@@ -1,24 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import codecs
 import contextlib
 import logging
 import lzma
 import os
 import shutil
 import tarfile
+from datetime import date
 from urllib import urlretrieve
 
-import requests
-
-from flask import current_app
-
-from udata.models import (
-    Dataset, ResourceBasedTerritoryDataset, TERRITORY_DATASETS
-)
+from udata.models import Dataset, GeoZone, SpatialCoverage
 from udata.commands import submanager
-from udata.core.storages import logos, references, tmp
+from udata.core.storages import logos, tmp
 
 
 log = logging.getLogger(__name__)
@@ -51,34 +45,52 @@ def load_logos(filename):
 
 
 @m.command
-def collect_references_files():
-    """Retrieve locally CSV files in use for dynamic territories' resources."""
-    REFERENCES_PATH = references.root
-    if not os.path.exists(REFERENCES_PATH):
-        os.makedirs(REFERENCES_PATH)
-    if current_app.config.get('ACTIVATE_TERRITORIES'):
-        # TERRITORY_DATASETS is a dict of dicts and we want all values
-        # that are resource based to collect related files.
-        territory_classes = [
-            territory_class
-            for territory_dict in TERRITORY_DATASETS.values()
-            for territory_class in territory_dict.values()
-            if issubclass(territory_class, ResourceBasedTerritoryDataset)]
-        for territory_class in territory_classes:
-            dataset = Dataset.objects.get(id=territory_class.dataset_id)
-            for resource in dataset.resources:
-                if str(resource.id) != str(territory_class.resource_id):
-                    continue
-                filename = resource.url.split('/')[-1]
-                reference_path = references.path(filename)
-                log.info('Found reference: %s', reference_path)
-                if os.path.exists(reference_path):
-                    log.info('Reference already downloaded')
-                    continue
-                log.info('Downloading from: %s', resource.url)
-                with codecs.open(reference_path, 'w', encoding='utf8') as fd:
-                    r = requests.get(resource.url, stream=True)
-                    for chunk in r.iter_content(chunk_size=1024):
-                        fd.write(chunk.decode('latin-1'))  # TODO: detect?
-
+def migrate_zones_from_old_to_new_ids_in_datasets():
+    """Should only be run once with the new version of geozones w/ geohisto."""
+    counter_datasets = 0
+    counter_zones = 0
+    counter_towns = 0
+    counter_counties = 0
+    counter_regions = 0
+    for dataset in Dataset.objects.all():
+        if dataset.spatial and dataset.spatial.zones:
+            counter_datasets += 1
+            new_zones = []
+            for zone in dataset.spatial.zones:
+                if zone.id.startswith('fr/'):
+                    counter_zones += 1
+                    country, kind, zone_id = zone.id.split('/')
+                    zone_id = zone_id.upper()  # Corsica 2a/b case.
+                    if kind == 'town':
+                        counter_towns += 1
+                        new_zones.append(
+                            GeoZone
+                            .objects(code=zone_id, level='fr/commune')
+                            .valid_at(date.today())
+                            .first())
+                    elif kind == 'county':
+                        counter_counties += 1
+                        # TODO: handle DROM-COM
+                        new_zones.append(
+                            GeoZone
+                            .objects(code=zone_id, level='fr/departement')
+                            .valid_at(date.today())
+                            .first())
+                    elif kind == 'region':
+                        counter_regions += 1
+                        # Only link to pre-2016 regions which kept the same id.
+                        new_zones.append(
+                            GeoZone
+                            .objects(code=zone_id, level='fr/region')
+                            .first())
+                    else:
+                        new_zones.append(zone)
+                else:
+                    new_zones.append(zone)
+            dataset.update(
+                spatial=SpatialCoverage(zones=[z.id for z in new_zones if z]))
+    print('{} datasets and {} zones affected.'.format(
+        counter_datasets, counter_zones))
+    print('{} town zones, {} county zones and {} region zones updated.'.format(
+        counter_towns, counter_counties, counter_regions))
     log.info('Done')
