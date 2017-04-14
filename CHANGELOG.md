@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.8 (2017-04-14)
 
 - Allow more headers in cors preflight headers
   [#857](https://github.com/opendatateam/udata/pull/857)
