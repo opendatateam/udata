@@ -2,8 +2,10 @@
 
 ## Current (in progress)
 
-- Fix numbering in system integrator FAQ (thanks to Bruno Cornec)
+- Fixed numbering in system integrator FAQ (thanks to Bruno Cornec)
   [#174](https://github.com/etalab/udata-gouvfr/pull/174)
+- Added a footer link to the SPD page
+  [#176](https://github.com/etalab/udata-gouvfr/pull/176)
 
 ## 1.0.5 (2017-04-06)
 
