@@ -3,7 +3,7 @@
  */
 import FrontMixin from 'front/mixin';
 
-import 'less/udata/swagger.less';
+import 'less/apidoc.less';
 
 import Vue from 'vue';
 

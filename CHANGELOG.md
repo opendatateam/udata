@@ -26,6 +26,12 @@
   [#851](https://github.com/opendatateam/udata/pull/851)
 - drop jquery.dotdotdot for a lighter css-only solution (less memory consumption)
   [#853](https://github.com/opendatateam/udata/pull/853)
+- Lighter style [#869](https://github.com/opendatateam/udata/pull/869):
+    - Drop glyphicons and use only Font-Awesome (more coherence, less fonts)
+    - lighter bootstrap style by importing only what's needed
+    - make use of bootstrap and admin-lte variables (easier for theming)
+    - proper separation between front and admin style
+
 
 ## 1.0.8 (2017-04-14)
 
