@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.8 (2017-04-14)
 
 - Allow more headers in cors preflight headers
