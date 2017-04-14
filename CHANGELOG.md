@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix numbering in system integrator FAQ (thanks to Bruno Cornec)
+  [#174](https://github.com/etalab/udata-gouvfr/pull/174)
 
 ## 1.0.5 (2017-04-06)
 
