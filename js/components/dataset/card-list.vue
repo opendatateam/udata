@@ -105,24 +105,24 @@
 
 <script>
 import Sorter from 'mixins/sorter';
+import Dataset from 'models/dataset';
 import DatasetCard from 'components/dataset/card.vue';
 import Box from 'components/containers/box.vue';
 import DatasetCompleter from 'components/form/dataset-completer.vue';
 
 export default {
-    name: 'datasets-card-list',
     mixins: [Sorter],
     MASK: DatasetCard.MASK,
     components: {Box, DatasetCompleter, DatasetCard},
     props: {
         title: {
             type: String,
-            default: function() {return this._('Datasets');}
+            default: () => this._('Datasets')
         },
         datasets: Array,
         loading: Boolean
     },
-    data: function() {
+    data() {
         return {
             editing: false,
             sorted: []
@@ -131,33 +131,33 @@ export default {
     events: {
         'completer:item-add': function(dataset_id, $item) {
             $item.remove();
-            this.sorted.push(dataset_id);
+            this.sorted.push(new Dataset({mask: this.$options.MASK}).fetch(dataset_id));
             this.$dispatch('dataset-card-list:add', dataset_id);
-        }
+        },
+        'sorter:update': function(evt) {
+            // Order from sortable
+            this.sorted = this.$sortable.toArray().map(id => this.sorted.find(dataset => dataset.id === id));
+        },
     },
     methods: {
-        edit: function() {
+        edit() {
             this.$sortable.option('disabled', false);
-            this._initial_order = this.$sortable.toArray();
-            this.sorted = this.datasets.map(function(dataset) {
-                return dataset.id;
-            });
+            this.sorted = this.datasets.slice(0);
             this.editing = true;
         },
-        submit: function() {
+        submit() {
             this.$dispatch('dataset-card-list:submit', this.$sortable.toArray());
             this.$sortable.option('disabled', true);
             this.editing = false;
             this.sorted = [];
         },
-        cancel: function() {
+        cancel() {
             this.$sortable.option('disabled', true);
             this.editing = false;
             this.sorted = [];
-            this.$sortable.sort(this._initial_order);
         },
-        on_remove: function(dataset) {
-            this.sorted.splice(this.sorted.indexOf(dataset.id), 1);
+        on_remove(dataset) {
+            this.sorted.splice(this.sorted.indexOf(dataset), 1);
             this.$dispatch('dataset-card-list:remove', dataset.id);
         }
     },
@@ -167,7 +167,7 @@ export default {
         ghostClass: 'ghost',
     },
     watch: {
-        editing: function(editing) {
+        editing(editing) {
             if (editing) {
                 this.$refs.completer.selectize.focus();
             }

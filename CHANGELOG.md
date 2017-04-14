@@ -27,6 +27,16 @@
 - drop jquery.dotdotdot for a lighter css-only solution (less memory consumption)
   [#853](https://github.com/opendatateam/udata/pull/853)
 
+## 1.0.8 (2017-04-14)
+
+- Allow more headers in cors preflight headers
+  [#857](https://github.com/opendatateam/udata/pull/857)
+  [#860](https://github.com/opendatateam/udata/pull/860)
+- Fix editorialization admin
+  [#863](https://github.com/opendatateam/udata/pull/863)
+- Fix missing completer images and ensure completion API is usable on a different domain
+  [#864](https://github.com/opendatateam/udata/pull/864)
+
 ## 1.0.7 (2017-04-07)
 
 - Fix display for zone completer existing values
