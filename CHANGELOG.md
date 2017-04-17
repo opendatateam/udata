@@ -31,6 +31,12 @@
     - lighter bootstrap style by importing only what's needed
     - make use of bootstrap and admin-lte variables (easier for theming)
     - proper separation between front and admin style
+- Drop `ExtractTextPlugin` on Vue components style:
+    - faster (re)compilation time
+    - resolves most compilation and missing style issues
+      [#555](https://github.com/opendatateam/udata/issues/555)
+      [#710](https://github.com/opendatateam/udata/issues/710)
+    - allows use of hot components reloading.
 
 
 ## 1.0.8 (2017-04-14)

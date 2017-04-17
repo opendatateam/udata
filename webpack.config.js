@@ -4,8 +4,8 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const node_path = path.join(__dirname, 'node_modules');
 
-const css_loader = ExtractTextPlugin.extract('style', 'css?sourceMap');
-const less_loader = ExtractTextPlugin.extract('style', 'css?sourceMap!less?sourceMap=source-map-less-inline');
+const css_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap');
+const less_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 
 const languages = ['en', 'es', 'fr'];
 
@@ -60,8 +60,8 @@ module.exports = {
     },
     vue: {
         loaders: {
-            css: css_loader,
-            less: less_loader,
+            css: 'vue-style?sourceMap!css?sourceMap',
+            less: 'vue-style?sourceMap!css?sourceMap!less?sourceMap=source-map-less-inline',
             js: 'babel-loader'
         }
     },
