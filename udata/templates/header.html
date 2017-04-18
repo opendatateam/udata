@@ -25,6 +25,11 @@
       <ul class="nav navbar-nav navbar-right collapse navbar-collapse">
         {# <li><a href="{{ url_for('front.metrics') }}">{{ _('Metrics') }}</a></li> #}
         {% if current_user.is_authenticated %}
+        <li>
+            <a href @click.prevent="$refs.publishActionModal.show" title="{{ _('Contribute') }}">
+                <span class="fa fa-plus"></span>
+            </a>
+        </li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <img src="{{ current_user|avatar_url(20) }}"
