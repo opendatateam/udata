@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.6 (2017-04-18)
 
 - Fixed numbering in system integrator FAQ (thanks to Bruno Cornec)
