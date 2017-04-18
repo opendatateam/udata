@@ -37,7 +37,8 @@
       [#555](https://github.com/opendatateam/udata/issues/555)
       [#710](https://github.com/opendatateam/udata/issues/710)
     - allows use of hot components reloading.
-
+- Pure Vue.js modals. Fix the default membership role. Added contribute modal.
+  [#873](https://github.com/opendatateam/udata/pull/873)
 
 ## 1.0.8 (2017-04-14)
 
