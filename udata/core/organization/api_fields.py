@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 
-from .models import ORG_ROLES, MEMBERSHIP_STATUS, LOGO_SIZES
+from .models import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_SIZES
 
 BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
@@ -44,7 +44,7 @@ member_fields = api.model('Member', {
     'user': fields.Nested(user_ref_fields),
     'role': fields.String(
         description='The member role in the organization', required=True,
-        enum=ORG_ROLES.keys())
+        enum=ORG_ROLES.keys(), default=DEFAULT_ROLE)
 })
 
 org_fields = api.model('Organization', {
