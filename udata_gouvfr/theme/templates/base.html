@@ -3,8 +3,3 @@
 {% block subnav %}
     {% include theme('subnav-small.html') with context %}
 {% endblock %}
-
-{% block modals %}
-    {{ super() }}
-    {% include theme('snippets/publish-action-modal.html') %}
-{% endblock %}

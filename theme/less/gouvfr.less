@@ -335,65 +335,6 @@ section.blog {
     }
 }
 
-
-/**
- * Calls to action.
- *
- * TODO: merge into udata site style
- */
-.actions-list {
-
-    .list-group-item {
-        @base-color: #eaeaea;
-        @base-size: 60px;
-        @border-size: 4px;
-        min-height: @base-size + 2 * @border-size;
-        background-color: lighten(@gray-lighter, 5%);
-        margin: 0px 0px 10px;
-        border-radius: 0px;
-        border: @border-size solid transparent;
-        padding: 0;
-
-        .action-icon {
-            .pull-left();
-            width: @base-size;
-            height: @base-size;
-            background-color: lighten(@gray-lighter, 10%);
-            margin: 0px;
-
-             span {
-                color: #03496F;
-                line-height: 60px;
-                text-align: center;
-                display: block;
-            }
-        }
-
-        .list-group-item-text {
-            margin-left: @base-size + 10px;
-            font-weight: normal;
-        }
-
-        .list-group-item-heading {
-            margin-left: @base-size + 10px;
-            margin-top: 9px;
-            margin-bottom: 3px;
-            font-weight: bold;
-        }
-
-        &:hover {
-            background-color: @gray-lighter;
-
-            .action-icon {
-                background-color: lighten(@gray-lighter, 5%);
-            }
-        }
-    }
-
-
-}
-
-
 .small-badge {
     .square-stamp(@bg-dark);
 

@@ -8,6 +8,8 @@
   [#172](https://github.com/etalab/udata-gouvfr/pull/172)
 - Drop glyphicons, remove some useless classes and upgrade to bootstrap 3.3.7
   [#177](https://github.com/etalab/udata-gouvfr/pull/177)
+- Use the core publish action modal
+  [#178](https://github.com/etalab/udata-gouvfr/pull/178)
 
 ## 1.0.5 (2017-04-06)
 

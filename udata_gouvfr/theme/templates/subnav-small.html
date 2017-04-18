@@ -40,12 +40,12 @@
 
             {# Publish call to action #}
             <div class="col-sm-4 col-md-3 col-lg-3 col-xs-12 collapse subnav-collapse">
-                <a class="btn btn-primary btn-transparent btn-block btn-md btn-left"
+                <button class="btn btn-primary btn-transparent btn-block btn-md btn-left"
                         title="{{ _('Contribute!') }}"
-                        data-toggle="modal" data-target="#publish-action-modal">
+                        @click="$refs.publishActionModal.show">
                     <span class="fa fa-plus"></span>
                     {{ _('Contribute!') }}
-                </a>
+                </button>
             </div>
         </div>
 
