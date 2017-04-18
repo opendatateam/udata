@@ -16,12 +16,12 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-warning btn-flat pointer pull-left"
+        <button type="button" class="btn btn-warning btn-flat pull-left"
             @click="confirm">
             {{ _('Confirm') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
-            data-dismiss="modal">
+        <button type="button" class="btn btn-danger btn-flat"
+            @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>
     </footer>

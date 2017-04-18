@@ -8,13 +8,13 @@
 
     <footer class="modal-footer text-center">
         <button type="button"
-            class="btn btn-primary btn-flat pointer pull-left"
+            class="btn btn-primary btn-flat pull-left"
             v-show="$refs.form.resource.filetype"
             @click="save">
             {{ _('Save') }}
         </button>
-        <button type="button" class="btn btn-outline btn-flat pointer"
-            data-dismiss="modal">
+        <button type="button" class="btn btn-outline btn-flat"
+            @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>
     </footer>
