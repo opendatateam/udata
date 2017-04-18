@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.6 (2017-04-18)
 
 - Fixed numbering in system integrator FAQ (thanks to Bruno Cornec)
   [#174](https://github.com/etalab/udata-gouvfr/pull/174)
