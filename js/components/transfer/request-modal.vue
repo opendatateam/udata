@@ -58,12 +58,12 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button v-if="recipient" type="button" class="btn btn-success btn-flat pointer pull-left"
+        <button v-if="recipient" type="button" class="btn btn-success btn-flat pull-left"
             @click="confirm">
             {{ _('Confirm') }}
         </button>
-        <button v-if="confirm" type="button" class="btn btn-danger btn-flat pointer"
-            data-dismiss="modal">
+        <button v-if="confirm" type="button" class="btn btn-danger btn-flat"
+            @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>
     </footer>

@@ -58,11 +58,11 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-success btn-flat pointer pull-left"
+        <button type="button" class="btn btn-success btn-flat pull-left"
             @click="respond('accept')">
             {{ _('Accept') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
+        <button type="button" class="btn btn-danger btn-flat"
             @click="respond('refuse')">
             {{ _('Refuse') }}
         </button>

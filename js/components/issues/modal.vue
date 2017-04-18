@@ -11,7 +11,7 @@
 </style>
 
 <template>
-<modal v-ref:modal :title="_('Issue')" class="issue-modal" size="lg">
+<modal v-ref:modal :title="_('Issue')" class="issue-modal" large>
     <div class="modal-body">
         <div class="row">
             <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
@@ -44,16 +44,16 @@
                 </textarea>
             </div>
         </form>
-        <button type="button" class="btn btn-success btn-flat pointer pull-left"
+        <button type="button" class="btn btn-success btn-flat pull-left"
             @click="comment_issue" v-if="!issue.closed">
             {{ _('Comment the issue') }}
         </button>
-        <button type="button" class="btn btn-warning btn-flat pointer pull-left"
+        <button type="button" class="btn btn-warning btn-flat pull-left"
             @click="close_issue" v-if="!issue.closed">
             {{ _('Comment and close issue') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
-            data-dismiss="modal">
+        <button type="button" class="btn btn-danger btn-flat"
+            @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
     </footer>
