@@ -10,7 +10,7 @@
                 <span class="fa fa-chevron-right"></span>
             </button>
         </nav>
-        <main v-show="view == 'days'" class="days">
+        <main v-if="view == 'days'" class="days">
             <header>
                 <span class="dow" v-for="day in days">{{ day }}</span>
             </header>
@@ -21,13 +21,13 @@
                 </button>
             </div>
         </main>
-        <main v-show="view == 'months'" class="months">
+        <main v-if="view == 'months'" class="months">
             <button v-for="(idx, month) in months" class="month" @click.prevent="pickMonth(idx)"
                 :disabled="isMonthDisabled(idx)">
                 {{ month }}
             </button>
         </main>
-        <main v-show="view == 'years'" class="years">
+        <main v-if="view == 'years'" class="years">
             <button v-for="year in yearsRange" class="year" @click.prevent="pickYear(year)"
                 :disabled="isYearDisabled(year)">
                 {{ year }}
@@ -241,7 +241,10 @@ export default {
         },
 
         focus() {
-            this.$el.focus(); // TODO focus on current date
+            // Focus active or first button
+            const button = this.$el.querySelector('main button.active:not(:disabled)')
+                || this.$el.querySelector('main button:not(:disabled)');
+            button.focus();
         },
 
         clear() {

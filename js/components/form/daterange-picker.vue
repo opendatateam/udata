@@ -24,7 +24,7 @@
         :value="endValue|dt dateFormat ''"
         :readonly="readonly">
     <div class="dropdown-menu" :style="dropdownStyle">
-        <calendar :selected="currentValue" :min="dateMin" :max="dateMax"></calendar>
+        <calendar v-ref:calendar :selected="currentValue" :min="dateMin" :max="dateMax"></calendar>
     </div>
     <input type="hidden" v-el:start-hidden
         :id="startId" :name="startId"
@@ -128,6 +128,9 @@ export default {
     },
     methods: {
         onFocus(e) {
+            if (!this.picking || e.target !== this.pickedField) {
+                this.$nextTick(this.$refs.calendar.focus);
+            }
             this.picking = true;
             this.pickedField = e.target;
         },
