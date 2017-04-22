@@ -12,14 +12,14 @@
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="input-sm form-control"
         v-el:start-input :placeholder="_('Start')"
-        @focus="onFocus"
+        @focus="onFocus" @input="onChange | debounce 500"
         :required="required"
         :value="startValue|dt dateFormat ''"
         :readonly="readonly">
     <span class="input-group-addon">{{ _('to') }}</span>
     <input type="text" class="input-sm form-control"
         v-el:end-input :placeholder="_('End')"
-        @focus="onFocus"
+        @focus="onFocus" @input="onChange | debounce 500"
         :required="required"
         :value="endValue|dt dateFormat ''"
         :readonly="readonly">
@@ -130,6 +130,11 @@ export default {
         onFocus(e) {
             this.picking = true;
             this.pickedField = e.target;
+        },
+        onChange(e) {
+            try {
+                this.currentValue = moment(e.target.value, this.dateFormat);
+            } catch(e) {}
         },
         onOutside() {
             this.picking = false;
