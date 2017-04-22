@@ -12,7 +12,7 @@
     v-outside="onOutside">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="form-control" v-el:input
-        @focus="onFocus"
+        @focus="onFocus" @input="onChange | debounce 500"
         :placeholder="placeholder"
         :required="required"
         :value="value|dt dateFormat ''"
@@ -72,6 +72,11 @@ export default {
     methods: {
         onFocus() {
             this.picking = true;
+        },
+        onChange(e) {
+            try {
+                this.value = moment(e.target.value, this.dateFormat);
+            } catch(e) {}
         },
         onOutside() {
             this.picking = false;

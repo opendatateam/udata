@@ -9,17 +9,15 @@
     <div class="input-group" :class="{ 'open': picking }">
         <input type="text" class="input-sm form-control"
             v-el:start-input :placeholder="_('Start')"
-            @focus="onFocus"
+            @focus="onFocus" @input="onChange | debounce 500"
             :required="required"
-            :value="currentMin|dt DATE_FORMAT ''"
-            readonly>
+            :value="currentMin|dt DATE_FORMAT ''">
         <span class="input-group-addon">{{ _('to') }}</span>
         <input type="text" class="input-sm form-control"
             v-el:end-input :placeholder="_('End')"
-            @focus="onFocus"
+            @focus="onFocus" @input="onChange | debounce 500"
             :required="required"
-            :value="currentMax|dt DATE_FORMAT ''"
-            readonly>
+            :value="currentMax|dt DATE_FORMAT ''">
     </div>
     <calendar v-ref:calendar v-show="picking" :selected="currentValue" :min="dateMin" :max="dateMax"></calendar>
     <div class="row" v-show="changed && !picking">
@@ -129,6 +127,11 @@ export default {
             this.picking = true;
             this.pickedField = e.target;
             this.$nextTick(this.$refs.calendar.focus);
+        },
+        onChange(e) {
+            try {
+                this.currentValue = moment(e.target.value, DATE_FORMAT);
+            } catch(e) {}
         },
         onOutside() {
             this.picking = false;

@@ -48,11 +48,12 @@
     - ensure harvest source are owned by a user or an organization, not both [migration]
 - Pure Vue.js search facets.
   Improve and fix the datepicker:
-  - Proper sizing and positionning in dropdowns
-  - Fix initial value not being displayed
-  - Make it usable on keyboard
-  - Allows to define `min` and `max` values to disable some dates
->>>>>>> Drop bootstrap-datepicker and use the calendar component.
+    - Proper sizing and positionning in dropdowns
+    - Fix initial value not being displayed
+    - Make it usable on keyboard
+    - Allows to define `min` and `max` values to disable some dates
+    - Keyboard input is reflected into the calendar
+      [#615](https://github.com/opendatateam/udata/issues/615)
 
 ## 1.0.10 (2017-05-11)
 
