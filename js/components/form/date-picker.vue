@@ -18,7 +18,7 @@
         :value="value|dt dateFormat ''"
         :readonly="readonly"></input>
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar :selected="value"></calendar>
+        <calendar v-ref:calendar :selected="value"></calendar>
     </div>
     <input v-if="serializable" type="hidden"
         :name="field.id"
@@ -71,6 +71,7 @@ export default {
     },
     methods: {
         onFocus() {
+            if (!this.picking) this.$nextTick(this.$refs.calendar.focus);
             this.picking = true;
         },
         onChange(e) {

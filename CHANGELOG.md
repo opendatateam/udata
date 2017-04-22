@@ -46,7 +46,8 @@
     - harvester listing is now paginated
     - more detailed harvesters widgets
     - ensure harvest source are owned by a user or an organization, not both [migration]
-- Pure Vue.js search facets.
+- Pure Vue.js search facets
+  [#880](https://github.com/opendatateam/udata/pull/880).
   Improve and fix the datepicker:
     - Proper sizing and positionning in dropdowns
     - Fix initial value not being displayed

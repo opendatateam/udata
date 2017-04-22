@@ -124,9 +124,12 @@ export default {
             window.location.search = search.toString();
         },
         onFocus(e) {
+            if (!this.picking || e.target !== this.pickedField) {
+                console.log('should focus');
+                this.$nextTick(this.$refs.calendar.focus);
+            }
             this.picking = true;
             this.pickedField = e.target;
-            this.$nextTick(this.$refs.calendar.focus);
         },
         onChange(e) {
             try {
