@@ -4,6 +4,8 @@
 
 - Fix broken post view
   [#877](https://github.com/opendatateam/udata/pull/877)
+- Fix new issue submission
+  [#874](https://github.com/opendatateam/udata/issues/874)
 
 ## 1.0.8 (2017-04-14)
 
