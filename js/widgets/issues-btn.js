@@ -125,7 +125,7 @@ $('.btn-issues').click(function(e) {
                 const msg = i18n._('Your issue has been sent to the team');
                 Notify.success(msg);
                 count++;
-            }).error(function(e) {
+            }).fail(function(e) {
                 const msg = i18n._('An error occured while submitting your issue');
                 Notify.error(msg);
                 log.error(e.responseJSON);
@@ -167,7 +167,7 @@ $('.btn-issues').click(function(e) {
                 if (close) {
                     count--;
                 }
-            }).error(function(e) {
+            }).fail(function(e) {
                 const msg = close ? i18n._('An error occured while closing the issue') : i18n._('An error occured while submitting your comment');
                 Notify.error(msg);
                 log.error(e.responseJSON);
