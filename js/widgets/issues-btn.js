@@ -116,7 +116,10 @@ $('.btn-issues').click(function(e) {
                 type: $modal.find('input[name="type"]:checked').val(),
                 title: $modal.find('#title').val(),
                 comment: $modal.find('#comment').val(),
-                subject: $this.data('subject')
+                subject: {
+                    id: $this.data('subject-id'),
+                    class: $this.data('subject-class')
+                }
             };
 
             $modal.find('button').attr('disabled', true);
