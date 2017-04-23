@@ -6,6 +6,8 @@
   [#877](https://github.com/opendatateam/udata/pull/877)
 - Fix new issue submission
   [#874](https://github.com/opendatateam/udata/issues/874)
+- Display full images/logo/avatars URL in references too
+  [#824](https://github.com/opendatateam/udata/issues/824)
 
 ## 1.0.8 (2017-04-14)
 
