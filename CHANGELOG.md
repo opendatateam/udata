@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix broken post view
+  [#877](https://github.com/opendatateam/udata/pull/877)
 
 ## 1.0.8 (2017-04-14)
 
