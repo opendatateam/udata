@@ -78,8 +78,10 @@ reuse_suggestion_fields = api.model('ReuseSuggestion', {
 
 reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
     'title': fields.String(description='The reuse title', readonly=True),
-    'image': fields.ImageField(size=BIGGEST_IMAGE_SIZE,
-        description='The reuse thumbnail'),
+    'image': fields.ImageField(description='The reuse thumbnail thumbnail (cropped) URL'),
+    'image_thumbnail': fields.ImageField(attribute='image', size=BIGGEST_IMAGE_SIZE,
+        description='The reuse thumbnail thumbnail URL. This is the square '
+        '({0}x{0}) and cropped version.'.format(BIGGEST_IMAGE_SIZE)),
     'uri': fields.UrlFor(
         'api.reuse', lambda o: {'reuse': o},
         description='The reuse API URI', readonly=True),
