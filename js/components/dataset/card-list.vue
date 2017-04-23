@@ -117,7 +117,7 @@ export default {
     props: {
         title: {
             type: String,
-            default: () => this._('Datasets')
+            default() {return this._('Datasets')}
         },
         datasets: Array,
         loading: Boolean

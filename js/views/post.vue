@@ -17,7 +17,7 @@ import Layout from 'components/layout.vue';
 
 export default {
     name: 'PostView',
-    data: function() {
+    data() {
         return {
             post: new Post(),
             actions: [{
