@@ -102,10 +102,10 @@ export default {
     },
     computed: {
         logo() {
-            if (!this.dataset || !this.dataset.organization || !this.dataset.organization.logo) {
+            if (!this.dataset || !this.dataset.organization || !this.dataset.organization.logo_thumbnail) {
                 return placeholders.organization;
             }
-            return this.dataset.organization.logo;
+            return this.dataset.organization.logo_thumbnail;
         },
         certified() {
             return `${config.theme_static}img/certified-stamp.png`;

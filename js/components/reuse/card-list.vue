@@ -117,7 +117,7 @@ export default {
     props: {
         title: {
             type: String,
-            default: () => this._('Reuses')
+            default() {return this._('Reuses')}
         },
         reuses: Array,
         loading: Boolean

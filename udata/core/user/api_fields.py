@@ -21,8 +21,11 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),
-    'avatar': fields.ImageField(size=BIGGEST_AVATAR_SIZE,
+    'avatar': fields.ImageField(original=True,
         description='The user avatar URL'),
+    'avatar_thumbnail': fields.ImageField(attribute='avatar', size=BIGGEST_AVATAR_SIZE,
+        description='The user avatar thumbnail URL. This is the square '
+        '({0}x{0}) and cropped version.'.format(BIGGEST_AVATAR_SIZE)),
 })
 
 

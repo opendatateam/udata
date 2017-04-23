@@ -21,8 +21,11 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
         description='The organization web page URL', readonly=True),
-    'logo': fields.ImageField(size=BIGGEST_LOGO_SIZE,
+    'logo': fields.ImageField(original=True,
         description='The organization logo URL'),
+    'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
+        description='The organization logo thumbnail URL. This is the square '
+        '({0}x{0}) and cropped version.'.format(BIGGEST_LOGO_SIZE)),
 })
 
 

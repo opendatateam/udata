@@ -108,7 +108,7 @@ export default {
             return this.$root.me.organizations.map(org => {
                 return {
                     label: org.acronym || org.name,
-                    image: org.logo,
+                    image: org.logo_thumbnail,
                     route: `/organization/${org.id}/`,
                     children: [{
                         label: this._('Dataset'),
