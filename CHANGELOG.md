@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.9 (2017-04-23)
 
 - Fix broken post view
   [#877](https://github.com/opendatateam/udata/pull/877)
