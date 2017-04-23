@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.9 (2017-04-23)
 
 - Fix broken post view
