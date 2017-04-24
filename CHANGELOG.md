@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix bad stored (community) resources URLs [migration]
+  [#882](https://github.com/opendatateam/udata/issues/882)
 
 ## 1.0.9 (2017-04-23)
 
