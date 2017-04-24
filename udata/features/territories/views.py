@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import StringIO
 from collections import namedtuple
 from datetime import date, datetime
 import unicodedata
