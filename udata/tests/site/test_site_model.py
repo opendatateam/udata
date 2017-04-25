@@ -8,9 +8,15 @@ from udata.core.site.models import current_site
 from udata.core.reuse.factories import ReuseFactory
 
 from udata.tests import TestCase, DBTestMixin
+from udata.frontend.markdown import init_app
 
 
 class SiteModelTest(DBTestMixin, TestCase):
+    def create_app(self):
+        app = super(SiteModelTest, self).create_app()
+        init_app(app)
+        return app
+
     def test_delete_home_dataset(self):
         '''Should pull home datasets on deletion'''
         current_site.settings.home_datasets = DatasetFactory.create_batch(3)

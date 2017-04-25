@@ -11,6 +11,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
+from udata.models.md_fields import mdstrip_field
 
 __all__ = ('Reuse', 'REUSE_TYPES')
 
@@ -40,12 +41,14 @@ class ReuseQuerySet(db.OwnedQuerySet):
                     db.Q(datasets__0__exists=False) |
                     db.Q(deleted__ne=None))
 
-
+decorator = mdstrip_field("description")
+@decorator
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     title = db.StringField(required=True)
     slug = db.SlugField(
         max_length=255, required=True, populate_from='title', update=True)
     description = db.StringField(required=True)
+    description_rendered = db.StringField()
     type = db.StringField(required=True, choices=REUSE_TYPES.keys())
     url = db.StringField(required=True)
     urlhash = db.StringField(required=True, unique=True)

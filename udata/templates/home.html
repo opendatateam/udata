@@ -85,7 +85,7 @@
                         <img class="img-responsive" src="{{reuse.image}}" alt="">
                     </div>
                     <div class="col-md-5">
-                        <p>{{reuse.description | mdstrip(300) }}</p>
+                        <p>{{reuse.description_rendered | truncate(300) }}</p>
 
                         <div class="row">
                             <div class="col-lg-12">

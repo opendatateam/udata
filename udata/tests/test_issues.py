@@ -28,6 +28,7 @@ from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
+from udata.frontend.markdown import init_app
 
 
 class IssuesTest(APITestCase):
@@ -363,6 +364,11 @@ class IssueCsvTest(FrontTestCase):
 
 
 class IssuesActionsTest(TestCase, DBTestMixin):
+    def create_app(self):
+        app = super(IssuesActionsTest, self).create_app()
+        init_app(app)
+        return app
+
     def test_issues_for_user(self):
         owner = UserFactory()
         dataset = DatasetFactory(owner=owner)

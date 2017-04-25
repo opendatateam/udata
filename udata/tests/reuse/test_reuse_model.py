@@ -10,9 +10,15 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 
 from .. import TestCase, DBTestMixin
+from udata.frontend.markdown import init_app
 
 
 class ReuseModelTest(TestCase, DBTestMixin):
+    def create_app(self):
+        app = super(ReuseModelTest, self).create_app()
+        init_app(app)
+        return app
+
     def test_owned_by_user(self):
         user = UserFactory()
         reuse = ReuseFactory(owner=user)

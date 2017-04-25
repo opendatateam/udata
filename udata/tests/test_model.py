@@ -9,7 +9,9 @@ from datetime import date, datetime, timedelta
 from mongoengine.errors import ValidationError
 
 from udata.models import db, Dataset
+from udata.models.md_fields import mdstrip_field
 from udata.tests import TestCase, DBTestMixin
+from udata.frontend.markdown import init_app
 
 
 class UUIDTester(db.Document):
@@ -23,6 +25,16 @@ class UUIDAsIdTester(db.Document):
 class SlugTester(db.Document):
     title = db.StringField()
     slug = db.SlugField(populate_from='title', max_length=1000)
+    meta = {
+        'allow_inheritance': True,
+    }
+
+
+decorator = mdstrip_field('description', 'description_rendered')
+
+@decorator
+class MDStripTester(db.Document):
+    description = db.StringField()
     meta = {
         'allow_inheritance': True,
     }
@@ -176,6 +188,28 @@ class SlugFieldTest(DBTestMixin, TestCase):
         obj.save()
         self.assertEqual(len(obj.title), SlugTester.slug.max_length + 1)
         self.assertEqual(len(obj.slug), SlugTester.slug.max_length)
+
+
+class MDStripFieldTest(DBTestMixin, TestCase):
+    def create_app(self):
+        app = super(MDStripFieldTest, self).create_app()
+        init_app(app)
+        return app
+
+    def test_populate(self):
+        obj = MDStripTester(description="**bold**")
+        self.assertEqual(obj.description, "**bold**")
+        obj.save()
+        self.assertEqual(obj.description_rendered, 'bold')
+
+    def test_change(self):
+        obj = MDStripTester(description="**bold**")
+        self.assertEqual(obj.description, "**bold**")
+        obj.save()
+        self.assertEqual(obj.description_rendered, 'bold')
+        obj.description = "__underlined__"
+        obj.save()
+        self.assertEqual(obj.description_rendered, 'underlined')
 
 
 class DateFieldTest(DBTestMixin, TestCase):

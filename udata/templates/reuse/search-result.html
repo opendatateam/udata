@@ -9,7 +9,7 @@
         <div class="result-body">
             <h4 class="result-title ellipsis">{{ reuse.title }}</h4>
             <div class="result-description clamp-2">
-            {{ reuse.description|mdstrip(300) }}
+            {{ reuse.description_rendered|truncate(300) }}
             </div>
         </div>
         <ul class="list-inline result-infos">

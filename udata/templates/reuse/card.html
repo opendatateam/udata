@@ -25,7 +25,7 @@
 
     <a class="rollover fade in" href="{{url_for('reuses.show', reuse=reuse)}}"
         title="{{ reuse.title }}">
-        {{ reuse.description|mdstrip(180) }}
+        {{ reuse.description_rendered|truncate(180) }}
     </a>
 
     <footer class="rollover fade in">
