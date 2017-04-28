@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 RESOURCE_TYPES = ('file', 'file.upload', 'api', 'documentation',
                   'image', 'visualization')
 
-ALLOWED_RESOURCE_TYPES = ('file', 'file.upload', 'api')
+ALLOWED_RESOURCE_TYPES = ('file', 'file.upload', 'api', 'metadata')
 
 resource = {
     'id': basestring,
@@ -75,7 +75,7 @@ schema = Schema({
     'id': basestring,
     'name': basestring,
     'title': basestring,
-    'notes': All(basestring, normalize_string),
+    'notes': Any(All(basestring, normalize_string), None),
     'license_id': All(DefaultTo('not-specified'), basestring),
     'tags': [tag],
 
