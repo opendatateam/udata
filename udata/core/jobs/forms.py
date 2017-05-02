@@ -10,11 +10,11 @@ from .models import PeriodicTask
 class CrontabForm(ModelForm):
     model_class = PeriodicTask.Crontab
 
-    minute = fields.Field(default='*')
-    hour = fields.Field(default='*')
-    day_of_week = fields.Field(default='*')
-    day_of_month = fields.Field(default='*')
-    month_of_year = fields.Field(default='*')
+    minute = fields.StringField(default='*')
+    hour = fields.StringField(default='*')
+    day_of_week = fields.StringField(default='*')
+    day_of_month = fields.StringField(default='*')
+    month_of_year = fields.StringField(default='*')
 
 
 class IntervalForm(ModelForm):
