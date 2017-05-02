@@ -86,7 +86,7 @@ schema = Schema({
     'revision_id': basestring,
     'extras': [{
         'key': basestring,
-        'value': Any(basestring, int, float, boolean, {}, []),
+        'value': Any(basestring, int, float, boolean, dict, list),
     }],
     'private': boolean,
     'type': 'dataset',
