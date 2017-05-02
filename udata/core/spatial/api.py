@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 from flask import current_app, abort
-
 from flask_restplus import inputs
 
-from udata.api import api, API
 from udata import search
+from udata.api import api, API
+from udata.api.cache import ONE_DAY, ONE_WEEK
 from udata.i18n import _
 from udata.models import Dataset, TERRITORY_DATASETS
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -24,7 +24,6 @@ GEOM_TYPES = (
     'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString',
     'MultiPolygon'
 )
-
 
 ns = api.namespace('spatial', 'Spatial references')
 
@@ -71,11 +70,14 @@ class SuggestZonesAPI(API):
 class ZonesAPI(API):
     @api.doc('spatial_zones',
              params={'ids': 'A zone identifiers list (comma separated)'})
+    @api.cache(check_serverside=False, key_pattern='zones%s',
+               client_timeout=ONE_DAY, server_timeout=ONE_WEEK,
+               make_response=api.make_response)
     @api.marshal_with(feature_collection_fields)
     def get(self, ids):
         '''Fetch a zone list as GeoJSON'''
         zones = GeoZone.objects.in_bulk(ids)
-        zones = [zones[id] for id in ids]
+        zones = [zones[id] for id in ids if id in zones]
         return {
             'type': 'FeatureCollection',
             'features': [z.toGeoJSON() for z in zones],

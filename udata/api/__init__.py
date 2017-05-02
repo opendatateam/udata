@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import httplib
 import logging
 import urllib
 
@@ -9,9 +10,9 @@ from functools import wraps
 from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
-from flask_restplus import Api, Resource, inputs, cors
+from flask_restplus import Api, Resource, cors
 
-from udata import search, theme, tracking
+from udata import search, theme, tracking  # noqa: search must be imported.
 from udata.app import csrf
 from udata.i18n import I18nBlueprint
 from udata.auth import (
@@ -21,6 +22,7 @@ from udata.core.user.models import User
 from udata.sitemap import sitemap
 
 from . import fields, oauth2
+from .cache import cache_response
 from .signals import on_api_call
 
 
@@ -157,6 +159,8 @@ class UDataApi(Api):
                             help='The page size to fetch')
         return parser
 
+    cache = cache_response
+
 
 api = UDataApi(
     apiv1,
@@ -179,7 +183,7 @@ api.model_reference = api.model('ModelReference', {
 
 
 @api.representation('application/json')
-def output_json(data, code, headers=None):
+def output_json(data, code=httplib.OK, headers=None):
     '''Use Flask JSON to serialize'''
     resp = make_response(json.dumps(data), code)
     resp.headers.extend(headers or {})
