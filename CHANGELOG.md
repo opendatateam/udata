@@ -8,6 +8,8 @@
 - Fix CKAN harvester empty notes and `metadata` file type handling
 - Remove (temporary) badges metrics
   [#885](https://github.com/opendatateam/udata/issues/885)
+- Test and fix topic search
+  [#892](https://github.com/opendatateam/udata/pull/892)
 
 ## 1.0.9 (2017-04-23)
 
