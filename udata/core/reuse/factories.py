@@ -17,6 +17,7 @@ class ReuseFactory(factory.mongoengine.MongoEngineFactory):
 
     title = factory.Faker('sentence')
     description = factory.Faker('text')
+    description_rendered = factory.Faker('text')
     url = factory.LazyAttribute(
         lambda o: '/'.join([faker.url(), faker.unique_string()]))
     type = FuzzyChoice(REUSE_TYPES.keys())

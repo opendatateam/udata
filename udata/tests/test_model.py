@@ -35,6 +35,7 @@ decorator = mdstrip_field('description', 'description_rendered')
 @decorator
 class MDStripTester(db.Document):
     description = db.StringField()
+    description_rendered = db.StringField()
     meta = {
         'allow_inheritance': True,
     }
