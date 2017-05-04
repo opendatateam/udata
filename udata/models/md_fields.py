@@ -4,15 +4,18 @@ from mongoengine import signals
 
 
 def mdstrip_field(populate_from, populate=None, length=None, end=None):
-    def func_(sender, document, *args, **kwargs):
-        to_ = to_ or populate_from + '_rendered'
-        from_value = getattr(document, populate_from)
-        stripped_value = mdstrip(from_value, length=length, end=end)
-        setattr(document, to_, stripped_value)
 
+    def func_(sender, document, *args, **kwargs):
+        to_ = populate or populate_from + '_rendered'
+        print document._get_changed_fields()
+        print document._created
+        if populate_from in document._get_changed_fields() or getattr(document, '_created'):
+            from_value = getattr(document, populate_from)
+            stripped_value = mdstrip(from_value, length=length, end=end)
+            document.__setattr__(to_, stripped_value)
 
     def apply(cls):
-        signals.post_init.connect(func_, sender=cls)
         signals.pre_save_post_validation.connect(func_, sender=cls)
         return cls
-    return apply
+    func_.apply = apply
+    return func_.apply
