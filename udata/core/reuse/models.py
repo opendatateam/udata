@@ -41,7 +41,7 @@ class ReuseQuerySet(db.OwnedQuerySet):
                     db.Q(datasets__0__exists=False) |
                     db.Q(deleted__ne=None))
 
-decorator = mdstrip_field("description")
+decorator = mdstrip_field('description')
 @decorator
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     title = db.StringField(required=True)
