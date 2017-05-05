@@ -7,8 +7,6 @@ def mdstrip_field(populate_from, populate=None, length=None, end=None):
 
     def func_(sender, document, *args, **kwargs):
         to_ = populate or populate_from + '_rendered'
-        print document._get_changed_fields()
-        print document._created
         if populate_from in document._get_changed_fields() or getattr(document, '_created'):
             from_value = getattr(document, populate_from)
             stripped_value = mdstrip(from_value, length=length, end=end)
