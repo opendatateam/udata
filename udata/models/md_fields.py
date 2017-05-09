@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from udata.frontend.markdown import mdstrip
 from mongoengine import signals
+from udata.frontend.markdown import mdstrip
 
 
 def mdstrip_field(populate_from, populate=None, length=None, end=None):
