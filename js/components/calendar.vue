@@ -48,6 +48,7 @@
 import moment from 'moment';
 
 const VIEWS = ['days', 'months', 'years'];
+const MONTH_FORMAT = 'MMMM YYYY';
 
 function optionalMoment(value) {
     return value ? moment(value) : null
@@ -98,11 +99,11 @@ export default {
             return moment.monthsShort();
         },
         monthDisplay() {
-            return moment().month(this.currentMonth).year(this.currentYear).format('MMMM YYYY');
+            return moment().month(this.currentMonth).year(this.currentYear).format(MONTH_FORMAT);
         },
         rangeDisplay() {
             if (this.view == 'days') {
-                return moment().month(this.currentMonth).year(this.currentYear).format('MMMM YYYY');
+                return moment().month(this.currentMonth).year(this.currentYear).format(MONTH_FORMAT);
             } else if (this.view == 'months') {
                 return this.currentYear;
             } else if (this.view == 'years') {
@@ -300,8 +301,6 @@ export default {
         }
     }
 
-
-
     main {
         display: flex;
         flex-wrap: wrap;
@@ -344,50 +343,50 @@ export default {
         display: flex;
     }
 
-	button {
-	    height: @unit;
+    button {
+        height: @unit;
         width: 100%;
         background: none;
         border: none;
         border-radius: @border-radius-base;
 
         &:hover {
-			background: @gray-lighter;
-		}
+            background: @gray-lighter;
+        }
 
-		&.old,
-		&.new {
-			color: @btn-link-disabled-color;
-		}
+        &.old,
+        &.new {
+            color: @btn-link-disabled-color;
+        }
 
-		&.day:hover,
-		&:focus {
-			background: @gray-lighter;
-			cursor: pointer;
-		}
+        &.day:hover,
+        &:focus {
+            background: @gray-lighter;
+            cursor: pointer;
+        }
 
-		&:disabled,
-		&:disabled:hover {
-			background: none;
-			color: @btn-link-disabled-color;
-			cursor: not-allowed;
-		}
+        &:disabled,
+        &:disabled:hover {
+            background: none;
+            color: @btn-link-disabled-color;
+            cursor: not-allowed;
+        }
 
-		&.today {
-			@today-bg: lighten(orange, 30%);
+        &.today {
+            @today-bg: lighten(orange, 30%);
             @today-color: #000;
-			.button-variant(@today-color, @today-bg, darken(@today-bg, 20%));
+            .button-variant(@today-color, @today-bg, darken(@today-bg, 20%));
             position: relative;
 
-			&:focus {
-				background: darken(@today-bg, 10%);
-			}
+            &:focus {
+                background: darken(@today-bg, 10%);
+            }
 
-			&:disabled,
-			&:disabled:active {
-				background: @today-bg;
-				color: @btn-link-disabled-color;
-			}
+            &:disabled,
+            &:disabled:active {
+                background: @today-bg;
+                color: @btn-link-disabled-color;
+            }
 
             &:before {
                 content: '';
@@ -400,16 +399,16 @@ export default {
                 bottom: 4px;
                 right: 4px;
             }
-		}
+        }
 
-		&.active {
-			.button-variant(@btn-primary-color, @btn-primary-bg, @btn-primary-border);
-			text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+        &.active {
+            .button-variant(@btn-primary-color, @btn-primary-bg, @btn-primary-border);
+            text-shadow: 0 -1px 0 rgba(0,0,0,.25);
 
             &.today:before {
                 border-bottom-color: @btn-primary-color;
             }
-		}
-	}
+        }
+    }
 }
 </style>

@@ -77,7 +77,9 @@ export default {
         onChange(e) {
             try {
                 this.value = moment(e.target.value, this.dateFormat);
-            } catch(e) {}
+            } catch(e) {
+                // Don't do anything while typing (ie. incomplete date is unparseable)
+            }
         },
         onOutside() {
             this.picking = false;

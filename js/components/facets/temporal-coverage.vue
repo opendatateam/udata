@@ -125,7 +125,6 @@ export default {
         },
         onFocus(e) {
             if (!this.picking || e.target !== this.pickedField) {
-                console.log('should focus');
                 this.$nextTick(this.$refs.calendar.focus);
             }
             this.picking = true;
@@ -134,7 +133,9 @@ export default {
         onChange(e) {
             try {
                 this.currentValue = moment(e.target.value, DATE_FORMAT);
-            } catch(e) {}
+            } catch(e) {
+                // Don't do anything while typing (ie. incomplete date is unparseable)
+            }
         },
         onOutside() {
             this.picking = false;
