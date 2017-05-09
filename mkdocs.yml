@@ -18,6 +18,7 @@ pages:
         - Adding translations: adding-translations.md
         - Creating a custom theme: creating-theme.md
         - Building the documentation: building-documentation.md
+        - Harvesting: harvesting.md
     - Contributing:
         - Guide: contributing-guide.md
         - Governance: governance.md
