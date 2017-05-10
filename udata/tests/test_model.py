@@ -30,9 +30,7 @@ class SlugTester(db.Document):
     }
 
 
-decorator = mdstrip_field('description', 'description_rendered')
-
-@decorator
+@mdstrip_field('description', 'description_rendered')
 class MDStripTester(db.Document):
     description = db.StringField()
     description_rendered = db.StringField()
