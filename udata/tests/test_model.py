@@ -193,6 +193,7 @@ class MDStripFieldTest(DBTestMixin, TestCase):
     def create_app(self):
         app = super(MDStripFieldTest, self).create_app()
         init_app(app)
+        app.config['DISABLE_MARKDOWN'] = False
         return app
 
     def test_populate(self):

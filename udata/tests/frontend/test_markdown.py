@@ -22,6 +22,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
 
     def create_app(self):
         app = super(MarkdownTestCase, self).create_app()
+        app.config['DISABLE_MARKDOWN'] = False
         init_app(app)
         return app
 

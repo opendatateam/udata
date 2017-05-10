@@ -110,6 +110,9 @@ class Defaults(object):
 
     MD_ALLOWED_STYLES = []
 
+    #For testing purposes
+    DISABLE_MARKDOWN = False
+
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
 
@@ -188,6 +191,7 @@ class Testing(object):
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
+    DISABLE_MARKDOWN = True
 
 
 class Debug(Defaults):

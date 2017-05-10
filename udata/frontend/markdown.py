@@ -11,7 +11,9 @@ from jinja2.filters import do_truncate, do_striptags
 
 from udata.i18n import _
 
-md = LocalProxy(lambda: current_app.extensions['markdown'])
+md = LocalProxy(lambda: (lambda v: v) 
+                            if current_app.config.get('DISABLE_MARKDOWN')
+                            else current_app.extensions['markdown'])
 
 EXCERPT_TOKEN = '<!--- --- -->'
 

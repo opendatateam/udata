@@ -12,6 +12,7 @@ from udata import frontend, api
 class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
     def create_app(self):
         app = super(FrontTestCase, self).create_app()
+        app.config['DISABLE_MARKDOWN'] = False
         api.init_app(app)
         frontend.init_app(app)
         return app
