@@ -105,9 +105,14 @@ from udata.features.territories.models import *  # noqa
 def init_app(app):
     # use `{database_name}-test` database for testing
     if app.config['TESTING']:
+<<<<<<< HEAD
         parsed_url = urlparse(app.config['MONGODB_HOST'])
         parsed_url = parsed_url._replace(path='%s-test' % parsed_url.path)
         app.config['MONGODB_HOST'] = parsed_url.geturl()
+=======
+        app.config['MONGODB_DB'] = '{MONGODB_DB}-test'.format(**app.config)
+        app.config['MONGODB_PORT'] = 27018
+>>>>>>> Use mongotest for tests
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
         name = 'udata_{0}.models'.format(plugin)
