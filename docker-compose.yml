@@ -1,27 +1,31 @@
-db:
-    image: mongo:3.2
-    command: mongod
-    volumes:
-      - ./data/db:/data/db
-    expose:
-      - "27017"
-    ports:
-    - "27017:27017"
+version: "3"
+services:
+    db:
+        image: mongo:3.2
+        command: mongod
+        volumes:
+          - ./data/db:/data/db
+        expose:
+          - "27017"
+        ports:
+        - "27017:27017"
 
-broker:
-    image: redis
-    volumes:
-      - ./data/broker:/data
-    expose:
-      - "6379"
-    ports:
-    - "6379:6379"
+    broker:
+        image: redis
+        volumes:
+          - ./data/broker:/data
+        expose:
+          - "6379"
+        ports:
+          - "6379:6379"
 
-search:
-    image: udata/elasticsearch:2.4.5
-    volumes:
-      - ./data/search/data:/usr/share/elasticsearch/data
-    expose:
-      - "9200"
-    ports:
-      - "9200:9200"
+
+
+        search:
+            image: udata/elasticsearch:2.4.5
+            volumes:
+              - ./data/search/data:/usr/share/elasticsearch/data
+            expose:
+              - "9200"
+            ports:
+              - "9200:9200"
