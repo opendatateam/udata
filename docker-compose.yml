@@ -10,6 +10,14 @@ services:
         ports:
         - "27017:27017"
 
+    mongo_test:
+        image: mongo:3.4.0
+        tmpfs: /tmp/db
+        expose:
+          - "27018"
+        ports:
+          - "27018:27017"
+
     broker:
         image: redis
         volumes:
