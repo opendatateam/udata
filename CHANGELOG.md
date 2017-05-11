@@ -47,6 +47,17 @@
     - more detailed harvesters widgets
     - ensure harvest source are owned by a user or an organization, not both [migration]
 
+## 1.0.10 (2017-05-11)
+
+- Fix bad stored (community) resources URLs [migration]
+  [#882](https://github.com/opendatateam/udata/issues/882)
+- Proper producer logo display on dataset pages
+- Fix CKAN harvester empty notes and `metadata` file type handling
+- Remove (temporary) badges metrics
+  [#885](https://github.com/opendatateam/udata/issues/885)
+- Test and fix topic search
+  [#892](https://github.com/opendatateam/udata/pull/892)
+
 ## 1.0.9 (2017-04-23)
 
 - Fix broken post view
