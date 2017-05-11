@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.10 (2017-05-11)
 
 - Fix bad stored (community) resources URLs [migration]
   [#882](https://github.com/opendatateam/udata/issues/882)
