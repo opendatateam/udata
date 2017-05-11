@@ -11,8 +11,8 @@ services:
         - "27017:27017"
 
     mongo_test:
-        image: mongo:3.4.0
-        tmpfs: /tmp/db
+        image: mongo:3.2.0
+        tmpfs: /data/db/
         expose:
           - "27018"
         ports:
