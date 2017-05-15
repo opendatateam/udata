@@ -102,6 +102,9 @@ class TransferStartTest(TestCase, DBTestMixin):
 
 
 class TransferAcceptTest(TestCase, DBTestMixin):
+    def setUp(self):
+        self.app.config['FORCE_METRICS'] = True
+
     def test_recipient_user_can_accept_transfer(self):
         owner = UserFactory()
         recipient = UserFactory()
@@ -181,6 +184,7 @@ class TransferAcceptTest(TestCase, DBTestMixin):
 
 
 class TransferNotificationsTest(TestCase, DBTestMixin):
+
     def test_pending_transfer_request_for_user(self):
         user = UserFactory()
         datasets = VisibleDatasetFactory.create_batch(2, owner=user)

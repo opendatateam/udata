@@ -14,6 +14,7 @@ metric_catalog = {}
 
 
 from udata.models import db  # noqa: need metrics refactoring
+from flask import current_app
 
 from .tasks import update_metric, archive_metric  # noqa
 
@@ -111,10 +112,12 @@ class Metric(object):
                 'Unsupported format: {0} ({1})'.format(value, type(value)))
 
     def trigger_update(self):
-        self.need_update.send(self)
+        if not current_app.config['TESTING'] or current_app.config.get('FORCE_METRICS'):
+            self.need_update.send(self)
 
     def notify_update(self):
-        self.updated.send(self)
+        if not current_app.config['TESTING'] or current_app.config.get('FORCE_METRICS'):
+            self.updated.send(self)
 
     @classmethod
     def aggregate_monthly(cls, queryset, month):

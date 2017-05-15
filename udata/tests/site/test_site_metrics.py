@@ -23,6 +23,7 @@ class FakeSiteMetric(SiteMetric):
 
 class SiteMetricTest(DBTestMixin, TestCase):
     def setUp(self):
+        self.app.config['FORCE_METRICS'] = True
         self.updated_emitted = False
         self.need_update_emitted = False
 
