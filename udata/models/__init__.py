@@ -103,7 +103,6 @@ from udata.features.territories.models import *  # noqa
 def init_app(app):
     if app.config['TESTING']:
         app.config['MONGODB_DB'] = '{MONGODB_DB}-test'.format(**app.config)
-        app.config['MONGODB_PORT'] = 27018
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
         name = 'udata_{0}.models'.format(plugin)
