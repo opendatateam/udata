@@ -29,11 +29,11 @@ services:
 
 
 
-        search:
-            image: udata/elasticsearch:2.4.5
-            volumes:
-              - ./data/search/data:/usr/share/elasticsearch/data
-            expose:
-              - "9200"
-            ports:
-              - "9200:9200"
+    search:
+        image: udata/elasticsearch:2.4.5
+        volumes:
+          - ./data/search/data:/usr/share/elasticsearch/data
+        expose:
+          - "9200"
+        ports:
+          - "9200:9200"
