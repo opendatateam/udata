@@ -52,6 +52,10 @@ def migrate_zones_from_old_to_new_ids_in_datasets():
     counter_towns = 0
     counter_counties = 0
     counter_regions = 0
+    counter_drom = 0
+    counter_dromcom = 0
+    drom_zone = GeoZone.objects(code='fr/drom').first()
+    dromcom_zone = GeoZone.objects(code='fr/dromcom').first()
     for dataset in Dataset.objects.all():
         if dataset.spatial and dataset.spatial.zones:
             counter_datasets += 1
@@ -70,7 +74,6 @@ def migrate_zones_from_old_to_new_ids_in_datasets():
                             .first())
                     elif kind == 'county':
                         counter_counties += 1
-                        # TODO: handle DROM-COM
                         new_zones.append(
                             GeoZone
                             .objects(code=zone_id, level='fr/departement')
@@ -85,6 +88,15 @@ def migrate_zones_from_old_to_new_ids_in_datasets():
                             .first())
                     else:
                         new_zones.append(zone)
+                elif zone.id.startswith('country-subset/fr'):
+                    counter_zones += 1
+                    subset, country, kind = zone.id.split('/')
+                    if kind == 'dom':
+                        counter_drom += 1
+                        new_zones.append(drom_zone)
+                    elif kind == 'domtom':
+                        counter_dromcom += 1
+                        new_zones.append(dromcom_zone)
                 else:
                     new_zones.append(zone)
             dataset.update(
@@ -93,4 +105,6 @@ def migrate_zones_from_old_to_new_ids_in_datasets():
         counter_datasets, counter_zones))
     print('{} town zones, {} county zones and {} region zones updated.'.format(
         counter_towns, counter_counties, counter_regions))
+    print('{} DROM zones, {} DROM-COM zones updated.'.format(
+        counter_drom, counter_dromcom))
     log.info('Done')
