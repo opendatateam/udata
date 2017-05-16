@@ -11,8 +11,9 @@ import BaseNotification from 'components/notifications/base';
 export default {
     mixins: [BaseNotification],
     methods: {
-        click: function() {
-            this.$go('/organization/' + this.details.organization + '#membership-requests');
+        click() {
+            // Can't use v-link because of hash (only supported in vue-router 2.0)
+            this.$go(`/organization/${this.details.organization}#membership-requests`);
         }
     }
 };
