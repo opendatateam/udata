@@ -1,7 +1,7 @@
 /**
  * Styles
  */
-import '../less/admin.less';
+import 'less/admin.less';
 
 // Catch all errors
 import 'raven';
@@ -18,8 +18,6 @@ import Vue from 'vue';
 import config from 'config';
 import router from 'admin.routes';
 
-// Ensure retrocompatibily for 0.12.2 replace behavior
-Vue.options.replace = false;
 Vue.config.debug = config.debug;
 
 Vue.use(require('plugins/util'));

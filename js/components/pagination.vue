@@ -35,7 +35,6 @@ const nb = 2;
 
 export default {
     name: 'pagination-widget',
-    replace: true,
     props: {
         p: Object
     },

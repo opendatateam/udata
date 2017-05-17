@@ -1,9 +1,11 @@
 <template>
+<div>
     <!-- Placeholder for non-routable modals -->
     <div v-el:modal></div>
     <app-header class="main-header"></app-header>
     <sidebar></sidebar>
     <router-view></router-view>
+</div>
 </template>
 
 <script>
@@ -18,6 +20,7 @@ import Sidebar from 'components/sidebar.vue';
 
 
 export default {
+    name: 'admin',
     data() {
         return {
             toggled: false,
@@ -57,13 +60,11 @@ export default {
          * @param  {Object} data        Data to assign to modal properties
          * @return {Vue}                The child instanciated vm
          */
-        $modal(options, data) {
+        $modal(options, propsData) {
             const constructor = Vue.extend(options);
-            const modal = new constructor({
-                el: this.$els.modal,
-                parent: this,
-                propsData: data
-            });
+            const el = document.createElement('div');
+            this.$els.modal.appendChild(el);
+            const modal = new constructor({el, parent: this, propsData});
             modal.$on('modal:closed', modal.$destroy);
             return modal;
         }

@@ -1,4 +1,5 @@
 <template>
+<div>
 <box :title="_('Details')" icon="cubes" boxclass="box-solid">
     <h3>{{dataset.title}}</h3>
     <div v-markdown="dataset.description"></div>
@@ -31,6 +32,7 @@
         <span v-for="b in dataset.badges" class="label label-primary">{{badges[b.kind]}}</span>
     </div>
 </box>
+</div>
 </template>
 
 <script>
@@ -42,7 +44,7 @@ export default {
     name: 'dataset-details',
     mixins: [DatasetFilters],
     props: ['dataset'],
-    data: function() {
+    data() {
         return {
             badges: badges.dataset
         };

@@ -90,7 +90,7 @@
 
 <script>
 export default {
-    replace: true,
+    name: 'box',
     props: {
         title: String,
         icon: null,

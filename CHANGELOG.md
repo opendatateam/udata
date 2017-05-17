@@ -55,6 +55,12 @@
     - Allows to define `min` and `max` values to disable some dates
     - Keyboard input is reflected into the calendar
       [#615](https://github.com/opendatateam/udata/issues/615)
+- Easier Vue.js development/debugging:
+    - Drop `Vue.config.replace = false`: compatible with Vue.js 1/2 and no more style guessing
+      [#760](https://github.com/opendatateam/udata/pull/760)
+    - `name` on all components: no more `Anonymous Component` in Vue debugger
+    - No more `Fragments`
+    - More ES6 everywhere
 
 ## 1.0.11 (2017-05-25)
 

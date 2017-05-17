@@ -73,7 +73,6 @@ const TEXT_TAGS = ['select', 'textarea'];
 
 export default {
     name: 'base-form',
-    replace: true,
     props: {
         fields: Array,
         model: Object,
@@ -145,6 +144,7 @@ export default {
             return s;
         },
         $form() {
+            if (!this) return;  // Prevent console noise on a non significant error
             return this.$refs.form || this.$els.form || this.$el;
         }
     },

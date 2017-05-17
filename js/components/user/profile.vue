@@ -17,7 +17,9 @@
     }
 }
 </style>
+
 <template>
+<div>
 <box :title="title" icon="user" boxclass="user-profile-widget">
     <h3>{{user.fullname}}</h3>
         <div class="profile-body">
@@ -27,6 +29,7 @@
         <div v-markdown="user.about"></div>
     </div>
 </box>
+</div>
 </template>
 
 <script>
@@ -43,7 +46,7 @@ export default {
         };
     },
     computed: {
-        endpoint: function() {
+        endpoint() {
             var operation = API.me.operations.my_avatar;
             return operation.urlify({});
         }

@@ -1,6 +1,7 @@
 <template>
+<div>
 <div class="page-header">
-  <h1>{{ _('Your harvester has been created') }}</h1>
+    <h1>{{ _('Your harvester has been created') }}</h1>
 </div>
 <div class="row">
     <div class="col-xs-12 lead text-center">
@@ -10,20 +11,20 @@
 </div>
 
 <div class="row">
-    <div class="col-xs-12 col-md-6 text-center">
+    <div class="col-xs-12 text-center">
         <button class="btn btn-primary btn-flat"
             v-link="{name: 'harvester', params: {oid: source.id}}">
             {{ _('See in the administration') }}
         </button>
     </div>
 </div>
+</div>
 </template>
 
 <script>
 export default {
-    data: function() {
-        return {source: {}};
-    },
-    props: ['source']
+    props: {
+        source: {type: Object, default: () => {}}
+    }
 };
 </script>

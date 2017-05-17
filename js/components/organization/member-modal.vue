@@ -13,6 +13,7 @@
 </style>
 
 <template>
+<div>
 <user-modal :user="user" v-ref:modal>
     <role-form class="member-form" v-ref:form
         :fields="fields" :model="member" :defs="defs"
@@ -43,6 +44,7 @@
         </div>
     </div>
 </user-modal>
+</div>
 </template>
 
 <script>
@@ -53,6 +55,7 @@ import UserModal from 'components/user/modal.vue';
 import RoleForm from 'components/form/horizontal-form.vue';
 
 export default {
+    name: 'member-modal',
     components: {UserModal, RoleForm},
     props: {
         member: {

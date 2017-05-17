@@ -1,4 +1,5 @@
 <template>
+<div>
     <box title="OAuth" icon="plug"
         boxclass="box-info"
         bodyclass="table-responsive no-padding">
@@ -22,15 +23,16 @@
             </tbody>
         </table>
     </box>
+</div>
 </template>
 
 <script>
+import Box from 'components/containers/box.vue';
+
 export default {
     name: 'oauth-widget',
-    components: {
-        box: require('components/containers/box.vue')
-    },
-    data: function() {
+    components: {Box},
+    data() {
         return {
             title: 'OAuth',
             clients: []

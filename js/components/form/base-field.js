@@ -27,7 +27,6 @@ export const FieldComponentMixin = {
  */
 export const BaseField = {
     name: 'base-field',
-    replace: true,
     data() {
         return {
             errors: []

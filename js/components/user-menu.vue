@@ -3,6 +3,7 @@
     margin-bottom: 0;
 }
 </style>
+
 <template>
 <li class="dropdown user user-menu">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -37,13 +38,13 @@
 </template>
 
 <script>
-'use strict';
+import placeholders from 'helpers/placeholders';
 
-module.exports = {
-    replace: true,
-    data: function() {
+export default {
+    name: 'user-menu',
+    data() {
         return {
-            placeholder: require('helpers/placeholders').user
+            placeholder: placeholders.user
         };
     }
 };

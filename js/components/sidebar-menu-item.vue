@@ -45,7 +45,6 @@
 <script>
 export default {
     name: 'sidebar-menu-item',
-    replace: true,
     props: ['label', 'icon','image', 'route', 'children', 'badge', 'scrollTo'],
     computed: {
         is_tree() {

@@ -1,4 +1,5 @@
 <template>
+<div>
 <datatable icon="cog"
     :title="title"
     bodyclass="table-responsive no-padding"
@@ -47,6 +48,7 @@
         </dl>
     </header>
 </datatable>
+</div>
 </template>
 
 <script>

@@ -1,4 +1,5 @@
 <template>
+<div>
     <datatable :title="_('Topics')" icon="book"
         boxclass="topics-widget"
         :fields="fields"
@@ -12,14 +13,14 @@
             </button>
         </footer>
     </datatable>
+</div>
 </template>
-
 
 <script>
 import Datatable from 'components/datatable/widget.vue';
 
 export default {
-    name: 'topics-widget',
+    name: 'topics-list',
     MASK: ['id', 'name'],
     components: {Datatable},
     props: ['topics'],

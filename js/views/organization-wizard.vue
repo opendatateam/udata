@@ -1,26 +1,37 @@
 <template>
+<div>
 <wizard v-ref:wizard :steps="steps" :title="_('New organization')"></wizard>
+</div>
 </template>
 
 <script>
 import Organization from 'models/organization';
 import API from 'api';
+import Wizard from 'components/widgets/wizard.vue';
+// Steps
+import PreCreate from 'components/organization/pre-create.vue';
+import OrganizationForm from 'components/organization/form.vue';
+import ImagePicker from 'components/widgets/image-picker.vue';
+import PostCreate from 'components/organization/post-create.vue';
 
 export default {
-    data: function() {
+    name: 'organization-wizard',
+    components: {Wizard},
+    props: ['orgid'],
+    data() {
         return {
             organization: new Organization(),
             steps: [{
                 label: this._('Verification'),
                 subtitle: this._('Ensure your organization does not exists'),
-                component: require('components/organization/pre-create.vue'),
+                component: PreCreate,
             }, {
                 label: this._('Description'),
                 subtitle: this._('Describe your organization'),
-                component: require('components/organization/form.vue'),
+                component: OrganizationForm,
                 next: (component) => {
                     if (component.validate()) {
-                        let data = component.serialize();
+                        const data = component.serialize();
                         Object.assign(this.organization, data);
                         this.organization.save();
                         this.organization.$once('updated', () => {
@@ -32,9 +43,9 @@ export default {
             }, {
                 label: this._('Logo'),
                 subtitle: this._('Upload your organization logo'),
-                component: require('components/widgets/image-picker.vue'),
+                component: ImagePicker,
                 init: (component) => {
-                    var endpoint = API.organizations.operations.organization_logo;
+                    const endpoint = API.organizations.operations.organization_logo;
                     component.endpoint = endpoint.urlify({org: this.organization.id});
                 },
                 next: (component) => {
@@ -44,16 +55,12 @@ export default {
             }, {
                 label: this._('Publish'),
                 subtitle: this._('Publish some content'),
-                component: require('components/organization/post-create.vue'),
+                component: PostCreate,
                 init: (component) => {
                     component.organization = this.organization;
                 }
             }],
          };
-    },
-    props: ['orgid'],
-    components: {
-        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {

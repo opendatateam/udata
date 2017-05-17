@@ -89,7 +89,7 @@ const BOTTOM_MENU = [{
 }];
 
 export default {
-    replace: true,
+    name: 'sidebar',
     components: {SidebarMenuItem, Scrollbox},
     data() {
         return {

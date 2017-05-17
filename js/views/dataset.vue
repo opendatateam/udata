@@ -1,4 +1,5 @@
 <template>
+<div>
 <layout :title="dataset.title || ''" :subtitle="_('Dataset')"
     :actions="actions" :badges="badges" :page="dataset.page || ''">
     <div class="row">
@@ -9,8 +10,8 @@
     </div>
     <div class="row">
         <div class="col-xs-12 col-md-6">
-            <dataset :dataset="dataset"></dataset>
-            <wmap :title="_('Spatial coverage')" :geojson="geojson" :footer="map_footer">
+            <dataset-details :dataset="dataset"></dataset-details>
+            <map-widget :title="_('Spatial coverage')" :geojson="geojson" :footer="map_footer">
                 <ul>
                     <li v-show="dataset.spatial && dataset.spatial.granularity">
                         <a class="btn btn-xs" v-tooltip tooltip-placement="top"
@@ -27,16 +28,16 @@
                         </a>
                     </li>
                 </ul>
-            </wmap>
+            </map-widget>
         </div>
-        <quality :quality="dataset.quality" class="col-xs-12 col-md-6"></quality>
+        <quality-widget :quality="dataset.quality" class="col-xs-12 col-md-6"></quality-widget>
     </div>
     <div class="row">
-        <resources :dataset="dataset" class="col-xs-12"></resources>
+        <resource-list :dataset="dataset" class="col-xs-12"></resource-list>
     </div>
     <div class="row">
-        <chart id="trafic" class="col-xs-12" :title="_('Audience')"
-            :metrics="metrics" x="date" :y="y"></chart>
+        <chart-widget id="trafic" class="col-xs-12" :title="_('Audience')"
+            :metrics="metrics" x="date" :y="y"></chart-widget>
     </div>
 
     <div class="row">
@@ -52,10 +53,11 @@
     </div>
 
     <div class="row">
-        <followers id="followers" class="col-xs-12 col-md-6" :followers="followers"></followers>
+        <follower-list id="followers" class="col-xs-12 col-md-6" :followers="followers"></follower-list>
         <community-list class="col-xs-12 col-md-6" :communities="communities" :without-dataset="true"></community-list>
     </div>
 </layout>
+</div>
 </template>
 
 <script>
@@ -70,16 +72,37 @@ import Metrics from 'models/metrics';
 import Reuses from 'models/reuses';
 import CommunityResources from 'models/communityresources';
 // Widgets
+import ChartWidget from 'components/charts/widget.vue';
 import CommunityList from 'components/dataset/communityresource/list.vue';
+import DatasetDetails from 'components/dataset/details.vue';
+import DatasetFilters from 'components/dataset/filters';
 import DiscussionList from 'components/discussions/list.vue';
+import FollowerList from 'components/follow/list.vue';
 import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
-import DatasetFilters from 'components/dataset/filters';
+import MapWidget from 'components/widgets/map.vue';
+import QualityWidget from 'components/dataset/quality.vue';
+import ResourceList from 'components/dataset/resource/list.vue';
 import ReuseList from 'components/reuse/list.vue';
 import SmallBox from 'components/containers/small-box.vue';
 
 export default {
+    name: 'dataset-view',
     mixins: [DatasetFilters],
+    components: {
+        ChartWidget,
+        CommunityList,
+        DatasetDetails,
+        DiscussionList,
+        FollowerList,
+        IssueList,
+        Layout,
+        MapWidget,
+        QualityWidget,
+        ResourceList,
+        ReuseList,
+        SmallBox,
+    },
     data() {
         return {
             dataset: new Dataset({mask: '*'}),
@@ -169,20 +192,6 @@ export default {
         map_footer() {
             return (this.dataset.spatial && this.dataset.spatial.granularity || this.territories_labels) !== undefined;
         }
-    },
-    components: {
-        dataset: require('components/dataset/details.vue'),
-        quality: require('components/dataset/quality.vue'),
-        chart: require('components/charts/widget.vue'),
-        resources: require('components/dataset/resource/list.vue'),
-        followers: require('components/follow/list.vue'),
-        wmap: require('components/widgets/map.vue'),
-        CommunityList,
-        DiscussionList,
-        SmallBox,
-        ReuseList,
-        IssueList,
-        Layout
     },
     methods: {
         edit() {

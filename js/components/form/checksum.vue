@@ -39,8 +39,8 @@ import API from 'api';
 import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
+    name: 'checksum-field',
     mixins: [FieldComponentMixin],
-    replace: true,
     data() {
         return {
             specs: API.definitions.Checksum.properties,

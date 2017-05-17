@@ -13,7 +13,6 @@ import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
     name: 'text-input',
-    replace: true,
     mixins: [FieldComponentMixin]
 };
 </script>

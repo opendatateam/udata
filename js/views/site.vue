@@ -1,4 +1,5 @@
 <template>
+<div>
 <layout :title="_('Site')">
     <div class="row">
         <small-box class="col-lg-3 col-xs-6" v-for="b in boxes"
@@ -7,8 +8,8 @@
         </small-box>
     </div>
     <div class="row">
-        <chart title="Traffic" :metrics="metrics" class="col-xs-12"
-            x="date" :y="y"></chart>
+        <chart-widget title="Traffic" :metrics="metrics" class="col-xs-12"
+            x="date" :y="y"></chart-widget>
     </div>
 
     <div class="row">
@@ -21,7 +22,7 @@
         <org-list id="organizations" class="col-xs-12" :organizations="organizations"></org-list>
     </div>
     <div class="row">
-        <users id="users" class="col-xs-12" :users="users"></users>
+        <user-list id="users" class="col-xs-12" :users="users"></user-list>
     </div>
     <div class="row">
         <issue-list class="col-xs-12 col-md-6" :issues="issues"></issue-list>
@@ -31,6 +32,7 @@
         <community-list class="col-xs-12" :communities="communities"></community-list>
     </div>
 </layout>
+</div>
 </template>
 
 <script>
@@ -53,10 +55,12 @@ import OrgList from 'components/organization/list.vue';
 import IssueList from 'components/issues/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
 import CommunityList from 'components/dataset/communityresource/list.vue';
+import ChartWidget from 'components/charts/widget.vue';
+import UserList from 'components/user/list.vue';
 
 export default {
     name: 'SiteView',
-    data: function() {
+    data() {
         return {
             metrics: new Metrics({
                 data: {
@@ -122,25 +126,25 @@ export default {
         }
     },
     components: {
-        chart: require('components/charts/widget.vue'),
-        users: require('components/user/list.vue'),
+        ChartWidget,
         CommunityList,
-        SmallBox,
         DatasetList,
         DiscussionList,
+        IssueList,
+        Layout,
         OrgList,
         ReuseList,
-        IssueList,
-        Layout
+        SmallBox,
+        UserList,
     },
     methods: {
-        fetch_metrics: function() {
+        fetch_metrics() {
             if (this.$root.site.id) {
                 this.metrics.fetch({id: this.$root.site.id});
             }
         }
     },
-    attached: function() {
+    attached() {
         this.fetch_metrics();
         this.datasets.fetch();
         this.reuses.fetch();

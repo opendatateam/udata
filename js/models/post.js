@@ -21,8 +21,8 @@ export default class Post extends Model {
     }
 
     save() {
-        let data = {payload: this},
-            endpoint = 'posts.create_post';
+        const data = {payload: this};
+        let endpoint = 'posts.create_post';
 
         if (this.id) {
             endpoint = 'posts.update_post';

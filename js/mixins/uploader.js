@@ -43,10 +43,10 @@ const messages = {
 export default {
     data() {
         return {
+            files: [],
             dropping: false,
             upload_endpoint: null,
-            HAS_FILE_API: HAS_FILE_API,
-            files: []
+            HAS_FILE_API,
         };
     },
     ready() {

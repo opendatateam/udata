@@ -14,12 +14,11 @@
 
 <script>
 import BaseForm from 'components/form/base-form';
+import Field from 'components/form/vertical-field.vue';
 
 export default {
-    name: 'form-vertical',
+    name: 'vertical-form',
     mixins: [BaseForm],
-    components: {
-        field: require('components/form/vertical-field.vue')
-    }
+    components: {Field}
 };
 </script>

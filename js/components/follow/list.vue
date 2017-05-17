@@ -1,19 +1,22 @@
 <template>
+<div>
     <datatable :title="title" icon="users"
         boxclass="followers-widget"
         :fields="fields"
         :p="followers"
         :empty="_('No follower')">
     </datatable>
+</div>
 </template>
 
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
-    name: 'followers-widget',
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
-    data: function() {
+    name: 'followers-list',
+    components: {Datatable},
+    props: ['followers'],
+    data() {
         return {
             title: this._('Followers'),
             fields: [{
@@ -37,9 +40,8 @@ export default {
     },
     events: {
         'datatable:item:click': function(item) {
-            this.$go('/user/' + item.follower.id + '/');
+            this.$go(`/user/${item.follower.id}/`);
         }
     },
-    props: ['followers']
 };
 </script>

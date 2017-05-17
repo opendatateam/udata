@@ -1,20 +1,22 @@
 <template>
+<div>
     <datatable :title="title" icon="building"
         boxclass="organizations-widget"
         :fields="fields "
         :p="organizations"
         :empty="_('No organization')">
     </datatable>
+</div>
 </template>
 
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
-    name: 'organizations-widget',
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
+    name: 'organizations-list',
+    components: {Datatable},
     MASK: ['id', 'name', 'logo_thumbnail', 'created_at', 'metrics'],
-    data: function() {
+    data() {
         return {
             title: this._('Organizations'),
             fields: [{
@@ -68,7 +70,7 @@ export default {
     },
     events: {
         'datatable:item:click': function(org) {
-            this.$go('/organization/' + org.id + '/');
+            this.$go(`/organization/${org.id}/`);
         }
     },
     props: ['organizations']

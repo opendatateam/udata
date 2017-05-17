@@ -16,7 +16,6 @@ import utils from 'utils';
 export default {
     name: 'datatable-cell',
     default: '',
-    replace: true,
     props: {
         field: Object,
         item: Object

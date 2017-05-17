@@ -12,6 +12,7 @@ import TooltipMixin from 'mixins/tooltip';
 import 'vue-strap/src/Tooltip.vue'; // Needed for style
 
 export default {
+    name: 'tooltip',
     mixins: [TooltipMixin],
     props: {
         // The tooltip content

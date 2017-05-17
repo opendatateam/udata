@@ -19,7 +19,6 @@ import {FieldComponentMixin} from 'components/form/base-field';
 export default {
     name: 'select-input',
     mixins: [FieldComponentMixin],
-    replace: true,
     computed: {
         options: function() {
             if (!this.property && !this.field) return [];

@@ -7,6 +7,7 @@
 </style>
 
 <template>
+<div>
 <modal :title="title" class="image-picker-modal modal-info" v-ref:modal>
     <div class="modal-body">
         <picker v-ref:picker :endpoint="endpoint" :sizes="sizes"></picker>
@@ -21,6 +22,7 @@
         </button>
     </footer>
 </modal>
+</div>
 </template>
 
 <script>
@@ -28,6 +30,7 @@ import Modal  from 'components/modal.vue';
 import Picker from 'components/widgets/image-picker.vue';
 
 export default {
+    name: 'image-picker-modal',
     components: {Modal, Picker},
     props: {
         endpoint: String,

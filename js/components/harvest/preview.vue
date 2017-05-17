@@ -1,4 +1,5 @@
 <template>
+<div>
 <job-widget :job="job" :loading="loading" :empty="empty">
     <div class="text-center">
         <button class="btn btn-primary btn-flat" @click="preview">
@@ -7,6 +8,7 @@
         </button>
     </div>
 </job-widget>
+</div>
 </template>
 
 <script>
@@ -14,33 +16,32 @@ import API from 'api';
 import backends from 'models/harvest/backends';
 import HarvestJob from 'models/harvest/job';
 import HarvestSource from 'models/harvest/source';
+import JobWidget from 'components/harvest/job.vue';
 
 export default {
     name: 'HarvestPreviewView',
+    components: {JobWidget},
     props: {
         source: {
             type: Object,
-            default: function() {
+            default() {
                 return new HarvestSource();
             }
         }
     },
-    data: function() {
+    data() {
         return {
             job: new HarvestJob(),
             loading: false
         };
     },
-    components: {
-        'job-widget': require('components/harvest/job.vue')
-    },
     computed: {
-        empty: function() {
+        empty() {
             return this.job.created ? this._('No item found') : ' ';
         }
     },
     methods: {
-        preview: function() {
+        preview() {
             this.loading = true;
             // this.$set('preview_job', job);
             API.harvest.preview_harvest_source(

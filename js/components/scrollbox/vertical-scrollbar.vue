@@ -11,7 +11,7 @@
 
 <script>
 export default {
-    replace: true,
+    name: 'vertical-scrollbar',
 
     data() {
         return {

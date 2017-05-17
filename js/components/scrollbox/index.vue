@@ -34,7 +34,7 @@ import VerticalScrollbar from './vertical-scrollbar.vue';
 import HorizontalScrollbar from './horizontal-scrollbar.vue';
 
 export default {
-    replace: true,
+    name: 'scrollbox',
     props: {
         speed: {type: Number, default: 53},
     },
@@ -196,7 +196,7 @@ export default {
         position: absolute;
         background: transparent;
         user-select: none;
-        
+
         &:hover {
             background: rgba(0,0,0,0.5);
         }

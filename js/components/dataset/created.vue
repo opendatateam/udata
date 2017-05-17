@@ -1,4 +1,5 @@
 <template>
+<div>
 <div class="page-header">
   <h1>{{ _('Your dataset has been created') }}</h1>
 </div>
@@ -21,20 +22,16 @@
         </a>
     </div>
 </div>
+</div>
 </template>
 
 <script>
+import Share from 'components/widgets/share.vue';
+
 export default {
+    components: {Share},
     props: {
-        dataset: {
-            type: Object,
-            default: function() {
-                return {};
-            }
-        }
+        dataset: {type: Object, default: () => {}},
     },
-    components: {
-        share: require('components/widgets/share.vue')
-    }
 };
 </script>

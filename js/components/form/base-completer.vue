@@ -41,7 +41,6 @@ function forceList(value) {
 }
 
 export default {
-    replace: true,
     mixins: [FieldComponentMixin],
     computed: {
         selectize_options() {

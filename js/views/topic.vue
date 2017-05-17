@@ -1,4 +1,5 @@
 <template>
+<div>
 <layout :title="topic.name || ''" :subtitle="_('Topic')" :page="topic.page || ''"
     :actions="actions">
     <div class="row">
@@ -9,12 +10,18 @@
         <reuses-list :reuses="topic.reuses" class="col-xs-12 col-md-6"></reuses-list>
     </div>
 </layout>
+</div>
 </template>
 
 <script>
 import moment from 'moment';
+
 import Topic from 'models/topic';
+
 import Layout from 'components/layout.vue';
+import TopicDetails from 'components/topic/details.vue';
+import DatasetsList from 'components/dataset/card-list.vue';
+import ReusesList from 'components/reuse/card-list.vue';
 
 export default {
     name: 'TopicView',
@@ -28,12 +35,7 @@ export default {
             }],
         };
     },
-    components: {
-        'topic-details': require('components/topic/details.vue'),
-        'datasets-list': require('components/dataset/card-list.vue'),
-        'reuses-list': require('components/reuse/card-list.vue'),
-        Layout
-    },
+    components: {Layout, TopicDetails, DatasetsList, ReusesList},
     events: {
         'dataset-card-list:submit': function(ids) {
             this.topic.datasets = ids;

@@ -1,10 +1,12 @@
 <template>
+<div>
     <datatable :title="title" icon="code-fork"
         boxclass="community-widget"
         :fields="fields"
         :p="communities"
         :empty="_('No community resources')">
     </datatable>
+</div>
 </template>
 
 <script>
@@ -32,7 +34,7 @@ export default {
     },
     components: {Datatable},
     data() {
-        let fields = [{
+        const fields = [{
             label: this._('Title'),
             key: 'title',
             type: 'text'

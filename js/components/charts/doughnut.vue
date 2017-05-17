@@ -10,20 +10,13 @@ import Chart from 'chart.js';
 export default {
     name: 'chartjs-doughnut',
     props: ['score'],
-    watch: {
-        'score': function() {
-            this.build_chart();
-        }
-    },
-    ready: function() {
+    ready() {
         this.build_chart()
     },
     methods: {
-        build_chart: function() {
-            if (!this.score) {
-                return;
-            }
-            let data = [
+        build_chart() {
+            if (!this.score) return;
+            const data = [
                 {
                     value: this.score,
                     color:"#3C8DBC",
@@ -33,12 +26,17 @@ export default {
                     color: "#F5F5F5",
                 }
             ];
-            let ctx = this.$els.canvas.getContext('2d');
+            const ctx = this.$els.canvas.getContext('2d');
             new Chart(ctx).Doughnut(data, {
                 segmentShowStroke : false,
                 showTooltips: false,
             });
         },
+    },
+    watch: {
+        score() {
+            this.build_chart();
+        }
     }
 };
 </script>

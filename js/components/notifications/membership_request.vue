@@ -1,5 +1,5 @@
 <template>
-<a class="pointer" @click="click">
+<a href @click.prevent="click">
     <span class="fa fa-fw fa-users text-aqua"></span>
     {{ _('Pending membership request') }}
 </a>

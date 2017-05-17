@@ -1,5 +1,5 @@
 <template>
-<a class="pointer" @click="click">
+<a v-link="link">
     <span class="fa fa-fw fa-tasks text-aqua"></span>
     {{ _('Pending harvester validation for {name}', details) }}
 </a>
@@ -10,9 +10,9 @@ import BaseNotification from 'components/notifications/base';
 
 export default {
     mixins: [BaseNotification],
-    methods: {
-        click: function() {
-            this.$go('/harvester/' + this.details.id + '/');
+    computed: {
+        link() {
+            return {name: 'harvester', params: {oid: this.details.id}};
         }
     }
 };

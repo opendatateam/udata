@@ -1,19 +1,21 @@
 <template>
+<div>
     <datatable :title="title" icon="users"
         boxclass="users-widget"
         :fields="fields"
         :p="users"
         :empty="_('No user')">
     </datatable>
+</div>
 </template>
 
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
-    name: 'users-widget',
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
-    data: function() {
+    name: 'users-list',
+    components: {Datatable},
+    data() {
         return {
             title: this._('Users'),
             fields: [{
@@ -69,7 +71,7 @@ export default {
     },
     events: {
         'datatable:item:click': function(user) {
-            this.$go('/user/' + user.id + '/');
+            this.$go(`/user/${user.id}/`);
         }
     },
     props: ['users']

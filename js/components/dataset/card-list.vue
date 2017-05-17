@@ -61,6 +61,7 @@
 </style>
 
 <template>
+<div>
     <box :title="title" icon="cubes"
         boxclass="box-solid datasets-cards-widget"
         footerclass="text-center" :footer="true" :loading="loading">
@@ -101,6 +102,7 @@
             </div>
         </footer>
     </box>
+</div>
 </template>
 
 <script>
@@ -111,6 +113,7 @@ import Box from 'components/containers/box.vue';
 import DatasetCompleter from 'components/form/dataset-completer.vue';
 
 export default {
+    name: 'dataset-card-list',
     mixins: [Sorter],
     MASK: DatasetCard.MASK,
     components: {Box, DatasetCompleter, DatasetCard},

@@ -11,7 +11,6 @@ import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
     name: 'hidden-input',
-    replace: true,
     mixins: [FieldComponentMixin]
 };
 </script>
