@@ -6,6 +6,8 @@
   [#909](https://github.com/opendatateam/udata/pull/909)
 - Fix producer sidebar image sizing
   [#913](https://github.com/opendatateam/udata/issues/913)
+- Fix js `Model.save()` not updating in some cases
+  [#910](https://github.com/opendatateam/udata/pull/910)
 
 ## 1.0.10 (2017-05-11)
 

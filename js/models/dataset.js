@@ -23,9 +23,11 @@ export default class Dataset extends Model {
      * Create or update the given dataset.
      */
     save(on_error) {
-        var ep = this.id ? 'datasets.update_dataset' : 'datasets.create_dataset';
+        if (this.id) {
+            return this.update(this, this.on_fetched, on_error);
+        }
         this.loading = true;
-        this.$api(ep, {payload: this}, this.on_fetched, on_error);
+        this.$api('datasets.create_dataset', {payload: this}, this.on_fetched, on_error);
     }
 
     update(data, on_success, on_error) {
