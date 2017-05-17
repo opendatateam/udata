@@ -55,7 +55,7 @@
                             {% endif %}
                             {% for badge in dataset.badges %}
                                 <small class="small-badge">
-                                    <a href="{{ url_for('front.search', badge=badge) }}"
+                                    <a href="{{ url_for('search.index', badge=badge) }}"
                                         title="{{ _('See all datasets with that badge.') }}">
                                         <span class="fa fa-bookmark"></span>
                                         {{ dataset.badge_label(badge) }}</a>
@@ -191,7 +191,7 @@
                             <li>
                                 <a href v-tooltip title="{{ _('Badges') }}"><span class="fa fa-fw fa-bookmark"></span></a>
                                 {% for badge in dataset.badges %}
-                                    <a href="{{ url_for('front.search', badge=badge) }}">
+                                    <a href="{{ url_for('search.index', badge=badge) }}">
                                         {{ dataset.badge_label(badge) }}</a>{% if not loop.last %}, {% endif %}
                                 {% endfor %}
                             </li>
@@ -270,7 +270,7 @@
 
                         <div class="tags">
                             {% for tag in dataset.tags %}
-                            <a href="{{ url_for('front.search', tag=tag) }}"
+                            <a href="{{ url_for('search.index', tag=tag) }}"
                                 class="btn btn-primary btn-grey btn-xs"
                                 title="{{ tag }}">
                                 {{ tag|truncate(14, True) }}

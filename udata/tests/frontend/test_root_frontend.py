@@ -19,11 +19,11 @@ class FrontEndRootTest(FrontTestCase):
                 DatasetFactory(organization=org)
                 ReuseFactory(organization=org)
 
-        response = self.get(url_for('front.search'))
+        response = self.get(url_for('search.index'))
         self.assert200(response)
 
     def test_render_search_no_data(self):
         '''It should render the search page without data'''
         self.init_search()
-        response = self.get(url_for('front.search'))
+        response = self.get(url_for('search.index'))
         self.assert200(response)

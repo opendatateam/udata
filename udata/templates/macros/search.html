@@ -213,7 +213,7 @@
 
 
 {# Display the site search component with raw html fallback #}
-{% set default_action = url_for('front.search') %}
+{% set default_action = url_for('search.index') %}
 {% set default_placeholder = _('Search') %}
 {% macro site_search(action=default_action, placeholder=default_placeholder, territory=None, size=None, class=None) -%}
 <site-search v-ref:search action="{{ action }}" placeholder="{{ placeholder }}"
