@@ -13,6 +13,8 @@ from . import FrontTestCase
 
 
 class UserBlueprintTest(FrontTestCase):
+    modules_to_load = ['core.user', 'admin', 'core.dataset', 'core.reuse',
+                      'core.site', 'core.organization']
     def test_render_profile(self):
         '''It should render the user profile'''
         user = UserFactory(about='* Title 1\n* Title 2',

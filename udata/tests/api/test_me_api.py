@@ -26,6 +26,8 @@ from . import APITestCase
 
 
 class MeAPITest(APITestCase):
+    modules_to_load = ['core.user', 'core.organization', 'core.dataset',
+                      'core.reuse']
 
     def test_get_profile(self):
         '''It should fetch my user data on GET'''

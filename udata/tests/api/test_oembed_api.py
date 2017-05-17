@@ -40,6 +40,8 @@ class OEmbedSettings(Testing):
 
 
 class OEmbedsDatasetAPITest(APITestCase):
+    modules_to_load = ['core.organization', 'features.territories',
+                       'core.dataset']
     settings = OEmbedSettings
 
     def setUp(self):
