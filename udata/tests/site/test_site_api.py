@@ -33,7 +33,7 @@ class FakeSiteMetric(SiteMetric):
 class MetricsAPITest(APITestCase):
     def test_get_metrics_for_site(self):
         '''It should fetch my user data on GET'''
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         with self.app.app_context():
             FakeSiteMetric.update()
 

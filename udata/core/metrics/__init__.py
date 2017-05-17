@@ -112,11 +112,11 @@ class Metric(object):
                 'Unsupported format: {0} ({1})'.format(value, type(value)))
 
     def trigger_update(self):
-        if not current_app.config['TESTING'] or current_app.config.get('FORCE_METRICS'):
+        if current_app.config['USE_METRICS']:
             self.need_update.send(self)
 
     def notify_update(self):
-        if not current_app.config['TESTING'] or current_app.config.get('FORCE_METRICS'):
+        if current_app.config['USE_METRICS']:
             self.updated.send(self)
 
     @classmethod

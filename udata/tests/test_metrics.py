@@ -116,7 +116,7 @@ class MetricsModelTest(DBTestMixin, TestCase):
 
 class MetricTest(DBTestMixin, TestCase):
     def setUp(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         self.obj = FakeModel.objects.create()
         self.updated_emitted = False
         self.need_update_emitted = False

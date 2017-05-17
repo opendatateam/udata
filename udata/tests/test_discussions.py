@@ -37,7 +37,7 @@ class DiscussionsTest(APITestCase):
         return app
 
     def test_new_discussion(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
@@ -227,7 +227,7 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
     def test_add_comment_to_discussion(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
@@ -265,7 +265,7 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_discussion(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         owner = self.login()
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
@@ -304,7 +304,7 @@ class DiscussionsTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_discussion_permissions(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
@@ -328,7 +328,7 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(dataset.metrics['discussions'], 1)
 
     def test_delete_discussion(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         owner = self.login(AdminFactory())
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
@@ -351,7 +351,7 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(Discussion.objects(subject=dataset).count(), 0)
 
     def test_delete_discussion_permissions(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)

@@ -37,7 +37,7 @@ class IssuesTest(APITestCase):
         return app
 
     def test_new_issue(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
@@ -237,7 +237,7 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
     def test_add_comment_to_issue(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
@@ -275,7 +275,7 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         owner = self.login()
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
@@ -314,7 +314,7 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue_permissions(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)

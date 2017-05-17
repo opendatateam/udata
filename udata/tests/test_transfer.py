@@ -103,7 +103,7 @@ class TransferStartTest(TestCase, DBTestMixin):
 
 class TransferAcceptTest(TestCase, DBTestMixin):
     def setUp(self):
-        self.app.config['FORCE_METRICS'] = True
+        self.app.config['USE_METRICS'] = True
 
     def test_recipient_user_can_accept_transfer(self):
         owner = UserFactory()

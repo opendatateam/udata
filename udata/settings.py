@@ -167,6 +167,7 @@ class Defaults(object):
         # Misc
         'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
     ]
+    USE_METRICS = True
 
 
 class Testing(object):
@@ -188,6 +189,7 @@ class Testing(object):
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
+    USE_METRICS = False
 
 
 class Debug(Defaults):

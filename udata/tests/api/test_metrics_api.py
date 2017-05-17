@@ -27,7 +27,7 @@ class FakeModelMetric(Metric):
 class MetricsAPITest(APITestCase):
     def create_app(self):
         app = super(MetricsAPITest, self).create_app()
-        app.config['FORCE_METRICS'] = True
+        app.config['USE_METRICS'] = True
         init_metrics(app)
         return app
 
