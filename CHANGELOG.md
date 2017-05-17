@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix presubmit form errors handling [#909]
+  (https://github.com/opendatateam/udata/pull/909)
 
 ## 1.0.10 (2017-05-11)
 

@@ -1,6 +1,6 @@
 import API from 'api';
 import {_} from 'i18n';
-import {setattr, isObject} from 'utils';
+import {setattr, isObject, isString} from 'utils';
 import log from 'logger';
 import moment from 'moment';
 import $ from 'jquery';
@@ -230,8 +230,13 @@ export default {
             return out;
         },
         on_error(response) {
+            // Errors occuring before submission are simple strings
+            if (isString(response)) {
+                log.error(response);
+                return;
+            }
             // Display the error identifier if present
-            if ('X-Sentry-ID' in response.headers) {
+            if (response.headers && 'X-Sentry-ID' in response.headers) {
                 this.$dispatch('notify', {
                     type: 'error',
                     icon: 'exclamation-triangle',
