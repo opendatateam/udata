@@ -33,11 +33,6 @@ noI18n = Blueprint('noI18n', __name__)
 blueprint = I18nBlueprint('site', __name__)
 
 
-@blueprint.app_context_processor
-def inject_site():
-    return dict(current_site=current_site)
-
-
 @blueprint.route('/activity.atom')
 def activity_feed():
     feed = AtomFeed(
@@ -74,7 +69,6 @@ def static_from_root():
 @blueprint.route('/map/')
 def map():
     return theme.render('site/map.html')
-
 
 @blueprint.route('/datasets.csv')
 def datasets_csv():
