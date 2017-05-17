@@ -11,6 +11,7 @@ from . import APITestCase
 
 
 class UserAPITest(APITestCase):
+    modules_to_load = ['core.user']
     def test_follow_user(self):
         '''It should follow an user on POST'''
         user = self.login()

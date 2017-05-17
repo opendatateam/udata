@@ -373,6 +373,7 @@ class DiscussionsTest(APITestCase):
 
 
 class DiscussionCsvTest(FrontTestCase):
+    modules_to_load = ['core.organization']
 
     def test_discussions_csv_content_empty(self):
         organization = OrganizationFactory()

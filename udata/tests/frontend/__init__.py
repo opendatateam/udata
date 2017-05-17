@@ -6,14 +6,19 @@ import re
 
 from udata.tests import TestCase, WebTestMixin, SearchTestMixin
 
+from udata.core.site import init_app as init_site
+from udata.core.followers import init_app as init_followers
 from udata import frontend, api
 
 
 class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
+    modules_to_load = []
     def create_app(self):
         app = super(FrontTestCase, self).create_app()
         api.init_app(app)
-        frontend.init_app(app)
+        frontend.init_app(app, self.modules_to_load)
+        init_site(app)
+        init_followers(app)
         return app
 
     def get_json_ld(self, response):

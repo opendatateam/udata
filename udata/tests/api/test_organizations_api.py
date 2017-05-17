@@ -22,6 +22,7 @@ from udata.core.reuse.factories import ReuseFactory
 
 
 class OrganizationAPITest(APITestCase):
+    modules_to_load = ['core.organization', 'core.user']
     def test_organization_api_list(self):
         '''It should fetch an organization list from the API'''
         with self.autoindex():
@@ -141,6 +142,7 @@ class OrganizationAPITest(APITestCase):
 
 
 class MembershipAPITest(APITestCase):
+    modules_to_load = ['core.user', 'core.organization']
     def test_request_membership(self):
         organization = OrganizationFactory()
         user = self.login()
@@ -527,6 +529,7 @@ class MembershipAPITest(APITestCase):
 
 
 class OrganizationDatasetsAPITest(APITestCase):
+    modules_to_load = ['core.organization', 'core.dataset']
     def test_list_org_datasets(self):
         '''Should list organization datasets'''
         org = OrganizationFactory()
@@ -574,6 +577,7 @@ class OrganizationDatasetsAPITest(APITestCase):
 
 
 class OrganizationReusesAPITest(APITestCase):
+    modules_to_load = ['core.organization', 'core.reuse']
     def test_list_org_reuses(self):
         '''Should list organization reuses'''
         org = OrganizationFactory()
@@ -609,6 +613,7 @@ class OrganizationReusesAPITest(APITestCase):
 
 
 class OrganizationIssuesAPITest(APITestCase):
+    modules_to_load = ['core.user']
     def test_list_org_issues(self):
         '''Should list organization issues'''
         user = UserFactory()
@@ -635,6 +640,7 @@ class OrganizationIssuesAPITest(APITestCase):
 
 
 class OrganizationDiscussionsAPITest(APITestCase):
+    modules_to_load = ['core.user']
     def test_list_org_discussions(self):
         '''Should list organization discussions'''
         user = UserFactory()

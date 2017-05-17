@@ -12,6 +12,7 @@ from udata.tests.features.territories.test_territories_process import (
 
 
 class TerritoriesAPITest(APITestCase):
+    modules_to_load = ['features.territories']
     settings = TerritoriesSettings
 
     def setUp(self):

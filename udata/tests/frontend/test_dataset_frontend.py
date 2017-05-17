@@ -19,6 +19,8 @@ from . import FrontTestCase
 
 
 class DatasetBlueprintTest(FrontTestCase):
+    modules_to_load = ['core.dataset', 'admin', 'core.reuse', 'core.site',
+                      'core.organization', 'core.user']
     def test_render_list(self):
         '''It should render the dataset list page'''
         with self.autoindex():

@@ -18,6 +18,8 @@ from udata.tests.frontend import FrontTestCase
 
 
 class SiteViewsTest(FrontTestCase):
+    modules_to_load = ['core.site', 'admin', 'core.dataset', 'core.reuse',
+                      'core.organization']
     def test_site_global(self):
         '''It should create and/or load the current site'''
         with self.app.test_request_context(''):

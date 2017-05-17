@@ -11,6 +11,8 @@ from . import FrontTestCase
 
 
 class FrontEndRootTest(FrontTestCase):
+    modules_to_load = ['core.dataset', 'core.reuse', 'core.organization',
+                       'admin', 'core.site']
     def test_render_search(self):
         '''It should render the search page'''
         with self.autoindex():

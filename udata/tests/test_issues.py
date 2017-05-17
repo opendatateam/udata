@@ -339,6 +339,7 @@ class IssuesTest(APITestCase):
 
 
 class IssueCsvTest(FrontTestCase):
+    modules_to_load = ['core.organization']
 
     def test_issues_csv_content_empty(self):
         organization = OrganizationFactory()
