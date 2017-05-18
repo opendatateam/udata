@@ -5,7 +5,7 @@ celery==3.1.24
 celerybeat-mongo==0.1.0
 chardet==3.0.3
 CommonMark==0.7.3
-elasticsearch==2.3.0
+elasticsearch==5.4.0
 elasticsearch-dsl==2.1.0
 factory-boy==2.8.1
 Faker==0.7.12
