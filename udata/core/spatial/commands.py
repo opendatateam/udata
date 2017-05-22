@@ -10,8 +10,8 @@ import shutil
 from urllib import urlretrieve
 
 import msgpack
-from mongoengine import errors
 import slugify
+from mongoengine import errors
 
 from udata.commands import submanager
 from udata.core.storages import tmp
@@ -67,11 +67,11 @@ def load(filename, drop=False):
     zones_filepath = tmp.path('zones.msgpack')
     with open(zones_filepath) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
-        unpacker.next()
+        unpacker.next()  # Skip headers.
         for i, geozone in enumerate(unpacker):
-            if ('geom' not in geozone or not geozone['geom'] or (
+            if not geozone.get('geom') or (
                 geozone['geom']['type'] == 'GeometryCollection' and
-                    not geozone['geom']['geometries'])):
+                    not geozone['geom']['geometries']):
                 geom = None
             else:
                 geom = geozone['geom']

@@ -49,7 +49,7 @@
             {% endif %}
             <h3><small>
                 {{ _('Main towns:') }}
-                {% for town in territory.popular_children %}
+                {% for town in territory.biggest_children %}
                     <a href="{{ town.url }}"> {{ town.name }}</a>{% if not loop.last %},{% endif %}
                 {% endfor %}
             </small></h3>

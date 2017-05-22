@@ -388,10 +388,9 @@ class TerritoriesTest(FrontTestCase):
         with self.autoindex():
             for region in [lr, occitanie]:
                 organization = OrganizationFactory(zone=region.id)
-                for _ in range(3):
-                    VisibleDatasetFactory(
-                        organization=organization,
-                        spatial=SpatialCoverageFactory(zones=[region.id]))
+                VisibleDatasetFactory.build_batch(
+                    3, organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[region.id]))
         response = self.client.get(
             url_for('territories.territory', territory=occitanie))
         self.assert200(response)

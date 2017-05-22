@@ -45,8 +45,11 @@ def load_logos(filename):
 
 
 @m.command
-def migrate_zones_from_old_to_new_ids_in_datasets():
-    """Should only be run once with the new version of geozones w/ geohisto."""
+def migrate_zones_ids():
+    """Migrate zones from old to new ids in datasets.
+
+    Should only be run once with the new version of geozones w/ geohisto.
+    """
     counter_datasets = 0
     counter_zones = 0
     counter_towns = 0
@@ -54,8 +57,8 @@ def migrate_zones_from_old_to_new_ids_in_datasets():
     counter_regions = 0
     counter_drom = 0
     counter_dromcom = 0
-    drom_zone = GeoZone.objects(code='fr/drom').first()
-    dromcom_zone = GeoZone.objects(code='fr/dromcom').first()
+    drom_zone = GeoZone.objects(id='country-subset/fr/drom').first()
+    dromcom_zone = GeoZone.objects(id='country-subset/fr/dromcom').first()
     for dataset in Dataset.objects.all():
         if dataset.spatial and dataset.spatial.zones:
             counter_datasets += 1

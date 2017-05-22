@@ -184,8 +184,9 @@ class GeoZone(db.Document):
 
     @cached_property
     def current_parent(self):
+        today = date.today()
         for parent in self.parents_objects:
-            if parent.valid_at(date.today()):
+            if parent.valid_at(today):
                 return parent
 
     @property
@@ -195,7 +196,7 @@ class GeoZone(db.Document):
                 .order_by('name'))
 
     @property
-    def popular_children(self):
+    def biggest_children(self):
         return self.children.order_by('-population', '-area')[:10]
 
     @property
