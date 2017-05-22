@@ -40,6 +40,27 @@ HEADER_API_KEY = 'X-API-KEY'
 PREFLIGHT_HEADERS = (
     HEADER_API_KEY,
     'X-Fields',
+    'Content-Type',
+    'Accept',
+    'Accept-Charset',
+    'Accept-Language',
+    'Cache-Control',
+    'Content-Encoding',
+    'Content-Length',
+    'Content-Security-Policy',
+    'Content-Type',
+    'Cookie',
+    'ETag',
+    'Host',
+    'If-Modified-Since',
+    'Keep-Alive',
+    'Last-Modified',
+    'Origin',
+    'Referer',
+    'User-Agent',
+    'X-Forwarded-For',
+    'X-Forwarded-Port',
+    'X-Forwarded-Proto',
 )
 
 

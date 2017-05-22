@@ -75,26 +75,28 @@
     {% endif %}
     <span>{{ labelize(value) if labelize else value }}</span>
     <a href="{{ ''|url_del('page', **{name: value}) }}">
-        <span class="close-icon glyphicon glyphicon-remove"></span>
+        <span class="close-icon fa fa-remove"></span>
     </a>
 </span>
 {% endfor %}
 {% endmacro %}
 
-{% macro facet_panel(result, name, label, icon=None, url=None) %}
-<div class="panel-heading clickable"
-    data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}">
+{% macro facet_panel(result, name, label, icon=None, url=None, classes='list-group') %}
+<div class="panel-heading clickable" @click="togglePanel('{{result.class_name}}-{{name}}', $event)">
     <h3 class="panel-title">
+        <span class="{{icon or 'fa fa-filter'}} fa-fw"></span>
+        {{ label or name }}
+        <span id="chevrons-{{result.class_name}}-{{name}}" class="fa fa-chevron-down pull-right"></span>
         {% if in_url(name) %}
-        <a href="{{ url_del(None, name, 'page') }}"
-            class="btn btn-xs btn-link pull-right" title="{{ _('Clear filter') }}">
-            <span class="glyphicon glyphicon-remove"></span>
+        <a id="facet-{{result.class_name}}-{{name}}-remove" class="btn-remove pull-right"
+            href="{{ url_del(None, name, 'page') }}" title="{{ _('Clear filter') }}">
+            <span class="fa fa-remove"></span>
         </a>
         {% endif %}
-        <span class="{{icon or 'glyphicon glyphicon-filter'}} fa-fw"></span>
-        {{ label or name }}
-        <span class="fa fa-chevron-down pull-right chevrons"></span>
     </h3>
+</div>
+<div id="facet-{{result.class_name}}-{{name}}" class="{{ classes }} collapse in">
+    {{ caller() }}
 </div>
 {% endmacro %}
 
@@ -102,8 +104,7 @@
 {% macro terms_facet(result, name, label, icon, url=None) %}
 {% set terms = result.facets[name] %}
 {% if terms|length > 1 %}
-    {{ facet_panel(result, name, label, icon, url) }}
-    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% call facet_panel(result, name, label, icon, url) %}
     {% for term, count, selected in terms[:nb_displayed_aggregations] %}
         <a href="{{ result.query.to_url(url, **{name: term}) }}"
             class="list-group-item">
@@ -112,12 +113,11 @@
         </a>
     {% endfor %}
     {% if terms|length > nb_displayed_aggregations %}
-        <button class="list-group-item"
-            data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}-more">
+        <button class="list-group-item" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
             {{ _('More results…') }}
             <span class="fa fa-chevron-right pull-right"></span>
         </button>
-        <div id="collapse-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
+        <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
         {% for term, count, selected in terms[nb_displayed_aggregations:] %}
             <a href="{{ result.query.to_url(url, **{name: term}) }}"
                 class="list-group-item">
@@ -127,7 +127,7 @@
         {% endfor %}
         </div>
     {% endif %}
-    </div>
+    {% endcall %}
 {% endif %}
 {% endmacro %}
 
@@ -135,8 +135,7 @@
 {% macro model_terms_facet(result, name, label, icon, url=None) %}
 {% set objects = result.facets[name] %}
 {% if objects|length > 1 %}
-    {{ facet_panel(result, name, label, icon, url) }}
-    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% call facet_panel(result, name, label, icon, url) %}
     {% for obj, count, selected in objects[:nb_displayed_aggregations] %}
         <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
@@ -145,12 +144,11 @@
         </a>
     {% endfor %}
     {% if objects|length > nb_displayed_aggregations %}
-        <button class="list-group-item list-group-more"
-            data-toggle="collapse" data-target="#collapse-{{result.class_name}}-{{name}}-more">
+        <button class="list-group-item list-group-more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
             {{ _('More results…') }}
             <span class="fa fa-chevron-right pull-right"></span>
         </button>
-        <div id="collapse-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
+        <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
         {% for obj, count, selected in objects[nb_displayed_aggregations:] %}
             <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
                 class="list-group-item">
@@ -160,15 +158,14 @@
         {% endfor %}
         </div>
     {% endif %}
-    </div>
+    {% endcall %}
 {% endif %}
 {% endmacro %}
 
 {% macro range_facet(result, name, label, icon, url=None) %}
 {% set ranges = result.facets[name] %}
 {% if ranges|length > 1 %}
-    {{ facet_panel(result, name, label, icon, url) }}
-    <div id="collapse-{{result.class_name}}-{{name}}" class="list-group collapse in">
+    {% call facet_panel(result, name, label, icon, url) %}
     {% for key, count, selected in ranges %}
         <a href="{{ result.query.to_url(url, **{name: key}) }}"
             class="list-group-item">
@@ -176,47 +173,18 @@
             <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
-    </div>
+    {% endcall %}
 {% endif %}
 {% endmacro %}
 
 {% macro temporal_coverage_facet(result, name, label, icon, url=None) %}
 {% set coverage = result.facets[name] %}
 {% if coverage and coverage.days > 2 %}
-    {{ facet_panel(result, name, label, icon, url) }}
-    <div id="collapse-{{result.class_name}}-{{name}}" class="panel-body collapse in temporal-coverage"
-        data-url-pattern="{{ result.query.to_url(url, **{name: '__r__', 'replace': True}) }}">
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="input-daterange input-group" id="datepicker">
-                    <input type="text" class="input-sm form-control" name="start"
-                        value="{{ coverage.min.isoformat() }}"
-                        data-isodate="{{ coverage.min.isoformat() }}"/>
-                    <span class="input-group-addon">{{ _('to') }}</span>
-                    <input type="text" class="input-sm form-control" name="end"
-                        value="{{ coverage.max.isoformat() }}"
-                        data-isodate="{{ coverage.max.isoformat() }}"/>
-                </div>
-            </div>
-        </div>
-        <div class="row hide">
-            <div class="col-xs-12 text-center">
-                <div class="facet-datepicker"
-                    date-date-format="yyyy-mm-dd"
-                    data-date-start-date="{{ coverage.min.isoformat() }}"
-                    data-date-end-date="{{ coverage.max.isoformat() }}"
-                ></div>
-            </div>
-        </div>
-        <div class="row hide">
-            <div class="col-xs-12">
-                <a class="btn btn-default btn-block btn-apply">
-                    <span class="{{ ficon('refresh') }}"></span>
-                    {{ _('Apply') }}
-                </a>
-            </div>
-        </div>
-    </div>
+    {% call facet_panel(result, name, label, icon, url, classes='panel-body temporal-coverage') %}
+        <temporal-coverage-facet name="{{ name }}"
+            min="{{ coverage.min.isoformat() }}" max="{{ coverage.max.isoformat() }}">
+        </temporal-coverage-facet>
+    {% endcall %}
 {% endif %}
 {% endmacro %}
 

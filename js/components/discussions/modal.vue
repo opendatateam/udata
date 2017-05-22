@@ -11,7 +11,7 @@
 </style>
 
 <template>
-<modal v-ref:modal :title="title" class="discussion-modal" size="lg"
+<modal v-ref:modal :title="title" class="discussion-modal" large
     :class="{'modal-danger': deleting}">
     <div class="modal-body" v-show="!deleting">
         <div class="row">
@@ -53,29 +53,29 @@
                 </textarea>
             </div>
         </form>
-        <button type="button" class="btn btn-danger btn-flat pointer pull-left"
+        <button type="button" class="btn btn-danger btn-flat pull-left"
             v-if="$root.me.is_admin" @click="confirm_delete">
             {{ _('Delete') }}
         </button>
-        <button type="button" class="btn btn-success btn-flat pointer pull-left"
+        <button type="button" class="btn btn-success btn-flat pull-left"
             @click="comment_discussion" v-if="!discussion.closed">
             {{ _('Comment the discussion') }}
         </button>
-        <button type="button" class="btn btn-warning btn-flat pointer pull-left"
+        <button type="button" class="btn btn-warning btn-flat pull-left"
             @click="close_discussion" v-if="!discussion.closed">
             {{ _('Comment and close discussion') }}
         </button>
-        <button type="button" class="btn btn-primary btn-flat pointer"
-            data-dismiss="modal">
+        <button type="button" class="btn btn-primary btn-flat"
+            @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
     </footer>
     <footer class="modal-footer text-center" v-show="deleting">
-        <button type="button" class="btn btn-warning btn-flat pointer pull-left"
+        <button type="button" class="btn btn-warning btn-flat pull-left"
             @click="delete">
             {{ _('Confirm') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
+        <button type="button" class="btn btn-danger btn-flat"
             @click="cancel_delete">
             {{ _('Cancel') }}
         </button>

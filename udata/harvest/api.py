@@ -113,6 +113,9 @@ source_fields = api.model('HarvestSource', {
     'deleted': fields.ISODateTime(description='The source deletion date'),
 })
 
+source_page_fields = api.model('HarvestSourcePage',
+                               fields.pager(source_fields))
+
 backend_fields = api.model('HarvestBackend', {
     'id': fields.String(description='The backend identifier'),
     'label': fields.String(description='The backend display name')
@@ -138,7 +141,7 @@ preview_job_fields = api.clone('HarvestJobPreview', job_fields, {
                          description='The job collected items'),
 })
 
-source_parser = api.parser()
+source_parser = api.page_parser()
 source_parser.add_argument('owner', type=str, location='args',
                            help='The organization or user ID to filter on')
 
@@ -146,11 +149,13 @@ source_parser.add_argument('owner', type=str, location='args',
 @ns.route('/sources/', endpoint='harvest_sources')
 class SourcesAPI(API):
     @api.doc('list_harvest_sources', parser=source_parser)
-    @api.marshal_list_with(source_fields)
+    @api.marshal_list_with(source_page_fields)
     def get(self):
         '''List all harvest sources'''
         args = source_parser.parse_args()
-        return actions.list_sources(args.get('owner'))
+        return actions.paginate_sources(args.get('owner'),
+                                        page=args['page'],
+                                        page_size=args['page_size'])
 
     @api.doc('create_harvest_source')
     @api.secure
@@ -173,6 +178,17 @@ class SourceAPI(API):
     def get(self, ident):
         '''Get a single source given an ID or a slug'''
         return actions.get_source(ident)
+
+    @api.secure
+    @api.doc('update_harvest_source')
+    @api.expect(source_fields)
+    @api.marshal_with(source_fields)
+    def put(self, ident):
+        '''Create a new harvests source'''
+        source = actions.get_source(ident)
+        form = api.validate(HarvestSourceForm, source)
+        source = actions.update_source(ident, form.data)
+        return source
 
     @api.secure
     @api.doc('delete_harvest_source')

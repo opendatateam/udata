@@ -299,7 +299,7 @@ def ficon(value):
     '''A simple helper for font icon class'''
     return ('fa {0}'.format(value)
             if value.startswith('fa')
-            else 'glyphicon glyphicon-{0}'.format(value))
+            else 'fa fa-{0}'.format(value))
 
 
 @front.app_template_filter()

@@ -101,7 +101,7 @@ def mdstrip(value, length=None, end='…'):
     rendered = md(value)
     text = do_striptags(rendered)
     if length > 0:
-        text = do_truncate(text, length, end=end)
+        text = do_truncate(None, text, length, end=end, leeway=2)
     return text
 
 

@@ -77,63 +77,64 @@
 }
 </style>
 <template>
-<div class="modal fade user-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
-        <div class="user-details">
-            <img class="img-circle"
-                :src="user.avatar || placeholder"
-                :alt="user.fullname"
-                :title="user.fullname"/>
-            </div-->
-            <div class="user-info-block">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                    <span class="sr-only" v-i18n="Close"></span>
-                </button>
-                <div class="user-heading">
-                    <h3>{{user.fullname}}</h3>
-                    <span class="help-block">{{{ user.about | markdown }}}</span>
-                </div>
-                <ul class="user-actions clearfix">
-                    <li>
-                        <a :href="user.page" class="text-center"
-                            :title="_('Profile')">
-                            <span class="fa fa-2x fa-user"></span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="text-center pointer" @click="to_dashboard"
-                             :title="_('Dashboard')">
-                            <span class="fa fa-2x fa-dashboard"></span>
-                        </a>
-                    </li>
-                </ul>
-                <div class="user-body" v-show="$options._content">
-                    <slot></slot>
-                </div>
+<modal v-ref:modal class="user-modal" small>
+    <div class="user-details" slot="modal-content">
+        <img class="img-circle"
+            :src="user.avatar || placeholder"
+            :alt="user.fullname"
+            :title="user.fullname"/>
+        <div class="user-info-block">
+            <button type="button" class="close" @click="$refs.modal.close">
+                <span aria-hidden="true">&times;</span>
+                <span class="sr-only" v-i18n="Close"></span>
+            </button>
+            <div class="user-heading">
+                <h3>{{user.fullname}}</h3>
+                <span class="help-block">{{{ user.about | markdown }}}</span>
+            </div>
+            <ul class="user-actions clearfix">
+                <li>
+                    <a :href="user.page" class="text-center"
+                        :title="_('Profile')">
+                        <span class="fa fa-2x fa-user"></span>
+                    </a>
+                </li>
+                <li>
+                    <a class="text-center pointer" @click="toDashboard"
+                         :title="_('Dashboard')">
+                        <span class="fa fa-2x fa-dashboard"></span>
+                    </a>
+                </li>
+            </ul>
+            <div class="user-body" v-show="$options._content">
+                <slot></slot>
             </div>
         </div>
     </div>
-</div>
+</modal>
 </template>
 
 <script>
-import Modal from 'mixins/modal';
+import Modal from 'components/modal.vue';
+import placeholders from 'helpers/placeholders';
 
 export default {
     name: 'user-modal',
     replace: true,
-    mixins: [Modal],
+    components: {Modal},
     props: ['user'],
-    data: function() {
+    data() {
         return {
-            placeholder: require('helpers/placeholders').user
+            placeholder: placeholders.user
         };
     },
     methods: {
-        to_dashboard: function() {
+        close() {
+            this.$refs.modal.close();
+        },
+        toDashboard() {
             this.close();
-            this.$go('/user/' + this.user.id);
+            this.$go(`/user/${this.user.id}`);
         }
     }
 };

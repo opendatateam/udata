@@ -90,7 +90,6 @@ class User(WithMetrics, UserMixin, db.Document):
     on_delete = Signal()
 
     meta = {
-        'allow_inheritance': True,
         'indexes': ['-created_at', 'slug', 'apikey'],
         'ordering': ['-created_at']
     }

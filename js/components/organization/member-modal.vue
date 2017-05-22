@@ -19,7 +19,7 @@
         :readonly="!is_admin" :fill="true">
     </role-form>
     <br v-if="is_admin" />
-    <div v-if="is_admin"  class="btn-group btn-group-justified">
+    <div v-if="is_admin && !member_exists"  class="btn-group btn-group-justified">
         <div class="btn-group">
             <button type="button" class="btn btn-success btn-flat"
                 @click="submit">
@@ -28,7 +28,7 @@
             </button>
         </div>
         <div class="btn-group">
-            <button type="button" class="btn btn-warning btn-flat" data-dismiss="modal">
+            <button type="button" class="btn btn-warning btn-flat" @click="$refs.modal.close">
                 <span class="fa fa-close"></span>
                 {{ _('Cancel') }}
             </button>
@@ -64,7 +64,6 @@ export default {
     data() {
         return {
             user: new User(),
-            // horizontal: true,
             fields: [{
                 id: 'role',
                 label: this._('Role'),

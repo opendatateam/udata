@@ -25,6 +25,7 @@ ORG_ROLES = {
     'admin': _('Administrateur'),
     'editor': _('Editor'),
 }
+DEFAULT_ROLE = 'editor'
 
 
 MEMBERSHIP_STATUS = {
@@ -51,7 +52,7 @@ class Team(db.EmbeddedDocument):
 
 class Member(db.EmbeddedDocument):
     user = db.ReferenceField('User')
-    role = db.StringField(choices=ORG_ROLES.keys())
+    role = db.StringField(choices=ORG_ROLES.keys(), default=DEFAULT_ROLE)
     since = db.DateTimeField(default=datetime.now, required=True)
 
     @property
@@ -114,7 +115,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     deleted = db.DateTimeField()
 
     meta = {
-        'allow_inheritance': True,
         'indexes': ['-created_at', 'slug'],
         'ordering': ['-created_at'],
         'queryset_class': OrganizationQuerySet,

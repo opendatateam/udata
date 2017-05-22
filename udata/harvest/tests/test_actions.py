@@ -15,7 +15,7 @@ from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.utils import faker
+from udata.utils import faker, Paginable
 
 from .factories import (
     HarvestSourceFactory, HarvestJobFactory,
@@ -90,6 +90,30 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         for source in sources:
             self.assertIn(source, result)
 
+    def test_paginate_sources(self):
+        result = actions.paginate_sources()
+        self.assertIsInstance(result, Paginable)
+        self.assertEqual(result.page, 1)
+        self.assertEqual(result.page_size, actions.DEFAULT_PAGE_SIZE)
+        self.assertEqual(result.total, 0)
+        self.assertEqual(len(result.objects), 0)
+
+        HarvestSourceFactory.create_batch(3)
+
+        result = actions.paginate_sources(page_size=2)
+        self.assertIsInstance(result, Paginable)
+        self.assertEqual(result.page, 1)
+        self.assertEqual(result.page_size, 2)
+        self.assertEqual(result.total, 3)
+        self.assertEqual(len(result.objects), 2)
+
+        result = actions.paginate_sources(page=2, page_size=2)
+        self.assertIsInstance(result, Paginable)
+        self.assertEqual(result.page, 2)
+        self.assertEqual(result.page_size, 2)
+        self.assertEqual(result.total, 3)
+        self.assertEqual(len(result.objects), 1)
+
     def test_create_source(self):
         source_url = faker.url()
 
@@ -111,6 +135,19 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertIsNone(source.validation.on)
         self.assertIsNone(source.validation.by)
         self.assertIsNone(source.validation.comment)
+
+    def test_update_source(self):
+        source = HarvestSourceFactory()
+        data = source.to_dict()
+        new_url = faker.url()
+        data['url'] = new_url
+
+        with self.assert_emit(signals.harvest_source_updated):
+            source = actions.update_source(source.id, data)
+
+        self.assertEqual(source.url, new_url)
+        source.reload()
+        self.assertEqual(source.url, new_url)
 
     @patch('udata.harvest.actions.launch')
     def test_validate_source(self, mock):

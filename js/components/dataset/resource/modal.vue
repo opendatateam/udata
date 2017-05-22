@@ -65,37 +65,37 @@
 
     <footer class="modal-footer text-center">
         <button type="button" v-show="!edit && !confirm"
-                class="btn btn-primary btn-sm btn-flat pointer pull-left"
-                data-dismiss="modal">
+                class="btn btn-primary btn-sm btn-flat pull-left"
+                @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
         <button type="button" v-show="confirm"
-                class="btn btn-warning btn-sm btn-flat pointer pull-left"
+                class="btn btn-warning btn-sm btn-flat pull-left"
                 @click="confirm = false">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="edit"
-                class="btn btn-primary btn-sm btn-flat pointer pull-left"
+                class="btn btn-primary btn-sm btn-flat pull-left"
                 @click="edit = false">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="!edit && !confirm && can_edit"
-                class="btn btn-danger btn-xs btn-flat pointer"
+                class="btn btn-danger btn-xs btn-flat"
                 @click="confirm = true">
             {{ _('Delete') }}
         </button>
         <button type="button" v-show="!edit && !confirm && can_edit"
-                class="btn btn-outline btn-flat pointer"
+                class="btn btn-outline btn-flat"
                 @click="edit = true">
             {{ _('Edit') }}
         </button>
         <button type="button" v-show="confirm"
-                class="btn btn-danger btn-outline btn-flat pointer"
+                class="btn btn-danger btn-outline btn-flat"
                 @click="delete_confirmed">
             {{ _('Confirm') }}
         </button>
         <button type="button" v-show="edit"
-                class="btn btn-outline btn-flat pointer"
+                class="btn btn-outline btn-flat"
                 @click="save">
             {{ _('Save') }}
         </button>

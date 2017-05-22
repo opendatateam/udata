@@ -11,14 +11,16 @@ import 'less/site.less';
 // Catch all errors
 import 'raven';
 
-// ES6 environment polyfills
+// ES6/DOM environment polyfills
 import 'babel-polyfill';
 import 'whatwg-fetch';
+import 'url-search-params-polyfill';
 
 import config from 'config';
 import Vue from 'vue';
 import NotificationZone from 'components/notification-zone.vue';
 import SiteSearch from 'components/site-search.vue';
+import Modal from 'components/modal.vue';
 
 // Common Vue.js frontend configuration
 Vue.config.debug = config.debug;
@@ -41,7 +43,7 @@ Vue.use(require('plugins/scroll-to'));
 */
 export default {
     el: 'body',
-    components: {NotificationZone, SiteSearch},
+    components: {NotificationZone, SiteSearch, Modal},
     data() {
         return {
             notifications: [],

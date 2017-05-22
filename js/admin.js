@@ -9,6 +9,9 @@ import 'raven';
 // ES6 environment
 import 'babel-polyfill';
 
+// DOM polyfills
+import 'dom-polyfills';
+
 import 'bootstrap';
 
 import Vue from 'vue';

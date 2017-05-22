@@ -24,6 +24,67 @@
   [#838](https://github.com/opendatateam/udata/pull/838)
 - Drop `jquery-slimscroll` and fix admin menu scrolling
   [#851](https://github.com/opendatateam/udata/pull/851)
+- drop jquery.dotdotdot for a lighter css-only solution (less memory consumption)
+  [#853](https://github.com/opendatateam/udata/pull/853)
+- Lighter style [#869](https://github.com/opendatateam/udata/pull/869):
+    - Drop glyphicons and use only Font-Awesome (more coherence, less fonts)
+    - lighter bootstrap style by importing only what's needed
+    - make use of bootstrap and admin-lte variables (easier for theming)
+    - proper separation between front and admin style
+- Drop `ExtractTextPlugin` on Vue components style:
+    - faster (re)compilation time
+    - resolves most compilation and missing style issues
+      [#555](https://github.com/opendatateam/udata/issues/555)
+      [#710](https://github.com/opendatateam/udata/issues/710)
+    - allows use of hot components reloading.
+- Pure Vue.js modals. Fix the default membership role. Added contribute modal.
+  [#873](https://github.com/opendatateam/udata/pull/873)
+- Lot of fixes and improvements on Harvest admin UI
+  [#817](https://github.com/opendatateam/udata/pull/817):
+    - harvester edition fixed (and missing API added)
+    - harvester deletion fixed
+    - harvester listing is now paginated
+    - more detailed harvesters widgets
+    - ensure harvest source are owned by a user or an organization, not both [migration]
+- Pure Vue.js search facets
+  [#880](https://github.com/opendatateam/udata/pull/880).
+  Improve and fix the datepicker:
+    - Proper sizing and positionning in dropdowns
+    - Fix initial value not being displayed
+    - Make it usable on keyboard
+    - Allows to define `min` and `max` values to disable some dates
+    - Keyboard input is reflected into the calendar
+      [#615](https://github.com/opendatateam/udata/issues/615)
+
+## 1.0.10 (2017-05-11)
+
+- Fix bad stored (community) resources URLs [migration]
+  [#882](https://github.com/opendatateam/udata/issues/882)
+- Proper producer logo display on dataset pages
+- Fix CKAN harvester empty notes and `metadata` file type handling
+- Remove (temporary) badges metrics
+  [#885](https://github.com/opendatateam/udata/issues/885)
+- Test and fix topic search
+  [#892](https://github.com/opendatateam/udata/pull/892)
+
+## 1.0.9 (2017-04-23)
+
+- Fix broken post view
+  [#877](https://github.com/opendatateam/udata/pull/877)
+- Fix new issue submission
+  [#874](https://github.com/opendatateam/udata/issues/874)
+- Display full images/logo/avatars URL in references too
+  [#824](https://github.com/opendatateam/udata/issues/824)
+
+## 1.0.8 (2017-04-14)
+
+- Allow more headers in cors preflight headers
+  [#857](https://github.com/opendatateam/udata/pull/857)
+  [#860](https://github.com/opendatateam/udata/pull/860)
+- Fix editorialization admin
+  [#863](https://github.com/opendatateam/udata/pull/863)
+- Fix missing completer images and ensure completion API is usable on a different domain
+  [#864](https://github.com/opendatateam/udata/pull/864)
 
 ## 1.0.7 (2017-04-07)
 

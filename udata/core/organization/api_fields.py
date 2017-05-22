@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 
-from .models import ORG_ROLES, MEMBERSHIP_STATUS, LOGO_SIZES
+from .models import ORG_ROLES, DEFAULT_ROLE, MEMBERSHIP_STATUS, LOGO_SIZES
 
 BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
@@ -21,8 +21,11 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
         description='The organization web page URL', readonly=True),
-    'logo': fields.ImageField(size=BIGGEST_LOGO_SIZE,
+    'logo': fields.ImageField(original=True,
         description='The organization logo URL'),
+    'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
+        description='The organization logo thumbnail URL. This is the square '
+        '({0}x{0}) and cropped version.'.format(BIGGEST_LOGO_SIZE)),
 })
 
 
@@ -44,7 +47,7 @@ member_fields = api.model('Member', {
     'user': fields.Nested(user_ref_fields),
     'role': fields.String(
         description='The member role in the organization', required=True,
-        enum=ORG_ROLES.keys())
+        enum=ORG_ROLES.keys(), default=DEFAULT_ROLE)
 })
 
 org_fields = api.model('Organization', {

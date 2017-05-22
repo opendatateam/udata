@@ -12,11 +12,11 @@
         <picker v-ref:picker :endpoint="endpoint" :sizes="sizes"></picker>
     </div>
     <footer class="modal-footer">
-        <button type="button" class="btn btn-primary btn-flat pointer pull-left"
+        <button type="button" class="btn btn-primary btn-flat pull-left"
              v-show="$refs.picker && $refs.picker.resizing" @click="click">
             {{ _('Validate') }}
         </button>
-        <button type="button" class="btn btn-warning btn-flat pointer" data-dismiss="modal">
+        <button type="button" class="btn btn-warning btn-flat" @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>
     </footer>

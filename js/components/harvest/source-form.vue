@@ -5,6 +5,7 @@
 <script>
 import HarvestSource from 'models/harvest/source';
 
+
 export default {
     props: {
         source: {
@@ -14,7 +15,7 @@ export default {
             }
         }
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                 id: 'name',
@@ -39,10 +40,10 @@ export default {
         vform: require('components/form/vertical-form.vue')
     },
     methods: {
-        serialize: function() {
+        serialize() {
             return this.$refs.form.serialize();
         },
-        validate: function() {
+        validate() {
             return this.$refs.form.validate();
         }
     }

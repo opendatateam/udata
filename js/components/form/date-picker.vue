@@ -1,8 +1,8 @@
 <style lang="less">
 .date-picker {
     .dropdown-menu {
-        min-width:100%;
-        width:auto;
+        min-width: 100%;
+        width: auto;
     }
 }
 </style>
@@ -12,18 +12,18 @@
     v-outside="onOutside">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
     <input type="text" class="form-control" v-el:input
-        @focus="onFocus"
+        @focus="onFocus" @input="onChange | debounce 500"
         :placeholder="placeholder"
         :required="required"
-        :value="value|dt date_format ''"
+        :value="value|dt dateFormat ''"
         :readonly="readonly"></input>
     <div class="dropdown-menu dropdown-menu-right">
-        <calendar :selected="value"></calendar>
+        <calendar v-ref:calendar :selected="value"></calendar>
     </div>
-    <input type="hidden" v-el:hidden
-        :id="field.id"
-        :name="serializable ? field.id : ''"
-        :value="value"></input>
+    <input v-if="serializable" type="hidden"
+        :name="field.id"
+        :value="value|dt ISO_FORMAT ''">
+    </input>
 </div>
 </template>
 
@@ -49,30 +49,37 @@ export default {
     data() {
         return {
             picking: false,
+            ISO_FORMAT,
         };
     },
     computed: {
-        date_format() {
+        dateFormat() {
             return this.field.format || DEFAULT_FORMAT;
         }
     },
     events: {
         'calendar:date:selected': function(date) {
-            this.$els.input.value = date.format(this.date_format);
-            this.$els.hidden.value = date.format(ISO_FORMAT);
+            this.value = date
             this.picking = false;
             return true;
         },
         'calendar:date:cleared': function() {
-            this.$els.input.value = '';
-            this.$els.hidden.value = '';
+            this.value = null;
             this.picking = false;
             return true;
         }
     },
     methods: {
         onFocus() {
+            if (!this.picking) this.$nextTick(this.$refs.calendar.focus);
             this.picking = true;
+        },
+        onChange(e) {
+            try {
+                this.value = moment(e.target.value, this.dateFormat);
+            } catch(e) {
+                // Don't do anything while typing (ie. incomplete date is unparseable)
+            }
         },
         onOutside() {
             this.picking = false;

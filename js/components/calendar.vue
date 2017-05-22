@@ -1,78 +1,45 @@
-<style lang="less">
-.calendar {
-    color: black;
-
-    > * {
-        display: block;
-    }
-
-    .fa-remove {
-        color: red;
-    }
-}
-</style>
-
 <template>
-<div class="calendar datepicker" :class="[ 'view' ]">
-    <div class="datepicker-{{view}}">
-        <table class="table table-condensed">
-            <thead>
-                <tr>
-                    <th class="prev" style="visibility: visible;"
-                        @click="previous">«</th>
-                    <th colspan="5" class="datepicker-switch"
-                        @click="zoomOut">{{rangeDisplay}}</th>
-                    <th class="next" style="visibility: visible;"
-                        @click="next">»</th>
-                </tr>
-                <tr v-if="view == 'days'">
-                    <th class="dow" v-for="day in days">{{day}}</th>
-                </tr>
-            </thead>
-            <tbody v-show="view == 'days'">
-                <tr v-for="week in currentMonthDays">
-                    <td class="day"
-                        v-for="day in week"
-                        @click="pickDay(day)"
-                        :class="{
-                            'old': isOld(day),
-                            'new': isNew(day),
-                            'today': day.isSame(today, 'day'),
-                            'active': day.isSame(selected, 'day')
-                        }">{{ day.date() }}</td>
-                </tr>
-            </tbody>
-            <tbody v-show="view == 'months'">
-                <tr>
-                    <td colspan="7">
-                        <span class="month" v-for="(idx, month) in months"
-                            @click="pickMonth(idx)">{{month}}
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-            <tbody v-show="view == 'years'">
-                <tr>
-                    <td colspan="7">
-                        <span class="year" v-for="year in yearsRange"
-                            @click="pickYear(year)">
-                        {{year}}
-                        </span>
-                    </td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="5" @click="pickDay(today)">
-                        {{ _('Today') }}
-                    </th>
-                    <th colspan="2" @click="clear">
-                        <span class="fa fa-remove"></span>
-                        {{ _('Clear') }}
-                    </th>
-                </tr>
-            </tfoot>
-        </table>
+<div class="calendar" :class="[ 'view' ]">
+    <div class="calendar-{{view}}">
+        <nav>
+            <button class="prev" @click.prevent="previous" :disabled="previousDisabled">
+                <span class="fa fa-chevron-left"></span>
+            </button>
+            <button class="switch" @click.prevent="zoomOut">{{ rangeDisplay }}</button>
+            <button class="next" @click.prevent="next" :disabled="nextDisabled">
+                <span class="fa fa-chevron-right"></span>
+            </button>
+        </nav>
+        <main v-if="view == 'days'" class="days">
+            <header>
+                <span class="dow" v-for="day in days">{{ day }}</span>
+            </header>
+            <div v-for="week in currentMonthDays">
+                <button v-for="day in week" class="day" :class="dayClasses(day)"
+                    @click.prevent="pickDay(day)" :disabled="isDisabled(day)">
+                    {{ day.date() }}
+                </button>
+            </div>
+        </main>
+        <main v-if="view == 'months'" class="months">
+            <button v-for="(idx, month) in months" class="month" @click.prevent="pickMonth(idx)"
+                :disabled="isMonthDisabled(idx)">
+                {{ month }}
+            </button>
+        </main>
+        <main v-if="view == 'years'" class="years">
+            <button v-for="year in yearsRange" class="year" @click.prevent="pickYear(year)"
+                :disabled="isYearDisabled(year)">
+                {{ year }}
+            </button>
+        </main>
+        <footer>
+            <button @click.prevent="pickDay(today)">{{ _('Today') }}</button>
+            <button @click.prevent="clear">
+                <span class="fa fa-remove"></span>
+                {{ _('Clear') }}
+            </button>
+        </footer>
     </div>
 </div>
 </template>
@@ -81,60 +48,76 @@
 import moment from 'moment';
 
 const VIEWS = ['days', 'months', 'years'];
+const MONTH_FORMAT = 'MMMM YYYY';
+
+function optionalMoment(value) {
+    return value ? moment(value) : null
+}
 
 export default {
+    replace: true,
     props: {
-        selected: null,
+        selected: {
+            type: moment,
+            coerce: optionalMoment,
+            default: null,
+        },
+        min: {
+            type: moment,
+            coerce: optionalMoment,
+            default: null,
+        },
+        max: {
+            type: moment,
+            coerce: optionalMoment,
+            default: null,
+        },
         view: {
             type: String,
             default: 'days'
         }
     },
-    data: function() {
+    data() {
+        const current = this.selected || moment();
         return {
-            currentMonth: moment().month(),
-            currentYear: moment().year(),
+            currentMonth: current.month(),
+            currentYear: current.year(),
             today: moment()
         };
     },
     computed: {
-        days: function() {
-            let days = [],
-                weekdays = moment.weekdaysShort(),
-                first = moment.localeData().firstDayOfWeek();
+        days() {
+            const days = [];
+            const weekdays = moment.weekdaysMin();
+            const first = moment.localeData().firstDayOfWeek();
             for (let i = 0; i < 7; i++) {
                 days.push(weekdays[(i + first) % 7]);
             }
             return days;
         },
-        months: function() {
+        months() {
             return moment.monthsShort();
         },
-        monthDisplay: function() {
-            return moment()
-                .month(this.currentMonth)
-                .year(this.currentYear)
-                .format('MMMM YYYY');
+        monthDisplay() {
+            return moment().month(this.currentMonth).year(this.currentYear).format(MONTH_FORMAT);
         },
-        rangeDisplay: function() {
+        rangeDisplay() {
             if (this.view == 'days') {
-                return moment()
-                    .month(this.currentMonth)
-                    .year(this.currentYear)
-                    .format('MMMM YYYY');
+                return moment().month(this.currentMonth).year(this.currentYear).format(MONTH_FORMAT);
             } else if (this.view == 'months') {
                 return this.currentYear;
             } else if (this.view == 'years') {
-                let start = moment().year(this.currentYear).subtract(5, 'years'),
-                    end = moment().year(this.currentYear).add(6, 'years');
-                return start.year() + '-' + end.year();
+                const start = moment().year(this.currentYear).subtract(5, 'years');
+                const end = moment().year(this.currentYear).add(6, 'years');
+                return `${start.year()}-${end.year()}`;
             }
         },
-        currentMonthDays: function() {
-            let month = moment().month(this.currentMonth).year(this.currentYear),
-                start = month.clone().startOf('month').startOf('week'),
-                end = month.clone().endOf('month').endOf('week'),
-                days = [], row;
+        currentMonthDays() {
+            const month = moment().month(this.currentMonth).year(this.currentYear);
+            const start = month.clone().startOf('month').startOf('week');
+            const end = month.clone().endOf('month').endOf('week');
+            const days = [];
+            let row;
 
             for (let i=0; i <= end.diff(start, 'days'); i++) {
                 if (i % 7 === 0) {
@@ -145,76 +128,287 @@ export default {
             }
             return days;
         },
-        yearsRange: function() {
-            let start = moment().year(this.currentYear).subtract(5, 'years'),
-                years = [];
+        yearsRange() {
+            const start = moment().year(this.currentYear).subtract(5, 'years');
+            const years = [];
 
             for (let i=0; i < 12; i++) {
                 years.push(start.clone().add(i, 'years').year());
             }
             return years;
+        },
+        nextValue() {
+            const value = moment().month(this.currentMonth).year(this.currentYear);
+            if (this.view === 'days') {
+                value.add(1, 'months');
+            } else if (this.view === 'months') {
+                value.add(1, 'years');
+            } else if (this.view === 'years') {
+                value.add(12, 'years');
+            }
+            return value;
+        },
+        previousValue() {
+            const value = moment().month(this.currentMonth).year(this.currentYear);
+            if (this.view === 'days') {
+                value.subtract(1, 'months');
+            } else if (this.view === 'months') {
+                value.subtract(1, 'year');
+            } else if (this.view === 'years') {
+                value.subtract(12, 'years');
+            }
+            return value;
+        },
+        nextDisabled() {
+            if (!this.max) return;
+            switch (this.view) {
+                case 'days': return this.nextValue.isAfter(this.max, 'month');
+                case 'months': return this.nextValue.isAfter(this.max, 'year');
+                case 'years': return this.yearsRange.slice(-1).pop() >= this.max.year();
+            }
+        },
+        previousDisabled() {
+            if (!this.min) return;
+            switch (this.view) {
+                case 'days': return this.previousValue.isBefore(this.min, 'month');
+                case 'months': return this.previousValue.isBefore(this.min, 'year');
+                case 'years': return this.yearsRange[0] <= this.min.year();
+            }
         }
     },
     methods: {
-        next: function() {
-            let current = moment().month(this.currentMonth).year(this.currentYear);
-            if (this.view === 'days') {
-                current.add(1, 'months');
-            } else if (this.view === 'months') {
-                current.add(1, 'years');
-            } else if (this.view === 'years') {
-                current.add(12, 'years');
-            }
-            this.currentMonth = current.month();
-            this.currentYear = current.year();
+        next() {
+            this.currentMonth = this.nextValue.month();
+            this.currentYear = this.nextValue.year();
         },
-        previous: function() {
-            let current = moment().month(this.currentMonth).year(this.currentYear);
-            if (this.view === 'days') {
-                current.subtract(1, 'months');
-            } else if (this.view === 'months') {
-                current.subtract(1, 'year');
-            } else if (this.view === 'years') {
-                current.subtract(12, 'years');
-            }
-            this.currentMonth = current.month();
-            this.currentYear = current.year();
+        previous() {
+            this.currentMonth = this.previousValue.month();
+            this.currentYear = this.previousValue.year();
         },
-        zoomOut: function() {
+        zoomOut() {
             if (VIEWS.indexOf(this.view) + 1 < VIEWS.length) {
                 this.view = VIEWS[VIEWS.indexOf(this.view) + 1];
             }
         },
-        pickDay: function(day) {
+        pickDay(day) {
             this.selected = day;
             this.$dispatch('calendar:date:selected', day);
         },
-        pickMonth: function(month) {
+        pickMonth(month) {
             this.currentMonth = month;
             this.view = 'days';
             this.$dispatch('calendar:month:selected', month);
         },
-        pickYear: function(year) {
+        pickYear(year) {
             this.currentYear = year;
             this.view = 'months';
             this.$dispatch('calendar:year:selected', year);
         },
 
-        isOld: function(date) {
-            return date.isBefore(moment().month(this.currentMonth).year(this.currentYear).startOf('month'));
+        isOld(day) {
+            return day.isBefore(moment().month(this.currentMonth).year(this.currentYear).startOf('month'));
         },
 
-        isNew: function(date) {
-            return date.isAfter(moment().month(this.currentMonth).year(this.currentYear).endOf('month'));
+        isNew(day) {
+            return day.isAfter(moment().month(this.currentMonth).year(this.currentYear).endOf('month'));
         },
 
-        clear: function() {
+        isDisabled(day) {
+            const isBeforeMin = this.min && day.isBefore(this.min, 'day');
+            const isAfterMax = this.max && day.isAfter(this.max, 'day');
+            return isBeforeMin || isAfterMax;
+        },
+
+        isMonthDisabled(idx) {
+            const month = moment().month(idx).year(this.currentYear);
+            const isBeforeMin = this.min && month.isBefore(this.min, 'month');
+            const isAfterMax = this.max && month.isAfter(this.max, 'month');
+            return isBeforeMin || isAfterMax;
+        },
+
+        isYearDisabled(year) {
+            const isBeforeMin = this.min && year < this.min.year();
+            const isAfterMax = this.max && year > this.max.year();
+            return isBeforeMin || isAfterMax;
+        },
+
+        dayClasses(day) {
+            return {
+                old: this.isOld(day),
+                new: this.isNew(day),
+                today: day.isSame(this.today, 'day'),
+                active: day.isSame(this.selected, 'day')
+            };
+        },
+
+        focus() {
+            // Focus active or first button
+            const button = this.$el.querySelector('main button.active:not(:disabled)')
+                || this.$el.querySelector('main button:not(:disabled)');
+            button.focus();
+        },
+
+        clear() {
             this.selected = null;
             this.currentYear = this.today.year();
             this.currentMonth = this.today.month();
             this.view = 'days';
             this.$dispatch('calendar:date:cleared');
         }
+    },
+    watch: {
+        selected(value) {
+            if (!value) return;
+            this.currentMonth = value.month();
+            this.currentYear = value.year();
+        }
     }
 };
 </script>
+
+<style lang="less">
+// Needs to chose between udata and admin variables
+// Choice might happen after the core/admin split
+@import '~bootstrap/less/variables';
+@import '~bootstrap/less/mixins';
+
+.calendar {
+    @unit: 30px;
+    color: black;
+
+    min-width: 7 * @unit;
+
+    > * {
+        display: block;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    border-radius: @border-radius-base;
+
+    nav {
+        font-weight: bold;
+        display: flex;
+
+        .switch {
+            flex: 2 0 50%;
+        }
+
+        .prev, .next {
+            flex: 1;
+        }
+    }
+
+    main {
+        display: flex;
+        flex-wrap: wrap;
+
+
+        header {
+            font-weight: bold;
+            span {
+                height: @unit;
+                padding-top: 10px;
+                line-height: 20px;
+            }
+        }
+
+        &.days {
+            > * {
+                display: flex;
+                flex: 1 0 100%;
+            }
+
+            span, button {
+                flex: 1 0 @unit;
+                text-align: center;
+            }
+        }
+
+        &.months, &.years {
+            flex-wrap: wrap;
+            button {
+                flex: 1 0 25%;
+                text-align: center;
+                height: 54px;
+                line-height: 54px;
+            }
+        }
+    }
+
+    footer {
+        font-weight: bold;
+        display: flex;
+    }
+
+    button {
+        height: @unit;
+        width: 100%;
+        background: none;
+        border: none;
+        border-radius: @border-radius-base;
+
+        &:hover {
+            background: @gray-lighter;
+        }
+
+        &.old,
+        &.new {
+            color: @btn-link-disabled-color;
+        }
+
+        &.day:hover,
+        &:focus {
+            background: @gray-lighter;
+            cursor: pointer;
+        }
+
+        &:disabled,
+        &:disabled:hover {
+            background: none;
+            color: @btn-link-disabled-color;
+            cursor: not-allowed;
+        }
+
+        &.today {
+            @today-bg: lighten(orange, 30%);
+            @today-color: #000;
+            .button-variant(@today-color, @today-bg, darken(@today-bg, 20%));
+            position: relative;
+
+            &:focus {
+                background: darken(@today-bg, 10%);
+            }
+
+            &:disabled,
+            &:disabled:active {
+                background: @today-bg;
+                color: @btn-link-disabled-color;
+            }
+
+            &:before {
+                content: '';
+                display: inline-block;
+                border: solid transparent;
+                border-width: 0 0 7px 7px;
+                border-bottom-color: @today-color;
+                border-top-color: @today-bg;
+                position: absolute;
+                bottom: 4px;
+                right: 4px;
+            }
+        }
+
+        &.active {
+            .button-variant(@btn-primary-color, @btn-primary-bg, @btn-primary-border);
+            text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+
+            &.today:before {
+                border-bottom-color: @btn-primary-color;
+            }
+        }
+    }
+}
+</style>

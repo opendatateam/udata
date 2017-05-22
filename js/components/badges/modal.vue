@@ -26,12 +26,12 @@
 
     <footer class="modal-footer text-center">
         <button :disabled="!hasModifications" type="button"
-            class="btn btn-success btn-flat pointer pull-left"
+            class="btn btn-success btn-flat pull-left"
             @click="confirm">
             {{ _('Confirm') }}
         </button>
-        <button v-if="confirm" type="button" class="btn btn-danger btn-flat pointer"
-            data-dismiss="modal">
+        <button v-if="confirm" type="button" class="btn btn-danger btn-flat"
+            @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>
     </footer>

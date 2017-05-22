@@ -92,7 +92,7 @@ class UserSearch(ModelSearchAdapter):
                 'input': cls.completer_tokenize(user.fullname) + [user.id],
                 'output': str(user.id),
                 'payload': {
-                    'avatar_url': user.avatar(40),
+                    'avatar_url': user.avatar(40, external=True),
                     'first_name': user.first_name,
                     'last_name': user.last_name,
                     'slug': user.slug,

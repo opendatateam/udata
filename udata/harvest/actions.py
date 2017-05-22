@@ -22,18 +22,31 @@ from .tasks import harvest
 
 log = logging.getLogger(__name__)
 
+DEFAULT_PAGE_SIZE = 10
+
 
 def list_backends():
     '''List all available backends'''
     return backends.get_all().values()
 
 
-def list_sources(owner=None):
-    '''List all harvest sources'''
+def _sources_queryset(owner=None):
     sources = HarvestSource.objects.visible()
     if owner:
-        return list(sources.owned_by(owner))
-    return list(sources)
+        sources = sources.owned_by(owner)
+    return sources
+
+
+def list_sources(owner=None):
+    '''List all harvest sources'''
+    return list(_sources_queryset(owner=owner))
+
+
+def paginate_sources(owner=None, page=1, page_size=DEFAULT_PAGE_SIZE):
+    '''Paginate harvest sources'''
+    sources = _sources_queryset(owner=owner)
+    page = max(page or 1, 1)
+    return sources.paginate(page, page_size)
 
 
 def get_source(ident):
@@ -68,6 +81,14 @@ def create_source(name, url, backend,
         organization=organization
     )
     signals.harvest_source_created.send(source)
+    return source
+
+
+def update_source(ident, data):
+    '''Update an harvest source'''
+    source = get_source(ident)
+    source.modify(**data)
+    signals.harvest_source_updated.send(source)
     return source
 
 

@@ -71,7 +71,7 @@
             >
                 <button type="button" class="close"
                     v-if="editing"
-                    @click="on_remove(reuse.id)">
+                    @click="on_remove(reuse)">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only" v-i18n="Close"></span>
                 </button>
@@ -105,24 +105,24 @@
 
 <script>
 import Box from 'components/containers/box.vue';
+import Reuse from 'models/reuse';
 import ReuseCard from 'components/reuse/card.vue';
 import ReuseCompleter from 'components/form/reuse-completer.vue';
 import Sorter from 'mixins/sorter';
 
 export default {
-    name: 'reuses-card-list',
     mixins: [Sorter],
     MASK: ReuseCard.MASK,
     components: {Box, ReuseCard, ReuseCompleter},
     props: {
         title: {
             type: String,
-            default: function() {return this._('Reuses');}
+            default() {return this._('Reuses')}
         },
         reuses: Array,
         loading: Boolean
     },
-    data: function() {
+    data() {
         return {
             editing: false,
             sorted: []
@@ -131,33 +131,33 @@ export default {
     events: {
         'completer:item-add': function(reuse_id, $item) {
             $item.remove();
-            this.sorted.push(reuse_id);
+            this.sorted.push(new Reuse({mask: this.$options.MASK}).fetch(reuse_id));
             this.$dispatch('reuse-card-list:add', reuse_id);
-        }
+        },
+        'sorter:update': function(evt) {
+            // Apply order from sortable
+            this.sorted = this.$sortable.toArray().map(id => this.sorted.find(reuse => reuse.id === id));
+        },
     },
     methods: {
-        edit: function() {
+        edit() {
             this.$sortable.option('disabled', false);
-            this._initial_order = this.$sortable.toArray();
-            this.sorted = this.reuses.map(function(reuse) {
-                return reuse.id;
-            });
+            this.sorted = this.reuses.slice(0);
             this.editing = true;
         },
-        submit: function() {
+        submit() {
             this.$dispatch('reuse-card-list:submit', this.$sortable.toArray());
             this.$sortable.option('disabled', true);
             this.editing = false;
             this.sorted = [];
         },
-        cancel: function() {
+        cancel() {
             this.$sortable.option('disabled', true);
             this.editing = false;
             this.sorted = [];
-            this.$sortable.sort(this._initial_order);
         },
-        on_remove: function(reuse) {
-            this.sorted.splice(this.sorted.indexOf(reuse.id), 1);
+        on_remove(reuse) {
+            this.sorted.splice(this.sorted.indexOf(reuse), 1);
             this.$dispatch('reuse-card-list:remove', reuse.id);
         }
     },
@@ -167,7 +167,7 @@ export default {
         ghostClass: 'ghost',
     },
     watch: {
-        editing: function(editing) {
+        editing(editing) {
             if (editing) {
                 this.$refs.completer.selectize.focus();
             }

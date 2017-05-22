@@ -10,8 +10,8 @@ Alright, now you can [install virtualenv][install-virtualenv] and then type thes
 ```shell
 $ virtualenv --python=python2.7 venv
 $ source venv/bin/activate
-$ pip install -r udata/requirements/develop.pip
-$ pip install -e udata/
+$ pip install -r requirements/develop.pip
+$ pip install -e .
 ```
 
 Some dependencies have an optionnal compilation support for Cython
@@ -20,8 +20,8 @@ To enable it, you need to install Cython before all other dependencies:
 
 ```shell
 $ pip install Cython
-$ pip install -r udata/requirements/develop.pip
-$ pip install -e udata/
+$ pip install -r requirements/develop.pip
+$ pip install -e .
 ```
 
 ## NodeJS and modules

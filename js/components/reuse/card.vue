@@ -78,7 +78,7 @@ export default {
     props: {
         reuse: {
             type: Object,
-            default: function() {return new Reuse();}
+            default: () => new Reuse({mask: MASK})
         },
         reuseid: null,
         reactive: {
@@ -87,51 +87,51 @@ export default {
         }
     },
     computed: {
-        certified: function() {
+        certified() {
             return `${config.theme_static}img/certified-stamp.png`;
         },
-        owner_avatar: function() {
+        owner_avatar() {
             if (this.reuse.organization) {
                 return this.reuse.organization.logo || placeholders.organization;
             } else if (this.reuse.owner) {
                 return this.reuse.owner.avatar || placeholders.user;
             }
         },
-        owner_url: function() {
+        owner_url() {
             if (this.reuse.organization) {
                 return this.reuse.organization.page;
             } else if (this.reuse.owner) {
                 return this.reuse.owner.page
             }
         },
-        owner_name: function() {
+        owner_name() {
             if (this.reuse.organization) {
                 return this.reuse.organization.name;
             } else if (this.reuse.owner) {
-                return this.reuse.owner.first_name + ' ' + this.reuse.owner.last_name;
+                return `${this.reuse.owner.first_name} ${this.reuse.owner.last_name}`;
             }
         }
     },
     filters: {
-        reusetype: function(reuse) {
+        reusetype(reuse) {
             if (reuse && reuse.type) {
                 return reuse_types.by_id(reuse.type).label;
             }
         }
     },
     methods: {
-        fetch: function() {
+        fetch() {
             if (this.reuseid) {
                 this.reuse.fetch(this.reuseid);
             }
         }
     },
     watch: {
-        'reuseid': function(id) {
+        reuseid(id) {
             this.fetch();
         }
     },
-    ready: function() {
+    ready() {
         this.fetch();
     }
 };

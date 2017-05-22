@@ -19,11 +19,11 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-success btn-flat pointer pull-left"
+        <button type="button" class="btn btn-success btn-flat pull-left"
             @click="validate">
             {{ _('Validate') }}
         </button>
-        <button type="button" class="btn btn-danger btn-flat pointer"
+        <button type="button" class="btn btn-danger btn-flat"
             @click="reject">
             {{ _('Reject') }}
         </button>

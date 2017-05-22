@@ -45,7 +45,7 @@
     </div>
     <footer class="modal-footer">
         <button type="button" class="btn btn-outline btn-flat pointer"
-            data-dismiss="modal">
+            @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
     </footer>

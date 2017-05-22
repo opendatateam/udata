@@ -122,7 +122,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|mdstrip(7) }}', text=text)
 
-        self.assertEqual(result, '1 2 3 …')
+        self.assertEqual(result, '1 2 3…')
 
     def test_mdstrip_filter_does_not_truncate_without_size(self):
         '''mdstrip should not truncate by default'''
@@ -155,7 +155,7 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|mdstrip(5) }}', text=text)
 
-        self.assertEqual(result.strip(), 'Here …')
+        self.assertEqual(result.strip(), 'Here…')
 
     def test_mdstrip_custom_end(self):
         '''mdstrip should allow a custom ending string'''
@@ -164,4 +164,4 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         with self.app.test_request_context('/'):
             result = render_template_string(template, text=text)
 
-        self.assertEqual(result.strip(), '1234 $')
+        self.assertEqual(result.strip(), '1234$')

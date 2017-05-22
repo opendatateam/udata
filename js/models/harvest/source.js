@@ -1,8 +1,21 @@
 import {Model} from 'models/base';
+import {_} from 'i18n';
 import log from 'logger';
 
+export const VALIDATION_STATUS_CLASSES = {
+    'pending': 'default',
+    'accepted': 'success',
+    'refused': 'danger',
+};
 
-export default class HarvestSource extends Model {
+export const VALIDATION_STATUS_I18N = {
+    'pending': _('Pending'),
+    'accepted': _('Accepted'),
+    'refused': _('Refused'),
+};
+
+
+export class HarvestSource extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         this.loading = true;
@@ -18,11 +31,21 @@ export default class HarvestSource extends Model {
     }
 
     /**
-     * Create or update the given dataset.
+     * Create or update the given harvest source.
      */
     save() {
-        var ep = this.id ? 'harvest.update_harvest_source' : 'harvest.create_harvest_source';
+        const ep = this.id ? 'harvest.update_harvest_source' : 'harvest.create_harvest_source';
         this.loading = true;
         this.$api(ep, {payload: this}, this.on_fetched);
     }
-};
+
+    update(data, on_success, on_error) {
+        this.loading = true;
+        this.$api('harvest.update_harvest_source', {
+            ident: this.id,
+            payload: data
+        }, on_success, on_error);
+    }
+}
+
+export default HarvestSource;

@@ -22,13 +22,12 @@ import Datatable from 'components/datatable/widget.vue';
 import HarvestJobs from 'models/harvest/jobs';
 
 export default {
-    name: 'harvest-jobs-widget',
     components: {Datatable},
     props: {
         source: Object,
         current: null
     },
-    data: function() {
+    data() {
         return {
             title: this._('Jobs'),
             jobs: new HarvestJobs({query: {page_size: 10}}),

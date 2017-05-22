@@ -27,8 +27,9 @@ with open(json_filename) as f:
 
 class OdsHarvesterTest(DBTestMixin, TestCase):
     def setUp(self):
+        super(OdsHarvesterTest, self).setUp()
         # Create fake licenses
-        for license_id in OdsHarvester.LICENSES.values():
+        for license_id in set(OdsHarvester.LICENSES.values()):
             License.objects.create(id=license_id, title=license_id)
 
     @httpretty.activate
