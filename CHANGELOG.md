@@ -2,8 +2,10 @@
 
 ## Current (in progress)
 
-- Fix presubmit form errors handling [#909]
-  (https://github.com/opendatateam/udata/pull/909)
+- Fix presubmit form errors handling
+  [#909](https://github.com/opendatateam/udata/pull/909)
+- Fix producer sidebar image sizing
+  [#913](https://github.com/opendatateam/udata/issues/913)
 
 ## 1.0.10 (2017-05-11)
 
