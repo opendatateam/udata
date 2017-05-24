@@ -29,7 +29,8 @@ def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    regions = GeoZone.objects(level='fr/region').valid_at(date.today())
+    highest_level = current_app.config['HANDLED_LEVELS'][-2]
+    regions = GeoZone.objects(level=highest_level).valid_at(date.today())
     regions = sorted(
         regions,
         key=lambda zone: unicodedata.normalize('NFD', zone.name)
@@ -64,7 +65,7 @@ def redirect_territory(level, code):
     Optimistically redirect to the latest valid/known INSEE code.
     """
     territory = GeoZone.objects.valid_at(datetime.now()).filter(
-        code=code, level='fr/{level}'.format(level=level)).first()
+        code=code[3:], level='fr/{level}'.format(level=level)).first()
     return redirect(url_for('territories.territory', territory=territory))
 
 
