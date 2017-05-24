@@ -24,7 +24,7 @@ def dict_to_namedtuple(name, data):
     return namedtuple(name, data.keys())(**data)
 
 
-@blueprint.route('/territoires/', endpoint='home')
+@blueprint.route('/territories/', endpoint='home')
 def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
@@ -55,7 +55,7 @@ def redirect_town(code):
     return redirect(url_for('territories.territory', territory=territory))
 
 
-@blueprint.route('/territoires/<level>/<code>@latest/',
+@blueprint.route('/territories/<level>/<code>@latest/',
                  endpoint='redirect_territory')
 def redirect_territory(level, code):
     """
@@ -68,7 +68,7 @@ def redirect_territory(level, code):
     return redirect(url_for('territories.territory', territory=territory))
 
 
-@blueprint.route('/territoires/<territory:territory>/', endpoint='territory')
+@blueprint.route('/territories/<territory:territory>/', endpoint='territory')
 def render_territory(territory):
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
