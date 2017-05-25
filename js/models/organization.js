@@ -26,32 +26,31 @@ export default class Organization extends Model {
     }
 
     save() {
-        let endpoint = this.id ? 'organizations.update_organization' : 'organizations.create_organization';
-        this.$api(endpoint, {payload: this}, this.on_fetched);
+        if (this.id) {
+            this.update(this, this.on_fetched);
+        } else {
+            this.create();
+        }
     }
 
     create() {
-        this.$api('organizations.create_organization', {
-            payload: JSON.stringify(this.$data)
-        }, this.on_fetched);
+        this.$api('organizations.create_organization', {payload: this}, this.on_fetched);
     }
 
     role_for(obj) {
-        var user_id = obj.hasOwnProperty('id') ? obj.id : obj,
-            members = this.members.filter(function(member) {
-                return member.user.id === user_id;
-            });
+        const user_id = obj.hasOwnProperty('id') ? obj.id : obj;
+        const members = this.members.filter(member => member.user.id === user_id);
         return members.length ? members[0] : null;
     }
 
     is_member(obj) {
-        return this.role_for(obj) != null;
+        return this.role_for(obj) !== null;
     }
 
     is_admin(obj) {
         if (obj.is_admin) return true;
-        var member = this.role_for(obj);
-        return member != null ? member.role === 'admin' : false;
+        const member = this.role_for(obj);
+        return member !== null && member.role === 'admin';
     }
 
     accept_membership(request, callback) {
@@ -68,9 +67,7 @@ export default class Organization extends Model {
             org: this.id,
             id: request.id,
             payload: {comment: comment}
-        }, function(response) {
-            callback(response);
-        });
+        }, callback);
     }
 };
 
