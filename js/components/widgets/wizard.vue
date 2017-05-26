@@ -1,8 +1,11 @@
 <style lang="less">
 .wizard {
     .nav.nav-pills > li {
+        height: 100%;
+
         > a {
             border-radius: 4px;
+            height: 100%;
         }
 
         &.active {
