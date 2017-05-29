@@ -37,7 +37,6 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 export default {
     name: 'date-picker',
-    replace: true,
     mixins: [FieldComponentMixin],
     props: {
         serializable: {

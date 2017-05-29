@@ -1,5 +1,5 @@
 <template>
-<a class="pointer" @click="click">
+<a v-link="link">
     <span class="fa fa-fw fa-warning text-yellow"></span>
     {{ details.title }}
 </a>
@@ -10,12 +10,13 @@ import BaseNotification from 'components/notifications/base';
 
 export default {
     mixins: [BaseNotification],
-    methods: {
-        click: function() {
-            let id = this.details.id,
-                subject = this.details.subject,
-                route = `/${subject.type}/${subject.id}/issue/${id}/`;
-            this.$go(route);
+    computed: {
+        link() {
+            const subject = this.details.subject;
+            return {name: `${subject.type}-issue`, params: {
+                oid: subject.id,
+                issue_id: this.details.id,
+            }};
         }
     }
 };

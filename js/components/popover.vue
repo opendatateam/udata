@@ -12,6 +12,7 @@ import TooltipMixin from 'mixins/tooltip';
 import 'vue-strap/src/Popover.vue'; // Needed for style
 
 export default {
+    name: 'popover',
     mixins: [TooltipMixin],
     props: {
         // An optionnal title

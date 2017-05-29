@@ -34,9 +34,11 @@ export class HarvestSource extends Model {
      * Create or update the given harvest source.
      */
     save() {
-        const ep = this.id ? 'harvest.update_harvest_source' : 'harvest.create_harvest_source';
+        if (this.id) {
+            return this.update(this, this.on_fetched);
+        }
         this.loading = true;
-        this.$api(ep, {payload: this}, this.on_fetched);
+        this.$api('harvest.create_harvest_source', {payload: this}, this.on_fetched);
     }
 
     update(data, on_success, on_error) {

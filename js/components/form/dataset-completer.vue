@@ -26,6 +26,7 @@ function cardify(value, $el) {
 }
 
 export default {
+    name: 'dataset-completer',
     mixins: [BaseCompleter],
     ns: 'datasets',
     endpoint: 'suggest_datasets',

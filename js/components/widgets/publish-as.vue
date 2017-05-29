@@ -1,17 +1,16 @@
 <template>
+<div>
 <div class="row">
     <p class="col-xs-12 text-center lead">
         {{ _('Choose under which identity you want to publish') }}
     </p>
 </div>
 <div class="row">
-    <user-card :user="$root.me" :selected="!selected"
-        class="col-xs-12 col-sm-6 col-md-4 col-lg-3"></user-card>
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
-        v-for="organization in $root.me.organizations">
-        <org-card :organization="organization"
-            :selected="selected == organization">
-        </org-card>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+        <user-card :user="$root.me" :selected="!selected"></user-card>
+    </div>
+    <div v-for="organization in $root.me.organizations" class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+        <org-card :organization="organization" :selected="selected == organization"></org-card>
     </div>
 </div>
 <div class="row" v-if="!$root.me.organizations">
@@ -29,20 +28,22 @@
 <org-filter v-if="$root.me.is_admin"
     cardclass="col-xs-12 col-sm-6 col-md-4 col-lg-3" :selected="selected">
 </org-filter>
+</div>
 </template>
 
 <script>
+import UserCard from 'components/user/card.vue';
+import OrgCard from 'components/organization/card.vue';
+import OrgFilter from 'components/organization/card-filter.vue';
+
 export default {
-    data: function() {
+    name: 'publish-as',
+    data() {
         return {
             selected: null
         };
     },
-    components: {
-        'user-card': require('components/user/card.vue'),
-        'org-card': require('components/organization/card.vue'),
-        'org-filter': require('components/organization/card-filter.vue')
-    },
+    components: {UserCard, OrgCard, OrgFilter},
     events: {
         'organization:clicked': function(org) {
             this.selected = org;

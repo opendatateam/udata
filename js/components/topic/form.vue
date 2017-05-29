@@ -1,19 +1,18 @@
 <template>
-<vform v-ref:form :fields="fields" :model="topic"></vform>
+<div>
+<vertical-form v-ref:form :fields="fields" :model="topic"></vertical-form>
+</div>
 </template>
 
 <script>
 import Topic from 'models/topic';
-import Vform from 'components/form/vertical-form.vue';
+import VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
+    name: 'topic-form',
+    components: {VerticalForm},
     props: {
-        topic: {
-            type: Topic,
-            default() {
-                return new Topic();
-            }
-        }
+        topic: {type: Topic, default: () => new Topic()}
     },
     data() {
         return {
@@ -33,7 +32,6 @@ export default {
                 }]
         };
     },
-    components: {Vform},
     methods: {
         serialize() {
             return this.$refs.form.serialize();

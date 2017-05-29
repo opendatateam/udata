@@ -1,4 +1,5 @@
 <template>
+<div>
 <layout :title="source.name || ''" :subtitle="source.backend || ''" :actions="actions" :badges="badges" >
     <div class="alert alert-info" v-if="should_validate">
         <div class="btn-toolbar pull-right">
@@ -31,6 +32,7 @@
         <preview class="col-xs-12" :source="source"></preview>
     </div>
 </layout>
+</div>
 </template>
 
 <script>

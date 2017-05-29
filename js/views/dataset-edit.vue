@@ -1,7 +1,9 @@
 <template>
+<div>
 <form-layout icon="cubes" :title="title" :save="save" :cancel="cancel" footer="true" :model="dataset">
     <dataset-form v-ref:form :dataset="dataset"></dataset-form>
 </form-layout>
+</div>
 </template>
 
 <script>
@@ -10,7 +12,8 @@ import Dataset from 'models/dataset';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
-    data: function() {
+    name: 'dataset-edit',
+    data() {
         return {
             dataset: new Dataset(),
         };
@@ -27,7 +30,7 @@ export default {
     },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
                 this.dataset.update(form.serialize(), (response) => {
                     this.dataset.on_fetched(response);

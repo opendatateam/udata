@@ -22,9 +22,9 @@
 
 <script>
 export default {
-    replace: true,
+    name: 'add-menu',
     computed: {
-        actions: function() {
+        actions() {
             var actions = [{
                     label: this._('A dataset'),
                     icon: 'fa-cubes',

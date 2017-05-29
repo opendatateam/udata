@@ -24,6 +24,7 @@
 </style>
 
 <template>
+<div>
 <layout :title="title || ''">
     <div class="wizard">
         <div class="row form-group wizard-steps">
@@ -65,6 +66,7 @@
         </div>
     </div>
 </layout>
+</div>
 </template>
 
 <script>
@@ -73,7 +75,8 @@ import Layout from 'components/layout.vue';
 import Box from 'components/containers/box.vue';
 
 export default {
-    data: function() {
+    name: 'wizard',
+    data() {
         return {
             step_index: 0
         };

@@ -14,6 +14,7 @@
 }
 </style>
 <template>
+<div>
 <box :title="post.name || ''" icon="newspaper-o"
     boxclass="box-solid post-content-widget">
     <image-button :src="post.image" :size="150"
@@ -22,6 +23,7 @@
     <p v-if="post.headline" class="lead">{{post.headline}}</p>
     <div v-markdown="post.content"></div>
 </box>
+</div>
 </template>
 
 <script>

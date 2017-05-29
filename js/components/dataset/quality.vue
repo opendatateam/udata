@@ -1,4 +1,5 @@
 <template>
+<div>
 <box :title="title" icon="thumbs-up" boxclass="box-solid" v-if="quality">
     <doughnut :score="quality.score + 1" width="200px" height="200px"></doughnut>
     <h4>{{ _('The aim of that box is to help you improve the quality of the (meta)data associated to your dataset.') }}</h4>
@@ -51,6 +52,7 @@
         <p>{{ _('The availability of your distant resources (if any) is crucial for reusers. They trust you for the reliability of these data both in terms of reachability and ease of access.') }}</p>
     </qa-section>
 </box>
+</div>
 </template>
 
 <script>
@@ -60,12 +62,12 @@ import QaSection from './quality-section.vue';
 
 export default {
     name: 'dataset-quality',
+    components: {Box, Doughnut, QaSection},
     props: ['quality'],
-    data: function() {
+    data() {
         return {
             title: this._('Quality')
         };
     },
-    components: {Box, Doughnut, QaSection},
 };
 </script>

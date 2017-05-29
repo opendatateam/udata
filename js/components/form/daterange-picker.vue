@@ -46,7 +46,6 @@ const ISO_FORMAT = 'YYYY-MM-DD';
 
 export default {
     name: 'daterange-picker',
-    replace: true,
     mixins: [FieldComponentMixin],
     components: {Calendar},
     data() {

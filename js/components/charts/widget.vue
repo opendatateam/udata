@@ -95,6 +95,7 @@ const COLORS = [
 
 
 export default {
+    name: 'chart-widget',
     data() {
         return {
             chart: null,

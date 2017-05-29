@@ -77,6 +77,7 @@
 }
 </style>
 <template>
+<div>
 <modal v-ref:modal class="user-modal" small>
     <div class="user-details" slot="modal-content">
         <img class="img-circle"
@@ -112,6 +113,7 @@
         </div>
     </div>
 </modal>
+</div>
 </template>
 
 <script>
@@ -120,7 +122,6 @@ import placeholders from 'helpers/placeholders';
 
 export default {
     name: 'user-modal',
-    replace: true,
     components: {Modal},
     props: ['user'],
     data() {

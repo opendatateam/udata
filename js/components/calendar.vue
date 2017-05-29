@@ -55,7 +55,7 @@ function optionalMoment(value) {
 }
 
 export default {
-    replace: true,
+    name: 'calendar',
     props: {
         selected: {
             type: moment,

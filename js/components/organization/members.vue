@@ -59,6 +59,7 @@
 </style>
 
 <template>
+<div>
 <div class="box box-danger members-widget" :class="{ 'box-danger': requests }">
     <div class="box-header with-border">
         <h3 class="box-title">{{ _('Members') }}</h3>
@@ -140,6 +141,7 @@
         </div>
     </div><!-- /.box-footer -->
 </div><!--/.box -->
+</div>
 </template>
 
 <script>
@@ -157,6 +159,7 @@ import PaginationWidget from 'components/pagination.vue';
 import UserCompleter from 'components/form/user-completer.vue';
 
 export default {
+    name: 'members-widget',
     components: {BoxContainer, PaginationWidget, UserCompleter},
     props: {
         org: Object

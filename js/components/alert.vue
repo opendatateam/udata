@@ -14,7 +14,6 @@ const TRANSITION_DURATION = 300;
 
 export default {
     name: 'alert-box',
-    replace: true,
     data() {
         return {
             closing: false

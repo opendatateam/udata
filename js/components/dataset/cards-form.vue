@@ -52,12 +52,15 @@
 </style>
 
 <template>
-    <div class="row">
-        <div class="input-group col-lg-10 col-lg-offset-1 completer-row">
-            <span class="input-group-addon">
-                <span class="fa fa-cubes"></span>
-            </span>
-            <completer v-ref:completer></completer>
+<div>
+    <div class="row completer-row">
+        <div class="col-lg-10 col-lg-offset-1">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <span class="fa fa-cubes"></span>
+                </span>
+                <completer v-ref:completer></completer>
+            </div>
         </div>
     </div>
     <div class="row" v-show="!datasets.length">
@@ -74,28 +77,28 @@
             <card :datasetid="datasetid"></card>
         </div>
     </div>
+</div>
 </template>
 
 <script>
 import Sorter from 'mixins/sorter';
+import Card from 'components/dataset/card.vue';
+import Completer from 'components/form/dataset-completer.vue';
 
 export default {
     name: 'datasets-cards-form',
     mixins: [Sorter],
-    components: {
-        card: require('components/dataset/card.vue'),
-        completer: require('components/form/dataset-completer.vue')
-    },
+    components: {Card, Completer},
     props: {
         datasets: {
             type: Array,
-            default: function() {
+            default() {
                 /* Prefill the datasets with optional ids contained in
                    `dataset_id` GET parameter. */
                 let datasets = [];
                 if ("dataset_id" in this.$route.query) {
                     // There might be a single id or a list.
-                    let datasetIds = this.$route.query.dataset_id;
+                    const datasetIds = this.$route.query.dataset_id;
                     if (typeof datasetIds === "string") {
                         datasets.push(datasetIds);
                     } else {
@@ -115,13 +118,12 @@ export default {
         }
     },
     methods: {
-        on_remove: function(dataset_id) {
+        on_remove(dataset_id) {
             this.datasets.splice(this.datasets.indexOf(dataset_id), 1);
             this.$dispatch('dataset-card-list:remove', dataset_id);
         }
     },
     sortable: {
-        // disabled: true,
         draggable: '.dataset-card-container',
         ghostClass: 'ghost',
     }

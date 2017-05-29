@@ -1,4 +1,5 @@
 <template>
+<div>
 <box :title="topic.name || ''" icon="book" boxclass="box-solid">
     <div v-markdown="topic.description"></div>
     <div v-if="topic.tags | length" class="label-list">
@@ -9,13 +10,14 @@
         <span v-for="tag in topic.tags" class="label label-default">{{tag}}</span>
     </div>
 </box>
+</div>
 </template>
 
 <script>
 import Box from 'components/containers/box.vue';
 
 export default {
-    name: 'topic-content',
+    name: 'topic-details',
     props: ['topic'],
     components: {Box}
 };

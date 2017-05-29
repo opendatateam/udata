@@ -37,7 +37,6 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 export default {
     name: 'time-picker',
-    replace: true,
     props: ['serializable'],
     mixins: [FieldComponentMixin],
     components: {

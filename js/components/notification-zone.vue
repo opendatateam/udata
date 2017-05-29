@@ -7,7 +7,7 @@
 <script>
 import Alert from 'components/alert.vue';
 export default {
-    replace: true,
+    name: 'notification-zone',
     components: {Alert}
 };
 </script>

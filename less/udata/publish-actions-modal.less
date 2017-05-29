@@ -2,6 +2,7 @@
  * Calls to action.
  */
 .actions-list {
+    margin-bottom: 0;
 
     .list-group-item {
         @base-color: #eaeaea;
@@ -13,6 +14,10 @@
         border-radius: 0px;
         border: @border-size solid transparent;
         padding: 0;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
 
         .action-icon {
             .pull-left();

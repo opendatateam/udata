@@ -5,6 +5,7 @@
 </style>
 
 <template>
+<div>
     <a class="small-box pointer" :class="[ bgcolor ]" @click="click">
         <div class="inner">
             <h3>{{value | numbers}}</h3>
@@ -18,6 +19,7 @@
             <i class="fa fa-arrow-circle-right"></i>
         </div>
     </a>
+</div>
 </template>
 
 <script>
@@ -34,15 +36,15 @@ export default {
         target: null  // No type check
     },
     computed:  {
-        bgcolor: function() {
+        bgcolor() {
             return 'bg-' + this.color;
         },
-        faicon: function() {
+        faicon() {
             return 'fa-' + this.icon;
         }
     },
     methods: {
-        click: function() {
+        click() {
             if (this.target) {
                 if (this.target[0] === '#') {
                     this.$scrollTo(this.target);

@@ -18,6 +18,7 @@
 }
 </style>
 <template>
+<div>
 <box :title="_('Profile')" icon="building" boxclass="box-solid org-profile-widget">
     <h3>
         {{org.name}}
@@ -37,6 +38,7 @@
         </div>
     </div>
 </box>
+</div>
 </template>
 
 <script>
@@ -46,6 +48,7 @@ import Box from 'components/containers/box.vue';
 import ImageButton from 'components/widgets/image-button.vue';
 
 export default {
+    name: 'organization-profile',
     props: {
         org: {
             type: Object,

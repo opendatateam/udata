@@ -1,20 +1,21 @@
 <template>
+<div>
     <datatable :title="title" icon="cogs"
         boxclass="jobs-widget"
         :fields="fields" :p="jobs"
         :empty="_('No job')">
     </datatable>
+</div>
 </template>
 
 <script>
 import jobs from 'models/jobs';
+import Datatable from 'components/datatable/widget.vue';
 
 export default {
-    name: 'jobs-widget',
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
-    data: function() {
+    name: 'jobs-list',
+    components: {Datatable},
+    data() {
         return {
             title: this._('Jobs'),
             jobs: jobs,

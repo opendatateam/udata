@@ -31,6 +31,7 @@
 </style>
 
 <template>
+<div>
     <box :title="title" icon="file"
         boxclass="box-solid resources-widget"
         bodyclass="table-responsive no-padding"
@@ -119,6 +120,7 @@
             </button>
         </footer>
     </box>
+</div>
 </template>
 
 <script>

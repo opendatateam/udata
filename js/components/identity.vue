@@ -16,15 +16,14 @@
 
 <script>
 export default {
-    replace: true,
     computed: {
-        avatar: function() {
+        avatar() {
             return this.$data.avatar
                 || this.$data.avatar_url
                 || this.$data.logo
                 || this.$data.logo_url;
         },
-        name: function() {
+        name() {
             if (this.id === this.$root.me.id) {
                 return this._('you');
             }
@@ -32,7 +31,7 @@ export default {
         }
     },
     methods: {
-        click: function() {
+        click() {
             this.$dispatch('identity:clicked', this);
         }
     }

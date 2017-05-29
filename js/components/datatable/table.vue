@@ -33,10 +33,7 @@ import Row from './row.vue';
 
 export default {
     name: 'datatable',
-    replace: true,
-    components: {
-        Row
-    },
+    components: {Row},
     props: {
         p: Object,
         fields: Array,
@@ -45,16 +42,16 @@ export default {
             default: 'id'
         }
     },
-    data: function() {
+    data() {
         return {
             selected: null
         };
     },
     computed: {
-        remote: function() {
+        remote() {
             return this.p && this.p.serverside;
         },
-        trackBy: function() {
+        trackBy() {
             return this.track || '';
         }
     },
@@ -74,15 +71,15 @@ export default {
             return this.remote ? field.sort : field.key;
         },
         classes_for(field) {
-            let classes = {pointer: Boolean(field.sort)},
-                align = field.align || 'left';
+            const classes = {pointer: Boolean(field.sort)};
+            const align = field.align || 'left';
 
             classes[`text-${align}`] = true;
 
             return classes;
         },
         sort_classes_for(field) {
-            let classes = {};
+            const classes = {};
 
             if (this.p.sorted != this.sort_for(field)) {
                 classes['fa-sort'] = true;

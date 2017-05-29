@@ -1,21 +1,22 @@
 <template>
+<div>
     <datatable :title="title" icon="comment"
         boxclass="discussions-widget"
         :fields="fields"
         :p="discussions"
         :empty="_('No discussion')">
     </datatable>
+</div>
 </template>
 
-
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
-    name: 'discussions-widget',
-    components: {
-         datatable: require('components/datatable/widget.vue')
-    },
+    name: 'discussions-list',
+    components: {Datatable},
     MASK: ['id', 'title', 'created', 'closed', 'class', 'subject'],
-    data: function() {
+    data() {
         return {
             fields: [{
                 label: this._('Title'),
@@ -49,9 +50,7 @@ export default {
         discussions: null,
         title: {
             type: String,
-            default: function() {
-                return this._('Discussions');
-            }
+            default() {return this._('Discussions')},
         }
     }
 };

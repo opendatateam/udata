@@ -69,13 +69,13 @@
 </template>
 
 <script>
-import $ from 'jquery';
 import API from 'api';
 import log from 'logger';
 import UploaderMixin from 'mixins/uploader';
 import Thumbnailer from 'components/widgets/thumbnailer.vue';
 
 export default {
+    name: 'image-picker',
     autoUpload: false,
     mixins: [UploaderMixin],
     components: {Thumbnailer},

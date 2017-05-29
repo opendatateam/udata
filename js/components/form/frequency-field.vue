@@ -35,7 +35,6 @@ const ISO_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 export default {
     name: 'frequency-field',
-    replace: true,
     mixins: [FieldComponentMixin],
     props: {
         placeholder: {

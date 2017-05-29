@@ -1,4 +1,5 @@
 <template>
+<div>
     <datatable :title="source.name || ''" icon="tasks"
         boxclass="harvest-jobs-widget"
         :fields="fields"
@@ -14,6 +15,7 @@
             </dl>
         </header>
     </datatable>
+</div>
 </template>
 
 <script>

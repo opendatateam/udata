@@ -15,7 +15,6 @@ import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
     name: 'url-field',
-    replace: true,
     mixins: [FieldComponentMixin],
 };
 </script>

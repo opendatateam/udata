@@ -1,21 +1,22 @@
 <template>
+<div>
     <datatable :title="title" icon="warning"
         boxclass="issues-widget"
         :fields="fields"
         :p="issues"
         :empty="_('No issues')">
     </datatable>
+</div>
 </template>
 
-
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
-    name: 'issues-widget',
-    components: {
-         datatable: require('components/datatable/widget.vue')
-    },
+    name: 'issues-list',
+    components: {Datatable},
     MASK: ['id', 'class', 'title', 'created', 'closed', 'subject'],
-    data: function() {
+    data() {
         return {
             fields: [{
                 label: this._('Title'),
@@ -37,8 +38,8 @@ export default {
     },
     events: {
         'datatable:item:click': function(issue) {
-            let prefix = issue.subject.class.toLowerCase(),
-                route = `${prefix}-issue`;
+            const prefix = issue.subject.class.toLowerCase();
+            const route = `${prefix}-issue`;
             this.$go({name: route, params: {
                 oid: issue.subject.id,
                 issue_id: issue.id
@@ -49,9 +50,7 @@ export default {
         issues: null,
         title: {
             type: String,
-            default: function() {
-                return this._('Issues');
-            }
+            default() {return this._('Issues')},
         }
     }
 };

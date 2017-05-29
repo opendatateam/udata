@@ -61,6 +61,7 @@
 </style>
 
 <template>
+<div>
     <box :title="title" icon="retwett"
         boxclass="box-solid reuses-cards-widget"
         footerclass="text-center" :footer="true" :loading="loading">
@@ -101,6 +102,7 @@
             </div>
         </footer>
     </box>
+</div>
 </template>
 
 <script>
@@ -111,6 +113,7 @@ import ReuseCompleter from 'components/form/reuse-completer.vue';
 import Sorter from 'mixins/sorter';
 
 export default {
+    name: 'reuse-card-list',
     mixins: [Sorter],
     MASK: ReuseCard.MASK,
     components: {Box, ReuseCard, ReuseCompleter},

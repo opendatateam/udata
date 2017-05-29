@@ -1,4 +1,5 @@
 <template>
+<div>
 <layout :title="reuse.title || ''" :subtitle="_('Reuse')"
     :actions="actions" :badges="badges" :page="reuse.page || ''">
     <div class="row">
@@ -28,6 +29,7 @@
         <follower-list id="followers-widget" class="col-xs-12" :followers="followers"></follower-list>
     </div>
 </layout>
+</div>
 </template>
 
 <script>
@@ -52,6 +54,7 @@ import SmallBox from 'components/containers/small-box.vue';
 const MASK = `datasets{${mask(DatasetCards.MASK)}},*`;
 
 export default {
+    name: 'reuse-view',
     components: {SmallBox, Chart, ReuseDetails, FollowerList, DiscussionList, IssueList, DatasetCards, Layout},
     data() {
         return {

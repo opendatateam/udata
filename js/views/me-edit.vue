@@ -1,7 +1,9 @@
 <template>
+<div>
 <form-layout icon="user" :title="_('Edit profile')" :save="save" :cancel="cancel" footer="true" :model="me">
     <user-form v-ref:form :user="me"></user-form>
 </form-layout>
+<div>
 </template>
 
 <script>
@@ -10,7 +12,8 @@ import me from 'models/me';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
-    data: function() {
+    name: 'me-edit',
+    data() {
         return {me};
     },
     components: {FormLayout, UserForm},

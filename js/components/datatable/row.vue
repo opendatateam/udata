@@ -21,7 +21,6 @@ import Cell from './cell.vue';
 
 export default {
     name: 'datatable-row',
-    replace: true,
     props: {
         item: Object,
         fields: Array,
@@ -30,14 +29,14 @@ export default {
             default: false
         }
     },
-    created: function() {
+    created() {
         // Loads cells from fields definitions
-        for(let field of this.fields) {
+        for (let field of this.fields) {
             this.load_cell(field.type || 'text');
         }
     },
     methods: {
-        item_click: function(item) {
+        item_click(item) {
             this.$dispatch('datatable:item:click', item);
         },
         /**
@@ -47,9 +46,14 @@ export default {
          *                             in the application scope when
          *                             the view is loaded
          */
-        load_cell: function(name) {
+        load_cell(name) {
             if (!this.$options.components.hasOwnProperty(name)) {
-                let options = require('./cells/' + name + '.vue');
+                // Import syntax required for dynamic components loading
+                // (webpack 1.x only support ES5 syntax)
+                // See:
+                //  - https://webpack.github.io/docs/context.html#dynamic-requires
+                //  - https://webpack.github.io/docs/code-splitting.html#es6-modules
+                const options = require('./cells/' + name + '.vue');
                 if (!options.hasOwnProperty('mixins')) {
                     options.mixins = [];
                 }

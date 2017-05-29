@@ -22,7 +22,6 @@ import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
     name: 'Checkbox',
-    replace: true,
     mixins: [FieldComponentMixin]
 };
 </script>

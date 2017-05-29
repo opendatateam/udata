@@ -4,6 +4,7 @@ a.sidebar-toggle {
 }
 </style>
 <template>
+<div>
     <a href="/" class="logo">
       <!-- Add the class icon to your logo image or logo icon to add the margining -->
       <!-- mini logo for sidebar mini 50x50 pixels -->
@@ -28,6 +29,7 @@ a.sidebar-toggle {
           </ul>
         </div>
     </nav>
+</div>
 </template>
 
 

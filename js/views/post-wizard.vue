@@ -1,19 +1,32 @@
 <template>
+<div>
 <wizard v-ref:wizard :steps="steps" :finish="true" :title="_('New Post')"></wizard>
+</div>
 </template>
 
 <script>
 import API from 'api';
 import Post from 'models/post';
 
+import Wizard from 'components/widgets/wizard.vue';
+
+// Steps
+import PostForm from 'components/post/form.vue';
+import DatasetCardsForm from 'components/dataset/cards-form.vue';
+import ReuseCardsForm from 'components/reuse/cards-form.vue';
+import ImagePicker from 'components/widgets/image-picker.vue';
+
+
 export default {
-    data: function() {
+    name: 'post-wizard',
+    components: {Wizard},
+    data() {
         return {
             post: new Post(),
             steps: [{
                 label: this._('Writing'),
                 subtitle: this._('Write your post'),
-                component: require('components/post/form.vue'),
+                component: PostForm,
                 next: (component) => {
                     if (component.$refs.form.validate()) {
                         Object.assign(this.post, component.$refs.form.serialize());
@@ -24,7 +37,7 @@ export default {
             }, {
                 label: this._('Datasets'),
                 subtitle: this._('Add some related datasets'),
-                component: require('components/dataset/cards-form.vue'),
+                component: DatasetCardsForm,
                 next: (component) => {
                     this.post.datasets = component.datasets;
                     this.post.save();
@@ -33,7 +46,7 @@ export default {
             }, {
                 label: this._('Reuses'),
                 subtitle: this._('Add some related reuses'),
-                component: require('components/reuse/cards-form.vue'),
+                component: ReuseCardsForm,
                 next: (component) => {
                     this.post.reuses = component.reuses;
                     this.post.save();
@@ -42,9 +55,9 @@ export default {
             }, {
                 label: this._('Image'),
                 subtitle: this._('Upload your post image'),
-                component: require('components/widgets/image-picker.vue'),
+                component: ImagePicker,
                 init: (component) => {
-                    var endpoint = API.posts.operations.post_image;
+                    const endpoint = API.posts.operations.post_image;
                     component.endpoint = endpoint.urlify({post: this.post.id});
                 },
                 next: (component) => {
@@ -53,9 +66,6 @@ export default {
                 }
             }]
          };
-    },
-    components: {
-        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {
@@ -68,7 +78,7 @@ export default {
             this.$refs.wizard.$refs.content.post = this.post;
         },
         'wizard:finish': function() {
-            this.$go('/post/' + this.post.id);
+            this.$go({name: 'post', params: {oid: this.post.id}});
         }
     }
 };
