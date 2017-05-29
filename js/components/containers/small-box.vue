@@ -1,3 +1,9 @@
+<style lang="less">
+.small-box {
+    overflow: hidden;
+}
+</style>
+
 <template>
     <a class="small-box pointer" :class="[ bgcolor ]" @click="click">
         <div class="inner">
