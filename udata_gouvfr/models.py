@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 
 from udata.i18n import lazy_gettext as _
 from udata.models import (
-    db, Dataset, User, Organization, Reuse,
-    TerritoryDataset, ResourceBasedTerritoryDataset,
+    db, Dataset, User, Organization, Reuse, TerritoryDataset,
     TERRITORY_DATASETS
 )
 
@@ -324,6 +323,6 @@ REGION_DATASETS = {
     'comptes_reg': ComptesRegionDataset,
 }
 
-TERRITORY_DATASETS['COM'].update(TOWN_DATASETS)
-TERRITORY_DATASETS['DEP'].update(COUNTY_DATASETS)
-TERRITORY_DATASETS['REG'].update(REGION_DATASETS)
+TERRITORY_DATASETS['commune'].update(TOWN_DATASETS)
+TERRITORY_DATASETS['departement'].update(COUNTY_DATASETS)
+TERRITORY_DATASETS['region'].update(REGION_DATASETS)
