@@ -13,28 +13,32 @@ from udata.settings import Testing
 
 def create_geozones_fixtures():
     paca = GeoZoneFactory(
-        id='REG93@1970-01-09', level='fr/region',
-        name='Provence Alpes Côtes dAzur')
+        id='fr:region:93@1970-01-09', level='fr/region',
+        name='Provence Alpes Côtes dAzur', code='93',
+        validity={'start': '1970-01-09', 'end': '9999-12-31'})
     bdr = GeoZoneFactory(
-        id='DEP13@1860-07-01', level='fr/departement', parents=[paca.id],
-        name='Bouches-du-Rhône', code='13', population=1993177, area=0)
+        id='fr:departement:13@1860-07-01', level='fr/departement',
+        parents=[paca.id], name='Bouches-du-Rhône', code='13',
+        population=1993177, area=0,
+        validity={'start': '1860-07-01', 'end': '9999-12-31'})
     arles = GeoZoneFactory(
-        id='COM13004@1942-01-01', level='fr/commune', parents=[bdr.id],
+        id='fr:commune:13004@1942-01-01', level='fr/commune', parents=[bdr.id],
         name='Arles', code='13004', keys={'postal': '13200'},
-        population=52439, area=0)
+        population=52439, area=0,
+        validity={'start': '1942-01-01', 'end': '9999-12-31'})
     return paca, bdr, arles
 
 
 def create_old_new_regions_fixtures():
     lr = GeoZoneFactory(
-        id='REG91@1970-01-09', level='fr/region',
-        name='Languedoc-Rousillon',
+        id='fr:region:91@1970-01-09', level='fr/region',
+        name='Languedoc-Rousillon', code='91',
         validity={'start': '1956-01-01', 'end': '2015-12-31'},
         population=2700266)
     occitanie = GeoZoneFactory(
-        id='REG76@2016-01-01', level='fr/region',
+        id='fr:region:76@2016-01-01', level='fr/region',
         name='Languedoc-Rousillon et Midi-Pyrénées',
-        ancestors=['REG91@1970-01-09'],
+        ancestors=['fr:region:91@1970-01-09'], code='76',
         validity={'start': '2016-01-01', 'end': '9999-12-31'},
         population=5573000)
     return lr, occitanie

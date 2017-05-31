@@ -16,15 +16,15 @@ m = submanager(
 
 
 @m.command
-def attach_zone(geohisto_code, organization_id_or_slug):
+def attach_zone(geoid, organization_id_or_slug):
     '''Attach a zone restricted to level for a given organization.'''
     organization = Organization.objects.get_by_id_or_slug(
         organization_id_or_slug)
     if not organization:
         log.error('No organization found for %s', organization_id_or_slug)
-    geozone = GeoZone.objects.get(id=geohisto_code)
+    geozone = GeoZone.objects.get(id=geoid)
     if not geozone:
-        log.error('No geozone found for %s', geohisto_code)
+        log.error('No geozone found for %s', geoid)
     log.info('Attaching {organization} with {geozone.name}'.format(
              organization=organization, geozone=geozone))
     organization.zone = geozone.id

@@ -26,7 +26,7 @@ class OEmbedsAPI(API):
         the `id` each of those separated by commas.
         E.g:
         dataset-5369992aa3a729239d205183,
-        territory-DEP33@1860-07-01:emploi_dep
+        territory-fr:departement:33@1860-07-01:emploi_dep
 
         Only datasets and territories are supported for now.
         """
@@ -46,12 +46,12 @@ class OEmbedsAPI(API):
             elif (item_kind == 'territory' and
                     current_app.config.get('ACTIVATE_TERRITORIES')):
                 try:
-                    zone_id, kind = item_id.split(':')
-                    level = zone_id[:3]
+                    country, level, code, kind = item_id.split(':')
                 except ValueError:
                     return api.abort(400, 'Invalid territory ID.')
                 try:
-                    geozone = GeoZone.objects.get(id=zone_id)
+                    geozone = GeoZone.objects.get(
+                        id=':'.join([country, level, code]))
                 except GeoZone.DoesNotExist:
                     return api.abort(400, 'Unknown territory identifier.')
                 if level in TERRITORY_DATASETS:

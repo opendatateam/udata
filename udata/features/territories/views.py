@@ -134,9 +134,18 @@ def sitemap_urls():
         for level in current_app.config.get('HANDLED_LEVELS'):
             if level == 'country':
                 continue  # Level not fully handled yet.
-            for item in GeoZone.objects(level=level).only('code'):
+            for territory in (GeoZone.objects(level=level)
+                                     .only('id', 'code', 'validity', 'slug')):
                 # Remove 'fr/' manually from the level.
                 territory = dict_to_namedtuple(
-                    'Territory', {'level_name': level[3:], 'code': item.code})
+                    'Territory', {
+                        'level_name': level[3:],
+                        'id': territory.id,
+                        'code': territory.code,
+                        'slug': territory.slug,
+                        'validity': territory.validity
+                    })
+                print(territory)
+                print(url_for('territories.territory', territory=territory))
                 yield ('territories.territory', {'territory': territory},
-                       None, "weekly", 0.5)
+                       None, 'weekly', 0.5)

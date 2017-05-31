@@ -114,10 +114,9 @@ class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = GeoZone
 
-    # Geozones ids are of the form `{LEVEL}{INSEE_ID}@YYYY-MM-DD` where
-    # `LEVEL` consists of the first 3 letters uppercased of the level.
+    # GeoID, see https://github.com/etalab/geoids.
     id = factory.LazyAttribute(
-        lambda o: '@'.join((o.level[3:6].upper() + o.code, '1970-01-01')))
+        lambda o: 'fr:commune:' + o.code + '@1970-01-01')
     level = factory.Faker('unique_string')
     name = factory.Faker('city')
     slug = factory.Faker('slug')

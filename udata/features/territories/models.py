@@ -11,9 +11,9 @@ __all__ = (
 
 
 TERRITORY_DATASETS = {
-    'COM': {},
-    'DEP': {},
-    'REG': {},
+    'commune': {},
+    'departement': {},
+    'region': {},
     'country': {}
 }
 
