@@ -103,6 +103,7 @@ class TransferStartTest(TestCase, DBTestMixin):
 
 class TransferAcceptTest(TestCase, DBTestMixin):
     def setUp(self):
+        super(TransferAcceptTest, self).setUp()
         self.app.config['USE_METRICS'] = True
 
     def test_recipient_user_can_accept_transfer(self):
