@@ -82,6 +82,8 @@
     - user is prompted for a superadmin user creation
     - user is prompted for a default set of licenses to import
     - user is prompted for some sample data creation
+- Added `License.guess()` helper to improve license matching while harvesting
+  [#967](https://github.com/opendatateam/udata/pull/967)
 
 ## 1.0.11 (2017-05-25)
 

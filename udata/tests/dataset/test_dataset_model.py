@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 
 from mongoengine import post_save
 
-from udata.models import db, Dataset, LEGACY_FREQUENCIES
+from udata.models import db, Dataset, License, LEGACY_FREQUENCIES
 from udata.core.dataset.factories import (
-    ResourceFactory, DatasetFactory, CommunityResourceFactory
+    ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
 )
 from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
@@ -235,3 +235,62 @@ class ResourceModelTest(TestCase, DBTestMixin):
         url = 'http://www.somewhere.com/with/spaces/   '
         dataset = DatasetFactory(resources=[ResourceFactory(url=url)])
         self.assertEqual(dataset.resources[0].url, url.strip())
+
+
+class LicenseModelTest(DBTestMixin, TestCase):
+    def setUp(self):
+        super(LicenseModelTest, self).setUp()
+        # Feed the DB with random data to ensure true matching
+        LicenseFactory.create_batch(3)
+
+    def test_not_found(self):
+        found = License.guess('should not be found')
+        self.assertIsNone(found)
+
+    def test_exact_match_by_id(self):
+        license = LicenseFactory()
+        found = License.guess(license.id)
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_exact_match_by_id_with_spaces(self):
+        license = LicenseFactory()
+        found = License.guess(' {0} '.format(license.id))
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_exact_match_by_url(self):
+        license = LicenseFactory()
+        found = License.guess(license.url)
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_exact_match_by_title(self):
+        license = LicenseFactory()
+        found = License.guess(license.title)
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_exact_match_by_title_with_spaces(self):
+        license = LicenseFactory()
+        found = License.guess(' {0} '.format(license.title))
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_match_by_title_with_low_edit_distance(self):
+        license = LicenseFactory(title='License')
+        found = License.guess('Licence')
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_match_by_title_with_extra_inner_space(self):
+        license = LicenseFactory(title='License ODBl')
+        found = License.guess('License  ODBl')  # 2 spaces instead of 1
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_match_by_title_with_mismatching_case(self):
+        license = LicenseFactory(title='License ODBl')
+        found = License.guess('License ODBL')
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)

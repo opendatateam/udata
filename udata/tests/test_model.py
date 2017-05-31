@@ -177,6 +177,26 @@ class SlugFieldTest(DBTestMixin, TestCase):
         self.assertEqual(len(obj.title), SlugTester.slug.max_length + 1)
         self.assertEqual(len(obj.slug), SlugTester.slug.max_length)
 
+    def test_multiple_spaces(self):
+        field = db.SlugField()
+        self.assertEqual(field.slugify('a  b'), 'a-b')
+
+    def test_lower_case_default(self):
+        field = db.SlugField()
+        self.assertEqual(field.slugify('ABC'), 'abc')
+
+    def test_lower_case_false(self):
+        field = db.SlugField(lower_case=False)
+        self.assertEqual(field.slugify('AbC'), 'AbC')
+
+    def test_custom_separator(self):
+        field = db.SlugField(separator='+')
+        self.assertEqual(field.slugify('a b'), 'a+b')
+
+    def test_is_stripped(self):
+        field = db.SlugField()
+        self.assertEqual(field.slugify('  ab  '), 'ab')
+
 
 class DateFieldTest(DBTestMixin, TestCase):
     def test_none_if_empty_and_not_required(self):

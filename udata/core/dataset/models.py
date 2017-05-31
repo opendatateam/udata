@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from collections import OrderedDict
 
 from blinker import signal
+from stringdist import rdlevenshtein
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
@@ -87,6 +88,11 @@ DEFAULT_CHECKSUM_TYPE = 'sha1'
 PIVOTAL_DATA = 'pivotal-data'
 CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 
+# Maximum acceptable Damerau-Levenshtein distance
+# used to guess license
+# (ie. number of allowed character changes)
+MAX_DISTANCE = 2
+
 
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default
@@ -103,6 +109,28 @@ class License(db.Document):
 
     def __unicode__(self):
         return self.title
+
+    @classmethod
+    def guess(cls, text):
+        '''
+        Try to guess license from a string.
+
+        Try to exact match on identifier then slugified title
+        and fallback on edit distance ranking (after slugification)
+        '''
+        qs = cls.objects
+        text = text.strip().lower()  # Stored identifiers are lower case
+        slug = cls.slug.slugify(text)  # Use slug as it normalize string
+        license = qs(db.Q(id=text) | db.Q(slug=slug) | db.Q(url=text)).first()
+        if license is None:
+            # Try to single match with a low Damerau-Levenshtein distance
+            computed = ((l, rdlevenshtein(l.slug, slug)) for l in cls.objects)
+            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            # If there is more that one match, we cannot determinate
+            # which one is closer to safely choose between candidates
+            if len(candidates) == 1:
+                license = candidates[0]
+        return license
 
 
 class DatasetQuerySet(db.OwnedQuerySet):

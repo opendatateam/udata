@@ -43,6 +43,17 @@ class SlugField(StringField):
     def generate(self):
         return populate_slug(self.instance, self)
 
+    def slugify(self, value):
+        '''
+        Apply slugification according to specified field rules
+        '''
+        if value is None:
+            return
+
+        return slugify.slugify(value, max_length=self.max_length,
+                               separator=self.separator,
+                               to_lower=self.lower_case)
+
 
 class SlugFollow(Document):
     '''
@@ -87,17 +98,14 @@ def populate_slug(instance, field):
                      not field.update):
         return value
 
+    slug = field.slugify(value)
+
     # This can happen when serializing an object which does not contain
     # the properties used to generate the slug. Typically, when such
     # an object is passed to one of the Celery workers (see issue #20).
-    if value is None:
+    if slug is None:
         return
 
-    if field.lower_case:
-        value = value.lower()
-
-    slug = slugify.slugify(value, max_length=field.max_length,
-                           separator=field.separator)
     # If previous and slug ==
     old_slug = getattr(previous, field.db_field, None)
 
