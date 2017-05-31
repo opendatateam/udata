@@ -33,6 +33,14 @@ from udata.core.user.factories import UserFactory
 class TestCase(BaseTestCase):
     settings = settings.Testing
 
+    def setUp(self):
+        # Ensure compatibility with multiple inheritance
+        super(TestCase, self).setUp()
+
+    def tearsDown(self):
+        # Ensure compatibility with multiple inheritance
+        super(TestCase, self).tearsDown()
+
     def create_app(self):
         '''Create an application a test application.
 
