@@ -5,6 +5,7 @@ import logging
 
 from blinker import Signal
 from datetime import date, datetime
+from flask import current_app
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +15,6 @@ metric_catalog = {}
 
 
 from udata.models import db  # noqa: need metrics refactoring
-from flask import current_app
 
 from .tasks import update_metric, archive_metric  # noqa
 
