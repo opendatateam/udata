@@ -22,7 +22,7 @@ You need to initialize some data before pushing uData to it's full potential:
 ```shell
 # Initialize database, indexes...
 $ udata init
-# Fetch and load licenses
+# Optionnaly fetch and load some licenses
 $ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
 # Fetch last translations
 $ tx pull

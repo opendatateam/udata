@@ -40,7 +40,7 @@ def create():
         user = datastore.create_user(**data)
         print '\nUser created successfully'
         print 'User(id=%s email=%s)' % (user.id, user.email)
-        return
+        return user
     print '\nError creating user:'
     for errors in form.errors.values():
         print '\n'.join(errors)

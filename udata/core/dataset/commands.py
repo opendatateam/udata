@@ -20,9 +20,12 @@ FLAGS_MAP = {
     'is_osi_compliant': 'osi_compliant',
 }
 
+# Use CKAN license group from opendefinition as default license list
+DEFAULT_LICENSE_FILE = 'http://licenses.opendefinition.org/licenses/groups/ckan.json'  # noqa
+
 
 @manager.command
-def licenses(filename):
+def licenses(filename=DEFAULT_LICENSE_FILE):
     '''Feed the licenses from a JSON file'''
     if filename.startswith('http'):
         json_licenses = requests.get(filename).json()
