@@ -10,6 +10,8 @@
   [#177](https://github.com/etalab/udata-gouvfr/pull/177)
 - Use the core publish action modal
   [#178](https://github.com/etalab/udata-gouvfr/pull/178)
+- Fix the deuil header not being an SVG
+  [#180](https://github.com/etalab/udata-gouvfr/pull/180)
 
 ## 1.0.6 (2017-04-18)
 
