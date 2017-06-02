@@ -4,14 +4,14 @@ machine:
 dependencies:
   cache_directories:
     - mongodb-linux-x86_64-3.2.4
-    - elasticsearch-2.4.3
+    - elasticsearch-2.4.5
   pre:
     - if [[ ! -d mongodb-linux-x86_64-3.2.4 ]]; then wget http://downloads.mongodb.org/linux/mongodb-linux-x86_64-3.2.4.tgz && tar xvzf mongodb-linux-x86_64-3.2.4.tgz; fi
     - sudo /etc/init.d/mongod stop
     - sudo cp mongodb-linux-x86_64-3.2.4/bin/* /usr/bin
     - sudo /etc/init.d/mongod start
-    - if [[ ! -d elasticsearch-2.4.3 ]]; then wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.4.3.tar.gz && tar xvzf elasticsearch-2.4.3.tar.gz && elasticsearch-2.4.3/bin/plugin install analysis-icu; fi
-    - elasticsearch-2.4.3/bin/elasticsearch: {background: true}
+    - if [[ ! -d elasticsearch-2.4.5 ]]; then wget https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.4.5.tar.gz && tar xvzf elasticsearch-2.4.5.tar.gz && elasticsearch-2.4.5/bin/plugin install analysis-icu; fi
+    - elasticsearch-2.4.5/bin/elasticsearch: {background: true}
     # Install jq required by circleci-requirements.sh (explanation in file)
     - sudo apt-get update && sudo apt-get install jq
   override:
