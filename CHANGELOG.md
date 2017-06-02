@@ -61,6 +61,7 @@
     - `name` on all components: no more `Anonymous Component` in Vue debugger
     - No more `Fragments`
     - More ES6 everywhere
+<<<<<<< HEAD
 - Improve and fix notifications:
   [#928](https://github.com/opendatateam/udata/issues/928)
     - Changed notification style to toast
@@ -75,6 +76,12 @@
   [#968](https://github.com/opendatateam/udata/pull/968)
 - Resource can hold extra metadata into the `extras` attribute
   [#969](https://github.com/opendatateam/udata/pull/969)
+- Improve `init` command:
+    - migrate before trying to index
+    - search indexation/mapping reuse the `search init` command
+    - user is prompted for a superadmin user creation
+    - user is prompted for a default set of licenses to import
+    - user is prompted for some sample data creation
 
 ## 1.0.11 (2017-05-25)
 
