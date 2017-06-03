@@ -26,7 +26,7 @@ Flask-Themes2==0.1.4
 Flask-WTF==0.14.2
 Flask==0.12.2
 html2text==2016.9.19
-lxml==3.7.3
+lxml==3.8.0
 mongoengine==0.13.0
 msgpack-python==0.4.8
 pillow==4.1.1
