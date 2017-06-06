@@ -17,7 +17,8 @@ export default {
         dataset: {
             type: Object,
             default: () => new Dataset(),
-        }
+        },
+        hideNotifications: false
     },
     data() {
         return {
@@ -76,7 +77,17 @@ export default {
             return this.$refs.form.serialize();
         },
         validate() {
-            return this.$refs.form.validate();
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your dataset has been updated.')
+                });
+            }
+
+            return isValid;
         },
         on_error(response) {
             return this.$refs.form.on_error(response);
