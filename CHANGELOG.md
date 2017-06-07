@@ -67,6 +67,8 @@
     - Fix notifications that weren't displayed on form submission
 - Add a toggle indicator on dataset quality blocks that are collapsible
   [#915](https://github.com/opendatateam/udata/issues/915)
+- Display error message on file upload step when there is no file
+  [#930](https://github.com/opendatateam/udata/issues/930)
 
 ## 1.0.11 (2017-05-25)
 

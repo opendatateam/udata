@@ -131,10 +131,10 @@ export default {
         save() {
             if (this.HAS_FILE_API) {
                 const data = {};
-                if (this.$refs.thumbnailer.bbox) {
+                try {
                     data.bbox = this.$refs.thumbnailer.bbox;
-                }
-                this.upload(data);
+                    this.upload(data);
+                } catch(e) {}
             } else {
                 this.$dispatch('image:saved');
             }
