@@ -41,7 +41,7 @@ export function install(Vue) {
      * @throws  {AuthenticationRequired} When the user is not authentified
      */
     Vue.prototype.$auth = function(message) {
-        if (!user) {
+        if (!this.$user) {
             window.location = get_auth_url(message);
             throw new AuthenticationRequired(message);  // This avoid calling function to continue its execution
         }

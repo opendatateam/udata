@@ -71,6 +71,7 @@
   [#905](https://github.com/opendatateam/udata/pull/905)
 - Disable `next` button when no file has been uploaded
   [#930](https://github.com/opendatateam/udata/issues/930)
+- Fix a bug where users cannot create new discussions
 
 ## 1.0.11 (2017-05-25)
 
