@@ -67,6 +67,8 @@
     - Fix notifications that weren't displayed on form submission
 - Add a toggle indicator on dataset quality blocks that are collapsible
   [#915](https://github.com/opendatateam/udata/issues/915)
+- Make metrics deactivable for tests
+  [#905](https://github.com/opendatateam/udata/pull/905)
 
 ## 1.0.11 (2017-05-25)
 
