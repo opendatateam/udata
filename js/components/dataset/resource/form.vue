@@ -101,6 +101,7 @@ export default {
             type: Object,
             default() {return new Resource()}
         },
+        hideNotifications: false
     },
     data() {
         return {
@@ -136,7 +137,16 @@ export default {
             return Object.assign({}, this.resource, this.$refs.form.serialize());
         },
         validate() {
-            return this.$refs.form.validate();
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your resource has been updated.')
+                });
+            }
+            return isValid;
         }
     }
 };

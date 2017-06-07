@@ -13,7 +13,8 @@ export default {
             default: function() {
                 return new Reuse();
             }
-        }
+        },
+        hideNotifications: false
     },
     data: function() {
         return {
@@ -53,7 +54,16 @@ export default {
             return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$refs.form.validate();
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your reuse has been updated.')
+                });
+            }
+            return isValid;
         },
         on_error: function(response) {
             return this.$refs.form.on_error(response);

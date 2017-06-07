@@ -61,6 +61,10 @@
     - `name` on all components: no more `Anonymous Component` in Vue debugger
     - No more `Fragments`
     - More ES6 everywhere
+- Improve and fix notifications:
+  [#928](https://github.com/opendatateam/udata/issues/928)
+    - Changed notification style to toast
+    - Fix notifications that weren't displayed on form submission
 
 ## 1.0.11 (2017-05-25)
 

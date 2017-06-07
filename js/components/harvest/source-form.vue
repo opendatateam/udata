@@ -13,7 +13,8 @@ export default {
             default() {
                 return new HarvestSource();
             }
-        }
+        },
+        hideNotifications: false
     },
     data() {
         return {
@@ -44,7 +45,16 @@ export default {
             return this.$refs.form.serialize();
         },
         validate() {
-            return this.$refs.form.validate();
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your source has been updated.')
+                });
+            }
+            return isValid;
         }
     }
 };

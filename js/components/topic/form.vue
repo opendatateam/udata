@@ -12,7 +12,8 @@ export default {
     name: 'topic-form',
     components: {VerticalForm},
     props: {
-        topic: {type: Topic, default: () => new Topic()}
+        topic: {type: Topic, default: () => new Topic()},
+        hideNotifications: false
     },
     data() {
         return {
@@ -37,7 +38,16 @@ export default {
             return this.$refs.form.serialize();
         },
         validate() {
-            return this.$refs.form.validate();
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your topic has been updated.')
+                });
+            }
+            return isValid;
         }
     }
 };

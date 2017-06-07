@@ -16,7 +16,8 @@ export default {
             default() {
                 return new HarvestSource();
             }
-        }
+        },
+        hideNotifications: false
     },
     data: function() {
         return {
@@ -33,7 +34,16 @@ export default {
             return this.$refs.form.serialize();
         },
         validate: function() {
-            return this.$refs.form.validate();
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your mapping has been updated.')
+                });
+            }
+            return isValid;
         },
         preview: function() {
             let job = new HarvestJob();

@@ -52,7 +52,7 @@
             </dl>
         </div>
 
-        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource"></resource-form>
+        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource" :hide-notifications="false"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
