@@ -3,6 +3,7 @@
     <h3 class="pointer" :class="textClass" @click="toggle">
         <span class="fa" :class="iconClass"></span>
         {{ title }}
+        <span class="fa pull-right" :class="angleClass"></span>
     </h3>
     <div class="collapse" :class="contentClass">
         <slot></slot>
@@ -53,6 +54,12 @@ export default {
                 'text-success': this.condition && !this.showInfo,
                 'text-warning': !this.condition && !this.showInfo,
                 'text-info': this.showInfo,
+            };
+        },
+        angleClass() {
+            return {
+                'fa-angle-down': !this.expanded,
+                'fa-angle-up': this.expanded
             };
         }
     },

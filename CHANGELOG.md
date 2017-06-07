@@ -65,6 +65,8 @@
   [#928](https://github.com/opendatateam/udata/issues/928)
     - Changed notification style to toast
     - Fix notifications that weren't displayed on form submission
+- Add a toggle indicator on dataset quality blocks that are collapsible
+  [#915](https://github.com/opendatateam/udata/issues/915)
 
 ## 1.0.11 (2017-05-25)
 
