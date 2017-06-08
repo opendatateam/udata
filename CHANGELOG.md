@@ -70,8 +70,9 @@
 - Make metrics deactivable for tests
   [#905](https://github.com/opendatateam/udata/pull/905)
 - Disable `next` button when no file has been uploaded
-  [#930](https://github.com/opendatateam/udata/issues/930)
 - Fix a bug where users cannot create new discussions
+- Allows unlocalized URLs on `I18nBlueprint`
+  [#968](https://github.com/opendatateam/udata/pull/968)
 
 ## 1.0.11 (2017-05-25)
 
