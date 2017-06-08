@@ -350,3 +350,9 @@ def to_json(data):
 def format_number(number):
     '''A locale aware formatter.'''
     return format_number_babel(number, locale=g.lang_code)
+
+
+@front.app_template_filter()
+def escapejs(text):
+    """Escape (HTML) strings for using them in JS"""
+    return json.dumps(str(text))
