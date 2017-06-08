@@ -26,6 +26,14 @@ def hardcoded():
     return out
 
 
+@bp.route('/not-localized/', localize=False)
+def not_localized():
+    out = g.lang_code + '-'
+    with language('fr'):
+        out += g.lang_code
+    return out
+
+
 class I18nBlueprintTest(WebTestMixin, DBTestMixin, TestCase):
     def create_app(self):
         app = super(I18nBlueprintTest, self).create_app()
@@ -73,3 +81,14 @@ class I18nBlueprintTest(WebTestMixin, DBTestMixin, TestCase):
 
         response = self.get('/lang/test/?q=test')
         self.assertRedirects(response, '/fr/lang/test/?q=test')
+
+    def test_lang_ignored_for_localize_false(self):
+        url = url_for('i18nbp.not_localized')
+        self.assertEqual(url, '/not-localized/')
+
+    def test_localized_url_redirect_for_localize_false(self):
+        url = url_for('i18nbp.not_localized_redirect')
+        self.assertEqual(url, '/en/not-localized/')
+
+        response = self.get(url)
+        self.assertRedirects(response, '/not-localized/')
