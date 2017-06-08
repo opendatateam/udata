@@ -58,6 +58,14 @@ class PluggableDomain(Domain):
                                                          domain='wtforms')
                 translations.merge(wtforms_translations)
 
+                import flask_security
+                flask_security_translations = Translations.load(
+                    join(flask_security.__path__[0], 'translations'),
+                    locale,
+                    domain='flask_security'
+                )
+                translations.merge(flask_security_translations)
+
                 for plugin_name in current_app.config['PLUGINS']:
                     module_name = 'udata_{0}'.format(plugin_name)
                     module = import_module(module_name)
@@ -75,7 +83,7 @@ class PluggableDomain(Domain):
                 theme_translations_dir = join(theme.current.path, 'translations')
                 if exists(theme_translations_dir):
                     domain = theme.current.identifier
-                    theme_translations = Translations.load(theme_translations,
+                    theme_translations = Translations.load(theme_translations_dir,
                                                            locale,
                                                            domain=domain)
                     translations.merge(theme_translations)
