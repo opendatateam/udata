@@ -67,6 +67,7 @@
     - Fix notifications that weren't displayed on form submission
 - Add a toggle indicator on dataset quality blocks that are collapsible
   [#915](https://github.com/opendatateam/udata/issues/915)
+- Fix login form password help display [#957](https://github.com/opendatateam/udata/issues/957)
 
 ## 1.0.11 (2017-05-25)
 

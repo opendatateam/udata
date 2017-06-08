@@ -26,7 +26,7 @@
     <label for="{{ f.id }}"
         class="{{ cols.label }} control-label{% if f.flags.required %} required{% endif %}">
         {{ f.label.text }}
-        {% if f.description %}<span class="form-help" data-content="{{ f.description }}"></span>{% endif %}
+        {% if f.description %}<span class="form-help" data-content="{{ f.description|escapejs }}"></span>{% endif %}
     </label>
     <div class="field-wrapper {{ cols.control }}">
         {% if f.type == 'RadioField' %}
