@@ -56,6 +56,7 @@
                             </button>
                             <button v-if="next_step || finish"
                                 class="btn btn-primary btn-flat pull-right pointer"
+                                :disabled="disableNext"
                                 @click="click_next">
                                 {{ this.step_index + 1 === this.steps.length ? _('Finish') : _('Next') }}
                             </button>
@@ -111,6 +112,9 @@ export default {
                 return;
             }
             return this.steps[this.step_index - 1];
+        },
+        disableNext() {
+            return this.active_step && this.active_step.disableNext;
         }
     },
     components: {Box, Layout},
@@ -162,6 +166,10 @@ export default {
                 Vue.extend(step.component);
             this.$options.components[`step-${index}`] = component;
         });
+    }, events: {
+        'wizard:enable-next': function() {
+            this.active_step.disableNext = false;
+        }
     }
 };
 </script>

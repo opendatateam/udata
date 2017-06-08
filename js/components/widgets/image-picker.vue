@@ -111,6 +111,7 @@ export default {
                 log.warning('File APIs not supported');
                 this.upload();
             }
+            this.$dispatch('wizard:enable-next')
             return true;
         },
         'uploader:progress': function(id, uploaded, total) {

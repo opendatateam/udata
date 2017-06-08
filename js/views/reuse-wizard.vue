@@ -61,7 +61,8 @@ export default {
                 next: (component) => {
                     component.save();
                     return false;
-                }
+                },
+                disableNext: true
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
