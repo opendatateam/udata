@@ -59,7 +59,7 @@ export default {
                 }
             }, {
                 label: this._('Resources'),
-                subtitle: this._('Add your firsts resources'),
+                subtitle: this._('Add your first resources'),
                 component: ResourceForm,
                 init: (component) => {
                     component.dataset = this.dataset;
