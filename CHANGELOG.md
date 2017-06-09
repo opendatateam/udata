@@ -70,23 +70,9 @@
 - Make metrics deactivable for tests
   [#905](https://github.com/opendatateam/udata/pull/905)
 - Disable `next` button when no file has been uploaded
-- Fix a bug where users cannot create new discussions
-- Allows unlocalized URLs on `I18nBlueprint`
-  [#968](https://github.com/opendatateam/udata/pull/968)
-- Resource can hold extra metadata into the `extras` attribute
-  [#969](https://github.com/opendatateam/udata/pull/969)
-- Improve `init` command:
-    - migrate before trying to index
-    - search indexation/mapping reuse the `search init` command
-    - user is prompted for a superadmin user creation
-    - user is prompted for a default set of licenses to import
-    - user is prompted for some sample data creation
-- Added `License.guess()` helper to improve license matching while harvesting
-  [#967](https://github.com/opendatateam/udata/pull/967)
-- Cleaner login, signup and password related forms
-  [#971](https://github.com/opendatateam/udata/pull/971)
-- Add certified image on default theme
-  [#972](https://github.com/opendatateam/udata/issues/972)
+  [#930](https://github.com/opendatateam/udata/issues/930)
+- Fix badges notification mails
+  [#894](https://github.com/opendatateam/udata/issues/894)
 
 ## 1.0.11 (2017-05-25)
 
