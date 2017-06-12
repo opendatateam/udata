@@ -69,10 +69,12 @@ def resource_to_rdf(resource, dataset=None, graph=None):
         r.add(DCT.rights, Literal(dataset.license.title))
         if dataset.license.url:
             r.add(DCT.license, URIRef(dataset.license.url))
-    if resource.filesize:
+    if resource.filesize is not None:
         r.add(DCAT.bytesSize, Literal(resource.filesize))
     if resource.mime:
         r.add(DCAT.mediaType, Literal(resource.mime))
+    if resource.format:
+        r.add(DCT.term('format'), Literal(resource.format))
     if resource.checksum:
         checksum = graph.resource(BNode())
         checksum.set(RDF.type, SPDX.Checksum)
@@ -162,6 +164,9 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
     resource.mime = rdf_value(distrib, DCAT.mediaType)
+    fmt = rdf_value(distrib, DCT.term('format'))
+    if fmt:
+        resource.format = fmt.lower()
     checksum = distrib.value(SPDX.checksum)
     if checksum:
         algorithm = checksum.value(SPDX.algorithm).identifier

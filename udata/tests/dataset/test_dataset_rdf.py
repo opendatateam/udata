@@ -99,7 +99,7 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
 
     def test_all_resource_fields(self):
         license = LicenseFactory()
-        resource = ResourceFactory()
+        resource = ResourceFactory(format='csv')
         dataset = DatasetFactory(resources=[resource], license=license)
         permalink = url_for('datasets.resource',
                             id=resource.id,
@@ -119,6 +119,7 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(r.value(DCAT.accessURL).identifier, URIRef(permalink))
         self.assertEqual(r.value(DCAT.bytesSize), Literal(resource.filesize))
         self.assertEqual(r.value(DCAT.mediaType), Literal(resource.mime))
+        self.assertEqual(r.value(DCT.term('format')), Literal(resource.format))
 
         checksum = r.value(SPDX.checksum)
         self.assertEqual(r.graph.value(checksum.identifier, RDF.type),
@@ -313,6 +314,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCT.modified, Literal(modified)))
         g.add((node, DCAT.bytesSize, Literal(filesize)))
         g.add((node, DCAT.mediaType, Literal(mime)))
+        g.add((node, DCT.term('format'), Literal('CSV')))
 
         checksum = BNode()
         g.add((node, SPDX.checksum, checksum))
@@ -333,6 +335,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         self.assertEqual(resource.checksum.value, sha1)
         self.assertEqual(resource.published, issued)
         self.assertEqual(resource.modified, modified)
+        self.assertEqual(resource.format, 'csv')
 
     def test_download_url_over_access_url(self):
         node = BNode()
