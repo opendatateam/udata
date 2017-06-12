@@ -212,11 +212,16 @@ def temporal_from_resource(resource):
 
 
 def temporal_from_rdf(period_of_time):
-    '''Parse an temporal coverage'''
-    if isinstance(period_of_time, Literal):
-        return temporal_from_literal(str(period_of_time))
-    elif isinstance(period_of_time, RdfResource):
-        return temporal_from_resource(period_of_time)
+    '''Failsafe parsing of a temporal coverage'''
+    try:
+        if isinstance(period_of_time, Literal):
+            return temporal_from_literal(str(period_of_time))
+        elif isinstance(period_of_time, RdfResource):
+            return temporal_from_resource(period_of_time)
+    except:
+        # There is a lot of case where parsing could/should fail
+        # but we never want to break the whole dataset parsing
+        pass
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None):

@@ -558,6 +558,15 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         self.assertEqual(daterange.start, date(2017, 1, 1))
         self.assertEqual(daterange.end, date(2017, 12, 31))
 
+    def test_parse_temporal_is_failsafe(self):
+        node = URIRef('http://nowhere.org')
+        g = Graph()
+
+        g.set((node, RDF.type, DCT.PeriodOfTime))
+
+        self.assertIsNone(temporal_from_rdf(g.resource(node)))
+        self.assertIsNone(temporal_from_rdf(Literal('unparseable')))
+
     def test_unicode(self):
         g = Graph()
         title = 'ééé'
