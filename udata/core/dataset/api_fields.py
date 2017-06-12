@@ -62,6 +62,7 @@ resource_fields = api.model('Resource', {
         attribute='modified', readonly=True,
         description='The resource last modification date'),
     'metrics': fields.Raw(description='The resource metrics', readonly=True),
+    'extras': fields.Raw(description='Extra attributes as key-value pairs'),
     'is_available': fields.Raw(
         description='The resource availability', readonly=True),
 })

@@ -136,6 +136,7 @@ class ResourceMixin(object):
     format = db.StringField()
     mime = db.StringField()
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
+    extras = db.ExtrasField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)

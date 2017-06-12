@@ -73,6 +73,8 @@
 - Fix a bug where users cannot create new discussions
 - Allows unlocalized URLs on `I18nBlueprint`
   [#968](https://github.com/opendatateam/udata/pull/968)
+- Resource can hold extra metadata into the `extras` attribute
+  [#969](https://github.com/opendatateam/udata/pull/969)
 
 ## 1.0.11 (2017-05-25)
 
