@@ -17,19 +17,22 @@ ADMS = Namespace('http://www.w3.org/ns/adms#')
 DCAT = Namespace('http://www.w3.org/ns/dcat#')
 HYDRA = Namespace('http://www.w3.org/ns/hydra/core#')
 SCHEMA = Namespace('http://schema.org/')
+SCHEMA = Namespace('http://schema.org/')
+SCV = Namespace('http://purl.org/NET/scovo#')
 SPDX = Namespace('http://spdx.org/rdf/terms#')
 VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
 DCT = DCTERMS  # More common usage
 
 namespace_manager = NamespaceManager(Graph())
-namespace_manager.bind('foaf', FOAF)
-namespace_manager.bind('dct', DCT)
-namespace_manager.bind('skos', SKOS)
 namespace_manager.bind('dcat', DCAT)
+namespace_manager.bind('dct', DCT)
+namespace_manager.bind('foaf', FOAF)
 namespace_manager.bind('foaf', FOAF)
 namespace_manager.bind('hydra', HYDRA)
-namespace_manager.bind('vcard', VCARD)
 namespace_manager.bind('rdfs', RDFS)
+namespace_manager.bind('scv', SCV)
+namespace_manager.bind('skos', SKOS)
+namespace_manager.bind('vcard', VCARD)
 namespace_manager.bind('xsd', XSD)
 
 # Support JSON-LD in format detection
@@ -110,6 +113,7 @@ CONTEXT = {
     'skos': 'http://www.w3.org/2004/02/skos/core#',
     'spdx': 'http://spdx.org/rdf/terms#',
     'vcard': 'http://www.w3.org/2006/vcard/ns#',
+    'schema': 'http://schema.org/',
     # Aliased field
     'downloadURL': {
         '@id': 'dcat:downloadURL',
@@ -144,7 +148,7 @@ CONTEXT = {
     },
     'fn': 'vcard:fn',
     'hasEmail': 'vcard:email',
-    'name': 'skos:prefLabel',
+    # 'name': 'skos:prefLabel',
     'subOrganizationOf': 'org:subOrganizationOf',
     'checksum': 'spdx:checksum',
     'algorithm': {
@@ -154,6 +158,8 @@ CONTEXT = {
     'checksumValue': 'spdx:checksumValue',
     'label': 'rdfs:label',
     'name': 'foaf:name',
+    'startDate': 'schema:startDate',
+    'endDate': 'schema:endDate',
 }
 
 
@@ -166,7 +172,7 @@ class UDataContext(Context):
     resulting JSON-LD.
 
     See: https://github.com/RDFLib/rdflib-jsonld/blob/master/rdflib_jsonld/serializer.py#L101-L103
-    '''
+    '''  # noqa
 
     def to_dict(self):
         '''Hackish way to provide the site context URL'''

@@ -3,17 +3,21 @@ from __future__ import unicode_literals
 '''
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
+import calendar
 import html2text
 
+from datetime import date
 from HTMLParser import HTMLParser
+from dateutil.parser import parse as parse_dt
 from flask import url_for
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
 
+from udata.models import db
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
-from udata.rdf import DCAT, DCT, SPDX, namespace_manager
+from udata.rdf import DCAT, DCT, SCV, SPDX, SCHEMA, namespace_manager
 from udata.utils import get_by
 
 from .models import Dataset, Resource, Checksum, License
@@ -43,6 +47,17 @@ def sanitize_html(text):
         return html2text.html2text(text.strip(), bodywidth=0).strip()
     else:
         return text.strip()
+
+
+def temporal_to_rdf(daterange, graph=None):
+    if not daterange:
+        return
+    graph = graph or Graph(namespace_manager=namespace_manager)
+    pot = graph.resource(BNode())
+    pot.set(RDF.type, DCT.PeriodOfTime)
+    pot.set(SCHEMA.startDate, Literal(daterange.start.date()))
+    pot.set(SCHEMA.endDate, Literal(daterange.end.date()))
+    return pot
 
 
 def resource_to_rdf(resource, dataset=None, graph=None):
@@ -123,6 +138,9 @@ def dataset_to_rdf(dataset, graph=None):
     elif dataset.organization:
         d.add(DCT.publisher, organization_to_rdf(dataset.organization, graph))
 
+    if dataset.temporal_coverage:
+        d.add(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
+
     return d
 
 
@@ -136,6 +154,69 @@ CHECKSUM_ALGORITHMS = {
 def rdf_value(obj, predicate, default=None):
     value = obj.value(predicate)
     return value.toPython() if value else default
+
+
+def temporal_from_literal(text):
+    '''
+    Parse a temporal coverage from a literal ie. either:
+    - an ISO date range
+    - a single ISO date period (month,year)
+    '''
+    if text.count('/') == 1:
+        # This is an ISO date range as preconized by Gov.uk
+        # http://guidance.data.gov.uk/dcat_fields.html
+        start, end = text.split('/')
+        return db.DateRange(
+            start=parse_dt(start).date(),
+            end=parse_dt(end).date()
+        )
+    else:
+        separators = text.count('-')
+        if separators == 0:
+            # this is a year
+            return db.DateRange(
+                start=date(int(text), 1, 1),
+                end=date(int(text), 12, 31)
+            )
+        elif separators == 1:
+            # this is a month
+            dt = parse_dt(text).date()
+            return db.DateRange(
+                start=dt.replace(day=1),
+                end=dt.replace(day=calendar.monthrange(dt.year, dt.month)[1])
+            )
+
+
+def temporal_from_resource(resource):
+    '''
+    Parse a temporal coverage from a RDF class/resource ie. either:
+    - a `dct:PeriodOfTime` with schema.org `startDate` and `endDate` properties
+    - an inline gov.uk Time Interval value
+    - an URI reference to a gov.uk Time Interval ontology
+      http://reference.data.gov.uk/
+    '''
+    if isinstance(resource.identifier, URIRef):
+        # Fetch remote ontology if necessary
+        g = Graph().parse(str(resource.identifier))
+        resource = g.resource(resource.identifier)
+    if resource.value(SCHEMA.startDate):
+        return db.DateRange(
+            start=resource.value(SCHEMA.startDate).toPython(),
+            end=resource.value(SCHEMA.endDate).toPython()
+        )
+    elif resource.value(SCV.min):
+        return db.DateRange(
+            start=resource.value(SCV.min).toPython(),
+            end=resource.value(SCV.max).toPython()
+        )
+
+
+def temporal_from_rdf(period_of_time):
+    '''Parse an temporal coverage'''
+    if isinstance(period_of_time, Literal):
+        return temporal_from_literal(str(period_of_time))
+    elif isinstance(period_of_time, RdfResource):
+        return temporal_from_resource(period_of_time)
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None):
@@ -203,6 +284,8 @@ def dataset_from_rdf(graph, dataset=None):
 
     if isinstance(d.identifier, URIRef):
         dataset.extras['uri'] = d.identifier.toPython()
+
+    dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     licenses = set()
     for distrib in d.objects(DCAT.distribution):

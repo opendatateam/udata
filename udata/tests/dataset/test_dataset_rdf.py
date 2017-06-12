@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import date
+
 from flask import url_for
 
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource as RdfResource
 
-from udata.models import Dataset, Resource, License, Checksum
+from udata.models import db
+from udata.core.dataset.models import Dataset, Resource, License, Checksum
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, LicenseFactory
 )
 from udata.core.dataset.rdf import (
-    dataset_to_rdf, dataset_from_rdf, resource_to_rdf, resource_from_rdf
+    dataset_to_rdf, dataset_from_rdf, resource_to_rdf, resource_from_rdf,
+    temporal_from_rdf
 )
 from udata.core.dataset.views import blueprint as dataset_blueprint
 from udata.core.organization.factories import OrganizationFactory
@@ -20,7 +24,7 @@ from udata.core.organization.views import blueprint as org_blueprint
 from udata.core.site.views import blueprint as site_blueprint
 from udata.core.user.factories import UserFactory
 from udata.core.user.views import blueprint as user_blueprint
-from udata.rdf import DCAT, DCT, SPDX
+from udata.rdf import DCAT, DCT, SPDX, SCHEMA
 from udata.tests import TestCase, DBTestMixin
 from udata.utils import faker
 
@@ -161,18 +165,19 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(publisher.value(RDF.type).identifier,
                          FOAF.Person)
 
-    #
-    # def test_spatial_coverage(self):
-    #     dataset = DatasetFactory()
-    #
-    #     g = dataset_to_rdf(dataset)
-    #     node = g.value(predicate=RDF.type, object=DCAT.Dataset)
-    #
-    # def test_time_coverage(self):
-    #     dataset = DatasetFactory()
-    #
-    #     g = dataset_to_rdf(dataset)
-    #     node = g.value(predicate=RDF.type, object=DCAT.Dataset)
+    def test_temporal_coverage(self):
+        start = faker.date_time_between(start_date='-60d', end_date='-30d')
+        end = faker.past_datetime(start_date='-30d')
+        temporal_coverage = db.DateRange(start=start, end=end)
+        dataset = DatasetFactory(temporal_coverage=temporal_coverage)
+
+        d = dataset_to_rdf(dataset)
+
+        pot = d.value(DCT.temporal)
+
+        self.assertEqual(pot.value(RDF.type).identifier, DCT.PeriodOfTime)
+        self.assertEqual(pot.value(SCHEMA.startDate).toPython(), start.date())
+        self.assertEqual(pot.value(SCHEMA.endDate).toPython(), end.date())
 
     def test_from_external_repository(self):
         dataset = DatasetFactory(extras={
@@ -226,10 +231,17 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         title = faker.sentence()
         description = faker.paragraph()
         tags = faker.words(nb=3)
+        start = faker.past_date(start_date='-30d')
+        end = faker.future_date(end_date='+30d')
         g.add((node, RDF.type, DCAT.Dataset))
         g.add((node, DCT.identifier, Literal(id)))
         g.add((node, DCT.title, Literal(title)))
         g.add((node, DCT.description, Literal(description)))
+        pot = BNode()
+        g.add((node, DCT.temporal, pot))
+        g.set((pot, RDF.type, DCT.PeriodOfTime))
+        g.set((pot, SCHEMA.startDate, Literal(start)))
+        g.set((pot, SCHEMA.endDate, Literal(end)))
         for tag in tags:
             g.add((node, DCAT.keyword, Literal(tag)))
 
@@ -239,6 +251,9 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         self.assertEqual(dataset.title, title)
         self.assertEqual(dataset.description, description)
         self.assertEqual(set(dataset.tags), set(tags))
+        self.assertIsInstance(dataset.temporal_coverage, db.DateRange)
+        self.assertEqual(dataset.temporal_coverage.start, start)
+        self.assertEqual(dataset.temporal_coverage.end, end)
 
         extras = dataset.extras
         self.assertIn('dct:identifier', extras)
@@ -484,6 +499,64 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
 
         self.assertIsInstance(dataset.license, License)
         self.assertEqual(dataset.license, license)
+
+    def test_parse_temporal_as_schema_format(self):
+        node = BNode()
+        g = Graph()
+        start = faker.past_date(start_date='-30d')
+        end = faker.future_date(end_date='+30d')
+
+        g.set((node, RDF.type, DCT.PeriodOfTime))
+        g.set((node, SCHEMA.startDate, Literal(start)))
+        g.set((node, SCHEMA.endDate, Literal(end)))
+
+        daterange = temporal_from_rdf(g.resource(node))
+
+        self.assertIsInstance(daterange, db.DateRange)
+        self.assertEqual(daterange.start, start)
+        self.assertEqual(daterange.end, end)
+
+    def test_parse_temporal_as_iso_interval(self):
+        start = faker.past_date(start_date='-30d')
+        end = faker.future_date(end_date='+30d')
+
+        pot = Literal('{0}/{1}'.format(start.isoformat(), end.isoformat()))
+
+        daterange = temporal_from_rdf(pot)
+
+        self.assertIsInstance(daterange, db.DateRange)
+        self.assertEqual(daterange.start, start)
+        self.assertEqual(daterange.end, end)
+
+    def test_parse_temporal_as_iso_year(self):
+        pot = Literal('2017')
+
+        daterange = temporal_from_rdf(pot)
+
+        self.assertIsInstance(daterange, db.DateRange)
+        self.assertEqual(daterange.start, date(2017, 1, 1))
+        self.assertEqual(daterange.end, date(2017, 12, 31))
+
+    def test_parse_temporal_as_iso_month(self):
+        pot = Literal('2017-06')
+
+        daterange = temporal_from_rdf(pot)
+
+        self.assertIsInstance(daterange, db.DateRange)
+        self.assertEqual(daterange.start, date(2017, 6, 1))
+        self.assertEqual(daterange.end, date(2017, 6, 30))
+
+    def test_parse_temporal_as_gov_uk_format(self):
+        node = URIRef('http://reference.data.gov.uk/id/year/2017')
+        g = Graph()
+
+        g.set((node, RDF.type, DCT.PeriodOfTime))
+
+        daterange = temporal_from_rdf(g.resource(node))
+
+        self.assertIsInstance(daterange, db.DateRange)
+        self.assertEqual(daterange.start, date(2017, 1, 1))
+        self.assertEqual(daterange.end, date(2017, 12, 31))
 
     def test_unicode(self):
         g = Graph()
