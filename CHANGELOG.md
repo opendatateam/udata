@@ -69,6 +69,8 @@
   [#915](https://github.com/opendatateam/udata/issues/915)
 - Make metrics deactivable for tests
   [#905](https://github.com/opendatateam/udata/pull/905)
+- Disable `next` button when no file has been uploaded
+  [#930](https://github.com/opendatateam/udata/issues/930)
 
 ## 1.0.11 (2017-05-25)
 
