@@ -122,12 +122,6 @@ class DcatBackendTest(DBTestMixin, TestCase):
                                       url=url,
                                       organization=org)
 
-        # data = [
-        #     dcat_dataset_factory(),
-        #     dcat_dataset_factory(),
-        #     dcat_dataset_factory(),
-        # ]
-
         actions.run(source.slug)
 
         source.reload()
@@ -135,7 +129,7 @@ class DcatBackendTest(DBTestMixin, TestCase):
         job = source.get_last_job()
         self.assertEqual(len(job.items), 3)
 
-        datasets = {d.extras['dcat:identifier']: d for d in Dataset.objects}
+        datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
 
         self.assertEqual(len(datasets), 3)
 
@@ -144,7 +138,7 @@ class DcatBackendTest(DBTestMixin, TestCase):
             self.assertEqual(d.title, 'Dataset {0}'.format(i))
             self.assertEqual(d.description,
                              'Dataset {0} description'.format(i))
-            self.assertEqual(d.extras['dcat:identifier'], i)
+            self.assertEqual(d.extras['dct:identifier'], i)
 
         # First dataset
         dataset = datasets['1']
@@ -162,56 +156,6 @@ class DcatBackendTest(DBTestMixin, TestCase):
         self.assertEqual(dataset.tags, ['tag-1', 'tag-2'])
         self.assertEqual(len(dataset.resources), 1)
 
-        # for dcat in data:
-        #     self.assertIn(dcat['identifier'], datasets)
-        #     d = datasets[dcat['identifier']]
-
-        # self.assertIn('dataset-1', datasets)
-        # d = datasets['dataset-1']
-        # self.assertEqual(d.title, 'Dataset 1')
-        # self.assertEqual(d.description, "Description 1")
-        # self.assertEqual(d.tags, ['country-uk',
-        #                           'date-2009',
-        #                           'openspending',
-        #                           'regional'])
-        # self.assertEqual(d.extras['harvest:remote_id'],
-        #                  '7e4d4ef3-f452-4c35-963d-9c6e582374b3')
-        # self.assertEqual(d.extras['harvest:domain'], 'ckan.test.org')
-        # self.assertEqual(d.extras['ckan:name'], 'dataset-1')
-        # # self.assertEqual(d.license.id, "fr-lo")
-        #
-        # self.assertEqual(len(d.resources), 3)
-        # resource = d.resources[0]
-        # self.assertEqual(resource.title, 'Resource 1')
-        # self.assertEqual(resource.description, 'Resource description 1')
-        # self.assertEqual(resource.format, 'csv')
-        # self.assertEqual(resource.mime, 'text/csv')
-        # self.assertIsInstance(resource.modified, datetime)
-        # self.assertEqual(resource.url,
-        #                  ('http://ckan.net/storage/f/file/'
-        #                   '3ffdcd42-5c63-4089-84dd-c23876259973'))
-        #
-        # # dataset-2 has geo feature
-        # self.assertIn('dataset-2', datasets)
-        # d = datasets['dataset-2']
-        # self.assertEqual(d.tags, ['africa',
-        #                           'bandwidth',
-        #                           'broadband',
-        #                           'cables',
-        #                           'fibre',
-        #                           'optic',
-        #                           'terrestrial'])
-        # self.assertEqual(len(d.resources), 1)
-        # self.assertEqual(d.spatial.geom['coordinates'],
-        #                  [[[[50.8, -34.2],
-        #                     [50.8, 36.7],
-        #                     [-19.9, 36.7],
-        #                     [-19.9, -34.2],
-        #                     [50.8, -34.2]]]])
-        #
-        # # dataset-3 has no data
-        # self.assertNotIn('dataset-3', datasets)
-
     @httpretty.activate
     def test_idempotence(self):
         filename = 'flat.jsonld'
@@ -225,7 +169,7 @@ class DcatBackendTest(DBTestMixin, TestCase):
         actions.run(source.slug)
         actions.run(source.slug)
 
-        datasets = {d.extras['dcat:identifier']: d for d in Dataset.objects}
+        datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
 
         self.assertEqual(len(datasets), 3)
         self.assertEqual(len(datasets['1'].resources), 2)

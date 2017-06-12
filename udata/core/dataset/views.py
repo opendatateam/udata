@@ -6,11 +6,15 @@ from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Discussion, Follow, Reuse, CommunityResource
+from udata.models import Dataset, Follow, Reuse, CommunityResource
 from udata.core.site.models import current_site
+from udata.rdf import (
+    guess_format, RDF_MIME_TYPES, negociate_content, RDF_EXTENSIONS, context
+)
 from udata.sitemap import sitemap
 from udata.utils import get_by
 
+from .rdf import dataset_to_rdf
 from .search import DatasetSearch
 from .permissions import ResourceEditPermission, DatasetEditPermission
 
@@ -114,6 +118,33 @@ def resource_redirect(id):
     else:
         resource = CommunityResource.objects(id=id).first()
     return redirect(resource.url.strip()) if resource else abort(404)
+
+
+@blueprint.route('/<dataset:dataset>/rdf', localize=False)
+def rdf(dataset):
+    '''Root RDF endpoint with content negociation handling'''
+    format = RDF_EXTENSIONS[negociate_content()]
+    url = url_for('datasets.rdf_format', dataset=dataset.id, format=format)
+    return redirect(url)
+
+
+@blueprint.route('/<dataset:dataset>/rdf.<format>', localize=False)
+def rdf_format(dataset, format):
+    if not DatasetEditPermission(dataset).can():
+        if dataset.private:
+            abort(404)
+        elif dataset.deleted:
+            abort(410)
+
+    format = guess_format(format)
+    resource = dataset_to_rdf(dataset)
+    headers = {
+        'Content-Type': RDF_MIME_TYPES[format]
+    }
+    kwargs = {}
+    if format == 'json-ld':
+        kwargs['context'] = context
+    return resource.graph.serialize(format=format, **kwargs), 200, headers
 
 
 @sitemap.register_generator

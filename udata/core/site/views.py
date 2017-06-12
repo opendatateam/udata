@@ -1,21 +1,29 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, current_app, send_from_directory, Blueprint
+from flask import (
+    request, current_app, send_from_directory, Blueprint, json,
+    redirect, url_for
+)
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search, theme
+from udata.core.dataset.csv import ResourcesCsvAdapter
+from udata.core.organization.csv import OrganizationCsvAdapter
+from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Activity, Reuse, Organization, Post
-from udata.utils import multi_to_dict
-from udata.core.dataset.csv import ResourcesCsvAdapter
-from udata.core.organization.csv import OrganizationCsvAdapter
-from udata.core.reuse.csv import ReuseCsvAdapter
+from udata.rdf import (
+    CONTEXT, RDF_MIME_TYPES, RDF_EXTENSIONS, context,
+    guess_format, negociate_content
+)
 from udata.sitemap import sitemap
+from udata.utils import multi_to_dict
 
 from .models import current_site
+from .rdf import build_catalog
 
 noI18n = Blueprint('noI18n', __name__)
 blueprint = I18nBlueprint('site', __name__)
@@ -152,6 +160,40 @@ class SiteDashboard(SiteView, DetailView):
 @blueprint.route('/terms/')
 def terms():
     return theme.render('terms.html')
+
+
+@blueprint.route('/context.jsonld', localize=False)
+def jsonld_context():
+    '''Expose the JSON-LD context'''
+    return json.dumps(CONTEXT), 200, {'Content-Type': 'application/ld+json'}
+
+
+@blueprint.route('/data.<format>', localize=False)
+def dataportal(format):
+    '''Root RDF endpoint with content negociation handling'''
+    url = url_for('site.rdf_catalog_format', format=format)
+    return redirect(url)
+
+
+@blueprint.route('/catalog', localize=False)
+def rdf_catalog():
+    '''Root RDF endpoint with content negociation handling'''
+    format = RDF_EXTENSIONS[negociate_content()]
+    url = url_for('site.rdf_catalog_format', format=format)
+    return redirect(url)
+
+
+@blueprint.route('/catalog.<format>', localize=False)
+def rdf_catalog_format(format):
+    format = guess_format(format)
+    catalog = build_catalog(current_site)
+    headers = {
+        'Content-Type': RDF_MIME_TYPES[format]
+    }
+    kwargs = {}
+    if format == 'json-ld':
+        kwargs['context'] = context
+    return catalog.graph.serialize(format=format, **kwargs), 200, headers
 
 
 @sitemap.register_generator
