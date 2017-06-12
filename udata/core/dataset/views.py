@@ -9,7 +9,8 @@ from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Dataset, Follow, Reuse, CommunityResource
 from udata.core.site.models import current_site
 from udata.rdf import (
-    guess_format, RDF_MIME_TYPES, negociate_content, RDF_EXTENSIONS, context
+    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    guess_format, negociate_content, context, want_rdf
 )
 from udata.sitemap import sitemap
 from udata.utils import get_by
@@ -81,6 +82,14 @@ class ProtectedDatasetView(DatasetView):
 @blueprint.route('/<dataset:dataset>/', endpoint='show')
 class DatasetDetailView(DatasetView, DetailView):
     template_name = 'dataset/display.html'
+
+    def dispatch_request(self, *args, **kwargs):
+        if want_rdf():
+            fmt = RDF_EXTENSIONS[negociate_content()]
+            url = url_for('datasets.rdf_format',
+                          dataset=kwargs['dataset'].id, format=fmt)
+            return redirect(url)
+        return super(DatasetDetailView, self).dispatch_request(*args, **kwargs)
 
     def get_context(self):
         context = super(DatasetDetailView, self).get_context()
