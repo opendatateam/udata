@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import logging
 import os
-
-from datetime import datetime
-from uuid import uuid4
 
 import httpretty
 
 from udata.models import Dataset, License
 from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
-from udata.utils import faker
 
 from .factories import HarvestSourceFactory
 from .. import actions
@@ -25,85 +20,12 @@ DCAT_URL = 'http://data.test.org/dcat.json'
 DCAT_URL_PATTERN = 'http://data.test.org/{filename}'
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'dcat')
 
-TEST_FORMATS = {
-    'html': 'text/html',
-    'json': 'application/json',
-    'GeoJSON': 'application/vnd.geo+json',
-    'CSV': 'text/csv',
-    'KML': 'application/vnd.google-earth.kml+xml',
-    'ZIP': "application/zip",
-}
-
-
-def html_factory():
-    return '<div>{0}</div>'.format(faker.paragraph())
-
-
-def dcat_distribution_factory(fileformat, mimetype):
-    return {
-        "@type": "dcat:Distribution",
-        "title": faker.sentence(),
-        "format": fileformat,
-        "mediaType": mimetype,
-        "accessURL": faker.uri()
-    }
-
-
-def dcat_dataset_factory(**kwargs):
-    created = faker.date_time_between(start_date='-3y', end_date='-7d')
-    updated = faker.date_time_between(start_date='-7d', end_date='now')
-    # nb_resources = faker.randomize_nb_elements(4)
-    nb_tags = faker.randomize_nb_elements(10)
-    url = faker.uri()
-    data = {
-        "@type": "dcat:Dataset",
-        "identifier": url,
-        "title": faker.sentence(),
-        "description": html_factory(),
-        "keyword": [
-            faker.word() for _ in range(nb_tags)
-        ],
-        "issued": created.isoformat(),
-        "modified": updated.isoformat(),
-        "publisher": {
-            "name": "Atelier Parisien d'Urbanisme"
-        },
-        "contactPoint": {
-            "@type": "vcard:Contact",
-            "fn": "Emmanuel FAURE",
-            "hasEmail": "mailto:"
-        },
-        "accessLevel": "public",
-        "distribution": [
-            dcat_distribution_factory(fmt, mime)
-            for fmt, mime in TEST_FORMATS.items()
-        ],
-        "landingPage": faker.uri(),
-        "webService": faker.uri(),
-        "license": faker.uri(),
-        "spatial": "2.2052,48.7577,2.4371,48.9599",
-        "theme": [faker.word()]
-    }
-    data.update(kwargs)
-    return data
-
-
-def dcat_catalog_factory(*datasets):
-    return {
-        "@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
-        "@type": "dcat:Catalog",
-        "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
-        "describedBy": "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
-        "datasets": [datasets],
-    }
-
 
 def mock_dcat(filename):
     url = DCAT_URL_PATTERN.format(filename=filename)
     with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
         body = dcatfile.read()
     httpretty.register_uri(httpretty.GET, url, body=body)
-    #    content_type='application/json')
     return url
 
 
