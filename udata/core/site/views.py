@@ -51,6 +51,11 @@ def home():
         'recent_datasets': Dataset.objects.visible(),
         'recent_reuses': Reuse.objects(featured=True).visible(),
         'last_post': Post.objects(private=False).first(),
+        'rdf_links': [
+            (RDF_MIME_TYPES[fmt],
+             url_for('site.rdf_catalog_format', format=ext))
+            for (fmt, ext) in RDF_EXTENSIONS.items()
+        ]
     }
     processor = theme.current.get_processor('home')
     context = processor(context)

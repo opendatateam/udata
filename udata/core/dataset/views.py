@@ -93,6 +93,13 @@ class DatasetDetailView(DatasetView, DetailView):
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
 
+        context['rdf_links'] = [
+            (RDF_MIME_TYPES[fmt],
+             url_for('datasets.rdf_format',
+                     dataset=self.dataset.id, format=ext))
+            for (fmt, ext) in RDF_EXTENSIONS.items()
+        ]
+
         return context
 
 
