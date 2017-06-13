@@ -14,7 +14,6 @@
 
 {% macro field(f, sizes='sm-2,md-3') %}
 <fieldset>
-    <legend>{{f.label}}</legend>
     {% if f.subfield %}
       {% for subfield in f %}
       {{ field(subfield, sizes) }}
@@ -26,7 +25,6 @@
     <label for="{{ f.id }}"
         class="{{ cols.label }} control-label{% if f.flags.required %} required{% endif %}">
         {{ f.label.text }}
-        {% if f.description %}<span class="form-help" data-content="{{ f.description }}"></span>{% endif %}
     </label>
     <div class="field-wrapper {{ cols.control }}">
         {% if f.type == 'RadioField' %}

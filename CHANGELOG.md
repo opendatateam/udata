@@ -61,7 +61,6 @@
     - `name` on all components: no more `Anonymous Component` in Vue debugger
     - No more `Fragments`
     - More ES6 everywhere
-<<<<<<< HEAD
 - Improve and fix notifications:
   [#928](https://github.com/opendatateam/udata/issues/928)
     - Changed notification style to toast
@@ -84,6 +83,8 @@
     - user is prompted for some sample data creation
 - Added `License.guess()` helper to improve license matching while harvesting
   [#967](https://github.com/opendatateam/udata/pull/967)
+- Cleaner login, signup and password related forms
+  [#971](https://github.com/opendatateam/udata/pull/971)
 
 ## 1.0.11 (2017-05-25)
 
