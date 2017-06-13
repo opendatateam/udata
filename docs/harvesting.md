@@ -6,18 +6,19 @@ and store them into udata for being able to search them.
 ## Vocabulary
 
 - **Backend**: designate a protocol implementation to harvest a remote endpoint.
-- **Source**: it's remote end point to harvest. Each harvest source is caracterized by
-  a single endpoint URL and a backend implementation. An harvester is configured for each source.
+- **Source**: it's a remote endpoint to harvest. Each harvest source is caracterized by
+  a single endpoint URL and a backend implementation. A harvester is configured for each source.
 - **Job**: designate a full harvesting for a given source.
 - **Validation**: each created harvester needs to be validated by the admin team before being run.
 
 ## Behavior
 
-After an harvester for a given source has been created and validated, it will run either on demand or periodically.
+After a harvester for a given source has been created and validated,
+it will run either on demand or periodically.
 
-An harvesting job is done in three separate phases:
+A harvesting job is done in three separate phases:
 
-1. `initialize`: the harvester fetch remote identifiers to harvest and create a single task for each of it
+1. `initialize`: the harvester fetches remote identifiers to harvest and create a single task for each.
 2. `process`: each task created in the `initialize` is executed. Each item is processed independently.
 3. `finalize`: when all tasks are done, the `finilize` is a closure for the job and mark it as done.
 
@@ -27,7 +28,7 @@ You can see the harvester administration interface in the `System` view.
 
 ![Administration harvester listing](screenshots/admin-harvest.png)
 
-You'll have an overview of all harvester and their state (pending validation, last run...)
+You'll have an overview of all harvesters and their state (pending validation, last run...)
 
 Each harvester have a full job history with every remote harvested items.
 
@@ -35,7 +36,7 @@ Each harvester have a full job history with every remote harvested items.
 
 ## Shell
 
-All harvest operations are grouped together into the `harvest` command namespace:
+All harvesting operations are grouped together into the `harvest` command namespace:
 
 ```shell
 usage: udata harvest [-?]
@@ -45,18 +46,18 @@ usage: udata harvest [-?]
 Handle remote repositories harvesting operations
 
 positional arguments:
-    jobs                Lists started harvest jobs
+    jobs                List started harvest jobs
     launch              Launch a source harvesting on the workers
     create              Create a new harvest source
-    schedule
+    schedule            Schedule a harvest job to run periodically
     purge               Permanently remove deleted harvest sources
     sources             List all harvest sources
     backends            List available backends
-    unschedule          Run an harvester synchronously
-    run                 Run an harvester synchronously
+    unschedule          Unschedule a periodical harvest job
+    run                 Run a harvester synchronously
     validate            Validate a source given its identifier
-    attach              Attach existing dataset to their harvest remote id.
-    delete              Delete an harvest source
+    attach              Attach existing datasets to their harvest remote id
+    delete              Delete a harvest source
 
 optional arguments:
   -?, --help            show this help message and exit
@@ -69,10 +70,10 @@ optional arguments:
 ### DCAT (prefered)
 
 This backend harvest any [DCAT][] endpoint.
-This is now the recommanded way to harvest remote portals and repositories
+This is now the recommended way to harvest remote portals and repositories
 (and so to expose opendata metadata for any portal and repository).
 
-As pagination is not described into the DCAT specifcation, we try to detect some supported
+As pagination is not described into the DCAT specification, we try to detect some supported
 pagination ontology:
 - [Hydra PartialCollectionView][http://www.hydra-cg.com/spec/latest/core/#hydra:PartialCollectionView]
 
@@ -147,7 +148,7 @@ class RandomBackend(BaseBackend):
 
 ```
 
-You take a look at the [existing backends][backends-repository] to see exiting implementations.
+You may take a look at the [existing backends][backends-repository] to see exiting implementations.
 
 
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
