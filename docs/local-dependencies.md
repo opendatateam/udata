@@ -5,6 +5,13 @@
 It is recommended to work within a virtualenv to ensure proper dependencies isolation.
 If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
 
+!!! note
+    On macOS, the library `lzma.h` has to be installed prior to running the next block of commands.
+
+    ```shell
+    $ brew install xz
+    ```
+
 Alright, now you can [install virtualenv][install-virtualenv] and then type these commands knowing what you are doing:
 
 ```shell
