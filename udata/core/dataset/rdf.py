@@ -18,7 +18,9 @@ from udata import i18n
 from udata.models import db
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
-from udata.rdf import DCAT, DCT, SCV, SPDX, SCHEMA, namespace_manager
+from udata.rdf import (
+    DCAT, DCT, SCV, SPDX, SCHEMA, namespace_manager, url_from_rdf
+)
 from udata.utils import get_by
 
 from .models import Dataset, Resource, Checksum, License
@@ -223,18 +225,6 @@ def temporal_from_rdf(period_of_time):
         # There is a lot of case where parsing could/should fail
         # but we never want to break the whole dataset parsing
         pass
-
-
-def url_from_rdf(rdf, prop):
-    '''
-    Try to extract An URL from a property.
-    It can be expressed in many forms as a URIRef or a Literal
-    '''
-    value = rdf.value(prop)
-    if isinstance(value, (URIRef, Literal)):
-        return value.toPython()
-    elif isinstance(value, RdfResource):
-        return value.identifier.toPython()
 
 
 def title_from_rdf(rdf, url):

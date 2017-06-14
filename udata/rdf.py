@@ -5,7 +5,8 @@ This module centralize udata-wide RDF helpers and configuration
 '''
 from flask import request, url_for
 
-from rdflib import Graph
+from rdflib import Graph, Literal, URIRef
+from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS
 )
@@ -180,3 +181,15 @@ class UDataContext(Context):
 
 
 context = UDataContext(CONTEXT)
+
+
+def url_from_rdf(rdf, prop):
+    '''
+    Try to extract An URL from a resource property.
+    It can be expressed in many forms as a URIRef or a Literal
+    '''
+    value = rdf.value(prop)
+    if isinstance(value, (URIRef, Literal)):
+        return value.toPython()
+    elif isinstance(value, RdfResource):
+        return value.identifier.toPython()

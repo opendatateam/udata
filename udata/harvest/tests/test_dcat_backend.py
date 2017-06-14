@@ -18,16 +18,29 @@ from .. import actions
 log = logging.getLogger(__name__)
 
 
-DCAT_URL = 'http://data.test.org/dcat.json'
-DCAT_URL_PATTERN = 'http://data.test.org/{filename}'
+TEST_DOMAIN = 'data.test.org'  # Need to be used in fixture file
+DCAT_URL_PATTERN = 'http://{domain}/{path}'
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'dcat')
 
 
 def mock_dcat(filename):
-    url = DCAT_URL_PATTERN.format(filename=filename)
+    url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
     with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
         body = dcatfile.read()
     httpretty.register_uri(httpretty.GET, url, body=body)
+    return url
+
+
+def mock_pagination(path, pattern):
+    url = DCAT_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
+
+    def callback(request, uri, headers):
+        page = request.querystring.get('page', [1])[0]
+        filename = pattern.format(page=page)
+        with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
+            return 200, {}, dcatfile.read()
+
+    httpretty.register_uri(httpretty.GET, url, body=callback)
     return url
 
 
@@ -127,3 +140,35 @@ class DcatBackendTest(DBTestMixin, TestCase):
         self.assertEqual(len(datasets['1'].resources), 2)
         self.assertEqual(len(datasets['2'].resources), 2)
         self.assertEqual(len(datasets['3'].resources), 1)
+
+    @httpretty.activate
+    def test_hydra_partial_collection_view_pagination(self):
+        url = mock_pagination('catalog.jsonld',
+                              'partial-collection-{page}.jsonld')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+        self.assertEqual(len(job.items), 4)
+
+    @httpretty.activate
+    def test_hydra_legacy_paged_collection_pagination(self):
+        url = mock_pagination('catalog.jsonld',
+                              'paged-collection-{page}.jsonld')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+        self.assertEqual(len(job.items), 4)
