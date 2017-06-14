@@ -166,8 +166,8 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
                          FOAF.Person)
 
     def test_temporal_coverage(self):
-        start = faker.date_time_between(start_date='-60d', end_date='-30d')
-        end = faker.past_datetime(start_date='-30d')
+        start = faker.past_date(start_date='-30d')
+        end = faker.future_date(end_date='+30d')
         temporal_coverage = db.DateRange(start=start, end=end)
         dataset = DatasetFactory(temporal_coverage=temporal_coverage)
 
@@ -176,8 +176,8 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
         pot = d.value(DCT.temporal)
 
         self.assertEqual(pot.value(RDF.type).identifier, DCT.PeriodOfTime)
-        self.assertEqual(pot.value(SCHEMA.startDate).toPython(), start.date())
-        self.assertEqual(pot.value(SCHEMA.endDate).toPython(), end.date())
+        self.assertEqual(pot.value(SCHEMA.startDate).toPython(), start)
+        self.assertEqual(pot.value(SCHEMA.endDate).toPython(), end)
 
     def test_from_external_repository(self):
         dataset = DatasetFactory(extras={
@@ -202,6 +202,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCT.title, Literal(title)))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.title, title)
@@ -217,6 +218,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCT.title, Literal(new_title)))
 
         dataset = dataset_from_rdf(g, dataset=original)
+        dataset.validate()
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.id, original.id)
@@ -246,6 +248,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
             g.add((node, DCAT.keyword, Literal(tag)))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.title, title)
@@ -271,6 +274,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCT.description, Literal('<div>a description</div>')))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.description, 'a description')
@@ -282,12 +286,14 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         tags = faker.words(nb=3)
         themes = faker.words(nb=3)
         g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
         for tag in tags:
             g.add((node, DCAT.keyword, Literal(tag)))
         for theme in themes:
             g.add((node, DCAT.theme, Literal(theme)))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(set(dataset.tags), set(tags + themes))
@@ -303,6 +309,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCAT.downloadURL, Literal(url)))
 
         resource = resource_from_rdf(g)
+        resource.validate()
 
         self.assertIsInstance(resource, Resource)
         self.assertEqual(resource.title, title)
@@ -338,6 +345,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((checksum, SPDX.checksumValue, Literal(sha1)))
 
         resource = resource_from_rdf(g)
+        resource.validate()
 
         self.assertIsInstance(resource, Resource)
         self.assertEqual(resource.title, title)
@@ -362,12 +370,14 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCAT.accessURL, Literal(access_url)))
 
         resource = resource_from_rdf(g)
+        resource.validate()
         self.assertEqual(resource.url, access_url)
 
         download_url = faker.uri()
         g.add((node, DCAT.downloadURL, Literal(download_url)))
 
         resource = resource_from_rdf(g)
+        resource.validate()
         self.assertEqual(resource.url, download_url)
 
     def test_resource_html_description(self):
@@ -382,8 +392,62 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCAT.downloadURL, Literal(faker.uri())))
 
         resource = resource_from_rdf(g)
+        resource.validate()
 
         self.assertEqual(resource.description, description)
+
+    def test_resource_title_from_url(self):
+        node = BNode()
+        g = Graph()
+        url = 'https://www.somewhere.com/somefile.csv'
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        self.assertEqual(resource.title, 'somefile.csv')
+
+    def test_resource_title_from_format(self):
+        node = BNode()
+        g = Graph()
+        url = 'https://www.somewhere.com/no-extension/'
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+        g.set((node, DCT.term('format'), Literal('CSV')))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        self.assertEqual(resource.title, 'csv resource')
+
+    def test_resource_generic_title(self):
+        node = BNode()
+        g = Graph()
+        url = 'https://www.somewhere.com/no-extension/'
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        self.assertEqual(resource.title, 'Nameless resource')
+
+    def test_resource_title_ignore_dynamic_url(self):
+        node = BNode()
+        g = Graph()
+        url = 'https://www.somewhere.com/endpoint.json?param=value'
+
+        g.set((node, RDF.type, DCAT.Distribution))
+        g.set((node, DCAT.downloadURL, URIRef(url)))
+
+        resource = resource_from_rdf(g)
+        resource.validate()
+
+        self.assertEqual(resource.title, 'Nameless resource')
 
     def test_match_existing_resource_by_url(self):
         dataset = DatasetFactory(resources=ResourceFactory.build_batch(3))
@@ -397,6 +461,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCAT.downloadURL, Literal(existing_resource.url)))
 
         resource = resource_from_rdf(g, dataset)
+        resource.validate()
 
         self.assertIsInstance(resource, Resource)
         self.assertEqual(resource.title, new_title)
@@ -413,6 +478,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((node, DCAT.downloadURL, Literal(url)))
 
         resource = resource_from_rdf(g.resource(node))
+        resource.validate()
 
         self.assertIsInstance(resource, Resource)
         self.assertEqual(resource.title, title)
@@ -427,27 +493,66 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         for i in range(3):
             rnode = BNode()
             g.set((rnode, RDF.type, DCAT.Distribution))
-            g.set((rnode, DCT.title, Literal(faker.sentence())))
             g.set((rnode, DCAT.downloadURL, URIRef(faker.uri())))
             g.add((node, DCAT.distribution, rnode))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(len(dataset.resources), 3)
+
+    def test_dataset_has_resources_from_buggy_plural_distribution(self):
+        '''Try to extract resources from the wrong distributions attribute'''
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        rnode = BNode()
+        g.set((rnode, RDF.type, DCAT.Distribution))
+        g.set((rnode, DCAT.downloadURL, URIRef(faker.uri())))
+        g.add((node, DCAT.distributions, rnode))  # use plural name
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertEqual(len(dataset.resources), 1)
+
+    def test_dataset_has_resources_from_literal_instead_of_uriref(self):
+        node = BNode()
+        g = Graph()
+
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(faker.sentence())))
+        rnode = BNode()
+        g.set((rnode, RDF.type, DCAT.Distribution))
+        # Resource URL is expressed as a Literal
+        g.set((rnode, DCAT.downloadURL, Literal(faker.uri())))
+        g.add((node, DCAT.distribution, rnode))
+
+        dataset = dataset_from_rdf(g)
+        dataset.validate()
+
+        self.assertIsInstance(dataset, Dataset)
+        self.assertEqual(len(dataset.resources), 1)
 
     def test_match_license_from_license_uri(self):
         license = LicenseFactory()
         node = BNode()
         g = Graph()
 
-        g.add((node, RDF.type, DCAT.Dataset))
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.title, Literal(faker.sentence())))
         rnode = BNode()
         g.set((rnode, RDF.type, DCAT.Distribution))
+        g.set((rnode, DCAT.downloadURL, URIRef(faker.uri())))
         g.set((rnode, DCT.license, URIRef(license.url)))
         g.add((node, DCAT.distribution, rnode))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset.license, License)
         self.assertEqual(dataset.license, license)
@@ -457,9 +562,11 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         node = BNode()
         g = Graph()
 
-        g.add((node, RDF.type, DCAT.Dataset))
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.title, Literal(faker.sentence())))
         rnode = BNode()
         g.set((rnode, RDF.type, DCAT.Distribution))
+        g.set((rnode, DCAT.downloadURL, URIRef(faker.uri())))
         g.set((rnode, DCT.rights, URIRef(license.url)))
         g.add((node, DCAT.distribution, rnode))
 
@@ -473,13 +580,16 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         node = BNode()
         g = Graph()
 
-        g.add((node, RDF.type, DCAT.Dataset))
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.title, Literal(faker.sentence())))
         rnode = BNode()
         g.set((rnode, RDF.type, DCAT.Distribution))
+        g.set((rnode, DCAT.downloadURL, URIRef(faker.uri())))
         g.set((rnode, DCT.license, Literal(license.url)))
         g.add((node, DCAT.distribution, rnode))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset.license, License)
         self.assertEqual(dataset.license, license)
@@ -489,13 +599,16 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         node = BNode()
         g = Graph()
 
-        g.add((node, RDF.type, DCAT.Dataset))
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.title, Literal(faker.sentence())))
         rnode = BNode()
         g.set((rnode, RDF.type, DCAT.Distribution))
+        g.set((rnode, DCAT.downloadURL, URIRef(faker.uri())))
         g.set((rnode, DCT.license, Literal(license.title)))
         g.add((node, DCAT.distribution, rnode))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
 
         self.assertIsInstance(dataset.license, License)
         self.assertEqual(dataset.license, license)
@@ -581,9 +694,11 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.add((rnode, RDF.type, DCAT.Distribution))
         g.add((rnode, DCT.title, Literal(title)))
         g.add((rnode, DCT.description, Literal(description)))
+        g.add((rnode, DCAT.downloadURL, URIRef(faker.uri())))
         g.add((node, DCAT.distribution, rnode))
 
         dataset = dataset_from_rdf(g)
+        dataset.validate()
         self.assertEqual(dataset.title, title)
         self.assertEqual(dataset.description, description)
 

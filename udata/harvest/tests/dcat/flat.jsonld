@@ -223,36 +223,5 @@
     "@type": [
       "http://purl.org/dc/terms/Location"
     ]
-  },
-  {
-    "@id": "http://demo.ckan.org/catalog.jsonld?page=1",
-    "@type": [
-      "http://www.w3.org/ns/hydra/core#PagedCollection"
-    ],
-    "http://www.w3.org/ns/hydra/core#firstPage": [
-      {
-        "@value": "http://demo.ckan.org/catalog.jsonld?page=1"
-      }
-    ],
-    "http://www.w3.org/ns/hydra/core#itemsPerPage": [
-      {
-        "@value": 100
-      }
-    ],
-    "http://www.w3.org/ns/hydra/core#lastPage": [
-      {
-        "@value": "http://demo.ckan.org/catalog.jsonld?page=26"
-      }
-    ],
-    "http://www.w3.org/ns/hydra/core#nextPage": [
-      {
-        "@value": "http://demo.ckan.org/catalog.jsonld?page=2"
-      }
-    ],
-    "http://www.w3.org/ns/hydra/core#totalItems": [
-      {
-        "@value": 2561
-      }
-    ]
   }
 ]

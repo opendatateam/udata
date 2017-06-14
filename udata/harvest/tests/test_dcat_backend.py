@@ -6,6 +6,8 @@ import os
 
 import httpretty
 
+from datetime import date
+
 from udata.models import Dataset, License
 from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
@@ -77,6 +79,34 @@ class DcatBackendTest(DBTestMixin, TestCase):
         dataset = datasets['3']
         self.assertEqual(dataset.tags, ['tag-1', 'tag-2'])
         self.assertEqual(len(dataset.resources), 1)
+
+    @httpretty.activate
+    def test_simple_nested_attributes(self):
+        filename = 'nested.jsonld'
+        url = mock_dcat(filename)
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=OrganizationFactory())
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+        self.assertEqual(len(job.items), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertIsNotNone(dataset.temporal_coverage)
+        self.assertEqual(dataset.temporal_coverage.start, date(2016, 1, 1))
+        self.assertEqual(dataset.temporal_coverage.end, date(2016, 12, 5))
+
+        self.assertEqual(len(dataset.resources), 1)
+
+        resource = dataset.resources[0]
+        self.assertIsNotNone(resource.checksum)
+        self.assertEqual(resource.checksum.type, 'sha1')
+        self.assertEqual(resource.checksum.value,
+                         'fb4106aa286a53be44ec99515f0f0421d4d7ad7d')
 
     @httpretty.activate
     def test_idempotence(self):

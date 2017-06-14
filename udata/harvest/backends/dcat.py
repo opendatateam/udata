@@ -6,7 +6,7 @@ import logging
 from rdflib import Graph
 from rdflib.namespace import RDF
 
-from udata.rdf import DCAT, DCT, namespace_manager, guess_format
+from udata.rdf import DCAT, DCT, SPDX, namespace_manager, guess_format
 from udata.models import db, Resource, License, SpatialCoverage
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.utils import get_by, daterange_start, daterange_end
@@ -15,6 +15,27 @@ from . import BaseBackend, register
 from ..exceptions import HarvestException, HarvestSkipException
 
 log = logging.getLogger(__name__)
+
+
+# Attributes representing nested classes to be stored in the graph
+# in order to have a complete graph
+DCAT_NESTING = {
+    DCAT.distribution: {
+        SPDX.checksum: {}
+    },
+    DCT.temporal: {},
+    DCT.spatial: {},
+}
+
+# Fix some misnamed properties
+DCAT_NESTING[DCAT.distributions] = DCAT_NESTING[DCAT.distribution]
+
+
+def extract_graph(source, target, node, specs):
+    for p, o in source.predicate_objects(node):
+        target.add((node, p, o))
+        if p in specs:
+            extract_graph(source, target, o, specs[p])
 
 
 @register
@@ -37,9 +58,7 @@ class DcatBackend(BaseBackend):
         for node in graph.subjects(RDF.type, DCAT.Dataset):
             dcat_id = graph.value(node, DCT.identifier)
             subgraph = Graph(namespace_manager=namespace_manager)
-            subgraph += graph.triples((node, None, None))
-            for distrib in graph.objects(node, DCAT.distribution):
-                subgraph += graph.triples((distrib, None, None))
+            extract_graph(graph, subgraph, node, DCAT_NESTING)
             yield str(dcat_id), subgraph.serialize(format='json-ld',
                                                    indent=None)
 
@@ -53,7 +72,6 @@ class DcatBackend(BaseBackend):
         #     msg = 'Dataset {0} has no record'.format(item.remote_id)
         #     raise HarvestSkipException(msg)
     #
-    #     temporal_start, temporal_end = None, None
     #     spatial_geom = None
     #
     #     for extra in data['extras']:
@@ -71,16 +89,6 @@ class DcatBackend(BaseBackend):
     #         # Update frequency
     #         elif extra['key'] == 'frequency':
     #             print 'frequency', extra['value']
-    #         # Temporal coverage start
-    #         elif extra['key'] == 'temporal_start':
-    #             print 'temporal_start', extra['value']
-    #             temporal_start = daterange_start(extra['value'])
-    #             continue
-    #         # Temporal coverage end
-    #         elif extra['key'] == 'temporal_end':
-    #             print 'temporal_end', extra['value']
-    #             temporal_end = daterange_end(extra['value'])
-    #             continue
     #         # else:
     #         #     print extra['key'], extra['value']
     #         dataset.extras[extra['key']] = extra['value']

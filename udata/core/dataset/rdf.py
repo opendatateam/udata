@@ -9,11 +9,12 @@ import html2text
 from datetime import date
 from HTMLParser import HTMLParser
 from dateutil.parser import parse as parse_dt
-from flask import url_for
+from flask import current_app, url_for
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
 
+from udata import i18n
 from udata.models import db
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
@@ -55,8 +56,8 @@ def temporal_to_rdf(daterange, graph=None):
     graph = graph or Graph(namespace_manager=namespace_manager)
     pot = graph.resource(BNode())
     pot.set(RDF.type, DCT.PeriodOfTime)
-    pot.set(SCHEMA.startDate, Literal(daterange.start.date()))
-    pot.set(SCHEMA.endDate, Literal(daterange.end.date()))
+    pot.set(SCHEMA.startDate, Literal(daterange.start))
+    pot.set(SCHEMA.endDate, Literal(daterange.end))
     return pot
 
 
@@ -224,6 +225,41 @@ def temporal_from_rdf(period_of_time):
         pass
 
 
+def url_from_rdf(rdf, prop):
+    '''
+    Try to extract An URL from a property.
+    It can be expressed in many forms as a URIRef or a Literal
+    '''
+    value = rdf.value(prop)
+    if isinstance(value, (URIRef, Literal)):
+        return value.toPython()
+    elif isinstance(value, RdfResource):
+        return value.identifier.toPython()
+
+
+def title_from_rdf(rdf, url):
+    '''
+    Try to extract a distribution title from a property.
+    As it's not a mandatory property,
+    it fallback on building a title from the URL
+    then the format and in last ressort a generic resource name.
+    '''
+    title = rdf_value(rdf, DCT.title)
+    if title:
+        return title
+    if url:
+        last_part = url.split('/')[-1]
+        if '.' in last_part and '?' not in last_part:
+            return last_part
+    fmt = rdf_value(rdf, DCT.term('format'))
+    lang = current_app.config['DEFAULT_LANGUAGE']
+    with i18n.language(lang):
+        if fmt:
+            return i18n._('{format} resource').format(format=fmt.lower())
+        else:
+            return i18n._('Nameless resource')
+
+
 def resource_from_rdf(graph_or_distrib, dataset=None):
     '''
     Map a Resource domain model to a DCAT/RDF graph
@@ -235,8 +271,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
                                       object=DCAT.Distribution)
         distrib = graph_or_distrib.resource(node)
 
-    download_url = distrib.value(DCAT.downloadURL)
-    access_url = distrib.value(DCAT.accessURL)
+    download_url = url_from_rdf(distrib, DCAT.downloadURL)
+    access_url = url_from_rdf(distrib, DCAT.accessURL)
     url = str(download_url or access_url)
 
     if dataset:
@@ -245,7 +281,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
         resource = Resource()
         if dataset:
             dataset.resources.append(resource)
-    resource.title = rdf_value(distrib, DCT.title)
+    resource.title = title_from_rdf(distrib, url)
     resource.url = url
     resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
@@ -285,7 +321,9 @@ def dataset_from_rdf(graph, dataset=None):
     tags += [theme.toPython() for theme in d.objects(DCAT.theme)]
     dataset.tags = list(set(tags))
 
-    dataset.extras['dct:identifier'] = rdf_value(d, DCT.identifier)
+    identifier = rdf_value(d, DCT.identifier)
+    if identifier:
+        dataset.extras['dct:identifier'] = identifier
 
     if isinstance(d.identifier, URIRef):
         dataset.extras['uri'] = d.identifier.toPython()
@@ -293,7 +331,7 @@ def dataset_from_rdf(graph, dataset=None):
     dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     licenses = set()
-    for distrib in d.objects(DCAT.distribution):
+    for distrib in d.objects(DCAT.distribution | DCAT.distributions):
         resource_from_rdf(distrib, dataset)
         for predicate in DCT.license, DCT.rights:
             value = distrib.value(predicate)
