@@ -368,7 +368,7 @@ class SpdTest(FrontTestCase):
 
 class TerritoriesSettings(GouvFrSettings):
     ACTIVATE_TERRITORIES = True
-    HANDLED_LEVELS = ('fr/commune', 'fr/departement', 'fr/region')
+    HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 
 
 class TerritoriesTest(FrontTestCase):
