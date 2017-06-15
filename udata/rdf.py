@@ -125,6 +125,14 @@ CONTEXT = {
         '@id': 'dcat:accessURL',
         '@type': '@id'
     },
+    'dataset': {
+        '@id': 'dcat:dataset',
+        '@type': '@id'
+    },
+    'distribution': {
+        '@id': 'dcat:distribution',
+        '@type': '@id'
+    },
     'title': 'dct:title',
     'description': 'dct:description',
     'issued': {
@@ -139,7 +147,6 @@ CONTEXT = {
     'license': 'dct:license',
     'rights': 'dct:rights',
     'spatial': 'dct:spatial',
-    'publisher': 'dct:publisher',
     'identifier': 'dct:identifier',
     'temporal': 'dct:temporal',
     'format': 'dct:format',
@@ -148,9 +155,12 @@ CONTEXT = {
         '@id': 'foaf:homepage',
         '@type': '@id'
     },
+    'publisher': {
+        '@id': 'dct:publisher',
+        '@type': '@id'
+    },
     'fn': 'vcard:fn',
     'hasEmail': 'vcard:email',
-    # 'name': 'skos:prefLabel',
     'subOrganizationOf': 'org:subOrganizationOf',
     'checksum': 'spdx:checksum',
     'algorithm': {
@@ -162,6 +172,27 @@ CONTEXT = {
     'name': 'foaf:name',
     'startDate': 'schema:startDate',
     'endDate': 'schema:endDate',
+    'view': {
+        '@id': 'hydra:view',
+        '@type': '@id'
+    },
+    'first': {
+        '@id': 'hydra:first',
+        '@type': '@id'
+    },
+    'last': {
+        '@id': 'hydra:last',
+        '@type': '@id'
+    },
+    'next': {
+        '@id': 'hydra:next',
+        '@type': '@id'
+    },
+    'previous': {
+        '@id': 'hydra:previous',
+        '@type': '@id'
+    },
+    'totalItems': 'hydra:totalItems',
 }
 
 
