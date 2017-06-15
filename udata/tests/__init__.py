@@ -12,7 +12,7 @@ import mock
 
 from contextlib import contextmanager
 from StringIO import StringIO
-from urlparse import urljoin
+from urlparse import urljoin, urlparse
 
 from flask import request, url_for
 from flask_testing import TestCase as BaseTestCase
@@ -183,7 +183,9 @@ class WebTestMixin(object):
 class DBTestMixin(object):
     def drop_db(self):
         '''Clear the database'''
-        db_name = self.app.config['MONGODB_DB']
+        parsed_url = urlparse(self.app.config['MONGODB_SETTINGS']['host'])
+        # drop the leading /
+        db_name = parsed_url.path[1:]
         db.connection.drop_database(db_name)
 
     def setUp(self):
