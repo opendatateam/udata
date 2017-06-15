@@ -50,10 +50,8 @@ def redirect_town(code):
     """
     Legacy redirect now prefixed with `territories` + French name.
     """
-    # Turn the dict into a namedtuple to be consistent in routing.
-    territory = dict_to_namedtuple(
-        'Territory', {'code': str(code), 'level_name': 'commune'})
-    return redirect(url_for('territories.territory', territory=territory))
+    return redirect(url_for('territories.redirect_territory',
+                            level='commune', code=code))
 
 
 @blueprint.route('/territories/<level>/<code>@latest/',
@@ -65,7 +63,7 @@ def redirect_territory(level, code):
     Optimistically redirect to the latest valid/known INSEE code.
     """
     territory = GeoZone.objects.valid_at(datetime.now()).filter(
-        code=code[3:], level='fr/{level}'.format(level=level)).first()
+        code=code, level='fr:{level}'.format(level=level)).first()
     return redirect(url_for('territories.territory', territory=territory))
 
 
@@ -136,7 +134,7 @@ def sitemap_urls():
                 continue  # Level not fully handled yet.
             for territory in (GeoZone.objects(level=level)
                                      .only('id', 'code', 'validity', 'slug')):
-                # Remove 'fr/' manually from the level.
+                # Remove 'fr:' manually from the level.
                 territory = dict_to_namedtuple(
                     'Territory', {
                         'level_name': level[3:],
@@ -145,7 +143,5 @@ def sitemap_urls():
                         'slug': territory.slug,
                         'validity': territory.validity
                     })
-                print(territory)
-                print(url_for('territories.territory', territory=territory))
                 yield ('territories.territory', {'territory': territory},
                        None, 'weekly', 0.5)

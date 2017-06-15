@@ -120,7 +120,7 @@ class OEmbedsDatasetAPITest(APITestCase):
         country = faker.country_code()
         level = 'commune'
         zone = GeoZoneFactory(
-            level='{0}/{1}'.format(country, level),
+            level='{0}:{1}'.format(country, level),
             validity={'start': '1942-01-01', 'end': '9999-12-31'})
         TestDataset = territory_dataset_factory()
         TERRITORY_DATASETS[level][TestDataset.id] = TestDataset
@@ -160,7 +160,7 @@ class OEmbedsDatasetAPITest(APITestCase):
         country = faker.country_code()
         level = 'commune'
         zone = GeoZoneFactory(
-            level='{0}/{1}'.format(country, level),
+            level='{0}:{1}'.format(country, level),
             validity={'start': '1942-01-01', 'end': '9999-12-31'})
         TestDataset = territory_dataset_factory()
         del TERRITORY_DATASETS[level]
@@ -176,7 +176,7 @@ class OEmbedsDatasetAPITest(APITestCase):
         country = faker.country_code()
         level = 'commune'
         zone = GeoZoneFactory(
-            level='{0}/{1}'.format(country, level),
+            level='{0}:{1}'.format(country, level),
             validity={'start': '1942-01-01', 'end': '9999-12-31'})
         TestDataset = territory_dataset_factory()
         TERRITORY_DATASETS[level] = {}

@@ -106,7 +106,8 @@ class GeoZone(db.Document):
     @cached_property
     def level_code(self):
         """Truncated level code for the sake of readability."""
-        # Either 'region', 'departement' or 'commune'.
+        # Either 'region', 'departement' or 'commune',
+        # useful to match TERRITORY_DATASETS keys.
         return self.id.split(':')[1]
 
     @cached_property
@@ -179,7 +180,7 @@ class GeoZone(db.Document):
     def parents_objects(self):
         if self.parent_level:
             for parent in self.parents:
-                if parent.startswith(self.parent_level.replace('/', ':')):
+                if parent.startswith(self.parent_level):
                     yield GeoZone.objects.get(id=parent,
                                               level=self.parent_level)
 
