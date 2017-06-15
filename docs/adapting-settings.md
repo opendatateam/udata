@@ -129,7 +129,7 @@ ELASTICSEARCH_URL = 'elasticserver:9200'
 RFC-1738 formatted URLs are also supported:
 
 ```python
-ELASTICSEARCH_URL = 'https://user:secret@other_host:443'
+ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
 ```
 
 ## Mongoengine/Flask-Mongoengine options
