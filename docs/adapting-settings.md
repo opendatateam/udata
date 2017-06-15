@@ -126,29 +126,29 @@ The elasticsearch server url used for search indexing.
 ELASTICSEARCH_URL = 'elasticserver:9200'
 ```
 
+RFC-1738 formatted URLs are also supported:
+
+```python
+ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
+```
+
 ## Mongoengine/Flask-Mongoengine options
 
 ### MONGODB_HOST
 
-**default**: `localhost`
-
-The mongodb hostname used by udata.
-
-### MONGODB_PORT
-
-**default**: `27017`
-
-The mongodb post used by udata.
-
-### MONGODB_DB
-
-**default**: `udata`
+**default**: `'mongodb://localhost:27017/udata'`
 
 The mongodb database used by udata.
 During tests, the test database will use the same name suffixed by `-test`
 
 See [the official Flask-MongoEngine documentation][flask-mongoengine-doc]
 for more details.
+
+Authentication is also supported in the URL:
+
+```python
+MONGODB_HOST = 'mongodb://<user>:<password>@<host>:<port>/<database>'
+```
 
 ## Celery options
 
@@ -167,6 +167,13 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERYD_HIJACK_ROOT_LOGGER = False
 CELERYBEAT_SCHEDULER = 'udata.tasks.Scheduler'
 CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
+```
+
+Authentication is supported on Redis:
+
+```python
+CELERY_RESULT_BACKEND = 'redis://u:<password>@<host>:<port>'
+BROKER_URL = 'redis://u:<password>@<host>:<port>'
 ```
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
