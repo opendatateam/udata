@@ -85,6 +85,8 @@
   [#967](https://github.com/opendatateam/udata/pull/967)
 - Cleaner login, signup and password related forms
   [#971](https://github.com/opendatateam/udata/pull/971)
+- Add certified image on default theme
+  [#972](https://github.com/opendatateam/udata/issues/972)
 
 ## 1.0.11 (2017-05-25)
 
