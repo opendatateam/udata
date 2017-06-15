@@ -66,7 +66,6 @@ class CatalogTest(DBTestMixin, TestCase):
         self.assertEqual(len(list(graph.subjects(RDF.type, DCAT.Dataset))),
                          len(datasets))
 
-
     def test_no_duplicate(self):
         site = SiteFactory()
         org = OrganizationFactory()
@@ -90,13 +89,15 @@ class CatalogTest(DBTestMixin, TestCase):
         page_size = 3
         total = 4
         uri = url_for('site.rdf_catalog', _external=True)
-        uri_first = url_for('site.rdf_catalog', page=1, _external=True)
-        uri_last = url_for('site.rdf_catalog', page=2, _external=True)
+        uri_first = url_for('site.rdf_catalog_format', format='json',
+                            page=1, page_size=page_size, _external=True)
+        uri_last = url_for('site.rdf_catalog_format', format='json',
+                           page=2, page_size=page_size, _external=True)
         VisibleDatasetFactory.create_batch(total)
 
         # First page
         datasets = Dataset.objects.paginate(1, page_size)
-        catalog = build_catalog(site, datasets)
+        catalog = build_catalog(site, datasets, format='json')
         graph = catalog.graph
 
         self.assertIsInstance(catalog, Resource)
@@ -124,7 +125,7 @@ class CatalogTest(DBTestMixin, TestCase):
 
         # Second page
         datasets = Dataset.objects.paginate(2, page_size)
-        catalog = build_catalog(site, datasets)
+        catalog = build_catalog(site, datasets, format='json')
         graph = catalog.graph
 
         self.assertIsInstance(catalog, Resource)
@@ -224,8 +225,9 @@ class SiteRdfViewsTest(FrontTestCase):
 
     def test_catalog_rdf_paginate(self):
         VisibleDatasetFactory.create_batch(4)
-        url = url_for('site.rdf_catalog_format',
-                      format='n3', page=2, page_size=3)
+        url = url_for('site.rdf_catalog_format', format='n3', page_size=3)
+        next_url = url_for('site.rdf_catalog_format', format='n3',
+                           page=2, page_size=3, _external=True)
 
         response = self.get(url)
         self.assert200(response)
@@ -235,5 +237,6 @@ class SiteRdfViewsTest(FrontTestCase):
                                  object=HYDRA.PartialCollectionView)
         self.assertIsNotNone(pagination)
         pagination = graph.resource(pagination)
-        self.assertTrue(pagination.value(HYDRA.previous))
-        self.assertFalse(pagination.value(HYDRA.next))
+        self.assertFalse(pagination.value(HYDRA.previous))
+        self.assertEqual(pagination.value(HYDRA.next).identifier,
+                         URIRef(next_url))

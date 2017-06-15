@@ -194,19 +194,19 @@ def rdf_catalog():
 
 @blueprint.route('/catalog.<format>', localize=False)
 def rdf_catalog_format(format):
-    format = guess_format(format)
+    fmt = guess_format(format)
     headers = {
-        'Content-Type': RDF_MIME_TYPES[format]
+        'Content-Type': RDF_MIME_TYPES[fmt]
     }
     kwargs = {}
-    if format == 'json-ld':
+    if fmt == 'json-ld':
         kwargs['context'] = context
     params = multi_to_dict(request.args)
     page = int(params.get('page', 1))
     page_size = int(params.get('page_size', 100))
     datasets = Dataset.objects.visible().paginate(page, page_size)
-    catalog = build_catalog(current_site, datasets)
-    return catalog.graph.serialize(format=format, **kwargs), 200, headers
+    catalog = build_catalog(current_site, datasets, format=format)
+    return catalog.graph.serialize(format=fmt, **kwargs), 200, headers
 
 
 @sitemap.register_generator

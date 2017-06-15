@@ -13,7 +13,7 @@ from udata.rdf import DCAT, DCT, HYDRA, namespace_manager
 from udata.utils import Paginable
 
 
-def build_catalog(site, datasets):
+def build_catalog(site, datasets, format=None):
     '''Build the DCAT catalog for this site'''
     site_url = url_for('site.home_redirect', _external=True)
     catalog_url = url_for('site.rdf_catalog', _external=True)
@@ -35,26 +35,33 @@ def build_catalog(site, datasets):
         catalog.add(DCAT.dataset, dataset_to_rdf(dataset, graph))
 
     if isinstance(datasets, Paginable):
+        if not format:
+            raise ValueError('Pagination requires format')
         catalog.add(RDF.type, HYDRA.Collection)
         catalog.set(HYDRA.totalItems, Literal(datasets.total))
+        kwargs = {
+            'format': format,
+            'page_size': datasets.page_size,
+            '_external': True,
+        }
 
-        first_url = url_for('site.rdf_catalog', page=1, _external=True)
-        page_url = url_for('site.rdf_catalog', page=datasets.page,
-                           _external=True)
-        last_url = url_for('site.rdf_catalog', page=datasets.pages,
-                           _external=True)
+        first_url = url_for('site.rdf_catalog_format', page=1, **kwargs)
+        page_url = url_for('site.rdf_catalog_format',
+                           page=datasets.page, **kwargs)
+        last_url = url_for('site.rdf_catalog_format',
+                           page=datasets.pages, **kwargs)
         pagination = graph.resource(URIRef(page_url))
         pagination.set(RDF.type, HYDRA.PartialCollectionView)
 
         pagination.set(HYDRA.first, URIRef(first_url))
         pagination.set(HYDRA.last, URIRef(last_url))
         if datasets.has_next:
-            next_url = url_for('site.rdf_catalog', page=datasets.page + 1,
-                               _external=True)
+            next_url = url_for('site.rdf_catalog_format',
+                               page=datasets.page + 1, **kwargs)
             pagination.set(HYDRA.next, URIRef(next_url))
         if datasets.has_prev:
-            prev_url = url_for('site.rdf_catalog', page=datasets.page - 1,
-                               _external=True)
+            prev_url = url_for('site.rdf_catalog_format',
+                               page=datasets.page - 1, **kwargs)
             pagination.set(HYDRA.previous, URIRef(prev_url))
 
         catalog.set(HYDRA.view, pagination)
