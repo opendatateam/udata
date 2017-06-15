@@ -1,4 +1,5 @@
 import i18n from 'i18n';
+import log from 'logger';
 import qq from 'fine-uploader';
 import allowedExtensions from 'models/allowedExtensions';
 
@@ -42,10 +43,10 @@ const messages = {
 export default {
     data() {
         return {
+            files: [],
             dropping: false,
             upload_endpoint: null,
-            HAS_FILE_API: HAS_FILE_API,
-            files: []
+            HAS_FILE_API,
         };
     },
     ready() {
@@ -76,7 +77,7 @@ export default {
                 dropActive: this.$options.dropActive || 'drop-active'
             },
             callbacks: {
-              processingDroppedFilesComplete: this.on_dropped_files_complete
+                processingDroppedFilesComplete: this.on_dropped_files_complete
             }
         });
     },
@@ -180,10 +181,12 @@ export default {
          */
         on_error(id, name, reason, xhr) {
             // If there is a JSON message display it instead of the non-explicit default one
-            try {
-                reason = JSON.parse(xhr.responseText).message || reason;
-            } catch(e) {
-                log.error('Unable to parse error', xhr.responseText);
+            if (xhr) {
+                try {
+                    reason = JSON.parse(xhr.responseText).message || reason;
+                } catch(e) {
+                    log.error('Unable to parse error', xhr.responseText);
+                }
             }
             this.$dispatch('notify', {
                 type: 'error',

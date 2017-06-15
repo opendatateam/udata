@@ -1,4 +1,5 @@
 <template>
+<div>
 <modal :title="_('Confirm deletion')"
     class="modal-danger dataset-delete-modal"
     v-ref:modal>
@@ -23,6 +24,7 @@
         </button>
     </footer>
 </modal>
+</div>
 </template>
 
 <script>

@@ -1,19 +1,29 @@
 <template>
+<div>
 <wizard v-ref:wizard :steps="steps" :title="_('New harvester')"></wizard>
+</div>
 </template>
 
 <script>
 import HarvestSource from 'models/harvest/source';
+import Wizard from 'components/widgets/wizard.vue';
+
+// Steps
+import PublishAs from 'components/widgets/publish-as.vue';
+import HarvesterForm from 'components/harvest/form.vue';
+import HarvesterCreated from 'components/harvest/created.vue';
 
 export default {
-    data: function() {
+    name: 'harvester-wizard',
+    components: {Wizard},
+    data() {
         return {
             source: new HarvestSource(),
             publish_as: null,
             steps: [{
                 label: this._('Harvest as'),
                 subtitle: this._('Choose who is harvesting'),
-                component: require('components/widgets/publish-as.vue'),
+                component: PublishAs,
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -23,7 +33,7 @@ export default {
             }, {
                 label: this._('New harvester'),
                 subtitle: this._('Configure your harvester'),
-                component: require('components/harvest/form.vue'),
+                component: HarvesterForm,
                 next: (component) => {
                     if (component.$refs.form.validate()) {
                         Object.assign(this.source, component.serialize());
@@ -40,15 +50,12 @@ export default {
             }, {
                 label: this._('Done'),
                 subtitle: this._('Your harvester is ready'),
-                component: require('components/harvest/created.vue'),
+                component: HarvesterCreated,
                 init: (component) => {
                     component.source = this.source;
                 }
             }],
          };
-    },
-    components: {
-        wizard: require('components/widgets/wizard.vue'),
     },
     events: {
         'wizard:next-step': function() {

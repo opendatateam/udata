@@ -1,19 +1,21 @@
 <template>
+<div>
     <datatable :title="title" icon="retweet"
         boxclass="reuses-widget"
         :fields="fields" :p="reuses"
         :downloads="downloads"
         :empty="_('No reuse')">
     </datatable>
+</div>
 </template>
 
 
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
-    name: 'reuses-widget',
-    components: {
-         datatable: require('components/datatable/widget.vue')
-    },
+    name: 'reuses-list',
+    components: {Datatable},
     MASK: ['id', 'title', 'created_at', 'last_modified', 'metrics', 'private', 'image_thumbnail'],
     data() {
         return {

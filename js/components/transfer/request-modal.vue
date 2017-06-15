@@ -1,8 +1,6 @@
 <template>
-<modal :title="_('Transfer request')"
-    class="modal-info transfer-request-modal"
-    v-ref:modal>
-
+<div>
+<modal v-ref:modal :title="_('Transfer request')" class="modal-info transfer-request-modal">
     <div class="modal-body">
         <div class="text-center row" v-if="!type">
             <p class="lead col-xs-12">{{ _('Transfer to') }}</p>
@@ -18,13 +16,8 @@
             </div>
         </div>
 
-        <div v-if="type == 'user' && !recipient">
-            <user-filter cardclass="col-xs-12 col-md-6"></user-filter>
-        </div>
-
-        <div v-if="type == 'organization' && !recipient">
-            <org-filter cardclass="col-xs-12 col-md-6"></org-filter>
-        </div>
+        <user-filter v-if="type == 'user' && !recipient" cardclass="col-xs-12 col-md-6"></user-filter>
+        <org-filter v-if="type == 'organization' && !recipient" cardclass="col-xs-12 col-md-6"></org-filter>
 
         <div v-if="recipient">
             <div class="row text-center">
@@ -53,7 +46,7 @@
                         v-model="comment">
                     </textarea>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -68,6 +61,7 @@
         </button>
     </footer>
 </modal>
+</div>
 </template>
 
 <script>
@@ -81,6 +75,7 @@ import DatasetCard from 'components/dataset/card.vue';
 import ReuseCard from 'components/reuse/card.vue';
 
 export default {
+    name: 'transfer-request-modal',
     components: {Modal, OrgFilter, UserFilter, OrgCard, UserCard, DatasetCard, ReuseCard},
     props: {
         subject: Object,

@@ -7,6 +7,7 @@
 </style>
 
 <template>
+<div>
 <modal :title="resource.title" class="resource-modal"
     :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
     v-ref:modal>
@@ -51,7 +52,7 @@
             </dl>
         </div>
 
-        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource"></resource-form>
+        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource" :hide-notifications="false"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -101,6 +102,7 @@
         </button>
     </footer>
 </modal>
+</div>
 </template>
 
 <script>
@@ -109,14 +111,15 @@ import Dataset from 'models/dataset';
 import Resource from 'models/resource';
 import CommunityResource from 'models/communityresource';
 
+import Modal from 'components/modal.vue'
+import ResourceForm from 'components/dataset/resource/form.vue'
+import OrgCard from 'components/organization/card.vue'
+import UserCard from 'components/user/card.vue'
+
 export default {
-    components: {
-        'modal': require('components/modal.vue'),
-        'resource-form': require('components/dataset/resource/form.vue'),
-        'org-card': require('components/organization/card.vue'),
-        'user-card': require('components/user/card.vue'),
-    },
-    data: function() {
+    name: 'resource-modal',
+    components: {Modal, ResourceForm, OrgCard, UserCard},
+    data() {
         return {
             edit: false,
             confirm: false,

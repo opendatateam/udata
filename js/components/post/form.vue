@@ -1,19 +1,19 @@
 <template>
-<vform v-ref:form :fields="fields" :model="post"></vform>
+<div>
+<vertical-form v-ref:form :fields="fields" :model="post"></vertical-form>
+</div>
 </template>
 
 <script>
 import Post from 'models/post';
-import Vform from 'components/form/vertical-form.vue';
+import VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
+    name: 'post-form',
+    components: {VerticalForm},
     props: {
-        post: {
-            type: Post,
-            default() {
-                return new Post();
-            }
-        }
+        post: {type: Post, default: () => new Post()},
+        hideNotifications: false
     },
     data() {
         return {
@@ -36,13 +36,21 @@ export default {
                 }]
         };
     },
-    components: {Vform},
     methods: {
         serialize() {
             return this.$refs.form.serialize();
         },
         validate() {
-            return this.$refs.form.validate();
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your post has been updated.')
+                });
+            }
+            return isValid;
         }
     }
 };

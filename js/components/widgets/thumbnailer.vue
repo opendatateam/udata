@@ -70,7 +70,7 @@
 </style>
 
 <template>
-<div class="thumbnailer" v-if="preview" :class="{ 'centered': centered }">
+<div class="thumbnailer" v-show="preview" :class="{ 'centered': centered }">
     <div class="row">
         <div class="col-xs-12 col-sm-8 crop-pane" v-el:crop_pane>
             <img class="cropper" v-el:cropper/>
@@ -99,15 +99,13 @@ import $ from 'jquery';
 import UploaderMixin from 'mixins/uploader';
 
 export default {
+    name: 'thumbnailer',
     mixins: [UploaderMixin],
     props: {
         src: null,
-        sizes: {
-            type: Array,
-            default: function() {return [50, 100];}
-        }
+        sizes: {type: Array, default: () => [50, 100]},
     },
-    data: function() {
+    data() {
         return {
             centered: false,
         };
@@ -116,9 +114,9 @@ export default {
         /**
          * Get the current crop Bounding Box (realsize) if any.
          */
-        bbox: function() {
+        bbox() {
             if (!this.$els.checkbox.checked) {
-                let selection = this.Jcrop.tellSelect();
+                const selection = this.Jcrop.tellSelect();
                 return [selection.x, selection.y, selection.x2, selection.y2];
             }
         }
@@ -127,20 +125,19 @@ export default {
         /**
          * Adjust the preview given the cropper position and size
          */
-        preview: function(coords) {
-            let bounds = this.Jcrop.getBounds(),
-                w = bounds[0],
-                h = bounds[1],
-                // Temp fix until https://github.com/vuejs/vue/issues/1697 is merged
-                // containers = this.$els.preview_containers;
-                containers = [...this.$el.querySelectorAll('.preview-container')];
+        preview(coords) {
+            const bounds = this.Jcrop.getBounds();
+            const [w, h] = bounds;
+            // Temp fix until https://github.com/vuejs/vue/issues/1697 is merged
+            // containers = this.$els.preview_containers;
+            const containers = [...this.$el.querySelectorAll('.preview-container')];
 
             containers.forEach(function(el) {
-                let $el = $(el),
-                    px = $el.width(),
-                    py = $el.height(),
-                    rx = px / coords.w,
-                    ry = py / coords.h;
+                const $el = $(el);
+                const px = $el.width();
+                const py = $el.height();
+                const rx = px / coords.w;
+                const ry = py / coords.h;
 
                 $el.find('.preview').removeAttr('style').css({
                     width: Math.round(rx * w) + 'px',
@@ -150,13 +147,13 @@ export default {
                 });
             });
         },
-        setImage: function(src) {
+        setImage(src) {
             if (!src) return;
 
-            let that = this,
-                $pane = $(this.$els.crop_pane),
-                max_width = $pane.width(),
-                max_height = parseInt($pane.css('max-height').replace('px', ''));
+            const that = this;  // Still required because we also need the default `this`.
+            const $pane = $(this.$els.crop_pane);
+            const max_width = $pane.width();
+            const max_height = parseInt($pane.css('max-height').replace('px', ''));
 
             $(this.$els.cropper)
                 .attr('src', src)
@@ -167,8 +164,7 @@ export default {
                     boxWidth: max_width,
                     boxHeight: max_height
                 }, function() {
-                    let bounds = this.getBounds(),
-                        size = Math.min(bounds[0], bounds[1]);
+                    const size = Math.min(...this.getBounds());
 
                     that.Jcrop = this;
                     this.setSelect([0, 0, size, size]);
@@ -179,10 +175,10 @@ export default {
         /**
          * Toggle centering
          */
-        centered: function(centered) {
+        centered(centered) {
             if (centered) {
-                let bounds = this.Jcrop.getBounds(),
-                    attr = bounds[0] > bounds[1] ? 'width' : 'height';
+                const bounds = this.Jcrop.getBounds();
+                const attr = bounds[0] > bounds[1] ? 'width' : 'height';
 
                 this.Jcrop.disable();
 
@@ -194,11 +190,11 @@ export default {
                 this.Jcrop.enable();
             }
         },
-        src: function(src) {
+        src(src) {
             return this.setImage(src);
         }
     },
-    ready: function() {
+    ready() {
         this.setImage(this.src);
     }
 };

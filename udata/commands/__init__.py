@@ -23,6 +23,9 @@ log = logging.getLogger(__name__)
 
 manager = Manager()
 
+# Tell wether or not you can prompt user
+IS_INTERACTIVE = sys.__stdin__.isatty()
+
 
 def submanager(name, **kwargs):
     sub_manager = Manager(**kwargs)

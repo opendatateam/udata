@@ -1,8 +1,11 @@
 <style lang="less">
 .wizard {
     .nav.nav-pills > li {
+        height: 100%;
+
         > a {
             border-radius: 4px;
+            height: 100%;
         }
 
         &.active {
@@ -21,6 +24,7 @@
 </style>
 
 <template>
+<div>
 <layout :title="title || ''">
     <div class="wizard">
         <div class="row form-group wizard-steps">
@@ -42,7 +46,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <box boxclass="box-solid" :footer="true">
-                    <component :is="component" v-ref:content></component>
+                    <component :is="component" v-ref:content :hide-notifications="false"></component>
                     <footer slot="footer">
                         <div class="col-xs-12">
                             <button v-if="previous_step"
@@ -52,6 +56,7 @@
                             </button>
                             <button v-if="next_step || finish"
                                 class="btn btn-primary btn-flat pull-right pointer"
+                                :disabled="disableNext"
                                 @click="click_next">
                                 {{ this.step_index + 1 === this.steps.length ? _('Finish') : _('Next') }}
                             </button>
@@ -62,6 +67,7 @@
         </div>
     </div>
 </layout>
+</div>
 </template>
 
 <script>
@@ -70,7 +76,8 @@ import Layout from 'components/layout.vue';
 import Box from 'components/containers/box.vue';
 
 export default {
-    data: function() {
+    name: 'wizard',
+    data() {
         return {
             step_index: 0
         };
@@ -105,6 +112,9 @@ export default {
                 return;
             }
             return this.steps[this.step_index - 1];
+        },
+        disableNext() {
+            return this.active_step && this.active_step.disableNext;
         }
     },
     components: {Box, Layout},
@@ -156,6 +166,10 @@ export default {
                 Vue.extend(step.component);
             this.$options.components[`step-${index}`] = component;
         });
+    }, events: {
+        'wizard:enable-next': function() {
+            this.active_step.disableNext = false;
+        }
     }
 };
 </script>

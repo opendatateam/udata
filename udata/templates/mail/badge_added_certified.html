@@ -3,8 +3,7 @@
 
 {% block body %}
 <p style="margin: 0;padding: 0;">{{
-    _('%(user)s added a new badge on your %(type)s %(subject)s',
-    type=badge.subject.verbose_name,
+    _('%(user)s has certified your organization "%(name)s"',
     user=(
         '<a href="'|safe
         + url_for('users.show', user=badge.created_by, _external=True)
@@ -12,25 +11,21 @@
         + badge.created_by.fullname
         + '</a>'|safe
     ),
-    subject=(
+    name=(
         '<a href="'|safe
-        + badge.subject.external_url
+        + organization.external_url
         + '">'|safe
-        + badge.subject|string
+        + organization.name|string
         + '</a>'|safe
     )
 ) }}.</p>
 <br/>
-<p style="margin: 0;padding: 0;">
-    <b>{{ _('Details') }}:</b>
-    {{ badge.title }}
-</p>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr>
         <td align="center">
             {{ mail_button(
                 _('See the badge'),
-                badge.subject.external_url
+                organization.external_url
             ) }}
         </td>
     </tr>

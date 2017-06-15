@@ -75,14 +75,14 @@
 import NotificationZone from 'components/notification-zone.vue';
 
 export default {
-    name: 'DashboardLayout',
+    name: 'layout',
     props: {
         title: String,
         subtitle: String,
         page: String,
         actions: {
             type: Array,
-            default() {return []}
+            default: () => [],
         },
         badges: Array
     },

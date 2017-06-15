@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 import importlib
 import logging
 
+from urlparse import urlparse
+
 from bson import ObjectId, DBRef
 from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
 from mongoengine.base import TopLevelDocumentMetaclass, get_document
@@ -101,8 +103,11 @@ from udata.features.territories.models import *  # noqa
 
 
 def init_app(app):
+    # use `{database_name}-test` database for testing
     if app.config['TESTING']:
-        app.config['MONGODB_DB'] = '{MONGODB_DB}-test'.format(**app.config)
+        parsed_url = urlparse(app.config['MONGODB_HOST'])
+        parsed_url = parsed_url._replace(path='%s-test' % parsed_url.path)
+        app.config['MONGODB_HOST'] = parsed_url.geturl()
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
         name = 'udata_{0}.models'.format(plugin)

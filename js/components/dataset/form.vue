@@ -1,5 +1,7 @@
 <template>
-<vform v-ref:form :fields="fields" :model="dataset"></vform>
+<div>
+<vertical-form v-ref:form :fields="fields" :model="dataset"></vertical-form>
+</div>
 </template>
 
 <script>
@@ -7,17 +9,18 @@ import Dataset from 'models/dataset';
 import licenses from 'models/licenses';
 import granularities from 'models/geogranularities';
 import frequencies from 'models/frequencies';
+import VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
+    components: {VerticalForm},
     props: {
         dataset: {
             type: Object,
-            default: function() {
-                return new Dataset();
-            }
-        }
+            default: () => new Dataset(),
+        },
+        hideNotifications: false
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                     id: 'title',
@@ -30,7 +33,7 @@ export default {
                     label: this._('License'),
                     widget: 'select-input',
                     values: licenses,
-                    map: function(item) {
+                    map(item) {
                         return {value: item.id, text: item.title};
                     }
                 }, {
@@ -39,7 +42,7 @@ export default {
                     widget: 'frequency-field',
                     frequency_date_id: 'frequency_date',
                     values: frequencies,
-                    map: function(item) {
+                    map(item) {
                         return {value: item.id, text: item.label};
                     }
                 }, {
@@ -59,7 +62,7 @@ export default {
                     label: this._('Spatial granularity'),
                     widget: 'select-input',
                     values: granularities,
-                    map: function(item) {
+                    map(item) {
                         return {value: item.id, text: item.name};
                     }
                 }, {
@@ -68,17 +71,25 @@ export default {
                 }]
         };
     },
-    components: {
-        vform: require('components/form/vertical-form.vue')
-    },
+
     methods: {
-        serialize: function() {
+        serialize() {
             return this.$refs.form.serialize();
         },
-        validate: function() {
-            return this.$refs.form.validate();
+        validate() {
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your dataset has been updated.')
+                });
+            }
+
+            return isValid;
         },
-        on_error: function(response) {
+        on_error(response) {
             return this.$refs.form.on_error(response);
         },
     }

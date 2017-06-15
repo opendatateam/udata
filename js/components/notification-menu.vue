@@ -22,16 +22,17 @@
 <script>
 import API from 'api';
 
-const INITIAL_FETCH = 5 * 1000,
-      POLL_INTERVAL = 30 * 1000;
+const INITIAL_FETCH = 5 * 1000;
+const POLL_INTERVAL = 30 * 1000;
 
 export default {
-    replace: true,
-    data: function() {
+    name: 'notification-menu',
+    data() {
         return {
             notifications: []
         };
     },
+    // Components name matters (beware of the low dash)
     components: {
         'issue': require('components/notifications/issue.vue'),
         'discussion': require('components/notifications/discussion.vue'),
@@ -39,14 +40,14 @@ export default {
         'transfer_request': require('components/notifications/transfer.vue'),
         'validate_harvester': require('components/notifications/validate-harvester.vue'),
     },
-    created: function() {
+    created() {
         // Trigger an initial fetch (don't wait for poll interval)
         setTimeout(this.fetch.bind(this), INITIAL_FETCH);
         // Start polling
         setInterval(this.fetch.bind(this), POLL_INTERVAL);
     },
     methods: {
-        fetch: function() {
+        fetch() {
             API.notifications.get_notifications({}, (response) => {
                 this.notifications = response.obj;
             });

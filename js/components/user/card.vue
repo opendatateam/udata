@@ -52,9 +52,7 @@ export default {
     props: {
         user: {
             type: Object,
-            default: function() {
-                return new User();
-            }
+            default: () => new User(),
         },
         userid: null,
         clickable: {
@@ -67,20 +65,18 @@ export default {
         }
     },
     computed: {
-        avatar: function() {
-            if (!this.user || !this.user.avatar) {
-                return placeholders.user;
-            }
-            return this.user.avatar;
+        avatar() {
+            if (!this.user || !this.user.avatar && !this.user.avatar_thumbnail) return placeholders.user;
+            return this.user.avatar_thumbnail || this.user.avatar;
         }
     },
-    created: function() {
+    created() {
         if (this.userid) {
             this.user.fetch(this.userid);
         }
     },
     methods: {
-        click: function() {
+        click() {
             if (this.clickable) {
                 this.$dispatch('user:clicked', this.user);
             }

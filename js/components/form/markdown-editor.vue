@@ -80,7 +80,6 @@ $.fn.markdown.messages[config.lang] = {
 
 export default {
     name: 'markdown-editor',
-    replace: true,
     props: ['rows'],
     mixins: [FieldComponentMixin],
     ready: function() {

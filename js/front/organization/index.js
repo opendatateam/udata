@@ -18,9 +18,6 @@ import SmallBox from 'components/containers/small-box.vue';
 
 import MembershipRequest from './membership-request.vue';
 
-// Ensure retrocompatibily for 0.12.2 replace behavior
-Vue.options.replace = false;
-
 
 new Vue({
     mixins: [FrontMixin],

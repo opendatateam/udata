@@ -5,6 +5,7 @@ import logging
 
 from blinker import Signal
 from datetime import date, datetime
+from flask import current_app
 
 log = logging.getLogger(__name__)
 
@@ -111,10 +112,12 @@ class Metric(object):
                 'Unsupported format: {0} ({1})'.format(value, type(value)))
 
     def trigger_update(self):
-        self.need_update.send(self)
+        if current_app.config['USE_METRICS']:
+            self.need_update.send(self)
 
     def notify_update(self):
-        self.updated.send(self)
+        if current_app.config['USE_METRICS']:
+            self.updated.send(self)
 
     @classmethod
     def aggregate_monthly(cls, queryset, month):

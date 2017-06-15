@@ -1,4 +1,5 @@
 <template>
+<div>
 <layout :title="org.name || ''" :subtitle="_('Organization')"
     :actions="actions" :badges="badges" :page="org.page || ''">
     <div class="row">
@@ -45,6 +46,7 @@
         <communities class="col-xs-12" :communities="communities"></communities>
     </div>
 </layout>
+</div>
 </template>
 
 <script>

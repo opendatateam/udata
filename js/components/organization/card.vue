@@ -55,9 +55,7 @@ export default {
     props: {
         organization: {
             type: Object,
-            default: function() {
-                return new Organization();
-            }
+            default: () => new Organization(),
         },
         orgid: null,
         clickable: {
@@ -70,23 +68,23 @@ export default {
         }
     },
     computed: {
-        logo: function() {
-            if (!this.organization ||  !this.organization.logo) {
+        logo() {
+            if (!this.organization || !this.organization.logo_thumbnail && !this.organization.logo) {
                 return placeholders.organization;
             }
-            return this.organization.logo;
+            return this.organization.logo_thumbnail || this.organization.logo;
         },
-        certified_stamp: function() {
+        certified_stamp() {
             return `${config.theme_static}img/certified-stamp.png`;
         }
     },
-    created: function() {
+    created() {
         if (this.orgid) {
             this.organization.fetch(this.orgid);
         }
     },
     methods: {
-        click: function() {
+        click() {
             if (this.clickable) {
                 this.$dispatch('organization:clicked', this.organization);
             }

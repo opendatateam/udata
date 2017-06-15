@@ -27,7 +27,6 @@ import {getScrollBarWidth} from 'vue-strap/src/utils/utils.js';
 import NotificationZone from 'components/notification-zone.vue';
 
 export default {
-    replace: true,
     name: 'modal',
     components: {NotificationZone},
     props: {

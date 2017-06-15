@@ -16,9 +16,7 @@ class Defaults(object):
     CONTACT_EMAIL = 'contact@example.org'
     TERRITORIES_EMAIL = 'territories@example.org'
 
-    MONGODB_HOST = 'localhost'
-    MONGODB_PORT = 27017
-    MONGODB_DB = 'udata'
+    MONGODB_HOST = 'mongodb://localhost:27017/udata'
 
     # BROKER_TRANSPORT = 'redis'
     BROKER_URL = 'redis://localhost:6379'
@@ -167,6 +165,7 @@ class Defaults(object):
         # Misc
         'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
     ]
+    USE_METRICS = True
 
 
 class Testing(object):
@@ -188,6 +187,7 @@ class Testing(object):
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
+    USE_METRICS = False
 
 
 class Debug(Defaults):

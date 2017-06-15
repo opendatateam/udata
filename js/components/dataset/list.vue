@@ -1,18 +1,20 @@
 <template>
+<div>
     <datatable :title="title" icon="cubes"
         boxclass="datasets-widget"
         :fields="fields" :p="datasets"
         :downloads="downloads"
         :empty="_('No dataset')">
     </datatable>
+</div>
 </template>
 
 <script>
+import Datatable from 'components/datatable/widget.vue';
+
 export default {
-    name: 'datasets-widget',
-    components: {
-        datatable: require('components/datatable/widget.vue')
-    },
+    name: 'dataset-list',
+    components: {Datatable},
     MASK: ['id', 'title', 'created_at', 'last_update', 'last_modified', 'metrics', 'private', 'quality'],
     data() {
         return {
@@ -79,8 +81,8 @@ export default {
         };
     },
     events: {
-        'datatable:item:click'(dataset) {
-            this.$go('/dataset/' + dataset.id + '/');
+        'datatable:item:click': function(dataset) {
+            this.$go(`/dataset/${dataset.id}/`);
         }
     },
     props: {

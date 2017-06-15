@@ -1,7 +1,9 @@
 <template>
+<div>
 <form-layout icon="book" :title="title" :save="save" :cancel="cancel" footer="true" :model="topic">
     <topic-form v-ref:form :topic="topic"></topic-form>
 </form-layout>
+</div>
 </template>
 
 <script>
@@ -10,6 +12,7 @@ import Topic from 'models/topic';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
+    name:'topic-edit',
     data() {
         return {
             topic: new Topic(),

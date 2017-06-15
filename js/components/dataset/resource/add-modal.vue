@@ -1,4 +1,5 @@
 <template>
+<div>
 <modal class="modal-primary add-resource-modal" v-ref:modal
     :title="_('Add a resource')">
 
@@ -19,6 +20,7 @@
         </button>
     </footer>
 </modal>
+</div>
 </template>
 
 <script>
@@ -27,6 +29,7 @@ import Modal from 'components/modal.vue';
 import ResourceForm from 'components/dataset/resource/form.vue';
 
 export default {
+    name: 'add-resource-modal',
     props: {
         dataset: {
             type: Dataset,

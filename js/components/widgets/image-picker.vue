@@ -69,13 +69,13 @@
 </template>
 
 <script>
-import $ from 'jquery';
 import API from 'api';
 import log from 'logger';
 import UploaderMixin from 'mixins/uploader';
 import Thumbnailer from 'components/widgets/thumbnailer.vue';
 
 export default {
+    name: 'image-picker',
     autoUpload: false,
     mixins: [UploaderMixin],
     components: {Thumbnailer},
@@ -111,6 +111,7 @@ export default {
                 log.warning('File APIs not supported');
                 this.upload();
             }
+            this.$dispatch('wizard:enable-next')
             return true;
         },
         'uploader:progress': function(id, uploaded, total) {
@@ -131,10 +132,10 @@ export default {
         save() {
             if (this.HAS_FILE_API) {
                 const data = {};
-                if (this.$refs.thumbnailer.bbox) {
+                try {
                     data.bbox = this.$refs.thumbnailer.bbox;
-                }
-                this.upload(data);
+                    this.upload(data);
+                } catch(e) {}
             } else {
                 this.$dispatch('image:saved');
             }

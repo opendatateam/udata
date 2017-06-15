@@ -8,7 +8,7 @@ import config from 'config';
 const INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
 
 export default {
-    replace: true,
+    name: 'leaflet-map',
     props: {
         // Whether or not to allow zooming and paning (scrool, tap...)
         fixed: {

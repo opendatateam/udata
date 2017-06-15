@@ -1,18 +1,30 @@
 <template>
+<div>
 <wizard v-ref:wizard :steps="steps" :finish="true" :title="_('New topic')"></wizard>
+</div>
 </template>
 
 <script>
 import Topic from 'models/topic';
 
+import Wizard from 'components/widgets/wizard.vue';
+
+// Steps
+import TopicForm from 'components/topic/form.vue';
+import DatasetCardsForm from 'components/dataset/cards-form.vue';
+import ReuseCardsForm from 'components/reuse/cards-form.vue';
+
+
 export default {
-    data: function() {
+    name: 'topic-wizard',
+    components: {Wizard},
+    data() {
         return {
             topic: new Topic(),
             steps: [{
                 label: this._('Writing'),
                 subtitle: this._('Write your topic'),
-                component: require('components/topic/form.vue'),
+                component: TopicForm,
                 next: (component) => {
                     if (component.$refs.form.validate()) {
                         Object.assign(this.topic, component.$refs.form.serialize());
@@ -23,7 +35,7 @@ export default {
             }, {
                 label: this._('Datasets'),
                 subtitle: this._('Add some related datasets'),
-                component: require('components/dataset/cards-form.vue'),
+                component: DatasetCardsForm,
                 next: (component) => {
                     this.topic.datasets = component.datasets;
                     this.topic.save();
@@ -32,7 +44,7 @@ export default {
             }, {
                 label: this._('Reuses'),
                 subtitle: this._('Add some related reuses'),
-                component: require('components/reuse/cards-form.vue'),
+                component: ReuseCardsForm,
                 next: (component) => {
                     this.topic.reuses = component.reuses;
                     this.topic.save();
@@ -40,9 +52,6 @@ export default {
                 }
             }]
          };
-    },
-    components: {
-        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {
@@ -55,7 +64,7 @@ export default {
             this.$refs.wizard.$refs.content.topic = this.topic;
         },
         'wizard:finish': function() {
-            this.$go('/topic/' + this.topic.id);
+            this.$go({name: 'topic', params: {oid: this.topic.id}});
         }
     }
 };

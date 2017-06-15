@@ -52,12 +52,14 @@
 </style>
 
 <template>
-    <div class="row">
-        <div class="input-group col-lg-10 col-lg-offset-1 completer-row">
-            <span class="input-group-addon">
-                <span class="fa fa-retweet"></span>
-            </span>
-            <completer v-ref:completer></completer>
+    <div class="row completer-row">
+        <div class="col-lg-10 col-lg-offset-1">
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <span class="fa fa-retweet"></span>
+                </span>
+                <completer v-ref:completer></completer>
+            </div>
         </div>
     </div>
     <div class="row" v-show="!reuses.length">
@@ -78,18 +80,17 @@
 
 <script>
 import Sorter from 'mixins/sorter';
+import Card from 'components/reuse/card.vue';
+import Completer from 'components/form/reuse-completer.vue';
 
 export default {
     name: 'reuses-cards-form',
     mixins: [Sorter],
-    components: {
-        card: require('components/reuse/card.vue'),
-        completer: require('components/form/reuse-completer.vue')
-    },
+    components: {Card, Completer},
     props: {
         reuses: {
             type: Array,
-            default: function() {return [];}
+            default: () => [],
         }
     },
     events: {
@@ -101,13 +102,12 @@ export default {
         }
     },
     methods: {
-        on_remove: function(reuse_id) {
+        on_remove(reuse_id) {
             this.reuses.splice(this.reuses.indexOf(reuse_id), 1);
             this.$dispatch('reuse-card-list:remove', reuse_id);
         }
     },
     sortable: {
-        // disabled: true,
         draggable: '.reuse-card-container',
         ghostClass: 'ghost',
     }

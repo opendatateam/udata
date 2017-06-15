@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Organization
+from udata.models import Organization, CERTIFIED, PUBLIC_SERVICE
 from udata.tasks import task, get_logger
 
 from .signals import on_badge_added
@@ -23,20 +23,55 @@ def connect(signal):
     return wrapper
 
 
-def owner_recipients(badge):
-    if badge.subject.organization:
-        members = badge.subject.organization.members
-    else:
-        members = badge.subject.members
-    return [m.user for m in members]
+@connect(on_badge_added)
+def notify_badge_added_certified(sender, kind=''):
+    '''
+    Send an email when a `CERTIFIED` badge is added to an `Organization`
+
+    Parameters
+    ----------
+    sender
+        The object that emitted the event.
+    kind: str
+        The kind of `Badge` object awarded.
+    '''
+    if kind == CERTIFIED and isinstance(sender, Organization):
+        recipients = [member.user for member in sender.members]
+        subject = _(
+            'Your organization "%(name)s" has been certified',
+            name=sender.name
+        )
+        mail.send(
+            subject,
+            recipients,
+            'badge_added_certified',
+            organization=sender,
+            badge=sender.get_badge(kind)
+        )
 
 
 @connect(on_badge_added)
-def notify_badge_added(badge):
-    if isinstance(badge.subject, Organization):
-        recipients = owner_recipients(badge)
-        subject = _('Your %(type)s gain a new badge',
-                    type=badge.subject.verbose_name)
-        mail.send(subject, recipients, 'badge_added', badge=badge)
-    else:
-        log.warning('Unrecognized badge subject type %s', type(badge.subject))
+def notify_badge_added_public_service(sender, kind=''):
+    '''
+    Send an email when a `PUBLIC_SERVICE` badge is added to an `Organization`
+
+    Parameters
+    ----------
+    sender
+        The object that emitted the event.
+    kind: str
+        The kind of `Badge` object awarded.
+    '''
+    if kind == PUBLIC_SERVICE and isinstance(sender, Organization):
+        recipients = [member.user for member in sender.members]
+        subject = _(
+            'Your organization "%(name)s" has been identified as public service',
+            name=sender.name
+        )
+        mail.send(
+            subject,
+            recipients,
+            'badge_added_public_service',
+            organization=sender,
+            badge=sender.get_badge(kind)
+        )

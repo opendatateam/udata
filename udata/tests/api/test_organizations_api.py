@@ -6,13 +6,15 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Organization, Member, MembershipRequest, Follow, Issue, Discussion
+    Organization, Member, MembershipRequest, Follow, Issue, Discussion,
+    CERTIFIED, PUBLIC_SERVICE
 )
 
 from . import APITestCase
 
 from udata.utils import faker
 from udata.core.badges.factories import badge_factory
+from udata.core.badges.signals import on_badge_added, on_badge_removed
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -681,23 +683,63 @@ class OrganizationBadgeAPITest(APITestCase):
 
     def test_create(self):
         data = self.factory.attributes()
-        with self.api_user():
-            response = self.post(
-                url_for('api.organization_badges', org=self.organization),
-                data)
+        with self.api_user(), self.assert_emit(on_badge_added):
+                response = self.post(
+                    url_for('api.organization_badges', org=self.organization),
+                    data)
         self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
 
-    def test_create_same(self):
+    def test_create_badge_certified_mail(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+
         data = self.factory.attributes()
-        with self.api_user():
+        data['kind'] = CERTIFIED
+
+        with self.capture_mails() as mails:
+            self.post(
+                url_for('api.organization_badges', org=org),
+                data)
+
+        # Should have sent one mail to each member of organization
+        members_emails = [m.user.email for m in org.members]
+        self.assertEqual(len(mails), len(members_emails))
+        self.assertListEqual([m.recipients[0] for m in mails], members_emails)
+
+    def test_create_badge_public_service_mail(self):
+        member = Member(user=self.user, role='admin')
+        org = OrganizationFactory(members=[member])
+
+        data = self.factory.attributes()
+        data['kind'] = PUBLIC_SERVICE
+
+        with self.capture_mails() as mails:
+            self.post(
+                url_for('api.organization_badges', org=org),
+                data)
+            # do it a second time, no email expected for this one
             self.post(
                 url_for('api.organization_badges', org=self.organization),
                 data)
-            response = self.post(
-                url_for('api.organization_badges', org=self.organization),
-                data)
+
+        # Should have sent one mail to each member of organization
+        members_emails = [m.user.email for m in org.members]
+        self.assertEqual(len(mails), len(members_emails))
+        self.assertListEqual([m.recipients[0] for m in mails], members_emails)
+
+    def test_create_same(self):
+        data = self.factory.attributes()
+        with self.api_user():
+            with self.assert_emit(on_badge_added):
+                self.post(
+                    url_for('api.organization_badges', org=self.organization),
+                    data)
+            with self.assert_not_emit(on_badge_added):
+                response = self.post(
+                    url_for('api.organization_badges', org=self.organization),
+                    data)
         self.assertStatus(response, 200)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
@@ -724,9 +766,10 @@ class OrganizationBadgeAPITest(APITestCase):
         self.organization.badges.append(badge)
         self.organization.save()
         with self.api_user():
-            response = self.delete(
-                url_for('api.organization_badge', org=self.organization,
-                        badge_kind=str(badge.kind)))
+            with self.assert_emit(on_badge_removed):
+                response = self.delete(
+                    url_for('api.organization_badge', org=self.organization,
+                            badge_kind=str(badge.kind)))
         self.assertStatus(response, 204)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 0)

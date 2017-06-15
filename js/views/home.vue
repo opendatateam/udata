@@ -1,4 +1,5 @@
 <template>
+<div>
 <layout :title="_('Dashboard')">
     <div class="row">
         <small-box class="col-lg-3 col-xs-6" v-for="b in dataBoxes"
@@ -25,6 +26,7 @@
         </discussion-list>
     </div>
 </layout>
+</div>
 </template>
 
 <script>

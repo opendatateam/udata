@@ -35,6 +35,7 @@ import PostList from 'components/post/list.vue';
 
 
 export default {
+    name: 'editorial-view',
     data() {
         return {
             posts: new Posts({query: {sort: '-created', page_size: 10}, mask: PostList.MASK}),

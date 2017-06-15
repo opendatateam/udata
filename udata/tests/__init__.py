@@ -12,7 +12,7 @@ import mock
 
 from contextlib import contextmanager
 from StringIO import StringIO
-from urlparse import urljoin
+from urlparse import urljoin, urlparse
 
 from flask import request, url_for
 from flask_testing import TestCase as BaseTestCase
@@ -32,6 +32,14 @@ from udata.core.user.factories import UserFactory
 
 class TestCase(BaseTestCase):
     settings = settings.Testing
+
+    def setUp(self):
+        # Ensure compatibility with multiple inheritance
+        super(TestCase, self).setUp()
+
+    def tearsDown(self):
+        # Ensure compatibility with multiple inheritance
+        super(TestCase, self).tearsDown()
 
     def create_app(self):
         '''Create an application a test application.
@@ -109,6 +117,28 @@ class TestCase(BaseTestCase):
             )
 
     @contextmanager
+    def assert_not_emit(self, *signals):
+        specs = []
+
+        def handler(sender, **kwargs):
+            pass
+
+        for signal in signals:
+            m = mock.Mock(spec=handler)
+            signal.connect(m, weak=False)
+            specs.append((signal, m))
+
+        yield
+
+        for signal, mock_handler in specs:
+            signal.disconnect(mock_handler)
+            signal_name = getattr(signal, 'name', str(signal))
+            self.assertFalse(
+                mock_handler.called,
+                'Signal "{0}" should NOT have been emitted'.format(signal_name)
+            )
+
+    @contextmanager
     def capture_mails(self):
         mails = []
 
@@ -175,7 +205,9 @@ class WebTestMixin(object):
 class DBTestMixin(object):
     def drop_db(self):
         '''Clear the database'''
-        db_name = self.app.config['MONGODB_DB']
+        parsed_url = urlparse(self.app.config['MONGODB_HOST'])
+        # drop the leading /
+        db_name = parsed_url.path[1:]
         db.connection.drop_database(db_name)
 
     def setUp(self):

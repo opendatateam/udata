@@ -158,8 +158,11 @@ def init_app(app):
 
 
 def _add_language_code(endpoint, values):
-    if not (endpoint.endswith('.static') or endpoint.endswith('_redirect')):
-        values.setdefault('lang_code', g.get('lang_code', default_lang))
+    try:
+        if current_app.url_map.is_endpoint_expecting(endpoint, 'lang_code'):
+            values.setdefault('lang_code', g.get('lang_code', default_lang))
+    except KeyError:  # Endpoint does not exist
+        pass
 
 
 def _pull_lang_code(endpoint, values):
@@ -184,6 +187,15 @@ def redirect_to_lang(*args, **kwargs):
     return redirect(url_for(endpoint, **kwargs))
 
 
+def redirect_to_unlocalized(*args, **kwargs):
+    '''Redirect lang-prefixed urls to no prefixed URL.'''
+    endpoint = request.endpoint.replace('_redirect', '')
+    kwargs = multi_to_dict(request.args)
+    kwargs.update(request.view_args)
+    kwargs.pop('lang_code', None)
+    return redirect(url_for(endpoint, **kwargs))
+
+
 class I18nBlueprintSetupState(BlueprintSetupState):
     def add_url_rule(self, rule, endpoint=None, view_func=None, **options):
         """A helper method to register a rule (and optionally a view function)
@@ -203,13 +215,23 @@ class I18nBlueprintSetupState(BlueprintSetupState):
         defaults = self.url_defaults
         if 'defaults' in options:
             defaults = dict(defaults, **options.pop('defaults'))
-        self.app.add_url_rule('/<lang:lang_code>' + rule,
-                              '%s.%s' % (self.blueprint.name, endpoint),
-                              view_func, defaults=defaults, **options)
+        if options.pop('localize', True):
+            self.app.add_url_rule('/<lang:lang_code>' + rule,
+                                  '%s.%s' % (self.blueprint.name, endpoint),
+                                  view_func, defaults=defaults, **options)
 
-        self.app.add_url_rule(
-            rule, '%s.%s_redirect' % (self.blueprint.name, endpoint),
-            redirect_to_lang, defaults=defaults, **options)
+            self.app.add_url_rule(
+                rule, '%s.%s_redirect' % (self.blueprint.name, endpoint),
+                redirect_to_lang, defaults=defaults, **options)
+        else:
+            self.app.add_url_rule(rule,
+                                  '%s.%s' % (self.blueprint.name, endpoint),
+                                  view_func, defaults=defaults, **options)
+
+            self.app.add_url_rule(
+                '/<lang:lang_code>' + rule,
+                '%s.%s_redirect' % (self.blueprint.name, endpoint),
+                redirect_to_unlocalized, defaults=defaults, **options)
 
 
 class I18nBlueprint(Blueprint):

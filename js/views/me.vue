@@ -1,9 +1,10 @@
 <template>
+<div>
 <layout :title="_('Me')" :subtitle="$root.me.fullname" :actions="actions">
     <div class="row">
-        <profile :user="$root.me" class="col-xs-12 col-md-6"></profile>
-        <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
-            x="date" :y="y"></chart>
+        <profile-widget :user="$root.me" class="col-xs-12 col-md-6"></profile-widget>
+        <chart-widget title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
+            x="date" :y="y"></chart-widget>
     </div>
 
     <div class="row">
@@ -14,10 +15,11 @@
         <reuse-list  id="reuses" class="col-xs-12" :reuses="reuses"></reuse-list>
     </div>
     <div class="row">
-        <apikey class="col-xs-12 col-md-6" :user="$root.me"></apikey>
-        <harvesters class="col-xs-12 col-md-6" :owner="$root.me"></harvesters>
+        <apikey-widget class="col-xs-12 col-md-6" :user="$root.me"></apikey-widget>
+        <harvester-list class="col-xs-12 col-md-6" :owner="$root.me"></harvester-list>
     </div>
 </layout>
+</div>
 </template>
 
 <script>
@@ -27,12 +29,18 @@ import API from 'api';
 import {PageList} from 'models/base';
 import Metrics from 'models/metrics';
 import Layout from 'components/layout.vue';
+
+import ApikeyWidget from 'components/user/apikey.vue';
+import ChartWidget from 'components/charts/widget.vue';
 import DatasetList from 'components/dataset/list.vue';
+import HarvesterList from 'components/harvest/sources.vue';
+import ProfileWidget from 'components/user/profile.vue';
 import ReuseList from 'components/reuse/list.vue';
 
 export default  {
     name: 'MeView',
-    data: function() {
+    components: {ProfileWidget, ApikeyWidget, HarvesterList, ChartWidget, DatasetList, ReuseList, Layout},
+    data() {
         return {
             actions: [{
                 label: this._('Edit'),
@@ -65,20 +73,11 @@ export default  {
             }]
         };
     },
-    components: {
-        profile: require('components/user/profile.vue'),
-        chart: require('components/charts/widget.vue'),
-        apikey: require('components/user/apikey.vue'),
-        harvesters: require('components/harvest/sources.vue'),
-        DatasetList,
-        ReuseList,
-        Layout
-    },
-    attached: function() {
+    attached() {
         this.update();
         this._handler = this.$root.me.$on('updated', this.update.bind(this));
     },
-    detached: function() {
+    detached() {
         this._handler.remove();
     },
     methods: {
@@ -90,7 +89,7 @@ export default  {
         edit() {
             this.$go({name: 'me-edit'});;
         },
-        update: function() {
+        update() {
             if (this.$root.me.id) {
                 this.metrics.fetch({
                     id: this.$root.me.id,

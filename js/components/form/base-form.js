@@ -1,6 +1,6 @@
 import API from 'api';
 import {_} from 'i18n';
-import {setattr, isObject} from 'utils';
+import {setattr, isObject, isString} from 'utils';
 import log from 'logger';
 import moment from 'moment';
 import $ from 'jquery';
@@ -73,7 +73,6 @@ const TEXT_TAGS = ['select', 'textarea'];
 
 export default {
     name: 'base-form',
-    replace: true,
     props: {
         fields: Array,
         model: Object,
@@ -145,6 +144,7 @@ export default {
             return s;
         },
         $form() {
+            if (!this) return;  // Prevent console noise on a non significant error
             return this.$refs.form || this.$els.form || this.$el;
         }
     },
@@ -230,8 +230,13 @@ export default {
             return out;
         },
         on_error(response) {
+            // Errors occuring before submission are simple strings
+            if (isString(response)) {
+                log.error(response);
+                return;
+            }
             // Display the error identifier if present
-            if ('X-Sentry-ID' in response.headers) {
+            if (response.headers && 'X-Sentry-ID' in response.headers) {
                 this.$dispatch('notify', {
                     type: 'error',
                     icon: 'exclamation-triangle',

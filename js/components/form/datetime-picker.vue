@@ -25,7 +25,6 @@ import {FieldComponentMixin} from 'components/form/base-field';
 
 export default {
     name: 'datetime-picker',
-    replace: true,
     mixins: [FieldComponentMixin],
     events: {
         'calendar:date:selected': function(datetime) {

@@ -19,6 +19,7 @@
 </style>
 
 <template>
+<div>
 <box :title="_('Details')" icon="retweet" boxclass="box-solid reuse-details-widget">
     <h3>{{reuse.title}}</h3>
     <div class="details-body">
@@ -42,6 +43,7 @@
         </div>
     </div>
 </box>
+</div>
 </template>
 
 <script>
@@ -51,14 +53,15 @@ import ImageButton from 'components/widgets/image-button.vue';
 
 export default {
     name: 'reuse-details',
+    components: {Box, ImageButton},
     props: ['reuse'],
-    data: function() {
+    data() {
         return {
             badges: require('models/badges').badges.reuse
         };
     },
     computed: {
-        endpoint: function() {
+        endpoint() {
             if (this.reuse.id) {
                 var operation = API.reuses.operations.reuse_image;
                 return operation.urlify({reuse: this.reuse.id});
@@ -70,6 +73,5 @@ export default {
             this.reuse.fetch();
         }
     },
-    components: {Box, ImageButton}
 };
 </script>

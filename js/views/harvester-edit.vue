@@ -1,4 +1,5 @@
 <template>
+<div>
 <form-layout icon="tasks" :title="title" :save="save" :cancel="cancel" footer="true" :model="source">
     <harvest-form v-ref:form :source="source"></harvest-form>
     <!--div class="row" slot="extras">
@@ -12,6 +13,7 @@
         <preview class="col-xs-12" :source="source"></preview>
     </div>
 </form-layout>
+</div>
 </template>
 
 <script>
@@ -23,6 +25,7 @@ import ItemModal from 'components/harvest/item.vue';
 import Preview from 'components/harvest/preview.vue';
 
 export default {
+    name: 'harvester-edit',
     data() {
         return {
             source: new HarvestSource(),

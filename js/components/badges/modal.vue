@@ -1,4 +1,5 @@
 <template>
+<div>
 <modal :title="_('Badges')"
     class="modal-info badges-modal"
     v-ref:modal>
@@ -36,6 +37,7 @@
         </button>
     </footer>
 </modal>
+</div>
 </template>
 
 <script>
@@ -44,6 +46,7 @@ import {badges} from 'models/badges';
 import Modal from 'components/modal.vue';
 
 export default {
+    name: 'badges-modal',
     components: {Modal},
     props: {
         subject: Object
@@ -63,33 +66,23 @@ export default {
         },
         hasModifications() {
             return (this.selected.length !== this.initial.length)
-                || this.selected.some((badge) => {
-                    return this.initial.indexOf(badge) < 0;
-                });
+                || this.selected.some(badge => this.initial.indexOf(badge) < 0);
         }
     },
     compiled() {
         this.badges = badges.available(this.subject);
 
         if (this.subject.hasOwnProperty('badges')) {
-            this.selected = this.subject.badges.map(function(badge) {
-                return badge.kind;
-            });
-
+            this.selected = this.subject.badges.map(badge => badge.kind);
             this.initial = this.selected.slice(0);
         }
     },
     methods: {
         confirm() {
-            const to_add = this.selected.filter((badge) => {
-                        return this.initial.indexOf(badge) < 0;
-                    }),
-                to_remove = this.initial.filter((badge) => {
-                        return this.selected.indexOf(badge) < 0;
-                    });
+            const toAdd = this.selected.filter(badge => this.initial.indexOf(badge) < 0);
+            const toRemove = this.initial.filter(badge => this.selected.indexOf(badge) < 0);
 
-
-            to_add.forEach((kind) => {
+            toAdd.forEach((kind) => {
                 this.added[kind] = false;
                 badges.add(this.subject, kind, (badge) => {
                     this.added[badge.kind] = true;
@@ -97,7 +90,7 @@ export default {
                 })
             });
 
-            to_remove.forEach((kind) => {
+            toRemove.forEach((kind) => {
                 this.removed[kind] = false;
                 badges.remove(this.subject, kind, () => {
                     this.removed[kind] = true;
@@ -106,12 +99,8 @@ export default {
             });
         },
         checkAllDone() {
-            const allAdded = Object.keys(this.added).every((key) => {
-                    return this.added[key];
-                }),
-                allRemoved = Object.keys(this.removed).every((key) => {
-                    return this.removed[key];
-                });
+            const allAdded = Object.keys(this.added).every(key => this.added[key]);
+            const allRemoved = Object.keys(this.removed).every(key => this.removed[key]);
 
             if (allAdded && allRemoved) {
                 this.$refs.modal.close();

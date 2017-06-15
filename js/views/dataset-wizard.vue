@@ -1,27 +1,38 @@
 <template>
+<div>
 <wizard v-ref:wizard :steps="steps" :title="_('New dataset')"></wizard>
+</div>
 </template>
 
 <script>
 import Dataset from 'models/dataset';
 import Vue from 'vue';
+import Wizard from 'components/widgets/wizard.vue';
+// Steps
+import PublishAs from 'components/widgets/publish-as.vue';
+import DatasetForm from 'components/dataset/form.vue';
+import ResourceForm from 'components/dataset/resource/form.vue';
+import Share from 'components/dataset/created.vue';
+
 
 export default {
+    name: 'dataset-wizard',
+    components: {Wizard},
     props: {
         dataset: {
             type: Dataset,
-            default: function() {
+            default() {
                 return new Dataset();
             }
         }
     },
-    data: function() {
+    data() {
         return {
             publish_as: null,
             steps: [{
                 label: this._('Publish as'),
                 subtitle: this._('Choose who is publishing'),
-                component: require('components/widgets/publish-as.vue'),
+                component: PublishAs,
                 next: (component) => {
                     if (component.selected) {
                         this.publish_as = component.selected;
@@ -31,10 +42,10 @@ export default {
             }, {
                 label: this._('New dataset'),
                 subtitle: this._('Describe your dataset'),
-                component: require('components/dataset/form.vue'),
+                component: DatasetForm,
                 next: (component) => {
                     if (component.validate()) {
-                        let data = component.serialize();
+                        const data = component.serialize();
                         if (this.publish_as) {
                             data.organization = this.publish_as;
                         }
@@ -48,14 +59,14 @@ export default {
                 }
             }, {
                 label: this._('Resources'),
-                subtitle: this._('Add your firsts resources'),
-                component: require('components/dataset/resource/form.vue'),
+                subtitle: this._('Add your first resources'),
+                component: ResourceForm,
                 init: (component) => {
                     component.dataset = this.dataset;
                 },
                 next: (component) => {
                     if (component.validate()) {
-                        var resource = component.serialize();
+                        const resource = component.serialize();
                         this.dataset.save_resource(resource);
                         this.dataset.$once('updated', () => {
                             this.$refs.wizard.go_next();
@@ -66,15 +77,12 @@ export default {
             }, {
                 label: this._('Share'),
                 subtitle: this._('Communicate about your publication'),
-                component: require('components/dataset/created.vue'),
+                component: Share,
                 init: (component) => {
                     component.dataset = this.dataset;
                 }
             }],
          };
-    },
-    components: {
-        wizard: require('components/widgets/wizard.vue')
     },
     events: {
         'wizard:next-step': function() {

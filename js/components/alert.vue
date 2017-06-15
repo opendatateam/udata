@@ -11,10 +11,10 @@
 
 <script>
 const TRANSITION_DURATION = 300;
+const AUTOCLOSE_DELAY = 5000;
 
 export default {
     name: 'alert-box',
-    replace: true,
     data() {
         return {
             closing: false
@@ -42,6 +42,13 @@ export default {
             setTimeout(() => {
                 this.$dispatch('notify:close', this.alert);
             }, TRANSITION_DURATION)
+        }
+    },
+    ready() {
+        if (this.alert.autoclose) {
+            setTimeout(() => {
+                this.$dispatch('notify:close', this.alert)
+            }, AUTOCLOSE_DELAY);
         }
     }
 };

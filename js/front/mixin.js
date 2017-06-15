@@ -72,7 +72,6 @@ export default {
             const constructor = Vue.extend(options);
             return new constructor({
                 el: this.$els.modal,  // This is the modal placeholder in Jinja template
-                replace: false,  // Needed while all components are not migrated to replace: true behavior
                 parent: this,
                 propsData: data
             });

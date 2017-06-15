@@ -1,18 +1,23 @@
 <template>
-<form-horizontal class="resource-form api-resource-form"
+<div>
+<horizontal-form class="resource-form api-resource-form"
         :fields="fields" :model="resource" v-ref:form>
-</form-horizontal>
+</horizontal-form>
+</div>
 </template>
 
 <script>
+import HorizontalForm from 'components/form/horizontal-form.vue';
+
 export default {
+    components: {HorizontalForm},
     props: {
         resource: {
             type: Object,
             default() {return new Resource()}
         },
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                     id: 'title',
@@ -34,14 +39,11 @@ export default {
                 }]
         };
     },
-    components: {
-        'form-horizontal': require('components/form/horizontal-form.vue')
-    },
     methods: {
-        validate: function() {
+        validate() {
             return this.$refs.form.validate();
         },
-        serialize: function() {
+        serialize() {
             return this.$refs.form.serialize();
         }
     }

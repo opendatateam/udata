@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+from urlparse import urlparse
+
 from celery import Celery, Task
 from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
@@ -87,12 +89,11 @@ def schedulables():
 def init_app(app):
     celery.main = app.import_name
 
-    default_name = app.config.get('MONGODB_DB', 'celery')
-    app.config.setdefault('CELERY_MONGODB_SCHEDULER_DB', default_name)
+    parsed_url = urlparse(app.config['MONGODB_HOST'])
 
-    from udata.models import db
-    with app.app_context():
-        default_url = 'mongodb://{0}:{1}'.format(*db.connection.address)
+    app.config.setdefault('CELERY_MONGODB_SCHEDULER_DB', parsed_url.path[1:])
+
+    default_url = '{0}://{1}'.format(*parsed_url)
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_URL', default_url)
 
     celery.conf.update(app.config)

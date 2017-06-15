@@ -1,15 +1,19 @@
 <template>
+<div>
 <form-layout icon="building" :title="title" :save="save" :cancel="cancel" footer="true" :model="org">
     <org-form v-ref:form :organization="org"></org-form>
 </form-layout>
+</div>
 </template>
+
 <script>
 import FormLayout from 'components/form-layout.vue';
 import OrgForm from 'components/organization/form.vue';
 import Organization from 'models/organization';
 
 export default {
-    data: function() {
+    name: 'organization-edit',
+    data() {
         return {
             org: new Organization(),
         };
@@ -26,7 +30,7 @@ export default {
     },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
                 this.org.update(form.serialize(), (response) => {
                     this.org.on_fetched(response);

@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import factory
 
-from udata.utils import faker
-
 from .models import Dataset, Resource, Checksum, CommunityResource, License
 
 
@@ -55,5 +53,6 @@ class LicenseFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = License
 
-    id = factory.Sequence(lambda n: '{0}-{1}'.format(faker.word(), n))
+    id = factory.Faker('unique_string')
     title = factory.Faker('sentence')
+    url = factory.Faker('uri')

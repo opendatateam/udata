@@ -8,6 +8,7 @@
 </style>
 
 <template>
+<div>
 <box :title="title" :icon="icon"
     :boxclass="boxclasses"
     bodyclass="table-responsive no-padding"
@@ -54,17 +55,18 @@
         <pagination-widget :p="p"></pagination-widget>
     </footer>
 </box>
+</div>
 </template>
 
 <script>
+import Box from 'components/containers/box.vue';
+import Datatable from 'components/datatable/table.vue';
+import PaginationWidget from 'components/pagination.vue';
+
 export default {
     name: 'datatable-widget',
-    components: {
-        'box': require('components/containers/box.vue'),
-        'datatable': require('components/datatable/table.vue'),
-        'pagination-widget': require('components/pagination.vue'),
-    },
-    data: function() {
+    components: {Box, Datatable, PaginationWidget},
+    data() {
         return {
             search_query: null,
             selected: null,
@@ -101,16 +103,16 @@ export default {
         },
         downloads: {
             type: Array,
-            default: function() {return [];}
+            default: () => [],
         }
     },
     methods: {
-        search: function() {
+        search() {
             this.p.search(this.search_query);
         }
     },
     watch: {
-        search_query: function(query) {
+        search_query(query) {
             this.p.search(query);
         }
     }

@@ -55,6 +55,33 @@
     - Allows to define `min` and `max` values to disable some dates
     - Keyboard input is reflected into the calendar
       [#615](https://github.com/opendatateam/udata/issues/615)
+- Easier Vue.js development/debugging:
+    - Drop `Vue.config.replace = false`: compatible with Vue.js 1/2 and no more style guessing
+      [#760](https://github.com/opendatateam/udata/pull/760)
+    - `name` on all components: no more `Anonymous Component` in Vue debugger
+    - No more `Fragments`
+    - More ES6 everywhere
+- Improve and fix notifications:
+  [#928](https://github.com/opendatateam/udata/issues/928)
+    - Changed notification style to toast
+    - Fix notifications that weren't displayed on form submission
+- Add a toggle indicator on dataset quality blocks that are collapsible
+  [#915](https://github.com/opendatateam/udata/issues/915)
+- Make metrics deactivable for tests
+  [#905](https://github.com/opendatateam/udata/pull/905)
+- Disable `next` button when no file has been uploaded
+  [#930](https://github.com/opendatateam/udata/issues/930)
+- Fix badges notification mails
+  [#894](https://github.com/opendatateam/udata/issues/894)
+
+## 1.0.11 (2017-05-25)
+
+- Fix presubmit form errors handling
+  [#909](https://github.com/opendatateam/udata/pull/909)
+- Fix producer sidebar image sizing
+  [#913](https://github.com/opendatateam/udata/issues/913)
+- Fix js `Model.save()` not updating in some cases
+  [#910](https://github.com/opendatateam/udata/pull/910)
 
 ## 1.0.10 (2017-05-11)
 

@@ -12,6 +12,7 @@
 </style>
 
 <template>
+<div>
 <form-horizontal class="resource-form file-resource-form"
     :fields="fields" :model="resource" v-ref:form>
 </form-horizontal>
@@ -50,6 +51,7 @@
             </span>
         </div>
     </div>
+</div>
 </div>
 </template>
 
@@ -120,7 +122,7 @@ export default {
             return this.resource instanceof CommunityResource;
         },
         upload_endpoint() {
-            let operations = API.datasets.operations;
+            const operations = API.datasets.operations;
             let params = {};
             let endpoint = 'upload_';
             if (typeof this.dataset !== 'undefined') {
@@ -141,7 +143,6 @@ export default {
             return operations[endpoint].urlify(params);
         }
     },
-
     events: {
         'uploader:progress': function(id, uploaded, total) {
             this.progress = Math.round(uploaded * 100 / total);
@@ -151,7 +152,7 @@ export default {
                 this.dataset.resources.unshift(response);
             }
             // Do not override an existing typed or registered title.
-            let title = this.$refs.form.serialize().title || this.resource.title;
+            const title = this.$refs.form.serialize().title || this.resource.title;
             if (title) {
                 response.title = title;
             }

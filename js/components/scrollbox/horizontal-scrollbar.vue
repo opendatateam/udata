@@ -11,7 +11,7 @@
 
 <script>
 export default {
-    replace: true,
+    name: 'horizontal-scrollbar',
 
     data() {
         return {

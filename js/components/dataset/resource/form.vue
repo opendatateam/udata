@@ -1,7 +1,12 @@
 <style lang="less">
-@gray-lighter: darken(#fff, 10%);
+// Mostly a duplicate from 'less/udata/publish-actions-modal.less'
+// but kept as both components are meant to be separated in the
+// soon to happen core/admin split
+@import '~less/admin/variables';
 
 .actions-list {
+    margin-bottom: 0;
+
     .list-group-item {
         @base-color: #eaeaea;
         @base-size: 60px;
@@ -13,11 +18,15 @@
         border: @border-size solid transparent;
         padding: 0;
 
+        &:last-child {
+            margin-bottom: 0;
+        }
+
         .action-icon {
             float: left;
             width: @base-size;
             height: @base-size;
-            background-color: lighten(#03496F, 10%);
+            background-color: @blue;
             margin: 0px;
 
             span {
@@ -52,6 +61,7 @@
 </style>
 
 <template>
+<div>
 <div class="list-group actions-list" v-if="!resource.filetype">
     <a v-for="action in actions" class="list-group-item pointer"
         @click="set_filetype(action.filetype)">
@@ -69,13 +79,19 @@
 <component v-ref:form v-if="resource.filetype" :is="form"
     :dataset="dataset" :resource="resource">
 </component>
+</div>
 </template>
 
 <script>
 import Dataset from 'models/dataset';
 import Resource from 'models/resource';
 
+import FileForm from 'components/dataset/resource/file-form.vue';
+import RemoteForm from 'components/dataset/resource/remote-form.vue';
+import ApiForm from 'components/dataset/resource/api-form.vue';
+
 export default {
+    components: {FileForm, RemoteForm, ApiForm},
     props: {
         dataset: {
             type: Object,
@@ -85,8 +101,9 @@ export default {
             type: Object,
             default() {return new Resource()}
         },
+        hideNotifications: false
     },
-    data: function() {
+    data() {
         return {
             actions: [{
                 label: this._('Local file'),
@@ -111,21 +128,25 @@ export default {
             return `${this.resource.filetype}-form`;
         }
     },
-    components: {
-        'file-form': require('components/dataset/resource/file-form.vue'),
-        'remote-form': require('components/dataset/resource/remote-form.vue'),
-        'api-form': require('components/dataset/resource/api-form.vue')
-    },
     methods: {
-        set_filetype: function(filetype) {
+        set_filetype(filetype) {
             this.resource.filetype = filetype;
         },
-        serialize: function() {
+        serialize() {
             // Required because of readonly fields and filetype.
-            return Object.assign({} , this.resource, this.$refs.form.serialize());
+            return Object.assign({}, this.resource, this.$refs.form.serialize());
         },
-        validate: function() {
-            return this.$refs.form.validate();
+        validate() {
+            const isValid = this.$refs.form.validate();
+
+            if (isValid & !this.hideNotifications) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your resource has been updated.')
+                });
+            }
+            return isValid;
         }
     }
 };
