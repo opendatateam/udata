@@ -72,14 +72,14 @@ def migrate_zones_ids():
                         counter_towns += 1
                         new_zones.append(
                             GeoZone
-                            .objects(code=zone_id, level='fr/commune')
+                            .objects(code=zone_id, level='fr:commune')
                             .valid_at(date.today())
                             .first())
                     elif kind == 'county':
                         counter_counties += 1
                         new_zones.append(
                             GeoZone
-                            .objects(code=zone_id, level='fr/departement')
+                            .objects(code=zone_id, level='fr:departement')
                             .valid_at(date.today())
                             .first())
                     elif kind == 'region':
@@ -87,7 +87,7 @@ def migrate_zones_ids():
                         # Only link to pre-2016 regions which kept the same id.
                         new_zones.append(
                             GeoZone
-                            .objects(code=zone_id, level='fr/region')
+                            .objects(code=zone_id, level='fr:region')
                             .first())
                     else:
                         new_zones.append(zone)

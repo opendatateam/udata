@@ -126,7 +126,7 @@ class TerritoryConverter(ModelConverter, PathConverter):
         level, code, slug = value.split('/')
         return self.model.objects.get_or_404(
             id=':'.join(['fr', level, code]),
-            level='fr/{level}'.format(level=level))
+            level='fr:{level}'.format(level=level))
 
     def to_url(self, obj):
         """
@@ -143,7 +143,7 @@ class TerritoryConverter(ModelConverter, PathConverter):
             if not code:
                 raise ValueError('Unable to serialize "%s" to url' % obj)
             territory = self.model.objects.get_or_404(
-                code=code, level='fr/{level}'.format(level=level_name))
+                code=code, level='fr:{level}'.format(level=level_name))
             return '{level_name}/{code}/{slug}'.format(
                 level_name=level_name, code=territory.code,
                 slug=territory.slug)

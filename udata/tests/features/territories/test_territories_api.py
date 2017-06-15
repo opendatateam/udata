@@ -74,7 +74,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_towns(self):
         arles_sur_tech = GeoZoneFactory(
-            id='fr:commune:66009@1942-01-01', level='fr/commune',
+            id='fr:commune:66009@1942-01-01', level='fr:commune',
             parents=[self.bdr.id], name='Arles-sur-Tech', code='66009',
             keys={'postal': '66150'}, population=2687, area=0,
             validity={'start': '1942-01-01', 'end': '9999-12-31'})
@@ -133,7 +133,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_town_and_county(self):
         bouchet = GeoZoneFactory(
-            id='fr:commune:26054@1942-01-01', level='fr/commune',
+            id='fr:commune:26054@1942-01-01', level='fr:commune',
             parents=[self.bdr.id], name='Bouchet', code='26054',
             keys={'postal': '26790'}, population=1305, area=0,
             validity={'start': '1942-01-01', 'end': '9999-12-31'})
@@ -148,7 +148,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_drom_com(self):
         guyane = GeoZoneFactory(
-            id='fr:departement:973@1860-07-01', level='fr/departement',
+            id='fr:departement:973@1860-07-01', level='fr:departement',
             name='Guyane', code='973', population=250109, area=0,
             validity={'start': '1860-07-01', 'end': '9999-12-31'})
         response = self.get(
@@ -160,7 +160,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_drom_com_by_code(self):
         guyane = GeoZoneFactory(
-            id='fr:departement:973@1860-07-01', level='fr/departement',
+            id='fr:departement:973@1860-07-01', level='fr:departement',
             name='Guyane', code='973', population=250109, area=0,
             validity={'start': '1860-07-01', 'end': '9999-12-31'})
         response = self.get(
@@ -172,7 +172,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_corsica(self):
         bastia = GeoZoneFactory(
-            id='fr:commune:2b033@1976-01-01', level='fr/commune',
+            id='fr:commune:2b033@1976-01-01', level='fr:commune',
             name='Bastia', code='2b033', population=4479, area=0,
             validity={'start': '1976-01-01', 'end': '9999-12-31'})
         response = self.get(
@@ -184,7 +184,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_corsica_by_code(self):
         bastia = GeoZoneFactory(
-            id='fr:commune:2b033@1976-01-01', level='fr/commune',
+            id='fr:commune:2b033@1976-01-01', level='fr:commune',
             name='Bastia', code='2b033', population=4479, area=0,
             validity={'start': '1976-01-01', 'end': '9999-12-31'})
         response = self.get(
@@ -196,7 +196,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_suggest_corsica_by_county_code(self):
         haute_corse = GeoZoneFactory(
-            id='fr:departement:2b@1976-01-01', level='fr/departement',
+            id='fr:departement:2b@1976-01-01', level='fr:departement',
             name='Haute-Corse', code='2b', population=168640, area=0,
             validity={'start': '1976-01-01', 'end': '9999-12-31'})
         response = self.get(
@@ -208,7 +208,7 @@ class TerritoriesAPITest(APITestCase):
 
     def test_not_suggest_country(self):
         GeoZoneFactory(
-            id='country/fr', level='country', name='France')
+            id='country:fr', level='country', name='France')
         response = self.get(
             url_for('api.suggest_territory'), qs={'q': 'fra'})
         self.assert200(response)

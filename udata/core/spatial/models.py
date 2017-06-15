@@ -112,9 +112,9 @@ class GeoZone(db.Document):
     @cached_property
     def level_name(self):
         """Truncated level name for the sake of readability."""
-        if self.level.startswith('fr/'):
+        if self.level.startswith('fr:'):
             return self.level[3:]
-        # Keep the whole level name as a fallback (e.g. `country/fr`)
+        # Keep the whole level name as a fallback (e.g. `country:fr`)
         return self.level
 
     @cached_property

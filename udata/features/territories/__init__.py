@@ -23,14 +23,14 @@ def check_for_territories(query):
         if level == 'country':
             continue  # Level not fully handled yet.
         q = db.Q(level=level)
-        if (query_length == 2 and level == 'fr/departement' and
+        if (query_length == 2 and level == 'fr:departement' and
                 (is_digit or query in ('2a', '2b'))):
             # Counties + Corsica.
             q &= db.Q(code=query)
-        elif query_length == 3 and level == 'fr/departement' and is_digit:
+        elif query_length == 3 and level == 'fr:departement' and is_digit:
             # French DROM-COM.
             q &= db.Q(code=query)
-        elif query_length == 5 and level == 'fr/commune' and (
+        elif query_length == 5 and level == 'fr:commune' and (
                 is_digit or query.startswith('2a') or query.startswith('2b')):
             # INSEE code then postal codes with Corsica exceptions.
             q &= db.Q(code=query) | db.Q(keys__postal__contains=query)

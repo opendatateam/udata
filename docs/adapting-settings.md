@@ -111,7 +111,7 @@ Warning: the order is important and will determine parents/children for
 a given territory. You have to set the smallest territory level first:
 
 ```python
-HANDLED_LEVELS = ('fr/commune', 'fr/departement', 'fr/region', 'country')
+HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region', 'country')
 ```
 
 ## ElasticSearch configuration

@@ -13,23 +13,23 @@
 }, {
     "id": "fr:canton",
     "name": "French canton",
-    "parents": ["fr/departement"]
+    "parents": ["fr:departement"]
 }, {
     "id": "fr:departement",
     "name": "French county",
-    "parents": ["fr/region"]
+    "parents": ["fr:region"]
 }, {
     "id": "fr:district",
     "name": "French district",
-    "parents": ["fr/departement"]
+    "parents": ["fr:departement"]
 }, {
     "id": "fr:epci",
     "name": "French intermunicipal (EPCI)",
-    "parents": ["fr/region"]
+    "parents": ["fr:region"]
 }, {
     "id": "fr:iris",
     "name": "Iris (Insee districts)",
-    "parents": ["fr/commune"]
+    "parents": ["fr:commune"]
 }, {
     "id": "fr:region",
     "name": "French region",
@@ -37,5 +37,5 @@
 }, {
     "id": "fr:commune",
     "name": "French town",
-    "parents": ["fr/district", "fr/epci"]
+    "parents": ["fr:district", "fr:epci"]
 }]
