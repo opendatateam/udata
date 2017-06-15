@@ -117,6 +117,28 @@ class TestCase(BaseTestCase):
             )
 
     @contextmanager
+    def assert_not_emit(self, *signals):
+        specs = []
+
+        def handler(sender, **kwargs):
+            pass
+
+        for signal in signals:
+            m = mock.Mock(spec=handler)
+            signal.connect(m, weak=False)
+            specs.append((signal, m))
+
+        yield
+
+        for signal, mock_handler in specs:
+            signal.disconnect(mock_handler)
+            signal_name = getattr(signal, 'name', str(signal))
+            self.assertFalse(
+                mock_handler.called,
+                'Signal "{0}" should NOT have been emitted'.format(signal_name)
+            )
+
+    @contextmanager
     def capture_mails(self):
         mails = []
 

@@ -11,6 +11,8 @@ from mongoengine.signals import post_save
 from udata.auth import current_user
 from udata.models import db
 
+from .signals import on_badge_added, on_badge_removed
+
 log = logging.getLogger(__name__)
 
 __all__ = ('Badge', 'BadgeMixin')
@@ -84,6 +86,7 @@ class BadgeMixin(object):
         })
         self.reload()
         post_save.send(self.__class__, document=self)
+        on_badge_added.send(self, kind=kind)
         return self.get_badge(kind)
 
     def remove_badge(self, kind):
@@ -94,6 +97,7 @@ class BadgeMixin(object):
             }
         })
         self.reload()
+        on_badge_removed.send(self, kind=kind)
         post_save.send(self.__class__, document=self)
 
     def toggle_badge(self, kind):
