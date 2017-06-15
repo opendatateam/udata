@@ -19,11 +19,23 @@ from udata.models import db
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
 from udata.rdf import (
-    DCAT, DCT, SCV, SPDX, SCHEMA, namespace_manager, url_from_rdf
+    DCAT, DCT, FREQ, SCV, SPDX, SCHEMA, namespace_manager, url_from_rdf
 )
 from udata.utils import get_by
 
 from .models import Dataset, Resource, Checksum, License
+
+# Map extra frequencies (ie. not defined in Dublin Core) to closest equivalent
+RDF_FREQUENCIES = {
+    'punctual': None,
+    'hourly': FREQ.continuous,
+    'fourTimesADay': FREQ.daily,
+    'threeTimesADay': FREQ.daily,
+    'semidaily': FREQ.daily,
+    'fourTimesAWeek': FREQ.threeTimesAWeek,
+    'quinquennial': None,
+    'unknown': None,
+}
 
 
 class HTMLDetector(HTMLParser):
@@ -61,6 +73,12 @@ def temporal_to_rdf(daterange, graph=None):
     pot.set(SCHEMA.startDate, Literal(daterange.start))
     pot.set(SCHEMA.endDate, Literal(daterange.end))
     return pot
+
+
+def frequency_to_rdf(frequency, graph=None):
+    if not frequency:
+        return
+    return RDF_FREQUENCIES.get(frequency, getattr(FREQ, frequency))
 
 
 def resource_to_rdf(resource, dataset=None, graph=None):
@@ -124,12 +142,12 @@ def dataset_to_rdf(dataset, graph=None):
         identifier = dataset.id
     graph = graph or Graph(namespace_manager=namespace_manager)
     d = graph.resource(id)
-    d.add(RDF.type, DCAT.Dataset)
-    d.add(DCT.identifier, Literal(identifier))
-    d.add(DCT.title, Literal(dataset.title))
-    d.add(DCT.description, Literal(dataset.description))
-    d.add(DCT.issued, Literal(dataset.created_at))
-    d.add(DCT.modified, Literal(dataset.last_modified))
+    d.set(RDF.type, DCAT.Dataset)
+    d.set(DCT.identifier, Literal(identifier))
+    d.set(DCT.title, Literal(dataset.title))
+    d.set(DCT.description, Literal(dataset.description))
+    d.set(DCT.issued, Literal(dataset.created_at))
+    d.set(DCT.modified, Literal(dataset.last_modified))
     for tag in dataset.tags:
         d.add(DCAT.keyword, Literal(tag))
 
@@ -142,7 +160,11 @@ def dataset_to_rdf(dataset, graph=None):
         d.add(DCT.publisher, organization_to_rdf(dataset.organization, graph))
 
     if dataset.temporal_coverage:
-        d.add(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
+        d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
+
+    frequency = frequency_to_rdf(dataset.frequency)
+    if frequency:
+        d.set(DCT.accrualPeriodicity, frequency)
 
     return d
 
@@ -227,6 +249,14 @@ def temporal_from_rdf(period_of_time):
         pass
 
 
+def frequency_from_rdf(term):
+    if isinstance(term, RdfResource):
+        term = term.identifier
+    if isinstance(term, URIRef):
+        _, _, freq = namespace_manager.compute_qname(term)
+        return freq
+
+
 def title_from_rdf(rdf, url):
     '''
     Try to extract a distribution title from a property.
@@ -304,8 +334,8 @@ def dataset_from_rdf(graph, dataset=None):
     d = graph.resource(node)
 
     dataset.title = rdf_value(d, DCT.title)
-
     dataset.description = sanitize_html(d.value(DCT.description))
+    dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
 
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
     tags += [theme.toPython() for theme in d.objects(DCAT.theme)]

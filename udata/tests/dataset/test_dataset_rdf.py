@@ -16,7 +16,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.rdf import (
     dataset_to_rdf, dataset_from_rdf, resource_to_rdf, resource_from_rdf,
-    temporal_from_rdf
+    temporal_from_rdf, frequency_to_rdf
 )
 from udata.core.dataset.views import blueprint as dataset_blueprint
 from udata.core.organization.factories import OrganizationFactory
@@ -24,7 +24,7 @@ from udata.core.organization.views import blueprint as org_blueprint
 from udata.core.site.views import blueprint as site_blueprint
 from udata.core.user.factories import UserFactory
 from udata.core.user.views import blueprint as user_blueprint
-from udata.rdf import DCAT, DCT, SPDX, SCHEMA
+from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA
 from udata.tests import TestCase, DBTestMixin
 from udata.utils import faker
 
@@ -59,7 +59,8 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
 
     def test_all_dataset_fields(self):
         resources = ResourceFactory.build_batch(3)
-        dataset = DatasetFactory(tags=faker.words(nb=3), resources=resources)
+        dataset = DatasetFactory(tags=faker.words(nb=3), resources=resources,
+                                 frequency='daily')
         d = dataset_to_rdf(dataset)
         g = d.graph
 
@@ -79,11 +80,28 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
         self.assertEqual(d.value(DCT.issued), Literal(dataset.created_at))
         self.assertEqual(d.value(DCT.modified),
                          Literal(dataset.last_modified))
+        self.assertEqual(d.value(DCT.accrualPeriodicity).identifier,
+                         FREQ.daily)
         expected_tags = set(Literal(t) for t in dataset.tags)
         self.assertEqual(set(d.objects(DCAT.keyword)), expected_tags)
 
         self.assertEqual(len(list(d.objects(DCAT.distribution))),
                          len(resources))
+
+    def test_map_unkownn_frequencies(self):
+        self.assertEqual(frequency_to_rdf('hourly'), FREQ.continuous)
+
+        self.assertEqual(frequency_to_rdf('fourTimesADay'), FREQ.daily)
+        self.assertEqual(frequency_to_rdf('threeTimesADay'), FREQ.daily)
+        self.assertEqual(frequency_to_rdf('semidaily'), FREQ.daily)
+
+        self.assertEqual(frequency_to_rdf('fourTimesAWeek'),
+                         FREQ.threeTimesAWeek)
+
+        self.assertIsNone(frequency_to_rdf('punctual'))
+        self.assertIsNone(frequency_to_rdf('unknown'))
+
+        self.assertIsNone(frequency_to_rdf('quinquennial'))  # Better idea ?
 
     def test_minimal_resource_fields(self):
         resource = ResourceFactory()
@@ -95,9 +113,11 @@ class DatasetToRdfTest(DBTestMixin, TestCase):
         self.assertIsInstance(r, RdfResource)
         self.assertEqual(len(list(distribs)), 1)
 
-        self.assertEqual(graph.value(r.identifier, RDF.type), DCAT.Distribution)
+        self.assertEqual(graph.value(r.identifier, RDF.type),
+                         DCAT.Distribution)
         self.assertEqual(r.value(DCT.title), Literal(resource.title))
-        self.assertEqual(r.value(DCAT.downloadURL).identifier, URIRef(resource.url))
+        self.assertEqual(r.value(DCAT.downloadURL).identifier,
+                         URIRef(resource.url))
         self.assertEqual(r.value(DCT.issued), Literal(resource.published))
         self.assertEqual(r.value(DCT.modified), Literal(resource.modified))
 
@@ -235,10 +255,11 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         tags = faker.words(nb=3)
         start = faker.past_date(start_date='-30d')
         end = faker.future_date(end_date='+30d')
-        g.add((node, RDF.type, DCAT.Dataset))
-        g.add((node, DCT.identifier, Literal(id)))
-        g.add((node, DCT.title, Literal(title)))
-        g.add((node, DCT.description, Literal(description)))
+        g.set((node, RDF.type, DCAT.Dataset))
+        g.set((node, DCT.identifier, Literal(id)))
+        g.set((node, DCT.title, Literal(title)))
+        g.set((node, DCT.description, Literal(description)))
+        g.set((node, DCT.accrualPeriodicity, FREQ.daily))
         pot = BNode()
         g.add((node, DCT.temporal, pot))
         g.set((pot, RDF.type, DCT.PeriodOfTime))
@@ -253,6 +274,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.title, title)
         self.assertEqual(dataset.description, description)
+        self.assertEqual(dataset.frequency, 'daily')
         self.assertEqual(set(dataset.tags), set(tags))
         self.assertIsInstance(dataset.temporal_coverage, db.DateRange)
         self.assertEqual(dataset.temporal_coverage.start, start)

@@ -22,6 +22,7 @@ SCHEMA = Namespace('http://schema.org/')
 SCV = Namespace('http://purl.org/NET/scovo#')
 SPDX = Namespace('http://spdx.org/rdf/terms#')
 VCARD = Namespace('http://www.w3.org/2006/vcard/ns#')
+FREQ = Namespace('http://purl.org/cld/freq/')
 DCT = DCTERMS  # More common usage
 
 namespace_manager = NamespaceManager(Graph())
@@ -35,6 +36,7 @@ namespace_manager.bind('scv', SCV)
 namespace_manager.bind('skos', SKOS)
 namespace_manager.bind('vcard', VCARD)
 namespace_manager.bind('xsd', XSD)
+namespace_manager.bind('freq', FREQ)
 
 # Support JSON-LD in format detection
 FORMAT_MAP = SUFFIX_FORMAT_MAP.copy()
@@ -116,6 +118,7 @@ CONTEXT = {
     'vcard': 'http://www.w3.org/2006/vcard/ns#',
     'schema': 'http://schema.org/',
     'hydra': 'http://www.w3.org/ns/hydra/core#',
+    'freq': 'http://purl.org/cld/freq/',
     # Aliased field
     'downloadURL': {
         '@id': 'dcat:downloadURL',
