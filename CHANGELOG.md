@@ -73,6 +73,9 @@
   [#930](https://github.com/opendatateam/udata/issues/930)
 - Fix badges notification mails
   [#894](https://github.com/opendatateam/udata/issues/894)
+- Integrating latest versions of GeoZones and GeoLogos for territories.
+  Especially using history of towns, counties and regions from GeoHisto.
+  [#499](https://github.com/opendatateam/udata/issues/499)
 
 ## 1.0.11 (2017-05-25)
 
