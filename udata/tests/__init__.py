@@ -183,7 +183,7 @@ class WebTestMixin(object):
 class DBTestMixin(object):
     def drop_db(self):
         '''Clear the database'''
-        parsed_url = urlparse(self.app.config['MONGODB_SETTINGS']['host'])
+        parsed_url = urlparse(self.app.config['MONGODB_HOST'])
         # drop the leading /
         db_name = parsed_url.path[1:]
         db.connection.drop_database(db_name)

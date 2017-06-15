@@ -105,11 +105,9 @@ from udata.features.territories.models import *  # noqa
 def init_app(app):
     # use `{database_name}-test` database for testing
     if app.config['TESTING']:
-        parsed_url = urlparse(app.config['MONGODB_SETTINGS']['host'])
+        parsed_url = urlparse(app.config['MONGODB_HOST'])
         parsed_url = parsed_url._replace(path='%s-test' % parsed_url.path)
-        app.config['MONGODB_SETTINGS'] = {
-            'host': parsed_url.geturl()
-        }
+        app.config['MONGODB_HOST'] = parsed_url.geturl()
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
         name = 'udata_{0}.models'.format(plugin)

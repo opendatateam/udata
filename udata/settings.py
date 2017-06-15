@@ -16,9 +16,7 @@ class Defaults(object):
     CONTACT_EMAIL = 'contact@example.org'
     TERRITORIES_EMAIL = 'territories@example.org'
 
-    MONGODB_SETTINGS = {
-        'host': 'mongodb://localhost:27017/udata'
-    }
+    MONGODB_HOST = 'mongodb://localhost:27017/udata'
 
     # BROKER_TRANSPORT = 'redis'
     BROKER_URL = 'redis://localhost:6379'

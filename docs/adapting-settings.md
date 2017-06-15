@@ -134,14 +134,9 @@ ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
 
 ## Mongoengine/Flask-Mongoengine options
 
-### MONGODB_SETTINGS
+### MONGODB_HOST
 
-**default**:
-```python
-MONGODB_SETTINGS = {
-    'host': 'mongodb://localhost:27017/udata'
-}
-```
+**default**: `'mongodb://localhost:27017/udata'`
 
 The mongodb database used by udata.
 During tests, the test database will use the same name suffixed by `-test`
@@ -152,9 +147,7 @@ for more details.
 Authentication is also supported in the URL:
 
 ```python
-MONGODB_SETTINGS = {
-    'host': 'mongodb://<user>:<password>@<host>:<port>/<database>'
-}
+MONGODB_HOST = 'mongodb://<user>:<password>@<host>:<port>/<database>'
 ```
 
 ## Celery options

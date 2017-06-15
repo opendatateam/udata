@@ -89,7 +89,7 @@ def schedulables():
 def init_app(app):
     celery.main = app.import_name
 
-    parsed_url = urlparse(app.config['MONGODB_SETTINGS']['host'])
+    parsed_url = urlparse(app.config['MONGODB_HOST'])
 
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_DB', parsed_url.path[1:])
 
