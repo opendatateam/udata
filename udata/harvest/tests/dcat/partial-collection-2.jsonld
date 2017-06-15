@@ -14,9 +14,6 @@
     ],
     "http://purl.org/dc/terms/title": [{"@value": "Sample DCAT Catalog"}],
     "http://www.w3.org/ns/dcat#dataset": [
-      {"@id": "http://data.test.org/datasets/1"},
-      {"@id": "http://data.test.org/datasets/2"},
-      {"@id": "http://data.test.org/datasets/3"},
       {"@id": "http://data.test.org/datasets/4"}
     ],
     "http://xmlns.com/foaf/0.1/homepage": [{"@value": "http://data.test.org"}],

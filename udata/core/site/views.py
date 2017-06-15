@@ -8,13 +8,17 @@ from flask import (
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search, theme
+from udata.core.activity.models import Activity
 from udata.core.dataset.csv import ResourcesCsvAdapter
+from udata.core.dataset.models import Dataset
 from udata.core.organization.csv import OrganizationCsvAdapter
+from udata.core.organization.models import Organization
+from udata.core.post.models import Post
 from udata.core.reuse.csv import ReuseCsvAdapter
+from udata.core.reuse.models import Reuse
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Activity, Reuse, Organization, Post
 from udata.rdf import (
     CONTEXT, RDF_MIME_TYPES, RDF_EXTENSIONS, context,
     guess_format, negociate_content
@@ -191,13 +195,17 @@ def rdf_catalog():
 @blueprint.route('/catalog.<format>', localize=False)
 def rdf_catalog_format(format):
     format = guess_format(format)
-    catalog = build_catalog(current_site)
     headers = {
         'Content-Type': RDF_MIME_TYPES[format]
     }
     kwargs = {}
     if format == 'json-ld':
         kwargs['context'] = context
+    params = multi_to_dict(request.args)
+    page = int(params.get('page', 1))
+    page_size = int(params.get('page_size', 100))
+    datasets = Dataset.objects.visible().paginate(page, page_size)
+    catalog = build_catalog(current_site, datasets)
     return catalog.graph.serialize(format=format, **kwargs), 200, headers
 
 

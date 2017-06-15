@@ -3,11 +3,12 @@ from __future__ import unicode_literals
 
 from flask import current_app, url_for
 
-from rdflib import URIRef, Literal
+from rdflib import URIRef, Literal, Graph
 from rdflib.namespace import RDF, FOAF
 from rdflib.resource import Resource
 
 from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.models import Dataset
 from udata.core.dataset.views import blueprint as dataset_blueprint
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.views import blueprint as org_blueprint
@@ -16,7 +17,7 @@ from udata.core.site.rdf import build_catalog
 from udata.core.site.views import blueprint as site_blueprint
 from udata.core.user.factories import UserFactory
 from udata.core.user.views import blueprint as user_blueprint
-from udata.rdf import CONTEXT, DCAT, DCT
+from udata.rdf import CONTEXT, DCAT, DCT, HYDRA
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.frontend import FrontTestCase
 
@@ -32,11 +33,11 @@ class CatalogTest(DBTestMixin, TestCase):
 
     def test_minimal(self):
         site = SiteFactory()
-        datasets = VisibleDatasetFactory.create_batch(3)
-        catalog = build_catalog(site)
-        graph = catalog.graph
         home_url = url_for('site.home_redirect', _external=True)
         uri = url_for('site.rdf_catalog', _external=True)
+        datasets = VisibleDatasetFactory.create_batch(3)
+        catalog = build_catalog(site, datasets)
+        graph = catalog.graph
 
         self.assertIsInstance(catalog, Resource)
         catalogs = graph.subjects(RDF.type, DCAT.Catalog)
@@ -65,13 +66,14 @@ class CatalogTest(DBTestMixin, TestCase):
         self.assertEqual(len(list(graph.subjects(RDF.type, DCAT.Dataset))),
                          len(datasets))
 
+
     def test_no_duplicate(self):
         site = SiteFactory()
         org = OrganizationFactory()
         user = UserFactory()
-        VisibleDatasetFactory.create_batch(2, owner=user)
-        VisibleDatasetFactory.create_batch(2, organization=org)
-        catalog = build_catalog(site)
+        datasets = VisibleDatasetFactory.create_batch(2, owner=user)
+        datasets += VisibleDatasetFactory.create_batch(2, organization=org)
+        catalog = build_catalog(site, datasets)
         graph = catalog.graph
 
         orgs = list(graph.subjects(RDF.type, FOAF.Organization))
@@ -82,6 +84,71 @@ class CatalogTest(DBTestMixin, TestCase):
         self.assertEqual(len(org_names), 1)
         user_names = list(graph.objects(users[0], FOAF.name))
         self.assertEqual(len(user_names), 1)
+
+    def test_pagination(self):
+        site = SiteFactory()
+        page_size = 3
+        total = 4
+        uri = url_for('site.rdf_catalog', _external=True)
+        uri_first = url_for('site.rdf_catalog', page=1, _external=True)
+        uri_last = url_for('site.rdf_catalog', page=2, _external=True)
+        VisibleDatasetFactory.create_batch(total)
+
+        # First page
+        datasets = Dataset.objects.paginate(1, page_size)
+        catalog = build_catalog(site, datasets)
+        graph = catalog.graph
+
+        self.assertIsInstance(catalog, Resource)
+        self.assertEqual(catalog.identifier, URIRef(uri))
+        types = [o.identifier for o in catalog.objects(RDF.type)]
+        self.assertIn(DCAT.Catalog, types)
+        self.assertIn(HYDRA.Collection, types)
+
+        self.assertEqual(catalog.value(HYDRA.totalItems), Literal(total))
+
+        self.assertEqual(len(list(catalog.objects(DCAT.dataset))),
+                         page_size)
+
+        paginations = list(graph.subjects(RDF.type, HYDRA.PartialCollectionView))
+        self.assertEqual(len(paginations), 1)
+        pagination = graph.resource(paginations[0])
+        self.assertEqual(pagination.identifier, URIRef(uri_first))
+        self.assertEqual(pagination.value(HYDRA.first).identifier,
+                         URIRef(uri_first))
+        self.assertEqual(pagination.value(HYDRA.next).identifier,
+                         URIRef(uri_last))
+        self.assertEqual(pagination.value(HYDRA.last).identifier,
+                         URIRef(uri_last))
+        self.assertNotIn(HYDRA.previous, pagination)
+
+        # Second page
+        datasets = Dataset.objects.paginate(2, page_size)
+        catalog = build_catalog(site, datasets)
+        graph = catalog.graph
+
+        self.assertIsInstance(catalog, Resource)
+        self.assertEqual(catalog.identifier, URIRef(uri))
+        types = [o.identifier for o in catalog.objects(RDF.type)]
+        self.assertIn(DCAT.Catalog, types)
+        self.assertIn(HYDRA.Collection, types)
+
+        self.assertEqual(catalog.value(HYDRA.totalItems), Literal(total))
+
+        self.assertEqual(len(list(catalog.objects(DCAT.dataset))),
+                         1)
+
+        paginations = list(graph.subjects(RDF.type, HYDRA.PartialCollectionView))
+        self.assertEqual(len(paginations), 1)
+        pagination = graph.resource(paginations[0])
+        self.assertEqual(pagination.identifier, URIRef(uri_last))
+        self.assertEqual(pagination.value(HYDRA.first).identifier,
+                         URIRef(uri_first))
+        self.assertEqual(pagination.value(HYDRA.previous).identifier,
+                         URIRef(uri_first))
+        self.assertEqual(pagination.value(HYDRA.last).identifier,
+                         URIRef(uri_last))
+        self.assertNotIn(HYDRA.next, pagination)
 
 
 class SiteRdfViewsTest(FrontTestCase):
@@ -154,3 +221,19 @@ class SiteRdfViewsTest(FrontTestCase):
 
             response = self.get(url)
             self.assertRedirects(response, expected_url)
+
+    def test_catalog_rdf_paginate(self):
+        VisibleDatasetFactory.create_batch(4)
+        url = url_for('site.rdf_catalog_format',
+                      format='n3', page=2, page_size=3)
+
+        response = self.get(url)
+        self.assert200(response)
+
+        graph = Graph().parse(data=response.data, format='n3')
+        pagination = graph.value(predicate=RDF.type,
+                                 object=HYDRA.PartialCollectionView)
+        self.assertIsNotNone(pagination)
+        pagination = graph.resource(pagination)
+        self.assertTrue(pagination.value(HYDRA.previous))
+        self.assertFalse(pagination.value(HYDRA.next))

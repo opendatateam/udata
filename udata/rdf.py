@@ -115,6 +115,7 @@ CONTEXT = {
     'spdx': 'http://spdx.org/rdf/terms#',
     'vcard': 'http://www.w3.org/2006/vcard/ns#',
     'schema': 'http://schema.org/',
+    'hydra': 'http://www.w3.org/ns/hydra/core#',
     # Aliased field
     'downloadURL': {
         '@id': 'dcat:downloadURL',
