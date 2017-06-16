@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 
 from udata.i18n import lazy_gettext as _
 from udata.models import (
-    db, Dataset, User, Organization, Reuse,
-    TerritoryDataset, ResourceBasedTerritoryDataset,
+    db, Dataset, User, Organization, Reuse, TerritoryDataset,
     TERRITORY_DATASETS
 )
 
@@ -35,12 +34,24 @@ Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 Dataset.__badges__[OPENFIELD16] = 'Openfield 16'
 Dataset.__badges__[SPD] = _('Reference Data')
 
+BASE_POPULATION_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2021173'
+POPULATION_FILENAME = 'popleg2013_cc_popleg.xls'
+BASE_CHIFFRES_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2020310'
+CHIFFRES_FILENAME = 'rp2013_cc_fam.xls'
+BASE_FORMATIONS_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2020665'
+FORMATIONS_FILENAME = 'rp2013_cc_for.xls'
+BASE_EMPLOI_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2020907'
+EMPLOI_FILENAME = 'rp2013_cc_act.xls'
+BASE_LOGEMENT_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2020507'
+LOGEMENT_FILENAME = 'rp2013_cc_log.xls'
+
+INSEE_ORG_ID = '534fff81a3a7292c64a77e5c'
+
 
 class PopulationDataset(TerritoryDataset):
     order = 1
     title = 'Population'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Population](/datasets/population/)
         par sexe et âge, indicateurs démographiques.
@@ -48,29 +59,25 @@ class PopulationDataset(TerritoryDataset):
     temporal_coverage = {'start': 2007, 'end': 2012}
 
 
-class PopulationTownDataset(PopulationDataset):
-    id = 'population_t'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=POP&nivgeo=COM&codgeo={code}')
+class PopulationCommuneDataset(PopulationDataset):
+    id = 'population_com'
+    url_template = BASE_POPULATION_URL + '/COM/{code}/' + POPULATION_FILENAME
 
 
-class PopulationCountyDataset(PopulationDataset):
-    id = 'population_c'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=POP&millesime=2012&typgeo=DEP&search={code}')
+class PopulationDepartementDataset(PopulationDataset):
+    id = 'population_dep'
+    url_template = BASE_POPULATION_URL + '/DEP/{code}/' + POPULATION_FILENAME
 
 
 class PopulationRegionDataset(PopulationDataset):
-    id = 'population_r'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=POP&millesime=2012&typgeo=REG&search={code}')
+    id = 'population_reg'
+    url_template = BASE_POPULATION_URL + '/REG/{code}/' + POPULATION_FILENAME
 
 
-class PopulationChiffresDataset(TerritoryDataset):
+class ChiffresDataset(TerritoryDataset):
     order = 2
-    title = 'Population - Chiffres clés'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    title = 'Chiffres clés'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Ménages, couples, familles
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-evolution-et-structure-de-la--40535162/)
@@ -79,29 +86,25 @@ class PopulationChiffresDataset(TerritoryDataset):
     temporal_coverage = {'start': 2007, 'end': 2012}
 
 
-class PopulationChiffresTownDataset(PopulationChiffresDataset):
-    id = 'population_chiffres_t'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=FAM&nivgeo=COM&codgeo={code}')
+class ChiffresCommuneDataset(ChiffresDataset):
+    id = 'chiffres_com'
+    url_template = BASE_CHIFFRES_URL + '/COM/{code}/' + CHIFFRES_FILENAME
 
 
-class PopulationChiffresCountyDataset(PopulationChiffresDataset):
-    id = 'population_chiffres_c'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=FAM&millesime=2012&typgeo=DEP&search={code}')
+class ChiffresDepartementDataset(ChiffresDataset):
+    id = 'chiffres_dep'
+    url_template = BASE_CHIFFRES_URL + '/DEP/{code}/' + CHIFFRES_FILENAME
 
 
-class PopulationChiffresRegionDataset(PopulationChiffresDataset):
-    id = 'population_chiffres_r'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=FAM&millesime=2012&typgeo=REG&search={code}')
+class ChiffresRegionDataset(ChiffresDataset):
+    id = 'chiffres_reg'
+    url_template = BASE_CHIFFRES_URL + '/REG/{code}/' + CHIFFRES_FILENAME
 
 
-class PopulationDiplomesDataset(TerritoryDataset):
+class FormationsDataset(TerritoryDataset):
     order = 3
-    title = 'Population - Diplômes et formations'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    title = 'Diplômes - Formation'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Scolarisation
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-diplomes-formation-40535144/)
@@ -110,29 +113,25 @@ class PopulationDiplomesDataset(TerritoryDataset):
     temporal_coverage = {'start': 2007, 'end': 2012}
 
 
-class PopulationDiplomesTownDataset(PopulationDiplomesDataset):
-    id = 'population_diplomes_t'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=FOR&nivgeo=COM&codgeo={code}')
+class FormationsCommuneDataset(FormationsDataset):
+    id = 'formations_com'
+    url_template = BASE_FORMATIONS_URL + '/COM/{code}/' + FORMATIONS_FILENAME
 
 
-class PopulationDiplomesCountyDataset(PopulationDiplomesDataset):
-    id = 'population_diplomes_c'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=FOR&millesime=2012&typgeo=DEP&search={code}')
+class FormationsDepartementDataset(FormationsDataset):
+    id = 'formations_dep'
+    url_template = BASE_FORMATIONS_URL + '/DEP/{code}/' + FORMATIONS_FILENAME
 
 
-class PopulationDiplomesRegionDataset(PopulationDiplomesDataset):
-    id = 'population_diplomes_r'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=FOR&millesime=2012&typgeo=REG&search={code}')
+class FormationsRegionDataset(FormationsDataset):
+    id = 'formations_reg'
+    url_template = BASE_FORMATIONS_URL + '/REG/{code}/' + FORMATIONS_FILENAME
 
 
-class EmploiChiffresDataset(TerritoryDataset):
+class EmploiDataset(TerritoryDataset):
     order = 4
-    title = 'Emploi - Chiffres clés'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    title = 'Emploi'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Population
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-caracteristiques-de-l-emploi-40535204/)
@@ -141,60 +140,25 @@ class EmploiChiffresDataset(TerritoryDataset):
     temporal_coverage = {'start': 2007, 'end': 2012}
 
 
-class EmploiChiffresTownDataset(EmploiChiffresDataset):
-    id = 'emploi_chiffres_t'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=ACT&nivgeo=COM&codgeo={code}')
+class EmploiCommuneDataset(EmploiDataset):
+    id = 'emploi_com'
+    url_template = BASE_EMPLOI_URL + '/COM/{code}/' + EMPLOI_FILENAME
 
 
-class EmploiChiffresCountyDataset(EmploiChiffresDataset):
-    id = 'emploi_chiffres_c'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=ACT&millesime=2012&typgeo=DEP&search={code}')
+class EmploiDepartementDataset(EmploiDataset):
+    id = 'emploi_dep'
+    url_template = BASE_EMPLOI_URL + '/DEP/{code}/' + EMPLOI_FILENAME
 
 
-class EmploiChiffresRegionDataset(EmploiChiffresDataset):
-    id = 'emploi_chiffres_r'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=ACT&millesime=2012&typgeo=REG&search={code}')
-
-
-class EmploiPopulationDataset(TerritoryDataset):
-    order = 5
-    title = 'Emploi - Population active'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
-    description = '''
-        [Population
-        ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-emploi-population-active-40535210/)
-        de 15 à 64 ans par type d’activité.
-    '''.strip()
-    temporal_coverage = {'start': 2007, 'end': 2012}
-
-
-class EmploiPopulationTownDataset(EmploiPopulationDataset):
-    id = 'emploi_population_t'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=EMP&nivgeo=COM&codgeo={code}')
-
-
-class EmploiPopulationCountyDataset(EmploiPopulationDataset):
-    id = 'emploi_population_c'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=EMP&millesime=2012&typgeo=DEP&search={code}')
-
-
-class EmploiPopulationRegionDataset(EmploiPopulationDataset):
-    id = 'emploi_population_r'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=EMP&millesime=2012&typgeo=REG&search={code}')
+class EmploiRegionDataset(EmploiDataset):
+    id = 'emploi_reg'
+    url_template = BASE_EMPLOI_URL + '/REG/{code}/' + EMPLOI_FILENAME
 
 
 class LogementDataset(TerritoryDataset):
     order = 6
     title = 'Logement'
-    # Institut National de la Statistique et des Etudes Economiques (INSEE).
-    organization_id = '534fff81a3a7292c64a77e5c'
+    organization_id = INSEE_ORG_ID
     description = '''
         [Chiffres clés
         ](/datasets/recensement-de-la-population-base-de-donnees-de-chiffres-cles-logement-40535148/)
@@ -203,52 +167,31 @@ class LogementDataset(TerritoryDataset):
     temporal_coverage = {'start': 2007, 'end': 2012}
 
 
-class LogementTownDataset(LogementDataset):
-    id = 'logement_t'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=LOG&nivgeo=COM&codgeo={code}')
+class LogementCommuneDataset(LogementDataset):
+    id = 'logement_com'
+    url_template = BASE_LOGEMENT_URL + '/COM/{code}/' + LOGEMENT_FILENAME
 
 
-class LogementCountyDataset(LogementDataset):
-    id = 'logement_c'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=LOG&millesime=2012&typgeo=DEP&search={code}')
+class LogementDepartementDataset(LogementDataset):
+    id = 'logement_dep'
+    url_template = BASE_LOGEMENT_URL + '/DEP/{code}/' + LOGEMENT_FILENAME
 
 
 class LogementRegionDataset(LogementDataset):
-    id = 'logement_r'
-    url_template = ('http://www.insee.fr/fr/themes/tableau_local.asp'
-                    '?ref_id=LOG&millesime=2012&typgeo=REG&search={code}')
+    id = 'logement_reg'
+    url_template = BASE_LOGEMENT_URL + '/REG/{code}/' + LOGEMENT_FILENAME
 
 
-class Regionales2015Tour2Dataset(ResourceBasedTerritoryDataset):
+class GeoSireneCommuneDataset(TerritoryDataset):
     order = 7
-    title = 'Élections régionales 2015, second tour'
-    # Ministère de l'Intérieur.
-    organization_id = '534fff91a3a7292c64a77f53'
+    id = 'geo_sirene_com'
+    title = 'SIRENE'
+    organization_id = INSEE_ORG_ID
+    url_template = 'http://212.47.238.202/geo_sirene/last/communes/{code}.csv'
     description = '''
-        [Résultats
-        ](/datasets/elections-regionales-2015-et-des-assemblees-de-corse-de-guyane-et-de-martinique-resultats-par-bureaux-de-vote-tour-2/)
-        par bureau de vote pour la commune concernée.
+        Extraite de la base [SIRENE](/datasets/5862206588ee38254d3f4e5e/)
+        sur le périmètre de la commune.
     '''.strip()
-    # Equals to: https://www.data.gouv.fr/fr/datasets/elections-regionales-2015
-    # -et-des-assemblees-de-corse-de-guyane-et-de-martinique-resultats-par-
-    # bureaux-de-vote-tour-2/
-    dataset_id = '56728d35c751df240dc664bd'
-    resource_id = 'e915b43b-f38c-4f18-ade5-2fb6c8cf80ca'
-    temporal_coverage = {'start': 2015}
-
-
-class Regionales2015Tour2TownDataset(Regionales2015Tour2Dataset):
-    id = 'elections_regionales_2015_2_t'
-    territory_attr = 'name'
-    csv_column = 'LIBSUBCOM'
-
-
-class Regionales2015Tour2CountyDataset(Regionales2015Tour2Dataset):
-    id = 'elections_regionales_2015_2_c'
-    territory_attr = 'code'
-    csv_column = 'CODDPT'
 
 
 class ZonagesDataset(TerritoryDataset):
@@ -264,25 +207,26 @@ class ZonagesDataset(TerritoryDataset):
     '''.strip()
 
 
-class ZonagesTownDataset(ZonagesDataset):
-    id = 'zonages_t'
+class ZonagesCommuneDataset(ZonagesDataset):
+    id = 'zonages_com'
     url_template = (
         'http://sig.ville.gouv.fr/Territoire/{code}/onglet/DonneesLocales')
 
 
-class ZonagesCountyDataset(ZonagesDataset):
-    id = 'zonages_c'
+class ZonagesDepartementDataset(ZonagesDataset):
+    id = 'zonages_dep'
     url_template = (
         'http://sig.ville.gouv.fr/Tableaux/{code_region}{code}')
 
     @property
     def url(self):
-        return self.url_template.format(code=self.territory.code,
-                                        code_region=self.territory.parent.code)
+        return self.url_template.format(
+            code=self.territory.code,
+            code_region=self.territory.current_parent.code)
 
 
 class ZonagesRegionDataset(ZonagesDataset):
-    id = 'zonages_r'
+    id = 'zonages_reg'
     url_template = 'http://sig.ville.gouv.fr/Tableaux/{code}'
 
 
@@ -299,8 +243,8 @@ class ComptesDataset(TerritoryDataset):
     license_id = 'notspecified'
 
 
-class ComptesTownDataset(ComptesDataset):
-    id = 'comptes_t'
+class ComptesCommuneDataset(ComptesDataset):
+    id = 'comptes_com'
     url_template = (
         'http://alize2.finances.gouv.fr/communes/eneuro/tableau.php'
         '?icom={icom}&dep=0{dep}&type=BPS&param=0')
@@ -311,8 +255,8 @@ class ComptesTownDataset(ComptesDataset):
                                         dep=self.territory.code[0:2])
 
 
-class ComptesCountyDataset(ComptesDataset):
-    id = 'comptes_c'
+class ComptesDepartementDataset(ComptesDataset):
+    id = 'comptes_dep'
     url_template = (
         'http://alize2.finances.gouv.fr/departements/tableau.php'
         '?dep=0{dep}')
@@ -323,7 +267,7 @@ class ComptesCountyDataset(ComptesDataset):
 
 
 class ComptesRegionDataset(ComptesDataset):
-    id = 'comptes_r'
+    id = 'comptes_reg'
     url_template = (
         'http://alize2.finances.gouv.fr/regions/tableau.php'
         '?reg=0{reg}&type=BPS')
@@ -333,9 +277,9 @@ class ComptesRegionDataset(ComptesDataset):
         return self.url_template.format(reg=self.territory.code)
 
 
-class BanODBLTownDataset(TerritoryDataset):
+class BanODBLCommuneDataset(TerritoryDataset):
     order = 10
-    id = 'ban_odbl_t'
+    id = 'ban_odbl_com'
     title = 'Adresses'
     # Etalab.
     organization_id = '534fff75a3a7292c64a77de4'
@@ -349,82 +293,36 @@ class BanODBLTownDataset(TerritoryDataset):
     license_id = 'odc-odbl'
 
 
-class AAHDenombrementCAFCountyDataset(ResourceBasedTerritoryDataset):
-    order = 11
-    id = 'aah_denombrement_caf_c'
-    title = 'Allocation aux Adultes Handicapés, dénombrement'
-    #  Caisse Nationale des Allocations familiales.
-    organization_id = '5595066cc751df4582a453ba'
-    description = '''
-        [Bénéficiaires percevant l'allocation aux adultes handicapés (AAH)
-        ](/datasets/personnes-percevant-l-allocation-aux-adultes-handicapes-aah-par-caf/),
-        dénombrement pour le département concerné.
-    '''.strip()
-    # Equals to: https://www.data.gouv.fr/fr/datasets/personnes-percevant-
-    # l-allocation-aux-adultes-handicapes-aah-par-caf/
-    dataset_id = '560d9160b595086cd501d755'
-    resource_id = '7a870488-f0de-4a40-9d8f-52e065e43c10'
-    territory_attr = 'code'
-    csv_column = 'dep'
-    temporal_coverage = {'start': 1993, 'end': 2015}
-
-
-class AAHRepartitionCAFCountyDataset(ResourceBasedTerritoryDataset):
-    order = 12
-    id = 'aah_repartition_caf_c'
-    title = 'Allocation aux Adultes Handicapés, répartition'
-    #  Caisse Nationale des Allocations familiales.
-    organization_id = '5595066cc751df4582a453ba'
-    description = '''
-        [Bénéficiaires percevant l'allocation aux adultes handicapés (AAH)
-        ](/datasets/personnes-percevant-l-allocation-aux-adultes-handicapes-aah-par-caf/),
-        répartition pour le département concerné.
-    '''.strip()
-    # Equals to: https://www.data.gouv.fr/fr/datasets/personnes-percevant-
-    # l-allocation-aux-adultes-handicapes-aah-par-caf/
-    dataset_id = '560d9160b595086cd501d755'
-    resource_id = 'b00056f5-ead5-4d7d-86b3-e1323fc02f0d'
-    territory_attr = 'code'
-    csv_column = 'Dep'
-    temporal_coverage = {'start': 2012, 'end': 2015}
-
-
 TOWN_DATASETS = {
-    'population_t': PopulationTownDataset,
-    'population_chiffres_t': PopulationChiffresTownDataset,
-    'population_diplomes_t': PopulationDiplomesTownDataset,
-    'emploi_chiffres_t': EmploiChiffresTownDataset,
-    'emploi_population_t': EmploiPopulationTownDataset,
-    'logement_t': LogementTownDataset,
-    'elections_regionales_2015_2_t': Regionales2015Tour2TownDataset,
-    'zonages_t': ZonagesTownDataset,
-    'comptes_t': ComptesTownDataset,
-    'ban_odbl_t': BanODBLTownDataset,
+    'population_com': PopulationCommuneDataset,
+    'chiffres_com': ChiffresCommuneDataset,
+    'formations_com': FormationsCommuneDataset,
+    'emploi_com': EmploiCommuneDataset,
+    'logement_com': LogementCommuneDataset,
+    'zonages_com': ZonagesCommuneDataset,
+    'comptes_com': ComptesCommuneDataset,
+    'ban_odbl_com': BanODBLCommuneDataset,
+    'geo_sirene_com': GeoSireneCommuneDataset,
 }
 COUNTY_DATASETS = {
-    'population_c': PopulationCountyDataset,
-    'population_chiffres_c': PopulationChiffresCountyDataset,
-    'population_diplomes_c': PopulationDiplomesCountyDataset,
-    'emploi_chiffres_c': EmploiChiffresCountyDataset,
-    'emploi_population_c': EmploiPopulationCountyDataset,
-    'logement_c': LogementCountyDataset,
-    'elections_regionales_2015_2_c': Regionales2015Tour2CountyDataset,
-    'zonages_c': ZonagesCountyDataset,
-    'comptes_c': ComptesCountyDataset,
-    'aah_denombrement_caf_c': AAHDenombrementCAFCountyDataset,
-    'aah_repartition_caf_c': AAHRepartitionCAFCountyDataset,
+    'population_dep': PopulationDepartementDataset,
+    'chiffres_dep': ChiffresDepartementDataset,
+    'formations_dep': FormationsDepartementDataset,
+    'emploi_dep': EmploiDepartementDataset,
+    'logement_dep': LogementDepartementDataset,
+    'zonages_dep': ZonagesDepartementDataset,
+    'comptes_dep': ComptesDepartementDataset,
 }
 REGION_DATASETS = {
-    'population_r': PopulationRegionDataset,
-    'population_chiffres_r': PopulationChiffresRegionDataset,
-    'population_diplomes_r': PopulationDiplomesRegionDataset,
-    'emploi_chiffres_r': EmploiChiffresRegionDataset,
-    'emploi_population_r': EmploiPopulationRegionDataset,
-    'logement_r': LogementRegionDataset,
-    'zonages_r': ZonagesRegionDataset,
-    'comptes_r': ComptesRegionDataset,
+    'population_reg': PopulationRegionDataset,
+    'chiffres_reg': ChiffresRegionDataset,
+    'formations_reg': FormationsRegionDataset,
+    'emploi_reg': EmploiRegionDataset,
+    'logement_reg': LogementRegionDataset,
+    'zonages_reg': ZonagesRegionDataset,
+    'comptes_reg': ComptesRegionDataset,
 }
 
-TERRITORY_DATASETS['town'].update(TOWN_DATASETS)
-TERRITORY_DATASETS['county'].update(COUNTY_DATASETS)
+TERRITORY_DATASETS['commune'].update(TOWN_DATASETS)
+TERRITORY_DATASETS['departement'].update(COUNTY_DATASETS)
 TERRITORY_DATASETS['region'].update(REGION_DATASETS)

@@ -12,6 +12,9 @@
   [#178](https://github.com/etalab/udata-gouvfr/pull/178)
 - Fix the deuil header not being an SVG
   [#180](https://github.com/etalab/udata-gouvfr/pull/180)
+- Integrating latest versions of GeoZones and GeoLogos for territories.
+  Especially using history of towns, counties and regions from GeoHisto.
+  [#499](https://github.com/opendatateam/udata/issues/499)
 
 ## 1.0.6 (2017-04-18)
 
