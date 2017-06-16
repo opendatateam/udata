@@ -113,24 +113,48 @@ class TerritoryConverter(ModelConverter, PathConverter):
 
     def to_python(self, value):
         """
-        `value` has a slash in it, that's why we inherit from `PathConverter`.
+        `value` has slashs in it, that's why we inherit from `PathConverter`.
 
-        E.g.: `town/13200`, `county/13 or `region/93`.
+        E.g.: `commune/13200@latest/`, `departement/13@1860-07-01/` or
+        `region/76@2016-01-01/Auvergne-Rhone-Alpes/`.
+
+        Note that the slug is not significative but cannot be omitted.
         """
         if '/' not in value:
             return
 
-        level, code = value.split('/')
+        level, code, slug = value.split('/')
         return self.model.objects.get_or_404(
-            code=code, level='fr/{level}'.format(level=level))
+            id=':'.join(['fr', level, code]),
+            level='fr:{level}'.format(level=level))
 
     def to_url(self, obj):
-        """Reconstruct the URL with slash from level name and code."""
+        """
+        Reconstruct the URL from level name, code or datagouv id and slug.
+        """
         level_name = getattr(obj, 'level_name', None)
+        if not level_name:
+            raise ValueError('Unable to serialize "%s" to url' % obj)
+
+        zone_id = getattr(obj, 'id', None)
+        if not zone_id:
+            # Fallback on code for old redirections.
+            code = getattr(obj, 'code', None)
+            if not code:
+                raise ValueError('Unable to serialize "%s" to url' % obj)
+            territory = self.model.objects.get_or_404(
+                code=code, level='fr:{level}'.format(level=level_name))
+            return '{level_name}/{code}/{slug}'.format(
+                level_name=level_name, code=territory.code,
+                slug=territory.slug)
+
         code = getattr(obj, 'code', None)
-        if level_name and code:
-            return '{level_name}/{code}'.format(
-                level_name=level_name, code=code)
+        validity = getattr(obj, 'validity', None)
+        slug = getattr(obj, 'slug', None)
+        if code and validity and slug:
+            return '{level_name}/{code}@{start_date}/{slug}'.format(
+                level_name=level_name, code=code, start_date=validity['start'],
+                slug=slug)
         else:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 

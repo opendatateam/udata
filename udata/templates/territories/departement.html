@@ -2,7 +2,7 @@
 
 {% set meta = {
     'title': territory.name,
-    'description': _('Datasets related to the region of %(name)s with INSEE code %(code)s', name=territory.name, code=territory.code),
+    'description': _('Datasets related to the county of %(name)s with INSEE code %(code)s', name=territory.name, code=territory.code),
     'image': logo,
     'keywords': [territory.name, territory.code],
 } %}
@@ -10,7 +10,8 @@
 {% block territory_content %}
     <p class="breadcrumb">
         <a href="{{ url_for('territories.home') }}">France</a> →
-        {{ _('Region:') }} <a href="{{ territory.url }}">{{ territory.name }}</a>
+        {{ _('Region:') }} <a href="{{ territory.current_parent.url }}">{{ territory.current_parent.name }}</a> →
+        {{ _('County:') }} <a href="{{ territory.url }}">{{ territory.name }}</a>
     </p>
     <div class="col-sm-8">
         <div class="col-sm-3">
@@ -39,13 +40,6 @@
                     {{ _('INSEE code:') }} {{ territory.code }}
                 </strong>
             </p>
-            {% if territory.postal_string %}
-                <p>
-                    <strong>
-                        {{ _('Postal code:') }} {{ territory.postal_string }}
-                    </strong>
-                </p>
-            {% endif %}
             {% if territory.population %}
                 <p>
                     <strong>
@@ -53,18 +47,10 @@
                     </strong>
                 </p>
             {% endif %}
-            {% if territory.ancestors_objects %}
-                <h3><small>
-                    {{ _('Previously:') }}
-                    {% for ancestor in territory.ancestors_objects %}
-                        <a href="{{ ancestor.url }}">{{ ancestor.name }}</a>{% if not loop.last %},{% endif %}
-                    {% endfor %}
-                </small></h3>
-            {% endif %}
             <h3><small>
-                {{ _('Counties:') }}
-                {% for county in territory.children %}
-                    <a href="{{ county.url }}"> {{ county.name }}</a>{% if not loop.last %},{% endif %}
+                {{ _('Main towns:') }}
+                {% for town in territory.biggest_children %}
+                    <a href="{{ town.url }}"> {{ town.name }}</a>{% if not loop.last %},{% endif %}
                 {% endfor %}
             </small></h3>
         </div>
@@ -75,5 +61,4 @@
             data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
         </leaflet-map>
     </aside>
-
 {% endblock %}

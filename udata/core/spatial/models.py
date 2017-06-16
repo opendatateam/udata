@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import date
+
 from flask import current_app, url_for
 from werkzeug.local import LocalProxy
 from werkzeug import cached_property
@@ -35,26 +37,39 @@ class GeoLevel(db.Document):
     parents = db.ListField(db.ReferenceField('self'))
 
 
+class GeoZoneQuerySet(db.BaseQuerySet):
+    def valid_at(self, valid_date):
+        compare_string = valid_date.isoformat()
+        return self(validity__end__gt=compare_string,
+                    validity__start__lt=compare_string)
+
+
 class GeoZone(db.Document):
     id = db.StringField(primary_key=True)
+    slug = db.StringField(required=True)
     name = db.StringField(required=True)
     level = db.StringField(required=True)
-    code = db.StringField(unique_with='level')
-    geom = db.MultiPolygonField(required=True)
+    code = db.StringField(required=True)
+    geom = db.MultiPolygonField()
     parents = db.ListField()
     keys = db.DictField()
+    validity = db.DictField()
+    ancestors = db.ListField()
+    successors = db.ListField()
     population = db.IntField()
     area = db.FloatField()
     wikipedia = db.StringField()
     dbpedia = db.StringField()
-    logo = db.ImageField(fs=logos)
+    flag = db.ImageField(fs=logos)
+    blazon = db.ImageField(fs=logos)
 
     meta = {
         'indexes': [
             'name',
             'parents',
             ('level', 'code'),
-        ]
+        ],
+        'queryset_class': GeoZoneQuerySet
     }
 
     def __unicode__(self):
@@ -67,25 +82,13 @@ class GeoZone(db.Document):
         return '{name} <i>({code})</i>'.format(
             name=gettext(self.name), code=self.code)
 
-    @cached_property
-    def html_title(self):
-        """In use within templates."""
-        if self.level_name == 'town':
-            return ('{name} '
-                    '<small>(<a href="{parent_url}">{parent_name}</a>)</small>'
-                    '').format(name=self.name,
-                               parent_url=self.parent.url,
-                               parent_name=self.parent.name)
-        elif self.level_name == 'county':
-            return '{name} <small>({code})</small>'.format(
-                name=self.name, code=self.code)
-        else:
-            return self.name
-
     def logo_url(self, external=False):
-        filename = self.logo.filename
-        if filename and self.logo.fs.exists(filename):
-            return self.logo.fs.url(filename, external=external)
+        flag_filename = self.flag.filename
+        blazon_filename = self.blazon.filename
+        if flag_filename and self.flag.fs.exists(flag_filename):
+            return self.flag.fs.url(flag_filename, external=external)
+        elif blazon_filename and self.blazon.fs.exists(blazon_filename):
+            return self.blazon.fs.url(blazon_filename, external=external)
         else:
             return ''
 
@@ -101,11 +104,18 @@ class GeoZone(db.Document):
         return keys_values
 
     @cached_property
+    def level_code(self):
+        """Truncated level code for the sake of readability."""
+        # Either 'region', 'departement' or 'commune',
+        # useful to match TERRITORY_DATASETS keys.
+        return self.id.split(':')[1]
+
+    @cached_property
     def level_name(self):
         """Truncated level name for the sake of readability."""
-        if self.level.startswith('fr/'):
+        if self.level.startswith('fr:'):
             return self.level[3:]
-        # Keep the whole level name as a fallback (e.g. `country/fr`)
+        # Keep the whole level name as a fallback (e.g. `country:fr`)
         return self.level
 
     @cached_property
@@ -115,6 +125,19 @@ class GeoZone(db.Document):
             if self.level == level:
                 return name
         return self.level_name  # Fallback that should never happen.
+
+    @cached_property
+    def ancestors_objects(self):
+        """Ancestors objects sorted by name."""
+        ancestors_objects = []
+        for ancestor in self.ancestors:
+            try:
+                ancestor_object = GeoZone.objects.get(id=ancestor)
+            except GeoZone.DoesNotExist:
+                continue
+            ancestors_objects.append(ancestor_object)
+        ancestors_objects.sort(key=lambda a: a.name)
+        return ancestors_objects
 
     @cached_property
     def child_level(self):
@@ -154,23 +177,39 @@ class GeoZone(db.Document):
         return ', '.join(self.keys.get('postal', []))
 
     @property
-    def parent(self):
+    def parents_objects(self):
         if self.parent_level:
             for parent in self.parents:
                 if parent.startswith(self.parent_level):
-                    return GeoZone.objects.get(id=parent,
-                                               level=self.parent_level)
+                    yield GeoZone.objects.get(id=parent,
+                                              level=self.parent_level)
+
+    @cached_property
+    def current_parent(self):
+        today = date.today()
+        for parent in self.parents_objects:
+            if parent.valid_at(today):
+                return parent
 
     @property
     def children(self):
-        if self.child_level:
-            return (GeoZone.objects(level=self.child_level,
-                                    parents__in=[self.id])
-                           .order_by('-population', '-area'))
+        return (GeoZone
+                .objects(level=self.child_level, parents__in=[self.id])
+                .order_by('name'))
+
+    @property
+    def biggest_children(self):
+        return self.children.order_by('-population', '-area')[:10]
 
     @property
     def handled_level(self):
         return self.level in current_app.config.get('HANDLED_LEVELS')
+
+    def valid_at(self, valid_date):
+        if not self.validity:
+            return True
+        compare_string = valid_date.isoformat()
+        return self.validity['start'] <= compare_string <= self.validity['end']
 
     def toGeoJSON(self):
         return {
@@ -178,9 +217,11 @@ class GeoZone(db.Document):
             'type': 'Feature',
             'geometry': self.geom,
             'properties': {
+                'slug': self.slug,
                 'name': gettext(self.name),
                 'level': self.level,
                 'code': self.code,
+                'validity': self.validity,
                 'parents': self.parents,
                 'keys': self.keys,
                 'population': self.population,

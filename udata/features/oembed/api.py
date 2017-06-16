@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from flask import current_app
 
 from udata import theme
-from udata.api import api, API, output_json
+from udata.api import api, API
 from udata.models import db, Dataset, GeoZone, TERRITORY_DATASETS
 
 oembeds_parser = api.parser()
@@ -24,7 +24,9 @@ class OEmbedsAPI(API):
 
         The `references` are composed by a keyword (`kind`) followed by
         the `id` each of those separated by commas.
-        E.g: dataset-5369992aa3a729239d205183,territory-fr-town-75056-comptes
+        E.g:
+        dataset-5369992aa3a729239d205183,
+        territory-fr:departement:33@1860-07-01:emploi_dep
 
         Only datasets and territories are supported for now.
         """
@@ -44,14 +46,12 @@ class OEmbedsAPI(API):
             elif (item_kind == 'territory' and
                     current_app.config.get('ACTIVATE_TERRITORIES')):
                 try:
-                    country, level, code, kind = item_id.split('-')
+                    country, level, code, kind = item_id.split(':')
                 except ValueError:
                     return api.abort(400, 'Invalid territory ID.')
                 try:
                     geozone = GeoZone.objects.get(
-                        code=code,
-                        level='{country}/{level}'.format(
-                            country=country, level=level))
+                        id=':'.join([country, level, code]))
                 except GeoZone.DoesNotExist:
                     return api.abort(400, 'Unknown territory identifier.')
                 if level in TERRITORY_DATASETS:

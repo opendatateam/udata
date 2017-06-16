@@ -11,8 +11,8 @@ __all__ = (
 
 
 TERRITORY_DATASETS = {
-    'town': {},
-    'county': {},
+    'commune': {},
+    'departement': {},
     'region': {},
     'country': {}
 }
@@ -36,8 +36,8 @@ class TerritoryDataset(object):
 
     @property
     def slug(self):
-        return '{territory_id}-{id}'.format(
-            territory_id=self.territory.id.replace('/', '-'), id=self.id)
+        return '{territory_id}:{id}'.format(
+            territory_id=self.territory.id, id=self.id)
 
     @property
     def organization(self):

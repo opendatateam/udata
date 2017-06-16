@@ -13,21 +13,40 @@ from udata.settings import Testing
 
 def create_geozones_fixtures():
     paca = GeoZoneFactory(
-        id='fr/region/93', level='fr/region',
-        name='Provence Alpes Côtes dAzur')
+        id='fr:region:93@1970-01-09', level='fr:region',
+        name='Provence Alpes Côtes dAzur', code='93',
+        validity={'start': '1970-01-09', 'end': '9999-12-31'})
     bdr = GeoZoneFactory(
-        id='fr/county/13', level='fr/county', parents=[paca.id],
-        name='Bouches-du-Rhône', code='13', population=1993177, area=0)
+        id='fr:departement:13@1860-07-01', level='fr:departement',
+        parents=[paca.id], name='Bouches-du-Rhône', code='13',
+        population=1993177, area=0,
+        validity={'start': '1860-07-01', 'end': '9999-12-31'})
     arles = GeoZoneFactory(
-        id='fr/town/13004', level='fr/town', parents=[bdr.id],
+        id='fr:commune:13004@1942-01-01', level='fr:commune', parents=[bdr.id],
         name='Arles', code='13004', keys={'postal': '13200'},
-        population=52439, area=0)
+        population=52439, area=0,
+        validity={'start': '1942-01-01', 'end': '9999-12-31'})
     return paca, bdr, arles
+
+
+def create_old_new_regions_fixtures():
+    lr = GeoZoneFactory(
+        id='fr:region:91@1970-01-09', level='fr:region',
+        name='Languedoc-Rousillon', code='91',
+        validity={'start': '1956-01-01', 'end': '2015-12-31'},
+        population=2700266)
+    occitanie = GeoZoneFactory(
+        id='fr:region:76@2016-01-01', level='fr:region',
+        name='Languedoc-Rousillon et Midi-Pyrénées',
+        ancestors=['fr:region:91@1970-01-09'], code='76',
+        validity={'start': '2016-01-01', 'end': '9999-12-31'},
+        population=5573000)
+    return lr, occitanie
 
 
 class TerritoriesSettings(Testing):
     ACTIVATE_TERRITORIES = True
-    HANDLED_LEVELS = ('fr/town', 'fr/county', 'fr/region', 'country')
+    HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region', 'country')
 
 
 class TerritoriesTest(FrontTestCase):
@@ -80,10 +99,9 @@ class TerritoriesTest(FrontTestCase):
     def test_towns_with_other_datasets(self):
         with self.autoindex():
             organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.arles))
         self.assert200(response)
@@ -105,10 +123,9 @@ class TerritoriesTest(FrontTestCase):
     def test_counties_with_other_datasets(self):
         with self.autoindex():
             organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.bdr))
         self.assert200(response)
@@ -130,10 +147,9 @@ class TerritoriesTest(FrontTestCase):
     def test_regions_with_other_datasets(self):
         with self.autoindex():
             organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.paca.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.paca.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.paca))
         self.assert200(response)
@@ -156,10 +172,9 @@ class TerritoriesTest(FrontTestCase):
         self.login()
         with self.autoindex():
             organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.arles))
         self.assert200(response)
@@ -176,10 +191,9 @@ class TerritoriesTest(FrontTestCase):
         self.login()
         with self.autoindex():
             organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.bdr))
         self.assert200(response)
@@ -196,10 +210,9 @@ class TerritoriesTest(FrontTestCase):
         self.login()
         with self.autoindex():
             organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.paca.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.paca.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.paca))
         self.assert200(response)
@@ -217,10 +230,9 @@ class TerritoriesTest(FrontTestCase):
         with self.autoindex():
             member = Member(user=user, role='admin')
             organization = OrganizationFactory(members=[member])
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.arles))
         self.assert200(response)
@@ -244,10 +256,9 @@ class TerritoriesTest(FrontTestCase):
         with self.autoindex():
             member = Member(user=user, role='admin')
             organization = OrganizationFactory(members=[member])
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.bdr))
         self.assert200(response)
@@ -271,10 +282,9 @@ class TerritoriesTest(FrontTestCase):
         with self.autoindex():
             member = Member(user=user, role='admin')
             organization = OrganizationFactory(members=[member])
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.paca.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.paca.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.paca))
         self.assert200(response)
@@ -296,10 +306,9 @@ class TerritoriesTest(FrontTestCase):
     def test_with_town_datasets(self):
         with self.autoindex():
             organization = OrganizationFactory(zone=self.arles.id)
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.arles.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.arles.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.arles))
         self.assert200(response)
@@ -321,10 +330,9 @@ class TerritoriesTest(FrontTestCase):
     def test_with_county_datasets(self):
         with self.autoindex():
             organization = OrganizationFactory(zone=self.bdr.id)
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.bdr.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.bdr))
         self.assert200(response)
@@ -346,10 +354,9 @@ class TerritoriesTest(FrontTestCase):
     def test_with_region_datasets(self):
         with self.autoindex():
             organization = OrganizationFactory(zone=self.paca.id)
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[self.paca.id]))
+            VisibleDatasetFactory.create_batch(
+                3, organization=organization,
+                spatial=SpatialCoverageFactory(zones=[self.paca.id]))
         response = self.client.get(
             url_for('territories.territory', territory=self.paca))
         self.assert200(response)
@@ -367,3 +374,38 @@ class TerritoriesTest(FrontTestCase):
         self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertNotIn('dataset-item--cta', data)
+
+    def test_with_old_region_datasets(self):
+        lr, occitanie = create_old_new_regions_fixtures()
+        with self.autoindex():
+            for region in [lr, occitanie]:
+                organization = OrganizationFactory(zone=region.id)
+                VisibleDatasetFactory.create_batch(
+                    3, organization=organization,
+                    spatial=SpatialCoverageFactory(zones=[region.id]))
+        response = self.client.get(
+            url_for('territories.territory', territory=occitanie))
+        self.assert200(response)
+        data = response.data.decode('utf-8')
+        self.assertIn(occitanie.name, data)
+        base_datasets = self.get_context_variable('base_datasets')
+        self.assertEqual(len(base_datasets), 0)
+        territory_datasets = self.get_context_variable('territory_datasets')
+        self.assertEqual(len(territory_datasets), 3)
+        territory_datasets = self.get_context_variable('other_datasets')
+        self.assertEqual(len(territory_datasets), 3)
+
+    def test_town_legacy_redirect(self):
+        response = self.client.get(
+            url_for('territories.town', code=self.arles.code))
+        self.assertStatus(response, 302)
+        self.assertTrue(
+            '/territories/commune/13004%40latest/' in response.location)
+
+    def test_territory_latest_redirect(self):
+        response = self.client.get(
+            url_for('territories.redirect_territory',
+                    level='commune', code=self.arles.code))
+        self.assertStatus(response, 302)
+        self.assertTrue(
+            '/territories/commune/13004@1942-01-01/' in response.location)

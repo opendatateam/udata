@@ -6,6 +6,13 @@
 
 {% block main_content %}
 <div class="row">
+    {% if present_territory %}
+    <h2 class="territory-announcement bg-danger">
+        {{ _('This territory has been replaced by:') }}
+        <a href="{{ present_territory.url }}">{{ present_territory }}</a>
+        {{ _('since') }} {{ present_territory.validity.start[:4] }}.
+    </h2>
+    {% endif %}
     {% block territory_content %}{% endblock %}
 </div>
 <div class="dataset-list">

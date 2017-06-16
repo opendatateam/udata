@@ -15,7 +15,7 @@ export default {
             type: Boolean,
             default: true
         },
-        // Whetjer or not to display hover popup
+        // Whether or not to display hover popup
         popup: {
             type: Boolean,
             default: true

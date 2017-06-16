@@ -6,10 +6,6 @@ import json
 
 from flask import url_for
 
-from udata.frontend.markdown import mdstrip
-
-from . import APITestCase
-
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.core.user.factories import UserFactory
@@ -17,8 +13,11 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.features.territories.models import (
     TerritoryDataset, TERRITORY_DATASETS
 )
+from udata.frontend.markdown import mdstrip
 from udata.settings import Testing
 from udata.utils import faker
+
+from . import APITestCase
 
 
 def territory_dataset_factory():
@@ -119,17 +118,13 @@ class OEmbedsDatasetAPITest(APITestCase):
     def test_oembeds_api_for_territory(self):
         '''It should fetch a territory in the oembed format.'''
         country = faker.country_code()
-        level = 'town'
-        zone = GeoZoneFactory(level='{0}/{1}'.format(country, level))
+        level = 'commune'
+        zone = GeoZoneFactory(
+            level='{0}:{1}'.format(country, level),
+            validity={'start': '1942-01-01', 'end': '9999-12-31'})
         TestDataset = territory_dataset_factory()
-
         TERRITORY_DATASETS[level][TestDataset.id] = TestDataset
-
-        reference = 'territory-{0}-{1}'.format(
-            zone.id.replace('/', '-'),
-            TestDataset.id
-        )
-
+        reference = 'territory-{0}:{1}'.format(zone.id, TestDataset.id)
         url = url_for('api.oembeds', references=reference)
         response = self.get(url)
         self.assert200(response)
@@ -153,7 +148,8 @@ class OEmbedsDatasetAPITest(APITestCase):
 
     def test_oembeds_api_for_territory_zone_not_found(self):
         '''Should raise 400 on unknown zone ID'''
-        url = url_for('api.oembeds', references='territory-fr-town-12345-xyz')
+        url = url_for('api.oembeds',
+                      references='territory-fr:commune:13004@1970-01-01:xyz')
         response = self.get(url)
         self.assert400(response)
         self.assertEqual(response.json['message'],
@@ -162,17 +158,13 @@ class OEmbedsDatasetAPITest(APITestCase):
     def test_oembeds_api_for_territory_level_not_registered(self):
         '''Should raise 400 on unregistered territory level'''
         country = faker.country_code()
-        level = 'town'
-        zone = GeoZoneFactory(level='{0}/{1}'.format(country, level))
+        level = 'commune'
+        zone = GeoZoneFactory(
+            level='{0}:{1}'.format(country, level),
+            validity={'start': '1942-01-01', 'end': '9999-12-31'})
         TestDataset = territory_dataset_factory()
-
         del TERRITORY_DATASETS[level]
-
-        reference = 'territory-{0}-{1}'.format(
-            zone.id.replace('/', '-'),
-            TestDataset.id
-        )
-
+        reference = 'territory-{0}:{1}'.format(zone.id, TestDataset.id)
         url = url_for('api.oembeds', references=reference)
         response = self.get(url)
         self.assert400(response)
@@ -182,17 +174,13 @@ class OEmbedsDatasetAPITest(APITestCase):
     def test_oembeds_api_for_territory_dataset_not_registered(self):
         '''Should raise 400 on unregistered territory dataset'''
         country = faker.country_code()
-        level = 'town'
-        zone = GeoZoneFactory(level='{0}/{1}'.format(country, level))
+        level = 'commune'
+        zone = GeoZoneFactory(
+            level='{0}:{1}'.format(country, level),
+            validity={'start': '1942-01-01', 'end': '9999-12-31'})
         TestDataset = territory_dataset_factory()
-
         TERRITORY_DATASETS[level] = {}
-
-        reference = 'territory-{0}-{1}'.format(
-            zone.id.replace('/', '-'),
-            TestDataset.id
-        )
-
+        reference = 'territory-{0}:{1}'.format(zone.id, TestDataset.id)
         url = url_for('api.oembeds', references=reference)
         response = self.get(url)
         self.assert400(response)

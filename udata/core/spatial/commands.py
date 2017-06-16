@@ -10,6 +10,8 @@ import shutil
 from urllib import urlretrieve
 
 import msgpack
+import slugify
+from mongoengine import errors
 
 from udata.commands import submanager
 from udata.core.storages import tmp
@@ -65,21 +67,39 @@ def load(filename, drop=False):
     zones_filepath = tmp.path('zones.msgpack')
     with open(zones_filepath) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
-        for i, geozone in enumerate(unpacker, start=1):
-            GeoZone.objects.create(
-                id=geozone['_id'],
-                level=geozone['level'],
-                code=geozone['code'],
-                name=geozone['name'],
-                keys=geozone.get('keys'),
-                parents=geozone.get('parents'),
-                population=geozone.get('population'),
-                dbpedia=geozone.get('dbpedia'),
-                logo=geozone.get('flag') or geozone.get('blazon'),
-                wikipedia=geozone.get('wikipedia'),
-                area=geozone.get('area'),
-                geom=geozone['geom']
-            )
+        unpacker.next()  # Skip headers.
+        for i, geozone in enumerate(unpacker):
+            if not geozone.get('geom') or (
+                geozone['geom']['type'] == 'GeometryCollection' and
+                    not geozone['geom']['geometries']):
+                geom = None
+            else:
+                geom = geozone['geom']
+            params = {
+                'id': geozone['_id'],
+                'slug': slugify.slugify(geozone['name'], separator='-'),
+                'level': geozone['level'],
+                'code': geozone['code'],
+                'name': geozone['name'],
+                'keys': geozone.get('keys'),
+                'parents': geozone.get('parents'),
+                'ancestors': geozone.get('ancestors'),
+                'successors': geozone.get('successors'),
+                'validity': geozone.get('validity'),
+                'population': geozone.get('population'),
+                'dbpedia': geozone.get('dbpedia'),
+                'flag': geozone.get('flag'),
+                'blazon': geozone.get('blazon'),
+                'wikipedia': geozone.get('wikipedia'),
+                'area': geozone.get('area'),
+                'geom': geom
+            }
+            try:
+                GeoZone.objects.create(**params)
+            except errors.ValidationError as e:
+                log.warning('Validation error (%s) for %s with %s',
+                            e, geozone, params)
+                continue
     os.remove(zones_filepath)
     log.info('Loaded {total} zones'.format(total=i))
 

@@ -256,9 +256,8 @@ function embedDatasets (datasets) {
         })
       } else {
         // IE 11 support.
-        event = document.createEvent('HTMLEvents')
-        event.initEvent(DATASETS_LOADED_EVENT_NAME, true, true)
-        event.detail = { datasets }
+        event = document.createEvent('CustomEvent')
+        event.initEvent(DATASETS_LOADED_EVENT_NAME, true, true, { datasets })
       }
       window.dispatchEvent(event)
       return datasets

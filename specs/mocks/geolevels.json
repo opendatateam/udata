@@ -11,31 +11,31 @@
     "name": "Country subset",
     "parents": ["country"]
 }, {
-    "id": "fr/canton",
+    "id": "fr:canton",
     "name": "French canton",
-    "parents": ["fr/county"]
+    "parents": ["fr:departement"]
 }, {
-    "id": "fr/county",
+    "id": "fr:departement",
     "name": "French county",
-    "parents": ["fr/region"]
+    "parents": ["fr:region"]
 }, {
-    "id": "fr/district",
+    "id": "fr:district",
     "name": "French district",
-    "parents": ["fr/county"]
+    "parents": ["fr:departement"]
 }, {
-    "id": "fr/epci",
+    "id": "fr:epci",
     "name": "French intermunicipal (EPCI)",
-    "parents": ["fr/region"]
+    "parents": ["fr:region"]
 }, {
-    "id": "fr/iris",
+    "id": "fr:iris",
     "name": "Iris (Insee districts)",
-    "parents": ["fr/town"]
+    "parents": ["fr:commune"]
 }, {
-    "id": "fr/region",
+    "id": "fr:region",
     "name": "French region",
     "parents": ["country"]
 }, {
-    "id": "fr/town",
+    "id": "fr:commune",
     "name": "French town",
-    "parents": ["fr/district", "fr/epci"]
+    "parents": ["fr:district", "fr:epci"]
 }]

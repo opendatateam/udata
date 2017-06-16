@@ -10,7 +10,13 @@
 {% block main_content %}
 <div class="row">
     <div class="col-sm-12">
-        <div id="map-nav" style="height:800px; width:100%"></div>
+        <h1>{{ _('Click to navigate to the given region:') }}</h1>
+        <div id="map-nav" style="height:100vh; width:100%"></div>
+        <h3>{{ _('Or sorted alphabetically:') }}
+            {% for region in regions %}
+                <a href="{{ region.url }}">{{ region.name }}</a>{% if loop.last %}.{% else %},{% endif %}
+            {% endfor %}
+        </h3>
     </div>
 </div>
 {% endblock %}
@@ -21,7 +27,7 @@
     <script>
         var defaultCenter = [47, 2];
         var defaultZoom = 6;
-        var tilelayer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png');
+        var tilelayer = L.tileLayer(uData.config.tiles_url, uData.config.tiles_config);
         var map = L.map('map-nav', {
             center: defaultCenter,
             zoom: defaultZoom,
@@ -30,7 +36,9 @@
         L.geoJson({{ geojson|tojson }}, {
             onEachFeature: function (feature, layer) {
                 layer.on('click', function () {
-                    window.location = '/fr/territory/region/' + feature.properties.code + '/';
+                    window.location = '/fr/territories/region/' + feature.properties.code +
+                                      '@' + feature.properties.validity.start + '/' +
+                                      feature.properties.slug + '/';
                 })
             }
         }).addTo(map);
