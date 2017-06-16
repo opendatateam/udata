@@ -4,6 +4,21 @@
 
 - Use the new entrypoint-based theme management
   [#164](https://github.com/etalab/udata-gouvfr/pull/164)
+- Adjust the dataset reuses title overflow for proper display
+  [#172](https://github.com/etalab/udata-gouvfr/pull/172)
+- Drop glyphicons, remove some useless classes and upgrade to bootstrap 3.3.7
+  [#177](https://github.com/etalab/udata-gouvfr/pull/177)
+- Use the core publish action modal
+  [#178](https://github.com/etalab/udata-gouvfr/pull/178)
+- Fix the deuil header not being an SVG
+  [#180](https://github.com/etalab/udata-gouvfr/pull/180)
+
+## 1.0.6 (2017-04-18)
+
+- Fixed numbering in system integrator FAQ (thanks to Bruno Cornec)
+  [#174](https://github.com/etalab/udata-gouvfr/pull/174)
+- Added a footer link to the SPD page
+  [#176](https://github.com/etalab/udata-gouvfr/pull/176)
 
 ## 1.0.5 (2017-04-06)
 

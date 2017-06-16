@@ -50,6 +50,7 @@ nav.Bar('gouvfr_footer', [
     nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
     nav.Item(_('As a system integrator'), 'gouvfr.faq',
              {'section': 'system-integrator'}),
+    nav.Item(_('Reference Data'), 'gouvfr.spd'),
     nav.Item(_('API'), 'apidoc.swaggerui'),
     nav.Item(_('Credits'), 'gouvfr.credits'),
     nav.Item(_('Terms of use'), 'site.terms'),

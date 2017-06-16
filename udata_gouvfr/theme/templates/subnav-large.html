@@ -32,12 +32,12 @@
         <div class="call-to-action col-sm-7 col-md-8 col-lg-7 col-xs-12">
             <h2>{{ _('Share, improve and reuse public data') }}</h2>
             <div class="collapse subnav-collapse">
-                <a class="btn btn-primary btn-big btn-transparent icon-left"
+                <button class="btn btn-primary btn-big btn-transparent btn-left"
                         title="{{ _('Contribute!') }}"
-                        data-toggle="modal" data-target="#publish-action-modal">
-                    <span class="glyphicon glyphicon-plus"></span>
+                        @click="$refs.publishActionModal.show">
+                    <span class="fa fa-plus"></span>
                     {{ _('Contribute!' )}}
-                </a>
+                </button>
             </div>
         </div>
 

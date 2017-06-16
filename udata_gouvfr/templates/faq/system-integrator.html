@@ -56,7 +56,7 @@
 
 <p>Cet usage est recommandé si vous êtes responsable de cette organisation ou de ce territoire et souhaitez faire la promotion des jeux de données associés. Par exemple dans la cadre de la loi Notre, il est demandé aux communes de plus de 3500 habitants de rendre accessible en open data certaines données. L’usage de la plateforme « data.gouv.fr » pour déposer ces données puis les intégrer sur son propre site est rendue possible par cette solution.</p>
 
-<h3>2.1 Intégration d’une organisation</h3>
+<h3>2.a Intégration d’une organisation</h3>
 
 <pre><code class="html">&lt;div data-udata-organization="IDENTIFIANT DE L’ORGANISATION"&gt;&lt;/div&gt;
 &lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.loadOrganization()"&gt;&lt;/script&gt;
@@ -66,7 +66,7 @@
 
 <p>Optionnellement, il est possible d’afficher une barre de recherche pour laisser la possibilité au visiteur de filtrer la liste des jeux de données affichés. Cela est activé en passant l’option <code>{withSearch: true}</code> à la méthode <code>loadOrganization()</code> ci-dessus.</p>
 
-<h3>2.1 Intégration d’un territoire</h3>
+<h3>2.b Intégration d’un territoire</h3>
 
 <pre><code class="html">&lt;div data-udata-territory="IDENTIFIANT DU TERRITOIRE"&gt;&lt;/div&gt;
 &lt;script src="https://www.data.gouv.fr/static/widgets.js" id="udata" async defer onload="udataScript.loadTerritory()"&gt;&lt;/script&gt;

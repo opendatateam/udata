@@ -33,24 +33,13 @@
         </div>
 
         <div class="topic-toolbar btn-toolbar pull-right">
-            {# <div class="btn-group btn-group-sm more"> #}
-                {# <a href class="btn btn-default"
-                    data-toggle="modal" data-target="#topic-modal">
-                    {{ _('Read more') }}
-                </a> #}
-                <a class="btn btn-primary btn-big btn-transparent icon-left"
-                        title="{{ _('Contribute!') }}"
-                        data-toggle="modal" data-target="#publish-action-modal">
-                    <span class="glyphicon glyphicon-plus"></span>
-                    {{ _('Contribute!' )}}
-                </a>
-            {# </div> #}
+            <button class="btn btn-primary btn-big btn-transparent btn-left"
+                    title="{{ _('Contribute!') }}"
+                    @click="$refs.publishActionModal.show">
+                <span class="fa fa-plus"></span>
+                {{ _('Contribute!' )}}
+            </button>
         </div>
-        {# <div class="call-to-action">
-            <div class="collapse subnav-collapse btn-container">
-            </div>
-        </div> #}
 
     </div>
-
 </nav>
