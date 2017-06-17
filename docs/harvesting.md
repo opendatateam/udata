@@ -22,6 +22,15 @@ A harvesting job is done in three separate phases:
 2. `process`: each task created in the `initialize` is executed. Each item is processed independently.
 3. `finalize`: when all tasks are done, the `finilize` is a closure for the job and mark it as done.
 
+Harvested dataset will have the following `extras` properties:
+
+| Property            | Meaning                                                          |
+|---------------------|------------------------------------------------------------------|
+| harvest:domain      | Domain on which dataset has been harvested (ex: `data.test.org`) |
+| harvest:remote_id   | Dataset identifier on the remote repository                      |
+| harvest:source_id   | Harvester identifier                                             |
+| harvest:last_update | Last time this dataset has been harvested                        |
+
 ## Administration interface
 
 You can see the harvester administration interface in the `System` view.
@@ -67,7 +76,7 @@ optional arguments:
 
 `udata` comes with 3 harvest backends but you can implement your own backend.
 
-### DCAT (prefered)
+### DCAT
 
 This backend harvest any [DCAT][] endpoint.
 This is now the recommended way to harvest remote portals and repositories
@@ -75,13 +84,70 @@ This is now the recommended way to harvest remote portals and repositories
 
 As pagination is not described into the DCAT specification, we try to detect some supported
 pagination ontology:
-- [Hydra PartialCollectionView][http://www.hydra-cg.com/spec/latest/core/#hydra:PartialCollectionView]
+- [Hydra PartialCollectionView](http://www.hydra-cg.com/spec/latest/core/#hydra:PartialCollectionView)
+- [Legacy Hydra PagedCollection](https://www.w3.org/community/hydra/wiki/Pagination)
 
-### CKAN (legacy)
+Fields are extracted according these rules:
+
+#### Dataset fields
+
+| Dataset           | dcat:Dataset            | notes                                       |
+|-------------------|-------------------------|---------------------------------------------|
+| title             | dct:title               |                                             |
+| description       | dct:description         | Detect and parse HTML as Markdown           |
+| tags              | dct:keyword + dct:theme |                                             |
+| frequency         | dct:accrualPeriodicity  |                                             |
+| temporal_coverage | dct:temporal            | See [Temporal coverage](#temporal-coverage) |
+| license           | N/A                     | See [License detection](#license-detection) |
+| resources         | dct:distribution        | Also match the buggy dct:distributions      |
+
+| Dataset.extras | dcat:Dataset   | notes                    |
+|----------------|----------------|--------------------------|
+| dct:identifier | dct:identifier |                          |
+| uri            | @id            | URI Reference if present |
+
+#### Resource fields
+
+| Resource      | dcat:Distribution                  | notes                                  |
+|---------------|------------------------------------|----------------------------------------|
+| title         | dct:title                          | If missing, guessed from URL or format |
+| description   | dct:description                    | Detect and parse HTML                  |
+| url           | dcat:downloadURL or dcat:accessURL |                                        |
+| published     | dct:issued                         |                                        |
+| last_modified | dct:modified                       |                                        |
+| format        | dct:format                         |                                        |
+| mime          | dcat:mediaType                     |                                        |
+| filesize      | dcat:bytesSize                     |                                        |
+| checksum      | spdx:checksum                      | See [Checksum](#checksum)              |
+
+
+#### Temporal coverage
+
+Temporal coverage can be expressed in many ways. This harvester try the following patterns:
+- DCAT-AP format using schema.org properties (`schema:startDate` and `schema:endDate`)
+- [Gov.uk Time Interval][gov-uk-references] parsing
+- ISO date interval as literal (ie. `YYYY[-MM[-DD]]/YYYY[-MM[-DD]]`)
+- A Single ISO month or year (ie. `YYYY[-MM]`)
+
+#### Checksum
+
+| Checksum | spdx:Checksum      |
+|----------|--------------------|
+| type     | spdx:algorithm     |
+| value    | spdx:checksumValue |
+
+#### License detection
+
+License is extracted from one of the DCAT distribution.
+The havester try to guess the license from `dct:license` and `dct:right`.
+The first match is kept.
+If none matches, no license is set on the dataset.
+
+### CKAN
 
 This backend harvest CKAN repositories/portals through their API.
 
-### OpenDataSoft (legacy)
+### OpenDataSoft
 
 This backend harvest OpenDataSoft repositories/portals through their API (v1).
 
@@ -153,3 +219,4 @@ You may take a look at the [existing backends][backends-repository] to see exiti
 
 [DCAT]: https://www.w3.org/TR/vocab-dcat/
 [backends-repository]: https://github.com/opendatateam/udata/tree/master/udata/harvest/backends
+[gov-uk-references]: http://reference.data.gov.uk/
