@@ -95,6 +95,7 @@ def resource_to_rdf(resource, dataset=None, graph=None):
     permalink = url_for('datasets.resource', id=resource.id, _external=True)
     r = graph.resource(id)
     r.set(RDF.type, DCAT.Distribution)
+    r.set(DCT.identifier, Literal(resource.id))
     r.add(DCT.title, Literal(resource.title))
     r.add(DCT.description, Literal(resource.description))
     r.add(DCAT.downloadURL, URIRef(resource.url))
@@ -320,6 +321,13 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
 
     resource.published = rdf_value(distrib, DCT.issued, resource.published)
     resource.modified = rdf_value(distrib, DCT.modified, resource.modified)
+
+    identifier = rdf_value(distrib, DCT.identifier)
+    if identifier:
+        resource.extras['dct:identifier'] = identifier
+
+    if isinstance(distrib.identifier, URIRef):
+        resource.extras['uri'] = distrib.identifier.toPython()
 
     return resource
 
