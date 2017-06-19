@@ -9,18 +9,18 @@
 </template>
 
 <script>
-import Vue from 'vue';
-
 import config from 'config';
 import me from 'models/me';
 import site from 'models/site';
 
 import AppHeader from 'components/header.vue';
 import Sidebar from 'components/sidebar.vue';
+import ModalMixin from 'mixins/modal';
 
 
 export default {
     name: 'admin',
+    mixins: [ModalMixin],
     data() {
         return {
             toggled: false,
@@ -52,22 +52,6 @@ export default {
                 details: this._('The error identifier is {id}', {id: e.data.event_id}),
             });
         });
-    },
-    methods: {
-        /**
-         * Insert a modal Vue in the application.
-         * @param  {Object} options     The modal component definition (options passed to Vue.extend())
-         * @param  {Object} data        Data to assign to modal properties
-         * @return {Vue}                The child instanciated vm
-         */
-        $modal(options, propsData) {
-            const constructor = Vue.extend(options);
-            const el = document.createElement('div');
-            this.$els.modal.appendChild(el);
-            const modal = new constructor({el, parent: this, propsData});
-            modal.$on('modal:closed', modal.$destroy);
-            return modal;
-        }
     }
 };
 </script>

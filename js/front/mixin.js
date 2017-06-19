@@ -21,6 +21,7 @@ import Vue from 'vue';
 import NotificationZone from 'components/notification-zone.vue';
 import SiteSearch from 'components/site-search.vue';
 import Modal from 'components/modal.vue';
+import ModalMixin from 'mixins/modal';
 
 // Common Vue.js frontend configuration
 Vue.config.debug = config.debug;
@@ -43,6 +44,7 @@ Vue.use(require('plugins/scroll-to'));
 */
 export default {
     el: 'body',
+    mixins: [ModalMixin],
     components: {NotificationZone, SiteSearch, Modal},
     data() {
         return {
@@ -60,22 +62,6 @@ export default {
             const index = this.notifications.indexOf(notification);
             this.notifications.splice(index, 1);
         }
-    },
-    methods: {
-        /**
-         * Insert a modal Vue in the application.
-         * @param  {Object} options     The modal component definition (options passed to Vue.extend())
-         * @param  {Object} data        Data to assign to modal properties
-         * @return {Vue}                The child instanciated vm
-         */
-        $modal(options, data) {
-            const constructor = Vue.extend(options);
-            return new constructor({
-                el: this.$els.modal,  // This is the modal placeholder in Jinja template
-                parent: this,
-                propsData: data
-            });
-        },
     }
 };
 
