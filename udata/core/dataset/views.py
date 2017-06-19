@@ -10,7 +10,7 @@ from udata.models import Dataset, Follow, Reuse, CommunityResource
 from udata.core.site.models import current_site
 from udata.rdf import (
     RDF_MIME_TYPES, RDF_EXTENSIONS,
-    guess_format, negociate_content, context, want_rdf
+    negociate_content, want_rdf, graph_response
 )
 from udata.sitemap import sitemap
 from udata.utils import get_by
@@ -152,15 +152,8 @@ def rdf_format(dataset, format):
         elif dataset.deleted:
             abort(410)
 
-    format = guess_format(format)
     resource = dataset_to_rdf(dataset)
-    headers = {
-        'Content-Type': RDF_MIME_TYPES[format]
-    }
-    kwargs = {}
-    if format == 'json-ld':
-        kwargs['context'] = context
-    return resource.graph.serialize(format=format, **kwargs), 200, headers
+    return graph_response(resource, format)
 
 
 @sitemap.register_generator

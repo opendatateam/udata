@@ -20,8 +20,8 @@ from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.rdf import (
-    CONTEXT, RDF_MIME_TYPES, RDF_EXTENSIONS, context,
-    guess_format, negociate_content
+    CONTEXT, RDF_MIME_TYPES, RDF_EXTENSIONS,
+    negociate_content, graph_response
 )
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
@@ -194,19 +194,12 @@ def rdf_catalog():
 
 @blueprint.route('/catalog.<format>', localize=False)
 def rdf_catalog_format(format):
-    fmt = guess_format(format)
-    headers = {
-        'Content-Type': RDF_MIME_TYPES[fmt]
-    }
-    kwargs = {}
-    if fmt == 'json-ld':
-        kwargs['context'] = context
     params = multi_to_dict(request.args)
     page = int(params.get('page', 1))
     page_size = int(params.get('page_size', 100))
     datasets = Dataset.objects.visible().paginate(page, page_size)
     catalog = build_catalog(current_site, datasets, format=format)
-    return catalog.graph.serialize(format=fmt, **kwargs), 200, headers
+    return graph_response(catalog, format)
 
 
 @sitemap.register_generator

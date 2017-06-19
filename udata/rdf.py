@@ -227,3 +227,19 @@ def url_from_rdf(rdf, prop):
         return value.toPython()
     elif isinstance(value, RdfResource):
         return value.identifier.toPython()
+
+
+def graph_response(graph, format):
+    '''
+    Return a proper flask response for a RDF resource given an expected format.
+    '''
+    fmt = guess_format(format)
+    headers = {
+        'Content-Type': RDF_MIME_TYPES[fmt]
+    }
+    kwargs = {}
+    if fmt == 'json-ld':
+        kwargs['context'] = context
+    if isinstance(graph, RdfResource):
+        graph = graph.graph
+    return graph.serialize(format=fmt, **kwargs), 200, headers
