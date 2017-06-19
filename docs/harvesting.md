@@ -1,7 +1,7 @@
 # Harvesting
 
-Harvesting is the process of fetching of automatically remote metadata (ie. from other data portals or not)
-and store them into udata for being able to search them.
+Harvesting is the process of automatically fetching remote metadata (ie. from other data portals or not)
+and storing them into udata to be able to search and find them.
 
 ## Vocabulary
 
@@ -20,7 +20,7 @@ A harvesting job is done in three separate phases:
 
 1. `initialize`: the harvester fetches remote identifiers to harvest and create a single task for each.
 2. `process`: each task created in the `initialize` is executed. Each item is processed independently.
-3. `finalize`: when all tasks are done, the `finilize` is a closure for the job and mark it as done.
+3. `finalize`: when all tasks are done, the `finalize` is a closure for the job and mark it as done.
 
 Harvested dataset will have the following `extras` properties:
 
@@ -182,8 +182,8 @@ class RandomBackend(BaseBackend):
             self.add_item(faker.uuid4())  # Accept kwargs to store data
 
     def process(self, item):
-        '''Generate a random dataset from a fake identifiers'''
-        # Get or create an harvested dataset with this identifier.
+        '''Generate a random dataset from a fake identifier'''
+        # Get or create a harvested dataset with this identifier.
         # Harvest metadata are already filled on creation.
         dataset = self.get_dataset(item.remote_id)
 

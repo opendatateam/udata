@@ -41,7 +41,7 @@ This URL performs content negociation and redirect to:
     /dataset/{id}/rdf.{format}
 
 The dataset pages serve as identifier and perform content negociation too,
-so the following URL will all redirect to the same RDF endpoint:
+so the following URLs will all redirect to the same RDF endpoint:
 
     /dataset/{id}
     /dataset/{slug}

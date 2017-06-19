@@ -245,7 +245,7 @@ def temporal_from_rdf(period_of_time):
         elif isinstance(period_of_time, RdfResource):
             return temporal_from_resource(period_of_time)
     except:
-        # There is a lot of case where parsing could/should fail
+        # There are a lot of cases where parsing could/should fail
         # but we never want to break the whole dataset parsing
         pass
 
