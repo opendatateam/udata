@@ -2,16 +2,19 @@
 
 We split the documentation given your profile (help us to improve it if you do not feel comfortable with those!):
 
-
 ## I want to launch the project to play with it locally
 
-Install both [system](system-dependencies.md) and [local](local-dependencies.md) dependencies. Then [run the project](running-project.md).
-
+The prefered way to test udata is to use the [docker images][]
+to easily have an up and ready udata instance.
 
 ## I’m a regular developer of the platform
 
-Once the project is up and running, it's time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [creating a custom theme](creating-theme.md), [testing your code](testing-code.md), [adding translations](adding-translations.md) and so on.
-
+Install [system depedencies](system-dependencies.md)
+and then read the `Developping` sections starting with [Development environment](development-environment.md).
+Once the project is up and running, it's time to customize it!
+Take a look at our advanced documentation on [adapting settings](adapting-settings.md),
+[creating a custom theme](creating-theme.md), [testing your code](testing-code.md),
+[adding translations](adding-translations.md) and so on.
 
 ## I want to use it for my country
 
@@ -19,6 +22,8 @@ The project is currently [in production for France][data-gouv-fr] and [in develo
 
 Take a look at the [governance](governance.md) section to know how we deal with feature voting from all the community.
 
+To perform a full installation for production purpose, follow the [System dependencies](system-dependencies.md)
+and [installation](installation.md) sections.
 
 ## I found a bug or I want to propose an improvement
 
@@ -29,4 +34,5 @@ For a contribution as a enthusiastic citizen, check out our [contributing guide]
 [data-gouv-fr]: https://www.data.gouv.fr/
 [data-gouv-lu-repository]: https://github.com/opendatalu/udata-gouvlu
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
+[docker images]: https://github.com/opendatateam/docker-udata
 [gitter]: https://gitter.im/opendatateam/udata

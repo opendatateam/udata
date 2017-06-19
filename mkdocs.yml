@@ -8,19 +8,21 @@ theme_dir: 'docs/custom_theme'
 
 pages:
     - Home: index.md
-    - Installing:
-        - 1. System dependencies: system-dependencies.md
-        - 2. Local dependencies: local-dependencies.md
-        - 3. Running the project: running-project.md
-    - Advanced:
+    - Deploying:
+        - System dependencies: system-dependencies.md
+        - Installation: installation.md
+        - Docker deployment: docker-deployment.md
         - Adapting settings: adapting-settings.md
+    - Running:
+        - Administrative tasks: administrative-tasks.md
+        - Harvesting: harvesting.md
+        - RDF support: rdf.md
+    - Developping:
+        - Development environment: development-environment.md
         - Testing your code: testing-code.md
-        - Launching tasks: launching-tasks.md
         - Adding translations: adding-translations.md
         - Creating a custom theme: creating-theme.md
         - Building the documentation: building-documentation.md
-        - Harvesting: harvesting.md
-        - RDF support: rdf.md
     - Contributing:
         - Guide: contributing-guide.md
         - Governance: governance.md
