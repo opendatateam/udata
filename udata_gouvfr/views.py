@@ -176,6 +176,14 @@ def spd():
     return theme.render('spd.html', datasets=datasets, badge=SPD)
 
 
+@blueprint.route('/licences')
+def licences():
+    try:
+        return theme.render('licences.html')
+    except TemplateNotFound:
+        abort(404)
+
+
 @blueprint.route('/faq/', defaults={'section': 'home'})
 @blueprint.route('/faq/<string:section>/')
 def faq(section):

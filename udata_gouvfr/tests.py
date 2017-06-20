@@ -282,6 +282,10 @@ class SpecificUrlsTest(FrontTestCase):
         response = self.client.get(url_for('gouvfr.credits'))
         self.assert200(response)
 
+    def test_licences(self):
+        response = self.client.get(url_for('gouvfr.licences'))
+        self.assert200(response)
+
 
 class DataconnexionsTest(FrontTestCase):
     settings = GouvFrSettings
