@@ -1,0 +1,268 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': _('Licences'),
+    'description': 'Licences de réutilisation des informations publiques.',
+    'keywords': [
+        'Licence Ouverte',
+        _('Licence'),
+        'Service Public de la Donnée',
+    ],
+} %}
+
+{% set body_class="licences" %}
+
+{% block content %}
+{% cache cache_duration, 'licenses', g.lang_code %}
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <h1 class="col-xs-12">Licenses de réutilisation</h1>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <article class="col-xs-12 col-sm-8 col-md-9">
+
+
+<p>
+    Afin d’éviter la prolifération des licences, la
+    <a href="https://www.legifrance.gouv.fr/affichTexteArticle.do?cidTexte=JORFTEXT000033202746&amp;idArticle=JORFARTI000033203004&amp;categorieLien=cid" >loi pour une République numérique</a>
+    a prévu la création d’une liste, fixée par décret, de licences
+    qui peuvent être utilisées par les administrations pour la
+    réutilisation à titre gratuit de leurs informations publiques,
+    qu’il s’agisse de données ou de code source d’un logiciel
+    (<a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000034504991&amp;cidTexte=LEGITEXT000031366350&amp;dateTexte=29991231">article
+    D.323-2-1 du code des relations entre le public et l’administration
+    (CRPA)</a>).
+</p>
+<p>
+    La présente page référence toutes les licences utilisables
+    à ce titre par les administrations. Elle pourra être tenue
+    à jour au gré des évolutions de versions de ces textes, et
+    des éventuelles évolutions du décret.
+</p>
+<p>
+    La première partie de cette page dresse la liste des licences
+    applicables aux informations publiques ainsi qu’aux codes sources
+    utilisables par l’administration.
+</p>
+<p>
+    La deuxième partie de cette page dresse la liste des licences
+    spéciales homologuées avec le périmètre applicable de
+    l’homologation (information publique spécifique, administration
+    spécifique, ou autre) au titre de l’<a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000034504993&amp;cidTexte=LEGITEXT000031366350&amp;dateTexte=29991231">article D. 323-2-2</a> du CRPA.
+</p>
+
+<h2>Les licences pouvant être utilisées par les administrations</h2>
+
+<ul>
+    <li>
+    Les licences applicables aux « informations publiques » (données, documents…) 
+    <ul>
+        <li>
+        la
+        <a href="https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf">
+        Licence Ouverte version 2.0</a>,
+        établie par le Gouvernement
+        </li>
+        <li>
+        la licence
+        <a href="https://opendatacommons.org/licenses/odbl/1.0/">
+        ODbL (Open Database License) version 1.0</a>,
+        qui inclut une obligation de partage à l’identique
+        </li>
+    </ul>
+    </li>
+    <li>
+    Les licences applicables aux codes source de logiciels :
+    <ul>
+        <li>
+        Les licences « permissives » :
+        <ul>
+            <li>
+            licence
+            <a href="http://www.apache.org/licenses/LICENSE-2.0">
+            Apache, version 2.0</a>,
+            </li>
+            <li>
+            licence
+            <a href="https://opensource.org/licenses/BSD-2-Clause">
+            Berkeley Software Distribution License, version dite BSD-2-Clause</a>,
+            </li>
+            <li>
+            license
+            <a href="https://opensource.org/licenses/BSD-3-Clause">
+            Berkeley Software Distribution License, version dite BSD-3-Clause</a>,
+            </li>
+            <li>
+            licence
+            <a href="http://www.cecill.info/licences/Licence_CeCILL-B_V1-fr.html">
+            CeCILL-B, version 1</a>,
+            </li>
+            <li>
+            licence
+            <a href="https://opensource.org/licenses/MIT">
+            Massuchusetts Institute of Technology, dite « MIT License »</a>,
+            </li>
+        </ul>
+        </li>
+        <li>
+        Les licences « avec obligation de réciprocité » :
+        <ul>
+            <li>
+            les licences CeCILL :
+            <ul>
+                <li>
+                licence
+				<a href="http://www.cecill.info/licences/Licence_CeCILL_V2.1-fr.html">
+				CeCILL, version 2.1</a>,
+                </li>
+                <li>
+                licence
+				<a href="http://www.cecill.info/licences/Licence_CeCILL-C_V1-fr.html">
+				CeCILL-C version 1</a>,
+                </li>
+            </ul>
+            </li>
+            <li>
+            les licences GPL :
+            <ul>
+                <li>
+                licence
+				<a href="http://www.gnu.org/licenses/gpl-3.0-standalone.html">
+				GNU General Public License, version 3.0</a>,
+                </li>
+                <li>
+                licence
+				<a href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html">
+				GNU Lesser General Public License, version 3.0</a>,
+                </li>
+                <li>
+                licence
+				<a href="http://www.gnu.org/licenses/agpl-3.0-standalone.html">
+				GNU Affero General Public License, version 3.0</a>,
+                </li>
+            </ul>
+            </li>
+            <li>
+            licence
+			<a href="https://www.mozilla.org/en-US/MPL/2.0/">
+			Mozilla Public License, version 2.0</a>.
+            </li>
+
+        </ul>
+        </li>
+    </ul>
+    </li>
+</ul>
+<p>
+Pour plus de détails sur les licences libres :
+</p>
+<ul>
+    <li>
+    la page de
+    <a href="https://opensource.org/licenses" >l’Open Source Initiative</a>,
+    </li>
+    <li>
+    la page de
+    <a href="https://www.gnu.org/licenses/license-list.fr.html" >la Free Software Foundation</a>.
+    </li>
+</ul>
+<p>
+    Il est précisé que l’obligation faite aux administrations
+    de choisir parmi ces licences ne vaut que lorsque les
+    administrations peuvent établir une licence de réutilisation.
+    En particulier, les administrations participant à un projet
+    déjà initié sous une licence déjà imposée ont bien entendu
+    la faculté de contribuer au projet sous cette licence
+    (<a href="https://www.etalab.gouv.fr/licence-version-2-0-de-la-licence-ouverte-suite-a-la-consultation-et-presentation-du-decret" >plus de détails</a>).
+</p>
+
+<h2>Les licences homologuées</h2>
+
+<p>
+    Les administrations souhaitant recourir à une licence
+    ne figurant pas dans le paragraphe précédent doivent
+    auparavant en obtenir l’homologation dans les conditions
+    prévues à l’<a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000034504993&amp;cidTexte=LEGITEXT000031366350&amp;dateTexte=29991231">article D.323-2-2</a> du CRPA.
+</p>
+<p>
+    Une homologation pour être prononcée, doit suivre une
+    procédure particulière. L’administration (services de l’Etat,
+    collectivité, établissement public…) doit pour cela contacter
+    la mission Etalab (homologation.licence@data.gouv.fr).
+</p>
+<p>
+    La demande d’homologation doit comporter :
+</p>
+<ol>
+    <li>
+    La description des données dont la réutilisation doit être spécialement encadrée
+    </li>
+    <li>
+    Les raisons motivées de cette volonté d’encadrement spécifique
+    </li>
+    <li>
+    Les explications montrant l’inadéquation des licences proposées
+    </li>
+    <li>
+    Le texte de la licence souhaitée
+    </li>
+    <li>
+    La synthèse de la concertation menée auprès des réutilisateurs
+    </li>
+</ol>
+<p>
+    Une fois homologuée, la licence s’applique aux seuls jeux
+    de données concernés par la demande originale.
+</p>
+<p>
+    Ont ainsi été homologuées :
+</p>
+<ul>
+    <li>
+    Conformément à la décision d’homologation du 5 mai 2017 :
+    </li>
+    <ul>
+        <li>
+        La « <a href="http://professionnels.ign.fr/doc/licence_gratuite.pdf">licence d’utilisation à titre gratuit</a>
+        » de l’institut national géographique et forestier (IGN),
+        concernant les données géographiques BD ORTHO®, BD TOPO®,
+        BD PARCELLAIRE®, BD ADRESSE® et RGE ALTI®,  et ce pour
+        une durée de 12 mois à compter du 5 mai 2017 ;
+        </li>
+        <li>
+        La <a href="https://adresse.data.gouv.fr/pdf/licence-gratuite-repartage.pdf">
+        licence du produit gratuit issu de la Base Adresse Nationale (BAN)</a>,
+        pour les données figurant dans la
+        <a href="https://adresse.data.gouv.fr/pdf/description-contenu.pdf">
+        description du contenu du produit gratuit issu de la Base Adresse Nationale (BAN)
+        </a>
+        , et ce pour une durée de 6 mois à compter du 5 mai 2017.
+        </li>
+    </ul>
+    </li>
+</ul>
+
+
+            </article>
+
+             <aside class="col-xs-12 col-sm-4 col-md-3">
+                 <h3>Références</h3>
+                 <ul class="list-unstyled">
+                     <li><a href="https://www.legifrance.gouv.fr/affichTexteArticle.do?cidTexte=JORFTEXT000033202746&amp;idArticle=JORFARTI000033203004&amp;categorieLien=cid">La loi pour une République numérique</a></li>
+                     <li><a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000034504991&amp;cidTexte=LEGITEXT000031366350&amp;dateTexte=29991231">article D.323-2-1 du code des relations entre le public et l’administration (CRPA)</a></li>
+                     <li><a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?idArticle=LEGIARTI000034504993&amp;cidTexte=LEGITEXT000031366350&amp;dateTexte=29991231">article D.323-2-2 du code des relations entre le public et l’administration (CRPA)</a></li>
+                 </ul>
+             </aside>
+         </div>
+     </div>
+ </section>
+
+ {% endcache %}
+ {% endblock %}
+

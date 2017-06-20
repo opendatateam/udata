@@ -4,6 +4,11 @@
 
 - Nothing yet
 
+## 1.0.7 (2017-06-20)
+
+- Added a Licences page
+  [#181](https://github.com/etalab/udata-gouvfr/pull/181)
+
 ## 1.0.6 (2017-04-18)
 
 - Fixed numbering in system integrator FAQ (thanks to Bruno Cornec)
