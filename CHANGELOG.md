@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.0.8 (2017-06-21)
 
 - Fixed a typo
   [#182](https://github.com/etalab/udata-gouvfr/pull/182)
