@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.8 (2017-06-21)
 
 - Fixed a typo
