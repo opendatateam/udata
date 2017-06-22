@@ -16,6 +16,11 @@
   Especially using history of towns, counties and regions from GeoHisto.
   [#499](https://github.com/opendatateam/udata/issues/499)
 
+## 1.0.8 (2017-06-21)
+
+- Fixed a typo
+  [#182](https://github.com/etalab/udata-gouvfr/pull/182)
+
 ## 1.0.7 (2017-06-20)
 
 - Added a Licences page
