@@ -206,8 +206,9 @@ class UDataContext(Context):
     and the fact that this method is used to render the context in the
     resulting JSON-LD.
 
-    See: https://github.com/RDFLib/rdflib-jsonld/blob/master/rdflib_jsonld/serializer.py#L101-L103
-    '''  # noqa
+    See:
+        https://github.com/RDFLib/rdflib-jsonld/blob/master/rdflib_jsonld/serializer.py#L101-L103
+    '''
 
     def to_dict(self):
         '''Hackish way to provide the site context URL'''

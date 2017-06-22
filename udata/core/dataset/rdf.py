@@ -5,6 +5,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
 import calendar
 import html2text
+import logging
 
 from datetime import date
 from HTMLParser import HTMLParser
@@ -24,6 +25,8 @@ from udata.rdf import (
 from udata.utils import get_by
 
 from .models import Dataset, Resource, Checksum, License
+
+log = logging.getLogger(__name__)
 
 # Map extra frequencies (ie. not defined in Dublin Core) to closest equivalent
 RDF_FREQUENCIES = {
@@ -247,7 +250,8 @@ def temporal_from_rdf(period_of_time):
     except:
         # There are a lot of cases where parsing could/should fail
         # but we never want to break the whole dataset parsing
-        pass
+        # so we log the error for future investigation and improvement
+        log.warning('Unable to parse temporal coverage', exc_info=True)
 
 
 def frequency_from_rdf(term):
