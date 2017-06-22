@@ -22,6 +22,11 @@
 <meta name="auth-url" content="{{ url_for('security.login') }}" />
 <meta name="github" content="{{ config.SITE_GITHUB_URL }}" />
 {{ i18n_alternate_links() }}
+{% if rdf_links %}
+{% for mime, url in rdf_links %}
+<link rel="alternate" type="{{ mime }}" href="{{ url }}" />
+{% endfor %}
+{% endif %}
 {% if config.SENTRY_PUBLIC_DSN %}
 <meta name="sentry" content="{{config.SENTRY_PUBLIC_DSN}}"
     data-release="{{config.SENTRY_RELEASE}}"

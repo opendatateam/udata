@@ -49,7 +49,7 @@ def validate(identifier):
 
 @m.command
 def delete(identifier):
-    '''Delete an harvest source'''
+    '''Delete a harvest source'''
     log.info('Deleting source "%s"', identifier)
     actions.delete_source(identifier)
     log.info('Deleted source "%s"', identifier)
@@ -87,7 +87,7 @@ def backends():
 
 @m.command
 def jobs():
-    '''Lists started harvest jobs'''
+    '''List started harvest jobs'''
 
 
 @m.option('identifier', help='The Harvest source identifier or slug')
@@ -99,8 +99,8 @@ def launch(identifier):
 
 @m.option('identifier', help='The Harvest source identifier or slug')
 def run(identifier):
-    '''Run an harvester synchronously'''
-    log.info('Harvest source "%s"', identifier)
+    '''Run a harvester synchronously'''
+    log.info('Harvesting source "%s"', identifier)
     actions.run(identifier)
 
 
@@ -116,7 +116,7 @@ def run(identifier):
 @m.option('-M', '--month-of-year', default=SUPPRESS,
           help='The crontab expression for month of year')
 def schedule(identifier, **kwargs):
-    log.info('Harvest source "%s"', identifier)
+    '''Schedule a harvest job to run periodically'''
     source = actions.schedule(identifier, **kwargs)
     msg = 'Scheduled {source.name} with the following crontab: {cron}'
     log.info(msg.format(source=source, cron=source.periodic_task.crontab))
@@ -124,7 +124,7 @@ def schedule(identifier, **kwargs):
 
 @m.option('identifier', help='The Harvest source identifier or slug')
 def unschedule(identifier):
-    '''Run an harvester synchronously'''
+    '''Unschedule a periodical harvest job'''
     source = actions.unschedule(identifier)
     log.info('Unscheduled harvest source "%s"', source.name)
 
@@ -140,7 +140,7 @@ def purge():
 @m.option('filename', help='The mapping CSV filename')
 @m.option('domain', help='The remote domain')
 def attach(domain, filename):
-    '''Attach existing dataset to their harvest remote id.'''
+    '''Attach existing datasets to their harvest remote id'''
     log.info('Attaching datasets for domain %s', domain)
     result = actions.attach(domain, filename)
     log.info('Attached %s datasets to %s', result.success, domain)

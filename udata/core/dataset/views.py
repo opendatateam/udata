@@ -6,11 +6,16 @@ from werkzeug.contrib.atom import AtomFeed
 
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Discussion, Follow, Reuse, CommunityResource
+from udata.models import Dataset, Follow, Reuse, CommunityResource
 from udata.core.site.models import current_site
+from udata.rdf import (
+    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    negociate_content, want_rdf, graph_response
+)
 from udata.sitemap import sitemap
 from udata.utils import get_by
 
+from .rdf import dataset_to_rdf
 from .search import DatasetSearch
 from .permissions import ResourceEditPermission, DatasetEditPermission
 
@@ -78,6 +83,14 @@ class ProtectedDatasetView(DatasetView):
 class DatasetDetailView(DatasetView, DetailView):
     template_name = 'dataset/display.html'
 
+    def dispatch_request(self, *args, **kwargs):
+        if want_rdf():
+            fmt = RDF_EXTENSIONS[negociate_content()]
+            url = url_for('datasets.rdf_format',
+                          dataset=kwargs['dataset'].id, format=fmt)
+            return redirect(url)
+        return super(DatasetDetailView, self).dispatch_request(*args, **kwargs)
+
     def get_context(self):
         context = super(DatasetDetailView, self).get_context()
         if not DatasetEditPermission(self.dataset).can():
@@ -88,6 +101,13 @@ class DatasetDetailView(DatasetView, DetailView):
         context['reuses'] = Reuse.objects(datasets=self.dataset).visible()
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
+
+        context['rdf_links'] = [
+            (RDF_MIME_TYPES[fmt],
+             url_for('datasets.rdf_format',
+                     dataset=self.dataset.id, format=ext))
+            for (fmt, ext) in RDF_EXTENSIONS.items()
+        ]
 
         return context
 
@@ -114,6 +134,26 @@ def resource_redirect(id):
     else:
         resource = CommunityResource.objects(id=id).first()
     return redirect(resource.url.strip()) if resource else abort(404)
+
+
+@blueprint.route('/<dataset:dataset>/rdf', localize=False)
+def rdf(dataset):
+    '''Root RDF endpoint with content negociation handling'''
+    format = RDF_EXTENSIONS[negociate_content()]
+    url = url_for('datasets.rdf_format', dataset=dataset.id, format=format)
+    return redirect(url)
+
+
+@blueprint.route('/<dataset:dataset>/rdf.<format>', localize=False)
+def rdf_format(dataset, format):
+    if not DatasetEditPermission(dataset).can():
+        if dataset.private:
+            abort(404)
+        elif dataset.deleted:
+            abort(410)
+
+    resource = dataset_to_rdf(dataset)
+    return graph_response(resource, format)
 
 
 @sitemap.register_generator

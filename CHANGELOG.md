@@ -2,6 +2,12 @@
 
 ## Current (in progress)
 
+- Added a [DCAT](https://www.w3.org/TR/vocab-dcat/) harvester
+  and expose metadata as RDF/DCAT
+  [#966](https://github.com/opendatateam/udata/pull/966)
+  See the dedicated documentions:
+    - [RDF](https://udata.readthedocs.io/en/stable/rdf/)
+    - [Harvesting](https://udata.readthedocs.io/en/stable/harvesting/)
 - Upgrade to Flask-Mongoengine 0.9.2, Flask-WTF 0.14.2, mongoengine 0.11.0.
   [#812](https://github.com/opendatateam/udata/pull/812)
 - Upgrade to Flask-Login 0.4.0 and switch from Flask-Security to the latest

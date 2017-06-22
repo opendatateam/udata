@@ -186,6 +186,19 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url_for('datasets.show', dataset='not-found'))
         self.assert404(response)
 
+    def test_redirect_to_rdf(self):
+        '''It should redirect RDF mimetypes'''
+        dataset = VisibleDatasetFactory()
+        url = url_for('datasets.show', dataset=dataset)
+        headers = {'accept': 'text/turtle'}
+        expected_url = url_for('datasets.rdf_format',
+                               dataset=dataset.id,
+                               format='ttl')
+
+        response = self.get(url, headers=headers)
+
+        self.assertRedirects(response, expected_url)
+
     def test_resource_latest_url(self):
         '''It should redirect to the real resource URL'''
         resource = ResourceFactory()

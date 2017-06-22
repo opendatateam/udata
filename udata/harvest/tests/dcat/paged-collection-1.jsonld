@@ -1,0 +1,162 @@
+[
+  {
+    "@id": "http://data.test.org",
+    "@type": ["http://www.w3.org/ns/dcat#Catalog"],
+    "http://purl.org/dc/terms/language": [{"@value": "en"}],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-15T09:19:51.723691"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [{"@value": "Sample DCAT Catalog"}],
+    "http://www.w3.org/ns/dcat#dataset": [
+      {"@id": "http://data.test.org/datasets/1"},
+      {"@id": "http://data.test.org/datasets/2"},
+      {"@id": "http://data.test.org/datasets/3"},
+      {"@id": "http://data.test.org/datasets/4"}
+    ],
+    "http://xmlns.com/foaf/0.1/homepage": [{"@value": "http://data.test.org"}]
+  },
+  {
+    "@id": "http://data.test.org/organizations/1",
+    "@type": ["http://xmlns.com/foaf/0.1/Organization"],
+    "http://xmlns.com/foaf/0.1/name": [{"@value": "An Organization"}]
+  },
+  {
+    "@id": "http://data.test.org/contacts/1",
+    "@type": ["http://www.w3.org/2006/vcard/ns#Organization"],
+    "http://www.w3.org/2006/vcard/ns#fn": [{"@value": "Organization contact"}],
+    "http://www.w3.org/2006/vcard/ns#hasEmail": [{"@value": "hello@its.me"}]
+  },
+  {
+    "@id": "http://data.test.org/datasets/1",
+    "@type": ["http://www.w3.org/ns/dcat#Dataset"],
+    "http://purl.org/dc/terms/description": [{"@value": "Dataset 1 description"}],
+    "http://purl.org/dc/terms/identifier": [{"@value": "1"}],
+    "http://purl.org/dc/terms/issued": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T18:59:02.737480"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T19:01:24.184120"
+      }
+    ],
+    "http://purl.org/dc/terms/temporal": [{"@id": "temporal-1"}],
+    "http://www.w3.org/ns/dcat#landingPage": [{"@value": "http://data.test.org/datasets/1"}],
+    "http://purl.org/dc/terms/publisher": [{"@id": "http://data.test.org/organizations/1"}],
+    "http://purl.org/dc/terms/title": [{"@value": "Dataset 1"}],
+    "http://www.w3.org/2002/07/owl#versionInfo": [{"@value": "1.0"}],
+    "http://www.w3.org/ns/dcat#contactPoint": [{"@id": "http://data.test.org/contacts/1"}],
+    "http://www.w3.org/ns/dcat#distribution": [{"@id": "http://data.test.org/datasets/1/resources/1"}],
+    "http://www.w3.org/ns/dcat#keyword": [
+      {"@value": "Tag 1"},
+      {"@value": "Tag 2"},
+      {"@value": "Tag 3"},
+      {"@value": "Tag 4"}
+    ],
+    "http://www.w3.org/ns/dcat#theme": [
+      {"@value": "Theme 1"},
+      {"@value": "Theme 2"}
+    ]
+  },
+  {
+    "@id": "http://data.test.org/datasets/2",
+    "@type": ["http://www.w3.org/ns/dcat#Dataset"],
+    "http://purl.org/dc/terms/description": [{"@value": "Dataset 2 description"}],
+    "http://purl.org/dc/terms/identifier": [{"@value": "2"}],
+    "http://purl.org/dc/terms/issued": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T18:59:02.737480"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T19:01:24.184120"
+      }
+    ],
+    "http://purl.org/dc/terms/publisher": [{"@id": "http://data.test.org/organizations/1"}],
+    "http://purl.org/dc/terms/title": [{"@value": "Dataset 2"}],
+    "http://www.w3.org/2002/07/owl#versionInfo": [{"@value": "1.0"}],
+    "http://www.w3.org/ns/dcat#contactPoint": [{"@id": "http://data.test.org/contacts/1"}],
+    "http://www.w3.org/ns/dcat#distribution": [{"@id": "http://data.test.org/datasets/2/resources/1"}],
+    "http://www.w3.org/ns/dcat#keyword": [
+      {"@value": "Tag 1"},
+      {"@value": "Tag 2"},
+      {"@value": "Tag 3"}
+    ]
+  },
+  {
+    "@id": "http://data.test.org/datasets/3",
+    "@type": ["http://www.w3.org/ns/dcat#Dataset"],
+    "http://purl.org/dc/terms/description": [{"@value": "Dataset 3 description"}],
+    "http://purl.org/dc/terms/identifier": [{"@value": "3"}],
+    "http://purl.org/dc/terms/issued": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T18:59:02.737480"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T19:01:24.184120"
+      }
+    ],
+    "http://purl.org/dc/terms/publisher": [{"@id": "http://data.test.org/organizations/1"}],
+    "http://purl.org/dc/terms/title": [{"@value": "Dataset 3"}],
+    "http://www.w3.org/2002/07/owl#versionInfo": [{"@value": "1.0"}],
+    "http://www.w3.org/ns/dcat#distribution": [
+      {"@id": "http://data.test.org/datasets/3/resources/1"}
+    ],
+    "http://www.w3.org/ns/dcat#keyword": [
+      {"@value": "Tag 1"},
+      {"@value": "Tag 2"}
+    ]
+  },
+  {
+    "@id": "http://data.test.org/datasets/1/resources/1",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 1-1"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/1/resources/1/file.json"}
+    ]
+  },
+  {
+    "@id": "http://data.test.org/datasets/2/resources/1",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 2-1"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/2/resources/1/file.json"}
+    ]
+  },
+  {
+    "@id": "http://data.test.org/datasets/3/resources/1",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 3-1"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/3/resources/1/file.json"}
+    ]
+  },
+  {
+    "@id": "http://data.test.org/catalog.jsonld?page=1",
+    "@type": ["http://www.w3.org/ns/hydra/core#PagedCollection"],
+    "http://www.w3.org/ns/hydra/core#firstPage": [{"@value": "http://data.test.org/catalog.jsonld?page=1"}],
+    "http://www.w3.org/ns/hydra/core#itemsPerPage": [{"@value": 3}],
+    "http://www.w3.org/ns/hydra/core#lastPage": [{"@value": "http://data.test.org/catalog.jsonld?page=2"}],
+    "http://www.w3.org/ns/hydra/core#nextPage": [{"@value": "http://data.test.org/catalog.jsonld?page=2"}],
+    "http://www.w3.org/ns/hydra/core#totalItems": [{"@value": 4}]
+  }
+]
