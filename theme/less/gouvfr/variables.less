@@ -3,10 +3,16 @@
  */
 @import "~bootstrap/less/variables";
 
-@highlight: #2267af;
+@brand-primary:         #49a5d6;
+@brand-success:         #5cb85c;
+@brand-info:            #5bc0de;
+@brand-warning:         #f0ad4e;
+@brand-danger:          #d9534f;
+
+@highlight: #2b8dc1;
 @highlight-dark: #3D5772;
 @bg-light: white;
-@bg-dark: #49a5d6;
+@bg-dark: @brand-primary;
 @bg-darker: #223346;
 @bg-gray: #F0F0F0;
 // @dark_text: #373c42;
@@ -14,6 +20,7 @@
 @green: #81c85b;
 @red: #ec364b;
 @yellow: #ffb311;
+
 
 /*
  * Customize bootstrap variables
@@ -27,7 +34,7 @@
 @navbar-default-link-color: #373c42;
 @grid-float-breakpoint: 500px;
 
-@btn-primary-bg: @bg-dark;
+@btn-primary-bg: @brand-primary;
 @btn-success-bg: @green ;
 @btn-danger-bg: @red ;
 @grid-gutter-width: 16px;
@@ -43,3 +50,17 @@
 @text-dark: #373c42;
 
 @title-font: Helvetica, Arial, sans-serif;
+
+
+@nav-tabs-link-hover-border-color:          @gray-lighter;
+
+@nav-tabs-active-link-hover-bg:             @body-bg;
+@nav-tabs-active-link-hover-color:          @gray;
+@nav-tabs-active-link-hover-border-color:   #ddd;
+
+@nav-tabs-justified-link-border-color:            @btn-primary-bg;
+@nav-tabs-justified-active-link-border-color:     @highlight;
+
+@nav-pills-border-radius:                   0;
+@nav-pills-active-link-hover-bg:            #fff;
+@nav-pills-active-link-hover-color:         @btn-primary-bg;
