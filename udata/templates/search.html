@@ -16,10 +16,11 @@
 {% set datasets_search_url = url_for('datasets.list') %}
 {% set reuses_search_url = url_for('reuses.list') %}
 {% set organizations_search_url = url_for('organizations.list') %}
+{% set breadcrum_class='search-bar'%}
 
 {% block breadcrumb_bar %}
 <!-- Nav tabs -->
-<ul class="nav nav-tabs search-tabs">
+<ul class="nav nav-tabs search-tabs nav-tabs--search-tabs">
     {% if datasets %}
         <li class="active" data-tab="datasets">
             <a href @click.prevent="setTab('datasets')">
