@@ -402,10 +402,47 @@ class TerritoriesTest(FrontTestCase):
         self.assertTrue(
             '/territories/commune/13004%40latest/' in response.location)
 
-    def test_territory_latest_redirect(self):
+    def test_town2_legacy_redirect(self):
+        response = self.client.get(
+            url_for('territories.town2', code=self.arles.code))
+        self.assertStatus(response, 302)
+        self.assertTrue(
+            '/territories/commune/13004%40latest/' in response.location)
+
+    def test_county_legacy_redirect(self):
+        response = self.client.get(
+            url_for('territories.county', code=self.bdr.code))
+        self.assertStatus(response, 302)
+        self.assertTrue(
+            '/territories/departement/13%40latest/' in response.location)
+
+    def test_region_legacy_redirect(self):
+        response = self.client.get(
+            url_for('territories.region', code=self.paca.code))
+        self.assertStatus(response, 302)
+        self.assertTrue(
+            '/territories/region/93%40latest/' in response.location)
+
+    def test_territory_town_latest_redirect(self):
         response = self.client.get(
             url_for('territories.redirect_territory',
                     level='commune', code=self.arles.code))
         self.assertStatus(response, 302)
         self.assertTrue(
             '/territories/commune/13004@1942-01-01/' in response.location)
+
+    def test_territory_county_latest_redirect(self):
+        response = self.client.get(
+            url_for('territories.redirect_territory',
+                    level='departement', code=self.bdr.code))
+        self.assertStatus(response, 302)
+        self.assertTrue(
+            '/territories/departement/13@1860-07-01/' in response.location)
+
+    def test_territory_region_latest_redirect(self):
+        response = self.client.get(
+            url_for('territories.redirect_territory',
+                    level='region', code=self.paca.code))
+        self.assertStatus(response, 302)
+        self.assertTrue(
+            '/territories/region/93@1970-01-09/' in response.location)
