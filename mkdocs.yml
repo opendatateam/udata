@@ -4,6 +4,7 @@ site_author: Etalab
 repo_url: https://github.com/etalab/udata
 
 theme: readthedocs
+theme_dir: 'docs/custom_theme'
 
 pages:
     - Home: index.md
