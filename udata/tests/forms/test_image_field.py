@@ -77,7 +77,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
             doc.image.save(img, 'image.jpg')
         doc.save()
         form = self.F(None, obj=doc)
-        self.assertEqual(form.image.filename.data, 'image.png')
+        self.assertEqual(form.image.filename.data, 'image.jpg')
         self.assertEqual(form.image.bbox.data, None)
 
     def test_with_image_and_bbox(self):
@@ -86,7 +86,7 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
             doc.thumbnail.save(img, 'image.jpg', bbox=[10, 10, 100, 100])
         doc.save()
         form = self.F(None, obj=doc)
-        self.assertEqual(form.thumbnail.filename.data, 'image.png')
+        self.assertEqual(form.thumbnail.filename.data, 'image.jpg')
         self.assertEqual(form.thumbnail.bbox.data, [10, 10, 100, 100])
 
     def test_post_new(self):
