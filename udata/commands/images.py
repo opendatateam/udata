@@ -27,7 +27,7 @@ def render_or_skip(obj, attr):
         obj.save()
         return 1
     except Exception as e:
-        log.warning('Skipped "%s": %e(%s)', obj, e.__class__.__name__, e)
+        log.warning('Skipped "%s": %s(%s)', obj, e.__class__.__name__, e)
         return 0
 
 
