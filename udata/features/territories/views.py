@@ -45,7 +45,7 @@ def render_home():
     })
 
 
-@blueprint.route('/town/<code>/', endpoint='town')
+@blueprint.route('/town/<code>/')
 def redirect_town(code):
     """
     Legacy redirect now prefixed with `territories` + French name.
@@ -54,7 +54,7 @@ def redirect_town(code):
                             level='commune', code=code))
 
 
-@blueprint.route('/territory/town/<code>/', endpoint='town2')
+@blueprint.route('/territory/town/<code>/')
 def redirect_town2(code):
     """
     Legacy redirect for French name and GeoIDs.
@@ -63,7 +63,7 @@ def redirect_town2(code):
                             level='commune', code=code))
 
 
-@blueprint.route('/territory/county/<code>/', endpoint='county')
+@blueprint.route('/territory/county/<code>/')
 def redirect_county(code):
     """
     Legacy redirect for French name and GeoIDs.
@@ -72,7 +72,7 @@ def redirect_county(code):
                             level='departement', code=code))
 
 
-@blueprint.route('/territory/region/<code>/', endpoint='region')
+@blueprint.route('/territory/region/<code>/')
 def redirect_region(code):
     """
     Legacy redirect for French name and GeoIDs.

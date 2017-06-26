@@ -397,28 +397,28 @@ class TerritoriesTest(FrontTestCase):
 
     def test_town_legacy_redirect(self):
         response = self.client.get(
-            url_for('territories.town', code=self.arles.code))
+            url_for('territories.redirect_town', code=self.arles.code))
         self.assertStatus(response, 302)
         self.assertTrue(
             '/territories/commune/13004%40latest/' in response.location)
 
     def test_town2_legacy_redirect(self):
         response = self.client.get(
-            url_for('territories.town2', code=self.arles.code))
+            url_for('territories.redirect_town2', code=self.arles.code))
         self.assertStatus(response, 302)
         self.assertTrue(
             '/territories/commune/13004%40latest/' in response.location)
 
     def test_county_legacy_redirect(self):
         response = self.client.get(
-            url_for('territories.county', code=self.bdr.code))
+            url_for('territories.redirect_county', code=self.bdr.code))
         self.assertStatus(response, 302)
         self.assertTrue(
             '/territories/departement/13%40latest/' in response.location)
 
     def test_region_legacy_redirect(self):
         response = self.client.get(
-            url_for('territories.region', code=self.paca.code))
+            url_for('territories.redirect_region', code=self.paca.code))
         self.assertStatus(response, 302)
         self.assertTrue(
             '/territories/region/93%40latest/' in response.location)
