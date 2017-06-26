@@ -16,28 +16,16 @@ from invoke import run, task
 from tasks_helpers import ROOT, info, header, lrun, green
 
 I18N_DOMAIN = 'udata'
-STATIC_ASSETS_EXTS = (
-    'js', 'map', 'css', 'eot', 'woff', 'woff2', 'svg', 'ttf', 'otf', 'png',
-    'jpg', 'gif'
-)
-STATIC_ASSETS_DIRS = (
-    'dataset', 'organization', 'post', 'reuse', 'site', 'topic', 'user', 'chunks',
-)
 
 
 @task
-def clean(ctx, bower=False, node=False, translations=False, all=False):
+def clean(ctx, node=False, translations=False, all=False):
     '''Cleanup all build artifacts'''
     header('Clean all build artifacts')
     patterns = [
         'build', 'dist', 'cover', 'docs/_build',
-        '**/*.pyc', '*.egg-info', '.tox'
+        '**/*.pyc', '*.egg-info', '.tox', 'udata/static/*'
     ]
-    # Static build assets
-    patterns.extend('udata/static/*.{0}'.format(e) for e in STATIC_ASSETS_EXTS)
-    patterns.extend('udata/static/{0}'.format(d) for d in STATIC_ASSETS_DIRS)
-    if bower or all:
-        patterns.append('udata/static/bower')
     if node or all:
         patterns.append('node_modules')
     if translations or all:

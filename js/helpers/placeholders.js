@@ -4,7 +4,7 @@ import config from 'config';
  * Resolve placeholder for a given type
  */
 export function getFor(type) {
-	return `${config.static_root}img/placeholders/${type}.png`;
+	return `${config.theme_static}img/placeholders/${type}.png`;
 }
 
 /**
