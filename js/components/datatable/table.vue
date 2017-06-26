@@ -1,7 +1,15 @@
 <style lang="less">
 .datatable {
-    th {
-        white-space: nowrap;
+    thead tr th {
+        padding-right: 20px;
+        position: relative;
+        vertical-align: top;
+    }
+
+    .fa {
+        position: absolute;
+        top: 13px;
+        right: 3px;
     }
 }
 </style>

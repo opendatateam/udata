@@ -23,7 +23,8 @@ export default {
                 key: 'title',
                 sort: 'title',
                 align: 'left',
-                type: 'text'
+                type: 'text',
+                width: 200
             }, {
                 label: this._('Creation'),
                 key: 'created_at',
