@@ -1,26 +1,29 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-_registered_backends = {}
-
-
-def register(cls):
-    '''Register a backend class'''
-    if hasattr(cls, 'name'):
-        _registered_backends[cls.name] = cls
-    return cls
+import pkg_resources
 
 
 def get(name):
     '''Get a backend given its name'''
-    return _registered_backends.get(name)
+    return get_all().get(name)
 
 
 def get_all():
-    return _registered_backends
+    return dict(
+        _ep_to_kv(e) for e in pkg_resources.iter_entry_points('udata.harvesters')
+    )
+
+def _ep_to_kv(entrypoint):
+    '''
+    Transform an entrypoint into a key-value tuple where:
+    - key is the entrypoint name
+    - value is the entrypoint class with the name attribute
+      matching from entrypoint name
+    '''
+    cls = entrypoint.load()
+    cls.name = entrypoint.name
+    return (entrypoint.name, cls)
 
 
 from .base import BaseBackend  # flake8: noqa
-from .ods import OdsHarvester  # flake8: noqa
-from .ckan import CkanBackend  # flake8: noqa
-from .dcat import DcatBackend  # flake8: noqa

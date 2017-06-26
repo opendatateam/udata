@@ -6,16 +6,14 @@ import logging
 import html2text
 
 from udata.models import License, Resource
-from . import BaseBackend, register
+from .base import BaseBackend
 from ..exceptions import HarvestSkipException
 
 
 log = logging.getLogger(__name__)
 
 
-@register
 class OdsHarvester(BaseBackend):
-    name = 'ods'
     display_name = 'OpenDataSoft'
     verify_ssl = False
 

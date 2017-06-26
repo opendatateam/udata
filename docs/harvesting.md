@@ -165,12 +165,10 @@ from __future__ import unicode_literals
 from udata.models import db, Resource
 from udata.utils import faker
 
-from . import BaseBackend, register
+from udata.harvest.backends.base import BaseBackend
 
 
-@register
 class RandomBackend(BaseBackend):
-    name = 'random'
     display_name = 'Random'
 
     def initialize(self):
@@ -213,6 +211,29 @@ class RandomBackend(BaseBackend):
         return dataset
 
 ```
+
+You need to properly expose the harvester as a `udata.harvesters` entrypoint in your `setup.py`:
+
+```python
+setup(
+    '...'
+    entry_points={
+        'udata.harvesters': [
+            'random = canonical.path.to_the:RandomBackend',
+        ]
+    },
+    '...'
+)
+```
+
+The easiest way is to start from the
+[dedicated cookiecutter template][cookiecutter-template]:
+
+```bash
+pip install cookiecutter
+cookiecutter gh:opendatateam/cookiecutter-udata-harvester
+```
+This will create a new package with a harvester skeleton on which you can start hacking.
 
 You may take a look at the [existing backends][backends-repository] to see exiting implementations.
 

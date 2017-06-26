@@ -127,6 +127,11 @@ setup(
         ],
         'udata.themes': [
             'default = udata.theme.default',
+        ],
+        'udata.harvesters': [
+            'ods = udata.harvest.backends.ods:OdsHarvester',
+            'ckan = udata.harvest.backends.ckan:CkanBackend',
+            'dcat = udata.harvest.backends.dcat:DcatBackend',
         ]
     },
     license='GNU AGPLv3+',

@@ -18,7 +18,10 @@ from .models import (
 
 ns = api.namespace('harvest', 'Harvest related operations')
 
-backends_ids = [b.name for b in actions.list_backends()]
+
+def backends_ids():
+    return [b.name for b in actions.list_backends()]
+
 
 error_fields = api.model('HarvestError', {
     'created_at': fields.ISODateTime(description='The error creation date',
@@ -259,10 +262,10 @@ class ListBackendsAPI(API):
     @api.marshal_with(backend_fields)
     def get(self):
         '''List all available harvest backends'''
-        return [
+        return sorted([
             {'id': b.name, 'label': b.display_name}
             for b in actions.list_backends()
-        ]
+        ], key=lambda b: b['label'])
 
 
 @ns.route('/job_status', endpoint='havest_job_status')

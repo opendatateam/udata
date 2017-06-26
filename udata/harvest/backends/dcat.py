@@ -11,7 +11,7 @@ from udata.rdf import (
 )
 from udata.core.dataset.rdf import dataset_from_rdf
 
-from . import BaseBackend, register
+from .base import BaseBackend
 
 log = logging.getLogger(__name__)
 
@@ -43,9 +43,7 @@ def extract_graph(source, target, node, specs):
             extract_graph(source, target, o, specs[p])
 
 
-@register
 class DcatBackend(BaseBackend):
-    name = 'dcat'
     display_name = 'DCAT'
 
     def initialize(self):
