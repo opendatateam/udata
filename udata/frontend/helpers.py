@@ -11,13 +11,14 @@ from urlparse import urlsplit, urlunsplit
 
 from babel.numbers import format_number as format_number_babel
 from flask import g, url_for, request, current_app, json
-from jinja2 import Markup
+from jinja2 import Markup, contextfilter
 from werkzeug import url_decode, url_encode
 
 from . import front
 
 from udata.models import db
 from udata.i18n import format_date, _, pgettext, get_current_locale
+from udata.theme import theme_static_with_version
 from udata.utils import camel_to_lodash
 
 
@@ -115,11 +116,12 @@ def in_url(*args, **kwargs):
 
 
 @front.app_template_filter()
-def placeholder(url, name='default', external=False):
-    return url or url_for(
-        'static',
+@contextfilter
+def placeholder(ctx, url, name='default', external=False):
+    return url or theme_static_with_version(
+        ctx,
         filename='img/placeholders/{0}.png'.format(name),
-        _external=external)
+        external=external)
 
 
 @front.app_template_filter()

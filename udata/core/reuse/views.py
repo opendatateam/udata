@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import abort, request, url_for, render_template
+from flask import abort, request, url_for
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.app import nav
 from udata.frontend.views import SearchView, DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Follow, Discussion
+from udata.models import Follow
 from udata.sitemap import sitemap
+from udata.theme import render as render_template
 
 from .models import Reuse
 from .permissions import ReuseEditPermission
@@ -36,7 +37,7 @@ def recent_feed():
                                user=reuse.owner.id, _external=True),
             }
         feed.add(reuse.title,
-                 unicode(render_template('reuse/feed_item.html', reuse=reuse)),
+                 render_template('reuse/feed_item.html', reuse=reuse),
                  content_type='html',
                  author=author,
                  url=url_for('reuses.show', reuse=reuse.id, _external=True),

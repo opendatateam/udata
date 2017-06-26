@@ -73,7 +73,7 @@
     - More ES6 everywhere
 - Improve and fix notifications:
   [#928](https://github.com/opendatateam/udata/issues/928)
-  
+
     - Changed notification style to toast
     - Fix notifications that weren't displayed on form submission
 - Add a toggle indicator on dataset quality blocks that are collapsible
@@ -87,6 +87,8 @@
 - Integrating latest versions of GeoZones and GeoLogos for territories.
   Especially using history of towns, counties and regions from GeoHisto.
   [#499](https://github.com/opendatateam/udata/issues/499)
+- Images placeholders are now entirely provided by themes
+  [#707](https://github.com/opendatateam/udata/issues/707)
 
 ## 1.0.11 (2017-05-25)
 
