@@ -23,11 +23,8 @@ $ git clone https://github.com/opendatateam/udata.git
 ## Middlewares
 
 We will use [docker-compose][] to manage all that.
-[Install Docker-Compose for your system][docker-compose-install].
-On linux you should also [create a _docker_ group][docker-compose-group].
-On Windows and MacOSX you will have to use a [docker-machine][].
-
-Then start the services:
+[Install Docker-Compose for your system][docker-compose-install]
+then start the services:
 
 ```shell
 $ cd udata
@@ -68,8 +65,7 @@ $ pip install -e .
 
 ## NodeJS and modules
 
-You need NodeJS 6.2.4 (but your can check the version used in the `.nvmrc` file at the repository root)
-If it's not already installed or you have a different version,
+NodeJS is required to build or run the frontend. Please check the .nvmrc at the root of the repository to check the exact version of NodeJS you need.
 you should consider [installing NVM][nvm-install] which uses the existing `.nvmrc`.
 
 ```shell
@@ -95,7 +91,7 @@ If you plan to hack on statics (JS, CSS files), a dedicated command `inv assets_
 
 ## Running the project
 
-As long as you have the middlewares up, you can use `invoke` to launch the development services
+As long as you have the middlewares up, you can use [invoke][] to launch the development services
 (you might want to have each one runnning in a terminal):
 
 ```shell
@@ -128,14 +124,14 @@ That's it! You're all set to start using uData and contributing.
 
 ## Common tasks
 
-Most of the common tasks are scripted in the `tasks.py` file (which is using invoke).
+Most of the common tasks are scripted in the `tasks.py` file (which is using [invoke][]).
 You can get the documentation related to all tasks with:
 
 ```shell
 $ inv -l
 ```
 
-It might be required to update your dependencies to ensure compatibility.
+It might be required to update your Python and JavaScript dependencies to ensure compatibility.
 A task is provided to automate it:
 
 ```shell
@@ -145,7 +141,7 @@ $ inv update
 $ inv update -m
 ```
 
-It's advised to update your workspace when you pull upstream changes or switch branch:
+It's advised to update your dependencies when you pull upstream changes or switch branch:
 
 ```shell
 # Update dependencies, migrate data, recompile translations...
@@ -161,14 +157,12 @@ or [the documentation](building-documentation.md).
 
 [Python Virtual Environments - a Primer]: https://realpython.com/blog/python/python-virtual-environments-a-primer/
 [dev-server]: http://localhost:7000/
-[docker-compose-group]: https://docs.docker.com/engine/installation/linux/ubuntulinux/#create-a-docker-group
 [docker-compose-install]: https://docs.docker.com/compose/install/
 [docker-compose]: https://docs.docker.com/compose/
-[docker-machine]: https://docs.docker.com/machine/overview/
 [git]: https://git-scm.com/
 [github]: https://github.com/opendatateam/udata
 [gitter]: https://gitter.im/opendatateam/udata
 [homebrew]: http://brew.sh/
-[honcho]: https://github.com/nickstenning/honcho
+[invoke]: http://www.pyinvoke.org/
 [install-virtualenv]: https://virtualenv.pypa.io/en/latest/installation.html
 [nvm-install]: https://github.com/creationix/nvm#installation

@@ -36,7 +36,7 @@ $ pwd
 It is recommended to work within a virtualenv to ensure proper dependencies isolation.
 If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
 
-We create a virtualenv in the udata home directory so it is activated each time
+We create a virtualenv in the `udata` home directory so it is activated each time
 you log into its account:
 
 ```shell
@@ -81,20 +81,20 @@ Just answer the questions:
 $ udata init
 ```
 
-## Sample NGinx & uWSGI configuration
+## Sample nginx & uWSGI configuration
 
-You can use whatever stack you want to run uData, NGinx or Apache 2 as reverse proxy, supervisord + GUnicorn or uWSGI...
+You can use whatever stack you want to run uData, nginx or Apache 2 as reverse proxy, supervisord + Gunicorn or uWSGI...
 
 All you need to remember is that uData requires at least 3 services to run:
 - a web frontend using the `udata.wsgi` WSGI entry point.
-- a worker service using celery
-- a beat/cron service using celery too
+- a worker service using [celery][]
+- a beat/cron service using [celery][] too
 
-We give you an example using [NGinx][] + [uWSGI][] to run these 3 parts,
+We give you an example using [nginx][] + [uWSGI][] to run these 3 parts,
 expose the frontend on the `data.example.com` domain
 (and having the middlewares running on the same host)
 
-Install NGinx and uWSGI with root privileges:
+Install nginx and uWSGI with root privileges:
 
 ```shell
 $ apt-get install nginx-full uwsgi uwsgi-plugin-python
@@ -136,7 +136,7 @@ cpu-affinity = 1
 ; Disable requests logging
 disable-logging = True
 
-; Disable write exception when NGinx timed out before uwsgi response
+; Disable write exception when nginx timed out before uwsgi response
 disable-write-exception = true
 
 ; Avoid PyMongo fork issue
@@ -206,11 +206,11 @@ $ ln -s /etc/uwsgi/apps-{available,enabled}/udata-worker.ini
 $ ln -s /etc/uwsgi/apps-{available,enabled}/udata-beat.ini
 ```
 
-Then define a NGinx server host configuration in `/etc/nginx/sites-availables/data.example.com`:
+Then define a nginx server host configuration in `/etc/nginx/sites-availables/data.example.com`:
 
 ```nginx
 ##
-# NGinx configuration for data.example.com
+# nginx configuration for data.example.com
 ##
 
 ## uWSGI
@@ -305,7 +305,7 @@ $ ln -s /etc/nginx/sites-{available,enabled}/data.example.com
 ```
 
 Before restarting all services to start uData, we need to adjust its configuration
-and collect static assets to make them available for NGinx.
+and collect static assets to make them available for nginx.
 
 ```shell
 su - udata
@@ -362,13 +362,13 @@ FS_ROOT = '/srv/udata/fs'
 FS_PREFIX = '/s'
 ```
 
-You can now process static assets in the directory declared in the NGinx configuration (ie. `/srv/udata/public`):
+You can now process static assets in the directory declared in the nginx configuration (ie. `/srv/udata/public`):
 
 ```shell
 $ udata collect -ni $HOME/public
 ```
 
-Alrigth, everything is ready to run udata so logout from the `udata` and restart NGinx and uWSGI:
+Alright, everything is ready to run uData so logout from the `udata` account and restart nginx and uWSGI:
 
 ```shell
 $ service uwsgi restart
@@ -378,5 +378,6 @@ And then go see your awesome open data portal on <http://data.example.com>.
 
 [uwsgi]: https://uwsgi-docs.readthedocs.io/
 [nginx]: https://nginx.org/
+[celery]: http://www.celeryproject.org/
 [install-virtualenv]: https://virtualenv.pypa.io/en/latest/installation.html
 [Python Virtual Environments - a Primer]: https://realpython.com/blog/python/python-virtual-environments-a-primer/
