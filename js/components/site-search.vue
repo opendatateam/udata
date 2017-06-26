@@ -11,22 +11,20 @@
         type="hidden" name="organization" :value="$location.query.organization">
     <input v-if="territoryId" type="hidden" name="geozone" :value="territoryId">
     <!-- TODO: Improve the scoping handling: internalize all and allow diffrent actions -->
-    <div class="form-group">
-        <div class="input-group" :class="{'input-group-lg': size == 'lg'}">
-            <div class="input-group-btn">
-                <button class="btn" type="submit"><i class="fa fa-search"></i></button>
-            </div>
-            <input name="q" type="search" class="form-control" autocomplete="off"
-                :placeholder="placeholder || _('Search')"
-                v-model="query" debounce="200"
-                @keydown.up.prevent="up"
-                @keydown.down.prevent="down"
-                @keydown.enter="hit"
-                @keydown.esc="reset"
-                @focus="show = true"
-                @blur="show = false"
-                />
+    <div class="input-group" :class="{'input-group-lg': size == 'lg'}">
+        <div class="input-group-btn">
+            <button class="btn" type="submit"><i class="fa fa-search"></i></button>
         </div>
+        <input name="q" type="search" class="form-control" autocomplete="off"
+            :placeholder="placeholder || _('Search')"
+            v-model="query" debounce="200"
+            @keydown.up.prevent="up"
+            @keydown.down.prevent="down"
+            @keydown.enter="hit"
+            @keydown.esc="reset"
+            @focus="show = true"
+            @blur="show = false"
+            />
     </div>
     <ul class="dropdown-menu suggestion" v-el:dropdown>
         <li v-for="group in groupsWithResults" track-by="id" class="result-group">
