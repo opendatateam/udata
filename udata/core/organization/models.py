@@ -34,6 +34,7 @@ MEMBERSHIP_STATUS = {
     'refused': _('Refused'),
 }
 
+LOGO_MAX_SIZE = 500
 LOGO_SIZES = [100, 60, 25]
 
 PUBLIC_SERVICE = 'public-service'
@@ -101,8 +102,8 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     description = db.StringField(required=True)
     url = db.StringField()
     image_url = db.StringField()
-    logo = db.ImageField(
-        fs=avatars, basename=default_image_basename, thumbnails=LOGO_SIZES)
+    logo = db.ImageField(fs=avatars, basename=default_image_basename,
+                         max_size=LOGO_MAX_SIZE, thumbnails=LOGO_SIZES)
 
     members = db.ListField(db.EmbeddedDocumentField(Member))
     teams = db.ListField(db.EmbeddedDocumentField(Team))
