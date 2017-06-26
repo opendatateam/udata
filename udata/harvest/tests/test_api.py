@@ -16,13 +16,13 @@ from udata.utils import faker
 from ..models import (
     HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING
 )
-from .factories import HarvestSourceFactory
+from .factories import HarvestSourceFactory, MockBackendsMixin
 
 
 log = logging.getLogger(__name__)
 
 
-class HarvestAPITest(APITestCase):
+class HarvestAPITest(MockBackendsMixin, APITestCase):
     def test_list_backends(self):
         '''It should fetch the harvest backends list from the API'''
         response = self.get(url_for('api.harvest_backends'))

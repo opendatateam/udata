@@ -89,6 +89,8 @@
   [#499](https://github.com/opendatateam/udata/issues/499)
 - Images placeholders are now entirely provided by themes
   [#707](https://github.com/opendatateam/udata/issues/707)
+- Harvester declaration is now entrypoint-based
+  [#1004](https://github.com/opendatateam/udata/pull/1004)
 
 ## 1.0.11 (2017-05-25)
 

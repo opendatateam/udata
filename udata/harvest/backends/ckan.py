@@ -15,7 +15,7 @@ from voluptuous import (
 from udata.models import db, Resource, License, SpatialCoverage
 from udata.utils import get_by, daterange_start, daterange_end
 
-from . import BaseBackend, register
+from .base import BaseBackend
 from ..exceptions import HarvestException, HarvestSkipException
 from ..filters import (
     boolean, email, to_date, slug, normalize_tag, normalize_string,
@@ -98,9 +98,7 @@ schema = Schema({
 }, required=True, extra=True)
 
 
-@register
 class CkanBackend(BaseBackend):
-    name = 'ckan'
     display_name = 'CKAN'
 
     def get_headers(self):

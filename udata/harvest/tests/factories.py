@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 import factory
 
 from factory.fuzzy import FuzzyChoice
-
 from flask.signals import Namespace
+from mock import patch
 
 from udata.core.dataset.factories import DatasetFactory
 
@@ -45,7 +45,6 @@ mock_process = ns.signal('backend:process')
 DEFAULT_COUNT = 3
 
 
-@backends.register
 class FactoryBackend(backends.BaseBackend):
     name = 'factory'
 
@@ -57,3 +56,16 @@ class FactoryBackend(backends.BaseBackend):
     def process(self, item):
         mock_process.send(self, item=item)
         return DatasetFactory.build(title='dataset-{0}'.format(item.remote_id))
+
+
+class MockBackendsMixin(object):
+    '''A mixin mocking the harvest backend'''
+    def setUp(self):
+        super(MockBackendsMixin, self).setUp()
+        self.patcher = patch('udata.harvest.backends.get_all')
+        mock_get_all = self.patcher.start()
+        mock_get_all.return_value = {'factory': FactoryBackend}
+
+    def tearDown(self):
+        super(MockBackendsMixin, self).tearDown()
+        self.patcher.stop()

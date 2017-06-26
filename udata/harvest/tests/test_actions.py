@@ -18,7 +18,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.utils import faker, Paginable
 
 from .factories import (
-    HarvestSourceFactory, HarvestJobFactory,
+    HarvestSourceFactory, HarvestJobFactory, MockBackendsMixin,
     mock_initialize, mock_process, DEFAULT_COUNT as COUNT
 )
 from ..models import (
@@ -372,7 +372,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         self.assertEqual(result.errors, 1)
 
 
-class ExecutionTestMixin(DBTestMixin):
+class ExecutionTestMixin(MockBackendsMixin, DBTestMixin):
     def test_default(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='factory', organization=org)
@@ -485,7 +485,7 @@ class HarvestRunTest(ExecutionTestMixin, TestCase):
         return actions.run(*args, **kwargs)
 
 
-class HarvestPreviewTest(DBTestMixin, TestCase):
+class HarvestPreviewTest(MockBackendsMixin, DBTestMixin, TestCase):
     def test_preview(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='factory', organization=org)
