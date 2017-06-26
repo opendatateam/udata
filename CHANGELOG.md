@@ -3,9 +3,10 @@
 ## Current (in progress)
 
 - Added a [DCAT](https://www.w3.org/TR/vocab-dcat/) harvester
-  and expose metadata as RDF/DCAT
+  and expose metadata as RDF/DCAT.
   [#966](https://github.com/opendatateam/udata/pull/966)
   See the dedicated documentions:
+
     - [RDF](https://udata.readthedocs.io/en/stable/rdf/)
     - [Harvesting](https://udata.readthedocs.io/en/stable/harvesting/)
 - Upgrade to Flask-Mongoengine 0.9.2, Flask-WTF 0.14.2, mongoengine 0.11.0.
@@ -15,6 +16,7 @@
   [#813](https://github.com/opendatateam/udata/pull/813)
 - Ensure URLs are stripped [#823](https://github.com/opendatateam/udata/pull/823)
 - Migrated remaining widgets to Vue.js [#828](https://github.com/opendatateam/udata/pull/828):
+
     - bug fixes on migrated widgets (Issues button/modal, integrate popover, coverage map)
     - more coherent JS environment for developpers
     - lighter assets
@@ -47,6 +49,7 @@
   [#873](https://github.com/opendatateam/udata/pull/873)
 - Lot of fixes and improvements on Harvest admin UI
   [#817](https://github.com/opendatateam/udata/pull/817):
+
     - harvester edition fixed (and missing API added)
     - harvester deletion fixed
     - harvester listing is now paginated
@@ -55,6 +58,7 @@
 - Pure Vue.js search facets
   [#880](https://github.com/opendatateam/udata/pull/880).
   Improve and fix the datepicker:
+
     - Proper sizing and positionning in dropdowns
     - Fix initial value not being displayed
     - Make it usable on keyboard
@@ -69,6 +73,7 @@
     - More ES6 everywhere
 - Improve and fix notifications:
   [#928](https://github.com/opendatateam/udata/issues/928)
+  
     - Changed notification style to toast
     - Fix notifications that weren't displayed on form submission
 - Add a toggle indicator on dataset quality blocks that are collapsible
