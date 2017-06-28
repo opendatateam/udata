@@ -5,8 +5,79 @@
     }
 
     aside {
-        .list-unstyled li {
+        h3 {
+            margin-top: 0;
+        }
+        ul {
+            list-style: none;
+        }
+        li {
             margin-bottom: 20px;
         }
+    }
+
+    .flatlist {
+          border-radius: 0;
+          margin-bottom: 20px;
+          background-color: #fff;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          box-shadow: 0 1px 1px rgba(0,0,0,.05);
+          max-width: 40em;
+          margin-left: auto;
+          margin-right: auto;
+          list-style-type: none;
+          padding: 0;
+
+          & > li:first-child {
+			    color: #333;
+                background-color: #f5f5f5;
+                border-color: #ddd;
+                padding: 10px 9px;
+                border-bottom: 1px solid transparent;
+                border-top-right-radius: 3px;
+                border-top-left-radius: 3px;
+                margin-top: 0;
+                margin-bottom: 0;
+                font-size: 13px;
+                font-weight: 700;
+
+                span {
+                      font-weight: 500;
+                }
+                @media (max-width: 440px) {
+                       padding-bottom: 25px;
+                }
+
+          }
+
+          li a {
+                border-width: 1px 0;
+                border-radius: 0;
+                position: relative;
+                display: block;
+                padding: 10px 15px;
+                margin-bottom: -1px;
+                background-color: #fff;
+                border-bottom: 1px solid #ddd;
+                border-top: 1px solid #d8d8d8;
+
+                &:hover {
+                        background-color:#eee;
+               }
+
+               @media (max-width: 440px) {
+                    padding-bottom: 25px;
+               }
+          }
+    }
+
+    .badge {
+            background-color: #337ab7;
+    }
+
+    ul {
+        list-style: disc inside none;
+        padding-left: 0;
     }
 }
