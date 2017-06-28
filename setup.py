@@ -96,6 +96,9 @@ setup(
     entry_points={
         'udata.themes': [
             'gouvfr = udata_gouvfr.theme',
+        ],
+        'udata.harvesters': [
+            'maaf = udata_gouvfr.harvesters.maaf:MaafBackend',
         ]
     },
     license='LGPL',
