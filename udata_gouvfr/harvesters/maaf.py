@@ -14,7 +14,7 @@ from lxml import etree, html
 from voluptuous import Schema, Optional, All, Any, Lower, In, Length
 
 from udata.models import db, License, Resource, Checksum, SpatialCoverage
-from udata.harvest import backends
+from udata.harvest.backends import BaseBackend
 from udata.harvest.filters import (
     boolean, email, to_date, taglist, force_list, normalize_string, is_url
 )
@@ -123,9 +123,7 @@ def dictize(element):
     return element.tag, OrderedDict(extract(element)) or element.text
 
 
-@backends.register
-class MaafBackend(backends.BaseBackend):
-    name = 'maaf'
+class MaafBackend(BaseBackend):
     display_name = 'MAAF'
     verify_ssl = False
 

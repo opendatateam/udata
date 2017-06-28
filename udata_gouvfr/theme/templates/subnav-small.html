@@ -21,7 +21,7 @@
 
             {% cache cache_duration, 'subnav-small-featured-topics', g.lang_code|default(config.DEFAULT_LANGUAGE)|string %}
             {# Topic chooser #}
-            <div class="form-group col-sm-4 col-md-3 col-lg-3 col-xs-12">
+            <div class="col-sm-4 col-md-3 col-lg-3 col-xs-12">
                 <button class="dropdown-toggle btn-block btn-light" data-toggle="dropdown">
                     {{ _('Topics') }}
                     <span class="fa fa-chevron-down pull-right hidden-sm"></span>
@@ -39,7 +39,7 @@
             {% endcache %}
 
             {# Publish call to action #}
-            <div class="col-sm-4 col-md-3 col-lg-3 col-xs-12 collapse subnav-collapse">
+            <div class="col-sm-4 col-md-3 col-lg-3 col-xs-12">
                 <button class="btn btn-primary btn-transparent btn-block btn-md btn-left"
                         title="{{ _('Contribute!') }}"
                         @click="$refs.publishActionModal.show">

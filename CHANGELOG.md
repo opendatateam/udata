@@ -15,6 +15,10 @@
 - Integrating latest versions of GeoZones and GeoLogos for territories.
   Especially using history of towns, counties and regions from GeoHisto.
   [#499](https://github.com/opendatateam/udata/issues/499)
+- Add the missing placeholders
+  [#194](https://github.com/etalab/udata-gouvfr/pull/194)
+- Use the `udata.harvesters` entrypoint
+  [#195](https://github.com/etalab/udata-gouvfr/pull/195)
 
 ## 1.0.8 (2017-06-21)
 
