@@ -24,6 +24,10 @@
 - Remove `.btn-more` class
   [#191](https://github.com/etalab/udata-gouvfr/pull/191)
 
+## 1.0.9 (2017-06-28)
+
+- Nothing yet
+
 ## 1.0.8 (2017-06-21)
 
 - Fixed a typo
