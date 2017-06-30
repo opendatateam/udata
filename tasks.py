@@ -72,12 +72,22 @@ def i18nc(ctx):
 
 @task
 def watch(ctx):
+    print(red('[deprecated] Please use `inv assets_watch` instead.'))
+    assets_watch(ctx)
+
+@task
+def assets_watch(ctx):
     '''Build assets on change'''
     lrun('npm run dev', pty=True)
 
 
 @task
 def assets(ctx):
+    print(red('[deprecated] Please use `inv assets_build` instead.'))
+    assets_build(ctx)
+
+@task
+def assets_build(ctx):
     '''Install and compile assets'''
     print(cyan('Building static assets'))
     lrun('npm run build', pty=True)
