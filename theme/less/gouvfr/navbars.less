@@ -297,63 +297,39 @@
     }
 }
 
-.nav-pills {
-    margin-top: 20px;
+.nav-pills,
+.nav-tabs {
+    border-bottom: 1px solid @brand-primary;
+    margin-top: 0;
 
-    @media (min-width: @screen-sm-min) {
-        margin-top: 40px;
+    > li {
+        margin-right: .5em;
     }
 
     & > li > a {
-        font-family: @title-font;
-        text-transform: uppercase;
+        background: @brand-primary;
+        border: 1px solid @brand-primary;
+        border-bottom: none;
+        border-radius: @nav-pills-border-radius;
+        color: @bg-light;
+        padding: (@grid-gutter-width / 2) @grid-gutter-width;
+
+        &:hover,
+        &:focus {
+            background: @highlight;
+        }
+    }
+
+    & > li.active > a,
+    & > li.active > a:hover,
+    & > li.active > a:focus, {
+        background: @bg-light;
+        border-bottom: 1px solid @bg-light;
+        color: @brand-primary;
         font-weight: bold;
-        padding: 0px;
-        margin-right: 5px;
-        color: #999;
-
-        @media (min-width: @screen-sm-min) {
-            margin-right: 15px;
-        }
-
-        section.colored & {
-            color: white;
-        }
-
-        &:hover {
-            color: @gray-lighter;
-            background: none;
-
-            section.colored & {
-                color: #999;
-            }
-        }
-
-    }
-
-    & > li.active > a, & > li.active > a:hover, & > li.active > a:focus {
-        color: @text-dark;
-        background: none;
-
-        section.colored & {
-            color: @gray;
-        }
+        margin-bottom: -1px;
     }
 }
-
-.nav-tabs {
-    > li > a {
-        color: white;
-        background-color: @gray-light;
-        padding: 8px 10px;
-        border-radius: 2px 2px 0 0;
-
-        &:hover {
-            background-color: @highlight;
-        }
-    }
-}
-
 
 /**
  * Sidebar style and fixes
