@@ -75,6 +75,7 @@ def watch(ctx):
     print(red('[deprecated] Please use `inv assets_watch` instead.'))
     assets_watch(ctx)
 
+
 @task
 def assets_watch(ctx):
     '''Build assets on change'''
@@ -86,6 +87,7 @@ def assets(ctx):
     print(red('[deprecated] Please use `inv assets_build` instead.'))
     assets_build(ctx)
 
+
 @task
 def assets_build(ctx):
     '''Install and compile assets'''
@@ -93,7 +95,7 @@ def assets_build(ctx):
     lrun('npm run build', pty=True)
 
 
-@task(clean, assets, i18nc)
+@task(clean, assets_build, i18nc)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
     print(cyan('Building a distribuable package'))
