@@ -136,7 +136,6 @@ def reindex(obj):
         except:
             log.exception('Unable to index %s "%s"',
                           model.__name__, str(obj.id))
-        adapter.delete(using=es.client, index=es.index_name)
     else:
         log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
 

@@ -3,7 +3,8 @@ from __future__ import unicode_literals
 
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Organization, Follow, Activity, Metrics
+from udata.models import Organization, Follow, Activity, Metrics, Dataset
+from udata.search import reindex
 from udata.tasks import job, task, get_logger
 
 log = get_logger(__name__)
@@ -20,8 +21,13 @@ def purge_organizations(self):
         Activity.objects(organization=organization).delete()
         # Remove metrics
         Metrics.objects(object_id=organization.id).delete()
+        # Store datasets for later reindexation
+        d_ids = [d.id for d in Dataset.objects(organization=organization)]
         # Remove
         organization.delete()
+        # Reindex the datasets that were linked to the organization
+        for dataset in Dataset.objects(id__in=d_ids):
+            reindex(dataset)
 
 
 @task

@@ -93,6 +93,8 @@
   [#1004](https://github.com/opendatateam/udata/pull/1004)
 - Fix the `udata search reindex` command
   [#1009](https://github.com/opendatateam/udata/issues/1009)
+- Reindex datasets when their parent organization is purged
+  [#1008](https://github.com/opendatateam/udata/issues/1008)
 
 ## 1.0.11 (2017-05-25)
 
