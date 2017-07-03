@@ -87,7 +87,7 @@ def reindex(doc_type=None):
     log.info('Initiliazing index "{0}"'.format(index_name))
     es.initialize(index_name)
     for adapter in iter_adapters():
-        if adapter.doc_type().lower() == doc_type.lower():
+        if doc_type and adapter.doc_type().lower() == doc_type.lower():
             index_model(index_name, adapter)
         else:
             log.info('Copying {0} objects to the new index'.format(
