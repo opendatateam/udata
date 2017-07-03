@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from __future__ import unicode_literals
 
 import logging
@@ -9,7 +10,7 @@ from os.path import join, dirname, splitext, basename
 from glob import iglob
 
 from flask_script import Manager
-from flask_script.commands import Clean, ShowUrls, Server
+from flask_script.commands import Clean, ShowUrls, Server, InvalidCommand
 
 from udata.app import create_app, standalone
 
@@ -81,7 +82,11 @@ def run_manager(config='udata.settings.Defaults'):
     set_logging(app)
     manager.app = app
     register_commands(manager)
-    manager.run()
+    try:
+        manager.run()
+    except InvalidCommand as err:
+        print(err, file=sys.stderr)
+        sys.exit(1)
 
 
 def console_script():
