@@ -25,7 +25,7 @@
         <small v-if="org.acronym">{{org.acronym}}</small>
     </h3>
     <div class="profile-body">
-        <image-button :src="org.logo_thumbnail" :size="100" class="logo-button"
+        <image-button :src="logoSrc" :size="100" class="logo-button"
             :endpoint="endpoint">
         </image-button>
         <div v-markdown="org.description"></div>
@@ -46,6 +46,7 @@ import API from 'api';
 import badges from 'models/badges';
 import Box from 'components/containers/box.vue';
 import ImageButton from 'components/widgets/image-button.vue';
+import placeholders from 'helpers/placeholders';
 
 export default {
     name: 'organization-profile',
@@ -58,7 +59,8 @@ export default {
     data() {
         return {
             toggled: false,
-            badges: badges.organization
+            badges: badges.organization,
+            logoSrc: this.org.logo_thumbnail || placeholders.organization,
         }
     },
     components: {Box, ImageButton},
