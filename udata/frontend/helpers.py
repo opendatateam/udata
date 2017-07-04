@@ -131,26 +131,24 @@ def obfuscate(email):
 
 
 @front.app_template_filter()
-@front.app_template_global()
-def avatar_url(obj, size):
+@contextfilter
+def avatar_url(ctx, obj, size):
     if hasattr(obj, 'avatar') and obj.avatar:
         return obj.avatar(size)
     elif hasattr(obj, 'logo') and obj.logo:
         return obj.logo(size)
     else:
-        return placeholder(None, 'user')
+        return placeholder(ctx, None, name='user')
 
 
-@front.app_template_global()
-@front.app_template_filter()
-def owner_avatar_url(obj, size=32):
+def owner_avatar_url(ctx, obj, size=32):
     if hasattr(obj, 'organization') and obj.organization:
         return (obj.organization.logo(size)
                 if obj.organization.logo
-                else placeholder(None, 'organization'))
+                else placeholder(ctx, None, name='organization'))
     elif hasattr(obj, 'owner') and obj.owner:
-        return avatar_url(obj.owner, size)
-    return placeholder(None, 'user')
+        return avatar_url(ctx, obj.owner, size)
+    return placeholder(ctx, None, name='user')
 
 
 @front.app_template_global()
@@ -164,8 +162,8 @@ def owner_url(obj):
 
 
 @front.app_template_filter()
-@front.app_template_global()
-def avatar(user, size, classes=''):
+@contextfilter
+def avatar(ctx, user, size, classes=''):
     markup = '''
         <a class="avatar {classes}" href="{url}" title="{title}">
             <img src="{avatar_url}" class="avatar" alt="{title}"
@@ -176,15 +174,15 @@ def avatar(user, size, classes=''):
         url=(url_for('users.show', user=user)
              if user and getattr(user, 'id', None) else '#'),
         size=size,
-        avatar_url=avatar_url(user, size),
+        avatar_url=avatar_url(ctx, user, size),
         classes=classes
     )
     return Markup(markup)
 
 
-@front.app_template_global()
 @front.app_template_filter()
-def owner_avatar(obj, size=32):
+@contextfilter
+def owner_avatar(ctx, obj, size=32):
     markup = '''
         <a class="avatar" href="{url}" title="{title}">
             <img src="{avatar_url}" class="avatar" alt="{title}"
@@ -195,7 +193,7 @@ def owner_avatar(obj, size=32):
         title=owner_name(obj),
         url=owner_url(obj),
         size=size,
-        avatar_url=owner_avatar_url(obj, size),
+        avatar_url=owner_avatar_url(ctx, obj, size),
     ))
 
 
