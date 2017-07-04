@@ -17,143 +17,147 @@
 
         <div class="row">
 
-            <div class="col-sm-9">
+            <div class="col-md-8 col-lg-9">
                 {% block main_content %}{% endblock %}
             </div>
 
             {# Right sidebar with organization aside ( counters, logo, social...) #}
-            <aside class="col-sm-3 panel panel-default">
-                {% if org.public_service %}
-                    <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified" class="certified"
-                        v-popover.literal="{{ _('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR) }}"
-                        popover-title="{{ _('Certified public service') }}"
-                        popover-placement="left" popover-trigger="hover"/>
-                {% endif %}
-                <div class="text-center">
-                    <img src="{{org.logo|placeholder('organization') }}"
-                        alt="{{ org.title }}" class="scalable" />
-                </div>
-                <br/>
-                <div class="tab-links">
-                    {# Badges #}
-                    {% if org.badges %}
-                    <p class="text-center">
-                        {% for badge in org.badges %}
-                            <small class="small-badge">
-                                <a href="{{ url_for('front.search', badge=badge) }}"
-                                    title="{{ _('See all organizations with that badge.') }}">
-                                    <span class="fa fa-bookmark"></span>
-                                    {{ org.badge_label(badge) }}</a>
-                            </small><br/>
-                        {% endfor %}
-                    </p>
-                    {% endif %}
+            <aside class="col-md-4 col-lg-3">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {% if org.public_service %}
+                            <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified" class="certified"
+                                v-popover.literal="{{ _('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR) }}"
+                                popover-title="{{ _('Certified public service') }}"
+                                popover-placement="left" popover-trigger="hover"/>
+                        {% endif %}
+                        <div class="text-center">
+                            <img src="{{org.logo|placeholder('organization') }}"
+                                alt="{{ org.title }}" class="scalable" />
+                        </div>
+                        <br/>
+                        <div class="tab-links">
+                            {# Badges #}
+                            {% if org.badges %}
+                            <p class="text-center">
+                                {% for badge in org.badges %}
+                                    <small class="small-badge">
+                                        <a href="{{ url_for('front.search', badge=badge) }}"
+                                            title="{{ _('See all organizations with that badge.') }}">
+                                            <span class="fa fa-bookmark"></span>
+                                            {{ org.badge_label(badge) }}</a>
+                                    </small><br/>
+                                {% endfor %}
+                            </p>
+                            {% endif %}
 
-                    {% if org.metrics.datasets %}
-                    <p class="text-center">
-                        <strong>
-                            <a href="{{url_for('organizations.show', org=org)}}#datasets">
-                            {{ ngettext('%(num)d dataset', '%(num)d datasets', org.metrics.datasets or 0) }}
+                            {% if org.metrics.datasets %}
+                            <p class="text-center">
+                                <strong>
+                                    <a href="{{url_for('organizations.show', org=org)}}#datasets">
+                                    {{ ngettext('%(num)d dataset', '%(num)d datasets', org.metrics.datasets or 0) }}
+                                    </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            {% if org.metrics.members %}
+                            <p class="text-center">
+                                <strong>
+                                    <a href="{{url_for('organizations.show', org=org)}}#members">
+                                    {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
+                                    </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            {% if org.metrics.followers %}
+                            <p class="text-center">
+                                <strong>
+                                    <a href="{{url_for('organizations.show', org=org)}}#followers">
+                                    {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
+                                    </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            {% if org.metrics.reuses %}
+                            <p class="text-center">
+                                <strong>
+                                <a href="{{url_for('organizations.show', org=org)}}#reuses"
+                                    v-tooltip tooltip-placement="left"
+                                    title="{{ _('Use of data by that organization for the community') }}">
+                                    {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
+                                </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            {% if org.metrics.permitted_reuses %}
+                            <p class="text-center">
+                                <strong>
+                                <a href="#" v-tooltip tooltip-placement="left"
+                                    title="{{ _('Use of data from that organization by the community') }}">
+                                    {{ ngettext('%(num)d reappropriation', '%(num)d reappropriations', org.metrics.permitted_reuses or 0) }}
+                                </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            <p class="text-center">
+                                <strong>
+                                    <a href="{{url_for('organizations.dashboard', org=org)}}">
+                                        {{ _('Dashboard') }}
+                                    </a>
+                                </strong>
+                            </p>
+                        </div>
+                        {% set member = org.member(current_user) %}
+                        {% if not member %}
+                            {% set pending_request = org.pending_request(current_user) %}
+                            {% if not pending_request %}
+                            <a href class="btn btn-primary btn-block btn-sm btn-left membership"
+                                v-tooltip tooltip-placement="left"
+                                title="{{ _('I belong to this organization') }}"
+                                @click.prevent="requestMembership('{{ url_for('api.request_membership', org=org) }}')">
+                                <span class="fa fa-user-plus"></span>
+                                {{ _('Join') }}
                             </a>
-                        </strong>
-                    </p>
-                    {% endif %}
-                    {% if org.metrics.members %}
-                    <p class="text-center">
-                        <strong>
-                            <a href="{{url_for('organizations.show', org=org)}}#members">
-                            {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
+                            {% endif %}
+                            <a id="pending-button" href v-tooltip tooltip-placement="left"
+                                title="{{ _('Waiting for approval') }}"
+                                class="btn btn-default btn-block btn-sm btn-left disabled {% if not pending_request %}hide{% endif %}"
+                                >
+                                <span class="fa fa-user-plus"></span>
+                                {{ _('Pending request') }}
                             </a>
-                        </strong>
-                    </p>
-                    {% endif %}
-                    {% if org.metrics.followers %}
-                    <p class="text-center">
-                        <strong>
-                            <a href="{{url_for('organizations.show', org=org)}}#followers">
-                            {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
-                            </a>
-                        </strong>
-                    </p>
-                    {% endif %}
-                    {% if org.metrics.reuses %}
-                    <p class="text-center">
-                        <strong>
-                        <a href="{{url_for('organizations.show', org=org)}}#reuses"
-                            v-tooltip tooltip-placement="left"
-                            title="{{ _('Use of data by that organization for the community') }}">
-                            {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
+                        {% elif member.role == 'admin' %}
+                        <a href v-tooltip tooltip-placement="left"
+                            class="btn btn-default btn-block btn-sm btn-left disabled"
+                            title="{{ _('You are an administrator of this organization') }}">
+                            <span class="fa fa-user"></span>
+                            {{ _('Administrator') }}
                         </a>
-                        </strong>
-                    </p>
-                    {% endif %}
-                    {% if org.metrics.permitted_reuses %}
-                    <p class="text-center">
-                        <strong>
-                        <a href="#" v-tooltip tooltip-placement="left"
-                            title="{{ _('Use of data from that organization by the community') }}">
-                            {{ ngettext('%(num)d reappropriation', '%(num)d reappropriations', org.metrics.permitted_reuses or 0) }}
+                        {% elif member.role == 'editor' %}
+                        <a href v-tooltip tooltip-placement="left"
+                            class="btn btn-default btn-block btn-sm btn-left disabled"
+                            title="{{ _('You are editor in this organization') }}">
+                            <span class="fa fa-user"></span>
+                            {{ _('Editor') }}
                         </a>
-                        </strong>
-                    </p>
-                    {% endif %}
-                    <p class="text-center">
-                        <strong>
-                            <a href="{{url_for('organizations.dashboard', org=org)}}">
-                                {{ _('Dashboard') }}
-                            </a>
-                        </strong>
-                    </p>
-                </div>
-                {% set member = org.member(current_user) %}
-                {% if not member %}
-                    {% set pending_request = org.pending_request(current_user) %}
-                    {% if not pending_request %}
-                    <a href class="btn btn-primary btn-block btn-sm btn-left membership"
-                        v-tooltip tooltip-placement="left"
-                        title="{{ _('I belong to this organization') }}"
-                        @click.prevent="requestMembership('{{ url_for('api.request_membership', org=org) }}')">
-                        <span class="fa fa-user-plus"></span>
-                        {{ _('Join') }}
-                    </a>
-                    {% endif %}
-                    <a id="pending-button" href v-tooltip tooltip-placement="left"
-                        title="{{ _('Waiting for approval') }}"
-                        class="btn btn-default btn-block btn-sm btn-left disabled {% if not pending_request %}hide{% endif %}"
-                        >
-                        <span class="fa fa-user-plus"></span>
-                        {{ _('Pending request') }}
-                    </a>
-                {% elif member.role == 'admin' %}
-                <a href v-tooltip tooltip-placement="left"
-                    class="btn btn-default btn-block btn-sm btn-left disabled"
-                    title="{{ _('You are an administrator of this organization') }}">
-                    <span class="fa fa-user"></span>
-                    {{ _('Administrator') }}
-                </a>
-                {% elif member.role == 'editor' %}
-                <a href v-tooltip tooltip-placement="left"
-                    class="btn btn-default btn-block btn-sm btn-left disabled"
-                    title="{{ _('You are editor in this organization') }}">
-                    <span class="fa fa-user"></span>
-                    {{ _('Editor') }}
-                </a>
-                {% else %}
-                <a href v-tooltip tooltip-placement="left"
-                    class="btn btn-default btn-block btn-sm btn-left disabled"
-                    title="{{ _('You are a member of this organization') }}">
-                    <span class="fa fa-user"></span>
-                    {{ _('Member') }}
-                </a>
-                {% endif %}
+                        {% else %}
+                        <a href v-tooltip tooltip-placement="left"
+                            class="btn btn-default btn-block btn-sm btn-left disabled"
+                            title="{{ _('You are a member of this organization') }}">
+                            <span class="fa fa-user"></span>
+                            {{ _('Member') }}
+                        </a>
+                        {% endif %}
 
-                <follow-button with-label classes="btn-primary btn-block btn-sm btn-left"
-                    class="btn-block"  {# Necessary until Vue.config.replace can be reverted to true #}
-                    {% if is_following(org) %}following{% endif %}
-                    url="{{ url_for('api.organization_followers', id=org.id|string) }}"
-                    tooltip="{{ _('I\'ll be informed about this organization news') }}"
-                    >
-                </follow-button>
+                        <follow-button with-label classes="btn-primary btn-block btn-sm btn-left"
+                            class="btn-block"  {# Necessary until Vue.config.replace can be reverted to true #}
+                            {% if is_following(org) %}following{% endif %}
+                            url="{{ url_for('api.organization_followers', id=org.id|string) }}"
+                            tooltip="{{ _('I\'ll be informed about this organization news') }}"
+                            >
+                        </follow-button>
+                    </div>
+                </div>
             </aside>
         </div>
 
