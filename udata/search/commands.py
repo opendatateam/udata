@@ -6,6 +6,7 @@ import logging
 from datetime import datetime
 
 from flask_script import prompt_bool
+from flask_script.commands import InvalidCommand
 
 from udata.commands import submanager
 from udata.search import es, adapter_catalog
@@ -79,6 +80,11 @@ def set_alias(index_name, delete=True):
           help='Only reindex a given type')
 def reindex(doc_type=None):
     '''Reindex models'''
+    if not doc_type:
+        raise InvalidCommand("Please specify a DocType "
+                             "(Dataset, Organization...) with -t. If you want "
+                             "to reindex the whole index, please use "
+                             "`udata search init`.'")
     doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
     if doc_type and not doc_type.lower() in doc_types_names:
         log.error('Unknown type %s', doc_type)
