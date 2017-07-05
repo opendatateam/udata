@@ -56,6 +56,11 @@ We’ll take care of tagging your issue with the appropriated labels and answer 
 
 If you’re not familiar with open-source workflows or our set of technologies, do not hesitate to ask for help! We can mentor you or propose good first bugs.
 
+**NOTE**: If you are fixing an existing issue,
+don't forget to end your commit message with `(fix #XXX)`
+where `XXX` is the original issue number. This will improve the tracability
+and will magicaly close the issue as soon as the commit is merged.
+
 ## Discussing strategies
 
 We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
