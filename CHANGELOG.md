@@ -2,6 +2,8 @@
 
 ## Current (in progress)
 
+### New features and improvements
+
 - Added a [DCAT](https://www.w3.org/TR/vocab-dcat/) harvester
   and expose metadata as RDF/DCAT.
   [#966](https://github.com/opendatateam/udata/pull/966)
@@ -9,26 +11,81 @@
 
     - [RDF](https://udata.readthedocs.io/en/stable/rdf/)
     - [Harvesting](https://udata.readthedocs.io/en/stable/harvesting/)
-- Upgrade to Flask-Mongoengine 0.9.2, Flask-WTF 0.14.2, mongoengine 0.11.0.
+
+- Images are now optimized and you can force rerendering using the `udata images render` command.
+- Allowed files extensions are now configurable via the `ALLOWED_RESOURCES_EXTENSIONS` setting
+  and both admin and API will have the same behavior
+  [#833](https://github.com/opendatateam/udata/pull/833).
+- Improve and fix notifications:
+  [#928](https://github.com/opendatateam/udata/issues/928)
+
+  - Changed notification style to toast
+  - Fix notifications that weren't displayed on form submission
+- Add a toggle indicator on dataset quality blocks that are collapsible
+  [#915](https://github.com/opendatateam/udata/issues/915)
+- Integrating latest versions of GeoZones and GeoLogos for territories.
+  Especially using history of towns, counties and regions from GeoHisto.
+  [#499](https://github.com/opendatateam/udata/issues/499)
+
+### Breaking Changes
+
+- Themes are now entrypoint-based [#829](https://github.com/opendatateam/udata/pull/829).
+  There is also a new [theming documention](https://udata.readthedocs.io/en/stable/creating-theme/).
+- Images placeholders are now entirely provided by themes
+  [#707](https://github.com/opendatateam/udata/issues/707)
+  [#1006](https://github.com/opendatateam/udata/issues/1006)
+- Harvester declaration is now entrypoint-based
+  [#1004](https://github.com/opendatateam/udata/pull/1004)
+
+### Fixes
+
+- Ensure URLs are stripped [#823](https://github.com/opendatateam/udata/pull/823)
+- Lot of fixes and improvements on Harvest admin UI
+  [#817](https://github.com/opendatateam/udata/pull/817):
+
+    - harvester edition fixed (and missing API added)
+    - harvester deletion fixed
+    - harvester listing is now paginated
+    - more detailed harvesters widgets
+    - ensure harvest source are owned by a user or an organization, not both [migration]
+
+- Pure Vue.js search facets
+  [#880](https://github.com/opendatateam/udata/pull/880).
+  Improve and fix the datepicker:
+
+    - Proper sizing and positionning in dropdowns
+    - Fix initial value not being displayed
+    - Make it usable on keyboard
+    - Allows to define `min` and `max` values to disable some dates
+    - Keyboard input is reflected into the calendar
+      [#615](https://github.com/opendatateam/udata/issues/615)
+- Disable `next` button when no file has been uploaded
+  [#930](https://github.com/opendatateam/udata/issues/930)
+- Fix badges notification mails
+  [#894](https://github.com/opendatateam/udata/issues/894)
+- Fix the `udata search reindex` command
+  [#1009](https://github.com/opendatateam/udata/issues/1009)
+- Reindex datasets when their parent organization is purged
+  [#1008](https://github.com/opendatateam/udata/issues/1008)
+
+### Miscellaneous / Internal
+
+- Upgrade to Flask-Mongoengine 0.9.3, Flask-WTF 0.14.2, mongoengine 0.13.0.
   [#812](https://github.com/opendatateam/udata/pull/812)
+  [#871](https://github.com/opendatateam/udata/pull/871)
+  [#903](https://github.com/opendatateam/udata/pull/903)
 - Upgrade to Flask-Login 0.4.0 and switch from Flask-Security to the latest
   [Flask-Security-Fork](https://pypi.python.org/pypi/Flask-Security-Fork)
   [#813](https://github.com/opendatateam/udata/pull/813)
-- Ensure URLs are stripped [#823](https://github.com/opendatateam/udata/pull/823)
 - Migrated remaining widgets to Vue.js [#828](https://github.com/opendatateam/udata/pull/828):
 
     - bug fixes on migrated widgets (Issues button/modal, integrate popover, coverage map)
     - more coherent JS environment for developpers
     - lighter assets
     - drop Handlebars dependency
-- Themes are now entrypoint-based [#829](https://github.com/opendatateam/udata/pull/829).
-  There is also a new [theming documention](https://udata.readthedocs.io/en/stable/creating-theme/).
-- Images are now optimized and you can force rerendering using the `udata images render` command.
-- Allowed files extensions are now configurable via the `ALLOWED_RESOURCES_EXTENSIONS` setting
-  and both admin and API will have the same behavior
-  [#833](https://github.com/opendatateam/udata/pull/833).
+
 - bleach and html5lib have been updated leading to more secure html/markdown cleanup
-  and (better performances)[http://bluesock.org/~willkg/blog/dev/bleach_2_0.html]
+  and [better performances](http://bluesock.org/~willkg/blog/dev/bleach_2_0.html)
   [#838](https://github.com/opendatateam/udata/pull/838)
 - Drop `jquery-slimscroll` and fix admin menu scrolling
   [#851](https://github.com/opendatateam/udata/pull/851)
@@ -47,56 +104,14 @@
     - allows use of hot components reloading.
 - Pure Vue.js modals. Fix the default membership role. Added contribute modal.
   [#873](https://github.com/opendatateam/udata/pull/873)
-- Lot of fixes and improvements on Harvest admin UI
-  [#817](https://github.com/opendatateam/udata/pull/817):
-
-    - harvester edition fixed (and missing API added)
-    - harvester deletion fixed
-    - harvester listing is now paginated
-    - more detailed harvesters widgets
-    - ensure harvest source are owned by a user or an organization, not both [migration]
-- Pure Vue.js search facets
-  [#880](https://github.com/opendatateam/udata/pull/880).
-  Improve and fix the datepicker:
-
-    - Proper sizing and positionning in dropdowns
-    - Fix initial value not being displayed
-    - Make it usable on keyboard
-    - Allows to define `min` and `max` values to disable some dates
-    - Keyboard input is reflected into the calendar
-      [#615](https://github.com/opendatateam/udata/issues/615)
 - Easier Vue.js development/debugging:
     - Drop `Vue.config.replace = false`: compatible with Vue.js 1/2 and no more style guessing
       [#760](https://github.com/opendatateam/udata/pull/760)
     - `name` on all components: no more `Anonymous Component` in Vue debugger
     - No more `Fragments`
     - More ES6 everywhere
-- Improve and fix notifications:
-  [#928](https://github.com/opendatateam/udata/issues/928)
-
-    - Changed notification style to toast
-    - Fix notifications that weren't displayed on form submission
-- Add a toggle indicator on dataset quality blocks that are collapsible
-  [#915](https://github.com/opendatateam/udata/issues/915)
 - Make metrics deactivable for tests
   [#905](https://github.com/opendatateam/udata/pull/905)
-- Disable `next` button when no file has been uploaded
-  [#930](https://github.com/opendatateam/udata/issues/930)
-- Fix badges notification mails
-  [#894](https://github.com/opendatateam/udata/issues/894)
-- Integrating latest versions of GeoZones and GeoLogos for territories.
-  Especially using history of towns, counties and regions from GeoHisto.
-  [#499](https://github.com/opendatateam/udata/issues/499)
-- Images placeholders are now entirely provided by themes
-  [#707](https://github.com/opendatateam/udata/issues/707)
-- Harvester declaration is now entrypoint-based
-  [#1004](https://github.com/opendatateam/udata/pull/1004)
-- Fix the `udata search reindex` command
-  [#1009](https://github.com/opendatateam/udata/issues/1009)
-- Reindex datasets when their parent organization is purged
-  [#1008](https://github.com/opendatateam/udata/issues/1008)
-- Fix image placeholders display in various places
-  [#1006](https://github.com/opendatateam/udata/issues/1006)
 
 ## 1.0.11 (2017-05-25)
 
