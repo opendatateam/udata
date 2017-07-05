@@ -9,8 +9,8 @@
   [#966](https://github.com/opendatateam/udata/pull/966)
   See the dedicated documentions:
 
-    - [RDF](https://udata.readthedocs.io/en/stable/rdf/)
-    - [Harvesting](https://udata.readthedocs.io/en/stable/harvesting/)
+  - [RDF](https://udata.readthedocs.io/en/stable/rdf/)
+  - [Harvesting](https://udata.readthedocs.io/en/stable/harvesting/)
 
 - Images are now optimized and you can force rerendering using the `udata images render` command.
 - Allowed files extensions are now configurable via the `ALLOWED_RESOURCES_EXTENSIONS` setting
@@ -43,22 +43,22 @@
 - Lot of fixes and improvements on Harvest admin UI
   [#817](https://github.com/opendatateam/udata/pull/817):
 
-    - harvester edition fixed (and missing API added)
-    - harvester deletion fixed
-    - harvester listing is now paginated
-    - more detailed harvesters widgets
-    - ensure harvest source are owned by a user or an organization, not both [migration]
+  - harvester edition fixed (and missing API added)
+  - harvester deletion fixed
+  - harvester listing is now paginated
+  - more detailed harvesters widgets
+  - ensure harvest source are owned by a user or an organization, not both [migration]
 
 - Pure Vue.js search facets
   [#880](https://github.com/opendatateam/udata/pull/880).
   Improve and fix the datepicker:
 
-    - Proper sizing and positionning in dropdowns
-    - Fix initial value not being displayed
-    - Make it usable on keyboard
-    - Allows to define `min` and `max` values to disable some dates
-    - Keyboard input is reflected into the calendar
-      [#615](https://github.com/opendatateam/udata/issues/615)
+  - Proper sizing and positionning in dropdowns
+  - Fix initial value not being displayed
+  - Make it usable on keyboard
+  - Allows to define `min` and `max` values to disable some dates
+  - Keyboard input is reflected into the calendar
+    [#615](https://github.com/opendatateam/udata/issues/615)
 - Disable `next` button when no file has been uploaded
   [#930](https://github.com/opendatateam/udata/issues/930)
 - Fix badges notification mails
@@ -79,10 +79,10 @@
   [#813](https://github.com/opendatateam/udata/pull/813)
 - Migrated remaining widgets to Vue.js [#828](https://github.com/opendatateam/udata/pull/828):
 
-    - bug fixes on migrated widgets (Issues button/modal, integrate popover, coverage map)
-    - more coherent JS environment for developpers
-    - lighter assets
-    - drop Handlebars dependency
+  - bug fixes on migrated widgets (Issues button/modal, integrate popover, coverage map)
+  - more coherent JS environment for developpers
+  - lighter assets
+  - drop Handlebars dependency
 
 - bleach and html5lib have been updated leading to more secure html/markdown cleanup
   and [better performances](http://bluesock.org/~willkg/blog/dev/bleach_2_0.html)
@@ -92,24 +92,27 @@
 - drop jquery.dotdotdot for a lighter css-only solution (less memory consumption)
   [#853](https://github.com/opendatateam/udata/pull/853)
 - Lighter style [#869](https://github.com/opendatateam/udata/pull/869):
-    - Drop glyphicons and use only Font-Awesome (more coherence, less fonts)
-    - lighter bootstrap style by importing only what's needed
-    - make use of bootstrap and admin-lte variables (easier for theming)
-    - proper separation between front and admin style
+
+  - Drop glyphicons and use only Font-Awesome (more coherence, less fonts)
+  - lighter bootstrap style by importing only what's needed
+  - make use of bootstrap and admin-lte variables (easier for theming)
+  - proper separation between front and admin style
 - Drop `ExtractTextPlugin` on Vue components style:
-    - faster (re)compilation time
-    - resolves most compilation and missing style issues
-      [#555](https://github.com/opendatateam/udata/issues/555)
-      [#710](https://github.com/opendatateam/udata/issues/710)
-    - allows use of hot components reloading.
+
+  - faster (re)compilation time
+  - resolves most compilation and missing style issues
+    [#555](https://github.com/opendatateam/udata/issues/555)
+    [#710](https://github.com/opendatateam/udata/issues/710)
+  - allows use of hot components reloading.
 - Pure Vue.js modals. Fix the default membership role. Added contribute modal.
   [#873](https://github.com/opendatateam/udata/pull/873)
 - Easier Vue.js development/debugging:
-    - Drop `Vue.config.replace = false`: compatible with Vue.js 1/2 and no more style guessing
-      [#760](https://github.com/opendatateam/udata/pull/760)
-    - `name` on all components: no more `Anonymous Component` in Vue debugger
-    - No more `Fragments`
-    - More ES6 everywhere
+
+  - Drop `Vue.config.replace = false`: compatible with Vue.js 1/2 and no more style guessing
+    [#760](https://github.com/opendatateam/udata/pull/760)
+  - `name` on all components: no more `Anonymous Component` in Vue debugger
+  - No more `Fragments`
+  - More ES6 everywhere
 - Make metrics deactivable for tests
   [#905](https://github.com/opendatateam/udata/pull/905)
 
