@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.0 (2017-07-05)
 
 - Use the new entrypoint-based theme management
   [#164](https://github.com/etalab/udata-gouvfr/pull/164)
