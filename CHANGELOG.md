@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.1.0 (2017-07-05)
 
 ### New features and improvements
