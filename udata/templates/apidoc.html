@@ -99,7 +99,7 @@
                 <p>{% trans %}Once httpie is installed, you can verify that it works as expected by typing that command in your shell:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http https://www.data.gouv.fr/api/1/organizations/?page_size=1</code></pre>
+                <pre><code class="json">$ http 'https://www.data.gouv.fr/api/1/organizations/?page_size=1'</code></pre>
 
                 <p>{% trans %}It should return something in this vein:
                 {% endtrans %}</p>
@@ -138,7 +138,7 @@ Access-Control-Allow-Credentials: true
                 <p>{% trans %}Once jq is installed, you can verify that it works as expected by typing that command in your shell:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http https://www.data.gouv.fr/api/1/organizations/?page_size=1 | jq '.data[].name'</code></pre>
+                <pre><code class="json">$ http 'https://www.data.gouv.fr/api/1/organizations/?page_size=1' | jq '.data[].name'</code></pre>
 
                 <p>{% trans %}It should return something in this vein:
                 {% endtrans %}</p>
