@@ -63,11 +63,18 @@ export default {
         size: String,
         territoryId: String,
     },
+    created() {
+        const {query} = this.$location;
+
+        const originalField = this.$options.el.querySelector('#search');
+        const queryStringValue = decodeURIComponent(query.q.replace('+', ' '));
+
+        this.query = originalField.value || queryStringValue || '';
+    },
     data() {
-        const query = this.$location.query.q || '';
         return {
             current: -1,
-            query: decodeURIComponent(query.replace('+', ' ')),
+            query: null,
             show: false,
             cache: new Cache('site-search', sessionStorage),
             groups: [

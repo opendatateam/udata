@@ -4,6 +4,7 @@
 
 - Display organization metrics in the organization page tab labels [#1022](https://github.com/opendatateam/udata/pull/1022)
 - Organization dashboard page has been merged into the main organization page [#1023](https://github.com/opendatateam/udata/pull/1023)
+- Fix an issue causing a loss of data input at the global search input level [#1019](https://github.com/opendatateam/udata/pull/1019)
 
 ## 1.1.0 (2017-07-05)
 
