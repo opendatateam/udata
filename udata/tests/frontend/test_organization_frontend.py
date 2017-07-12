@@ -254,8 +254,3 @@ class OrganizationBlueprintTest(FrontTestCase):
         dataset_ids = set(row[0] for row in rows)
         self.assertNotIn(str(hidden_dataset.id), dataset_ids)
         self.assertNotIn(str(not_org_dataset.id), dataset_ids)
-
-    def test_render_dashboard_empty(self):
-        org = OrganizationFactory()
-        response = self.get(url_for('organizations.dashboard', org=org))
-        self.assert200(response)
