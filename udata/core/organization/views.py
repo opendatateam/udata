@@ -98,7 +98,7 @@ class OrganizationDetailView(OrgView, DetailView):
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')
 def organization_dashboard(org):
-    return redirect('%s#dashboard' % url_for('.show', org=org), code=301)
+    return redirect('%s#dashboard' % url_for('organizations.show', org=org), code=301)
 
 
 @blueprint.route('/<org:org>/datasets.csv')
