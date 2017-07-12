@@ -1122,7 +1122,7 @@ msgstr "Permission refusée pour cette organisation"
 #: udata/forms/validators.py:48
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
-msgstr "Ce champs requiert que le champ \"%(name)s\" soit défini"
+msgstr "Ce champ requiert que le champ \"%(name)s\" soit défini"
 
 #: udata/frontend/helpers.py:173
 msgid "Anonymous user"
