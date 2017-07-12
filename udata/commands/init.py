@@ -27,17 +27,17 @@ def init():
     init_search(delete=True, force=not IS_INTERACTIVE)
 
     if IS_INTERACTIVE:
-        text = _('Do you want to create a superadmin user ?')
+        text = _('Do you want to create a superadmin user?')
         if prompt_bool(text, default=True):
             user = user_commands.create()
             user_commands.set_admin(user.email)
 
-        text = _('Do you want to import some data-related license ?')
+        text = _('Do you want to import some data-related license?')
         if prompt_bool(text, default=True):
             licenses()
 
-        text = _('Do you want to create some sample data ?')
+        text = _('Do you want to create some sample data?')
         if prompt_bool(text, default=True):
             generate_fixtures()
 
-    log.info(green(_('Your udata instance is ready !')))
+    log.info(green(_('Your udata instance is ready!')))
