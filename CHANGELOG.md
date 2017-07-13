@@ -4,6 +4,8 @@
 
 - Fix an issue preventing reuse edition:
   [#1027](https://github.com/opendatateam/udata/issues/1027)
+- Fix an issue preventing user display and edit in admin:
+  [#1030](https://github.com/opendatateam/udata/issues/1030)
 
 ## 1.1.0 (2017-07-05)
 

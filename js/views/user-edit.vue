@@ -1,7 +1,9 @@
 <template>
-<form-layout icon="user" :title="_('Edit user')" :save="save" :cancel="cancel" footer="true" :model="user">
-    <user-form v-ref:form :user="user"></user-form>
-</form-layout>
+<div>
+    <form-layout icon="user" :title="_('Edit user')" :save="save" :cancel="cancel" footer="true" :model="user">
+        <user-form v-ref:form :user="user"></user-form>
+    </form-layout>
+</div>
 </template>
 
 <script>
