@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix an issue preventing reuse edition:
+  [#1027](https://github.com/opendatateam/udata/issues/1027)
 
 ## 1.1.0 (2017-07-05)
 
