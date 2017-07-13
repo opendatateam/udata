@@ -1,27 +1,29 @@
 <template>
-<layout :title="user.fullname || ''" :subtitle="_('User')" :page="user.page || ''" :actions="actions">
-    <div class="row">
-        <profile :user="user" class="col-xs-12 col-md-6"></profile>
-        <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
-            x="date" :y="y"></chart>
-    </div>
+<div>
+    <layout :title="user.fullname || ''" :subtitle="_('User')" :page="user.page || ''" :actions="actions">
+        <div class="row">
+            <profile :user="user" class="col-xs-12 col-md-6"></profile>
+            <chart title="Traffic" :metrics="metrics" class="col-xs-12 col-md-6"
+                x="date" :y="y"></chart>
+        </div>
 
-    <div class="row">
-        <dataset-list class="col-xs-12" :datasets="datasets"></dataset-list>
-    </div>
+        <div class="row">
+            <dataset-list class="col-xs-12" :datasets="datasets"></dataset-list>
+        </div>
 
-    <div class="row">
-        <reuse-list class="col-xs-12" :reuses="reuses"></reuse-list>
-    </div>
+        <div class="row">
+            <reuse-list class="col-xs-12" :reuses="reuses"></reuse-list>
+        </div>
 
-    <div class="row">
-        <community-list class="col-xs-12" :communities="communities"></community-list>
-    </div>
+        <div class="row">
+            <community-list class="col-xs-12" :communities="communities"></community-list>
+        </div>
 
-    <div class="row">
-        <harvesters id="harvesters-widget" class="col-xs-12" :owner="user"></harvesters>
-    </div>
-</layout>
+        <div class="row">
+            <harvesters id="harvesters-widget" class="col-xs-12" :owner="user"></harvesters>
+        </div>
+    </layout>
+</div>
 </template>
 
 <script>
