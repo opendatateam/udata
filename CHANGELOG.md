@@ -10,6 +10,8 @@
   [#1028](https://github.com/opendatateam/udata/issues/1028)
 - Fix issue modal on a reuse:
   [#1026](https://github.com/opendatateam/udata/issues/1026)
+- Fix sort by date on admin users list:
+  [#1029](https://github.com/opendatateam/udata/issues/1029)
 
 ## 1.1.0 (2017-07-05)
 

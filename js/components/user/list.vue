@@ -35,7 +35,7 @@ export default {
             }, {
                 label: this._('Member since'),
                 key: 'since',
-                sort: 'since',
+                sort: 'created',
                 align: 'left',
                 type: 'since',
                 width: 135
