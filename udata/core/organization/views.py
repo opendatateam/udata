@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import itertools
 
-from flask import g, abort
+from flask import g, abort, redirect, url_for
 from flask_security import current_user
 
 from udata import search
@@ -97,77 +97,8 @@ class OrganizationDetailView(OrgView, DetailView):
 
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')
-class OrganizationDashboardView(OrgView, DetailView):
-    template_name = 'organization/dashboard.html'
-
-    def get_context(self):
-        context = super(OrganizationDashboardView, self).get_context()
-
-        widgets = []
-
-        if self.organization.metrics.get('datasets', 0) > 0:
-            widgets.append({
-                'title': _('Datasets'),
-                'widgets': [
-                    {
-                        'title': _('Datasets'),
-                        'metric': 'datasets',
-                        'type': 'line',
-                        'endpoint': 'datasets.list',
-                        'args': {'org': self.organization}
-                    },
-                    {
-                        'title': _('Views'),
-                        'metric': 'dataset_views',
-                        'data': 'datasets_nb_uniq_visitors',
-                        'type': 'bar',
-                        'endpoint': 'datasets.list',
-                        'args': {'org': self.organization}
-                    }
-                ]
-            })
-
-        if self.organization.metrics.get('reuses') > 0:
-            widgets.append({
-                'title': _('Reuses'),
-                'widgets': [
-                    {
-                        'title': _('Reuses'),
-                        'metric': 'reuses',
-                        'type': 'line',
-                        'endpoint': 'reuses.list',
-                        'args': {'org': self.organization}
-                    },
-                    {
-                        'title': _('Views'),
-                        'metric': 'reuse_views',
-                        'data': 'reuses_nb_uniq_visitors',
-                        'type': 'bar',
-                        'endpoint': 'reuses.list',
-                        'args': {'org': self.organization}
-                    }
-                ]
-            })
-
-        widgets.append({
-            'title': _('Community'),
-            'widgets': [
-                {
-                    'title': _('Permitted reuses'),
-                    'metric': 'permitted_reuses',
-                    'type': 'line',
-                },
-                {
-                    'title': _('Followers'),
-                    'metric': 'followers',
-                    'type': 'line',
-                }
-            ]
-        })
-
-        context['metrics'] = widgets
-
-        return context
+def organization_dashboard(org):
+    return redirect('%s#dashboard' % url_for('organizations.show', org=org), code=301)
 
 
 @blueprint.route('/<org:org>/datasets.csv')

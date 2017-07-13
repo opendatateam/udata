@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Display organization metrics in the organization page tab labels [#1022](https://github.com/opendatateam/udata/pull/1022)
+- Organization dashboard page has been merged into the main organization page [#1023](https://github.com/opendatateam/udata/pull/1023)
 
 ## 1.1.0 (2017-07-05)
 

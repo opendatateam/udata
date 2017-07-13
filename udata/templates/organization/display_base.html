@@ -99,13 +99,6 @@
                                 </strong>
                             </p>
                             {% endif %}
-                            <p class="text-center">
-                                <strong>
-                                    <a href="{{url_for('organizations.dashboard', org=org)}}">
-                                        {{ _('Dashboard') }}
-                                    </a>
-                                </strong>
-                            </p>
                         </div>
                         {% set member = org.member(current_user) %}
                         {% if not member %}
