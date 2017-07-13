@@ -6,6 +6,8 @@
   [#1027](https://github.com/opendatateam/udata/issues/1027)
 - Fix an issue preventing user display and edit in admin:
   [#1030](https://github.com/opendatateam/udata/issues/1030)
+- Fix an error when a membership request is accepted:
+  [#1028](https://github.com/opendatateam/udata/issues/1028)
 
 ## 1.1.0 (2017-07-05)
 
