@@ -8,6 +8,8 @@
   [#1030](https://github.com/opendatateam/udata/issues/1030)
 - Fix an error when a membership request is accepted:
   [#1028](https://github.com/opendatateam/udata/issues/1028)
+- Fix issue modal on a reuse:
+  [#1026](https://github.com/opendatateam/udata/issues/1026)
 
 ## 1.1.0 (2017-07-05)
 
