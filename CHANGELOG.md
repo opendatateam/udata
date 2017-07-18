@@ -12,6 +12,8 @@
   [#1026](https://github.com/opendatateam/udata/issues/1026)
 - Fix sort by date on admin users list:
   [#1029](https://github.com/opendatateam/udata/issues/1029)
+- Improve the `purge` command
+  [#1039](https://github.com/opendatateam/udata/pull/1039)
 
 ## 1.1.0 (2017-07-05)
 
