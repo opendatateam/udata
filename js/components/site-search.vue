@@ -64,10 +64,10 @@ export default {
         territoryId: String,
     },
     created() {
-        const {query} = this.$location;
+        const {q=''} = this.$location.query;
 
         const originalField = this.$options.el.querySelector('#search');
-        const queryStringValue = decodeURIComponent(query.q.replace('+', ' '));
+        const queryStringValue = decodeURIComponent(q.replace('+', ' '));
 
         this.query = originalField.value || queryStringValue || '';
     },
