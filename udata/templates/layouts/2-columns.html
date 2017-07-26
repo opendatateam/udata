@@ -1,10 +1,6 @@
 {% extends theme('base.html') %}
-{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
-{% set section_class = section_class|default('default') %}
 
 {% block content %}
-{{ breadcrumb(self) }}
-
 <section class="{{ section_class }}">
     <div class="container {{ container_class }}">
         <div class="row">

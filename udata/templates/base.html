@@ -1,4 +1,7 @@
 {% extends theme('raw.html') %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
+{% set section_class = section_class|default('default') %}
+{% set toolbar_class = toolbar_class|default('') %}
 
 {% block body %}
     {% include theme("header.html") with context %}
@@ -16,6 +19,12 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
+    {{ breadcrumb(self,
+        breadcrum_class=breadcrum_class,
+        toolbar_class=toolbar_class
+    ) }}
+
     {% block content %}{% endblock %}
     {% include theme('footer.html') %}
     {% include theme('publish-action-modal.html') %}
