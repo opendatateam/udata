@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.1 (2017-07-31)
 
 - Fix an issue preventing reuse edition:
   [#1027](https://github.com/opendatateam/udata/issues/1027)
