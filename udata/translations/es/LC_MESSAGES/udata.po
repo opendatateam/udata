@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-07-31 12:34+0200\n"
+"POT-Creation-Date: 2017-07-31 13:24+0200\n"
 "PO-Revision-Date: 2017-01-20 09:11+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language: es\n"
@@ -105,7 +105,6 @@ msgstr "Tipo de insignia (certificada,etc)"
 
 #: udata/core/badges/tasks.py:40
 #, fuzzy, python-format
-#| msgid "Your membership for the organization \"%(org)s\" has been refused"
 msgid "Your organization \"%(name)s\" has been certified"
 msgstr ""
 "La solicitud de membresía para la organización \"%(org)s\"  ha sido "
@@ -448,7 +447,6 @@ msgstr "conjunto de datos"
 
 #: udata/core/dataset/rdf.py:283
 #, fuzzy
-#| msgid "No resources"
 msgid "{format} resource"
 msgstr "Ningún expediente"
 
@@ -1683,35 +1681,37 @@ msgstr "Métricas del sitio"
 msgid "metrics"
 msgstr "métricas "
 
-#: udata/templates/publish-action-modal.html:9
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:10
 #, fuzzy
-#| msgid "Publish data"
 msgid "Publish a dataset"
 msgstr "Publique datos "
 
-#: udata/templates/publish-action-modal.html:12
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:14
 msgid "Contribute and add a new dataset to this site catalog."
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:21
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:24
 #, fuzzy
-#| msgid "Publish as"
 msgid "Publish a reuse"
 msgstr "Publicar como"
 
-#: udata/templates/publish-action-modal.html:24
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:28
 msgid "Contribute and add a new reuse to this site catalog."
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:33
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:38
 #, fuzzy
-#| msgid "created an organization"
 msgid "Create or find your organization"
 msgstr "ha creado una organización"
 
-#: udata/templates/publish-action-modal.html:36
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:42
 #, fuzzy
-#| msgid "created an organization"
 msgid "You can create a new organization or find yours."
 msgstr "ha creado una organización"
 
@@ -1760,8 +1760,6 @@ msgstr[1] "%(num)d reutilizaciones"
 
 #: udata/templates/search.html:41
 #, fuzzy, python-format
-#| msgid "Follow %(num)d organization"
-#| msgid_plural "Follow %(num)d organizations"
 msgid "%(num)d organization"
 msgid_plural "%(num)d organizations"
 msgstr[0] ""
@@ -1771,7 +1769,6 @@ msgstr[1] "Seguir %(num)d organizaciones"
 
 #: udata/templates/search.html:49
 #, fuzzy, python-format
-#| msgid "Error %(code)s"
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
 msgstr[0] "Error %(code)s"
@@ -2298,7 +2295,6 @@ msgstr ""
 
 #: udata/templates/mail/badge_added_certified.html:6
 #, fuzzy, python-format
-#| msgid "%(user)s followed your organization %(org)s"
 msgid "%(user)s has certified your organization \"%(name)s\""
 msgstr "%(user)s han comenzado a seguir su organización %(org)s"
 
@@ -2309,7 +2305,6 @@ msgstr "Ver la insignia"
 
 #: udata/templates/mail/badge_added_public_service.html:6
 #, fuzzy, python-format
-#| msgid "%(user)s followed your organization %(org)s"
 msgid "%(user)s has identified your organization \"%(name)s\" as public service"
 msgstr "%(user)s han comenzado a seguir su organización %(org)s"
 
@@ -2914,7 +2909,6 @@ msgstr ""
 #: udata/templates/territories/commune.html:14
 #: udata/templates/territories/departement.html:14
 #, fuzzy
-#| msgid "Country"
 msgid "County:"
 msgstr "País"
 

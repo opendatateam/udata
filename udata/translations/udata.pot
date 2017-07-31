@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 1.1.1.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-07-31 12:34+0200\n"
+"POT-Creation-Date: 2017-07-31 13:24+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1581,27 +1581,33 @@ msgstr ""
 msgid "metrics"
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:9
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:10
 msgid "Publish a dataset"
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:12
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:14
 msgid "Contribute and add a new dataset to this site catalog."
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:21
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:24
 msgid "Publish a reuse"
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:24
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:28
 msgid "Contribute and add a new reuse to this site catalog."
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:33
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:38
 msgid "Create or find your organization"
 msgstr ""
 
-#: udata/templates/publish-action-modal.html:36
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:42
 msgid "You can create a new organization or find yours."
 msgstr ""
 

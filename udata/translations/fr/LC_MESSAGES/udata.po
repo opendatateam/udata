@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-07-31 12:34+0200\n"
-"PO-Revision-Date: 2017-07-31 10:36+0000\n"
+"PO-Revision-Date: 2017-07-31 13:24+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -1580,23 +1580,23 @@ msgstr "métriques"
 
 #: udata/templates/publish-action-modal.html:9
 msgid "Publish a dataset"
-msgstr "Publier un jeu de données"
+msgstr "Publiez un jeu de données"
 
 #: udata/templates/publish-action-modal.html:12
 msgid "Contribute and add a new dataset to this site catalog."
-msgstr "Contribuer et ajouter un nouveau jeu de données au catalogue de ce site"
+msgstr "Contribuez et ajoutez un nouveau jeu de données au catalogue de ce site"
 
 #: udata/templates/publish-action-modal.html:21
 msgid "Publish a reuse"
-msgstr "Publier une réutilisation"
+msgstr "Publiez une réutilisation"
 
 #: udata/templates/publish-action-modal.html:24
 msgid "Contribute and add a new reuse to this site catalog."
-msgstr "Contribuer et ajouter une nouvelle réutilisation au catalogue de ce site."
+msgstr "Contribuez et ajoutez une nouvelle réutilisation au catalogue de ce site."
 
 #: udata/templates/publish-action-modal.html:33
 msgid "Create or find your organization"
-msgstr "Créer ou trouver votre organisation"
+msgstr "Créez ou trouvez votre organisation"
 
 #: udata/templates/publish-action-modal.html:36
 msgid "You can create a new organization or find yours."
