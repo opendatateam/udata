@@ -19,6 +19,7 @@
   [#1063](https://github.com/opendatateam/udata/issues/1063)
 - Start using Celery queues to handle task priorities
   [#1067](https://github.com/opendatateam/udata/pull/1067)
+- Updated translations
 
 ## 1.1.0 (2017-07-05)
 
