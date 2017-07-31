@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Updated translations
 
 ## 1.1.0 (2017-07-05)
 
