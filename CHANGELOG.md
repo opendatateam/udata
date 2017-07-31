@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.1 (2017-07-31)
 
 - Updated translations
 
