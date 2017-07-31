@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-07-31 12:34+0200\n"
-"PO-Revision-Date: 2017-07-31 13:24+0000\n"
+"PO-Revision-Date: 2017-07-31 17:12+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -1717,7 +1717,7 @@ msgstr "Mainteneur"
 #: udata/templates/post/display.html:118
 #: udata/templates/reuse/display.html:102 udata/templates/user/base.html:23
 msgid "Edit"
-msgstr "Éditer"
+msgstr "Modifier"
 
 #: udata/templates/api/admin.html:34
 msgid "Delete"
