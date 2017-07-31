@@ -14,6 +14,9 @@
   [#1029](https://github.com/opendatateam/udata/issues/1029)
 - Improve the `purge` command
   [#1039](https://github.com/opendatateam/udata/pull/1039)
+- Ensure search does not fail when a deleted object has not been
+  unindexed yet
+  [#1063](https://github.com/opendatateam/udata/issues/1063)
 
 ## 1.1.0 (2017-07-05)
 

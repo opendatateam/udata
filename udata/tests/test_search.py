@@ -172,6 +172,21 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
         self.assertIsInstance(result, search.SearchResult)
         self.assertEqual(result.query.adapter, FakeSearch)
 
+    def test_should_not_fail_on_missing_objects(self):
+        with self.autoindex():
+            FakeFactory.create_batch(3)
+            deleted_fake = FakeFactory()
+
+        result = search.query(FakeSearch)
+        deleted_fake.delete()
+        self.assertEqual(len(result), 4)
+
+        # Missing object should be filtered out
+        objects = result.objects
+        self.assertEqual(len(objects), 3)
+        for o in objects:
+            self.assertIsInstance(o, Fake)
+
     def test_only_id(self):
         '''Should only fetch id field'''
         search_query = search.search_for(FakeSearch)
@@ -810,7 +825,8 @@ class TestTermsFacet(FacetTestCase):
         self.assertEqual(self.facet.labelize('fake'), 'fake')
 
     def test_labelize_with_or(self):
-        self.assertEqual(self.facet.labelize('fake-1|fake-2'), 'fake-1 OR fake-2')
+        self.assertEqual(self.facet.labelize('fake-1|fake-2'),
+                         'fake-1 OR fake-2')
 
     def test_labelize_with_or_and_custom_labelizer(self):
         labelizer = lambda v: 'custom-{0}'.format(v)  # noqa: E731
