@@ -17,6 +17,8 @@
 - Ensure search does not fail when a deleted object has not been
   unindexed yet
   [#1063](https://github.com/opendatateam/udata/issues/1063)
+- Start using Celery queues to handle task priorities
+  [#1067](https://github.com/opendatateam/udata/pull/1067)
 
 ## 1.1.0 (2017-07-05)
 

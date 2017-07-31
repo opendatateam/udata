@@ -175,6 +175,16 @@ gid = www-data
 smart-attach-daemon = /tmp/celery-worker.pid %(home)/bin/celery -A udata.worker worker --pidfile=/tmp/celery-worker.pid
 exec-as-user-atexit = kill -TERM `cat /tmp/celery-worker.pid`
 ```
+
+**note:** You can handle tasks priorities by starting 3 workers
+with the following `smart-attach-daemon` commands:
+```
+/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high worker
+/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high,default worker
+/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high,default,low worker
+```
+
+
 **`/etc/uwsgi/apps-available/udata-beat.ini`**
 
 ```inifile
