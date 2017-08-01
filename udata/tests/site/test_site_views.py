@@ -25,17 +25,6 @@ class SiteViewsTest(FrontTestCase):
             self.assertIsInstance(current_site._get_current_object(), Site)
             self.assertEqual(current_site.id, self.app.config['SITE_ID'])
 
-    def test_render_robotstxt(self):
-        '''It should render the robots.txt with all pages allowed.'''
-        response = self.get('/robots.txt')
-        self.assertEqual(response.data.split('\n'), [
-            'User-agent: *',
-            'Disallow: /fr/users/',
-            'Disallow: /en/users/',
-            'Disallow: /es/users/',
-            ''
-        ])
-
     def test_render_home(self):
         '''It should render the home page'''
         for i in range(3):
