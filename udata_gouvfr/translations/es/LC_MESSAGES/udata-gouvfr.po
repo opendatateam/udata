@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-07-31 19:14+0200\n"
+"POT-Creation-Date: 2017-08-03 12:09+0200\n"
 "PO-Revision-Date: 2017-02-20 21:32+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language: es\n"
@@ -66,7 +66,6 @@ msgstr "Ver los %(nb)s conjuntos de datos "
 
 #: udata_gouvfr/templates/licences.html:4 udata_gouvfr/theme/__init__.py:54
 #, fuzzy
-#| msgid "Public services"
 msgid "Licences"
 msgstr "Sevicios públicos"
 
@@ -182,7 +181,9 @@ msgid "Network"
 msgstr "Vínculo"
 
 #: udata_gouvfr/theme/templates/footer.html:48
-msgid "Contact"
+#, fuzzy
+#| msgid "Contact"
+msgid "Contacts"
 msgstr "Contacto"
 
 #: udata_gouvfr/theme/templates/footer.html:64
@@ -226,7 +227,6 @@ msgstr "Navegador"
 
 #: udata_gouvfr/theme/templates/header.html:18
 #, fuzzy
-#| msgid "Open platform for french public data"
 msgid "Open platform for French public data"
 msgstr "Plataforma abierta para los datos públicos franceses "
 
