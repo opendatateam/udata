@@ -63,7 +63,7 @@ class BaseBackend(object):
 
     def harvest(self):
         '''Start the harvesting process'''
-        if self.perform_initialization():
+        if self.perform_initialization() is not None:
             self.process_items()
             self.finalize()
         return self.job
