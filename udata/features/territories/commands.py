@@ -61,7 +61,7 @@ def migrate_zones_ids():
     drom_zone = GeoZone.objects(id='country-subset:fr:drom').first()
     dromcom_zone = GeoZone.objects(id='country-subset:fr:dromcom').first()
     france_zone = GeoZone.objects(id='country:fr').first()
-    for dataset in Dataset.objects.all():
+    for dataset in Dataset.objects(spatial_exists=True):
         if dataset.spatial and dataset.spatial.zones:
             counter_datasets += 1
             new_zones = []
