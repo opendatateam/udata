@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Handle territory URLs generation without validity
+  [#1068](https://github.com/opendatateam/udata/issues/1068)
 
 ## 1.1.1 (2017-07-31)
 

@@ -29,7 +29,7 @@ def render_home():
     if not current_app.config.get('ACTIVATE_TERRITORIES'):
         return abort(404)
 
-    highest_level = current_app.config['HANDLED_LEVELS'][-2]
+    highest_level = current_app.config['HANDLED_LEVELS'][-1]
     regions = GeoZone.objects(level=highest_level).valid_at(date.today())
     regions = sorted(
         regions,
@@ -157,8 +157,6 @@ def render_territory(territory):
 def sitemap_urls():
     if current_app.config.get('ACTIVATE_TERRITORIES'):
         for level in current_app.config.get('HANDLED_LEVELS'):
-            if level == 'country':
-                continue  # Level not fully handled yet.
             for territory in (GeoZone.objects(level=level)
                                      .only('id', 'code', 'validity', 'slug')):
                 # Remove 'fr:' manually from the level.
