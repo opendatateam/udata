@@ -63,7 +63,7 @@ class BaseBackend(object):
 
     def harvest(self):
         '''Start the harvesting process'''
-        if self.perform_initialization():
+        if self.perform_initialization() is not None:
             self.process_items()
             self.finalize()
         return self.job
@@ -84,11 +84,8 @@ class BaseBackend(object):
             if not self.dryrun:
                 self.job.save()
         except Exception as e:
-            log.error("Error in initialization : %s" % (str(e)))
-            log.exception(e)
             self.job.status = 'failed'
-            error = HarvestError(message=str(e),
-                                 details=traceback.format_exc())
+            error = HarvestError(message=str(e))
             self.job.errors.append(error)
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
