@@ -84,8 +84,6 @@ class BaseBackend(object):
             if not self.dryrun:
                 self.job.save()
         except Exception as e:
-            log.error("Error in initialization : %s" % (str(e)))
-            log.exception(e)
             self.job.status = 'failed'
             error = HarvestError(message=str(e),
                                  details=traceback.format_exc())
