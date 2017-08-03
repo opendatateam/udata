@@ -85,8 +85,7 @@ class BaseBackend(object):
                 self.job.save()
         except Exception as e:
             self.job.status = 'failed'
-            error = HarvestError(message=str(e),
-                                 details=traceback.format_exc())
+            error = HarvestError(message=str(e))
             self.job.errors.append(error)
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
