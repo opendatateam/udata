@@ -6,6 +6,8 @@
   [#1068](https://github.com/opendatateam/udata/issues/1068)
 - Added a contact button to trigger discussions
   [#1076](https://github.com/opendatateam/udata/pull/1076)
+- Improve harvest error handling
+  [#1078](https://github.com/opendatateam/udata/pull/1078)
 
 ## 1.1.1 (2017-07-31)
 
