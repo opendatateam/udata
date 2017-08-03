@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-07-31 12:34+0200\n"
-"PO-Revision-Date: 2017-07-31 17:12+0000\n"
+"POT-Creation-Date: 2017-08-03 11:47+0200\n"
+"PO-Revision-Date: 2017-08-03 09:49+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language-Team: French (http://www.transifex.com/etalab/udata/language/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -147,7 +147,7 @@ msgid "Description"
 msgstr "Description"
 
 #: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
-#: udata/templates/reuse/card.html:34 udata/templates/reuse/display.html:172
+#: udata/templates/reuse/card.html:34 udata/templates/reuse/display.html:178
 #: udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:6
 #: udata/templates/reuse/search-result.html:18
@@ -205,7 +205,7 @@ msgstr "Publier en tant que"
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "Les détails sur le jeu de données (processus de collecte, spécificités...)."
 
-#: udata/core/dataset/forms.py:79 udata/templates/dataset/display.html:197
+#: udata/core/dataset/forms.py:79 udata/templates/dataset/display.html:203
 #: udata/templates/dataset/search-labels.html:9
 msgid "License"
 msgstr "Licence"
@@ -223,7 +223,7 @@ msgid "Expected frequency date"
 msgstr "Date de mise à jour prévue"
 
 #: udata/core/dataset/forms.py:88 udata/templates/dataset/card.html:65
-#: udata/templates/dataset/display.html:207
+#: udata/templates/dataset/display.html:213
 #: udata/templates/dataset/search-labels.html:15
 #: udata/templates/dataset/search-panel.html:13
 #: udata/templates/dataset/search-result.html:31
@@ -236,7 +236,7 @@ msgid "The period covered by the data"
 msgstr "La période couverte par les données"
 
 #: udata/core/dataset/forms.py:91 udata/core/spatial/forms.py:60
-#: udata/templates/dataset/display.html:295
+#: udata/templates/dataset/display.html:301
 #: udata/templates/dataset/search-labels.html:18
 #: udata/templates/dataset/search-panel.html:15
 #: udata/templates/dataset/search-result.html:55
@@ -275,9 +275,9 @@ msgstr "Restreint la visibilité du jeu de données à vous ou votre organisatio
 
 #: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:33
 #: udata/core/organization/views.py:132 udata/core/organization/views.py:135
-#: udata/core/site/metrics.py:52 udata/core/site/views.py:137
+#: udata/core/site/metrics.py:52 udata/core/site/views.py:131
 #: udata/core/user/metrics.py:42 udata/templates/dataset/card.html:38
-#: udata/templates/dataset/display.html:370
+#: udata/templates/dataset/display.html:376
 #: udata/templates/dataset/list.html:38
 #: udata/templates/dataset/search-labels.html:25
 #: udata/templates/dataset/search-panel.html:18
@@ -415,7 +415,7 @@ msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
 #: udata/core/dataset/models.py:267 udata/models/datetime_fields.py:58
-#: udata/templates/dataset/display.html:224
+#: udata/templates/dataset/display.html:230
 #: udata/templates/dataset/list.html:36
 #: udata/templates/organization/list.html:35
 #: udata/templates/reuse/list.html:37 udata/templates/search.html:74
@@ -490,8 +490,8 @@ msgid "Subject"
 msgstr "Sujet"
 
 #: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
-#: udata/templates/dataset/display.html:339
-#: udata/templates/reuse/display.html:256
+#: udata/templates/dataset/display.html:345
+#: udata/templates/reuse/display.html:262
 #: udata/templates/site/dashboard.html:25
 msgid "Discussions"
 msgstr "Discussions"
@@ -522,7 +522,7 @@ msgstr "Une discussion a été cloturée"
 #: udata/templates/organization/list.html:39
 #: udata/templates/organization/search-labels.html:12
 #: udata/templates/organization/search-panel.html:8
-#: udata/templates/reuse/display.html:201 udata/templates/reuse/list.html:40
+#: udata/templates/reuse/display.html:207 udata/templates/reuse/list.html:40
 #: udata/templates/reuse/search-labels.html:15
 #: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:104
 #: udata/templates/topic/reuses.html:36 udata/templates/user/followers.html:7
@@ -619,7 +619,7 @@ msgstr "Rôle"
 
 #: udata/core/organization/metrics.py:17 udata/core/organization/views.py:110
 #: udata/core/organization/views.py:113 udata/core/reuse/metrics.py:24
-#: udata/core/site/metrics.py:42 udata/core/site/views.py:131
+#: udata/core/site/metrics.py:42 udata/core/site/views.py:125
 #: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:23
 #: udata/templates/dataset/followers.html:4
 #: udata/templates/dataset/list.html:8 udata/templates/dataset/list.html:18
@@ -742,7 +742,7 @@ msgstr "Demande d'adhésion refusée"
 msgid "Views"
 msgstr "Vues"
 
-#: udata/core/organization/views.py:153 udata/core/site/views.py:149
+#: udata/core/organization/views.py:153 udata/core/site/views.py:143
 msgid "Community"
 msgstr "Communauté"
 
@@ -798,7 +798,7 @@ msgid ""
 msgstr "Les détails de la réutilisation (procédé de construction, spécificités, auto-critique...)."
 
 #: udata/core/reuse/forms.py:33 udata/templates/home.html:92
-#: udata/templates/reuse/display.html:223
+#: udata/templates/reuse/display.html:229
 msgid "Used datasets"
 msgstr "Jeux de données utilisés"
 
@@ -858,21 +858,21 @@ msgstr "Taille du flux"
 msgid "Number of elements in feeds"
 msgstr "Nombre d'élements dans les flux"
 
-#: udata/core/site/metrics.py:62 udata/core/site/views.py:143
+#: udata/core/site/metrics.py:62 udata/core/site/views.py:137
 #: udata/templates/dataset/display.html:87
 #: udata/templates/dataset/list.html:33 udata/templates/search.html:71
 #: udata/templates/site/dashboard.html:21
 msgid "Resources"
 msgstr "Ressources"
 
-#: udata/core/site/metrics.py:81 udata/core/site/views.py:158
+#: udata/core/site/metrics.py:81 udata/core/site/views.py:152
 #: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:8
 #: udata/templates/user/list.html:18
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: udata/core/site/metrics.py:91 udata/core/site/views.py:152
+#: udata/core/site/metrics.py:91 udata/core/site/views.py:146
 #: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:47
 #: udata/templates/organization/display_base.html:8
 #: udata/templates/organization/followers.html:5
@@ -913,7 +913,7 @@ msgstr "Maximum de réutilisations pour une organisation"
 msgid "Maximum organization datasets"
 msgstr "Maximum de jeux de données pour une organisation"
 
-#: udata/core/site/views.py:128
+#: udata/core/site/views.py:122
 msgid "Data"
 msgstr "Données"
 
@@ -1472,9 +1472,9 @@ msgstr "Référence"
 msgid "Download from "
 msgstr "Télécharger depuis"
 
-#: udata/templates/dataset/display.html:168
+#: udata/templates/dataset/display.html:174
 #: udata/templates/embed-dataset.html:177
-#: udata/templates/reuse/display.html:124
+#: udata/templates/reuse/display.html:130
 msgid "Producer"
 msgstr "Producteur"
 
@@ -1507,7 +1507,7 @@ msgid "Territory"
 msgstr "Territoire"
 
 #: udata/templates/dataset/card.html:85
-#: udata/templates/dataset/display.html:216
+#: udata/templates/dataset/display.html:222
 #: udata/templates/dataset/search-result.html:42
 #: udata/templates/embed-dataset.html:232
 msgid "Frequency"
@@ -1578,27 +1578,33 @@ msgstr "Métriques du site"
 msgid "metrics"
 msgstr "métriques"
 
-#: udata/templates/publish-action-modal.html:9
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:10
 msgid "Publish a dataset"
 msgstr "Publiez un jeu de données"
 
-#: udata/templates/publish-action-modal.html:12
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:14
 msgid "Contribute and add a new dataset to this site catalog."
 msgstr "Contribuez et ajoutez un nouveau jeu de données au catalogue de ce site"
 
-#: udata/templates/publish-action-modal.html:21
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:24
 msgid "Publish a reuse"
 msgstr "Publiez une réutilisation"
 
-#: udata/templates/publish-action-modal.html:24
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:28
 msgid "Contribute and add a new reuse to this site catalog."
 msgstr "Contribuez et ajoutez une nouvelle réutilisation au catalogue de ce site."
 
-#: udata/templates/publish-action-modal.html:33
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:38
 msgid "Create or find your organization"
 msgstr "Créez ou trouvez votre organisation"
 
-#: udata/templates/publish-action-modal.html:36
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:42
 msgid "You can create a new organization or find yours."
 msgstr "Vous pouvez créer une nouvelle organisation ou trouver la vôtre"
 
@@ -1710,12 +1716,12 @@ msgid "Maintainer"
 msgstr "Mainteneur"
 
 #: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:133
-#: udata/templates/dataset/display.html:407
+#: udata/templates/dataset/display.html:413
 #: udata/templates/dataset/resource/list-item.html:31
 #: udata/templates/organization/display.html:25
 #: udata/templates/organization/followers.html:15
 #: udata/templates/post/display.html:118
-#: udata/templates/reuse/display.html:102 udata/templates/user/base.html:23
+#: udata/templates/reuse/display.html:108 udata/templates/user/base.html:23
 msgid "Edit"
 msgstr "Modifier"
 
@@ -1741,8 +1747,8 @@ msgid "%(app)s want to access your %(site)s account."
 msgstr "%(app)s voudrait accéder à votre compte %(site)s."
 
 #: udata/templates/api/oauth_authorize.html:26
-#: udata/templates/dataset/display.html:283
-#: udata/templates/dataset/display.html:285
+#: udata/templates/dataset/display.html:289
+#: udata/templates/dataset/display.html:291
 #: udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/issue_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
@@ -1781,12 +1787,12 @@ msgid "OAuth Authentication Error"
 msgstr "Erreur d'authentification OAuth"
 
 #: udata/templates/dataset/card.html:29
-#: udata/templates/dataset/display.html:256
+#: udata/templates/dataset/display.html:262
 msgid "Territorial coverage"
 msgstr "Couverture territoriale"
 
 #: udata/templates/dataset/card.html:75
-#: udata/templates/dataset/display.html:248
+#: udata/templates/dataset/display.html:254
 #: udata/templates/dataset/search-result.html:89
 msgid "Territorial coverage granularity"
 msgstr "Granularité de la couverture territoriale"
@@ -1838,74 +1844,80 @@ msgstr "Voir les %(nb)d ressources"
 msgid "Add a resource"
 msgstr "Ajouter une ressource"
 
-#: udata/templates/dataset/display.html:179
-#: udata/templates/reuse/display.html:165
+#: udata/templates/dataset/display.html:145
+#: udata/templates/organization/sidebar-producer.html:18
+#: udata/templates/reuse/display.html:101
+msgid "Contact the producer"
+msgstr "Contacter le producteur"
+
+#: udata/templates/dataset/display.html:185
+#: udata/templates/reuse/display.html:171
 msgid "Informations"
 msgstr "Informations"
 
-#: udata/templates/dataset/display.html:186
+#: udata/templates/dataset/display.html:192
 #: udata/templates/dataset/search-panel.html:8
 #: udata/templates/organization/search-panel.html:5
 #: udata/templates/reuse/search-panel.html:5
 msgid "Badges"
 msgstr "Badges"
 
-#: udata/templates/dataset/display.html:231
+#: udata/templates/dataset/display.html:237
 msgid "Modification date"
 msgstr "Date de modification"
 
-#: udata/templates/dataset/display.html:238
+#: udata/templates/dataset/display.html:244
 msgid "Latest resource update"
 msgstr "Dernière mise à jour de ressource"
 
-#: udata/templates/dataset/display.html:275
-#: udata/templates/reuse/display.html:190
+#: udata/templates/dataset/display.html:281
+#: udata/templates/reuse/display.html:196
 msgid "Suggest a tag with a new discussion thread"
 msgstr "Suggérer un mot-clé avec un nouveau fil de discussion"
 
-#: udata/templates/dataset/display.html:277
-#: udata/templates/reuse/display.html:192
+#: udata/templates/dataset/display.html:283
+#: udata/templates/reuse/display.html:198
 msgid "Suggest a tag"
 msgstr "Suggérer un mot-clé"
 
-#: udata/templates/dataset/display.html:313
+#: udata/templates/dataset/display.html:319
 msgid "Territories"
 msgstr "Territoires"
 
-#: udata/templates/dataset/display.html:331
-#: udata/templates/reuse/display.html:249
+#: udata/templates/dataset/display.html:337
+#: udata/templates/reuse/display.html:255
 msgid "Community contributions"
 msgstr "Contributions communautaires"
 
-#: udata/templates/dataset/display.html:346
-#: udata/templates/reuse/display.html:262
+#: udata/templates/dataset/display.html:352
+#: udata/templates/reuse/display.html:268
 msgid ""
 "Discussion between the organization and the community about this dataset."
 msgstr "Discussion entre l'organisation et la communauté à propos de ce jeu de données."
 
-#: udata/templates/dataset/display.html:350
+#: udata/templates/dataset/display.html:356
 msgid "Community resources"
 msgstr "Ressources communautaires"
 
-#: udata/templates/dataset/display.html:360
+#: udata/templates/dataset/display.html:366
 msgid "New community resource"
 msgstr "Nouvelle ressource communautaire"
 
-#: udata/templates/dataset/display.html:366
+#: udata/templates/dataset/display.html:372
 msgid ""
 "You have built a more comprehensive database than those presented here? This"
 " is the time to share it!"
 msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
 
-#: udata/templates/dataset/display.html:403
+#: udata/templates/dataset/display.html:409
 msgid "Open in a new window"
 msgstr "Ouvrir dans une nouvelle fenêtre"
 
-#: udata/templates/dataset/display.html:425
+#: udata/templates/dataset/display.html:431
 msgid "Add a reuse"
 msgstr "Ajouter une réutilisation"
 
-#: udata/templates/dataset/display.html:433
+#: udata/templates/dataset/display.html:439
 msgid ""
 "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
@@ -2512,7 +2524,7 @@ msgid "Member"
 msgstr "Membre"
 
 #: udata/templates/organization/display_base.html:156
-#: udata/templates/organization/sidebar-producer.html:20
+#: udata/templates/organization/sidebar-producer.html:26
 msgid "I'll be informed about this organization news"
 msgstr "Je serais informé de l'activité de cette organisation"
 
@@ -2580,9 +2592,14 @@ msgstr[0] "%(num)s membre"
 msgstr[1] "%(num)s membres"
 
 #: udata/templates/organization/sidebar-producer.html:11
-#: udata/templates/reuse/display.html:146
+#: udata/templates/reuse/display.html:152
 msgid "more"
 msgstr "plus"
+
+#. This is an action (present indicative).
+#: udata/templates/organization/sidebar-producer.html:21
+msgid "Contact"
+msgstr "Contacter"
 
 #: udata/templates/post/display.html:18
 msgid "News"
@@ -2628,15 +2645,15 @@ msgid ""
 "This reuse has been deleted. This will be permanent in the next 24 hours"
 msgstr "Cette réutilisation a été supprimée. Cela sera permanent dans les prochaines 24 heures"
 
-#: udata/templates/reuse/display.html:133
+#: udata/templates/reuse/display.html:139
 msgid "Author"
 msgstr "Auteur"
 
-#: udata/templates/reuse/display.html:155
+#: udata/templates/reuse/display.html:161
 msgid "I'll be informed about this user news"
 msgstr "Je serais informé de l'activité de cet utilisateur"
 
-#: udata/templates/reuse/display.html:206
+#: udata/templates/reuse/display.html:212
 msgid "No followers yet"
 msgstr "Aucun abonné pour l'instant"
 
