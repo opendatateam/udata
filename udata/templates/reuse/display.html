@@ -95,6 +95,12 @@
                             {{ share_btn(reuse.title) }}
                             {{ issues_btn(reuse) }}
                         </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-warning" @click="$refs.discussions.start('')">
+                                <span class="fa fa-envelope-o"></span>
+                                {{ _('Contact the producer') }}
+                            </button>
+                        </div>
                         {% if can_edit %}
                         <div class="btn-group btn-group-sm">
                             <a href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}" class="btn btn-success">

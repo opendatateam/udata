@@ -4,6 +4,8 @@
 
 - Handle territory URLs generation without validity
   [#1068](https://github.com/opendatateam/udata/issues/1068)
+- Added a contact button to trigger discussions
+  [#1076](https://github.com/opendatateam/udata/pull/1076)
 
 ## 1.1.1 (2017-07-31)
 
