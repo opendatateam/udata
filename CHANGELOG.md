@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fixes some spacing issues on dataset and reuses page buttons
+  [#209](https://github.com/etalab/udata-gouvfr/pull/209)
 
 ## 1.1.1 (2017-07-31)
 
