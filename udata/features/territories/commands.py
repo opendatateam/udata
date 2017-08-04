@@ -10,6 +10,7 @@ import tarfile
 
 from collections import Counter
 from datetime import date
+from string import Formatter
 from urllib import urlretrieve
 
 from udata.models import Dataset, GeoZone, SpatialCoverage
@@ -110,18 +111,19 @@ def migrate_zones_ids():
         dataset.update(
             spatial=SpatialCoverage(
                 granularity=dataset.spatial.granularity,
-                zones=[z.id for z in new_zones if z]
+                zones=[getattr(z, 'id', z) for z in new_zones if z]
             )
         )
-    log.info('''Summary
+    log.info(Formatter().vformat('''Summary
     Processed {zones} zones in {datasets} datasets:
     - {countrygroups} country groups (World/UE)
     - {countries} countries
     - France:
         - {regions} regions
         - {counties} counties
+        - {epcis} EPCIs
         - {towns} towns
         - {drom} DROM
         - {dromcom} DROM-COM
-    '''.format(**counter))
+    ''', (), counter))
     log.info('Done')
