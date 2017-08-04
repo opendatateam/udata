@@ -4,6 +4,8 @@
 
 - Fixes some spacing issues on dataset and reuses page buttons
   [#209](https://github.com/etalab/udata-gouvfr/pull/209)
+- Fix some wrong spatial coverages
+  [#213](https://github.com/etalab/udata-gouvfr/pull/213)
 - Updated some translations
 
 ## 1.1.1 (2017-07-31)
