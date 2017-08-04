@@ -15,6 +15,7 @@
 - Prevent the "Bad request error" happening on search but only on some servers
   [#1097](https://github.com/opendatateam/udata/pull/1097)
 - Migrate spatial granularities to new identifiers
+- Migrate remaining legacy spatial identifiers
   [#1079](https://github.com/opendatateam/udata/pull/1079)
 
 ## 1.1.1 (2017-07-31)
