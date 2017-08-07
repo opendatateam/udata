@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  udata-gouv.fr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-08-03 12:09+0200\n"
+"POT-Creation-Date: 2017-08-07 14:09+0200\n"
 "PO-Revision-Date: 2017-02-20 21:32+0000\n"
 "Last-Translator: Axel Haustant\n"
 "Language: es\n"
@@ -182,8 +182,7 @@ msgstr "Vínculo"
 
 #: udata_gouvfr/theme/templates/footer.html:48
 #, fuzzy
-#| msgid "Contact"
-msgid "Contacts"
+msgid "Contact Us"
 msgstr "Contacto"
 
 #: udata_gouvfr/theme/templates/footer.html:64
