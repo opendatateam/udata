@@ -169,20 +169,25 @@ export default {
 @import "~admin-lte/build/less/timeline";
 
 .timeline {
+    li > .timeline-item > .timeline-header {
+        border-bottom: none;
+    }
+    li > .timeline-item > .time {
+        margin-top: 10px;
+    }
     li > .timeline-icon {
         background: #f0f0f0;
+        margin-top:10px;
+        top: 3px;
     }
     li > .timeline-icon-more {
         cursor: pointer;
         background: #ffb311;
     }
-    .card {
-        margin-left: 10%;
-        margin-right: 10%;
 
-        @media (max-width: @screen-sm-min) {
-            margin-left: 0;
-            margin-right: 0;
+    @media (min-width: @screen-sm-max) {
+        .card {
+            max-width: 80%;
         }
     }
 }
