@@ -9,7 +9,7 @@ to easily have an up and ready udata instance.
 
 ## I’m a regular developer of the platform
 
-Install [system depedencies](system-dependencies.md)
+Install [system dependencies](system-dependencies.md)
 and then read the `Developping` sections starting with [Development environment](development-environment.md).
 Once the project is up and running, it's time to customize it!
 Take a look at our advanced documentation on [adapting settings](adapting-settings.md),
