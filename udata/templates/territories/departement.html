@@ -56,9 +56,11 @@
         </div>
     </div>
 
-    <aside class="col-sm-4 panel panel-default">
-        <leaflet-map v-ref:map class="aside-map" :popup="false"
-            data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
-        </leaflet-map>
+    <aside class="col-sm-4">
+        <div class="panel panel-default">
+            <leaflet-map v-ref:map class="aside-map" :popup="false"
+                data-zones="{{ url_for('api.zones', ids=[territory.id]) }}">
+            </leaflet-map>
+        </div>
     </aside>
 {% endblock %}
