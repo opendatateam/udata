@@ -3,15 +3,12 @@
         padding: 1em;
     }
     .dataset-list {
-        .col-sm-4 {
-            padding: 5px;
-        }
         .dataset-card {
-            margin: 0 0 1em 0 !important;
+            margin: 0 0 @grid-gutter-width 0 !important;
         }
     }
     .panel {
-        padding: 1em;
+        margin-bottom: 0;
 
         .tab-links {
             margin-top: 1em;
@@ -20,7 +17,9 @@
     .dataset-item--cta {
         @base-color: #7d8489;
         border: 1px solid @base-color;
-        padding: 0;
+        margin-bottom: @grid-gutter-width;
+        margin-top: @grid-gutter-width;
+        overflow: hidden;
 
         .format-label {
             width: 1em;
