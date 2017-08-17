@@ -51,6 +51,16 @@ discussion_fields = api.model('Discussion', {
         'api.discussion', description='The discussion API URI', readonly=True),
 })
 
+start_discussion_fields = api.model('DiscussionStart', {
+    'title': fields.String(description='The title of the discussion to open',
+                           required=True),
+    'comment': fields.String(description='The content of the initial comment',
+                             required=True),
+    'subject': fields.Nested(api.model_reference,
+                             description='The discussion target object',
+                             required=True),
+})
+
 comment_discussion_fields = api.model('DiscussionResponse', {
     'comment': fields.String(
         description='The comment to submit', required=True),
@@ -149,7 +159,7 @@ class DiscussionsAPI(API):
 
     @api.secure
     @api.doc('create_discussion')
-    @api.expect(discussion_fields)
+    @api.expect(start_discussion_fields)
     @api.marshal_with(discussion_fields)
     def post(self):
         '''Create a new Discussion'''
