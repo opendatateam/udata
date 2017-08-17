@@ -105,6 +105,19 @@ def mdstrip(value, length=None, end='…'):
     return text
 
 
+def render(value):
+    '''
+    Render safe markdown for the frontend (like modals etc.)
+    '''
+    unsafe_rendered = md(value)
+    # Maybe we would like to preserve some tags
+    # and remove dubious tags (script, object)
+    # and remove dubious attrs (onclick, onfocus, etc.)
+    #
+    # safe_rendered = do_striptags(rendered)
+    return unsafe_rendered
+
+
 def init_app(app):
     parser = CommonMark.Parser  # Not an instance because not thread-safe(?)
     renderer = CommonMark.HtmlRenderer()
