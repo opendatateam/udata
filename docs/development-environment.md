@@ -82,12 +82,12 @@ $ npm install
 Once it's done, you should be able to run the build command for JS and CSS:
 
 ```shell
-$ inv assets_build
-$ inv widgets_build
+$ inv assets-build
+$ inv widgets-build
 ```
 
 !!! note
-    The **watcher commands** `inv assets_watch` and `inv widgets_watch` will recompile on each save, and only the relevant parts.
+    The **watcher commands** `inv assets-watch` and `inv widgets-watch` will recompile on each save, and only the relevant parts.
 
 ## Running the project for the first time
 
@@ -117,8 +117,8 @@ $ inv serve         # Start the development server
 $ inv worker        # Start a worker process
 $ inv beat          # Start a scheduler process
 
-$ inv assets_watch  # Continously watch and build assets
-$ inv widgets_watch # Continously watch and build widgets
+$ inv assets-watch  # Continously watch and build assets
+$ inv widgets-watch # Continously watch and build widgets
 ```
 
 When you have the development server running,
