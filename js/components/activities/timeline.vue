@@ -160,3 +160,30 @@ export default {
     }
 };
 </script>
+
+<style lang="less">
+@import "~less/udata/variables";
+
+@import "~bootstrap/less/mixins";
+@import "~admin-lte/build/less/mixins";
+@import "~admin-lte/build/less/timeline";
+
+.timeline {
+    li > .timeline-icon {
+        background: #f0f0f0;
+    }
+    li > .timeline-icon-more {
+        cursor: pointer;
+        background: #ffb311;
+    }
+    .card {
+        margin-left: 10%;
+        margin-right: 10%;
+
+        @media (max-width: @screen-sm-min) {
+            margin-left: 0;
+            margin-right: 0;
+        }
+    }
+}
+</style>
