@@ -50,6 +50,9 @@ class TerritoriesSettings(Testing):
 
 
 class TerritoriesTest(FrontTestCase):
+    modules_to_load = ['features.territories', 'admin', 'core.dataset',
+                       'core.reuse', 'core.site', 'core.organization',
+                       'core.user']
     settings = TerritoriesSettings
 
     def setUp(self):

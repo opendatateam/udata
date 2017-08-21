@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 
 
 class TagsTests(FrontTestCase):
+    modules_to_load = ['core.tags']
     def test_csv(self):
         Tag.objects.create(name='datasets-only', counts={'datasets': 15})
         Tag.objects.create(name='reuses-only', counts={'reuses': 10})

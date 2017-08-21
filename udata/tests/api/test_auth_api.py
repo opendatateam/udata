@@ -38,6 +38,8 @@ class FakeAPI(API):
 
 
 class APIAuthTest(APITestCase):
+    modules_to_load = ['admin', 'core.dataset', 'core.reuse', 'core.site',
+                      'core.organization', 'core.user']
     def oauth_app(self, name='test-client'):
         owner = UserFactory()
         return OAuth2Client.objects.create(

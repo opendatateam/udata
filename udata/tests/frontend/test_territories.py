@@ -10,6 +10,8 @@ from udata.tests.frontend import FrontTestCase
 
 
 class TerritoriesTest(FrontTestCase):
+    modules_to_load = ['features.territories', 'admin', 'core.dataset',
+                       'core.reuse', 'core.site', 'core.organization']
 
     def setUp(self):
         super(TerritoriesTest, self).setUp()
