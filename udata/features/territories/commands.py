@@ -86,6 +86,13 @@ def migrate_zones_ids():
                         GeoZone
                         .objects(code=zone_id, level='fr:region')
                         .first())
+                elif kind == 'epci':
+                    counter['epcis'] += 1
+                    new_zones.append(
+                        GeoZone
+                        .objects(code=zone_id, level='fr:epci')
+                        .valid_at(dataset.created_at.date())
+                        .first())
                 else:
                     new_zones.append(zone)
             elif zone.id.startswith('country-subset/fr'):
@@ -105,7 +112,6 @@ def migrate_zones_ids():
                 counter['zones'] += 1
                 counter['countrygroups'] += 1
                 new_zones.append(zone.id.replace('/', ':'))
-            # TODO: handle EPCIs
             else:
                 new_zones.append(zone)
         dataset.update(
