@@ -210,7 +210,7 @@ export default {
     watch: {
         'dataset.id': function(id) {
             if (id) {
-                this.upload_endpoint = API.datasets.operations.upload_dataset_resource.urlify({dataset: id});
+                this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
             }
         }
     }

@@ -128,18 +128,17 @@ export default {
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
             }
-            if (this.is_community) {
-                endpoint += 'community_';
-                params.community = this.resource.id;
-            } else {
-                endpoint += 'dataset_';
-            }
             if (this.resource.id) {
-                endpoint += 'resource';
-                params.rid = this.resource.id;
+                if (this.is_community) {
+                    params.community = this.resource.id;
+                } else {
+                    params.rid = this.resource.id;
+                }
             } else {
-                endpoint += 'resources';
+                endpoint += 'new_';
             }
+            endpoint += this.is_community ? 'community_' : 'dataset_';
+            endpoint += 'resource';
             return operations[endpoint].urlify(params);
         }
     },
