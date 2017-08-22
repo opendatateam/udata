@@ -164,9 +164,8 @@ export default {
             const el = document.getElementById(`progress-${id}`);
             el.style.width = `${Math.round(uploaded * 100 / total)}%`;
         },
-        'uploader:complete': function(id, response) {
-            const file = this.$uploader.getFile(id);
-            this.files.$remove(this.files.indexOf(file));
+        'uploader:complete': function(id, response, file) {
+            this.files.splice(this.files.indexOf(file), 1);
             this.dataset.resources.unshift(response);
         }
     },
