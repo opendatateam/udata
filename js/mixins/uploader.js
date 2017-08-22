@@ -91,6 +91,9 @@ export default {
     },
 
     filters: {
+        fileext(filename) {
+            return filename.split('.').pop();
+        },
         filesize(size) {
             if (!size || size <= 0) {
                 return '-';
