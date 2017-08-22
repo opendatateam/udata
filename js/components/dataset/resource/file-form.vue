@@ -1,12 +1,18 @@
 <style lang="less">
+@import '~less/admin/variables';
+
 .resource-upload-dropzone {
-    border: 4px dashed #bbb;
+    border: 4px dashed @gray-lte;
     min-height: 150px;
     padding-top: 10px;
     padding-bottom: 10px;
 
     .lead {
         margin-bottom: 0;
+    }
+
+    .drop-active > & {
+        border: 4px dashed @green;
     }
 }
 </style>
