@@ -167,6 +167,11 @@ export default {
         'uploader:complete': function(id, response, file) {
             this.files.splice(this.files.indexOf(file), 1);
             this.dataset.resources.unshift(response);
+        },
+        'uploader:error': function(id) {
+            // Remove the progressing file (an error is already displayed globally)
+            const file = this.$uploader.getFile(id);
+            this.files.splice(this.files.indexOf(file), 1);
         }
     },
     ready() {
