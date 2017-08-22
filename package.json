@@ -80,7 +80,7 @@
     "bootstrap-markdown": "^2.10.0",
     "chart.js": "^1.1.1",
     "diff": "^2.2.3",
-    "fine-uploader": "~5.11.10",
+    "fine-uploader": "~5.15.0",
     "font-awesome": "^4.7.0",
     "highlight.js": "^9.9.0",
     "i18next": "3.3.1",
