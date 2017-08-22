@@ -92,7 +92,7 @@ export default {
 
     filters: {
         filesize(size) {
-            if (size <= 0) {
+            if (!size || size <= 0) {
                 return '-';
             }
             if (size > _1GO) {

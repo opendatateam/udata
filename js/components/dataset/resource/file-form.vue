@@ -28,7 +28,7 @@
     </span>
     <div class="info-box-content">
         <span class="info-box-text">{{file.name}}</span>
-        <span class="info-box-number">{{file.filesize | filesize}}</span>
+        <span class="info-box-number">{{file.size | filesize}}</span>
         <div class="progress">
             <div class="progress-bar" :style="{width: progress+'%'}"></div>
         </div>
