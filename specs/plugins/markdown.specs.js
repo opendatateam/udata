@@ -77,3 +77,51 @@ describe('Markdown plugin', function() {
         });
     });
 });
+
+describe('Markdown backend compliance', function() {
+    const commonmark = require('helpers/commonmark').default;
+
+    /**
+    * An expect wrapper rendering the markdown
+    * and then allowing to perform chai-dom expectation on it
+    */
+    function markdown(source) {
+        const div = document.createElement('div');
+        div.innerHTML = commonmark(source);
+        return div;
+    }
+
+    it('should transform urls to anchors', function() {
+        const source = 'http://example.net/';
+        expect(markdown(source)).to.have.html('<p><a href="http://example.net/">http://example.net/</a></p>');
+    });
+
+    it('should not transform emails to anchors', function() {
+        const source = 'coucou@cmoi.fr';
+        expect(markdown(source)).to.have.html('<p>coucou@cmoi.fr</p>');
+    });
+
+    it('should not transform links within pre', function() {
+        const source = '<pre>http://example.net/</pre>';
+        expect(markdown(source)).to.have.html('<pre>http://example.net/</pre>');
+    });
+
+    it('should sanitize evil code', function() {
+        const source = 'an <script>evil()</script>';
+        expect(markdown(source)).to.have.text('an &lt;script&gt;evil()&lt;/script&gt;');
+    });
+
+    it('should handle soft breaks as <br/>', function() {
+        const source = 'line 1\nline 2';
+        expect(markdown(source)).to.have.html('<p>line 1<br>line 2</p>');
+    });
+
+    it('should not render github tables', function() {
+        const source = [
+            '| first | second |',
+            '|-------|--------|',
+            '| value | value  |',
+        ].join('\n');
+        expect(markdown(source)).to.have.html(`<p>${source.replace(/\n/g, '<br>')}</p>`);
+    });
+});
