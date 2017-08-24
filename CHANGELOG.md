@@ -8,6 +8,8 @@
   [#1076](https://github.com/opendatateam/udata/pull/1076)
 - Improve harvest error handling
   [#1078](https://github.com/opendatateam/udata/pull/1078)
+- Improve elasticsearch configurability
+  [#1096](https://github.com/opendatateam/udata/pull/1096)
 
 ## 1.1.1 (2017-07-31)
 
