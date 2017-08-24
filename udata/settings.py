@@ -20,6 +20,10 @@ class Defaults(object):
 
     MONGODB_HOST = 'mongodb://localhost:27017/udata'
 
+    # Elasticsearch configuration
+    ELASTICSEARCH_URL = 'localhost:9200'
+    ELASTICSEARCH_INDEX_BASENAME = 'udata'
+
     # BROKER_TRANSPORT = 'redis'
     BROKER_URL = 'redis://localhost:6379'
     BROKER_TRANSPORT_OPTIONS = {
