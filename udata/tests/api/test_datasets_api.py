@@ -583,7 +583,7 @@ class DatasetResourceAPITest(APITestCase):
             ])
             dataset = DatasetFactory(organization=org)
         response = self.post(
-            url_for('api.upload_dataset_resources', dataset=dataset),
+            url_for('api.upload_new_dataset_resource', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
         self.assert201(response)
         data = json.loads(response.data)
@@ -926,7 +926,7 @@ class CommunityResourceAPITest(APITestCase):
         dataset = VisibleDatasetFactory()
         self.login()
         response = self.post(
-            url_for('api.upload_community_resources', dataset=dataset),
+            url_for('api.upload_new_community_resource', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
         self.assert201(response)
         data = json.loads(response.data)
@@ -950,7 +950,7 @@ class CommunityResourceAPITest(APITestCase):
             Member(user=user, role='admin')
         ])
         response = self.post(
-            url_for('api.upload_community_resources', dataset=dataset),
+            url_for('api.upload_new_community_resource', dataset=dataset),
             {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
         self.assert201(response)
         data = json.loads(response.data)

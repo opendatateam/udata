@@ -17,6 +17,10 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        td .progress {
+            margin-top: 5px;
+        }
     }
 
     .drop-active > & {
@@ -53,13 +57,15 @@
                     <td v-if="reordering"></td>
                     <td>
                         <div class="ellipsis">{{ file.name }}</div>
+                    </td>
+                    <td>{{ file.name | fileext }}</td>
+                    <td>{{ file.size | filesize }}</td>
+                    <td colspan="2">
                         <div class="progress progress-xs progress-striped active">
-                          <div class="progress-bar progress-bar-primary"
-                            id="progress-{{file.id}}" style="width: 0%"></div>
+                            <div class="progress-bar progress-bar-primary"
+                                id="progress-{{file.id}}" style="width: 0%"></div>
                         </div>
                     </td>
-                    <td>{{ file.type }}</td>
-                    <td>{{ file.size | filesize }}</td>
                 </tr>
                 <tr v-for="resource in dataset.resources" @click="display(resource)"
                     :class="{ 'pointer': !reodering, 'move': reordering }"
@@ -155,13 +161,17 @@ export default {
     },
     events: {
         'uploader:progress': function(id, uploaded, total) {
-            const el = this.$el.getElementById(`progress-${id}`);
+            const el = document.getElementById(`progress-${id}`);
             el.style.width = `${Math.round(uploaded * 100 / total)}%`;
         },
-        'uploader:complete': function(id, response) {
-            const file = this.$uploader.getFile(id);
-            this.files.$remove(this.files.indexOf(file));
+        'uploader:complete': function(id, response, file) {
+            this.files.$remove(file);
             this.dataset.resources.unshift(response);
+        },
+        'uploader:error': function(id) {
+            // Remove the progressing file (an error is already displayed globally)
+            const file = this.$uploader.getFile(id);
+            this.files.splice(this.files.indexOf(file), 1);
         }
     },
     ready() {
@@ -210,7 +220,7 @@ export default {
     watch: {
         'dataset.id': function(id) {
             if (id) {
-                this.upload_endpoint = API.datasets.operations.upload_dataset_resource.urlify({dataset: id});
+                this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
             }
         }
     }

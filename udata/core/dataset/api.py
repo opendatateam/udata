@@ -259,11 +259,11 @@ class UploadMixin(object):
         }
 
 
-@ns.route('/<dataset:dataset>/upload/', endpoint='upload_dataset_resources')
+@ns.route('/<dataset:dataset>/upload/', endpoint='upload_new_dataset_resource')
 @api.doc(parser=upload_parser, **common_doc)
-class UploadDatasetResources(UploadMixin, API):
+class UploadNewDatasetResource(UploadMixin, API):
     @api.secure
-    @api.doc('upload_dataset_resources')
+    @api.doc('upload_new_dataset_resource')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new dataset resource'''
@@ -278,11 +278,11 @@ class UploadDatasetResources(UploadMixin, API):
 
 
 @ns.route('/<dataset:dataset>/upload/community/',
-          endpoint='upload_community_resources')
+          endpoint='upload_new_community_resource')
 @api.doc(parser=upload_parser, **common_doc)
-class UploadCommunityResources(UploadMixin, API):
+class UploadNewCommunityResources(UploadMixin, API):
     @api.secure
-    @api.doc('upload_community_resources')
+    @api.doc('upload_new_community_resource')
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new community resource'''

@@ -10,6 +10,8 @@
   [#1078](https://github.com/opendatateam/udata/pull/1078)
 - Improve elasticsearch configurability
   [#1096](https://github.com/opendatateam/udata/pull/1096)
+- Lots of fixes admin files upload
+  [1094](https://github.com/opendatateam/udata/pull/1094)
 
 ## 1.1.1 (2017-07-31)
 
