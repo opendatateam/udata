@@ -165,7 +165,7 @@ export default {
             el.style.width = `${Math.round(uploaded * 100 / total)}%`;
         },
         'uploader:complete': function(id, response, file) {
-            this.files.splice(this.files.indexOf(file), 1);
+            this.files.$remove(file);
             this.dataset.resources.unshift(response);
         },
         'uploader:error': function(id) {

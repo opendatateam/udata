@@ -164,7 +164,7 @@ export default {
         on_complete(id, name, response) {
             if (!response.success) return;
             const file = this.$uploader.getFile(id);
-            this.files.$remove(this.files.indexOf(file));
+            this.files.$remove(file);
             this.$emit('uploader:complete', id, response, file);
         },
 

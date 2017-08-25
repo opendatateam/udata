@@ -130,7 +130,6 @@ export default {
         upload_endpoint() {
             const operations = API.datasets.operations;
             let params = {};
-            let endpoint = 'upload_';
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
             }
@@ -140,11 +139,10 @@ export default {
                 } else {
                     params.rid = this.resource.id;
                 }
-            } else {
-                endpoint += 'new_';
             }
-            endpoint += this.is_community ? 'community_' : 'dataset_';
-            endpoint += 'resource';
+            const route_new = this.resource.id ? '' : 'new_';
+            const route_namespace = this.is_community ? 'community_' : 'dataset_';
+            const endpoint = `upload_${route_new}${route_namespace}resource`;
             return operations[endpoint].urlify(params);
         }
     },
