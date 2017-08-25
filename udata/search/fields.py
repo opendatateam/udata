@@ -46,9 +46,9 @@ class Facet(object):
     def labelize(self, value):
         labelize = self.labelizer or self.default_labelizer
         if isinstance(value, basestring):
-            return ' {0} '.format(OR_LABEL).join(
-                str(labelize(v)) for v in value.split(OR_SEPARATOR)
-            )
+            return str(' {0} '.format(OR_LABEL)).join(
+                labelize(v).encode('utf-8') for v in value.split(OR_SEPARATOR)
+            ).decode('utf-8')
         return labelize(value)
 
     def default_labelizer(self, value):

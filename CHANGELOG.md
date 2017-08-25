@@ -12,6 +12,8 @@
   [#1096](https://github.com/opendatateam/udata/pull/1096)
 - Lots of fixes admin files upload
   [1094](https://github.com/opendatateam/udata/pull/1094)
+- Prevent the "Bad request error" happening on search but only on some servers
+  [#1097](https://github.com/opendatateam/udata/pull/1097)
 
 ## 1.1.1 (2017-07-31)
 
