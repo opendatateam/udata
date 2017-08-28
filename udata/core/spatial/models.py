@@ -62,6 +62,7 @@ class GeoZone(db.Document):
     dbpedia = db.StringField()
     flag = db.ImageField(fs=logos)
     blazon = db.ImageField(fs=logos)
+    logo = db.ImageField(fs=logos)
 
     meta = {
         'indexes': [

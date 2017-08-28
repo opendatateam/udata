@@ -128,13 +128,13 @@ class BaseFormatter(logging.Formatter):
     def format(self, record):
         '''Customize the line prefix and indent multiline logs'''
         record.__dict__['prefix'] = self._prefix(record.levelname)
-        record.msg = str(record.msg).replace('\n', '\n  | ')
+        record.msg = str(record.msg).replace('\n', '\n  │ ')
         return super(BaseFormatter, self).format(record)
 
     def formatException(self, ei):
         '''Indent traceback info for better readability'''
         out = super(BaseFormatter, self).formatException(ei)
-        out = str('\n').join(str('  | ') + line for line in out.splitlines())
+        out = str('\n').join(str('  │ ') + line for line in out.splitlines())
         return out
 
     def _prefix(self, name):
