@@ -17,6 +17,8 @@
 - Migrate spatial granularities to new identifiers
 - Migrate remaining legacy spatial identifiers
   [#1080](https://github.com/opendatateam/udata/pull/1080)
+- Fix the discussion API documention
+  [#1093](https://github.com/opendatateam/udata/pull/1093)
 
 ## 1.1.1 (2017-07-31)
 
