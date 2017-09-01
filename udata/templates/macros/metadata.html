@@ -46,8 +46,8 @@
 />
 {% endif %}
 
-<meta name="check-urls" content="{{ 'true' if config.CROQUEMORT else 'false' }}" />
-<meta name="check-urls-ignore" content="{{ config.CROQUEMORT_IGNORE|tojson|urlencode }}" />
+<meta name="check-urls" content="{{ config.LINKCHECKING_ENABLED|tojson }}" />
+<meta name="check-urls-ignore" content="{{ config.LINKCHECKING_IGNORE_DOMAINS|tojson|urlencode }}" />
 <meta name="territory-enabled" content="{{ 'true' if config.ACTIVATE_TERRITORIES else 'false' }}">
 
 <meta name="delete-me-enabled" content="{{ 'true' if config.DELETE_ME else 'false' }}">

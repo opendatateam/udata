@@ -136,6 +136,31 @@ The number of items to fetch while previewing an harvest source
 
 A cron expression used as default harvester schedule when validating harvesters.
 
+## Link checker configuration
+
+### LINKCHECKING_ENABLED
+
+**default**: `True`
+
+A flag to enable the resources urls check by an external link checker.
+
+### LINKCHECKING_DEFAULT_LINKCHECKER
+
+**default**: `no_check`
+
+An entrypoint key of `udata.linkcheckers` that will be used as a default link checker, i.e. when no specific link checker is set for a resource (via `resource.extras.check:checker`).
+
+### LINKCHECKING_IGNORE_DOMAINS
+
+**default**: []
+
+A list of domains to ignore when triggering link checking of resources urls.
+
+### LINKCHECKING_CACHE_DURATION
+
+**default**: 300
+
+The minimum time in seconds between two consecutive checks of a resource's url.
 
 ## ElasticSearch configuration
 
