@@ -32,10 +32,11 @@ THEME = 'gouvfr'
 
 ## Development
 
-Prepare a [`udata` development environment][udata-develop].
+Prepare a [udata development environment][udata-develop].
 
 It is recommended to have a workspace with the following layout:
-```
+
+```shell
 $WORKSPACE
 ├── fs
 ├── udata
