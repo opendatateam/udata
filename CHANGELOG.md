@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.1.2 (2017-09-04)
 
 - Fixes some spacing issues on dataset and reuses page buttons
