@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.1.2 (2017-09-04)
 
 - Handle territory URLs generation without validity
