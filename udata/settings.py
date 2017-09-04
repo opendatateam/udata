@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from kombu import Exchange, Queue
+
 
 class Defaults(object):
     DEBUG = False
@@ -18,6 +20,10 @@ class Defaults(object):
 
     MONGODB_HOST = 'mongodb://localhost:27017/udata'
 
+    # Elasticsearch configuration
+    ELASTICSEARCH_URL = 'localhost:9200'
+    ELASTICSEARCH_INDEX_BASENAME = 'udata'
+
     # BROKER_TRANSPORT = 'redis'
     BROKER_URL = 'redis://localhost:6379'
     BROKER_TRANSPORT_OPTIONS = {
@@ -31,6 +37,40 @@ class Defaults(object):
     CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
     # CELERY_TASK_SERIALIZER = 'pickle'
     # CELERYD_POOL = 'gevent'
+
+    # Default celery routing
+    CELERY_DEFAULT_QUEUE = 'default'
+    CELERY_QUEUES = (
+        # Default queue (on default exchange)
+        Queue('default', routing_key='task.#'),
+        # High priority for urgent tasks
+        Queue('high', Exchange('high', type='topic'), routing_key='high.#'),
+        # Low priority for slow tasks
+        Queue('low', Exchange('low', type='topic'), routing_key='low.#'),
+    )
+    CELERY_DEFAULT_EXCHANGE = 'default'
+    CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
+    CELERY_DEFAULT_ROUTING_KEY = 'task.default'
+    CELERY_ROUTES = {
+        # High priority for search tasks
+        'udata.search.reindex': {
+            'queue': 'high',
+            'routing_key': 'high.search',
+        },
+        # Low priority for harvest operations
+        'harvest': {
+            'queue': 'low',
+            'routing_key': 'low.harvest',
+        },
+        'udata.harvest.tasks.harvest_item': {
+            'queue': 'low',
+            'routing_key': 'low.harvest',
+        },
+        'udata.harvest.tasks.harvest_finalize': {
+            'queue': 'low',
+            'routing_key': 'low.harvest',
+        },
+    }
 
     CACHE_KEY_PREFIX = 'udata-cache'
     CACHE_TYPE = 'redis'

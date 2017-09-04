@@ -6,6 +6,47 @@
 - Organization dashboard page has been merged into the main organization page [#1023](https://github.com/opendatateam/udata/pull/1023)
 - Fix an issue causing a loss of data input at the global search input level [#1019](https://github.com/opendatateam/udata/pull/1019)
 
+## 1.1.2 (2017-09-04)
+
+- Handle territory URLs generation without validity
+  [#1068](https://github.com/opendatateam/udata/issues/1068)
+- Added a contact button to trigger discussions
+  [#1076](https://github.com/opendatateam/udata/pull/1076)
+- Improve harvest error handling
+  [#1078](https://github.com/opendatateam/udata/pull/1078)
+- Improve elasticsearch configurability
+  [#1096](https://github.com/opendatateam/udata/pull/1096)
+- Lots of fixes admin files upload
+  [1094](https://github.com/opendatateam/udata/pull/1094)
+- Prevent the "Bad request error" happening on search but only on some servers
+  [#1097](https://github.com/opendatateam/udata/pull/1097)
+- Migrate spatial granularities to new identifiers
+- Migrate remaining legacy spatial identifiers
+  [#1080](https://github.com/opendatateam/udata/pull/1080)
+- Fix the discussion API documention
+  [#1093](https://github.com/opendatateam/udata/pull/1093)
+
+## 1.1.1 (2017-07-31)
+
+- Fix an issue preventing reuse edition:
+  [#1027](https://github.com/opendatateam/udata/issues/1027)
+- Fix an issue preventing user display and edit in admin:
+  [#1030](https://github.com/opendatateam/udata/issues/1030)
+- Fix an error when a membership request is accepted:
+  [#1028](https://github.com/opendatateam/udata/issues/1028)
+- Fix issue modal on a reuse:
+  [#1026](https://github.com/opendatateam/udata/issues/1026)
+- Fix sort by date on admin users list:
+  [#1029](https://github.com/opendatateam/udata/issues/1029)
+- Improve the `purge` command
+  [#1039](https://github.com/opendatateam/udata/pull/1039)
+- Ensure search does not fail when a deleted object has not been
+  unindexed yet
+  [#1063](https://github.com/opendatateam/udata/issues/1063)
+- Start using Celery queues to handle task priorities
+  [#1067](https://github.com/opendatateam/udata/pull/1067)
+- Updated translations
+
 ## 1.1.0 (2017-07-05)
 
 ### New features and improvements

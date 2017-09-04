@@ -46,6 +46,7 @@ def mock_pagination(path, pattern):
 
 class DcatBackendTest(DBTestMixin, TestCase):
     def setUp(self):
+        super(DcatBackendTest, self).setUp()
         # Create fake licenses
         for license_id in 'lool', 'fr-lo':
             License.objects.create(id=license_id, title=license_id)
@@ -172,3 +173,63 @@ class DcatBackendTest(DBTestMixin, TestCase):
 
         job = source.get_last_job()
         self.assertEqual(len(job.items), 4)
+
+    @httpretty.activate
+    def test_failure_on_initialize(self):
+        url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
+        httpretty.register_uri(httpretty.GET, url, body='should fail')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+
+        self.assertEqual(job.status, 'failed')
+
+    @httpretty.activate
+    def test_unsupported_mime_type(self):
+        url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
+        httpretty.register_uri(httpretty.HEAD, url, content_type='text/html; charset=utf-8')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+
+        self.assertEqual(job.status, 'failed')
+        self.assertEqual(len(job.errors), 1)
+
+        error = job.errors[0]
+        self.assertEqual(error.message, 'Unsupported mime type "text/html"')
+
+    @httpretty.activate
+    def test_unable_to_detect_format(self):
+        url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
+        httpretty.register_uri(httpretty.HEAD, url, content_type='')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+
+        self.assertEqual(job.status, 'failed')
+        self.assertEqual(len(job.errors), 1)
+
+        error = job.errors[0]
+        expected = 'Unable to detect format from extension or mime type'
+        self.assertEqual(error.message, expected)

@@ -76,6 +76,9 @@ class SearchResult(Paginable, Response):
             ids = [ObjectId(id) for id in self.get_ids()]
             objects = self.query.model.objects.in_bulk(ids)
             self._objects = [objects.get(id) for id in ids]
+            # Filter out DBref ie. indexed object not found in DB
+            self._objects = [o for o in self._objects
+                             if isinstance(o, self.query.model)]
         return self._objects
 
     @property

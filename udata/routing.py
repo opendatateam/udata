@@ -149,12 +149,15 @@ class TerritoryConverter(ModelConverter, PathConverter):
                 slug=territory.slug)
 
         code = getattr(obj, 'code', None)
-        validity = getattr(obj, 'validity', None)
         slug = getattr(obj, 'slug', None)
-        if code and validity and slug:
+        validity = getattr(obj, 'validity', {})
+        if code and slug:
             return '{level_name}/{code}@{start_date}/{slug}'.format(
-                level_name=level_name, code=code, start_date=validity['start'],
-                slug=slug)
+                level_name=level_name,
+                code=code,
+                start_date=validity.get('start', 'latest'),
+                slug=slug
+            )
         else:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 

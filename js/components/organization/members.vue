@@ -189,7 +189,7 @@ export default {
             this.$root.$modal(MemberModal, {member: member, org: this.org});
         },
         accept_request(request) {
-            this.org.accept_membership(request, function(member) {
+            this.org.accept_membership(request, (member) => {
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
             })

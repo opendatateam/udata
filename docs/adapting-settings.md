@@ -111,7 +111,7 @@ Warning: the order is important and will determine parents/children for
 a given territory. You have to set the smallest territory level first:
 
 ```python
-HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region', 'country')
+HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 ```
 
 ## ElasticSearch configuration
@@ -131,6 +131,25 @@ RFC-1738 formatted URLs are also supported:
 ```python
 ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
 ```
+
+### ELASTICSEARCH_INDEX_BASENAME
+
+**default**: `'udata'`
+
+The base name used to produce elasticsearch index names and alias.
+The default `udata` value will produce:
+- a `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
+- a `udata` alias on `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
+- a temporary `udata-test` index during each test requiring it
+
+```python
+ELASTICSEARCH_INDEX_BASENAME = 'myindex'
+```
+The above example will produce:
+- a `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
+- a `myindex` alias on `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
+- a temporary `myindex-test` index during each test requiring it
+
 
 ## Mongoengine/Flask-Mongoengine options
 

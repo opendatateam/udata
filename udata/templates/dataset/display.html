@@ -140,6 +140,12 @@
                         </div>
                         {% endif %}
                         <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-warning" @click="$refs.discussions.start('')">
+                                <span class="fa fa-envelope-o"></span>
+                                {{ _('Contact the producer') }}
+                            </button>
+                        </div>
+                        <div class="btn-group btn-group-sm">
                             {{ follow_btn(dataset, ['fa-star-o', 'fa-star']) }}
                         </div>
                         <div class="btn-group btn-group-sm">
