@@ -31,7 +31,7 @@ class TopicsAPITest(APITestCase):
 
     def test_topic_api_create(self):
         '''It should create a topic from the API'''
-        data = TopicFactory.attributes()
+        data = TopicFactory.as_dict()
         data['datasets'] = [str(d.id) for d in data['datasets']]
         data['reuses'] = [str(r.id) for r in data['reuses']]
         self.login(AdminFactory())

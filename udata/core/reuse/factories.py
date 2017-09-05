@@ -6,12 +6,13 @@ import factory
 from factory.fuzzy import FuzzyChoice
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.factories import ModelFactory
 from udata.utils import faker
 
 from .models import Reuse, REUSE_TYPES
 
 
-class ReuseFactory(factory.mongoengine.MongoEngineFactory):
+class ReuseFactory(ModelFactory):
     class Meta:
         model = Reuse
 

@@ -48,7 +48,7 @@ class ReuseAPITest(APITestCase):
 
     def test_reuse_api_create(self):
         '''It should create a reuse from the API'''
-        data = ReuseFactory.attributes()
+        data = ReuseFactory.as_dict()
         self.login()
         response = self.post(url_for('api.reuses'), data)
         self.assert201(response)
@@ -61,7 +61,7 @@ class ReuseAPITest(APITestCase):
     def test_reuse_api_create_as_org(self):
         '''It should create a reuse as organization from the API'''
         self.login()
-        data = ReuseFactory.attributes()
+        data = ReuseFactory.as_dict()
         member = Member(user=self.user, role='editor')
         org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
@@ -79,7 +79,7 @@ class ReuseAPITest(APITestCase):
         only if user is member.
         """
         self.login()
-        data = ReuseFactory.attributes()
+        data = ReuseFactory.as_dict()
         org = OrganizationFactory()
         data['organization'] = str(org.id)
         response = self.post(url_for('api.reuses'), data)
@@ -335,7 +335,7 @@ class ReuseBadgeAPITest(APITestCase):
             self.assertEqual(response.json[kind], label)
 
     def test_create(self):
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         with self.api_user():
             response = self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
@@ -344,7 +344,7 @@ class ReuseBadgeAPITest(APITestCase):
         self.assertEqual(len(self.reuse.badges), 1)
 
     def test_create_same(self):
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         with self.api_user():
             self.post(
                 url_for('api.reuse_badges', reuse=self.reuse), data)
@@ -361,7 +361,7 @@ class ReuseBadgeAPITest(APITestCase):
         self.reuse.badges.append(
             self.factory(kind=kinds_keys[0]))
         self.reuse.save()
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import factory
-
 from factory.fuzzy import FuzzyChoice
+
+from udata.factories import ModelFactory
 
 from .models import Badge
 
 
 def badge_factory(model):
-    class BadgeFactory(factory.mongoengine.MongoEngineFactory):
+    class BadgeFactory(ModelFactory):
         class Meta:
             model = Badge
 
