@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.4 (2017-09-05)
 
 - Fix packaging
 
