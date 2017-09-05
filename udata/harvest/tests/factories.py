@@ -32,7 +32,7 @@ class HarvestJobFactory(factory.mongoengine.MongoEngineFactory):
 
     created = dtfactory('-3h', '-2h')
     started = dtfactory('-2h', '-1h')
-    ended = dtfactory('-1h', 'new')
+    ended = dtfactory('-1h', 'now')
     status = FuzzyChoice(HarvestJob.status.choices)
     source = factory.SubFactory(HarvestSourceFactory)
 
