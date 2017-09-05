@@ -1,7 +1,13 @@
 {% extends theme("layouts/1-column.html") %}
 
 {% set bundle = 'territory' %}
-{% set logo=territory.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) %}
+{% set logo = territory.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) %}
+{#
+   Children variables outside of blocks are set before parents
+   so children template can't access logo outside of blocks.
+   Workaround: inject logo in meta object from parent template (until a better solution is found)
+#}
+{% set ___ = meta.__setitem__('image', logo) %}
 {% set body_class="territory" %}
 
 {% block main_content %}
