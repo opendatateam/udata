@@ -51,7 +51,7 @@ def md2pypi(filename):
     refs = dict(RE_LINK_REF.findall(content))
     content = RE_LINK_REF.sub('.. _\g<key>: \g<url>', content)
     content = RE_SELF_LINK.sub('`\g<1>`_', content)
-    content = RE_LINK_TO_URL.sub('`\g<text> <\g<url>>`_', content)
+    content = RE_LINK_TO_URL.sub('`\g<text> <\g<url>>`__', content)
 
     for match in RE_BADGE.finditer(content):
         if match.group('badge') not in BADGES_TO_KEEP:

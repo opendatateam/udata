@@ -6,6 +6,10 @@
 - Organization dashboard page has been merged into the main organization page [#1023](https://github.com/opendatateam/udata/pull/1023)
 - Fix an issue causing a loss of data input at the global search input level [#1019](https://github.com/opendatateam/udata/pull/1019)
 
+## 1.1.4 (2017-09-05)
+
+- Fix packaging
+
 ## 1.1.3 (2017-09-05)
 
 - Make the spatial search levels exclusion list configurable through `SPATIAL_SEARCH_EXCLUDE_LEVELS`.
