@@ -12,12 +12,11 @@ from elasticsearch_dsl.faceted_search import (
     Facet as DSLFacet,
     TermsFacet as DSLTermsFacet,
     RangeFacet as DSLRangeFacet,
-    DateHistogramFacet as DSLDateHistogramFacet,
 )
 from flask_restplus import inputs
+from jinja2 import Markup
 
 from udata.i18n import lazy_gettext as _, format_date
-from udata.models import db
 from udata.utils import to_bool
 
 log = logging.getLogger(__name__)
@@ -38,6 +37,20 @@ OR_SEPARATOR = '|'
 OR_LABEL = _('OR')
 
 
+def obj_to_string(obj):
+    '''Render an object into a unicode string if possible'''
+    if not obj:
+        return None
+    elif isinstance(obj, bytes):
+        return obj.encode('utf-8')
+    elif isinstance(obj, str):
+        return obj
+    elif hasattr(obj, '__html__'):
+        return obj.__html__()
+    else:
+        return str(obj)
+
+
 class Facet(object):
     def __init__(self, **kwargs):
         super(Facet, self).__init__(**kwargs)
@@ -46,9 +59,11 @@ class Facet(object):
     def labelize(self, value):
         labelize = self.labelizer or self.default_labelizer
         if isinstance(value, basestring):
-            return str(' {0} '.format(OR_LABEL)).join(
-                labelize(v).encode('utf-8') for v in value.split(OR_SEPARATOR)
-            ).decode('utf-8')
+            labels = (labelize(v) for v in value.split(OR_SEPARATOR))
+            labels = (obj_to_string(l) for l in labels)
+            labels = (l for l in labels if l)
+            or_label = str(' {0} '.format(OR_LABEL))
+            return Markup(or_label.join(labels).decode('utf-8'))
         return labelize(value)
 
     def default_labelizer(self, value):
