@@ -8,6 +8,8 @@
   [#1102](https://github.com/opendatateam/udata/issues/1102)
 - Ensure territories pages have image defined in metadatas
   [#1103](https://github.com/opendatateam/udata/issues/1103)
+- Strip tags in autocomplete results
+  [#1104](https://github.com/opendatateam/udata/pull/1104)
 
 ## 1.1.2 (2017-09-04)
 
