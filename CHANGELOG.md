@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.3 (2017-09-05)
 
 - Make the spatial search levels exclusion list configurable through `SPATIAL_SEARCH_EXCLUDE_LEVELS`.
   [#1101](https://github.com/opendatateam/udata/pull/1101)
