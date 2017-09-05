@@ -59,7 +59,7 @@ export function parseQS(qs) {
     if (qs.startsWith('?')) qs = qs.substr(1);
     qs.split('&').forEach(function(part) {
         const [key, value] = part.split('=');
-        result[decodeURIComponent(key)] = decodeURIComponent(value);
+        result[decodeURIComponent(key)] = decodeURIComponent(value.replace(/\+/g, '%20'));
     });
     return result;
 }

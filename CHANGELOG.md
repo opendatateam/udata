@@ -12,6 +12,8 @@
   [#1104](https://github.com/opendatateam/udata/pull/1104)
 - Transmit link checker status to frontend
   [#1048](https://github.com/opendatateam/udata/issues/1048)
+- Remove plus signs from search query
+  [#1048](https://github.com/opendatateam/udata/issues/987)
 
 ## 1.1.2 (2017-09-04)
 

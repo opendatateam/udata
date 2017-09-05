@@ -64,10 +64,9 @@ export default {
         territoryId: String,
     },
     data() {
-        const query = this.$location.query.q || '';
         return {
             current: -1,
-            query: decodeURIComponent(query.replace('+', ' ')),
+            query: this.$location.query.q || '',
             show: false,
             cache: new Cache('site-search', sessionStorage),
             groups: [
