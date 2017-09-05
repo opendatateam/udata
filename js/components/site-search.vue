@@ -64,12 +64,9 @@ export default {
         territoryId: String,
     },
     created() {
-        const {q=''} = this.$location.query;
-
         const originalField = this.$options.el.querySelector('#search');
-        const queryStringValue = decodeURIComponent(q.replace('+', ' '));
 
-        this.query = originalField.value || queryStringValue || '';
+        this.query = originalField.value || this.$location.query.q || '';
     },
     data() {
         return {
@@ -105,14 +102,14 @@ export default {
         default: `<div class="logo">
             <img :src="item.image_url || placeholders.generic" class="avatar" width="30" height="30" alt="">
             </div>
-            <p v-html="item.title | highlight query"></p>`,
+            <p v-html="item.title | stripTags | highlight query"></p>`,
         organization: `<div class="logo"><img :src="item.image_url || placeholders.organization" class="avatar" width="30" height="30" alt=""></div>
-            <p v-html="item.name | highlight query"></p>
+            <p v-html="item.name | stripTags | highlight query"></p>
             <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,
         territory: `<div class="logo">
             <img :src="item.image_url || placeholders.territory" class="avatar" width="30" height="30" alt="">
             </div>
-            <p v-html="item.title | highlight query"></p>
+            <p v-html="item.title | stripTags | highlight query"></p>
             <small v-if="item.parent">{{ item.parent }}</small>`,
     },
     methods: {
@@ -153,6 +150,10 @@ export default {
     filters: {
         highlight(value, phrase) {
             return value.replace(new RegExp('('+phrase+')', 'gi'), '<strong>$1</strong>')
+        },
+        stripTags(value) {
+            let regex = /(<([^>]+)>)/ig;
+            return value.replace(regex, '');
         }
     },
     watch: {

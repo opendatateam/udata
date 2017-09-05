@@ -6,6 +6,21 @@
 - Organization dashboard page has been merged into the main organization page [#1023](https://github.com/opendatateam/udata/pull/1023)
 - Fix an issue causing a loss of data input at the global search input level [#1019](https://github.com/opendatateam/udata/pull/1019)
 
+## 1.1.3 (2017-09-05)
+
+- Make the spatial search levels exclusion list configurable through `SPATIAL_SEARCH_EXCLUDE_LEVELS`.
+  [#1101](https://github.com/opendatateam/udata/pull/1101)
+- Fix facets labelizer with html handling
+  [#1102](https://github.com/opendatateam/udata/issues/1102)
+- Ensure territories pages have image defined in metadatas
+  [#1103](https://github.com/opendatateam/udata/issues/1103)
+- Strip tags in autocomplete results
+  [#1104](https://github.com/opendatateam/udata/pull/1104)
+- Transmit link checker status to frontend
+  [#1048](https://github.com/opendatateam/udata/issues/1048)
+- Remove plus signs from search query
+  [#1048](https://github.com/opendatateam/udata/issues/987)
+
 ## 1.1.2 (2017-09-04)
 
 - Handle territory URLs generation without validity

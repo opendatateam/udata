@@ -38,6 +38,9 @@ class Fake(db.Document):
     def __unicode__(self):
         return self.title
 
+    def __html__(self):
+        return '<span>{0}</span>'.format(self.title)
+
 
 class FakeMetricInt(Metric):
     model = Fake
@@ -889,6 +892,19 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
             '{0} OR {1}'.format(fake_1.title, fake_2.title)
         )
 
+    def test_labelize_object_with_or_and_html(self):
+        def labelizer(value):
+            return Fake.objects(id=value).first()
+        fake_1 = FakeFactory()
+        fake_2 = FakeFactory()
+        facet = search.ModelTermsFacet(field='id', model=Fake,
+                                       labelizer=labelizer)
+        self.assertEqual(
+            facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id)),
+            '<span>{0}</span> OR <span>{1}</span>'.format(fake_1.title,
+                                                          fake_2.title)
+        )
+
     def test_get_values(self):
         fakes = [FakeFactory() for _ in range(10)]
         buckets = [{
@@ -942,6 +958,19 @@ class TestModelTermsFacetWithStringId(FacetTestCase, DBTestMixin):
         self.assertEqual(
             facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id)),
             '{0} OR {1}'.format(fake_1.title, fake_2.title)
+        )
+
+    def test_labelize_object_with_or_and_html(self):
+        def labelizer(value):
+            return FakeWithStringId.objects(id=value).first()
+        fake_1 = FakeWithStringIdFactory()
+        fake_2 = FakeWithStringIdFactory()
+        facet = search.ModelTermsFacet(field='id', model=FakeWithStringId,
+                                       labelizer=labelizer)
+        self.assertEqual(
+            facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id)),
+            '<span>{0}</span> OR <span>{1}</span>'.format(fake_1.title,
+                                                          fake_2.title)
         )
 
     def test_get_values(self):

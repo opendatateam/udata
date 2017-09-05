@@ -155,6 +155,9 @@ class Defaults(object):
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
 
+    # Lists levels that shouldn't be indexed
+    SPATIAL_SEARCH_EXCLUDE_LEVELS = tuple()
+
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()
