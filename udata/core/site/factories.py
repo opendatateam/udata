@@ -3,15 +3,17 @@ from __future__ import unicode_literals
 
 import factory
 
+from udata.factories import ModelFactory
+
 from .models import Site, SiteSettings
 
 
-class SiteSettingsFactory(factory.mongoengine.MongoEngineFactory):
+class SiteSettingsFactory(ModelFactory):
     class Meta:
         model = SiteSettings
 
 
-class SiteFactory(factory.mongoengine.MongoEngineFactory):
+class SiteFactory(ModelFactory):
     class Meta:
         model = Site
 

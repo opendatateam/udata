@@ -7,6 +7,7 @@ from faker.providers import BaseProvider
 
 from geojson.utils import generate_random
 
+from udata.factories import ModelFactory
 from udata.utils import add_faker_provider
 
 from .models import GeoLevel, GeoZone, SpatialCoverage, spatial_granularities
@@ -102,7 +103,7 @@ add_faker_provider(GeoJsonProvider)
 add_faker_provider(SpatialProvider)
 
 
-class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
+class SpatialCoverageFactory(ModelFactory):
     class Meta:
         model = SpatialCoverage
 
@@ -110,7 +111,7 @@ class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
     granularity = factory.Faker('spatial_granularity')
 
 
-class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
+class GeoZoneFactory(ModelFactory):
     class Meta:
         model = GeoZone
 
@@ -124,7 +125,7 @@ class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
     geom = factory.Faker('multipolygon')
 
 
-class GeoLevelFactory(factory.mongoengine.MongoEngineFactory):
+class GeoLevelFactory(ModelFactory):
     class Meta:
         model = GeoLevel
 

@@ -125,7 +125,7 @@ class DatasetAPITest(APITestCase):
     @attr('create')
     def test_dataset_api_create(self):
         '''It should create a dataset from the API'''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         self.login()
         response = self.post(url_for('api.datasets'), data)
         self.assert201(response)
@@ -139,7 +139,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_create_as_org(self):
         '''It should create a dataset as organization from the API'''
         self.login()
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         member = Member(user=self.user, role='editor')
         org = OrganizationFactory(members=[member])
         data['organization'] = str(org.id)
@@ -159,7 +159,7 @@ class DatasetAPITest(APITestCase):
         only if the current user is member.
         """
         self.login()
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         org = OrganizationFactory()
         data['organization'] = str(org.id)
         response = self.post(url_for('api.datasets'), data)
@@ -169,7 +169,7 @@ class DatasetAPITest(APITestCase):
     @attr('create')
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API with tags'''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['tags'] = [unique_string(16) for _ in range(3)]
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
@@ -182,7 +182,7 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_fail_to_create_too_short_tags(self):
         '''It should fail to create a dataset from the API because
         the tag is too short'''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['tags'] = [unique_string(MIN_TAG_LENGTH - 1)]
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
@@ -191,7 +191,7 @@ class DatasetAPITest(APITestCase):
     @attr('create')
     def test_dataset_api_fail_to_create_too_long_tags(self):
         '''Should fail creating a dataset with a tag long'''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['tags'] = [unique_string(MAX_TAG_LENGTH + 1)]
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
@@ -200,7 +200,7 @@ class DatasetAPITest(APITestCase):
     @attr('create')
     def test_dataset_api_create_and_slugify_tags(self):
         '''It should create a dataset from the API and slugify the tags'''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['tags'] = [' Aaa bBB $$ $$-µ  ']
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
@@ -212,7 +212,7 @@ class DatasetAPITest(APITestCase):
     @attr('create')
     def test_dataset_api_create_with_extras(self):
         '''It should create a dataset with extras from the API'''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['extras'] = {
             'integer': 42,
             'float': 42.0,
@@ -231,8 +231,8 @@ class DatasetAPITest(APITestCase):
     @attr('create')
     def test_dataset_api_create_with_resources(self):
         '''It should create a dataset with resources from the API'''
-        data = DatasetFactory.attributes()
-        data['resources'] = [ResourceFactory.attributes() for _ in range(3)]
+        data = DatasetFactory.as_dict()
+        data['resources'] = [ResourceFactory.as_dict() for _ in range(3)]
 
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
@@ -245,7 +245,7 @@ class DatasetAPITest(APITestCase):
     @attr('create')
     def test_dataset_api_create_with_geom(self):
         '''It should create a dataset with resources from the API'''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['spatial'] = {'geom': SAMPLE_GEOM}
 
         with self.api_user():
@@ -262,7 +262,7 @@ class DatasetAPITest(APITestCase):
         self.login()
 
         for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
-            data = DatasetFactory.attributes()
+            data = DatasetFactory.as_dict()
             data['frequency'] = oldFreq
             response = self.post(url_for('api.datasets'), data)
             self.assert201(response)
@@ -288,7 +288,7 @@ class DatasetAPITest(APITestCase):
         dataset = VisibleDatasetFactory(owner=user)
         initial_length = len(dataset.resources)
         data = dataset.to_dict()
-        data['resources'].append(ResourceFactory.attributes())
+        data['resources'].append(ResourceFactory.as_dict())
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         self.assertEqual(Dataset.objects.count(), 1)
@@ -340,7 +340,7 @@ class DatasetAPITest(APITestCase):
 
         In that case the extras parameters are kept.
         '''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['extras'] = {
             'integer': 42,
             'float': 42.0,
@@ -367,7 +367,7 @@ class DatasetAPITest(APITestCase):
 
         In that case the extras parameters are set to an empty dict.
         '''
-        data = DatasetFactory.attributes()
+        data = DatasetFactory.as_dict()
         data['extras'] = {
             'integer': 42,
             'float': 42.0,
@@ -491,7 +491,7 @@ class DatasetBadgeAPITest(APITestCase):
             self.assertEqual(response.json[kind], label)
 
     def test_create(self):
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         with self.api_user():
             response = self.post(
                 url_for('api.dataset_badges', dataset=self.dataset), data)
@@ -500,7 +500,7 @@ class DatasetBadgeAPITest(APITestCase):
         self.assertEqual(len(self.dataset.badges), 1)
 
     def test_create_same(self):
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         with self.api_user():
             self.post(
                 url_for('api.dataset_badges', dataset=self.dataset), data)
@@ -516,7 +516,7 @@ class DatasetBadgeAPITest(APITestCase):
         kinds_keys = Dataset.__badges__.keys()
         self.dataset.badges.append(self.factory(kind=kinds_keys[0]))
         self.dataset.save()
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
@@ -552,7 +552,7 @@ class DatasetResourceAPITest(APITestCase):
 
     @attr('create')
     def test_create(self):
-        data = ResourceFactory.attributes()
+        data = ResourceFactory.as_dict()
         with self.api_user():
             response = self.post(url_for('api.resources',
                                          dataset=self.dataset), data)
@@ -565,7 +565,7 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.resources.append(ResourceFactory())
         self.dataset.save()
 
-        data = ResourceFactory.attributes()
+        data = ResourceFactory.as_dict()
         with self.api_user():
             response = self.post(url_for('api.resources',
                                          dataset=self.dataset), data)
@@ -1012,7 +1012,7 @@ class CommunityResourceAPITest(APITestCase):
         '''It should create a remote community resource from the API'''
         user = self.login()
         dataset = VisibleDatasetFactory()
-        attrs = CommunityResourceFactory.attributes()
+        attrs = CommunityResourceFactory.as_dict()
         attrs['dataset'] = str(dataset.id)
         response = self.post(
             url_for('api.community_resources'),
@@ -1037,7 +1037,7 @@ class CommunityResourceAPITest(APITestCase):
         self.login()
         response = self.post(
             url_for('api.community_resources'),
-            CommunityResourceFactory.attributes()
+            CommunityResourceFactory.as_dict()
         )
         self.assertStatus(response, 400)
         data = json.loads(response.data)
@@ -1052,7 +1052,7 @@ class CommunityResourceAPITest(APITestCase):
         dataset identifier
         '''
         self.login()
-        attrs = CommunityResourceFactory.attributes()
+        attrs = CommunityResourceFactory.as_dict()
         attrs['dataset'] = 'xxx'
         response = self.post(
             url_for('api.community_resources'),

@@ -54,7 +54,7 @@ class OrganizationAPITest(APITestCase):
 
     def test_organization_api_create(self):
         '''It should create an organization from the API'''
-        data = OrganizationFactory.attributes()
+        data = OrganizationFactory.as_dict()
         self.login()
         response = self.post(url_for('api.organizations'), data)
         self.assert201(response)
@@ -682,7 +682,7 @@ class OrganizationBadgeAPITest(APITestCase):
             self.assertEqual(response.json[kind], label)
 
     def test_create(self):
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         with self.api_user(), self.assert_emit(on_badge_added):
                 response = self.post(
                     url_for('api.organization_badges', org=self.organization),
@@ -695,7 +695,7 @@ class OrganizationBadgeAPITest(APITestCase):
         member = Member(user=self.user, role='admin')
         org = OrganizationFactory(members=[member])
 
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         data['kind'] = CERTIFIED
 
         with self.capture_mails() as mails:
@@ -712,7 +712,7 @@ class OrganizationBadgeAPITest(APITestCase):
         member = Member(user=self.user, role='admin')
         org = OrganizationFactory(members=[member])
 
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         data['kind'] = PUBLIC_SERVICE
 
         with self.capture_mails() as mails:
@@ -730,7 +730,7 @@ class OrganizationBadgeAPITest(APITestCase):
         self.assertListEqual([m.recipients[0] for m in mails], members_emails)
 
     def test_create_same(self):
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         with self.api_user():
             with self.assert_emit(on_badge_added):
                 self.post(
@@ -751,7 +751,7 @@ class OrganizationBadgeAPITest(APITestCase):
         self.organization.badges.append(
             self.factory(kind=kinds_keys[0]))
         self.organization.save()
-        data = self.factory.attributes()
+        data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]
         with self.api_user():
             response = self.post(
