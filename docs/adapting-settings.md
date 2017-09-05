@@ -92,6 +92,14 @@ The duration used for templates' cache, in minutes.
 
 This is the allowed resources extensions list that user can upload.
 
+## Spatial configuration
+
+### SPATIAL_SEARCH_EXCLUDE_LEVELS
+
+**default**: `tuple()`
+
+List spatial levels that shoudn't be indexed (for time, performance and user experience).
+
 ## Territories configuration
 
 ### ACTIVATE_TERRITORIES
