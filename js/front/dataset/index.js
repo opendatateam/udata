@@ -38,18 +38,18 @@ new Vue({
             dataset: this.extractDataset(),
             userReuses: []
         };
-        if (config.check_urls) {
-            const port = location.port ? `:${location.port}` : '';
-            const domain = `${location.hostname}${port}`;
-            data.ignore = [domain].concat(config.check_urls_ignore || []);
-        }
         return data;
     },
     ready() {
         this.loadCoverageMap();
-        this.checkResources();
         this.fetchReuses();
         log.debug('Dataset display page ready');
+        // TODO better coupling strategy
+        window.addEventListener('load', () => {
+            if (linkchecker) {
+                this.checkResources();
+            }
+        })
     },
     methods: {
         /**
@@ -141,9 +141,7 @@ new Vue({
          * Asynchronously check all resources status
          */
         checkResources() {
-            if (config.check_urls) {
-                this.dataset.resources.forEach(this.checkResource);
-            }
+            this.dataset.resources.forEach(this.checkResource);
         },
 
         /**
@@ -153,30 +151,8 @@ new Vue({
         checkResource(resource) {
             const url = parseUrl(resource.contentUrl);
             const resource_el = document.querySelector(`#resource-${resource['@id']}`);
-            const el = resource_el.querySelector('.format-label');
-            const checkurl = resource_el.dataset.checkurl;
-            if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
-                if (url.protocol.startsWith('ftp')) {
-                    el.classList.add('format-label-warning');
-                    el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
-                } else {
-                    this.$api.get(checkurl, {url: url.href, group: this.dataset.alternateName})
-                    .then(() => el.classList.add('format-label-success'))
-                    .catch(error => {
-                        switch (error.status) {
-                            case 404:
-                                el.classList.add('format-label-warning');
-                                el.setTooltip(this._('The resource cannot be found.'), true);
-                                break;
-                            case 503:
-                                break;
-                            default:
-                                el.classList.add('format-label-danger');
-                                el.setTooltip(this._('The server cannot be found.'), true);
-                        }
-                    });
-                }
-            }
+            const group = this.dataset.alternateName;
+            linkchecker.checkUrl(url, group, resource_el);
         },
 
         /**

@@ -34,7 +34,6 @@ from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
-from .croquemort import check_url
 from .api_fields import (
     community_resource_fields,
     community_resource_page_fields,
@@ -514,28 +513,3 @@ class AllowedExtensionsAPI(API):
     def get(self):
         '''List all allowed resources extensions'''
         return current_app.config['ALLOWED_RESOURCES_EXTENSIONS']
-
-
-checkurl_parser = api.parser()
-checkurl_parser.add_argument('url', type=str, help='The URL to check',
-                             location='args', required=True)
-checkurl_parser.add_argument('group', type=str,
-                             help='The dataset related to the URL',
-                             location='args', required=True)
-
-
-@ns.route('/checkurl/', endpoint='checkurl')
-class CheckUrlAPI(API):
-
-    @api.doc('checkurl', parser=checkurl_parser)
-    def get(self):
-        '''Checks that a URL exists and returns metadata.'''
-        args = checkurl_parser.parse_args()
-        error, response = check_url(args['url'], args['group'])
-        status = (isinstance(response, int) and response or
-                  int(response.get('status', 500)))
-        if error or status >= 500:
-            # We keep 503 which means the URL checker is unreachable.
-            return error, status == 503 and status or 500
-        else:
-            return response

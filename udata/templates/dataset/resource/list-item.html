@@ -1,6 +1,5 @@
 {% set resource_format = resource.format|trim|lower or 'data' %}
 <div id="resource-{{resource.id}}" class="list-group-item"
-    data-checkurl="{{ url_for('api.checkurl') }}"
     @click="showResource('{{resource.id}}', $event, {{ resource.owner is defined|tojson }})">
     <div class="format-label pull-left" v-tooltip tooltip-placement="left">
         <span class="ellipsis" data-format="{{ resource_format }}">
