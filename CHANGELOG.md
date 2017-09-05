@@ -10,6 +10,8 @@
   [#1103](https://github.com/opendatateam/udata/issues/1103)
 - Strip tags in autocomplete results
   [#1104](https://github.com/opendatateam/udata/pull/1104)
+- Transmit link checker status to frontend
+  [#1048](https://github.com/opendatateam/udata/issues/1048)
 
 ## 1.1.2 (2017-09-04)
 

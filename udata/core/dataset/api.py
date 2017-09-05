@@ -538,4 +538,4 @@ class CheckUrlAPI(API):
             # We keep 503 which means the URL checker is unreachable.
             return error, status == 503 and status or 500
         else:
-            return response
+            return response, status
