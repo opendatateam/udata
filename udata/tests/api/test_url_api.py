@@ -98,7 +98,7 @@ class CheckUrlAPITest(APITestCase):
         mock_url_check(url, status=404)
         response = self.get(url_for('api.checkurl'),
                             qs={'url': url, 'group': ''})
-        self.assertStatus(response, 500)
+        self.assertStatus(response, 503)
         self.assertEqual(
             response.json['error'],
             'We were unable to retrieve the URL after 2 attempts.')
@@ -146,5 +146,5 @@ class CheckUrlAPITest(APITestCase):
                                content_type='test/html')
         response = self.get(url_for('api.checkurl'),
                             qs={'url': url, 'group': ''})
-        self.assertStatus(response, 500)
+        self.assertStatus(response, 503)
         self.assertIn('error', response.json)
