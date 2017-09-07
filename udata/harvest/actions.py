@@ -101,6 +101,7 @@ def validate_source(ident, comment=None):
     if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
+    schedule(ident, cron=current_app.config['HARVEST_DEFAULT_SCHEDULE'])
     launch(ident)
     return source
 
@@ -154,11 +155,15 @@ def preview(ident):
 
 
 def schedule(ident, minute='*', hour='*',
-             day_of_week='*', day_of_month='*', month_of_year='*'):
+             day_of_week='*', day_of_month='*', month_of_year='*',
+             cron=None):
     '''Schedule an harvesting on a source given a crontab'''
     source = get_source(ident)
     if source.periodic_task:
         raise ValueError('Source {0} is already scheduled'.format(source.name))
+
+    if cron:
+        minute, hour, day_of_week, day_of_month, month_of_year = cron.split()
 
     source.periodic_task = PeriodicTask.objects.create(
         task='harvest',
