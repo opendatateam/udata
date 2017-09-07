@@ -12,6 +12,8 @@
   [#774](https://github.com/opendatateam/udata/issues/774)
 - Pin GeoJSON version to avoid breaking changes
   [#1118](https://github.com/opendatateam/udata/pull/1118)
+- Deduplicate organization members
+  [#1111](https://github.com/opendatateam/udata/issues/1111)
 
 ## 1.1.4 (2017-09-05)
 
