@@ -242,12 +242,11 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_schedule(self):
         source = HarvestSourceFactory()
         with self.assert_emit(signals.harvest_source_scheduled):
-            actions.schedule(str(source.id), hour=0)
+            source = actions.schedule(str(source.id), hour=0)
 
-        source.reload()
         self.assertEqual(len(PeriodicTask.objects), 1)
-        periodic_task = PeriodicTask.objects.first()
-        self.assertEqual(source.periodic_task, periodic_task)
+        periodic_task = source.periodic_task
+        self.assertEqual(periodic_task, PeriodicTask.objects.first())
         self.assertEqual(periodic_task.args, [str(source.id)])
         self.assertEqual(periodic_task.crontab.hour, '0')
         self.assertEqual(periodic_task.crontab.minute, '*')
@@ -260,18 +259,37 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_schedule_from_cron(self):
         source = HarvestSourceFactory()
         with self.assert_emit(signals.harvest_source_scheduled):
-            actions.schedule(str(source.id), cron='0 1 2 3 4')
+            source = actions.schedule(str(source.id), '0 1 2 3 sunday')
 
-        source.reload()
         self.assertEqual(len(PeriodicTask.objects), 1)
-        periodic_task = PeriodicTask.objects.first()
-        self.assertEqual(source.periodic_task, periodic_task)
+        periodic_task = source.periodic_task
+        self.assertEqual(periodic_task, PeriodicTask.objects.first())
         self.assertEqual(periodic_task.args, [str(source.id)])
         self.assertEqual(periodic_task.crontab.minute, '0')
         self.assertEqual(periodic_task.crontab.hour, '1')
-        self.assertEqual(periodic_task.crontab.day_of_week, '2')
-        self.assertEqual(periodic_task.crontab.day_of_month, '3')
-        self.assertEqual(periodic_task.crontab.month_of_year, '4')
+        self.assertEqual(periodic_task.crontab.day_of_month, '2')
+        self.assertEqual(periodic_task.crontab.month_of_year, '3')
+        self.assertEqual(periodic_task.crontab.day_of_week, 'sunday')
+        self.assertTrue(periodic_task.enabled)
+        self.assertEqual(periodic_task.name, 'Harvest {0}'.format(source.name))
+
+    def test_reschedule(self):
+        source = HarvestSourceFactory()
+        with self.assert_emit(signals.harvest_source_scheduled):
+            source = actions.schedule(str(source.id), hour=0)
+
+        with self.assert_emit(signals.harvest_source_scheduled):
+            source = actions.schedule(str(source.id), minute=0)
+
+        self.assertEqual(len(PeriodicTask.objects), 1)
+        periodic_task = source.periodic_task
+        self.assertEqual(periodic_task, PeriodicTask.objects.first())
+        self.assertEqual(periodic_task.args, [str(source.id)])
+        self.assertEqual(periodic_task.crontab.hour, '*')
+        self.assertEqual(periodic_task.crontab.minute, '0')
+        self.assertEqual(periodic_task.crontab.day_of_week, '*')
+        self.assertEqual(periodic_task.crontab.day_of_month, '*')
+        self.assertEqual(periodic_task.crontab.month_of_year, '*')
         self.assertTrue(periodic_task.enabled)
         self.assertEqual(periodic_task.name, 'Harvest {0}'.format(source.name))
 

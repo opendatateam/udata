@@ -6,7 +6,8 @@
   [#934](https://github.com/opendatateam/udata/issues/934)
 - Fix and tune harvest admin loading state and payload size
   [#1113](https://github.com/opendatateam/udata/issues/1113)
-- Automatically schedule validated harvesters
+- Automatically schedule validated harvesters and allow to (re)schedule them
+  [#1114](https://github.com/opendatateam/udata/pull/1114)
 
 ## 1.1.4 (2017-09-05)
 
