@@ -9,6 +9,8 @@ from udata.models import db
 
 __all__ = ('PeriodicTask', 'PERIODS')
 
+CRON = '{minute} {hour} {day_of_month} {month_of_year} {day_of_week}'
+
 
 class PeriodicTask(BasePeriodicTask):
     last_run_id = db.StringField()
@@ -19,6 +21,10 @@ class PeriodicTask(BasePeriodicTask):
                 return _('every {0.period_singular}').format(self)
             return _('every {0.every} {0.period}').format(self)
 
+    class Crontab(BasePeriodicTask.Crontab):
+        def __unicode__(self):
+            return CRON.format(**self._data)
+
     @property
     def schedule_display(self):
         if self.interval:
@@ -27,3 +33,6 @@ class PeriodicTask(BasePeriodicTask):
             return str(self.crontab)
         else:
             raise Exception("must define internal or crontab schedule")
+
+    interval = db.EmbeddedDocumentField(Interval)
+    crontab = db.EmbeddedDocumentField(Crontab)
