@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix the organization members grid in admin
+  [#934](https://github.com/opendatateam/udata/issues/934)
 
 ## 1.1.4 (2017-09-05)
 

@@ -70,12 +70,10 @@
         </div>
     </div><!-- /.box-header -->
     <div v-if="!validating" class="box-body row">
-        <div class="col-xs-3 col-lg-2 text-center user-face"
-             v-for="member in org.members">
-            <a class="pointer"
-                @click="member_click(member)">
+        <div class="col-xs-4 col-lg-3 text-center user-face" v-for="member in org.members">
+            <a class="pointer" @click="member_click(member)">
                 <img class="img-circle" :alt="_('User Image')"
-                    :src="member.user.avatar || avatar_placeholder"/>
+                    :src="member.user.avatar_thumbnail || avatar_placeholder"/>
                 <strong>{{member.user | display}}</strong>
                 <small class="text-muted">{{member.role}}</small>
             </a>
