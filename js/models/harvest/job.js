@@ -25,12 +25,11 @@ export const STATUS_I18N = {
 
 export class HarvestJob extends Model {
     fetch() {
-        if (this.id || this.slug) {
-            this.$api('harvest.get_job', {
-                dataset: this.id || this.slug
-            }, this.on_fetched);
+        if (this.id) {
+            this.loading = true;
+            this.$api('harvest.get_harvest_job', {ident: this.id}, this.on_fetched);
         } else {
-            log.error('Unable to fetch Dataset: no identifier specified');
+            log.error('Unable to fetch Job');
         }
         return this;
     }

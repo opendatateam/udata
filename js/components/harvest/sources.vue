@@ -16,7 +16,7 @@ import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 import Datatable from 'components/datatable/widget.vue';
 import placeholders from 'helpers/placeholders';
 
-const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization', 'backend', 'validation{state}'];
+const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization{name,logo_thumbnail}', 'backend', 'validation{state}'];
 
 export default {
     MASK,
@@ -41,7 +41,7 @@ export default {
                 fields.push({
                     key(item) {
                         if (item.organization) {
-                            return item.organization.logo || placeholders.organization;
+                            return item.organization.logo_thumbnail || placeholders.organization;
                         } else {
                             return item.owner.avatar || placeholders.user;
                         }

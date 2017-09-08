@@ -4,6 +4,8 @@
 
 - Fix the organization members grid in admin
   [#934](https://github.com/opendatateam/udata/issues/934)
+- Fix and tune harvest admin loading state and payload size
+  [#1113](https://github.com/opendatateam/udata/issues/1113)
 
 ## 1.1.4 (2017-09-05)
 
