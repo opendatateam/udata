@@ -104,8 +104,6 @@ source_fields = api.model('HarvestSource', {
                              required=True, default=False),
     'validation': fields.Nested(validation_fields, readonly=True,
                                 description='Has the source been validated'),
-    'config': fields.Raw(description='The source specific configuration',
-                         default={}),
     'last_job': fields.Nested(job_fields,
                               description='The last job for this source',
                               allow_null=True, readonly=True),
