@@ -154,6 +154,8 @@ class Defaults(object):
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
+    # Harvesters are scheduled at midnight by default
+    HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
 
     # Lists levels that shouldn't be indexed
     SPATIAL_SEARCH_EXCLUDE_LEVELS = tuple()
