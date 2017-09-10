@@ -10,6 +10,7 @@
   [#1114](https://github.com/opendatateam/udata/pull/1114)
 - Raise the minimum `raven` version to ensure sentry is filtering legit HTTP exceptions
   [#774](https://github.com/opendatateam/udata/issues/774)
+- Pin GeoJSON version to avoid breaking changes
 
 ## 1.1.4 (2017-09-05)
 
