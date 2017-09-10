@@ -201,9 +201,19 @@ def widgets_watch(ctx):
     lrun('npm run widgets:watch', pty=True)
 
 
-@task(clean, i18nc, assets_build, widgets_build)
+@task(clean, i18nc, assets_build, widgets_build, default=True)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
+    perform_dist(buildno)
+
+
+@task(i18nc)
+def pydist(ctx, buildno=None):
+    '''Perform python packaging (without compiling assets)'''
+    perform_dist(buildno)
+
+
+def perform_dist(buildno=None):
     header('Building a distribuable package')
     cmd = ['python setup.py']
     if buildno:

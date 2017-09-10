@@ -49,7 +49,7 @@ jobs:
           paths:
           - venv
 
-  js:
+  assets:
     docker:
       - image: udata/circleci
     environment:
@@ -68,8 +68,7 @@ jobs:
             - js-cache-{{ .Branch }}
             - js-cache-{{ .Environment.BASE_BRANCH }}
       - run:
-          name: Install node and dependencies
-          shell: /bin/bash +e -o pipefail
+          name: Install NodeJS and dependencies
           command: nvm install && npm install
       - save_cache:
           key: js-cache-{{ checksum "js.deps" }}
@@ -85,10 +84,18 @@ jobs:
             mkdir -p $CIRCLE_TEST_REPORTS/karma
             nvm use
             REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
+      - run:
+          name: Compile assets
+          command: |
+            nvm use
+            npm run assets:build
+            npm run widgets:build
+
       - persist_to_workspace:
           root: .
           paths:
             - node_modules
+            - udata/static
 
   dist:
     docker:
@@ -104,7 +111,7 @@ jobs:
           command: |
             source venv/bin/activate
             nvm use
-            if [[ $CIRCLE_TAG ]]; then inv dist; else inv dist -b $CIRCLE_BUILD_NUM; fi
+            if [[ $CIRCLE_TAG ]]; then inv pydist; else inv pydist -b $CIRCLE_BUILD_NUM; fi
       - store_artifacts:
           path: dist/*.whl
   publish:
@@ -123,11 +130,11 @@ workflows:
   build:
     jobs:
       - python
-      - js
+      - assets
       - dist:
           requires:
             - python
-            - js
+            - assets
       - publish:
           requires:
             - dist
