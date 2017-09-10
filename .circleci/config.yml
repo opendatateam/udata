@@ -41,9 +41,15 @@ jobs:
       - run:
           name: Run tests
           command: |
-            mkdir -p $CIRCLE_TEST_REPORTS/python
+            mkdir -p reports/python
             source venv/bin/activate
-            nosetests --with-xunit --xunit-file=$CIRCLE_TEST_REPORTS/python/tests.xml  udata
+            nosetests --with-xunit --xunit-file=reports/python/tests.xml  udata
+      - store_test_results:
+          path: reports/python
+      - store_artifacts:
+          path: reports/
+          destination: reports
+
       - persist_to_workspace:
           root: .
           paths:
@@ -81,9 +87,14 @@ jobs:
       - run:
           name: Execute Karma tests
           command: |
-            mkdir -p $CIRCLE_TEST_REPORTS/karma
+            mkdir -p reports/karma
             nvm use
-            REPORT_DIR=$CIRCLE_TEST_REPORTS/karma npm -s run test:unit -- --reporters mocha,junit
+            REPORT_DIR=reports/karma npm -s run test:unit -- --reporters mocha,junit
+      - store_test_results:
+          path: reports/karma
+      - store_artifacts:
+          path: reports/
+          destination: reports
       - run:
           name: Compile assets
           command: |
@@ -94,7 +105,6 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - node_modules
             - udata/static
 
   dist:
@@ -110,10 +120,10 @@ jobs:
           name: Build a distributable package
           command: |
             source venv/bin/activate
-            nvm use
             if [[ $CIRCLE_TAG ]]; then inv pydist; else inv pydist -b $CIRCLE_BUILD_NUM; fi
       - store_artifacts:
-          path: dist/*.whl
+          path: dist
+
   publish:
     docker:
       - image: udata/circleci
