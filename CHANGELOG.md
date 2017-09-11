@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix CircleCI automated publication on release tags
+  [#1120](https://github.com/opendatateam/udata/pull/1120)
 
 ## 1.1.5 (2017-09-11)
 
