@@ -122,6 +122,21 @@ a given territory. You have to set the smallest territory level first:
 HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 ```
 
+## Harvesting configuration
+
+### HARVEST_PREVIEW_MAX_ITEMS
+
+**default**: `20`
+
+The number of items to fetch while previewing an harvest source
+
+### HARVEST_DEFAULT_SCHEDULE
+
+**default**: `0 0 * * *`
+
+A cron expression used as default harvester schedule when validating harvesters.
+
+
 ## ElasticSearch configuration
 
 ### ELASTICSEARCH_URL

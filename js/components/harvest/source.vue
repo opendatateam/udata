@@ -4,6 +4,7 @@
         boxclass="harvest-jobs-widget"
         :fields="fields"
         :p="jobs"
+        :loading="source.loading || jobs.loading"
         :empty="_('No job yet')">
         <header slot="header">
             {{{ source.description | markdown }}}
@@ -23,6 +24,8 @@ import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 import Datatable from 'components/datatable/widget.vue';
 import HarvestJobs from 'models/harvest/jobs';
 
+const MASK = ['id', 'created', 'status'];
+
 export default {
     components: {Datatable},
     props: {
@@ -32,7 +35,7 @@ export default {
     data() {
         return {
             title: this._('Jobs'),
-            jobs: new HarvestJobs({query: {page_size: 10}}),
+            jobs: new HarvestJobs({query: {page_size: 10}, mask: MASK}),
             fields: [{
                 label: this._('Date'),
                 key: 'created',
