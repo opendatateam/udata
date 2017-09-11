@@ -133,7 +133,7 @@ jobs:
           command: pip install twine
       - deploy:
           name: Publish on PyPI
-          commands: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+          command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
 workflows:
   version: 2
