@@ -12,7 +12,7 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
 
-from udata.frontend.markdown import mdstrip
+from udata.frontend.markdown import render as md_render
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
@@ -244,7 +244,7 @@ class ResourceMixin(object):
             result['fileFormat'] = self.mime
 
         if self.description:
-            result['description'] = mdstrip(self.description)
+            result['description'] = md_render(self.description)
 
         # These 2 values are not standard
         if self.checksum:
@@ -550,7 +550,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         }
 
         if self.description:
-            result['description'] = mdstrip(self.description)
+            result['description'] = md_render(self.description)
 
         if self.license and self.license.url:
             result['license'] = self.license.url
