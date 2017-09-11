@@ -123,11 +123,17 @@ jobs:
             if [[ $CIRCLE_TAG ]]; then inv pydist; else inv pydist -b $CIRCLE_BUILD_NUM; fi
       - store_artifacts:
           path: dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
 
   publish:
     docker:
       - image: udata/circleci
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Install Twine
           command: pip install twine
