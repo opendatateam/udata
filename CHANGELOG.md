@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.1.5 (2017-09-11)
 
 - Fix the organization members grid in admin
