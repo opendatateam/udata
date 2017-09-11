@@ -45,7 +45,7 @@ import SourceWidget from 'components/harvest/source.vue';
 import JobWidget from 'components/harvest/job.vue';
 import Layout from 'components/layout.vue';
 
-const MASK = ['id', 'name', 'owner', 'organization', 'backend', 'validation{state}'];
+const MASK = ['id', 'name', 'owner', 'organization', 'backend', 'validation{state}', 'schedule'];
 
 export default {
     name: 'HarvestSourceView',
@@ -55,15 +55,6 @@ export default {
             source: new HarvestSource({mask: MASK}),
             current_job: null,
             current_item: null,
-            actions: [{
-                label: this._('Edit'),
-                icon: 'pencil',
-                method: this.edit
-            },{
-                label: this._('Delete'),
-                icon: 'trash',
-                method: this.confirm_delete
-            }]
         };
     },
     computed: {
@@ -86,6 +77,26 @@ export default {
             } else {
                 return [];
             }
+        },
+        actions() {
+            const actions = [{
+                label: this._('Edit'),
+                icon: 'pencil',
+                method: this.edit
+            }];
+            if (this.$root.me.is_admin) {
+                actions.push({
+                    label: this._('Scheduling'),
+                    icon: 'history',
+                    method: this.schedule
+                }, {divider: true});
+            }
+            actions.push({
+                label: this._('Delete'),
+                icon: 'trash',
+                method: this.confirm_delete
+            });
+            return actions;
         }
     },
     events: {
@@ -117,10 +128,7 @@ export default {
         },
         schedule() {
             this.$go({name: 'harvester-schedule', params: {oid: this.source.id}});
-        },
-        unschedule() {
-            this.$go({name: 'harvester-unschedule', params: {oid: this.source.id}});
-        },
+        }
     },
     route: {
         data() {

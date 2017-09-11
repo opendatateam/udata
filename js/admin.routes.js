@@ -180,6 +180,14 @@ router.map({
         name: 'harvester',
         component(resolve) {
             require(['./views/harvester.vue'], resolve);
+        },
+        subRoutes: {
+            'schedule': {
+                name: 'harvester-schedule',
+                component(resolve) {
+                    require(['./components/harvest/schedule-modal.vue'], resolve);
+                }
+            }
         }
     },
     '/harvester/:oid/edit': {
