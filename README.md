@@ -22,5 +22,5 @@ The [full documentation][readthedocs-url] is hosted on Read the Docs.
 [david-dm-dev-badge]: https://david-dm.org/opendatateam/udata/dev/dev-status.svg
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/opendatateam/udata
-[readthedocs-badge]: https://readthedocs.org/projects/udata/badge/?version=latest
-[readthedocs-url]: https://udata.readthedocs.io/en/latest/
+[readthedocs-badge]: https://readthedocs.org/projects/udata/badge/?version=v1.1.5
+[readthedocs-url]: https://udata.readthedocs.io/en/v1.1.5/
