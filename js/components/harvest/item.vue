@@ -7,7 +7,7 @@
 </style>
 
 <template>
-<modal class="job-item-modal"
+<modal class="job-item-modal" v-ref:modal
     :class="{
         'modal-success': item.status === 'done',
         'modal-danger': item.status === 'failed',

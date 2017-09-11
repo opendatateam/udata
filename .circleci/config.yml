@@ -1,0 +1,163 @@
+---
+version: 2
+
+jobs:
+  python:
+    docker:
+      - image: udata/circleci
+      - image: mongo:3.2
+      - image: redis
+      - image: udata/elasticsearch:2.4.5
+    environment:
+       BASH_ENV: /root/.bashrc
+    steps:
+      - checkout
+      - run:
+          name: Compute Python dependencies key
+          command: cat requirements/*.pip > python.deps
+      - run:
+          name: Get the base reference branch
+          command: export BASE_BRANCH=$(base_branch)
+      - restore_cache:
+          keys:
+          - py-cache-{{ checksum "python.deps" }}
+          - py-cache-{{ .Branch }}
+          - py-cache-{{ .Environment.BASE_BRANCH }}
+      - run:
+          name: Install python dependencies
+          command: |
+            virtualenv venv
+            source venv/bin/activate
+            pip install -e .
+            pip install -r requirements/circleci.pip
+      - save_cache:
+          key: py-cache-{{ checksum "python.deps" }}
+          paths:
+          - venv
+      - save_cache:
+          key: py-cache-{{ .Branch }}
+          paths:
+          - venv
+      - run:
+          name: Run tests
+          command: |
+            mkdir -p reports/python
+            source venv/bin/activate
+            nosetests --with-xunit --xunit-file=reports/python/tests.xml  udata
+      - store_test_results:
+          path: reports/python
+      - store_artifacts:
+          path: reports/
+          destination: reports
+
+      - persist_to_workspace:
+          root: .
+          paths:
+          - venv
+
+  assets:
+    docker:
+      - image: udata/circleci
+    environment:
+       BASH_ENV: /root/.bashrc
+    steps:
+      - checkout
+      - run:
+          name: Compute JS dependencies key
+          command: cat .nvmrc package.json > js.deps
+      - run:
+          name: Get the base reference branch
+          command: export BASE_BRANCH=$(base_branch)
+      - restore_cache:
+          keys:
+            - js-cache-{{ checksum "js.deps" }}
+            - js-cache-{{ .Branch }}
+            - js-cache-{{ .Environment.BASE_BRANCH }}
+      - run:
+          name: Install NodeJS and dependencies
+          command: nvm install && npm install
+      - save_cache:
+          key: js-cache-{{ checksum "js.deps" }}
+          paths:
+          - node_modules
+      - save_cache:
+          key: js-cache-{{ .Branch }}
+          paths:
+          - node_modules
+      - run:
+          name: Execute Karma tests
+          command: |
+            mkdir -p reports/karma
+            nvm use
+            REPORT_DIR=reports/karma npm -s run test:unit -- --reporters mocha,junit
+      - store_test_results:
+          path: reports/karma
+      - store_artifacts:
+          path: reports/
+          destination: reports
+      - run:
+          name: Compile assets
+          command: |
+            nvm use
+            npm run assets:build
+            npm run widgets:build
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - udata/static
+
+  dist:
+    docker:
+      - image: udata/circleci
+    environment:
+       BASH_ENV: /root/.bashrc
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build a distributable package
+          command: |
+            source venv/bin/activate
+            if [[ $CIRCLE_TAG ]]; then inv pydist; else inv pydist -b $CIRCLE_BUILD_NUM; fi
+      - store_artifacts:
+          path: dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  publish:
+    docker:
+      - image: udata/circleci
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install Twine
+          command: pip install twine
+      - deploy:
+          name: Publish on PyPI
+          command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - python
+      - assets
+      - dist:
+          requires:
+            - python
+            - assets
+      - publish:
+          requires:
+            - dist
+          filters:
+            branches:
+              only:
+                - master
+                - dev
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/

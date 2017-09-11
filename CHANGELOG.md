@@ -2,7 +2,18 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix the organization members grid in admin
+  [#934](https://github.com/opendatateam/udata/issues/934)
+- Fix and tune harvest admin loading state and payload size
+  [#1113](https://github.com/opendatateam/udata/issues/1113)
+- Automatically schedule validated harvesters and allow to (re)schedule them
+  [#1114](https://github.com/opendatateam/udata/pull/1114)
+- Raise the minimum `raven` version to ensure sentry is filtering legit HTTP exceptions
+  [#774](https://github.com/opendatateam/udata/issues/774)
+- Pin GeoJSON version to avoid breaking changes
+  [#1118](https://github.com/opendatateam/udata/pull/1118)
+- Deduplicate organization members
+  [#1111](https://github.com/opendatateam/udata/issues/1111)
 
 ## 1.1.4 (2017-09-05)
 

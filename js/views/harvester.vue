@@ -37,6 +37,7 @@
 
 <script>
 import HarvestSource from 'models/harvest/source';
+import HarvestJob from 'models/harvest/job';
 import ItemModal from 'components/harvest/item.vue';
 import Vue from 'vue';
 import Preview from 'components/harvest/preview.vue';
@@ -44,12 +45,14 @@ import SourceWidget from 'components/harvest/source.vue';
 import JobWidget from 'components/harvest/job.vue';
 import Layout from 'components/layout.vue';
 
+const MASK = ['id', 'name', 'owner', 'organization', 'backend', 'validation{state}'];
+
 export default {
     name: 'HarvestSourceView',
     components: {Preview, SourceWidget, JobWidget, Layout},
     data() {
         return {
-            source: new HarvestSource(),
+            source: new HarvestSource({mask: MASK}),
             current_job: null,
             current_item: null,
             actions: [{
@@ -87,7 +90,7 @@ export default {
     },
     events: {
         'harvest:job:selected': function(job) {
-            this.current_job = job;
+            this.current_job = new HarvestJob({data: job}).fetch();
             return true;
         },
         'harvest:job:item:selected': function(item) {
@@ -98,7 +101,7 @@ export default {
     },
     methods: {
         edit() {
-            this.$go('/harvester/' + this.source.id + '/edit');
+            this.$go({name: 'harvester-edit', params: {oid: this.source.id}});
         },
         confirm_delete() {
             this.$root.$modal(
@@ -111,13 +114,17 @@ export default {
                 require('components/harvest/validation-modal.vue'),
                 {source: this.source}
             );
-        }
+        },
+        schedule() {
+            this.$go({name: 'harvester-schedule', params: {oid: this.source.id}});
+        },
+        unschedule() {
+            this.$go({name: 'harvester-unschedule', params: {oid: this.source.id}});
+        },
     },
     route: {
         data() {
-            if (this.$route.params.oid !== this.source.id) {
-                this.source.fetch(this.$route.params.oid);
-            }
+            this.source.fetch(this.$route.params.oid);
         }
     }
 };
