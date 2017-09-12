@@ -5,29 +5,35 @@
         {{ _('Choose under which identity you want to publish') }}
     </p>
 </div>
-<div class="row">
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-        <user-card :user="$root.me" :selected="!selected"></user-card>
-    </div>
+<div class="row" v-if="$root.me.organizations.length">
+    <p class="col-xs-12">{{ _('Publish as an organization') }}</p>
     <div v-for="organization in $root.me.organizations" class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
         <org-card :organization="organization" :selected="selected == organization"></org-card>
     </div>
 </div>
-<div class="row" v-if="!$root.me.organizations">
-    <p class="col-xs-12">{{ _("You are not member of any organization.") }}</p>
-    <p class="col-xs-12">{{ _("Maybe you should find or create your own.") }}</p>
-    <div class="col-xs-12 text-center">
-        <a v-link.literal="/organization/new" class="btn btn-flat btn-primary">{{ _('Find or create your organization') }}</a>
+<div class="row text-center" v-if="!$root.me.organizations.length">
+    <p class="col-xs-12 lead">
+        {{ _("You are not a member of any organization.") }}
+        {{ _("Maybe you should find yours or create your own.") }}
+    </p>
+    <div class="col-xs-12">
+        <a v-link="{name: 'organization-new'}" class="btn btn-flat btn-primary">
+            {{ _('Find or create your organization') }}
+        </a>
     </div>
 </div>
 <div class="row">
+    <p class="col-xs-12">{{ _('Publish in your own name') }}</p>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+        <user-card :user="$root.me" :selected="!selected"></user-card>
+    </div>
+</div>
+<div class="row" v-if="$root.me.is_admin">
     <p class="col-xs-12 text-center lead">
        {{ _('As administrator you can choose any organization to publish') }}
     </p>
+    <org-filter cardclass="col-xs-12 col-sm-6 col-md-4 col-lg-3" :selected="selected"></org-filter>
 </div>
-<org-filter v-if="$root.me.is_admin"
-    cardclass="col-xs-12 col-sm-6 col-md-4 col-lg-3" :selected="selected">
-</org-filter>
 </div>
 </template>
 
@@ -40,7 +46,7 @@ export default {
     name: 'publish-as',
     data() {
         return {
-            selected: null
+            selected: this.$root.me.organizations[0]
         };
     },
     components: {UserCard, OrgCard, OrgFilter},
@@ -52,6 +58,11 @@ export default {
         'user:clicked': function(user) {
             this.selected = null;
             return true;
+        }
+    },
+    watch: {
+        '$root.me.organizations': function(orgs) {
+            this.selected = this.$root.me.organizations[0];
         }
     }
 };
