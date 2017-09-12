@@ -13,7 +13,7 @@ def check_for_territories(query):
     Results are sorted by population and area (biggest first).
     """
     if not query or not current_app.config.get('ACTIVATE_TERRITORIES'):
-        return GeoZone.objects.none()
+        return []
 
     dbqs = db.Q()
     query = query.lower()
