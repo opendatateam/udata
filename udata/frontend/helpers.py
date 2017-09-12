@@ -182,9 +182,9 @@ def avatar(ctx, user, size, classes=''):
 
 @front.app_template_filter()
 @contextfilter
-def owner_avatar(ctx, obj, size=32):
+def owner_avatar(ctx, obj, size=32, classes=''):
     markup = '''
-        <a class="avatar" href="{url}" title="{title}">
+        <a class="avatar {classes}" href="{url}" title="{title}">
             <img src="{avatar_url}" class="avatar" alt="{title}"
             width="{size}" height="{size}"/>
         </a>
@@ -194,6 +194,7 @@ def owner_avatar(ctx, obj, size=32):
         url=owner_url(obj),
         size=size,
         avatar_url=owner_avatar_url(ctx, obj, size),
+        classes=classes
     ))
 
 
