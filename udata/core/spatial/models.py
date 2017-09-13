@@ -27,6 +27,8 @@ BASE_GRANULARITIES = [
 ADMIN_LEVEL_MIN = 1
 ADMIN_LEVEL_MAX = 110
 
+END_OF_TIME = date(9999, 12, 31)
+
 
 class GeoLevel(db.Document):
     id = db.StringField(primary_key=True)
@@ -39,9 +41,8 @@ class GeoLevel(db.Document):
 
 class GeoZoneQuerySet(db.BaseQuerySet):
     def valid_at(self, valid_date):
-        compare_string = valid_date.isoformat()
-        return self(validity__end__gt=compare_string,
-                    validity__start__lt=compare_string)
+        return self(validity__end__gt=valid_date,
+                    validity__start__lt=valid_date)
 
 
 class GeoZone(db.Document):
@@ -53,7 +54,7 @@ class GeoZone(db.Document):
     geom = db.MultiPolygonField()
     parents = db.ListField()
     keys = db.DictField()
-    validity = db.DictField()
+    validity = db.EmbeddedDocumentField(db.DateRange)
     ancestors = db.ListField()
     successors = db.ListField()
     population = db.IntField()
@@ -209,8 +210,7 @@ class GeoZone(db.Document):
     def valid_at(self, valid_date):
         if not self.validity:
             return True
-        compare_string = valid_date.isoformat()
-        return self.validity['start'] <= compare_string <= self.validity['end']
+        return self.validity.start <= valid_date <= self.validity.end
 
     def toGeoJSON(self):
         return {

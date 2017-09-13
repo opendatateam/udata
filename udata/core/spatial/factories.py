@@ -7,11 +7,13 @@ from faker.providers import BaseProvider
 
 from geojson.utils import generate_random
 
-from udata.utils import add_faker_provider
+from udata.factories import DateRangeFactory
+from udata.utils import faker_provider
 
 from .models import GeoLevel, GeoZone, SpatialCoverage, spatial_granularities
 
 
+@faker_provider
 class GeoJsonProvider(BaseProvider):
     '''A Fake GeoJSON provider'''
 
@@ -91,15 +93,12 @@ class GeoJsonProvider(BaseProvider):
         }
 
 
+@faker_provider
 class SpatialProvider(BaseProvider):
     def spatial_granularity(self):
         return self.generator.random_element([
             row[0] for row in spatial_granularities
         ])
-
-
-add_faker_provider(GeoJsonProvider)
-add_faker_provider(SpatialProvider)
 
 
 class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
@@ -122,6 +121,7 @@ class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
     slug = factory.Faker('slug')
     code = factory.Faker('zipcode')
     geom = factory.Faker('multipolygon')
+    validity = factory.SubFactory(DateRangeFactory)
 
 
 class GeoLevelFactory(factory.mongoengine.MongoEngineFactory):
