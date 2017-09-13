@@ -26,7 +26,7 @@ export default {
                 align: 'left',
                 type: 'text'
             }, {
-                label: this._('Schedule'),
+                label: this._('Scheduling'),
                 key: 'schedule',
                 sort: 'schedule',
                 align: 'left',

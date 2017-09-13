@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask import request
+
 from udata.api import api, API, fields
 from udata.auth import admin_permission
 
@@ -112,6 +114,8 @@ source_fields = api.model('HarvestSource', {
     'organization': fields.Nested(org_ref_fields, allow_null=True,
                                   description='The producer organization'),
     'deleted': fields.ISODateTime(description='The source deletion date'),
+    'schedule': fields.String(description='The source schedule (interval or cron expression)',
+                              readonly=True),
 })
 
 source_page_fields = api.model('HarvestSourcePage',
@@ -215,6 +219,31 @@ class ValidateSourceAPI(API):
             return actions.reject_source(ident, form.comment.data)
 
 
+@ns.route('/source/<string:ident>/schedule',
+          endpoint='schedule_harvest_source')
+@api.doc(params={'ident': 'A source ID or slug'})
+class ScheduleSourceAPI(API):
+    @api.doc('schedule_harvest_source')
+    @api.secure(admin_permission)
+    @api.expect((str, 'A cron expression'))
+    @api.marshal_with(source_fields)
+    def post(self, ident):
+        '''Schedule an harvest source'''
+        # Handle both syntax: quoted and unquoted
+        try:
+            data = request.json
+        except Exception as e:
+            data = request.data
+        return actions.schedule(ident, data)
+
+    @api.doc('unschedule_harvest_source')
+    @api.secure(admin_permission)
+    @api.marshal_with(source_fields)
+    def delete(self, ident):
+        '''Unschedule an harvest source'''
+        return actions.unschedule(ident), 204
+
+
 @ns.route('/source/<string:ident>/preview', endpoint='preview_harvest_source')
 @api.doc(params={'ident': 'A source ID or slug'})
 class PreviewSourceAPI(API):
@@ -239,8 +268,7 @@ class JobsAPI(API):
     def get(self, ident):
         '''List all jobs for a given source'''
         args = parser.parse_args()
-        source = actions.get_source(ident)
-        qs = HarvestJob.objects(source=source)
+        qs = HarvestJob.objects(source=ident)
         qs = qs.order_by('-created')
         return qs.paginate(args['page'], args['page_size'])
 

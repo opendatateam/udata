@@ -123,6 +123,12 @@ class HarvestSource(db.Owned, db.Document):
     def last_job(self):
         return self.get_last_job()
 
+    @property
+    def schedule(self):
+        if not self.periodic_task:
+            return
+        return self.periodic_task.schedule_display
+
     meta = {
         'indexes': [
             '-created_at',
