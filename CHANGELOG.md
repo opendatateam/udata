@@ -5,6 +5,7 @@
 - Prevent a random territory from being displayed when query doesn't match [#1124](https://github.com/opendatateam/udata/pull/1124)
 - Display avatar when the community resource owner is an organization [#1125](https://github.com/opendatateam/udata/pull/1125)
 - Refactor the "publish as" screen to make it more obvious that an user is publishing under its own name [#1122](https://github.com/opendatateam/udata/pull/1122)
+- Make the "find your organization" screen cards clickable (send to the organization page) [#1129](https://github.com/opendatateam/udata/pull/1129)
 
 ## 1.1.6 (2017-09-11)
 
