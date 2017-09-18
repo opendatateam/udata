@@ -133,7 +133,7 @@ export default {
             if (this.HAS_FILE_API) {
                 const data = {};
                 try {
-                    let bbox = this.$refs.thumbnailer.bbox;
+                    const bbox = this.$refs.thumbnailer.bbox;
                     if (bbox) {
                         data.bbox = bbox;
                     }
