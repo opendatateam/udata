@@ -25,22 +25,22 @@ class Defaults(object):
     ELASTICSEARCH_INDEX_BASENAME = 'udata'
 
     # BROKER_TRANSPORT = 'redis'
-    BROKER_URL = 'redis://localhost:6379'
-    BROKER_TRANSPORT_OPTIONS = {
+    CELERY_BROKER_URL = 'redis://localhost:6379'
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
         'fanout_prefix': True,
         'fanout_patterns': True,
     }
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+    CELERY_TASK_SERIALIZER = 'pickle'
+    CELERY_RESULT_SERIALIZER = 'pickle'
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
-    CELERYD_HIJACK_ROOT_LOGGER = False
-    CELERYBEAT_SCHEDULER = 'udata.tasks.Scheduler'
+    CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+    CELERY_BEAT_SCHEDULER = 'udata.tasks.Scheduler'
     CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
-    # CELERY_TASK_SERIALIZER = 'pickle'
-    # CELERYD_POOL = 'gevent'
 
     # Default celery routing
-    CELERY_DEFAULT_QUEUE = 'default'
-    CELERY_QUEUES = (
+    CELERY_TASK_DEFAULT_QUEUE = 'default'
+    CELERY_TASK_QUEUES = (
         # Default queue (on default exchange)
         Queue('default', routing_key='task.#'),
         # High priority for urgent tasks
@@ -48,10 +48,10 @@ class Defaults(object):
         # Low priority for slow tasks
         Queue('low', Exchange('low', type='topic'), routing_key='low.#'),
     )
-    CELERY_DEFAULT_EXCHANGE = 'default'
-    CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
-    CELERY_DEFAULT_ROUTING_KEY = 'task.default'
-    CELERY_ROUTES = {
+    CELERY_TASK_DEFAULT_EXCHANGE = 'default'
+    CELERY_TASK_DEFAULT_EXCHANGE_TYPE = 'topic'
+    CELERY_TASK_DEFAULT_ROUTING_KEY = 'task.default'
+    CELERY_TASK_ROUTES = {
         # High priority for search tasks
         'udata.search.reindex': {
             'queue': 'high',
@@ -219,7 +219,7 @@ class Testing(object):
     SEND_MAIL = False
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False
-    CELERY_ALWAYS_EAGER = True
+    CELERY_TASK_ALWAYS_EAGER = True
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False
