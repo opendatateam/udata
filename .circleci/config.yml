@@ -28,7 +28,7 @@ jobs:
           command: |
             virtualenv venv
             source venv/bin/activate
-            pip install -e .
+            pip install -e . || pip install -e .
             pip install -r requirements/circleci.pip
       - save_cache:
           key: py-cache-{{ checksum "python.deps" }}
