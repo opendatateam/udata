@@ -211,6 +211,16 @@ def unique_string(length=UUID_LENGTH):
     return string[:length] if length else string
 
 
+faker = Faker()
+
+
+def faker_provider(provider):
+    faker.add_provider(provider)
+    factory.Faker.add_provider(provider)
+    return provider
+
+
+@faker_provider
 class UDataProvider(BaseProvider):
     '''
     A Faker provider for UData missing requirements.
@@ -220,14 +230,3 @@ class UDataProvider(BaseProvider):
     def unique_string(self, length=UUID_LENGTH):
         '''Generate a unique string'''
         return unique_string(length)
-
-
-faker = Faker()
-
-
-def add_faker_provider(provider):
-    faker.add_provider(provider)
-    factory.Faker.add_provider(provider)
-
-
-add_faker_provider(UDataProvider)

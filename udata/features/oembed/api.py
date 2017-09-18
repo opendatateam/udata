@@ -45,18 +45,18 @@ class OEmbedsAPI(API):
                     return api.abort(400, 'Unknown dataset ID.')
             elif (item_kind == 'territory' and
                     current_app.config.get('ACTIVATE_TERRITORIES')):
+
                 try:
                     country, level, code, kind = item_id.split(':')
                 except ValueError:
                     return api.abort(400, 'Invalid territory ID.')
-                try:
-                    geozone = GeoZone.objects.get(
-                        id=':'.join([country, level, code]))
-                except GeoZone.DoesNotExist:
+                geoid = ':'.join((country, level, code))
+                zone = GeoZone.objects.resolve(geoid)
+                if not zone:
                     return api.abort(400, 'Unknown territory identifier.')
                 if level in TERRITORY_DATASETS:
                     if kind in TERRITORY_DATASETS[level]:
-                        item = TERRITORY_DATASETS[level][kind](geozone)
+                        item = TERRITORY_DATASETS[level][kind](zone)
                     else:
                         return api.abort(400, 'Unknown territory dataset id.')
                 else:

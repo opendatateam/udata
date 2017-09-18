@@ -12,10 +12,12 @@ from udata.i18n import lazy_gettext as _, gettext, get_locale
 from udata.models import db
 from udata.core.storages import logos
 
+from . import geoids
+
 
 __all__ = (
     'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities'
+    'spatial_granularities',
 )
 
 
@@ -39,9 +41,43 @@ class GeoLevel(db.Document):
 
 class GeoZoneQuerySet(db.BaseQuerySet):
     def valid_at(self, valid_date):
-        compare_string = valid_date.isoformat()
-        return self(validity__end__gt=compare_string,
-                    validity__start__lt=compare_string)
+        '''Limit current QuerySet to zone valid at a given date'''
+        is_valid = db.Q(validity__end__gt=valid_date,
+                        validity__start__lte=valid_date)
+        no_validity = db.Q(validity=None)
+        return self(is_valid | no_validity)
+
+    def latest(self):
+        '''
+        Fetch the latest valid zone matching a QuerySet.
+
+        Ensuring the QuerySet unicity for (level, code)
+        is you responsibility.
+        '''
+        return self.order_by('-validity__end').first()
+
+    def resolve(self, geoid, id_only=False):
+        '''
+        Resolve a GeoZone given a GeoID.
+
+        The start date is resolved from the given GeoID,
+        ie. it find there is a zone valid a the geoid validity,
+        resolve the `latest` alias
+        or use `latest` when no validity is given.
+
+        If `id_only` is True,
+        the result will be the resolved GeoID
+        instead of the resolved zone.
+        '''
+        level, code, validity = geoids.parse(geoid)
+        qs = self(level=level, code=code)
+        if id_only:
+            qs = qs.only('id')
+        if validity == 'latest':
+            result = qs.latest()
+        else:
+            result = qs.valid_at(validity).first()
+        return result.id if id_only and result else result
 
 
 class GeoZone(db.Document):
@@ -53,7 +89,7 @@ class GeoZone(db.Document):
     geom = db.MultiPolygonField()
     parents = db.ListField()
     keys = db.DictField()
-    validity = db.DictField()
+    validity = db.EmbeddedDocumentField(db.DateRange)
     ancestors = db.ListField()
     successors = db.ListField()
     population = db.IntField()
@@ -209,8 +245,7 @@ class GeoZone(db.Document):
     def valid_at(self, valid_date):
         if not self.validity:
             return True
-        compare_string = valid_date.isoformat()
-        return self.validity['start'] <= compare_string <= self.validity['end']
+        return self.validity.start <= valid_date <= self.validity.end
 
     def toGeoJSON(self):
         return {
