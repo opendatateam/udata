@@ -15,7 +15,7 @@ from udata.core.storages import logos
 
 __all__ = (
     'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities'
+    'spatial_granularities', 'parse_geoid',
 )
 
 
@@ -27,7 +27,25 @@ BASE_GRANULARITIES = [
 ADMIN_LEVEL_MIN = 1
 ADMIN_LEVEL_MAX = 110
 
+# Arbitrary date value used as validity.end
+# for zone not yet ended
 END_OF_TIME = date(9999, 12, 31)
+
+
+def parse_geoid(text):
+    '''
+    Parse a geoid from text
+    and return a tuple (level, code, validity)
+
+    GeoID, see https://github.com/etalab/geoids.
+    '''
+    if '@' in text:
+        spatial, validity = text.split('@')
+    else:
+        spatial = text
+        validity = 'latest'
+    level, code = spatial.rsplit(':', 1)
+    return level, code, validity
 
 
 class GeoLevel(db.Document):
@@ -41,8 +59,43 @@ class GeoLevel(db.Document):
 
 class GeoZoneQuerySet(db.BaseQuerySet):
     def valid_at(self, valid_date):
-        return self(validity__end__gt=valid_date,
-                    validity__start__lt=valid_date)
+        '''Limit current QuerySet to zone valid at a given date'''
+        is_valid = db.Q(validity__end__gt=valid_date,
+                        validity__start__lte=valid_date)
+        no_validity = db.Q(validity=None)
+        return self(is_valid | no_validity)
+
+    def latest(self):
+        '''
+        Fetch the latest valid zone matching a QuerySet.
+
+        Ensuring the QuerySet unicity for (level, code)
+        is you responsibility.
+        '''
+        return self.order_by('-validity__end').first()
+
+    def resolve(self, geoid, id_only=False):
+        '''
+        Resolve a GeoZone given a GeoID.
+
+        The start date is resolved from the given GeoID,
+        ie. it find there is a zone valid a the geoid validity,
+        resolve the `latest` alias
+        or use `latest` when no validity is given.
+
+        If `id_only` is True,
+        the result will be the resolved GeoID
+        instead of the resolved zone.
+        '''
+        level, code, validity = parse_geoid(geoid)
+        qs = self(level=level, code=code)
+        if id_only:
+            qs = qs.only('id')
+        if validity == 'latest':
+            result = qs.latest()
+        else:
+            result = qs.valid_at(validity).first()
+        return result.id if id_only and result else result
 
 
 class GeoZone(db.Document):

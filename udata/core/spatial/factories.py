@@ -109,13 +109,24 @@ class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
     granularity = factory.Faker('spatial_granularity')
 
 
+def geoid(zone):
+    '''
+    Build a GeoID from a given zone
+
+    GeoID, see https://github.com/etalab/geoids
+    '''
+    spatial = ':'.join((zone.level, zone.code))
+    if not zone.validity:
+        return spatial
+    else:
+        return '@'.join((spatial, zone.validity.start.isoformat()))
+
+
 class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = GeoZone
 
-    # GeoID, see https://github.com/etalab/geoids.
-    id = factory.LazyAttribute(
-        lambda o: 'fr:commune:' + o.code + '@1970-01-01')
+    id = factory.LazyAttribute(geoid)
     level = factory.Faker('unique_string')
     name = factory.Faker('city')
     slug = factory.Faker('slug')
