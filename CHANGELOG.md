@@ -9,7 +9,7 @@
 - Fix "Center the full picture" on user avatar upload   
 [#1130](https://github.com/opendatateam/udata/issues/1130)
 - Hide issue modal forbidden actions [#1128](https://github.com/opendatateam/udata/pull/1128)
-- Ensure spatial coverage zones are resolved when submitted from the API.
+- Ensure spatial coverage zones are resolved when submitted from the API or when querying oembed API. [#1140](https://github.com/opendatateam/udata/pull/1140)
 
 ## 1.1.6 (2017-09-11)
 
