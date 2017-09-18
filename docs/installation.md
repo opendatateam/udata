@@ -41,8 +41,9 @@ you log into its account:
 
 ```shell
 $ virtualenv --python=python2.7 $HOME
-$ source bin/activate  
+$ . bin/activate  
 $ pip install Cython  # Enable optimizations on some packages
+$ pip install --upgrade setuptools  # Make sure setuptools is up to date
 $ pip install udata
 ```
 You can also install the extensions you want:
@@ -216,7 +217,7 @@ $ ln -s /etc/uwsgi/apps-{available,enabled}/udata-worker.ini
 $ ln -s /etc/uwsgi/apps-{available,enabled}/udata-beat.ini
 ```
 
-Then define a nginx server host configuration in `/etc/nginx/sites-availables/data.example.com`:
+Then define a nginx server host configuration in `/etc/nginx/sites-available/data.example.com`:
 
 ```nginx
 ##

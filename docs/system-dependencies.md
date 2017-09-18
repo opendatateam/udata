@@ -22,6 +22,7 @@ The full dependencies list is:
 * Misc dependencies
     * liblzma (required to load GeoZones)
     * libyaml (not mandatory but speed up the yaml processing)
+    * libffi (required by bcrypt)
 
 !!! note
     By the time this project was started, Python 3 did not have great third dependencies support
@@ -35,7 +36,7 @@ On any Debian-like system you can install the development tools and libraries wi
 $ apt-get install build-essential pkg-config python python-dev python-pip python-virtualenv\
     libjpeg-dev zlib1g-dev libtiff5-dev libfreetype6-dev \
     liblcms2-dev libopenjpeg-dev libwebp-dev libpng12-dev \
-    libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev
+    libxml2-dev  libxslt1-dev liblzma-dev libyaml-dev libffi-dev
 ```
 
 ### OSX/Homebrew
@@ -58,6 +59,28 @@ Elasticsearch requires the [Analysis ICU][analysis-icu] plugin for your specific
 The installation process is very specific to your operating system
 and will depend on your configuration, join us on [Gitter][] if you have any issue.
 
+### Redis
+
+On Debian, as root:
+
+```shell
+$ apt-get install redis-server
+```
+
+### MongoDB
+
+On Debian Jessie (cf [mongo-install-instructions][] for other versions), as root:
+
+```
+$ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+$ apt-get update
+$ apt-get install -y mongodb-org
+$ service mongod start
+```
+
+### ElasticSearch
+
 On Debian, you need to add the appropriate apt repository:
 
     deb https://packages.elastic.co/elasticsearch/2.x/debian stable main
@@ -65,7 +88,13 @@ On Debian, you need to add the appropriate apt repository:
 and install it like any other Debian package (You might need to enable Debian Backport repository)
 The `plugin` command is located in the `/usr/share/elasticsearch/bin` directory.
 
-For example, on Debian Jessie, you will have to perform (as root):
+You need a `java` binary in your path for ElasticSearch to operate properly, for example on Debian (as root):
+
+```shell
+$ apt-get install default-jre
+```
+
+To install ElasticSearch, for example on Debian Jessie, you will have to perform (as root):
 
 ```shell
 $ echo "deb https://packages.elastic.co/elasticsearch/2.x/debian stable main" \
@@ -92,3 +121,4 @@ $ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
 [analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu
+[mongo-install-instructions]: https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
