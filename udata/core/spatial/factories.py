@@ -10,6 +10,7 @@ from geojson.utils import generate_random
 from udata.factories import DateRangeFactory
 from udata.utils import faker_provider
 
+from . import geoids
 from .models import GeoLevel, GeoZone, SpatialCoverage, spatial_granularities
 
 
@@ -109,24 +110,11 @@ class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
     granularity = factory.Faker('spatial_granularity')
 
 
-def geoid(zone):
-    '''
-    Build a GeoID from a given zone
-
-    GeoID, see https://github.com/etalab/geoids
-    '''
-    spatial = ':'.join((zone.level, zone.code))
-    if not zone.validity:
-        return spatial
-    else:
-        return '@'.join((spatial, zone.validity.start.isoformat()))
-
-
 class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
     class Meta:
         model = GeoZone
 
-    id = factory.LazyAttribute(geoid)
+    id = factory.LazyAttribute(geoids.from_zone)
     level = factory.Faker('unique_string')
     name = factory.Faker('city')
     slug = factory.Faker('slug')

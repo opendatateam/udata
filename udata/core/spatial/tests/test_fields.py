@@ -13,8 +13,9 @@ from udata.tests import TestCase
 from udata.utils import faker
 
 from ..factories import GeoZoneFactory
-from ..models import SpatialCoverage, END_OF_TIME
 from ..forms import SpatialCoverageField
+from ..geoids import END_OF_TIME
+from ..models import SpatialCoverage
 
 
 A_YEAR = timedelta(days=365)

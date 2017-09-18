@@ -12,10 +12,12 @@ from udata.i18n import lazy_gettext as _, gettext, get_locale
 from udata.models import db
 from udata.core.storages import logos
 
+from . import geoids
+
 
 __all__ = (
     'GeoLevel', 'GeoZone', 'SpatialCoverage', 'BASE_GRANULARITIES',
-    'spatial_granularities', 'parse_geoid',
+    'spatial_granularities',
 )
 
 
@@ -26,26 +28,6 @@ BASE_GRANULARITIES = [
 
 ADMIN_LEVEL_MIN = 1
 ADMIN_LEVEL_MAX = 110
-
-# Arbitrary date value used as validity.end
-# for zone not yet ended
-END_OF_TIME = date(9999, 12, 31)
-
-
-def parse_geoid(text):
-    '''
-    Parse a geoid from text
-    and return a tuple (level, code, validity)
-
-    GeoID, see https://github.com/etalab/geoids.
-    '''
-    if '@' in text:
-        spatial, validity = text.split('@')
-    else:
-        spatial = text
-        validity = 'latest'
-    level, code = spatial.rsplit(':', 1)
-    return level, code, validity
 
 
 class GeoLevel(db.Document):
@@ -87,7 +69,7 @@ class GeoZoneQuerySet(db.BaseQuerySet):
         the result will be the resolved GeoID
         instead of the resolved zone.
         '''
-        level, code, validity = parse_geoid(geoid)
+        level, code, validity = geoids.parse(geoid)
         qs = self(level=level, code=code)
         if id_only:
             qs = qs.only('id')

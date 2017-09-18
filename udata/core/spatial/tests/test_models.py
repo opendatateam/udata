@@ -7,7 +7,8 @@ from udata.tests import TestCase, DBTestMixin
 from udata.utils import faker
 
 from ..factories import GeoZoneFactory, GeoLevelFactory
-from ..models import GeoZone, SpatialCoverage, END_OF_TIME
+from ..geoids import END_OF_TIME
+from ..models import GeoZone, SpatialCoverage
 
 
 A_YEAR = timedelta(days=365)
