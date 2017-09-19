@@ -150,12 +150,12 @@ class TerritoryConverter(ModelConverter, PathConverter):
 
         code = getattr(obj, 'code', None)
         slug = getattr(obj, 'slug', None)
-        validity = getattr(obj, 'validity', {})
+        validity = getattr(obj, 'validity', None)
         if code and slug:
             return '{level_name}/{code}@{start_date}/{slug}'.format(
                 level_name=level_name,
                 code=code,
-                start_date=validity.get('start', 'latest'),
+                start_date=getattr(validity, 'start') or 'latest',
                 slug=slug
             )
         else:

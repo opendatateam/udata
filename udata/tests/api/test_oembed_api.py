@@ -117,17 +117,40 @@ class OEmbedsDatasetAPITest(APITestCase):
 
     def test_oembeds_api_for_territory(self):
         '''It should fetch a territory in the oembed format.'''
-        country = faker.country_code()
+        country = faker.country_code().lower()
         level = 'commune'
-        zone = GeoZoneFactory(
-            level='{0}:{1}'.format(country, level),
-            validity={'start': '1942-01-01', 'end': '9999-12-31'})
+        zone = GeoZoneFactory(level='{0}:{1}'.format(country, level))
         TestDataset = territory_dataset_factory()
         TERRITORY_DATASETS[level][TestDataset.id] = TestDataset
         reference = 'territory-{0}:{1}'.format(zone.id, TestDataset.id)
         url = url_for('api.oembeds', references=reference)
         response = self.get(url)
         self.assert200(response)
+        data = json.loads(response.data)[0]
+        self.assertIn('html', data)
+        self.assertIn('width', data)
+        self.assertIn('maxwidth', data)
+        self.assertIn('height', data)
+        self.assertIn('maxheight', data)
+        self.assertTrue(data['type'], 'rich')
+        self.assertTrue(data['version'], '1.0')
+        self.assertIn(zone.name, data['html'])
+        self.assertIn('placeholders/default.png', data['html'])
+
+    def test_oembeds_api_for_territory_resolve_geoid(self):
+        '''It should fetch a territory from a geoid in the oembed format.'''
+        country = faker.country_code().lower()
+        level = 'commune'
+        zone = GeoZoneFactory(level='{0}:{1}'.format(country, level))
+        TestDataset = territory_dataset_factory()
+        TERRITORY_DATASETS[level][TestDataset.id] = TestDataset
+        geoid = '{0.level}:{0.code}@latest'.format(zone)
+        reference = 'territory-{0}:{1}'.format(geoid, TestDataset.id)
+
+        url = url_for('api.oembeds', references=reference)
+        response = self.get(url)
+        self.assert200(response)
+        
         data = json.loads(response.data)[0]
         self.assertIn('html', data)
         self.assertIn('width', data)
@@ -157,11 +180,9 @@ class OEmbedsDatasetAPITest(APITestCase):
 
     def test_oembeds_api_for_territory_level_not_registered(self):
         '''Should raise 400 on unregistered territory level'''
-        country = faker.country_code()
+        country = faker.country_code().lower()
         level = 'commune'
-        zone = GeoZoneFactory(
-            level='{0}:{1}'.format(country, level),
-            validity={'start': '1942-01-01', 'end': '9999-12-31'})
+        zone = GeoZoneFactory(level='{0}:{1}'.format(country, level))
         TestDataset = territory_dataset_factory()
         del TERRITORY_DATASETS[level]
         reference = 'territory-{0}:{1}'.format(zone.id, TestDataset.id)
@@ -173,11 +194,9 @@ class OEmbedsDatasetAPITest(APITestCase):
 
     def test_oembeds_api_for_territory_dataset_not_registered(self):
         '''Should raise 400 on unregistered territory dataset'''
-        country = faker.country_code()
+        country = faker.country_code().lower()
         level = 'commune'
-        zone = GeoZoneFactory(
-            level='{0}:{1}'.format(country, level),
-            validity={'start': '1942-01-01', 'end': '9999-12-31'})
+        zone = GeoZoneFactory(level='{0}:{1}'.format(country, level))
         TestDataset = territory_dataset_factory()
         TERRITORY_DATASETS[level] = {}
         reference = 'territory-{0}:{1}'.format(zone.id, TestDataset.id)
