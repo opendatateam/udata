@@ -73,7 +73,7 @@ On Debian Jessie (cf [mongo-install-instructions][] for other versions), as root
 
 ```
 $ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.2 main" > /etc/apt/sources.list.d/mongodb-org-3.2.list
 $ apt-get update
 $ apt-get install -y mongodb-org
 $ service mongod start
@@ -81,7 +81,7 @@ $ service mongod start
 
 ### ElasticSearch
 
-On Debian, you need to add the appropriate apt repository:
+On Debian, you need to add the appropriate apt repository (cf [elastic-install-instructions][] for more details):
 
     deb https://packages.elastic.co/elasticsearch/2.x/debian stable main
 
@@ -122,3 +122,4 @@ $ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
 [python]: https://www.python.org/
 [analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu
 [mongo-install-instructions]: https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
+[elastic-install-instructions]: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/setup-repositories.html#_apt
