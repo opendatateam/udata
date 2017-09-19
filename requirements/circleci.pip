@@ -1,2 +1,2 @@
 -r test.pip
-invoke==0.20.4
+invoke==0.21.0
