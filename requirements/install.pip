@@ -46,6 +46,6 @@ voluptuous==0.10.5
 wtforms-json==0.3.3
 wtforms==2.1
 xmltodict==0.11.0
-geojson==2.2.0
+geojson==2.3.0
 pymongo==3.5.1
 Jinja2==2.9.6
