@@ -40,6 +40,10 @@ class UDataDocument(Document):
         return data
 
 
+    def __str__(self):
+        return self.__unicode__().encode('utf-8')
+
+
 class DomainModel(UDataDocument):
     '''Placeholder for inheritance'''
     pass

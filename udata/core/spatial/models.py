@@ -112,8 +112,6 @@ class GeoZone(db.Document):
     def __unicode__(self):
         return self.id
 
-    __str__ = __unicode__
-
     def __html__(self):
         """In use within the admin."""
         return '{name} <i>({code})</i>'.format(
