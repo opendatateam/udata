@@ -29,6 +29,9 @@ class Site(WithMetrics, db.Document):
     themes = db.DictField()
     settings = db.EmbeddedDocumentField(SiteSettings, default=SiteSettings)
 
+    def __unicode__(self):
+        return self.title or ''
+
 
 def get_current_site():
     if getattr(g, 'site', None) is None:

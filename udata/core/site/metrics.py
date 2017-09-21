@@ -44,6 +44,7 @@ class DatasetsMetric(SiteMetric):
     def get_value(self):
         return Dataset.objects.visible().count()
 
+
 DatasetsMetric.connect(Dataset.on_create, Dataset.on_update)
 
 
