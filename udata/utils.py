@@ -12,7 +12,9 @@ from datetime import date, datetime
 from calendar import monthrange
 from math import ceil
 from faker import Faker
+from faker.config import PROVIDERS
 from faker.providers import BaseProvider
+from faker.providers.lorem.la import Provider as LoremProvider
 
 
 def get_by(lst, field, value):
@@ -211,7 +213,12 @@ def unique_string(length=UUID_LENGTH):
     return string[:length] if length else string
 
 
-faker = Faker()
+# This is the default providers list
+# We remove the lorum one to replace it
+# with a unicode enabled one below
+PROVIDERS.remove('faker.providers.lorem')
+
+faker = Faker('fr_FR')  # Use a unicode/utf-8 based locale
 
 
 def faker_provider(provider):
@@ -230,3 +237,9 @@ class UDataProvider(BaseProvider):
     def unique_string(self, length=UUID_LENGTH):
         '''Generate a unique string'''
         return unique_string(length)
+
+
+@faker_provider  # Replace the default lorem provider with a unicode one
+class UnicodeLoremProvider(LoremProvider):
+    '''A Lorem provider that forces unicode in words'''
+    word_list = map(lambda w: w + 'é', LoremProvider.word_list)

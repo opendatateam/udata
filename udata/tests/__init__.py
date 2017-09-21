@@ -3,9 +3,10 @@ from __future__ import unicode_literals
 
 import json
 import os
-import logging
 import shutil
 import tempfile
+import sys
+
 from datetime import timedelta
 
 import mock
@@ -34,7 +35,7 @@ class TestCase(BaseTestCase):
     settings = settings.Testing
 
     def setUp(self):
-        # Ensure compatibility with multiple inheritance
+        reload(sys).setdefaultencoding('ascii')
         super(TestCase, self).setUp()
 
     def tearsDown(self):
