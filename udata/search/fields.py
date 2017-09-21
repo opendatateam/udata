@@ -64,7 +64,7 @@ class Facet(object):
             labels = (l for l in labels if l)
             or_label = str(' {0} '.format(OR_LABEL))
             return Markup(or_label.join(labels))
-        return labelize(value)
+        return obj_to_string(labelize(value))
 
     def default_labelizer(self, value):
         return str(value)
