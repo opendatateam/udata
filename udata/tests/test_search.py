@@ -881,7 +881,7 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
 
     def test_labelize_object(self):
         fake = FakeFactory()
-        self.assertEqual(self.facet.labelize(fake).decode('utf-8'), fake.title)
+        self.assertEqual(self.facet.labelize(fake), fake.title)
 
     def test_labelize_object_with_or(self):
         fake_1 = FakeFactory()
@@ -949,7 +949,7 @@ class TestModelTermsFacetWithStringId(FacetTestCase, DBTestMixin):
 
     def test_labelize_object(self):
         fake = FakeWithStringIdFactory()
-        self.assertEqual(self.facet.labelize(fake).decode('utf-8'), fake.title)
+        self.assertEqual(self.facet.labelize(fake), fake.title)
 
     def test_labelize_object_with_or(self):
         fake_1 = FakeWithStringIdFactory()
