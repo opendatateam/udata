@@ -357,7 +357,7 @@ class IssueCsvTest(FrontTestCase):
             url_for('organizations.issues_csv', org=organization))
         self.assert200(response)
 
-        headers, data = response.data.strip().split('\r\n')
+        headers, data = response.data.decode('utf-8').strip().split('\r\n')
         self.assertStartswith(
             data, '"{issue.id}";"{issue.user}"'.format(issue=issue))
 
