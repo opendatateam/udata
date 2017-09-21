@@ -170,8 +170,8 @@ class FollowReuseAPI(FollowAPI):
 
 suggest_parser = api.parser()
 suggest_parser.add_argument(
-    'q', type=str, help='The string to autocomplete/suggest',
-    location='args', required=True)
+    'q', help='The string to autocomplete/suggest', location='args',
+    required=True)
 suggest_parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',
     location='args', default=10)
