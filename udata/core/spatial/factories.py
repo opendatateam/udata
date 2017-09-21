@@ -102,25 +102,25 @@ class SpatialProvider(BaseProvider):
         ])
 
 
-class SpatialCoverageFactory(ModelFactory):
-    class Meta:
-        model = SpatialCoverage
-
-    geom = factory.Faker('multipolygon')
-    granularity = factory.Faker('spatial_granularity')
-
-
 class GeoZoneFactory(ModelFactory):
     class Meta:
         model = GeoZone
 
     id = factory.LazyAttribute(geoids.from_zone)
-    level = factory.Faker('unique_string')
+    level = factory.LazyAttribute(lambda o: GeoLevelFactory().id)
     name = factory.Faker('city')
     slug = factory.Faker('slug')
     code = factory.Faker('zipcode')
     geom = factory.Faker('multipolygon')
     validity = factory.SubFactory(DateRangeFactory)
+
+
+class SpatialCoverageFactory(ModelFactory):
+    class Meta:
+        model = SpatialCoverage
+
+    zones = factory.LazyAttribute(lambda o: [GeoZoneFactory()])
+    granularity = factory.Faker('spatial_granularity')
 
 
 class GeoLevelFactory(ModelFactory):

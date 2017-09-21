@@ -25,8 +25,20 @@ class DatasetBlueprintTest(FrontTestCase):
     def test_render_list(self):
         '''It should render the dataset list page'''
         with self.autoindex():
-            datasets = [DatasetFactory(
-                resources=[ResourceFactory()]) for i in range(3)]
+            datasets = [VisibleDatasetFactory() for i in range(3)]
+
+        response = self.get(url_for('datasets.list'))
+
+        self.assert200(response)
+        rendered_datasets = self.get_context_variable('datasets')
+        self.assertEqual(len(rendered_datasets), len(datasets))
+
+    def test_render_list_with_facets(self):
+        '''It should render the dataset list page with facets'''
+
+        with self.autoindex():
+            datasets = DatasetFactory.create_batch(3, visible=True,
+                                                   org=True, geo=True)
 
         response = self.get(url_for('datasets.list'))
 
