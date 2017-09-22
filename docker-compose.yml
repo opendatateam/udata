@@ -9,12 +9,6 @@ services:
         ports:
         - "27017:27017"
 
-    db_test:
-        image: mongo:3.2
-        tmpfs: /data/db/
-        ports:
-          - "27018:27017"
-
     broker:
         image: redis
         volumes:
@@ -32,9 +26,3 @@ services:
           - "9200"
         ports:
           - "9200:9200"
-
-    search_test:
-        image: udata/elasticsearch:2.4.5
-        tmpfs: /usr/share/elasticsearch/data
-        ports:
-          - "9201:9200"
