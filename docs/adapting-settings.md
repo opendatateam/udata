@@ -155,6 +155,12 @@ RFC-1738 formatted URLs are also supported:
 ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
 ```
 
+### ELASTICSEARCH_URL_TEST
+
+**default**: same as `ELASTICSEARCH_URL`
+
+An optionnal alternative elasticsearch server url that may be used for testing.
+
 ### ELASTICSEARCH_INDEX_BASENAME
 
 **default**: `'udata'`
@@ -191,6 +197,12 @@ Authentication is also supported in the URL:
 ```python
 MONGODB_HOST = 'mongodb://<user>:<password>@<host>:<port>/<database>'
 ```
+
+### MONGODB_HOST_TEST
+
+**default**: same as `MONGODB_HOST` with a `-test` suffix on the collection
+
+An optionnal alternative mongo database used for testing.
 
 ## Celery options
 
