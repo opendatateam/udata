@@ -10,7 +10,7 @@ services:
         - "27017:27017"
 
     db_test:
-        image: mongo:3.2.0
+        image: mongo:3.2
         tmpfs: /data/db/
         ports:
           - "27018:27017"
