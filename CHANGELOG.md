@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.7 (2017-09-25)
 
 - Prevent a random territory from being displayed when query doesn't match [#1124](https://github.com/opendatateam/udata/pull/1124)
 - Display avatar when the community resource owner is an organization [#1125](https://github.com/opendatateam/udata/pull/1125)
