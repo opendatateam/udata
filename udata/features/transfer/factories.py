@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 
 import factory
 
+from udata.factories import ModelFactory
+
 from .models import Transfer
 
 
-class TransferFactory(factory.mongoengine.MongoEngineFactory):
+class TransferFactory(ModelFactory):
     class Meta:
         model = Transfer
     comment = factory.Faker('sentence')

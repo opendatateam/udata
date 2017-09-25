@@ -7,6 +7,7 @@ from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
 from mock import patch
 
+from udata.factories import ModelFactory
 from udata.core.dataset.factories import DatasetFactory
 
 from .. import backends
@@ -17,7 +18,7 @@ def dtfactory(start, end):
     return factory.Faker('date_time_between', start_date=start, end_date=end)
 
 
-class HarvestSourceFactory(factory.mongoengine.MongoEngineFactory):
+class HarvestSourceFactory(ModelFactory):
     class Meta:
         model = HarvestSource
 
@@ -26,7 +27,7 @@ class HarvestSourceFactory(factory.mongoengine.MongoEngineFactory):
     description = factory.Faker('text')
 
 
-class HarvestJobFactory(factory.mongoengine.MongoEngineFactory):
+class HarvestJobFactory(ModelFactory):
     class Meta:
         model = HarvestJob
 
