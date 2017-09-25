@@ -38,6 +38,8 @@
         width: 76%;
         max-width: 60px;
         max-height: 60px;
+        min-height: 60px;
+        min-width: 60px;
     }
 
     strong {
