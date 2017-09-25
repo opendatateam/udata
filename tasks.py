@@ -107,7 +107,7 @@ def serve(ctx, host='localhost'):
 @task
 def work(ctx, loglevel='info'):
     '''Run a development worker'''
-    run('celery -A udata.worker worker --purge --autoreload -l %s' % loglevel,
+    run('celery -A udata.worker worker --purge -l %s' % loglevel,
         pty=True)
 
 
