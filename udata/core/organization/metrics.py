@@ -24,7 +24,8 @@ class DatasetsMetric(Metric):
 @Dataset.on_create.connect
 @Dataset.on_update.connect
 def update_datasets_metrics(document, **kwargs):
-    DatasetsMetric(document.organization).trigger_update()
+    if document.organization:
+        DatasetsMetric(document.organization).trigger_update()
 
 
 class ReusesMetric(Metric):
@@ -36,7 +37,11 @@ class ReusesMetric(Metric):
         return Reuse.objects(organization=self.target).count()
 
 
-ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
+@Reuse.on_create.connect
+@Reuse.on_update.connect
+def update_reuses_metrics(document, **kwargs):
+    if document.organization:
+        ReusesMetric(document.organization).trigger_update()
 
 
 class PermitedReusesMetric(Metric):

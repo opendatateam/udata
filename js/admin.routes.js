@@ -133,6 +133,7 @@ router.map({
         },
     },
     '/organization/new/': {
+        name: 'organization-new',
         component(resolve) {
             require(['./views/organization-wizard.vue'], resolve);
         }

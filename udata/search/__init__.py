@@ -55,6 +55,8 @@ class ElasticSearch(object):
         # do we register on? app.extensions looks a little hackish (I don't
         # know flask well enough to be sure), but that's how it's done in
         # flask-pymongo so let's use it for now.
+        if app.config['TESTING'] and 'ELASTICSEARCH_URL_TEST' in app.config:
+                app.config['ELASTICSEARCH_URL'] = app.config['ELASTICSEARCH_URL_TEST']
         app.extensions['elasticsearch'] = Elasticsearch(
             [app.config['ELASTICSEARCH_URL']], serializer=EsJSONSerializer())
 

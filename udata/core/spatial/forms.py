@@ -31,6 +31,29 @@ class ZonesField(ModelList, Field):
     model = GeoZone
     widget = ZonesAutocompleter()
 
+    def fetch_objects(self, geoids):
+        '''
+        Custom object retrieval.
+
+        Zones are resolved from their identifier
+        instead of the default bulk fetch by ID.
+        '''
+        zones = []
+        no_match = []
+        for geoid in geoids:
+            zone = GeoZone.objects.resolve(geoid)
+            if zone:
+                zones.append(zone)
+            else:
+                no_match.append(geoid)
+
+        if no_match:
+            msg = _('Unknown geoid(s): {identifiers}').format(
+                identifiers=', '.join(str(id) for id in no_match))
+            raise validators.ValidationError(msg)
+
+        return zones
+
 
 class GeomField(Field):
     def process_formdata(self, valuelist):

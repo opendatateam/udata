@@ -7,12 +7,14 @@ from faker.providers import BaseProvider
 
 from geojson.utils import generate_random
 
-from udata.factories import ModelFactory
-from udata.utils import add_faker_provider
+from udata.factories import DateRangeFactory, ModelFactory
+from udata.utils import faker_provider
 
+from . import geoids
 from .models import GeoLevel, GeoZone, SpatialCoverage, spatial_granularities
 
 
+@faker_provider
 class GeoJsonProvider(BaseProvider):
     '''A Fake GeoJSON provider'''
 
@@ -92,15 +94,12 @@ class GeoJsonProvider(BaseProvider):
         }
 
 
+@faker_provider
 class SpatialProvider(BaseProvider):
     def spatial_granularity(self):
         return self.generator.random_element([
             row[0] for row in spatial_granularities
         ])
-
-
-add_faker_provider(GeoJsonProvider)
-add_faker_provider(SpatialProvider)
 
 
 class SpatialCoverageFactory(ModelFactory):
@@ -115,14 +114,13 @@ class GeoZoneFactory(ModelFactory):
     class Meta:
         model = GeoZone
 
-    # GeoID, see https://github.com/etalab/geoids.
-    id = factory.LazyAttribute(
-        lambda o: 'fr:commune:' + o.code + '@1970-01-01')
+    id = factory.LazyAttribute(geoids.from_zone)
     level = factory.Faker('unique_string')
     name = factory.Faker('city')
     slug = factory.Faker('slug')
     code = factory.Faker('zipcode')
     geom = factory.Faker('multipolygon')
+    validity = factory.SubFactory(DateRangeFactory)
 
 
 class GeoLevelFactory(ModelFactory):

@@ -62,6 +62,13 @@ export default {
             }));
         }
     },
+    events: {
+        'organization:clicked': function(org) {
+            // TODO: find a better implementation
+            // (ie. open the membership modal from the admin)
+            document.location = org.page;
+        }
+    },
     watch: {
         search_query(query) {
             API.organizations.suggest_organizations({
