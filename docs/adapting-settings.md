@@ -232,13 +232,13 @@ CELERY_BROKER_URL = 'redis://u:<password>@<host>:<port>'
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
 
-**Note** The celery parameters changed in UData 1.2 upgrade because Celery as upgraded to 4.1.0.
-(You can get the change map [here][[celery-conf-map]).
+**Note** Celery parameters changed in UData 1.2 because Celery has been upgraded to 4.1.0.
+(You can get the change map [here][celery-conf-map]).
 UData expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
 and they will be automatically transformed for Celery 4.x:
 Example:
- - Celery 3.x expected `BROKER_URL` and Celery 4.x expect `broker_url` so you need to have change `BROKER_URL` to `CELERY_BROKER_URL` in your settings
- - Celery 3.X expected `CELERY_RESULT_BACKEND` and Celery 4.x expect `result_backend` so you can leave `CELERY_RESULT_BACKEND`
+ - Celery 3.x expected `BROKER_URL` and Celery 4.x expects `broker_url` so you need to change `BROKER_URL` to `CELERY_BROKER_URL` in your settings
+ - Celery 3.X expected `CELERY_RESULT_BACKEND` and Celery 4.x expects `result_backend` so you can leave `CELERY_RESULT_BACKEND`
 
 ## Flask-Mail options
 
