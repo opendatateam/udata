@@ -10,8 +10,7 @@
 - Display avatar when the community resource owner is an organization [#1125](https://github.com/opendatateam/udata/pull/1125)
 - Refactor the "publish as" screen to make it more obvious that an user is publishing under its own name [#1122](https://github.com/opendatateam/udata/pull/1122)
 - Make the "find your organization" screen cards clickable (send to the organization page) [#1129](https://github.com/opendatateam/udata/pull/1129)
-- Fix "Center the full picture" on user avatar upload   
-[#1130](https://github.com/opendatateam/udata/issues/1130)
+- Fix "Center the full picture" on user avatar upload [#1130](https://github.com/opendatateam/udata/issues/1130)
 - Hide issue modal forbidden actions [#1128](https://github.com/opendatateam/udata/pull/1128)
 - Ensure spatial coverage zones are resolved when submitted from the API or when querying oembed API. [#1140](https://github.com/opendatateam/udata/pull/1140)
 - Prevent user metrics computation when the object owner is an organization (and vice versa) [#1152](https://github.com/opendatateam/udata/pull/1152)
