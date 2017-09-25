@@ -232,8 +232,8 @@ CELERY_BROKER_URL = 'redis://u:<password>@<host>:<port>'
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
 
-**Note** The celery parameters changed in UData 1.2 upgrade because Celery as upgraded to 4.1.0.
-(You can get the change map [here][[celery-conf-map]).
+**Note** Celery parameters changed in UData 1.2 because Celery has been upgraded to 4.1.0.
+(You can get the change map [here][celery-conf-map]).
 UData expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
 and they will be automatically transformed for Celery 4.x:
 Example:
