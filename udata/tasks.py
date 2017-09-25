@@ -96,7 +96,11 @@ def init_app(app):
     default_url = '{0}://{1}'.format(*parsed_url)
     app.config.setdefault('CELERY_MONGODB_SCHEDULER_URL', default_url)
 
-    celery.conf.update(app.config)
+    celery.conf.update(**dict(
+        (k.replace('CELERY_', '').lower(), v)
+        for k, v in app.config.items()
+        if k.startswith('CELERY_')
+    ))
 
     ContextTask.current_app = app
 
