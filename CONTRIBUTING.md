@@ -49,8 +49,8 @@ basically you’ll have to:
 * commit incrementally with readable and detailed commit messages
 * add the change to the `CHANGELOG.md` file if appropriated
 * submit a pull-request against the right branch of this repository:
-    * `dev` for new features
-    * `master` for bugfixes (unless only present in `dev`)
+    * `master` for new features or bug fixes for the current state
+    * `vX.Y` for bugfixes or backports on previous versions
 
 We’ll take care of tagging your issue with the appropriated labels and answer within a week (hopefully less!) to the problem you encounter.
 
