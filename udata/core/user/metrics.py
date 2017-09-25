@@ -34,7 +34,8 @@ class DatasetsMetric(UserMetric):
 @Dataset.on_create.connect
 @Dataset.on_update.connect
 def update_datasets_metrics(document, **kwargs):
-    DatasetsMetric(document.owner).trigger_update()
+    if document.owner:
+        DatasetsMetric(document.owner).trigger_update()
 
 
 class ReusesMetric(UserMetric):
@@ -45,7 +46,11 @@ class ReusesMetric(UserMetric):
         return Reuse.objects(owner=self.user).count()
 
 
-ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
+@Reuse.on_create.connect
+@Reuse.on_update.connect
+def update_reuses_metrics(document, **kwargs):
+    if document.owner:
+        ReusesMetric(document.owner).trigger_update()
 
 
 @db.Owned.on_owner_change.connect
