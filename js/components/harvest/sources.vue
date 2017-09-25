@@ -130,7 +130,9 @@ export default {
     },
     watch: {
         'owner.id': function(ownerid) {
-            this.sources.fetch({owner: ownerid});
+            if (ownerid) {
+                this.sources.fetch({owner: ownerid});
+            }
         }
     }
 };
