@@ -94,10 +94,8 @@ class User(WithMetrics, UserMixin, db.Document):
         'ordering': ['-created_at']
     }
 
-    def __str__(self):
+    def __unicode__(self):
         return self.fullname
-
-    __unicode__ = __str__
 
     @property
     def fullname(self):

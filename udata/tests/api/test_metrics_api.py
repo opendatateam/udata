@@ -14,6 +14,9 @@ from . import APITestCase
 class FakeModel(db.Document, WithMetrics):
     name = db.StringField()
 
+    def __unicode__(self):
+        return self.name or ''
+
 
 class FakeModelMetric(Metric):
     name = 'fake-model-metric'

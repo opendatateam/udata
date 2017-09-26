@@ -42,7 +42,7 @@ def obj_to_string(obj):
     if not obj:
         return None
     elif isinstance(obj, bytes):
-        return obj.encode('utf-8')
+        return obj.decode('utf-8')
     elif isinstance(obj, str):
         return obj
     elif hasattr(obj, '__html__'):
@@ -63,8 +63,8 @@ class Facet(object):
             labels = (obj_to_string(l) for l in labels)
             labels = (l for l in labels if l)
             or_label = str(' {0} '.format(OR_LABEL))
-            return Markup(or_label.join(labels).decode('utf-8'))
-        return labelize(value)
+            return Markup(or_label.join(labels))
+        return Markup(obj_to_string(labelize(value)))
 
     def default_labelizer(self, value):
         return str(value)

@@ -29,6 +29,7 @@ metrics_fields = api.model('Metric', {
 def isodate(value):
     return date(*(int(p) for p in value.split('-'))).isoformat()
 
+
 parser = api.parser()
 parser.add_argument(
     'start', type=isodate, help='Start of the period to fetch',

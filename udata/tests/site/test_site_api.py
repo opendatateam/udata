@@ -20,6 +20,9 @@ from udata.tests.api import APITestCase
 class FakeModel(db.Document, WithMetrics):
     name = db.StringField()
 
+    def __unicode__(self):
+        return self.name or ''
+
 
 class FakeSiteMetric(SiteMetric):
     name = 'fake-site-metric'

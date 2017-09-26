@@ -290,10 +290,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     deleted = db.DateTimeField()
 
-    def __str__(self):
+    def __unicode__(self):
         return self.title or ''
-
-    __unicode__ = __str__
 
     __badges__ = {
         PIVOTAL_DATA: _('Pivotal data'),

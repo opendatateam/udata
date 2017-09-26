@@ -8,7 +8,9 @@ from udata.tests import TestCase, DBTestMixin
 
 
 class FakeModel(WithMetrics, db.Document):
-    pass
+
+    def __unicode__(self):
+        return ''
 
 
 FAKE_VALUE = 42

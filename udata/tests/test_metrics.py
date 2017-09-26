@@ -9,7 +9,9 @@ from udata.tests import TestCase, DBTestMixin, mock_task
 
 
 class FakeModel(WithMetrics, db.Document):
-    pass
+
+    def __unicode__(self):
+        return ''
 
 
 class FakeMetric(Metric):
