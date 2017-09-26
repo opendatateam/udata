@@ -211,15 +211,15 @@ By default, uData is configured to use Redis as Celery backend and a customized 
 The defaults are:
 
 ```python
-BROKER_URL = 'redis://localhost:6379'
-BROKER_TRANSPORT_OPTIONS = {
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_BROKER_TRANSPORT_OPTIONS = {
     'fanout_prefix': True,
     'fanout_patterns': True,
 }
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['pickle', 'json']
-CELERYD_HIJACK_ROOT_LOGGER = False
-CELERYBEAT_SCHEDULER = 'udata.tasks.Scheduler'
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+CELERY_BEAT_SCHEDULER = 'udata.tasks.Scheduler'
 CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
 ```
 
@@ -227,10 +227,18 @@ Authentication is supported on Redis:
 
 ```python
 CELERY_RESULT_BACKEND = 'redis://u:<password>@<host>:<port>'
-BROKER_URL = 'redis://u:<password>@<host>:<port>'
+CELERY_BROKER_URL = 'redis://u:<password>@<host>:<port>'
 ```
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
+
+**Note** Celery parameters changed in UData 1.2 because Celery has been upgraded to 4.1.0.
+(You can get the change map [here][celery-conf-map]).
+UData expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
+and they will be automatically transformed for Celery 4.x:
+Example:
+ - Celery 3.x expected `BROKER_URL` and Celery 4.x expects `broker_url` so you need to change `BROKER_URL` to `CELERY_BROKER_URL` in your settings
+ - Celery 3.X expected `CELERY_RESULT_BACKEND` and Celery 4.x expects `result_backend` so you can leave `CELERY_RESULT_BACKEND`
 
 ## Flask-Mail options
 
@@ -322,6 +330,7 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 ```
 
 [celery-doc]: https://docs.celeryproject.org/en/latest/configuration.html
+[celery-conf-map]: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-old-settings-map
 [flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
