@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-08-03 11:47+0200\n"
-"PO-Revision-Date: 2017-09-26 14:30-0400\n"
+"PO-Revision-Date: 2017-09-26 14:40-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -239,7 +239,7 @@ msgstr "La zone géographique couverte par les données."
 #: udata/core/topic/forms.py:25 udata/templates/dataset/search-panel.html:10
 #: udata/templates/reuse/search-panel.html:7
 msgid "Tags"
-msgstr ""
+msgstr "Tags"
 
 #: udata/core/dataset/forms.py:93 udata/core/reuse/forms.py:32
 msgid "Some taxonomy keywords"
@@ -390,7 +390,7 @@ msgstr "Fichier distant"
 
 #: udata/core/dataset/models.py:82 udata/core/reuse/models.py:19
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: udata/core/dataset/models.py:221 udata/core/dataset/rdf.py:285
 #: udata/templates/dataset/resource/list-item.html:12
@@ -473,7 +473,7 @@ msgstr "Sujet"
 #: udata/templates/dataset/display.html:345 udata/templates/reuse/display.html:262
 #: udata/templates/site/dashboard.html:25
 msgid "Discussions"
-msgstr ""
+msgstr "Discussions"
 
 #: udata/core/discussions/tasks.py:39
 #, python-format
@@ -590,7 +590,7 @@ msgstr "L'URL du site web de votre organisation"
 
 #: udata/core/organization/forms.py:31
 msgid "Logo"
-msgstr ""
+msgstr "Logo"
 
 #: udata/core/organization/forms.py:63
 msgid "Role"
@@ -1017,7 +1017,7 @@ msgstr "Nom"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #: udata/core/user/forms.py:21
 msgid "About"
@@ -1130,7 +1130,7 @@ msgstr "%(start)s à %(end)s"
 
 #: udata/frontend/markdown.py:30
 msgid "Source"
-msgstr ""
+msgstr "Source"
 
 #: udata/harvest/forms.py:18
 msgid "Some optionnal details about this harvester"
@@ -1196,7 +1196,7 @@ msgstr "Une couverture temporelle est exprimée par début-fin où les deux date
 
 #: udata/templates/admin.html:6
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: udata/templates/apidoc.html:4
 msgid "API Documentation"
@@ -1250,7 +1250,7 @@ msgstr "Par exemple, vous devez être membre de l'organisation pour modifier l'u
 
 #: udata/templates/apidoc.html:64
 msgid "Pagination"
-msgstr ""
+msgstr "Pagination"
 
 #: udata/templates/apidoc.html:68
 msgid "Some method are paginated and always follow the same pattern.\n"
@@ -1607,12 +1607,12 @@ msgstr[1] "%(num)d territoires"
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
 msgid "Tag"
-msgstr ""
+msgstr "Tag"
 
 #: udata/templates/dataset/search-labels.html:12
 #: udata/templates/organization/search-labels.html:3 udata/templates/search.html:59
 msgid "Badge"
-msgstr ""
+msgstr "Badge"
 
 #: udata/templates/dataset/card.html:45 udata/templates/dataset/list.html:39
 #: udata/templates/organization/card.html:43 udata/templates/reuse/card.html:47
@@ -1783,14 +1783,14 @@ msgstr "Contacter le producteur"
 
 #: udata/templates/dataset/display.html:185 udata/templates/reuse/display.html:171
 msgid "Informations"
-msgstr ""
+msgstr "Informations"
 
 #: udata/templates/dataset/display.html:192
 #: udata/templates/dataset/search-panel.html:8
 #: udata/templates/organization/search-panel.html:5
 #: udata/templates/reuse/search-panel.html:5
 msgid "Badges"
-msgstr ""
+msgstr "Badges"
 
 #: udata/templates/dataset/display.html:237
 msgid "Modification date"
