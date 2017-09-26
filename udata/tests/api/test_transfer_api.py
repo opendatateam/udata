@@ -15,7 +15,8 @@ from . import APITestCase
 
 
 class TransferAPITest(APITestCase):
-    modules_to_load = ['core.user', 'core.dataset']
+    modules = ['core.user', 'core.dataset']
+
     @patch('udata.features.transfer.api.request_transfer')
     def test_request_dataset_transfer(self, action):
         user = self.login()

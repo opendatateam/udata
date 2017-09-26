@@ -38,8 +38,9 @@ class FakeAPI(API):
 
 
 class APIAuthTest(APITestCase):
-    modules_to_load = ['admin', 'core.dataset', 'core.reuse', 'core.site',
-                      'core.organization', 'core.user']
+    modules = ['admin', 'search', 'core.dataset', 'core.reuse', 'core.site',
+               'core.organization', 'core.user']
+
     def oauth_app(self, name='test-client'):
         owner = UserFactory()
         return OAuth2Client.objects.create(
@@ -156,6 +157,7 @@ class APIAuthTest(APITestCase):
             redirect_uri=client.default_redirect_uri
         ))
 
+        print(response)
         self.assert200(response)
 
     def test_authorization_decline(self):

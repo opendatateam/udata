@@ -16,8 +16,9 @@ from . import FrontTestCase
 
 
 class ReuseBlueprintTest(FrontTestCase):
-    modules_to_load  = ['core.reuse', 'admin', 'core.dataset', 'core.site',
-                       'core.organization', 'core.user']
+    modules = ['core.reuse', 'admin', 'search', 'core.dataset', 'core.site',
+               'core.organization', 'core.user', 'core.followers']
+
     def test_render_list(self):
         '''It should render the reuse list page'''
         with self.autoindex():

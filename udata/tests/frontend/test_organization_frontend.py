@@ -20,8 +20,9 @@ from . import FrontTestCase
 
 
 class OrganizationBlueprintTest(FrontTestCase):
-    modules_to_load = ['core.organization', 'admin', 'core.dataset',
-                       'core.reuse', 'core.site', 'core.user']
+    modules = ['core.organization', 'admin', 'search', 'core.dataset',
+               'core.reuse', 'core.site', 'core.user', 'core.followers']
+
     def test_render_list(self):
         '''It should render the organization list page'''
         with self.autoindex():

@@ -121,8 +121,8 @@ def with_basename():
 
 
 class CsvTest(FrontTestCase):
-    modules_to_load = ['admin', 'core.dataset', 'core.reuse', 'core.site',
-                       'core.organization']
+    modules = ['admin', 'core.dataset', 'core.reuse', 'core.site',
+               'core.organization', 'search']
 
     def create_app(self):
         app = super(CsvTest, self).create_app()

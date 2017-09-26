@@ -37,7 +37,8 @@ SAMPLE_GEOM = {
 
 
 class DatasetAPITest(APITestCase):
-    modules_to_load = ['core.user', 'core.dataset', 'core.organization']
+    modules = ['core.user', 'core.dataset', 'core.organization']
+    
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
         with self.autoindex():
@@ -547,7 +548,7 @@ class DatasetBadgeAPITest(APITestCase):
 
 
 class DatasetResourceAPITest(APITestCase):
-    modules_to_load = None
+    modules = None
     def setUp(self):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
@@ -899,7 +900,7 @@ class DatasetReferencesAPITest(APITestCase):
 
 
 class CommunityResourceAPITest(APITestCase):
-    modules_to_load = ['core.dataset', 'core.user', 'core.organization']
+    modules = ['core.dataset', 'core.user', 'core.organization']
 
     def test_community_resource_api_get(self):
         '''It should fetch a community resource from the API'''

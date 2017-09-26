@@ -17,8 +17,8 @@ from . import APITestCase
 
 
 class ReuseAPITest(APITestCase):
-    modules_to_load = ['core.dataset', 'core.reuse', 'core.user',
-                       'core.organization']
+    modules = ['core.dataset', 'core.reuse', 'core.user', 'core.organization']
+
     def test_reuse_api_list(self):
         '''It should fetch a reuse list from the API'''
         with self.autoindex():

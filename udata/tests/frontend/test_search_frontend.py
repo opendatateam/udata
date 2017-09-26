@@ -10,9 +10,10 @@ from udata.core.organization.factories import OrganizationFactory
 from . import FrontTestCase
 
 
-class FrontEndRootTest(FrontTestCase):
-    modules_to_load = ['core.dataset', 'core.reuse', 'core.organization',
-                       'admin', 'core.site']
+class SearchFrontTest(FrontTestCase):
+    modules = ['core.dataset', 'core.reuse', 'core.organization',
+               'admin', 'core.site', 'search']
+
     def test_render_search(self):
         '''It should render the search page'''
         with self.autoindex():

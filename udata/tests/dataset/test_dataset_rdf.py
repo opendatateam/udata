@@ -18,27 +18,27 @@ from udata.core.dataset.rdf import (
     dataset_to_rdf, dataset_from_rdf, resource_to_rdf, resource_from_rdf,
     temporal_from_rdf, frequency_to_rdf
 )
-from udata.core.dataset.views import blueprint as dataset_blueprint
+# from udata.core.dataset.views import blueprint as dataset_blueprint
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.views import blueprint as org_blueprint
-from udata.core.site.views import blueprint as site_blueprint
+# from udata.core.organization.views import blueprint as org_blueprint
+# from udata.core.site.views import blueprint as site_blueprint
 from udata.core.user.factories import UserFactory
-from udata.core.user.views import blueprint as user_blueprint
+# from udata.core.user.views import blueprint as user_blueprint
 from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA
 from udata.tests import TestCase, DBTestMixin
+from udata.tests.frontend import FrontTestCase
 from udata.utils import faker
 
-from udata.tests.frontend import FrontTestCase
 
-
-class DatasetToRdfTest(DBTestMixin, TestCase):
-    def create_app(self):
-        app = super(DatasetToRdfTest, self).create_app()
-        app.register_blueprint(dataset_blueprint)
-        app.register_blueprint(org_blueprint)
-        app.register_blueprint(user_blueprint)
-        app.register_blueprint(site_blueprint)
-        return app
+class DatasetToRdfTest(FrontTestCase):
+    modules = ['core.dataset', 'core.organization', 'core.user', 'core.site']
+    # def create_app(self):
+    #     app = super(DatasetToRdfTest, self).create_app()
+    #     app.register_blueprint(dataset_blueprint)
+    #     app.register_blueprint(org_blueprint)
+    #     app.register_blueprint(user_blueprint)
+    #     app.register_blueprint(site_blueprint)
+    #     return app
 
     def test_minimal(self):
         dataset = DatasetFactory.build()  # Does not have an URL
@@ -730,6 +730,8 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
 
 
 class DatasetRdfViewsTest(FrontTestCase):
+    modules = ['core.dataset', 'core.organization', 'core.user', 'core.site']
+
     def test_rdf_default_to_jsonld(self):
         dataset = DatasetFactory()
         expected = url_for('datasets.rdf_format',

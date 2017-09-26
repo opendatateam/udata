@@ -73,8 +73,9 @@ class TopicSearchTest(SearchTestMixin, TestCase):
 
 
 class TopicsBlueprintTest(FrontTestCase):
-    modules_to_load = ['core.topic', 'admin', 'core.dataset', 'core.reuse',
-                      'core.site', 'core.organization']
+    modules = ['core.topic', 'admin', 'core.dataset', 'core.reuse',
+               'core.site', 'core.organization', 'search']
+
     def test_render_display(self):
         '''It should render a topic page'''
         with self.autoindex():

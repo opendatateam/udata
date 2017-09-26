@@ -11,7 +11,8 @@ from udata.core.user.factories import AdminFactory
 
 
 class PostsAPITest(APITestCase):
-    modules_to_load = ['core.dataset', 'core.reuse', 'core.user', 'core.post']
+    modules = ['core.dataset', 'core.reuse', 'core.user', 'core.post']
+
     def test_post_api_list(self):
         '''It should fetch a post list from the API'''
         posts = PostFactory.create_batch(3)

@@ -48,8 +48,8 @@ class MetricsAPITest(APITestCase):
 
 
 class SiteAPITest(APITestCase):
-    modules_to_load = ['core.site', 'core.dataset', 'core.reuse',
-                       'core.organization']
+    modules = ['core.site', 'core.dataset', 'core.reuse', 'core.organization']
+
     def test_get_site(self):
         response = self.get(url_for('api.site'))
         self.assert200(response)
