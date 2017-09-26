@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-08-03 11:47+0200\n"
-"PO-Revision-Date: 2017-09-26 15:12-0400\n"
+"PO-Revision-Date: 2017-09-26 15:35-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -51,7 +51,7 @@ msgstr "Implicite"
 
 #: udata/api/oauth2.py:43
 msgid "Resource Owner Password Credentials"
-msgstr "Mot de passe du proprioétaire de la resource"
+msgstr "Mot de passe du propriétaire de la resource"
 
 #: udata/api/oauth2.py:44
 msgid "Client Credentials"
@@ -91,7 +91,7 @@ msgstr "Type"
 
 #: udata/core/badges/forms.py:19
 msgid "Kind of badge (certified, etc)"
-msgstr "Type de badge (certified, etc)"
+msgstr "Type de badge (certifié, etc)"
 
 #: udata/core/badges/tasks.py:40
 #, python-format
@@ -142,7 +142,7 @@ msgstr "Type"
 
 #: udata/core/dataset/forms.py:32
 msgid "Whether the resource is an uploaded file, a remote file or an API"
-msgstr "Est-ce que la resource est un fichier uploadé, un fichier distant ou une API"
+msgstr "Est-ce que la ressource est un fichier uploadé, un fichier distant ou une API"
 
 #: udata/core/dataset/forms.py:35 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:19
@@ -201,7 +201,7 @@ msgstr "Fréquence de mise à jour"
 
 #: udata/core/dataset/forms.py:85
 msgid "The frequency at which data are updated."
-msgstr "La fréquence à laquelle les données sont mises à jour"
+msgstr "La fréquence à laquelle les données sont mises à jour."
 
 #: udata/core/dataset/forms.py:86
 msgid "Expected frequency date"
@@ -487,7 +487,7 @@ msgstr "%(user)s a commenté votre discussion"
 
 #: udata/core/discussions/tasks.py:70
 msgid "A discussion has been closed"
-msgstr "Une discussion a été cloturée"
+msgstr "Une discussion a été clôturée"
 
 #: udata/core/followers/metrics.py:29 udata/core/organization/views.py:161
 #: udata/core/site/metrics.py:101 udata/templates/dataset/followers.html:6
@@ -535,7 +535,7 @@ msgstr "%(user)s a commenté votre anomalie"
 
 #: udata/core/issues/tasks.py:54
 msgid "An issue has been closed"
-msgstr "Une anomalie a été cloturée"
+msgstr "Une anomalie a été clôturée"
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
@@ -578,7 +578,7 @@ msgstr "Nom court de l'organisation"
 
 #: udata/core/organization/forms.py:28
 msgid "The details about your organization"
-msgstr "Les détails sur votre oganisation"
+msgstr "Les détails sur votre organisation"
 
 #: udata/core/organization/forms.py:30 udata/core/user/forms.py:20
 msgid "Website"
@@ -819,7 +819,7 @@ msgstr "Dernières réutilisations"
 
 #: udata/core/reuse/views.py:58
 msgid "Transfer"
-msgstr "Transferer"
+msgstr "Transférer"
 
 #: udata/core/site/forms.py:16
 msgid "Some SEO keywords"
@@ -831,7 +831,7 @@ msgstr "Taille du flux"
 
 #: udata/core/site/forms.py:18
 msgid "Number of elements in feeds"
-msgstr "Nombre d'élements dans les flux"
+msgstr "Nombre d’éléments dans les flux"
 
 #: udata/core/site/metrics.py:62 udata/core/site/views.py:137
 #: udata/templates/dataset/display.html:87 udata/templates/dataset/list.html:33
