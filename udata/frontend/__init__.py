@@ -55,12 +55,15 @@ def _load_views(app, module):
         log.error('Error importing %s views: %s', module, e)
 
 
+VIEWS = ['core.storages', 'core.user', 'core.site', 'core.dataset',
+         'core.reuse', 'core.organization', 'core.followers',
+         'core.topic', 'core.post', 'core.tags', 'admin', 'search',
+         'features.territories']
+
+
 def init_app(app, views=None):
-    if views is None:
-        views = ['core.storages', 'core.user', 'core.site', 'core.dataset',
-                 'core.reuse', 'core.organization', 'core.followers',
-                 'core.topic', 'core.post', 'core.tags', 'admin', 'search',
-                 'features.territories']
+    views = views or VIEWS
+
     init_markdown(app)
 
     from . import helpers, error_handlers  # noqa
