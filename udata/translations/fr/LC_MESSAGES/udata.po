@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-08-03 11:47+0200\n"
-"PO-Revision-Date: 2017-09-26 14:18-0400\n"
+"PO-Revision-Date: 2017-09-26 14:30-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -23,7 +23,7 @@ msgstr "Erreur de validation : vos données ne peuvent être sauvegardées pour
 
 #: udata/api/oauth2.py:30
 msgid "Public"
-msgstr ""
+msgstr "Public"
 
 #: udata/api/oauth2.py:31
 msgid "Confidential"
@@ -130,7 +130,7 @@ msgstr "Titre"
 #: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:20
 #: udata/harvest/forms.py:17
 msgid "Description"
-msgstr ""
+msgstr "Description"
 
 #: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
 #: udata/templates/reuse/card.html:34 udata/templates/reuse/display.html:178
@@ -138,7 +138,7 @@ msgstr ""
 #: udata/templates/reuse/search-panel.html:6
 #: udata/templates/reuse/search-result.html:18
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: udata/core/dataset/forms.py:32
 msgid "Whether the resource is an uploaded file, a remote file or an API"
@@ -147,11 +147,11 @@ msgstr "Est-ce que la resource est un fichier uploadé, un fichier distant ou un
 #: udata/core/dataset/forms.py:35 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:19
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: udata/core/dataset/forms.py:36 udata/templates/dataset/search-labels.html:24
 msgid "Format"
-msgstr ""
+msgstr "Format"
 
 #: udata/core/dataset/forms.py:39
 msgid "Mime type"
@@ -1889,7 +1889,7 @@ msgstr "Granularité territoriale"
 
 #: udata/templates/dataset/search-panel.html:17
 msgid "Formats"
-msgstr ""
+msgstr "Formats"
 
 #: udata/templates/dataset/search-result.html:98
 msgid "Reuse number"
@@ -1913,7 +1913,7 @@ msgstr "avec"
 msgid "%(nb)s message"
 msgid_plural "%(nb)s messages"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(nb)s messages"
 
 #: udata/templates/discussion/item.html:28
 msgid "Deleted message"
@@ -2744,7 +2744,7 @@ msgstr "Niveau administratif"
 
 #: udata/templates/territories/search-result.html:30
 msgid "Population"
-msgstr ""
+msgstr "Population"
 
 #: udata/templates/territories/territory.html:11
 msgid "This territory has been replaced by:"
