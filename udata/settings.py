@@ -117,7 +117,7 @@ class Defaults(object):
 
     STATIC_DIRS = []
 
-    OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth-i18n.oauth_error'
+    OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth.oauth_error'
 
     MD_ALLOWED_TAGS = [
         'a',

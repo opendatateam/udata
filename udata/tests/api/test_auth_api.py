@@ -151,7 +151,7 @@ class APIAuthTest(APITestCase):
 
         client = self.oauth_app()
         response = self.get(url_for(
-            'oauth-i18n.authorize',
+            'oauth.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
@@ -166,7 +166,7 @@ class APIAuthTest(APITestCase):
 
         client = self.oauth_app()
         response = self.post(url_for(
-            'oauth-i18n.authorize',
+            'oauth.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
@@ -186,7 +186,7 @@ class APIAuthTest(APITestCase):
         client = self.oauth_app()
 
         response = self.post(url_for(
-            'oauth-i18n.authorize',
+            'oauth.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
