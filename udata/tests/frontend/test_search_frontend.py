@@ -10,7 +10,10 @@ from udata.core.organization.factories import OrganizationFactory
 from . import FrontTestCase
 
 
-class FrontEndRootTest(FrontTestCase):
+class SearchFrontTest(FrontTestCase):
+    modules = ['core.dataset', 'core.reuse', 'core.organization',
+               'admin', 'core.site', 'search']
+
     def test_render_search(self):
         '''It should render the search page'''
         with self.autoindex():
@@ -19,11 +22,11 @@ class FrontEndRootTest(FrontTestCase):
                 DatasetFactory(organization=org)
                 ReuseFactory(organization=org)
 
-        response = self.get(url_for('front.search'))
+        response = self.get(url_for('search.index'))
         self.assert200(response)
 
     def test_render_search_no_data(self):
         '''It should render the search page without data'''
         self.init_search()
-        response = self.get(url_for('front.search'))
+        response = self.get(url_for('search.index'))
         self.assert200(response)

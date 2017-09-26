@@ -6,8 +6,6 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import Dataset, Member
-from udata.core.user.views import blueprint as user_bp
-from udata.core.dataset.views import blueprint as dataset_bp
 from udata.core.discussions.models import Message, Discussion
 from udata.core.discussions.notifications import discussions_notifications
 from udata.core.discussions.signals import (
@@ -31,10 +29,7 @@ from .api import APITestCase
 
 
 class DiscussionsTest(APITestCase):
-    def create_app(self):
-        app = super(DiscussionsTest, self).create_app()
-        app.register_blueprint(user_bp)
-        return app
+    modules = ['core.user']
 
     def test_new_discussion(self):
         self.app.config['USE_METRICS'] = True
@@ -373,6 +368,7 @@ class DiscussionsTest(APITestCase):
 
 
 class DiscussionCsvTest(FrontTestCase):
+    modules = ['core.organization']
 
     def test_discussions_csv_content_empty(self):
         organization = OrganizationFactory()
@@ -480,12 +476,8 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
             self.assertEqual(details['subject']['type'], 'dataset')
 
 
-class DiscussionsMailsTest(TestCase, DBTestMixin):
-    def create_app(self):
-        app = super(DiscussionsMailsTest, self).create_app()
-        app.register_blueprint(user_bp)
-        app.register_blueprint(dataset_bp)
-        return app
+class DiscussionsMailsTest(FrontTestCase):
+    modules = ['core.user', 'core.dataset']
 
     def test_new_discussion_mail(self):
         user = UserFactory()

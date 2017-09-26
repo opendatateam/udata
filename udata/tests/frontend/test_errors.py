@@ -25,6 +25,9 @@ def route_500():
 
 
 class CustomErrorPagesTest(FrontTestCase):
+    modules = ['admin', 'core.dataset', 'core.reuse', 'core.site',
+               'core.organization', 'search']
+
     def create_app(self):
         app = super(CustomErrorPagesTest, self).create_app()
         app.register_blueprint(errors)

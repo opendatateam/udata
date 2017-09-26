@@ -10,7 +10,7 @@ from werkzeug.security import gen_salt
 from werkzeug.exceptions import Unauthorized
 
 from udata import theme
-from udata.app import Blueprint, csrf
+from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import db
@@ -18,8 +18,7 @@ from udata.core.storages import images, default_image_basename
 
 
 oauth = OAuth2Provider()
-bp = Blueprint('oauth', __name__)
-i18n = I18nBlueprint('oauth-i18n', __name__)
+blueprint = I18nBlueprint('oauth', __name__)
 
 
 GRANT_EXPIRATION = 100  # 100 seconds
@@ -186,14 +185,14 @@ def save_token(token, request, *args, **kwargs):
     )
 
 
-@bp.route('/oauth/token', methods=['POST'])
+@blueprint.route('/oauth/token', methods=['POST'], localize=False)
 @csrf.exempt
 @oauth.token_handler
 def access_token():
     return None
 
 
-@i18n.route('/oauth/authorize', methods=['GET', 'POST'])
+@blueprint.route('/oauth/authorize', methods=['GET', 'POST'])
 @oauth.authorize_handler
 @login_required
 def authorize(*args, **kwargs):
@@ -210,7 +209,7 @@ def authorize(*args, **kwargs):
         abort(405)
 
 
-@i18n.route('/oauth/error')
+@blueprint.route('/oauth/error')
 def oauth_error():
     return theme.render('api/oauth_error.html')
 
@@ -229,5 +228,4 @@ def check_credentials():
 
 def init_app(app):
     oauth.init_app(app)
-    app.register_blueprint(bp)
-    app.register_blueprint(i18n)
+    app.register_blueprint(blueprint)

@@ -40,6 +40,7 @@ class OEmbedSettings(Testing):
 
 
 class OEmbedsDatasetAPITest(APITestCase):
+    modules = ['core.organization', 'features.territories', 'core.dataset']
     settings = OEmbedSettings
 
     def setUp(self):
@@ -150,7 +151,7 @@ class OEmbedsDatasetAPITest(APITestCase):
         url = url_for('api.oembeds', references=reference)
         response = self.get(url)
         self.assert200(response)
-        
+
         data = json.loads(response.data)[0]
         self.assertIn('html', data)
         self.assertIn('width', data)

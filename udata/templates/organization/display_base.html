@@ -42,7 +42,7 @@
                             <p class="text-center">
                                 {% for badge in org.badges %}
                                     <small class="small-badge">
-                                        <a href="{{ url_for('front.search', badge=badge) }}"
+                                        <a href="{{ url_for('search.index', badge=badge) }}"
                                             title="{{ _('See all organizations with that badge.') }}">
                                             <span class="fa fa-bookmark"></span>
                                             {{ org.badge_label(badge) }}</a>

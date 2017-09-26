@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import (
-    request, current_app, send_from_directory, Blueprint, json,
-    redirect, url_for
-)
+from flask import request, json, redirect, url_for
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search, theme

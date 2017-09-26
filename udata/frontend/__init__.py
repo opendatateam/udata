@@ -55,41 +55,21 @@ def _load_views(app, module):
         log.error('Error importing %s views: %s', module, e)
 
 
-def init_app(app):
+VIEWS = ['core.storages', 'core.user', 'core.site', 'core.dataset',
+         'core.reuse', 'core.organization', 'core.followers',
+         'core.topic', 'core.post', 'core.tags', 'admin', 'search',
+         'features.territories']
+
+
+def init_app(app, views=None):
+    views = views or VIEWS
+
     init_markdown(app)
 
     from . import helpers, error_handlers  # noqa
 
-    # Load all core views and blueprint
-    import udata.search.views  # noqa
-
-    from udata.core.storages.views import blueprint as storages_blueprint
-    from udata.core.user.views import blueprint as user_blueprint
-    from udata.core.site.views import blueprint as site_blueprint
-    from udata.core.dataset.views import blueprint as dataset_blueprint
-    from udata.core.reuse.views import blueprint as reuse_blueprint
-    from udata.core.organization.views import blueprint as org_blueprint
-    from udata.core.followers.views import blueprint as follow_blueprint
-    from udata.core.topic.views import blueprint as topic_blueprint
-    from udata.core.post.views import blueprint as post_blueprint
-    from udata.core.tags.views import bp as tags_blueprint
-    from udata.admin.views import admin as admin_blueprint
-    from udata.features.territories.views import (
-        blueprint as territories_blueprint
-    )
-
-    app.register_blueprint(storages_blueprint)
-    app.register_blueprint(user_blueprint)
-    app.register_blueprint(site_blueprint)
-    app.register_blueprint(dataset_blueprint)
-    app.register_blueprint(reuse_blueprint)
-    app.register_blueprint(org_blueprint)
-    app.register_blueprint(follow_blueprint)
-    app.register_blueprint(topic_blueprint)
-    app.register_blueprint(post_blueprint)
-    app.register_blueprint(tags_blueprint)
-    app.register_blueprint(admin_blueprint)
-    app.register_blueprint(territories_blueprint)
+    for view in views:
+        _load_views(app, 'udata.{}.views'.format(view))
 
     # Load all plugins views and blueprints
     for plugin in app.config['PLUGINS']:

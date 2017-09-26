@@ -21,6 +21,8 @@ def dr(start, end):
 
 
 class FrontEndRootTest(FrontTestCase):
+    modules = ['core.site']
+
     def test_rewrite(self):
         '''url_rewrite should replace a parameter in the URL if present'''
         url = url_for('site.home', one='value', two='two')

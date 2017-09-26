@@ -38,6 +38,9 @@ class FakeAPI(API):
 
 
 class APIAuthTest(APITestCase):
+    modules = ['admin', 'search', 'core.dataset', 'core.reuse', 'core.site',
+               'core.organization', 'core.user']
+
     def oauth_app(self, name='test-client'):
         owner = UserFactory()
         return OAuth2Client.objects.create(
@@ -148,12 +151,13 @@ class APIAuthTest(APITestCase):
 
         client = self.oauth_app()
         response = self.get(url_for(
-            'oauth-i18n.authorize',
+            'oauth.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
         ))
 
+        print(response)
         self.assert200(response)
 
     def test_authorization_decline(self):
@@ -162,7 +166,7 @@ class APIAuthTest(APITestCase):
 
         client = self.oauth_app()
         response = self.post(url_for(
-            'oauth-i18n.authorize',
+            'oauth.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri
@@ -182,7 +186,7 @@ class APIAuthTest(APITestCase):
         client = self.oauth_app()
 
         response = self.post(url_for(
-            'oauth-i18n.authorize',
+            'oauth.authorize',
             response_type='code',
             client_id=client.client_id,
             redirect_uri=client.default_redirect_uri

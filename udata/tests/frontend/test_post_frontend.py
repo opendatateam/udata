@@ -9,6 +9,9 @@ from . import FrontTestCase
 
 
 class OrganizationBlueprintTest(FrontTestCase):
+    modules = ['core.post', 'admin', 'core.dataset', 'core.reuse',
+               'core.site', 'core.organization', 'search']
+
     def test_render_list(self):
         '''It should render the post list page'''
         # with self.autoindex():

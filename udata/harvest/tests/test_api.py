@@ -24,6 +24,8 @@ log = logging.getLogger(__name__)
 
 
 class HarvestAPITest(MockBackendsMixin, APITestCase):
+    modules = ['core.organization', 'core.user', 'core.dataset']
+
     def test_list_backends(self):
         '''It should fetch the harvest backends list from the API'''
         response = self.get(url_for('api.harvest_backends'))

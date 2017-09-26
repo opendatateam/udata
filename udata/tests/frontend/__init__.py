@@ -10,10 +10,12 @@ from udata import frontend, api
 
 
 class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
+    modules = []
+
     def create_app(self):
         app = super(FrontTestCase, self).create_app()
         api.init_app(app)
-        frontend.init_app(app)
+        frontend.init_app(app, self.modules)
         return app
 
     def get_json_ld(self, response):

@@ -9,27 +9,16 @@ from rdflib.resource import Resource
 
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.views import blueprint as dataset_blueprint
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.views import blueprint as org_blueprint
 from udata.core.site.factories import SiteFactory
 from udata.core.site.rdf import build_catalog
-from udata.core.site.views import blueprint as site_blueprint
 from udata.core.user.factories import UserFactory
-from udata.core.user.views import blueprint as user_blueprint
 from udata.rdf import CONTEXT, DCAT, DCT, HYDRA
-from udata.tests import TestCase, DBTestMixin
 from udata.tests.frontend import FrontTestCase
 
 
-class CatalogTest(DBTestMixin, TestCase):
-    def create_app(self):
-        app = super(CatalogTest, self).create_app()
-        app.register_blueprint(dataset_blueprint)
-        app.register_blueprint(org_blueprint)
-        app.register_blueprint(user_blueprint)
-        app.register_blueprint(site_blueprint)
-        return app
+class CatalogTest(FrontTestCase):
+    modules = ['core.dataset', 'core.organization', 'core.user', 'core.site']
 
     def test_minimal(self):
         site = SiteFactory()
@@ -153,6 +142,8 @@ class CatalogTest(DBTestMixin, TestCase):
 
 
 class SiteRdfViewsTest(FrontTestCase):
+    modules = ['core.site', 'core.dataset']
+
     def test_expose_jsonld_context(self):
         url = url_for('site.jsonld_context')
         self.assertEqual(url, '/context.jsonld')

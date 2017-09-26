@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from flask import request
-from flask_restplus import inputs
 
 from udata import search
 from udata.api import api, API, errors

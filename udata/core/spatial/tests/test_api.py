@@ -18,6 +18,8 @@ from udata.core.spatial.factories import (
 
 
 class SpatialApiTest(APITestCase):
+    modules = ['core.dataset']
+
     def test_zones_api_one(self):
         zone = GeoZoneFactory()
 
@@ -318,6 +320,7 @@ class SpatialApiTest(APITestCase):
 
 
 class SpatialTerritoriesApiTest(APITestCase):
+    modules = ['core.dataset']
     settings = TerritoriesSettings
 
     def test_zone_datasets_with_dynamic_and_setting(self):

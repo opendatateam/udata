@@ -11,6 +11,8 @@ from . import APITestCase
 
 
 class TopicsAPITest(APITestCase):
+    modules = ['core.dataset', 'core.topic', 'core.reuse', 'core.user']
+
     def test_topic_api_list(self):
         '''It should fetch a topic list from the API'''
         topics = TopicFactory.create_batch(3)

@@ -185,7 +185,7 @@
 
                         <div class="tags">
                             {% for tag in reuse.tags %}
-                            <a href="{{ url_for('front.search', tag=tag) }}"
+                            <a href="{{ url_for('search.index', tag=tag) }}"
                                 class="btn btn-primary btn-grey btn-xs"
                                 title="{{ tag }}">
                                 {{ tag|truncate(14, True) }}
