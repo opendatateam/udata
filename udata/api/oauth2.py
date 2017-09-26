@@ -78,6 +78,9 @@ class OAuth2Client(db.Datetimed, db.Document):
         'collection': 'oauth2_client'
     }
 
+    def __unicode__(self):
+        return self.name
+
     @property
     def client_id(self):
         return str(self.id)
@@ -106,6 +109,9 @@ class OAuth2Grant(db.Document):
         'collection': 'oauth2_grant'
     }
 
+    def __unicode__(self):
+        return '<OAuth2Grant({0.client.name}, {0.user.fullname})>'.format(self)
+
 
 class OAuth2Token(db.Document):
     client = db.ReferenceField('OAuth2Client', required=True)
@@ -123,6 +129,9 @@ class OAuth2Token(db.Document):
     meta = {
         'collection': 'oauth2_token'
     }
+
+    def __unicode__(self):
+        return '<OAuth2Token({0.client.name})>'.format(self)
 
 
 @oauth.clientgetter
