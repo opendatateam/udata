@@ -8,6 +8,7 @@
 - Expose harvester scheduling through the API and the admin interface [#1123](https://github.com/opendatateam/udata/pull/1123)
 - **BREAKING** Upgrade to Celery 4.1.0. All celery parameters should be updated. (See [Celery options documentation](https://udata.readthedocs.io/en/stable/adapting-settings/#celery-options) [#1150](https://github.com/opendatateam/udata/pull/1050)
 - Fixes a lot of encoding issues [#1146](https://github.com/opendatateam/udata/pull/1146)
+- Switch to [Crowdin](https://crowdin.com) to manage translations [#1171](https://github.com/opendatateam/udata/pull/1171)
 
 ## 1.1.7 (2017-09-25)
 
