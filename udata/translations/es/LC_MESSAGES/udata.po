@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-09-27 10:41+0200\n"
-"PO-Revision-Date: 2017-09-27 08:17-0400\n"
+"PO-Revision-Date: 2017-09-27 10:13-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -2301,15 +2301,15 @@ msgstr "Esta organización se ha eliminado. Esto será permanente durante las pr
 #, python-format
 msgid "%(num)d private dataset"
 msgid_plural "%(num)d private datasets"
-msgstr[0] "%(num)d conjunto de datos"
-msgstr[1] "%(num)d conjuntos de datos"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:51
 #, python-format
 msgid "%(num)d private reuse"
 msgid_plural "%(num)d private reuses"
-msgstr[0] "%(num)d reutilización"
-msgstr[1] "%(num)d reutilizaciones"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:78
 #, python-format
@@ -2896,28 +2896,4 @@ msgstr ""
 #: udata/theme/__init__.py:41
 msgid "Map"
 msgstr ""
-
-#~ msgid "Do you want to create a superadmin user ?"
-#~ msgstr ""
-
-#~ msgid "Do you want to import some data-related license ?"
-#~ msgstr ""
-
-#~ msgid "Do you want to create some sample data ?"
-#~ msgstr ""
-
-#~ msgid "Your udata instance is ready !"
-#~ msgstr ""
-
-#~ msgid "Administrateur"
-#~ msgstr "Administrador"
-
-#~ msgid "Views"
-#~ msgstr "Vistas"
-
-#~ msgid "Private datasets"
-#~ msgstr "Conjuntos de datos privados"
-
-#~ msgid "Private reuses"
-#~ msgstr "Reutilizaciones privadas"
 
