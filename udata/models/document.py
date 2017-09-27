@@ -39,9 +39,14 @@ class UDataDocument(Document):
         data[id_field] = getattr(self, id_field)
         return data
 
-
     def __str__(self):
         return self.__unicode__().encode('utf-8')
+
+    def __unicode__(self):
+        return '{classname}({id})'.format(
+            classname=self.__class__.__name__,
+            id=getattr(self, self._meta['id_field'])
+        )
 
 
 class DomainModel(UDataDocument):

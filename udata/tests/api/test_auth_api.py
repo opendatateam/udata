@@ -157,7 +157,6 @@ class APIAuthTest(APITestCase):
             redirect_uri=client.default_redirect_uri
         ))
 
-        print(response)
         self.assert200(response)
 
     def test_authorization_decline(self):
