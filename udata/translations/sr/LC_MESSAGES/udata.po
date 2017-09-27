@@ -1,0 +1,3020 @@
+# Translations template for udata.
+# Copyright (C) 2017 ORGANIZATION
+# This file is distributed under the same license as the udata project.
+# 
+# Translators:
+# Jovan <jdjak@mail.com>, 2016
+msgid ""
+msgstr ""
+"Project-Id-Version: udata\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2017-08-03 11:47+0200\n"
+"PO-Revision-Date: 2017-09-22 21:55+0000\n"
+"Last-Translator: Axel Haustant\n"
+"Language-Team: Serbian (http://www.transifex.com/etalab/udata/language/sr/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+"Language: sr\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: udata/api/errors.py:4
+msgid ""
+"Validation error: your data cannot be updated for now, we have been notified"
+" of the error and we will fix it as soon as possible."
+msgstr ""
+
+#: udata/api/oauth2.py:30
+msgid "Public"
+msgstr ""
+
+#: udata/api/oauth2.py:31
+msgid "Confidential"
+msgstr ""
+
+#: udata/api/oauth2.py:35
+msgid "Web Application"
+msgstr ""
+
+#: udata/api/oauth2.py:36
+msgid "User Agent"
+msgstr ""
+
+#: udata/api/oauth2.py:37
+msgid "Native"
+msgstr ""
+
+#: udata/api/oauth2.py:41
+msgid "Authorization Code"
+msgstr ""
+
+#: udata/api/oauth2.py:42
+msgid "Implicit"
+msgstr ""
+
+#: udata/api/oauth2.py:43
+msgid "Resource Owner Password Credentials"
+msgstr ""
+
+#: udata/api/oauth2.py:44
+msgid "Client Credentials"
+msgstr ""
+
+#: udata/api/oauth2.py:48
+msgid "Bearer Token"
+msgstr ""
+
+#: udata/api/oauth2.py:52
+msgid "Default scope"
+msgstr ""
+
+#: udata/api/oauth2.py:53
+msgid "System administrator rights"
+msgstr ""
+
+#: udata/commands/init.py:30
+msgid "Do you want to create a superadmin user ?"
+msgstr ""
+
+#: udata/commands/init.py:35
+msgid "Do you want to import some data-related license ?"
+msgstr ""
+
+#: udata/commands/init.py:39
+msgid "Do you want to create some sample data ?"
+msgstr ""
+
+#: udata/commands/init.py:43
+msgid "Your udata instance is ready !"
+msgstr ""
+
+#: udata/core/badges/forms.py:17
+msgid "Kind"
+msgstr ""
+
+#: udata/core/badges/forms.py:19
+msgid "Kind of badge (certified, etc)"
+msgstr ""
+
+#: udata/core/badges/tasks.py:40
+#, python-format
+msgid "Your organization \"%(name)s\" has been certified"
+msgstr ""
+
+#: udata/core/badges/tasks.py:67
+#, python-format
+msgid "Your organization \"%(name)s\" has been identified as public service"
+msgstr ""
+
+#: udata/core/dataset/activities.py:25
+msgid "created a dataset"
+msgstr ""
+
+#: udata/core/dataset/activities.py:31
+msgid "updated a dataset"
+msgstr ""
+
+#: udata/core/dataset/activities.py:38
+msgid "deleted a dataset"
+msgstr ""
+
+#: udata/core/dataset/forms.py:27 udata/core/dataset/forms.py:73
+#: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
+#: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
+#: udata/templates/dataset/list.html:35
+#: udata/templates/discussion/threads.html:43
+#: udata/templates/organization/list.html:34
+#: udata/templates/reuse/list.html:36 udata/templates/search.html:73
+#: udata/templates/search.html:87 udata/templates/topic/datasets.html:33
+#: udata/templates/topic/reuses.html:32
+msgid "Title"
+msgstr ""
+
+#: udata/core/dataset/forms.py:28 udata/core/dataset/forms.py:75
+#: udata/core/jobs/forms.py:31 udata/core/organization/forms.py:27
+#: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:20
+#: udata/harvest/forms.py:17
+msgid "Description"
+msgstr ""
+
+#: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
+#: udata/templates/reuse/card.html:34 udata/templates/reuse/display.html:178
+#: udata/templates/reuse/search-labels.html:6
+#: udata/templates/reuse/search-panel.html:6
+#: udata/templates/reuse/search-result.html:18
+msgid "Type"
+msgstr ""
+
+#: udata/core/dataset/forms.py:32
+msgid "Whether the resource is an uploaded file, a remote file or an API"
+msgstr ""
+
+#: udata/core/dataset/forms.py:35 udata/core/reuse/forms.py:29
+#: udata/harvest/forms.py:19
+msgid "URL"
+msgstr ""
+
+#: udata/core/dataset/forms.py:36
+#: udata/templates/dataset/search-labels.html:24
+msgid "Format"
+msgstr ""
+
+#: udata/core/dataset/forms.py:39
+msgid "Mime type"
+msgstr ""
+
+#: udata/core/dataset/forms.py:40
+msgid "The mime type associated to the extension. (ex: text/plain)"
+msgstr ""
+
+#: udata/core/dataset/forms.py:43
+msgid "Size"
+msgstr ""
+
+#: udata/core/dataset/forms.py:44
+msgid "The file size in bytes"
+msgstr ""
+
+#: udata/core/dataset/forms.py:46
+msgid "Publication date"
+msgstr ""
+
+#: udata/core/dataset/forms.py:47
+msgid "The publication date of the resource"
+msgstr ""
+
+#: udata/core/dataset/forms.py:59
+msgid "Related dataset"
+msgstr ""
+
+#: udata/core/dataset/forms.py:61 udata/core/dataset/forms.py:100
+#: udata/core/reuse/forms.py:40 udata/harvest/forms.py:24
+msgid "Publish as"
+msgstr ""
+
+#: udata/core/dataset/forms.py:76
+msgid "The details about the dataset (collection process, specifics...)."
+msgstr ""
+
+#: udata/core/dataset/forms.py:79 udata/templates/dataset/display.html:203
+#: udata/templates/dataset/search-labels.html:9
+msgid "License"
+msgstr ""
+
+#: udata/core/dataset/forms.py:81
+msgid "Update frequency"
+msgstr ""
+
+#: udata/core/dataset/forms.py:85
+msgid "The frequency at which data are updated."
+msgstr ""
+
+#: udata/core/dataset/forms.py:86
+msgid "Expected frequency date"
+msgstr ""
+
+#: udata/core/dataset/forms.py:88 udata/templates/dataset/card.html:65
+#: udata/templates/dataset/display.html:213
+#: udata/templates/dataset/search-labels.html:15
+#: udata/templates/dataset/search-panel.html:13
+#: udata/templates/dataset/search-result.html:31
+#: udata/templates/embed-dataset.html:209
+msgid "Temporal coverage"
+msgstr ""
+
+#: udata/core/dataset/forms.py:89
+msgid "The period covered by the data"
+msgstr ""
+
+#: udata/core/dataset/forms.py:91 udata/core/spatial/forms.py:60
+#: udata/templates/dataset/display.html:301
+#: udata/templates/dataset/search-labels.html:18
+#: udata/templates/dataset/search-panel.html:15
+#: udata/templates/dataset/search-result.html:55
+#: udata/templates/dataset/search-result.html:65
+#: udata/templates/dataset/search-result.html:76
+msgid "Spatial coverage"
+msgstr ""
+
+#: udata/core/dataset/forms.py:92
+msgid "The geographical area covered by the data."
+msgstr ""
+
+#: udata/core/dataset/forms.py:93 udata/core/post/forms.py:29
+#: udata/core/reuse/forms.py:32 udata/core/site/forms.py:16
+#: udata/core/topic/forms.py:25 udata/templates/dataset/search-panel.html:10
+#: udata/templates/reuse/search-panel.html:7
+msgid "Tags"
+msgstr ""
+
+#: udata/core/dataset/forms.py:93 udata/core/reuse/forms.py:32
+msgid "Some taxonomy keywords"
+msgstr ""
+
+#: udata/core/dataset/forms.py:95 udata/core/post/forms.py:31
+#: udata/core/reuse/forms.py:35 udata/core/topic/forms.py:26
+#: udata/templates/dataset/display.html:67
+#: udata/templates/dataset/display.html:68
+#: udata/templates/post/display.html:61 udata/templates/post/display.html:64
+#: udata/templates/reuse/display.html:56 udata/templates/reuse/display.html:59
+msgid "Private"
+msgstr ""
+
+#: udata/core/dataset/forms.py:96 udata/core/reuse/forms.py:36
+msgid "Restrict the dataset visibility to you or your organization only."
+msgstr ""
+
+#: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:33
+#: udata/core/organization/views.py:132 udata/core/organization/views.py:135
+#: udata/core/site/metrics.py:52 udata/core/site/views.py:131
+#: udata/core/user/metrics.py:42 udata/templates/dataset/card.html:38
+#: udata/templates/dataset/display.html:376
+#: udata/templates/dataset/list.html:38
+#: udata/templates/dataset/search-labels.html:25
+#: udata/templates/dataset/search-panel.html:18
+#: udata/templates/organization/dashboard.html:22
+#: udata/templates/organization/display.html:50
+#: udata/templates/organization/list.html:38
+#: udata/templates/organization/search-labels.html:9
+#: udata/templates/organization/search-panel.html:6
+#: udata/templates/reuse/display.html:23 udata/templates/reuse/list.html:8
+#: udata/templates/reuse/list.html:18 udata/templates/reuse/list.html:34
+#: udata/templates/search.html:76 udata/templates/search.html:85
+#: udata/templates/search.html:103 udata/templates/site/dashboard.html:22
+#: udata/templates/topic/browse.html:15 udata/templates/topic/datasets.html:36
+#: udata/templates/topic/reuses.html:21 udata/templates/user/following.html:16
+#: udata/templates/user/list.html:33 udata/templates/user/reuses.html:8
+#: udata/theme/__init__.py:40
+msgid "Reuses"
+msgstr ""
+
+#: udata/core/dataset/models.py:33
+msgid "Punctual"
+msgstr ""
+
+#: udata/core/dataset/models.py:34
+msgid "Real time"
+msgstr ""
+
+#: udata/core/dataset/models.py:35
+msgid "Hourly"
+msgstr ""
+
+#: udata/core/dataset/models.py:36
+msgid "Four times a day"
+msgstr ""
+
+#: udata/core/dataset/models.py:37
+msgid "Three times a day"
+msgstr ""
+
+#: udata/core/dataset/models.py:38
+msgid "Semidaily"
+msgstr ""
+
+#: udata/core/dataset/models.py:39 udata/harvest/models.py:18
+msgid "Daily"
+msgstr ""
+
+#: udata/core/dataset/models.py:40
+msgid "Four times a week"
+msgstr ""
+
+#: udata/core/dataset/models.py:41
+msgid "Three times a week"
+msgstr ""
+
+#: udata/core/dataset/models.py:42
+msgid "Semiweekly"
+msgstr ""
+
+#: udata/core/dataset/models.py:43 udata/harvest/models.py:17
+msgid "Weekly"
+msgstr ""
+
+#: udata/core/dataset/models.py:44
+msgid "Biweekly"
+msgstr ""
+
+#: udata/core/dataset/models.py:45
+msgid "Semimonthly"
+msgstr ""
+
+#: udata/core/dataset/models.py:46
+msgid "Three times a month"
+msgstr ""
+
+#: udata/core/dataset/models.py:47 udata/harvest/models.py:16
+msgid "Monthly"
+msgstr ""
+
+#: udata/core/dataset/models.py:48
+msgid "Bimonthly"
+msgstr ""
+
+#: udata/core/dataset/models.py:49
+msgid "Quarterly"
+msgstr ""
+
+#: udata/core/dataset/models.py:50
+msgid "Three times a year"
+msgstr ""
+
+#: udata/core/dataset/models.py:51
+msgid "Biannual"
+msgstr ""
+
+#: udata/core/dataset/models.py:52
+msgid "Annual"
+msgstr ""
+
+#: udata/core/dataset/models.py:53
+msgid "Biennial"
+msgstr ""
+
+#: udata/core/dataset/models.py:54
+msgid "Triennial"
+msgstr ""
+
+#: udata/core/dataset/models.py:55
+msgid "Quinquennial"
+msgstr ""
+
+#: udata/core/dataset/models.py:56
+msgid "Irregular"
+msgstr ""
+
+#: udata/core/dataset/models.py:57
+msgid "Unknown"
+msgstr ""
+
+#: udata/core/dataset/models.py:80
+msgid "Uploaded file"
+msgstr ""
+
+#: udata/core/dataset/models.py:81
+msgid "Remote file"
+msgstr ""
+
+#: udata/core/dataset/models.py:82 udata/core/reuse/models.py:19
+msgid "API"
+msgstr ""
+
+#: udata/core/dataset/models.py:221 udata/core/dataset/rdf.py:285
+#: udata/templates/dataset/resource/list-item.html:12
+msgid "Nameless resource"
+msgstr ""
+
+#: udata/core/dataset/models.py:267 udata/models/datetime_fields.py:58
+#: udata/templates/dataset/display.html:230
+#: udata/templates/dataset/list.html:36
+#: udata/templates/organization/list.html:35
+#: udata/templates/reuse/list.html:37 udata/templates/search.html:74
+#: udata/templates/search.html:88 udata/templates/topic/datasets.html:34
+#: udata/templates/topic/reuses.html:33
+msgid "Creation date"
+msgstr ""
+
+#: udata/core/dataset/models.py:269 udata/models/datetime_fields.py:60
+#: udata/templates/dataset/list.html:37
+#: udata/templates/organization/list.html:36
+#: udata/templates/reuse/list.html:38 udata/templates/search.html:75
+#: udata/templates/search.html:89 udata/templates/topic/datasets.html:35
+#: udata/templates/topic/reuses.html:34
+msgid "Last modification date"
+msgstr ""
+
+#: udata/core/dataset/models.py:282
+msgid "Future date of update"
+msgstr ""
+
+#: udata/core/dataset/models.py:299
+msgid "Pivotal data"
+msgstr ""
+
+#: udata/core/dataset/models.py:321 udata/templates/dataset/display.html:11
+msgid "dataset"
+msgstr ""
+
+#: udata/core/dataset/rdf.py:283
+msgid "{format} resource"
+msgstr ""
+
+#: udata/core/dataset/search.py:146 udata/tests/test_search.py:92
+msgid "Never reused"
+msgstr ""
+
+#: udata/core/dataset/search.py:147 udata/tests/test_search.py:93
+msgid "Little reused"
+msgstr ""
+
+#: udata/core/dataset/search.py:148 udata/tests/test_search.py:94
+msgid "Quite reused"
+msgstr ""
+
+#: udata/core/dataset/search.py:149 udata/tests/test_search.py:95
+msgid "Heavily reused"
+msgstr ""
+
+#: udata/core/dataset/tasks.py:93
+msgid "You need to update some frequency-based datasets"
+msgstr ""
+
+#: udata/core/dataset/views.py:28 udata/templates/home.html:122
+msgid "Last datasets"
+msgstr ""
+
+#: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:21
+#: udata/core/issues/forms.py:16 udata/core/issues/forms.py:21
+#: udata/core/organization/forms.py:52 udata/core/organization/forms.py:56
+#: udata/harvest/forms.py:29 udata/templates/discussion/item.html:60
+#: udata/templates/discussion/threads.html:45
+#: udata/templates/mail/discussion_closed.html:31
+#: udata/templates/mail/issue_closed.html:31
+#: udata/templates/mail/new_discussion_comment.html:31
+#: udata/templates/mail/new_issue_comment.html:31
+msgid "Comment"
+msgstr ""
+
+#: udata/core/discussions/forms.py:17 udata/core/issues/forms.py:17
+msgid "Subject"
+msgstr ""
+
+#: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
+#: udata/templates/dataset/display.html:345
+#: udata/templates/reuse/display.html:262
+#: udata/templates/site/dashboard.html:25
+msgid "Discussions"
+msgstr ""
+
+#: udata/core/discussions/tasks.py:39
+#, python-format
+msgid "Your %(type)s have a new discussion"
+msgstr ""
+
+#: udata/core/discussions/tasks.py:54
+#, python-format
+msgid "%(user)s commented your discussion"
+msgstr ""
+
+#: udata/core/discussions/tasks.py:70
+msgid "A discussion has been closed"
+msgstr ""
+
+#: udata/core/followers/metrics.py:29 udata/core/organization/views.py:161
+#: udata/core/site/metrics.py:101 udata/templates/dataset/followers.html:6
+#: udata/templates/dataset/search-labels.html:28
+#: udata/templates/dataset/search-panel.html:19
+#: udata/templates/dataset/search-result.html:106
+#: udata/templates/organization/dashboard.html:23
+#: udata/templates/organization/display.html:55
+#: udata/templates/organization/display.html:155
+#: udata/templates/organization/followers.html:7
+#: udata/templates/organization/list.html:39
+#: udata/templates/organization/search-labels.html:12
+#: udata/templates/organization/search-panel.html:8
+#: udata/templates/reuse/display.html:207 udata/templates/reuse/list.html:40
+#: udata/templates/reuse/search-labels.html:15
+#: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:104
+#: udata/templates/topic/reuses.html:36 udata/templates/user/followers.html:7
+#: udata/templates/user/list.html:34
+msgid "Followers"
+msgstr ""
+
+#: udata/core/followers/tasks.py:22 udata/templates/mail/new_follower.html:8
+#, python-format
+msgid "%(user)s followed you"
+msgstr ""
+
+#: udata/core/followers/tasks.py:25
+#, python-format
+msgid "%(user)s followed your organization"
+msgstr ""
+
+#: udata/core/issues/metrics.py:13 udata/core/reuse/views.py:57
+msgid "Issues"
+msgstr ""
+
+#: udata/core/issues/tasks.py:25
+#, python-format
+msgid "Your %(type)s have a new issue"
+msgstr ""
+
+#: udata/core/issues/tasks.py:39
+#, python-format
+msgid "%(user)s commented your issue"
+msgstr ""
+
+#: udata/core/issues/tasks.py:54
+msgid "An issue has been closed"
+msgstr ""
+
+#: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
+#: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
+#: udata/harvest/forms.py:15 udata/templates/api/admin.html:10
+#: udata/templates/search.html:101 udata/templates/user/list.html:35
+msgid "Name"
+msgstr ""
+
+#: udata/core/jobs/forms.py:32
+msgid "Tasks"
+msgstr ""
+
+#: udata/core/jobs/forms.py:33
+msgid "Enabled"
+msgstr ""
+
+#: udata/core/jobs/models.py:19
+msgid "every {0.period_singular}"
+msgstr ""
+
+#: udata/core/jobs/models.py:20
+msgid "every {0.every} {0.period}"
+msgstr ""
+
+#: udata/core/organization/activities.py:25
+msgid "created an organization"
+msgstr ""
+
+#: udata/core/organization/activities.py:32
+msgid "updated an organization"
+msgstr ""
+
+#: udata/core/organization/forms.py:25
+msgid "Acronym"
+msgstr ""
+
+#: udata/core/organization/forms.py:25
+msgid "Shorter organization name"
+msgstr ""
+
+#: udata/core/organization/forms.py:28
+msgid "The details about your organization"
+msgstr ""
+
+#: udata/core/organization/forms.py:30 udata/core/user/forms.py:20
+msgid "Website"
+msgstr ""
+
+#: udata/core/organization/forms.py:30
+msgid "The organization website URL"
+msgstr ""
+
+#: udata/core/organization/forms.py:31
+msgid "Logo"
+msgstr ""
+
+#: udata/core/organization/forms.py:63
+msgid "Role"
+msgstr ""
+
+#: udata/core/organization/metrics.py:17 udata/core/organization/views.py:110
+#: udata/core/organization/views.py:113 udata/core/reuse/metrics.py:24
+#: udata/core/site/metrics.py:42 udata/core/site/views.py:125
+#: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:23
+#: udata/templates/dataset/followers.html:4
+#: udata/templates/dataset/list.html:8 udata/templates/dataset/list.html:18
+#: udata/templates/dataset/list.html:32
+#: udata/templates/organization/dashboard.html:21
+#: udata/templates/organization/display.html:46
+#: udata/templates/organization/list.html:37
+#: udata/templates/organization/search-labels.html:6
+#: udata/templates/organization/search-panel.html:4
+#: udata/templates/reuse/list.html:39
+#: udata/templates/reuse/search-labels.html:12
+#: udata/templates/reuse/search-panel.html:8 udata/templates/search.html:70
+#: udata/templates/search.html:102 udata/templates/site/dashboard.html:20
+#: udata/templates/topic/browse.html:9 udata/templates/topic/datasets.html:21
+#: udata/templates/topic/reuses.html:35 udata/templates/user/datasets.html:8
+#: udata/templates/user/following.html:15 udata/templates/user/list.html:32
+#: udata/theme/__init__.py:39
+msgid "Datasets"
+msgstr ""
+
+#: udata/core/organization/metrics.py:45 udata/core/organization/views.py:156
+msgid "Permitted reuses"
+msgstr ""
+
+#: udata/core/organization/metrics.py:56
+#: udata/templates/organization/display.html:54
+#: udata/templates/organization/display.html:143
+msgid "Members"
+msgstr ""
+
+#: udata/core/organization/models.py:25
+msgid "Administrateur"
+msgstr ""
+
+#: udata/core/organization/models.py:26
+#: udata/templates/organization/display_base.html:141
+msgid "Editor"
+msgstr ""
+
+#: udata/core/organization/models.py:32 udata/features/transfer/models.py:17
+#: udata/harvest/models.py:22 udata/harvest/models.py:32
+#: udata/harvest/models.py:69
+msgid "Pending"
+msgstr ""
+
+#: udata/core/organization/models.py:33 udata/features/transfer/models.py:18
+#: udata/harvest/models.py:70
+msgid "Accepted"
+msgstr ""
+
+#: udata/core/organization/models.py:34 udata/features/transfer/models.py:19
+#: udata/harvest/models.py:71
+msgid "Refused"
+msgstr ""
+
+#: udata/core/organization/models.py:130
+msgid "Public Service"
+msgstr ""
+
+#: udata/core/organization/models.py:131
+msgid "Certified"
+msgstr ""
+
+#: udata/core/organization/search.py:74
+msgid "No reuses"
+msgstr ""
+
+#: udata/core/organization/search.py:75
+msgid "Few reuses"
+msgstr ""
+
+#: udata/core/organization/search.py:76
+msgid "Many reuses"
+msgstr ""
+
+#: udata/core/organization/search.py:85 udata/core/reuse/search.py:95
+#: udata/core/user/search.py:62
+msgid "No datasets"
+msgstr ""
+
+#: udata/core/organization/search.py:86 udata/core/reuse/search.py:96
+#: udata/core/user/search.py:63
+msgid "Few datasets"
+msgstr ""
+
+#: udata/core/organization/search.py:87 udata/core/reuse/search.py:97
+#: udata/core/user/search.py:64
+msgid "Many datasets"
+msgstr ""
+
+#: udata/core/organization/search.py:94 udata/core/reuse/search.py:104
+#: udata/core/user/search.py:71
+msgid "No followers"
+msgstr ""
+
+#: udata/core/organization/search.py:95 udata/core/reuse/search.py:105
+#: udata/core/user/search.py:72
+msgid "Few followers"
+msgstr ""
+
+#: udata/core/organization/search.py:96 udata/core/reuse/search.py:106
+#: udata/core/user/search.py:73
+msgid "Many followers"
+msgstr ""
+
+#: udata/core/organization/tasks.py:37
+msgid "New membership request"
+msgstr ""
+
+#: udata/core/organization/tasks.py:44 udata/core/organization/tasks.py:54
+#, python-format
+msgid "You are now a member of the organization \"%(org)s\""
+msgstr ""
+
+#: udata/core/organization/tasks.py:48
+msgid "Membership refused"
+msgstr ""
+
+#: udata/core/organization/views.py:120 udata/core/organization/views.py:142
+msgid "Views"
+msgstr ""
+
+#: udata/core/organization/views.py:153 udata/core/site/views.py:143
+msgid "Community"
+msgstr ""
+
+#: udata/core/post/forms.py:19
+msgid "Headline"
+msgstr ""
+
+#: udata/core/post/forms.py:20
+msgid "Content"
+msgstr ""
+
+#: udata/core/post/forms.py:22 udata/core/topic/forms.py:22
+#: udata/templates/post/display.html:147
+msgid "Associated datasets"
+msgstr ""
+
+#: udata/core/post/forms.py:23 udata/core/topic/forms.py:23
+#: udata/templates/post/display.html:134
+msgid "Associated reuses"
+msgstr ""
+
+#: udata/core/post/forms.py:25 udata/core/reuse/forms.py:31
+msgid "Image"
+msgstr ""
+
+#: udata/core/post/forms.py:26
+msgid "Image credits"
+msgstr ""
+
+#: udata/core/post/forms.py:27
+msgid "Credit URL"
+msgstr ""
+
+#: udata/core/reuse/activities.py:26
+msgid "created a reuse"
+msgstr ""
+
+#: udata/core/reuse/activities.py:32
+msgid "updated a reuse"
+msgstr ""
+
+#: udata/core/reuse/activities.py:39
+msgid "deleted a reuse"
+msgstr ""
+
+#: udata/core/reuse/forms.py:16
+msgid "This URL is already registered"
+msgstr ""
+
+#: udata/core/reuse/forms.py:25
+msgid ""
+"The details about the reuse (build process, specifics, self-critics...)."
+msgstr ""
+
+#: udata/core/reuse/forms.py:33 udata/templates/home.html:92
+#: udata/templates/reuse/display.html:229
+msgid "Used datasets"
+msgstr ""
+
+#: udata/core/reuse/models.py:20
+msgid "Application"
+msgstr ""
+
+#: udata/core/reuse/models.py:21
+msgid "Idea"
+msgstr ""
+
+#: udata/core/reuse/models.py:22
+msgid "News Article"
+msgstr ""
+
+#: udata/core/reuse/models.py:23
+msgid "Paper"
+msgstr ""
+
+#: udata/core/reuse/models.py:24
+msgid "Post"
+msgstr ""
+
+#: udata/core/reuse/models.py:25
+msgid "Visualization"
+msgstr ""
+
+#: udata/core/reuse/models.py:26
+msgid "Connected device"
+msgstr ""
+
+#: udata/core/reuse/models.py:90 udata/templates/reuse/display.html:10
+msgid "reuse"
+msgstr ""
+
+#: udata/core/reuse/tasks.py:41
+msgid "New reuse"
+msgstr ""
+
+#: udata/core/reuse/views.py:22 udata/templates/home.html:139
+msgid "Last reuses"
+msgstr ""
+
+#: udata/core/reuse/views.py:58
+msgid "Transfer"
+msgstr ""
+
+#: udata/core/site/forms.py:16
+msgid "Some SEO keywords"
+msgstr ""
+
+#: udata/core/site/forms.py:18
+msgid "Feed size"
+msgstr ""
+
+#: udata/core/site/forms.py:18
+msgid "Number of elements in feeds"
+msgstr ""
+
+#: udata/core/site/metrics.py:62 udata/core/site/views.py:137
+#: udata/templates/dataset/display.html:87
+#: udata/templates/dataset/list.html:33 udata/templates/search.html:71
+#: udata/templates/site/dashboard.html:21
+msgid "Resources"
+msgstr ""
+
+#: udata/core/site/metrics.py:81 udata/core/site/views.py:152
+#: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
+#: udata/templates/user/following.html:18 udata/templates/user/list.html:8
+#: udata/templates/user/list.html:18
+msgid "Users"
+msgstr ""
+
+#: udata/core/site/metrics.py:91 udata/core/site/views.py:146
+#: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:47
+#: udata/templates/organization/display_base.html:8
+#: udata/templates/organization/followers.html:5
+#: udata/templates/organization/list.html:8
+#: udata/templates/organization/list.html:18
+#: udata/templates/organization/list.html:32
+#: udata/templates/reuse/search-panel.html:4 udata/templates/search.html:99
+#: udata/templates/site/dashboard.html:24 udata/templates/user/base.html:92
+#: udata/templates/user/following.html:17 udata/theme/__init__.py:38
+msgid "Organizations"
+msgstr "Organizacija"
+
+#: udata/core/site/metrics.py:111
+msgid "Maximum dataset followers"
+msgstr ""
+
+#: udata/core/site/metrics.py:124
+msgid "Maximum dataset reuses"
+msgstr ""
+
+#: udata/core/site/metrics.py:137
+msgid "Maximum datasets in reuses"
+msgstr ""
+
+#: udata/core/site/metrics.py:150
+msgid "Maximum reuse followers"
+msgstr ""
+
+#: udata/core/site/metrics.py:163
+msgid "Maximum organization followers"
+msgstr ""
+
+#: udata/core/site/metrics.py:177
+msgid "Maximum organization reuses"
+msgstr ""
+
+#: udata/core/site/metrics.py:191
+msgid "Maximum organization datasets"
+msgstr ""
+
+#: udata/core/site/views.py:122
+msgid "Data"
+msgstr ""
+
+#: udata/core/spatial/api.py:59
+msgid "payloadname"
+msgstr ""
+
+#: udata/core/spatial/forms.py:47
+msgid "Not a valid GeoJSON"
+msgstr ""
+
+#: udata/core/spatial/forms.py:61
+msgid "A list of covered territories"
+msgstr ""
+
+#: udata/core/spatial/forms.py:63
+#: udata/templates/dataset/search-labels.html:21
+msgid "Spatial granularity"
+msgstr ""
+
+#: udata/core/spatial/forms.py:64
+msgid "The size of the data increment"
+msgstr ""
+
+#: udata/core/spatial/models.py:23
+msgid "POI"
+msgstr ""
+
+#: udata/core/spatial/models.py:24
+msgid "Other"
+msgstr ""
+
+#: udata/core/spatial/models.py:262
+msgid "other"
+msgstr ""
+
+#: udata/core/spatial/translations.py:8
+msgid "French region"
+msgstr ""
+
+#: udata/core/spatial/translations.py:9
+msgid "French intermunicipal (EPCI)"
+msgstr ""
+
+#: udata/core/spatial/translations.py:10
+msgid "French county"
+msgstr ""
+
+#: udata/core/spatial/translations.py:11
+msgid "French district"
+msgstr ""
+
+#: udata/core/spatial/translations.py:12
+msgid "French town"
+msgstr ""
+
+#: udata/core/spatial/translations.py:13
+msgid "French canton"
+msgstr ""
+
+#: udata/core/spatial/translations.py:14
+msgid "Iris (Insee districts)"
+msgstr ""
+
+#: udata/core/spatial/translations.py:15
+msgid "Country"
+msgstr ""
+
+#: udata/core/spatial/translations.py:16
+msgid "World"
+msgstr ""
+
+#: udata/core/spatial/translations.py:17
+msgid "Country group"
+msgstr ""
+
+#: udata/core/spatial/translations.py:18
+msgid "Country subset"
+msgstr ""
+
+#: udata/core/spatial/translations.py:19
+msgid "European Union"
+msgstr ""
+
+#: udata/core/spatial/translations.py:20
+msgid "Metropolitan France"
+msgstr ""
+
+#: udata/core/spatial/translations.py:21
+msgid "Overseas France"
+msgstr ""
+
+#: udata/core/topic/forms.py:27
+msgid "Featured"
+msgstr ""
+
+#: udata/core/user/activities.py:36 udata/core/user/activities.py:68
+msgid "followed an organization"
+msgstr ""
+
+#: udata/core/user/activities.py:41
+msgid "followed a user"
+msgstr ""
+
+#: udata/core/user/activities.py:48
+msgid "discussed a dataset"
+msgstr ""
+
+#: udata/core/user/activities.py:53
+msgid "discussed a reuse"
+msgstr ""
+
+#: udata/core/user/activities.py:58
+msgid "followed a dataset"
+msgstr ""
+
+#: udata/core/user/activities.py:63
+msgid "followed a reuse"
+msgstr ""
+
+#: udata/core/user/forms.py:17
+msgid "First name"
+msgstr ""
+
+#: udata/core/user/forms.py:18 udata/templates/user/list.html:31
+msgid "Last name"
+msgstr ""
+
+#: udata/core/user/forms.py:19
+msgid "Avatar"
+msgstr ""
+
+#: udata/core/user/forms.py:21
+msgid "About"
+msgstr ""
+
+#: udata/core/user/forms.py:25
+msgid "Roles"
+msgstr ""
+
+#: udata/core/user/metrics.py:67 udata/templates/user/following.html:7
+msgid "Following"
+msgstr ""
+
+#: udata/core/user/models.py:240 udata/tests/api/test_me_api.py:372
+msgid "Account deletion"
+msgstr ""
+
+#: udata/core/user/permissions.py:8
+msgid "System administrator"
+msgstr ""
+
+#: udata/core/user/permissions.py:9
+msgid "Site editorialist"
+msgstr ""
+
+#: udata/core/user/permissions.py:10
+msgid "Site moderator"
+msgstr ""
+
+#: udata/core/user/tasks.py:15
+msgid "Test mail"
+msgstr ""
+
+#: udata/forms/fields.py:93
+msgid "The role {role} does not exist"
+msgstr ""
+
+#: udata/forms/fields.py:110
+msgid "Not a valid UUID"
+msgstr ""
+
+#: udata/forms/fields.py:135
+msgid "Invalid URL"
+msgstr ""
+
+#: udata/forms/fields.py:331
+#, python-format
+msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
+msgstr ""
+
+#: udata/forms/fields.py:371 udata/forms/fields.py:395
+msgid "{0} does not exists"
+msgstr ""
+
+#: udata/forms/fields.py:384
+msgid "Expect both class and identifier"
+msgstr ""
+
+#: udata/forms/fields.py:398
+msgid "{0} is not a valid identifier"
+msgstr ""
+
+#: udata/forms/fields.py:424
+msgid "Model for {0} not found"
+msgstr ""
+
+#: udata/forms/fields.py:449
+msgid "Unknown identifiers: {identifiers}"
+msgstr ""
+
+#: udata/forms/fields.py:580
+msgid "Unable to parse date range"
+msgstr ""
+
+#: udata/forms/fields.py:607 udata/forms/fields.py:630
+msgid "You must be authenticated"
+msgstr ""
+
+#: udata/forms/fields.py:610
+msgid "You can only set yourself as owner"
+msgstr ""
+
+#: udata/forms/fields.py:633
+msgid "Permission denied for this organization"
+msgstr ""
+
+#: udata/forms/validators.py:48
+#, python-format
+msgid "This field requires \"%(name)s\" to be set"
+msgstr ""
+
+#: udata/frontend/helpers.py:173
+msgid "Anonymous user"
+msgstr ""
+
+#: udata/frontend/helpers.py:266
+msgctxt "month-format"
+msgid "yyyy/MM"
+msgstr ""
+
+#: udata/frontend/helpers.py:270
+msgctxt "day-format"
+msgid "yyyy/MM/dd"
+msgstr ""
+
+#: udata/frontend/helpers.py:293
+#, python-format
+msgid "%(start)s to %(end)s"
+msgstr ""
+
+#: udata/frontend/markdown.py:30
+msgid "Source"
+msgstr ""
+
+#: udata/harvest/forms.py:18
+msgid "Some optionnal details about this harvester"
+msgstr ""
+
+#: udata/harvest/forms.py:20
+msgid "Backend"
+msgstr ""
+
+#: udata/harvest/models.py:15
+msgid "Manual"
+msgstr ""
+
+#: udata/harvest/models.py:23
+msgid "Initializing"
+msgstr ""
+
+#: udata/harvest/models.py:24
+msgid "Initialized"
+msgstr ""
+
+#: udata/harvest/models.py:25
+msgid "Processing"
+msgstr ""
+
+#: udata/harvest/models.py:26 udata/harvest/models.py:34
+msgid "Done"
+msgstr ""
+
+#: udata/harvest/models.py:27
+msgid "Done with errors"
+msgstr ""
+
+#: udata/harvest/models.py:28 udata/harvest/models.py:35
+msgid "Failed"
+msgstr ""
+
+#: udata/harvest/models.py:33
+msgid "Started"
+msgstr ""
+
+#: udata/harvest/models.py:36
+msgid "Skipped"
+msgstr ""
+
+#: udata/search/fields.py:38
+msgid "OR"
+msgstr ""
+
+#: udata/search/fields.py:101 udata/tests/test_search.py:800
+#: udata/tests/test_search.py:803
+msgid "yes"
+msgstr ""
+
+#: udata/search/fields.py:101 udata/tests/test_search.py:801
+#: udata/tests/test_search.py:804
+msgid "no"
+msgstr ""
+
+#: udata/search/fields.py:272
+msgid ""
+"A date range expressed as start-end where both dates are in iso format (ie. "
+"YYYY-MM-DD-YYYY-MM-DD)"
+msgstr ""
+
+#: udata/templates/admin.html:6
+msgid "Admin"
+msgstr ""
+
+#: udata/templates/apidoc.html:4
+msgid "API Documentation"
+msgstr ""
+
+#: udata/templates/apidoc.html:5
+#, python-format
+msgid "%(site)s dynamic API documentation"
+msgstr ""
+
+#: udata/templates/apidoc.html:24
+msgid "This page describe this website's free and open RESTful API's behavior"
+msgstr ""
+
+#: udata/templates/apidoc.html:30
+msgid "Authentication"
+msgstr ""
+
+#: udata/templates/apidoc.html:35
+msgid "In order to be able to execute write operations,"
+msgstr ""
+
+#: udata/templates/apidoc.html:37
+#, python-format
+msgid "you first need to obtain an %(apikey)s in your profile settings."
+msgstr ""
+
+#: udata/templates/apidoc.html:41
+msgid "API Key"
+msgstr ""
+
+#: udata/templates/apidoc.html:44
+msgid ""
+"you first need to authenticate and obtain an API Key in your profile "
+"settings."
+msgstr ""
+
+#: udata/templates/apidoc.html:47
+msgid ""
+"This key should be provided on each call in the <code>X-API-KEY</code> HTTP "
+"header."
+msgstr ""
+
+#: udata/templates/apidoc.html:53
+msgid "Authorizations"
+msgstr ""
+
+#: udata/templates/apidoc.html:57
+msgid "API calls are subject to the same permissions than the web interface."
+msgstr ""
+
+#: udata/templates/apidoc.html:58
+msgid ""
+"By example, you need to be part of the organization to modify one of its "
+"datasets."
+msgstr ""
+
+#: udata/templates/apidoc.html:64
+msgid "Pagination"
+msgstr ""
+
+#: udata/templates/apidoc.html:68
+msgid ""
+"Some method are paginated and always follow the same pattern.\n"
+"                The object list is wrapped in a <code>Page</code> object.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:72
+msgid ""
+"You don't have to compute yourself the previous and next pages\n"
+"                because the URLs are available in the response under the\n"
+"                <code>previous_page</code> and <code>next_page</code> attributes.\n"
+"                They will be set to <code>null</code> if there is no previous and/or next page."
+msgstr ""
+
+#: udata/templates/apidoc.html:77
+msgid "Example"
+msgstr ""
+
+#: udata/templates/apidoc.html:90
+msgid "Examples"
+msgstr ""
+
+#: udata/templates/apidoc.html:94
+msgid ""
+"All examples use the <a href=\"http://httpie.org\">httpie</a> and <a href=\"http://stedolan.github.io/jq/\">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:97
+msgid "Verifying that httpie is working"
+msgstr ""
+
+#: udata/templates/apidoc.html:99
+msgid ""
+"Once httpie is installed, you can verify that it works as expected by typing that command in your shell:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:104 udata/templates/apidoc.html:143
+msgid ""
+"It should return something in this vein:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:133
+msgid ""
+"This is very verbose and we don't need all that information yet. That's why we use jq.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:136
+msgid "Verifying that jq is working"
+msgstr ""
+
+#: udata/templates/apidoc.html:138
+msgid ""
+"Once jq is installed, you can verify that it works as expected by typing that command in your shell:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:148
+msgid ""
+"That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:153
+msgid ""
+"The previous command is now equivalent to the more readable (don't forget the quotes):\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:158
+msgid ""
+"That's a good start, now let's dig into the API itself. We don't know it yet but we already fetched our first organization.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:162
+msgid "Browsing and retrieving data"
+msgstr ""
+
+#: udata/templates/apidoc.html:164
+msgid ""
+"You can retrieve a list of organization (filtered or not) or a unique organization. When you reach an endpoint, the default page size is 20. Let's fetch the first 20 organization from the API:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:192
+msgid ""
+"That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:205
+msgid ""
+"Now we'll be able to retrieve a unique organization thanks to the returned URI:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:210
+msgid ""
+"That's a lot of data to compute. Let's refine these data, if we want only metrics:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:232
+msgid ""
+"Or maybe just the name of the members of that organization:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:256
+msgid ""
+"It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href=\"http://stedolan.github.io/jq/tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/\">manual</a> if you want to browse the API through the command-line in depth.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:260
+msgid "Modifying and deleting data"
+msgstr ""
+
+#: udata/templates/apidoc.html:262
+msgid ""
+"Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:265
+msgid ""
+"If you try to modify a resource without an authentication token, a 401 will be returned:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:280
+msgid ""
+"You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:295
+msgid ""
+"This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:308
+msgid ""
+"It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:321
+msgid ""
+"But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:333
+msgid ""
+"The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:345
+msgid ""
+"Once you did it, you can verify that it's effective issuing a GET against the previous URI:\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:362
+msgid ""
+"Please consult the reference documentation below for further interactions with the API or ask us for questions related to it!\n"
+"                "
+msgstr ""
+
+#: udata/templates/apidoc.html:369
+msgid "Reference"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:169
+msgid "Download from "
+msgstr ""
+
+#: udata/templates/dataset/display.html:174
+#: udata/templates/embed-dataset.html:177
+#: udata/templates/reuse/display.html:130
+msgid "Producer"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:183
+msgid "Uploader"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:205
+msgid "Add to your own website"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:206
+msgid "Close"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:206
+msgid "Embed"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:213
+msgid "to"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:221
+msgid "Granularity"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:225
+msgid "Territory"
+msgstr ""
+
+#: udata/templates/dataset/card.html:85
+#: udata/templates/dataset/display.html:222
+#: udata/templates/dataset/search-result.html:42
+#: udata/templates/embed-dataset.html:232
+msgid "Frequency"
+msgstr ""
+
+#: udata/templates/embed-dataset.html:237
+#: udata/templates/territories/commune.html:24
+#: udata/templates/territories/departement.html:23
+#: udata/templates/territories/region.html:22
+msgid "License:"
+msgstr ""
+
+#: udata/templates/header.html:29
+msgid "Contribute"
+msgstr ""
+
+#: udata/templates/header.html:41
+msgid "Profile"
+msgstr ""
+
+#: udata/templates/header.html:44
+msgid "Change password"
+msgstr ""
+
+#: udata/templates/header.html:60
+msgid "Settings"
+msgstr ""
+
+#: udata/templates/header.html:68 udata/templates/header.html:71
+#: udata/templates/territories/territory.html:37
+msgid "Sign In / Register"
+msgstr ""
+
+#: udata/templates/api/oauth_error.html:13 udata/templates/errors/base.html:18
+#: udata/templates/home.html:4 udata/templates/macros/breadcrumb.html:16
+#: udata/templates/macros/metadata.html:2
+msgid "Home"
+msgstr ""
+
+#: udata/templates/home.html:5
+#, python-format
+msgid "%(site)s home"
+msgstr ""
+
+#: udata/templates/home.html:6
+msgid "home"
+msgstr ""
+
+#: udata/templates/home.html:53 udata/templates/topic/display.html:74
+msgid "Featured datasets"
+msgstr ""
+
+#: udata/templates/home.html:78
+msgid "Reuse"
+msgstr ""
+
+#: udata/templates/metrics.html:4 udata/templates/metrics.html:10
+msgid "Metrics"
+msgstr ""
+
+#: udata/templates/metrics.html:5
+msgid "Site metrics"
+msgstr ""
+
+#: udata/templates/metrics.html:6
+#: udata/templates/organization/dashboard.html:7
+#: udata/templates/site/dashboard.html:6
+msgid "metrics"
+msgstr ""
+
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:10
+msgid "Publish a dataset"
+msgstr ""
+
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:14
+msgid "Contribute and add a new dataset to this site catalog."
+msgstr ""
+
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:24
+msgid "Publish a reuse"
+msgstr ""
+
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:28
+msgid "Contribute and add a new reuse to this site catalog."
+msgstr ""
+
+#. This is a call to action.
+#: udata/templates/publish-action-modal.html:38
+msgid "Create or find your organization"
+msgstr ""
+
+#. This is a call to action details.
+#: udata/templates/publish-action-modal.html:42
+msgid "You can create a new organization or find yours."
+msgstr ""
+
+#: udata/templates/raw.html:16
+msgid "Recent datasets"
+msgstr ""
+
+#: udata/templates/raw.html:20
+msgid "Recent reuses"
+msgstr ""
+
+#: udata/templates/macros/search.html:217 udata/templates/post/subnav.html:13
+#: udata/templates/search.html:8
+msgid "Search"
+msgstr ""
+
+#: udata/templates/search.html:9
+#, python-format
+msgid "%(site)s search"
+msgstr ""
+
+#: udata/templates/dataset/list.html:10
+#: udata/templates/organization/list.html:10
+#: udata/templates/reuse/list.html:10 udata/templates/search.html:10
+#: udata/templates/topic/datasets.html:9 udata/templates/topic/reuses.html:9
+#: udata/templates/user/list.html:10
+msgid "search"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:58
+#: udata/templates/search.html:27 udata/templates/user/base.html:79
+#, python-format
+msgid "%(num)d dataset"
+msgid_plural "%(num)d datasets"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/display_base.html:87
+#: udata/templates/search.html:34 udata/templates/user/base.html:85
+#, python-format
+msgid "%(num)d reuse"
+msgid_plural "%(num)d reuses"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/search.html:41
+#, python-format
+msgid "%(num)d organization"
+msgid_plural "%(num)d organizations"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/search.html:49
+#, python-format
+msgid "Territory: %(name)s"
+msgid_plural "%(num)d territories"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/dataset/search-labels.html:6
+#: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
+msgid "Tag"
+msgstr ""
+
+#: udata/templates/dataset/search-labels.html:12
+#: udata/templates/organization/search-labels.html:3
+#: udata/templates/search.html:59
+msgid "Badge"
+msgstr ""
+
+#: udata/templates/dataset/card.html:45 udata/templates/dataset/list.html:39
+#: udata/templates/organization/card.html:43
+#: udata/templates/reuse/card.html:47 udata/templates/search.html:77
+#: udata/templates/search.html:91 udata/templates/topic/datasets.html:37
+#: udata/templates/user/card.html:36
+msgid "Stars"
+msgstr ""
+
+#: udata/templates/search.html:90
+msgid "Datasets used"
+msgstr ""
+
+#: udata/templates/search.html:116
+msgid "No results found, try to be less specific."
+msgstr ""
+
+#: udata/templates/search.html:133 udata/templates/search.html:158
+#: udata/templates/search.html:185 udata/templates/topic/browse.html:34
+#: udata/templates/topic/browse.html:54
+#, python-format
+msgid "See the %(total)s results"
+msgstr ""
+
+#: udata/templates/search.html:169 udata/templates/search.html:196
+#: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
+msgid "No results found"
+msgstr ""
+
+#: udata/templates/terms.html:4 udata/templates/terms.html:5
+msgid "Terms"
+msgstr ""
+
+#: udata/templates/terms.html:7
+msgid "terms"
+msgstr ""
+
+#: udata/templates/api/admin.html:11
+msgid "Maintainer"
+msgstr ""
+
+#: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:133
+#: udata/templates/dataset/display.html:413
+#: udata/templates/dataset/resource/list-item.html:31
+#: udata/templates/organization/display.html:25
+#: udata/templates/organization/followers.html:15
+#: udata/templates/post/display.html:118
+#: udata/templates/reuse/display.html:108 udata/templates/user/base.html:23
+msgid "Edit"
+msgstr ""
+
+#: udata/templates/api/admin.html:34
+msgid "Delete"
+msgstr ""
+
+#: udata/templates/api/admin.html:42
+msgid "No OAuth clients"
+msgstr ""
+
+#: udata/templates/api/admin.html:53
+msgid "Add a client"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:4
+msgid "External application authorization"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:14
+#, python-format
+msgid "%(app)s want to access your %(site)s account."
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:26
+#: udata/templates/dataset/display.html:289
+#: udata/templates/dataset/display.html:291
+#: udata/templates/mail/discussion_closed.html:26
+#: udata/templates/mail/issue_closed.html:26
+#: udata/templates/mail/new_discussion.html:25
+#: udata/templates/mail/new_discussion_comment.html:26
+#: udata/templates/mail/new_issue.html:25
+#: udata/templates/mail/new_issue_comment.html:26
+msgid "Details"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:36
+msgid "Access your profile"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:37
+msgid "Read your profile, the orgnization you belong to, your publications"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:45
+msgid "Publish data"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:46
+msgid "Publish datasets, reuses, follow or unfollow"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:60
+msgid "Accept"
+msgstr ""
+
+#: udata/templates/api/oauth_authorize.html:62
+msgid "Refuse"
+msgstr ""
+
+#: udata/templates/api/oauth_error.html:8
+msgid "OAuth Authentication Error"
+msgstr ""
+
+#: udata/templates/dataset/card.html:29
+#: udata/templates/dataset/display.html:262
+msgid "Territorial coverage"
+msgstr ""
+
+#: udata/templates/dataset/card.html:75
+#: udata/templates/dataset/display.html:254
+#: udata/templates/dataset/search-result.html:89
+msgid "Territorial coverage granularity"
+msgstr ""
+
+#: udata/templates/dataset/display.html:43
+msgid "This dataset comes from a certified public service"
+msgstr ""
+
+#: udata/templates/dataset/display.html:48
+#, python-format
+msgid ""
+"This dataset has been published on %(date)s and updated on %(update)s on the"
+" initiative and under the responsibility of <a href=\"%(url)s\" "
+"title=\"%(author)s\">%(author)s</a>"
+msgstr ""
+
+#: udata/templates/dataset/display.html:59
+msgid "See all datasets with that badge."
+msgstr ""
+
+#: udata/templates/dataset/display.html:66
+msgid "This dataset is private and will not be visible by other users"
+msgstr ""
+
+#: udata/templates/dataset/display.html:72
+msgid ""
+"This dataset has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+
+#: udata/templates/dataset/display.html:73
+#: udata/templates/dataset/display.html:74
+#: udata/templates/organization/display.html:34
+#: udata/templates/organization/display.html:36
+#: udata/templates/post/display.html:67 udata/templates/post/display.html:70
+#: udata/templates/reuse/display.html:63 udata/templates/reuse/display.html:66
+msgid "Deleted"
+msgstr ""
+
+#: udata/templates/dataset/display.html:97
+msgid "No resources"
+msgstr ""
+
+#: udata/templates/dataset/display.html:108
+#, python-format
+msgid "See the %(nb)d resources"
+msgstr ""
+
+#: udata/templates/dataset/display.html:118
+msgid "Add a resource"
+msgstr ""
+
+#: udata/templates/dataset/display.html:145
+#: udata/templates/organization/sidebar-producer.html:18
+#: udata/templates/reuse/display.html:101
+msgid "Contact the producer"
+msgstr ""
+
+#: udata/templates/dataset/display.html:185
+#: udata/templates/reuse/display.html:171
+msgid "Informations"
+msgstr ""
+
+#: udata/templates/dataset/display.html:192
+#: udata/templates/dataset/search-panel.html:8
+#: udata/templates/organization/search-panel.html:5
+#: udata/templates/reuse/search-panel.html:5
+msgid "Badges"
+msgstr ""
+
+#: udata/templates/dataset/display.html:237
+msgid "Modification date"
+msgstr ""
+
+#: udata/templates/dataset/display.html:244
+msgid "Latest resource update"
+msgstr ""
+
+#: udata/templates/dataset/display.html:281
+#: udata/templates/reuse/display.html:196
+msgid "Suggest a tag with a new discussion thread"
+msgstr ""
+
+#: udata/templates/dataset/display.html:283
+#: udata/templates/reuse/display.html:198
+msgid "Suggest a tag"
+msgstr ""
+
+#: udata/templates/dataset/display.html:319
+msgid "Territories"
+msgstr ""
+
+#: udata/templates/dataset/display.html:337
+#: udata/templates/reuse/display.html:255
+msgid "Community contributions"
+msgstr ""
+
+#: udata/templates/dataset/display.html:352
+#: udata/templates/reuse/display.html:268
+msgid ""
+"Discussion between the organization and the community about this dataset."
+msgstr ""
+
+#: udata/templates/dataset/display.html:356
+msgid "Community resources"
+msgstr ""
+
+#: udata/templates/dataset/display.html:366
+msgid "New community resource"
+msgstr ""
+
+#: udata/templates/dataset/display.html:372
+msgid ""
+"You have built a more comprehensive database than those presented here? This"
+" is the time to share it!"
+msgstr ""
+
+#: udata/templates/dataset/display.html:409
+msgid "Open in a new window"
+msgstr ""
+
+#: udata/templates/dataset/display.html:431
+msgid "Add a reuse"
+msgstr ""
+
+#: udata/templates/dataset/display.html:439
+msgid ""
+"You reused these data and published an article, a computer graphics, or an application?\n"
+"                It's time to let you know!\n"
+"                Reference your work in just a few clicks and increase your visibility."
+msgstr ""
+
+#: udata/templates/dataset/followers.html:13
+#: udata/templates/organization/display_base.html:76
+#: udata/templates/organization/followers.html:26
+#: udata/templates/user/base.html:67 udata/templates/user/followers.html:14
+#, python-format
+msgid "%(num)d follower"
+msgid_plural "%(num)d followers"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/dataset/list.html:9
+#, python-format
+msgid "%(site)s dataset search"
+msgstr ""
+
+#: udata/templates/dataset/list.html:10 udata/templates/topic/datasets.html:9
+msgid "datasets"
+msgstr ""
+
+#: udata/templates/dataset/list.html:19
+#: udata/templates/organization/list.html:19
+#: udata/templates/reuse/list.html:19 udata/templates/topic/datasets.html:22
+#: udata/templates/topic/reuses.html:22 udata/templates/user/list.html:19
+#, python-format
+msgid "%(start)s to %(end)s on %(total)s"
+msgstr ""
+
+#: udata/templates/dataset/search-labels.html:3
+#: udata/templates/reuse/search-labels.html:3
+msgid "Organization"
+msgstr ""
+
+#: udata/templates/dataset/search-panel.html:11
+msgid "Licenses"
+msgstr ""
+
+#: udata/templates/dataset/search-panel.html:16
+msgid "Territorial granularity"
+msgstr ""
+
+#: udata/templates/dataset/search-panel.html:17
+msgid "Formats"
+msgstr ""
+
+#: udata/templates/dataset/search-result.html:98
+msgid "Reuse number"
+msgstr ""
+
+#: udata/templates/dataset/resource/list-item.html:16
+#, python-format
+msgid "Last modified on %(date)s"
+msgstr ""
+
+#: udata/templates/discussion/item.html:12
+msgid "Discussion started on"
+msgstr ""
+
+#: udata/templates/discussion/item.html:12
+msgid "with"
+msgstr ""
+
+#: udata/templates/discussion/item.html:13
+#, python-format
+msgid "%(nb)s message"
+msgid_plural "%(nb)s messages"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/discussion/item.html:28
+msgid "Deleted message"
+msgstr ""
+
+#: udata/templates/discussion/item.html:38
+msgid "Add a comment"
+msgstr ""
+
+#: udata/templates/discussion/item.html:52
+msgid "Commenting on this thread"
+msgstr ""
+
+#: udata/templates/discussion/item.html:55
+msgid "You're about to answer to this particular thread about:"
+msgstr ""
+
+#: udata/templates/discussion/item.html:64
+msgid "Submit your comment"
+msgstr ""
+
+#: udata/templates/discussion/threads.html:20
+msgid "Start a new discussion"
+msgstr ""
+
+#: udata/templates/discussion/threads.html:32
+msgid "Starting a new discussion thread"
+msgstr ""
+
+#: udata/templates/discussion/threads.html:35
+msgid ""
+"You're about to start a new discussion thread. Make sure that a thread about"
+" the same topic doesn't exist yet just above."
+msgstr ""
+
+#: udata/templates/discussion/threads.html:49
+msgid "Start a discussion"
+msgstr ""
+
+#: udata/templates/errors/400.html:3
+msgid "Bad request"
+msgstr ""
+
+#: udata/templates/errors/403.html:3
+msgid "Forbidden"
+msgstr ""
+
+#: udata/templates/errors/403.html:6
+msgid "You are not allowed to display this page."
+msgstr ""
+
+#: udata/templates/errors/404.html:3 udata/templates/errors/410.html:3
+msgid "Page Not Found"
+msgstr ""
+
+#: udata/templates/errors/404.html:6
+msgid "The page you're looking for could not be found."
+msgstr ""
+
+#: udata/templates/errors/410.html:6
+msgid "The page you're looking has been deleted."
+msgstr ""
+
+#: udata/templates/errors/500.html:3
+msgid "Internal server error"
+msgstr ""
+
+#: udata/templates/errors/500.html:6
+msgid ""
+"The server encountered an internal error and was unable to complete your "
+"request. Either the server is overloaded or there is an error in the "
+"application."
+msgstr ""
+
+#: udata/templates/errors/500.html:8
+msgid "The error identifier is {id}"
+msgstr ""
+
+#: udata/templates/errors/base.html:11
+#, python-format
+msgid "Error %(code)s"
+msgstr ""
+
+#: udata/templates/follow/follower-card.html:6
+#, python-format
+msgid "Following since %(date)s"
+msgstr ""
+
+#: udata/templates/macros/certified.html:4
+#: udata/templates/organization/display_base.html:30
+#, python-format
+msgid "The identity of this public service is certified by %(certifier)s"
+msgstr ""
+
+#: udata/templates/macros/certified.html:5
+#: udata/templates/organization/display_base.html:31
+msgid "Certified public service"
+msgstr ""
+
+#: udata/templates/macros/forms.html:106
+msgid "required fields"
+msgstr ""
+
+#: udata/templates/macros/integrate.html:4
+msgid "Integrate"
+msgstr ""
+
+#: udata/templates/macros/metadata.html:3
+msgid "Share, improve and reuse public data"
+msgstr ""
+
+#: udata/templates/macros/paginator.html:8
+msgid "First page"
+msgstr ""
+
+#: udata/templates/macros/paginator.html:13
+msgid "Previous page"
+msgstr ""
+
+#: udata/templates/macros/paginator.html:23
+msgid "Next page"
+msgstr ""
+
+#: udata/templates/macros/paginator.html:28
+msgid "Last page"
+msgstr ""
+
+#: udata/templates/macros/search.html:17
+msgid "Sort by"
+msgstr ""
+
+#: udata/templates/macros/search.html:43
+msgid "Ascending"
+msgstr ""
+
+#: udata/templates/macros/search.html:43
+msgid "Descending"
+msgstr ""
+
+#: udata/templates/macros/search.html:53
+msgid "Export"
+msgstr ""
+
+#: udata/templates/macros/search.html:92
+msgid "Clear filter"
+msgstr ""
+
+#: udata/templates/macros/search.html:117
+#: udata/templates/macros/search.html:148
+msgid "More results…"
+msgstr ""
+
+#: udata/templates/macros/search.html:194
+#, python-format
+msgid "Results %(start)s to %(end)s on %(total)s found"
+msgstr ""
+
+#: udata/templates/macros/search.html:209
+msgid "No result found"
+msgstr ""
+
+#: udata/templates/macros/uploader.html:8
+msgid "Drag a file here"
+msgstr ""
+
+#: udata/templates/macros/uploader.html:11
+msgid "or"
+msgstr ""
+
+#: udata/templates/macros/uploader.html:15
+msgid "Select a file from your computer"
+msgstr ""
+
+#: udata/templates/mail/account_deleted.html:4
+msgid "Your account has now been deleted"
+msgstr ""
+
+#: udata/templates/mail/badge_added_certified.html:6
+#, python-format
+msgid "%(user)s has certified your organization \"%(name)s\""
+msgstr ""
+
+#: udata/templates/mail/badge_added_certified.html:27
+#: udata/templates/mail/badge_added_public_service.html:27
+msgid "See the badge"
+msgstr ""
+
+#: udata/templates/mail/badge_added_public_service.html:6
+#, python-format
+msgid "%(user)s has identified your organization \"%(name)s\" as public service"
+msgstr ""
+
+#: udata/templates/mail/base.html:14
+#, python-format
+msgid "Hi %(user)s"
+msgstr ""
+
+#: udata/templates/mail/base.html:18
+msgid "See you soon on the platform"
+msgstr ""
+
+#: udata/templates/mail/base.html:19
+#, python-format
+msgid "The %(site)s team"
+msgstr ""
+
+#: udata/templates/mail/discussion_closed.html:6
+#, python-format
+msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/discussion_closed.html:40
+#: udata/templates/mail/new_discussion.html:32
+#: udata/templates/mail/new_discussion_comment.html:40
+msgid "See the discussion"
+msgstr ""
+
+#: udata/templates/mail/frequency_reminder.html:6
+msgid ""
+"Some of your datasets need to be updated according to the frequency you set:"
+msgstr ""
+
+#: udata/templates/mail/frequency_reminder.html:12
+#, python-format
+msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
+msgstr ""
+
+#: udata/templates/mail/frequency_reminder.html:17
+#, python-format
+msgid ""
+"Given the set frequency (%(dataset_frequency)s) update was due "
+"%(due_update_days)s days ago."
+msgstr ""
+
+#: udata/templates/mail/frequency_reminder.html:25
+msgid "Update the dataset and associated resources"
+msgstr ""
+
+#: udata/templates/mail/issue_closed.html:6
+#, python-format
+msgid "%(user)s closed an issue on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/issue_closed.html:40
+#: udata/templates/mail/new_issue.html:32
+#: udata/templates/mail/new_issue_comment.html:40
+msgid "See the issue"
+msgstr ""
+
+#: udata/templates/mail/membership_refused.html:7
+#, python-format
+msgid "Your membership for the organization \"%(org)s\" has been refused"
+msgstr ""
+
+#: udata/templates/mail/membership_refused.html:18
+msgid "Refusal reason"
+msgstr ""
+
+#: udata/templates/mail/membership_request.html:8
+#, python-format
+msgid ""
+"As an administrator of \"%(org)s\" you are being informed than a new "
+"membership request from %(user)s is pending for validation"
+msgstr ""
+
+#: udata/templates/mail/membership_request.html:40
+msgid "See the request"
+msgstr ""
+
+#: udata/templates/mail/new_discussion.html:6
+#, python-format
+msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/new_discussion_comment.html:6
+#, python-format
+msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/new_follower.html:33
+#: udata/templates/mail/new_follower_org.html:40
+msgid "See his profile"
+msgstr ""
+
+#: udata/templates/mail/new_follower_org.html:8
+#, python-format
+msgid "%(user)s followed your organization %(org)s"
+msgstr ""
+
+#: udata/templates/mail/new_issue.html:6
+#, python-format
+msgid "%(user)s submitted a new issue on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/new_issue_comment.html:6
+#, python-format
+msgid "%(user)s commented an issue on your %(type)s %(subject)s"
+msgstr ""
+
+#: udata/templates/mail/new_member.html:7
+#, python-format
+msgid "Congratulations, you are now a member of the organization \"%(org)s\""
+msgstr ""
+
+#: udata/templates/mail/new_member.html:21
+msgid "See the organization page"
+msgstr ""
+
+#: udata/templates/mail/new_reuse.html:7
+#, python-format
+msgid "A new reuse of your dataset %(dataset)s has been published"
+msgstr ""
+
+#: udata/templates/mail/new_reuse.html:31
+#: udata/templates/reuse/display.html:82
+msgid "See the reuse"
+msgstr ""
+
+#: udata/templates/mail/new_reuse.html:37
+msgid "See on the dataset page"
+msgstr ""
+
+#: udata/templates/mail/test.html:4
+msgid "This is a test mail"
+msgstr ""
+
+#: udata/templates/mail/test.html:5
+msgid "If you read this, your mail configuration is working"
+msgstr ""
+
+#: udata/templates/mail/security/reset_instructions.html:7
+#, python-format
+msgid ""
+"Someone has requested a password reset for your %(site)s account. If you "
+"didn't, please ignore this email."
+msgstr ""
+
+#: udata/templates/mail/security/reset_instructions.html:10
+msgid ""
+"To reset your password, please confirm your request through the link below:"
+msgstr ""
+
+#: udata/templates/mail/security/reset_instructions.html:18
+msgid "Reset my password"
+msgstr ""
+
+#: udata/templates/mail/security/reset_notice.html:7
+#, python-format
+msgid "Your password for %(site)s has been reset."
+msgstr ""
+
+#: udata/templates/mail/security/welcome.html:7
+#, python-format
+msgid "Welcome to %(site)s!"
+msgstr ""
+
+#: udata/templates/mail/security/welcome.html:10
+msgid ""
+"To activate your account, please confirm your email address through the link"
+" below:"
+msgstr ""
+
+#: udata/templates/mail/security/welcome.html:18
+msgid "Confirm now"
+msgstr ""
+
+#: udata/templates/organization/card.html:22
+#: udata/templates/organization/search-result.html:21
+#: udata/templates/user/card.html:21
+msgid "Number of datasets"
+msgstr ""
+
+#: udata/templates/organization/card.html:24
+#: udata/templates/organization/search-result.html:23
+#: udata/templates/reuse/search-result.html:27
+#: udata/templates/user/card.html:23
+#, python-format
+msgid "%(num)s dataset"
+msgid_plural "%(num)s datasets"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/card.html:30 udata/templates/user/card.html:29
+msgid "Number of reuses"
+msgstr ""
+
+#: udata/templates/organization/card.html:32
+#: udata/templates/organization/search-result.html:32
+#: udata/templates/user/card.html:31
+#, python-format
+msgid "%(num)s reuse"
+msgid_plural "%(num)s reuses"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/dashboard.html:4
+#: udata/templates/organization/dashboard.html:13
+#: udata/templates/organization/display_base.html:105
+#: udata/templates/site/dashboard.html:4
+#: udata/templates/site/dashboard.html:14
+msgid "Dashboard"
+msgstr ""
+
+#: udata/templates/organization/dashboard.html:5
+#: udata/templates/site/dashboard.html:5
+msgid "Site metrics and activity"
+msgstr ""
+
+#: udata/templates/organization/dashboard.html:7
+#: udata/templates/site/dashboard.html:6
+msgid "activity"
+msgstr ""
+
+#: udata/templates/organization/dashboard.html:43
+#: udata/templates/site/dashboard.html:51
+msgid "Community activity"
+msgstr ""
+
+#: udata/templates/organization/display.html:7
+msgid "organization"
+msgstr ""
+
+#: udata/templates/organization/display.html:35
+msgid ""
+"This organization has been deleted. This will be permanent in the next 24 "
+"hours"
+msgstr ""
+
+#: udata/templates/organization/display.html:47
+msgid "Private datasets"
+msgstr ""
+
+#: udata/templates/organization/display.html:51
+msgid "Private reuses"
+msgstr ""
+
+#: udata/templates/organization/display.html:78
+#, python-format
+msgid "See the %(nb)s datasets"
+msgstr ""
+
+#: udata/templates/organization/display.html:85
+msgid "Download as CSV"
+msgstr ""
+
+#: udata/templates/organization/display.html:90
+msgid "Datasets list"
+msgstr ""
+
+#: udata/templates/organization/display.html:95
+msgid "Resources list"
+msgstr ""
+
+#: udata/templates/organization/display.html:100
+msgid "Issues list"
+msgstr ""
+
+#: udata/templates/organization/display.html:105
+msgid "Discussions list"
+msgstr ""
+
+#: udata/templates/organization/display.html:134
+#, python-format
+msgid "See the %(nb)s reuses"
+msgstr ""
+
+#: udata/templates/organization/display.html:168
+msgid "Display all followers"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:46
+msgid "See all organizations with that badge."
+msgstr ""
+
+#: udata/templates/organization/display_base.html:67
+#, python-format
+msgid "%(num)d member"
+msgid_plural "%(num)d members"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/display_base.html:86
+msgid "Use of data by that organization for the community"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:96
+msgid "Use of data from that organization by the community"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:97
+#, python-format
+msgid "%(num)d reappropriation"
+msgid_plural "%(num)d reappropriations"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/display_base.html:116
+msgid "I belong to this organization"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:119
+msgid "Join"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:123
+msgid "Waiting for approval"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:127
+msgid "Pending request"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:132
+msgid "You are an administrator of this organization"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:134
+msgid "Administrator"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:139
+msgid "You are editor in this organization"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:146
+msgid "You are a member of this organization"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:148
+msgid "Member"
+msgstr ""
+
+#: udata/templates/organization/display_base.html:156
+#: udata/templates/organization/sidebar-producer.html:26
+msgid "I'll be informed about this organization news"
+msgstr ""
+
+#: udata/templates/organization/list.html:9
+#, python-format
+msgid "%(site)s organization search"
+msgstr ""
+
+#: udata/templates/organization/list.html:10
+msgid "organizations"
+msgstr ""
+
+#: udata/templates/organization/search-panel.html:7
+msgid "Reappropriations"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:30
+msgid "Number of reuses by the organization"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:39
+msgid "Number of reappropriations by the community"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:41
+#, python-format
+msgid "%(num)s reappropriation"
+msgid_plural "%(num)s reappropriations"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/search-result.html:48
+#: udata/templates/reuse/search-result.html:32
+msgid "Number of stars"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:50
+#: udata/templates/reuse/search-result.html:34
+#, python-format
+msgid "%(num)s star"
+msgid_plural "%(num)s stars"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/search-result.html:57
+msgid "Number of followers"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:59
+#, python-format
+msgid "%(num)s follower"
+msgid_plural "%(num)s followers"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/search-result.html:65
+msgid "Number of members"
+msgstr ""
+
+#: udata/templates/organization/search-result.html:67
+#, python-format
+msgid "%(num)s members"
+msgid_plural "%(num)s members"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/organization/sidebar-producer.html:11
+#: udata/templates/reuse/display.html:152
+msgid "more"
+msgstr ""
+
+#. This is an action (present indicative).
+#: udata/templates/organization/sidebar-producer.html:21
+msgid "Contact"
+msgstr ""
+
+#: udata/templates/post/display.html:18
+msgid "News"
+msgstr ""
+
+#: udata/templates/post/display.html:32 udata/templates/post/display.html:86
+msgid "Photo credit"
+msgstr ""
+
+#: udata/templates/post/display.html:56
+#, python-format
+msgid "Published on %(date)s"
+msgstr ""
+
+#: udata/templates/post/display.html:62
+msgid "This post is private and will not be visible by other users"
+msgstr ""
+
+#: udata/templates/post/display.html:68
+msgid ""
+"This post has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+
+#: udata/templates/post/subnav.html:39
+msgid "Read more"
+msgstr ""
+
+#: udata/templates/reuse/card.html:40
+msgid "Number of datasets used"
+msgstr ""
+
+#: udata/templates/reuse/display.html:47
+#, python-format
+msgid "Published on %(date)s by %(user)s"
+msgstr ""
+
+#: udata/templates/reuse/display.html:57
+msgid "This reuse is private and will not be visible by other users"
+msgstr ""
+
+#: udata/templates/reuse/display.html:64
+msgid ""
+"This reuse has been deleted. This will be permanent in the next 24 hours"
+msgstr ""
+
+#: udata/templates/reuse/display.html:139
+msgid "Author"
+msgstr ""
+
+#: udata/templates/reuse/display.html:161
+msgid "I'll be informed about this user news"
+msgstr ""
+
+#: udata/templates/reuse/display.html:212
+msgid "No followers yet"
+msgstr ""
+
+#: udata/templates/reuse/list.html:9
+#, python-format
+msgid "%(site)s reuse search"
+msgstr ""
+
+#: udata/templates/reuse/list.html:10 udata/templates/topic/reuses.html:9
+msgid "reuses"
+msgstr ""
+
+#: udata/templates/reuse/search-result.html:25
+msgid "Number of dataset"
+msgstr ""
+
+#: udata/templates/security/change_password.html:12
+#: udata/templates/security/change_password.html:19
+msgid "Change Password"
+msgstr ""
+
+#: udata/templates/security/forgot_password.html:12
+#: udata/templates/security/forgot_password.html:18
+#: udata/templates/security/reset_password.html:13
+#: udata/templates/security/reset_password.html:19
+msgid "Reset Password"
+msgstr ""
+
+#: udata/templates/security/forgot_password.html:13
+msgid ""
+"Forgotten your password? Enter your email address below, and we'll email "
+"instructions for setting a new one."
+msgstr ""
+
+#: udata/templates/security/login_user.html:14
+msgid "Sign In"
+msgstr ""
+
+#: udata/templates/security/login_user.html:18
+msgid "Sign in"
+msgstr ""
+
+#: udata/templates/security/login_user.html:22
+msgid "Forgot your password?"
+msgstr ""
+
+#: udata/templates/security/login_user.html:24
+msgid "Recover your password"
+msgstr ""
+
+#: udata/templates/security/login_user.html:33
+#: udata/templates/security/register_user.html:30
+msgid "Sign up"
+msgstr ""
+
+#: udata/templates/security/login_user.html:36
+msgid "Register"
+msgstr ""
+
+#: udata/templates/security/login_user.html:40
+msgid "Create an account"
+msgstr ""
+
+#: udata/templates/security/register_user.html:12
+msgid "Sign Up"
+msgstr ""
+
+#: udata/templates/security/register_user.html:21
+#, python-format
+msgid ""
+"I have read and accept <a href=\"%(url)s\"> the terms and conditions of the "
+"service.</a>"
+msgstr ""
+
+#: udata/templates/security/register_user.html:23
+msgid ""
+"In particular, I understand that this site\n"
+"                    values the production and enrichment of datasets over definitive or partisan interpretations.\n"
+"                    The members of the community are in charge of looking after the quality of the content it produces."
+msgstr ""
+
+#: udata/templates/site/map.html:5 udata/templates/site/map.html:13
+msgid "Coverage map"
+msgstr ""
+
+#: udata/templates/site/map.html:6
+msgid "Display datasets on a map"
+msgstr ""
+
+#: udata/templates/site/map.html:7
+msgid "coverage"
+msgstr ""
+
+#: udata/templates/site/map.html:7
+msgid "map"
+msgstr ""
+
+#: udata/templates/territories/commune.html:5
+#, python-format
+msgid ""
+"Datasets related to the town of %(name)s with INSEE code %(code)s and postal"
+" code %(postal)s"
+msgstr ""
+
+#: udata/templates/territories/commune.html:13
+#: udata/templates/territories/departement.html:13
+#: udata/templates/territories/region.html:13
+msgid "Region:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:14
+#: udata/templates/territories/departement.html:14
+msgid "County:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:15
+msgid "Town:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:23
+#: udata/templates/territories/departement.html:22
+#: udata/templates/territories/region.html:21
+msgid "Source:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:30
+#: udata/templates/territories/departement.html:29
+#: udata/templates/territories/region.html:28
+msgid "Submit your logo through:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:31
+#: udata/templates/territories/departement.html:30
+#: udata/templates/territories/region.html:29
+msgid "we only expose logos under an open license"
+msgstr ""
+
+#: udata/templates/territories/commune.html:41
+#: udata/templates/territories/departement.html:40
+#: udata/templates/territories/region.html:39
+#: udata/templates/territories/search-result.html:13
+msgid "INSEE code:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:47
+#: udata/templates/territories/region.html:45
+#: udata/templates/territories/search-result.html:15
+msgid "Postal code:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:54
+#: udata/templates/territories/departement.html:46
+#: udata/templates/territories/region.html:52
+msgid "Population:"
+msgstr ""
+
+#: udata/templates/territories/departement.html:5
+#, python-format
+msgid "Datasets related to the county of %(name)s with INSEE code %(code)s"
+msgstr ""
+
+#: udata/templates/territories/departement.html:51
+msgid "Main towns:"
+msgstr ""
+
+#: udata/templates/territories/home.html:4
+#: udata/templates/territories/home.html:5
+msgid "French regions"
+msgstr ""
+
+#: udata/templates/territories/home.html:13
+msgid "Click to navigate to the given region:"
+msgstr ""
+
+#: udata/templates/territories/home.html:15
+msgid "Or sorted alphabetically:"
+msgstr ""
+
+#: udata/templates/territories/region.html:5
+#, python-format
+msgid "Datasets related to the region of %(name)s with INSEE code %(code)s"
+msgstr ""
+
+#: udata/templates/territories/region.html:58
+msgid "Previously:"
+msgstr ""
+
+#: udata/templates/territories/region.html:65
+msgid "Counties:"
+msgstr ""
+
+#: udata/templates/territories/search-result.html:22
+msgid "Administrative level"
+msgstr ""
+
+#: udata/templates/territories/search-result.html:30
+msgid "Population"
+msgstr ""
+
+#: udata/templates/territories/territory.html:11
+msgid "This territory has been replaced by:"
+msgstr ""
+
+#: udata/templates/territories/territory.html:13
+msgid "since"
+msgstr ""
+
+#: udata/templates/territories/territory.html:29
+msgid "Some of your datasets have an exact match!"
+msgstr ""
+
+#: udata/templates/territories/territory.html:31
+msgid "Claim that territory"
+msgstr ""
+
+#: udata/templates/territories/territory.html:31
+msgid "and your datasets will appear first."
+msgstr ""
+
+#: udata/templates/territories/territory.html:33
+#, python-format
+msgid ""
+"If you want your datasets to appear in that list, the geographical zone "
+"associated must be the exact same one of that territory (%(code)s)."
+msgstr ""
+
+#: udata/templates/territories/territory.html:36
+msgid "You want to add your own datasets to that list?"
+msgstr ""
+
+#: udata/templates/territories/territory.html:39
+msgid "Log in"
+msgstr ""
+
+#: udata/templates/territories/territory.html:40
+msgid "and create resources for that territory."
+msgstr ""
+
+#: udata/templates/topic/datasets.html:7
+#, python-format
+msgid "%(topic)s datasets"
+msgstr ""
+
+#: udata/templates/topic/datasets.html:8
+#, python-format
+msgid "%(site)s %(topic)s related datasets"
+msgstr ""
+
+#: udata/templates/topic/datasets.html:9
+#: udata/templates/topic/display_base.html:7
+#: udata/templates/topic/reuses.html:9
+msgid "topic"
+msgstr ""
+
+#: udata/templates/topic/display.html:5
+msgid "Topics"
+msgstr ""
+
+#: udata/templates/topic/display.html:17
+msgid "Best reuse cases"
+msgstr ""
+
+#: udata/templates/topic/display.html:75
+msgid "Latest datasets"
+msgstr ""
+
+#: udata/templates/topic/display.html:111
+msgid "See more"
+msgstr ""
+
+#: udata/templates/topic/display_base.html:23
+msgid "Related tags"
+msgstr ""
+
+#: udata/templates/topic/reuses.html:7
+#, python-format
+msgid "%(topic)s reuses"
+msgstr ""
+
+#: udata/templates/topic/reuses.html:8
+#, python-format
+msgid "%(site)s %(topic)s related reuses"
+msgstr ""
+
+#: udata/templates/user/activity.html:5 udata/templates/user/base.html:62
+msgid "Activity"
+msgstr ""
+
+#: udata/templates/user/base.html:8
+#, python-format
+msgid "%(site)s %(username)s profile"
+msgstr ""
+
+#: udata/templates/user/base.html:9
+msgid "user"
+msgstr ""
+
+#: udata/templates/user/base.html:9
+msgid "profile"
+msgstr ""
+
+#: udata/templates/user/base.html:73
+#, python-format
+msgid "%(num)d followed"
+msgid_plural "%(num)d followed"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/user/following.html:43
+#, python-format
+msgid "Follow %(num)d dataset"
+msgid_plural "Follow %(num)d datasets"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/user/following.html:63
+#, python-format
+msgid "Follow %(num)d reuse"
+msgid_plural "Follow %(num)d reuses"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/user/following.html:83
+#, python-format
+msgid "Follow %(num)d organization"
+msgid_plural "Follow %(num)d organizations"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/user/following.html:103
+#, python-format
+msgid "Follow %(num)d user"
+msgid_plural "Follow %(num)d users"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: udata/templates/user/following.html:129
+#, python-format
+msgid "%(user)s is not following anyone"
+msgstr ""
+
+#: udata/templates/user/list.html:9
+#, python-format
+msgid "%(site)s user search"
+msgstr ""
+
+#: udata/templates/user/list.html:10
+msgid "users"
+msgstr ""
+
+#: udata/theme/__init__.py:41
+msgid "Map"
+msgstr ""
