@@ -22,7 +22,7 @@ __all__ = (
 
 
 ORG_ROLES = {
-    'admin': _('Administrateur'),
+    'admin': _('Administrator'),
     'editor': _('Editor'),
 }
 DEFAULT_ROLE = 'editor'
