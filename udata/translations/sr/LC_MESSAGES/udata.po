@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-09-27 10:41+0200\n"
-"PO-Revision-Date: 2017-09-27 11:20-0400\n"
+"PO-Revision-Date: 2017-09-27 11:41-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "MIME-Version: 1.0\n"
@@ -841,7 +841,7 @@ msgstr ""
 #: udata/templates/site/dashboard.html:24 udata/templates/user/base.html:92
 #: udata/templates/user/following.html:17 udata/theme/__init__.py:38
 msgid "Organizations"
-msgstr ""
+msgstr "Organizacija"
 
 #: udata/core/site/metrics.py:112
 msgid "Maximum dataset followers"
