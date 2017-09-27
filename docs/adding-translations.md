@@ -2,41 +2,37 @@
 
 There are translatable strings from both JS an Python.
 
-We use [Transifex][transifex] for translations on the project.
-First, you have to create an account and set a [~/.transifexrc][transifexrc].
+We use [Crowdin][crowdin] for translations on the project.
+First, you have to create an account.
 
-After that you'll be able to reach the [Transifex page for the project][transifex-udata] and interact with translations.
+After that you'll be able to reach the [Crowdin page for the project][crowdin-udata] and interact with translations.
 
 !!! warning
-    We only translate strings from the `master` branch of the repository, do not push languages on any other branch because merging translations is incredibly painful.
+    We only translate strings from the `master` and maintenance branches of the repository.
+    Do not push languages on any other branch because merging translations is incredibly painful.
 
 
 ## Existing languages
 
-The command `inv i18n` retrieve all these strings locally that you can then push to Transifex with the command `tx push -s`.
+The command `inv i18n` extract all these strings locally.
+Pushing the changes on any branch will automatically update translatable strings on Crowdin.
 
-Then go to Transifex and translate new strings.
-
-Once you did this, you can pull these strings with `tx pull` and then compile the retrieved files with `inv i18nc`.
-
-Restart your server and new strings should be translated (don't forget to activate the right language!).
+Crowdin will submit pull requests on github each time translations are updated.
 
 
 ## Proposing a new language
 
-Propose the new language on [Transifex][transifex-udata], once accepted you can:
+To propose a new language you need to submit a pull request:
 
-* translate on transifex
-* create a branch for the new translations
+* create a branch for the new translations (ex: `add-language-fr`)
 * in this branch
     - add the language to the `LANGUAGES` setting
-    - import the initial translations from transifex: `tx pull -r <language_code>`
     - add the corresponding flag in the default theme static assets (use one from [famfamfam flags][famfamfam-flags])
-* check that it compiles with the command `inv i18nc` and that it is displayed as you expect on your local instance
 * submit the pull request
 
+Once it has been accepted, we will also create the new language translation in Crowdin.
 
-[transifex]: https://www.transifex.com
-[transifexrc]: http://docs.transifex.com/client/config/
-[transifex-udata]: https://www.transifex.com/opendatateam/udata/
+
+[crowdin]: https://crowdin.com
+[crowdin-udata]: https://crowdin.com/project/udata
 [famfamfam-flags]: http://www.famfamfam.com/lab/icons/flags/
