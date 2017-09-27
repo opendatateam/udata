@@ -37,7 +37,7 @@ and [milestones][].
 
 UData uses [Bump'R][bumpr] to perform its release process.
 
-To be perform a release, you'll need to:
+To perform a release, you'll need to:
 
 - have administrator permission on the UData repository (to allow direct push)
 - have a working development environment up to date with the `master` branch
