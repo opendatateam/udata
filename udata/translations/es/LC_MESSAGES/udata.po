@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-08-03 11:47+0200\n"
-"PO-Revision-Date: 2017-09-26 14:18-0400\n"
+"POT-Creation-Date: 2017-09-27 10:41+0200\n"
+"PO-Revision-Date: 2017-09-27 08:17-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.4.0\n"
+"Generated-By: Babel 2.5.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: crowdin.com\n"
 "X-Crowdin-Project: udata\n"
@@ -21,68 +21,68 @@ msgstr ""
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
 msgstr ""
 
-#: udata/api/oauth2.py:30
+#: udata/api/oauth2.py:29
 msgid "Public"
 msgstr "Público"
 
-#: udata/api/oauth2.py:31
+#: udata/api/oauth2.py:30
 msgid "Confidential"
 msgstr "Confidencial"
 
-#: udata/api/oauth2.py:35
+#: udata/api/oauth2.py:34
 msgid "Web Application"
 msgstr "Aplicación web"
 
-#: udata/api/oauth2.py:36
+#: udata/api/oauth2.py:35
 msgid "User Agent"
 msgstr "Usuario "
 
-#: udata/api/oauth2.py:37
+#: udata/api/oauth2.py:36
 msgid "Native"
 msgstr "Nativo"
 
-#: udata/api/oauth2.py:41
+#: udata/api/oauth2.py:40
 msgid "Authorization Code"
 msgstr "Código de autorización "
 
-#: udata/api/oauth2.py:42
+#: udata/api/oauth2.py:41
 msgid "Implicit"
 msgstr "Implícito"
 
-#: udata/api/oauth2.py:43
+#: udata/api/oauth2.py:42
 msgid "Resource Owner Password Credentials"
 msgstr "El propietario posede las credenciales de contraseña "
 
-#: udata/api/oauth2.py:44
+#: udata/api/oauth2.py:43
 msgid "Client Credentials"
 msgstr "Credenciales del cliente"
 
-#: udata/api/oauth2.py:48
+#: udata/api/oauth2.py:47
 msgid "Bearer Token"
 msgstr "Portador de emergencia"
 
-#: udata/api/oauth2.py:52
+#: udata/api/oauth2.py:51
 msgid "Default scope"
 msgstr "El ámbito predeterminado"
 
-#: udata/api/oauth2.py:53
+#: udata/api/oauth2.py:52
 msgid "System administrator rights"
 msgstr "Derechos del administrador del sistema"
 
 #: udata/commands/init.py:30
-msgid "Do you want to create a superadmin user ?"
+msgid "Do you want to create a superadmin user?"
 msgstr ""
 
 #: udata/commands/init.py:35
-msgid "Do you want to import some data-related license ?"
+msgid "Do you want to import some data-related license?"
 msgstr ""
 
 #: udata/commands/init.py:39
-msgid "Do you want to create some sample data ?"
+msgid "Do you want to create some sample data?"
 msgstr ""
 
 #: udata/commands/init.py:43
-msgid "Your udata instance is ready !"
+msgid "Your udata instance is ready!"
 msgstr ""
 
 #: udata/core/badges/forms.py:17
@@ -220,7 +220,7 @@ msgstr "Cobertura temporal"
 msgid "The period covered by the data"
 msgstr "El período cubierto por los datos. "
 
-#: udata/core/dataset/forms.py:91 udata/core/spatial/forms.py:60
+#: udata/core/dataset/forms.py:91 udata/core/spatial/forms.py:84
 #: udata/templates/dataset/display.html:301
 #: udata/templates/dataset/search-labels.html:18
 #: udata/templates/dataset/search-panel.html:15
@@ -257,15 +257,12 @@ msgstr "Privado"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restringa la visibilidad del conjunto de datos solo para usted o su organización."
 
-#: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:33
-#: udata/core/organization/views.py:132 udata/core/organization/views.py:135
-#: udata/core/site/metrics.py:52 udata/core/site/views.py:131
-#: udata/core/user/metrics.py:42 udata/templates/dataset/card.html:38
+#: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:34
+#: udata/core/site/metrics.py:53 udata/core/site/views.py:128
+#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:38
 #: udata/templates/dataset/display.html:376 udata/templates/dataset/list.html:38
 #: udata/templates/dataset/search-labels.html:25
 #: udata/templates/dataset/search-panel.html:18
-#: udata/templates/organization/dashboard.html:22
-#: udata/templates/organization/display.html:50
 #: udata/templates/organization/list.html:38
 #: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:6
@@ -417,11 +414,11 @@ msgstr "Ultima fecha de creación "
 msgid "Future date of update"
 msgstr "La futura fecha de actualización"
 
-#: udata/core/dataset/models.py:299
+#: udata/core/dataset/models.py:297
 msgid "Pivotal data"
 msgstr "Datos centrales"
 
-#: udata/core/dataset/models.py:321 udata/templates/dataset/display.html:11
+#: udata/core/dataset/models.py:319 udata/templates/dataset/display.html:11
 msgid "dataset"
 msgstr "conjunto de datos"
 
@@ -429,19 +426,19 @@ msgstr "conjunto de datos"
 msgid "{format} resource"
 msgstr ""
 
-#: udata/core/dataset/search.py:146 udata/tests/test_search.py:92
+#: udata/core/dataset/search.py:146 udata/tests/test_search.py:95
 msgid "Never reused"
 msgstr ""
 
-#: udata/core/dataset/search.py:147 udata/tests/test_search.py:93
+#: udata/core/dataset/search.py:147 udata/tests/test_search.py:96
 msgid "Little reused"
 msgstr ""
 
-#: udata/core/dataset/search.py:148 udata/tests/test_search.py:94
+#: udata/core/dataset/search.py:148 udata/tests/test_search.py:97
 msgid "Quite reused"
 msgstr ""
 
-#: udata/core/dataset/search.py:149 udata/tests/test_search.py:95
+#: udata/core/dataset/search.py:149 udata/tests/test_search.py:98
 msgid "Heavily reused"
 msgstr ""
 
@@ -489,14 +486,12 @@ msgstr "%(user)s comentó tu discusión"
 msgid "A discussion has been closed"
 msgstr "Una discusión fue cerrada"
 
-#: udata/core/followers/metrics.py:29 udata/core/organization/views.py:161
-#: udata/core/site/metrics.py:101 udata/templates/dataset/followers.html:6
+#: udata/core/followers/metrics.py:29 udata/core/site/metrics.py:102
+#: udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:28
 #: udata/templates/dataset/search-panel.html:19
 #: udata/templates/dataset/search-result.html:106
-#: udata/templates/organization/dashboard.html:23
 #: udata/templates/organization/display.html:55
-#: udata/templates/organization/display.html:155
 #: udata/templates/organization/followers.html:7
 #: udata/templates/organization/list.html:39
 #: udata/templates/organization/search-labels.html:12
@@ -552,11 +547,11 @@ msgstr "Tareas"
 msgid "Enabled"
 msgstr "Deshabilitado"
 
-#: udata/core/jobs/models.py:19
+#: udata/core/jobs/models.py:21
 msgid "every {0.period_singular}"
 msgstr "cada {0.period_singular}"
 
-#: udata/core/jobs/models.py:20
+#: udata/core/jobs/models.py:22
 msgid "every {0.every} {0.period}"
 msgstr "cada {0.every} {0.period} "
 
@@ -596,14 +591,11 @@ msgstr "Logotipo"
 msgid "Role"
 msgstr "Rol"
 
-#: udata/core/organization/metrics.py:17 udata/core/organization/views.py:110
-#: udata/core/organization/views.py:113 udata/core/reuse/metrics.py:24
-#: udata/core/site/metrics.py:42 udata/core/site/views.py:125
+#: udata/core/organization/metrics.py:17 udata/core/reuse/metrics.py:24
+#: udata/core/site/metrics.py:42 udata/core/site/views.py:122
 #: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:23
 #: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:8
 #: udata/templates/dataset/list.html:18 udata/templates/dataset/list.html:32
-#: udata/templates/organization/dashboard.html:21
-#: udata/templates/organization/display.html:46
 #: udata/templates/organization/list.html:37
 #: udata/templates/organization/search-labels.html:6
 #: udata/templates/organization/search-panel.html:4
@@ -617,22 +609,22 @@ msgstr "Rol"
 msgid "Datasets"
 msgstr "Conjunto de datos"
 
-#: udata/core/organization/metrics.py:45 udata/core/organization/views.py:156
+#: udata/core/organization/metrics.py:50
 msgid "Permitted reuses"
 msgstr "Reutilizaciones permitidas"
 
-#: udata/core/organization/metrics.py:56
+#: udata/core/organization/metrics.py:61
 #: udata/templates/organization/display.html:54
-#: udata/templates/organization/display.html:143
 msgid "Members"
 msgstr "Miembros"
 
 #: udata/core/organization/models.py:25
-msgid "Administrateur"
+#: udata/templates/organization/display_base.html:127
+msgid "Administrator"
 msgstr "Administrador"
 
 #: udata/core/organization/models.py:26
-#: udata/templates/organization/display_base.html:141
+#: udata/templates/organization/display_base.html:134
 msgid "Editor"
 msgstr ""
 
@@ -651,11 +643,11 @@ msgstr "Aceptado"
 msgid "Refused"
 msgstr "Rechazado"
 
-#: udata/core/organization/models.py:130
+#: udata/core/organization/models.py:128
 msgid "Public Service"
 msgstr "Servicio público"
 
-#: udata/core/organization/models.py:131
+#: udata/core/organization/models.py:129
 msgid "Certified"
 msgstr "Certificado"
 
@@ -713,14 +705,6 @@ msgstr "Usted es ahora miembro de la organización \"%(org)s\""
 #: udata/core/organization/tasks.py:48
 msgid "Membership refused"
 msgstr "Membresía rechazada"
-
-#: udata/core/organization/views.py:120 udata/core/organization/views.py:142
-msgid "Views"
-msgstr "Vistas"
-
-#: udata/core/organization/views.py:153 udata/core/site/views.py:143
-msgid "Community"
-msgstr "Comunidad"
 
 #: udata/core/post/forms.py:19
 msgid "Headline"
@@ -805,7 +789,7 @@ msgstr "Visualización"
 msgid "Connected device"
 msgstr "Dispositivo conectado"
 
-#: udata/core/reuse/models.py:90 udata/templates/reuse/display.html:10
+#: udata/core/reuse/models.py:88 udata/templates/reuse/display.html:10
 msgid "reuse"
 msgstr "reutilización"
 
@@ -833,20 +817,20 @@ msgstr "Granulometría de entrada"
 msgid "Number of elements in feeds"
 msgstr "Número de elementos de granularidad"
 
-#: udata/core/site/metrics.py:62 udata/core/site/views.py:137
+#: udata/core/site/metrics.py:63 udata/core/site/views.py:134
 #: udata/templates/dataset/display.html:87 udata/templates/dataset/list.html:33
 #: udata/templates/search.html:71 udata/templates/site/dashboard.html:21
 msgid "Resources"
 msgstr "Recursos"
 
-#: udata/core/site/metrics.py:81 udata/core/site/views.py:152
+#: udata/core/site/metrics.py:82 udata/core/site/views.py:149
 #: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:8
 #: udata/templates/user/list.html:18
 msgid "Users"
 msgstr "Usuarios"
 
-#: udata/core/site/metrics.py:91 udata/core/site/views.py:146
+#: udata/core/site/metrics.py:92 udata/core/site/views.py:143
 #: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:47
 #: udata/templates/organization/display_base.html:8
 #: udata/templates/organization/followers.html:5
@@ -859,67 +843,75 @@ msgstr "Usuarios"
 msgid "Organizations"
 msgstr "Organizaciones"
 
-#: udata/core/site/metrics.py:111
+#: udata/core/site/metrics.py:112
 msgid "Maximum dataset followers"
 msgstr "Número máximo de seguidores de conjuntos de datos "
 
-#: udata/core/site/metrics.py:124
+#: udata/core/site/metrics.py:125
 msgid "Maximum dataset reuses"
 msgstr "Número máximo de reutilizaciones de conjuntos de datos  "
 
-#: udata/core/site/metrics.py:137
+#: udata/core/site/metrics.py:138
 msgid "Maximum datasets in reuses"
 msgstr "Número máximo de conjunto de datos en las reutilizaciones "
 
-#: udata/core/site/metrics.py:150
+#: udata/core/site/metrics.py:151
 msgid "Maximum reuse followers"
 msgstr "Número máximo de seguidores de reutilizaciones "
 
-#: udata/core/site/metrics.py:163
+#: udata/core/site/metrics.py:164
 msgid "Maximum organization followers"
 msgstr "Número máximo de seguidores de organizaciones"
 
-#: udata/core/site/metrics.py:177
+#: udata/core/site/metrics.py:178
 msgid "Maximum organization reuses"
 msgstr "Número máximo de reutilizaciones de organizaciones "
 
-#: udata/core/site/metrics.py:191
+#: udata/core/site/metrics.py:192
 msgid "Maximum organization datasets"
 msgstr "Número máximo de conjunto de datos de organizaciones"
 
-#: udata/core/site/views.py:122
+#: udata/core/site/views.py:119
 msgid "Data"
 msgstr "Datos"
+
+#: udata/core/site/views.py:140
+msgid "Community"
+msgstr "Comunidad"
 
 #: udata/core/spatial/api.py:59
 msgid "payloadname"
 msgstr ""
 
-#: udata/core/spatial/forms.py:47
+#: udata/core/spatial/forms.py:51
+msgid "Unknown geoid(s): {identifiers}"
+msgstr ""
+
+#: udata/core/spatial/forms.py:70
 msgid "Not a valid GeoJSON"
 msgstr ""
 
-#: udata/core/spatial/forms.py:61
+#: udata/core/spatial/forms.py:85
 msgid "A list of covered territories"
 msgstr "Lista de los territorios cubiertos"
 
-#: udata/core/spatial/forms.py:63 udata/templates/dataset/search-labels.html:21
+#: udata/core/spatial/forms.py:87 udata/templates/dataset/search-labels.html:21
 msgid "Spatial granularity"
 msgstr "Granularidad espacial"
 
-#: udata/core/spatial/forms.py:64
+#: udata/core/spatial/forms.py:88
 msgid "The size of the data increment"
 msgstr "El tamaño del incremento de datos "
 
-#: udata/core/spatial/models.py:23
+#: udata/core/spatial/models.py:25
 msgid "POI"
 msgstr "PDI"
 
-#: udata/core/spatial/models.py:24
+#: udata/core/spatial/models.py:26
 msgid "Other"
 msgstr "Otro"
 
-#: udata/core/spatial/models.py:262
+#: udata/core/spatial/models.py:296
 msgid "other"
 msgstr ""
 
@@ -1027,11 +1019,11 @@ msgstr "Sobre"
 msgid "Roles"
 msgstr ""
 
-#: udata/core/user/metrics.py:67 udata/templates/user/following.html:7
+#: udata/core/user/metrics.py:72 udata/templates/user/following.html:7
 msgid "Following"
 msgstr "Siguiendo"
 
-#: udata/core/user/models.py:240 udata/tests/api/test_me_api.py:372
+#: udata/core/user/models.py:238 udata/tests/api/test_me_api.py:373
 msgid "Account deletion"
 msgstr ""
 
@@ -1084,23 +1076,23 @@ msgstr ""
 msgid "Model for {0} not found"
 msgstr "Modelo para {0} no encontrado"
 
-#: udata/forms/fields.py:449
+#: udata/forms/fields.py:459
 msgid "Unknown identifiers: {identifiers}"
 msgstr ""
 
-#: udata/forms/fields.py:580
+#: udata/forms/fields.py:590
 msgid "Unable to parse date range"
 msgstr "Incapaz de analizar el rango de los datos"
 
-#: udata/forms/fields.py:607 udata/forms/fields.py:630
+#: udata/forms/fields.py:617 udata/forms/fields.py:640
 msgid "You must be authenticated"
 msgstr "Usted debe estar autentificado"
 
-#: udata/forms/fields.py:610
+#: udata/forms/fields.py:620
 msgid "You can only set yourself as owner"
 msgstr "Sólo puede establecerse usted mismo como propietario"
 
-#: udata/forms/fields.py:633
+#: udata/forms/fields.py:643
 msgid "Permission denied for this organization"
 msgstr "Permiso negado para esta organización"
 
@@ -1113,17 +1105,17 @@ msgstr "Este campo requiere de \"%(name)s\"  que deben ser ajustados"
 msgid "Anonymous user"
 msgstr "Usuario anónimo"
 
-#: udata/frontend/helpers.py:266
+#: udata/frontend/helpers.py:267
 msgctxt "month-format"
 msgid "yyyy/MM"
 msgstr "MM/yyyy"
 
-#: udata/frontend/helpers.py:270
+#: udata/frontend/helpers.py:271
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
 msgstr "dd/MM/yyyy"
 
-#: udata/frontend/helpers.py:293
+#: udata/frontend/helpers.py:294
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr "%(start)s hasta %(end)s\n"
@@ -1177,21 +1169,21 @@ msgstr "Comenzó"
 msgid "Skipped"
 msgstr "Salteado"
 
-#: udata/search/fields.py:38
+#: udata/search/fields.py:37
 msgid "OR"
 msgstr ""
 
-#: udata/search/fields.py:101 udata/tests/test_search.py:800
-#: udata/tests/test_search.py:803
+#: udata/search/fields.py:116 udata/tests/test_search.py:803
+#: udata/tests/test_search.py:806
 msgid "yes"
 msgstr "sí"
 
-#: udata/search/fields.py:101 udata/tests/test_search.py:801
-#: udata/tests/test_search.py:804
+#: udata/search/fields.py:116 udata/tests/test_search.py:804
+#: udata/tests/test_search.py:807
 msgid "no"
 msgstr ""
 
-#: udata/search/fields.py:272
+#: udata/search/fields.py:287
 msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
 msgstr ""
 
@@ -1458,9 +1450,9 @@ msgid "Frequency"
 msgstr "Frecuencia"
 
 #: udata/templates/embed-dataset.html:237
-#: udata/templates/territories/commune.html:24
-#: udata/templates/territories/departement.html:23
-#: udata/templates/territories/region.html:22
+#: udata/templates/territories/commune.html:23
+#: udata/templates/territories/departement.html:22
+#: udata/templates/territories/region.html:21
 msgid "License:"
 msgstr ""
 
@@ -1481,7 +1473,7 @@ msgid "Settings"
 msgstr "Ajustes"
 
 #: udata/templates/header.html:68 udata/templates/header.html:71
-#: udata/templates/territories/territory.html:37
+#: udata/templates/territories/territory.html:41
 msgid "Sign In / Register"
 msgstr "Conexión / Registro"
 
@@ -1516,8 +1508,7 @@ msgstr "Métricas "
 msgid "Site metrics"
 msgstr "Métricas del sitio"
 
-#: udata/templates/metrics.html:6 udata/templates/organization/dashboard.html:7
-#: udata/templates/site/dashboard.html:6
+#: udata/templates/metrics.html:6 udata/templates/site/dashboard.html:6
 msgid "metrics"
 msgstr "métricas "
 
@@ -1576,6 +1567,7 @@ msgstr "%(site)s buscar"
 msgid "search"
 msgstr "buscar"
 
+#: udata/templates/organization/display.html:46
 #: udata/templates/organization/display_base.html:58 udata/templates/search.html:27
 #: udata/templates/user/base.html:79
 #, python-format
@@ -1584,6 +1576,7 @@ msgid_plural "%(num)d datasets"
 msgstr[0] "%(num)d conjunto de datos"
 msgstr[1] "%(num)d conjuntos de datos"
 
+#: udata/templates/organization/display.html:50
 #: udata/templates/organization/display_base.html:87 udata/templates/search.html:34
 #: udata/templates/user/base.html:85
 #, python-format
@@ -1852,6 +1845,7 @@ msgstr "¿Usted reutiliza estos datos y publica un artículo, una infografía o 
 "Referencie su trabajo en tan sólo unos clicks y aumene su visibilidad."
 
 #: udata/templates/dataset/followers.html:13
+#: udata/templates/organization/display.html:155
 #: udata/templates/organization/display_base.html:76
 #: udata/templates/organization/followers.html:26 udata/templates/user/base.html:67
 #: udata/templates/user/followers.html:14
@@ -2295,28 +2289,6 @@ msgid_plural "%(num)s reuses"
 msgstr[0] "%(num)s reutilización"
 msgstr[1] "%(num)s reutilizaciones"
 
-#: udata/templates/organization/dashboard.html:4
-#: udata/templates/organization/dashboard.html:13
-#: udata/templates/organization/display_base.html:105
-#: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
-msgid "Dashboard"
-msgstr "Tablero de mando"
-
-#: udata/templates/organization/dashboard.html:5
-#: udata/templates/site/dashboard.html:5
-msgid "Site metrics and activity"
-msgstr "Métricas y actividad del sitio"
-
-#: udata/templates/organization/dashboard.html:7
-#: udata/templates/site/dashboard.html:6
-msgid "activity"
-msgstr "actividad"
-
-#: udata/templates/organization/dashboard.html:43
-#: udata/templates/site/dashboard.html:51
-msgid "Community activity"
-msgstr "Actividad de la comunidad"
-
 #: udata/templates/organization/display.html:7
 msgid "organization"
 msgstr "organización"
@@ -2326,12 +2298,18 @@ msgid "This organization has been deleted. This will be permanent in the next 24
 msgstr "Esta organización se ha eliminado. Esto será permanente durante las próximas 24 horas"
 
 #: udata/templates/organization/display.html:47
-msgid "Private datasets"
-msgstr "Conjuntos de datos privados"
+#, python-format
+msgid "%(num)d private dataset"
+msgid_plural "%(num)d private datasets"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:51
-msgid "Private reuses"
-msgstr "Reutilizaciones privadas"
+#, python-format
+msgid "%(num)d private reuse"
+msgid_plural "%(num)d private reuses"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:78
 #, python-format
@@ -2363,20 +2341,26 @@ msgstr "Lista de discusiones"
 msgid "See the %(nb)s reuses"
 msgstr "Ver el %(nb)s de reutilizaciones"
 
-#: udata/templates/organization/display.html:168
-msgid "Display all followers"
-msgstr "Visualizar todos los seguidores"
-
-#: udata/templates/organization/display_base.html:46
-msgid "See all organizations with that badge."
-msgstr "Ver todas las organizaciones con una insignia "
-
+#: udata/templates/organization/display.html:143
 #: udata/templates/organization/display_base.html:67
 #, python-format
 msgid "%(num)d member"
 msgid_plural "%(num)d members"
 msgstr[0] "%(num)d miembro"
 msgstr[1] "%(num)d miembros"
+
+#: udata/templates/organization/display.html:168
+msgid "Display all followers"
+msgstr "Visualizar todos los seguidores"
+
+#: udata/templates/organization/display.html:188
+#: udata/templates/site/dashboard.html:51
+msgid "Community activity"
+msgstr "Actividad de la comunidad"
+
+#: udata/templates/organization/display_base.html:46
+msgid "See all organizations with that badge."
+msgstr "Ver todas las organizaciones con una insignia "
 
 #: udata/templates/organization/display_base.html:86
 msgid "Use of data by that organization for the community"
@@ -2393,43 +2377,39 @@ msgid_plural "%(num)d reappropriations"
 msgstr[0] "%(num)d reapropiación"
 msgstr[1] "%(num)d reapropiaciones"
 
-#: udata/templates/organization/display_base.html:116
+#: udata/templates/organization/display_base.html:109
 msgid "I belong to this organization"
 msgstr "Yo hago parte de esta organización"
 
-#: udata/templates/organization/display_base.html:119
+#: udata/templates/organization/display_base.html:112
 msgid "Join"
 msgstr "Unir"
 
-#: udata/templates/organization/display_base.html:123
+#: udata/templates/organization/display_base.html:116
 msgid "Waiting for approval"
 msgstr "Esperando aprobación"
 
-#: udata/templates/organization/display_base.html:127
+#: udata/templates/organization/display_base.html:120
 msgid "Pending request"
 msgstr "Solicitud pendiente"
 
-#: udata/templates/organization/display_base.html:132
+#: udata/templates/organization/display_base.html:125
 msgid "You are an administrator of this organization"
 msgstr "Usted es un administrador de esta organización"
 
-#: udata/templates/organization/display_base.html:134
-msgid "Administrator"
-msgstr "Administrador"
-
-#: udata/templates/organization/display_base.html:139
+#: udata/templates/organization/display_base.html:132
 msgid "You are editor in this organization"
 msgstr "Usted es editor de esta organización"
 
-#: udata/templates/organization/display_base.html:146
+#: udata/templates/organization/display_base.html:139
 msgid "You are a member of this organization"
 msgstr "Usted es un miembro de esta organización"
 
-#: udata/templates/organization/display_base.html:148
+#: udata/templates/organization/display_base.html:141
 msgid "Member"
 msgstr "Miembro"
 
-#: udata/templates/organization/display_base.html:156
+#: udata/templates/organization/display_base.html:149
 #: udata/templates/organization/sidebar-producer.html:26
 msgid "I'll be informed about this organization news"
 msgstr "Estaré informado acerca de las noticias de esta organización"
@@ -2635,6 +2615,18 @@ msgid "In particular, I understand that this site\n"
 "                    The members of the community are in charge of looking after the quality of the content it produces."
 msgstr ""
 
+#: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
+msgid "Dashboard"
+msgstr "Tablero de mando"
+
+#: udata/templates/site/dashboard.html:5
+msgid "Site metrics and activity"
+msgstr "Métricas y actividad del sitio"
+
+#: udata/templates/site/dashboard.html:6
+msgid "activity"
+msgstr "actividad"
+
 #: udata/templates/site/map.html:5 udata/templates/site/map.html:13
 msgid "Coverage map"
 msgstr "Mapa de cobertura"
@@ -2656,55 +2648,55 @@ msgstr "mapa"
 msgid "Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s"
 msgstr ""
 
-#: udata/templates/territories/commune.html:13
-#: udata/templates/territories/departement.html:13
-#: udata/templates/territories/region.html:13
+#: udata/templates/territories/commune.html:12
+#: udata/templates/territories/departement.html:12
+#: udata/templates/territories/region.html:12
 msgid "Region:"
 msgstr ""
 
-#: udata/templates/territories/commune.html:14
-#: udata/templates/territories/departement.html:14
+#: udata/templates/territories/commune.html:13
+#: udata/templates/territories/departement.html:13
 msgid "County:"
 msgstr ""
 
-#: udata/templates/territories/commune.html:15
+#: udata/templates/territories/commune.html:14
 msgid "Town:"
 msgstr ""
 
-#: udata/templates/territories/commune.html:23
-#: udata/templates/territories/departement.html:22
-#: udata/templates/territories/region.html:21
+#: udata/templates/territories/commune.html:22
+#: udata/templates/territories/departement.html:21
+#: udata/templates/territories/region.html:20
 msgid "Source:"
+msgstr ""
+
+#: udata/templates/territories/commune.html:29
+#: udata/templates/territories/departement.html:28
+#: udata/templates/territories/region.html:27
+msgid "Submit your logo through:"
 msgstr ""
 
 #: udata/templates/territories/commune.html:30
 #: udata/templates/territories/departement.html:29
 #: udata/templates/territories/region.html:28
-msgid "Submit your logo through:"
-msgstr ""
-
-#: udata/templates/territories/commune.html:31
-#: udata/templates/territories/departement.html:30
-#: udata/templates/territories/region.html:29
 msgid "we only expose logos under an open license"
 msgstr ""
 
-#: udata/templates/territories/commune.html:41
-#: udata/templates/territories/departement.html:40
-#: udata/templates/territories/region.html:39
+#: udata/templates/territories/commune.html:40
+#: udata/templates/territories/departement.html:39
+#: udata/templates/territories/region.html:38
 #: udata/templates/territories/search-result.html:13
 msgid "INSEE code:"
 msgstr ""
 
-#: udata/templates/territories/commune.html:47
-#: udata/templates/territories/region.html:45
+#: udata/templates/territories/commune.html:46
+#: udata/templates/territories/region.html:44
 #: udata/templates/territories/search-result.html:15
 msgid "Postal code:"
 msgstr ""
 
-#: udata/templates/territories/commune.html:54
-#: udata/templates/territories/departement.html:46
-#: udata/templates/territories/region.html:52
+#: udata/templates/territories/commune.html:53
+#: udata/templates/territories/departement.html:45
+#: udata/templates/territories/region.html:51
 msgid "Population:"
 msgstr ""
 
@@ -2713,7 +2705,7 @@ msgstr ""
 msgid "Datasets related to the county of %(name)s with INSEE code %(code)s"
 msgstr ""
 
-#: udata/templates/territories/departement.html:51
+#: udata/templates/territories/departement.html:50
 msgid "Main towns:"
 msgstr ""
 
@@ -2734,11 +2726,11 @@ msgstr ""
 msgid "Datasets related to the region of %(name)s with INSEE code %(code)s"
 msgstr ""
 
-#: udata/templates/territories/region.html:58
+#: udata/templates/territories/region.html:57
 msgid "Previously:"
 msgstr ""
 
-#: udata/templates/territories/region.html:65
+#: udata/templates/territories/region.html:64
 msgid "Counties:"
 msgstr ""
 
@@ -2750,40 +2742,40 @@ msgstr ""
 msgid "Population"
 msgstr ""
 
-#: udata/templates/territories/territory.html:11
+#: udata/templates/territories/territory.html:17
 msgid "This territory has been replaced by:"
 msgstr ""
 
-#: udata/templates/territories/territory.html:13
+#: udata/templates/territories/territory.html:19
 msgid "since"
 msgstr ""
 
-#: udata/templates/territories/territory.html:29
+#: udata/templates/territories/territory.html:33
 msgid "Some of your datasets have an exact match!"
 msgstr ""
 
-#: udata/templates/territories/territory.html:31
+#: udata/templates/territories/territory.html:35
 msgid "Claim that territory"
 msgstr ""
 
-#: udata/templates/territories/territory.html:31
+#: udata/templates/territories/territory.html:35
 msgid "and your datasets will appear first."
 msgstr ""
 
-#: udata/templates/territories/territory.html:33
+#: udata/templates/territories/territory.html:37
 #, python-format
 msgid "If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s)."
 msgstr ""
 
-#: udata/templates/territories/territory.html:36
+#: udata/templates/territories/territory.html:40
 msgid "You want to add your own datasets to that list?"
 msgstr ""
 
-#: udata/templates/territories/territory.html:39
+#: udata/templates/territories/territory.html:43
 msgid "Log in"
 msgstr ""
 
-#: udata/templates/territories/territory.html:40
+#: udata/templates/territories/territory.html:44
 msgid "and create resources for that territory."
 msgstr ""
 
