@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Display membership modal actions buttons for site administrators and on membership display. [#1176](https://github.com/opendatateam/udata/pull/1176)
 
 ## 1.1.7 (2017-09-25)
 
