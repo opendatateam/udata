@@ -60,11 +60,13 @@ export default {
         return {
             toggled: false,
             badges: badges.organization,
-            logoSrc: this.org.logo_thumbnail || placeholders.organization,
         }
     },
     components: {Box, ImageButton},
     computed: {
+        logoSrc () {
+            return this.org.logo_thumbnail || placeholders.organization;
+        },
         endpoint() {
             if (this.org.id) {
                 var operation = API.organizations.operations.organization_logo;
