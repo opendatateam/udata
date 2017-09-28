@@ -129,6 +129,7 @@ def create_app(config='udata.settings.Defaults', override=None):
     app.config.from_object(config)
     settings = os.environ.get('UDATA_SETTINGS', join(os.getcwd(), 'udata.cfg'))
     if exists(settings):
+        app.settings_file = settings  # Keep track of loaded settings for diagnostic
         app.config.from_pyfile(settings)
 
     if override:
