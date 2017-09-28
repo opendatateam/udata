@@ -25,6 +25,7 @@ manager = Manager()
 
 # Tell wether or not you can prompt user
 IS_INTERACTIVE = sys.__stdin__.isatty()
+WITH_COLORS = sys.stdout.isatty()
 
 
 def submanager(name, **kwargs):
@@ -144,7 +145,7 @@ class BaseFormatter(logging.Formatter):
 
 def color(code):
     '''A simple ANSI color wrapper factory'''
-    return lambda t: '\033[{0}{1}\033[0;m'.format(code, t)
+    return lambda t: '\033[{0}{1}\033[0;m'.format(code, t) if WITH_COLORS else t
 
 
 green = color('1;32m')
