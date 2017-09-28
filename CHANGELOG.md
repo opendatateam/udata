@@ -10,6 +10,7 @@
 - Fixes a lot of encoding issues [#1146](https://github.com/opendatateam/udata/pull/1146)
 - Switch to [Crowdin](https://crowdin.com) to manage translations [#1171](https://github.com/opendatateam/udata/pull/1171)
 - **BREAKING** Switch to `Flask-Security`. `Flask-Security-Fork` should be uninstalled before installing the new requirements [#958](https://github.com/opendatateam/udata/pull/958)
+- Added a `udata info` command for diagnostic purpose [#1179](https://github.com/opendatateam/udata/pull/1179)
 
 ## 1.1.8 (2017-09-28)
 
