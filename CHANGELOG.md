@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.8 (2017-09-28)
 
 - Display membership modal actions buttons for site administrators and on membership display. [#1176](https://github.com/opendatateam/udata/pull/1176)
 - Fix organization avatar in admin profile [#1175](https://github.com/opendatateam/udata/issues/1175)
