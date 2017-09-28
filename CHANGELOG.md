@@ -9,6 +9,7 @@
 - **BREAKING** Upgrade to Celery 4.1.0. All celery parameters should be updated. (See [Celery options documentation](https://udata.readthedocs.io/en/stable/adapting-settings/#celery-options) [#1150](https://github.com/opendatateam/udata/pull/1050)
 - Fixes a lot of encoding issues [#1146](https://github.com/opendatateam/udata/pull/1146)
 - Switch to [Crowdin](https://crowdin.com) to manage translations [#1171](https://github.com/opendatateam/udata/pull/1171)
+- **BREAKING** Switch to `Flask-Security`. `Flask-Security-Fork` should be uninstalled before installing the new requirements [#958](https://github.com/opendatateam/udata/pull/958)
 
 ## 1.1.7 (2017-09-25)
 
