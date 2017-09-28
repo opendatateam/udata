@@ -17,10 +17,10 @@
 <user-modal :user="user" v-ref:modal>
     <role-form class="member-form" v-ref:form
         :fields="fields" :model="member" :defs="defs"
-        :readonly="!is_admin" :fill="true">
+        :readonly="!can_edit" :fill="true">
     </role-form>
-    <br v-if="is_admin" />
-    <div v-if="is_admin && !member_exists"  class="btn-group btn-group-justified">
+    <br v-if="can_edit" />
+    <div v-if="can_edit"  class="btn-group btn-group-justified">
         <div class="btn-group">
             <button type="button" class="btn btn-success btn-flat"
                 @click="submit">
@@ -35,7 +35,7 @@
             </button>
         </div>
     </div>
-    <div v-if="is_admin && member_exists" class="btn-group btn-group-justified">
+    <div v-if="can_edit && member_exists" class="btn-group btn-group-justified">
         <div class="btn-group">
             <button type="button" class="btn btn-danger btn-flat" @click="delete">
                 <span class="fa fa-user-times"></span>
@@ -76,8 +76,8 @@ export default {
         };
     },
     computed: {
-        is_admin() {
-            return this.org.is_admin(this.$root.me);
+        can_edit() {
+            return this.$root.me.is_admin || this.org.is_admin(this.$root.me);
         },
         member_exists() {
             return this.org.is_member(this.user);
