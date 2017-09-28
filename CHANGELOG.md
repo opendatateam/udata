@@ -11,6 +11,11 @@
 - Switch to [Crowdin](https://crowdin.com) to manage translations [#1171](https://github.com/opendatateam/udata/pull/1171)
 - **BREAKING** Switch to `Flask-Security`. `Flask-Security-Fork` should be uninstalled before installing the new requirements [#958](https://github.com/opendatateam/udata/pull/958)
 
+## 1.1.8 (2017-09-28)
+
+- Display membership modal actions buttons for site administrators and on membership display. [#1176](https://github.com/opendatateam/udata/pull/1176)
+- Fix organization avatar in admin profile [#1175](https://github.com/opendatateam/udata/issues/1175)
+
 ## 1.1.7 (2017-09-25)
 
 - Prevent a random territory from being displayed when query doesn't match [#1124](https://github.com/opendatateam/udata/pull/1124)
