@@ -13,6 +13,17 @@ And then get the documentation for subtasks:
 ```shell
 $ udata user -?
 ```
+
+## Diagnostic
+
+If you have some issues, start with:
+
+```shell
+$ udata info
+```
+
+This will display some useful details about your local configuration.
+
 ## Managing users
 
 You can create a user with:
