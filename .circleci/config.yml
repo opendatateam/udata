@@ -20,9 +20,9 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py-cache-{{ checksum "python.deps" }}
-          - py-cache-{{ .Branch }}
-          - py-cache-{{ .Environment.BASE_BRANCH }}
+          - py-cache-{{ arch }}-{{ checksum "python.deps" }}
+          - py-cache-{{ arch }}-{{ .Branch }}
+          - py-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
@@ -31,11 +31,11 @@ jobs:
             pip install -e . || pip install -e .
             pip install -r requirements/circleci.pip
       - save_cache:
-          key: py-cache-{{ checksum "python.deps" }}
+          key: py-cache-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py-cache-{{ .Branch }}
+          key: py-cache-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
@@ -70,18 +70,18 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-            - js-cache-{{ checksum "js.deps" }}
-            - js-cache-{{ .Branch }}
-            - js-cache-{{ .Environment.BASE_BRANCH }}
+            - js-cache-{{ arch }}-{{ checksum "js.deps" }}
+            - js-cache-{{ arch }}-{{ .Branch }}
+            - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install NodeJS and dependencies
           command: nvm install && npm install
       - save_cache:
-          key: js-cache-{{ checksum "js.deps" }}
+          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:
           - node_modules
       - save_cache:
-          key: js-cache-{{ .Branch }}
+          key: js-cache-{{ arch }}-{{ .Branch }}
           paths:
           - node_modules
       - run:
