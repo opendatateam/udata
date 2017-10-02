@@ -1,5 +1,5 @@
 awesome-slugify==1.6.5
-bleach==2.0.0
+bleach==2.1
 blinker==1.4
 celery==4.1.0
 celerybeat-mongo==0.1.0
