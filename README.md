@@ -72,7 +72,8 @@ You can execute `udata-gouvfr` specific tasks from the `udata-gouvfr` directory.
 
 ```shell
 cd udata-gouvfr
-inv assets_build
+npm install
+inv assets-build
 ```
 
 You can list available development commands with:
