@@ -29,10 +29,12 @@ C3 = 'c3'
 NECMERGITUR = 'nec'
 OPENFIELD16 = 'openfield16'
 SPD = 'spd'
+TRANSPORT = 'transport'
 Dataset.__badges__[C3] = _('C³')
 Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
 Dataset.__badges__[OPENFIELD16] = 'Openfield 16'
 Dataset.__badges__[SPD] = _('Reference Data')
+Dataset.__badges__[TRANSPORT] = _('Transport')
 
 BASE_POPULATION_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2021173'
 POPULATION_FILENAME = 'popleg2013_cc_popleg.xls'
