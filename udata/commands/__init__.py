@@ -109,6 +109,11 @@ def set_logging(app):
     app.logger.handlers = []
     app.logger.addHandler(handler)
 
+    logger = logging.getLogger('__main__')
+    logger.setLevel(log_level)
+    logger.handlers = []
+    logger.addHandler(handler)
+
     for name in app.config['PLUGINS']:
         logger = logging.getLogger('udata_{0}'.format(name))
         logger.setLevel(log_level)

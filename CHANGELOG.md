@@ -11,6 +11,8 @@
 - Switch to [Crowdin](https://crowdin.com) to manage translations [#1171](https://github.com/opendatateam/udata/pull/1171)
 - **BREAKING** Switch to `Flask-Security`. `Flask-Security-Fork` should be uninstalled before installing the new requirements [#958](https://github.com/opendatateam/udata/pull/958)
 - Added a `udata info` command for diagnostic purpose [#1179](https://github.com/opendatateam/udata/pull/1179)
+- Add `.ttl` and `.n3` as supported file extensions [#1183](https://github.com/opendatateam/udata/pull/1183)
+- Improve logging for adhoc scripts [#1184](https://github.com/opendatateam/udata/pull/1184)
 
 ## 1.1.8 (2017-09-28)
 
