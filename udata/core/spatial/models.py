@@ -28,6 +28,7 @@ BASE_GRANULARITIES = [
 
 ADMIN_LEVEL_MIN = 1
 ADMIN_LEVEL_MAX = 110
+EMPTY_GEOM = {'type': 'MultiPolygon', 'coordinates': []}
 
 
 class GeoLevel(db.Document):
@@ -249,7 +250,7 @@ class GeoZone(db.Document):
         return {
             'id': self.id,
             'type': 'Feature',
-            'geometry': self.geom,
+            'geometry': self.geom or EMPTY_GEOM,
             'properties': {
                 'slug': self.slug,
                 'name': gettext(self.name),

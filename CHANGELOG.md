@@ -14,6 +14,7 @@
 - Add `.ttl` and `.n3` as supported file extensions [#1183](https://github.com/opendatateam/udata/pull/1183)
 - Improve logging for adhoc scripts [#1184](https://github.com/opendatateam/udata/pull/1184)
 - Improve URLs validation (support new tlds, unicode URLs...) [#1182](https://github.com/opendatateam/udata/pull/1182)
+- Properly serialize empty geometries for zones missing it
 
 ## 1.1.8 (2017-09-28)
 
