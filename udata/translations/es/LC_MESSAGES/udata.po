@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-09-27 10:41+0200\n"
-"PO-Revision-Date: 2017-09-27 10:13-0400\n"
+"PO-Revision-Date: 2017-10-02 04:25-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -147,7 +147,7 @@ msgstr "Bien sea el recurso un archivo cargado, un archivo remoto o una API"
 #: udata/core/dataset/forms.py:35 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:19
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: udata/core/dataset/forms.py:36 udata/templates/dataset/search-labels.html:24
 msgid "Format"
@@ -291,11 +291,11 @@ msgstr ""
 
 #: udata/core/dataset/models.py:36
 msgid "Four times a day"
-msgstr ""
+msgstr "Cuatro veces al día"
 
 #: udata/core/dataset/models.py:37
 msgid "Three times a day"
-msgstr ""
+msgstr "Tres veces al día"
 
 #: udata/core/dataset/models.py:38
 msgid "Semidaily"
@@ -307,11 +307,11 @@ msgstr "Diario"
 
 #: udata/core/dataset/models.py:40
 msgid "Four times a week"
-msgstr ""
+msgstr "Cuatro veces por semana"
 
 #: udata/core/dataset/models.py:41
 msgid "Three times a week"
-msgstr ""
+msgstr "Tres veces por semana"
 
 #: udata/core/dataset/models.py:42
 msgid "Semiweekly"
@@ -949,7 +949,7 @@ msgstr "País"
 
 #: udata/core/spatial/translations.py:16
 msgid "World"
-msgstr ""
+msgstr "Mundo"
 
 #: udata/core/spatial/translations.py:17
 msgid "Country group"
@@ -961,11 +961,11 @@ msgstr "Subconjunto de países"
 
 #: udata/core/spatial/translations.py:19
 msgid "European Union"
-msgstr ""
+msgstr "Unión Europea"
 
 #: udata/core/spatial/translations.py:20
 msgid "Metropolitan France"
-msgstr ""
+msgstr "Francia metropolitana"
 
 #: udata/core/spatial/translations.py:21
 msgid "Overseas France"
@@ -1009,7 +1009,7 @@ msgstr "Apellido"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #: udata/core/user/forms.py:21
 msgid "About"
