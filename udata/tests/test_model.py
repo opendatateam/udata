@@ -53,6 +53,10 @@ class URLTester(db.Document):
     url = db.URLField()
 
 
+class PublicURLTester(db.Document):
+    url = db.URLField(public=True)
+
+
 class AutoUUIDFieldTest(DBTestMixin, TestCase):
     def test_auto_populate(self):
         '''AutoUUIDField should populate itself if not set'''
@@ -246,6 +250,18 @@ class URLFieldTest(DBTestMixin, TestCase):
         obj = URLTester(url=url)
         obj.save().reload()
         self.assertEqual(obj.url, url.strip())
+
+    def test_handle_unicode(self):
+        url = 'https://www.somewhère.com/with/accënts/'
+        obj = URLTester(url=url)
+        obj.save().reload()
+        self.assertEqual(obj.url, url)
+
+    def test_public(self):
+        url = 'http://10.10.0.2/path/'
+        URLTester(url=url).save()
+        with self.assertRaises(ValidationError):
+            PublicURLTester(url=url).save()
 
 
 class DatetimedTest(DBTestMixin, TestCase):
