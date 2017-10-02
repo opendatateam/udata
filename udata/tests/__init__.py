@@ -68,6 +68,27 @@ class TestCase(BaseTestCase):
     def data(self, filename):
         return os.path.join(os.path.dirname(__file__), 'data', filename)
 
+    def assertStatus(self, response, status_code, message=None):
+        """
+        Helper method to check matching response status.
+
+        Extracted from parent class to improve output in case of JSON.
+
+        :param response: Flask response
+        :param status_code: response status code (e.g. 200)
+        :param message: Message to display on test failure
+        """
+
+        message = message or 'HTTP Status %s expected but got %s' \
+                             % (status_code, response.status_code)
+        if response.mimetype == 'application/json':
+            try:
+                second_line = 'Response content is {0}'.format(response.json)
+                message = '\n'.join((message, second_line))
+            except Exception:
+                pass
+        self.assertEqual(response.status_code, status_code, message)
+
     def assert201(self, response):
         self.assertStatus(response, 201)
 
