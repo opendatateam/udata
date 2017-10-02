@@ -12,7 +12,7 @@
                 {% set action = url_for('datasets.list') %}
                 {% set placeholder = _('Search in this ') + territory.level_i18n_name|lower %}
             {% else %}
-                {% set action = url_for('front.search') %}
+                {% set action = url_for('search.index') %}
                 {% set placeholder = _('Search') %}
             {% endif %}
             <div class="col-sm-4 col-md-6 col-lg-6 col-xs-12">
