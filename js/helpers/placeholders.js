@@ -13,11 +13,6 @@ export function getFor(type) {
 export const organization = getFor('organization');
 
 /**
- * User placeholder
- */
-export const user = getFor('user');
-
-/**
  * Reuse placeholder
  */
 export const reuse = getFor('reuse');
@@ -30,14 +25,30 @@ export const territory = `${config.theme_static}img/placeholder_territory_medium
 /**
  * Generic placeholder
  */
-export const generic = user;
+export const generic = reuse;
+
+/**
+ * Get an identicon (ie. deterministic avatar given an identifier)
+ */
+export function identicon(identifier, size) {
+    return `${config.api_root}avatars/${identifier}/${size}`;
+}
+
+/**
+ * Get an avatar url for a given user object.
+ */
+export function user_avatar(user, size) {
+    if (!user) return;
+    return user.avatar_thumbnail || user.avatar || identicon(user.id, size);
+}
 
 
 export default {
     getFor,
-    user,
+    user_avatar,
     organization,
     reuse,
     territory,
     generic,
+    identicon,
 };

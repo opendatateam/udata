@@ -10,6 +10,6 @@
 <a href="{{ url_for('datasets.show', dataset=dataset.id, _external=True) }}"
     title="{{ dataset.title }}">
     <img alt="{{ dataset.owner.fullname }}"
-        src="{{ dataset.owner.avatar|placeholder('user') }}">
+        src="{{ dataset.owner|avatar_url(150) }}">
 </a>
 {% endif %}

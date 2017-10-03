@@ -81,7 +81,7 @@
 <modal v-ref:modal class="user-modal" small>
     <div class="user-details" slot="modal-content">
         <img class="img-circle"
-            :src="user.avatar || placeholder"
+            :src="user | avatar_url 100"
             :alt="user.fullname"
             :title="user.fullname"/>
         <div class="user-info-block">

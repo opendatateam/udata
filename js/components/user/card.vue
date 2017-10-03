@@ -2,7 +2,7 @@
 <div class="card user-card"
     :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
     <a class="card-logo">
-        <img :alt="user | display" :src="avatar">
+        <img :alt="user | display" :src="user | avatar_url 60">
     </a>
     <div class="card-body">
         <h4>
@@ -46,7 +46,6 @@
 
 <script>
 import User from 'models/user';
-import placeholders from 'helpers/placeholders';
 
 export default {
     props: {
@@ -62,12 +61,6 @@ export default {
         selected: {
             type: Boolean,
             default: false
-        }
-    },
-    computed: {
-        avatar() {
-            if (!this.user || !this.user.avatar && !this.user.avatar_thumbnail) return placeholders.user;
-            return this.user.avatar_thumbnail || this.user.avatar;
         }
     },
     created() {

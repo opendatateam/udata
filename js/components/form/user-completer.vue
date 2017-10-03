@@ -3,18 +3,17 @@
 import Vue from 'vue';
 import API from 'api';
 import BaseCompleter from 'components/form/base-completer.vue';
-import placeholders from 'helpers/placeholders';
 
 const template = `<div class="selectize-option">
     <div class="logo pull-left">
-        <img src="{{ user.avatar || user.avatar_url || placeholder }}"/>
+        <img src="{{ user | avatar_url 32 }}"/>
     </div>
     {{user.first_name}} {{user.last_name}}
 </div>`;
 
 
 function render(user) {
-    return new Vue({data: {user: user, placeholder: placeholders.user}}).$interpolate(template);
+    return new Vue({data: {user: user}}).$interpolate(template);
 }
 
 export default {
@@ -27,18 +26,12 @@ export default {
         options: [],
         plugins: ['remove_button'],
         render: {
-            option: function(data, escape) {
-                return render(data);
-            },
-            item: function(data, escape) {
-                return render(data);
-            }
+            option: (data, escape) => render(data),
+            item: (data, escape) => render(data)
         },
     },
-    dataLoaded: function(data) {
-        return data.filter((datum) => {
-            return this.userIds.indexOf(datum.id) <= 0;
-        });
+    dataLoaded(data) {
+        return data.filter(datum => this.userIds.indexOf(datum.id) <= 0);
     },
 };
 </script>

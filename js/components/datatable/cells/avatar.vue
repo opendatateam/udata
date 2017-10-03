@@ -7,27 +7,14 @@
 </style>
 
 <template>
-<img :src="src" :width="field.width" :height="field.width" />
+<img :src="value | avatar_url field.width" :width="field.width" :height="field.width" />
 </template>
 
 <script>
-import placeholders from 'helpers/placeholders';
-
 export default {
     attached() {
         // Dirty hack to fix class on field/td iteration
         this.$el.closest('td').classList.add('avatar-cell');
-    },
-    computed: {
-        src() {
-            if (this.value) {
-                return this.value;
-            } else if (this.field.placeholder) {
-                return placeholders.getFor(this.field.placeholder);
-            } else {
-                return placeholders.generic;
-            }
-        }
     }
 };
 </script>

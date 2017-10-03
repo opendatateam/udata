@@ -1,12 +1,11 @@
 <template>
 <a class="avatar" :href="user.url" :title="user | display">
-    <img class="avatar" :src="url"
+    <img class="avatar" :src="user | avatar_url size"
         :alt="user | display" :width="size" :height="size">
 </a>
 </template>
 
 <script>
-import placeholders from 'helpers/placeholders';
 
 const DEFAULT_SIZE = 52;
 
@@ -16,11 +15,6 @@ export default {
         size: {
             type: Number,
             default: DEFAULT_SIZE
-        }
-    },
-    computed: {
-        url() {
-            return this.user.avatar_thumbnail || this.user.avatar || placeholders.user;
         }
     }
 }

@@ -138,7 +138,7 @@ def avatar_url(ctx, obj, size):
     elif hasattr(obj, 'logo') and obj.logo:
         return obj.logo(size)
     else:
-        return placeholder(ctx, None, name='user')
+        return url_for('api.avatar', identifier=str(obj.id), size=size)
 
 
 def owner_avatar_url(ctx, obj, size=32):

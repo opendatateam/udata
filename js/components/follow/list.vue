@@ -20,7 +20,7 @@ export default {
         return {
             title: this._('Followers'),
             fields: [{
-                key: 'follower.avatar',
+                key: 'follower',
                 type: 'avatar',
                 width: 30
             }, {

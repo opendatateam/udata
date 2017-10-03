@@ -245,6 +245,28 @@ python setup.py compile_catalog  # Compile .mo files for each language
     Don't forget to compile and include translations in your theme distribution
     when you publish it.
 
+
+## Avatars/identicon customization
+
+Theme can provide settings for the avatar provider.
+
+These settings take precedence over default values but are still overridable by local settings.
+
+Simply declare your theme default values in your theme file:
+
+```
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+AVATAR_INTERNAL_FOREGROUND = ['rgb(45,79,255)', 'rgb(254,180,44)']
+AVATAR_INTERNAL_BACKGROUND = 'rgb(141,69,170)'
+
+...
+```
+
+See the list of available settings [here](adapting-settings.md#avatarsidenticon-configuration).
+
+
 ## Publish and use
 
 Once your theme is ready, you can publish it on [PyPI][] to share it to the world

@@ -30,7 +30,7 @@
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>
                 </div>
                 <img class="direct-chat-img"  :alt="_('User Image')"
-                    :src="message.posted_by.avatar || avatar_placeholder"/>
+                    :src="message.posted_by | avatar_url 40"/>
                 <div class="direct-chat-text" v-markdown="message.content"></div>
             </div>
         </div>
@@ -67,7 +67,6 @@ import BaseForm from 'components/form/base-form';
 import Modal from 'components/modal.vue';
 import DatasetCard from 'components/dataset/card.vue';
 import ReuseCard from 'components/reuse/card.vue';
-import placeholders from 'helpers/placeholders';
 
 export default {
     name: 'issue-modal',
@@ -76,7 +75,6 @@ export default {
     data() {
         return {
             issue: {},
-            avatar_placeholder: placeholders.user,
             comment: null,
             next_route: null
         };
