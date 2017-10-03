@@ -203,14 +203,13 @@
 
                 {# Followers panel #}
                 <div class="panel panel-transparent">
-                    <div class="panel-body">
+                    <div class="panel-body panel-followers">
                         <h3>{{ _('Followers') }}</h3>
-
-                        {% for follow in followers %}
-                        {{ follow.follower|avatar(32) }}
-                        {% else %}
+                        {%- for follow in followers -%}
+                        {{ follow.follower|avatar(34) }}
+                        {%- else -%}
                         <p>{{ _('No followers yet') }}</p>
-                        {% endfor %}
+                        {%- endfor -%}
                     </div>
                 </div>
 

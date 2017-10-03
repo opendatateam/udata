@@ -164,12 +164,12 @@ def owner_url(obj):
 @front.app_template_filter()
 @contextfilter
 def avatar(ctx, user, size, classes=''):
-    markup = '''
-        <a class="avatar {classes}" href="{url}" title="{title}">
-            <img src="{avatar_url}" class="avatar" alt="{title}"
-            width="{size}" height="{size}"/>
-        </a>
-    '''.format(
+    markup = ''.join((
+        '<a class="avatar {classes}" href="{url}" title="{title}">',
+        '<img src="{avatar_url}" class="avatar" alt="{title}" ',
+        'width="{size}" height="{size}"/>',
+        '</a>'
+    )).format(
         title=getattr(user, 'fullname', _('Anonymous user')),
         url=(url_for('users.show', user=user)
              if user and getattr(user, 'id', None) else '#'),
