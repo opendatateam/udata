@@ -120,7 +120,16 @@ jobs:
           name: Build a distributable package
           command: |
             source venv/bin/activate
-            if [[ $CIRCLE_TAG ]]; then inv pydist; else inv pydist -b $CIRCLE_BUILD_NUM; fi
+            if [[ $CIRCLE_TAG ]]; then
+                # This is a tagged release
+                inv pydist
+            elif [[ "$CIRCLE_BRANCH" == feature/* ]]; then
+                # This is a feature branch
+                inv pydist -b $CIRCLE_BUILD_NUM+${CIRCLE_BRANCH#*/}
+            else
+                # This is a simple development build
+                inv pydist -b $CIRCLE_BUILD_NUM
+            fi
       - store_artifacts:
           path: dist
       - persist_to_workspace:
@@ -169,5 +178,7 @@ workflows:
                 - master
                 - dev
                 - /v[0-9]+(\.[0-9]+)*/
+                - /feature\/.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
+          context: org-global

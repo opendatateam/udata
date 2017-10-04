@@ -94,6 +94,15 @@ git commit
 git push -u myrepository my-fix
 ```
 
+## Feature branches
+
+Sometimes a new feature or an EPIC requires more than one pull request and a lot of testing.
+For these cases, it's not desirable to use the `master` branch to test until it's stable because we want to keep the `master` branch as stable as possible.
+
+To handle these cases we are using feature branches, named like `feature/my-feature`. These branches will build on CircleCI and publish [local versions](pep440-local) packages on PyPI.
+
+The local identifier will be the feature branch name so the version number will be `X.Y.Z.devBBB+my-feature` where `BBB` is the build number.
+
 ## Deprecation policy
 
 **When it's possible** deprecation are signaled 2 minor versions before being really dropped.
@@ -107,3 +116,4 @@ It's up to the developpers and system administrators to read the [changelog](cha
 [milestones]: https://github.com/opendatateam/udata/milestones
 [CircleCI]: https://circleci.com/gh/opendatateam/udata
 [pep440]: https://www.python.org/dev/peps/pep-0440/
+[pep440-local]: https://www.python.org/dev/peps/pep-0440/#local-version-segments
