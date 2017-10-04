@@ -120,6 +120,9 @@ jobs:
           name: Build a distributable package
           command: |
             source venv/bin/activate
+            # Check long description renders properly
+            python setup.py check -r -s
+            # Build a wheel release
             if [[ $CIRCLE_TAG ]]; then
                 # This is a tagged release
                 inv pydist
