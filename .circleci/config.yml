@@ -177,11 +177,7 @@ workflows:
             - dist
           filters:
             branches:
-              only:
-                - master
-                - dev
-                - /v[0-9]+(\.[0-9]+)*/
-                - /feature\/.*/
+              ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
           context: org-global

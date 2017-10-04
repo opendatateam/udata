@@ -99,7 +99,7 @@ git push -u myrepository my-fix
 Sometimes a new feature or an EPIC requires more than one pull request and a lot of testing.
 For these cases, it's not desirable to use the `master` branch to test until it's stable because we want to keep the `master` branch as stable as possible.
 
-To handle these cases we are using feature branches, named like `feature/my-feature`. These branches will build on CircleCI and publish [local versions](pep440-local) packages on PyPI.
+To handle these cases we are using feature branches, named like `feature/my-feature`. These branches will build on CircleCI and produce a [local version](pep440-local) package.
 
 The local identifier will be the feature branch name so the version number will be `X.Y.Z.devBBB+my-feature` where `BBB` is the build number.
 
