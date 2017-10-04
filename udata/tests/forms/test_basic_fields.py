@@ -72,3 +72,17 @@ class UrlFieldTest(TestCase):
         form.validate()
         self.assertIn('url', form.errors)
         self.assertEqual(len(form.errors['url']), 1)
+
+    def test_with_unicode_url(self):
+        Fake, FakeForm = self.factory()
+
+        fake = Fake()
+        url = 'https://www.somewhère.com/with/accënts/'
+        form = FakeForm(MultiDict({'url': url}))
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(fake.url, url)

@@ -20,9 +20,9 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py-cache-{{ checksum "python.deps" }}
-          - py-cache-{{ .Branch }}
-          - py-cache-{{ .Environment.BASE_BRANCH }}
+          - py-cache-{{ arch }}-{{ checksum "python.deps" }}
+          - py-cache-{{ arch }}-{{ .Branch }}
+          - py-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
@@ -31,11 +31,11 @@ jobs:
             pip install -e . || pip install -e .
             pip install -r requirements/circleci.pip
       - save_cache:
-          key: py-cache-{{ checksum "python.deps" }}
+          key: py-cache-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py-cache-{{ .Branch }}
+          key: py-cache-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
@@ -70,18 +70,18 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-            - js-cache-{{ checksum "js.deps" }}
-            - js-cache-{{ .Branch }}
-            - js-cache-{{ .Environment.BASE_BRANCH }}
+            - js-cache-{{ arch }}-{{ checksum "js.deps" }}
+            - js-cache-{{ arch }}-{{ .Branch }}
+            - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install NodeJS and dependencies
           command: nvm install && npm install
       - save_cache:
-          key: js-cache-{{ checksum "js.deps" }}
+          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:
           - node_modules
       - save_cache:
-          key: js-cache-{{ .Branch }}
+          key: js-cache-{{ arch }}-{{ .Branch }}
           paths:
           - node_modules
       - run:
@@ -120,7 +120,19 @@ jobs:
           name: Build a distributable package
           command: |
             source venv/bin/activate
-            if [[ $CIRCLE_TAG ]]; then inv pydist; else inv pydist -b $CIRCLE_BUILD_NUM; fi
+            # Check long description renders properly
+            python setup.py check -r -s
+            # Build a wheel release
+            if [[ $CIRCLE_TAG ]]; then
+                # This is a tagged release
+                inv pydist
+            elif [[ "$CIRCLE_BRANCH" == feature/* ]]; then
+                # This is a feature branch
+                inv pydist -b $CIRCLE_BUILD_NUM+${CIRCLE_BRANCH#*/}
+            else
+                # This is a simple development build
+                inv pydist -b $CIRCLE_BUILD_NUM
+            fi
       - store_artifacts:
           path: dist
       - persist_to_workspace:
@@ -140,6 +152,29 @@ jobs:
       - deploy:
           name: Publish on PyPI
           command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+
+  github:
+    docker:
+      - image: udata/circleci
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Upload github release
+          command: |
+            path=$(set -- src/udata/dist/*.whl; echo "$1")
+            filename=$(basename $path)
+            RELEASE_URL="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/releases/tags/$CIRCLE_TAG"
+            RELEASE_DATA=$(curl -fsSL $RELEASE_URL)
+            RELEASE_PAGE_URL=$(jq -r '.html_url' <<< $RELEASE_DATA)
+            UPLOAD_URL=$(jq -r '.upload_url' <<< $RELEASE_DATA)
+            UPLOAD_URL="$(sed 's/{.*}/?name=/' <<< $UPLOAD_URL)$filename"
+            curl --request POST \
+                --data-binary @$path \
+                --header "Authorization: token $GITHUB_OAUTH_TOKEN" \
+                --header "Content-Type: application/zip" \
+                $UPLOAD_URL
+            echo "Wheel upload to release $RELEASE_PAGE_URL"
 
 workflows:
   version: 2
@@ -165,9 +200,16 @@ workflows:
             - dist
           filters:
             branches:
-              only:
-                - master
-                - dev
-                - /v[0-9]+(\.[0-9]+)*/
+              ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
+          context: org-global
+      - github:
+          requires:
+            - dist
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+          context: org-global

@@ -25,6 +25,7 @@ from werkzeug.local import LocalProxy
 
 from udata.app import Blueprint
 from udata.auth import current_user
+from udata.errors import ConfigError
 from udata.utils import multi_to_dict
 
 
@@ -159,7 +160,15 @@ def get_locale():
     return str(default_lang)
 
 
+def check_config(cfg):
+    default_language = cfg['DEFAULT_LANGUAGE']
+    if default_language not in cfg.get('LANGUAGES', []):
+        raise ConfigError('You are using a DEFAULT_LANGUAGE {0} not defined '
+                          'into LANGUAGES'.format(default_language))
+
+
 def init_app(app):
+    check_config(app.config)
     app.config.setdefault('BABEL_DEFAULT_LOCALE',
                           app.config['DEFAULT_LANGUAGE'])
     babel.init_app(app)

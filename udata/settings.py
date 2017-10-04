@@ -193,7 +193,7 @@ class Defaults(object):
     # Default resources extensions whitelist
     ALLOWED_RESOURCES_EXTENSIONS = [
         # Base
-        'csv', 'txt', 'json', 'pdf', 'xml', 'rdf', 'rtf', 'xsd',
+        'csv', 'txt', 'json', 'pdf', 'xml', 'rtf', 'xsd',
         # OpenOffice
         'ods', 'odt', 'odp', 'odg',
         # Microsoft Office
@@ -208,6 +208,8 @@ class Defaults(object):
         'grib2',
         # Misc
         'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
+        # RDF
+        'rdf', 'ttl', 'n3',
     ]
     USE_METRICS = True
 

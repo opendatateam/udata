@@ -44,6 +44,33 @@ class SpatialApiTest(APITestCase):
         self.assertEqual(properties['keys'], zone.keys)
         self.assertEqual(properties['logo'], zone.logo_url(external=True))
 
+    def test_zones_api_no_geom(self):
+        zone = GeoZoneFactory(geom=None)
+
+        url = url_for('api.zones', ids=[zone.id])
+        response = self.get(url)
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['features']), 1)
+
+        feature = response.json['features'][0]
+        self.assertEqual(feature['type'], 'Feature')
+        self.assertJsonEqual(feature['geometry'], {
+            'type': 'MultiPolygon',
+            'coordinates': [],
+        })
+        self.assertEqual(feature['id'], zone.id)
+
+        properties = feature['properties']
+        self.assertEqual(properties['name'], zone.name)
+        self.assertEqual(properties['code'], zone.code)
+        self.assertEqual(properties['level'], zone.level)
+        self.assertEqual(properties['parents'], zone.parents)
+        self.assertEqual(properties['population'], zone.population)
+        self.assertEqual(properties['area'], zone.area)
+        self.assertEqual(properties['keys'], zone.keys)
+        self.assertEqual(properties['logo'], zone.logo_url(external=True))
+
     def test_zones_api_many(self):
         zones = [GeoZoneFactory() for _ in range(3)]
 

@@ -57,7 +57,8 @@ export default {
                     }
                 });
                 this.layer.addTo(this.map);
-                this.map.fitBounds(this.layer.getBounds());
+                const bounds = this.layer.getBounds();
+                if (bounds.isValid()) this.map.fitBounds(bounds);
             }
         }
     }
