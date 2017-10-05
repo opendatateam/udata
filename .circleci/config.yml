@@ -1,0 +1,195 @@
+---
+version: 2
+
+jobs:
+  python:
+    docker:
+      - image: udata/circleci
+      - image: mongo:3.2
+      - image: redis
+      - image: udata/elasticsearch:2.4.5
+    environment:
+       BASH_ENV: /root/.bashrc
+    steps:
+      - checkout
+      - run:
+          name: Get the base reference branch
+          command: export BASE_BRANCH=$(base_branch)
+      - restore_cache:
+          keys:
+          - py-cache-{{ arch }}-{{ .Branch }}
+          - py-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+      - run:
+          name: Install python dependencies
+          command: |
+            virtualenv venv
+            source venv/bin/activate
+            pip install -r .circleci/requirements.pip
+            pip install -e . || pip install -e .
+      - save_cache:
+          key: py-cache-{{ arch }}-{{ .Branch }}
+          paths:
+          - venv
+      - run:
+          name: Run tests
+          command: |
+            mkdir -p reports/python
+            source venv/bin/activate
+            nosetests --with-xunit --xunit-file=reports/python/tests.xml udata_gouvfr
+      - store_test_results:
+          path: reports/python
+      - store_artifacts:
+          path: reports/
+          destination: reports
+
+      - persist_to_workspace:
+          root: .
+          paths:
+          - venv
+
+  assets:
+    docker:
+      - image: udata/circleci
+    environment:
+       BASH_ENV: /root/.bashrc
+    steps:
+      - checkout
+      - run:
+          name: Compute JS dependencies key
+          command: cat .nvmrc package.json > js.deps
+      - run:
+          name: Get the base reference branch
+          command: export BASE_BRANCH=$(base_branch)
+      - restore_cache:
+          keys:
+            - js-cache-{{ arch }}-{{ checksum "js.deps" }}
+            - js-cache-{{ arch }}-{{ .Branch }}
+            - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+      - run:
+          name: Install NodeJS and dependencies
+          command: nvm install && npm install
+      - save_cache:
+          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
+          paths:
+          - node_modules
+      - save_cache:
+          key: js-cache-{{ arch }}-{{ .Branch }}
+          paths:
+          - node_modules
+      - run:
+          name: Compile assets
+          command: |
+            nvm use
+            npm run build
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - udata_gouvfr/theme/static
+
+  dist:
+    docker:
+      - image: udata/circleci
+    environment:
+       BASH_ENV: /root/.bashrc
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Build a distributable package
+          command: |
+            source venv/bin/activate
+            # Check long description renders properly
+            python setup.py check -r -s
+            # Build a wheel release
+            if [[ $CIRCLE_TAG ]]; then
+                # This is a tagged release
+                inv pydist
+            elif [[ "$CIRCLE_BRANCH" == feature/* ]]; then
+                # This is a feature branch
+                inv pydist -b $CIRCLE_BUILD_NUM+${CIRCLE_BRANCH#*/}
+            else
+                # This is a simple development build
+                inv pydist -b $CIRCLE_BUILD_NUM
+            fi
+      - store_artifacts:
+          path: dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  publish:
+    docker:
+      - image: udata/circleci
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install Twine
+          command: pip install twine
+      - deploy:
+          name: Publish on PyPI
+          command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+
+  github:
+    docker:
+      - image: udata/circleci
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Upload github release
+          command: |
+            path=$(set -- dist/*.whl; echo "$1")
+            filename=$(basename $path)
+            RELEASE_URL="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/releases/tags/$CIRCLE_TAG"
+            RELEASE_DATA=$(curl -fsSL $RELEASE_URL)
+            RELEASE_PAGE_URL=$(jq -r '.html_url' <<< $RELEASE_DATA)
+            UPLOAD_URL=$(jq -r '.upload_url' <<< $RELEASE_DATA)
+            UPLOAD_URL="$(sed 's/{.*}/?name=/' <<< $UPLOAD_URL)$filename"
+            curl --request POST \
+                --data-binary @$path \
+                --header "Authorization: token $GITHUB_OAUTH_TOKEN" \
+                --header "Content-Type: application/zip" \
+                $UPLOAD_URL
+            echo "Wheel upload to release $RELEASE_PAGE_URL"
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - python:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+      - assets:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+      - dist:
+          requires:
+            - python
+            - assets
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+      - publish:
+          requires:
+            - dist
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+          context: org-global
+      - github:
+          requires:
+            - dist
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+          context: org-global

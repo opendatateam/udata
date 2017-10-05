@@ -95,9 +95,19 @@ def assets_build(ctx):
     lrun('npm run build', pty=True)
 
 
-@task(clean, assets_build, i18nc)
+@task(clean, i18nc, assets_build, default=True)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
+    perform_dist(buildno)
+
+
+@task(i18nc)
+def pydist(ctx, buildno=None):
+    '''Perform python packaging (without compiling assets)'''
+    perform_dist(buildno)
+
+
+def perform_dist(buildno=None):
     print(cyan('Building a distribuable package'))
     cmd = ['python setup.py']
     if buildno:

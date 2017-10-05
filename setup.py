@@ -3,9 +3,7 @@
 from __future__ import unicode_literals
 import io
 import re
-import sys
 
-from os.path import join
 from setuptools import setup, find_packages
 
 RE_MD_CODE_BLOCK = re.compile(r'```(?P<language>\w+)?\n(?P<lines>.*?)```', re.S)
@@ -25,6 +23,7 @@ RST_BADGE = '''\
     :target: {target}
     :alt: {text}
 '''
+
 
 def md2pypi(filename):
     '''
@@ -92,6 +91,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
+        'udata>=1.2.0.dev',
         'feedparser',
     ],
     entry_points={
