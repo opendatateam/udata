@@ -162,7 +162,7 @@ jobs:
       - run:
           name: Upload github release
           command: |
-            path=$(set -- src/udata/dist/*.whl; echo "$1")
+            path=$(set -- dist/*.whl; echo "$1")
             filename=$(basename $path)
             RELEASE_URL="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/releases/tags/$CIRCLE_TAG"
             RELEASE_DATA=$(curl -fsSL $RELEASE_URL)
@@ -200,7 +200,9 @@ workflows:
             - dist
           filters:
             branches:
-              ignore: /.*/
+              only:
+                - master
+                - /v[0-9]+(\.[0-9]+)*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
           context: org-global
