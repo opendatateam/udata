@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Use new search blueprint from uData [#224](https://github.com/etalab/udata-gouvfr/pull/224)
 
 ## 1.1.2 (2017-09-04)
 
