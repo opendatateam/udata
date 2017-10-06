@@ -232,6 +232,7 @@ router.map({
         },
     },
     '/editorial/': {
+        name: 'editorial',
         component(resolve) {
             require(['./views/editorial.vue'], resolve);
         }
