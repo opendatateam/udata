@@ -16,6 +16,7 @@
 - Improve URLs validation (support new tlds, unicode URLs...) [#1182](https://github.com/opendatateam/udata/pull/1182)
 - Properly serialize empty geometries for zones missing it and prevent leaflet crash on invalid bounds [#1188](https://github.com/opendatateam/udata/pull/1188)
 - Start validating some configuration parameters [#1197](https://github.com/opendatateam/udata/pull/1197)
+- Migration to remove resources without title or url [#1200](https://github.com/opendatateam/udata/pull/1200)
 
 ## 1.1.8 (2017-09-28)
 
