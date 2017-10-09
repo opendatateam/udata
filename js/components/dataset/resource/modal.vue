@@ -3,6 +3,11 @@
     a {
         color: white;
     }
+
+    .dl-wide dd {
+        // URLs and hashes are not breakable on words
+        word-break: break-all;
+    }
 }
 </style>
 
