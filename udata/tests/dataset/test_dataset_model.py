@@ -247,6 +247,19 @@ class LicenseModelTest(DBTestMixin, TestCase):
         found = License.guess('should not be found')
         self.assertIsNone(found)
 
+    def test_not_found_with_default(self):
+        license = LicenseFactory()
+        found = License.guess('should not be found', default=license)
+        self.assertEqual(found.id, license.id)
+
+    def test_none(self):
+        found = License.guess(None)
+        self.assertIsNone(found)
+
+    def test_empty_string(self):
+        found = License.guess('')
+        self.assertIsNone(found)
+
     def test_exact_match_by_id(self):
         license = LicenseFactory()
         found = License.guess(license.id)
@@ -292,5 +305,11 @@ class LicenseModelTest(DBTestMixin, TestCase):
     def test_match_by_title_with_mismatching_case(self):
         license = LicenseFactory(title='License ODBl')
         found = License.guess('License ODBL')
+        self.assertIsInstance(found, License)
+        self.assertEqual(license.id, found.id)
+
+    def test_multiple_strings(self):
+        license = LicenseFactory()
+        found = License.guess('should not match', license.id)
         self.assertIsInstance(found, License)
         self.assertEqual(license.id, found.id)
