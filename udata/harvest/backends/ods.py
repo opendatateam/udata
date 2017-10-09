@@ -115,10 +115,12 @@ class OdsHarvester(BaseBackend):
 
         dataset.tags = list(tags)
 
-        ods_license_id = ods_metadata.get('license')
-        if ods_license_id and ods_license_id in self.LICENSES:
-            license_id = self.LICENSES[ods_license_id]
-            dataset.license = License.objects.get(id=license_id)
+        # Detect license
+        default_license = dataset.license or License.default()
+        license_id = ods_metadata.get('license')
+        dataset.license = License.guess(license_id,
+                                        self.LICENSES.get(license_id),
+                                        default=default_license)
 
         dataset.resources = []
 
