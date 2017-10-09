@@ -77,6 +77,7 @@ schema = Schema({
     'title': basestring,
     'notes': Any(All(basestring, normalize_string), None),
     'license_id': All(DefaultTo('not-specified'), basestring),
+    'license_title': Any(basestring, None),
     'tags': [tag],
 
     'metadata_created': All(basestring, to_date),
@@ -159,8 +160,13 @@ class CkanBackend(BaseBackend):
             dataset.slug = data['name']
         dataset.title = data['title']
         dataset.description = data['notes']
-        dataset.license = License.objects(id=data['license_id']).first()
-        # dataset.license = license or License.objects.get(id='notspecified')
+
+        # Detect license
+        default_license = dataset.license or License.default()
+        dataset.license = License.guess(data['license_id'],
+                                        data['license_title'],
+                                        default=default_license)
+
         dataset.tags = [t['name'] for t in data['tags'] if t['name']]
 
         dataset.created_at = data['metadata_created']

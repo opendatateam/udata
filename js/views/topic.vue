@@ -20,6 +20,7 @@ import Topic from 'models/topic';
 
 import Layout from 'components/layout.vue';
 import TopicDetails from 'components/topic/details.vue';
+import DeleteModal from 'components/topic/delete-modal.vue';
 import DatasetsList from 'components/dataset/card-list.vue';
 import ReusesList from 'components/reuse/card-list.vue';
 
@@ -32,6 +33,10 @@ export default {
                 label: this._('Edit'),
                 icon: 'edit',
                 method: this.edit
+            }, {
+                label: this._('Delete'),
+                icon: 'trash',
+                method: this.confirm_delete
             }],
         };
     },
@@ -51,7 +56,10 @@ export default {
     methods: {
         edit() {
             this.$go({name: 'topic-edit', params: {oid: this.topic.id}});
-        }
+        },
+        confirm_delete() {
+            this.$root.$modal(DeleteModal, {topic: this.topic});
+        },
     },
     route: {
         data() {

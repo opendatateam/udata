@@ -372,10 +372,7 @@ def dataset_from_rdf(graph, dataset=None):
             elif isinstance(value, RdfResource):
                 licenses.add(value.identifier.toPython())
 
-    for text in licenses:
-        license = License.guess(text)
-        if license:
-            dataset.license = license
-            break
+    default_license = dataset.license or License.default()
+    dataset.license = License.guess(*licenses, default=default_license)
 
     return dataset
