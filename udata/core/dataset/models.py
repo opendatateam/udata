@@ -111,13 +111,30 @@ class License(db.Document):
         return self.title
 
     @classmethod
-    def guess(cls, text):
+    def guess(cls, *strings, **kwargs):
+        '''
+        Try to guess a license from a list of strings.
+
+        Accept a `default` keyword argument which will be
+        the default fallback license.
+        '''
+        license = None
+        for string in strings:
+            license = cls.guess_one(string)
+            if license:
+                break
+        return license or kwargs.get('default')
+
+    @classmethod
+    def guess_one(cls, text):
         '''
         Try to guess license from a string.
 
         Try to exact match on identifier then slugified title
         and fallback on edit distance ranking (after slugification)
         '''
+        if not text:
+            return
         qs = cls.objects
         text = text.strip().lower()  # Stored identifiers are lower case
         slug = cls.slug.slugify(text)  # Use slug as it normalize string
@@ -131,6 +148,10 @@ class License(db.Document):
             if len(candidates) == 1:
                 license = candidates[0]
         return license
+
+    @classmethod
+    def default(cls):
+        return cls.objects(id=DEFAULT_LICENSE['id']).first()
 
 
 class DatasetQuerySet(db.OwnedQuerySet):
