@@ -18,6 +18,7 @@
 - Start validating some configuration parameters [#1197](https://github.com/opendatateam/udata/pull/1197)
 - Migration to remove resources without title or url [#1200](https://github.com/opendatateam/udata/pull/1200)
 - Improve harvesting licenses detection [#1203](https://github.com/opendatateam/udata/pull/1203)
+- Added missing delete post and topic admin actions [#1202](https://github.com/opendatateam/udata/pull/1202)
 
 ## 1.1.8 (2017-09-28)
 

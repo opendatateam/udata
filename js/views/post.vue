@@ -18,6 +18,7 @@ import Post from 'models/post';
 import Layout from 'components/layout.vue';
 
 import PostContent from 'components/post/content.vue';
+import DeleteModal from 'components/post/delete-modal.vue';
 import DatasetCardList from 'components/dataset/card-list.vue';
 import ReuseCardList from 'components/reuse/card-list.vue';
 
@@ -30,6 +31,10 @@ export default {
                 label: this._('Edit'),
                 icon: 'edit',
                 method: this.edit
+            }, {
+                label: this._('Delete'),
+                icon: 'trash',
+                method: this.confirm_delete
             }],
         };
     },
@@ -49,7 +54,10 @@ export default {
     methods: {
         edit() {
             this.$go({name: 'post-edit', params: {oid: this.post.id}});
-        }
+        },
+        confirm_delete() {
+            this.$root.$modal(DeleteModal, {post: this.post});
+        },
     },
     route: {
         data() {
