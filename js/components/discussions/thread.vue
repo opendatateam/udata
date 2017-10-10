@@ -136,7 +136,7 @@ export default {
             this.detailed = true;
             if (index) {
                 this.$nextTick(() => {
-                    this.$scrollTo(`#${discussionIdAttr}-${index}`);
+                    this.$scrollTo(`#${this.discussionIdAttr}-${index}`);
                 })
             } else {
                 this.$scrollTo(this);
