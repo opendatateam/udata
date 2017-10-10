@@ -21,7 +21,7 @@ export default {
             title: this._('Organizations'),
             fields: [{
                 key: 'logo_thumbnail',
-                type: 'avatar',
+                type: 'thumbnail',
                 width: 30,
                 placeholder: 'organization'
             },{

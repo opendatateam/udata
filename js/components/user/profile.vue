@@ -23,7 +23,7 @@
 <box :title="title" icon="user" boxclass="user-profile-widget">
     <h3>{{user.fullname}}</h3>
         <div class="profile-body">
-            <image-button :src="avatarSrc" :size="100" class="avatar-button"
+            <image-button :src="user | avatar_url 100" :size="100" class="avatar-button"
                 :endpoint="endpoint">
             </image-button>
         <div v-markdown="user.about"></div>
@@ -36,7 +36,6 @@
 import API from 'api';
 import Box from 'components/containers/box.vue';
 import ImageButton from 'components/widgets/image-button.vue';
-import placeholders from 'helpers/placeholders';
 
 export default {
     name: 'user-profile',
@@ -44,7 +43,6 @@ export default {
     data() {
         return {
             title: this._('Profile'),
-            avatarSrc: this.user.avatar_thumbnail || placeholders.user,
         };
     },
     computed: {

@@ -7,13 +7,13 @@
 <template>
 <li class="dropdown user user-menu">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-        <img :src="$root.me.avatar || placeholder" class="user-image" alt="User Image">
+        <img :src="$root.me | avatar_url 25" class="user-image" alt="User Image">
         <span class="hidden-xs">{{$root.me.fullname}}</span>
     </a>
     <ul class="dropdown-menu">
         <!-- User image -->
         <li class="user-header bg-light-blue">
-            <img :src="$root.me.avatar || placeholder" class="img-circle" alt="User Image" />
+            <img :src="$root.me | avatar_url 90" class="img-circle" alt="User Image" />
             <p>
                 {{$root.me.fullname}}
                 <small><span v-i18n="Member since"></span> {{ $root.me.since | dt LL}}</small>
@@ -38,14 +38,7 @@
 </template>
 
 <script>
-import placeholders from 'helpers/placeholders';
-
 export default {
     name: 'user-menu',
-    data() {
-        return {
-            placeholder: placeholders.user
-        };
-    }
 };
 </script>

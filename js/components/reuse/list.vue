@@ -21,7 +21,7 @@ export default {
         return {
             fields: [{
                 key: 'image_thumbnail',
-                type: 'avatar',
+                type: 'thumbnail',
                 width: 30
             },{
                 label: this._('Title'),
