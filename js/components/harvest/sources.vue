@@ -43,10 +43,10 @@ export default {
                         if (item.organization) {
                             return item.organization.logo_thumbnail || placeholders.organization;
                         } else {
-                            return item.owner.avatar || placeholders.user;
+                            return placeholders.user_avatar(item.owner, 30);
                         }
                     },
-                    type: 'avatar',
+                    type: 'thumbnail',
                     width: 30,
                 });
             }

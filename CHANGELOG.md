@@ -19,6 +19,7 @@
 - Migration to remove resources without title or url [#1200](https://github.com/opendatateam/udata/pull/1200)
 - Improve harvesting licenses detection [#1203](https://github.com/opendatateam/udata/pull/1203)
 - Added missing delete post and topic admin actions [#1202](https://github.com/opendatateam/udata/pull/1202)
+- Switch from static theme avatars/placeholders to [identicons](https://en.wikipedia.org/wiki/Identicon) for readability (mostly on discussions) [#1193](https://github.com/opendatateam/udata/pull/1193)
 
 ## 1.1.8 (2017-09-28)
 

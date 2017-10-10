@@ -21,12 +21,14 @@ export default {
         item: Object
     },
     computed: {
-        value: function() {
+        value() {
             if (!this.field || !this.item) {
                 return this.$options.default;
             }
 
-            if (utils.isFunction(this.field.key)) {
+            if (!this.field.key) {
+                result = this.item;
+            } else if (utils.isFunction(this.field.key)) {
                 result = this.field.key(this.item);
             } else {
                 var parts = this.field.key.split('.'),

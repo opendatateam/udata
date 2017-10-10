@@ -19,7 +19,6 @@ export default {
         return {
             title: this._('Users'),
             fields: [{
-                key: 'avatar_thumbnail',
                 type: 'avatar',
                 width: 30
             },{

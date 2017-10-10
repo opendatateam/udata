@@ -132,7 +132,12 @@ setup(
             'ods = udata.harvest.backends.ods:OdsHarvester',
             'ckan = udata.harvest.backends.ckan:CkanBackend',
             'dcat = udata.harvest.backends.dcat:DcatBackend',
-        ]
+        ],
+        'udata.avatars': [
+            'internal = udata.features.identicon.backends:internal',
+            'adorable = udata.features.identicon.backends:adorable',
+            'robohash = udata.features.identicon.backends:robohash',
+        ],
     },
     license='GNU AGPLv3+',
     # use_2to3=True,

@@ -298,6 +298,63 @@ This activates metrics, this is deactivated for tests
 
 uData use Flask-FS as storage abstraction.
 
+## Avatars/identicon configuration
+
+Theses settings allow you to customize avatar rendering.
+If defined to anything else than a falsy value, theses settings take precedence over the theme configuration and the default values.
+
+### AVATAR_PROVIDER
+
+**default** `'internal'`
+
+Avatar provider used to render user avatars.
+
+uData provides 3 backends:
+
+- `internal`: uData renders avatars itself using [pydenticon](http://pydenticon.readthedocs.io)
+- `adorable`: uData uses [Adorable Avatars](http://avatars.adorable.io/) to render avatars
+- `robohash`: uData uses [Robohash](https://robohash.org/) to render avatars
+
+### AVATAR_INTERNAL_SIZE
+
+**default**: `7`
+
+Number of blocks (the matrix size) used by the internal provider.
+
+*Ex*: `7` will render avatars on a 7x7 matrix
+
+### AVATAR_INTERNAL_FOREGROUND
+
+**default**: `['rgb(45,79,255)', 'rgb(254,180,44)', 'rgb(226,121,234)', 'rgb(30,179,253)', 'rgb(232,77,65)', 'rgb(49,203,115)', 'rgb(141,69,170)']`
+
+A list of foreground colors used by the internal provider to render the avatars
+
+### AVATAR_INTERNAL_BACKGROUND
+
+**default**: `'rgb(224,224,224)'`
+
+The background color used by the internal provider
+
+### AVATAR_INTERNAL_PADDING
+
+**default**: `10`
+
+The padding (in percent) used by the internal provider
+
+### AVATAR_ROBOHASH_SKIN
+
+**default**: `'set1'`
+
+The skin (set) used by the robohash provider.
+See <https://robohash.org/> for more details.
+
+## AVATAR_ROBOHASH_BACKGROUND
+
+**default**: `'bg0'` (transparent background)
+
+The background used by the robohash provider.
+See <https://robohash.org/> for more details.
+
 ## Example configuration file
 
 Here a sample configuration file:

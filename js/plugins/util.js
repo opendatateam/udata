@@ -1,3 +1,5 @@
+import {user_avatar} from 'helpers/placeholders';
+
 export function install(Vue) {
     /**
      * Give the size of an array or a string
@@ -37,6 +39,11 @@ export function install(Vue) {
             return;
         }
     });
+
+    /**
+     * Get the avatar url given an user and a size
+     */
+    Vue.filter('avatar_url', user_avatar);
 
     /**
      * Test that object is a given domain model class

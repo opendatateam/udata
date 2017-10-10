@@ -38,7 +38,7 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <div class="text-center">
-                    <img src="{{ user.avatar|placeholder('user') }}"
+                    <img src="{{ user|avatar_url(150) }}"
                         alt="{{ user.fullname }}" class="scalable"/>
                 </div>
                 <h2>{{ user.fullname }}</h2>

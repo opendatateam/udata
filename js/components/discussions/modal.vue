@@ -31,7 +31,7 @@
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>
                 </div>
                 <img class="direct-chat-img"  :alt="_('User Image')"
-                    :src="message.posted_by.avatar || avatar_placeholder"/>
+                    :src="message.posted_by | avatar_url 40"/>
                 <div class="direct-chat-text" v-markdown="message.content"></div>
             </div>
         </div>
@@ -100,10 +100,9 @@ export default {
             return this.deleting ? this._('Confirm deletion') : this._('Discussion');
         }
     },
-    data: function() {
+    data() {
         return {
             discussion: {},
-            avatar_placeholder: require('helpers/placeholders').user,
             next_route: null,
             comment: null,
             deleting: false

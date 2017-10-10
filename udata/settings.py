@@ -213,6 +213,24 @@ class Defaults(object):
     ]
     USE_METRICS = True
 
+    # Avatar providers parameters
+    # Overrides themes and default parameters
+    # if set to anything else than `None`
+    ###########################################################################
+    # avatar provider used to render user avatars
+    AVATAR_PROVIDER = None
+    # Number of blocks used by the internal provider
+    AVATAR_INTERNAL_SIZE = None
+    # List of foreground colors used by the internal provider
+    AVATAR_INTERNAL_FOREGROUND = None
+    # Background color used by the internal provider
+    AVATAR_INTERNAL_BACKGROUND = None
+    # Padding (in percent) used by the internal provider
+    AVATAR_INTERNAL_PADDING = None
+    # Skin (set) used by the robohash provider
+    AVATAR_ROBOHASH_SKIN = None
+    # The background used by the robohash provider.
+    AVATAR_ROBOHASH_BACKGROUND = None
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
