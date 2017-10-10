@@ -60,3 +60,12 @@ export default {
     }
 };
 </script>
+
+<style lang="less">
+.resource-modal {
+    .dl-wide dd {
+        // URLs and hashes are not breakable on words
+        word-break: break-all;
+    }
+}
+</style>
