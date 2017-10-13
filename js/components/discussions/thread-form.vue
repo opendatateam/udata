@@ -1,5 +1,5 @@
 <template>
-<form role="form" class="clearfix animated" @submit.prevent @submit="submit">
+<form role="form" class="clearfix animated" @submit.prevent="submit">
     <div class="form-group">
         <label for="comment-new-message">{{ _('Comment') }}</label>
         <textarea v-el:textarea id="comment-new-message" v-model="comment" class="form-control" rows="3" required></textarea>
