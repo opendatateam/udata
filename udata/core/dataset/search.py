@@ -31,6 +31,8 @@ __all__ = ('DatasetSearch', )
 
 # After this number of years, scoring is kept constant instead of increasing.
 MAX_TEMPORAL_WEIGHT = 10
+DEFAULT_SPATIAL_WEIGHT = 1
+DEFAULT_TEMPORAL_WEIGHT = 1
 
 
 def max_reuses():
@@ -105,7 +107,7 @@ class DatasetSearch(ModelSearchAdapter):
         'keys': String(index='not_analyzed')
     })
     granularity = String(index='not_analyzed')
-    coverage_weight = Long()
+    spatial_weight = Long()
     extras = Object()
     from_certified = Boolean()
 
@@ -154,7 +156,7 @@ class DatasetSearch(ModelSearchAdapter):
     boosters = [
         BoolBooster('featured', 1.5),
         BoolBooster('from_certified', 1.2),
-        ValueFactor('coverage_weight', missing=1),
+        ValueFactor('spatial_weight', missing=1),
         ValueFactor('temporal_weight', missing=1),
         GaussDecay('metrics.reuses', max_reuses, decay=0.1),
         GaussDecay(
@@ -168,10 +170,20 @@ class DatasetSearch(ModelSearchAdapter):
                 not dataset.private)
 
     @classmethod
+    def get_suggest_weight(cls, temporal_weight, spatial_weight, featured):
+        '''Compute the suggest part of the indexation payload'''
+        featured_weight = 1 if not featured else 2
+        # XXX temporal_weight seems too high
+        return temporal_weight * spatial_weight * featured_weight
+
+    @classmethod
     def serialize(cls, dataset):
         organization = None
         owner = None
         image_url = None
+        spatial_weight = DEFAULT_SPATIAL_WEIGHT
+        temporal_weight = DEFAULT_TEMPORAL_WEIGHT
+
         if dataset.organization:
             organization = Organization.objects(id=dataset.organization.id).first()
             image_url = organization.logo(40, external=True)
@@ -223,10 +235,10 @@ class DatasetSearch(ModelSearchAdapter):
                 dataset.temporal_coverage.end):
             start = dataset.temporal_coverage.start.toordinal()
             end = dataset.temporal_coverage.end.toordinal()
-            weight = min((end - start) / 365, MAX_TEMPORAL_WEIGHT)
+            temporal_weight = min((end - start) / 365, MAX_TEMPORAL_WEIGHT)
             document.update({
                 'temporal_coverage': {'start': start, 'end': end},
-                'temporal_weight': weight,
+                'temporal_weight': temporal_weight,
             })
 
         if dataset.spatial is not None:
@@ -248,10 +260,14 @@ class DatasetSearch(ModelSearchAdapter):
 
             geozones.extend([{'id': p} for p in parents])
 
+            spatial_weight = ADMIN_LEVEL_MAX / coverage_level
             document.update({
                 'geozones': geozones,
                 'granularity': dataset.spatial.granularity,
-                'coverage_weight': ADMIN_LEVEL_MAX / coverage_level,
+                'spatial_weight': spatial_weight,
             })
+
+        document['dataset_suggest']['weight'] = cls.get_suggest_weight(
+            temporal_weight, spatial_weight, dataset.featured)
 
         return document
