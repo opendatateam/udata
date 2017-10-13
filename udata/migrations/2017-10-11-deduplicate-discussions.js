@@ -1,5 +1,5 @@
 /*
- * Deduplicate discussions by content, dataset and author.
+ * Deduplicate discussions by content, subject and author.
  */
 
 var nbTopLevelRemoved = 0;
@@ -18,7 +18,7 @@ function getUniqueAnswers(answers) {
 }
 
 // Remove duplicate top level discussions
-// And re-assing non duplicated answers if any
+// And re-assign non duplicated answers if any
 db.discussion.aggregate([
     {$group: {
         _id: {author: '$user', subject: '$subject', title: '$title'},
