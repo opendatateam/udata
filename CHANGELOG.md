@@ -16,11 +16,12 @@
 - Improve URLs validation (support new tlds, unicode URLs...) [#1182](https://github.com/opendatateam/udata/pull/1182)
 - Properly serialize empty geometries for zones missing it and prevent leaflet crash on invalid bounds [#1188](https://github.com/opendatateam/udata/pull/1188)
 - Start validating some configuration parameters [#1197](https://github.com/opendatateam/udata/pull/1197)
-- Migration to remove resources without title or url [#1200](https://github.com/opendatateam/udata/pull/1200)
+- Remove resources without title or url [migration] [#1200](https://github.com/opendatateam/udata/pull/1200)
 - Improve harvesting licenses detection [#1203](https://github.com/opendatateam/udata/pull/1203)
 - Added missing delete post and topic admin actions [#1202](https://github.com/opendatateam/udata/pull/1202)
 - Switch from static theme avatars/placeholders to [identicons](https://en.wikipedia.org/wiki/Identicon) for readability (mostly on discussions) [#1193](https://github.com/opendatateam/udata/pull/1193)
 - Fix the scroll to a discussion sub-thread [#1206](https://github.com/opendatateam/udata/pull/1206)
+- Fix duplication in discussions [migration] [#1209](https://github.com/opendatateam/udata/pull/1209)
 
 ## 1.1.8 (2017-09-28)
 
