@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import io
-import re
 
-from os.path import join, dirname
+import io
+import os
+import re
 
 from setuptools import setup, find_packages
 
-ROOT = dirname(__file__)
-
 RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
-
 RE_MD_CODE_BLOCK = re.compile(r'```(?P<language>\w+)?\n(?P<lines>.*?)```', re.S)
 RE_SELF_LINK = re.compile(r'\[(.*?)\]\[\]')
 RE_LINK_TO_URL = re.compile(r'\[(?P<text>.*?)\]\((?P<url>.*?)\)')
@@ -90,9 +87,9 @@ long_description = '\n'.join((
 def pip(filename):
     """Parse pip reqs file and transform it to setuptools requirements."""
     requirements = []
-    for line in open(join(ROOT, 'requirements', filename)):
+    for line in open(os.path.join('requirements', filename)):
         line = line.strip()
-        if not line or '://' in line:
+        if not line or '://' in line or line.startswith('#'):
             continue
         match = RE_REQUIREMENT.match(line)
         if match:
@@ -129,8 +126,6 @@ setup(
             'default = udata.theme.default',
         ],
         'udata.harvesters': [
-            'ods = udata.harvest.backends.ods:OdsHarvester',
-            'ckan = udata.harvest.backends.ckan:CkanBackend',
             'dcat = udata.harvest.backends.dcat:DcatBackend',
         ],
         'udata.avatars': [
