@@ -14,6 +14,7 @@
 - Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
 - Fix OAuth authorization screen failing with unicode `SITE_TITLE` [#1624](https://github.com/opendatateam/udata/pull/1624)
 - Fix markdown handling of autolinks with angle brackets and factorize (and test) markdown `parse_html()` [#1625](https://github.com/opendatateam/udata/pull/1625)
+- Allow to specify a dataset acronym [#1217](https://github.com/opendatateam/udata/pull/1217)
 
 ## 1.3.8 (2018-04-25)
 

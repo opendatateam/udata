@@ -344,6 +344,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     last_modified = DateTimeField(verbose_name=_('Last modification date'),
                                   default=datetime.now, required=True)
     title = db.StringField(required=True)
+    acronym = db.StringField(max_length=128)
     slug = db.SlugField(max_length=255, required=True,
                         populate_from='title', update=True)
     description = db.StringField(required=True, default='')
@@ -424,6 +425,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     @property
     def is_hidden(self):
         return len(self.resources) == 0 or self.private or self.deleted
+
+    @property
+    def full_title(self):
+        if not self.acronym:
+            return self.title
+        return '{title} ({acronym})'.format(**self._data)
 
     @property
     def external_url(self):

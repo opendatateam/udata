@@ -461,6 +461,7 @@ class SuggestDatasetsAPI(API):
             {
                 'id': opt['payload']['id'],
                 'title': opt['text'],
+                'acronym': opt['payload'].get('acronym'),
                 'score': opt['score'],
                 'slug': opt['payload']['slug'],
                 'image_url': opt['payload']['image_url'],

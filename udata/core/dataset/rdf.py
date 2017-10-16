@@ -20,7 +20,7 @@ from udata.models import db
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SPDX, SCHEMA, namespace_manager, url_from_rdf
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, namespace_manager, url_from_rdf
 )
 from udata.utils import get_by
 
@@ -145,6 +145,7 @@ def dataset_to_rdf(dataset, graph=None):
     else:
         identifier = dataset.id
     graph = graph or Graph(namespace_manager=namespace_manager)
+
     d = graph.resource(id)
     d.set(RDF.type, DCAT.Dataset)
     d.set(DCT.identifier, Literal(identifier))
@@ -152,6 +153,10 @@ def dataset_to_rdf(dataset, graph=None):
     d.set(DCT.description, Literal(dataset.description))
     d.set(DCT.issued, Literal(dataset.created_at))
     d.set(DCT.modified, Literal(dataset.last_modified))
+
+    if dataset.acronym:
+        d.set(SKOS.altLabel, Literal(dataset.acronym))
+
     for tag in dataset.tags:
         d.add(DCAT.keyword, Literal(tag))
 
@@ -247,7 +252,7 @@ def temporal_from_rdf(period_of_time):
             return temporal_from_literal(str(period_of_time))
         elif isinstance(period_of_time, RdfResource):
             return temporal_from_resource(period_of_time)
-    except:
+    except Exception:
         # There are a lot of cases where parsing could/should fail
         # but we never want to break the whole dataset parsing
         # so we log the error for future investigation and improvement
@@ -348,6 +353,10 @@ def dataset_from_rdf(graph, dataset=None):
     dataset.title = rdf_value(d, DCT.title)
     dataset.description = sanitize_html(d.value(DCT.description))
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
+
+    acronym = rdf_value(d, SKOS.altLabel)
+    if acronym:
+        dataset.acronym = acronym
 
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
     tags += [theme.toPython() for theme in d.objects(DCAT.theme)]

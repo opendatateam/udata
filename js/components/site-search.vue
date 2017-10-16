@@ -102,7 +102,8 @@ export default {
         default: `<div class="logo">
             <img :src="item.image_url || placeholders.generic" class="avatar" width="30" height="30" alt="">
             </div>
-            <p v-html="item.title | stripTags | highlight query"></p>`,
+            <p v-html="item.title | stripTags | highlight query"></p>
+            <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,
         organization: `<div class="logo"><img :src="item.image_url || placeholders.organization" class="avatar" width="30" height="30" alt=""></div>
             <p v-html="item.name | stripTags | highlight query"></p>
             <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,

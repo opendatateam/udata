@@ -1,5 +1,5 @@
 <template>
-<a class="card dataset-card" :class="{ selected: selected }" :title="dataset.title"
+<a class="card dataset-card" :class="{ selected: selected }" :title="dataset.full_title"
     :href="clickable" @click.prevent="click">
     <div v-if="dataset.organization" class="card-logo">
         <img :alt="dataset.organization.name" :src="logo">
@@ -12,7 +12,7 @@
         popover-trigger="hover"/>
 
     <div class="card-body">
-        <h4>{{ dataset.title }}</h4>
+        <h4>{{ dataset.full_title | truncate 80 }}</h4>
         <div class="clamp-3">{{{ dataset.description | markdown 180 }}}</div>
     </div>
 
