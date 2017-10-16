@@ -24,6 +24,7 @@
 - Fix duplication in discussions [migration] [#1209](https://github.com/opendatateam/udata/pull/1209)
 - Explicit dataset search reuse facet context (only known reuses) [#1219](https://github.com/opendatateam/udata/pull/1219)
 - Optimize indexation a little bit [#1215](https://github.com/opendatateam/udata/pull/1215)
+- Fix some reversed temporal coverage [migration] [#1214](https://github.com/opendatateam/udata/pull/1214)
 
 ## 1.1.8 (2017-09-28)
 
