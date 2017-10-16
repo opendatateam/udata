@@ -134,13 +134,20 @@ class ReuseSearch(ModelSearchAdapter):
 
         and exclude ``_id``, ``_cls`` and ``owner`` fields.
         """
+        datasets = Dataset.objects(id__in=[r.id for r in reuse.datasets])
+        datasets = list(datasets.only('id', 'title').no_dereference())
+        organization = None
+        owner = None
+        if reuse.organization:
+            organization = Organization.objects(id=reuse.organization.id).first()
+        elif reuse.owner:
+            owner = User.objects(id=reuse.owner.id).first()
         return {
             'title': reuse.title,
             'description': reuse.description,
             'url': reuse.url,
-            'organization': (str(reuse.organization.id)
-                             if reuse.organization else None),
-            'owner': str(reuse.owner.id) if reuse.owner else None,
+            'organization': str(organization.id) if organization else None,
+            'owner': str(owner.id) if owner else None,
             'type': reuse.type,
             'tags': reuse.tags,
             'tag_suggest': reuse.tags,
@@ -150,7 +157,7 @@ class ReuseSearch(ModelSearchAdapter):
             'dataset': [{
                 'id': str(d.id),
                 'title': d.title
-            } for d in reuse.datasets if isinstance(d, Dataset)],
+            } for d in datasets],
             'metrics': reuse.metrics,
             'featured': reuse.featured,
             'extras': reuse.extras,

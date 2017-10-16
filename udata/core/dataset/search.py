@@ -169,22 +169,22 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, dataset):
-        org_id = (str(dataset.organization.id)
-                  if dataset.organization is not None else None)
+        organization = None
+        owner = None
+        image_url = None
         if dataset.organization:
-            image_url = dataset.organization.logo(40, external=True)
+            organization = Organization.objects(id=dataset.organization.id).first()
+            image_url = organization.logo(40, external=True)
         elif dataset.owner:
-            image_url = dataset.owner.avatar(40, external=True)
-        else:
-            image_url = None
+            owner = User.objects(id=dataset.owner.id).first()
+            image_url = owner.avatar(40, external=True)
 
-        certified = dataset.organization and dataset.organization.certified
+        certified = organization and organization.certified
 
         document = {
             'title': dataset.title,
             'description': dataset.description,
-            'license': (dataset.license.id
-                        if dataset.license is not None else None),
+            'license': getattr(dataset.license, 'id', None),
             'tags': dataset.tags,
             'badges': [badge.kind for badge in dataset.badges],
             'tag_suggest': dataset.tags,
@@ -199,8 +199,8 @@ class DatasetSearch(ModelSearchAdapter):
                                for r in dataset.resources
                                if r.format],
             'frequency': dataset.frequency,
-            'organization': org_id,
-            'owner': str(dataset.owner.id) if dataset.owner else None,
+            'organization': str(organization.id) if organization else None,
+            'owner': str(owner.id) if owner else None,
             'dataset_suggest': {
                 'input': cls.completer_tokenize(dataset.title) + [dataset.id],
                 'output': dataset.title,
@@ -250,7 +250,6 @@ class DatasetSearch(ModelSearchAdapter):
 
             document.update({
                 'geozones': geozones,
-                # 'geom': dataset.spatial.geom,
                 'granularity': dataset.spatial.granularity,
                 'coverage_weight': ADMIN_LEVEL_MAX / coverage_level,
             })
