@@ -30,9 +30,10 @@ __all__ = ('DatasetSearch', )
 
 
 # After this number of years, scoring is kept constant instead of increasing.
-MAX_TEMPORAL_WEIGHT = 10
+MAX_TEMPORAL_WEIGHT = 5
 DEFAULT_SPATIAL_WEIGHT = 1
 DEFAULT_TEMPORAL_WEIGHT = 1
+FEATURED_WEIGHT = 3
 
 
 def max_reuses():
@@ -172,8 +173,7 @@ class DatasetSearch(ModelSearchAdapter):
     @classmethod
     def get_suggest_weight(cls, temporal_weight, spatial_weight, featured):
         '''Compute the suggest part of the indexation payload'''
-        featured_weight = 1 if not featured else 2
-        # XXX temporal_weight seems too high
+        featured_weight = 1 if not featured else FEATURED_WEIGHT
         return temporal_weight * spatial_weight * featured_weight
 
     @classmethod
