@@ -10,11 +10,15 @@
         </span>
         <h4 class="list-group-item-heading ellipsis open-discussion-thread">
             <span>{{ discussion.title }}</span>
+            <span v-if="discussion.closed" class="fa fa-microphone-slash"></span>
         </h4>
         <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
-            {{ _('Discussion started on {created} with {count} messages.',
+            <span v-if="!discussion.closed">{{ _('Discussion started on {created} with {count} messages.',
                  {created: createdDate, count: discussion.discussion.length})
-            }}
+            }}</span>
+            <span v-if="discussion.closed">{{ _('Discussion closed on {closed} with {count} messages.',
+                 {closed: closedDate, count: discussion.discussion.length})
+            }}</span>
         </p>
     </div>
     <div v-for="(index, response) in discussion.discussion" id="{{ discussionIdAttr }}-{{ index }}"
@@ -94,6 +98,9 @@ export default {
         },
         createdDate() {
             return moment(this.discussion.created).format('LL')
+        },
+        closedDate() {
+            return moment(this.discussion.closed).format('LL')
         }
     },
     methods: {
