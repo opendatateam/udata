@@ -94,6 +94,7 @@
   "Details":"Détails",
   "Discussing with the community about your datasets is key to involve developers and hackers in your open process. The feedback from reusers of your data is unvaluable and should be answered rather quickly.":"Discuter avec la communauté au sujet des jeux de données est important pour impliquer les développeurs et les hackers dans votre processus d'ouverture. Le retour de la communauté des réutilisateurs sur vos données est d'une grande importance et doit être adressé rapidement.",
   "Discussion":"Discussion",
+  "Discussion closed on {closed} with {count} messages.": "Discussion close le {closed} avec {count} messages.",
   "Discussion started on {created} with {count} messages.":"Discussion démarrée le {created} avec {count} messages.",
   "Discussions":"Discussions",
   "Discussions about your data (including your organizations)":"Discussions au sujet de vos données (incluant vos organisations)",
