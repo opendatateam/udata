@@ -22,6 +22,7 @@
 - Switch from static theme avatars/placeholders to [identicons](https://en.wikipedia.org/wiki/Identicon) for readability (mostly on discussions) [#1193](https://github.com/opendatateam/udata/pull/1193)
 - Fix the scroll to a discussion sub-thread [#1206](https://github.com/opendatateam/udata/pull/1206)
 - Fix duplication in discussions [migration] [#1209](https://github.com/opendatateam/udata/pull/1209)
+- Explicit dataset search reuse facet context (only known reuses) [#1219](https://github.com/opendatateam/udata/pull/1219)
 
 ## 1.1.8 (2017-09-28)
 
