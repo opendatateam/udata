@@ -28,6 +28,7 @@
 - Fix some reversed temporal coverage [migration] [#1214](https://github.com/opendatateam/udata/pull/1214)
 - Move croquemort features to a generic link checker architecture [#1110](https://github.com/opendatateam/udata/pull/1110)
 - CKAN and OpenDataSoft backends are now optionnal separate udata extensions [#1213](https://github.com/opendatateam/udata/pull/1213)
+- Better search autocomplete [#1222](https://github.com/opendatateam/udata/pull/1222)
 
 ## 1.1.8 (2017-09-28)
 
