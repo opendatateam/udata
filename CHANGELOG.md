@@ -26,6 +26,7 @@
 - Explicit dataset search reuse facet context (only known reuses) [#1219](https://github.com/opendatateam/udata/pull/1219)
 - Optimize indexation a little bit [#1215](https://github.com/opendatateam/udata/pull/1215)
 - Fix some reversed temporal coverage [migration] [#1214](https://github.com/opendatateam/udata/pull/1214)
+- Better search autocomplete [#1210](https://github.com/opendatateam/udata/pull/1210)
 
 ## 1.1.8 (2017-09-28)
 
