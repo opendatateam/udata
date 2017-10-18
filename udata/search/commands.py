@@ -44,11 +44,11 @@ def index_model(index_name, adapter):
         qs = qs.visible()
     if adapter.exclude_fields:
         qs = qs.exclude(*adapter.exclude_fields)
-    for obj in qs.timeout(False):
+    for obj in qs.no_dereference().timeout(False):
         if adapter.is_indexable(obj):
             try:
-                adapter = adapter.from_model(obj)
-                adapter.save(using=es.client, index=index_name)
+                doc = adapter.from_model(obj)
+                doc.save(using=es.client, index=index_name)
             except:
                 log.exception('Unable to index %s "%s"',
                               model.__name__, str(obj.id))
