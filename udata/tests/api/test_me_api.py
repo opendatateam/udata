@@ -73,7 +73,7 @@ class MeAPITest(APITestCase):
         self.login()
         response = self.get(url_for('api.my_metrics'))
         self.assert200(response)
-        self.assertEqual(response.json['resources_availability'], 0)
+        self.assertEqual(response.json['resources_availability'], 100.)
         self.assertEqual(response.json['datasets_org_count'], 0)
         self.assertEqual(response.json['followers_org_count'], 0)
         self.assertEqual(response.json['datasets_count'], 0)
