@@ -145,7 +145,6 @@ class UploadableURLField(URLField):
     def __init__(self, *args, **kwargs):
         storage = kwargs.pop('storage')
         self.endpoint = url_for('storage.upload', name=storage.name)
-        self.checkurl = url_for('api.checkurl')
         super(UploadableURLField, self).__init__(*args, **kwargs)
 
 

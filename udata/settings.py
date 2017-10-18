@@ -163,13 +163,10 @@ class Defaults(object):
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()
 
-    # CROQUEMORT = {
-    #     'url': 'http://localhost:8000',
-    #     'delay': 1,
-    #     'retry': 10,
-    # }
-    #
-    CROQUEMORT_IGNORE = []
+    LINKCHECKING_ENABLED = True
+    LINKCHECKING_IGNORE_DOMAINS = []
+    LINKCHECKING_CACHE_DURATION = 60 * 5  # in seconds
+    LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 
     # PIWIK_ID = # Demo = 11, Prod = 1
     # PIWIK_URL = 'stats.data.gouv.fr'
@@ -183,7 +180,7 @@ class Defaults(object):
     #     'RESOURCE_DOWNLOAD': , # Demo = 5, Prod = ?
     #     'RESOURCE_REDIRECT': , # Demo = 6, Prod = ?
     # }
-    # TRACKING_BLACKLIST = ['api.notifications', 'api.checkurl']  # Default: []
+    # TRACKING_BLACKLIST = ['api.notifications', 'api.check_dataset_resource']  # Default: []
 
     DELETE_ME = True
 

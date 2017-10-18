@@ -133,11 +133,13 @@ class User(WithMetrics, UserMixin, db.Document):
                 *[org.check_availability() for org in self.organizations]
             )
         )
+        # Filter out the unknown
+        availabilities = [a for a in availabilities if type(a) is bool]
         if availabilities:
             # Trick will work because it's a sum() of booleans.
             return round(100. * sum(availabilities) / len(availabilities), 2)
-        else:
-            return 0
+        # if nothing is unavailable, everything is considered OK
+        return 100
 
     @cached_property
     def datasets_org_count(self):

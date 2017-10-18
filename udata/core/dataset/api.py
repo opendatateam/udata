@@ -19,6 +19,7 @@ These changes might lead to backward compatibility breakage meaning:
 '''
 from __future__ import unicode_literals
 import os
+import logging
 from datetime import datetime
 
 from flask import request, current_app
@@ -34,7 +35,6 @@ from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
 
-from .croquemort import check_url
 from .api_fields import (
     community_resource_fields,
     community_resource_page_fields,
@@ -46,6 +46,7 @@ from .api_fields import (
     resource_fields,
     upload_fields,
 )
+from udata.linkchecker.checker import check_resource
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
     CommunityResource
@@ -55,6 +56,8 @@ from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
 from .search import DatasetSearch
+
+log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
 search_parser = DatasetSearch.as_request_parser()
@@ -516,26 +519,13 @@ class AllowedExtensionsAPI(API):
         return current_app.config['ALLOWED_RESOURCES_EXTENSIONS']
 
 
-checkurl_parser = api.parser()
-checkurl_parser.add_argument('url', type=str, help='The URL to check',
-                             location='args', required=True)
-checkurl_parser.add_argument('group', type=str,
-                             help='The dataset related to the URL',
-                             location='args', required=True)
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/check/',
+          endpoint='check_dataset_resource', doc=common_doc)
+@api.doc(params={'rid': 'The resource unique identifier'})
+class CheckDatasetResource(API, ResourceMixin):
 
-
-@ns.route('/checkurl/', endpoint='checkurl')
-class CheckUrlAPI(API):
-
-    @api.doc('checkurl', parser=checkurl_parser)
-    def get(self):
-        '''Checks that a URL exists and returns metadata.'''
-        args = checkurl_parser.parse_args()
-        error, response = check_url(args['url'], args['group'])
-        status = (isinstance(response, int) and response or
-                  int(response.get('status', 500)))
-        if error or status >= 500:
-            # We keep 503 which means the URL checker is unreachable.
-            return error, status == 503 and status or 500
-        else:
-            return response, status
+    @api.doc('check_dataset_resource')
+    def get(self, dataset, rid):
+        '''Checks that a resource's URL exists and returns metadata.'''
+        resource = self.get_resource_or_404(dataset, rid)
+        return check_resource(resource)

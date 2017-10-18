@@ -145,11 +145,13 @@ If none matches, no license is set on the dataset.
 
 ### CKAN
 
-This backend harvest CKAN repositories/portals through their API.
+This backend harvests CKAN repositories/portals through their API
+and [is available as a udata extension](https://github.com/opendatateam/udata-ckan).
 
 ### OpenDataSoft
 
-This backend harvest OpenDataSoft repositories/portals through their API (v1).
+This backend harvests OpenDataSoft repositories/portals through their API (v1)
+and [is available as a udata extension](https://github.com/opendatateam/udata-ods).
 
 ### Custom
 
