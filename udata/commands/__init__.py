@@ -64,6 +64,7 @@ def register_commands(manager):
     import udata.api.commands  # noqa
     import udata.harvest.commands  # noqa
     import udata.features.territories.commands  # noqa
+    import udata.linkchecker.commands  # noqa
 
     # Dynamic module commands loading
     for plugin in manager.app.config['PLUGINS']:

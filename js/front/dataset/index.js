@@ -160,20 +160,22 @@ new Vue({
                     el.classList.add('format-label-warning');
                     el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
                 } else {
-                    this.$api.get(checkurl, {url: url.href, group: this.dataset.alternateName})
-                    .then(() => el.classList.add('format-label-success'))
-                    .catch(error => {
-                        switch (error.status) {
-                            case 404:
-                                el.classList.add('format-label-warning');
-                                el.setTooltip(this._('The resource cannot be found.'), true);
-                                break;
-                            case 503:
-                                break;
-                            default:
-                                el.classList.add('format-label-danger');
-                                el.setTooltip(this._('The server cannot be found.'), true);
+                    this.$api.get(checkurl)
+                    .then((res) => {
+                        const status = res['check:status'];
+                        if (status >= 200 && status < 400) {
+                            el.classList.add('format-label-success')
+                        } else if (status >= 400 && status < 500) {
+                            el.classList.add('format-label-danger');
+                            el.setTooltip(this._('The resource cannot be found.'), true);
+                        } else if (status >= 500) {
+                            el.classList.add('format-label-warning');
+                            el.setTooltip(this._('An error occured on the remote server. This may be temporary.'), true);
                         }
+                    })
+                    .catch(error => {
+                        el.classList.add('format-label-unchecked');
+                        console.log('Something went wrong with the linkchecker', error);
                     });
                 }
             }

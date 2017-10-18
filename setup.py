@@ -138,6 +138,9 @@ setup(
             'adorable = udata.features.identicon.backends:adorable',
             'robohash = udata.features.identicon.backends:robohash',
         ],
+        'udata.linkcheckers': [
+            'no_check = udata.linkchecker.backends:NoCheckLinkchecker',
+        ],
     },
     license='GNU AGPLv3+',
     # use_2to3=True,

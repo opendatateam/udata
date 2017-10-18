@@ -85,8 +85,7 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        <span v-if="resource.is_available" class="badge bg-green">✓</span>
-                        <span v-if="!resource.is_available" class="badge bg-red">×</span>
+                        <resource-availability :resource="resource"></resource-availability>
                     </td>
                 </tr>
                 <tr v-if="!(dataset && dataset.resources)" class="text-center lead">
@@ -137,11 +136,12 @@ import Uploader from 'mixins/uploader';
 import Resource from 'models/resource';
 import Box from 'components/containers/box.vue';
 import PaginationWidget from 'components/pagination.vue';
+import ResourceAvailability from './availability.vue';
 
 export default {
     name: 'resources-list',
     mixins: [Uploader, Sorter],
-    components: {Box, PaginationWidget},
+    components: {Box, PaginationWidget, ResourceAvailability},
     props: {
         dataset: {
             type: Object,

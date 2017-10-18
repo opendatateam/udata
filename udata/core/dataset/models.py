@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import httplib
 from datetime import datetime, timedelta
 from collections import OrderedDict
 
@@ -16,9 +15,6 @@ from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import hash_url
-
-from .croquemort import check_url_from_cache, check_url_from_group
-
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
@@ -202,26 +198,14 @@ class ResourceMixin(object):
         """Return True if the specified format is in CLOSED_FORMATS."""
         return self.format.lower() in CLOSED_FORMATS
 
-    def check_availability(self, group):
-        """Check if a resource is reachable against a Croquemort server.
+    def check_availability(self):
+        '''
+        Return the check status from extras if any.
 
-        Return a boolean.
-        """
-        if self.filetype == 'remote':
-            # We perform a quick check for performances matters.
-            error, response = check_url_from_cache(self.url, group)
-            if error or 'status' not in response:
-                return False
-            elif int(response['status']) >= httplib.INTERNAL_SERVER_ERROR:
-                return False
-            else:
-                return True
-        else:
-            return True  # We consider that API cases (types) are OK.
-
-    @property
-    def is_available(self):
-        return self.check_availability(group=None)
+        NB: `unknown` will evaluate to True in the aggregate checks using
+        `all([])` (dataset, organization, user).
+        '''
+        return self.extras.get('check:available', 'unknown')
 
     @property
     def latest(self):
@@ -382,7 +366,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     def check_availability(self):
         """Check if resources from that dataset are available.
 
-        Return a list of booleans.
+        Return a list of (boolean or 'unknown')
         """
         # Only check remote resources.
         remote_resources = [resource
@@ -390,16 +374,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                             if resource.filetype == 'remote']
         if not remote_resources:
             return []
-        # First, we try to retrieve all data from the group (slug).
-        error, response = check_url_from_group(self.slug)
-        if error:
-            # The group is unknown, the check will be performed by resource.
-            return [resource.check_availability(self.slug)
-                    for resource in remote_resources]
-        else:
-            return [(int(url_infos.get('status', httplib.UNPROCESSABLE_ENTITY))
-                     == httplib.OK)
-                    for url_infos in response['urls']]
+        return [resource.check_availability() for resource in remote_resources]
 
     @property
     def last_update(self):
