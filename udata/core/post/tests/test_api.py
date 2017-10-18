@@ -3,11 +3,10 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.core.post.models import Post
-
-from . import APITestCase
 from udata.core.post.factories import PostFactory
+from udata.core.post.models import Post
 from udata.core.user.factories import AdminFactory
+from udata.tests.api import APITestCase
 
 
 class PostsAPITest(APITestCase):

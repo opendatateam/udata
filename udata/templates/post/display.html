@@ -187,4 +187,30 @@
         </div>
     </div> #}
 </section>
+
+{% if config['POST_DISCUSSIONS_ENABLED'] %}
+<section class="community_container discussions-section">
+    <header>
+        <div class="container">
+            <div class="cover-communaute"></div>
+            <div class="page-header"><h2>{{ _('Discussions') }}</h2></div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <h3></h3>
+        <div class="row">
+            <discussion-threads v-ref:discussions class="col-sm-9"
+                subject-id="{{ post.id }}"
+                subject-class="{{ post.__class__.__name__ }}">
+            </discussion-threads>
+            <div class="col-sm-3 note">
+                <p>{{ _('Comments about this post.') }}</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endif %}
 {% endblock %}

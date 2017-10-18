@@ -9,11 +9,12 @@ import Vue from 'vue';
 
 // Components
 import ShareButton from 'components/buttons/share.vue';
+import DiscussionThreads from 'components/discussions/threads.vue';
 
 
 new Vue({
     mixins: [FrontMixin],
-    components: {ShareButton},
+    components: {ShareButton, DiscussionThreads},
     ready() {
         log.debug('Post page ready');
     }
