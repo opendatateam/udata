@@ -23,6 +23,7 @@
 - Fix the scroll to a discussion sub-thread [#1206](https://github.com/opendatateam/udata/pull/1206)
 - Fix duplication in discussions [migration] [#1209](https://github.com/opendatateam/udata/pull/1209)
 - Explicit dataset search reuse facet context (only known reuses) [#1219](https://github.com/opendatateam/udata/pull/1219)
+- Optimize indexation a little bit [#1215](https://github.com/opendatateam/udata/pull/1215)
 
 ## 1.1.8 (2017-09-28)
 
