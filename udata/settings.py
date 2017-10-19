@@ -233,6 +233,8 @@ class Defaults(object):
     ###########################################################################
     # Discussions on posts are disabled by default
     POST_DISCUSSIONS_ENABLED = False
+    # Default pagination size on listing
+    POST_DEFAULT_PAGINATION = 20
 
 
 class Testing(object):

@@ -4,8 +4,6 @@ from __future__ import unicode_literals
 from flask import request, redirect, abort, g, json
 from flask.views import MethodView
 
-from elasticsearch_dsl.query import MultiMatch
-
 from udata import search, auth, theme
 from udata.utils import multi_to_dict
 
@@ -56,6 +54,7 @@ class ListView(Templated, BaseView):
     '''
     model = None
     context_name = 'objects'
+    default_page_size = 20
 
     def get_queryset(self):
         return self.model.objects
@@ -64,6 +63,25 @@ class ListView(Templated, BaseView):
         context = super(ListView, self).get_context()
         context[self.context_name] = self.get_queryset()
         return context
+
+    @property
+    def page(self):
+        try:
+            params_page = int(request.args.get('page', 1) or 1)
+            return max(params_page, 1)
+        except ValueError:  # Cast exception
+            # Failsafe, if page cannot be parsed, we falback on first page
+            return 1
+
+    @property
+    def page_size(self):
+        try:
+            params_page_size = request.args.get('page_size',
+                                                self.default_page_size)
+            return int(params_page_size or self.default_page_size)
+        except ValueError:  # Cast exception
+            # Failsafe, if page_size cannot be parsed, we falback on default
+            return self.default_page_size
 
     def get(self, **kwargs):
         return self.render()
