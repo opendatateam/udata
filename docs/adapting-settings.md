@@ -373,12 +373,29 @@ The padding (in percent) used by the internal provider
 The skin (set) used by the robohash provider.
 See <https://robohash.org/> for more details.
 
-## AVATAR_ROBOHASH_BACKGROUND
+### AVATAR_ROBOHASH_BACKGROUND
 
 **default**: `'bg0'` (transparent background)
 
 The background used by the robohash provider.
 See <https://robohash.org/> for more details.
+
+## Posts configuration
+
+Theses settings allow you to customize the post feature.
+
+### POST_DISCUSSIONS_ENABLED
+
+**default** `False`
+
+Whether or not discussions should be enabled on posts
+
+### POST_DEFAULT_PAGINATION
+
+**default** `20`
+
+The default page size for post listing
+
 
 ## Example configuration file
 
