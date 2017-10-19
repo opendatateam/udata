@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 1.2.0.dev0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-09-27 10:41+0200\n"
+"POT-Creation-Date: 2017-10-19 12:14+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -264,7 +264,6 @@ msgstr ""
 #: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:38
 #: udata/templates/dataset/display.html:376 udata/templates/dataset/list.html:38
 #: udata/templates/dataset/search-labels.html:25
-#: udata/templates/dataset/search-panel.html:18
 #: udata/templates/organization/list.html:38
 #: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:6
@@ -279,124 +278,124 @@ msgstr ""
 msgid "Reuses"
 msgstr ""
 
-#: udata/core/dataset/models.py:33
+#: udata/core/dataset/models.py:29
 msgid "Punctual"
 msgstr ""
 
-#: udata/core/dataset/models.py:34
+#: udata/core/dataset/models.py:30
 msgid "Real time"
 msgstr ""
 
-#: udata/core/dataset/models.py:35
+#: udata/core/dataset/models.py:31
 msgid "Hourly"
 msgstr ""
 
-#: udata/core/dataset/models.py:36
+#: udata/core/dataset/models.py:32
 msgid "Four times a day"
 msgstr ""
 
-#: udata/core/dataset/models.py:37
+#: udata/core/dataset/models.py:33
 msgid "Three times a day"
 msgstr ""
 
-#: udata/core/dataset/models.py:38
+#: udata/core/dataset/models.py:34
 msgid "Semidaily"
 msgstr ""
 
-#: udata/core/dataset/models.py:39 udata/harvest/models.py:18
+#: udata/core/dataset/models.py:35 udata/harvest/models.py:18
 msgid "Daily"
 msgstr ""
 
-#: udata/core/dataset/models.py:40
+#: udata/core/dataset/models.py:36
 msgid "Four times a week"
 msgstr ""
 
-#: udata/core/dataset/models.py:41
+#: udata/core/dataset/models.py:37
 msgid "Three times a week"
 msgstr ""
 
-#: udata/core/dataset/models.py:42
+#: udata/core/dataset/models.py:38
 msgid "Semiweekly"
 msgstr ""
 
-#: udata/core/dataset/models.py:43 udata/harvest/models.py:17
+#: udata/core/dataset/models.py:39 udata/harvest/models.py:17
 msgid "Weekly"
 msgstr ""
 
-#: udata/core/dataset/models.py:44
+#: udata/core/dataset/models.py:40
 msgid "Biweekly"
 msgstr ""
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:41
 msgid "Semimonthly"
 msgstr ""
 
-#: udata/core/dataset/models.py:46
+#: udata/core/dataset/models.py:42
 msgid "Three times a month"
 msgstr ""
 
-#: udata/core/dataset/models.py:47 udata/harvest/models.py:16
+#: udata/core/dataset/models.py:43 udata/harvest/models.py:16
 msgid "Monthly"
 msgstr ""
 
-#: udata/core/dataset/models.py:48
+#: udata/core/dataset/models.py:44
 msgid "Bimonthly"
 msgstr ""
 
-#: udata/core/dataset/models.py:49
+#: udata/core/dataset/models.py:45
 msgid "Quarterly"
 msgstr ""
 
-#: udata/core/dataset/models.py:50
+#: udata/core/dataset/models.py:46
 msgid "Three times a year"
 msgstr ""
 
-#: udata/core/dataset/models.py:51
+#: udata/core/dataset/models.py:47
 msgid "Biannual"
 msgstr ""
 
-#: udata/core/dataset/models.py:52
+#: udata/core/dataset/models.py:48
 msgid "Annual"
 msgstr ""
 
-#: udata/core/dataset/models.py:53
+#: udata/core/dataset/models.py:49
 msgid "Biennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:54
+#: udata/core/dataset/models.py:50
 msgid "Triennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:55
+#: udata/core/dataset/models.py:51
 msgid "Quinquennial"
 msgstr ""
 
-#: udata/core/dataset/models.py:56
+#: udata/core/dataset/models.py:52
 msgid "Irregular"
 msgstr ""
 
-#: udata/core/dataset/models.py:57
+#: udata/core/dataset/models.py:53
 msgid "Unknown"
 msgstr ""
 
-#: udata/core/dataset/models.py:80
+#: udata/core/dataset/models.py:76
 msgid "Uploaded file"
 msgstr ""
 
-#: udata/core/dataset/models.py:81
+#: udata/core/dataset/models.py:77
 msgid "Remote file"
 msgstr ""
 
-#: udata/core/dataset/models.py:82 udata/core/reuse/models.py:19
+#: udata/core/dataset/models.py:78 udata/core/reuse/models.py:19
 msgid "API"
 msgstr ""
 
-#: udata/core/dataset/models.py:221 udata/core/dataset/rdf.py:285
+#: udata/core/dataset/models.py:226 udata/core/dataset/rdf.py:285
 #: udata/templates/dataset/resource/list-item.html:12
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/core/dataset/models.py:267 udata/models/datetime_fields.py:58
+#: udata/core/dataset/models.py:272 udata/models/datetime_fields.py:58
 #: udata/templates/dataset/display.html:230 udata/templates/dataset/list.html:36
 #: udata/templates/organization/list.html:35 udata/templates/reuse/list.html:37
 #: udata/templates/search.html:74 udata/templates/search.html:88
@@ -404,7 +403,7 @@ msgstr ""
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataset/models.py:269 udata/models/datetime_fields.py:60
+#: udata/core/dataset/models.py:274 udata/models/datetime_fields.py:60
 #: udata/templates/dataset/list.html:37 udata/templates/organization/list.html:36
 #: udata/templates/reuse/list.html:38 udata/templates/search.html:75
 #: udata/templates/search.html:89 udata/templates/topic/datasets.html:35
@@ -412,15 +411,15 @@ msgstr ""
 msgid "Last modification date"
 msgstr ""
 
-#: udata/core/dataset/models.py:282
+#: udata/core/dataset/models.py:287
 msgid "Future date of update"
 msgstr ""
 
-#: udata/core/dataset/models.py:297
+#: udata/core/dataset/models.py:302
 msgid "Pivotal data"
 msgstr ""
 
-#: udata/core/dataset/models.py:319 udata/templates/dataset/display.html:11
+#: udata/core/dataset/models.py:324 udata/templates/dataset/display.html:11
 msgid "dataset"
 msgstr ""
 
@@ -428,23 +427,23 @@ msgstr ""
 msgid "{format} resource"
 msgstr ""
 
-#: udata/core/dataset/search.py:146 udata/tests/test_search.py:95
+#: udata/core/dataset/search.py:149 udata/tests/test_search.py:95
 msgid "Never reused"
 msgstr ""
 
-#: udata/core/dataset/search.py:147 udata/tests/test_search.py:96
+#: udata/core/dataset/search.py:150 udata/tests/test_search.py:96
 msgid "Little reused"
 msgstr ""
 
-#: udata/core/dataset/search.py:148 udata/tests/test_search.py:97
+#: udata/core/dataset/search.py:151 udata/tests/test_search.py:97
 msgid "Quite reused"
 msgstr ""
 
-#: udata/core/dataset/search.py:149 udata/tests/test_search.py:98
+#: udata/core/dataset/search.py:152 udata/tests/test_search.py:98
 msgid "Heavily reused"
 msgstr ""
 
-#: udata/core/dataset/tasks.py:93
+#: udata/core/dataset/tasks.py:69
 msgid "You need to update some frequency-based datasets"
 msgstr ""
 
@@ -469,22 +468,22 @@ msgid "Subject"
 msgstr ""
 
 #: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
-#: udata/templates/dataset/display.html:345 udata/templates/reuse/display.html:262
-#: udata/templates/site/dashboard.html:25
+#: udata/templates/dataset/display.html:345 udata/templates/post/display.html:198
+#: udata/templates/reuse/display.html:261 udata/templates/site/dashboard.html:25
 msgid "Discussions"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:39
+#: udata/core/discussions/tasks.py:41
 #, python-format
 msgid "Your %(type)s have a new discussion"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:54
+#: udata/core/discussions/tasks.py:56
 #, python-format
 msgid "%(user)s commented your discussion"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:70
+#: udata/core/discussions/tasks.py:72
 msgid "A discussion has been closed"
 msgstr ""
 
@@ -666,32 +665,32 @@ msgid "Many reuses"
 msgstr ""
 
 #: udata/core/organization/search.py:85 udata/core/reuse/search.py:95
-#: udata/core/user/search.py:62
+#: udata/core/user/search.py:61
 msgid "No datasets"
 msgstr ""
 
 #: udata/core/organization/search.py:86 udata/core/reuse/search.py:96
-#: udata/core/user/search.py:63
+#: udata/core/user/search.py:62
 msgid "Few datasets"
 msgstr ""
 
 #: udata/core/organization/search.py:87 udata/core/reuse/search.py:97
-#: udata/core/user/search.py:64
+#: udata/core/user/search.py:63
 msgid "Many datasets"
 msgstr ""
 
 #: udata/core/organization/search.py:94 udata/core/reuse/search.py:104
-#: udata/core/user/search.py:71
+#: udata/core/user/search.py:70
 msgid "No followers"
 msgstr ""
 
 #: udata/core/organization/search.py:95 udata/core/reuse/search.py:105
-#: udata/core/user/search.py:72
+#: udata/core/user/search.py:71
 msgid "Few followers"
 msgstr ""
 
 #: udata/core/organization/search.py:96 udata/core/reuse/search.py:106
-#: udata/core/user/search.py:73
+#: udata/core/user/search.py:72
 msgid "Many followers"
 msgstr ""
 
@@ -738,6 +737,10 @@ msgstr ""
 msgid "Credit URL"
 msgstr ""
 
+#: udata/core/post/models.py:43
+msgid "post"
+msgstr ""
+
 #: udata/core/reuse/activities.py:26
 msgid "created a reuse"
 msgstr ""
@@ -759,7 +762,7 @@ msgid "The details about the reuse (build process, specifics, self-critics...)."
 msgstr ""
 
 #: udata/core/reuse/forms.py:33 udata/templates/home.html:92
-#: udata/templates/reuse/display.html:229
+#: udata/templates/reuse/display.html:228
 msgid "Used datasets"
 msgstr ""
 
@@ -913,7 +916,7 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: udata/core/spatial/models.py:296
+#: udata/core/spatial/models.py:297
 msgid "other"
 msgstr ""
 
@@ -1025,7 +1028,7 @@ msgstr ""
 msgid "Following"
 msgstr ""
 
-#: udata/core/user/models.py:238 udata/tests/api/test_me_api.py:373
+#: udata/core/user/models.py:240 udata/tests/api/test_me_api.py:373
 msgid "Account deletion"
 msgstr ""
 
@@ -1057,44 +1060,44 @@ msgstr ""
 msgid "Invalid URL"
 msgstr ""
 
-#: udata/forms/fields.py:331
+#: udata/forms/fields.py:330
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:371 udata/forms/fields.py:395
+#: udata/forms/fields.py:370 udata/forms/fields.py:394
 msgid "{0} does not exists"
 msgstr ""
 
-#: udata/forms/fields.py:384
+#: udata/forms/fields.py:383
 msgid "Expect both class and identifier"
 msgstr ""
 
-#: udata/forms/fields.py:398
+#: udata/forms/fields.py:397
 msgid "{0} is not a valid identifier"
 msgstr ""
 
-#: udata/forms/fields.py:424
+#: udata/forms/fields.py:423
 msgid "Model for {0} not found"
 msgstr ""
 
-#: udata/forms/fields.py:459
+#: udata/forms/fields.py:458
 msgid "Unknown identifiers: {identifiers}"
 msgstr ""
 
-#: udata/forms/fields.py:590
+#: udata/forms/fields.py:589
 msgid "Unable to parse date range"
 msgstr ""
 
-#: udata/forms/fields.py:617 udata/forms/fields.py:640
+#: udata/forms/fields.py:616 udata/forms/fields.py:639
 msgid "You must be authenticated"
 msgstr ""
 
-#: udata/forms/fields.py:620
+#: udata/forms/fields.py:619
 msgid "You can only set yourself as owner"
 msgstr ""
 
-#: udata/forms/fields.py:643
+#: udata/forms/fields.py:642
 msgid "Permission denied for this organization"
 msgstr ""
 
@@ -1870,11 +1873,11 @@ msgstr ""
 msgid "Territories"
 msgstr ""
 
-#: udata/templates/dataset/display.html:337 udata/templates/reuse/display.html:255
+#: udata/templates/dataset/display.html:337 udata/templates/reuse/display.html:254
 msgid "Community contributions"
 msgstr ""
 
-#: udata/templates/dataset/display.html:352 udata/templates/reuse/display.html:268
+#: udata/templates/dataset/display.html:352 udata/templates/reuse/display.html:267
 msgid "Discussion between the organization and the community about this dataset."
 msgstr ""
 
@@ -1930,8 +1933,9 @@ msgid "datasets"
 msgstr ""
 
 #: udata/templates/dataset/list.html:19 udata/templates/organization/list.html:19
-#: udata/templates/reuse/list.html:19 udata/templates/topic/datasets.html:22
-#: udata/templates/topic/reuses.html:22 udata/templates/user/list.html:19
+#: udata/templates/post/list.html:16 udata/templates/reuse/list.html:19
+#: udata/templates/topic/datasets.html:22 udata/templates/topic/reuses.html:22
+#: udata/templates/user/list.html:19
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
 msgstr ""
@@ -1951,6 +1955,10 @@ msgstr ""
 
 #: udata/templates/dataset/search-panel.html:17
 msgid "Formats"
+msgstr ""
+
+#: udata/templates/dataset/search-panel.html:18
+msgid "Known reuses"
 msgstr ""
 
 #: udata/templates/dataset/search-result.html:98
@@ -2586,6 +2594,39 @@ msgstr ""
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
 msgstr ""
 
+#: udata/templates/post/display.html:169 udata/templates/post/display.html:171
+msgid "Previous post"
+msgstr ""
+
+#: udata/templates/post/display.html:178
+msgid "All posts"
+msgstr ""
+
+#: udata/templates/post/display.html:183 udata/templates/post/display.html:184
+msgid "Next post"
+msgstr ""
+
+#: udata/templates/post/display.html:211
+msgid "Comments about this post."
+msgstr ""
+
+#: udata/templates/post/list.html:5 udata/templates/post/list.html:15
+msgid "Posts"
+msgstr ""
+
+#: udata/templates/post/list.html:6
+#, python-format
+msgid "%(site)s posts"
+msgstr ""
+
+#: udata/templates/post/list.html:7
+msgid "posts"
+msgstr ""
+
+#: udata/templates/post/search-result.html:18
+msgid "Posted on"
+msgstr ""
+
 #: udata/templates/post/subnav.html:39
 msgid "Read more"
 msgstr ""
@@ -2615,7 +2656,7 @@ msgstr ""
 msgid "I'll be informed about this user news"
 msgstr ""
 
-#: udata/templates/reuse/display.html:212
+#: udata/templates/reuse/display.html:211
 msgid "No followers yet"
 msgstr ""
 

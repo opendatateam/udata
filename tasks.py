@@ -118,13 +118,14 @@ def beat(ctx, loglevel='info'):
 
 
 @task
-def i18n(ctx):
+def i18n(ctx, update=False):
     '''Extract translatable strings'''
     header('Extract translatable strings')
 
     info('Extract Python strings')
     lrun('python setup.py extract_messages')
-    lrun('python setup.py update_catalog')
+    if update:
+        lrun('python setup.py update_catalog')
 
     info('Extract JavaScript strings')
     keys = set()
