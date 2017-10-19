@@ -229,6 +229,14 @@ class Defaults(object):
     # The background used by the robohash provider.
     AVATAR_ROBOHASH_BACKGROUND = None
 
+    # Post settings
+    ###########################################################################
+    # Discussions on posts are disabled by default
+    POST_DISCUSSIONS_ENABLED = False
+    # Default pagination size on listing
+    POST_DEFAULT_PAGINATION = 20
+
+
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
     TESTING = True

@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 
 from flask import url_for
 
-from udata.models import db
 from udata.core.storages import images, default_image_basename
+from udata.i18n import lazy_gettext as _
+from udata.models import db
 
 
 __all__ = ('Post', )
@@ -39,9 +40,18 @@ class Post(db.Datetimed, db.Document):
         'ordering': ['-created_at'],
     }
 
+    verbose_name = _('post')
+
     def __unicode__(self):
         return self.name or ''
 
+    def url_for(self, *args, **kwargs):
+        return url_for('posts.show', post=self, *args, **kwargs)
+
     @property
     def display_url(self):
-        return url_for('posts.show', post=self)
+        return self.url_for()
+
+    @property
+    def external_url(self):
+        return self.url_for(_external=True)

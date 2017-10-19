@@ -3,7 +3,9 @@ from __future__ import unicode_literals, absolute_import
 
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Dataset, Reuse
+from udata.core.dataset.models import Dataset
+from udata.core.reuse.models import Reuse
+from udata.core.post.models import Post
 from udata.tasks import task, get_logger
 
 from .signals import (
@@ -26,7 +28,7 @@ def connect(signal):
 
 
 def owner_recipients(discussion):
-    if discussion.subject.organization:
+    if getattr(discussion.subject, 'organization', None):
         return [m.user for m in discussion.subject.organization.members]
     else:
         return [discussion.subject.owner]
@@ -34,7 +36,7 @@ def owner_recipients(discussion):
 
 @connect(on_new_discussion)
 def notify_new_discussion(discussion):
-    if isinstance(discussion.subject, (Dataset, Reuse)):
+    if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         recipients = owner_recipients(discussion)
         subject = _('Your %(type)s have a new discussion',
                     type=discussion.subject.verbose_name)
@@ -46,7 +48,7 @@ def notify_new_discussion(discussion):
 
 @connect(on_new_discussion_comment)
 def notify_new_discussion_comment(discussion, **kwargs):
-    if isinstance(discussion.subject, (Dataset, Reuse)):
+    if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         comment = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
@@ -62,7 +64,7 @@ def notify_new_discussion_comment(discussion, **kwargs):
 
 @connect(on_discussion_closed)
 def notify_discussion_closed(discussion, **kwargs):
-    if isinstance(discussion.subject, (Dataset, Reuse)):
+    if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         comment = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
