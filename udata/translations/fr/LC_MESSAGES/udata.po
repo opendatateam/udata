@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-10-19 12:14+0200\n"
-"PO-Revision-Date: 2017-10-19 06:16-0400\n"
+"PO-Revision-Date: 2017-10-19 06:20-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -737,7 +737,7 @@ msgstr "URL des crédits"
 
 #: udata/core/post/models.py:43
 msgid "post"
-msgstr ""
+msgstr "article"
 
 #: udata/core/reuse/activities.py:26
 msgid "created a reuse"
@@ -1891,7 +1891,7 @@ msgstr "Formats"
 
 #: udata/templates/dataset/search-panel.html:18
 msgid "Known reuses"
-msgstr ""
+msgstr "Réutilisations connues"
 
 #: udata/templates/dataset/search-result.html:98
 msgid "Reuse number"
@@ -2513,36 +2513,36 @@ msgstr "Cet article a été supprimé. Cel sera permanent dans les prochaines 24
 
 #: udata/templates/post/display.html:169 udata/templates/post/display.html:171
 msgid "Previous post"
-msgstr ""
+msgstr "Article précédent"
 
 #: udata/templates/post/display.html:178
 msgid "All posts"
-msgstr ""
+msgstr "Tous les articles"
 
 #: udata/templates/post/display.html:183 udata/templates/post/display.html:184
 msgid "Next post"
-msgstr ""
+msgstr "Article suivant"
 
 #: udata/templates/post/display.html:211
 msgid "Comments about this post."
-msgstr ""
+msgstr "Commentaires sur cet article."
 
 #: udata/templates/post/list.html:5 udata/templates/post/list.html:15
 msgid "Posts"
-msgstr ""
+msgstr "Articles"
 
 #: udata/templates/post/list.html:6
 #, python-format
 msgid "%(site)s posts"
-msgstr ""
+msgstr "Articles de %(site)s"
 
 #: udata/templates/post/list.html:7
 msgid "posts"
-msgstr ""
+msgstr "articles"
 
 #: udata/templates/post/search-result.html:18
 msgid "Posted on"
-msgstr ""
+msgstr "Publié le"
 
 #: udata/templates/post/subnav.html:39
 msgid "Read more"
