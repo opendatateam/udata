@@ -2,15 +2,28 @@
 
 ## Current (in progress)
 
+### New features and big improvements
+
+- Expose harvester scheduling through the API and the admin interface [#1123](https://github.com/opendatateam/udata/pull/1123)
+- Added a `udata info` command for diagnostic purpose [#1179](https://github.com/opendatateam/udata/pull/1179)
+- Switch from static theme avatars/placeholders to [identicons](https://en.wikipedia.org/wiki/Identicon) for readability (mostly on discussions) [#1193](https://github.com/opendatateam/udata/pull/1193)
+- Move croquemort features to a generic link checker architecture [#1110](https://github.com/opendatateam/udata/pull/1110)
+- CKAN and OpenDataSoft backends are now optionnal separate udata extensions [#1213](https://github.com/opendatateam/udata/pull/1213)
+- Better search autocomplete [#1222](https://github.com/opendatateam/udata/pull/1222)
+- Big post improvements (discussions support, navigation, fixes...) [#1224](https://github.com/opendatateam/udata/pull/1224)
+
+### Breaking changes
+
+- Upgrade to Celery 4.1.0. All celery parameters should be updated. (See [Celery options documentation](https://udata.readthedocs.io/en/stable/adapting-settings/#celery-options) [#1150](https://github.com/opendatateam/udata/pull/1050)
+- Switch to [Crowdin](https://crowdin.com) to manage translations [#1171](https://github.com/opendatateam/udata/pull/1171)
+- Switch to `Flask-Security`. `Flask-Security-Fork` should be uninstalled before installing the new requirements [#958](https://github.com/opendatateam/udata/pull/958)
+
+### Miscellaneous changes and fixes
+
 - Display organization metrics in the organization page tab labels [#1022](https://github.com/opendatateam/udata/pull/1022)
 - Organization dashboard page has been merged into the main organization page [#1023](https://github.com/opendatateam/udata/pull/1023)
 - Fix an issue causing a loss of data input at the global search input level [#1019](https://github.com/opendatateam/udata/pull/1019)
-- Expose harvester scheduling through the API and the admin interface [#1123](https://github.com/opendatateam/udata/pull/1123)
-- **BREAKING** Upgrade to Celery 4.1.0. All celery parameters should be updated. (See [Celery options documentation](https://udata.readthedocs.io/en/stable/adapting-settings/#celery-options) [#1150](https://github.com/opendatateam/udata/pull/1050)
 - Fixes a lot of encoding issues [#1146](https://github.com/opendatateam/udata/pull/1146)
-- Switch to [Crowdin](https://crowdin.com) to manage translations [#1171](https://github.com/opendatateam/udata/pull/1171)
-- **BREAKING** Switch to `Flask-Security`. `Flask-Security-Fork` should be uninstalled before installing the new requirements [#958](https://github.com/opendatateam/udata/pull/958)
-- Added a `udata info` command for diagnostic purpose [#1179](https://github.com/opendatateam/udata/pull/1179)
 - Add `.ttl` and `.n3` as supported file extensions [#1183](https://github.com/opendatateam/udata/pull/1183)
 - Improve logging for adhoc scripts [#1184](https://github.com/opendatateam/udata/pull/1184)
 - Improve URLs validation (support new tlds, unicode URLs...) [#1182](https://github.com/opendatateam/udata/pull/1182)
@@ -19,17 +32,13 @@
 - Remove resources without title or url [migration] [#1200](https://github.com/opendatateam/udata/pull/1200)
 - Improve harvesting licenses detection [#1203](https://github.com/opendatateam/udata/pull/1203)
 - Added missing delete post and topic admin actions [#1202](https://github.com/opendatateam/udata/pull/1202)
-- Switch from static theme avatars/placeholders to [identicons](https://en.wikipedia.org/wiki/Identicon) for readability (mostly on discussions) [#1193](https://github.com/opendatateam/udata/pull/1193)
 - Fix the scroll to a discussion sub-thread [#1206](https://github.com/opendatateam/udata/pull/1206)
 - Fix duplication in discussions [migration] [#1209](https://github.com/opendatateam/udata/pull/1209)
 - Display that a discussion has been closed [#1216](https://github.com/opendatateam/udata/pull/1216)
 - Explicit dataset search reuse facet context (only known reuses) [#1219](https://github.com/opendatateam/udata/pull/1219)
 - Optimize indexation a little bit [#1215](https://github.com/opendatateam/udata/pull/1215)
 - Fix some reversed temporal coverage [migration] [#1214](https://github.com/opendatateam/udata/pull/1214)
-- Move croquemort features to a generic link checker architecture [#1110](https://github.com/opendatateam/udata/pull/1110)
-- CKAN and OpenDataSoft backends are now optionnal separate udata extensions [#1213](https://github.com/opendatateam/udata/pull/1213)
-- Better search autocomplete [#1222](https://github.com/opendatateam/udata/pull/1222)
-- Big post improvements (discussions support, navigation, fixes...) [#1224](https://github.com/opendatateam/udata/pull/1224)
+
 
 ## 1.1.8 (2017-09-28)
 
