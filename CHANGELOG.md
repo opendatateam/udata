@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.0 (2017-10-20)
 
 ### New features and big improvements
 
