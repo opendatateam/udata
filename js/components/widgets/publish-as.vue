@@ -5,13 +5,13 @@
         {{ _('Choose under which identity you want to publish') }}
     </p>
 </div>
-<div class="row" v-if="$root.me.organizations.length">
+<div class="row" v-if="$root.me.organizations && $root.me.organizations.length">
     <p class="col-xs-12">{{ _('Publish as an organization') }}</p>
     <div v-for="organization in $root.me.organizations" class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
         <org-card :organization="organization" :selected="selected == organization"></org-card>
     </div>
 </div>
-<div class="row text-center" v-if="!$root.me.organizations.length">
+<div class="row text-center" v-if="$root.me.organizations && !$root.me.organizations.length">
     <p class="col-xs-12 lead">
         {{ _("You are not a member of any organization.") }}
         {{ _("Maybe you should find yours or create your own.") }}
@@ -46,7 +46,7 @@ export default {
     name: 'publish-as',
     data() {
         return {
-            selected: this.$root.me.organizations[0]
+            selected: this.$root.me.organizations && this.$root.me.organizations[0]
         };
     },
     components: {UserCard, OrgCard, OrgFilter},
