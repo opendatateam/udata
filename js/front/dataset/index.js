@@ -34,16 +34,10 @@ new Vue({
         LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton, ShareButton, FollowButton
     },
     data() {
-        const data = {
+        return {
             dataset: this.extractDataset(),
             userReuses: []
         };
-        if (config.check_urls) {
-            const port = location.port ? `:${location.port}` : '';
-            const domain = `${location.hostname}${port}`;
-            data.ignore = [domain].concat(config.check_urls_ignore || []);
-        }
-        return data;
     },
     ready() {
         this.loadCoverageMap();
@@ -155,29 +149,27 @@ new Vue({
             const resource_el = document.querySelector(`#resource-${resource['@id']}`);
             const el = resource_el.querySelector('.format-label');
             const checkurl = resource_el.dataset.checkurl;
-            if (!this.ignore.some(domain => url.origin.endsWith(domain))) {
-                if (url.protocol.startsWith('ftp')) {
-                    el.classList.add('format-label-warning');
-                    el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
-                } else {
-                    this.$api.get(checkurl)
-                    .then((res) => {
-                        const status = res['check:status'];
-                        if (status >= 200 && status < 400) {
-                            el.classList.add('format-label-success')
-                        } else if (status >= 400 && status < 500) {
-                            el.classList.add('format-label-danger');
-                            el.setTooltip(this._('The resource cannot be found.'), true);
-                        } else if (status >= 500) {
-                            el.classList.add('format-label-warning');
-                            el.setTooltip(this._('An error occured on the remote server. This may be temporary.'), true);
-                        }
-                    })
-                    .catch(error => {
-                        el.classList.add('format-label-unchecked');
-                        console.log('Something went wrong with the linkchecker', error);
-                    });
-                }
+            if (url.protocol.startsWith('ftp')) {
+                el.classList.add('format-label-warning');
+                el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
+            } else {
+                this.$api.get(checkurl)
+                .then((res) => {
+                    const status = res['check:status'];
+                    if (status >= 200 && status < 400) {
+                        el.classList.add('format-label-success')
+                    } else if (status >= 400 && status < 500) {
+                        el.classList.add('format-label-danger');
+                        el.setTooltip(this._('The resource cannot be found.'), true);
+                    } else if (status >= 500) {
+                        el.classList.add('format-label-warning');
+                        el.setTooltip(this._('An error occured on the remote server. This may be temporary.'), true);
+                    }
+                })
+                .catch(error => {
+                    el.classList.add('format-label-unchecked');
+                    console.log('Something went wrong with the linkchecker', error);
+                });
             }
         },
 
