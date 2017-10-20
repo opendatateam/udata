@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.0 (2017-10-20)
 
 - Use new search blueprint from uData [#224](https://github.com/etalab/udata-gouvfr/pull/224)
