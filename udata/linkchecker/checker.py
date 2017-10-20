@@ -17,8 +17,8 @@ def get_cache(resource):
     '''Return a cached version from a resource's check if any and fresh'''
     if resource.extras.get('check:date'):
         cache_duration = current_app.config['LINKCHECKING_CACHE_DURATION']
-        limit_date = datetime.now() + timedelta(seconds=cache_duration)
-        if resource.extras['check:date'] <= limit_date:
+        limit_date = datetime.now() - timedelta(seconds=cache_duration)
+        if resource.extras['check:date'] >= limit_date:
             return _get_check_keys(resource.extras)
 
 

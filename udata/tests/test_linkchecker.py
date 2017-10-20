@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 import mock
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from udata.tests import TestCase
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
@@ -12,6 +12,7 @@ from udata.linkchecker.checker import check_resource
 class LinkcheckerTestSettings():
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = ['example-ignore.com']
+    LINKCHECKING_CACHE_DURATION = 30
 
 
 class LinkcheckerTest(TestCase):
@@ -97,3 +98,39 @@ class LinkcheckerTest(TestCase):
         res = check_resource(self.resource)
         self.assertEquals(res.get('check:status'), 204)
         self.assertEquals(res.get('check:available'), True)
+
+    @mock.patch('udata.linkchecker.checker.get_linkchecker')
+    def test_valid_cache(self, mock_fn):
+        self.resource.extras = {'check:date': datetime.now(),
+                                'check:status': 42}
+
+        check_res = {'check:status': 200, 'check:available': True,
+                     'check:date': datetime.now()}
+
+        class DummyLinkchecker:
+            def check(self, _):
+                return check_res
+        mock_fn.return_value = DummyLinkchecker
+
+        res = check_resource(self.resource)
+        # we get the result from cache and not from DummyLinkchecker
+        self.assertEquals(res, self.resource.extras)
+
+    @mock.patch('udata.linkchecker.checker.get_linkchecker')
+    def test_unvalid_cache(self, mock_fn):
+        self.resource.extras = {
+            'check:date': datetime.now() - timedelta(seconds=3600),
+            'check:status': 42
+        }
+
+        check_res = {'check:status': 200, 'check:available': True,
+                     'check:date': datetime.now()}
+
+        class DummyLinkchecker:
+            def check(self, _):
+                return check_res
+        mock_fn.return_value = DummyLinkchecker
+
+        res = check_resource(self.resource)
+        # we get the result from DummyLinkchecker and not from cache
+        self.assertEquals(res, check_res)
