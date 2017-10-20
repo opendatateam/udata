@@ -70,11 +70,6 @@ export const csrf_token = _meta('csrf-token');
 export const check_urls = _jsonMeta('check-urls');
 
 /**
- * List of ignored domain for url check
- */
-export const check_urls_ignore = _jsonMeta('check-urls-ignore');
-
-/**
  * The API root/base URL
  */
 export const api_root = _meta('api-root');
@@ -173,7 +168,6 @@ export default {
     auth_url,
     sentry,
     check_urls,
-    check_urls_ignore,
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
