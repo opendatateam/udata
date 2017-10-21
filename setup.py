@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 import io
 import os
@@ -138,8 +137,7 @@ setup(
         ],
     },
     license='GNU AGPLv3+',
-    # use_2to3=True,
-    keywords='',
+    keywords='udata opendata portal data',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python',
