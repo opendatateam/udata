@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 
 import logging
+import sys
+import signal
 
+from contextlib import contextmanager
 from datetime import datetime
 
 from flask_script import prompt_bool
@@ -10,6 +13,7 @@ from flask_script.commands import InvalidCommand
 
 from udata.commands import submanager
 from udata.search import es, adapter_catalog
+
 
 from elasticsearch.helpers import reindex as es_reindex, streaming_bulk
 
@@ -118,42 +122,65 @@ def set_alias(index_name, delete=True):
     es.indices.refresh()
 
 
-@m.option('-t', '--type', dest='doc_type', default=None,
-          help='Only reindex a given type')
-def reindex(doc_type=None):
+@contextmanager
+def handle_error(index_name, keep=False):
+    '''
+    Handle errors while indexing.
+    In case of error, properly log it, remove the index and exit.
+    If `keep` is `True`, index is not deleted.
+    '''
+    # Handle keyboard interrupt
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
+    try:
+        yield
+    except KeyboardInterrupt:
+        log.warning('Interrupted by signal')
+    except Exception as e:
+        log.error(e)
+    if not keep:
+        log.info('Removing index %s', index_name)
+        es.indices.delete(index=index_name)
+    sys.exit(-1)
+
+
+@m.option(dest='models', nargs='+', metavar='model',
+          help='Model to reindex')
+@m.option('-k', '--keep', default=False, action='store_true',
+          help='Keep index in case of error')
+def reindex(models, keep=False):
     '''Reindex models'''
-    if not doc_type:
-        raise InvalidCommand("Please specify a DocType "
-                             "(Dataset, Organization...) with -t. If you want "
-                             "to reindex the whole index, please use "
-                             "`udata search init`.'")
     doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
-    if doc_type and not doc_type.lower() in doc_types_names:
-        log.error('Unknown type %s', doc_type)
+    models = [model.lower().rstrip('s') for model in models]
+    for model in models:
+        if model not in doc_types_names:
+            log.error('Unknown model %s', model)
+            sys.exit(-1)
 
     index_name = default_index_name()
     log.info('Initiliazing index "{0}"'.format(index_name))
     es.initialize(index_name)
     disable_refresh(index_name)
-    for adapter in iter_adapters():
-        if adapter.doc_type().lower() == doc_type.lower():
-            index_model(index_name, adapter)
-        else:
-            log.info('Copying {0} objects to the new index'.format(
-                     adapter.model.__name__))
-            # Need upgrade to Elasticsearch-py 5.0.0
-            # es.reindex({
-            #     'source': {'index': es.index_name, 'type': adapter.doc_type()},
-            #     'dest': {'index': index_name}
-            # })
-            # http://elasticsearch-py.readthedocs.io/en/master/api.html#elasticsearch.Elasticsearch.reindex
-            # This method (introduced in Elasticsearch 2.3 but only in Elasticsearch-py 5.0.0)
-            # triggers a server-side documents copy.
-            # Instead we use this helper for meant for backward compatibility
-            # but with poor performance as copy is client-side (scan+bulk)
-            es_reindex(es.client, es.index_name, index_name, scan_kwargs={
-                'doc_type': adapter.doc_type()
-            })
+    with handle_error(index_name, keep):
+        for adapter in iter_adapters():
+            if adapter.doc_type().lower() in models:
+                index_model(index_name, adapter)
+            else:
+                log.info('Copying {0} objects to the new index'.format(
+                         adapter.model.__name__))
+                # Need upgrade to Elasticsearch-py 5.0.0
+                # es.reindex({
+                #     'source': {'index': es.index_name, 'type': adapter.doc_type()},
+                #     'dest': {'index': index_name}
+                # })
+                # http://elasticsearch-py.readthedocs.io/en/master/api.html#elasticsearch.Elasticsearch.reindex
+                # This method (introduced in Elasticsearch 2.3 but only in Elasticsearch-py 5.0.0)
+                # triggers a server-side documents copy.
+                # Instead we use this helper for meant for backward compatibility
+                # but with poor performance as copy is client-side (scan+bulk)
+                es_reindex(es.client, es.index_name, index_name, scan_kwargs={
+                    'doc_type': adapter.doc_type()
+                })
 
     enable_refresh(index_name)
     set_alias(index_name)
@@ -164,7 +191,9 @@ def reindex(doc_type=None):
           help='Delete previously aliased indices')
 @m.option('-f', '--force', default=False, action='store_true',
           help='Do not prompt on deletion')
-def init(name=None, delete=False, force=False):
+@m.option('-k', '--keep', default=False, action='store_true',
+          help='Keep index in case of error')
+def init(name=None, delete=False, force=False, keep=False):
     '''Initialize or rebuild the search index'''
     index_name = name or default_index_name()
     log.info('Initiliazing index "{0}"'.format(index_name))
@@ -173,13 +202,14 @@ def init(name=None, delete=False, force=False):
                                  .format(index_name))):
             es.indices.delete(index_name)
         else:
-            exit(-1)
+            sys.exit(-1)
 
     es.initialize(index_name)
     disable_refresh(index_name)
 
-    for adapter in iter_adapters():
-        index_model(index_name, adapter)
+    with handle_error(index_name, keep):
+        for adapter in iter_adapters():
+            index_model(index_name, adapter)
 
     enable_refresh(index_name)
     set_alias(index_name, delete=delete)
