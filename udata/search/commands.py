@@ -11,7 +11,7 @@ from flask_script.commands import InvalidCommand
 from udata.commands import submanager
 from udata.search import es, adapter_catalog
 
-from elasticsearch.helpers import reindex as es_reindex
+from elasticsearch.helpers import reindex as es_reindex, streaming_bulk
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +35,21 @@ def iter_adapters():
     return sorted(adapters, key=lambda a: a.model.__name__)
 
 
+def iter_qs(qs, adapter):
+    '''Safely iterate over a DB QuerySet yielding ES documents'''
+    for obj in qs.no_dereference().timeout(False):
+        if adapter.is_indexable(obj):
+            doc = adapter.from_model(obj).to_dict(include_meta=True)
+            yield doc
+
+
+def iter_for_index(docs, index_name):
+    '''Iter over ES documents ensuring a given index'''
+    for doc in docs:
+        doc['_index'] = index_name
+        yield doc
+
+
 def index_model(index_name, adapter):
     ''' Indel all objects given a model'''
     model = adapter.model
@@ -44,18 +59,22 @@ def index_model(index_name, adapter):
         qs = qs.visible()
     if adapter.exclude_fields:
         qs = qs.exclude(*adapter.exclude_fields)
-    for obj in qs.no_dereference().timeout(False):
-        if adapter.is_indexable(obj):
-            try:
-                doc = adapter.from_model(obj)
-                doc.save(using=es.client, index=index_name)
-            except:
-                log.exception('Unable to index %s "%s"',
-                              model.__name__, str(obj.id))
+
+    docs = iter_qs(qs, adapter)
+    docs = iter_for_index(docs, index_name)
+
+    for ok, info in streaming_bulk(es.client, docs, raise_on_error=False):
+        if not ok:
+            log.error('Unable to index %s "%s": %s', model.__name__,
+                      info['index']['_id'], info['index']['error'])
 
 
 def disable_refresh(index_name):
-    '''Disable refresh to optimize indexing'''
+    '''
+    Disable refresh to optimize indexing
+
+    See: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html#bulk
+    '''  # noqa
     es.indices.put_settings(index=index_name, body={
         'index': {
             'refresh_interval': '-1'
@@ -64,7 +83,11 @@ def disable_refresh(index_name):
 
 
 def enable_refresh(index_name):
-    '''Enable refresh after indexing and force merge'''
+    '''
+    Enable refresh after indexing and force merge
+
+    See: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html#bulk
+    '''  # noqa
     es.indices.put_settings(index=index_name, body={
         'index': {
             'refresh_interval': '1s'
