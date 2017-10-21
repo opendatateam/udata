@@ -23,6 +23,7 @@ class Defaults(object):
     # Elasticsearch configuration
     ELASTICSEARCH_URL = 'localhost:9200'
     ELASTICSEARCH_INDEX_BASENAME = 'udata'
+    ELASTICSEARCH_REFRESH_INTERVAL = '1s'
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
