@@ -54,6 +54,25 @@ def index_model(index_name, adapter):
                               model.__name__, str(obj.id))
 
 
+def disable_refresh(index_name):
+    '''Disable refresh to optimize indexing'''
+    es.indices.put_settings(index=index_name, body={
+        'index': {
+            'refresh_interval': '-1'
+        }
+    })
+
+
+def enable_refresh(index_name):
+    '''Enable refresh after indexing and force merge'''
+    es.indices.put_settings(index=index_name, body={
+        'index': {
+            'refresh_interval': '1s'
+        }
+    })
+    es.indices.forcemerge(index=index_name)
+
+
 def set_alias(index_name, delete=True):
     '''
     Properly end an indexation by creating an alias.
@@ -92,6 +111,7 @@ def reindex(doc_type=None):
     index_name = default_index_name()
     log.info('Initiliazing index "{0}"'.format(index_name))
     es.initialize(index_name)
+    disable_refresh(index_name)
     for adapter in iter_adapters():
         if adapter.doc_type().lower() == doc_type.lower():
             index_model(index_name, adapter)
@@ -112,6 +132,7 @@ def reindex(doc_type=None):
                 'doc_type': adapter.doc_type()
             })
 
+    enable_refresh(index_name)
     set_alias(index_name)
 
 
@@ -132,7 +153,10 @@ def init(name=None, delete=False, force=False):
             exit(-1)
 
     es.initialize(index_name)
+    disable_refresh(index_name)
 
     for adapter in iter_adapters():
         index_model(index_name, adapter)
+
+    enable_refresh(index_name)
     set_alias(index_name, delete=delete)
