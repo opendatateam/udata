@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Introduce `udata search index` commmand to replace both deprecated `udata search init` and `udata search reindex` commands. They will be removed in udata 1.4. [#1233](https://github.com/opendatateam/udata/pull/1233)
 
 ## 1.2.0 (2017-10-20)
 
