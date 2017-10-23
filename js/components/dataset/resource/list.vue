@@ -85,7 +85,7 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        <resource-availability :resource="resource"></resource-availability>
+                        <resource-availability :dataset="dataset" :resource="resource"></resource-availability>
                     </td>
                 </tr>
                 <tr v-if="!(dataset && dataset.resources)" class="text-center lead">
