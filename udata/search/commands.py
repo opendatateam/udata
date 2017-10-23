@@ -2,16 +2,20 @@
 from __future__ import unicode_literals
 
 import logging
+import sys
+import signal
 
+from contextlib import contextmanager
 from datetime import datetime
 
+from flask import current_app
 from flask_script import prompt_bool
-from flask_script.commands import InvalidCommand
 
-from udata.commands import submanager
+from udata.commands import submanager, IS_INTERACTIVE
 from udata.search import es, adapter_catalog
 
-from elasticsearch.helpers import reindex as es_reindex
+
+from elasticsearch.helpers import reindex as es_reindex, streaming_bulk
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +26,8 @@ m = submanager(
 )
 
 TIMESTAMP_FORMAT = '%Y-%m-%d-%H-%M'
+
+DEPRECATION_MSG = '{cmd} command will be removed in udata 1.4, use index command instead'
 
 
 def default_index_name():
@@ -35,6 +41,21 @@ def iter_adapters():
     return sorted(adapters, key=lambda a: a.model.__name__)
 
 
+def iter_qs(qs, adapter):
+    '''Safely iterate over a DB QuerySet yielding ES documents'''
+    for obj in qs.no_dereference().timeout(False):
+        if adapter.is_indexable(obj):
+            doc = adapter.from_model(obj).to_dict(include_meta=True)
+            yield doc
+
+
+def iter_for_index(docs, index_name):
+    '''Iterate over ES documents ensuring a given index'''
+    for doc in docs:
+        doc['_index'] = index_name
+        yield doc
+
+
 def index_model(index_name, adapter):
     ''' Indel all objects given a model'''
     model = adapter.model
@@ -44,14 +65,40 @@ def index_model(index_name, adapter):
         qs = qs.visible()
     if adapter.exclude_fields:
         qs = qs.exclude(*adapter.exclude_fields)
-    for obj in qs.no_dereference().timeout(False):
-        if adapter.is_indexable(obj):
-            try:
-                doc = adapter.from_model(obj)
-                doc.save(using=es.client, index=index_name)
-            except:
-                log.exception('Unable to index %s "%s"',
-                              model.__name__, str(obj.id))
+
+    docs = iter_qs(qs, adapter)
+    docs = iter_for_index(docs, index_name)
+
+    for ok, info in streaming_bulk(es.client, docs, raise_on_error=False):
+        if not ok:
+            log.error('Unable to index %s "%s": %s', model.__name__,
+                      info['index']['_id'], info['index']['error'])
+
+
+def disable_refresh(index_name):
+    '''
+    Disable refresh to optimize indexing
+
+    See: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html#bulk
+    '''  # noqa
+    es.indices.put_settings(index=index_name, body={
+        'index': {
+            'refresh_interval': '-1'
+        }
+    })
+
+
+def enable_refresh(index_name):
+    '''
+    Enable refresh and force merge. To be used after indexing.
+
+    See: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html#bulk
+    '''  # noqa
+    refresh_interval = current_app.config['ELASTICSEARCH_REFRESH_INTERVAL']
+    es.indices.put_settings(index=index_name, body={
+        'index': {'refresh_interval': refresh_interval}
+    })
+    es.indices.forcemerge(index=index_name)
 
 
 def set_alias(index_name, delete=True):
@@ -76,43 +123,35 @@ def set_alias(index_name, delete=True):
     es.indices.refresh()
 
 
-@m.option('-t', '--type', dest='doc_type', default=None,
+@contextmanager
+def handle_error(index_name, keep=False):
+    '''
+    Handle errors while indexing.
+    In case of error, properly log it, remove the index and exit.
+    If `keep` is `True`, index is not deleted.
+    '''
+    # Handle keyboard interrupt
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
+    try:
+        yield
+    except KeyboardInterrupt:
+        print('')  # Proper warning message under the "^C" display
+        log.warning('Interrupted by signal')
+    except Exception as e:
+        log.error(e)
+    if not keep:
+        log.info('Removing index %s', index_name)
+        es.indices.delete(index=index_name)
+    sys.exit(-1)
+
+
+@m.option('-t', '--type', dest='doc_type', required=True,
           help='Only reindex a given type')
-def reindex(doc_type=None):
-    '''Reindex models'''
-    if not doc_type:
-        raise InvalidCommand("Please specify a DocType "
-                             "(Dataset, Organization...) with -t. If you want "
-                             "to reindex the whole index, please use "
-                             "`udata search init`.'")
-    doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
-    if doc_type and not doc_type.lower() in doc_types_names:
-        log.error('Unknown type %s', doc_type)
-
-    index_name = default_index_name()
-    log.info('Initiliazing index "{0}"'.format(index_name))
-    es.initialize(index_name)
-    for adapter in iter_adapters():
-        if adapter.doc_type().lower() == doc_type.lower():
-            index_model(index_name, adapter)
-        else:
-            log.info('Copying {0} objects to the new index'.format(
-                     adapter.model.__name__))
-            # Need upgrade to Elasticsearch-py 5.0.0
-            # es.reindex({
-            #     'source': {'index': es.index_name, 'type': adapter.doc_type()},
-            #     'dest': {'index': index_name}
-            # })
-            # http://elasticsearch-py.readthedocs.io/en/master/api.html#elasticsearch.Elasticsearch.reindex
-            # This method (introduced in Elasticsearch 2.3 but only in Elasticsearch-py 5.0.0)
-            # triggers a server-side documents copy.
-            # Instead we use this helper for meant for backward compatibility
-            # but with poor performance as copy is client-side (scan+bulk)
-            es_reindex(es.client, es.index_name, index_name, scan_kwargs={
-                'doc_type': adapter.doc_type()
-            })
-
-    set_alias(index_name)
+def reindex(doc_type):
+    '''[DEPRECATED] Reindex models'''
+    log.warn(DEPRECATION_MSG.format(cmd='reindex'))
+    index([doc_type], force=True, keep=False)
 
 
 @m.option('-n', '--name', default=None, help='Optionnal index name')
@@ -120,19 +159,69 @@ def reindex(doc_type=None):
           help='Delete previously aliased indices')
 @m.option('-f', '--force', default=False, action='store_true',
           help='Do not prompt on deletion')
-def init(name=None, delete=False, force=False):
+@m.option('-k', '--keep', default=False, action='store_true',
+          help='Keep index in case of error')
+def init(name=None, delete=False, force=False, keep=False):
+    '''[DEPRECATED] Initialize or rebuild the search index'''
+    log.warn(DEPRECATION_MSG.format(cmd='init'))
+    index(name=name, force=force, keep=not delete)
+
+
+@m.option(dest='models', nargs='*', metavar='model',
+          help='Model to reindex')
+@m.option('-n', '--name', default=None, help='Optionnal index name')
+@m.option('-f', '--force', default=False, action='store_true',
+          help='Do not prompt on deletion')
+@m.option('-k', '--keep', default=False, action='store_true',
+          help='Do not delete indexes')
+def index(models=None, name=None, force=False, keep=False):
     '''Initialize or rebuild the search index'''
     index_name = name or default_index_name()
+
+    doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
+    models = [model.lower().rstrip('s') for model in (models or [])]
+    for model in models:
+        if model not in doc_types_names:
+            log.error('Unknown model %s', model)
+            sys.exit(-1)
+
     log.info('Initiliazing index "{0}"'.format(index_name))
     if es.indices.exists(index_name):
-        if force or prompt_bool(('Index {0} will be deleted, are you sure ?'
-                                 .format(index_name))):
+        if IS_INTERACTIVE and not force:
+            msg = 'Index {0} will be deleted, are you sure?'
+            delete = prompt_bool(msg.format(index_name))
+        else:
+            delete = True
+        if delete:
             es.indices.delete(index_name)
         else:
-            exit(-1)
+            sys.exit(-1)
 
     es.initialize(index_name)
 
-    for adapter in iter_adapters():
-        index_model(index_name, adapter)
-    set_alias(index_name, delete=delete)
+    with handle_error(index_name, keep):
+
+        disable_refresh(index_name)
+        for adapter in iter_adapters():
+            if not models or adapter.doc_type().lower() in models:
+                index_model(index_name, adapter)
+            else:
+                log.info('Copying {0} objects to the new index'.format(
+                         adapter.model.__name__))
+                # Need upgrade to Elasticsearch-py 5.0.0 to write:
+                # es.reindex({
+                #     'source': {'index': es.index_name, 'type': adapter.doc_type()},
+                #     'dest': {'index': index_name}
+                # })
+                #
+                # http://elasticsearch-py.readthedocs.io/en/master/api.html#elasticsearch.Elasticsearch.reindex
+                # This method (introduced in Elasticsearch 2.3 but only in Elasticsearch-py 5.0.0)
+                # triggers a server-side documents copy.
+                # Instead we use this helper for meant for backward compatibility
+                # but with poor performance as copy is client-side (scan+bulk)
+                es_reindex(es.client, es.index_name, index_name, scan_kwargs={
+                    'doc_type': adapter.doc_type()
+                })
+
+    enable_refresh(index_name)
+    set_alias(index_name, delete=not keep)
