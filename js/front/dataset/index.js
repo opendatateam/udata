@@ -149,10 +149,10 @@ new Vue({
 
         /**
          * Get a cached checked result from extras if fresh enough
-         * @param  {Object} resource_el A resource element from DOM
+         * @param  {Object} resource A resource as extracted from JSON-LD
          */
-        getCachedCheck(resource_el) {
-            const extras = JSON.parse(resource_el.dataset.extras);
+        getCachedCheck(resource) {
+            const extras = resource.extras;
             if (extras['check:date']) {
                 const checkDate = new Date(extras['check:date']);
                 if (checkDate >= this.limitCheckDate) {
@@ -189,7 +189,7 @@ new Vue({
                 el.classList.add('format-label-warning');
                 el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
             } else {
-                this.getResourceCheckStatus(resource_el, checkurl)
+                this.getResourceCheckStatus(resource, checkurl)
                 .then((res) => {
                     const status = res['check:status'];
                     if (status >= 200 && status < 400) {
