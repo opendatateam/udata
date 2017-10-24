@@ -51,6 +51,7 @@ export default {
                 this.checking = false;
             }, err => {
                 console.log('Something went wrong with the check', err);
+                this.availability = 'UNKNOWN';
                 this.checking = false;
             });
         }
