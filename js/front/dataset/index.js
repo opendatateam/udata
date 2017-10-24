@@ -39,6 +39,13 @@ new Vue({
             userReuses: []
         };
     },
+    computed: {
+        limitCheckDate() {
+            const limitDate = new Date();
+            limitDate.setSeconds(limitDate.getSeconds() - config.check_urls_cache_duration);
+            return limitDate;
+        }
+    },
     ready() {
         this.loadCoverageMap();
         this.checkResources();
@@ -141,6 +148,35 @@ new Vue({
         },
 
         /**
+         * Get a cached checked result from extras if fresh enough
+         * @param  {Object} resource A resource as extracted from JSON-LD
+         */
+        getCachedCheck(resource) {
+            const extras = resource.extras;
+            if (extras['check:date']) {
+                const checkDate = new Date(extras['check:date']);
+                if (checkDate >= this.limitCheckDate) {
+                    return Object.keys(extras).reduce((obj, key) => {
+                        if (key.startsWith('check:')) {
+                            obj[key] = extras[key];
+                        }
+                        return obj;
+                    }, {});
+                }
+            }
+        },
+
+        /**
+         * Get cached check or API check
+         * @param  {Object} resource A resource element from DOM
+         * @param  {String} checkurl The API check url
+         */
+        getResourceCheckStatus(resource_el, checkurl) {
+            const cachedCheck = this.getCachedCheck(resource_el);
+            return (cachedCheck && Promise.resolve(cachedCheck)) || this.$api.get(checkurl);
+        },
+
+        /**
          * Asynchronously check a displayed resource status
          * @param  {Object} resource A resource as extracted from JSON-LD
          */
@@ -153,7 +189,7 @@ new Vue({
                 el.classList.add('format-label-warning');
                 el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
             } else {
-                this.$api.get(checkurl)
+                this.getResourceCheckStatus(resource, checkurl)
                 .then((res) => {
                     const status = res['check:status'];
                     if (status >= 200 && status < 400) {

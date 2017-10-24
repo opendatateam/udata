@@ -90,6 +90,16 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 MAX_DISTANCE = 2
 
 
+def get_json_ld_extra(key, value):
+    '''Serialize an extras key, value pair into JSON-LD'''
+    value = value.serialize() if hasattr(value, 'serialize') else value
+    return {
+        '@type': 'http://schema.org/PropertyValue',
+        'name': key,
+        'value': value,
+    }
+
+
 class License(db.Document):
     # We need to declare id explicitly since we do not use the default
     # value set by Mongo.
@@ -228,6 +238,8 @@ class ResourceMixin(object):
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.modified.isoformat(),
             'datePublished': self.published.isoformat(),
+            'extras': [get_json_ld_extra(*item)
+                       for item in self.extras.items()],
         }
 
         if 'views' in self.metrics:
@@ -539,7 +551,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             'contributedDistribution': [
                 resource.json_ld for resource in self.community_resources
             ],
-            'extras': [self.get_json_ld_extra(*item)
+            'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
 
@@ -560,16 +572,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['author'] = author
 
         return result
-
-    @staticmethod
-    def get_json_ld_extra(key, value):
-
-        value = value.serialize() if hasattr(value, 'serialize') else value
-        return {
-            '@type': 'http://schema.org/PropertyValue',
-            'name': key,
-            'value': value,
-        }
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
