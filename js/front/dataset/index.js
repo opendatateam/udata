@@ -41,7 +41,7 @@ new Vue({
     },
     computed: {
         limitCheckDate() {
-            let limitDate = new Date();
+            const limitDate = new Date();
             limitDate.setSeconds(limitDate.getSeconds() - config.check_urls_cache_duration);
             return limitDate;
         }
@@ -156,7 +156,7 @@ new Vue({
             if (extras['check:date']) {
                 const checkDate = new Date(extras['check:date']);
                 if (checkDate >= this.limitCheckDate) {
-                    return Object.keys(extras).reduce(function(obj, key) {
+                    return Object.keys(extras).reduce((obj, key) => {
                         if (key.startsWith('check:')) {
                             obj[key] = extras[key];
                         }

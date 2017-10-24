@@ -90,17 +90,14 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 MAX_DISTANCE = 2
 
 
-class JsonLdExtrasMixin(object):
-
-    @staticmethod
-    def get_json_ld_extra(key, value):
-
-        value = value.serialize() if hasattr(value, 'serialize') else value
-        return {
-            '@type': 'http://schema.org/PropertyValue',
-            'name': key,
-            'value': value,
-        }
+def get_json_ld_extra(key, value):
+    '''Serialize an extras key, value pair into JSON-LD'''
+    value = value.serialize() if hasattr(value, 'serialize') else value
+    return {
+        '@type': 'http://schema.org/PropertyValue',
+        'name': key,
+        'value': value,
+    }
 
 
 class License(db.Document):
@@ -182,7 +179,7 @@ class Checksum(db.EmbeddedDocument):
             return super(Checksum, self).to_mongo()
 
 
-class ResourceMixin(JsonLdExtrasMixin):
+class ResourceMixin(object):
     id = db.AutoUUIDField(primary_key=True)
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
@@ -241,7 +238,7 @@ class ResourceMixin(JsonLdExtrasMixin):
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.modified.isoformat(),
             'datePublished': self.published.isoformat(),
-            'extras': [self.get_json_ld_extra(*item)
+            'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
 
@@ -283,8 +280,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     on_deleted = signal('Resource.on_deleted')
 
 
-class Dataset(WithMetrics, BadgeMixin, JsonLdExtrasMixin, db.Owned,
-              db.Document):
+class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     created_at = DateTimeField(verbose_name=_('Creation date'),
                                default=datetime.now, required=True)
     last_modified = DateTimeField(verbose_name=_('Last modification date'),
@@ -555,7 +551,7 @@ class Dataset(WithMetrics, BadgeMixin, JsonLdExtrasMixin, db.Owned,
             'contributedDistribution': [
                 resource.json_ld for resource in self.community_resources
             ],
-            'extras': [self.get_json_ld_extra(*item)
+            'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
 
