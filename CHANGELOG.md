@@ -7,6 +7,7 @@
 - Get cached linkchecker result before hitting API [#1235](https://github.com/opendatateam/udata/pull/1235)
 - Cleanup resources checksum [migration] [#1239](https://github.com/opendatateam/udata/pull/1239)
 - Show check results in resource modal [#1242](https://github.com/opendatateam/udata/pull/1242)
+- Cache avatar rendering [#1243](https://github.com/opendatateam/udata/pull/1243)
 
 ## 1.2.0 (2017-10-20)
 
