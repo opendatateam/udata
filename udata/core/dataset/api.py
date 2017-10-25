@@ -25,6 +25,7 @@ from datetime import datetime
 from flask import request, current_app
 from flask_security import current_user
 
+from flask_restplus.inputs import boolean
 from werkzeug.datastructures import FileStorage
 
 from udata import fileutils, search
@@ -519,13 +520,20 @@ class AllowedExtensionsAPI(API):
         return current_app.config['ALLOWED_RESOURCES_EXTENSIONS']
 
 
+check_dataset_resource_parser = api.parser()
+check_dataset_resource_parser.add_argument(
+    'no_cache', help='Flag to ignore the cached check', location='args',
+    type=boolean, default=False)
+
+
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/check/',
           endpoint='check_dataset_resource', doc=common_doc)
 @api.doc(params={'rid': 'The resource unique identifier'})
 class CheckDatasetResource(API, ResourceMixin):
 
-    @api.doc('check_dataset_resource')
+    @api.doc('check_dataset_resource', parser=check_dataset_resource_parser)
     def get(self, dataset, rid):
         '''Checks that a resource's URL exists and returns metadata.'''
         resource = self.get_resource_or_404(dataset, rid)
-        return check_resource(resource)
+        args = check_dataset_resource_parser.parse_args()
+        return check_resource(resource, no_cache=args['no_cache'])

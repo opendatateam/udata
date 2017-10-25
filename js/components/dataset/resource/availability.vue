@@ -46,7 +46,7 @@ export default {
         },
         refresh() {
             this.checking = true;
-            API.datasets.check_dataset_resource({dataset: this.dataset.id, rid: this.resource.id}, res => {
+            API.datasets.check_dataset_resource({dataset: this.dataset.id, rid: this.resource.id, no_cache: true}, res => {
                 this.availability = this.computeAvailability(res.obj['check:available']);
                 this.checking = false;
             }, err => {

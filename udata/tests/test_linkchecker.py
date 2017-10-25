@@ -117,6 +117,23 @@ class LinkcheckerTest(TestCase):
         self.assertEquals(res, self.resource.extras)
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
+    def test_no_cache_argument(self, mock_fn):
+        self.resource.extras = {'check:date': datetime.now(),
+                                'check:status': 42}
+
+        check_res = {'check:status': 200, 'check:available': True,
+                     'check:date': datetime.now()}
+
+        class DummyLinkchecker:
+            def check(self, _):
+                return check_res
+        mock_fn.return_value = DummyLinkchecker
+
+        res = check_resource(self.resource, no_cache=True)
+        # we get the result from DummyLinkchecker and not from cache
+        self.assertEquals(res, check_res)
+
+    @mock.patch('udata.linkchecker.checker.get_linkchecker')
     def test_unvalid_cache(self, mock_fn):
         self.resource.extras = {
             'check:date': datetime.now() - timedelta(seconds=3600),

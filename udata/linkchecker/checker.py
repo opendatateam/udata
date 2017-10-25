@@ -37,7 +37,7 @@ def dummy_check_response():
     return NoCheckLinkchecker().check(None)
 
 
-def check_resource(resource):
+def check_resource(resource, no_cache=False):
     '''
     Check a resource availability against a linkchecker backend
 
@@ -47,14 +47,22 @@ def check_resource(resource):
     fallback on the default linkchecker defined by the configuration variable
     `LINKCHECKING_DEFAULT_LINKCHECKER`.
 
+    Parameters
+    ----------
+    resource
+        The resource object to be checked
+    no_cache : bool, optional
+        If set to True, will ignore the cached check result if any
+
     Returns
     -------
     dict or (dict, int)
         Check results dict and status code (if error).
     '''
-    cached_check = get_cache(resource)
-    if cached_check:
-        return cached_check
+    if not no_cache:
+        cached_check = get_cache(resource)
+        if cached_check:
+            return cached_check
     linkchecker_type = resource.extras.get('check:checker')
     LinkChecker = get_linkchecker(linkchecker_type)
     if not LinkChecker:
