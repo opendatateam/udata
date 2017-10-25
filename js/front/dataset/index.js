@@ -100,7 +100,7 @@ new Vue({
          * Display a modal with the user reuses
          * allowing him to chose an existing.
          *
-         * The modal only show ff there is candidate reuses
+         * The modal only show if there is candidate reuses
          */
         addReuse(e) {
             const reuses = this.userReuses.filter((reuse) => {
@@ -148,20 +148,29 @@ new Vue({
         },
 
         /**
+         * Get check related extras from JSON-LD
+         * @param {Array} extras A list of extras in JSON-LD format
+         * @return {Object} Check extras as a hash, if any
+         */
+        getCheckExtras(extras) {
+            return extras.reduce((obj, extra) => {
+                if (extra.name.startsWith('check:')) {
+                    obj[extra.name] = extra.value;
+                }
+                return obj;
+            }, {});
+        },
+
+        /**
          * Get a cached checked result from extras if fresh enough
          * @param  {Object} resource A resource as extracted from JSON-LD
          */
         getCachedCheck(resource) {
-            const extras = resource.extras;
+            const extras = this.getCheckExtras(resource.extras || []);
             if (extras['check:date']) {
                 const checkDate = new Date(extras['check:date']);
                 if (checkDate >= this.limitCheckDate) {
-                    return Object.keys(extras).reduce((obj, key) => {
-                        if (key.startsWith('check:')) {
-                            obj[key] = extras[key];
-                        }
-                        return obj;
-                    }, {});
+                    return extras;
                 }
             }
         },
