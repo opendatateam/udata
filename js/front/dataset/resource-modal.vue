@@ -26,6 +26,12 @@
           <dd v-if="resource.datePublished"> {{ resource.datePublished|dt }}</dd>
           <dt v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
           <dd v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount"> {{ resource.interactionStatistic.userInteractionCount }}</dd>
+          <dt v-if="checkResults['check:date']">{{ _('Last checked on') }}</dt>
+          <dd v-if="checkResults['check:date']"> {{ checkResults['check:date']|dt }}</dd>
+          <dt v-if="checkAvailability">{{ _('Last checked result') }}</dt>
+          <dd v-if="checkAvailability">
+              <span :class="['label', checkAvailability.class]">{{ checkAvailability.message }}</span>
+          </dd>
         </dl>
     </div>
 
@@ -46,6 +52,35 @@ export default {
         resource: Object
     },
     components: {Modal},
+    computed: {
+        checkResults() {
+            return this.resource.extras.reduce((obj, extra) => {
+                if (extra.name.startsWith('check:')) {
+                    obj[extra.name] = extra.value;
+                }
+                return obj;
+            }, {});
+        },
+        checkAvailability() {
+            const status = this.checkResults['check:status'];
+            if (status >= 200 && status < 400) {
+                return {
+                    message: this._('Available'),
+                    class: 'label-success'
+                }
+            } else if (status >= 400 && status < 500) {
+                return {
+                    message: this._('Unavailable'),
+                    class: 'label-danger'
+                }
+            } else if (status >= 500) {
+                return {
+                    message: this._('Unavailable (maybe temporary)'),
+                    class: 'label-warning'
+                }
+            }
+        }
+    },
     methods: {
         onClick() {
             let eventName;

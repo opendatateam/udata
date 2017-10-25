@@ -6,6 +6,7 @@
 - Rollback oauthlib from 2.0.5 to 2.0.2, pending a permanent solution [#1237](https://github.com/opendatateam/udata/pull/1237)
 - Get cached linkchecker result before hitting API [#1235](https://github.com/opendatateam/udata/pull/1235)
 - Cleanup resources checksum [migration] [#1239](https://github.com/opendatateam/udata/pull/1239)
+- Show check results in resource modal [#1242](https://github.com/opendatateam/udata/pull/1242)
 
 ## 1.2.0 (2017-10-20)
 
