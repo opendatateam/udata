@@ -26,6 +26,10 @@
           <dd v-if="resource.datePublished"> {{ resource.datePublished|dt }}</dd>
           <dt v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
           <dd v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount"> {{ resource.interactionStatistic.userInteractionCount }}</dd>
+          <dt v-if="checkResults['check:date']">{{ _('Last checked on') }}</dt>
+          <dd v-if="checkResults['check:date']"> {{ checkResults['check:date']|dt }}</dd>
+          <dt v-if="checkResults['check:available']">{{ _('Last checked result') }}</dt>
+          <dd v-if="checkResults['check:available']"> {{ checkResults['check:available'] ? _('Available') : _('Unavailable') }}</dd>
         </dl>
     </div>
 
@@ -46,6 +50,16 @@ export default {
         resource: Object
     },
     components: {Modal},
+    computed: {
+        checkResults() {
+            return this.resource.extras.reduce((obj, extra) => {
+                if (extra.name.startsWith('check:')) {
+                    obj[extra.name] = extra.value;
+                }
+                return obj;
+            }, {});
+        }
+    },
     methods: {
         onClick() {
             let eventName;
