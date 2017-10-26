@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.1 (2017-10-26)
 
 - Introduce `udata search index` commmand to replace both deprecated `udata search init` and `udata search reindex` commands. They will be removed in udata 1.4. [#1233](https://github.com/opendatateam/udata/pull/1233)
 - Rollback oauthlib from 2.0.5 to 2.0.2, pending a permanent solution [#1237](https://github.com/opendatateam/udata/pull/1237)
