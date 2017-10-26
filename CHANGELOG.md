@@ -2,14 +2,14 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fixes on the `search index command` [#1245](https://github.com/opendatateam/udata/pull/1245)
 
 ## 1.2.1 (2017-10-26)
 
 - Introduce `udata search index` commmand to replace both deprecated `udata search init` and `udata search reindex` commands. They will be removed in udata 1.4. [#1233](https://github.com/opendatateam/udata/pull/1233)
 - Rollback oauthlib from 2.0.5 to 2.0.2, pending a permanent solution [#1237](https://github.com/opendatateam/udata/pull/1237)
 - Get cached linkchecker result before hitting API [#1235](https://github.com/opendatateam/udata/pull/1235)
-- Cleanup resources checksum [migration] [#1239](https://github.com/opendatateam/udata/pull/1239)
+- Cleanup resources checksum (migration) [#1239](https://github.com/opendatateam/udata/pull/1239)
 - Show check results in resource modal [#1242](https://github.com/opendatateam/udata/pull/1242)
 - Cache avatar rendering [#1243](https://github.com/opendatateam/udata/pull/1243)
 
