@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.2 (2017-10-26)
 
 - Fixes on the `search index command` [#1245](https://github.com/opendatateam/udata/pull/1245)
 
