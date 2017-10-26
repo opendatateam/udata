@@ -87,6 +87,7 @@ new Vue({
             new Velocity(e.target, {height: 0, opacity: 0}, {complete(els) {
                 els[0].remove();
             }});
+            this.checkResourcesCollapsed();
         },
 
         /**
@@ -139,11 +140,24 @@ new Vue({
         },
 
         /**
-         * Asynchronously check all resources status
+         * Asynchronously check non-collapsed resources status
          */
         checkResources() {
             if (config.check_urls) {
-                this.dataset.resources.forEach(this.checkResource);
+                this.dataset.resources
+                    .slice(0, config.dataset_max_resources_uncollapsed)
+                    .forEach(this.checkResource);
+            }
+        },
+
+        /**
+         * Asynchronously check collapsed resources status
+         */
+        checkResourcesCollapsed() {
+            if (config.check_urls) {
+                this.dataset.resources
+                    .slice(config.dataset_max_resources_uncollapsed)
+                    .forEach(this.checkResource);
             }
         },
 

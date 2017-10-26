@@ -158,6 +158,11 @@ export const tiles_config = {subdomains: 'abcd', attribution: tiles_attributions
  */
 export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
 
+/**
+ * Max number of resources to display uncollapsed in dataset view
+ */
+export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
+
 
 export default {
     user,
@@ -181,4 +186,5 @@ export default {
     tiles_attributions,
     tiles_url,
     tiles_config,
+    dataset_max_resources_uncollapsed,
 };
