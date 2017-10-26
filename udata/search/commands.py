@@ -120,7 +120,6 @@ def set_alias(index_name, delete=True):
                     es.indices.delete(index=index)
     else:
         es.indices.put_alias(index=index_name, name=es.index_name)
-    es.indices.refresh()
 
 
 @contextmanager
@@ -133,17 +132,21 @@ def handle_error(index_name, keep=False):
     # Handle keyboard interrupt
     signal.signal(signal.SIGINT, signal.default_int_handler)
     signal.signal(signal.SIGTERM, signal.default_int_handler)
+    has_error = False
     try:
         yield
     except KeyboardInterrupt:
         print('')  # Proper warning message under the "^C" display
         log.warning('Interrupted by signal')
+        has_error = True
     except Exception as e:
         log.error(e)
-    if not keep:
-        log.info('Removing index %s', index_name)
-        es.indices.delete(index=index_name)
-    sys.exit(-1)
+        has_error = True
+    if has_error:
+        if not keep:
+            log.info('Removing index %s', index_name)
+            es.indices.delete(index=index_name)
+        sys.exit(-1)
 
 
 @m.option('-t', '--type', dest='doc_type', required=True,
@@ -223,5 +226,7 @@ def index(models=None, name=None, force=False, keep=False):
                     'doc_type': adapter.doc_type()
                 })
 
-    enable_refresh(index_name)
+        enable_refresh(index_name)
+    # At this step, we don't want error handler to delete the index
+    # in case of error
     set_alias(index_name, delete=not keep)
