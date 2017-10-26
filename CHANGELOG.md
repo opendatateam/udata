@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Check only the uncollapsed resources at first on dataset view [#1246](https://github.com/opendatateam/udata/pull/1246)
 
 ## 1.2.2 (2017-10-26)
 
