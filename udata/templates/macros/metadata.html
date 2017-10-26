@@ -49,8 +49,8 @@
 <meta name="check-urls" content="{{ config.LINKCHECKING_ENABLED|tojson }}" />
 <meta name="check-urls-cache-duration" content="{{ config.LINKCHECKING_CACHE_DURATION }}" />
 <meta name="territory-enabled" content="{{ 'true' if config.ACTIVATE_TERRITORIES else 'false' }}">
-
 <meta name="delete-me-enabled" content="{{ 'true' if config.DELETE_ME else 'false' }}">
+<meta name="dataset-max-resources-uncollapsed" content="{{ config.DATASET_MAX_RESOURCES_UNCOLLAPSED }}">
 
 {% if json_ld %}
 <script id="json_ld" type="application/ld+json">{{ json_ld|safe }}</script>
