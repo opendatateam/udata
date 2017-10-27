@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.3 (2017-10-27)
 
 - Check only the uncollapsed resources at first on dataset view [#1246](https://github.com/opendatateam/udata/pull/1246)
 
