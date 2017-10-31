@@ -1,18 +1,20 @@
 {% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
 <div class="card organization-card">
-    <a class="card-logo" href="{{ url_for('organizations.show', org=organization) }}">
-        <img alt="{{ organization.title }}"
+    <div class="card-logo">
+        <img alt=""
             src="{{ organization.logo(60)|placeholder('organization') }}"
             width="60" height="60">
-    </a>
+    </div>
     {{ badge_if_certified(organization) }}
     <div class="card-body">
         <h4>
             <a href="{{ url_for('organizations.show', org=organization) }}" title="{{organization.name}}">
-                {{ organization.name|truncate(250) }}
+                {{ organization.name }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{ organization.description|mdstrip(180) }}</div>
     </div>
 
     <footer>
@@ -47,10 +49,5 @@
             </li>
         </ul>
     </footer>
-
-    <a class="rollover fade in" href="{{url_for('organizations.show', org=organization)}}"
-        title="{{ organization.name }}">
-        {{ organization.description|mdstrip(180) }}
-    </a>
 </div>
 {% endcache %}
