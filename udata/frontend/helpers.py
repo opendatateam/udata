@@ -279,19 +279,11 @@ def daterange(value):
         raise ValueError('daterange only accept db.DateRange as parameter')
     delta = value.end - value.start
     start, end = None, None
-    if is_first_year_day(value.start) and is_last_year_day(value.end):
-        start = value.start.year
-        if delta.days > 365:
-            end = value.end.year
-    elif is_first_month_day(value.start) and is_last_month_day(value.end):
-        start = short_month(value.start)
-        if delta.days > 31:
-            end = short_month(value.end)
-    else:
-        start = short_day(value.start)
-        if value.start != value.end:
-            end = short_day(value.end)
-    return _('%(start)s to %(end)s', start=start, end=end) if end else start
+    start = value.start.year
+    if delta.days > 365:
+        end = value.end.year
+
+    return _('%(start)s-%(end)s', start=start, end=end) if end else start
 
 
 @front.app_template_filter()
