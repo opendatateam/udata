@@ -61,10 +61,10 @@
     {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
     {% if datasets %}
     <tab id="{{tab_id}}" header="{{label}}">
-        <ul class="card-list">
+        <ul class="card-list row">
 
             {% for dataset in datasets %}
-            <li class="col-md-4 col-sm-6">
+            <li class="col-sm-6">
                 {% include theme('dataset/card.html') %}
             </li>
             {% endfor %}
@@ -118,7 +118,7 @@
     {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
     {% if reuses %}
     <tab id="{{tab_id}}" header="{{label}}">
-        <ul class="card-list">
+        <ul class="card-list row">
 
             {% for reuse in reuses %}
             <li class="col-md-4 col-sm-6">
