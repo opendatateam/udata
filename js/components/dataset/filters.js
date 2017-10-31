@@ -14,10 +14,11 @@ export default {
             }
             const start = moment(range.start);
             const end = range.end ? moment(range.end) : undefined;
-            const start_label = start.format('L');
-            const end_label = end.format('L');
+            const start_label = start.format('YYYY');
+            const end_label = end.format('YYYY');
+
             return end_label
-                ? this._('{start} to {end}', {start: start_label, end: end_label, interpolation: { escapeValue: false }})
+                ? this._('{start_label}-{end_label}', {start_label, end_label, interpolation: { escapeValue: false }})
                 : start_label;
         },
         frequency_label(dataset) {
