@@ -186,12 +186,13 @@ def register_extensions(app):
         models, routing, tasks, mail, i18n, auth, theme, search, sitemap,
         sentry
     )
+    # done first because Celery config is parsed there
+    tasks.init_app(app)
     i18n.init_app(app)
     models.init_app(app)
     routing.init_app(app)
     auth.init_app(app)
     cache.init_app(app)
-    tasks.init_app(app)
     csrf.init_app(app)
     nav.init_app(app)
     theme.init_app(app)
@@ -199,7 +200,6 @@ def register_extensions(app):
     search.init_app(app)
     sitemap.init_app(app)
     sentry.init_app(app)
-    from . import patch_flask_security  # noqa
     return app
 
 
