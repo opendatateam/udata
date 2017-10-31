@@ -10,6 +10,8 @@
                 {{ user | display }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{{ user.about | markdown 180 }}}</div>
     </div>
     <footer v-if="user.metrics">
         <ul>
@@ -36,11 +38,6 @@
             </li>
         </ul>
     </footer>
-
-    <a v-if="user.about" class="rollover fade in"
-        :title="user | display">
-        {{{ user.about | markdown 180 }}}
-    </a>
 </div>
 </template>
 

@@ -4,18 +4,23 @@
     <a class="card-logo">
         <img :alt="organization.name" :src="logo">
     </a>
+
     <img v-if="organization.public_service"
         :src="certified_stamp" alt="certified" class="certified"
         v-popover="_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)"
         :popover-title="_('Certified public service')"
         popover-trigger="hover"/>
+
     <div class="card-body">
         <h4>
             <a :title="organization.name">
-                {{ organization.name | truncate 120 }}
+                {{ organization.name }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{{ organization.description | markdown 180 }}}</div>
     </div>
+
     <footer>
         <ul>
             <li v-if="organization.metrics">
@@ -38,11 +43,6 @@
             </li>
         </ul>
     </footer>
-
-    <a v-if="organization.description" class="rollover fade in"
-        :title="organization.name">
-        {{{ organization.description | markdown 180 }}}
-    </a>
 </div>
 </template>
 

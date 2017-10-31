@@ -3,20 +3,32 @@
     <a v-if="dataset.organization" class="card-logo" :href="dataset.page">
         <img :alt="dataset.organization.name" :src="logo">
     </a>
+
     <img v-if="dataset.organization && dataset.organization.public_service"
         :src="certified" alt="certified" class="certified"
         v-popover="_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)"
         :popover-title="_('Certified public service')"
         popover-trigger="hover"/>
+
     <div class="card-body">
         <h4>
             <a :href="dataset.page" :title="dataset.title">
-                {{ dataset.title | truncate 80 }}
+                {{ dataset.title }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{{ dataset.description | markdown 180 }}}</div>
     </div>
+
     <footer>
         <ul>
+            <li>
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
+                    :title="_('Resources count')">
+                    <span class="fa fa-files-o fa-fw"></span>
+                    {{ dataset.resources.length  }}
+                </a>
+            </li>
             <li v-if="dataset.spatial && dataset.spatial.zones && dataset.spatial.zones.length > 0">
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Territorial coverage')">
                     <span class="fa fa-map-marker fa-fw"></span>
@@ -35,15 +47,7 @@
                     {{ dataset.metrics.followers || 0 }}
                 </a>
             </li>
-        </ul>
-    </footer>
 
-    <a class="rollover fade in" :href="dataset.page"
-        :title="dataset.title">
-        {{{ dataset.description | markdown 180 }}}
-    </a>
-    <footer class="rollover fade in">
-        <ul>
             <!-- Temporal coverage -->
             <li v-if="dataset.temporal_coverage">
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Temporal coverage')">
@@ -58,14 +62,6 @@
                     :title="_('Territorial coverage granularity')">
                     <span class="fa fa-bullseye fa-fw"></span>
                     {{ dataset | granularity_label }}
-                </a>
-            </li>
-
-            <!-- frequency -->
-            <li v-if="dataset.frequency">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Frequency')">
-                    <span class="fa fa-clock-o fa-fw"></span>
-                    {{ dataset | frequency_label }}
                 </a>
             </li>
         </ul>
