@@ -45,11 +45,36 @@
         cursor: pointer;
     }
 
+    .card__cover {
+        @cover-height: 110px;
+
+        display: block;
+        height: @cover-height;
+        margin-bottom: @card-padding;
+        text-align: center;
+        overflow: hidden;
+
+        > * {
+            display: block;
+        }
+
+        img {
+            min-height: @cover-height;
+            min-width: 100%;
+        }
+    }
+
     .card-body {
         font-size: @card-font-size;
         line-height: 1.3em;
         min-height: 6em;
         padding-left: @logo-size + (2 * @logo-margin) + @card-padding;
+    }
+    &.card--with-cover {
+        .card-body,
+        footer {
+            padding-left: 0;
+        }
     }
 
     footer {

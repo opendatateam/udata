@@ -1,5 +1,5 @@
 <template>
-<div class="list-group resources-list smaller">
+<div class="list-group resources-list">
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
