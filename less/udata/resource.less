@@ -77,3 +77,29 @@
         }
     }
 }
+
+.file-format {
+    text-transform: uppercase;
+}
+
+.healthcheck__status {
+
+    &,
+    &.healthcheck--default,
+    &.healthcheck--unknown {
+        border-color: @healthcheck-unknown;
+        color: @healthcheck-unknown;
+    }
+    &.healthcheck--success {
+        border-color: @healthcheck-success;
+        color: @healthcheck-success;
+    }
+    &.healthcheck--warning {
+        border-color: @healthcheck-warning;
+        color: @healthcheck-warning;
+    }
+    &.healthcheck--error {
+        border-color: @healthcheck-error;
+        color: @healthcheck-error;
+    }
+}

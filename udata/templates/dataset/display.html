@@ -83,15 +83,19 @@
                     </div>
                 </div>
 
-                <div class="list-group resources-list">
-                    <h3>{{ _('Resources') }}</h3>
+                <div class="row resources-list" id="resources">
+                    <div class="col-sm-12">
+                        <h3>{{ _('Resources') }}</h3>
+                    </div>
 
                     {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
                     {% for resource in dataset.resources %}
                         {% if loop.index0 == max_resources %}
                         <div id="collapsed-resources" class="collapse">
                         {% endif %}
-                        {% include theme('dataset/resource/list-item.html') %}
+                        <div class="col-sm-12">
+                        {% include theme('dataset/resource/card.html') %}
+                        </div>
                     {% else %}
                     <p class="text-center">{{ _('No resources') }}</p>
                     {% endfor %}
@@ -110,13 +114,15 @@
                     {% endif %}
 
                     {% if can_edit %}
-                    <a class="list-group-item add"
-                        href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
-                        <div class="format-label pull-left">+</div>
-                        <h4 class="list-group-item-heading">
-                            {{ _('Add a resource') }}
-                        </h4>
-                    </a>
+                    <div class="col-sm-12">
+                        <div class="list-group-item add">
+                            <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                                <div class="format-label pull-left">+</div>
+                                <h4 class="list-group-item-heading">{{ _('Add a resource') }}</h4>
+                            </a>
+                        </div>
+
+                    </div>
                     {% endif %}
 
                 </div>
@@ -340,32 +346,43 @@
     </header>
 
     <div class="container">
-
-        <h3 id="community-discussions">{{ _('Discussions') }}</h3>
         <div class="row">
-            <discussion-threads v-ref:discussions class="col-sm-9"
-                subject-id="{{ dataset.id }}"
-                subject-class="{{ dataset.__class__.__name__ }}">
-            </discussion-threads>
+            <div class="col-sm-12">
+                <h3 id="community-discussions">{{ _('Discussions') }}</h3>
+            </div>
+            <div class="col-sm-9">
+                <discussion-threads v-ref:discussions
+                    subject-id="{{ dataset.id }}"
+                    subject-class="{{ dataset.__class__.__name__ }}">
+                </discussion-threads>
+            </div>
+
             <div class="col-sm-3 note">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
         </div>
 
-        <h3 id="community-resources">{{ _('Community resources') }}</h3>
         <div class="row">
+            <div class="col-sm-12">
+                <h3 id="community-resources">{{ _('Community resources') }}</h3>
+            </div>
             <div class="col-sm-9 resources-list">
-                <div class="list-group">
+                <div class="row">
                     {% for resource in dataset.community_resources %}
-                        {% include theme('dataset/resource/list-item.html') %}
+                    <div class="col-sm-12">
+                    {% include theme('dataset/resource/card.html') %}
+                    </div>
                     {% endfor %}
-                    <a class="list-group-item add"
-                        href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                        <div class="format-label pull-left">+</div>
-                        <h4 class="list-group-item-heading">
-                            {{ _('New community resource') }}
-                        </h4>
-                    </a>
+
+                    <div class="col-sm-12">
+                        <a class="list-group-item add"
+                            href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                            <div class="format-label pull-left">+</div>
+                            <h4 class="list-group-item-heading">
+                                {{ _('New community resource') }}
+                            </h4>
+                        </a>
+                    </div>
                 </div>
             </div>
 

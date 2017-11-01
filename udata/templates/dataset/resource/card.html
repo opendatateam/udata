@@ -1,0 +1,60 @@
+{% set resource_format = resource.format|trim|lower or 'data' %}
+<article id="resource-{{resource.id}}" class="card resource-card"
+    data-checkurl="{{ url_for('api.check_dataset_resource', dataset=dataset.id, rid=resource.id) }}">
+
+    <header class="row">
+        <div class="col-xs-12">
+            <h4 class="ellipsis">
+                {{ resource.title or _('Nameless resource') }}
+            </h4>
+        </div>
+    </header>
+
+    <div class="row">
+        <div class="resource-item__description col-xs-12">{{ resource.description | markdown }}</div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6 card__metadata">
+            <span class="btn btn-default resource__type healthcheck__status">
+                <span class="fa fa-circle" v-tooltip></span>
+
+                <span class="file-format">
+                    {{ resource.format }}
+
+                    {% if resource.filesize %}
+                    <span class="filesize">({{ resource.filesize | filesize }})</span>
+                    {% endif %}
+                </span>
+            </span>
+
+            <span class="fa fa-cloud-download" v-tooltip title="{{ _('%(count)d downloads', count=resource.metrics.views) }}"></span>
+            {{ resource.metrics.views }}
+            {% if dataset.temporal_coverage %}
+            •
+            <span class="fa fa-calendar" v-tooltip title="{{ _('From %(start)s to %(end)s', start=dataset.temporal_coverage.start, end=dataset.temporal_coverage.end) }}"></span>
+            {{ dataset.temporal_coverage | daterange }}
+            {% endif %}
+        </div>
+
+        <div class="col-xs-6 text-right">
+            <div class="btn-group">
+                <a href="{{ resource.latest }}" class="btn btn-primary" download>{{ _('Download') }}</a>
+                <button class="btn btn-default" v-tooltip title="{{ _('Copy permalink to clipboard') }}" v-clipboard="{{ resource.latest }}">
+                    <span class="fa fa-clipboard"></span>
+                </button>
+            {% if can_edit_resource(resource if resource.from_community else dataset) %}
+                {% if resource.from_community %}
+                    {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
+                {% else %}
+                    {% set edit_path = 'dataset/{id}/resource/{rid}' %}
+                {% endif %}
+                <a class="btn btn-default" v-tooltip title="{{ _('Edit this resource') }}"
+                    href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
+                    <span class="fa fa-pencil"></span>
+                </a>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</article>
