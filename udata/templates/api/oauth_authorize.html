@@ -53,9 +53,9 @@
     <form class="form text-center" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         {% for scope in oauth.scopes %}
-        <input type="hidden" name="scopes" value="{{ scope }}" />
+        <input type="hidden" name="scope" value="{{ scope }}" />
         {% else %}
-        <input type="hidden" name="scopes" value="false" />
+        <input type="hidden" name="scope" value="false" />
         {% endfor %}
         <input type="submit" name="accept" value="{{ _('Accept') }}"
             class="btn btn-success btn-lg" />
