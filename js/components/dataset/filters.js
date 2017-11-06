@@ -17,7 +17,7 @@ export default {
             const end_label = end.format('YYYY');
 
             return end_label
-                ? this._('{start_label}-{end_label}', {start_label, end_label})
+                ? `${start_label}-${end_label}`
                 : start_label;
         },
         frequency_label: function(dataset) {
