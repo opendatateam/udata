@@ -302,13 +302,16 @@ def daterange(value):
     '''Display a date range in the shorter possible maner.'''
     if not isinstance(value, db.DateRange):
         raise ValueError('daterange only accept db.DateRange as parameter')
+
+    date_format = 'YYYY'
+
     delta = value.end - value.start
     start, end = None, None
-    start = value.start.year
+    start = format_date(value.start, date_format)
     if delta.days > 365:
-        end = value.end.year
+        end = format_date(value.end, date_format)
 
-    return _('%(start)s-%(end)s', start=start, end=end) if end else start
+    return '{start!s}–{end!s}'.format(start=start, end=end) if end else start
 
 
 @front.app_template_filter()
