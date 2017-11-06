@@ -182,7 +182,6 @@ def init_logging(app):
 
 
 def register_extensions(app):
-    from . import patch_flask_security  # noqa
     from udata import (
         models, routing, tasks, mail, i18n, auth, theme, search, sitemap,
         sentry
@@ -200,6 +199,7 @@ def register_extensions(app):
     search.init_app(app)
     sitemap.init_app(app)
     sentry.init_app(app)
+    from . import patch_flask_security  # noqa
     return app
 
 

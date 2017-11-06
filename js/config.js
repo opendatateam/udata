@@ -70,6 +70,11 @@ export const csrf_token = _meta('csrf-token');
 export const check_urls = _jsonMeta('check-urls');
 
 /**
+ * What is the link checker result cache duration?
+ */
+export const check_urls_cache_duration = _jsonMeta('check-urls-cache-duration');
+
+/**
  * The API root/base URL
  */
 export const api_root = _meta('api-root');
@@ -153,6 +158,11 @@ export const tiles_config = {subdomains: 'abcd', attribution: tiles_attributions
  */
 export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
 
+/**
+ * Max number of resources to display uncollapsed in dataset view
+ */
+export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
+
 
 export default {
     user,
@@ -168,6 +178,7 @@ export default {
     auth_url,
     sentry,
     check_urls,
+    check_urls_cache_duration,
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
@@ -175,4 +186,5 @@ export default {
     tiles_attributions,
     tiles_url,
     tiles_config,
+    dataset_max_resources_uncollapsed,
 };

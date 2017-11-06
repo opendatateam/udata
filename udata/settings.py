@@ -237,6 +237,11 @@ class Defaults(object):
     # Default pagination size on listing
     POST_DEFAULT_PAGINATION = 20
 
+    # Dataset settings
+    ###########################################################################
+    # Max number of resources to display uncollapsed in dataset view
+    DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

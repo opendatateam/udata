@@ -39,6 +39,13 @@ new Vue({
             userReuses: []
         };
     },
+    computed: {
+        limitCheckDate() {
+            const limitDate = new Date();
+            limitDate.setSeconds(limitDate.getSeconds() - config.check_urls_cache_duration);
+            return limitDate;
+        }
+    },
     ready() {
         this.loadCoverageMap();
         this.checkResources();
@@ -80,6 +87,7 @@ new Vue({
             new Velocity(e.target, {height: 0, opacity: 0}, {complete(els) {
                 els[0].remove();
             }});
+            this.checkResourcesCollapsed();
         },
 
         /**
@@ -93,7 +101,7 @@ new Vue({
          * Display a modal with the user reuses
          * allowing him to chose an existing.
          *
-         * The modal only show ff there is candidate reuses
+         * The modal only show if there is candidate reuses
          */
         addReuse(e) {
             const reuses = this.userReuses.filter((reuse) => {
@@ -132,12 +140,63 @@ new Vue({
         },
 
         /**
-         * Asynchronously check all resources status
+         * Asynchronously check non-collapsed resources status
          */
         checkResources() {
             if (config.check_urls) {
-                this.dataset.resources.forEach(this.checkResource);
+                this.dataset.resources
+                    .slice(0, config.dataset_max_resources_uncollapsed)
+                    .forEach(this.checkResource);
             }
+        },
+
+        /**
+         * Asynchronously check collapsed resources status
+         */
+        checkResourcesCollapsed() {
+            if (config.check_urls) {
+                this.dataset.resources
+                    .slice(config.dataset_max_resources_uncollapsed)
+                    .forEach(this.checkResource);
+            }
+        },
+
+        /**
+         * Get check related extras from JSON-LD
+         * @param {Array} extras A list of extras in JSON-LD format
+         * @return {Object} Check extras as a hash, if any
+         */
+        getCheckExtras(extras) {
+            return extras.reduce((obj, extra) => {
+                if (extra.name.startsWith('check:')) {
+                    obj[extra.name] = extra.value;
+                }
+                return obj;
+            }, {});
+        },
+
+        /**
+         * Get a cached checked result from extras if fresh enough
+         * @param  {Object} resource A resource as extracted from JSON-LD
+         */
+        getCachedCheck(resource) {
+            const extras = this.getCheckExtras(resource.extras || []);
+            if (extras['check:date']) {
+                const checkDate = new Date(extras['check:date']);
+                if (checkDate >= this.limitCheckDate) {
+                    return extras;
+                }
+            }
+        },
+
+        /**
+         * Get cached check or API check
+         * @param  {Object} resource A resource element from DOM
+         * @param  {String} checkurl The API check url
+         */
+        getResourceCheckStatus(resource_el, checkurl) {
+            const cachedCheck = this.getCachedCheck(resource_el);
+            return (cachedCheck && Promise.resolve(cachedCheck)) || this.$api.get(checkurl);
         },
 
         /**
@@ -153,7 +212,7 @@ new Vue({
                 el.classList.add('format-label-warning');
                 el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
             } else {
-                this.$api.get(checkurl)
+                this.getResourceCheckStatus(resource, checkurl)
                 .then((res) => {
                     const status = res['check:status'];
                     if (status >= 200 && status < 400) {

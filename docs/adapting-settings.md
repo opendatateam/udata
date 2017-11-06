@@ -396,6 +396,14 @@ Whether or not discussions should be enabled on posts
 
 The default page size for post listing
 
+## Datasets configuration
+
+### DATASET_MAX_RESOURCES_UNCOLLAPSED
+
+**default** `6`
+
+Max number of resources to display uncollapsed in dataset view.
+
 
 ## Example configuration file
 
@@ -428,7 +436,7 @@ FS_PREFIX = '/s'
 FS_ROOT = '/srv/http/www.data.dev/fs'
 ```
 
-[celery-doc]: https://docs.celeryproject.org/en/latest/configuration.html
+[celery-doc]: http://docs.celeryproject.org/en/latest/userguide/configuration.html
 [celery-conf-map]: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-old-settings-map
 [flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/
