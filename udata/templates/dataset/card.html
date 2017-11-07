@@ -23,58 +23,45 @@
 
         <div class="clamp-3">{{ dataset.description|mdstrip(180) }}</div>
     </div>
-    <footer>
+
+    <footer class="card__footer">
         <ul>
-            <li>
-                <a class="btn btn-xs" v-tooltip title="{{ _('Resources count') }}">
-                    <span class="{{ ficon('fa-files-o') }} fa-fw"></span>
-                    {{ dataset.resources | length  }}
-                </a>
+            <li v-tooltip title="{{ _('Number of resources') }}">
+                <span class="{{ ficon('fa-cubes') }} fa-fw"></span>
+                {{ dataset.resources | length  }}
             </li>
             {% if dataset.metrics %}
-            <li>
-                <a class="btn btn-xs" v-tooltip
-                    title="{{ _('Reuses') }}">
-                    <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
-                    {{ dataset.metrics.reuses or 0 }}
-                </a>
+            <li v-tooltip title="{{ _('Reuses') }}">
+                <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
+                {{ dataset.metrics.reuses or 0 }}
             </li>
-            <li>
-                <a class="btn btn-xs" v-tooltip
-                    title="{{ _('Stars') }}">
-                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                    {{ dataset.metrics.followers or 0 }}
-                </a>
+            <li v-tooltip title="{{ _('Stars') }}">
+                <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                {{ dataset.metrics.followers or 0 }}
             </li>
             {% endif %}
 
             {# Temporal coverage #}
             {% if dataset.temporal_coverage %}
-            <li>
-                <a class="btn btn-xs" v-tooltip title="{{ _('Temporal coverage') }}">
-                    <span class="fa fa-calendar fa-fw"></span>
-                    {{ dataset.temporal_coverage|daterange }}
-                </a>
+            <li v-tooltip title="{{ _('Temporal coverage') }}">
+                <span class="fa fa-calendar fa-fw"></span>
+                {{ dataset.temporal_coverage|daterange }}
             </li>
             {% endif %}
 
             {# Territorial coverage #}
             {% if dataset.spatial and dataset.spatial.territories %}
-            <li>
-                <a class="btn btn-xs" v-tooltip title="{{ _('Territorial coverage') }}">>
-                    <span class="fa fa-map-marker fa-fw"></span>
-                    {{ dataset.spatial.top_label }}
-                </a>
+            <li v-tooltip title="{{ _('Territorial coverage') }}">
+                <span class="fa fa-map-marker fa-fw"></span>
+                {{ dataset.spatial.top_label }}
             </li>
             {% endif %}
 
             {# Territorial granularity #}
             {% if dataset.spatial and dataset.spatial.granularity and dataset.spatial.granularity != 'other' %}
-            <li>
-                <a class="btn btn-xs" v-tooltip title="{{ _('Territorial coverage granularity') }}">
-                    <span class="fa fa-bullseye fa-fw"></span>
-                    {{ dataset.spatial.granularity_label }}
-                </a>
+            <li v-tooltip title="{{ _('Territorial coverage granularity') }}">
+                <span class="fa fa-bullseye fa-fw"></span>
+                {{ dataset.spatial.granularity_label }}
             </li>
             {% endif %}
         </ul>
