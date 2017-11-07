@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix flask_security celery tasks context [#1249](https://github.com/opendatateam/udata/pull/1249)
+- Fix `dataset.quality` when `resource.format` is not filled [#1261](https://github.com/opendatateam/udata/pull/1261)
 
 ## 1.2.3 (2017-10-27)
 
