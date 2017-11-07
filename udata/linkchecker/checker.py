@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from datetime import datetime, timedelta
 from urlparse import urlparse
 
 from flask import current_app
