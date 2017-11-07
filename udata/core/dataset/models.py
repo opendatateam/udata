@@ -206,7 +206,7 @@ class ResourceMixin(object):
     @property
     def closed_format(self):
         """Return True if the specified format is in CLOSED_FORMATS."""
-        return self.format.lower() in CLOSED_FORMATS
+        return self.format and self.format.lower() in CLOSED_FORMATS
 
     def check_availability(self):
         '''
