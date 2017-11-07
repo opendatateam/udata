@@ -43,11 +43,11 @@
 
 {% block main_content %}
 <div class="row">
-    <div class="col-md-8 col-lg-9 smaller">
+    <div class="col-md-8 col-lg-9">
 
         <ul class="search-results">
             {% for dataset in datasets %}
-            {% include theme('dataset/search-result.html') %}
+            {% include theme('dataset/card.html') %}
             {% endfor %}
         </ul>
 

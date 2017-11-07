@@ -9,44 +9,24 @@
                 {{ reuse.title | truncate 100 }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{{ reuse.description | markdown 120 }}}</div>
     </div>
-    <footer>
-        <div class="author">
-            <a class="avatar" :href="owner_url" :title="reuse.title">
-            <img :src="owner_avatar" class="avatar" width="20" height="20"/>
-            </a>
-            <a class="user" :href="owner_url" :title="owner_name">
-            {{ owner_name }}
-            </a>
-            <span class="date">{{ reuse.created_at | dt }}</span>
-        </div>
-    </footer>
 
-    <a class="rollover fade in" :href="reuse.page"
-        :title="reuse.title">
-        {{{ reuse.description | markdown 120 }}}
-    </a>
-    <footer class="rollover fade in">
+    <footer class="card__footer">
         <ul>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Type')">
-                    <span class="fa fa-file fa-fw"></span>
-                    {{ reuse | reusetype }}
-                </a>
+            <li v-tooltip :title="_('Type')">
+                <span class="fa fa-file fa-fw"></span>
+                {{ reuse | reusetype }}
             </li>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    :title="_('Number of datasets used')">
-                    <span class="fa fa-cubes fa-fw"></span>
-                    {{ reuse.datasets ? reuse.datasets.length : 0 }}
-                </a>
+            <li v-tooltip :title="_('Number of datasets used')">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ reuse.datasets ? reuse.datasets.length : 0 }}
             </li>
 
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Stars')">
-                    <span class="fa fa-star fa-fw"></span>
-                    {{ reuse.metrics ? reuse.metrics.followers || 0 : 0 }}
-                </a>
+            <li v-tooltip :title="_('Stars')">
+                <span class="fa fa-star fa-fw"></span>
+                {{ reuse.metrics ? reuse.metrics.followers || 0 : 0 }}
             </li>
         </ul>
     </footer>

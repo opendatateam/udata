@@ -31,7 +31,7 @@
     <div class="container dataset-container">
         <div class="row">
 
-            <div class="col-md-9 col-sm-9 smaller">
+            <div class="col-md-9 col-sm-9">
                 <div class="page-header">
                     <h2>{{ dataset.title }}</h2>
 
@@ -83,15 +83,19 @@
                     </div>
                 </div>
 
-                <div class="list-group resources-list">
-                    <h3>{{ _('Resources') }}</h3>
+                <div class="row resources-list" id="resources">
+                    <div class="col-sm-12">
+                        <h3>{{ _('Resources') }}</h3>
+                    </div>
 
                     {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
                     {% for resource in dataset.resources %}
                         {% if loop.index0 == max_resources %}
                         <div id="collapsed-resources" class="collapse">
                         {% endif %}
-                        {% include theme('dataset/resource/list-item.html') %}
+                        <div class="col-sm-12">
+                        {% include theme('dataset/resource/card.html') %}
+                        </div>
                     {% else %}
                     <p class="text-center">{{ _('No resources') }}</p>
                     {% endfor %}
@@ -110,13 +114,15 @@
                     {% endif %}
 
                     {% if can_edit %}
-                    <a class="list-group-item add"
-                        href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
-                        <div class="format-label pull-left">+</div>
-                        <h4 class="list-group-item-heading">
-                            {{ _('Add a resource') }}
-                        </h4>
-                    </a>
+                    <div class="col-sm-12">
+                        <div class="list-group-item add">
+                            <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                                <div class="format-label pull-left">+</div>
+                                <h4 class="list-group-item-heading">{{ _('Add a resource') }}</h4>
+                            </a>
+                        </div>
+
+                    </div>
                     {% endif %}
 
                 </div>
@@ -328,7 +334,7 @@
     </div>
 </section>
 
-<section class="community_container">
+<section class="community_container" id="community">
     <header>
         <div class="container">
             <div class="cover-communaute"></div>
@@ -340,31 +346,44 @@
     </header>
 
     <div class="container">
-
-        <h3>{{ _('Discussions') }}</h3>
         <div class="row">
-            <discussion-threads v-ref:discussions class="col-sm-9"
-                subject-id="{{ dataset.id }}"
-                subject-class="{{ dataset.__class__.__name__ }}">
-            </discussion-threads>
+            <div class="col-sm-12">
+                <h3 id="community-discussions">{{ _('Discussions') }}</h3>
+            </div>
+            <div class="col-sm-9">
+                <discussion-threads v-ref:discussions
+                    subject-id="{{ dataset.id }}"
+                    subject-class="{{ dataset.__class__.__name__ }}">
+                </discussion-threads>
+            </div>
+
             <div class="col-sm-3 note">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
         </div>
 
-        <h3>{{ _('Community resources') }}</h3>
         <div class="row">
-            <div class="col-sm-9 list-group resources-list smaller">
-            {% for resource in dataset.community_resources %}
-                {% include theme('dataset/resource/list-item.html') %}
-            {% endfor %}
-                <a class="list-group-item add"
-                    href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                    <div class="format-label pull-left">+</div>
-                    <h4 class="list-group-item-heading">
-                        {{ _('New community resource') }}
-                    </h4>
-                </a>
+            <div class="col-sm-12">
+                <h3 id="community-resources">{{ _('Community resources') }}</h3>
+            </div>
+            <div class="col-sm-9 resources-list">
+                <div class="row">
+                    {% for resource in dataset.community_resources %}
+                    <div class="col-sm-12">
+                    {% include theme('dataset/resource/card.html') %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="col-sm-12">
+                        <a class="list-group-item add"
+                            href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                            <div class="format-label pull-left">+</div>
+                            <h4 class="list-group-item-heading">
+                                {{ _('New community resource') }}
+                            </h4>
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <div class="col-sm-3 note">
@@ -372,63 +391,24 @@
             </div>
         </div>
 
-        <h3>{{ _('Reuses') }}</h3>
+        <h3 id="community-reuses">{{ _('Reuses') }}</h3>
         <div class="row">
-            <div class="col-sm-9 reuses-list smaller">
+            <div class="col-sm-9 resources-list">
                 <div class="row">
                     {% for reuse in reuses %}
-                    <div class="col-sm-6 col-lg-4">
-                        <div id="reuse-{{reuse.id}}" class="thumbnail reuse">
-                            <a class="preview" href="{{ url_for('reuses.show', reuse=reuse) }}">
-                                <img class="media-object img-responsive" alt="{{ reuse.title }}"
-                                    src="{{ reuse.image|placeholder('reuse') }}">
-                            </a>
-                            <div class="caption">
-                                <h4 class="clamp-2">
-                                    <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
-                                        {{ reuse.title }}
-                                    </a>
-                                </h4>
-                                <div class="author">
-                                    {{ reuse|owner_avatar(25) }}
-                                    <a class="user" href="{{ reuse|owner_url }}" title="{{ reuse|owner_name }}">
-                                    {{ reuse|owner_name }}
-                                    </a>
-                                    <span class="date">{{ reuse.created_at|dateformat('long') }}</span>
-                                </div>
-                            </div>
-                            {% if reuse.description %}
-                            <a class="rollover fade in" href="{{url_for('reuses.show', reuse=reuse)}}"
-                                title="{{ reuse.title }}">
-                                {{ reuse.description|mdstrip(180) }}
-                            </a>
-                            {% endif %}
-                            <div class="btn-group btn-group-xs">
-                                <a class="btn btn-default" href="{{ reuse.url }}"
-                                    v-tooltip title="{{ _('Open in a new window') }}">
-                                    <span class="fa fa-external-link"></span>
-                                </a>
-                                {% if current_user.sysadmin or reuse.owner == current_user %}
-                                <a class="btn btn-default" v-tooltip title="{{ _('Edit') }}"
-                                    href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}">
-                                    <span class="fa fa-pencil"></span>
-                                </a>
-                                {% endif %}
-                                {% if current_user.sysadmin %}
-                                <featured-button compact subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
-                                {% endif %}
-                            </div>
-                        </div>
+                    {% set features = ['preview'] %}
+                    <div class="col-sm-6">
+                        {% include theme('reuse/card.html') %}
                     </div>
                     {% endfor %}
-                    <div class="col-sm-6 col-md-4">
-                        <a class="thumbnail reuse add" v-el:add-reuse
+                    <div class="col-sm-12">
+                        <a class="list-group-item add"
                             href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
                             @click="addReuse($event)">
-                            <div class="preview">+</div>
-                            <div class="caption">
-                                <h4>{{ _('Add a reuse') }}</h4>
-                            </div>
+                            <div class="format-label pull-left">+</div>
+                            <h4 class="list-group-item-heading">
+                                {{ _('Add a reuse') }}
+                            </h4>
                         </a>
                     </div>
                 </div>

@@ -1,14 +1,8 @@
 .resources-list {
-    margin: 0;
 
     .list-group-item {
         @vspacing: 10px;
-        @base-color: #eaeaea;
-        height: 54px;
         cursor: pointer;
-        background-color: @base-color;
-        margin: 0px 0px @vspacing;
-        border-color: @base-color;
         border-radius: 0px;
         padding: 0;
         position: relative;
@@ -23,35 +17,6 @@
 
         &:hover {
             background-color: #ddd;
-        }
-
-        &.add {
-            @add-base-color: darken(@base-color, 30%);
-            background-color: fadeout(@add-base-color, 92%);
-            border: 2px dashed @add-base-color;
-            height: 56px;
-
-            h4 {
-                color: @add-base-color;
-                line-height: 30px;
-            }
-
-            .format-label {
-                color: #7d8489;
-                background-color: fadeout(@add-base-color, 80%);
-                text-align: center;
-                font-size: 34px;
-                font-weight: bold;
-                line-height: 44px;
-            }
-
-            &:hover {
-                background-color: fadeout(@add-base-color, 87%);
-            }
-
-            &:not(:first-child) {
-                margin-top: 13px;
-            }
         }
 
         &.expanded {
@@ -90,21 +55,6 @@
         }
     }
 
-    .format-label {
-        width: 52px;
-        height: 52px;
-        background-color: #f9f9f9;
-        margin: 0px;
-
-        span {
-            line-height: 52px;
-            text-align: center;
-            font-weight: bold;
-            text-transform: uppercase;
-            display: block;
-        }
-    }
-
     .resource-frame {
         margin-top: 10px;
         width: 100%;
@@ -125,5 +75,31 @@
         .btn-default {
             background: fadeout(white, 50%) !important;
         }
+    }
+}
+
+.file-format {
+    text-transform: uppercase;
+}
+
+.healthcheck__status {
+
+    &,
+    &.healthcheck--default,
+    &.healthcheck--unknown {
+        border-color: @healthcheck-unknown;
+        color: @healthcheck-unknown;
+    }
+    &.healthcheck--success {
+        border-color: @healthcheck-success;
+        color: @healthcheck-success;
+    }
+    &.healthcheck--warning {
+        border-color: @healthcheck-warning;
+        color: @healthcheck-warning;
+    }
+    &.healthcheck--error {
+        border-color: @healthcheck-error;
+        color: @healthcheck-error;
     }
 }

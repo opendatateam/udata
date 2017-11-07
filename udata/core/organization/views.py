@@ -65,7 +65,7 @@ class ProtectedOrgView(OrgView):
 @blueprint.route('/<org:org>/', endpoint='show')
 class OrganizationDetailView(OrgView, DetailView):
     template_name = 'organization/display.html'
-    page_size = 9
+    page_size = 10
 
     def get_context(self):
         context = super(OrganizationDetailView, self).get_context()
@@ -76,8 +76,8 @@ class OrganizationDetailView(OrgView, DetailView):
         if self.organization.deleted and not can_view.can():
             abort(410)
 
-        datasets = Dataset.objects(organization=self.organization).visible()
-        reuses = Reuse.objects(organization=self.organization).visible()
+        datasets = Dataset.objects(organization=self.organization).order_by('-temporal_coverage.end', '-metrics.reuses', '-metrics.followers').visible()
+        reuses = Reuse.objects(organization=self.organization).order_by('-metrics.reuses', '-metrics.followers').visible()
         followers = (Follow.objects.followers(self.organization)
                                    .order_by('follower.fullname'))
         context.update({

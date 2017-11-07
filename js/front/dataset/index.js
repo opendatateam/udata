@@ -206,27 +206,28 @@ new Vue({
         checkResource(resource) {
             const url = parseUrl(resource.contentUrl);
             const resource_el = document.querySelector(`#resource-${resource['@id']}`);
-            const el = resource_el.querySelector('.format-label');
+            const el = resource_el.querySelector('.healthcheck__status');
             const checkurl = resource_el.dataset.checkurl;
             if (url.protocol.startsWith('ftp')) {
-                el.classList.add('format-label-warning');
-                el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
+                el.classList.add('healthcheck--warning');
+                el.setTooltip(this._('The server may be hard to reach (FTP).'));
             } else {
                 this.getResourceCheckStatus(resource, checkurl)
                 .then((res) => {
                     const status = res['check:status'];
                     if (status >= 200 && status < 400) {
-                        el.classList.add('format-label-success')
+                        el.classList.add('healthcheck--success');
+                        el.setTooltip(this._('The resource is available and can be downloaded.'));
                     } else if (status >= 400 && status < 500) {
-                        el.classList.add('format-label-danger');
-                        el.setTooltip(this._('The resource cannot be found.'), true);
+                        el.classList.add('healthcheck--error');
+                        el.setTooltip(this._('The resource cannot be found.'));
                     } else if (status >= 500) {
-                        el.classList.add('format-label-warning');
-                        el.setTooltip(this._('An error occured on the remote server. This may be temporary.'), true);
+                        el.classList.add('healthcheck--warning');
+                        el.setTooltip(this._('An error occured on the remote server. This may be temporary.'));
                     }
                 })
                 .catch(error => {
-                    el.classList.add('format-label-unchecked');
+                    el.classList.add('healthcheck--unknown');
                     console.log('Something went wrong with the linkchecker', error);
                 });
             }
