@@ -24,7 +24,7 @@
         {% if datasets %}
         <ul class="search-results">
             {% for dataset in datasets %}
-            {% include theme('dataset/search-result.html') %}
+            {% include theme('dataset/card.html') %}
             {% endfor %}
         </ul>
             {% if datasets.has_next %}
