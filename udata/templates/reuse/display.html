@@ -183,21 +183,25 @@
                         </ul>
 
 
-                        <div class="tags">
+                        <ul class="tags">
                             {% for tag in reuse.tags %}
-                            <a href="{{ url_for('search.index', tag=tag) }}"
-                                class="btn btn-primary btn-grey btn-xs"
+                            <li>
+                                <a href="{{ url_for('search.index', tag=tag) }}"
+                                class="label label-primary"
                                 title="{{ tag }}">
-                                {{ tag|truncate(14, True) }}
-                            </a>
+                                    {{ tag|truncate(14, True) }}
+                                </a>
+                            </li>
                             {% endfor %}
-                            <a @click="suggestTag"
-                                class="btn btn-primary btn-dark btn-xs suggest-tag"
+                            <li>
+                                <a @click="suggestTag"
+                                class="label label-primary suggest-tag"
                                 title="{{ _('Suggest a tag with a new discussion thread') }}"
                                 v-tooltip tooltip-placement="right">
-                                {{ _('Suggest a tag') }}
-                            </a>
-                        </div>
+                                    {{ _('Suggest a tag') }}
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
