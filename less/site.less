@@ -159,10 +159,55 @@ hr {
     }
 }
 
-div.list-group-item.active {
-    color: @list-group-active-color;
-    background-color: @list-group-active-bg;
-    border-color: @list-group-active-border;
+.list-group-item {
+    @base-color: #eaeaea;
+
+    &.active {
+        color: @list-group-active-color;
+        background-color: @list-group-active-bg;
+        border-color: @list-group-active-border;
+    }
+
+    &.add {
+        @add-base-color: darken(@base-color, 30%);
+        background-color: fadeout(@add-base-color, 92%) !important;
+        border: 2px dashed @add-base-color;
+        height: 56px;
+        padding: 0;
+
+        h4 {
+            color: @add-base-color;
+            line-height: 30px;
+        }
+
+        .format-label {
+            color: #7d8489;
+            background-color: fadeout(@add-base-color, 80%) !important;
+            text-align: center;
+            font-size: 34px;
+            font-weight: bold;
+            line-height: 44px;
+
+            width: 52px;
+            height: 52px;
+
+            span {
+                line-height: 52px;
+                text-align: center;
+                font-weight: bold;
+                text-transform: uppercase;
+                display: block;
+            }
+        }
+
+        &:hover {
+            background-color: fadeout(@add-base-color, 87%) !important;
+        }
+
+        &:not(:first-child) {
+            margin-top: 13px;
+        }
+    }
 }
 
 .advanced-search-panel {
