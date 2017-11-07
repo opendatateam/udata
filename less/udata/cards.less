@@ -72,18 +72,22 @@
     }
     &.card--with-cover {
         .card-body,
-        footer {
+        .card__footer {
             padding-left: 0;
         }
     }
 
-    footer {
+    .card__footer {
         .clamp(1);
-        @color: #7E7E7E;
+        @color: rgb(126, 126, 126);
 
         bottom: 0;
+        color: @color;
+        font-size: .9em;
+        font-weight: bold;
         padding: @card-padding 0 0;
         padding-left: @logo-size + (2 * @logo-margin) + @card-padding;
+        white-space: nowrap;
         width: 100%;
 
 
@@ -92,16 +96,12 @@
             margin: 0;
             padding: 0;
 
-            .btn {
-                color: @color;
-                text-transform: none;
+            > li {
+                margin-right: .5em;
+            }
 
-                padding: 1px 5px 1px 0;
-
-                .fa {
-                    background: none !important;
-                    color: #bababa;
-                }
+            .fa {
+                margin-right: -.1em;
             }
         }
 
