@@ -148,13 +148,17 @@
                             {% if reuse.owner.about %}
                             <p>
                                 {{ reuse.owner.about|mdstrip(180) }}
-                                <a href="{{ url_for('users.show', user=reuse.owner) }}"
-                                    title="{{ _('more') }}"
-                                    class="btn btn-grey btn-primary btn-mini">+</a>
                             </p>
                             {% else %}
                             <br/>
                             {% endif %}
+
+                            <a href="{{ url_for('users.show', user=reuse.owner) }}"
+                                title="{{ _('more') }}"
+                                class="btn btn-block btn-sm btn-left btn-warning btn-primary">
+                                <span class="fa fa-user"></span>
+                                {{ _('View Profile') }}
+                            </a>
                             <follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
                                 {% if is_following(reuse.owner) %}following{% endif %}
                                 url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
