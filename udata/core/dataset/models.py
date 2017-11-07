@@ -221,7 +221,7 @@ class ResourceMixin(object):
         '''Does the resource needs to be checked against its linkchecker?
 
         We check unavailable resources often. Available resources are checked
-        less and less frequently based on their historical availability
+        less and less frequently based on their historical availability.
         '''
         cache_duration = current_app.config['LINKCHECKING_MIN_CACHE_DURATION']
         count_availability = self.extras.get('check:count-availability', 1)
