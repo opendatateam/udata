@@ -156,7 +156,7 @@ An entrypoint key of `udata.linkcheckers` that will be used as a default link ch
 
 A list of domains to ignore when triggering link checking of resources urls.
 
-### LINKCHECKING_CACHE_DURATION
+### LINKCHECKING_MIN_CACHE_DURATION
 
 **default**: 300
 

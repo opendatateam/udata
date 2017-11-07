@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 from blinker import signal
 from stringdist import rdlevenshtein
-from flask import url_for
+from flask import url_for, current_app
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
@@ -217,6 +217,27 @@ class ResourceMixin(object):
         '''
         return self.extras.get('check:available', 'unknown')
 
+    def is_need_check(self):
+        '''Does the resource needs to be checked against its linkchecker?
+
+        We check unavailable resources often. Available resources are checked
+        less and less frequently based on their historical availability
+        '''
+        cache_duration = current_app.config['LINKCHECKING_MIN_CACHE_DURATION']
+        count_availability = self.extras.get('check:count-availability', 1)
+        is_available = self.check_availability()
+        if is_available == 'unknown':
+            return True
+        if is_available:
+            delta = cache_duration * count_availability
+        else:
+            delta = cache_duration
+        if self.extras.get('check:date'):
+            limit_date = datetime.now() - timedelta(seconds=delta)
+            if self.extras['check:date'] >= limit_date:
+                return False
+        return True
+
     @property
     def latest(self):
         '''
@@ -240,6 +261,7 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
+            'needCheck': self.is_need_check()
         }
 
         if 'views' in self.metrics:
