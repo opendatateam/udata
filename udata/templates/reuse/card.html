@@ -47,6 +47,13 @@
                 <span class="fa fa-calendar fa-fw"></span>
                 {{ reuse.created_at|dateformat(format='YYYY') }}
             </li>
+
+            {% if 'preview' in features %}
+            <li v-tooltip title="{{ _('Created by %(user)s', user=owner_name(reuse)) }}">
+                <span class="fa fa-user fa-fw"></span>
+                {{ _('by %(user)s', user=owner_name(reuse)) }}
+            </li>
+            {% endif %}
         </ul>
     </footer>
 </div>
