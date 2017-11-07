@@ -20,11 +20,7 @@ def _get_check_keys(the_dict, resource, previous_status):
 def _compute_count_availability(resource, status, previous_status):
     '''Compute the `check:count-availability` extra value'''
     count_availability = resource.extras.get('check:count-availability', 1)
-    if status == previous_status:
-        count_availability += 1
-    else:
-        count_availability = 1
-    return count_availability
+    return count_availability + 1 if status == previous_status else 1
 
 
 def is_ignored(resource):
