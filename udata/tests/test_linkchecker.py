@@ -148,3 +148,35 @@ class LinkcheckerTest(TestCase):
             'check:status': 42
         }
         self.assertTrue(self.resource.is_need_check())
+
+    @mock.patch('udata.linkchecker.checker.get_linkchecker')
+    def test_count_availability_increment(self, mock_fn):
+        check_res = {'check:status': 200, 'check:available': True,
+                     'check:date': datetime.now()}
+
+        class DummyLinkchecker:
+            def check(self, _):
+                return check_res
+        mock_fn.return_value = DummyLinkchecker
+
+        check_resource(self.resource)
+        self.assertEquals(self.resource.extras['check:count-availability'], 1)
+
+        check_resource(self.resource)
+        self.assertEquals(self.resource.extras['check:count-availability'], 2)
+
+    @mock.patch('udata.linkchecker.checker.get_linkchecker')
+    def test_count_availability_reset(self, mock_fn):
+        self.resource.extras = {'check:status': 200, 'check:available': True,
+                                'check:date': datetime.now(),
+                                'check:count-availability': 2}
+        check_res = {'check:status': 200, 'check:available': False,
+                     'check:date': datetime.now()}
+
+        class DummyLinkchecker:
+            def check(self, _):
+                return check_res
+        mock_fn.return_value = DummyLinkchecker
+
+        check_resource(self.resource)
+        self.assertEquals(self.resource.extras['check:count-availability'], 1)

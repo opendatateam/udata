@@ -13,7 +13,7 @@ def _get_check_keys(the_dict, resource, previous_status):
     check_keys = {k: v for k, v in the_dict.iteritems()
                   if k.startswith('check:')}
     check_keys['check:count-availability'] = _compute_count_availability(
-            resource, check_keys.get('check:status'), previous_status)
+            resource, check_keys.get('check:available'), previous_status)
     return check_keys
 
 
@@ -73,6 +73,7 @@ def check_resource(resource):
     # store the check result in the resource's extras
     # XXX maybe this logic should be in the `Resource` model?
     previous_status = resource.extras.get('check:available')
-    resource.extras.update(_get_check_keys(result, resource, previous_status))
+    check_keys = _get_check_keys(result, resource, previous_status)
+    resource.extras.update(check_keys)
     resource.save()
     return result
