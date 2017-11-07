@@ -20,49 +20,35 @@
         <div class="clamp-3">{{{ dataset.description | markdown 180 }}}</div>
     </div>
 
-    <footer>
+    <footer class="card__footer">
         <ul>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    :title="_('Resources count')">
-                    <span class="fa fa-files-o fa-fw"></span>
-                    {{ dataset.resources.length  }}
-                </a>
+            <li v-tooltip :title="_('Resources count')">
+                <span class="fa fa-files-o fa-fw"></span>
+                {{ dataset.resources.length  }}
             </li>
-            <li v-if="dataset.spatial && dataset.spatial.zones && dataset.spatial.zones.length > 0">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Territorial coverage')">
-                    <span class="fa fa-map-marker fa-fw"></span>
-                    {{ dataset.spatial.zones[0].name }}
-                </a>
+            <li v-if="dataset.spatial && dataset.spatial.zones && dataset.spatial.zones.length > 0" v-tooltip :title="_('Territorial coverage')">
+                <span class="fa fa-map-marker fa-fw"></span>
+                {{ dataset.spatial.zones[0].name }}
             </li>
-            <li v-if="dataset.metrics">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Reuses')">
-                    <span class="fa fa-retweet fa-fw"></span>
-                    {{ dataset.metrics.reuses || 0 }}
-                </a>
+            <li v-if="dataset.metrics" v-tooltip :title="_('Reuses')">
+                <span class="fa fa-retweet fa-fw"></span>
+                {{ dataset.metrics.reuses || 0 }}
             </li>
-            <li v-if="dataset.metrics">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Stars')">
-                    <span class="fa fa-star fa-fw"></span>
-                    {{ dataset.metrics.followers || 0 }}
-                </a>
+            <li v-if="dataset.metrics" v-tooltip :title="_('Stars')">
+                <span class="fa fa-star fa-fw"></span>
+                {{ dataset.metrics.followers || 0 }}
             </li>
 
             <!-- Temporal coverage -->
-            <li v-if="dataset.temporal_coverage">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Temporal coverage')">
-                    <span class="fa fa-calendar fa-fw"></span>
-                    {{ dataset.temporal_coverage | daterange }}
-                </a>
+            <li v-if="dataset.temporal_coverage" v-tooltip :title="_('Temporal coverage')">
+                <span class="fa fa-calendar fa-fw"></span>
+                {{ dataset.temporal_coverage | daterange }}
             </li>
 
             <!-- Territorial coverage -->
-            <li v-if="dataset.spatial && dataset.spatial.granularity">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    :title="_('Territorial coverage granularity')">
-                    <span class="fa fa-bullseye fa-fw"></span>
-                    {{ dataset | granularity_label }}
-                </a>
+            <li v-if="dataset.spatial && dataset.spatial.granularity" v-tooltip :title="_('Territorial coverage granularity')">
+                <span class="fa fa-bullseye fa-fw"></span>
+                {{ dataset | granularity_label }}
             </li>
         </ul>
 
