@@ -12,7 +12,7 @@ from udata.linkchecker.checker import check_resource
 class LinkcheckerTestSettings():
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = ['example-ignore.com']
-    LINKCHECKING_MIN_CACHE_DURATION = 30
+    LINKCHECKING_MIN_CACHE_DURATION = 0.5
 
 
 class LinkcheckerTest(TestCase):
@@ -104,11 +104,11 @@ class LinkcheckerTest(TestCase):
         self.resource.extras = {'check:available': True,
                                 'check:date': datetime.now(),
                                 'check:status': 42}
-        self.assertFalse(self.resource.is_need_check())
+        self.assertFalse(self.resource.need_check())
 
     def test_is_need_check_unknown_status(self):
         self.resource.extras = {}
-        self.assertTrue(self.resource.is_need_check())
+        self.assertTrue(self.resource.need_check())
 
     def test_is_need_check_cache_expired(self):
         self.resource.extras = {
@@ -116,7 +116,7 @@ class LinkcheckerTest(TestCase):
             'check:date': datetime.now() - timedelta(seconds=3600),
             'check:status': 42
         }
-        self.assertTrue(self.resource.is_need_check())
+        self.assertTrue(self.resource.need_check())
 
     def test_is_need_check_count_availability(self):
         self.resource.extras = {
@@ -126,7 +126,7 @@ class LinkcheckerTest(TestCase):
             'check:date': datetime.now() - timedelta(seconds=3600),
             'check:status': 42
         }
-        self.assertTrue(self.resource.is_need_check())
+        self.assertTrue(self.resource.need_check())
 
     def test_is_need_check_count_availability_expired(self):
         self.resource.extras = {
@@ -136,7 +136,7 @@ class LinkcheckerTest(TestCase):
             'check:date': datetime.now() - timedelta(seconds=3600),
             'check:status': 42
         }
-        self.assertFalse(self.resource.is_need_check())
+        self.assertFalse(self.resource.need_check())
 
     def test_is_need_check_count_availability_unavailable(self):
         self.resource.extras = {
@@ -147,7 +147,7 @@ class LinkcheckerTest(TestCase):
             'check:date': datetime.now() - timedelta(seconds=3600),
             'check:status': 42
         }
-        self.assertTrue(self.resource.is_need_check())
+        self.assertTrue(self.resource.need_check())
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
     def test_count_availability_increment(self, mock_fn):

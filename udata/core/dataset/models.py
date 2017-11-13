@@ -217,7 +217,7 @@ class ResourceMixin(object):
         '''
         return self.extras.get('check:available', 'unknown')
 
-    def is_need_check(self):
+    def need_check(self):
         '''Does the resource needs to be checked against its linkchecker?
 
         We check unavailable resources often. Available resources are checked
@@ -228,12 +228,12 @@ class ResourceMixin(object):
         is_available = self.check_availability()
         if is_available == 'unknown':
             return True
-        if is_available:
+        elif is_available:
             delta = cache_duration * count_availability
         else:
             delta = cache_duration
         if self.extras.get('check:date'):
-            limit_date = datetime.now() - timedelta(seconds=delta)
+            limit_date = datetime.now() - timedelta(minutes=delta)
             if self.extras['check:date'] >= limit_date:
                 return False
         return True
@@ -261,7 +261,7 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
-            'needCheck': self.is_need_check()
+            'needCheck': self.need_check()
         }
 
         if 'views' in self.metrics:

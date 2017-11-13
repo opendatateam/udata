@@ -166,7 +166,7 @@ class Defaults(object):
 
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = []
-    LINKCHECKING_MIN_CACHE_DURATION = 60 * 5  # in seconds
+    LINKCHECKING_MIN_CACHE_DURATION = 5  # in minutes
     LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 
     # PIWIK_ID = # Demo = 11, Prod = 1
