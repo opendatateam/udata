@@ -13,6 +13,7 @@ class LinkcheckerTestSettings():
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = ['example-ignore.com']
     LINKCHECKING_MIN_CACHE_DURATION = 0.5
+    LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
 
 
 class LinkcheckerTest(TestCase):
@@ -141,8 +142,8 @@ class LinkcheckerTest(TestCase):
     def test_is_need_check_count_availability_unavailable(self):
         self.resource.extras = {
             # should need a new check after 30s < 3600S
-            # check:count-availability is not relevant for unavailable resource
-            'check:count-availability': 150,
+            # count-availability is below threshold
+            'check:count-availability': 95,
             'check:available': False,
             'check:date': datetime.now() - timedelta(seconds=3600),
             'check:status': 42
@@ -180,3 +181,14 @@ class LinkcheckerTest(TestCase):
 
         check_resource(self.resource)
         self.assertEquals(self.resource.extras['check:count-availability'], 1)
+
+    def test_count_availability_threshold(self):
+        self.resource.extras = {
+            'check:status': 404,
+            'check:available': False,
+            # if it weren't above threshold, should need check (>30s)
+            'check:date': datetime.now() - timedelta(seconds=60),
+            'check:count-availability': 101
+        }
+        check_resource(self.resource)
+        self.assertFalse(self.resource.need_check())

@@ -220,15 +220,17 @@ class ResourceMixin(object):
     def need_check(self):
         '''Does the resource needs to be checked against its linkchecker?
 
-        We check unavailable resources often. Available resources are checked
-        less and less frequently based on their historical availability.
+        We check unavailable resources often, unless they go over the
+        threshold. Available resources are checked less and less frequently
+        based on their historical availability.
         '''
         cache_duration = current_app.config['LINKCHECKING_MIN_CACHE_DURATION']
+        ko_threshold = current_app.config['LINKCHECKING_UNAVAILABLE_THRESHOLD']
         count_availability = self.extras.get('check:count-availability', 1)
         is_available = self.check_availability()
         if is_available == 'unknown':
             return True
-        elif is_available:
+        elif is_available or count_availability > ko_threshold:
             delta = cache_duration * count_availability
         else:
             delta = cache_duration
