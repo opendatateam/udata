@@ -204,9 +204,12 @@ class ResourceMixin(object):
             self.urlhash = hash_url(self.url)
 
     @property
-    def closed_format(self):
-        """Return True if the specified format is in CLOSED_FORMATS."""
-        return self.format and self.format.lower() in CLOSED_FORMATS
+    def closed_or_no_format(self):
+        """
+        Return True if the specified format is in CLOSED_FORMATS or
+        no format has been specified.
+        """
+        return not self.format or self.format.lower() in CLOSED_FORMATS
 
     def check_availability(self):
         '''
@@ -454,8 +457,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['description_length'] = len(self.description)
         if self.resources:
             result['has_resources'] = True
-            result['has_only_closed_formats'] = all(
-                resource.closed_format for resource in self.resources)
+            result['has_only_closed_or_no_formats'] = all(
+                resource.closed_or_no_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
                 self.check_availability())
         discussions = Discussion.objects(subject=self)
@@ -484,7 +487,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             if quality['description_length'] > 100:
                 score += UNIT
         if 'has_resources' in quality:
-            if quality['has_only_closed_formats']:
+            if quality['has_only_closed_or_no_formats']:
                 score -= UNIT
             else:
                 score += UNIT
