@@ -158,9 +158,15 @@ A list of domains to ignore when triggering link checking of resources urls.
 
 ### LINKCHECKING_MIN_CACHE_DURATION
 
-**default**: 5
+**default**: 60
 
 The minimum time in minutes between two consecutive checks of a resource's url.
+
+### LINKCHECKING_MAX_CACHE_DURATION
+
+**default**: 1080
+
+The maximum time in minutes between two consecutive checks of a resource's url.
 
 ### LINKCHECKING_UNAVAILABLE_THRESHOLD
 

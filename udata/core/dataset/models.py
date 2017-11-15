@@ -224,16 +224,22 @@ class ResourceMixin(object):
         threshold. Available resources are checked less and less frequently
         based on their historical availability.
         '''
-        cache_duration = current_app.config['LINKCHECKING_MIN_CACHE_DURATION']
-        ko_threshold = current_app.config['LINKCHECKING_UNAVAILABLE_THRESHOLD']
+        min_cache_duration, max_cache_duration, ko_threshold = [
+            current_app.config.get(k) for k in (
+                'LINKCHECKING_MIN_CACHE_DURATION',
+                'LINKCHECKING_MAX_CACHE_DURATION',
+                'LINKCHECKING_UNAVAILABLE_THRESHOLD',
+            )
+        ]
         count_availability = self.extras.get('check:count-availability', 1)
         is_available = self.check_availability()
         if is_available == 'unknown':
             return True
         elif is_available or count_availability > ko_threshold:
-            delta = cache_duration * count_availability
+            delta = min(min_cache_duration * count_availability,
+                        max_cache_duration)
         else:
-            delta = cache_duration
+            delta = min_cache_duration
         if self.extras.get('check:date'):
             limit_date = datetime.now() - timedelta(minutes=delta)
             if self.extras['check:date'] >= limit_date:

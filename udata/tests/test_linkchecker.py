@@ -14,6 +14,7 @@ class LinkcheckerTestSettings():
     LINKCHECKING_IGNORE_DOMAINS = ['example-ignore.com']
     LINKCHECKING_MIN_CACHE_DURATION = 0.5
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
+    LINKCHECKING_MAX_CACHE_DURATION = 100
 
 
 class LinkcheckerTest(TestCase):
@@ -187,8 +188,20 @@ class LinkcheckerTest(TestCase):
             'check:status': 404,
             'check:available': False,
             # if it weren't above threshold, should need check (>30s)
+            # and we're still below max_cache 101 * 0.5 < 100
             'check:date': datetime.now() - timedelta(seconds=60),
             'check:count-availability': 101
         }
-        check_resource(self.resource)
         self.assertFalse(self.resource.need_check())
+
+    def test_count_availability_max_cache_duration(self):
+        self.resource.extras = {
+            'check:status': 200,
+            'check:available': True,
+            # next check should be at 300 * 0.5 = 150min
+            # but we are above max cache duration 150min > 100min
+            # and 120m > 100 min so we should need a new check
+            'check:date': datetime.now() - timedelta(minutes=120),
+            'check:count-availability': 300
+        }
+        self.assertTrue(self.resource.need_check())
