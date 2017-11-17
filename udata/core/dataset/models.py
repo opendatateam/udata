@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 from blinker import signal
 from stringdist import rdlevenshtein
-from flask import url_for
+from flask import url_for, current_app
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
@@ -220,6 +220,35 @@ class ResourceMixin(object):
         '''
         return self.extras.get('check:available', 'unknown')
 
+    def need_check(self):
+        '''Does the resource needs to be checked against its linkchecker?
+
+        We check unavailable resources often, unless they go over the
+        threshold. Available resources are checked less and less frequently
+        based on their historical availability.
+        '''
+        min_cache_duration, max_cache_duration, ko_threshold = [
+            current_app.config.get(k) for k in (
+                'LINKCHECKING_MIN_CACHE_DURATION',
+                'LINKCHECKING_MAX_CACHE_DURATION',
+                'LINKCHECKING_UNAVAILABLE_THRESHOLD',
+            )
+        ]
+        count_availability = self.extras.get('check:count-availability', 1)
+        is_available = self.check_availability()
+        if is_available == 'unknown':
+            return True
+        elif is_available or count_availability > ko_threshold:
+            delta = min(min_cache_duration * count_availability,
+                        max_cache_duration)
+        else:
+            delta = min_cache_duration
+        if self.extras.get('check:date'):
+            limit_date = datetime.now() - timedelta(minutes=delta)
+            if self.extras['check:date'] >= limit_date:
+                return False
+        return True
+
     @property
     def latest(self):
         '''
@@ -243,6 +272,7 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
+            'needCheck': self.need_check()
         }
 
         if 'views' in self.metrics:

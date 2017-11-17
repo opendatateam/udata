@@ -39,13 +39,6 @@ new Vue({
             userReuses: []
         };
     },
-    computed: {
-        limitCheckDate() {
-            const limitDate = new Date();
-            limitDate.setSeconds(limitDate.getSeconds() - config.check_urls_cache_duration);
-            return limitDate;
-        }
-    },
     ready() {
         this.loadCoverageMap();
         this.checkResources();
@@ -176,15 +169,15 @@ new Vue({
         },
 
         /**
-         * Get a cached checked result from extras if fresh enough
+         * Get a cached checked result from extras if resource is not flagged
+         * as needing a new check
          * @param  {Object} resource A resource as extracted from JSON-LD
          */
         getCachedCheck(resource) {
-            const extras = this.getCheckExtras(resource.extras || []);
-            if (extras['check:date']) {
-                const checkDate = new Date(extras['check:date']);
-                if (checkDate >= this.limitCheckDate) {
-                    return extras;
+            if (!resource.needCheck) {
+                const extras = this.getCheckExtras(resource.extras || []);
+                if (extras['check:status']) {
+                    return extras
                 }
             }
         },
