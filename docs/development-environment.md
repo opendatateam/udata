@@ -79,7 +79,8 @@ Then install JavaScript dependencies:
 $ npm install
 ```
 
-Once it's done, you should be able to run the build command for JS and CSS:
+Once it's done, you should be able to run the build command for JS and CSS
+(please add `./venv/bin` in your path):
 
 ```shell
 $ inv assets-build
