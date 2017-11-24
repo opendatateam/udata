@@ -88,11 +88,7 @@ def schedulables():
 
 def default_scheduler_config(url):
     parsed_url = urlparse(url)
-    if not all((parsed_url.scheme, parsed_url.netloc)):
-        raise ValueError('{0} is not a valid MongoDB URL'.format(url))
     default_url = '{0}://{1}'.format(*parsed_url)
-    if len(parsed_url.path) <= 1:
-        raise ValueError('{0} is missing the database path'.format(url))
     return parsed_url.path[1:], default_url
 
 

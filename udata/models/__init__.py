@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import importlib
 import logging
+import warnings
 
 from urlparse import urlparse
 
@@ -12,6 +13,8 @@ from mongoengine.errors import ValidationError
 from mongoengine.signals import pre_save, post_save
 
 from flask_fs.mongo import FileField, ImageField
+
+from udata.errors import ConfigError
 
 from .badges_field import BadgesField
 from .taglist_field import TagListField
@@ -102,15 +105,38 @@ from udata.features.transfer.models import *  # noqa
 from udata.features.territories.models import *  # noqa
 
 
+MONGODB_DEPRECATED_SETTINGS = 'MONGODB_PORT', 'MONGODB_DB'
+MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST url syntax'
+
+
+def validate_config(config):
+    for setting in MONGODB_DEPRECATED_SETTINGS:
+        if setting in config:
+            warnings.warn(MONGODB_DEPRECATED_MSG.format(setting),
+                          category=DeprecationWarning, stacklevel=2)
+    url = config['MONGODB_HOST']
+    parsed_url = urlparse(url)
+    if not all((parsed_url.scheme, parsed_url.netloc)):
+        raise ConfigError('{0} is not a valid MongoDB URL'.format(url))
+    if len(parsed_url.path) <= 1:
+        raise ConfigError('{0} is missing the database path'.format(url))
+
+
+def build_test_config(config):
+    if 'MONGODB_HOST_TEST' in config:
+        config['MONGODB_HOST'] = config['MONGODB_HOST_TEST']
+    else:
+        parsed_url = urlparse(config['MONGODB_HOST'])
+        parsed_url = parsed_url._replace(path='%s-test' % parsed_url.path)
+        config['MONGODB_HOST'] = parsed_url.geturl()
+    validate_config(config)
+
+
 def init_app(app):
     # use `{database_name}-test` database for testing
+    validate_config(app.config)
     if app.config['TESTING']:
-        if 'MONGODB_HOST_TEST' in app.config:
-            app.config['MONGODB_HOST'] = app.config['MONGODB_HOST_TEST']
-        else:
-            parsed_url = urlparse(app.config['MONGODB_HOST'])
-            parsed_url = parsed_url._replace(path='%s-test' % parsed_url.path)
-            app.config['MONGODB_HOST'] = parsed_url.geturl()
+        build_test_config(app.config)
     db.init_app(app)
     for plugin in app.config['PLUGINS']:
         name = 'udata_{0}.models'.format(plugin)

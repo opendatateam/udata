@@ -17,13 +17,3 @@ class DefaultSchedulerConfigTest(TestCase):
         db, url = default_scheduler_config(full_url)
         self.assertEqual(db, 'mydb')
         self.assertEqual(url, 'mongodb://userid:password@somewhere.com:1234')
-
-    def test_raise_exception_on_host_only(self):
-        with self.assertRaises(ValueError):
-            default_scheduler_config('somehost')
-
-    def test_raise_exception_on_missing_db(self):
-        with self.assertRaises(ValueError):
-            default_scheduler_config('mongodb://somewhere.com:1234')
-        with self.assertRaises(ValueError):
-            default_scheduler_config('mongodb://somewhere.com:1234/')
