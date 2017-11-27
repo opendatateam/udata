@@ -8,17 +8,31 @@
 {% endblock %}
 
 {% block user_content %}
-<h2>
-    {{ user.name }}
-    <small>
-        {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
-    </small>
-</h2>
+{% if followers|length > 0 %}
+	<h2>
+			{{ user.name }}
+	    <small>
+	        {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
+	    </small>
+	</h2>
+	<div class="row">
+	    {% for follow in followers %}
+	    <div class="col-md-4">
+	      {% include theme('follow/follower-card.html') %}
+	    </div>
+	    {% endfor %}
+	</div>
+
+{% else %}
+
 <div class="row">
-    {% for follow in followers %}
-    <div class="col-md-4">
-      {% include theme('follow/follower-card.html') %}
+    <div class="col-xs-12">
+
     </div>
-    {% endfor %}
 </div>
+<p class="text-center lead">
+{{ _('%(user)s has no follower', user=user.fullname) }}
+</p>
+
+{% endif %}
 {% endblock %}
