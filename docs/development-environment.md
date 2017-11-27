@@ -20,6 +20,8 @@ The sources of the project are on [Github][]:
 $ git clone https://github.com/opendatateam/udata.git
 ```
 
+(or clone your own fork if you plan to [contribute](contributing-guide.md))
+
 ## Middlewares
 
 We will use [docker-compose][] to manage all that.
