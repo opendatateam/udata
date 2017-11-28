@@ -65,7 +65,7 @@ and will magicaly close the issue as soon as the commit is merged.
 
 We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
 
-We also [vote for new features](governance.md) in order to include the whole community in the process.
+We also [vote for new features](docs/governance.md) in order to include the whole community in the process.
 
 
 ## Code guides
