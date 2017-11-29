@@ -134,6 +134,10 @@ def build_test_config(config):
     validate_config(config)
 
 
+# Avoid nose misdetecting this function as a test
+build_test_config.__test__ = False
+
+
 def init_app(app):
     validate_config(app.config)
     if app.config['TESTING']:
