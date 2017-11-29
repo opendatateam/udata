@@ -123,7 +123,10 @@ class UDataJsonEncoder(json.JSONEncoder):
         return super(UDataJsonEncoder, self).default(obj)
 
 
-WARNING_LOGGERS = 'elasticsearch', 'requests'
+# These loggers are very verbose
+# We need to put them in WARNING level
+# even if the main level is INFO or DEBUG
+VERBOSE_LOGGERS = 'elasticsearch', 'requests'
 
 
 def init_logging(app):
@@ -133,7 +136,7 @@ def init_logging(app):
     app.logger.setLevel(log_level)
     for name in app.config['PLUGINS']:
         logging.getLogger('udata_{0}'.format(name)).setLevel(log_level)
-    for logger in WARNING_LOGGERS:
+    for logger in VERBOSE_LOGGERS:
         logging.getLogger(logger).setLevel(logging.WARNING)
     return app
 

@@ -11,7 +11,7 @@ from glob import iglob
 from flask_script import Manager
 from flask_script.commands import Clean, ShowUrls, Server, InvalidCommand
 
-from udata.app import create_app, standalone, WARNING_LOGGERS
+from udata.app import create_app, standalone, VERBOSE_LOGGERS
 
 # TODO: Switch to flask.cli and drop flask-script dependency
 
@@ -120,7 +120,7 @@ def set_logging(app):
         logger.handlers = []
         logger.addHandler(handler)
 
-    for name in WARNING_LOGGERS:
+    for name in VERBOSE_LOGGERS:
         logger = logging.getLogger(name)
         logger.setLevel(logging.WARNING)
         logger.handlers = []
