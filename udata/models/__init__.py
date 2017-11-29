@@ -126,6 +126,7 @@ def build_test_config(config):
     if 'MONGODB_HOST_TEST' in config:
         config['MONGODB_HOST'] = config['MONGODB_HOST_TEST']
     else:
+        # use `{database_name}-test` database for testing
         parsed_url = urlparse(config['MONGODB_HOST'])
         parsed_url = parsed_url._replace(path='%s-test' % parsed_url.path)
         config['MONGODB_HOST'] = parsed_url.geturl()
@@ -133,7 +134,6 @@ def build_test_config(config):
 
 
 def init_app(app):
-    # use `{database_name}-test` database for testing
     validate_config(app.config)
     if app.config['TESTING']:
         build_test_config(app.config)
