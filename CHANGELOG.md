@@ -4,6 +4,7 @@
 
 - Fix flask_security celery tasks context [#1249](https://github.com/opendatateam/udata/pull/1249)
 - Fix `dataset.quality` handling when no format filled [#1265](https://github.com/opendatateam/udata/pull/1265)
+- Ignore celery tasks results except for harvest tasks which require it
 
 ## 1.2.3 (2017-10-27)
 

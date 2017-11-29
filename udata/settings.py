@@ -32,6 +32,7 @@ class Defaults(object):
         'fanout_patterns': True,
     }
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+    CELERY_TASK_IGNORE_RESULT = True
     CELERY_TASK_SERIALIZER = 'pickle'
     CELERY_RESULT_SERIALIZER = 'pickle'
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
