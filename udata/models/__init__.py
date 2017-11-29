@@ -112,8 +112,9 @@ MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST url syntax'
 def validate_config(config):
     for setting in MONGODB_DEPRECATED_SETTINGS:
         if setting in config:
-            warnings.warn(MONGODB_DEPRECATED_MSG.format(setting),
-                          category=DeprecationWarning, stacklevel=2)
+            msg = MONGODB_DEPRECATED_MSG.format(setting)
+            log.warning(msg)
+            warnings.warn(msg, category=DeprecationWarning, stacklevel=2)
     url = config['MONGODB_HOST']
     parsed_url = urlparse(url)
     if not all((parsed_url.scheme, parsed_url.netloc)):
