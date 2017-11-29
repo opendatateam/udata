@@ -123,7 +123,23 @@ class UDataJsonEncoder(json.JSONEncoder):
         return super(UDataJsonEncoder, self).default(obj)
 
 
-def create_app(config='udata.settings.Defaults', override=None):
+WARNING_LOGGERS = 'elasticsearch', 'requests'
+
+
+def init_logging(app):
+    logging.captureWarnings(True)  # Display warnings
+    debug = app.debug or app.config.get('TESTING')
+    log_level = logging.DEBUG if debug else logging.WARNING
+    app.logger.setLevel(log_level)
+    for name in app.config['PLUGINS']:
+        logging.getLogger('udata_{0}'.format(name)).setLevel(log_level)
+    for logger in WARNING_LOGGERS:
+        logging.getLogger(logger).setLevel(logging.WARNING)
+    return app
+
+
+def create_app(config='udata.settings.Defaults', override=None,
+               init_logging=init_logging):
     '''Factory for a minimal application'''
     app = UDataApp(APP_NAME)
     app.config.from_object(config)
@@ -163,22 +179,6 @@ def standalone(app):
         if hasattr(plugin, 'init_app') and callable(plugin.init_app):
             plugin.init_app(app)
 
-    return app
-
-
-def init_logging(app):
-    logging.captureWarnings(True)  # Display warnings
-    debug = app.debug or app.config.get('TESTING')
-    log_level = logging.DEBUG if debug else logging.WARNING
-    app.logger.setLevel(log_level)
-    loggers = [
-        logging.getLogger('elasticsearch'),
-        logging.getLogger('requests')
-    ]
-    for name in app.config['PLUGINS']:
-        logging.getLogger('udata_{0}'.format(name)).setLevel(log_level)
-    for logger in loggers:
-        logger.setLevel(logging.WARNING)
     return app
 
 
