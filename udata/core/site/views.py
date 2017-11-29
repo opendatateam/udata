@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import request, json, redirect, url_for
+import logging
+import requests
+
+from flask import request, json, redirect, url_for, current_app
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search, theme
+from udata.app import cache
 from udata.core.activity.models import Activity
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
@@ -27,6 +31,8 @@ from .models import current_site
 from .rdf import build_catalog
 
 blueprint = I18nBlueprint('site', __name__)
+
+log = logging.getLogger(__name__)
 
 
 @blueprint.app_context_processor
@@ -157,9 +163,25 @@ class SiteDashboard(SiteView, DetailView):
         return context
 
 
+@cache.cached(50)
+def get_terms_content():
+    filename = current_app.config['SITE_TERMS']
+    if filename.startswith('http'):
+        # We let the error appear because:
+        # - we dont want to cache false responses
+        # - this is only visible on terms
+        response = requests.get(filename, timeout=5)
+        response.raise_for_status()
+        return response.content
+    else:
+        with open(filename) as terms:
+            return terms.read()
+
+
 @blueprint.route('/terms/')
 def terms():
-    return theme.render('terms.html')
+    content = get_terms_content()
+    return theme.render('terms.html', terms=content)
 
 
 @blueprint.route('/context.jsonld', localize=False)

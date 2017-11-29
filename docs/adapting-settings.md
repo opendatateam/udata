@@ -48,6 +48,13 @@ A secret key used as salt for cryptographic parts.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
+### SITE_TERMS
+
+**default**: `'default'`
+
+The site terms in markdown. It can be either an URL to a markdown content or a local path.
+If this is an URL, the content is downloaded on the first terms page display and cached.
+
 ### PLUGINS
 
 **default**: `[]`
