@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from kombu import Exchange, Queue
 
+HOUR = 60 * 60
+
 
 class Defaults(object):
     DEBUG = False
@@ -32,6 +34,8 @@ class Defaults(object):
         'fanout_patterns': True,
     }
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+    CELERY_RESULT_EXPIRES = 6 * HOUR  # Results are kept 6 hours
+    CELERY_TASK_IGNORE_RESULT = True
     CELERY_TASK_SERIALIZER = 'pickle'
     CELERY_RESULT_SERIALIZER = 'pickle'
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
@@ -100,7 +104,7 @@ class Defaults(object):
     # Flask WTF settings
     CSRF_SESSION_KEY = 'Default uData csrf key'
 
-    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * 60 * 60  # 30 days
+    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * HOUR  # 30 days
 
     AUTO_INDEX = True
 
