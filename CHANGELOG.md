@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Export community resource avatar style to udata [#233](https://github.com/etalab/udata-gouvfr/pull/233)
 
 ## 1.2.0 (2017-10-20)
 
