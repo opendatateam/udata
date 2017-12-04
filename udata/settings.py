@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pkg_resources
+
 from kombu import Exchange, Queue
 
 HOUR = 60 * 60
@@ -114,6 +116,8 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = 'Udata'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
+    SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
+
     USE_SSL = False
 
     PLUGINS = []
@@ -142,6 +146,8 @@ class Defaults(object):
         'small',
         'strong',
         'ul',
+        'sup',
+        'sub',
     ]
 
     MD_ALLOWED_ATTRIBUTES = {
