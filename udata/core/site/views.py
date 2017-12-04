@@ -165,7 +165,7 @@ class SiteDashboard(SiteView, DetailView):
 
 @cache.cached(50)
 def get_terms_content():
-    filename = current_app.config['SITE_TERMS']
+    filename = current_app.config['SITE_TERMS_LOCATION']
     if filename.startswith('http'):
         # We let the error appear because:
         # - we dont want to cache false responses

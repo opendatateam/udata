@@ -116,7 +116,7 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = 'Udata'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
-    SITE_TERMS = pkg_resources.resource_filename(__name__, 'cgu.md')
+    SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
 
     USE_SSL = False
 
