@@ -5,6 +5,7 @@
 - Fix flask_security celery tasks context [#1249](https://github.com/opendatateam/udata/pull/1249)
 - Fix `dataset.quality` handling when no format filled [#1265](https://github.com/opendatateam/udata/pull/1265)
 - Ignore celery tasks results except for tasks which require it and lower the default results expiration to 6 hours [#1281](https://github.com/opendatateam/udata/pull/1281)
+- Import community resource avatar style from udata-gouvfr [#1288](https://github.com/opendatateam/udata/pull/1288)
 
 ## 1.2.3 (2017-10-27)
 
