@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.4 (2017-12-06)
 
 - Fix flask_security celery tasks context [#1249](https://github.com/opendatateam/udata/pull/1249)
 - Fix `dataset.quality` handling when no format filled [#1265](https://github.com/opendatateam/udata/pull/1265)
