@@ -7,6 +7,7 @@
 - Ignore celery tasks results except for tasks which require it and lower the default results expiration to 6 hours [#1281](https://github.com/opendatateam/udata/pull/1281)
 - Import community resource avatar style from udata-gouvfr [#1288](https://github.com/opendatateam/udata/pull/1288)
 - Terms are now handled from markdown and customizable with the `SITE_TERMS_LOCATION` setting. [#1285](https://github.com/opendatateam/udata/pull/1285)
+- Deeplink to resource [#1289](https://github.com/opendatateam/udata/pull/1289)
 
 ## 1.2.3 (2017-10-27)
 
