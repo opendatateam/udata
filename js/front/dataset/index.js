@@ -28,8 +28,7 @@ function parseUrl(url) {
     return a;
 }
 
-const RESOURCE_REGEX = /^#resource-([0-9a-f-]{36})$/;
-const RESOURCE_COMMUNITY_REGEX = /^#resource-community-([0-9a-f-]{36})$/;
+const RESOURCE_REGEX = /^#resource(-community)?-([0-9a-f-]{36})$/;
 
 new Vue({
     mixins: [FrontMixin],
@@ -253,11 +252,8 @@ new Vue({
          */
         openResourceFromHash(hash) {
             if (RESOURCE_REGEX.test(hash)) {
-                const [, id] = hash.match(RESOURCE_REGEX);
-                this.showResource(id, false);
-            } else if (RESOURCE_COMMUNITY_REGEX.test(hash)) {
-                const [, id] = hash.match(RESOURCE_COMMUNITY_REGEX);
-                this.showResource(id, true);
+                const [, isCommunity, id] = hash.match(RESOURCE_REGEX);
+                this.showResource(id, isCommunity);
             }
         },
     }
