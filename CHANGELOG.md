@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Display date of comments in dataset discussions [#1283](https://github.com/opendatateam/udata/pull/1283)
+- Prevent `reindex` command from failing on a specific object and log error instead. [#1293](https://github.com/opendatateam/udata/pull/1293)
 
 ## 1.2.4 (2017-12-06)
 
