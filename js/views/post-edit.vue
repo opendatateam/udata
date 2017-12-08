@@ -1,7 +1,9 @@
 <template>
-<form-layout icon="newspaper-o" :title="title" :save="save" :cancel="cancel" footer="true" :model="post">
-    <post-form v-ref:form :post="post"></post-form>
-</form-layout>
+<div>
+    <form-layout icon="newspaper-o" :title="title" :save="save" :cancel="cancel" footer="true" :model="post">
+        <post-form v-ref:form :post="post"></post-form>
+    </form-layout>
+</div>
 </template>
 
 <script>

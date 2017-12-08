@@ -1,16 +1,18 @@
 <template>
 <div>
-<vertical-form v-ref:form :fields="fields" :model="post"></vertical-form>
+    <vform v-ref:form :fields="fields" :model="post"></vform>
 </div>
 </template>
 
 <script>
 import Post from 'models/post';
-import VerticalForm from 'components/form/vertical-form.vue';
+// iimport VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
     name: 'post-form',
-    components: {VerticalForm},
+    components: {
+            vform: require('components/form/vertical-form.vue')
+    },
     props: {
         post: {type: Post, default: () => new Post()},
         hideNotifications: false
