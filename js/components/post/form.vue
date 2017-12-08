@@ -6,7 +6,6 @@
 
 <script>
 import Post from 'models/post';
-// iimport VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
     name: 'post-form',
