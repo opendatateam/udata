@@ -15,6 +15,6 @@ Bugs are [reported directly on Github][github-new-issue] following the proposed 
 For daily chat, development discussions and so on we idle on [Gitter][gitter].
 
 [etalab]: https://github.com/etalab
-[feathub]: http://feathub.com/
+[feathub]: https://feathub.com/opendatateam/udata
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
 [gitter]: https://gitter.im/opendatateam/udata
