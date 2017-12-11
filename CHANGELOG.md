@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Fix broken post edit page  [#1295](https://github.com/opendatateam/udata/pull/1295)
+- Fix misused hand cursor over the spatial coverage map in dataset admin [#1296](https://github.com/opendatateam/udata/pull/1296)
+- Fix broken post edit page [#1295](https://github.com/opendatateam/udata/pull/1295)
 - Display date of comments in dataset discussions [#1283](https://github.com/opendatateam/udata/pull/1283)
 - Prevent `reindex` command from failing on a specific object and log error instead. [#1293](https://github.com/opendatateam/udata/pull/1293)
 
