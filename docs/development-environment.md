@@ -116,7 +116,7 @@ You can use [invoke][] to launch the application services
 ```shell
 $ inv serve         # Start the development server
 
-$ inv worker        # Start a worker process
+$ inv work          # Start a worker process
 $ inv beat          # Start a scheduler process
 
 $ inv assets-watch  # Continously watch and build assets
