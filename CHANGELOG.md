@@ -9,6 +9,7 @@
 - Position the community resource link icon correctly [#1298](https://github.com/opendatateam/udata/pull/1298)
 - Add a sort option to query of list of posts in API [#1301](https://github.com/opendatateam/udata/pull/1301)
 - Import dropdown behavior from `udata-gouvfr` and fix hidden submenus on mobile [#1297](https://github.com/opendatateam/udata/pull/1297)
+- show message for emtpy dataset search [#1044](https://github.com/opendatateam/udata/pull/1284)
 
 ## 1.2.4 (2017-12-06)
 
