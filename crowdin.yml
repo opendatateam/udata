@@ -1,0 +1,3 @@
+files:
+  - source: /udata_gouvfr/translations/udata-gouvfr.pot
+    translation: /udata_gouvfr/translations/%two_letters_code%/LC_MESSAGES/%file_name%.po
