@@ -1,6 +1,6 @@
 <template>
 <div>
-<vertical-form v-ref:form :fields="fields" :model="post"></vertical-form>
+    <vertical-form v-ref:form :fields="fields" :model="post"></vertical-form> 
 </div>
 </template>
 
