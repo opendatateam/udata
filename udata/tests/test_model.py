@@ -8,8 +8,10 @@ from datetime import date, datetime, timedelta
 
 from mongoengine.errors import ValidationError
 
-from udata.models import db, Dataset
+from udata.settings import Defaults
+from udata.models import db, Dataset, validate_config, build_test_config
 from udata.tests import TestCase, DBTestMixin
+from udata.errors import ConfigError
 
 
 class UUIDTester(db.Document):
@@ -414,3 +416,48 @@ class ModelResolutionTest(DBTestMixin, TestCase):
     def test_raise_if_missing_class_entry(self):
         with self.assertRaises(ValueError):
             db.resolve_model({'field': 'value'})
+
+
+class MongoConfigTest(TestCase):
+    def test_validate_default_value(self):
+        validate_config({'MONGODB_HOST': Defaults.MONGODB_HOST})
+
+    def test_validate_with_auth(self):
+        validate_config({'MONGODB_HOST': 'mongodb://userid:password@somewhere.com:1234/mydb'})
+
+    def test_raise_exception_on_host_only(self):
+        with self.assertRaises(ConfigError):
+            validate_config({'MONGODB_HOST': 'somehost'})
+
+    def test_raise_exception_on_missing_db(self):
+        with self.assertRaises(ConfigError):
+            validate_config({'MONGODB_HOST': 'mongodb://somewhere.com:1234'})
+        with self.assertRaises(ConfigError):
+            validate_config({'MONGODB_HOST': 'mongodb://somewhere.com:1234/'})
+
+    def test_warn_on_deprecated_db_port(self):
+        with self.assert_warn(DeprecationWarning):
+            validate_config({'MONGODB_HOST': Defaults.MONGODB_HOST,
+                             'MONGODB_PORT': 1234})
+        with self.assert_warn(DeprecationWarning):
+            validate_config({'MONGODB_HOST': Defaults.MONGODB_HOST,
+                             'MONGODB_DB': 'udata'})
+
+    def test_build_test_config_with_MONGODB_HOST_TEST(self):
+        test_url = 'mongodb://somewhere.com:1234/test'
+        config = {'MONGODB_HOST_TEST': test_url}
+        build_test_config(config)
+        self.assertIn('MONGODB_HOST', config)
+        self.assertEqual(config['MONGODB_HOST'], test_url)
+
+    def test_build_test_config_without_MONGODB_HOST_TEST(self):
+        config = {'MONGODB_HOST': Defaults.MONGODB_HOST}
+        expected = '{0}-test'.format(Defaults.MONGODB_HOST)
+        build_test_config(config)
+        self.assertEqual(config['MONGODB_HOST'], expected)
+
+    def test_build_test_config_should_validate(self):
+        with self.assertRaises(ConfigError):
+            test_url = 'mongodb://somewhere.com:1234'
+            config = {'MONGODB_HOST_TEST': test_url}
+            build_test_config(config)

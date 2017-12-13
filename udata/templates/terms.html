@@ -11,11 +11,10 @@
 {% block content %}
 <section class="content">
     <div class="container">
-        <div class="page-header">
-            <h1>Generic terms and conditions</h1>
-        </div>
         <div class="row">
-            <p>Be excellent to each other.</p>
+            <div class="col-xs-12">
+                {{ terms|markdown }}
+            </div>
         </div>
     </div>
 </section>
