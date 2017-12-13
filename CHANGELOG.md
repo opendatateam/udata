@@ -2,7 +2,12 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Export CSS dropdown behavior to `udata` [#234](https://github.com/etalab/udata-gouvfr/pull/234)
+
+## 1.2.1 (2017-12-06)
+
+- Export community resource avatar style to udata [#233](https://github.com/etalab/udata-gouvfr/pull/233)
+- Drop the `terms.html` template. Terms and conditions are now externalized and use the udata core template. (See [udata#1285](https://github.com/opendatateam/udata/pull/1285)) [#232](https://github.com/etalab/udata-gouvfr/pull/232)
 
 ## 1.2.0 (2017-10-20)
 
