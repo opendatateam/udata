@@ -148,13 +148,17 @@
                             {% if reuse.owner.about %}
                             <p>
                                 {{ reuse.owner.about|mdstrip(180) }}
-                                <a href="{{ url_for('users.show', user=reuse.owner) }}"
-                                    title="{{ _('more') }}"
-                                    class="btn btn-grey btn-primary btn-mini">+</a>
                             </p>
                             {% else %}
                             <br/>
                             {% endif %}
+
+                            <a href="{{ url_for('users.show', user=reuse.owner) }}"
+                                title="{{ _('more') }}"
+                                class="btn btn-block btn-sm btn-left btn-warning btn-primary">
+                                <span class="fa fa-user"></span>
+                                {{ _('View Profile') }}
+                            </a>
                             <follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
                                 {% if is_following(reuse.owner) %}following{% endif %}
                                 url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"
@@ -183,21 +187,25 @@
                         </ul>
 
 
-                        <div class="tags">
+                        <ul class="tags">
                             {% for tag in reuse.tags %}
-                            <a href="{{ url_for('search.index', tag=tag) }}"
-                                class="btn btn-primary btn-grey btn-xs"
+                            <li>
+                                <a href="{{ url_for('search.index', tag=tag) }}"
+                                class="label label-primary"
                                 title="{{ tag }}">
-                                {{ tag|truncate(14, True) }}
-                            </a>
+                                    {{ tag|truncate(14, True) }}
+                                </a>
+                            </li>
                             {% endfor %}
-                            <a @click="suggestTag"
-                                class="btn btn-primary btn-dark btn-xs suggest-tag"
+                            <li>
+                                <a @click="suggestTag"
+                                class="label label-primary suggest-tag"
                                 title="{{ _('Suggest a tag with a new discussion thread') }}"
                                 v-tooltip tooltip-placement="right">
-                                {{ _('Suggest a tag') }}
-                            </a>
-                        </div>
+                                    {{ _('Suggest a tag') }}
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
