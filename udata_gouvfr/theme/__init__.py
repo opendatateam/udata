@@ -24,14 +24,7 @@ WP_TIMEOUT = 5
 
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
-    nav.Item(_('Discover OpenData'), 'gouvfr.faq', items=[
-        nav.Item(_('As a citizen'), 'gouvfr.faq', {'section': 'citizen'}),
-        nav.Item(_('As a producer'), 'gouvfr.faq', {'section': 'producer'}),
-        nav.Item(_('As a reuser'), 'gouvfr.faq', {'section': 'reuser'}),
-        nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
-        nav.Item(_('As a system integrator'), 'gouvfr.faq',
-                 {'section': 'system-integrator'}),
-    ]),
+    nav.Item(_('Discover OpenData'), None, url='https://doc.data.gouv.fr'),
     nav.Item(_('Data'), 'datasets.list', items=[
         nav.Item(_('Datasets'), 'datasets.list'),
         nav.Item(_('Reuses'), 'reuses.list'),
@@ -44,12 +37,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 theme.menu(gouvfr_menu)
 
 nav.Bar('gouvfr_footer', [
-    nav.Item(_('As a citizen'), 'gouvfr.faq', {'section': 'citizen'}),
-    nav.Item(_('As a producer'), 'gouvfr.faq', {'section': 'producer'}),
-    nav.Item(_('As a reuser'), 'gouvfr.faq', {'section': 'reuser'}),
-    nav.Item(_('As a developer'), 'gouvfr.faq', {'section': 'developer'}),
-    nav.Item(_('As a system integrator'), 'gouvfr.faq',
-             {'section': 'system-integrator'}),
+    nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr'),
     nav.Item(_('Reference Data'), 'gouvfr.spd'),
     nav.Item(_('Licences'), 'gouvfr.licences'),
     nav.Item(_('API'), 'apidoc.swaggerui'),
