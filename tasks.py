@@ -7,10 +7,13 @@ import json
 import os
 import re
 
+from datetime import datetime
 from glob import iglob
 from os.path import join, exists
 from sys import exit
 
+from babel.messages.pofile import read_po, write_po
+from babel.util import LOCALTZ
 from invoke import run, task
 
 from tasks_helpers import ROOT, info, header, lrun, green
@@ -124,6 +127,21 @@ def i18n(ctx, update=False):
 
     info('Extract Python strings')
     lrun('python setup.py extract_messages')
+
+    # Fix crowdin requiring Language with `2-digit` iso code in potfile
+    # to produce 2-digit iso code pofile
+    # Opening the catalog also allows to set extra metadata
+    potfile = join(ROOT, 'udata', 'translations', '{}.pot'.format(I18N_DOMAIN))
+    with open(potfile, 'rb') as infile:
+        catalog = read_po(infile, 'en')
+    catalog.copyright_holder = 'Open Data Team'
+    catalog.msgid_bugs_address = 'i18n@opendata.team'
+    catalog.language_team = 'Open Data Team <i18n@opendata.team>'
+    catalog.last_translator = 'Open Data Team <i18n@opendata.team>'
+    catalog.revision_date = datetime.now(LOCALTZ)
+    with open(potfile, 'wb') as outfile:
+        write_po(outfile, catalog, width=80)
+
     if update:
         lrun('python setup.py update_catalog')
 
