@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.5 (2017-12-14)
 
 - Fix misused hand cursor over the spatial coverage map in dataset admin [#1296](https://github.com/opendatateam/udata/pull/1296)
 - Fix broken post edit page [#1295](https://github.com/opendatateam/udata/pull/1295)
