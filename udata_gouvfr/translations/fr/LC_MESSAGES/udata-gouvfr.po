@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata-gouvfr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-14 16:24+0100\n"
-"PO-Revision-Date: 2017-12-14 10:31-0500\n"
+"PO-Revision-Date: 2017-12-14 10:41-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -52,7 +52,7 @@ msgstr "Données de référence"
 
 #: udata_gouvfr/models.py:37
 msgid "Transport"
-msgstr ""
+msgstr "Transport"
 
 #: udata_gouvfr/templates/c3.html:138 udata_gouvfr/templates/nec_mergitur.html:80
 #: udata_gouvfr/templates/openfield16.html:190
@@ -62,11 +62,11 @@ msgstr "Voir les %(nb)s jeux de données"
 
 #: udata_gouvfr/templates/licences.html:4 udata_gouvfr/theme/__init__.py:42
 msgid "Licences"
-msgstr ""
+msgstr "Licences"
 
 #: udata_gouvfr/templates/licences.html:8
 msgid "Licence"
-msgstr ""
+msgstr "Licence"
 
 #: udata_gouvfr/theme/__init__.py:27
 msgid "Discover OpenData"
@@ -96,11 +96,11 @@ msgstr "Tableau de bord"
 
 #: udata_gouvfr/theme/__init__.py:40
 msgid "Documentation"
-msgstr ""
+msgstr "Documentation"
 
 #: udata_gouvfr/theme/__init__.py:43
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: udata_gouvfr/theme/__init__.py:44
 msgid "Credits"
@@ -174,7 +174,7 @@ msgstr "Mon profil"
 
 #: udata_gouvfr/theme/templates/header.html:93
 msgid "Administration"
-msgstr ""
+msgstr "Administration"
 
 #: udata_gouvfr/theme/templates/header.html:100
 msgid "Logout"
