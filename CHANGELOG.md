@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.2 (2017-12-14)
 
 - Export CSS dropdown behavior to `udata` [#234](https://github.com/etalab/udata-gouvfr/pull/234)
 - Remove internal FAQ and switch to [doc.data.gouv.fr](https://doc.data.gouv.fr) [#236](https://github.com/etalab/udata-gouvfr/issues/236)
