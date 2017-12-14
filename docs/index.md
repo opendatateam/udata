@@ -29,7 +29,7 @@ and [installation](installation.md) sections.
 
 For a bug, please [report it directly as a Github issue][github-new-issue] following the proposed template. We’ll answer you as soon as possible.
 
-For a contribution as a enthusiastic citizen, check out our [contributing guide](contributing-guide.md). It's good to have you on board!
+For a contribution as an enthusiastic citizen, check out our [contributing guide](contributing-guide.md). It's good to have you on board!
 
 [data-gouv-fr]: https://www.data.gouv.fr/
 [data-gouv-lu-repository]: https://github.com/opendatalu/udata-gouvlu

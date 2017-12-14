@@ -9,7 +9,7 @@ from udata.commands import manager, IS_INTERACTIVE, green
 from udata.core.dataset.commands import licenses
 from udata.core.user import commands as user_commands
 from udata.i18n import lazy_gettext as _
-from udata.search.commands import init as init_search
+from udata.search.commands import index
 
 from .db import migrate
 from .fixtures import generate_fixtures
@@ -24,7 +24,7 @@ def init():
     log.info('Apply DB migrations if needed')
     migrate(record=True)
 
-    init_search(delete=True, force=not IS_INTERACTIVE)
+    index()
 
     if IS_INTERACTIVE:
         text = _('Do you want to create a superadmin user?')

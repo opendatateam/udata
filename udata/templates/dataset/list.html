@@ -15,11 +15,16 @@
 
 {% block breadcrumb %}
     <li class="active">
+    
         {{ _('Datasets') }}
-        <small>{{ _('%(start)s to %(end)s on %(total)s',
-            start=datasets.page_start,
-            end=datasets.page_end,
-            total=datasets.total) }}</small>
+
+        {% if datasets.total > 0 %}
+            <small>{{ _('%(start)s to %(end)s on %(total)s',
+                start=datasets.page_start,
+                end=datasets.page_end,
+                total=datasets.total) }}</small>
+		{% endif %}
+        
         {% include "dataset/search-labels.html" %}
     </li>
 {% endblock %}
@@ -43,21 +48,31 @@
 
 {% block main_content %}
 <div class="row">
-    <div class="col-md-8 col-lg-9 smaller">
 
-        <ul class="search-results">
-            {% for dataset in datasets %}
-            {% include theme('dataset/search-result.html') %}
-            {% endfor %}
-        </ul>
+    {% if datasets %} 
+        <div class="col-md-8 col-lg-9 smaller">
 
-        <div class="clearfix"></div>
-        {{ paginator(datasets) }}
+            <ul class="search-results">
+                {% for dataset in datasets %}
+                {% include theme('dataset/search-result.html') %}
+                {% endfor %}
+            </ul>
+
+            <div class="clearfix"></div>
+
+            {{ paginator(datasets) }}
+
     </div>
 
     <aside class="col-md-4 col-lg-3">
     {% include theme('dataset/search-panel.html') %}
     </aside>
-
+    {% else %} 
+        <p class="text-center">
+            <strong>
+                {{ _('No results found, try to be less specific.') }}
+            </strong>
+        </p>
+    {% endif %}
 </div>
 {% endblock %}

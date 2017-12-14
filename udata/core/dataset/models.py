@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 from blinker import signal
 from stringdist import rdlevenshtein
-from flask import url_for
+from flask import url_for, current_app
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from werkzeug import cached_property
@@ -88,6 +88,16 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 # used to guess license
 # (ie. number of allowed character changes)
 MAX_DISTANCE = 2
+
+
+def get_json_ld_extra(key, value):
+    '''Serialize an extras key, value pair into JSON-LD'''
+    value = value.serialize() if hasattr(value, 'serialize') else value
+    return {
+        '@type': 'http://schema.org/PropertyValue',
+        'name': key,
+        'value': value,
+    }
 
 
 class License(db.Document):
@@ -194,9 +204,12 @@ class ResourceMixin(object):
             self.urlhash = hash_url(self.url)
 
     @property
-    def closed_format(self):
-        """Return True if the specified format is in CLOSED_FORMATS."""
-        return self.format.lower() in CLOSED_FORMATS
+    def closed_or_no_format(self):
+        """
+        Return True if the specified format is in CLOSED_FORMATS or
+        no format has been specified.
+        """
+        return not self.format or self.format.lower() in CLOSED_FORMATS
 
     def check_availability(self):
         '''
@@ -206,6 +219,35 @@ class ResourceMixin(object):
         `all([])` (dataset, organization, user).
         '''
         return self.extras.get('check:available', 'unknown')
+
+    def need_check(self):
+        '''Does the resource needs to be checked against its linkchecker?
+
+        We check unavailable resources often, unless they go over the
+        threshold. Available resources are checked less and less frequently
+        based on their historical availability.
+        '''
+        min_cache_duration, max_cache_duration, ko_threshold = [
+            current_app.config.get(k) for k in (
+                'LINKCHECKING_MIN_CACHE_DURATION',
+                'LINKCHECKING_MAX_CACHE_DURATION',
+                'LINKCHECKING_UNAVAILABLE_THRESHOLD',
+            )
+        ]
+        count_availability = self.extras.get('check:count-availability', 1)
+        is_available = self.check_availability()
+        if is_available == 'unknown':
+            return True
+        elif is_available or count_availability > ko_threshold:
+            delta = min(min_cache_duration * count_availability,
+                        max_cache_duration)
+        else:
+            delta = min_cache_duration
+        if self.extras.get('check:date'):
+            limit_date = datetime.now() - timedelta(minutes=delta)
+            if self.extras['check:date'] >= limit_date:
+                return False
+        return True
 
     @property
     def latest(self):
@@ -228,6 +270,9 @@ class ResourceMixin(object):
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.modified.isoformat(),
             'datePublished': self.published.isoformat(),
+            'extras': [get_json_ld_extra(*item)
+                       for item in self.extras.items()],
+            'needCheck': self.need_check()
         }
 
         if 'views' in self.metrics:
@@ -442,8 +487,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['description_length'] = len(self.description)
         if self.resources:
             result['has_resources'] = True
-            result['has_only_closed_formats'] = all(
-                resource.closed_format for resource in self.resources)
+            result['has_only_closed_or_no_formats'] = all(
+                resource.closed_or_no_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
                 self.check_availability())
         discussions = Discussion.objects(subject=self)
@@ -472,7 +517,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             if quality['description_length'] > 100:
                 score += UNIT
         if 'has_resources' in quality:
-            if quality['has_only_closed_formats']:
+            if quality['has_only_closed_or_no_formats']:
                 score -= UNIT
             else:
                 score += UNIT
@@ -539,7 +584,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             'contributedDistribution': [
                 resource.json_ld for resource in self.community_resources
             ],
-            'extras': [self.get_json_ld_extra(*item)
+            'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
 
@@ -560,16 +605,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['author'] = author
 
         return result
-
-    @staticmethod
-    def get_json_ld_extra(key, value):
-
-        value = value.serialize() if hasattr(value, 'serialize') else value
-        return {
-            '@type': 'http://schema.org/PropertyValue',
-            'name': key,
-            'value': value,
-        }
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)

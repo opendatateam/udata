@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 import mock
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from udata.tests import TestCase
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
@@ -12,6 +12,9 @@ from udata.linkchecker.checker import check_resource
 class LinkcheckerTestSettings():
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = ['example-ignore.com']
+    LINKCHECKING_MIN_CACHE_DURATION = 0.5
+    LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
+    LINKCHECKING_MAX_CACHE_DURATION = 100
 
 
 class LinkcheckerTest(TestCase):
@@ -40,6 +43,7 @@ class LinkcheckerTest(TestCase):
 
         res = check_resource(self.resource)
         self.assertEquals(res, check_res)
+        check_res.update({'check:count-availability': 1})
         self.assertEquals(self.resource.extras, check_res)
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
@@ -53,7 +57,7 @@ class LinkcheckerTest(TestCase):
 
         res = check_resource(self.resource)
         self.assertEquals(res, check_res)
-        self.assertEquals(self.resource.extras, {'check:status': 200})
+        self.assertNotIn('dummy', self.resource.extras)
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
     def test_check_resource_linkchecker_no_status(self, mock_fn):
@@ -97,3 +101,107 @@ class LinkcheckerTest(TestCase):
         res = check_resource(self.resource)
         self.assertEquals(res.get('check:status'), 204)
         self.assertEquals(res.get('check:available'), True)
+
+    def test_is_need_check(self):
+        self.resource.extras = {'check:available': True,
+                                'check:date': datetime.now(),
+                                'check:status': 42}
+        self.assertFalse(self.resource.need_check())
+
+    def test_is_need_check_unknown_status(self):
+        self.resource.extras = {}
+        self.assertTrue(self.resource.need_check())
+
+    def test_is_need_check_cache_expired(self):
+        self.resource.extras = {
+            'check:available': True,
+            'check:date': datetime.now() - timedelta(seconds=3600),
+            'check:status': 42
+        }
+        self.assertTrue(self.resource.need_check())
+
+    def test_is_need_check_count_availability(self):
+        self.resource.extras = {
+            # should need a new check after 100 * 30s = 3000s < 3600s
+            'check:count-availability': 100,
+            'check:available': True,
+            'check:date': datetime.now() - timedelta(seconds=3600),
+            'check:status': 42
+        }
+        self.assertTrue(self.resource.need_check())
+
+    def test_is_need_check_count_availability_expired(self):
+        self.resource.extras = {
+            # should need a new check after 150 * 30s = 4500s > 3600s
+            'check:count-availability': 150,
+            'check:available': True,
+            'check:date': datetime.now() - timedelta(seconds=3600),
+            'check:status': 42
+        }
+        self.assertFalse(self.resource.need_check())
+
+    def test_is_need_check_count_availability_unavailable(self):
+        self.resource.extras = {
+            # should need a new check after 30s < 3600S
+            # count-availability is below threshold
+            'check:count-availability': 95,
+            'check:available': False,
+            'check:date': datetime.now() - timedelta(seconds=3600),
+            'check:status': 42
+        }
+        self.assertTrue(self.resource.need_check())
+
+    @mock.patch('udata.linkchecker.checker.get_linkchecker')
+    def test_count_availability_increment(self, mock_fn):
+        check_res = {'check:status': 200, 'check:available': True,
+                     'check:date': datetime.now()}
+
+        class DummyLinkchecker:
+            def check(self, _):
+                return check_res
+        mock_fn.return_value = DummyLinkchecker
+
+        check_resource(self.resource)
+        self.assertEquals(self.resource.extras['check:count-availability'], 1)
+
+        check_resource(self.resource)
+        self.assertEquals(self.resource.extras['check:count-availability'], 2)
+
+    @mock.patch('udata.linkchecker.checker.get_linkchecker')
+    def test_count_availability_reset(self, mock_fn):
+        self.resource.extras = {'check:status': 200, 'check:available': True,
+                                'check:date': datetime.now(),
+                                'check:count-availability': 2}
+        check_res = {'check:status': 200, 'check:available': False,
+                     'check:date': datetime.now()}
+
+        class DummyLinkchecker:
+            def check(self, _):
+                return check_res
+        mock_fn.return_value = DummyLinkchecker
+
+        check_resource(self.resource)
+        self.assertEquals(self.resource.extras['check:count-availability'], 1)
+
+    def test_count_availability_threshold(self):
+        self.resource.extras = {
+            'check:status': 404,
+            'check:available': False,
+            # if it weren't above threshold, should need check (>30s)
+            # and we're still below max_cache 101 * 0.5 < 100
+            'check:date': datetime.now() - timedelta(seconds=60),
+            'check:count-availability': 101
+        }
+        self.assertFalse(self.resource.need_check())
+
+    def test_count_availability_max_cache_duration(self):
+        self.resource.extras = {
+            'check:status': 200,
+            'check:available': True,
+            # next check should be at 300 * 0.5 = 150min
+            # but we are above max cache duration 150min > 100min
+            # and 120m > 100 min so we should need a new check
+            'check:date': datetime.now() - timedelta(minutes=120),
+            'check:count-availability': 300
+        }
+        self.assertTrue(self.resource.need_check())

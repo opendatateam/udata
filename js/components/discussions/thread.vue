@@ -31,6 +31,9 @@
             <span class="list-group-item-link">
                 <a href="#{{ discussionIdAttr }}-{{ index }}"><span class="fa fa-link"></span></a>
             </span>
+
+            <div class="list-group-item-text ellipsis">{{ _('Comment posted on {posted_on}', { posted_on: formatDate(response.posted_on) })  }}</div>
+
         </template>
         <p class="list-group-item-heading">
             {{{ response.content | markdown }}}
@@ -97,10 +100,10 @@ export default {
             return `discussion-${this.discussion.id}`;
         },
         createdDate() {
-            return moment(this.discussion.created).format('LL')
+            return moment(this.discussion.created).format('LL');
         },
         closedDate() {
-            return moment(this.discussion.closed).format('LL')
+            return moment(this.discussion.closed).format('LL');
         }
     },
     methods: {
@@ -148,6 +151,9 @@ export default {
             } else {
                 this.$scrollTo(this);
             }
+        },
+        formatDate(val) {
+            return moment(val).format('LL');
         }
     }
 }

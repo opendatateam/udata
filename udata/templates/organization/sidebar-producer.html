@@ -7,13 +7,15 @@
 {% if organization.description %}
 <p>
     {{ organization.description|mdstrip(180) }}
-    <a href="{{ url_for('organizations.show', org=organization) }}"
-        title="{{ _('more') }}"
-        class="btn btn-grey btn-primary btn-mini">+</a>
 </p>
 {% else %}
 <br/>
 {% endif %}
+<a href="{{ url_for('organizations.show', org=organization) }}"
+    class="btn btn-sm btn-block btn-left btn-warning btn-primary">
+    <span class="fa fa-users"></span>
+    {{ _('View Profile') }}
+</a>
 <button type="button" class="btn btn-sm btn-block btn-left btn-warning" @click="$refs.discussions.start('')"
     v-tooltip="'{{ _('Contact the producer') }}'" tooltip-placement="left">
     <span class="fa fa-envelope-o"></span>

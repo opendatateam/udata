@@ -3,15 +3,15 @@ from __future__ import unicode_literals
 
 import hashlib
 import io
-import sys
 
 import pydenticon
 
 from flask import redirect, send_file, current_app
 
 from udata import theme, entrypoints
+from udata.app import cache
 
-ADORABLE_AVATARS_URL = 'https://api.adorable.io/avatars/{size}/{identifier}.png'
+ADORABLE_AVATARS_URL = 'https://api.adorable.io/avatars/{size}/{identifier}.png'  # noqa
 ROBOHASH_URL = 'https://robohash.org/{identifier}.png?size={size}x{size}&set={skin}&bgset={bg}'  # noqa
 
 
@@ -76,17 +76,17 @@ def get_identicon(identifier, size):
     return get_provider()(identifier, size)
 
 
-def internal(identifier, size):
+@cache.memoize()
+def generate_pydenticon(identifier, size):
     '''
-    Internal provider
-
-    Use pydenticon to generate an identicon.
+    Use pydenticon to generate an identicon image.
     All parameters are extracted from configuration.
     '''
     blocks_size = get_internal_config('size')
     foreground = get_internal_config('foreground')
     background = get_internal_config('background')
-    generator = pydenticon.Generator(blocks_size, blocks_size, digest=hashlib.sha1,
+    generator = pydenticon.Generator(blocks_size, blocks_size,
+                                     digest=hashlib.sha1,
                                      foreground=foreground,
                                      background=background)
 
@@ -95,11 +95,19 @@ def internal(identifier, size):
     padding = int(round(get_internal_config('padding') * size / 100.))
     size = size - 2 * padding
     padding = (padding, ) * 4
-    identicon = generator.generate(identifier, size, size,
-                                   padding=padding,
-                                   output_format='png')
-    return send_file(io.BytesIO(identicon), mimetype='image/png')
+    return generator.generate(identifier, size, size,
+                              padding=padding,
+                              output_format='png')
 
+
+def internal(identifier, size):
+    '''
+    Internal provider
+
+    Use pydenticon to generate an identicon.
+    '''
+    identicon = generate_pydenticon(identifier, size)
+    return send_file(io.BytesIO(identicon), mimetype='image/png')
 
 
 def adorable(identifier, size):

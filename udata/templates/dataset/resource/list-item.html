@@ -1,12 +1,17 @@
 {% set resource_format = resource.format|trim|lower or 'data' %}
-<div id="resource-{{resource.id}}" class="list-group-item"
+<div id="resource{% if resource.from_community %}-community{% endif %}-{{resource.id}}" class="list-group-item"
     data-checkurl="{{ url_for('api.check_dataset_resource', dataset=dataset.id, rid=resource.id) }}"
-    @click="showResource('{{resource.id}}', $event, {{ resource.owner is defined|tojson }})">
+    @click.prevent="showResource('{{resource.id}}', {{ resource.owner is defined|tojson }})">
     <div class="format-label pull-left" v-tooltip tooltip-placement="left">
         <span class="ellipsis" data-format="{{ resource_format }}">
             {{ resource_format }}
         </span>
     </div>
+    <span class="list-group-item-link">
+        <a @click.stop href="#resource{% if resource.from_community %}-community{% endif %}-{{ resource.id }}">
+            <span class="fa fa-link"></span>
+        </a>
+    </span>
     <h4 class="list-group-item-heading ellipsis">
         <a href="{{resource.url}}">
             <span>{{ resource.title or _('Nameless resource') }}</span>
@@ -28,7 +33,7 @@
             {% set edit_path = 'dataset/{id}/resource/{rid}' %}
         {% endif %}
         <div class="btn-group btn-group-xs tools">
-            <a class="btn btn-default btn-edit" v-tooltip title="{{ _('Edit') }}"
+            <a @click.stop class="btn btn-default btn-edit" v-tooltip title="{{ _('Edit') }}"
                 href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
                 <span class="fa fa-pencil"></span>
             </a>

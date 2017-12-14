@@ -21,9 +21,9 @@
     </qa-section>
 
     <qa-section :title="_('Open formats')"
-        :condition="!quality.has_only_closed_formats"
-        :ok="_('You currently have other formats!')"
-        :ko="_('You only have closed formats. Cannot you export some in open ones?')">
+        :condition="!quality.has_only_closed_or_no_formats"
+        :ok="_('You currently have some open formats!')"
+        :ko="_('You only have closed formats or no format defined. Can you fill the format info or export some resources in an open format?')">
         <p>{{ _('The open data community enjoy using files in open formats that can be manipulated easily through open software and tools. Make sure you publish your data at least in formats different from XLS, DOC and PDF.') }}</p>
     </qa-section>
 
