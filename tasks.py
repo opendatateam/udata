@@ -72,7 +72,7 @@ def i18nc(ctx):
 
 @task
 def watch(ctx):
-    print(red('[deprecated] Please use `inv assets_watch` instead.'))
+    print(red('[deprecated] Please use `inv assets-watch` instead.'))
     assets_watch(ctx)
 
 
@@ -84,7 +84,7 @@ def assets_watch(ctx):
 
 @task
 def assets(ctx):
-    print(red('[deprecated] Please use `inv assets_build` instead.'))
+    print(red('[deprecated] Please use `inv assets-build` instead.'))
     assets_build(ctx)
 
 
