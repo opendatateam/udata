@@ -1,30 +1,21 @@
-# French translations for udata-gouvfr.
-# Copyright (C) 2017 ORGANIZATION
-# This file is distributed under the same license as the udata-gouvfr
-# project.
-#
-# Translators:
-# Axel Haustant, 2014
-# Axel Haustant, 2014-2017
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014
-# Larlet David <david@larlet.fr>, 2015-2017
-# noirbizarre, 2014
-# odtvince, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version:  udata-gouv.fr\n"
+"Project-Id-Version: udata-gouvfr\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-14 16:24+0100\n"
-"PO-Revision-Date: 2017-08-07 12:10+0000\n"
-"Last-Translator: Axel Haustant\n"
-"Language: fr\n"
-"Language-Team: French (http://www.transifex.com/etalab/udata-"
-"gouvfr/language/fr/)\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"PO-Revision-Date: 2017-12-14 10:41-0500\n"
+"Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
+"Language-Team: French\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.5.0\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: crowdin.com\n"
+"X-Crowdin-Project: udata-gouvfr\n"
+"X-Crowdin-Language: fr\n"
+"X-Crowdin-File: /master/udata_gouvfr/translations/udata-gouvfr.pot\n"
+"Language: fr_FR\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
@@ -48,11 +39,11 @@ msgstr "Lauréat Dataconnexions 6"
 
 #: udata_gouvfr/models.py:33
 msgid "C³"
-msgstr "C³"
+msgstr ""
 
 #: udata_gouvfr/models.py:34
 msgid "Nec Mergitur"
-msgstr "Nec Mergitur"
+msgstr ""
 
 #: udata_gouvfr/models.py:36 udata_gouvfr/templates/spd.html:8
 #: udata_gouvfr/theme/__init__.py:41
@@ -61,10 +52,9 @@ msgstr "Données de référence"
 
 #: udata_gouvfr/models.py:37
 msgid "Transport"
-msgstr ""
+msgstr "Transport"
 
-#: udata_gouvfr/templates/c3.html:138
-#: udata_gouvfr/templates/nec_mergitur.html:80
+#: udata_gouvfr/templates/c3.html:138 udata_gouvfr/templates/nec_mergitur.html:80
 #: udata_gouvfr/templates/openfield16.html:190
 #, python-format
 msgid "See the %(nb)s datasets"
@@ -72,11 +62,11 @@ msgstr "Voir les %(nb)s jeux de données"
 
 #: udata_gouvfr/templates/licences.html:4 udata_gouvfr/theme/__init__.py:42
 msgid "Licences"
-msgstr ""
+msgstr "Licences"
 
 #: udata_gouvfr/templates/licences.html:8
 msgid "Licence"
-msgstr ""
+msgstr "Licence"
 
 #: udata_gouvfr/theme/__init__.py:27
 msgid "Discover OpenData"
@@ -86,20 +76,17 @@ msgstr "Découvrez l’OpenData"
 msgid "Data"
 msgstr "Données"
 
-#: udata_gouvfr/theme/__init__.py:29
-#: udata_gouvfr/theme/templates/footer.html:68
+#: udata_gouvfr/theme/__init__.py:29 udata_gouvfr/theme/templates/footer.html:68
 #: udata_gouvfr/theme/templates/footer.html:70
 msgid "Datasets"
 msgstr "Jeux de données"
 
-#: udata_gouvfr/theme/__init__.py:30
-#: udata_gouvfr/theme/templates/footer.html:73
+#: udata_gouvfr/theme/__init__.py:30 udata_gouvfr/theme/templates/footer.html:73
 #: udata_gouvfr/theme/templates/footer.html:75
 msgid "Reuses"
 msgstr "Réutilisations"
 
-#: udata_gouvfr/theme/__init__.py:31
-#: udata_gouvfr/theme/templates/header.html:78
+#: udata_gouvfr/theme/__init__.py:31 udata_gouvfr/theme/templates/header.html:78
 msgid "Organizations"
 msgstr "Organisations"
 
@@ -108,10 +95,8 @@ msgid "Dashboard"
 msgstr "Tableau de bord"
 
 #: udata_gouvfr/theme/__init__.py:40
-#, fuzzy
-#| msgid "Administration"
 msgid "Documentation"
-msgstr "Administration"
+msgstr "Documentation"
 
 #: udata_gouvfr/theme/__init__.py:43
 msgid "API"
@@ -168,12 +153,8 @@ msgid "Back to top"
 msgstr "Haut de page"
 
 #: udata_gouvfr/theme/templates/header.html:4
-msgid ""
-"Internet Explorer 8 and below are not anymore supported. Please upgrade "
-"or change your browser to access the website."
-msgstr ""
-"Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jour "
-"ou changez de navigateur pour accéder à ce site."
+msgid "Internet Explorer 8 and below are not anymore supported. Please upgrade or change your browser to access the website."
+msgstr "Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jour ou changez de navigateur pour accéder à ce site."
 
 #: udata_gouvfr/theme/templates/header.html:4
 msgid "More information →"
@@ -326,46 +307,4 @@ msgstr "L'identité de ce service public est certifiée par Etalab"
 #: udata_gouvfr/theme/templates/organization/sidebar-producer.html:4
 msgid "Certified public service"
 msgstr "Service public certifié"
-
-#~ msgid "Découvrir l’OpenData en tant que citoyen - FAQ"
-#~ msgstr "Découvrir l’OpenData en tant que citoyen - FAQ"
-
-#~ msgid "Questions fréquemment posées sur la plateforme data.gouv.fr"
-#~ msgstr "Questions fréquemment posées sur la plateforme data.gouv.fr"
-
-#~ msgid "Découvrir l’OpenData en tant que développeur - FAQ"
-#~ msgstr "Découvrir l’OpenData en tant que développeur - FAQ"
-
-#~ msgid "Découvrir l’OpenData - FAQ"
-#~ msgstr "Découvrir l’OpenData - FAQ"
-
-#~ msgid "Découvrir l’OpenData en tant que producteur - FAQ"
-#~ msgstr "Découvrir l’OpenData en tant que producteur - FAQ"
-
-#~ msgid "Découvrir l’OpenData en tant que réutilisateur - FAQ"
-#~ msgstr "Découvrir l’OpenData en tant que réutilisateur - FAQ"
-
-#~ msgid "Découvrir l’OpenData en tant qu’intégrateur - FAQ"
-#~ msgstr "Découvrir l’OpenData en tant qu’intégrateur - FAQ"
-
-#~ msgid "As a citizen"
-#~ msgstr "En tant que citoyen"
-
-#~ msgid "As a producer"
-#~ msgstr "En tant que producteur"
-
-#~ msgid "As a reuser"
-#~ msgstr "En tant que réutilisateur"
-
-#~ msgid "As a developer"
-#~ msgstr "En tant que développeur"
-
-#~ msgid "As a system integrator"
-#~ msgstr "En tant qu’intégrateur"
-
-#~ msgid "Terms"
-#~ msgstr "Conditions générales d'utilisations"
-
-#~ msgid "terms"
-#~ msgstr "conditions générales d'utilisations"
 
