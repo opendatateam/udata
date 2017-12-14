@@ -36,5 +36,6 @@ module.exports = {
     },
     plugins: [
         new ExtractTextPlugin('[name].css'),
+        require('webpack-fail-plugin'),
     ]
 };

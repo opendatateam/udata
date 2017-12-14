@@ -18,7 +18,8 @@
     "less": "^2.5.3",
     "less-loader": "^2.2.2",
     "style-loader": "^0.13.0",
-    "webpack": "^1.12.11"
+    "webpack": "^1.12.11",
+    "webpack-fail-plugin": "^2.0.0"
   },
   "dependencies": {
     "bootstrap": "^3.3.7"
