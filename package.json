@@ -69,7 +69,8 @@
     "vue-html-loader": "^1.2.3",
     "vue-loader": "8.5.3",
     "vue-style-loader": "^1.0.0",
-    "webpack": "1.13.1"
+    "webpack": "1.13.1",
+    "webpack-fail-plugin": "^2.0.0"
   },
   "dependencies": {
     "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
