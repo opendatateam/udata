@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.2 (2017-12-14)
 
 - Export CSS dropdown behavior to `udata` [#234](https://github.com/etalab/udata-gouvfr/pull/234)
