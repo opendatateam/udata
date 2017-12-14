@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2017-12-14 10:21-0500\n"
+"PO-Revision-Date: 2017-12-14 11:39-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -2483,7 +2483,7 @@ msgstr[1] "%(num)s membres"
 #: udata/templates/organization/sidebar-producer.html:17
 #: udata/templates/reuse/display.html:160
 msgid "View Profile"
-msgstr ""
+msgstr "Voir le profil"
 
 #. This is an action (present indicative).
 #: udata/templates/organization/sidebar-producer.html:23
@@ -2892,12 +2892,12 @@ msgstr[1] "%(num)d suivis"
 #: udata/templates/user/datasets.html:39
 #, python-format
 msgid "%(user)s has not yet published dataset"
-msgstr ""
+msgstr "%(user)s n'a pas encore publié de jeu de données"
 
 #: udata/templates/user/followers.html:34
 #, python-format
 msgid "%(user)s has no follower"
-msgstr ""
+msgstr "%(user)s n'a pas d'abonnés"
 
 #: udata/templates/user/following.html:43
 #, python-format
@@ -2944,7 +2944,7 @@ msgstr "utilisateurs"
 #: udata/templates/user/reuses.html:38
 #, python-format
 msgid "%(user)s has not yet published resuse"
-msgstr ""
+msgstr "%(user)s n'a pas encore publié de réutilisation"
 
 #: udata/theme/__init__.py:41
 msgid "Map"
