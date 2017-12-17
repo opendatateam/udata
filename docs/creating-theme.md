@@ -13,7 +13,7 @@ cookiecutter gh:opendatateam/cookiecutter-udata-theme
 This will create a new theme skeleton on which you can start hacking.
 
 As udata is Bootstrap-based (only the style part),
-the difficulty will depends on what you cant to do:
+the difficulty will depend on what you want to do:
 
 - customize some style and colors ⇨ very easy
 - customize the layouts or how some part of udata is rendered ⇨ easy

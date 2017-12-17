@@ -75,6 +75,8 @@ module.exports = {
         languages,
     },
     plugins: [
+        // Prevent webpack 1.x false positive
+        require('webpack-fail-plugin'),
         // Fix AdminLTE packaging
         new webpack.NormalModuleReplacementPlugin(
             /admin-lte\/build\/img\/boxed-bg\.jpg$/,

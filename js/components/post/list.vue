@@ -34,7 +34,7 @@ export default {
             },{
                 label: this._('Creation'),
                 key: 'created_at',
-                sort: 'created',
+                sort: 'created_at',
                 align: 'left',
                 type: 'timeago',
                 width: 120

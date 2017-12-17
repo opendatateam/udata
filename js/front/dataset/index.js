@@ -28,6 +28,8 @@ function parseUrl(url) {
     return a;
 }
 
+const RESOURCE_REGEX = /^#resource(-community)?-([0-9a-f-]{36})$/;
+
 new Vue({
     mixins: [FrontMixin],
     components: {
@@ -43,6 +45,11 @@ new Vue({
         this.loadCoverageMap();
         this.checkResources();
         this.fetchReuses();
+        if (document.location.hash) {
+            this.$nextTick(() => { // Wait for data to be binded
+                this.openResourceFromHash(document.location.hash);
+            });
+        }
         log.debug('Dataset display page ready');
     },
     methods: {
@@ -64,13 +71,16 @@ new Vue({
         /**
          * Display a resource or a community ressource in a modal
          */
-        showResource(id, e, isCommunity) {
-            // Ensure edit button work
-            if ([e.target, e.target.parentNode].some(el => el.classList.contains('btn-edit'))) return;
-            e.preventDefault();
+        showResource(id, isCommunity) {
             const attr = isCommunity ? 'communityResources' : 'resources';
             const resource = this.dataset[attr].find(resource => resource['@id'] === id);
-            this.$modal(ResourceModal, {resource});
+            const communityPrefix = isCommunity ? '-community' : '';
+            location.hash = `resource${communityPrefix}-${id}`;
+            const modal = this.$modal(ResourceModal, {resource});
+            modal.$on('modal:closed', () => {
+                // prevent scrolling to top
+                location.hash = '_';
+            });
         },
 
         /**
@@ -233,6 +243,18 @@ new Vue({
                 this._('New tag suggestion to improve metadata'),
                 this._('Hello,\n\nI propose this new tag: ')
             );
-        }
+        },
+
+        /**
+         * Open resource modal if corresponding hash in URL.
+         * /!\ there is a similar function in <discussion-threads> (jumpToHash),
+         * jump may come from there too.
+         */
+        openResourceFromHash(hash) {
+            if (RESOURCE_REGEX.test(hash)) {
+                const [, isCommunity, id] = hash.match(RESOURCE_REGEX);
+                this.showResource(id, isCommunity);
+            }
+        },
     }
 });
