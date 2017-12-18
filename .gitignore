@@ -40,6 +40,7 @@ js-built
 /udata/static/
 /jsdoc/
 *.rdb
+venv
 
 # Installer logs
 pip-log.txt
@@ -71,3 +72,6 @@ udata.cfg
 
 # Local data directory
 data
+
+# PyCharm
+.idea
