@@ -23,7 +23,8 @@ and install **udata-gouvfr**:
 pip install udata-gouvfr
 ```
 
-Modify your local configuration file of **udata** (typically, `udata.cfg`) as following:
+Create a local configuration file `udata.cfg` in your **udata** directory
+(or where your UDATA_SETTINGS point out) or modify an existing one as following:
 
 ```python
 PLUGINS = ['gouvfr']
