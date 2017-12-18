@@ -26,7 +26,7 @@ def harvest(self, ident):
         chord(items)(finalize)
 
 
-@task
+@task(ignore_result=False)
 def harvest_item(source_id, item_id):
     log.info('Harvesting item %s for source "%s"', item_id, source_id)
 
@@ -41,7 +41,7 @@ def harvest_item(source_id, item_id):
     return (item_id, result)
 
 
-@task
+@task(ignore_result=False)
 def harvest_finalize(results, source_id):
     log.info('Finalize harvesting for source "%s"', source_id)
     source = HarvestSource.get(source_id)
