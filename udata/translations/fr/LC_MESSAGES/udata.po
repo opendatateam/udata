@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2017-12-14 11:39-0500\n"
+"PO-Revision-Date: 2017-12-14 13:41-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -239,7 +239,7 @@ msgstr "La zone géographique couverte par les données."
 #: udata/core/topic/forms.py:25 udata/templates/dataset/search-panel.html:10
 #: udata/templates/reuse/search-panel.html:7
 msgid "Tags"
-msgstr "Tags"
+msgstr "Mots-clés"
 
 #: udata/core/dataset/forms.py:93 udata/core/reuse/forms.py:32
 msgid "Some taxonomy keywords"
@@ -1603,7 +1603,7 @@ msgstr[1] "%(num)d territoires"
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
 msgid "Tag"
-msgstr "Tag"
+msgstr "Mot-clé"
 
 #: udata/templates/dataset/search-labels.html:12
 #: udata/templates/organization/search-labels.html:3 udata/templates/search.html:59
@@ -2853,7 +2853,7 @@ msgstr "Voir plus"
 
 #: udata/templates/topic/display_base.html:23
 msgid "Related tags"
-msgstr "Tags associés"
+msgstr "Mots-clés associés"
 
 #: udata/templates/topic/reuses.html:7
 #, python-format
