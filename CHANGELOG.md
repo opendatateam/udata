@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add a `udata worker status` command to list pending tasks.[breaking] The `udata worker` command is replaced by `udata worker start`
 
 ## 1.2.5 (2017-12-14)
 
