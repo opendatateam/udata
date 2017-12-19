@@ -152,3 +152,17 @@ udata search index datasets reuses
 # Only reindex datasets and reuses (singular form)
 udata search index dataset reuse
 ```
+
+## Workers
+
+Start a worker with:
+
+```shell
+$ udata worker start
+```
+
+See all waiting Celery tasks across all workers:
+
+```shell
+$ udata worker status
+```
