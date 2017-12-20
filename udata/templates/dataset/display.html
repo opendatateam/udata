@@ -392,6 +392,7 @@
                     {% endfor %}
                     <div class="col-sm-12">
                         <a class="list-group-item add"
+                            v-el:add-reuse
                             href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
                             @click="addReuse($event)">
                             <div class="format-label pull-left">+</div>
