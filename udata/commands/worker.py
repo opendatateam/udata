@@ -61,6 +61,25 @@ def status_print_config(queue):
         print('%s.label %s' % (format_field_for_munin(task), task))
 
 
+def status_print_queue(queue, munin=False):
+    r = get_redis_connection()
+    if not munin:
+        print('-' * 40)
+    queue_length = r.llen(queue)
+    if not munin:
+        print('Queue "%s": %s task(s)' % (queue, queue_length))
+    counter = Counter()
+    biggest_task_name = 0
+    for task in r.lrange(queue, 0, -1):
+        task = json.loads(task)
+        task_name = task['headers']['task']
+        if len(task_name) > biggest_task_name:
+            biggest_task_name = len(task_name)
+        counter[task_name] += 1
+    for count in counter.most_common():
+        status_print_task(count, biggest_task_name, munin=munin)
+
+
 def format_field_for_munin(field):
     return field.replace('.', '__').replace('-', '_')
 
@@ -82,25 +101,6 @@ def get_redis_connection():
                              db=db)
 
 
-def print_queue(queue, munin=False):
-    r = get_redis_connection()
-    if not munin:
-        print('-' * 40)
-    queue_length = r.llen(queue)
-    if not munin:
-        print('Queue "%s": %s task(s)' % (queue, queue_length))
-    counter = Counter()
-    biggest_task_name = 0
-    for task in r.lrange(queue, 0, -1):
-        task = json.loads(task)
-        task_name = task['headers']['task']
-        if len(task_name) > biggest_task_name:
-            biggest_task_name = len(task_name)
-        counter[task_name] += 1
-    for count in counter.most_common():
-        status_print_task(count, biggest_task_name, munin=munin)
-
-
 @m.option('-q', '--queue', help='Queue to be analyzed', default=None)
 @m.option('-m', '--munin', action='store_true', dest='munin',
           help='Output in a munin plugin compatible format')
@@ -113,6 +113,6 @@ def status(queue, munin, munin_config):
         return
     queues = get_queues(queue)
     for queue in queues:
-        print_queue(queue, munin=munin)
+        status_print_queue(queue, munin=munin)
     if not munin:
         print('-' * 40)
