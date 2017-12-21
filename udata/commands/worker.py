@@ -66,6 +66,7 @@ def status_print_config(queue):
                       timeout=TASKS_LIST_CACHE_DURATION)
     print('graph_title Waiting tasks for queue %s' % queue)
     print('graph_vlabel Nb of tasks')
+    print('graph_category celery')
     for task in tasks:
         print('%s.label %s' % (format_field_for_munin(task), task))
 
