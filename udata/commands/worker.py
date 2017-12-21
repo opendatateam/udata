@@ -65,6 +65,42 @@ def format_field_for_munin(field):
     return field.replace('.', '__').replace('-', '_')
 
 
+def get_queues(queue):
+    queues = [q.name for q in current_app.config['CELERY_TASK_QUEUES']]
+    if queue:
+        queues = [q for q in queues if q == queue]
+    if not len(queues):
+        print(red('Error: no queue found'))
+        sys.exit(-1)
+    return queues
+
+
+def get_redis_connection():
+    parsed_url = urlparse(current_app.config['CELERY_BROKER_URL'])
+    db = parsed_url.path[1:] if parsed_url.path else 0
+    return redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
+                             db=db)
+
+
+def print_queue(queue, munin=False):
+    r = get_redis_connection()
+    if not munin:
+        print('-' * 40)
+    queue_length = r.llen(queue)
+    if not munin:
+        print('Queue "%s": %s task(s)' % (queue, queue_length))
+    counter = Counter()
+    biggest_task_name = 0
+    for task in r.lrange(queue, 0, -1):
+        task = json.loads(task)
+        task_name = task['headers']['task']
+        if len(task_name) > biggest_task_name:
+            biggest_task_name = len(task_name)
+        counter[task_name] += 1
+    for count in counter.most_common():
+        status_print_task(count, biggest_task_name, munin=munin)
+
+
 @m.option('-q', '--queue', help='Queue to be analyzed', default=None)
 @m.option('-m', '--munin', action='store_true', dest='munin',
           help='Output in a munin plugin compatible format')
@@ -75,31 +111,8 @@ def status(queue, munin, munin_config):
     if munin_config:
         status_print_config(queue)
         return
-    parsed_url = urlparse(current_app.config['CELERY_BROKER_URL'])
-    db = parsed_url.path[1:] if parsed_url.path else 0
-    r = redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
-                          db=db)
-    queues = [q.name for q in current_app.config['CELERY_TASK_QUEUES']]
-    if queue:
-        queues = [q for q in queues if q == queue]
-    if not len(queues):
-        print(red('Error: no queue found'))
-        sys.exit(-1)
+    queues = get_queues(queue)
     for queue in queues:
-        if not munin:
-            print('-' * 40)
-        queue_length = r.llen(queue)
-        if not munin:
-            print('Queue "%s": %s task(s)' % (queue, queue_length))
-        counter = Counter()
-        biggest_task_name = 0
-        for task in r.lrange(queue, 0, -1):
-            task = json.loads(task)
-            task_name = task['headers']['task']
-            if len(task_name) > biggest_task_name:
-                biggest_task_name = len(task_name)
-            counter[task_name] += 1
-        for count in counter.most_common():
-            status_print_task(count, biggest_task_name, munin=munin)
+        print_queue(queue, munin=munin)
     if not munin:
         print('-' * 40)
