@@ -109,8 +109,7 @@ def get_redis_connection():
 def status(queue, munin, munin_config):
     """List queued tasks aggregated by name"""
     if munin_config:
-        status_print_config(queue)
-        return
+        return status_print_config(queue)
     queues = get_queues(queue)
     for queue in queues:
         status_print_queue(queue, munin=munin)
