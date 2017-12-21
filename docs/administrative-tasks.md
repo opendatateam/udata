@@ -167,9 +167,11 @@ See all waiting Celery tasks across all workers:
 $ udata worker status
 ```
 
-Display waiting tasks in a Munin plugin compatible format:
+Display waiting tasks in a Munin plugin compatible format (you can use the provided [Munin plugin][munin-plugin]):
 
 ```shell
 $ udata worker status --munin -q default
 $ udata worker status --munin-config -q default
 ```
+
+[munin-plugin]: https://github.com/etalab/munin-plugins/tree/master/udata-worker-status
