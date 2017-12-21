@@ -9,8 +9,10 @@ from urlparse import urlparse
 
 import redis
 
+from celery.task.control import inspect
 from flask import current_app
 
+from udata.app import cache
 from udata.commands import submanager, red
 from udata.tasks import celery
 
@@ -22,6 +24,10 @@ m = submanager(
     description='Handle all worker related operations and maintenance'
 )
 
+TASKS_LIST_CACHE_KEY = 'worker-status-tasks'
+# we're using an aggressive cache in order not to hit Celery every 5 min
+TASKS_LIST_CACHE_DURATION = 60*60*24  # in seconds
+
 
 @m.command
 def start():
@@ -29,11 +35,55 @@ def start():
     celery.start()
 
 
-@m.option('-q', '--queue', help='Only records the migrations', default=None)
-# @m.option('-d', '--dry-run', action='store_true', dest='dryrun',
-#           help='Only print migrations to be applied')
-def status(queue):
+def status_print_header(munin=False):
+    if not munin:
+        print('-' * 40)
+
+
+def status_print_title(queue, queue_length, munin=False):
+    if not munin:
+        print('Queue "%s": %s task(s)' % (queue, queue_length))
+
+
+def status_print_task(count, biggest_task_name, munin=False):
+    if not munin:
+        print('* %s : %s' % (count[0].ljust(biggest_task_name), count[1]))
+    else:
+        print('%s.value %s' % (format_field_for_munin(count[0]), count[1]))
+
+
+def status_print_config(queue):
+    if not queue:
+        print(red('--munin-config called without a --queue parameter'))
+        sys.exit(-1)
+    tasks = cache.get(TASKS_LIST_CACHE_KEY) or []
+    if not tasks:
+        registered = inspect().registered_tasks()
+        if registered:
+            for w, tasks_list in registered.iteritems():
+                tasks += [t for t in tasks_list if t not in tasks]
+            cache.set(TASKS_LIST_CACHE_KEY, tasks,
+                      timeout=TASKS_LIST_CACHE_DURATION)
+    print('graph_title Waiting tasks for queue %s' % queue)
+    print('graph_vlabel Nb of tasks')
+    for task in tasks:
+        print('%s.label %s' % (format_field_for_munin(task), task))
+
+
+def format_field_for_munin(field):
+    return field.replace('.', '__').replace('-', '_')
+
+
+@m.option('-q', '--queue', help='Queue to be analyzed', default=None)
+@m.option('-m', '--munin', action='store_true', dest='munin',
+          help='Output in a munin plugin compatible format')
+@m.option('-c', '--munin-config', action='store_true', dest='munin_config',
+          help='Output in a munin plugin config compatible format')
+def status(queue, munin, munin_config):
     """List queued tasks aggregated by name"""
+    if munin_config:
+        status_print_config(queue)
+        return
     parsed_url = urlparse(current_app.config['CELERY_BROKER_URL'])
     db = parsed_url.path[1:] if parsed_url.path else 0
     r = redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
@@ -45,9 +95,9 @@ def status(queue):
         print(red('Error: no queue found'))
         sys.exit(-1)
     for queue in queues:
-        print('-' * 40)
+        status_print_header(munin=munin)
         queue_length = r.llen(queue)
-        print('Queue "%s": %s task(s)' % (queue, queue_length))
+        status_print_title(queue, queue_length, munin=munin)
         counter = Counter()
         biggest_task_name = 0
         for task in r.lrange(queue, 0, -1):
@@ -57,5 +107,5 @@ def status(queue):
                 biggest_task_name = len(task_name)
             counter[task_name] += 1
         for count in counter.most_common():
-            print('* %s : %s' % (count[0].ljust(biggest_task_name), count[1]))
-    print('-' * 40)
+            status_print_task(count, biggest_task_name, munin=munin)
+    status_print_header(munin)
