@@ -35,16 +35,6 @@ def start():
     celery.start()
 
 
-def status_print_header(munin=False):
-    if not munin:
-        print('-' * 40)
-
-
-def status_print_title(queue, queue_length, munin=False):
-    if not munin:
-        print('Queue "%s": %s task(s)' % (queue, queue_length))
-
-
 def status_print_task(count, biggest_task_name, munin=False):
     if not munin:
         print('* %s : %s' % (count[0].ljust(biggest_task_name), count[1]))
@@ -96,9 +86,11 @@ def status(queue, munin, munin_config):
         print(red('Error: no queue found'))
         sys.exit(-1)
     for queue in queues:
-        status_print_header(munin=munin)
+        if not munin:
+            print('-' * 40)
         queue_length = r.llen(queue)
-        status_print_title(queue, queue_length, munin=munin)
+        if not munin:
+            print('Queue "%s": %s task(s)' % (queue, queue_length))
         counter = Counter()
         biggest_task_name = 0
         for task in r.lrange(queue, 0, -1):
@@ -109,4 +101,5 @@ def status(queue, munin, munin_config):
             counter[task_name] += 1
         for count in counter.most_common():
             status_print_task(count, biggest_task_name, munin=munin)
-    status_print_header(munin)
+    if not munin:
+        print('-' * 40)
