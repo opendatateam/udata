@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import sys
 from collections import Counter
 from urlparse import urlparse
 
@@ -10,7 +11,7 @@ import redis
 
 from flask import current_app
 
-from udata.commands import submanager
+from udata.commands import submanager, red
 from udata.tasks import celery
 
 log = logging.getLogger(__name__)
@@ -28,14 +29,21 @@ def start():
     celery.start()
 
 
-@m.command
-def status():
+@m.option('-q', '--queue', help='Only records the migrations', default=None)
+# @m.option('-d', '--dry-run', action='store_true', dest='dryrun',
+#           help='Only print migrations to be applied')
+def status(queue):
     """List queued tasks aggregated by name"""
     parsed_url = urlparse(current_app.config['CELERY_BROKER_URL'])
     db = parsed_url.path[1:] if parsed_url.path else 0
     r = redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
                           db=db)
     queues = [q.name for q in current_app.config['CELERY_TASK_QUEUES']]
+    if queue:
+        queues = [q for q in queues if q == queue]
+    if not len(queues):
+        print(red('Error: no queue found'))
+        sys.exit(-1)
     for queue in queues:
         print('-' * 40)
         queue_length = r.llen(queue)
