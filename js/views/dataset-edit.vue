@@ -30,12 +30,12 @@ export default {
     },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
                 this.dataset.update(form.serialize(), (response) => {
-                    this.dataset.on_fetched(response); 
+                    this.dataset.on_fetched(response);
                     
-                    if(!form.hideNotifications){
+                    if (!form.hideNotifications) {
                         this.$dispatch('notify', {
                             autoclose: true,
                             title: this._('Changes saved'),
@@ -44,7 +44,7 @@ export default {
                     }
 
                     this.$go({name: 'dataset', params: {oid: this.dataset.id}});
-                }, (error)=>{
+                }, error => {
                     this.dataset.loading = false;
                     form.on_error(error);
                 });
