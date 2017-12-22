@@ -44,7 +44,7 @@ export default {
                     }
 
                     this.$go({name: 'dataset', params: {oid: this.dataset.id}});
-                }, error => {
+                }, (error) => {
                     this.dataset.loading = false;
                     form.on_error(error);
                 });
