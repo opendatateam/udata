@@ -9,11 +9,13 @@
         </a>
     </div>
     {% else %}
-    <a class="card-logo" href="{{ url_for('reuses.show', reuse=reuse) }}">
-        <img alt=""
-            src="{{ reuse.image(86)|placeholder('reuse') }}"
-            width="86" height="86">
-    </a>
+    <div class="card-logo">
+        <a href="{{ url_for('reuses.show', reuse=reuse) }}">
+            <img alt=""
+                src="{{ reuse.image(86)|placeholder('reuse') }}"
+                width="86" height="86">
+        </a>
+    </div>
     {% endif %}
 
     <div class="card-body">

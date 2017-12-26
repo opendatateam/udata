@@ -116,7 +116,7 @@
     {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
     {% if reuses %}
     <tab id="{{tab_id}}" header="{{label}}">
-        <ul class="card-list row">
+        <ul class="card-list row card-list--columned">
 
             {% for reuse in reuses %}
             <li class="col-md-4 col-sm-6">
