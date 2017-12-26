@@ -26,6 +26,7 @@
         <div class="clamp-3">{{ reuse.description|mdstrip(180) }}</div>
     </div>
 
+    {% if 'footer' in features or 'no-footer' not in features %}
     <footer class="card__footer">
         <ul>
             <li v-tooltip title="{{ _('Type') }}">
@@ -56,5 +57,6 @@
             {% endif %}
         </ul>
     </footer>
+    {% endif %}
 </div>
 {% endcache %}
