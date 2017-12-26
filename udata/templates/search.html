@@ -199,7 +199,7 @@
 
     {% if territories %}
     <div class="tab-pane row{% if territories and not organizations and not reuses and not datasets %} active{% endif %}" id="territories">
-        <div class="col-xs-12 smaller">
+        <div class="col-xs-12">
             <ul class="search-results">
                 {% for territory in territories %}
                 {% include theme('territories/search-result.html') %}
