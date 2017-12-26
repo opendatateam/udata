@@ -77,7 +77,8 @@
     &.card--with-cover {
         .card-body,
         .card__footer {
-            padding-left: 0;
+            flex: 1 0 100%;
+            margin-left: 0;
         }
     }
 
@@ -163,6 +164,9 @@
     }
     &.organization-card {
         border-bottom-color: @organization-color;
+    }
+    &.territory-card {
+        border-bottom-color: @territory-color;
     }
     &.user-card {
         border-bottom-color: @user-color;
