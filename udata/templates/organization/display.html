@@ -59,7 +59,7 @@
     {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
     {% if datasets %}
     <tab id="{{tab_id}}" header="{{label}}">
-        <ul class="card-list row">
+        <ul class="card-list card-list--columned row">
 
             {% for dataset in datasets %}
             <li class="col-sm-6">
@@ -141,7 +141,7 @@
 
     {% if org.members %}
     <tab id="members" header="{{ ngettext('%(num)d member', '%(num)d members', org.members | length) }}">
-        <div class="row card-list">
+        <div class="row card-list card-list--columned">
             {% for member in org.members %}
             <div class="col-md-4">
                 {% include theme('organization/member-card.html') %}
@@ -153,7 +153,7 @@
 
     {% if followers %}
     <tab id="followers" header="{{ ngettext('%(num)d follower', '%(num)d followers', followers | length) }}">
-        <div class="row card-list">
+        <div class="row card-list card-list--columned">
             {% for follow in followers %}
             <div class="col-md-4" {% if loop.index > 15 %}:class="{hidden: !followersVisible}"{% endif %}">
                 {% include theme('follow/follower-card.html') %}

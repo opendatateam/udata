@@ -56,10 +56,11 @@
                 </div>
 
                 <div class="row">
-                    <ul class="card-list">
+                    <ul class="card-list card-list--columned">
                         {% for dataset in current_site.settings.home_datasets %}
+                        {% set features = ['no-footer'] %}
                         <li class="col-md-4 col-sm-6">
-                        {% include theme('dataset/card.html') %}
+                        {% include theme('dataset/card.html')  %}
                         </li>
                         {% endfor %}
                     </ul>
@@ -121,7 +122,7 @@
       <div class="col-lg-12 text-center">
         <h2>{{ _('Last datasets') }}</h2>
       </div>
-      <ul class="card-list">
+      <ul class="card-list card-list--columned">
           {% for dataset in recent_datasets[:9] %}
           <li class="col-md-4 col-sm-6">
             {% include theme('dataset/card.html') %}
@@ -138,7 +139,7 @@
       <div class="col-lg-12 text-center">
         <h2>{{ _('Last reuses') }}</h2>
       </div>
-      <ul class="card-list">
+      <ul class="card-list card-list--columned">
         {% for reuse in recent_reuses[:9] %}
         <li class="col-md-4 col-sm-6">{% include theme('reuse/card.html') %}</li>
         {% endfor %}

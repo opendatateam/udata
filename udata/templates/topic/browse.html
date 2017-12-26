@@ -22,9 +22,11 @@
 
     <div class="tab-pane active" id="datasets">
         {% if datasets %}
-        <ul class="search-results">
+        <ul class="search-results card-list row">
             {% for dataset in datasets %}
+            <li class="col-xs-12">
             {% include theme('dataset/card.html') %}
+            </li>
             {% endfor %}
         </ul>
             {% if datasets.has_next %}
@@ -42,9 +44,11 @@
 
     <div class="tab-pane" id="reuses">
         {% if reuses %}
-        <ul class="search-results">
+        <ul class="search-results card-list row">
             {% for reuse in reuses %}
-            {% include theme('reuse/search-result.html') %}
+            <li class="col-xs-12">
+            {% include theme('reuse/card.html') %}
+            </li>
             {% endfor %}
         </ul>
             {% if reuses.has_next %}
