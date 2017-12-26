@@ -8,7 +8,6 @@
     border-bottom-color: @default-concept-color;
     border-bottom-width: 2px;
     border-radius: 3px;
-    margin-bottom: @grid-gutter-width;
 
     @card-font-size: 14px;
     @logo-size: 60px;
@@ -16,6 +15,10 @@
     @card-padding: 8px;
     @card-footer-size: 24px;
     @footer-line-height: 25px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 
     position: relative;
     padding: @card-padding;
@@ -25,9 +28,10 @@
     .card-logo {
         .pull-left();
         background-color: white;
-        border: 1px solid @gray-lighter;
+        flex: 0 0 (@logo-size + @card-padding);
 
         img {
+            border: 1px solid @gray-lighter;
             max-width: @logo-size;
             max-height: @logo-size;
             overflow: hidden;
@@ -48,7 +52,7 @@
     .card__cover {
         @cover-height: 110px;
 
-        display: block;
+        flex: 1 0 100%;
         height: @cover-height;
         margin-bottom: @card-padding;
         text-align: center;
@@ -65,10 +69,10 @@
     }
 
     .card-body {
+        flex: 1 0 80%;
         font-size: @card-font-size;
         line-height: 1.3em;
         min-height: 6em;
-        padding-left: @logo-size + (2 * @logo-margin) + @card-padding;
     }
     &.card--with-cover {
         .card-body,
@@ -78,20 +82,34 @@
     }
 
     .card__footer {
-        .clamp(1);
         @color: rgb(126, 126, 126);
 
-        bottom: 0;
         color: @color;
+        flex: 1 0 80%;
         font-size: .9em;
         font-weight: bold;
+        margin-left: @logo-size + @card-padding;
+        margin-top: auto;
         padding: @card-padding 0 0;
-        padding-left: @logo-size + (2 * @logo-margin) + @card-padding;
+        position: relative;
         white-space: nowrap;
         width: 100%;
+        .clamp-uniline;
+
+        &:after {
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, .7), white);
+            content: "";
+            display: inline-block;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 15px;
+        }
 
 
         ul {
+
             list-style: none;
             margin: 0;
             padding: 0;
@@ -118,8 +136,6 @@
     }
 
     h4 {
-        .clamp(1);
-
         font-size: 16px;
         margin-top: 0;
         line-height: inherit;
@@ -157,7 +173,24 @@
 .card-list {
     padding: 0;
     list-style: none;
+
+    &.card-list--columned > *,
+    > .col-xs-12 {
+        margin-bottom: @grid-gutter-width;
+    }
+
+    &.card-list--columned {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+
+        .card {
+            height: 100%;
+        }
+    }
 }
+
 
 .card-list-footer {
     .dropdown {
