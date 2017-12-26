@@ -53,6 +53,7 @@
             <div class="col-md-4 single-column">
                 <ul class="card-list">
                     {% for reuse in topic.reuses %}
+                    {% set features = ['no-footer'] %}
                     <li class="col-xs-12">
                         {% include theme('reuse/card.html') %}
                     </li>
