@@ -120,10 +120,12 @@
 
     <div class="tab-pane row{% if datasets %} active{% endif %}" id="datasets">
         {% if datasets %}
-            <div class="col-md-8 col-lg-9 smaller">
-                <ul class="search-results">
+            <div class="col-md-8 col-lg-9">
+                <ul class="search-results card-list row">
                     {% for dataset in datasets %}
+                    <li class="col-xs-12">
                     {% include theme('dataset/card.html') %}
+                    </li>
                     {% endfor %}
                 </ul>
                 {% if datasets.has_next %}
@@ -145,10 +147,12 @@
 
     <div class="tab-pane row{% if reuses and not datasets %} active{% endif %}" id="reuses">
         {% if reuses %}
-            <div class="col-md-8 col-lg-9 smaller">
-                <ul class="search-results">
+            <div class="col-md-8 col-lg-9">
+                <ul class="search-results card-list row">
                     {% for reuse in reuses %}
-                    {% include theme('reuse/search-result.html') %}
+                    <li class="col-xs-12">
+                    {% include theme('reuse/card.html') %}
+                    </li>
                     {% endfor %}
                 </ul>
                 {% if reuses.has_next %}
@@ -172,10 +176,12 @@
 
     <div class="tab-pane row{% if organizations and not reuses and not datasets %} active{% endif %}" id="organizations">
         {% if organizations %}
-            <div class="col-md-8 col-lg-9 smaller">
-                <ul class="search-results">
+            <div class="col-md-8 col-lg-9">
+                <ul class="search-results card-list row">
                     {% for organization in organizations %}
-                    {% include theme('organization/search-result.html') %}
+                    <li class="col-xs-12">
+                    {% include theme('organization/card.html') %}
+                    </li>
                     {% endfor %}
                 </ul>
                 {% if organizations.has_next %}

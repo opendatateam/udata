@@ -95,7 +95,7 @@
 
                     {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
                     <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-                        <ul class="card-list">
+                        <ul class="card-list card-list--columned">
 
                             {% for dataset in datasets %}
                             <li class="col-md-4 col-sm-6">

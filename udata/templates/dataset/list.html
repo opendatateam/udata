@@ -51,9 +51,11 @@
     {% if datasets %}
     <div class="col-md-8 col-lg-9">
 
-        <ul class="search-results">
+        <ul class="search-results card-list row">
             {% for dataset in datasets %}
+            <li class="col-xs-12">
             {% include theme('dataset/card.html') %}
+            </li>
             {% endfor %}
         </ul>
 
