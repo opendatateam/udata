@@ -9,6 +9,7 @@
     'description': dataset.description|mdstrip(60)|forceescape,
     'image': dataset.organization and dataset.organization.logo(external=True) or '',
     'keywords': [_('dataset')] + dataset.tags,
+    'robots': 'noindex, nofollow' if dataset.is_hidden else '',
 } %}
 
 {% set bundle = 'dataset' %}
