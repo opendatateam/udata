@@ -4,6 +4,7 @@
 
 - Fix topic creation [#1333](https://github.com/opendatateam/udata/pull/1333)
 - Add a `udata worker status` command to list pending tasks.[breaking] The `udata worker` command is replaced by `udata worker start`. [#1324](https://github.com/opendatateam/udata/pull/1324)
+- Prevent crawlers from indexing spammy datasets and reuses [#1334](https://github.com/opendatateam/udata/pull/1334)
 
 ## 1.2.5 (2017-12-14)
 

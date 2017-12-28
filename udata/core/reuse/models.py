@@ -108,6 +108,14 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     display_url = property(url_for)
 
     @property
+    def is_visible(self):
+        return not self.is_hidden
+
+    @property
+    def is_hidden(self):
+        return len(self.datasets) == 0 or self.private or self.deleted
+
+    @property
     def external_url(self):
         return self.url_for(_external=True)
 

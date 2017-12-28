@@ -75,6 +75,8 @@ class DatasetBlueprintTest(FrontTestCase):
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         self.assert200(response)
+        self.assertNotIn(b'<meta name="robots" content="noindex, nofollow">',
+                         response.data)
 
     def test_json_ld(self):
         '''It should render a json-ld markup into the dataset page'''
@@ -195,6 +197,14 @@ class DatasetBlueprintTest(FrontTestCase):
         dataset = DatasetFactory(deleted=datetime.now(), owner=self.user)
         response = self.get(url_for('datasets.show', dataset=dataset))
         self.assert200(response)
+
+    def test_no_index_on_empty(self):
+        '''It should prevent crawlers from indexing empty datasets'''
+        dataset = DatasetFactory()
+        response = self.get(url_for('datasets.show', dataset=dataset))
+        self.assert200(response)
+        self.assertIn(b'<meta name="robots" content="noindex, nofollow"',
+                      response.data)
 
     def test_not_found(self):
         '''It should render the dataset page'''
