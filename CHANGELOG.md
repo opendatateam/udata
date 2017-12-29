@@ -7,6 +7,7 @@
 - Add a `udata worker status` command to list pending tasks.[breaking] The `udata worker` command is replaced by `udata worker start`. [#1324](https://github.com/opendatateam/udata/pull/1324)
 - Prevent crawlers from indexing spammy datasets, reuses and organizations [#1334](https://github.com/opendatateam/udata/pull/1334) [#1335](https://github.com/opendatateam/udata/pull/1335)
 - Ensure Swagger.js properly set jQuery.ajax contentType parameter (and so data is properly serialized) [#1126](https://github.com/opendatateam/udata/issues/1126)
+- Allows theme to easily access the `owner_avatar_url` template filter [#1336](https://github.com/opendatateam/udata/pull/1336)
 
 ## 1.2.5 (2017-12-14)
 
