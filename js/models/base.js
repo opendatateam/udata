@@ -10,7 +10,7 @@ export const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * This request interceptor add the missing jQuery.ajax contentType parameters
- * when required (ie. when swagge as set the proper Content-Type header)
+ * when required (ie. when swagger has set the proper Content-Type header)
  */
 const requestInterceptor = {
     apply(obj) {
