@@ -9,6 +9,19 @@ import mask from './mask';
 export const DEFAULT_PAGE_SIZE = 10;
 
 /**
+ * This request interceptor add the missing jQuery.ajax contentType parameters
+ * when required (ie. when swagge as set the proper Content-Type header)
+ */
+const requestInterceptor = {
+    apply(obj) {
+        if (obj.headers['Content-Type']) {
+            obj.contentType = obj.headers['Content-Type'];
+        }
+        return obj;
+    }
+}
+
+/**
  * Common class behaviors.
  *
  * Provide:
@@ -103,12 +116,13 @@ export class Base {
         API.onReady(() => {
             const [namespace, method] = endpoint.split('.');
             const operation = API[namespace][method];
+            const opts = {requestInterceptor};
 
             if (this.$options.mask && !('X-Fields' in data)) {
                 data['X-Fields'] = mask(this.$options.mask);
             }
 
-            operation(data, on_success.bind(this), on_error.bind(this));
+            operation(data, opts, on_success.bind(this), on_error.bind(this));
         });
     }
 }
