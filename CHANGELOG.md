@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Bump chartjs version to 2.x [1318](https://github.com/opendatateam/udata/pull/1318)
 - Fix wrongly timed notification on dataset creation with misformed tags [#1332](https://github.com/opendatateam/udata/pull/1332)
 - Fix topic creation [#1333](https://github.com/opendatateam/udata/pull/1333)
 - Add a `udata worker status` command to list pending tasks.[breaking] The `udata worker` command is replaced by `udata worker start`. [#1324](https://github.com/opendatateam/udata/pull/1324)
