@@ -148,6 +148,6 @@ def init_app(app):
         try:
             importlib.import_module(name)
         except ImportError as e:
-            log.warning('Error importing %s: %s', name, e)
+            pass
         except Exception as e:
             log.error('Error during import of %s: %s', name, e)

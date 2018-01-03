@@ -46,6 +46,8 @@ class OrganizationBlueprintTest(FrontTestCase):
         url = url_for('organizations.show', org=organization)
         response = self.get(url)
         self.assert200(response)
+        self.assertNotIn(b'<meta name="robots" content="noindex, nofollow">',
+                         response.data)
         json_ld = self.get_json_ld(response)
         self.assertEquals(json_ld['@context'], 'http://schema.org')
         self.assertEquals(json_ld['@type'], 'Organization')
@@ -173,6 +175,15 @@ class OrganizationBlueprintTest(FrontTestCase):
         '''It should render the organization page'''
         response = self.get(url_for('organizations.show', org='not-found'))
         self.assert404(response)
+
+    def test_no_index_on_empty(self):
+        '''It should prevent crawlers from indexing empty organizations'''
+        organization = OrganizationFactory()
+        url = url_for('organizations.show', org=organization)
+        response = self.get(url)
+        self.assert200(response)
+        self.assertIn(b'<meta name="robots" content="noindex, nofollow"',
+                      response.data)
 
     def test_datasets_csv(self):
         with self.autoindex():

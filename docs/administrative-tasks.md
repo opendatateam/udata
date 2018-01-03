@@ -152,3 +152,26 @@ udata search index datasets reuses
 # Only reindex datasets and reuses (singular form)
 udata search index dataset reuse
 ```
+
+## Workers
+
+Start a worker with:
+
+```shell
+$ udata worker start
+```
+
+See all waiting Celery tasks across all workers:
+
+```shell
+$ udata worker status
+```
+
+Display waiting tasks in a Munin plugin compatible format (you can use the provided [Munin plugin][munin-plugin]):
+
+```shell
+$ udata worker status --munin -q default
+$ udata worker status --munin-config -q default
+```
+
+[munin-plugin]: https://github.com/etalab/munin-plugins/tree/master/udata-worker-status
