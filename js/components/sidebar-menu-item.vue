@@ -25,7 +25,7 @@
         <i v-if="icon" class="fa fa-fw fa-{{icon}}"></i>
         <img v-if="image" :src="image" />
         <span>{{ label | truncate 25 }}</span>
-        <i v-if="is_tree" class="fa fa-angle-{{active ? 'down' : 'left'}} pull-right"></i>
+        <i v-if="is_tree" class="fa fa-angle-left pull-right"></i>
         <small v-if="badge" class="badge pull-right bg-{{badge-color}}">{{badge.label}}</small>
     </a>
     <ul v-if="is_tree" v-show="active" class="treeview-menu">
