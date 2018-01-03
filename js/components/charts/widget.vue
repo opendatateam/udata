@@ -35,7 +35,6 @@
         <div class="chart" :style="{height: height}" v-el:container>
             <canvas v-el:canvas height="100%"></canvas>
         </div>
-        <div class="chart-legend" v-el:legend></div>
     </box>
 </div>
 </template>
@@ -187,7 +186,6 @@ export default {
             this.cleanChart();
             ctx.canvas.height = this.canvasHeight;
             this.chart = factory(ctx);
-            this.$els.legend.innerHTML = this.chart.generateLegend();
         },
         buildArea(ctx) {
             return new Chart(ctx, {
