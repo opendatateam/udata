@@ -141,6 +141,8 @@ def avatar_url(ctx, obj, size):
         return url_for('api.avatar', identifier=str(obj.id), size=size)
 
 
+@front.app_template_filter()
+@contextfilter
 def owner_avatar_url(ctx, obj, size=32):
     if hasattr(obj, 'organization') and obj.organization:
         return (obj.organization.logo(size)
