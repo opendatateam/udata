@@ -76,12 +76,10 @@ export default {
     },
     methods: {
         fetchMetrics() {
-            const period = 30;
-
             if (this.objectId) {
                 this.metrics.fetch({
                     id: this.objectId,
-                    start: moment().subtract(period, 'days').format('YYYY-MM-DD'),
+                    start: moment().subtract(12, 'days').format('YYYY-MM-DD'),
                     end: moment().format('YYYY-MM-DD'),
                     cumulative: false
                 });
