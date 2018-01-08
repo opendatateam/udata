@@ -103,7 +103,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['@context'], 'http://schema.org')
         self.assertEquals(json_ld['@type'], 'Dataset')
         self.assertEquals(json_ld['@id'], str(dataset.id))
-        self.assertEquals(json_ld['description'], 'a&éèëù$£')
+        self.assertEquals(json_ld['description'], 'a&amp;éèëù$£')
         self.assertEquals(json_ld['alternateName'], dataset.slug)
         self.assertEquals(json_ld['dateCreated'][:16],
                           dataset.created_at.isoformat()[:16])
@@ -178,6 +178,15 @@ class DatasetBlueprintTest(FrontTestCase):
                           }])
         self.assertEquals(json_ld['license'], 'http://www.datagouv.fr/licence')
         self.assertEquals(json_ld['author']['@type'], 'Person')
+
+    def test_json_ld_sanitize(self):
+        '''Json-ld should be sanitized'''
+        dataset = DatasetFactory(description='an <script>evil()</script>')
+        url = url_for('datasets.show', dataset=dataset)
+        response = self.get(url)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['description'],
+                          'an &lt;script&gt;evil()&lt;/script&gt;')
 
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the dataset is private'''
