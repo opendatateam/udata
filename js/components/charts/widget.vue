@@ -1,31 +1,3 @@
-<style lang="less">
-.chart-legend {
-    text-align: center;
-    margin-top: 10px;
-
-    ul {
-        list-style: none;
-        margin-bottom: 0;
-
-        li {
-            display: inline-block;
-            margin-right: 5px;
-
-            .line-legend-icon {
-                display: inline-block;
-                width: 20px;
-                height: 16px;
-                margin-right: 5px;
-                margin-left: 10px;
-                border: 1px solid #999;
-                vertical-align: middle;
-            }
-        }
-
-    }
-}
-</style>
-
 <template>
 <div class="chart-widget">
     <box :title="title" :icon="icon"
