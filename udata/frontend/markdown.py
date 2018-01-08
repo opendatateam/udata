@@ -92,7 +92,7 @@ def mdstrip(value, length=None, end='…'):
     '''
     Truncate and strip tags from a markdown source
 
-    The markdown source is truncated at except if present and
+    The markdown source is truncated at the excerpt if present and
     smaller than the required length. Then, all html tags are stripped.
     '''
     if not value:
