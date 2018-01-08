@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Sanitize mdstrip [#1351](https://github.com/opendatateam/udata/pull/1351)
 
 ## 1.2.6 (2018-01-04)
 
