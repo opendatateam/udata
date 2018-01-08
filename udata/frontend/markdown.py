@@ -7,7 +7,8 @@ import bleach
 import CommonMark
 from flask import current_app, Markup
 from werkzeug.local import LocalProxy
-from jinja2.filters import do_truncate, do_striptags
+from jinja2.filters import do_truncate
+from jinja2.utils import escape
 
 from udata.i18n import _
 
@@ -91,7 +92,7 @@ def mdstrip(value, length=None, end='…'):
     '''
     Truncate and strip tags from a markdown source
 
-    The markdown source is truncated at the excerpt if present and
+    The markdown source is truncated at except if present and
     smaller than the required length. Then, all html tags are stripped.
     '''
     if not value:
@@ -99,7 +100,7 @@ def mdstrip(value, length=None, end='…'):
     if EXCERPT_TOKEN in value:
         value = value.split(EXCERPT_TOKEN, 1)[0]
     rendered = md(value)
-    text = do_striptags(rendered)
+    text = escape(rendered)
     if length > 0:
         text = do_truncate(None, text, length, end=end, leeway=2)
     return text
