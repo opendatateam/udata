@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add extras field in discussions [#1360](https://github.com/opendatateam/udata/pull/1360)
 
 ## 1.2.7 (2018-01-10)
 

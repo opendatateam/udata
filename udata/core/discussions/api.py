@@ -44,6 +44,7 @@ discussion_fields = api.model('Discussion', {
     'discussion': fields.Nested(message_fields),
     'url': fields.UrlFor('api.discussion',
                          description='The discussion API URI'),
+    'extras': fields.Raw(description='Extra attributes as key-value pairs'),
 })
 
 start_discussion_fields = api.model('DiscussionStart', {
@@ -54,6 +55,7 @@ start_discussion_fields = api.model('DiscussionStart', {
     'subject': fields.Nested(api.model_reference,
                              description='The discussion target object',
                              required=True),
+    'extras': fields.Raw(description='Extras attributes as key-value pairs'),
 })
 
 comment_discussion_fields = api.model('DiscussionResponse', {
