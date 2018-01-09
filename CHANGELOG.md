@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Bump chartjs version to 2.x [1352](https://github.com/opendatateam/udata/pull/1352)
+- Bump chartjs version to 2.x [#1352](https://github.com/opendatateam/udata/pull/1352)
 - Sanitize mdstrip [#1351](https://github.com/opendatateam/udata/pull/1351)
 
 ## 1.2.6 (2018-01-04)
