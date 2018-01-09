@@ -8,6 +8,7 @@ import CommonMark
 from flask import current_app, Markup
 from werkzeug.local import LocalProxy
 from jinja2.filters import do_truncate, do_striptags
+from jinja2.utils import escape
 
 from udata.i18n import _
 
@@ -64,14 +65,7 @@ class UDataMarkdown(object):
     def __call__(self, stream, source_tooltip=False):
         if not stream:
             return ''
-        # Sanitize malicious attempts but keep the `EXCERPT_TOKEN`.
-        # By default, only keeps `bleach.ALLOWED_TAGS`.
-        stream = bleach.clean(
-            stream,
-            tags=current_app.config['MD_ALLOWED_TAGS'],
-            attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
-            styles=current_app.config['MD_ALLOWED_STYLES'],
-            strip_comments=False)
+        stream = bleach_clean(stream)
         # Turn markdown to HTML.
         ast = self.parser().parse(stream)
         html = self.renderer.render(ast)
@@ -87,6 +81,19 @@ class UDataMarkdown(object):
         return Markup(html)
 
 
+def bleach_clean(stream):
+    """
+    Sanitize malicious attempts but keep the `EXCERPT_TOKEN`.
+    By default, only keeps `bleach.ALLOWED_TAGS`.
+    """
+    return bleach.clean(
+        stream,
+        tags=current_app.config['MD_ALLOWED_TAGS'],
+        attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
+        styles=current_app.config['MD_ALLOWED_STYLES'],
+        strip_comments=False)
+
+
 def mdstrip(value, length=None, end='…'):
     '''
     Truncate and strip tags from a markdown source
@@ -100,6 +107,7 @@ def mdstrip(value, length=None, end='…'):
         value = value.split(EXCERPT_TOKEN, 1)[0]
     rendered = md(value)
     text = do_striptags(rendered)
+    text = bleach_clean(text)
     if length > 0:
         text = do_truncate(None, text, length, end=end, leeway=2)
     return text
