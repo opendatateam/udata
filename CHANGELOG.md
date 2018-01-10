@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.8 (2018-01-10)
 
 - Fix html2text dependency version [#1362](https://github.com/opendatateam/udata/pull/1362)
