@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix html2text dependency version [#1362](https://github.com/opendatateam/udata/pull/1362)
 
 ## 1.2.7 (2018-01-10)
 
