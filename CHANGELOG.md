@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.7 (2018-01-10)
 
 - Bump chartjs version to 2.x [#1352](https://github.com/opendatateam/udata/pull/1352)
