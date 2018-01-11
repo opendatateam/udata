@@ -119,7 +119,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'udata = udata.commands:console_script',
+            'udata = udata.commands:cli',
         ],
         'udata.themes': [
             'default = udata.theme.default',
