@@ -3,21 +3,25 @@ from __future__ import unicode_literals
 
 import logging
 
-from udata.commands import submanager
+import click
+
+from udata.commands import cli
 from udata.models import GeoZone, Organization
 
 log = logging.getLogger(__name__)
 
-m = submanager(
-    'organizations',
-    help='Organizations related operations',
-    description='Handle all organizations related operations and maintenance'
-)
+
+@cli.group()
+def organization():
+    '''Organizations related operations'''
+    pass
 
 
-@m.command
+@organization.command()
+@click.argument('geoid', metavar='<geoid>')
+@click.argument('organization_id_or_slug', metavar='<organization>')
 def attach_zone(geoid, organization_id_or_slug):
-    '''Attach a zone restricted to level for a given organization.'''
+    '''Attach a zone <geoid> restricted to level for a given <organization>.'''
     organization = Organization.objects.get_by_id_or_slug(
         organization_id_or_slug)
     if not organization:
@@ -32,9 +36,10 @@ def attach_zone(geoid, organization_id_or_slug):
     log.info('Done')
 
 
-@m.command
+@organization.command()
+@click.argument('organization_id_or_slug', metavar='<organization>')
 def detach_zone(organization_id_or_slug):
-    '''Detach the zone of a given organization.'''
+    '''Detach the zone of a given <organization>.'''
     organization = Organization.objects.get_by_id_or_slug(
         organization_id_or_slug)
     if not organization:

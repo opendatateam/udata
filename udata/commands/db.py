@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+import click
+
 from os.path import join
 from pkg_resources import resource_isdir, resource_listdir, resource_string
 
@@ -11,16 +13,16 @@ from flask import current_app
 from pymongo.errors import PyMongoError, OperationFailure
 from mongoengine.connection import get_db
 
-from udata.commands import submanager, green, yellow, cyan, purple, red
+from udata.commands import cli, green, yellow, cyan, red, magenta
 
 log = logging.getLogger(__name__)
 
 
-m = submanager(
-    'db',
-    help='Database related operations',
-    description='Handle all database related operations and maintenance'
-)
+@cli.group()
+def db():
+    '''Database related operations'''
+    pass
+
 
 # A migration script wrapper recording the stdout lines
 SCRIPT_WRAPPER = '''
@@ -134,7 +136,7 @@ def log_status(plugin, filename, status):
     log.info('%s [%s]', '{:.<70}'.format(display), status)
 
 
-@m.command
+@db.command()
 def status():
     '''Display the database migrations status'''
     for plugin, package, filename in available_migrations():
@@ -146,11 +148,12 @@ def status():
         log_status(plugin, filename, status)
 
 
-@m.option('-r', '--record', action='store_true',
-          help='Only records the migrations')
-@m.option('-d', '--dry-run', action='store_true', dest='dryrun',
-          help='Only print migrations to be applied')
-def migrate(record, dryrun=False):
+@db.command()
+@click.option('-r', '--record', is_flag=True,
+              help='Only records the migrations')
+@click.option('-d', '--dry-run', is_flag=True,
+              help='Only print migrations to be applied')
+def migrate(record, dry_run=False):
     '''Perform database migrations'''
     handler = record_migration if record else execute_migration
     success = True
@@ -159,13 +162,13 @@ def migrate(record, dryrun=False):
         if migration or not success:
             log_status(plugin, filename, cyan('Skipped'))
         else:
-            status = purple('Recorded') if record else yellow('Apply')
+            status = magenta('Recorded') if record else yellow('Apply')
             log_status(plugin, filename, status)
             script = resource_string(package, join('migrations', filename))
-            success &= handler(plugin, filename, script, dryrun=dryrun)
+            success &= handler(plugin, filename, script, dryrun=dry_run)
 
 
-@m.command
+@db.command()
 def unrecord(plugin, filename):
     '''Remove a database migration record'''
     migration = get_migration(plugin, filename)

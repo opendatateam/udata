@@ -3,22 +3,23 @@ from __future__ import unicode_literals
 
 import logging
 
-from udata.commands import submanager
+from udata.commands import cli
 from udata.app import cache
 
 log = logging.getLogger(__name__)
 
 
-m = submanager(
-    'cache',
-    help='Cache related operations',
-    description='Handle all cache related operations and maintenance'
-)
+@cli.group('cache')
+def grp():
+    '''
+    Cache related operations.
+    '''
+    pass
 
 
-@m.command
+@grp.command()
 def flush():
     '''Flush the cache'''
-    print('Flusing cache')
+    log.info('Flusing cache')
     cache.clear()
-    print('Cache flushed')
+    log.info('Cache flushed')

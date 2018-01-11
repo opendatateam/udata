@@ -7,32 +7,36 @@ import sys
 from collections import Counter
 from urlparse import urlparse
 
+import click
 import redis
 
 from celery.task.control import inspect
 from flask import current_app
 
 from udata.app import cache
-from udata.commands import submanager, red
+from udata.commands import cli, exit
 from udata.tasks import celery
 
 log = logging.getLogger(__name__)
 
-m = submanager(
-    'worker',
-    help='Worker related operations',
-    description='Handle all worker related operations and maintenance'
-)
+
+@cli.group()
+def worker():
+    '''Worker related operations'''
+    pass
+
 
 TASKS_LIST_CACHE_KEY = 'worker-status-tasks'
 # we're using an aggressive cache in order not to hit Celery every 5 min
-TASKS_LIST_CACHE_DURATION = 60*60*24  # in seconds
+TASKS_LIST_CACHE_DURATION = 60 * 60 * 24  # in seconds
 
 
-@m.command
+@worker.command()
 def start():
-    """Start a worker"""
-    celery.start()
+    '''Start a worker'''
+    worker = celery.Worker()
+    worker.start()
+    return worker.exitcode
 
 
 def status_print_task(count, biggest_task_name, munin=False):
@@ -44,7 +48,7 @@ def status_print_task(count, biggest_task_name, munin=False):
 
 def status_print_config(queue):
     if not queue:
-        print(red('--munin-config called without a --queue parameter'))
+        log.error('--munin-config called without a --queue parameter')
         sys.exit(-1)
     tasks = cache.get(TASKS_LIST_CACHE_KEY) or []
     if not tasks:
@@ -89,8 +93,7 @@ def get_queues(queue):
     if queue:
         queues = [q for q in queues if q == queue]
     if not len(queues):
-        print(red('Error: no queue found'))
-        sys.exit(-1)
+        exit('Error: no queue found')
     return queues
 
 
@@ -100,12 +103,12 @@ def get_redis_connection():
     return redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
                              db=db)
 
-
-@m.option('-q', '--queue', help='Queue to be analyzed', default=None)
-@m.option('-m', '--munin', action='store_true', dest='munin',
-          help='Output in a munin plugin compatible format')
-@m.option('-c', '--munin-config', action='store_true', dest='munin_config',
-          help='Output in a munin plugin config compatible format')
+@worker.command()
+@click.option('-q', '--queue', help='Queue to be analyzed', default=None)
+@click.option('-m', '--munin', is_flag=True,
+              help='Output in a munin plugin compatible format')
+@click.option('-c', '--munin-config', is_flag=True,
+              help='Output in a munin plugin config compatible format')
 def status(queue, munin, munin_config):
     """List queued tasks aggregated by name"""
     if munin_config:

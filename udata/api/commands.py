@@ -4,19 +4,20 @@ from __future__ import unicode_literals
 import logging
 import os
 
+import click
+
 from flask import json
 
 from udata.api import api
-from udata.commands import submanager
+from udata.commands import cli
 
 log = logging.getLogger(__name__)
 
 
-m = submanager(
-    'api',
-    help='API related operations',
-    description='Handle all API related operations and maintenance'
-)
+@cli.group('api')
+def grp():
+    '''API related operations'''
+    pass
 
 
 def json_to_file(data, filename, pretty=False):
@@ -30,21 +31,20 @@ def json_to_file(data, filename, pretty=False):
         f.write(dump.encode('utf-8'))
 
 
-@m.option('filename', help='The output filename')
-@m.option('-p', '--pretty', action='store_true', default=False,
-          help='Pretty print')
+@grp.command()
+@click.argument('filename')
+@click.option('-p', '--pretty', is_flag=True, help='Pretty print')
 def swagger(filename, pretty):
     '''Dump the swagger specifications'''
     json_to_file(api.__schema__, filename, pretty)
 
 
-@m.option('filename', help='The output filename')
-@m.option('-p', '--pretty', action='store_true', default=False,
-          help='Pretty print')
-@m.option('-u', '--urlvars', action='store_true', default=False,
-          help='Export query strings')
-@m.option('-s', '--swagger', action='store_true', default=False,
-          help='Export Swagger specifications')
+@grp.command()
+@click.argument('filename')
+@click.option('-p', '--pretty', is_flag=True, help='Pretty print')
+@click.option('-u', '--urlvars', is_flag=True, help='Export query strings')
+@click.option('-s', '--swagger', is_flag=True,
+              help='Export Swagger specifications')
 def postman(filename, pretty, urlvars, swagger):
     '''Dump the API as a Postman collection'''
     data = api.as_postman(urlvars=urlvars, swagger=swagger)
