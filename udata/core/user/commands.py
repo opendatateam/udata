@@ -53,14 +53,13 @@ def activate():
     email = prompt('Email')
     user = User.objects(email=email).first()
     if not user:
-        print 'Invalid user'
-        return
+        exit('Invalid user')
     if user.confirmed_at is not None:
-        print 'User email address already confirmed'
+        exit('User email address already confirmed')
         return
     user.confirmed_at = datetime.utcnow()
     user.save()
-    print 'User activated successfully'
+    success('User activated successfully')
 
 
 @grp.command()

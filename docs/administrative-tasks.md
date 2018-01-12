@@ -104,11 +104,10 @@ $ udata job run -d job-name
 ```
 
 Some jobs require arguments and keywords arguments.
-You can pass them with the `-a` for arguments and `-k`
-for keyword arguments:
+You can pass them with ass arguments too:
 
 ```shell
-$ udata job run job-name -a arg1 arg2 -k key1=value key2=value
+$ udata job run job-name arg1 arg2 key1=value key2=value
 ```
 
 **Note**: this is a low level command.

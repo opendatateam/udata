@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from udata.commands import cli
+from udata.commands import cli, success
 from udata.app import cache
 
 log = logging.getLogger(__name__)
@@ -22,4 +22,4 @@ def flush():
     '''Flush the cache'''
     log.info('Flusing cache')
     cache.clear()
-    log.info('Cache flushed')
+    success('Cache flushed')

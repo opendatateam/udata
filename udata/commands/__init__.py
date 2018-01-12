@@ -9,7 +9,7 @@ import pkg_resources
 
 from glob import iglob
 
-from flask.cli import FlaskGroup, shell_command
+from flask.cli import FlaskGroup, shell_command, ScriptInfo
 from udata.app import create_app, standalone, VERBOSE_LOGGERS
 
 # Expect an utf8 compatible terminal
@@ -150,19 +150,17 @@ def init_logging(app):
         logger = logging.getLogger('udata_{0}'.format(name))
         logger.setLevel(log_level)
         logger.handlers = []
-        logger.addHandler(handler)
 
     for name in VERBOSE_LOGGERS:
         logger = logging.getLogger(name)
-        logger.setLevel(logging.WARNING)
+        logger.setLevel(logging.WARNING if app.debug else logging.ERROR)
         logger.handlers = []
-        logger.addHandler(handler)
 
     return app
 
 
 def create_cli_app(info):
-    app = create_app('udata.settings.Defaults', init_logging=init_logging)
+    app = create_app(info.settings, init_logging=init_logging)
     return standalone(app)
 
 
@@ -182,8 +180,26 @@ MODULES_WITH_COMMANDS = [
 
 
 class UdataGroup(FlaskGroup):
-    def _load_plugin_commands(self):
-        if self._loaded_plugin_commands:
+    def __init__(self, *args, **kwargs):
+        self._udata_commands_loaded = False
+        super(UdataGroup, self).__init__(*args, **kwargs)
+
+    def get_command(self, ctx, name):
+        self.load_udata_commands(ctx)
+        return super(UdataGroup, self).get_command(ctx, name)
+
+    def list_commands(self, ctx):
+        self.load_udata_commands(ctx)
+        return super(UdataGroup, self).list_commands(ctx)
+
+    def load_udata_commands(self, ctx):
+        '''
+        Load udata commands from:
+        - `udata.commands.*` module
+        - known internal modules with commands
+        - plugins exporting a `udata.commands` entrpoints
+        '''
+        if self._udata_commands_loaded:
             return
 
         # Load all commands submodule
@@ -202,10 +218,27 @@ class UdataGroup(FlaskGroup):
             except Exception as e:
                 error('Unable to import {0}'.format(module), e)
 
-        # Load commands from entry points
+        # Load commands from entry points for enabled plugins
+        app = ctx.ensure_object(ScriptInfo).load_app()
         for ep in pkg_resources.iter_entry_points('udata.commands'):
-            self.add_command(ep.load(), ep.name)
-        super(UdataGroup, self)._load_plugin_commands()
+            if ep.name in app.config['PLUGINS']:
+                ep.load()
+
+        # Ensure loading happens once
+        self._udata_commands_loaded = False
+
+    def main(self, *args, **kwargs):
+        '''
+        Instanciate ScriptInfo before parent does
+        to ensure the `settings` parameters is available to `create_app
+        '''
+        obj = kwargs.get('obj')
+        if obj is None:
+            obj = ScriptInfo(create_app=self.create_app)
+        # This is the import line: allows create_app to access the settings
+        obj.settings = kwargs.pop('settings', 'udata.settings.Defaults')
+        kwargs['obj'] = obj
+        return super(UdataGroup, self).main(*args, **kwargs)
 
 
 def print_version(ctx, param, value):

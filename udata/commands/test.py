@@ -18,6 +18,7 @@ def log():
     '''Test logging'''
     logger.debug('debug')
     logger.info('info')
+    logger.info('success')
     logger.info('info\nmulti\nlines')
     logger.warning('warning')
     logger.error('error')
