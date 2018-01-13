@@ -23,6 +23,7 @@ class Discussion(db.Document):
     created = db.DateTimeField(default=datetime.now, required=True)
     closed = db.DateTimeField()
     closed_by = db.ReferenceField('User')
+    extras = db.ExtrasField()
 
     meta = {
         'indexes': [
