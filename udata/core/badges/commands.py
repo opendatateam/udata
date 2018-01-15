@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import click
 import logging
 
 from os.path import exists
@@ -29,6 +30,8 @@ def toggle_badge(id_or_slug, badge_kind):
 
 
 @badges.command()
+@click.argument('path_or_id')
+@click.argument('badge_kind')
 def toggle(path_or_id, badge_kind):
     '''Toggle a `badge_kind` for a given `path_or_id`
 
