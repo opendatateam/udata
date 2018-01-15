@@ -5,7 +5,6 @@ import json
 import os
 import shutil
 import tempfile
-import sys
 import warnings
 
 from datetime import timedelta
@@ -36,7 +35,7 @@ class TestCase(BaseTestCase):
     settings = settings.Testing
 
     def setUp(self):
-        reload(sys).setdefaultencoding('ascii')
+        # Ensure compatibility with multiple inheritance
         super(TestCase, self).setUp()
 
     def tearsDown(self):

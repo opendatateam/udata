@@ -12,19 +12,15 @@ from glob import iglob
 from flask.cli import FlaskGroup, shell_command, ScriptInfo
 from udata.app import create_app, standalone, VERBOSE_LOGGERS
 
-# Expect an utf8 compatible terminal
-reload(sys)  # noqa
-sys.setdefaultencoding('utf8')
-
 log = logging.getLogger(__name__)
 
 IS_TTY = sys.__stdin__.isatty()
 
-INFO = '➢'
-DEBUG = '⇝'
-OK = '✔'
-KO = '✘'
-WARNING = '⚠'
+INFO = '➢'.encode('utf8')
+DEBUG = '⇝'.encode('utf8')
+OK = '✔'.encode('utf8')
+KO = '✘'.encode('utf8')
+WARNING = '⚠'.encode('utf8')
 
 CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'udata',
@@ -109,7 +105,7 @@ class CliFormatter(logging.Formatter):
 
     def _prefix(self, record):
         if record.levelno in LEVELS_PREFIX:
-            return LEVELS_PREFIX[record.levelno]
+            return LEVELS_PREFIX[record.levelno].decode('utf8')
         else:
             color = LEVEL_COLORS.get(record.levelno, white)
             return '{0}:'.format(color(record.levelname.upper()))
