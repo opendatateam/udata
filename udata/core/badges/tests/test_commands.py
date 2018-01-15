@@ -17,11 +17,12 @@ class BadgeCommandTest(DBTestMixin, TestCase):
     def toggle(self, path_or_id, kind):
         runner = CliRunner()
         with patch.object(cli, 'create_app', return_value=self.app):
-            result = runner.invoke(cli, ['badges', 'toggle', path_or_id, kind])
+            result = runner.invoke(cli, ['badges', 'toggle', path_or_id, kind],
+                                   catch_exceptions=False)
         self.assertEqual(result.exit_code, 0,
                          'The command failed with exit code {0.exit_code} '
-                         'and the following output:\n'
-                         '{0.output_bytes}'.format(result))
+                         'and the following output:\n{0.output}'
+                         .format(result))
         return result
 
     def test_toggle_badge_on(self):
