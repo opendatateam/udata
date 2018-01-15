@@ -41,9 +41,9 @@ def serve(info, host, port, reload, debugger, eager_loading, with_threads):
     This local server is recommended for development purposes only but it
     can also be used for simple intranet deployments.
 
-    By default it will
-    not support any sort of concurrency at all to simplify debugging.  This
-    can be changed with the --with-threads option which will enable basic
+    By default it will not support any sort of concurrency at all
+    to simplify debugging.
+    This can be changed with the --with-threads option which will enable basic
     multithreading.
 
     The reloader and debugger are by default enabled if the debug flag of
@@ -65,19 +65,8 @@ def serve(info, host, port, reload, debugger, eager_loading, with_threads):
 
     app = DispatchingApp(info.load_app, use_eager_loading=eager_loading)
 
-    # # Extra startup messages.  This depends a bit on Werkzeug internals to
-    # # not double execute when the reloader kicks in.
-    # if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
-    #     # If we have an import path we can print it out now which can help
-    #     # people understand what's being served.  If we do not have an
-    #     # import path because the app was loaded through a callback then
-    #     # we won't print anything.
-    #     if info.app_import_path is not None:
-    #         print(' * Serving Flask app "%s"' % info.app_import_path)
-    #     if debug is not None:
-    #         print(' * Forcing debug mode %s' % (debug and 'on' or 'off'))
-
-    settings = os.environ.get('UDATA_SETTINGS', os.path.join(os.getcwd(), 'udata.cfg'))
+    settings = os.environ.get('UDATA_SETTINGS',
+                              os.path.join(os.getcwd(), 'udata.cfg'))
     run_simple(host, port, app, use_reloader=reload,
                use_debugger=debugger, threaded=with_threads,
                extra_files=[settings])
