@@ -45,15 +45,15 @@ echo = click.echo
 
 def header(msg):
     '''Display an header'''
-    echo(' '.join((yellow('✯'), green(msg))))
+    echo(' '.join((yellow('✯').decode('utf8'), green(msg))))
 
 
 def success(msg):
-    echo('{0} {1}'.format(green(OK), white(msg)))
+    echo('{0} {1}'.format(green(OK).decode('utf8'), white(msg)))
 
 
 def error(msg, details=None):
-    msg = '{0} {1}'.format(red(KO), white(msg))
+    msg = '{0} {1}'.format(red(KO).decode('utf8'), white(msg))
     if details:
         msg = '\n'.join((msg, str(details)))
     echo(format_multiline(msg))
