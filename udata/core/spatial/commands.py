@@ -9,6 +9,7 @@ import tarfile
 import shutil
 
 from collections import Counter
+from datetime import date
 from string import Formatter
 from urllib import urlretrieve
 
