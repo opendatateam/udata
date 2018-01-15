@@ -21,6 +21,7 @@ DEBUG = '⇝'.encode('utf8')
 OK = '✔'.encode('utf8')
 KO = '✘'.encode('utf8')
 WARNING = '⚠'.encode('utf8')
+HEADER = '✯'.encode('utf8')
 
 CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'udata',
@@ -31,7 +32,7 @@ click.disable_unicode_literals_warning = True
 
 
 def color(name, **kwargs):
-    return lambda t: click.style(str(t), fg=name, **kwargs)
+    return lambda t: click.style(str(t), fg=name, **kwargs).decode('utf8')
 
 
 green = color('green', bold=True)
@@ -45,21 +46,24 @@ echo = click.echo
 
 def header(msg):
     '''Display an header'''
-    echo(' '.join((yellow('✯').decode('utf8'), green(msg))))
+    echo(' '.join((yellow(HEADER), white(msg), yellow(HEADER))))
 
 
 def success(msg):
-    echo('{0} {1}'.format(green(OK).decode('utf8'), white(msg)))
+    '''Display a success message'''
+    echo('{0} {1}'.format(green(OK), white(msg)))
 
 
 def error(msg, details=None):
-    msg = '{0} {1}'.format(red(KO).decode('utf8'), white(msg))
+    '''Display an error message with optionnal details'''
+    msg = '{0} {1}'.format(red(KO), white(msg))
     if details:
         msg = '\n'.join((msg, str(details)))
     echo(format_multiline(msg))
 
 
 def exit(msg, details=None, code=-1):
+    '''Exit with error'''
     error(msg, details)
     sys.exit(code)
 
@@ -105,7 +109,7 @@ class CliFormatter(logging.Formatter):
 
     def _prefix(self, record):
         if record.levelno in LEVELS_PREFIX:
-            return LEVELS_PREFIX[record.levelno].decode('utf8')
+            return LEVELS_PREFIX[record.levelno]
         else:
             color = LEVEL_COLORS.get(record.levelno, white)
             return '{0}:'.format(color(record.levelname.upper()))

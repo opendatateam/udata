@@ -298,6 +298,9 @@ class CliTestMixin(object):
         from click.testing import CliRunner
         from udata.commands import cli
 
+        if len(args) == 1 and ' ' in args[0]:
+            args = args[0].split()
+
         runner = CliRunner()
         with mock.patch.object(cli, 'create_app', return_value=self.app):
             result = runner.invoke(cli, args, catch_exceptions=False)

@@ -3,7 +3,7 @@ from __future__ import unicode_literals, print_function
 
 import logging
 
-from . import cli
+from . import cli, success, error, header
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,9 @@ def test():
 @test.command()
 def log():
     '''Test logging'''
+    header('header')
+    success('success')
+    error('error')
     logger.debug('debug')
     logger.info('info')
     logger.info('success')
