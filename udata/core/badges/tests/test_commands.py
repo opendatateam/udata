@@ -3,27 +3,14 @@ from __future__ import unicode_literals
 
 from tempfile import NamedTemporaryFile
 
-from mock import patch
-
 from udata.models import Badge, CERTIFIED, PUBLIC_SERVICE
-from udata.tests import TestCase, DBTestMixin
+from udata.tests import TestCase, DBTestMixin, CliTestMixin
 from udata.core.organization.factories import OrganizationFactory
 
-from click.testing import CliRunner
-from udata.commands import cli
 
-
-class BadgeCommandTest(DBTestMixin, TestCase):
+class BadgeCommandTest(CliTestMixin, DBTestMixin, TestCase):
     def toggle(self, path_or_id, kind):
-        runner = CliRunner()
-        with patch.object(cli, 'create_app', return_value=self.app):
-            result = runner.invoke(cli, ['badges', 'toggle', path_or_id, kind],
-                                   catch_exceptions=False)
-        self.assertEqual(result.exit_code, 0,
-                         'The command failed with exit code {0.exit_code} '
-                         'and the following output:\n{0.output}'
-                         .format(result))
-        return result
+        return self.cli('badges', 'toggle', path_or_id, kind)
 
     def test_toggle_badge_on(self):
         org = OrganizationFactory()
