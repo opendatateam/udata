@@ -1,3 +1,12 @@
+<style lang="less">
+.list-group-item {
+    p.list-group-item-heading {
+        a, a:hover {
+            text-decoration: underline;
+        }
+    }
+}
+</style>
 <template>
 <div>
     <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions"

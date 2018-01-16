@@ -11,10 +11,11 @@ __all__ = ('DiscussionCreateForm', 'DiscussionCommentForm')
 
 class DiscussionCreateForm(ModelForm):
     model_class = Discussion
-    
+
     title = fields.StringField(_('Title'), [validators.required()])
     comment = fields.StringField(_('Comment'), [validators.required()])
     subject = fields.ModelField(_('Subject'), [validators.required()])
+    extras = fields.ExtrasField(extras=Discussion.extras)
 
 
 class DiscussionCommentForm(Form):
