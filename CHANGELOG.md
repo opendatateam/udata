@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add the homologation of CC-BY-SA for SHOM [#244](https://github.com/etalab/udata-gouvfr/pull/244/files)
+- Dataset recommendations [#243](https://github.com/etalab/udata-gouvfr/pull/243)
 
 ## 1.2.2 (2017-12-14)
 
