@@ -14,6 +14,7 @@ module.exports = {
     entry: {
         theme: "theme",
         admin: "admin",
+        "dataset-recommendations": "js/dataset-recommendations.js",
     },
     output: {
         path: static_path,
@@ -32,7 +33,16 @@ module.exports = {
             {test: /\.json$/, loader: "json"},
             {test: /\.html$/, loader: "html"},
             {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: "file?name=[name].[ext]"},
+            {test: /\.js$/, loader: 'babel-loader', include: [
+                    path.resolve(source_path, 'js'),
+                ]
+            }
         ]
+    },
+    babel: {
+        presets: ['es2015'],
+        comments: false,
+        plugins: ['transform-runtime']
     },
     plugins: [
         new ExtractTextPlugin('[name].css'),
