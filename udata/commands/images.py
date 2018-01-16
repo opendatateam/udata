@@ -10,8 +10,8 @@ from udata.commands import cli, header, success
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def images():
+@cli.group('images')
+def grp():
     '''Images related operations'''
     pass
 
@@ -26,7 +26,7 @@ def render_or_skip(obj, attr):
         return 0
 
 
-@images.command()
+@grp.command()
 def render():
     '''Force (re)rendering stored images'''
     from udata.core.organization.models import Organization

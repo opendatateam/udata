@@ -12,13 +12,13 @@ from udata.linkchecker.tasks import check_resources
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def linkchecker():
+@cli.group('linkchecker')
+def grp():
     '''Link checking operations'''
     pass
 
 
-@linkchecker.command()
+@grp.command()
 @click.option('-n', '--number', type=int, default=5000,
               help='Number of URLs to check')
 def check(number):

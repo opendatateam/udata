@@ -12,7 +12,7 @@ from werkzeug.datastructures import MultiDict
 
 from udata.models import User, datastore
 
-from udata.commands import cli, success, error, exit
+from udata.commands import cli, success, exit_with_error
 
 log = logging.getLogger(__name__)
 
@@ -44,18 +44,18 @@ def create():
         success('User(id={u.id} email={u.email}) created'.format(u=user))
         return user
     errors = '\n'.join('\n'.join(e) for e in form.errors.values())
-    exit('Error creating user', errors)
+    exit_with_error('Error creating user', errors)
 
 
 @grp.command()
 def activate():
     '''Activate an existing user (validate their email confirmation)'''
-    email = prompt('Email')
+    email = click.prompt('Email')
     user = User.objects(email=email).first()
     if not user:
-        exit('Invalid user')
+        exit_with_error('Invalid user')
     if user.confirmed_at is not None:
-        exit('User email address already confirmed')
+        exit_with_error('User email address already confirmed')
         return
     user.confirmed_at = datetime.utcnow()
     user.save()
@@ -65,10 +65,10 @@ def activate():
 @grp.command()
 def delete():
     '''Delete an existing user'''
-    email = prompt('Email')
+    email = click.prompt('Email')
     user = User.objects(email=email).first()
     if not user:
-        exit('Invalid user')
+        exit_with_error('Invalid user')
     user.delete()
     success('User deleted successfully')
 

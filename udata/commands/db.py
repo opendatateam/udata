@@ -18,8 +18,8 @@ from udata.commands import cli, green, yellow, cyan, red, magenta
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def db():
+@cli.group('db')
+def grp():
     '''Database related operations'''
     pass
 
@@ -136,7 +136,7 @@ def log_status(plugin, filename, status):
     log.info('%s [%s]', '{:.<70}'.format(display), status)
 
 
-@db.command()
+@grp.command()
 def status():
     '''Display the database migrations status'''
     for plugin, package, filename in available_migrations():
@@ -148,7 +148,7 @@ def status():
         log_status(plugin, filename, status)
 
 
-@db.command()
+@grp.command()
 @click.option('-r', '--record', is_flag=True,
               help='Only records the migrations')
 @click.option('-d', '--dry-run', is_flag=True,
@@ -168,7 +168,7 @@ def migrate(record, dry_run=False):
             success &= handler(plugin, filename, script, dryrun=dry_run)
 
 
-@db.command()
+@grp.command()
 def unrecord(plugin, filename):
     '''Remove a database migration record'''
     migration = get_migration(plugin, filename)

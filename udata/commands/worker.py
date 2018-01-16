@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import json
 import logging
-import sys
 from collections import Counter
 from urlparse import urlparse
 
@@ -14,14 +13,14 @@ from celery.task.control import inspect
 from flask import current_app
 
 from udata.app import cache
-from udata.commands import cli, exit
+from udata.commands import cli, exit_with_error
 from udata.tasks import celery
 
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def worker():
+@cli.group('worker')
+def grp():
     '''Worker related operations'''
     pass
 
@@ -31,7 +30,7 @@ TASKS_LIST_CACHE_KEY = 'worker-status-tasks'
 TASKS_LIST_CACHE_DURATION = 60 * 60 * 24  # in seconds
 
 
-@worker.command()
+@grp.command()
 def start():
     '''Start a worker'''
     worker = celery.Worker()
@@ -48,8 +47,7 @@ def status_print_task(count, biggest_task_name, munin=False):
 
 def status_print_config(queue):
     if not queue:
-        log.error('--munin-config called without a --queue parameter')
-        sys.exit(-1)
+        exit_with_error('--munin-config called without a --queue parameter')
     tasks = cache.get(TASKS_LIST_CACHE_KEY) or []
     if not tasks:
         registered = inspect().registered_tasks()
@@ -93,7 +91,7 @@ def get_queues(queue):
     if queue:
         queues = [q for q in queues if q == queue]
     if not len(queues):
-        exit('Error: no queue found')
+        exit_with_error('Error: no queue found')
     return queues
 
 
@@ -103,7 +101,8 @@ def get_redis_connection():
     return redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
                              db=db)
 
-@worker.command()
+
+@grp.command()
 @click.option('-q', '--queue', help='Queue to be analyzed', default=None)
 @click.option('-m', '--munin', is_flag=True,
               help='Output in a munin plugin compatible format')

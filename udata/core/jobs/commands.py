@@ -5,23 +5,23 @@ import logging
 
 import click
 
-from udata.commands import cli, exit
+from udata.commands import cli, exit_with_error
 from udata.tasks import schedulables, celery
 
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def job():
+@cli.group('job')
+def grp():
     '''Jobs related operations'''
     pass
 
 
-@job.command()
+@grp.command()
 @click.argument('name', metavar='<name>')
 @click.argument('params', nargs=-1,  metavar='<arg key=value ...>')
 @click.option('-d', '--delay', is_flag=True,
-          help='Run the job asynchronously on a worker')
+              help='Run the job asynchronously on a worker')
 def run(name, params, delay):
     '''
     Run the job <name>
@@ -36,7 +36,7 @@ def run(name, params, delay):
     kwargs = dict(p.split('=') for p in params if '=' in p)
 
     if name not in celery.tasks:
-        exit('Job %s not found', name)
+        exit_with_error('Job %s not found', name)
     job = celery.tasks[name]
     label = name
     if params:
@@ -51,7 +51,7 @@ def run(name, params, delay):
         log.info('Job %s done', name)
 
 
-@job.command()
+@grp.command()
 def list():
     '''List all availables jobs'''
     for job in schedulables():

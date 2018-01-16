@@ -5,7 +5,7 @@ import logging
 
 import click
 
-from udata.commands import cli, success, IS_TTY, success
+from udata.commands import cli, success, IS_TTY
 from udata.core.dataset.commands import licenses
 from udata.core.user import commands as user_commands
 from udata.i18n import gettext as _

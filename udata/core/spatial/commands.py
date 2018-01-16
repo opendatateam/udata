@@ -27,20 +27,20 @@ from udata.core.storages import logos, tmp
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def spatial():
+@cli.group('spatial')
+def grp():
     '''Geospatial related operations'''
     pass
 
 
-@spatial.command()
+@grp.command()
 @click.argument('filename', metavar='<filename>')
 @click.option('-d', '--drop', is_flag=True, help='Drop existing data')
 def load(filename, drop=False):
     '''
     Load a geozones archive from <filename>
 
-    <filename> can be either a local poath or a remote URL.
+    <filename> can be either a local path or a remote URL.
     '''
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
@@ -118,13 +118,13 @@ def load(filename, drop=False):
     shutil.rmtree(tmp.path('translations'))  # Not in use for now.
 
 
-@spatial.command()
+@grp.command()
 @click.argument('filename', metavar='<filename>')
 def load_logos(filename):
     '''
     Load logos from a geologos archive from <filename>
 
-    <filename> can be either a local poath or a remote URL.
+    <filename> can be either a local path or a remote URL.
     '''
     if filename.startswith('http'):
         log.info('Downloading GeoLogos bundle: %s', filename)
@@ -142,7 +142,7 @@ def load_logos(filename):
     log.info('Done')
 
 
-@spatial.command()
+@grp.command()
 def migrate():
     '''
     Migrate zones from old to new ids in datasets.

@@ -15,9 +15,9 @@ log = logging.getLogger(__name__)
 
 
 @cli.command()
-@click.option('--datasets', is_flag=True)
-@click.option('--reuses', is_flag=True)
-@click.option('--organizations', is_flag=True)
+@click.option('-d', '--datasets', is_flag=True)
+@click.option('-r', '--reuses', is_flag=True)
+@click.option('-o', '--organizations', is_flag=True)
 def purge(datasets, reuses, organizations):
     '''
     Permanently remove data flagged as deleted.

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 
-import os
-import click
-import sys
 import logging
+import os
 import pkg_resources
+import sys
 
 from glob import iglob
+
+import click
 
 from flask.cli import FlaskGroup, shell_command, ScriptInfo
 from udata.app import create_app, standalone, VERBOSE_LOGGERS
@@ -38,7 +39,7 @@ def color(name, **kwargs):
 green = color('green', bold=True)
 yellow = color('yellow', bold=True)
 red = color('red', bold=True)
-cyan = color('cyan')
+cyan = color('cyan', bold=True)
 magenta = color('magenta', bold=True)
 white = color('white', bold=True)
 echo = click.echo
@@ -62,7 +63,7 @@ def error(msg, details=None):
     echo(format_multiline(msg))
 
 
-def exit(msg, details=None, code=-1):
+def exit_with_error(msg, details=None, code=-1):
     '''Exit with error'''
     error(msg, details)
     sys.exit(code)
@@ -72,7 +73,7 @@ LEVEL_COLORS = {
     logging.DEBUG: cyan,
     logging.WARNING: yellow,
     logging.ERROR: red,
-    logging.CRITICAL: color('black', bg='red', bold=True),
+    logging.CRITICAL: color('white', bg='red', bold=True),
 }
 
 LEVELS_PREFIX = {
@@ -197,12 +198,12 @@ class UdataGroup(FlaskGroup):
         Load udata commands from:
         - `udata.commands.*` module
         - known internal modules with commands
-        - plugins exporting a `udata.commands` entrpoints
+        - plugins exporting a `udata.commands` entrypoint
         '''
         if self._udata_commands_loaded:
             return
 
-        # Load all commands submodule
+        # Load all commands submodules
         pattern = os.path.join(os.path.dirname(__file__), '[!_]*.py')
         for filename in iglob(pattern):
             module = os.path.splitext(os.path.basename(filename))[0]

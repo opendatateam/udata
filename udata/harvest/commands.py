@@ -13,13 +13,13 @@ from . import actions
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def harvest():
+@cli.group('harvest')
+def grp():
     '''Remote repositories harvesting operations'''
     pass
 
 
-@harvest.command()
+@grp.command()
 @click.argument('backend')
 @click.argument('url')
 @click.argument('name')
@@ -43,7 +43,7 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
     organization: {0.organization}'''.format(source))
 
 
-@harvest.command()
+@grp.command()
 @click.argument('identifier')
 def validate(identifier):
     '''Validate a source given its identifier'''
@@ -51,7 +51,7 @@ def validate(identifier):
     log.info('Source %s (%s) has been validated', source.slug, str(source.id))
 
 
-@harvest.command()
+@grp.command()
 def delete(identifier):
     '''Delete a harvest source'''
     log.info('Deleting source "%s"', identifier)
@@ -59,7 +59,7 @@ def delete(identifier):
     log.info('Deleted source "%s"', identifier)
 
 
-@harvest.command()
+@grp.command()
 @click.option('-s', '--scheduled', is_flag=True,
               help='list only scheduled source')
 def sources(scheduled=False):
@@ -81,7 +81,7 @@ def sources(scheduled=False):
         log.info('No sources defined yet')
 
 
-@harvest.command()
+@grp.command()
 def backends():
     '''List available backends'''
     log.info('Available backends:')
@@ -89,12 +89,12 @@ def backends():
         log.info('%s (%s)', backend.name, backend.display_name or backend.name)
 
 
-@harvest.command()
+@grp.command()
 def jobs():
     '''List started harvest jobs'''
 
 
-@harvest.command()
+@grp.command()
 @click.argument('identifier')
 def launch(identifier):
     '''Launch a source harvesting on the workers'''
@@ -102,7 +102,7 @@ def launch(identifier):
     actions.launch(identifier)
 
 
-@harvest.command()
+@grp.command()
 @click.argument('identifier')
 def run(identifier):
     '''Run a harvester synchronously'''
@@ -110,7 +110,7 @@ def run(identifier):
     actions.run(identifier)
 
 
-@harvest.command()
+@grp.command()
 @click.argument('identifier')
 @click.option('-m', '--minute', default='*',
               help='The crontab expression for minute')
@@ -129,7 +129,7 @@ def schedule(identifier, **kwargs):
     log.info(msg.format(source=source, cron=source.periodic_task.crontab))
 
 
-@harvest.command()
+@grp.command()
 @click.argument('identifier')
 def unschedule(identifier):
     '''Unschedule a periodical harvest job'''
@@ -137,7 +137,7 @@ def unschedule(identifier):
     log.info('Unscheduled harvest source "%s"', source.name)
 
 
-@harvest.command()
+@grp.command()
 def purge():
     '''Permanently remove deleted harvest sources'''
     log.info('Purging deleted harvest sources')
@@ -145,7 +145,7 @@ def purge():
     log.info('Purged %s source(s)', count)
 
 
-@harvest.command()
+@grp.command()
 @click.argument('filename')
 @click.argument('domain')
 def attach(domain, filename):
@@ -153,7 +153,6 @@ def attach(domain, filename):
     Attach existing datasets to their harvest remote id
 
     Mapping between identifiers should be in FILENAME CSV file.
-
     '''
     log.info('Attaching datasets for domain %s', domain)
     result = actions.attach(domain, filename)

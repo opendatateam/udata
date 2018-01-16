@@ -15,18 +15,13 @@ from udata.core.user.factories import UserFactory
 
 log = logging.getLogger(__name__)
 
-# Set default values as constant
-# so direct function calls benefit from it too
-DEFAULT_DATASETS = 5
-DEFAULT_REUSES = 1
-
 
 @cli.command()
-@click.option('-d', '--datasets', type=int, default=DEFAULT_DATASETS,
+@click.option('-d', '--datasets', type=int, default=5,
               help='Number of datasets to generate')
-@click.option('-r', '--reuses', type=int, default=DEFAULT_REUSES,
+@click.option('-r', '--reuses', type=int, default=1,
               help='Number of reuses by dataset')
-def generate_fixtures(datasets=DEFAULT_DATASETS, reuses=DEFAULT_REUSES):
+def generate_fixtures(datasets, reuses):
     '''Build sample fixture data (users, datasets and reuses).'''
     user = UserFactory()
     log.info('Generated user "{user.email}".'.format(user=user))

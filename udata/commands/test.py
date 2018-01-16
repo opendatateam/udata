@@ -8,7 +8,7 @@ from . import cli, success, error, header
 logger = logging.getLogger(__name__)
 
 
-@cli.group()
+@cli.group('test')
 def test():
     '''Some commands for testing purpose'''
 

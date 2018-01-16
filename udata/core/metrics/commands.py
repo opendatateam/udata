@@ -14,8 +14,8 @@ from .tasks import update_metrics_for, update_site_metrics
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def metrics():
+@cli.group('metrics')
+def grp():
     '''Metrics related operations'''
     pass
 
@@ -26,7 +26,7 @@ def iter_catalog(*models):
             yield (model, metrics)
 
 
-@metrics.command()
+@grp.command()
 @click.option('-s', '--site', is_flag=True, help='Update site metrics')
 @click.option('-o', '--organizations', is_flag=True,
               help='Compute organizations metrics')

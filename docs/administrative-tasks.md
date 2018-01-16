@@ -104,7 +104,7 @@ $ udata job run -d job-name
 ```
 
 Some jobs require arguments and keywords arguments.
-You can pass them with ass arguments too:
+You can pass them as arguments too:
 
 ```shell
 $ udata job run job-name arg1 arg2 key1=value key2=value

@@ -22,8 +22,8 @@ from elasticsearch.helpers import reindex as es_reindex, streaming_bulk
 log = logging.getLogger(__name__)
 
 
-@cli.group()
-def search():
+@cli.group('search')
+def grp():
     '''Search/Indexation related operations'''
     pass
 
@@ -155,7 +155,7 @@ def handle_error(index_name, keep=False):
         sys.exit(-1)
 
 
-@search.command()
+@grp.command()
 @click.argument('models', nargs=-1, metavar='[<model> ...]')
 @click.option('-n', '--name', default=None, help='Optionnal index name')
 @click.option('-f', '--force', is_flag=True, help='Do not prompt on deletion')
@@ -165,7 +165,7 @@ def index(models=None, name=None, force=False, keep=False):
     Initialize or rebuild the search index
 
     Models to reindex can optionnaly be specified as arguments.
-    If not, all models are reindexed
+    If not, all models are reindexed.
     '''
     index_name = name or default_index_name()
 

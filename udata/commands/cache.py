@@ -20,6 +20,6 @@ def grp():
 @grp.command()
 def flush():
     '''Flush the cache'''
-    log.info('Flusing cache')
+    log.info('Flushing cache')
     cache.clear()
     success('Cache flushed')
