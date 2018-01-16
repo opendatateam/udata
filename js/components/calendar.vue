@@ -14,7 +14,7 @@
             <header>
                 <span class="dow" v-for="day in days">{{ day }}</span>
             </header>
-            <div v-for="week in currentMonthDays">
+            <div v-for="week in monthDays(current)">
                 <button v-for="day in week" class="day" :class="dayClasses(day)"
                     @click.prevent="pickDay(day)" :disabled="isDisabled(day)">
                     {{ day.date() }}
@@ -111,21 +111,6 @@ export default {
                 return `${start.year()}-${end.year()}`;
             }
         },
-        currentMonthDays() {
-            const start = this.current.clone().startOf('month').startOf('week');
-            const end = this.current.clone().endOf('month').endOf('week');
-            const days = [];
-            let row;
-
-            for (let i=0; i <= end.diff(start, 'days'); i++) {
-                if (i % 7 === 0) {
-                    row = [];
-                    days.push(row);
-                }
-                row.push(start.clone().add(i, 'days'));
-            }
-            return days;
-        },
         yearsRange() {
             const start = this.current.clone().subtract(5, 'years');
             const years = [];
@@ -175,6 +160,21 @@ export default {
         }
     },
     methods: {
+        monthDays(date) {
+            const start = date.clone().startOf('month').startOf('week');
+            const end = date.clone().endOf('month').endOf('week');
+            const days = [];
+            let row;
+
+            for (let i=0; i <= end.diff(start, 'days'); i++) {
+                if (i % 7 === 0) {
+                    row = [];
+                    days.push(row);
+                }
+                row.push(start.clone().add(i, 'days'));
+            }
+            return days;
+        },
         next() {
             this.current = this.nextValue;
         },
@@ -191,12 +191,12 @@ export default {
             this.$dispatch('calendar:date:selected', day);
         },
         pickMonth(month) {
-            this.current.month(month);
+            this.current = this.current.month(month);
             this.view = 'days';
             this.$dispatch('calendar:month:selected', month);
         },
         pickYear(year) {
-            this.current.year(year);
+            this.current = this.current.year(year);
             this.view = 'months';
             this.$dispatch('calendar:year:selected', year);
         },
