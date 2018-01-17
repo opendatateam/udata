@@ -253,10 +253,8 @@ export default {
     },
     watch: {
         selected(value) {
-            console.log('selected', JSON.parse(JSON.stringify(value)));
             if (!value) return;
             this.current = value.clone();
-            console.log('current', JSON.parse(JSON.stringify(this.current)));
         }
     }
 };
