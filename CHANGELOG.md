@@ -4,6 +4,7 @@
 
 - Add extras field in discussions [#1360](https://github.com/opendatateam/udata/pull/1360)
 - Fix datepicker [#1370](https://github.com/opendatateam/udata/pull/1370)
+- Fix error on forbidden scheme in `is_url` harvest filter [#1376](https://github.com/opendatateam/udata/pull/1376)
 
 ## 1.2.8 (2018-01-10)
 
