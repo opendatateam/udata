@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.9 (2018-01-17)
 
 - Add extras field in discussions [#1360](https://github.com/opendatateam/udata/pull/1360)
