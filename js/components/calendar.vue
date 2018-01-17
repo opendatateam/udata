@@ -216,7 +216,7 @@ export default {
         },
 
         isMonthDisabled(idx) {
-            const month = moment().month(idx).year(this.current.year());
+            const month = this.current.clone().month(idx);
             const isBeforeMin = this.min && month.isBefore(this.min, 'month');
             const isAfterMax = this.max && month.isAfter(this.max, 'month');
             return isBeforeMin || isAfterMax;
@@ -253,8 +253,10 @@ export default {
     },
     watch: {
         selected(value) {
+            console.log('selected', JSON.parse(JSON.stringify(value)));
             if (!value) return;
-            this.current = value;
+            this.current = value.clone();
+            console.log('current', JSON.parse(JSON.stringify(this.current)));
         }
     }
 };
