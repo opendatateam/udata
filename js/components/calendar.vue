@@ -14,7 +14,7 @@
             <header>
                 <span class="dow" v-for="day in days">{{ day }}</span>
             </header>
-            <div v-for="week in currentMonthDays">
+            <div v-for="week in monthDays(current)">
                 <button v-for="day in week" class="day" :class="dayClasses(day)"
                     @click.prevent="pickDay(day)" :disabled="isDisabled(day)">
                     {{ day.date() }}
@@ -80,8 +80,7 @@ export default {
     data() {
         const current = this.selected || moment();
         return {
-            currentMonth: current.month(),
-            currentYear: current.year(),
+            current: current,
             today: moment()
         };
     },
@@ -99,37 +98,21 @@ export default {
             return moment.monthsShort();
         },
         monthDisplay() {
-            return moment().month(this.currentMonth).year(this.currentYear).format(MONTH_FORMAT);
+            return this.current.format(MONTH_FORMAT);
         },
         rangeDisplay() {
             if (this.view == 'days') {
-                return moment().month(this.currentMonth).year(this.currentYear).format(MONTH_FORMAT);
+                return this.current.format(MONTH_FORMAT);
             } else if (this.view == 'months') {
-                return this.currentYear;
+                return this.current.year();
             } else if (this.view == 'years') {
-                const start = moment().year(this.currentYear).subtract(5, 'years');
-                const end = moment().year(this.currentYear).add(6, 'years');
+                const start = this.current.clone().subtract(5, 'years');
+                const end = this.current.clone().add(6, 'years');
                 return `${start.year()}-${end.year()}`;
             }
         },
-        currentMonthDays() {
-            const month = moment().month(this.currentMonth).year(this.currentYear);
-            const start = month.clone().startOf('month').startOf('week');
-            const end = month.clone().endOf('month').endOf('week');
-            const days = [];
-            let row;
-
-            for (let i=0; i <= end.diff(start, 'days'); i++) {
-                if (i % 7 === 0) {
-                    row = [];
-                    days.push(row);
-                }
-                row.push(start.clone().add(i, 'days'));
-            }
-            return days;
-        },
         yearsRange() {
-            const start = moment().year(this.currentYear).subtract(5, 'years');
+            const start = this.current.clone().subtract(5, 'years');
             const years = [];
 
             for (let i=0; i < 12; i++) {
@@ -138,7 +121,7 @@ export default {
             return years;
         },
         nextValue() {
-            const value = moment().month(this.currentMonth).year(this.currentYear);
+            const value = this.current.clone();
             if (this.view === 'days') {
                 value.add(1, 'months');
             } else if (this.view === 'months') {
@@ -149,7 +132,7 @@ export default {
             return value;
         },
         previousValue() {
-            const value = moment().month(this.currentMonth).year(this.currentYear);
+            const value = this.current.clone();
             if (this.view === 'days') {
                 value.subtract(1, 'months');
             } else if (this.view === 'months') {
@@ -177,13 +160,26 @@ export default {
         }
     },
     methods: {
+        monthDays(date) {
+            const start = date.clone().startOf('month').startOf('week');
+            const end = date.clone().endOf('month').endOf('week');
+            const days = [];
+            let row;
+
+            for (let i=0; i <= end.diff(start, 'days'); i++) {
+                if (i % 7 === 0) {
+                    row = [];
+                    days.push(row);
+                }
+                row.push(start.clone().add(i, 'days'));
+            }
+            return days;
+        },
         next() {
-            this.currentMonth = this.nextValue.month();
-            this.currentYear = this.nextValue.year();
+            this.current = this.nextValue;
         },
         previous() {
-            this.currentMonth = this.previousValue.month();
-            this.currentYear = this.previousValue.year();
+            this.current = this.previousValue;
         },
         zoomOut() {
             if (VIEWS.indexOf(this.view) + 1 < VIEWS.length) {
@@ -195,22 +191,22 @@ export default {
             this.$dispatch('calendar:date:selected', day);
         },
         pickMonth(month) {
-            this.currentMonth = month;
+            this.current = this.current.month(month);
             this.view = 'days';
             this.$dispatch('calendar:month:selected', month);
         },
         pickYear(year) {
-            this.currentYear = year;
+            this.current = this.current.year(year);
             this.view = 'months';
             this.$dispatch('calendar:year:selected', year);
         },
 
         isOld(day) {
-            return day.isBefore(moment().month(this.currentMonth).year(this.currentYear).startOf('month'));
+            return day.isBefore(this.current.startOf('month'));
         },
 
         isNew(day) {
-            return day.isAfter(moment().month(this.currentMonth).year(this.currentYear).endOf('month'));
+            return day.isAfter(this.current.endOf('month'));
         },
 
         isDisabled(day) {
@@ -220,7 +216,7 @@ export default {
         },
 
         isMonthDisabled(idx) {
-            const month = moment().month(idx).year(this.currentYear);
+            const month = this.current.clone().month(idx);
             const isBeforeMin = this.min && month.isBefore(this.min, 'month');
             const isAfterMax = this.max && month.isAfter(this.max, 'month');
             return isBeforeMin || isAfterMax;
@@ -250,8 +246,7 @@ export default {
 
         clear() {
             this.selected = null;
-            this.currentYear = this.today.year();
-            this.currentMonth = this.today.month();
+            this.current = this.today.clone();
             this.view = 'days';
             this.$dispatch('calendar:date:cleared');
         }
@@ -259,8 +254,7 @@ export default {
     watch: {
         selected(value) {
             if (!value) return;
-            this.currentMonth = value.month();
-            this.currentYear = value.year();
+            this.current = value.clone();
         }
     }
 };
