@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.9 (2018-01-17)
 
 - Add extras field in discussions [#1360](https://github.com/opendatateam/udata/pull/1360)
 - Fix datepicker [#1370](https://github.com/opendatateam/udata/pull/1370)
