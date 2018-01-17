@@ -13,10 +13,10 @@ function addRecos(recos) {
     recos.splice(0, maxRecos).forEach((reco) => {
         recoChildContainer = document.createElement('div');
         recoChildContainer.classList.add('recommendation');
-    
+
         recoChildEmbed = document.createElement('div');
         recoChildEmbed.setAttribute('data-udata-dataset-id', reco[0]);
-    
+
         recoChildContainer.appendChild(recoChildEmbed);
         recoContainer.appendChild(recoChildContainer);
     });
@@ -33,6 +33,8 @@ function addWidgetScript() {
 
 function loadDatasets() {
     udataScript.loadDatasets();
+    const recoParent = document.getElementById('dataset-recommendations');
+    recoParent.style.display = 'block';
 }
 
 function fetchRecos(datasetId) {
@@ -45,8 +47,6 @@ function fetchRecos(datasetId) {
         if (recos) {
             addRecos(recos);
             addWidgetScript();
-            const recoParent = document.getElementById('dataset-recommendations');
-            recoParent.style.display = 'block';
         }
     }).catch((err) => {
         console.log('Error while fetching recommendations:', err);
