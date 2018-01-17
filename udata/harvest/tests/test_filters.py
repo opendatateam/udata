@@ -65,3 +65,15 @@ class FiltersTest(TestCase):
     def test_unknown_hash(self):
         self.assertEqual(filters.hash('xxxx'), None)
         self.assertEqual(filters.hash(None), None)
+
+
+class IsUrlFilterTest(TestCase):
+    def test_valid_url_with_defaults(self):
+        f = filters.is_url()
+        self.assertEqual(f('https://somewhere.com/path'),
+                         'https://somewhere.com/path')
+
+    def test_allowed_scheme_not_allowed(self):
+        f = filters.is_url()
+        with self.assertRaises(Invalid):
+            f('not-allowed://somewhere.com')
