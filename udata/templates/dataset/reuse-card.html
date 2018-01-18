@@ -1,0 +1,41 @@
+<div id="reuse-{{reuse.id}}" class="thumbnail reuse">
+    <a class="preview" href="{{ url_for('reuses.show', reuse=reuse) }}">
+        <img class="media-object img-responsive" alt="{{ reuse.title }}"
+            src="{{ reuse.image|placeholder('reuse') }}">
+    </a>
+    <div class="caption">
+        <h4 class="clamp-2">
+            <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
+                {{ reuse.title }}
+            </a>
+        </h4>
+        <div class="author">
+            {{ reuse|owner_avatar(25) }}
+            <a class="user" href="{{ reuse|owner_url }}" title="{{ reuse|owner_name }}">
+            {{ reuse|owner_name }}
+            </a>
+            <span class="date">{{ reuse.created_at|dateformat('long') }}</span>
+        </div>
+    </div>
+    {% if reuse.description %}
+    <a class="rollover fade in" href="{{url_for('reuses.show', reuse=reuse)}}"
+        title="{{ reuse.title }}">
+        {{ reuse.description|mdstrip(180) }}
+    </a>
+    {% endif %}
+    <div class="btn-group btn-group-xs">
+        <a class="btn btn-default" href="{{ reuse.url }}"
+            v-tooltip title="{{ _('Open in a new window') }}">
+            <span class="fa fa-external-link"></span>
+        </a>
+        {% if current_user.sysadmin or reuse.owner == current_user %}
+        <a class="btn btn-default" v-tooltip title="{{ _('Edit') }}"
+            href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}">
+            <span class="fa fa-pencil"></span>
+        </a>
+        {% endif %}
+        {% if current_user.sysadmin %}
+        <featured-button compact subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|to_json }}"></featured-button>
+        {% endif %}
+    </div>
+</div>

@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Markdown rendering is now the same between the back and the frontend. [#604](https://github.com/opendatateam/udata/issues/604)
+- Make the dataset page reuses section and cards themable. [#1378](https://github.com/opendatateam/udata/pull/1378)
 
 ## 1.2.9 (2018-01-17)
 
