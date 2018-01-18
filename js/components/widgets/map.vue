@@ -2,6 +2,7 @@
 .map-widget {
     .box-body {
         height: 350px;
+        cursor: default;
     }
 
     .leaflet-popup {

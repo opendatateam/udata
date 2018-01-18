@@ -20,6 +20,8 @@ The sources of the project are on [Github][]:
 $ git clone https://github.com/opendatateam/udata.git
 ```
 
+(or clone your own fork if you plan to [contribute](contributing-guide.md))
+
 ## Middlewares
 
 We will use [docker-compose][] to manage all that.
@@ -98,7 +100,7 @@ You need to initialize some data before being able to use uData:
 $ udata init
 
 # Optionnaly fetch and load some licenses from another udata instance
-$ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
+$ udata licenses --source=https://www.data.gouv.fr/api/1/datasets/licenses
 
 # Compile translations
 $ inv i18nc
@@ -114,7 +116,7 @@ You can use [invoke][] to launch the application services
 ```shell
 $ inv serve         # Start the development server
 
-$ inv worker        # Start a worker process
+$ inv work          # Start a worker process
 $ inv beat          # Start a scheduler process
 
 $ inv assets-watch  # Continously watch and build assets

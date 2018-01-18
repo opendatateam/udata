@@ -75,6 +75,8 @@ class DatasetBlueprintTest(FrontTestCase):
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         self.assert200(response)
+        self.assertNotIn(b'<meta name="robots" content="noindex, nofollow">',
+                         response.data)
 
     def test_json_ld(self):
         '''It should render a json-ld markup into the dataset page'''
@@ -101,7 +103,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['@context'], 'http://schema.org')
         self.assertEquals(json_ld['@type'], 'Dataset')
         self.assertEquals(json_ld['@id'], str(dataset.id))
-        self.assertEquals(json_ld['description'], 'a&éèëù$£')
+        self.assertEquals(json_ld['description'], 'a&amp;éèëù$£')
         self.assertEquals(json_ld['alternateName'], dataset.slug)
         self.assertEquals(json_ld['dateCreated'][:16],
                           dataset.created_at.isoformat()[:16])
@@ -177,6 +179,15 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['license'], 'http://www.datagouv.fr/licence')
         self.assertEquals(json_ld['author']['@type'], 'Person')
 
+    def test_json_ld_sanitize(self):
+        '''Json-ld should be sanitized'''
+        dataset = DatasetFactory(description='an <script>evil()</script>')
+        url = url_for('datasets.show', dataset=dataset)
+        response = self.get(url)
+        json_ld = self.get_json_ld(response)
+        self.assertEquals(json_ld['description'],
+                          'an &lt;script&gt;evil()&lt;/script&gt;')
+
     def test_raise_404_if_private(self):
         '''It should raise a 404 if the dataset is private'''
         dataset = DatasetFactory(private=True)
@@ -195,6 +206,14 @@ class DatasetBlueprintTest(FrontTestCase):
         dataset = DatasetFactory(deleted=datetime.now(), owner=self.user)
         response = self.get(url_for('datasets.show', dataset=dataset))
         self.assert200(response)
+
+    def test_no_index_on_empty(self):
+        '''It should prevent crawlers from indexing empty datasets'''
+        dataset = DatasetFactory()
+        response = self.get(url_for('datasets.show', dataset=dataset))
+        self.assert200(response)
+        self.assertIn(b'<meta name="robots" content="noindex, nofollow"',
+                      response.data)
 
     def test_not_found(self):
         '''It should render the dataset page'''

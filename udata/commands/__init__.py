@@ -11,7 +11,7 @@ from glob import iglob
 from flask_script import Manager
 from flask_script.commands import Clean, ShowUrls, Server, InvalidCommand
 
-from udata.app import create_app, standalone
+from udata.app import create_app, standalone, VERBOSE_LOGGERS
 
 # TODO: Switch to flask.cli and drop flask-script dependency
 
@@ -72,15 +72,14 @@ def register_commands(manager):
         try:
             __import__(name)
         except ImportError as e:
-            log.warning('Error importing %s: %s', name, e)
+            pass
         except Exception as e:
             log.error('Error during import of %s: %s', name, e)
 
 
 def run_manager(config='udata.settings.Defaults'):
-    app = create_app(config)
+    app = create_app(config, init_logging=set_logging)
     app = standalone(app)
-    set_logging(app)
     manager.app = app
     register_commands(manager)
     try:
@@ -118,6 +117,12 @@ def set_logging(app):
     for name in app.config['PLUGINS']:
         logger = logging.getLogger('udata_{0}'.format(name))
         logger.setLevel(log_level)
+        logger.handlers = []
+        logger.addHandler(handler)
+
+    for name in VERBOSE_LOGGERS:
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.WARNING)
         logger.handlers = []
         logger.addHandler(handler)
 

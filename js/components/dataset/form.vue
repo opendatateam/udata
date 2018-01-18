@@ -78,15 +78,6 @@ export default {
         },
         validate() {
             const isValid = this.$refs.form.validate();
-
-            if (isValid & !this.hideNotifications) {
-                this.$dispatch('notify', {
-                    autoclose: true,
-                    title: this._('Changes saved'),
-                    details: this._('Your dataset has been updated.')
-                });
-            }
-
             return isValid;
         },
         on_error(response) {

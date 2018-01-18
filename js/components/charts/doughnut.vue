@@ -16,20 +16,27 @@ export default {
     methods: {
         build_chart() {
             if (!this.score) return;
-            const data = [
-                {
-                    value: this.score,
-                    color:"#3C8DBC",
-                },
-                {
-                    value: 10 - this.score,
-                    color: "#F5F5F5",
-                }
-            ];
+ 
+            const data = {
+                datasets: [{
+                    backgroundColor: [ "#3C8DBC", "#F5F5F5" ],
+                    data: [ this.score, 10 - this.score ],
+                }],
+            };
+
             const ctx = this.$els.canvas.getContext('2d');
-            new Chart(ctx).Doughnut(data, {
-                segmentShowStroke : false,
-                showTooltips: false,
+ 
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    tooltips: {
+                        enabled: false
+                    },
+                    hover: {
+                        mode: null
+                    }
+                }
             });
         },
     },

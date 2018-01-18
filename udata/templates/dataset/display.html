@@ -9,6 +9,7 @@
     'description': dataset.description|mdstrip(60)|forceescape,
     'image': dataset.organization and dataset.organization.logo(external=True) or '',
     'keywords': [_('dataset')] + dataset.tags,
+    'robots': 'noindex, nofollow' if dataset.is_hidden else '',
 } %}
 
 {% set bundle = 'dataset' %}
@@ -86,8 +87,7 @@
                 <div class="list-group resources-list">
                     <h3>{{ _('Resources') }}</h3>
 
-                    {# TODO: extract max_resources conf #}
-                    {% set max_resources = 6 %}
+                    {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
                     {% for resource in dataset.resources %}
                         {% if loop.index0 == max_resources %}
                         <div id="collapsed-resources" class="collapse">
@@ -160,7 +160,7 @@
                     </div>
                 </div></div>
                 {# end button bar #}
-
+                {% block left_column_bottom %}{% endblock %}
             </div>
             {# end left column #}
 
@@ -268,21 +268,25 @@
                             {% endif %}
                         </ul>
 
-                        <div class="tags">
+                        <ul class="tags">
                             {% for tag in dataset.tags %}
-                            <a href="{{ url_for('search.index', tag=tag) }}"
-                                class="btn btn-primary btn-grey btn-xs"
+                            <li>
+                                <a href="{{ url_for('search.index', tag=tag) }}"
+                                class="label label-default"
                                 title="{{ tag }}">
-                                {{ tag|truncate(14, True) }}
-                            </a>
+                                    {{ tag|truncate(14, True) }}
+                                </a>
+                            </li>
                             {% endfor %}
-                            <a @click="suggestTag"
-                                class="btn btn-primary btn-dark btn-xs suggest-tag"
-                                title="{{ _('Suggest a tag with a new discussion thread') }}"
-                                v-tooltip tooltip-placement="right">
-                                {{ _('Suggest a tag') }}
-                            </a>
-                        </div>
+                            <li>
+                                <a @click="suggestTag"
+                                    class="label label-primary suggest-tag"
+                                    title="{{ _('Suggest a tag with a new discussion thread') }}"
+                                    v-tooltip tooltip-placement="right">
+                                    {{ _('Suggest a tag') }}
+                                </a>
+                            </li>
+                        </ul>
 
                         <button type="button" @click="showDetails"
                             class="btn btn-primary btn-extras btn-block btn-sm btn-left"
@@ -355,7 +359,7 @@
 
         <h3>{{ _('Community resources') }}</h3>
         <div class="row">
-            <div class="col-sm-9 list-group resources-list smaller">
+            <div class="col-sm-9 list-group community-resources-list resources-list smaller">
             {% for resource in dataset.community_resources %}
                 {% include theme('dataset/resource/list-item.html') %}
             {% endfor %}

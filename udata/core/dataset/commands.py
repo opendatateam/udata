@@ -25,12 +25,12 @@ DEFAULT_LICENSE_FILE = 'http://licenses.opendefinition.org/licenses/groups/ckan.
 
 
 @manager.command
-def licenses(filename=DEFAULT_LICENSE_FILE):
+def licenses(source=DEFAULT_LICENSE_FILE):
     '''Feed the licenses from a JSON file'''
-    if filename.startswith('http'):
-        json_licenses = requests.get(filename).json()
+    if source.startswith('http'):
+        json_licenses = requests.get(source).json()
     else:
-        with open(filename) as fp:
+        with open(source) as fp:
             json_licenses = json.load(fp)
 
     if len(json_licenses):

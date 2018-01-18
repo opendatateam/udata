@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from datetime import datetime, timedelta
 from urlparse import urlparse
 
 from flask import current_app
@@ -9,17 +8,18 @@ from flask import current_app
 from .backends import get as get_linkchecker, NoCheckLinkchecker
 
 
-def _get_check_keys(the_dict):
-    return {k: v for k, v in the_dict.iteritems() if k.startswith('check:')}
+def _get_check_keys(the_dict, resource, previous_status):
+    check_keys = {k: v for k, v in the_dict.iteritems()
+                  if k.startswith('check:')}
+    check_keys['check:count-availability'] = _compute_count_availability(
+            resource, check_keys.get('check:available'), previous_status)
+    return check_keys
 
 
-def get_cache(resource):
-    '''Return a cached version from a resource's check if any and fresh'''
-    if resource.extras.get('check:date'):
-        cache_duration = current_app.config['LINKCHECKING_CACHE_DURATION']
-        limit_date = datetime.now() + timedelta(seconds=cache_duration)
-        if resource.extras['check:date'] <= limit_date:
-            return _get_check_keys(resource.extras)
+def _compute_count_availability(resource, status, previous_status):
+    '''Compute the `check:count-availability` extra value'''
+    count_availability = resource.extras.get('check:count-availability', 1)
+    return count_availability + 1 if status == previous_status else 1
 
 
 def is_ignored(resource):
@@ -52,9 +52,6 @@ def check_resource(resource):
     dict or (dict, int)
         Check results dict and status code (if error).
     '''
-    cached_check = get_cache(resource)
-    if cached_check:
-        return cached_check
     linkchecker_type = resource.extras.get('check:checker')
     LinkChecker = get_linkchecker(linkchecker_type)
     if not LinkChecker:
@@ -69,6 +66,9 @@ def check_resource(resource):
     elif not result.get('check:status'):
         return {'error': 'No status in response from linkchecker'}, 503
     # store the check result in the resource's extras
-    resource.extras.update(_get_check_keys(result))
+    # XXX maybe this logic should be in the `Resource` model?
+    previous_status = resource.extras.get('check:available')
+    check_keys = _get_check_keys(result, resource, previous_status)
+    resource.extras.update(check_keys)
     resource.save()
     return result

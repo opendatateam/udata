@@ -12,14 +12,32 @@
 
 {% set user_tab = 'reuses' %}
 
+
 {% block user_content %}
-<div class="row">
-    <div class="col-sm-12">
-        <ul class="card-list">
-            {% for reuse in reuses %}
-            <li class="col-sm-6">{% include theme('reuse/card.html') %}</li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
+
+{% if reuses %}
+
+	<div class="row">
+	    <div class="col-sm-12">
+	        <ul class="card-list">
+	            {% for reuse in reuses %}
+	            <li class="col-sm-6">{% include theme('reuse/card.html') %}</li>
+	            {% endfor %}
+	        </ul>
+	    </div>
+	</div>
+
+{% else %}
+
+	<div class="row">
+	    <div class="col-xs-12">
+	
+	    </div>
+	</div>
+	<p class="text-center lead">
+	{{ _('%(user)s has not yet published resuse', user=user.fullname) }}
+	</p>
+
+{% endif %}
+
 {% endblock %}

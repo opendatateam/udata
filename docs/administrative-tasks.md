@@ -114,3 +114,64 @@ $ udata job run job-name -a arg1 arg2 -k key1=value key2=value
 **Note**: this is a low level command.
 Most of the time, you won't need it because there will be a dedicated command
 to perform the task you need.
+
+
+## Reindexing data
+
+Sometimes, you need to reindex data (in case of model breaking changes, workers defect...).
+You can use the `udata search index` command to do so.
+
+This command supports both full reindex without arguments and partial with model names as arguments:
+
+```shell
+# Reindex everything
+udata search index
+# Only reindex reuses and organizations
+udata search index reuses organizations
+```
+
+By default the command deletes the previous index in case of success or the new unfinished index in case of error but you can ask to keep indexes with the `-k/--keep` parameter
+
+```shell
+# Reindex everything but keep the old index
+udata search index -k
+```
+
+When used from an interactive terminal the command also prompt for deletion confirmation if an index with the same name already exists. This can be bypassed with the `-f/--force` parameter.
+
+```shell
+# Reindex everything and delete old index
+udata search index -f
+```
+
+It's possible to do a partial reindex by providing models (both singular and plural are supported) as arguments:
+
+```shell
+# Only reindex datasets and reuses (plural form)
+udata search index datasets reuses
+# Only reindex datasets and reuses (singular form)
+udata search index dataset reuse
+```
+
+## Workers
+
+Start a worker with:
+
+```shell
+$ udata worker start
+```
+
+See all waiting Celery tasks across all workers:
+
+```shell
+$ udata worker status
+```
+
+Display waiting tasks in a Munin plugin compatible format (you can use the provided [Munin plugin][munin-plugin]):
+
+```shell
+$ udata worker status --munin -q default
+$ udata worker status --munin-config -q default
+```
+
+[munin-plugin]: https://github.com/etalab/munin-plugins/tree/master/udata-worker-status

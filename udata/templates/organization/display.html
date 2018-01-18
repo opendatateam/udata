@@ -1,10 +1,12 @@
 {% extends theme("organization/display_base.html") %}
 
+{% set is_hidden = (reuses.total or 0) + (datasets.total or 0) <= 0 %}
 {% set meta = {
     'title': org.name,
     'description': org.description|mdstrip(60)|forceescape,
     'image': org.logo(external=True),
     'keywords': [_('organization')],
+    'robots': 'noindex, nofollow' if is_hidden else '',
 } %}
 
 {% set bundle = 'organization' %}

@@ -105,7 +105,7 @@ def is_url(add_prefix='http://', full=False, remove_fragment=False,
         if full and not scheme:
             raise Invalid('URL must be complete')
         if scheme and schemes is not None and scheme not in schemes:
-            raise Invalid('Scheme must belong to {0}').format(sorted(schemes))
+            raise Invalid('Scheme must belong to {0}'.format(sorted(schemes)))
         network_location = split_url[1]
         if network_location != network_location.lower():
             split_url[1] = network_location = network_location.lower()

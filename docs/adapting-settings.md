@@ -48,6 +48,13 @@ A secret key used as salt for cryptographic parts.
 
 The site identifier. It is used to attached some database configuration, metrics...
 
+### SITE_TERMS_LOCATION
+
+**default**: `generic embedded terms`
+
+The site terms in markdown. It can be either an URL or a local path to a markdown content.
+If this is an URL, the content is downloaded on the first terms page display and cached.
+
 ### PLUGINS
 
 **default**: `[]`
@@ -156,11 +163,23 @@ An entrypoint key of `udata.linkcheckers` that will be used as a default link ch
 
 A list of domains to ignore when triggering link checking of resources urls.
 
-### LINKCHECKING_CACHE_DURATION
+### LINKCHECKING_MIN_CACHE_DURATION
 
-**default**: 300
+**default**: 60
 
-The minimum time in seconds between two consecutive checks of a resource's url.
+The minimum time in minutes between two consecutive checks of a resource's url.
+
+### LINKCHECKING_MAX_CACHE_DURATION
+
+**default**: 1080
+
+The maximum time in minutes between two consecutive checks of a resource's url.
+
+### LINKCHECKING_UNAVAILABLE_THRESHOLD
+
+**default**: 100
+
+The number of unavailable checks after which the resource is considered lastingly unavailable and won't be checked as often.
 
 ## ElasticSearch configuration
 
@@ -396,6 +415,14 @@ Whether or not discussions should be enabled on posts
 
 The default page size for post listing
 
+## Datasets configuration
+
+### DATASET_MAX_RESOURCES_UNCOLLAPSED
+
+**default** `6`
+
+Max number of resources to display uncollapsed in dataset view.
+
 
 ## Example configuration file
 
@@ -428,7 +455,7 @@ FS_PREFIX = '/s'
 FS_ROOT = '/srv/http/www.data.dev/fs'
 ```
 
-[celery-doc]: https://docs.celeryproject.org/en/latest/configuration.html
+[celery-doc]: http://docs.celeryproject.org/en/latest/userguide/configuration.html
 [celery-conf-map]: http://docs.celeryproject.org/en/latest/userguide/configuration.html#conf-old-settings-map
 [flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/

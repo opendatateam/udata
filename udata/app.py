@@ -123,7 +123,26 @@ class UDataJsonEncoder(json.JSONEncoder):
         return super(UDataJsonEncoder, self).default(obj)
 
 
-def create_app(config='udata.settings.Defaults', override=None):
+# These loggers are very verbose
+# We need to put them in WARNING level
+# even if the main level is INFO or DEBUG
+VERBOSE_LOGGERS = 'elasticsearch', 'requests'
+
+
+def init_logging(app):
+    logging.captureWarnings(True)  # Display warnings
+    debug = app.debug or app.config.get('TESTING')
+    log_level = logging.DEBUG if debug else logging.WARNING
+    app.logger.setLevel(log_level)
+    for name in app.config['PLUGINS']:
+        logging.getLogger('udata_{0}'.format(name)).setLevel(log_level)
+    for logger in VERBOSE_LOGGERS:
+        logging.getLogger(logger).setLevel(logging.WARNING)
+    return app
+
+
+def create_app(config='udata.settings.Defaults', override=None,
+               init_logging=init_logging):
     '''Factory for a minimal application'''
     app = UDataApp(APP_NAME)
     app.config.from_object(config)
@@ -166,23 +185,7 @@ def standalone(app):
     return app
 
 
-def init_logging(app):
-    debug = app.debug or app.config.get('TESTING')
-    log_level = logging.DEBUG if debug else logging.WARNING
-    app.logger.setLevel(log_level)
-    loggers = [
-        logging.getLogger('elasticsearch'),
-        logging.getLogger('requests')
-    ]
-    for name in app.config['PLUGINS']:
-        logging.getLogger('udata_{0}'.format(name)).setLevel(log_level)
-    for logger in loggers:
-        logger.setLevel(logging.WARNING)
-    return app
-
-
 def register_extensions(app):
-    from . import patch_flask_security  # noqa
     from udata import (
         models, routing, tasks, mail, i18n, auth, theme, search, sitemap,
         sentry
@@ -200,6 +203,7 @@ def register_extensions(app):
     search.init_app(app)
     sitemap.init_app(app)
     sentry.init_app(app)
+    from . import patch_flask_security  # noqa
     return app
 
 

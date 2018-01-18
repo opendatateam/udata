@@ -22,7 +22,7 @@ topic_fields = api.model('Topic', {
     'description': fields.Markdown(
         description='The topic description in Markdown', required=True),
     'tags': fields.List(
-        fields.String, description='Some keywords to help in search'),
+        fields.String, description='Some keywords to help in search', required=True),
     'datasets': fields.List(
         fields.Nested(dataset_ref_fields), description='The topic datasets'),
     'reuses': fields.List(

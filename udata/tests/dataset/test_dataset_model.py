@@ -145,15 +145,22 @@ class DatasetModelTest(TestCase, DBTestMixin):
     def test_quality_has_only_closed_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
-        self.assertTrue(dataset.quality['has_only_closed_formats'])
+        self.assertTrue(dataset.quality['has_only_closed_or_no_formats'])
         self.assertEqual(dataset.quality['score'], 0)
 
     def test_quality_has_opened_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
-        self.assertFalse(dataset.quality['has_only_closed_formats'])
+        self.assertFalse(dataset.quality['has_only_closed_or_no_formats'])
         self.assertEqual(dataset.quality['score'], 4)
+
+    def test_quality_has_undefined_and_closed_format(self):
+        dataset = DatasetFactory(description='', )
+        dataset.add_resource(ResourceFactory(format=None))
+        dataset.add_resource(ResourceFactory(format='xls'))
+        self.assertTrue(dataset.quality['has_only_closed_or_no_formats'])
+        self.assertEqual(dataset.quality['score'], 0)
 
     def test_quality_has_untreated_discussions(self):
         user = UserFactory()
@@ -195,7 +202,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
                 'description_length',
                 'discussions',
                 'frequency',
-                'has_only_closed_formats',
+                'has_only_closed_or_no_formats',
                 'has_resources',
                 'has_unavailable_resources',
                 'has_untreated_discussions',

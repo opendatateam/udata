@@ -52,11 +52,7 @@
 <div class="panel-body">
     <form class="form text-center" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        {% for scope in oauth.scopes %}
-        <input type="hidden" name="scopes" value="{{ scope }}" />
-        {% else %}
-        <input type="hidden" name="scopes" value="false" />
-        {% endfor %}
+        <input type="hidden" name="scopes" value="{{ scopes|join(' ')|default('default') }}" />
         <input type="submit" name="accept" value="{{ _('Accept') }}"
             class="btn btn-success btn-lg" />
         <input type="submit" name="decline" value="{{ _('Refuse') }}"
