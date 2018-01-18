@@ -2,7 +2,52 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 1.2.9 (2018-01-17)
+
+- Add extras field in discussions [#1360](https://github.com/opendatateam/udata/pull/1360)
+- Fix datepicker [#1370](https://github.com/opendatateam/udata/pull/1370)
+- Fix error on forbidden scheme in `is_url` harvest filter [#1376](https://github.com/opendatateam/udata/pull/1376)
+- Fix an error on rendering present territory date [#1377](https://github.com/opendatateam/udata/pull/1377)
+
+## 1.2.8 (2018-01-10)
+
+- Fix html2text dependency version [#1362](https://github.com/opendatateam/udata/pull/1362)
+
+## 1.2.7 (2018-01-10)
+
+- Bump chartjs version to 2.x [#1352](https://github.com/opendatateam/udata/pull/1352)
+- Sanitize mdstrip [#1351](https://github.com/opendatateam/udata/pull/1351)
+
+## 1.2.6 (2018-01-04)
+
+- Fix wrongly timed notification on dataset creation with misformed tags [#1332](https://github.com/opendatateam/udata/pull/1332)
+- Fix topic creation [#1333](https://github.com/opendatateam/udata/pull/1333)
+- Add a `udata worker status` command to list pending tasks.[breaking] The `udata worker` command is replaced by `udata worker start`. [#1324](https://github.com/opendatateam/udata/pull/1324)
+- Prevent crawlers from indexing spammy datasets, reuses and organizations [#1334](https://github.com/opendatateam/udata/pull/1334) [#1335](https://github.com/opendatateam/udata/pull/1335)
+- Ensure Swagger.js properly set jQuery.ajax contentType parameter (and so data is properly serialized) [#1126](https://github.com/opendatateam/udata/issues/1126)
+- Allows theme to easily access the `owner_avatar_url` template filter [#1336](https://github.com/opendatateam/udata/pull/1336)
+
+## 1.2.5 (2017-12-14)
+
+- Fix misused hand cursor over the spatial coverage map in dataset admin [#1296](https://github.com/opendatateam/udata/pull/1296)
+- Fix broken post edit page [#1295](https://github.com/opendatateam/udata/pull/1295)
+- Display date of comments in dataset discussions [#1283](https://github.com/opendatateam/udata/pull/1283)
+- Prevent `reindex` command from failing on a specific object and log error instead. [#1293](https://github.com/opendatateam/udata/pull/1293)
+- Position the community resource link icon correctly [#1298](https://github.com/opendatateam/udata/pull/1298)
+- Add a sort option to query of list of posts in API [#1301](https://github.com/opendatateam/udata/pull/1301)
+- Import dropdown behavior from `udata-gouvfr` and fix hidden submenus on mobile [#1297](https://github.com/opendatateam/udata/pull/1297)
+- show message for emtpy dataset search [#1044](https://github.com/opendatateam/udata/pull/1284)
+
+## 1.2.4 (2017-12-06)
+
 - Fix flask_security celery tasks context [#1249](https://github.com/opendatateam/udata/pull/1249)
+- Fix `dataset.quality` handling when no format filled [#1265](https://github.com/opendatateam/udata/pull/1265)
+- Ignore celery tasks results except for tasks which require it and lower the default results expiration to 6 hours [#1281](https://github.com/opendatateam/udata/pull/1281)
+- Import community resource avatar style from udata-gouvfr [#1288](https://github.com/opendatateam/udata/pull/1288)
+- Terms are now handled from markdown and customizable with the `SITE_TERMS_LOCATION` setting. [#1285](https://github.com/opendatateam/udata/pull/1285)
+- Deeplink to resource [#1289](https://github.com/opendatateam/udata/pull/1289)
 
 ## 1.2.3 (2017-10-27)
 

@@ -100,6 +100,37 @@ class DiscussionsTest(APITestCase):
         })
         self.assertStatus(response, 400)
 
+    def test_new_discussion_with_extras(self):
+        user = self.login()
+        dataset = Dataset.objects.create(title='Test dataset',
+                                         extras={'key': 'value'})
+
+        with self.assert_emit(on_new_discussion):
+            response = self.post(url_for('api.discussions'), {
+                'title': 'test title',
+                'comment': 'bla bla',
+                'subject': {
+                    'class': 'Dataset',
+                    'id': dataset.id,
+                },
+                'extras': {'key': 'value'}
+            })
+        self.assert201(response)
+
+        discussions = Discussion.objects(subject=dataset)
+        self.assertEqual(len(discussions), 1)
+
+        discussion = discussions[0]
+        self.assertEqual(discussion.user, user)
+        self.assertEqual(len(discussion.discussion), 1)
+        self.assertEqual(discussion.title, 'test title')
+        self.assertEqual(discussion.extras, {u'key': u'value'})
+
+        message = discussion.discussion[0]
+        self.assertEqual(message.content, 'bla bla')
+        self.assertEqual(message.posted_by, user)
+        self.assertIsNotNone(message.posted_on)
+
     def test_list_discussions(self):
         dataset = Dataset.objects.create(title='Test dataset')
         open_discussions = []

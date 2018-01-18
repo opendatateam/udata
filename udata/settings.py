@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pkg_resources
+
 from kombu import Exchange, Queue
+
+HOUR = 60 * 60
 
 
 class Defaults(object):
@@ -32,6 +36,8 @@ class Defaults(object):
         'fanout_patterns': True,
     }
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+    CELERY_RESULT_EXPIRES = 6 * HOUR  # Results are kept 6 hours
+    CELERY_TASK_IGNORE_RESULT = True
     CELERY_TASK_SERIALIZER = 'pickle'
     CELERY_RESULT_SERIALIZER = 'pickle'
     CELERY_ACCEPT_CONTENT = ['pickle', 'json']
@@ -100,7 +106,7 @@ class Defaults(object):
     # Flask WTF settings
     CSRF_SESSION_KEY = 'Default uData csrf key'
 
-    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * 60 * 60  # 30 days
+    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * HOUR  # 30 days
 
     AUTO_INDEX = True
 
@@ -110,6 +116,8 @@ class Defaults(object):
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = 'Udata'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
+    SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
+
     USE_SSL = False
 
     PLUGINS = []
@@ -138,6 +146,8 @@ class Defaults(object):
         'small',
         'strong',
         'ul',
+        'sup',
+        'sub',
     ]
 
     MD_ALLOWED_ATTRIBUTES = {
@@ -166,7 +176,9 @@ class Defaults(object):
 
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = []
-    LINKCHECKING_CACHE_DURATION = 60 * 5  # in seconds
+    LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
+    LINKCHECKING_MAX_CACHE_DURATION = 1080 # in minutes (1 week)
+    LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 
     # PIWIK_ID = # Demo = 11, Prod = 1

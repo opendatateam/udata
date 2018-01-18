@@ -69,16 +69,16 @@
     "vue-html-loader": "^1.2.3",
     "vue-loader": "8.5.3",
     "vue-style-loader": "^1.0.0",
-    "webpack": "1.13.1"
+    "webpack": "1.13.1",
+    "webpack-fail-plugin": "^2.0.0"
   },
   "dependencies": {
-    "Chart.StackedBar.js": "regaddi/Chart.StackedBar.js#1.0.3",
     "admin-lte": "2.3.11",
     "babel-polyfill": "^6.9.1",
     "babel-runtime": "^6.9.1",
     "bootstrap": "^3.3.7",
     "bootstrap-markdown": "^2.10.0",
-    "chart.js": "^1.1.1",
+    "chart.js": "^2.7.1",
     "diff": "^2.2.3",
     "fine-uploader": "~5.15.0",
     "font-awesome": "^4.7.0",

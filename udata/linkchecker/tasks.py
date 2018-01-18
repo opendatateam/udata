@@ -53,5 +53,8 @@ def check_resources(self, number):
         resource_obj = get_by(dataset_obj.resources, 'id', rid)
         log.info('Checking resource %s (%s/%s)',
                  resource_id, idx + 1, nb_resources)
-        check_resource(resource_obj)
+        if resource_obj.need_check():
+            check_resource(resource_obj)
+        else:
+            log.info("--> Skipping this resource, cache is fresh enough.")
     log.info('Done.')

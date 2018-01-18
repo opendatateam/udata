@@ -57,6 +57,8 @@ class ReuseBlueprintTest(FrontTestCase):
         url = url_for('reuses.show', reuse=reuse)
         response = self.get(url)
         self.assert200(response)
+        self.assertNotIn(b'<meta name="robots" content="noindex, nofollow">',
+                         response.data)
         json_ld = self.get_json_ld(response)
         self.assertEquals(json_ld['@context'], 'http://schema.org')
         self.assertEquals(json_ld['@type'], 'CreativeWork')
@@ -94,6 +96,15 @@ class ReuseBlueprintTest(FrontTestCase):
         '''It should render the reuse page'''
         response = self.get(url_for('reuses.show', reuse='not-found'))
         self.assert404(response)
+
+    def test_no_index_on_empty(self):
+        '''It should prevent crawlers from indexing empty reuses'''
+        reuse = ReuseFactory()
+        url = url_for('reuses.show', reuse=reuse)
+        response = self.get(url)
+        self.assert200(response)
+        self.assertIn(b'<meta name="robots" content="noindex, nofollow"',
+                      response.data)
 
     def test_recent_feed(self):
         datasets = [ReuseFactory(
