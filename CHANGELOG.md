@@ -4,6 +4,7 @@
 
 - Markdown rendering is now the same between the back and the frontend. [#604](https://github.com/opendatateam/udata/issues/604)
 - Make the dataset page reuses section and cards themable. [#1378](https://github.com/opendatateam/udata/pull/1378)
+- Spatial encoding fixes: prevent breaking unicode errors. [#1381](https://github.com/opendatateam/udata/pull/1381)
 
 ## 1.2.9 (2018-01-17)
 
