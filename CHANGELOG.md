@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Markdown rendering is now the same between the back and the frontend. [#604](https://github.com/opendatateam/udata/issues/604)
 
 ## 1.2.9 (2018-01-17)
 
