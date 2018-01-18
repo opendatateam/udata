@@ -46,7 +46,7 @@
                 followed_datasets|length
             ) }}
             </h3>
-            <ul class="card-list">
+            <ul class="card-list card-list--columned">
                 {% for dataset in followed_datasets %}
                 <li class="col-sm-6">
                   {% include theme('dataset/card.html') %}
@@ -66,7 +66,7 @@
                 followed_reuses|length
             ) }}
             </h3>
-            <ul class="card-list">
+            <ul class="card-list card-list--columned">
                 {% for reuse in followed_reuses %}
                 <li class="col-sm-6">
                   {% include theme('reuse/card.html') %}
@@ -86,7 +86,7 @@
                 followed_organizations|length
             ) }}
             </h3>
-            <ul class="card-list">
+            <ul class="card-list card-list--columned">
                 {% for organization in followed_organizations %}
                 <li class="col-sm-6">
                   {% include theme('organization/card.html') %}
@@ -106,7 +106,7 @@
                 followed_users|length
             ) }}
             </h3>
-            <ul class="card-list">
+            <ul class="card-list card-list--columned">
             {% for user in followed_users %}
                 <li class="col-sm-6">
                 {% include theme('user/card.html') %}

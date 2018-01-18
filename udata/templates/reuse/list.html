@@ -45,9 +45,11 @@
 {% block main_content %}
 <div class="row">
     <div class="col-md-8 col-lg-9 smaller">
-        <ul class="search-results">
+        <ul class="search-results card-list card-list--columned row">
         {% for reuse in reuses %}
-        {% include theme('reuse/search-result.html') %}
+        <li class="col-xs-12">
+            {% include theme('reuse/card.html') %}
+        </li>
         {% endfor %}
         </ul>
         <div class="clearfix"></div>

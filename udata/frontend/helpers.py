@@ -279,21 +279,16 @@ def daterange(value):
     '''Display a date range in the shorter possible maner.'''
     if not isinstance(value, db.DateRange):
         raise ValueError('daterange only accept db.DateRange as parameter')
+
+    date_format = 'YYYY'
+
     delta = value.end - value.start
     start, end = None, None
-    if is_first_year_day(value.start) and is_last_year_day(value.end):
-        start = value.start.year
-        if delta.days > 365:
-            end = value.end.year
-    elif is_first_month_day(value.start) and is_last_month_day(value.end):
-        start = short_month(value.start)
-        if delta.days > 31:
-            end = short_month(value.end)
-    else:
-        start = short_day(value.start)
-        if value.start != value.end:
-            end = short_day(value.end)
-    return _('%(start)s to %(end)s', start=start, end=end) if end else start
+    start = format_date(value.start, date_format)
+    if delta.days > 365:
+        end = format_date(value.end, date_format)
+
+    return '{start!s}–{end!s}'.format(start=start, end=end) if end else start
 
 
 @front.app_template_filter()

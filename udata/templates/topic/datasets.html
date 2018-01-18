@@ -43,11 +43,13 @@
 <section class="default">
     <div class="container">
         <div class="row">
-            <div class="col-md-8 col-lg-9 smaller">
+            <div class="col-md-8 col-lg-9">
 
-                <ul class="search-results">
+                <ul class="search-results card-list row">
                     {% for dataset in datasets %}
-                    {% include theme('dataset/search-result.html') %}
+                    <li class="col-xs-12">
+                    {% include theme('dataset/card.html') %}
+                    </li>
                     {% endfor %}
                 </ul>
 

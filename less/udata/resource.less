@@ -1,14 +1,8 @@
 .resources-list {
-    margin: 0;
 
     .list-group-item {
         @vspacing: 10px;
-        @base-color: #eaeaea;
-        height: 54px;
         cursor: pointer;
-        background-color: @base-color;
-        margin: 0px 0px @vspacing;
-        border-color: @base-color;
         border-radius: 0px;
         padding: 0;
         position: relative;
@@ -23,35 +17,6 @@
 
         &:hover {
             background-color: #ddd;
-        }
-
-        &.add {
-            @add-base-color: darken(@base-color, 30%);
-            background-color: fadeout(@add-base-color, 92%);
-            border: 2px dashed @add-base-color;
-            height: 56px;
-
-            h4 {
-                color: @add-base-color;
-                line-height: 30px;
-            }
-
-            .format-label {
-                color: #7d8489;
-                background-color: fadeout(@add-base-color, 80%);
-                text-align: center;
-                font-size: 34px;
-                font-weight: bold;
-                line-height: 44px;
-            }
-
-            &:hover {
-                background-color: fadeout(@add-base-color, 87%);
-            }
-
-            &:not(:first-child) {
-                margin-top: 13px;
-            }
         }
 
         &.expanded {
@@ -78,6 +43,12 @@
         font-weight: normal;
     }
 
+    .list-group-item-link {
+        float: right;
+        margin-top: 5px;
+        margin-right: 5px;
+    }
+
     .list-group-item-heading {
         margin-left: 60px;
         margin-top: 9px;
@@ -87,27 +58,6 @@
 
         &.dual{
             line-height: 2;
-        }
-    }
-
-    .list-group-item-link {
-        float: right;
-        margin-top: 5px;
-        margin-right: 5px;
-    }
-
-    .format-label {
-        width: 52px;
-        height: 52px;
-        background-color: #f9f9f9;
-        margin: 0px;
-
-        span {
-            line-height: 52px;
-            text-align: center;
-            font-weight: bold;
-            text-transform: uppercase;
-            display: block;
         }
     }
 
