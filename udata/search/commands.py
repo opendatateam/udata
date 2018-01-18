@@ -45,8 +45,13 @@ def iter_qs(qs, adapter):
     '''Safely iterate over a DB QuerySet yielding ES documents'''
     for obj in qs.no_dereference().timeout(False):
         if adapter.is_indexable(obj):
-            doc = adapter.from_model(obj).to_dict(include_meta=True)
-            yield doc
+            try:
+                doc = adapter.from_model(obj).to_dict(include_meta=True)
+                yield doc
+            except Exception as e:
+                model = adapter.model.__name__
+                log.error('Unable to index %s "%s": %s', model, str(obj.id),
+                          str(e), exc_info=True)
 
 
 def iter_for_index(docs, index_name):

@@ -1,31 +1,3 @@
-<style lang="less">
-.chart-legend {
-    text-align: center;
-    margin-top: 10px;
-
-    ul {
-        list-style: none;
-        margin-bottom: 0;
-
-        li {
-            display: inline-block;
-            margin-right: 5px;
-
-            .line-legend-icon {
-                display: inline-block;
-                width: 20px;
-                height: 16px;
-                margin-right: 5px;
-                margin-left: 10px;
-                border: 1px solid #999;
-                vertical-align: middle;
-            }
-        }
-
-    }
-}
-</style>
-
 <template>
 <div class="chart-widget">
     <box :title="title" :icon="icon"
@@ -35,7 +7,6 @@
         <div class="chart" :style="{height: height}" v-el:container>
             <canvas v-el:canvas height="100%"></canvas>
         </div>
-        <div class="chart-legend" v-el:legend></div>
     </box>
 </div>
 </template>
@@ -43,7 +14,6 @@
 <script>
 import moment from 'moment';
 import Chart from 'chart.js';
-import 'Chart.StackedBar.js';
 
 import Box from 'components/containers/box.vue';
 
@@ -62,7 +32,13 @@ const AREA_OPTIONS = {
     // scaleShowGridLines: false,
     scaleShowHorizontalLines: true,
     scaleShowVerticalLines: true,
-    bezierCurveTension: 0.3,
+    lineTension: 0.3,
+    yAxes: [{
+        ticks: {
+            min: 0,
+            stepSize: 1
+        }
+    }]
 };
 
 const LINE_OPTIONS = Object.assign({}, AREA_OPTIONS, {
@@ -82,6 +58,14 @@ const BAR_OPTIONS = {
 };
 const STACKEDBAR_OPTIONS = Object.assign({}, BAR_OPTIONS, {
     scaleShowVerticalLines: false,
+    scales:{
+        xAxes: [{
+            stacked: true
+        }],
+        yAxes: [{
+            stacked: true
+        }]
+    }
 });
 
 const COLORS = [
@@ -133,13 +117,16 @@ export default {
                 datasets: this.y.map((serie, idx) => {
                     const dataset = {label: serie.label};
                     const color = serie.color || COLORS[idx];
-                    dataset.fillColor = this.toRGBA(color, .5);
-                    dataset.strokeColor = color;
-                    dataset.pointColor = color;
-                    // datasetpointStrokeColor: "#c1c7d1",
-                    dataset.pointHighlightFill = '#fff';
-                    dataset.pointHighlightStroke = color;
+
+                    dataset.backgroundColor = this.toRGBA(color, .5);
+                    dataset.borderColor = color;
+
+                    dataset.pointBackgroundColor = color;
+                    dataset.pointHoverBackgroundColor = '#fff';
+                    dataset.pointHoverBorderColor = color;
+
                     dataset.data = raw.map(item => item[serie.id]);
+                    
                     return dataset;
                 })
             };
@@ -171,19 +158,34 @@ export default {
             this.cleanChart();
             ctx.canvas.height = this.canvasHeight;
             this.chart = factory(ctx);
-            this.$els.legend.innerHTML = this.chart.generateLegend();
         },
         buildArea(ctx) {
-            return new Chart(ctx).Line(this.series, AREA_OPTIONS);
+            return new Chart(ctx, {
+                type: 'line',
+                data: this.series,
+                options: AREA_OPTIONS
+            });
         },
         buildBar(ctx) {
-            return new Chart(ctx).Bar(this.series, BAR_OPTIONS);
+            return new Chart(ctx,{
+                type: 'bar',
+                data: this.series,
+                options: BAR_OPTIONS
+            });
         },
         buildStackedBar(ctx) {
-            return new Chart(ctx).StackedBar(this.series, STACKEDBAR_OPTIONS);
+            return new Chart(ctx, {
+                type: 'bar',
+                data: this.series,
+                options: STACKEDBAR_OPTIONS
+            });
         },
         buildLine(ctx) {
-            return new Chart(ctx).Line(this.series, LINE_OPTIONS);
+            return new Chart(ctx, {
+                type: 'line',
+                data: this.series,
+                options: LINE_OPTIONS
+            });
         },
         cleanChart() {
             if (this.chart) {

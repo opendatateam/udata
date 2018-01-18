@@ -34,8 +34,20 @@ export default {
             if (form.validate()) {
                 this.dataset.update(form.serialize(), (response) => {
                     this.dataset.on_fetched(response);
+                    
+                    if (!form.hideNotifications) {
+                        this.$dispatch('notify', {
+                            autoclose: true,
+                            title: this._('Changes saved'),
+                            details: this._('Your dataset has been updated.')
+                        });
+                    }
+
                     this.$go({name: 'dataset', params: {oid: this.dataset.id}});
-                }, form.on_error);
+                }, (error) => {
+                    this.dataset.loading = false;
+                    form.on_error(error);
+                });
             }
         },
         cancel() {
