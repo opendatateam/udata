@@ -7,11 +7,14 @@ from faker.providers import BaseProvider
 
 from geojson.utils import generate_random
 
-from udata.utils import add_faker_provider
+from udata.factories import DateRangeFactory, ModelFactory
+from udata.utils import faker_provider
 
+from . import geoids
 from .models import GeoLevel, GeoZone, SpatialCoverage, spatial_granularities
 
 
+@faker_provider
 class GeoJsonProvider(BaseProvider):
     '''A Fake GeoJSON provider'''
 
@@ -91,6 +94,7 @@ class GeoJsonProvider(BaseProvider):
         }
 
 
+@faker_provider
 class SpatialProvider(BaseProvider):
     def spatial_granularity(self):
         return self.generator.random_element([
@@ -98,11 +102,7 @@ class SpatialProvider(BaseProvider):
         ])
 
 
-add_faker_provider(GeoJsonProvider)
-add_faker_provider(SpatialProvider)
-
-
-class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
+class SpatialCoverageFactory(ModelFactory):
     class Meta:
         model = SpatialCoverage
 
@@ -110,21 +110,20 @@ class SpatialCoverageFactory(factory.mongoengine.MongoEngineFactory):
     granularity = factory.Faker('spatial_granularity')
 
 
-class GeoZoneFactory(factory.mongoengine.MongoEngineFactory):
+class GeoZoneFactory(ModelFactory):
     class Meta:
         model = GeoZone
 
-    # GeoID, see https://github.com/etalab/geoids.
-    id = factory.LazyAttribute(
-        lambda o: 'fr:commune:' + o.code + '@1970-01-01')
+    id = factory.LazyAttribute(geoids.from_zone)
     level = factory.Faker('unique_string')
     name = factory.Faker('city')
     slug = factory.Faker('slug')
     code = factory.Faker('zipcode')
     geom = factory.Faker('multipolygon')
+    validity = factory.SubFactory(DateRangeFactory)
 
 
-class GeoLevelFactory(factory.mongoengine.MongoEngineFactory):
+class GeoLevelFactory(ModelFactory):
     class Meta:
         model = GeoLevel
 

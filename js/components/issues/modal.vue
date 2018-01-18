@@ -36,7 +36,7 @@
         </div>
     </div>
     <footer class="modal-footer text-center">
-        <form v-if="!issue.closed" v-el:form>
+        <form v-if="can_comment" v-el:form>
             <div class="form-group">
                 <textarea class="form-control" rows="3"
                     :placeholder="_('Type your comment')"
@@ -45,11 +45,11 @@
             </div>
         </form>
         <button type="button" class="btn btn-success btn-flat pull-left"
-            @click="comment_issue" v-if="!issue.closed">
+            @click="comment_issue" v-if="can_comment">
             {{ _('Comment the issue') }}
         </button>
         <button type="button" class="btn btn-warning btn-flat pull-left"
-            @click="close_issue" v-if="!issue.closed">
+            @click="close_issue" v-if="can_close">
             {{ _('Comment and close issue') }}
         </button>
         <button type="button" class="btn btn-danger btn-flat"
@@ -64,22 +64,30 @@
 import API from 'api';
 import Vue from 'vue';
 import BaseForm from 'components/form/base-form';
+import Modal from 'components/modal.vue';
+import DatasetCard from 'components/dataset/card.vue';
+import ReuseCard from 'components/reuse/card.vue';
+import placeholders from 'helpers/placeholders';
 
 export default {
     name: 'issue-modal',
     mixins: [BaseForm],
-    components: {
-        'modal': require('components/modal.vue'),
-        'dataset-card': require('components/dataset/card.vue'),
-        'reuse-card': require('components/reuse/card.vue'),
-    },
-    data: function() {
+    components: {Modal, DatasetCard, ReuseCard},
+    data() {
         return {
             issue: {},
-            avatar_placeholder: require('helpers/placeholders').user,
+            avatar_placeholder: placeholders.user,
             comment: null,
             next_route: null
         };
+    },
+    computed: {
+        can_comment() {
+            return !this.issue.closed;
+        },
+        can_close() {
+            return this.issue.subject && !this.issue.closed && this.$root.me.can_edit(this.issue.subject);
+        }
     },
     events: {
         'modal:closed': function() {
@@ -90,14 +98,14 @@ export default {
         data() {
             if (this.$route.matched.length > 1) {
                 // This is a nested view
-                let idx = this.$route.matched.length - 2,
-                    parent = this.$route.matched[idx];
+                const idx = this.$route.matched.length - 2;
+                const parent = this.$route.matched[idx];
                 this.next_route = {
                     name: parent.handler.name,
                     params: parent.params
                 };
             }
-            let id = this.$route.params.issue_id;
+            const id = this.$route.params.issue_id;
             API.issues.get_issue({id}, (response) => {
                 this.issue = response.obj;
             });
@@ -118,7 +126,7 @@ export default {
                 }}, (response) => {
                     this.issue = response.obj;
                     this.comment = null;
-                });
+                }, this.$root.handleApiError);
             }
         }
     }

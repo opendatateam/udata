@@ -41,8 +41,9 @@ you log into its account:
 
 ```shell
 $ virtualenv --python=python2.7 $HOME
-$ source bin/activate  
+$ . bin/activate  
 $ pip install Cython  # Enable optimizations on some packages
+$ pip install --upgrade setuptools  # Make sure setuptools is up to date
 $ pip install udata
 ```
 You can also install the extensions you want:
@@ -175,6 +176,16 @@ gid = www-data
 smart-attach-daemon = /tmp/celery-worker.pid %(home)/bin/celery -A udata.worker worker --pidfile=/tmp/celery-worker.pid
 exec-as-user-atexit = kill -TERM `cat /tmp/celery-worker.pid`
 ```
+
+**note:** You can handle tasks priorities by starting 3 workers
+with the following `smart-attach-daemon` commands:
+```
+/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high worker
+/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high,default worker
+/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high,default,low worker
+```
+
+
 **`/etc/uwsgi/apps-available/udata-beat.ini`**
 
 ```inifile
@@ -206,7 +217,7 @@ $ ln -s /etc/uwsgi/apps-{available,enabled}/udata-worker.ini
 $ ln -s /etc/uwsgi/apps-{available,enabled}/udata-beat.ini
 ```
 
-Then define a nginx server host configuration in `/etc/nginx/sites-availables/data.example.com`:
+Then define a nginx server host configuration in `/etc/nginx/sites-available/data.example.com`:
 
 ```nginx
 ##

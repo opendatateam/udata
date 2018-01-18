@@ -1,5 +1,7 @@
 <template>
-<vform v-ref:form :fields="fields" :model="reuse"></vform>
+<div>
+  <vform v-ref:form :fields="fields" :model="reuse"></vform>
+</div>
 </template>
 
 <script>

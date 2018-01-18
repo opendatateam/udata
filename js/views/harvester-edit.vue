@@ -24,11 +24,13 @@ import HarvestSource from 'models/harvest/source';
 import ItemModal from 'components/harvest/item.vue';
 import Preview from 'components/harvest/preview.vue';
 
+const MASK = ['id', 'name', 'description', 'owner', 'last_job{status,ended}', 'organization', 'backend', 'validation{state}'];
+
 export default {
     name: 'harvester-edit',
     data() {
         return {
-            source: new HarvestSource(),
+            source: new HarvestSource({mask: MASK}),
         };
     },
     components: {Box, FormLayout, HarvestForm, Preview},

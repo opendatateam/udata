@@ -73,7 +73,8 @@ class GeoZoneSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, zone):
-        return zone.level not in ('fr/iris', 'fr/canton', 'fr/district')
+        excluded = current_app.config['SPATIAL_SEARCH_EXCLUDE_LEVELS']
+        return zone.level not in excluded
 
     @classmethod
     def serialize(cls, zone):

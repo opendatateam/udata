@@ -52,6 +52,17 @@ export default {
                 details: this._('The error identifier is {id}', {id: e.data.event_id}),
             });
         });
+    },
+    methods: {
+        handleApiError(error) {
+            const notif = {type: 'danger', icon: 'exclamation-circle'};
+            if (error.status === 403) {
+                notif.title = this._('Operation not permitted');
+                notif.details = this._('You are not allowed to perform this operation');
+                notif.icon = 'ban'
+            }
+            this.notifications.push(notif);
+        }
     }
 };
 </script>

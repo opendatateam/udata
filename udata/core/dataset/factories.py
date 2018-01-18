@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 
 import factory
 
+from udata.factories import ModelFactory
+
 from .models import Dataset, Resource, Checksum, CommunityResource, License
 
 
-class DatasetFactory(factory.mongoengine.MongoEngineFactory):
+class DatasetFactory(ModelFactory):
     class Meta:
         model = Dataset
 
@@ -21,7 +23,7 @@ class VisibleDatasetFactory(DatasetFactory):
         return [ResourceFactory()]
 
 
-class ChecksumFactory(factory.mongoengine.MongoEngineFactory):
+class ChecksumFactory(ModelFactory):
     class Meta:
         model = Checksum
 
@@ -29,7 +31,7 @@ class ChecksumFactory(factory.mongoengine.MongoEngineFactory):
     value = factory.Faker('sha1')
 
 
-class BaseResourceFactory(factory.mongoengine.MongoEngineFactory):
+class BaseResourceFactory(ModelFactory):
     title = factory.Faker('sentence')
     description = factory.Faker('text')
     filetype = 'file'
@@ -49,7 +51,7 @@ class ResourceFactory(BaseResourceFactory):
         model = Resource
 
 
-class LicenseFactory(factory.mongoengine.MongoEngineFactory):
+class LicenseFactory(ModelFactory):
     class Meta:
         model = License
 

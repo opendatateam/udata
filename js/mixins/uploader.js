@@ -91,8 +91,11 @@ export default {
     },
 
     filters: {
+        fileext(filename) {
+            return filename.split('.').pop();
+        },
         filesize(size) {
-            if (size <= 0) {
+            if (!size || size <= 0) {
                 return '-';
             }
             if (size > _1GO) {
@@ -161,7 +164,7 @@ export default {
         on_complete(id, name, response) {
             if (!response.success) return;
             const file = this.$uploader.getFile(id);
-            this.files.$remove(this.files.indexOf(file));
+            this.files.$remove(file);
             this.$emit('uploader:complete', id, response, file);
         },
 

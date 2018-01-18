@@ -442,7 +442,17 @@ class ModelList(object):
                     for id in valuelist[0].split(',') if id]
         else:
             oids = [clean_oid(id, self.model) for id in valuelist]
+        self.data = self.fetch_objects(oids)
 
+    def fetch_objects(self, oids):
+        '''
+        This methods is used to fetch models
+        from a list of identifiers.
+
+        Default implementation performs a bulk query on identifiers.
+
+        Override this method to customize the objects retrieval.
+        '''
         objects = self.model.objects.in_bulk(oids)
         if len(objects.keys()) != len(oids):
             non_existants = set(oids) - set(objects.keys())
@@ -450,7 +460,7 @@ class ModelList(object):
                 identifiers=', '.join(str(ne) for ne in non_existants))
             raise validators.ValidationError(msg)
 
-        self.data = [objects[id] for id in oids]
+        return [objects[id] for id in oids]
 
 
 class NestedModelList(fields.FieldList):

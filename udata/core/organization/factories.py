@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 
 import factory
 
+from udata.factories import ModelFactory
+
 from .models import Organization, Team
 
 
-class OrganizationFactory(factory.mongoengine.MongoEngineFactory):
+class OrganizationFactory(ModelFactory):
     class Meta:
         model = Organization
 
@@ -14,7 +16,7 @@ class OrganizationFactory(factory.mongoengine.MongoEngineFactory):
     description = factory.Faker('text')
 
 
-class TeamFactory(factory.mongoengine.MongoEngineFactory):
+class TeamFactory(ModelFactory):
     class Meta:
         model = Team
 

@@ -6,11 +6,12 @@ import factory
 from udata import utils
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.factories import ModelFactory
 
 from .models import Topic
 
 
-class TopicFactory(factory.mongoengine.MongoEngineFactory):
+class TopicFactory(ModelFactory):
     class Meta:
         model = Topic
 

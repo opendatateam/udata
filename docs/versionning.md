@@ -2,44 +2,35 @@
 
 ## Versionning process
 
-UData uses [semantic versionning][semver] to publish its published releases.
+UData follows [Python PEP 440 on versionning][pep440] to version its published releases.
 
 ### Branches management
 
-There is two main branches on the [UData git repository][github]: `master` and `dev`
+There is a main branch on the [UData git repository][github], `master`,
+and some maintenance branches `vX.Y`
 
 The `master` is the stable development branch on which:
 
-- bug fixes should occurs (unless is only present on `dev` branch)
-- bugfix or security upgrades (only) are done
+- bug fixes should occurs (unless is only present on a maintenance branch)
+- security upgrades are done (unless is only necessary on a maintenance branch)
+- the incoming new features (and their bug fixes)
+- the refactoring
+- the dependencies upgrades
 - translations are done
 - releases are done
 
-The `dev` branch hosts:
+The `vX.Y` maintenance branches host:
 
-- the incoming new features (and their bug fixes)
-- the factoring
-- the dependencies upgrades
-- the bug fixes associated to these
+- the bug fixes and security upgrades associated to theses versions only
+- the backported bug fixes and security upgrades
 
-There is always at least one minor version between the `dev` and the `master branch`
-(*ie.* `1.0.2.dev` on `master` and `1.1.0.dev` on `dev`).
+Every minor version has a maintenance branch `vX.Y` and every version has a git tag `vX.Y.Z`.
 
-
-Every version has a git tag `X.Y.Z` and then when bug fixes need to be applied
-without publishing new changes, there will be a version branch `X.Y`
+Otherwise the version is `X.Y.Z.dev` (1.1.7.dev)
+so you can easily see when you are not using a stable release.
 
 The content of each version (expected or real) is tracked trough [issues][], [pull requests][pulls]
 and [milestones][].
-
-
-### Merging
-
-Regular imports of changes from `master` branch are done into the `dev` branch
-in the form of pull requests (ideally from a branch named `merge-master-YYYY-MM-DD`).
-
-Merge from `dev` to `master` branch are done when the dev branch is considered stable
-and should not receive new features.
 
 
 ## Releasing
@@ -66,7 +57,7 @@ The step to perform a release are:
     - perform replacements (bumped version, URLs)
     - set the changelog version and date
     - commit
-    - set a git tag with the version (`X.Y.Z`)
+    - set a git tag with the version (`vX.Y.Z`)
     - perform next iterationreplacements (increased dev version, URLs)
     - prepare the changelog for the next iteration
     - commit
@@ -76,29 +67,31 @@ The step to perform a release are:
 9. check on [PyPI](https://pypi.python.org/pypi/udata) that the new release is present
 10. celebrate
 
+## Branching
+
+We need to branch the master each time a minor version development cycle starts:
+
+- create a branch for the current minor version. **ex**: if the current master version is `1.1.8.dev`, create a `v1.1` branch with `git checkout -b v1.1`
+- publish the branch to the official repository: `git push -u origin vX.Y`
+- get the `master` branch back: `git checkout master`
+- increment the version in `udata/__init__.py`: **ex** `1.1.8.dev` become `1.2.0.dev`
+
 ### Fixing an old version
 
-If this is first bug fix, create a branch associated with the minor version
-(*ie.* `X.Y` when the tag is `X.Y.0`) and and publish it:
+Switch on the maintenance branch you need:
 
 ```shell
-git checkout -b X.Y X.Y.0
-git push -u origin X.Y
+git checkout vX.Y
 ```
 
-If the branch already exists, just switch on it:
+Create a new branch from the maintenance one and
+perform a pull request from it:
 
 ```shell
-git checkout X.Y
-```
-
-Perform a pull request from this branch:
-
-```shell
-git checkout -b my-old-fix
+git checkout -b my-fix
 # fix fix fix
 git commit
-git push -u myrepository my-old-fix
+git push -u myrepository my-fix
 ```
 
 ## Deprecation policy
@@ -108,9 +101,9 @@ It's up to the developpers and system administrators to read the [changelog](cha
 (deprecations and breaking changes are signaled).
 
 [bumpr]: https://github.com/noirbizarre/bumpr/
-[semver]: http://semver.org/
 [github]: https://github.com/opendatateam/udata
 [issues]: https://github.com/opendatateam/udata/issues
 [pulls]: https://github.com/opendatateam/udata/pulls
 [milestones]: https://github.com/opendatateam/udata/milestones
 [CircleCI]: https://circleci.com/gh/opendatateam/udata
+[pep440]: https://www.python.org/dev/peps/pep-0440/

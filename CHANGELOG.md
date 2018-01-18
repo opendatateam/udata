@@ -5,6 +5,98 @@
 - Display organization metrics in the organization page tab labels [#1022](https://github.com/opendatateam/udata/pull/1022)
 - Organization dashboard page has been merged into the main organization page [#1023](https://github.com/opendatateam/udata/pull/1023)
 - Fix an issue causing a loss of data input at the global search input level [#1019](https://github.com/opendatateam/udata/pull/1019)
+- Expose harvester scheduling through the API and the admin interface [#1123](https://github.com/opendatateam/udata/pull/1123)
+
+## 1.1.7 (2017-09-25)
+
+- Prevent a random territory from being displayed when query doesn't match [#1124](https://github.com/opendatateam/udata/pull/1124)
+- Display avatar when the community resource owner is an organization [#1125](https://github.com/opendatateam/udata/pull/1125)
+- Refactor the "publish as" screen to make it more obvious that an user is publishing under its own name [#1122](https://github.com/opendatateam/udata/pull/1122)
+- Make the "find your organization" screen cards clickable (send to the organization page) [#1129](https://github.com/opendatateam/udata/pull/1129)
+- Fix "Center the full picture" on user avatar upload [#1130](https://github.com/opendatateam/udata/issues/1130)
+- Hide issue modal forbidden actions [#1128](https://github.com/opendatateam/udata/pull/1128)
+- Ensure spatial coverage zones are resolved when submitted from the API or when querying oembed API. [#1140](https://github.com/opendatateam/udata/pull/1140)
+- Prevent user metrics computation when the object owner is an organization (and vice versa) [#1152](https://github.com/opendatateam/udata/pull/1152)
+
+## 1.1.6 (2017-09-11)
+
+- Fix CircleCI automated publication on release tags
+  [#1120](https://github.com/opendatateam/udata/pull/1120)
+
+## 1.1.5 (2017-09-11)
+
+- Fix the organization members grid in admin
+  [#934](https://github.com/opendatateam/udata/issues/934)
+- Fix and tune harvest admin loading state and payload size
+  [#1113](https://github.com/opendatateam/udata/issues/1113)
+- Automatically schedule validated harvesters and allow to (re)schedule them
+  [#1114](https://github.com/opendatateam/udata/pull/1114)
+- Raise the minimum `raven` version to ensure sentry is filtering legit HTTP exceptions
+  [#774](https://github.com/opendatateam/udata/issues/774)
+- Pin GeoJSON version to avoid breaking changes
+  [#1118](https://github.com/opendatateam/udata/pull/1118)
+- Deduplicate organization members
+  [#1111](https://github.com/opendatateam/udata/issues/1111)
+
+## 1.1.4 (2017-09-05)
+
+- Fix packaging
+
+## 1.1.3 (2017-09-05)
+
+- Make the spatial search levels exclusion list configurable through `SPATIAL_SEARCH_EXCLUDE_LEVELS`.
+  [#1101](https://github.com/opendatateam/udata/pull/1101)
+- Fix facets labelizer with html handling
+  [#1102](https://github.com/opendatateam/udata/issues/1102)
+- Ensure territories pages have image defined in metadatas
+  [#1103](https://github.com/opendatateam/udata/issues/1103)
+- Strip tags in autocomplete results
+  [#1104](https://github.com/opendatateam/udata/pull/1104)
+- Transmit link checker status to frontend
+  [#1048](https://github.com/opendatateam/udata/issues/1048)
+- Remove plus signs from search query
+  [#1048](https://github.com/opendatateam/udata/issues/987)
+
+## 1.1.2 (2017-09-04)
+
+- Handle territory URLs generation without validity
+  [#1068](https://github.com/opendatateam/udata/issues/1068)
+- Added a contact button to trigger discussions
+  [#1076](https://github.com/opendatateam/udata/pull/1076)
+- Improve harvest error handling
+  [#1078](https://github.com/opendatateam/udata/pull/1078)
+- Improve elasticsearch configurability
+  [#1096](https://github.com/opendatateam/udata/pull/1096)
+- Lots of fixes admin files upload
+  [1094](https://github.com/opendatateam/udata/pull/1094)
+- Prevent the "Bad request error" happening on search but only on some servers
+  [#1097](https://github.com/opendatateam/udata/pull/1097)
+- Migrate spatial granularities to new identifiers
+- Migrate remaining legacy spatial identifiers
+  [#1080](https://github.com/opendatateam/udata/pull/1080)
+- Fix the discussion API documention
+  [#1093](https://github.com/opendatateam/udata/pull/1093)
+
+## 1.1.1 (2017-07-31)
+
+- Fix an issue preventing reuse edition:
+  [#1027](https://github.com/opendatateam/udata/issues/1027)
+- Fix an issue preventing user display and edit in admin:
+  [#1030](https://github.com/opendatateam/udata/issues/1030)
+- Fix an error when a membership request is accepted:
+  [#1028](https://github.com/opendatateam/udata/issues/1028)
+- Fix issue modal on a reuse:
+  [#1026](https://github.com/opendatateam/udata/issues/1026)
+- Fix sort by date on admin users list:
+  [#1029](https://github.com/opendatateam/udata/issues/1029)
+- Improve the `purge` command
+  [#1039](https://github.com/opendatateam/udata/pull/1039)
+- Ensure search does not fail when a deleted object has not been
+  unindexed yet
+  [#1063](https://github.com/opendatateam/udata/issues/1063)
+- Start using Celery queues to handle task priorities
+  [#1067](https://github.com/opendatateam/udata/pull/1067)
+- Updated translations
 
 ## 1.1.0 (2017-07-05)
 

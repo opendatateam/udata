@@ -21,34 +21,39 @@ from .signals import (
 ns = api.namespace('discussions', 'Discussion related operations')
 
 message_fields = api.model('DiscussionMessage', {
-    'content': fields.String(description='The message body', required=True),
-    'posted_by': fields.Nested(
-        user_ref_fields, description='The message author', required=True),
-    'posted_on': fields.ISODateTime(
-        description='The message posting date', required=True),
+    'content': fields.String(description='The message body'),
+    'posted_by': fields.Nested(user_ref_fields,
+                               description='The message author'),
+    'posted_on': fields.ISODateTime(description='The message posting date'),
 })
 
 discussion_fields = api.model('Discussion', {
-    'id': fields.String(
-        description='The discussion identifier', readonly=True),
+    'id': fields.String(description='The discussion identifier'),
+    'subject': fields.Nested(api.model_reference,
+                             description='The discussion target object'),
+    'class': fields.ClassName(description='The object class',
+                              discriminator=True),
+    'title': fields.String(description='The discussion title'),
+    'user': fields.Nested(
+        user_ref_fields, description='The discussion author'),
+    'created': fields.ISODateTime(description='The discussion creation date'),
+    'closed': fields.ISODateTime(description='The discussion closing date'),
+    'closed_by': fields.String(
+        attribute='closed_by.id',
+        description='The user who closed the discussion'),
+    'discussion': fields.Nested(message_fields),
+    'url': fields.UrlFor('api.discussion',
+                         description='The discussion API URI'),
+})
+
+start_discussion_fields = api.model('DiscussionStart', {
+    'title': fields.String(description='The title of the discussion to open',
+                           required=True),
+    'comment': fields.String(description='The content of the initial comment',
+                             required=True),
     'subject': fields.Nested(api.model_reference,
                              description='The discussion target object',
                              required=True),
-    'class': fields.ClassName(description='The object class',
-                              discriminator=True, required=True),
-    'title': fields.String(description='The discussion title', required=True),
-    'user': fields.Nested(
-        user_ref_fields, description='The discussion author', required=True),
-    'created': fields.ISODateTime(
-        description='The discussion creation date', readonly=True),
-    'closed': fields.ISODateTime(
-        description='The discussion closing date', readonly=True),
-    'closed_by': fields.String(
-        attribute='closed_by.id',
-        description='The user who closed the discussion', readonly=True),
-    'discussion': fields.Nested(message_fields),
-    'url': fields.UrlFor(
-        'api.discussion', description='The discussion API URI', readonly=True),
 })
 
 comment_discussion_fields = api.model('DiscussionResponse', {
@@ -149,7 +154,7 @@ class DiscussionsAPI(API):
 
     @api.secure
     @api.doc('create_discussion')
-    @api.expect(discussion_fields)
+    @api.expect(start_discussion_fields)
     @api.marshal_with(discussion_fields)
     def post(self):
         '''Create a new Discussion'''

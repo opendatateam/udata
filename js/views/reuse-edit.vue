@@ -1,7 +1,9 @@
 <template>
-<form-layout icon="retweet" :title="title" :save="save" :cancel="cancel" footer="true" :model="reuse">
-    <reuse-form v-ref:form :reuse="reuse"></reuse-form>
-</form-layout>
+<div>
+    <form-layout icon="retweet" :title="title" :save="save" :cancel="cancel" footer="true" :model="reuse">
+      <reuse-form v-ref:form :reuse="reuse"></reuse-form>
+    </form-layout>
+</div>
 </template>
 
 <script>

@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 
 import factory
 
+from udata.factories import ModelFactory
+
 from .models import User, Role
 
 
-class UserFactory(factory.mongoengine.MongoEngineFactory):
+class UserFactory(ModelFactory):
     class Meta:
         model = User
 

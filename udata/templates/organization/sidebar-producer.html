@@ -14,6 +14,12 @@
 {% else %}
 <br/>
 {% endif %}
+<button type="button" class="btn btn-sm btn-block btn-left btn-warning" @click="$refs.discussions.start('')"
+    v-tooltip="'{{ _('Contact the producer') }}'" tooltip-placement="left">
+    <span class="fa fa-envelope-o"></span>
+    {# TRANSLATORS: This is an action (present indicative). #}
+    {{ _('Contact') }}
+</button>
 <follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
     {% if is_following(organization) %}following{% endif %}
     url="{{ url_for('api.organization_followers', id=organization.id|string) }}"

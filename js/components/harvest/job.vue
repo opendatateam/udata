@@ -4,7 +4,7 @@
     :title="title"
     bodyclass="table-responsive no-padding"
     :p="p" :track="false"
-    :loading="loading !== undefined ? loading : p.loading"
+    :loading="loading !== undefined ? loading : job.loading"
     :fields="fields"
     track="remote_id"
     :empty="empty"
@@ -64,11 +64,11 @@ import Datatable from 'components/datatable/widget.vue';
 export default {
     name: 'JobDetails',
     props: {
-        job: {
-            type: Object,
-            default: () => new HarvestJob()
+        job: HarvestJob,
+        loading: {
+            type: Boolean,
+            default: undefined
         },
-        loading: Boolean,
         empty: String
     },
     components: {Datatable},
@@ -93,7 +93,7 @@ export default {
     },
     computed: {
         title() {
-            return this.job.id ? ('Job ' + this.job.id) : 'Job';
+            return this.job.id ? `Job ${this.job.id}` : 'Job';
         },
     },
     events: {
@@ -117,7 +117,7 @@ export default {
     },
     watch: {
         'job.items': function(items) {
-            this.p.data = items;
+            this.p = new PageList({data: items});
         }
     }
 };

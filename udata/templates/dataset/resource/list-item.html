@@ -17,8 +17,8 @@
             date=resource.modified|dateformat('full'),
         ) }}
     </p>
-    {% if resource.owner %}
-    {{ resource.owner|avatar(52, 'resource-owner') }}
+    {% if resource.owner or resource.organization %}
+    {{ resource|owner_avatar(52, 'resource-owner') }}
     {% endif %}
 
     {% if can_edit_resource(resource if resource.from_community else dataset) %}

@@ -7,14 +7,15 @@ from flask import url_for
 
 from .. import actions
 
-from udata.models import Member
+from udata.models import Member, PeriodicTask
 from udata.tests.api import APITestCase
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.utils import faker
 
 from ..models import (
-    HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING
+    HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING,
+
 )
 from .factories import HarvestSourceFactory, MockBackendsMixin
 
@@ -194,3 +195,76 @@ class HarvestAPITest(MockBackendsMixin, APITestCase):
 
         deleted_sources = HarvestSource.objects(deleted__exists=True)
         self.assertEqual(len(deleted_sources), 1)
+
+    def test_schedule_source(self):
+        '''It should allow to schedule a source if admin'''
+        self.login(AdminFactory())
+        source = HarvestSourceFactory()
+
+        data = '0 0 * * *'
+        url = url_for('api.schedule_harvest_source', ident=str(source.id))
+        response = self.post(url, data)
+        self.assert200(response)
+
+        self.assertEqual(response.json['schedule'], '0 0 * * *')
+
+        source.reload()
+        self.assertIsNotNone(source.periodic_task)
+        periodic_task = source.periodic_task
+        self.assertEqual(periodic_task.crontab.hour, '0')
+        self.assertEqual(periodic_task.crontab.minute, '0')
+        self.assertEqual(periodic_task.crontab.day_of_week, '*')
+        self.assertEqual(periodic_task.crontab.day_of_month, '*')
+        self.assertEqual(periodic_task.crontab.month_of_year, '*')
+        self.assertTrue(periodic_task.enabled)
+
+    def test_schedule_source_is_admin_only(self):
+        '''It should only allow admins to schedule a source'''
+        self.login()
+        source = HarvestSourceFactory()
+
+        data = '0 0 * * *'
+        url = url_for('api.schedule_harvest_source', ident=str(source.id))
+        response = self.post(url, data)
+        self.assert403(response)
+
+        source.reload()
+        self.assertIsNone(source.periodic_task)
+
+    def test_unschedule_source(self):
+        '''It should allow to unschedule a source if admin'''
+        self.login(AdminFactory())
+        periodic_task = PeriodicTask.objects.create(
+            task='harvest',
+            name=faker.name(),
+            description=faker.sentence(),
+            enabled=True,
+            crontab=PeriodicTask.Crontab()
+        )
+        source = HarvestSourceFactory(periodic_task=periodic_task)
+
+        url = url_for('api.schedule_harvest_source', ident=str(source.id))
+        response = self.delete(url)
+        self.assert204(response)
+
+        source.reload()
+        self.assertIsNone(source.periodic_task)
+
+    def test_unschedule_source_is_admin_only(self):
+        '''It should only allow admins to unschedule a source'''
+        self.login()
+        periodic_task = PeriodicTask.objects.create(
+            task='harvest',
+            name=faker.name(),
+            description=faker.sentence(),
+            enabled=True,
+            crontab=PeriodicTask.Crontab()
+        )
+        source = HarvestSourceFactory(periodic_task=periodic_task)
+
+        url = url_for('api.schedule_harvest_source', ident=str(source.id))
+        response = self.delete(url)
+        self.assert403(response)
+
+        source.reload()
+        self.assertIsNotNone(source.periodic_task)

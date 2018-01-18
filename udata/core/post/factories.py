@@ -5,11 +5,12 @@ import factory
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
+from udata.factories import ModelFactory
 
 from .models import Post
 
 
-class PostFactory(factory.mongoengine.MongoEngineFactory):
+class PostFactory(ModelFactory):
     class Meta:
         model = Post
 

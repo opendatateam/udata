@@ -82,45 +82,52 @@ $ npm install
 Once it's done, you should be able to run the build command for JS and CSS:
 
 ```shell
-$ inv assets_build
+$ inv assets-build
+$ inv widgets-build
 ```
 
 !!! note
-If you plan to hack on statics (JS, CSS files), a dedicated command `inv assets_watch` will watch these files and recompile (the modified part only!) on each save.
+    The **watcher commands** `inv assets-watch` and `inv widgets-watch` will recompile on each save, and only the relevant parts.
 
+## Running the project for the first time
 
-## Running the project
-
-As long as you have the middlewares up, you can use [invoke][] to launch the development services
-(you might want to have each one runnning in a terminal):
-
-```shell
-$ inv serve  # Start the development server
-$ inv worker  # Start a worker process
-$ inv beat  # Start a scheduler process
-$ inv assets_watch  # Continously watch and build assets
-```
-
-When you have the development server running,
-you can open your browser to <http://localhost:7000>.
-Everything is up and running!
-
-!!! error
-    If not, it's time for your first contribution to improve the documentation!
-    But first let's try to figure out together what went wrong on [Gitter][].
-
-You need to initialize some data before pushing uData to it's full potential:
+You need to initialize some data before being able to use uData:
 
 ```shell
 # Initialize database, indexes...
 $ udata init
+
 # Optionnaly fetch and load some licenses from another udata instance
 $ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
+
 # Compile translations
 $ inv i18nc
 ```
 
-That's it! You're all set to start using uData and contributing.
+You should be to start using and contributing to uData.
+
+## Running the project
+
+You can use [invoke][] to launch the application services
+(you might want to have each one runnning in a terminal):
+
+```shell
+$ inv serve         # Start the development server
+
+$ inv worker        # Start a worker process
+$ inv beat          # Start a scheduler process
+
+$ inv assets-watch  # Continously watch and build assets
+$ inv widgets-watch # Continously watch and build widgets
+```
+
+When you have the development server running,
+you can open your browser to <http://localhost:7000>.
+Everything should be up and running!
+
+!!! note "Tell us what you think"
+    You are always welcome to tell us about your experience _installing uData_.
+    Get in touch with us via our [Gitter chatroom][Gitter] or by raising a [new issue][] on [GitHub][].
 
 ## Common tasks
 
@@ -137,6 +144,7 @@ A task is provided to automate it:
 ```shell
 # Update dependencies
 $ inv update
+
 # Update dependencies and migrate data
 $ inv update -m
 ```
@@ -162,6 +170,7 @@ or [the documentation](building-documentation.md).
 [git]: https://git-scm.com/
 [github]: https://github.com/opendatateam/udata
 [gitter]: https://gitter.im/opendatateam/udata
+[new issue]: https://github.com/opendatateam/udata/issues/new
 [homebrew]: http://brew.sh/
 [invoke]: http://www.pyinvoke.org/
 [install-virtualenv]: https://virtualenv.pypa.io/en/latest/installation.html

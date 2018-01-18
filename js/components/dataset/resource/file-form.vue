@@ -1,12 +1,18 @@
 <style lang="less">
+@import '~less/admin/variables';
+
 .resource-upload-dropzone {
-    border: 4px dashed #bbb;
+    border: 4px dashed @gray-lte;
     min-height: 150px;
     padding-top: 10px;
     padding-bottom: 10px;
 
     .lead {
         margin-bottom: 0;
+    }
+
+    .drop-active > & {
+        border: 4px dashed @green;
     }
 }
 </style>
@@ -22,7 +28,7 @@
     </span>
     <div class="info-box-content">
         <span class="info-box-text">{{file.name}}</span>
-        <span class="info-box-number">{{file.filesize | filesize}}</span>
+        <span class="info-box-number">{{file.size | filesize}}</span>
         <div class="progress">
             <div class="progress-bar" :style="{width: progress+'%'}"></div>
         </div>
@@ -124,22 +130,19 @@ export default {
         upload_endpoint() {
             const operations = API.datasets.operations;
             let params = {};
-            let endpoint = 'upload_';
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
             }
-            if (this.is_community) {
-                endpoint += 'community_';
-                params.community = this.resource.id;
-            } else {
-                endpoint += 'dataset_';
-            }
             if (this.resource.id) {
-                endpoint += 'resource';
-                params.rid = this.resource.id;
-            } else {
-                endpoint += 'resources';
+                if (this.is_community) {
+                    params.community = this.resource.id;
+                } else {
+                    params.rid = this.resource.id;
+                }
             }
+            const route_new = this.resource.id ? '' : 'new_';
+            const route_namespace = this.is_community ? 'community_' : 'dataset_';
+            const endpoint = `upload_${route_new}${route_namespace}resource`;
             return operations[endpoint].urlify(params);
         }
     },

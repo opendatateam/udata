@@ -3,6 +3,8 @@ from __future__ import unicode_literals, absolute_import
 
 import json
 
+from datetime import timedelta
+
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form
@@ -11,8 +13,12 @@ from udata.tests import TestCase
 from udata.utils import faker
 
 from ..factories import GeoZoneFactory
-from ..models import SpatialCoverage
 from ..forms import SpatialCoverageField
+from ..geoids import END_OF_TIME
+from ..models import SpatialCoverage
+
+
+A_YEAR = timedelta(days=365)
 
 
 class SpatialCoverageFieldTest(TestCase):
@@ -288,3 +294,55 @@ class SpatialCoverageFieldTest(TestCase):
 
         self.assertEqual(len(fake.spatial.zones), 1)
         self.assertEqual(fake.spatial.zones[0], zone)
+
+    def test_resolve_zones_from_json(self):
+        Fake, FakeForm = self.factory()
+        zone = GeoZoneFactory()
+
+        zone = GeoZoneFactory(validity__end=END_OF_TIME)
+        for i in range(3):
+            start = zone.validity.start - (i + 1) * A_YEAR
+            end = zone.validity.start - i * A_YEAR
+            GeoZoneFactory(code=zone.code,
+                           validity__start=start, validity__end=end)
+
+        validity = faker.date_between(start_date=zone.validity.start,
+                                      end_date=zone.validity.end)
+        geoid = '{0.level}:{0.code}@{1}'.format(zone, validity.isoformat())
+
+        fake = Fake()
+        form = FakeForm.from_json({
+            'spatial': {
+                'zones': [geoid],
+                'granularity': faker.spatial_granularity()
+            }
+        })
+
+        form.validate()
+        self.assertEqual(form.errors, {})
+
+        form.populate_obj(fake)
+
+        self.assertEqual(len(fake.spatial.zones), 1)
+        self.assertEqual(fake.spatial.zones[0], zone)
+
+    def test_resolve_zones_from_json_failure(self):
+        Fake, FakeForm = self.factory()
+        GeoZoneFactory.create_batch(3)
+        form = FakeForm.from_json({
+            'spatial': {
+                'zones': [
+                    '{0}:{0}@{0}'.format(faker.unique_string())
+                    for _ in range(2)
+                ],
+                'granularity': faker.spatial_granularity()
+            }
+        })
+
+        form.validate()
+
+        self.assertIn('spatial', form.errors)
+        self.assertEqual(len(form.errors['spatial']), 1)
+
+        self.assertIn('zones', form.errors['spatial'])
+        self.assertEqual(len(form.errors['spatial']['zones']), 1)

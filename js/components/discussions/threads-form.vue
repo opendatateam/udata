@@ -2,7 +2,7 @@
 <form role="form" class="clearfix animated" @submit.prevent="submit">
     <div class="form-group">
         <label for="title-new-discussion">{{ _('Title') }}</label>
-        <input type="text" id="title-new-discussion" v-model="title" class="form-control" required />
+        <input v-el:title type="text" id="title-new-discussion" v-model="title" class="form-control" required />
         <label for="comment-new-discussion">{{ _('Comment') }}</label>
         <textarea v-el:textarea id="comment-new-discussion" v-model="comment" class="form-control" rows="3" required></textarea>
     </div>
@@ -36,8 +36,12 @@ export default {
             comment = comment || '';
             this.comment = comment;
             this.title = title || '';
-            this.$els.textarea.setSelectionRange(comment.length, comment.length);
-            this.$els.textarea.focus();
+            if (title) {
+                this.$els.textarea.setSelectionRange(comment.length, comment.length);
+                this.$els.textarea.focus();
+            } else {
+                this.$els.title.focus();
+            }
         },
         submit() {
             const data = {

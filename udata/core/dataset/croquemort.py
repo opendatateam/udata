@@ -71,7 +71,7 @@ def check_url(url, group=None):
         if attempts >= retry:
             msg = ('We were unable to retrieve the URL after'
                    ' {attempts} attempts.').format(attempts=attempts)
-            return {'error': msg}, {}
+            return {'error': msg}, 503
         try:
             response = requests.get(retrieve_url,
                                     params=params,

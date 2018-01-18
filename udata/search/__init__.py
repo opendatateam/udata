@@ -51,12 +51,12 @@ class ElasticSearch(object):
             self.init_app(app)
 
     def init_app(self, app):
-        app.config.setdefault('ELASTICSEARCH_URL', 'localhost:9200')
-
         # using the app factory pattern _app_ctx_stack.top is None so what
         # do we register on? app.extensions looks a little hackish (I don't
         # know flask well enough to be sure), but that's how it's done in
         # flask-pymongo so let's use it for now.
+        if app.config['TESTING'] and 'ELASTICSEARCH_URL_TEST' in app.config:
+                app.config['ELASTICSEARCH_URL'] = app.config['ELASTICSEARCH_URL_TEST']
         app.extensions['elasticsearch'] = Elasticsearch(
             [app.config['ELASTICSEARCH_URL']], serializer=EsJSONSerializer())
 
@@ -75,9 +75,10 @@ class ElasticSearch(object):
 
     @property
     def index_name(self):
+        basename = current_app.config['ELASTICSEARCH_INDEX_BASENAME']
         if current_app.config.get('TESTING'):
-            return '{0}-test'.format(current_app.name)
-        return current_app.name
+            return '{0}-test'.format(basename)
+        return basename
 
     def scan(self, body, **kwargs):
         return scan(self.client, query=body, **kwargs)

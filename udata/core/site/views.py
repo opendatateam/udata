@@ -29,7 +29,6 @@ from udata.utils import multi_to_dict
 from .models import current_site
 from .rdf import build_catalog
 
-noI18n = Blueprint('noI18n', __name__)
 blueprint = I18nBlueprint('site', __name__)
 
 
@@ -64,11 +63,6 @@ def home():
     processor = theme.current.get_processor('home')
     context = processor(context)
     return theme.render('home.html', **context)
-
-
-@noI18n.route('/robots.txt')
-def static_from_root():
-    return send_from_directory(current_app.static_folder, request.path[1:])
 
 
 @blueprint.route('/map/')

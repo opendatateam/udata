@@ -160,3 +160,35 @@ export default {
     }
 };
 </script>
+
+<style lang="less">
+@import "~less/udata/variables";
+
+@import "~bootstrap/less/mixins";
+@import "~admin-lte/build/less/mixins";
+@import "~admin-lte/build/less/timeline";
+
+.timeline {
+    li > .timeline-item > .timeline-header {
+        border-bottom: none;
+    }
+    li > .timeline-item > .time {
+        margin-top: 10px;
+    }
+    li > .timeline-icon {
+        background: #f0f0f0;
+        margin-top:10px;
+        top: 3px;
+    }
+    li > .timeline-icon-more {
+        cursor: pointer;
+        background: #ffb311;
+    }
+
+    @media (min-width: @screen-sm-max) {
+        .card {
+            max-width: 80%;
+        }
+    }
+}
+</style>

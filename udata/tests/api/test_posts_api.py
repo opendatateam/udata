@@ -27,7 +27,7 @@ class PostsAPITest(APITestCase):
 
     def test_post_api_create(self):
         '''It should create a post from the API'''
-        data = PostFactory.attributes()
+        data = PostFactory.as_dict()
         data['datasets'] = [str(d.id) for d in data['datasets']]
         data['reuses'] = [str(r.id) for r in data['reuses']]
         self.login(AdminFactory())

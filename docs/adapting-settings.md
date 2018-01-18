@@ -92,6 +92,14 @@ The duration used for templates' cache, in minutes.
 
 This is the allowed resources extensions list that user can upload.
 
+## Spatial configuration
+
+### SPATIAL_SEARCH_EXCLUDE_LEVELS
+
+**default**: `tuple()`
+
+List spatial levels that shoudn't be indexed (for time, performance and user experience).
+
 ## Territories configuration
 
 ### ACTIVATE_TERRITORIES
@@ -111,8 +119,23 @@ Warning: the order is important and will determine parents/children for
 a given territory. You have to set the smallest territory level first:
 
 ```python
-HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region', 'country')
+HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 ```
+
+## Harvesting configuration
+
+### HARVEST_PREVIEW_MAX_ITEMS
+
+**default**: `20`
+
+The number of items to fetch while previewing an harvest source
+
+### HARVEST_DEFAULT_SCHEDULE
+
+**default**: `0 0 * * *`
+
+A cron expression used as default harvester schedule when validating harvesters.
+
 
 ## ElasticSearch configuration
 
@@ -132,6 +155,31 @@ RFC-1738 formatted URLs are also supported:
 ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
 ```
 
+### ELASTICSEARCH_URL_TEST
+
+**default**: same as `ELASTICSEARCH_URL`
+
+An optionnal alternative elasticsearch server url that may be used for testing.
+
+### ELASTICSEARCH_INDEX_BASENAME
+
+**default**: `'udata'`
+
+The base name used to produce elasticsearch index names and alias.
+The default `udata` value will produce:
+- a `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
+- a `udata` alias on `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
+- a temporary `udata-test` index during each test requiring it
+
+```python
+ELASTICSEARCH_INDEX_BASENAME = 'myindex'
+```
+The above example will produce:
+- a `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
+- a `myindex` alias on `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
+- a temporary `myindex-test` index during each test requiring it
+
+
 ## Mongoengine/Flask-Mongoengine options
 
 ### MONGODB_HOST
@@ -149,6 +197,12 @@ Authentication is also supported in the URL:
 ```python
 MONGODB_HOST = 'mongodb://<user>:<password>@<host>:<port>/<database>'
 ```
+
+### MONGODB_HOST_TEST
+
+**default**: same as `MONGODB_HOST` with a `-test` suffix on the collection
+
+An optionnal alternative mongo database used for testing.
 
 ## Celery options
 

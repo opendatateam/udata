@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import logging
 
+import requests
+
 from rdflib import Graph
 from rdflib.namespace import RDF
 
@@ -49,6 +51,18 @@ class DcatBackend(BaseBackend):
     def initialize(self):
         '''List all datasets for a given ...'''
         fmt = guess_format(self.source.url)
+        # if format can't be guessed from the url
+        # we fallback on the declared Content-Type
+        if not fmt:
+            response = requests.head(self.source.url)
+            mime_type = response.headers.get('Content-Type', '').split(';', 1)[0]
+            if not mime_type:
+                msg = 'Unable to detect format from extension or mime type'
+                raise ValueError(msg)
+            fmt = guess_format(mime_type)
+            if not fmt:
+                msg = 'Unsupported mime type "{0}"'.format(mime_type)
+                raise ValueError(msg)
         self.parse_graph(self.source.url, fmt)
 
     def parse_graph(self, url, fmt):

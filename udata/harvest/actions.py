@@ -101,6 +101,7 @@ def validate_source(ident, comment=None):
     if current_user.is_authenticated:
         source.validation.by = current_user._get_current_object()
     source.save()
+    schedule(ident, cron=current_app.config['HARVEST_DEFAULT_SCHEDULE'])
     launch(ident)
     return source
 
@@ -153,28 +154,33 @@ def preview(ident):
     return backend.harvest()
 
 
-def schedule(ident, minute='*', hour='*',
+def schedule(ident, cron=None, minute='*', hour='*',
              day_of_week='*', day_of_month='*', month_of_year='*'):
     '''Schedule an harvesting on a source given a crontab'''
     source = get_source(ident)
-    if source.periodic_task:
-        raise ValueError('Source {0} is already scheduled'.format(source.name))
 
-    source.periodic_task = PeriodicTask.objects.create(
-        task='harvest',
-        name='Harvest {0}'.format(source.name),
-        description='Periodic Harvesting',
-        enabled=True,
-        args=[str(source.id)],
-        crontab=PeriodicTask.Crontab(
-            minute=str(minute),
-            hour=str(hour),
-            day_of_week=str(day_of_week),
-            day_of_month=str(day_of_month),
-            month_of_year=str(month_of_year)
-        ),
+    if cron:
+        minute, hour, day_of_month, month_of_year, day_of_week = cron.split()
+
+    crontab = PeriodicTask.Crontab(
+        minute=str(minute),
+        hour=str(hour),
+        day_of_week=str(day_of_week),
+        day_of_month=str(day_of_month),
+        month_of_year=str(month_of_year)
     )
-    source.save()
+
+    if source.periodic_task:
+        source.periodic_task.modify(crontab=crontab)
+    else:
+        source.modify(periodic_task=PeriodicTask.objects.create(
+            task='harvest',
+            name='Harvest {0}'.format(source.name),
+            description='Periodic Harvesting',
+            enabled=True,
+            args=[str(source.id)],
+            crontab=crontab,
+        ))
     signals.harvest_source_scheduled.send(source)
     return source
 

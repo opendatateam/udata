@@ -25,6 +25,7 @@
 {% endblock %}
 
 {% block content %}
+<div v-el:modal></div>
 <section class="reuse-section community-section">
     <div class="container reuse-container">
         <div class="row">
@@ -93,6 +94,12 @@
                             {{ follow_btn(reuse, ['fa-star-o', 'fa-star'])}}
                             {{ share_btn(reuse.title) }}
                             {{ issues_btn(reuse) }}
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-warning" @click="$refs.discussions.start('')">
+                                <span class="fa fa-envelope-o"></span>
+                                {{ _('Contact the producer') }}
+                            </button>
                         </div>
                         {% if can_edit %}
                         <div class="btn-group btn-group-sm">

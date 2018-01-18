@@ -26,6 +26,8 @@ class MetricsQuerySet(db.BaseQuerySet):
 
     def update_daily(self, obj, date=None, **kwargs):
         oid = obj.id if hasattr(obj, 'id') else obj
+        if not oid:
+            raise ValueError('Unable to get identifier for {0}'.format(obj))
         if isinstance(date, basestring):
             day = date
         else:
@@ -50,7 +52,7 @@ class WithMetrics(object):
 
 
 class Metrics(db.Document):
-    object_id = db.DynamicField(required=True)
+    object_id = db.DynamicField(required=True, null=False, unique_with='date')
     date = db.StringField(required=True)
     level = db.StringField(
         required=True, default='daily',

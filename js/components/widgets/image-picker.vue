@@ -133,7 +133,10 @@ export default {
             if (this.HAS_FILE_API) {
                 const data = {};
                 try {
-                    data.bbox = this.$refs.thumbnailer.bbox;
+                    const bbox = this.$refs.thumbnailer.bbox;
+                    if (bbox) {
+                        data.bbox = bbox;
+                    }
                     this.upload(data);
                 } catch(e) {}
             } else {

@@ -13,15 +13,24 @@ log = logging.getLogger(__name__)
 
 
 @manager.command
-def purge():
-    '''permanently remove data flagged as deleted'''
-    log.info('Purging datasets')
-    purge_datasets()
+def purge(datasets=False, reuses=False, organizations=False):
+    '''
+    Permanently remove data flagged as deleted.
 
-    log.info('Purging reuses')
-    purge_reuses()
+    If no model flag is given, all models are purged.
+    '''
+    purge_all = not any((datasets, reuses, organizations))
 
-    log.info('Purging organizations')
-    purge_organizations()
+    if purge_all or datasets:
+        log.info('Purging datasets')
+        purge_datasets()
+
+    if purge_all or reuses:
+        log.info('Purging reuses')
+        purge_reuses()
+
+    if purge_all or organizations:
+        log.info('Purging organizations')
+        purge_organizations()
 
     log.info('Done')
