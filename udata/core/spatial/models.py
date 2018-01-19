@@ -8,7 +8,7 @@ from werkzeug.local import LocalProxy
 from werkzeug import cached_property
 
 from udata.app import cache
-from udata.i18n import lazy_gettext as _, gettext, get_locale
+from udata.i18n import gettext as _, get_locale, language
 from udata.models import db
 from udata.core.storages import logos
 
@@ -116,7 +116,7 @@ class GeoZone(db.Document):
     def __html__(self):
         """In use within the admin."""
         return '{name} <i>({code})</i>'.format(
-            name=gettext(self.name), code=self.code)
+            name=_(self.name), code=self.code)
 
     def logo_url(self, external=False):
         flag_filename = self.flag.filename
@@ -253,7 +253,7 @@ class GeoZone(db.Document):
             'geometry': self.geom or EMPTY_GEOM,
             'properties': {
                 'slug': self.slug,
-                'name': gettext(self.name),
+                'name': _(self.name),
                 'level': self.level,
                 'code': self.code,
                 'validity': self.validity,
@@ -268,9 +268,10 @@ class GeoZone(db.Document):
 
 @cache.memoize()
 def get_spatial_granularities(lang):
-    granularities = [(l.id, _(l.name))
-                     for l in GeoLevel.objects] + BASE_GRANULARITIES
-    return [(id, str(name)) for id, name in granularities]
+    with language(lang):
+        return [
+            (l.id, _(l.name)) for l in GeoLevel.objects
+        ] + BASE_GRANULARITIES
 
 
 spatial_granularities = LocalProxy(
