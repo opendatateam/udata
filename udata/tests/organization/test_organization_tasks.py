@@ -20,12 +20,12 @@ class OrganizationTasksTest(SearchTestMixin, TestCase):
         tasks.purge_organizations()
 
         dataset = Dataset.objects(id=dataset.id).first()
-        self.assertEqual(dataset.organization, None)
+        self.assertIsNone(dataset.organization)
 
         organization = Organization.objects(name='delete me').first()
-        self.assertEqual(organization, None)
+        self.assertIsNone(organization)
 
         indexed_dataset = DatasetSearch.get(id=dataset.id,
                                             using=es.client,
                                             index=es.index_name)
-        self.assertEqual(indexed_dataset.organization, '')
+        self.assertIsNone(indexed_dataset.organization)
