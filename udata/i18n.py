@@ -127,11 +127,9 @@ def lazy_pgettext(*args, **kwargs):
 
 
 def _default_lang(user=None):
-    user = user or current_user
-    if user.is_authenticated and user.prefered_language:
-        return user.prefered_language
-    else:
-        return current_app.config['DEFAULT_LANGUAGE']
+    lang = getattr(user or current_user, 'prefered_language', None)
+    return lang or current_app.config['DEFAULT_LANGUAGE']
+
 
 default_lang = LocalProxy(lambda: _default_lang())
 
@@ -155,7 +153,7 @@ def language(lang_code):
 
 @babel.localeselector
 def get_locale():
-    if hasattr(g, 'lang_code'):
+    if getattr(g, 'lang_code', None):
         return g.lang_code
     return str(default_lang)
 
@@ -177,13 +175,13 @@ def init_app(app):
 def _add_language_code(endpoint, values):
     try:
         if current_app.url_map.is_endpoint_expecting(endpoint, 'lang_code'):
-            values.setdefault('lang_code', g.get('lang_code', default_lang))
+            values.setdefault('lang_code', g.get('lang_code') or get_locale())
     except KeyError:  # Endpoint does not exist
         pass
 
 
 def _pull_lang_code(endpoint, values):
-    lang_code = values.pop('lang_code', g.get('lang_code', default_lang))
+    lang_code = values.pop('lang_code', g.get('lang_code') or get_locale())
     if lang_code not in current_app.config['LANGUAGES']:
         try:
             abort(redirect(
