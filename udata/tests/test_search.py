@@ -556,7 +556,7 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
     def test_query_with_multiple_including_and_excluding_terms(self):
         '''A query should detect negation on each term in query_string'''
         search_query = search.search_for(FakeSearch,
-                                         q='test -negated value -other')
+                                         q='test -negated1 value -negated2')
         expected = {
             'bool': {
                 'must': [
@@ -570,13 +570,13 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
                 ],
                 'must_not': [
                     {'multi_match': {
-                        'query': 'negated',
+                        'query': 'negated1',
                         'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']
                     }},
                     {'multi_match': {
-                        'query': 'other',
+                        'query': 'negated2',
                         'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']
