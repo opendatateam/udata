@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
 from udata import theme
 from udata.frontend import front
 from udata.auth import PermissionDenied
 
+log = logging.getLogger(__name__)
+
 
 @front.app_errorhandler(ValueError)
 def validation_error(error):
+    error_label = '{0.__class__.__name__}({0})'.format(error)
+    log.error('Uncaught error: %s', error_label, exc_info=True)
     return theme.render('errors/400.html', error=error), 400
 
 
