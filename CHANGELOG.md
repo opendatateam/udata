@@ -6,7 +6,7 @@
 - Make the dataset page reuses section and cards themable. [#1378](https://github.com/opendatateam/udata/pull/1378)
 - `ValueError`s are not hidden anymore by the Bad Request error page, they are logged. [#1382](https://github.com/opendatateam/udata/pull/1382)
 - Spatial encoding fixes: prevent breaking unicode errors. [#1381](https://github.com/opendatateam/udata/pull/1381)
-- Ensure the multiple term search use a `AND` operator [#1384](https://github.com/opendatateam/udata/pull/1384)
+- Ensure the multiple term search uses a `AND` operator [#1384](https://github.com/opendatateam/udata/pull/1384)
 
 ## 1.2.9 (2018-01-17)
 
