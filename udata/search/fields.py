@@ -15,6 +15,7 @@ from elasticsearch_dsl.faceted_search import (
 )
 from flask_restplus import inputs
 from jinja2 import Markup
+from speaklater import is_lazy_string
 
 from udata.i18n import lazy_gettext as _, format_date
 from udata.utils import to_bool
@@ -43,8 +44,10 @@ def obj_to_string(obj):
         return None
     elif isinstance(obj, bytes):
         return obj.decode('utf-8')
-    elif isinstance(obj, str):
+    elif isinstance(obj, basestring):
         return obj
+    elif is_lazy_string(obj):
+        return obj.value
     elif hasattr(obj, '__html__'):
         return obj.__html__()
     else:
