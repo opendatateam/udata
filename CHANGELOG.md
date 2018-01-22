@@ -6,6 +6,10 @@
 - Make the dataset page reuses section and cards themable. [#1378](https://github.com/opendatateam/udata/pull/1378)
 - `ValueError`s are not hidden anymore by the Bad Request error page, they are logged. [#1382](https://github.com/opendatateam/udata/pull/1382)
 - Spatial encoding fixes: prevent breaking unicode errors. [#1381](https://github.com/opendatateam/udata/pull/1381)
+- Ensure the multiple term search uses a `AND` operator [#1384](https://github.com/opendatateam/udata/pull/1384)
+- Facets encoding fixes: ensure lazy strings are propery encoded. [#1388](https://github.com/opendatateam/udata/pull/1388)
+- Markdown content is now easily themable (namespaced into a `markdown` class) [#1389](https://github.com/opendatateam/udata/pull/1389)
+- Fix discussions and community resources alignment on datasets and reuses pages [#1390](https://github.com/opendatateam/udata/pull/1390)
 
 ## 1.2.9 (2018-01-17)
 

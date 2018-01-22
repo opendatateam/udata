@@ -25,9 +25,13 @@ class MarkdownTestCase(TestCase, WebTestMixin):
         init_app(app)
         return app
 
+    def assert_md_equal(self, value, expected):
+        expected = '<div class="markdown">{0}</div>'.format(expected)
+        self.assertEqual(value.strip(), expected)
+
     def test_excerpt_is_not_removed(self):
         with self.app.test_request_context('/'):
-            self.assertEqual(md(EXCERPT_TOKEN).strip(), EXCERPT_TOKEN)
+            self.assert_md_equal(md(EXCERPT_TOKEN), EXCERPT_TOKEN)
 
     def test_markdown_filter_with_none(self):
         '''Markdown filter should not fails with None'''
@@ -92,29 +96,29 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             result = render_template_string('{{ text|markdown }}', text=text)
             parsed = parser.parse(result)
             self.assertEqual(parsed.getElementsByTagName('a'), [])
-            self.assertEqual(result.strip(), '<p>coucou@cmoi.fr</p>')
+            self.assert_md_equal(result, '<p>coucou@cmoi.fr</p>')
 
     def test_markdown_linkify_within_pre(self):
         '''Markdown filter should not transform urls into <pre> anchors'''
         text = '<pre>http://example.net/</pre>'
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|markdown }}', text=text)
-            self.assertEqual(result.strip(), '<pre>http://example.net/</pre>')
+            self.assert_md_equal(result, '<pre>http://example.net/</pre>')
 
     def test_markdown_linkify_email_within_pre(self):
         '''Markdown filter should not transform emails into <pre> anchors'''
         text = '<pre>coucou@cmoi.fr</pre>'
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|markdown }}', text=text)
-            self.assertEqual(result.strip(), '<pre>coucou@cmoi.fr</pre>')
+            self.assert_md_equal(result, '<pre>coucou@cmoi.fr</pre>')
 
     def test_bleach_sanitize(self):
         '''Markdown filter should sanitize evil code'''
         text = 'an <script>evil()</script>'
         with self.app.test_request_context('/'):
             result = render_template_string('{{ text|markdown }}', text=text)
-            self.assertEqual(result.strip(),
-                             '<p>an &lt;script&gt;evil()&lt;/script&gt;</p>')
+            expected = '<p>an &lt;script&gt;evil()&lt;/script&gt;</p>'
+            self.assert_md_equal(result, expected)
 
     def test_mdstrip_filter(self):
         '''mdstrip should truncate the text before rendering'''

@@ -348,10 +348,12 @@
 
         <h3 id="community-discussions">{{ _('Discussions') }}</h3>
         <div class="row">
-            <discussion-threads v-ref:discussions class="col-sm-9"
-                subject-id="{{ dataset.id }}"
-                subject-class="{{ dataset.__class__.__name__ }}">
-            </discussion-threads>
+            <div class="col-sm-9">
+                <discussion-threads v-ref:discussions
+                    subject-id="{{ dataset.id }}"
+                    subject-class="{{ dataset.__class__.__name__ }}">
+                </discussion-threads>
+            </div>
             <div class="col-sm-3 note">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
@@ -359,11 +361,11 @@
 
         <h3 id="community-resources">{{ _('Community resources') }}</h3>
         <div class="row">
-            <div class="col-sm-9 community-resources-list resources-list">
-                <div class="list-group">
-                    {% for resource in dataset.community_resources %}
-                        {% include theme('dataset/resource/list-item.html') %}
-                    {% endfor %}
+            <div class="col-sm-9">
+                <div class="list-group community-resources-list resources-list smaller">
+                {% for resource in dataset.community_resources %}
+                    {% include theme('dataset/resource/list-item.html') %}
+                {% endfor %}
                     <a class="list-group-item add"
                         href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
                         <div class="format-label pull-left">+</div>
@@ -390,9 +392,8 @@
                         {% include theme('reuse/card.html') %}
                     </div>
                     {% endfor %}
-                    <div class="col-sm-12">
-                        <a class="list-group-item add"
-                            v-el:add-reuse
+                    <div class="col-sm-6 col-lg-4">
+                        <a class="thumbnail reuse add" v-el:add-reuse
                             href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
                             @click="addReuse($event)">
                             <div class="format-label pull-left">+</div>

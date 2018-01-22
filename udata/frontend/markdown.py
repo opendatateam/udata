@@ -62,7 +62,7 @@ class UDataMarkdown(object):
         self.renderer = renderer
         app.jinja_env.filters.setdefault('markdown', self.__call__)
 
-    def __call__(self, stream, source_tooltip=False):
+    def __call__(self, stream, source_tooltip=False, wrap=True):
         if not stream:
             return ''
         stream = bleach_clean(stream)
@@ -77,6 +77,8 @@ class UDataMarkdown(object):
         # Turn string links into HTML ones *after* markdown transformation.
         html = bleach.linkify(html, skip_tags=['pre'],
                               parse_email=True, callbacks=callbacks)
+        if wrap:
+            html = '<div class="markdown">{0}</div>'.format(html.strip())
         # Return a `Markup` element considered as safe by Jinja.
         return Markup(html)
 
@@ -105,7 +107,7 @@ def mdstrip(value, length=None, end='…'):
         return ''
     if EXCERPT_TOKEN in value:
         value = value.split(EXCERPT_TOKEN, 1)[0]
-    rendered = md(value)
+    rendered = md(value, wrap=False)
     text = do_striptags(rendered)
     text = bleach_clean(text)
     if length > 0:
