@@ -11,6 +11,7 @@ export function install(Vue, options) {
             $(this.el).addClass('markdown');
         },
         update: function(value) {
+            this.el.classList.add('markdown');
             this.el.innerHTML = value ? commonmark(value) : '';
         },
         unbind: function() {
@@ -24,6 +25,7 @@ export function install(Vue, options) {
         }
         if (max_length) {
             const div = document.createElement('div');
+            div.classList.add('markdown');
             div.innerHTML = commonmark(text);
             return txt.truncate(div.textContent || div.innerText || '', max_length);
         } else {
