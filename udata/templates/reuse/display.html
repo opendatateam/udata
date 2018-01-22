@@ -8,6 +8,7 @@
     'description': reuse.description|mdstrip(60)|forceescape,
     'image': reuse.image(external=True),
     'keywords': [_('reuse')] + reuse.tags,
+    'robots': 'noindex, nofollow' if reuse.is_hidden else '',
 } %}
 
 {% set bundle = 'reuse' %}
