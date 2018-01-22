@@ -391,7 +391,7 @@
                         {% include theme('dataset/reuse-card.html') %}
                     </div>
                     {% endfor %}
-                    <div class="col-sm-6 col-md-4">
+                    <div class="col-sm-6 col-lg-4">
                         <a class="thumbnail reuse add" v-el:add-reuse
                             href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
                             @click="addReuse($event)">
