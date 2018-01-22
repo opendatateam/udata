@@ -8,7 +8,7 @@ from werkzeug.local import LocalProxy
 from werkzeug import cached_property
 
 from udata.app import cache
-from udata.i18n import gettext as _, get_locale, language
+from udata.i18n import _, L_, get_locale, language
 from udata.models import db
 from udata.core.storages import logos
 
@@ -22,8 +22,8 @@ __all__ = (
 
 
 BASE_GRANULARITIES = [
-    ('poi', _('POI')),
-    ('other', _('Other')),
+    ('poi', L_('POI')),
+    ('other', L_('Other')),
 ]
 
 ADMIN_LEVEL_MIN = 1
@@ -271,7 +271,7 @@ def get_spatial_granularities(lang):
     with language(lang):
         return [
             (l.id, _(l.name)) for l in GeoLevel.objects
-        ] + BASE_GRANULARITIES
+        ] + [(id, label.value) for id, label in BASE_GRANULARITIES]
 
 
 spatial_granularities = LocalProxy(
@@ -295,7 +295,7 @@ class SpatialCoverage(db.EmbeddedDocument):
 
     @property
     def granularity_label(self):
-        return _(dict(spatial_granularities)[self.granularity or 'other'])
+        return dict(spatial_granularities)[self.granularity or 'other']
 
     @property
     def top_label(self):

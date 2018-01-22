@@ -101,16 +101,19 @@ babel = Babel(default_domain=domain)
 # Create shortcuts for the default Flask domain
 def gettext(*args, **kwargs):
     return domain.gettext(*args, **kwargs)
+
 _ = gettext
 
 
 def ngettext(*args, **kwargs):
     return domain.ngettext(*args, **kwargs)
+
 N_ = ngettext
 
 
 def pgettext(*args, **kwargs):
     return domain.pgettext(*args, **kwargs)
+
 P_ = pgettext
 
 
@@ -120,6 +123,8 @@ def npgettext(*args, **kwargs):
 
 def lazy_gettext(*args, **kwargs):
     return domain.lazy_gettext(*args, **kwargs)
+
+L_ = lazy_gettext
 
 
 def lazy_pgettext(*args, **kwargs):
