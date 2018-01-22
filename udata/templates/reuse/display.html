@@ -241,17 +241,13 @@
     </header>
 
     <div class="container">
-        <div class="row">
-            <div class="col-xs-12">
-                <ul class="card-list">
-                    {% for dataset in reuse.datasets %}
-                    <li class="col-md-4 col-sm-6">
-                    {% include theme('dataset/card.html') %}
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+        <ul class="row card-list">
+            {% for dataset in reuse.datasets %}
+            <li class="col-md-4 col-sm-6">
+                {% include theme('dataset/card.html') %}
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 </section>
 
@@ -269,9 +265,11 @@
     <div class="container">
         <h3>{{ _('Discussions') }}</h3>
         <div class="row">
-            <discussion-threads v-ref:discussions class="col-sm-9"
-                subject-id="{{ reuse.id }}" subject-class="{{ reuse.__class__.__name__ }}">
-            </discussion-threads>
+            <div class="col-sm-9">
+                <discussion-threads v-ref:discussions
+                    subject-id="{{ reuse.id }}" subject-class="{{ reuse.__class__.__name__ }}">
+                </discussion-threads>
+            </div>
             <div class="col-sm-3 note">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
