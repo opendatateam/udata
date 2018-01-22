@@ -348,10 +348,12 @@
 
         <h3>{{ _('Discussions') }}</h3>
         <div class="row">
-            <discussion-threads v-ref:discussions class="col-sm-9"
-                subject-id="{{ dataset.id }}"
-                subject-class="{{ dataset.__class__.__name__ }}">
-            </discussion-threads>
+            <div class="col-sm-9">
+                <discussion-threads v-ref:discussions
+                    subject-id="{{ dataset.id }}"
+                    subject-class="{{ dataset.__class__.__name__ }}">
+                </discussion-threads>
+            </div>
             <div class="col-sm-3 note">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
@@ -359,17 +361,19 @@
 
         <h3>{{ _('Community resources') }}</h3>
         <div class="row">
-            <div class="col-sm-9 list-group community-resources-list resources-list smaller">
-            {% for resource in dataset.community_resources %}
-                {% include theme('dataset/resource/list-item.html') %}
-            {% endfor %}
-                <a class="list-group-item add"
-                    href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                    <div class="format-label pull-left">+</div>
-                    <h4 class="list-group-item-heading">
-                        {{ _('New community resource') }}
-                    </h4>
-                </a>
+            <div class="col-sm-9">
+                <div class="list-group community-resources-list resources-list smaller">
+                {% for resource in dataset.community_resources %}
+                    {% include theme('dataset/resource/list-item.html') %}
+                {% endfor %}
+                    <a class="list-group-item add"
+                        href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                        <div class="format-label pull-left">+</div>
+                        <h4 class="list-group-item-heading">
+                            {{ _('New community resource') }}
+                        </h4>
+                    </a>
+                </div>
             </div>
 
             <div class="col-sm-3 note">
