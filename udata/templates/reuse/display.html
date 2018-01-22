@@ -8,7 +8,6 @@
     'description': reuse.description|mdstrip(60)|forceescape,
     'image': reuse.image(external=True),
     'keywords': [_('reuse')] + reuse.tags,
-    'robots': 'noindex, nofollow' if reuse.is_hidden else '',
 } %}
 
 {% set bundle = 'reuse' %}
@@ -243,7 +242,7 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12">
-                <ul class="row card-list">
+                <ul class="row card-list card-list--columned">
                     {% for dataset in reuse.datasets %}
                     <li class="col-md-4 col-sm-6">
                     {% include theme('dataset/card.html') %}
