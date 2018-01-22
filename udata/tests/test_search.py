@@ -471,6 +471,18 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
         }}
         self.assert_dict_equal(get_query(search_query), expected)
 
+    def test_with_multiple_terms(self):
+        '''A query with multiple terms should use the AND operator'''
+        search_query = search.search_for(FakeSearch, q='test value')
+        expected = {'multi_match': {
+            'query': 'test value',
+            'analyzer': search.i18n_analyzer._name,
+            'type': 'cross_fields',
+            'operator': 'and',
+            'fields': ['title^2', 'description']
+        }}
+        self.assert_dict_equal(get_query(search_query), expected)
+
     def test_default_analyzer(self):
         '''Default analyzer is overridable'''
         class FakeAnalyzerSearch(FakeSearch):
@@ -532,6 +544,39 @@ class SearchQueryTest(SearchTestMixin, SearchTestCase):
                 'must_not': [
                     {'multi_match': {
                         'query': 'negated',
+                        'analyzer': search.i18n_analyzer._name,
+                        'type': 'cross_fields',
+                        'fields': ['title^2', 'description']
+                    }}
+                ]
+            }
+        }
+        self.assert_dict_equal(get_query(search_query), expected)
+
+    def test_query_with_multiple_including_and_excluding_terms(self):
+        '''A query should detect negation on each term in query_string'''
+        search_query = search.search_for(FakeSearch,
+                                         q='test -negated1 value -negated2')
+        expected = {
+            'bool': {
+                'must': [
+                    {'multi_match': {
+                        'query': 'test value',
+                        'analyzer': search.i18n_analyzer._name,
+                        'type': 'cross_fields',
+                        'operator': 'and',
+                        'fields': ['title^2', 'description']
+                    }}
+                ],
+                'must_not': [
+                    {'multi_match': {
+                        'query': 'negated1',
+                        'analyzer': search.i18n_analyzer._name,
+                        'type': 'cross_fields',
+                        'fields': ['title^2', 'description']
+                    }},
+                    {'multi_match': {
+                        'query': 'negated2',
                         'analyzer': search.i18n_analyzer._name,
                         'type': 'cross_fields',
                         'fields': ['title^2', 'description']

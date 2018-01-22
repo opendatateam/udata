@@ -134,8 +134,8 @@ class SearchQuery(FacetedSearch):
                 included.append(term)
         if included:
             search = search.query(self.multi_match(included))
-        if excluded:
-            search = search.query(~self.multi_match(excluded))
+        for term in excluded:
+            search = search.query(~self.multi_match([term]))
         return search
 
     def build_search(self):
@@ -152,6 +152,8 @@ class SearchQuery(FacetedSearch):
 
     def multi_match(self, terms):
         params = {'query': ' '.join(terms)}
+        if len(terms) > 1:
+            params['operator'] = 'and'
         # Optionnal search type
         if self.match_type:
             params['type'] = self.match_type
