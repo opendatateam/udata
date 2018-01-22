@@ -1,5 +1,5 @@
 <template>
-<div class="list-group resources-list smaller">
+<div class="list-group resources-list smaller discussion-threads">
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
@@ -143,3 +143,15 @@ export default {
     }
 }
 </script>
+
+<style lang="less">
+.discussion-threads {
+    .list-group-form {
+        height: inherit;
+        
+        form {
+            padding: 1em;
+        }
+    }
+}
+</style>
