@@ -8,6 +8,7 @@
 
 - Add the homologation of CC-BY-SA for SHOM [#244](https://github.com/etalab/udata-gouvfr/pull/244/files)
 - Dataset recommendations [#243](https://github.com/etalab/udata-gouvfr/pull/243)
+- Move some discussions style into `udata` core [#251](https://github.com/etalab/udata-gouvfr/pull/251)
 
 ## 1.2.2 (2017-12-14)
 
