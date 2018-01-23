@@ -11,6 +11,7 @@
 - Markdown content is now easily themable (namespaced into a `markdown` class) [#1389](https://github.com/opendatateam/udata/pull/1389)
 - Fix discussions and community resources alignment on datasets and reuses pages [#1390](https://github.com/opendatateam/udata/pull/1390)
 - Fix discussions style on default theme [#1393](https://github.com/opendatateam/udata/pull/1393)
+- Ensure empty harvest jobs properly end [#1395](https://github.com/opendatateam/udata/pull/1395)
 
 ## 1.2.9 (2018-01-17)
 
