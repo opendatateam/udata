@@ -512,6 +512,26 @@ class ExecutionTestMixin(MockBackendsMixin, DBTestMixin):
         self.assertEqual(len(HarvestJob.objects), 1)
         self.assertEqual(len(Dataset.objects), COUNT - 1)
 
+    def test_empty(self):
+        source = HarvestSourceFactory(backend='factory', config={'count': 0})
+        with self.assert_emit(signals.before_harvest_job,
+                              signals.after_harvest_job):
+            self.action(source.slug)
+
+        source.reload()
+        self.assertEqual(len(HarvestJob.objects(source=source)), 1)
+
+        job = source.get_last_job()
+
+        self.assertEqual(job.status, 'done')
+        self.assertEqual(job.errors, [])
+        self.assertIsNotNone(job.started)
+        self.assertIsNotNone(job.ended)
+        self.assertEqual(job.items, [])
+
+        self.assertEqual(len(HarvestJob.objects), 1)
+        self.assertEqual(len(Dataset.objects), 0)
+
 
 class HarvestLaunchTest(ExecutionTestMixin, TestCase):
     def action(self, *args, **kwargs):
