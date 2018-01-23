@@ -1,14 +1,32 @@
 <style lang="less">
-.list-group-item {
-    p.list-group-item-heading {
-        a, a:hover {
-            text-decoration: underline;
+.discussion-thread {
+    @vspacing: 10px;
+
+    .list-group-item {
+        p.list-group-item-heading {
+            a, a:hover {
+                text-decoration: underline;
+            }
+        }
+
+        &.list-group-indent {
+            margin-left: 54px;
+            height: inherit;
+            min-height: 54px;
+        }
+
+        &.body-only {
+            margin-top: -@vspacing;
+
+            .list-group-item-heading {
+                margin: 5px;
+            }
         }
     }
 }
 </style>
 <template>
-<div>
+<div class="discussion-thread">
     <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions"
         :class="{expanded: detailed}">
         <div class="format-label pull-left">

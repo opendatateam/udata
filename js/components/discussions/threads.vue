@@ -1,28 +1,15 @@
 <template>
-<div class="resources-list">
-    <div class="list-group">
-        <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
-        </discussion-thread>
-        <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
-            <div class="format-label pull-left">+</div>
-            <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
-        </a>
-        <div v-el:form id="discussion-create" v-show="formDisplayed" v-if="currentUser"
-            class="list-group-item list-group-form list-group-form-discussion animated">
-            <div class="format-label pull-left">
-                <avatar :user="currentUser"></avatar>
-            </div>
-            <span class="list-group-item-link">
-                <a href="#discussion-create"><span class="fa fa-link"></span></a>
-                <a @click="hideForm"><span class="fa fa-times"></span></a>
-            </span>
-            <h4 class="list-group-item-heading">
-                {{ _('Starting a new discussion thread') }}
-            </h4>
-            <p class="list-group-item-text">
-                {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
-            </p>
-            <threads-form v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></threads-form>
+<div class="list-group resources-list smaller discussion-threads">
+    <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
+    </discussion-thread>
+    <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
+        <div class="format-label pull-left">+</div>
+        <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
+    </a>
+    <div v-el:form id="discussion-create" v-show="formDisplayed" v-if="currentUser"
+        class="list-group-item list-group-form list-group-form-discussion animated">
+        <div class="format-label pull-left">
+            <avatar :user="currentUser"></avatar>
         </div>
     </div>
 </div>
@@ -145,3 +132,15 @@ export default {
     }
 }
 </script>
+
+<style lang="less">
+.discussion-threads {
+    .list-group-form {
+        height: inherit;
+        
+        form {
+            padding: 1em;
+        }
+    }
+}
+</style>

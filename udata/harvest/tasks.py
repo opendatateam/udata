@@ -18,12 +18,15 @@ def harvest(self, ident):
     source = HarvestSource.get(ident)
     Backend = backends.get(source.backend)
     backend = Backend(source)
-    if backend.perform_initialization():
+    items = backend.perform_initialization()
+    if items > 0:
         finalize = harvest_finalize.s(ident)
         items = [
             harvest_item.s(ident, item.remote_id) for item in backend.job.items
         ]
         chord(items)(finalize)
+    elif items == 0:
+        backend.finalize()
 
 
 @task(ignore_result=False)
