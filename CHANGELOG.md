@@ -10,6 +10,7 @@
 - Facets encoding fixes: ensure lazy strings are propery encoded. [#1388](https://github.com/opendatateam/udata/pull/1388)
 - Markdown content is now easily themable (namespaced into a `markdown` class) [#1389](https://github.com/opendatateam/udata/pull/1389)
 - Fix discussions and community resources alignment on datasets and reuses pages [#1390](https://github.com/opendatateam/udata/pull/1390)
+- Fix discussions style on default theme [#1393](https://github.com/opendatateam/udata/pull/1393)
 
 ## 1.2.9 (2018-01-17)
 
