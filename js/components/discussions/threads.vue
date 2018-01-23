@@ -11,6 +11,17 @@
         <div class="format-label pull-left">
             <avatar :user="currentUser"></avatar>
         </div>
+        <span class="list-group-item-link">
+            <a href="#discussion-create"><span class="fa fa-link"></span></a>
+            <a @click="hideForm"><span class="fa fa-times"></span></a>
+        </span>
+        <h4 class="list-group-item-heading">
+            {{ _('Starting a new discussion thread') }}
+        </h4>
+        <p class="list-group-item-text">
+            {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
+        </p>
+        <threads-form v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></threads-form>
     </div>
 </div>
 </template>
