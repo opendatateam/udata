@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.4 (2018-01-24)
 
 - Licenses: Update SHOM attachment + fix BAN URL [#249](https://github.com/etalab/udata-gouvfr/pull/249)
