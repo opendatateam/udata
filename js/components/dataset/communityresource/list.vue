@@ -3,7 +3,7 @@
     <datatable :title="title" icon="code-fork"
         boxclass="community-widget"
         :fields="fields"
-        :p="communities"
+        :p="communities" :loading="communities.loading"
         :empty="_('No community resources')">
     </datatable>
 </div>

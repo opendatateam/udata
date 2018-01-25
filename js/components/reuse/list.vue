@@ -2,7 +2,7 @@
 <div>
     <datatable :title="title" icon="retweet"
         boxclass="reuses-widget"
-        :fields="fields" :p="reuses"
+        :fields="fields" :p="reuses" :loading="reuses.loading"
         :downloads="downloads"
         :empty="_('No reuse')">
     </datatable>

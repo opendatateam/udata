@@ -3,7 +3,7 @@
     <datatable :title="title" icon="warning"
         boxclass="issues-widget"
         :fields="fields"
-        :p="issues"
+        :p="issues" :loading="issues.loading"
         :empty="_('No issues')">
     </datatable>
 </div>

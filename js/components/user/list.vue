@@ -3,7 +3,7 @@
     <datatable :title="title" icon="users"
         boxclass="users-widget"
         :fields="fields"
-        :p="users"
+        :p="users" :loading="users.loading"
         :empty="_('No user')">
     </datatable>
 </div>
