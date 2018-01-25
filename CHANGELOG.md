@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix organization admin pagination [#1372](https://github.com/opendatateam/udata/issues/1372)
 
 ## 1.2.10 (2018-01-24)
 
