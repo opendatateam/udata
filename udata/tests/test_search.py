@@ -809,6 +809,7 @@ class FacetTestCase(TestCase):
 
 class TestBoolFacet(FacetTestCase):
     def setUp(self):
+        super(TestBoolFacet, self).setUp()
         self.facet = search.BoolFacet(field='boolean')
 
     def test_get_values(self):
@@ -854,6 +855,7 @@ class TestBoolFacet(FacetTestCase):
 
 class TestTermsFacet(FacetTestCase):
     def setUp(self):
+        super(TestTermsFacet, self).setUp()
         self.facet = search.TermsFacet(field='tags')
 
     def test_get_values(self):
@@ -917,6 +919,7 @@ class TestTermsFacet(FacetTestCase):
 
 class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def setUp(self):
+        super(TestModelTermsFacet, self).setUp()
         self.facet = search.ModelTermsFacet(field='fakes', model=Fake)
 
     def test_labelize_id(self):
@@ -984,6 +987,7 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
 
 class TestModelTermsFacetWithStringId(FacetTestCase, DBTestMixin):
     def setUp(self):
+        super(TestModelTermsFacetWithStringId, self).setUp()
         self.facet = search.ModelTermsFacet(field='fakes',
                                             model=FakeWithStringId)
 
@@ -1046,6 +1050,7 @@ class TestModelTermsFacetWithStringId(FacetTestCase, DBTestMixin):
 
 class TestRangeFacet(FacetTestCase):
     def setUp(self):
+        super(TestRangeFacet, self).setUp()
         self.ranges = [
             ('first', (None, 1)),
             ('second', (1, 5)),
@@ -1138,6 +1143,7 @@ class TestRangeFacet(FacetTestCase):
 
 class TestTemporalCoverageFacet(FacetTestCase):
     def setUp(self):
+        super(TestTemporalCoverageFacet, self).setUp()
         self.facet = search.TemporalCoverageFacet(field='some_field')
 
     def test_get_aggregation(self):

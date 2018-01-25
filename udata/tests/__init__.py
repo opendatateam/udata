@@ -5,7 +5,10 @@ import json
 import os
 import shutil
 import tempfile
+import unittest
 import warnings
+
+import pytest
 
 from datetime import timedelta
 
@@ -16,7 +19,6 @@ from StringIO import StringIO
 from urlparse import urljoin, urlparse
 
 from flask import request, url_for
-from flask_testing import TestCase as BaseTestCase
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
@@ -26,12 +28,29 @@ from udata.mail import mail_sent
 from udata.models import db
 from udata.search import es
 
+from werkzeug import cached_property
 from werkzeug.urls import url_encode
 
 from udata.core.user.factories import UserFactory
 
 
-class TestCase(BaseTestCase):
+class JsonResponseMixin(object):
+    """
+    Mixin with testing helper methods
+    """
+    @cached_property
+    def json(self):
+        return json.loads(self.data)
+
+
+def _make_test_response(response_class):
+    class TestResponse(response_class, JsonResponseMixin):
+        pass
+
+    return TestResponse
+
+
+class TestCase(unittest.TestCase):
     settings = settings.Testing
 
     def setUp(self):
@@ -41,6 +60,10 @@ class TestCase(BaseTestCase):
     def tearsDown(self):
         # Ensure compatibility with multiple inheritance
         super(TestCase, self).tearsDown()
+
+    @pytest.fixture(name='app', autouse=True)
+    def app_fixture(self):
+        return self.create_app()
 
     def create_app(self):
         '''Create an application a test application.
@@ -55,56 +78,22 @@ class TestCase(BaseTestCase):
         - CSRF is disabled
         - automatic indexing is disabled
         '''
-        app = create_app(settings.Defaults, override=self.settings)
+        # Compatibility with legacy flask testing
+        app = self.app = create_app(settings.Defaults, override=self.settings)
         return app
-
-    def login(self, user=None, client=None):
-        self.user = user or UserFactory()
-        with (client or self.client).session_transaction() as session:
-            session['user_id'] = str(self.user.id)
-            session['_fresh'] = True
-        return self.user
 
     def data(self, filename):
         return os.path.join(os.path.dirname(__file__), 'data', filename)
 
-    def assertStatus(self, response, status_code, message=None):
-        """
-        Helper method to check matching response status.
-
-        Extracted from parent class to improve output in case of JSON.
-
-        :param response: Flask response
-        :param status_code: response status code (e.g. 200)
-        :param message: Message to display on test failure
-        """
-
-        message = message or 'HTTP Status %s expected but got %s' \
-                             % (status_code, response.status_code)
-        if response.mimetype == 'application/json':
-            try:
-                second_line = 'Response content is {0}'.format(response.json)
-                message = '\n'.join((message, second_line))
-            except Exception:
-                pass
-        self.assertEqual(response.status_code, status_code, message)
-
-    def assert201(self, response):
-        self.assertStatus(response, 201)
-
-    def assert204(self, response):
-        self.assertStatus(response, 204)
-
-    def assert410(self, response):
-        self.assertStatus(response, 410)
-
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
         """Lax date comparison, avoid comparing milliseconds and seconds."""
+        __tracebackhide__ = True
         delta = (datetime1 - datetime2)
         self.assertTrue(
             timedelta(seconds=-limit) <= delta <= timedelta(seconds=limit))
 
     def assertStartswith(self, haystack, needle):
+        __tracebackhide__ = True
         self.assertEqual(
             haystack.startswith(needle), True,
             '{haystack} does not start with {needle}'.format(
@@ -112,12 +101,14 @@ class TestCase(BaseTestCase):
 
     def assertJsonEqual(self, first, second):
         '''Ensure two dict produce the same JSON'''
+        __tracebackhide__ = True
         json1 = json.loads(json.dumps(first))
         json2 = json.loads(json.dumps(second))
         self.assertEqual(json1, json2)
 
     @contextmanager
     def assert_emit(self, *signals):
+        __tracebackhide__ = True
         specs = []
 
         def handler(sender, **kwargs):
@@ -140,6 +131,7 @@ class TestCase(BaseTestCase):
 
     @contextmanager
     def assert_not_emit(self, *signals):
+        __tracebackhide__ = True
         specs = []
 
         def handler(sender, **kwargs):
@@ -191,6 +183,16 @@ class TestCase(BaseTestCase):
 class WebTestMixin(object):
     user = None
 
+    def create_app(self):
+        '''
+        Inject test client for compatibility with Flask-Testing.
+        '''
+        # Compatibility with legacy flask testing
+        app = super(WebTestMixin, self).create_app()
+        app.response_class = _make_test_response(app.response_class)
+        self.client = app.test_client()
+        return app
+
     def _build_url(self, url, kwargs):
         if 'qs' not in kwargs:
             return url
@@ -217,25 +219,93 @@ class WebTestMixin(object):
         url = self._build_url(url, kwargs)
         return (client or self.client).delete(url, data=data, **kwargs)
 
-    def assert_flashes(self, expected_message, expected_category='message'):
-        with self.client.session_transaction() as session:
-            try:
-                category, message = session['_flashes'][0]
-            except KeyError:
-                raise AssertionError('nothing flashed')
-            self.assertIn(expected_message, message)
-            self.assertEqual(expected_category, category)
+    def assertRedirects(self, response, location, message=None):
+        """
+        Checks if response is an HTTP redirect to the
+        given location.
+        :param response: Flask response
+        :param location: relative URL path to SERVER_NAME or an absolute URL
+        """
+        __tracebackhide__ = True
+        parts = urlparse(location)
 
-    def assert_not_flash(self):
-        with self.client.session_transaction() as session:
-            flashes = session.get('_flashes', [])
-            self.assertNotIn(
-                '_flashes', session,
-                'There is {0} unexpected flashed message(s): {1}'.format(
-                    len(flashes),
-                    ', '.join('"{0} ({1})"'.format(msg, cat)
-                              for cat, msg in flashes)
-                ))
+        if parts.netloc:
+            expected_location = location
+        else:
+            server_name = self.app.config.get('SERVER_NAME') or 'localhost'
+            expected_location = urljoin("http://%s" % server_name, location)
+
+        valid_status_codes = (301, 302, 303, 305, 307)
+        valid_status_code_str = ', '.join(str(code) for code in valid_status_codes)
+        not_redirect = "HTTP Status %s expected but got %d" % (valid_status_code_str, response.status_code)
+        self.assertTrue(response.status_code in valid_status_codes,
+                        message or not_redirect)
+        self.assertEqual(response.location, expected_location, message)
+
+    def assertStatus(self, response, status_code, message=None):
+        """
+        Helper method to check matching response status.
+
+        Extracted from parent class to improve output in case of JSON.
+
+        :param response: Flask response
+        :param status_code: response status code (e.g. 200)
+        :param message: Message to display on test failure
+        """
+        __tracebackhide__ = True
+
+        message = message or 'HTTP Status %s expected but got %s' \
+                             % (status_code, response.status_code)
+        if response.mimetype == 'application/json':
+            try:
+                second_line = 'Response content is {0}'.format(response.json)
+                message = '\n'.join((message, second_line))
+            except Exception:
+                pass
+        assert response.status_code == status_code, message
+
+    def assert200(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 200)
+
+    def assert201(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 201)
+
+    def assert204(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 204)
+
+    def assert400(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 400)
+
+    def assert401(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 401)
+
+    def assert403(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 403)
+
+    def assert404(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 404)
+
+    def assert410(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 410)
+
+    def assert500(self, response):
+        __tracebackhide__ = True
+        self.assertStatus(response, 500)
+
+    def login(self, user=None, client=None):
+        self.user = user or UserFactory()
+        with (client or self.client).session_transaction() as session:
+            session['user_id'] = str(self.user.id)
+            session['_fresh'] = True
+        return self.user
 
 
 class DBTestMixin(object):

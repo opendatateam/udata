@@ -19,6 +19,7 @@ class FakeActivity(Activity):
 
 class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
     def setUp(self):
+        super(ActivityTest, self).setUp()
         self.fake = FakeModel.objects.create(name='fake')
         self.login()
 

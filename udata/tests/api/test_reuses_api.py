@@ -325,6 +325,7 @@ class ReuseBadgeAPITest(APITestCase):
         cls.factory = badge_factory(Reuse)
 
     def setUp(self):
+        super(ReuseBadgeAPITest, self).setUp()
         self.login(AdminFactory())
         self.reuse = ReuseFactory()
 

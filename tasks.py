@@ -56,21 +56,27 @@ def update(ctx, migrate=False):
 
 
 @task
-def test(ctx, fast=False):
+def test(ctx, fast=False, report=False):
     '''Run tests suite'''
     header('Run tests suite')
-    cmd = 'nosetests --rednose --force-color udata'
+    cmd = ['pytest udata']
     if fast:
-        cmd = ' '.join([cmd, '--stop'])
-    lrun(cmd)
+        cmd.append('-x')
+    if report:
+        cmd.append('--junitxml=reports/python/tests.xml')
+    with ctx.cd(ROOT):
+        ctx.run(' '.join(cmd), pty=True)
 
 
 @task
-def cover(ctx):
+def cover(ctx, html=False):
     '''Run tests suite with coverage'''
     header('Run tests suite with coverage')
-    lrun('nosetests --rednose --force-color \
-        --with-coverage --cover-html --cover-package=udata')
+    cmd = 'pytest --cov udata --cov-report term'
+    if html:
+        cmd = ' '.join((cmd, '--cov-report html:reports/python/cover'))
+    with ctx.cd(ROOT):
+        ctx.run(cmd, pty=True)
 
 
 @task
