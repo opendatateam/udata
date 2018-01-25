@@ -2,7 +2,7 @@
 <div>
     <datatable :title="title" icon="cubes"
         boxclass="datasets-widget"
-        :fields="fields" :p="datasets"
+        :fields="fields" :p="datasets" :loading="datasets.loading"
         :downloads="downloads"
         :empty="_('No dataset')">
     </datatable>

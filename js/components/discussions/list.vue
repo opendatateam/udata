@@ -3,7 +3,7 @@
     <datatable :title="title" icon="comment"
         boxclass="discussions-widget"
         :fields="fields"
-        :p="discussions"
+        :p="discussions" :loading="discussions.loading"
         :empty="_('No discussion')">
     </datatable>
 </div>
