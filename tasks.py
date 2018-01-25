@@ -56,10 +56,14 @@ def update(ctx, migrate=False):
 
 
 @task
-def test(ctx, fast=False, report=False):
+def test(ctx, fast=False, report=False, verbose=False, ci=False):
     '''Run tests suite'''
     header('Run tests suite')
     cmd = ['pytest udata']
+    if ci:
+        cmd.append('-p no:sugar --color=yes')
+    if verbose:
+        cmd.append('-v')
     if fast:
         cmd.append('-x')
     if report:

@@ -43,7 +43,7 @@ jobs:
           command: |
             mkdir -p reports/python
             source venv/bin/activate
-            inv test --report
+            inv test --report --ci
       - store_test_results:
           path: reports/python
       - store_artifacts:
