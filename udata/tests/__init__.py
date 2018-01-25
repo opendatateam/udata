@@ -5,7 +5,6 @@ import json
 import os
 import shutil
 import tempfile
-import sys
 import warnings
 
 from datetime import timedelta
@@ -36,7 +35,7 @@ class TestCase(BaseTestCase):
     settings = settings.Testing
 
     def setUp(self):
-        reload(sys).setdefaultencoding('ascii')
+        # Ensure compatibility with multiple inheritance
         super(TestCase, self).setUp()
 
     def tearsDown(self):
@@ -292,6 +291,25 @@ class FSTestMixin(object):
         '''Clear the temporary file system'''
         super(FSTestMixin, self).tearDown()
         shutil.rmtree(self.fs_root)
+
+
+class CliTestMixin(object):
+    def cli(self, *args):
+        from click.testing import CliRunner
+        from udata.commands import cli
+
+        if len(args) == 1 and ' ' in args[0]:
+            args = args[0].split()
+
+        runner = CliRunner()
+        with mock.patch.object(cli, 'create_app', return_value=self.app):
+            result = runner.invoke(cli, args, catch_exceptions=False)
+
+        self.assertEqual(result.exit_code, 0,
+                         'The command failed with exit code {0.exit_code}'
+                         ' and the following output:\n{0.output}'
+                         .format(result))
+        return result
 
 
 def mock_task(name, **kwargs):

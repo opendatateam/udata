@@ -1,91 +1,93 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import click
 import logging
 
 from datetime import datetime
-from flask_script import prompt, prompt_pass
+from flask import current_app
 from flask_security.forms import RegisterForm
 from flask_security.utils import encrypt_password
 from werkzeug.datastructures import MultiDict
 
 from udata.models import User, datastore
 
-from udata.commands import submanager
+from udata.commands import cli, success, exit_with_error
 
 log = logging.getLogger(__name__)
 
-m = submanager(
-    'user',
-    help='User related operations',
-    description='Handle all user related operations and maintenance'
-)
+
+@cli.group('user')
+def grp():
+    '''User related operations'''
+    pass
 
 
-@m.command
+@grp.command()
 def create():
     '''Create a new user'''
     data = {
-        'first_name': prompt('First name'),
-        'last_name': prompt('Last name'),
-        'email': prompt('Email'),
-        'password': prompt_pass('Password'),
-        'password_confirm': prompt_pass('Confirm Password'),
+        'first_name': click.prompt('First name'),
+        'last_name': click.prompt('Last name'),
+        'email': click.prompt('Email'),
+        'password': click.prompt('Password', hide_input=True),
+        'password_confirm': click.prompt('Confirm Password', hide_input=True),
     }
-    form = RegisterForm(MultiDict(data), csrf_enabled=False)
+    # Until https://github.com/mattupstate/flask-security/issues/672 is fixed
+    with current_app.test_request_context():
+        form = RegisterForm(MultiDict(data), meta={'csrf': False})
     if form.validate():
         data['password'] = encrypt_password(data['password'])
         del data['password_confirm']
         data['confirmed_at'] = datetime.utcnow()
         user = datastore.create_user(**data)
-        print '\nUser created successfully'
-        print 'User(id=%s email=%s)' % (user.id, user.email)
+        success('User(id={u.id} email={u.email}) created'.format(u=user))
         return user
-    print '\nError creating user:'
-    for errors in form.errors.values():
-        print '\n'.join(errors)
+    errors = '\n'.join('\n'.join(e) for e in form.errors.values())
+    exit_with_error('Error creating user', errors)
 
 
-@m.command
+@grp.command()
 def activate():
     '''Activate an existing user (validate their email confirmation)'''
-    email = prompt('Email')
+    email = click.prompt('Email')
     user = User.objects(email=email).first()
     if not user:
-        print 'Invalid user'
-        return
+        exit_with_error('Invalid user')
     if user.confirmed_at is not None:
-        print 'User email address already confirmed'
+        exit_with_error('User email address already confirmed')
         return
     user.confirmed_at = datetime.utcnow()
     user.save()
-    print 'User activated successfully'
+    success('User activated successfully')
 
 
-@m.command
+@grp.command()
 def delete():
     '''Delete an existing user'''
-    email = prompt('Email')
+    email = click.prompt('Email')
     user = User.objects(email=email).first()
     if not user:
-        print 'Invalid user'
-        return
+        exit_with_error('Invalid user')
     user.delete()
-    print 'User deleted successfully'
+    success('User deleted successfully')
 
 
-@m.command
+@grp.command()
+@click.argument('email')
 def set_admin(email):
     '''Set an user as administrator'''
     user = datastore.get_user(email)
-    print 'Adding admin role to user %s (%s)' % (user.fullname, user.email)
+    log.info('Adding admin role to user %s (%s)', user.fullname, user.email)
     role = datastore.find_or_create_role('admin')
     datastore.add_role_to_user(user, role)
-    print 'User %s (%s) is now administrator' % (user.fullname, user.email)
+    success('User %s (%s) is now administrator' % (user.fullname, user.email))
 
 
-@m.command
+@grp.command()
+@click.argument('email')
 def password(email):
     user = datastore.get_user(email)
-    user.password = encrypt_password(prompt_pass('Enter new password'))
+    password = click.prompt('Enter new password', hide_input=True)
+    user.password = encrypt_password(password)
     user.save()

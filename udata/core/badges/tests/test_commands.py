@@ -4,16 +4,19 @@ from __future__ import unicode_literals
 from tempfile import NamedTemporaryFile
 
 from udata.models import Badge, CERTIFIED, PUBLIC_SERVICE
-from udata.tests import TestCase, DBTestMixin
+from udata.tests import TestCase, DBTestMixin, CliTestMixin
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.badges.commands import toggle
 
 
-class BadgeCommandTest(DBTestMixin, TestCase):
+class BadgeCommandTest(CliTestMixin, DBTestMixin, TestCase):
+    def toggle(self, path_or_id, kind):
+        return self.cli('badges', 'toggle', path_or_id, kind)
 
     def test_toggle_badge_on(self):
         org = OrganizationFactory()
-        toggle(str(org.id), PUBLIC_SERVICE)
+
+        self.toggle(str(org.id), PUBLIC_SERVICE)
+
         org.reload()
         self.assertEqual(org.badges[0].kind, PUBLIC_SERVICE)
 
@@ -21,7 +24,9 @@ class BadgeCommandTest(DBTestMixin, TestCase):
         ps_badge = Badge(kind=PUBLIC_SERVICE)
         certified_badge = Badge(kind=CERTIFIED)
         org = OrganizationFactory(badges=[ps_badge, certified_badge])
-        toggle(str(org.id), PUBLIC_SERVICE)
+
+        self.toggle(str(org.id), PUBLIC_SERVICE)
+
         org.reload()
         self.assertEqual(org.badges[0].kind, CERTIFIED)
 
@@ -32,7 +37,7 @@ class BadgeCommandTest(DBTestMixin, TestCase):
             temp.write('\n'.join((str(org.id) for org in orgs)))
             temp.flush()
 
-            toggle(temp.name, PUBLIC_SERVICE)
+            self.toggle(temp.name, PUBLIC_SERVICE)
 
         for org in orgs:
             org.reload()

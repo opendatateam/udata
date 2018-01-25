@@ -100,7 +100,7 @@ You need to initialize some data before being able to use uData:
 $ udata init
 
 # Optionnaly fetch and load some licenses from another udata instance
-$ udata licenses --source=https://www.data.gouv.fr/api/1/datasets/licenses
+$ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
 
 # Compile translations
 $ inv i18nc
