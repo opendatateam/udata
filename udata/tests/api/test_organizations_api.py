@@ -543,7 +543,7 @@ class OrganizationDatasetsAPITest(APITestCase):
         response = self.get(url_for('api.org_datasets', org=org))
 
         self.assert200(response)
-        self.assertEqual(len(response.json), len(datasets))
+        self.assertEqual(len(response.json['data']), len(datasets))
 
     def test_list_org_datasets_private(self):
         '''Should include private datasets when member'''
@@ -556,7 +556,7 @@ class OrganizationDatasetsAPITest(APITestCase):
         response = self.get(url_for('api.org_datasets', org=org))
 
         self.assert200(response)
-        self.assertEqual(len(response.json), len(datasets))
+        self.assertEqual(len(response.json['data']), len(datasets))
 
     def test_list_org_datasets_hide_private(self):
         '''Should not include private datasets when not member'''
@@ -567,7 +567,7 @@ class OrganizationDatasetsAPITest(APITestCase):
         response = self.get(url_for('api.org_datasets', org=org))
 
         self.assert200(response)
-        self.assertEqual(len(response.json), len(datasets))
+        self.assertEqual(len(response.json['data']), len(datasets))
 
     def test_list_org_datasets_with_size(self):
         '''Should list organization datasets'''
@@ -575,10 +575,10 @@ class OrganizationDatasetsAPITest(APITestCase):
         DatasetFactory.create_batch(3, organization=org)
 
         response = self.get(
-            url_for('api.org_datasets', org=org), qs={'size': 2})
+            url_for('api.org_datasets', org=org), qs={'page_size': 2})
 
         self.assert200(response)
-        self.assertEqual(len(response.json), 2)
+        self.assertEqual(len(response.json['data']), 2)
 
 
 class OrganizationReusesAPITest(APITestCase):

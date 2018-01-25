@@ -8,6 +8,7 @@ from dateutil.parser import parse
 from flask import request, url_for
 from flask_restplus.fields import *  # noqa
 
+from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ class NextPageUrl(String):
     def output(self, key, obj):
         if not getattr(obj, 'has_next', None):
             return None
-        args = request.args.copy()
+        args = multi_to_dict(request.args)
         args.update(request.view_args)
         args['page'] = obj.page + 1
         return url_for(request.endpoint, _external=True, **args)
@@ -52,7 +53,7 @@ class PreviousPageUrl(String):
     def output(self, key, obj):
         if not getattr(obj, 'has_prev', None):
             return None
-        args = request.args.copy()
+        args = multi_to_dict(request.args)
         args.update(request.view_args)
         args['page'] = obj.page - 1
         return url_for(request.endpoint, _external=True, **args)
