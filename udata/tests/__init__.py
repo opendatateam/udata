@@ -102,20 +102,6 @@ class TestCase(unittest.TestCase):
 
         mail_sent.disconnect(on_mail_sent)
 
-    @contextmanager
-    def assert_warn(self, warning_cls):
-        with warnings.catch_warnings(record=True) as w:
-            # Cause all warnings to always be triggered.
-            warnings.simplefilter('always', warning_cls)
-            yield
-            warnings.simplefilter('default', warning_cls)
-            assert len(w), 'No warning has been raised'
-            warning = w[-1]
-            msg = '{0} raised and is not a sublcass of {1}'.format(
-                warning.category.__name__, warning_cls.__name__
-            )
-            assert issubclass(warning.category, DeprecationWarning), msg
-
 
 class WebTestMixin(object):
     user = None

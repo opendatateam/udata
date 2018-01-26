@@ -96,21 +96,6 @@ def capture_mails():
     mail_sent.disconnect(on_mail_sent)
 
 
-@contextmanager
-def assert_warn(warning_cls):
-    with warnings.catch_warnings(record=True) as w:
-        # Cause all warnings to always be triggered.
-        warnings.simplefilter('always', warning_cls)
-        yield
-        warnings.simplefilter('default', warning_cls)
-    assert len(w), 'No warning has been raised'
-    warning = w[-1]
-    msg = '{0} raised and is not a sublcass of {1}'.format(
-        warning.category.__name__, warning_cls.__name__
-    )
-    assert issubclass(warning.category, DeprecationWarning), msg
-
-
 REDIRECT_CODES = (301, 302, 303, 305, 307)
 REDIRECT_MSG = 'HTTP Status {} expected but got {{}}'.format(
     ', '.join(str(code) for code in REDIRECT_CODES)
