@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import unittest
-import warnings
 
 import mock
 import pytest
@@ -10,7 +9,6 @@ import pytest
 from contextlib import contextmanager
 
 from udata import settings
-from udata.mail import mail_sent
 from udata.search import es
 
 from . import helpers
@@ -88,19 +86,6 @@ class TestCase(unittest.TestCase):
                 mock_handler.called,
                 'Signal "{0}" should NOT have been emitted'.format(signal_name)
             )
-
-    @contextmanager
-    def capture_mails(self):
-        mails = []
-
-        def on_mail_sent(mail):
-            mails.append(mail)
-
-        mail_sent.connect(on_mail_sent)
-
-        yield mails
-
-        mail_sent.disconnect(on_mail_sent)
 
 
 class WebTestMixin(object):

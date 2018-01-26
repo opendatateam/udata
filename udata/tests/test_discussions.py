@@ -27,7 +27,7 @@ from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .helpers import assert_starts_with
+from .helpers import assert_starts_with, capture_mails
 
 
 class DiscussionsTest(APITestCase):
@@ -521,7 +521,7 @@ class DiscussionsMailsTest(FrontTestCase):
             discussion=[message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_discussion(discussion)
 
         # Should have sent one mail to the owner
@@ -541,7 +541,7 @@ class DiscussionsMailsTest(FrontTestCase):
             discussion=[message, new_message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_discussion_comment(discussion, message=new_message)
 
         # Should have sent one mail to the owner and the other participants
@@ -566,7 +566,7 @@ class DiscussionsMailsTest(FrontTestCase):
             discussion=[message, second_message, closing_message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_discussion_closed(discussion, message=closing_message)
 
         # Should have sent one mail to each participant

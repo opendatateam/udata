@@ -27,7 +27,7 @@ from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .helpers import assert_starts_with
+from .helpers import assert_starts_with, capture_mails
 
 
 class IssuesTest(APITestCase):
@@ -582,7 +582,7 @@ class IssuesMailsTest(FrontTestCase):
             discussion=[message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_issue(issue)
 
         # Should have sent one mail to the owner
@@ -603,7 +603,7 @@ class IssuesMailsTest(FrontTestCase):
         )
 
         # issue = IssueFactory()
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_issue_comment(issue, message=new_message)
 
         # Should have sent one mail to the owner and the other participants
@@ -629,7 +629,7 @@ class IssuesMailsTest(FrontTestCase):
         )
 
         # issue = IssueFactory()
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_issue_closed(issue, message=closing_message)
 
         # Should have sent one mail to each participant

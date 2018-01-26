@@ -20,6 +20,8 @@ from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 
+from udata.tests.helpers import capture_mails
+
 import udata.core.badges.tasks  # noqa
 
 
@@ -715,7 +717,7 @@ class OrganizationBadgeAPITest(APITestCase):
         data = self.factory.as_dict()
         data['kind'] = CERTIFIED
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             self.post(
                 url_for('api.organization_badges', org=org),
                 data)
@@ -732,7 +734,7 @@ class OrganizationBadgeAPITest(APITestCase):
         data = self.factory.as_dict()
         data['kind'] = PUBLIC_SERVICE
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             self.post(
                 url_for('api.organization_badges', org=org),
                 data)

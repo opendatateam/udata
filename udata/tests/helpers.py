@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import json
 import mock
 import os
-import warnings
 
 from udata.mail import mail_sent
 
