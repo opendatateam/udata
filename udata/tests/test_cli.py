@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.tests import TestCase, CliTestMixin
+
+def test_cli_help(cli):
+    '''Should display help without errors'''
+    cli()
+    cli('-?')
+    cli('-h')
+    cli('--help')
 
 
-class CliTest(CliTestMixin, TestCase):
-    def test_help(self):
-        '''Should display help without errors'''
-        self.cli()
-        self.cli('-?')
-        self.cli('-h')
-        self.cli('--help')
+def test_cli_log_and_printing(cli):
+    '''Should properly log and print'''
+    cli('test log')
 
-    def test_log_and_printing(self):
-        '''Should properly log and print'''
-        self.cli('test log')
 
-    def test_version(self):
-        '''Should display version without errors'''
-        self.cli('--version')
+def test_cli_version(cli):
+    '''Should display version without errors'''
+    cli('--version')

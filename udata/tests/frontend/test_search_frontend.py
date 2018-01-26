@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import pytest
-
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
@@ -12,7 +10,6 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.tests.helpers import assert200
 
 
-@pytest.mark.front
 class SearchFrontTest:
     modules = ['core.dataset', 'core.reuse', 'core.organization',
                'admin', 'core.site', 'search']

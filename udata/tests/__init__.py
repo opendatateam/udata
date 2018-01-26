@@ -231,25 +231,6 @@ class FSTestMixin(object):
         shutil.rmtree(self.fs_root)
 
 
-class CliTestMixin(object):
-    def cli(self, *args):
-        from click.testing import CliRunner
-        from udata.commands import cli
-
-        if len(args) == 1 and ' ' in args[0]:
-            args = args[0].split()
-
-        runner = CliRunner()
-        with mock.patch.object(cli, 'create_app', return_value=self.app):
-            result = runner.invoke(cli, args, catch_exceptions=False)
-
-        self.assertEqual(result.exit_code, 0,
-                         'The command failed with exit code {0.exit_code}'
-                         ' and the following output:\n{0.output}'
-                         .format(result))
-        return result
-
-
 def mock_task(name, **kwargs):
     def wrapper(func):
         return mock.patch(name, **kwargs)(func)

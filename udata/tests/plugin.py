@@ -147,7 +147,7 @@ def api(client):
 
 
 @pytest.fixture
-def autoindex(app):
+def autoindex(app, clean_db):
     app.config['AUTO_INDEX'] = True
     es.initialize()
     es.cluster.health(wait_for_status='yellow', request_timeout=10)
@@ -161,3 +161,20 @@ def autoindex(app):
 
     if es.indices.exists(index=es.index_name):
         es.indices.delete(index=es.index_name)
+
+
+@pytest.fixture(name='cli')
+def cli_fixture(mocker, app):
+
+    def mock_runner(*args):
+        from click.testing import CliRunner
+        from udata.commands import cli
+
+        if len(args) == 1 and ' ' in args[0]:
+            args = args[0].split()
+        runner = CliRunner()
+        # Avoid instanciating another app and reuse the app fixture
+        with mocker.patch.object(cli, 'create_app', return_value=app):
+            return runner.invoke(cli, args, catch_exceptions=False)
+
+    return mock_runner
