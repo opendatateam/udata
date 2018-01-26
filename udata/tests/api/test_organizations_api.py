@@ -20,7 +20,7 @@ from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 
-from udata.tests.helpers import capture_mails
+from udata.tests.helpers import capture_mails, assert_emit, assert_not_emit
 
 import udata.core.badges.tasks  # noqa
 
@@ -702,10 +702,9 @@ class OrganizationBadgeAPITest(APITestCase):
 
     def test_create(self):
         data = self.factory.as_dict()
-        with self.api_user(), self.assert_emit(on_badge_added):
-                response = self.post(
-                    url_for('api.organization_badges', org=self.organization),
-                    data)
+        url = url_for('api.organization_badges', org=self.organization)
+        with self.api_user(), assert_emit(on_badge_added):
+            response = self.post(url, data)
         self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
@@ -750,15 +749,12 @@ class OrganizationBadgeAPITest(APITestCase):
 
     def test_create_same(self):
         data = self.factory.as_dict()
+        url = url_for('api.organization_badges', org=self.organization)
         with self.api_user():
-            with self.assert_emit(on_badge_added):
-                self.post(
-                    url_for('api.organization_badges', org=self.organization),
-                    data)
-            with self.assert_not_emit(on_badge_added):
-                response = self.post(
-                    url_for('api.organization_badges', org=self.organization),
-                    data)
+            with assert_emit(on_badge_added):
+                self.post(url, data)
+            with assert_not_emit(on_badge_added):
+                response = self.post(url, data)
         self.assertStatus(response, 200)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
@@ -784,11 +780,12 @@ class OrganizationBadgeAPITest(APITestCase):
         badge = self.factory()
         self.organization.badges.append(badge)
         self.organization.save()
+        url = url_for('api.organization_badge',
+                      org=self.organization,
+                      badge_kind=str(badge.kind))
         with self.api_user():
-            with self.assert_emit(on_badge_removed):
-                response = self.delete(
-                    url_for('api.organization_badge', org=self.organization,
-                            badge_kind=str(badge.kind)))
+            with assert_emit(on_badge_removed):
+                response = self.delete(url)
         self.assertStatus(response, 204)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 0)

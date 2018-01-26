@@ -38,7 +38,7 @@ def assert_json_equal(first, second):
 
 
 @contextmanager
-def assert_emit(*signals):
+def mock_signals(callback, *signals):
     __tracebackhide__ = True
     specs = []
 
@@ -55,30 +55,31 @@ def assert_emit(*signals):
     for signal, mock_handler in specs:
         signal.disconnect(mock_handler)
         signal_name = getattr(signal, 'name', str(signal))
-        msg = 'Signal "{0}" should have been emitted'.format(signal_name)
-        assert mock_handler.called, msg
+        callback(signal_name, mock_handler)
+
+
+@contextmanager
+def assert_emit(*signals):
+    __tracebackhide__ = True
+    msg = 'Signal "{0}" should have been emitted'
+
+    def callback(name, handler):
+        assert handler.called, msg.format(name)
+
+    with mock_signals(callback, *signals):
+        yield
 
 
 @contextmanager
 def assert_not_emit(*signals):
     __tracebackhide__ = True
-    specs = []
+    msg = 'Signal "{0}" should NOT have been emitted'
 
-    def handler(sender, **kwargs):
-        pass
+    def callback(name, handler):
+        assert not handler.called, msg.format(name)
 
-    for signal in signals:
-        m = mock.Mock(spec=handler)
-        signal.connect(m, weak=False)
-        specs.append((signal, m))
-
-    yield
-
-    for signal, mock_handler in specs:
-        signal.disconnect(mock_handler)
-        signal_name = getattr(signal, 'name', str(signal))
-        msg = 'Signal "{0}" should NOT have been emitted'.format(signal_name)
-        assert mock_handler.called, msg
+    with mock_signals(callback, *signals):
+        yield
 
 
 @contextmanager

@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import unittest
 
-import mock
 import pytest
 
 from contextlib import contextmanager
@@ -40,52 +39,6 @@ class TestCase(unittest.TestCase):
         """Lax date comparison, avoid comparing milliseconds and seconds."""
         __tracebackhide__ = True
         helpers.assert_equal_dates(datetime1, datetime2, limit=1)
-
-    @contextmanager
-    def assert_emit(self, *signals):
-        __tracebackhide__ = True
-        specs = []
-
-        def handler(sender, **kwargs):
-            pass
-
-        for signal in signals:
-            m = mock.Mock(spec=handler)
-            signal.connect(m, weak=False)
-            specs.append((signal, m))
-
-        yield
-
-        for signal, mock_handler in specs:
-            signal.disconnect(mock_handler)
-            signal_name = getattr(signal, 'name', str(signal))
-            self.assertTrue(
-                mock_handler.called,
-                'Signal "{0}" should have been emitted'.format(signal_name)
-            )
-
-    @contextmanager
-    def assert_not_emit(self, *signals):
-        __tracebackhide__ = True
-        specs = []
-
-        def handler(sender, **kwargs):
-            pass
-
-        for signal in signals:
-            m = mock.Mock(spec=handler)
-            signal.connect(m, weak=False)
-            specs.append((signal, m))
-
-        yield
-
-        for signal, mock_handler in specs:
-            signal.disconnect(mock_handler)
-            signal_name = getattr(signal, 'name', str(signal))
-            self.assertFalse(
-                mock_handler.called,
-                'Signal "{0}" should NOT have been emitted'.format(signal_name)
-            )
 
 
 class WebTestMixin(object):

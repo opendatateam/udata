@@ -27,7 +27,7 @@ from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .helpers import assert_starts_with, capture_mails
+from .helpers import assert_starts_with, assert_emit, capture_mails
 
 
 class IssuesTest(APITestCase):
@@ -39,7 +39,7 @@ class IssuesTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
 
         url = url_for('api.issues', **{'for': dataset.id})
-        with self.assert_emit(on_new_issue):
+        with assert_emit(on_new_issue):
             response = self.post(url, {
                 'title': 'test title',
                 'comment': 'bla bla',
@@ -247,7 +247,7 @@ class IssuesTest(APITestCase):
         on_new_issue.send(issue)  # Updating metrics.
 
         poster = self.login()
-        with self.assert_emit(on_new_issue_comment):
+        with assert_emit(on_new_issue_comment):
             response = self.post(url_for('api.issue', id=issue.id), {
                 'comment': 'new bla bla'
             })
@@ -285,7 +285,7 @@ class IssuesTest(APITestCase):
         )
         on_new_issue.send(issue)  # Updating metrics.
 
-        with self.assert_emit(on_issue_closed):
+        with assert_emit(on_issue_closed):
             response = self.post(url_for('api.issue', id=issue.id), {
                 'comment': 'close bla bla',
                 'close': True
