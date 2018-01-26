@@ -96,7 +96,10 @@ export default {
         boxclass: String,
         tint: String,
         empty: String,
-        loading: Boolean,
+        loading: {
+            type: Boolean,
+            default: undefined
+        },
         track: {
             type: null,
             default: 'id'
