@@ -44,7 +44,6 @@ class OEmbedsDatasetAPITest(APITestCase):
     settings = OEmbedSettings
 
     def setUp(self):
-        super(OEmbedsDatasetAPITest, self).setUp()
         self.territory_datasets_backup = {
             k: copy.deepcopy(v) for k, v in TERRITORY_DATASETS.items()
         }

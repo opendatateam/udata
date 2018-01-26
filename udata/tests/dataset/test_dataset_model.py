@@ -247,7 +247,6 @@ class ResourceModelTest(TestCase, DBTestMixin):
 
 class LicenseModelTest(DBTestMixin, TestCase):
     def setUp(self):
-        super(LicenseModelTest, self).setUp()
         # Feed the DB with random data to ensure true matching
         LicenseFactory.create_batch(3)
 

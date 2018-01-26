@@ -16,14 +16,6 @@ from . import helpers
 class TestCase(unittest.TestCase):
     settings = settings.Testing
 
-    def setUp(self):
-        # Ensure compatibility with multiple inheritance
-        super(TestCase, self).setUp()
-
-    def tearsDown(self):
-        # Ensure compatibility with multiple inheritance
-        super(TestCase, self).tearsDown()
-
     @pytest.fixture(autouse=True)
     def inject_app(self, app):
         self.app = app
@@ -115,6 +107,5 @@ class SearchTestMixin(DBTestMixin):
 
     def tearDown(self):
         '''Drop indices if needed'''
-        super(SearchTestMixin, self).tearDown()
         if self._used_search and es.indices.exists(index=es.index_name):
             es.indices.delete(index=es.index_name)

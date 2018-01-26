@@ -461,7 +461,6 @@ class DatasetBadgeAPITest(APITestCase):
         cls.factory = badge_factory(Dataset)
 
     def setUp(self):
-        super(DatasetBadgeAPITest, self).setUp()
         self.login(AdminFactory())
         self.dataset = DatasetFactory(owner=UserFactory())
 
@@ -532,7 +531,6 @@ class DatasetResourceAPITest(APITestCase):
     modules = None
 
     def setUp(self):
-        super(DatasetResourceAPITest, self).setUp()
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
 

@@ -688,7 +688,6 @@ class OrganizationBadgeAPITest(APITestCase):
         cls.factory = badge_factory(Organization)
 
     def setUp(self):
-        super(OrganizationBadgeAPITest, self).setUp()
         self.login(AdminFactory())
         self.organization = OrganizationFactory()
 

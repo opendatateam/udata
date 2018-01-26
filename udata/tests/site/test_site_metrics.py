@@ -25,7 +25,6 @@ class FakeSiteMetric(SiteMetric):
 
 class SiteMetricTest(DBTestMixin, TestCase):
     def setUp(self):
-        super(SiteMetricTest, self).setUp()
         self.app.config['USE_METRICS'] = True
         self.updated_emitted = False
         self.need_update_emitted = False

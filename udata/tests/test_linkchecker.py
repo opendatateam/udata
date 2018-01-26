@@ -21,7 +21,6 @@ class LinkcheckerTest(TestCase):
     settings = LinkcheckerTestSettings
 
     def setUp(self):
-        super(LinkcheckerTest, self).setUp()
         self.resource = ResourceFactory()
         self.dataset = DatasetFactory(resources=[self.resource])
 

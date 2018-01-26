@@ -5,15 +5,12 @@ import os
 import tempfile
 import pytest
 
-from shutil import rmtree
 from StringIO import StringIO
-from tempfile import mkdtemp
 
 from flask import url_for
 
 from udata.core import storages
 from udata.core.storages import utils
-from udata.core.storages.views import blueprint
 
 from . import TestCase, WebTestMixin
 
