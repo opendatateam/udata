@@ -247,3 +247,12 @@ def templates():
     recorder = TemplateRecorder()
     with recorder.capture():
         yield recorder
+
+
+@pytest.fixture
+def httpretty():
+    import httpretty
+    httpretty.reset()
+    httpretty.enable()
+    yield httpretty
+    httpretty.disable()
