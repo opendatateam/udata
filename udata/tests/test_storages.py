@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 import tempfile
+import pytest
 
 from shutil import rmtree
 from StringIO import StringIO
@@ -81,27 +82,9 @@ class TestConfigurableAllowedExtensions(TestCase):
         self.assertNotIn('exe', storages.CONFIGURABLE_AUTHORIZED_TYPES)
         self.assertNotIn('bat', storages.CONFIGURABLE_AUTHORIZED_TYPES)
 
-class StorageTestMixin(object):
-    def create_app(self):
-        app = super(StorageTestMixin, self).create_app()
-        self._instance_path = app.instance_path
-        app.instance_path = mkdtemp()
-        storages.init_app(app)
-        app.register_blueprint(blueprint)
-        return app
 
-    def tearsDown(self):
-        '''Cleanup the mess'''
-        rmtree(self.app.instance_path)
-        self.app.instance_path = self._instance_path
-        super(StorageTestCase, self).tearsDown()
-
-
-class StorageTestCase(StorageTestMixin, WebTestMixin, TestCase):
-    pass
-
-
-class StorageUploadViewTest(StorageTestCase):
+@pytest.mark.usefixtures('instance_path')
+class StorageUploadViewTest(WebTestMixin, TestCase):
     def test_upload(self):
         self.login()
         response = self.post(
