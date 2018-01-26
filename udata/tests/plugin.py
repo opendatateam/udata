@@ -3,7 +3,7 @@ import pytest
 from contextlib import contextmanager
 from urlparse import urlparse
 
-from flask import json
+from flask import json, template_rendered
 from flask.testing import FlaskClient
 from werkzeug.urls import url_encode
 
@@ -191,3 +191,59 @@ def instance_path(app, tmpdir):
     app.register_blueprint(blueprint)
 
     return tmpdir
+
+
+class ContextVariableDoesNotExist(Exception):
+    pass
+
+
+class TemplateRecorder:
+    @contextmanager
+    def capture(self):
+        self.templates = []
+        template_rendered.connect(self._add_template)
+        yield
+        template_rendered.disconnect(self._add_template)
+
+    def _add_template(self, app, template, context):
+        self.templates.append((template, context))
+
+    def assert_used(self, name):
+        """
+        Checks if a given template is used in the request.
+
+        :param name: template name
+        """
+        __tracebackhide__ = True
+
+        used_templates = []
+
+        for template, context in self.templates:
+            if template.name == name:
+                return True
+
+            used_templates.append(template)
+
+        msg = 'Template %s not used. Templates were used: %s' % (
+            name, ' '.join(repr(used_templates))
+        )
+        raise AssertionError(msg)
+
+    def get_context_variable(self, name):
+        """
+        Returns a variable from the context passed to the template.
+
+        :param name: name of variable
+        :raises ContextVariableDoesNotExist: if does not exist.
+        """
+        for template, context in self.templates:
+            if name in context:
+                return context[name]
+        raise ContextVariableDoesNotExist
+
+
+@pytest.fixture
+def templates():
+    recorder = TemplateRecorder()
+    with recorder.capture():
+        yield recorder

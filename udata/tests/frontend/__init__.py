@@ -3,29 +3,17 @@ from __future__ import unicode_literals
 
 import json
 import re
-
-from flask import template_rendered
+import pytest
 
 from udata.tests import TestCase, WebTestMixin, SearchTestMixin
-
-
-class ContextVariableDoesNotExist(Exception):
-    pass
 
 
 class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
     modules = []
 
-    def setUp(self):
-        # Ensure compatibility with multiple inheritance
-        super(TestCase, self).setUp()
-        self.templates = []
-        template_rendered.connect(self._add_template)
-
-    def tearsDown(self):
-        # Ensure compatibility with multiple inheritance
-        super(TestCase, self).tearsDown()
-        template_rendered.disconnect(self._add_template)
+    @pytest.fixture(autouse=True)
+    def inject_templates(self, templates):
+        self.templates = templates
 
     def get_json_ld(self, response):
         # In the pattern below, we extract the content of the JSON-LD script
@@ -39,9 +27,6 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         json_ld = search.group('json_ld')
         return json.loads(json_ld)
 
-    def _add_template(self, app, template, context):
-        self.templates.append((template, context))
-
     def assertTemplateUsed(self, name):
         """
         Checks if a given template is used in the request.
@@ -49,21 +34,7 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         :param name: template name
         """
         __tracebackhide__ = True
-
-        used_templates = []
-
-        for template, context in self.templates:
-            if template.name == name:
-                return True
-
-            used_templates.append(template)
-
-        msg = 'Template %s not used. Templates were used: %s' % (
-            name, ' '.join(repr(used_templates))
-        )
-        raise AssertionError(msg)
-
-    assert_template_used = assertTemplateUsed
+        self.templates.assert_used(name)
 
     def get_context_variable(self, name):
         """
@@ -72,7 +43,4 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         :param name: name of variable
         :raises ContextVariableDoesNotExist: if does not exist.
         """
-        for template, context in self.templates:
-            if name in context:
-                return context[name]
-        raise ContextVariableDoesNotExist
+        return self.templates.get_context_variable(name)
