@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import mock
+
 from datetime import date, timedelta
 
 from udata.models import db, Metrics, WithMetrics
 from udata.core.metrics import Metric
-from udata.tests import TestCase, DBTestMixin, mock_task
+from udata.tests import TestCase, DBTestMixin
 
 
 class FakeModel(WithMetrics, db.Document):
@@ -164,7 +166,7 @@ class MetricTest(DBTestMixin, TestCase):
         metrics = Metrics.objects.last_for(self.obj)
         self.assertEqual(metrics.values['fake'], 'some-value')
 
-    @mock_task('udata.core.metrics.tasks.archive_metric.delay')
+    @mock.patch('udata.core.metrics.tasks.archive_metric.delay')
     def test_not_archived(self, task):
         '''It should not store the updated metric when archived=False'''
         class NotArchivedMetric(Metric):

@@ -210,20 +210,3 @@ class SearchTestMixin(DBTestMixin):
         super(SearchTestMixin, self).tearDown()
         if self._used_search and es.indices.exists(index=es.index_name):
             es.indices.delete(index=es.index_name)
-
-
-def mock_task(name, **kwargs):
-    def wrapper(func):
-        return mock.patch(name, **kwargs)(func)
-    return wrapper
-
-
-def filestorage(filename, content):
-    data = (StringIO(str(content))
-            if isinstance(content, basestring) else content)
-    builder = EnvironBuilder(method='POST', data={
-        'file': (data, filename)
-    })
-    env = builder.get_environ()
-    req = Request(env)
-    return req.files['file']
