@@ -5,18 +5,11 @@ import pytest
 
 from contextlib import contextmanager
 
-from udata.core import storages
-from udata.core.storages.views import blueprint
-
 from ..frontend import FrontTestCase
 
 
+@pytest.mark.usefixtures('instance_path')
 class APITestCase(FrontTestCase):
-    def create_app(self):
-        app = super(APITestCase, self).create_app()
-        storages.init_app(app)
-        app.register_blueprint(blueprint)
-        return app
 
     @pytest.fixture(autouse=True)
     def inject_api(self, api):

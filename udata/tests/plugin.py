@@ -178,3 +178,16 @@ def cli_fixture(mocker, app):
             return runner.invoke(cli, args, catch_exceptions=False)
 
     return mock_runner
+
+
+@pytest.fixture
+def instance_path(app, tmpdir):
+    '''Use temporary application instance_path'''
+    from udata.core import storages
+    from udata.core.storages.views import blueprint
+
+    app.instance_path = str(tmpdir)
+    storages.init_app(app)
+    app.register_blueprint(blueprint)
+
+    return tmpdir

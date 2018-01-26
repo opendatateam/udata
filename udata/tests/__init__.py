@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-import shutil
-import tempfile
 import unittest
 import warnings
 
@@ -44,9 +41,6 @@ class TestCase(unittest.TestCase):
         Here for compatibility legacy test classes
         '''
         return self.app
-
-    def data(self, filename):
-        return os.path.join(os.path.dirname(__file__), 'data', filename)
 
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
         """Lax date comparison, avoid comparing milliseconds and seconds."""
@@ -216,19 +210,6 @@ class SearchTestMixin(DBTestMixin):
         super(SearchTestMixin, self).tearDown()
         if self._used_search and es.indices.exists(index=es.index_name):
             es.indices.delete(index=es.index_name)
-
-
-class FSTestMixin(object):
-    def setUp(self):
-        '''Use a temporary FS_ROOT'''
-        super(FSTestMixin, self).setUp()
-        self.fs_root = tempfile.mkdtemp()
-        self.app.config['FS_ROOT'] = self.fs_root
-
-    def tearDown(self):
-        '''Clear the temporary file system'''
-        super(FSTestMixin, self).tearDown()
-        shutil.rmtree(self.fs_root)
 
 
 def mock_task(name, **kwargs):

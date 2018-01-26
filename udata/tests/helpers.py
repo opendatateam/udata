@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import json
 import mock
+import os
 import warnings
 
 from udata.mail import mail_sent
@@ -204,4 +205,10 @@ def assert500(response):
 
 
 def full_url(*args, **kwargs):
+    '''Build a full URL'''
     return urljoin(request.url_root, url_for(*args, **kwargs))
+
+
+def data_path(filename):
+    '''Get a test data path'''
+    return os.path.join(os.path.dirname(__file__), 'data', filename)
