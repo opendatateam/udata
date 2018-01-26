@@ -135,6 +135,9 @@ setup(
         'udata.linkcheckers': [
             'no_check = udata.linkchecker.backends:NoCheckLinkchecker',
         ],
+        'pytest11': [
+            'udata = udata.tests.plugin',
+        ],
     },
     license='GNU AGPLv3+',
     keywords='udata opendata portal data',

@@ -1,53 +1,26 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import os
 import shutil
 import tempfile
 import unittest
 import warnings
 
-import pytest
-
-from datetime import timedelta
-
 import mock
+import pytest
 
 from contextlib import contextmanager
 from StringIO import StringIO
-from urlparse import urljoin, urlparse
 
-from flask import request, url_for
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
 from udata import settings
-from udata.app import create_app
 from udata.mail import mail_sent
-from udata.models import db
 from udata.search import es
 
-from werkzeug import cached_property
-from werkzeug.urls import url_encode
-
-from udata.core.user.factories import UserFactory
-
-
-class JsonResponseMixin(object):
-    """
-    Mixin with testing helper methods
-    """
-    @cached_property
-    def json(self):
-        return json.loads(self.data)
-
-
-def _make_test_response(response_class):
-    class TestResponse(response_class, JsonResponseMixin):
-        pass
-
-    return TestResponse
+from . import helpers
 
 
 class TestCase(unittest.TestCase):
@@ -61,26 +34,16 @@ class TestCase(unittest.TestCase):
         # Ensure compatibility with multiple inheritance
         super(TestCase, self).tearsDown()
 
-    @pytest.fixture(name='app', autouse=True)
-    def app_fixture(self):
+    @pytest.fixture(autouse=True)
+    def inject_app(self, app):
+        self.app = app
         return self.create_app()
 
     def create_app(self):
-        '''Create an application a test application.
-
-        - load settings in this order: Default > local > Testing
-        - create a minimal application
-        - plugins and themes are disabled
-        - server name is forced to localhost
-        - defaut language is set to EN
-        - cache is disabled
-        - celery is synchronous
-        - CSRF is disabled
-        - automatic indexing is disabled
         '''
-        # Compatibility with legacy flask testing
-        app = self.app = create_app(settings.Defaults, override=self.settings)
-        return app
+        Here for compatibility legacy test classes
+        '''
+        return self.app
 
     def data(self, filename):
         return os.path.join(os.path.dirname(__file__), 'data', filename)
@@ -88,23 +51,19 @@ class TestCase(unittest.TestCase):
     def assertEqualDates(self, datetime1, datetime2, limit=1):  # Seconds.
         """Lax date comparison, avoid comparing milliseconds and seconds."""
         __tracebackhide__ = True
-        delta = (datetime1 - datetime2)
-        self.assertTrue(
-            timedelta(seconds=-limit) <= delta <= timedelta(seconds=limit))
+        helpers.assert_equal_dates(datetime1, datetime2, limit=1)
 
     def assertStartswith(self, haystack, needle):
         __tracebackhide__ = True
-        self.assertEqual(
-            haystack.startswith(needle), True,
-            '{haystack} does not start with {needle}'.format(
-                haystack=haystack, needle=needle))
+        msg = '{haystack} does not start with {needle}'
+        assert haystack.startswith(needle), msg.format(
+            haystack=haystack, needle=needle
+        )
 
     def assertJsonEqual(self, first, second):
         '''Ensure two dict produce the same JSON'''
         __tracebackhide__ = True
-        json1 = json.loads(json.dumps(first))
-        json2 = json.loads(json.dumps(second))
-        self.assertEqual(json1, json2)
+        helpers.assert_json_equal(first, second)
 
     @contextmanager
     def assert_emit(self, *signals):
@@ -183,41 +142,24 @@ class TestCase(unittest.TestCase):
 class WebTestMixin(object):
     user = None
 
-    def create_app(self):
+    @pytest.fixture(autouse=True)
+    def inject_client(self, client):
         '''
         Inject test client for compatibility with Flask-Testing.
         '''
-        # Compatibility with legacy flask testing
-        app = super(WebTestMixin, self).create_app()
-        app.response_class = _make_test_response(app.response_class)
-        self.client = app.test_client()
-        return app
+        self.client = client
 
-    def _build_url(self, url, kwargs):
-        if 'qs' not in kwargs:
-            return url
-        qs = kwargs.pop('qs')
-        return '?'.join([url, url_encode(qs)])
+    def get(self, url, **kwargs):
+        return self.client.get(url, **kwargs)
 
-    def full_url(self, *args, **kwargs):
-        with self.app.test_request_context(''):
-            return urljoin(request.url_root, url_for(*args, **kwargs))
+    def post(self, url, data=None, **kwargs):
+        return self.client.post(url, data=data, **kwargs)
 
-    def get(self, url, client=None, **kwargs):
-        url = self._build_url(url, kwargs)
-        return (client or self.client).get(url, **kwargs)
+    def put(self, url, data=None, **kwargs):
+        return self.client.put(url, data=data, **kwargs)
 
-    def post(self, url, data=None, client=None, **kwargs):
-        url = self._build_url(url, kwargs)
-        return (client or self.client).post(url, data=data, **kwargs)
-
-    def put(self, url, data=None, client=None, **kwargs):
-        url = self._build_url(url, kwargs)
-        return (client or self.client).put(url, data=data, **kwargs)
-
-    def delete(self, url, data=None, client=None, **kwargs):
-        url = self._build_url(url, kwargs)
-        return (client or self.client).delete(url, data=data, **kwargs)
+    def delete(self, url, data=None, **kwargs):
+        return self.client.delete(url, data=data, **kwargs)
 
     def assertRedirects(self, response, location, message=None):
         """
@@ -227,104 +169,30 @@ class WebTestMixin(object):
         :param location: relative URL path to SERVER_NAME or an absolute URL
         """
         __tracebackhide__ = True
-        parts = urlparse(location)
-
-        if parts.netloc:
-            expected_location = location
-        else:
-            server_name = self.app.config.get('SERVER_NAME') or 'localhost'
-            expected_location = urljoin("http://%s" % server_name, location)
-
-        valid_status_codes = (301, 302, 303, 305, 307)
-        valid_status_code_str = ', '.join(str(code) for code in valid_status_codes)
-        not_redirect = "HTTP Status %s expected but got %d" % (valid_status_code_str, response.status_code)
-        self.assertTrue(response.status_code in valid_status_codes,
-                        message or not_redirect)
-        self.assertEqual(response.location, expected_location, message)
+        helpers.assert_redirects(response, location, message=message)
 
     def assertStatus(self, response, status_code, message=None):
-        """
-        Helper method to check matching response status.
-
-        Extracted from parent class to improve output in case of JSON.
-
-        :param response: Flask response
-        :param status_code: response status code (e.g. 200)
-        :param message: Message to display on test failure
-        """
         __tracebackhide__ = True
+        helpers.assert_status(response, status_code, message=message)
 
-        message = message or 'HTTP Status %s expected but got %s' \
-                             % (status_code, response.status_code)
-        if response.mimetype == 'application/json':
-            try:
-                second_line = 'Response content is {0}'.format(response.json)
-                message = '\n'.join((message, second_line))
-            except Exception:
-                pass
-        assert response.status_code == status_code, message
-
-    def assert200(self, response):
+    def full_url(self, *args, **kwargs):
         __tracebackhide__ = True
-        self.assertStatus(response, 200)
+        return helpers.full_url(*args, **kwargs)
 
-    def assert201(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 201)
-
-    def assert204(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 204)
-
-    def assert400(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 400)
-
-    def assert401(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 401)
-
-    def assert403(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 403)
-
-    def assert404(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 404)
-
-    def assert410(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 410)
-
-    def assert500(self, response):
-        __tracebackhide__ = True
-        self.assertStatus(response, 500)
-
-    def login(self, user=None, client=None):
-        self.user = user or UserFactory()
-        with (client or self.client).session_transaction() as session:
-            session['user_id'] = str(self.user.id)
-            session['_fresh'] = True
+    def login(self, user=None):
+        self.user = self.client.login(user)
         return self.user
 
 
+for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
+    name = 'assert{0}'.format(code)
+    helper = getattr(helpers, name)
+    setattr(WebTestMixin, name, lambda s, r, h=helper: h(r))
+
+
+@pytest.mark.usefixtures('clean_db')
 class DBTestMixin(object):
-    def drop_db(self):
-        '''Clear the database'''
-        parsed_url = urlparse(self.app.config['MONGODB_HOST'])
-        # drop the leading /
-        db_name = parsed_url.path[1:]
-        db.connection.drop_database(db_name)
-
-    def setUp(self):
-        '''Ensure always working on a en empty database'''
-        super(DBTestMixin, self).setUp()
-        self.drop_db()
-
-    def tearDown(self):
-        '''Leave the DB clean'''
-        super(DBTestMixin, self).tearDown()
-        self.drop_db()
+    pass
 
 
 class SearchTestMixin(DBTestMixin):

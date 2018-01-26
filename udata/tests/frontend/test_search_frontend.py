@@ -1,32 +1,34 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 
-from . import FrontTestCase
+from udata.tests.helpers import assert200
 
 
-class SearchFrontTest(FrontTestCase):
+@pytest.mark.front
+class SearchFrontTest:
     modules = ['core.dataset', 'core.reuse', 'core.organization',
                'admin', 'core.site', 'search']
 
-    def test_render_search(self):
+    def test_render_search(self, client, autoindex):
         '''It should render the search page'''
-        with self.autoindex():
+        with autoindex():
             for i in range(3):
                 org = OrganizationFactory()
                 DatasetFactory(organization=org)
                 ReuseFactory(organization=org)
 
-        response = self.get(url_for('search.index'))
-        self.assert200(response)
+        response = client.get(url_for('search.index'))
+        assert200(response)
 
-    def test_render_search_no_data(self):
+    def test_render_search_no_data(self, client, autoindex):
         '''It should render the search page without data'''
-        self.init_search()
-        response = self.get(url_for('search.index'))
-        self.assert200(response)
+        response = client.get(url_for('search.index'))
+        assert200(response)

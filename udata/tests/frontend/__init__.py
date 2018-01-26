@@ -8,8 +8,6 @@ from flask import template_rendered
 
 from udata.tests import TestCase, WebTestMixin, SearchTestMixin
 
-from udata import frontend, api
-
 
 class ContextVariableDoesNotExist(Exception):
     pass
@@ -29,12 +27,6 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         super(TestCase, self).tearsDown()
         template_rendered.disconnect(self._add_template)
 
-    def create_app(self):
-        app = super(FrontTestCase, self).create_app()
-        api.init_app(app)
-        frontend.init_app(app, self.modules)
-        return app
-
     def get_json_ld(self, response):
         # In the pattern below, we extract the content of the JSON-LD script
         # The first ? is used to name the extracted string
@@ -48,9 +40,6 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         return json.loads(json_ld)
 
     def _add_template(self, app, template, context):
-        # if len(self.templates) > 0:
-        #     self.templates = []
-        print('add template', template, context)
         self.templates.append((template, context))
 
     def assertTemplateUsed(self, name):
