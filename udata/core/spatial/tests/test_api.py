@@ -10,6 +10,7 @@ from udata.tests.api import APITestCase
 from udata.tests.features.territories.test_territories_process import (
     create_geozones_fixtures, TerritoriesSettings
 )
+from udata.tests.helpers import assert_json_equal
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.spatial.factories import (
@@ -31,7 +32,7 @@ class SpatialApiTest(APITestCase):
 
         feature = response.json['features'][0]
         self.assertEqual(feature['type'], 'Feature')
-        self.assertJsonEqual(feature['geometry'], zone.geom)
+        assert_json_equal(feature['geometry'], zone.geom)
         self.assertEqual(feature['id'], zone.id)
 
         properties = feature['properties']
@@ -55,7 +56,7 @@ class SpatialApiTest(APITestCase):
 
         feature = response.json['features'][0]
         self.assertEqual(feature['type'], 'Feature')
-        self.assertJsonEqual(feature['geometry'], {
+        assert_json_equal(feature['geometry'], {
             'type': 'MultiPolygon',
             'coordinates': [],
         })
@@ -82,7 +83,7 @@ class SpatialApiTest(APITestCase):
 
         for zone, feature in zip(zones, response.json['features']):
             self.assertEqual(feature['type'], 'Feature')
-            self.assertJsonEqual(feature['geometry'], zone.geom)
+            assert_json_equal(feature['geometry'], zone.geom)
             self.assertEqual(feature['id'], zone.id)
 
             properties = feature['properties']
@@ -326,7 +327,7 @@ class SpatialApiTest(APITestCase):
 
             zone = get_by(subzones, 'id', feature['id'])
             self.assertIsNotNone(zone)
-            self.assertJsonEqual(feature['geometry'], zone.geom)
+            assert_json_equal(feature['geometry'], zone.geom)
 
             properties = feature['properties']
             self.assertEqual(properties['name'], zone.name)

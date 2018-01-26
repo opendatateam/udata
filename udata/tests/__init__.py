@@ -8,10 +8,6 @@ import mock
 import pytest
 
 from contextlib import contextmanager
-from StringIO import StringIO
-
-from werkzeug.test import EnvironBuilder
-from werkzeug.wrappers import Request
 
 from udata import settings
 from udata.mail import mail_sent
@@ -46,18 +42,6 @@ class TestCase(unittest.TestCase):
         """Lax date comparison, avoid comparing milliseconds and seconds."""
         __tracebackhide__ = True
         helpers.assert_equal_dates(datetime1, datetime2, limit=1)
-
-    def assertStartswith(self, haystack, needle):
-        __tracebackhide__ = True
-        msg = '{haystack} does not start with {needle}'
-        assert haystack.startswith(needle), msg.format(
-            haystack=haystack, needle=needle
-        )
-
-    def assertJsonEqual(self, first, second):
-        '''Ensure two dict produce the same JSON'''
-        __tracebackhide__ = True
-        helpers.assert_json_equal(first, second)
 
     @contextmanager
     def assert_emit(self, *signals):

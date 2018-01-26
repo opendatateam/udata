@@ -22,10 +22,12 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.utils import faker
 
+
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
+from .helpers import assert_starts_with
 
 
 class DiscussionsTest(APITestCase):
@@ -423,10 +425,8 @@ class DiscussionCsvTest(FrontTestCase):
         self.assert200(response)
 
         headers, data = response.data.decode('utf-8').strip().split('\r\n')
-        self.assertStartswith(
-            data,
-            '"{discussion.id}";"{discussion.user}"'.format(
-                discussion=discussion))
+        expected = '"{discussion.id}";"{discussion.user}"'
+        assert_starts_with(data, expected.format(discussion=discussion))
 
 
 class DiscussionsNotificationsTest(TestCase, DBTestMixin):

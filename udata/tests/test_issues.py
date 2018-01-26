@@ -22,10 +22,12 @@ from udata.core.user.factories import UserFactory
 from udata.core.issues.factories import IssueFactory
 from udata.utils import faker
 
+
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
+from .helpers import assert_starts_with
 
 
 class IssuesTest(APITestCase):
@@ -358,8 +360,8 @@ class IssueCsvTest(FrontTestCase):
         self.assert200(response)
 
         headers, data = response.data.decode('utf-8').strip().split('\r\n')
-        self.assertStartswith(
-            data, '"{issue.id}";"{issue.user}"'.format(issue=issue))
+        expected = '"{issue.id}";"{issue.user}"'.format(issue=issue)
+        assert_starts_with(data, expected)
 
 
 class IssuesActionsTest(TestCase, DBTestMixin):
