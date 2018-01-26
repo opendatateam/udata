@@ -16,4 +16,5 @@ class PublicServicesMetric(SiteMetric):
     def get_value(self):
         return Organization.objects(badges__kind=PUBLIC_SERVICE).count()
 
+
 PublicServicesMetric.connect(Organization.on_update)

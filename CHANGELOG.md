@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Make use of [udata pytest plugin](opendatateam/udata#1400) [#254](https://github.com/etalab/udata-gouvfr/pull/254)
 
 ## 1.2.4 (2018-01-24)
 
