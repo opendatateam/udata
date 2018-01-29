@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import os
 import io
 import re
 
@@ -80,6 +82,12 @@ long_description = '\n'.join((
     ''
 ))
 
+
+def pip(filename):
+    """Parse pip reqs file and transform it to setuptools requirements."""
+    return open(os.path.join('requirements', filename)).readlines()
+
+
 setup(
     name='udata-gouvfr',
     version=__import__('udata_gouvfr').__version__,
@@ -90,10 +98,11 @@ setup(
     author_email='pypi@data.gouv.fr',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        'udata>=1.2.0',
-        'feedparser',
-    ],
+    install_requires=pip('install.pip'),
+    tests_require=pip('test.pip'),
+    extras_require={
+        'test': pip('test.pip'),
+    },
     entry_points={
         'udata.themes': [
             'gouvfr = udata_gouvfr.theme',
@@ -103,7 +112,7 @@ setup(
         ]
     },
     license='LGPL',
-    use_2to3=True,
+    zip_safe=False,
     keywords='udata opendata portal etalab',
     classifiers=[
         "Development Status :: 3 - Alpha",

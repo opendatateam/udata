@@ -15,7 +15,7 @@ from udata.core.dataset.factories import (
 )
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.spatial.factories import GeoZoneFactory, SpatialCoverageFactory
+from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.frontend.markdown import md
 from udata.models import Badge, PUBLIC_SERVICE
 from udata.settings import Testing
