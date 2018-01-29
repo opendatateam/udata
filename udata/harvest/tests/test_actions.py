@@ -15,6 +15,7 @@ from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.tests.helpers import assert_emit
 from udata.utils import faker, Paginable
 
 from .factories import (
@@ -117,7 +118,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
     def test_create_source(self):
         source_url = faker.url()
 
-        with self.assert_emit(signals.harvest_source_created):
+        with assert_emit(signals.harvest_source_created):
             source = actions.create_source('Test source',
                                            source_url,
                                            'factory')
@@ -142,7 +143,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
         new_url = faker.url()
         data['url'] = new_url
 
-        with self.assert_emit(signals.harvest_source_updated):
+        with assert_emit(signals.harvest_source_updated):
             source = actions.update_source(source.id, data)
 
         self.assertEqual(source.url, new_url)
@@ -203,7 +204,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
     def test_delete_source_by_slug(self):
         source = HarvestSourceFactory()
-        with self.assert_emit(signals.harvest_source_deleted):
+        with assert_emit(signals.harvest_source_deleted):
             deleted_source = actions.delete_source(source.slug)
 
         self.assertIsNotNone(deleted_source.deleted)
@@ -213,7 +214,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
     def test_delete_source_by_id(self):
         source = HarvestSourceFactory()
-        with self.assert_emit(signals.harvest_source_deleted):
+        with assert_emit(signals.harvest_source_deleted):
             deleted_source = actions.delete_source(str(source.id))
 
         self.assertIsNotNone(deleted_source.deleted)
@@ -223,7 +224,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
     def test_delete_source_by_objectid(self):
         source = HarvestSourceFactory()
-        with self.assert_emit(signals.harvest_source_deleted):
+        with assert_emit(signals.harvest_source_deleted):
             deleted_source = actions.delete_source(source.id)
 
         self.assertIsNotNone(deleted_source.deleted)
@@ -241,7 +242,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
     def test_schedule(self):
         source = HarvestSourceFactory()
-        with self.assert_emit(signals.harvest_source_scheduled):
+        with assert_emit(signals.harvest_source_scheduled):
             source = actions.schedule(str(source.id), hour=0)
 
         self.assertEqual(len(PeriodicTask.objects), 1)
@@ -258,7 +259,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
     def test_schedule_from_cron(self):
         source = HarvestSourceFactory()
-        with self.assert_emit(signals.harvest_source_scheduled):
+        with assert_emit(signals.harvest_source_scheduled):
             source = actions.schedule(str(source.id), '0 1 2 3 sunday')
 
         self.assertEqual(len(PeriodicTask.objects), 1)
@@ -275,10 +276,10 @@ class HarvestActionsTest(DBTestMixin, TestCase):
 
     def test_reschedule(self):
         source = HarvestSourceFactory()
-        with self.assert_emit(signals.harvest_source_scheduled):
+        with assert_emit(signals.harvest_source_scheduled):
             source = actions.schedule(str(source.id), hour=0)
 
-        with self.assert_emit(signals.harvest_source_scheduled):
+        with assert_emit(signals.harvest_source_scheduled):
             source = actions.schedule(str(source.id), minute=0)
 
         self.assertEqual(len(PeriodicTask.objects), 1)
@@ -302,7 +303,7 @@ class HarvestActionsTest(DBTestMixin, TestCase):
             crontab=PeriodicTask.Crontab()
         )
         source = HarvestSourceFactory(periodic_task=periodic_task)
-        with self.assert_emit(signals.harvest_source_unscheduled):
+        with assert_emit(signals.harvest_source_unscheduled):
             actions.unschedule(str(source.id))
 
         source.reload()
@@ -414,8 +415,8 @@ class ExecutionTestMixin(MockBackendsMixin, DBTestMixin):
     def test_default(self):
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='factory', organization=org)
-        with self.assert_emit(signals.before_harvest_job,
-                              signals.after_harvest_job):
+        with assert_emit(signals.before_harvest_job,
+                         signals.after_harvest_job):
             self.action(source.slug)
 
         source.reload()
@@ -451,7 +452,7 @@ class ExecutionTestMixin(MockBackendsMixin, DBTestMixin):
             raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')
-        with self.assert_emit(signals.before_harvest_job),\
+        with assert_emit(signals.before_harvest_job),\
                 mock_initialize.connected_to(init):
             self.action(source.slug)
 
@@ -476,8 +477,8 @@ class ExecutionTestMixin(MockBackendsMixin, DBTestMixin):
                 raise ValueError('test')
 
         source = HarvestSourceFactory(backend='factory')
-        with self.assert_emit(signals.before_harvest_job,
-                              signals.after_harvest_job), \
+        with assert_emit(signals.before_harvest_job,
+                         signals.after_harvest_job), \
                 mock_process.connected_to(process):
             self.action(source.slug)
 
@@ -514,8 +515,8 @@ class ExecutionTestMixin(MockBackendsMixin, DBTestMixin):
 
     def test_empty(self):
         source = HarvestSourceFactory(backend='factory', config={'count': 0})
-        with self.assert_emit(signals.before_harvest_job,
-                              signals.after_harvest_job):
+        with assert_emit(signals.before_harvest_job,
+                         signals.after_harvest_job):
             self.action(source.slug)
 
         source.reload()

@@ -22,10 +22,12 @@ from udata.core.user.factories import UserFactory
 from udata.core.issues.factories import IssueFactory
 from udata.utils import faker
 
+
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
+from .helpers import assert_starts_with, assert_emit, capture_mails
 
 
 class IssuesTest(APITestCase):
@@ -37,7 +39,7 @@ class IssuesTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset')
 
         url = url_for('api.issues', **{'for': dataset.id})
-        with self.assert_emit(on_new_issue):
+        with assert_emit(on_new_issue):
             response = self.post(url, {
                 'title': 'test title',
                 'comment': 'bla bla',
@@ -245,7 +247,7 @@ class IssuesTest(APITestCase):
         on_new_issue.send(issue)  # Updating metrics.
 
         poster = self.login()
-        with self.assert_emit(on_new_issue_comment):
+        with assert_emit(on_new_issue_comment):
             response = self.post(url_for('api.issue', id=issue.id), {
                 'comment': 'new bla bla'
             })
@@ -283,7 +285,7 @@ class IssuesTest(APITestCase):
         )
         on_new_issue.send(issue)  # Updating metrics.
 
-        with self.assert_emit(on_issue_closed):
+        with assert_emit(on_issue_closed):
             response = self.post(url_for('api.issue', id=issue.id), {
                 'comment': 'close bla bla',
                 'close': True
@@ -358,8 +360,8 @@ class IssueCsvTest(FrontTestCase):
         self.assert200(response)
 
         headers, data = response.data.decode('utf-8').strip().split('\r\n')
-        self.assertStartswith(
-            data, '"{issue.id}";"{issue.user}"'.format(issue=issue))
+        expected = '"{issue.id}";"{issue.user}"'.format(issue=issue)
+        assert_starts_with(data, expected)
 
 
 class IssuesActionsTest(TestCase, DBTestMixin):
@@ -580,7 +582,7 @@ class IssuesMailsTest(FrontTestCase):
             discussion=[message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_issue(issue)
 
         # Should have sent one mail to the owner
@@ -601,7 +603,7 @@ class IssuesMailsTest(FrontTestCase):
         )
 
         # issue = IssueFactory()
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_issue_comment(issue, message=new_message)
 
         # Should have sent one mail to the owner and the other participants
@@ -627,7 +629,7 @@ class IssuesMailsTest(FrontTestCase):
         )
 
         # issue = IssueFactory()
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_issue_closed(issue, message=closing_message)
 
         # Should have sent one mail to each participant

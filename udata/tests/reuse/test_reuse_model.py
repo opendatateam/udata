@@ -8,6 +8,7 @@ from udata.models import Reuse
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
+from udata.tests.helpers import assert_emit
 
 from .. import TestCase, DBTestMixin
 
@@ -58,6 +59,6 @@ class ReuseModelTest(TestCase, DBTestMixin):
 
     def test_send_on_delete(self):
         reuse = ReuseFactory()
-        with self.assert_emit(Reuse.on_delete):
+        with assert_emit(Reuse.on_delete):
             reuse.deleted = datetime.now()
             reuse.save()

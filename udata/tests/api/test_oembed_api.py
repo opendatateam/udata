@@ -49,6 +49,7 @@ class OEmbedsDatasetAPITest(APITestCase):
         }
 
     def tearDown(self):
+        super(OEmbedsDatasetAPITest, self).tearDown()
         TERRITORY_DATASETS.update(self.territory_datasets_backup)
 
     def test_oembeds_dataset_api_get(self):

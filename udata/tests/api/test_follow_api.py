@@ -24,7 +24,6 @@ class FollowFakeAPI(FollowAPI):
 class FollowAPITest(APITestCase):
     def setUp(self):
         self.signal_emitted = False
-        super(FollowAPITest, self).setUp()
 
     def handler(self, sender):
         self.assertIsInstance(sender, Follow)

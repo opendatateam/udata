@@ -12,6 +12,7 @@ from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
 )
 from udata.core.user.factories import UserFactory
+from udata.tests.helpers import assert_emit
 
 from .. import TestCase, DBTestMixin
 
@@ -23,11 +24,11 @@ class DatasetModelTest(TestCase, DBTestMixin):
         resource = ResourceFactory()
         expected_signals = post_save, Dataset.after_save, Dataset.on_update
 
-        with self.assert_emit(*expected_signals):
+        with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory())
         self.assertEqual(len(dataset.resources), 1)
 
-        with self.assert_emit(*expected_signals):
+        with assert_emit(*expected_signals):
             dataset.add_resource(resource)
         self.assertEqual(len(dataset.resources), 2)
         self.assertEqual(dataset.resources[0].id, resource.id)
@@ -38,11 +39,11 @@ class DatasetModelTest(TestCase, DBTestMixin):
         resource = ResourceFactory(checksum=None)
         expected_signals = post_save, Dataset.after_save, Dataset.on_update
 
-        with self.assert_emit(*expected_signals):
+        with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory(checksum=None))
         self.assertEqual(len(dataset.resources), 1)
 
-        with self.assert_emit(*expected_signals):
+        with assert_emit(*expected_signals):
             dataset.add_resource(resource)
         self.assertEqual(len(dataset.resources), 2)
         self.assertEqual(dataset.resources[0].id, resource.id)
@@ -64,7 +65,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
         resource.description = 'New description'
 
-        with self.assert_emit(*expected_signals):
+        with assert_emit(*expected_signals):
             dataset.update_resource(resource)
         self.assertEqual(len(dataset.resources), 1)
         self.assertEqual(dataset.resources[0].id, resource.id)
@@ -224,7 +225,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
     def test_send_on_delete(self):
         dataset = DatasetFactory()
-        with self.assert_emit(Dataset.on_delete):
+        with assert_emit(Dataset.on_delete):
             dataset.deleted = datetime.now()
             dataset.save()
 
@@ -246,7 +247,6 @@ class ResourceModelTest(TestCase, DBTestMixin):
 
 class LicenseModelTest(DBTestMixin, TestCase):
     def setUp(self):
-        super(LicenseModelTest, self).setUp()
         # Feed the DB with random data to ensure true matching
         LicenseFactory.create_batch(3)
 

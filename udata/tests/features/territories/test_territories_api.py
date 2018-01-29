@@ -16,7 +16,6 @@ class TerritoriesAPITest(APITestCase):
     settings = TerritoriesSettings
 
     def setUp(self):
-        super(TerritoriesAPITest, self).setUp()
         self.paca, self.bdr, self.arles = create_geozones_fixtures()
 
     def test_suggest_no_parameter(self):

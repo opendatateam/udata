@@ -43,7 +43,7 @@ jobs:
           command: |
             mkdir -p reports/python
             source venv/bin/activate
-            nosetests --with-xunit --xunit-file=reports/python/tests.xml  udata
+            inv test --report --ci
       - store_test_results:
           path: reports/python
       - store_artifacts:

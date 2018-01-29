@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 
 from udata.features.identicon.backends import internal
 
-from udata.tests import TestCase
+from udata.tests import TestCase, WebTestMixin
 from udata.utils import faker
 
 
-class InternalBackendTests(TestCase):
+class InternalBackendTests(WebTestMixin, TestCase):
     def assert_stream_equal(self, response1, response2):
         self.assertEqual(list(response1.iter_encoded()),
                          list(response2.iter_encoded()))

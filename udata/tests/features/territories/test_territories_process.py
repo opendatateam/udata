@@ -56,7 +56,6 @@ class TerritoriesTest(FrontTestCase):
     settings = TerritoriesSettings
 
     def setUp(self):
-        super(TerritoriesTest, self).setUp()
         self.paca, self.bdr, self.arles = create_geozones_fixtures()
 
     def test_towns_with_default_base_datasets(self):

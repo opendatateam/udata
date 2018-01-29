@@ -20,6 +20,7 @@ from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.i18n import _
+from udata.tests.helpers import capture_mails
 from udata.utils import faker
 
 from . import APITestCase
@@ -366,7 +367,7 @@ class MeAPITest(APITestCase):
         following = Follow.objects().create(follower=user, following=other_user)
         followed = Follow.objects().create(follower=other_user, following=user)
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             response = self.delete(url_for('api.me'))
         self.assertEqual(len(mails), 1)
         self.assertEqual(mails[0].send_to, set([user.email]))
