@@ -6,6 +6,7 @@
 - Switch to `flask-cli` and drop `flask-script`. Deprecated commands have been removed. [#1364](https://github.com/opendatateam/udata/pull/1364) [breaking]
 - Fix missing spinners on loading datatables [#1401](https://github.com/opendatateam/udata/pull/1401)
 - Switch to pytest as testing tool and expose a `udata` pytest plugin [#1400](https://github.com/opendatateam/udata/pull/1400)
+- Fixes on the search facets [#1410](https://github.com/opendatateam/udata/pull/1410)
 
 ## 1.2.10 (2018-01-24)
 
