@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-29 10:32-0500\n"
+"PO-Revision-Date: 2018-01-29 10:42-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -31,7 +31,7 @@ msgstr "Confidencial"
 
 #: udata/api/oauth2.py:34
 msgid "Web Application"
-msgstr ""
+msgstr "Aplicação Web"
 
 #: udata/api/oauth2.py:35
 msgid "User Agent"
@@ -39,39 +39,39 @@ msgstr ""
 
 #: udata/api/oauth2.py:36
 msgid "Native"
-msgstr ""
+msgstr "Nativo"
 
 #: udata/api/oauth2.py:40
 msgid "Authorization Code"
-msgstr ""
+msgstr "Código de autorização"
 
 #: udata/api/oauth2.py:41
 msgid "Implicit"
-msgstr ""
+msgstr "Implícito"
 
 #: udata/api/oauth2.py:42
 msgid "Resource Owner Password Credentials"
-msgstr ""
+msgstr "Credenciais do proprietário do recurso"
 
 #: udata/api/oauth2.py:43
 msgid "Client Credentials"
-msgstr ""
+msgstr "Credenciais do cliente"
 
 #: udata/api/oauth2.py:47
 msgid "Bearer Token"
-msgstr ""
+msgstr "Token de portador"
 
 #: udata/api/oauth2.py:51
 msgid "Default scope"
-msgstr ""
+msgstr "Contexto padrão"
 
 #: udata/api/oauth2.py:52
 msgid "System administrator rights"
-msgstr ""
+msgstr "Direitos de administrador de sistema"
 
 #: udata/commands/init.py:30
 msgid "Do you want to create a superadmin user?"
-msgstr ""
+msgstr "Deseja criar um utilizador administrador?"
 
 #: udata/commands/init.py:35
 msgid "Do you want to import some data-related license?"
