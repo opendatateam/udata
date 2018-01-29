@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from flask import json
 
 from uuid import uuid4, UUID
@@ -436,10 +438,10 @@ class MongoConfigTest(TestCase):
             validate_config({'MONGODB_HOST': 'mongodb://somewhere.com:1234/'})
 
     def test_warn_on_deprecated_db_port(self):
-        with self.assert_warn(DeprecationWarning):
+        with pytest.deprecated_call():
             validate_config({'MONGODB_HOST': Defaults.MONGODB_HOST,
                              'MONGODB_PORT': 1234})
-        with self.assert_warn(DeprecationWarning):
+        with pytest.deprecated_call():
             validate_config({'MONGODB_HOST': Defaults.MONGODB_HOST,
                              'MONGODB_DB': 'udata'})
 

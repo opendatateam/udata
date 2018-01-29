@@ -16,6 +16,7 @@ class Defaults(object):
         'en': 'English',
         'fr': 'Français',
         'es': 'Español',
+        'pt': 'Português',
     }
     DEFAULT_LANGUAGE = 'en'
     SECRET_KEY = 'Default uData secret key'

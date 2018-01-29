@@ -1,67 +1,36 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from contextlib import contextmanager
 
-from flask import json
-
-from udata.core import storages
-from udata.core.storages.views import blueprint
-
-from udata.core.user.factories import UserFactory
 from ..frontend import FrontTestCase
 
 
+@pytest.mark.usefixtures('instance_path')
 class APITestCase(FrontTestCase):
-    def create_app(self):
-        app = super(APITestCase, self).create_app()
-        storages.init_app(app)
-        app.register_blueprint(blueprint)
-        return app
+
+    @pytest.fixture(autouse=True)
+    def inject_api(self, api):
+        '''
+        Inject API test client for compatibility with legacy tests.
+        '''
+        self.api = api
 
     @contextmanager
     def api_user(self, user=None):
-        self._api_user = user or UserFactory()
-        if not self._api_user.apikey:
-            self._api_user.generate_api_key()
-            self._api_user.save()
-        yield self._api_user
+        with self.api.user(user) as user:
+            yield user
 
-    def perform(self, verb, url, **kwargs):
-        headers = kwargs.pop('headers', {})
-        headers['Content-Type'] = 'application/json'
+    def get(self, url, *args, **kwargs):
+        return self.api.get(url, *args, **kwargs)
 
-        data = kwargs.get('data')
-        if data is not None:
-            data = json.dumps(data)
-            headers['Content-Length'] = len(data)
-            kwargs['data'] = data
+    def post(self, url, data=None, json=True, *args, **kwargs):
+        return self.api.post(url, data=data, json=json, *args, **kwargs)
 
-        if getattr(self, '_api_user', None):
-            headers['X-API-KEY'] = kwargs.get('X-API-KEY',
-                                              self._api_user.apikey)
+    def put(self, url, data=None, json=True, *args, **kwargs):
+        return self.api.put(url, data=data, json=json, *args, **kwargs)
 
-        kwargs['headers'] = headers
-        method = getattr(super(APITestCase, self), verb)
-        return method(url, **kwargs)
-
-    def get(self, url, client=None, *args, **kwargs):
-        return self.perform('get', url, client=client, *args, **kwargs)
-
-    def post(self, url, data=None, client=None, json=True, *args, **kwargs):
-        if not json:
-            return super(APITestCase, self).post(
-                url, data or {}, client=client, *args, **kwargs)
-        return self.perform('post', url, data=data or {}, client=client,
-                            *args, **kwargs)
-
-    def put(self, url, data=None, client=None, json=True, *args, **kwargs):
-        if not json:
-            return super(APITestCase, self).put(
-                url, data or {}, client=client, *args, **kwargs)
-        return self.perform('put', url, data=data or {}, client=client,
-                            *args, **kwargs)
-
-    def delete(self, url, data=None, client=None, *args, **kwargs):
-        return self.perform('delete', url, data=data or {}, client=client,
-                            *args, **kwargs)
+    def delete(self, url, data=None, *args, **kwargs):
+        return self.api.delete(url, data=data, *args, **kwargs)

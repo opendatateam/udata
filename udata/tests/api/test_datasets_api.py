@@ -23,8 +23,6 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.tags import MIN_TAG_LENGTH, MAX_TAG_LENGTH
 from udata.utils import unique_string, faker
 
-from nose.plugins.attrib import attr
-
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -38,7 +36,7 @@ SAMPLE_GEOM = {
 
 class DatasetAPITest(APITestCase):
     modules = ['core.user', 'core.dataset', 'core.organization']
-    
+
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
         with self.autoindex():
@@ -124,7 +122,6 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
 
-    @attr('create')
     def test_dataset_api_create(self):
         '''It should create a dataset from the API'''
         data = DatasetFactory.as_dict()
@@ -137,7 +134,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.owner, self.user)
         self.assertIsNone(dataset.organization)
 
-    @attr('create')
     def test_dataset_api_create_as_org(self):
         '''It should create a dataset as organization from the API'''
         self.login()
@@ -154,7 +150,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.organization, org)
         self.assertIsNone(dataset.owner)
 
-    @attr('create')
     def test_dataset_api_create_as_org_permissions(self):
         """It should create a dataset as organization from the API
 
@@ -168,7 +163,6 @@ class DatasetAPITest(APITestCase):
         self.assert400(response)
         self.assertEqual(Dataset.objects.count(), 0)
 
-    @attr('create')
     def test_dataset_api_create_tags(self):
         '''It should create a dataset from the API with tags'''
         data = DatasetFactory.as_dict()
@@ -180,7 +174,6 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.tags, sorted(data['tags']))
 
-    @attr('create')
     def test_dataset_api_fail_to_create_too_short_tags(self):
         '''It should fail to create a dataset from the API because
         the tag is too short'''
@@ -190,7 +183,6 @@ class DatasetAPITest(APITestCase):
             response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 400)
 
-    @attr('create')
     def test_dataset_api_fail_to_create_too_long_tags(self):
         '''Should fail creating a dataset with a tag long'''
         data = DatasetFactory.as_dict()
@@ -199,7 +191,6 @@ class DatasetAPITest(APITestCase):
             response = self.post(url_for('api.datasets'), data)
         self.assertStatus(response, 400)
 
-    @attr('create')
     def test_dataset_api_create_and_slugify_tags(self):
         '''It should create a dataset from the API and slugify the tags'''
         data = DatasetFactory.as_dict()
@@ -211,7 +202,6 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.tags, ['aaa-bbb-u'])
 
-    @attr('create')
     def test_dataset_api_create_with_extras(self):
         '''It should create a dataset with extras from the API'''
         data = DatasetFactory.as_dict()
@@ -230,7 +220,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
-    @attr('create')
     def test_dataset_api_create_with_resources(self):
         '''It should create a dataset with resources from the API'''
         data = DatasetFactory.as_dict()
@@ -244,7 +233,6 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), 3)
 
-    @attr('create')
     def test_dataset_api_create_with_geom(self):
         '''It should create a dataset with resources from the API'''
         data = DatasetFactory.as_dict()
@@ -258,7 +246,6 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.spatial.geom, SAMPLE_GEOM)
 
-    @attr('create')
     def test_dataset_api_create_with_legacy_frequency(self):
         '''It should create a dataset from the API with a legacy frequency'''
         self.login()
@@ -270,7 +257,6 @@ class DatasetAPITest(APITestCase):
             self.assert201(response)
             self.assertEqual(response.json['frequency'], newFreq)
 
-    @attr('update')
     def test_dataset_api_update(self):
         '''It should update a dataset from the API'''
         user = self.login()
@@ -283,7 +269,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(Dataset.objects.first().description,
                          'new description')
 
-    @attr('update')
     def test_dataset_api_update_with_resources(self):
         '''It should update a dataset from the API with resources parameters'''
         user = self.login()
@@ -298,7 +283,6 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), initial_length + 1)
 
-    @attr('update')
     def test_dataset_api_update_without_resources(self):
         '''It should update a dataset from the API without resources'''
         user = self.login()
@@ -316,7 +300,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.description, data['description'])
         self.assertEqual(len(dataset.resources), initial_length)
 
-    @attr('update')
     def test_dataset_api_update_with_extras(self):
         '''It should update a dataset from the API with extras parameters'''
         user = self.login()
@@ -336,7 +319,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
-    @attr('update')
     def test_dataset_api_update_with_no_extras(self):
         '''It should update a dataset from the API with no extras
 
@@ -363,7 +345,6 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(dataset.extras['float'], 42.0)
         self.assertEqual(dataset.extras['string'], 'value')
 
-    @attr('update')
     def test_dataset_api_update_with_empty_extras(self):
         '''It should update a dataset from the API with empty extras
 
@@ -388,7 +369,6 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.extras, {})
 
-    @attr('update')
     def test_dataset_api_update_deleted(self):
         '''It should not update a deleted dataset from the API and raise 401'''
         user = self.login()
@@ -549,11 +529,11 @@ class DatasetBadgeAPITest(APITestCase):
 
 class DatasetResourceAPITest(APITestCase):
     modules = None
+
     def setUp(self):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
 
-    @attr('create')
     def test_create(self):
         data = ResourceFactory.as_dict()
         with self.api_user():
@@ -563,7 +543,6 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
 
-    @attr('create')
     def test_create_2nd(self):
         self.dataset.resources.append(ResourceFactory())
         self.dataset.save()
@@ -576,7 +555,6 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 2)
 
-    @attr('create')
     def test_create_with_file(self):
         '''It should create a resource from the API with a file'''
         user = self.login()
@@ -598,7 +576,6 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
-    @attr('update')
     def test_reorder(self):
         self.dataset.resources = ResourceFactory.build_batch(3)
         self.dataset.save()
@@ -619,7 +596,6 @@ class DatasetResourceAPITest(APITestCase):
                          [str(r['id']) for r in expected_order])
         self.assertEqual(self.dataset.last_modified, initial_last_modified)
 
-    @attr('update')
     def test_update(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
@@ -644,7 +620,6 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.url, data['url'])
         self.assertEqualDates(updated.published, now)
 
-    @attr('update')
     def test_bulk_update(self):
         resources = ResourceFactory.build_batch(2)
         self.dataset.resources.extend(resources)
@@ -677,7 +652,6 @@ class DatasetResourceAPITest(APITestCase):
         new_resource = self.dataset.resources[-1]
         self.assertEqualDates(new_resource.published, now)
 
-    @attr('update')
     def test_update_404(self):
         data = {
             'title': faker.sentence(),
@@ -690,7 +664,6 @@ class DatasetResourceAPITest(APITestCase):
                                         rid=str(ResourceFactory().id)), data)
         self.assert404(response)
 
-    @attr('update')
     def test_update_with_file(self):
         '''It should update a resource from the API with a file'''
         user = self.login()
@@ -924,7 +897,6 @@ class CommunityResourceAPITest(APITestCase):
         data = json.loads(response.data)
         self.assertEqual(data['id'], str(community_resource.id))
 
-    @attr('create')
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
         dataset = VisibleDatasetFactory()
@@ -945,7 +917,6 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(community_resource.owner, self.user)
         self.assertIsNone(community_resource.organization)
 
-    @attr('create')
     def test_community_resource_api_create_as_org(self):
         '''It should create a community resource as org from the API'''
         dataset = VisibleDatasetFactory()
@@ -970,7 +941,6 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(community_resource.organization, org)
         self.assertIsNone(community_resource.owner)
 
-    @attr('update')
     def test_community_resource_api_update(self):
         '''It should update a community resource from the API'''
         user = self.login()
@@ -985,7 +955,6 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.first().description,
                          'new description')
 
-    @attr('update')
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''
         dataset = VisibleDatasetFactory()
@@ -1011,7 +980,6 @@ class CommunityResourceAPITest(APITestCase):
         self.assertTrue(
             CommunityResource.objects.first().url.endswith('test.txt'))
 
-    @attr('create')
     def test_community_resource_api_create_remote(self):
         '''It should create a remote community resource from the API'''
         user = self.login()
@@ -1032,7 +1000,6 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(community_resource.owner, user)
         self.assertIsNone(community_resource.organization)
 
-    @attr('create')
     def test_community_resource_api_create_remote_needs_dataset(self):
         '''
         It should prevent remote community resource creation without dataset
@@ -1049,7 +1016,6 @@ class CommunityResourceAPITest(APITestCase):
         self.assertIn('dataset', data['errors'])
         self.assertEqual(CommunityResource.objects.count(), 0)
 
-    @attr('create')
     def test_community_resource_api_create_remote_needs_real_dataset(self):
         '''
         It should prevent remote community resource creation without a valid

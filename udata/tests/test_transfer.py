@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import pytest
+
 from udata.auth import login_user, PermissionDenied
 
 from udata.features.transfer.factories import TransferFactory
@@ -15,18 +17,19 @@ from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 
-from . import TestCase, DBTestMixin
+
+pytestmark = pytest.mark.usefixtures('clean_db')
 
 
-class TransferStartTest(TestCase, DBTestMixin):
+class TransferStartTest:
     def assert_transfer_started(self, subject, owner, recipient, comment):
         transfer = request_transfer(subject, recipient, comment)
 
-        self.assertEqual(transfer.owner, owner)
-        self.assertEqual(transfer.recipient, recipient)
-        self.assertEqual(transfer.subject, subject)
-        self.assertEqual(transfer.comment, comment)
-        self.assertEqual(transfer.status, 'pending')
+        assert transfer.owner == owner
+        assert transfer.recipient == recipient
+        assert transfer.subject == subject
+        assert transfer.comment == comment
+        assert transfer.status == 'pending'
 
     def test_request_transfer_owner_to_user(self):
         user = UserFactory()
@@ -64,7 +67,7 @@ class TransferStartTest(TestCase, DBTestMixin):
         comment = faker.sentence()
 
         login_user(user)
-        with self.assertRaises(PermissionDenied):
+        with pytest.raises(PermissionDenied):
             request_transfer(dataset, recipient, comment)
 
     def test_request_transfer_not_authorized_not_admin(self):
@@ -76,7 +79,7 @@ class TransferStartTest(TestCase, DBTestMixin):
         comment = faker.sentence()
 
         login_user(user)
-        with self.assertRaises(PermissionDenied):
+        with pytest.raises(PermissionDenied):
             request_transfer(dataset, recipient, comment)
 
     def test_request_transfer_to_self(self):
@@ -85,7 +88,7 @@ class TransferStartTest(TestCase, DBTestMixin):
         comment = faker.sentence()
 
         login_user(user)
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.assert_transfer_started(dataset, user, user, comment)
 
     def test_request_transfer_to_same_organization(self):
@@ -97,15 +100,12 @@ class TransferStartTest(TestCase, DBTestMixin):
 
         login_user(user)
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.assert_transfer_started(dataset, org, org, comment)
 
 
-class TransferAcceptTest(TestCase, DBTestMixin):
-    def setUp(self):
-        super(TransferAcceptTest, self).setUp()
-        self.app.config['USE_METRICS'] = True
-
+@pytest.mark.options(USE_METRICS=True)
+class TransferAcceptTest:
     def test_recipient_user_can_accept_transfer(self):
         owner = UserFactory()
         recipient = UserFactory()
@@ -115,24 +115,24 @@ class TransferAcceptTest(TestCase, DBTestMixin):
                                    subject=subject)
 
         owner.reload()  # Needs updated metrics
-        self.assertEqual(owner.metrics['datasets'], 1)
+        assert owner.metrics['datasets'] == 1
 
         recipient.reload()  # Needs updated metrics
-        self.assertEqual(recipient.metrics['datasets'], 0)
+        assert recipient.metrics['datasets'] == 0
 
         login_user(recipient)
         transfer = accept_transfer(transfer)
 
-        self.assertEqual(transfer.status, 'accepted')
+        assert transfer.status == 'accepted'
 
         subject.reload()
-        self.assertEqual(subject.owner, recipient)
+        assert subject.owner == recipient
 
         recipient.reload()
-        self.assertEqual(recipient.metrics['datasets'], 1)
+        assert recipient.metrics['datasets'] == 1
 
         owner.reload()
-        self.assertEqual(owner.metrics['datasets'], 0)
+        assert owner.metrics['datasets'] == 0
 
     def test_org_admin_can_accept_transfer(self):
         owner = UserFactory()
@@ -144,31 +144,31 @@ class TransferAcceptTest(TestCase, DBTestMixin):
                                    subject=subject)
 
         owner.reload()  # Needs updated metrics
-        self.assertEqual(owner.metrics['datasets'], 1)
+        assert owner.metrics['datasets'] == 1
 
         org.reload()  # Needs updated metrics
-        self.assertEqual(org.metrics['datasets'], 0)
+        assert org.metrics['datasets'] == 0
 
         admin.reload()  # Needs updated metrics
-        self.assertEqual(admin.metrics['datasets'], 0)
+        assert admin.metrics['datasets'] == 0
 
         login_user(admin)
         transfer = accept_transfer(transfer)
 
-        self.assertEqual(transfer.status, 'accepted')
+        assert transfer.status == 'accepted'
 
         subject.reload()
-        self.assertEqual(subject.organization, org)
-        self.assertIsNone(subject.owner)
+        assert subject.organization == org
+        assert subject.owner is None
 
         org.reload()
-        self.assertEqual(org.metrics['datasets'], 1)
+        assert org.metrics['datasets'] == 1
 
         admin.reload()
-        self.assertEqual(admin.metrics['datasets'], 0)
+        assert admin.metrics['datasets'] == 0
 
         owner.reload()
-        self.assertEqual(owner.metrics['datasets'], 0)
+        assert owner.metrics['datasets'] == 0
 
     def test_org_editor_cant_accept_transfer(self):
         owner = UserFactory()
@@ -180,12 +180,11 @@ class TransferAcceptTest(TestCase, DBTestMixin):
                                    subject=subject)
 
         login_user(editor)
-        with self.assertRaises(PermissionDenied):
+        with pytest.raises(PermissionDenied):
             accept_transfer(transfer)
 
 
-class TransferNotificationsTest(TestCase, DBTestMixin):
-
+class TransferNotificationsTest:
     def test_pending_transfer_request_for_user(self):
         user = UserFactory()
         datasets = VisibleDatasetFactory.create_batch(2, owner=user)
@@ -198,14 +197,14 @@ class TransferNotificationsTest(TestCase, DBTestMixin):
             transfer = request_transfer(dataset, recipient, comment)
             transfers[transfer.id] = transfer
 
-        self.assertEqual(len(transfer_request_notifications(user)), 0)
+        assert len(transfer_request_notifications(user)) == 0
 
         notifications = transfer_request_notifications(recipient)
-        self.assertEqual(len(notifications), len(datasets))
+        assert len(notifications) == len(datasets)
         for dt, details in notifications:
             transfer = transfers[details['id']]
-            self.assertEqual(details['subject']['class'], 'dataset')
-            self.assertEqual(details['subject']['id'], transfer.subject.id)
+            assert details['subject']['class'] == 'dataset'
+            assert details['subject']['id'] == transfer.subject.id
 
     def test_pending_transfer_request_for_org(self):
         user = UserFactory()
@@ -221,11 +220,11 @@ class TransferNotificationsTest(TestCase, DBTestMixin):
             transfer = request_transfer(dataset, org, comment)
             transfers[transfer.id] = transfer
 
-        self.assertEqual(len(transfer_request_notifications(user)), 0)
+        assert len(transfer_request_notifications(user)) == 0
 
         notifications = transfer_request_notifications(recipient)
-        self.assertEqual(len(notifications), len(datasets))
+        assert len(notifications) == len(datasets)
         for dt, details in notifications:
             transfer = transfers[details['id']]
-            self.assertEqual(details['subject']['class'], 'dataset')
-            self.assertEqual(details['subject']['id'], transfer.subject.id)
+            assert details['subject']['class'] == 'dataset'
+            assert details['subject']['id'] == transfer.subject.id

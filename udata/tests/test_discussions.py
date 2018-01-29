@@ -22,10 +22,12 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.utils import faker
 
+
 from frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
+from .helpers import assert_starts_with, capture_mails, assert_emit
 
 
 class DiscussionsTest(APITestCase):
@@ -36,7 +38,7 @@ class DiscussionsTest(APITestCase):
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
-        with self.assert_emit(on_new_discussion):
+        with assert_emit(on_new_discussion):
             response = self.post(url_for('api.discussions'), {
                 'title': 'test title',
                 'comment': 'bla bla',
@@ -105,7 +107,7 @@ class DiscussionsTest(APITestCase):
         dataset = Dataset.objects.create(title='Test dataset',
                                          extras={'key': 'value'})
 
-        with self.assert_emit(on_new_discussion):
+        with assert_emit(on_new_discussion):
             response = self.post(url_for('api.discussions'), {
                 'title': 'test title',
                 'comment': 'bla bla',
@@ -266,7 +268,7 @@ class DiscussionsTest(APITestCase):
         on_new_discussion.send(discussion)  # Updating metrics.
 
         poster = self.login()
-        with self.assert_emit(on_new_discussion_comment):
+        with assert_emit(on_new_discussion_comment):
             response = self.post(url_for('api.discussion', id=discussion.id), {
                 'comment': 'new bla bla'
             })
@@ -304,7 +306,7 @@ class DiscussionsTest(APITestCase):
         )
         on_new_discussion.send(discussion)  # Updating metrics.
 
-        with self.assert_emit(on_discussion_closed):
+        with assert_emit(on_discussion_closed):
             response = self.post(url_for('api.discussion', id=discussion.id), {
                 'comment': 'close bla bla',
                 'close': True
@@ -368,7 +370,7 @@ class DiscussionsTest(APITestCase):
         on_new_discussion.send(discussion)  # Updating metrics.
         self.assertEqual(Discussion.objects(subject=dataset).count(), 1)
 
-        with self.assert_emit(on_discussion_deleted):
+        with assert_emit(on_discussion_deleted):
             response = self.delete(url_for('api.discussion', id=discussion.id))
         self.assertStatus(response, 204)
 
@@ -423,10 +425,8 @@ class DiscussionCsvTest(FrontTestCase):
         self.assert200(response)
 
         headers, data = response.data.decode('utf-8').strip().split('\r\n')
-        self.assertStartswith(
-            data,
-            '"{discussion.id}";"{discussion.user}"'.format(
-                discussion=discussion))
+        expected = '"{discussion.id}";"{discussion.user}"'
+        assert_starts_with(data, expected.format(discussion=discussion))
 
 
 class DiscussionsNotificationsTest(TestCase, DBTestMixin):
@@ -521,7 +521,7 @@ class DiscussionsMailsTest(FrontTestCase):
             discussion=[message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_discussion(discussion)
 
         # Should have sent one mail to the owner
@@ -541,7 +541,7 @@ class DiscussionsMailsTest(FrontTestCase):
             discussion=[message, new_message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_new_discussion_comment(discussion, message=new_message)
 
         # Should have sent one mail to the owner and the other participants
@@ -566,7 +566,7 @@ class DiscussionsMailsTest(FrontTestCase):
             discussion=[message, second_message, closing_message]
         )
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             notify_discussion_closed(discussion, message=closing_message)
 
         # Should have sent one mail to each participant
