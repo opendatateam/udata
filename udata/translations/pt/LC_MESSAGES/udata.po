@@ -1,10 +1,9 @@
-
 msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-29 07:14-0500\n"
+"PO-Revision-Date: 2018-01-29 10:32-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -20,15 +19,15 @@ msgstr ""
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
-msgstr ""
+msgstr "Erro de validação: Os seus dados não podem ser atualizados de momento, fomos notificados do erro e vamos corrigir logo que possível."
 
 #: udata/api/oauth2.py:29
 msgid "Public"
-msgstr ""
+msgstr "Público"
 
 #: udata/api/oauth2.py:30
 msgid "Confidential"
-msgstr ""
+msgstr "Confidencial"
 
 #: udata/api/oauth2.py:34
 msgid "Web Application"
