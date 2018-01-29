@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-29 10:53-0500\n"
+"PO-Revision-Date: 2018-01-29 11:21-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -59,7 +59,7 @@ msgstr "Credenciais do cliente"
 
 #: udata/api/oauth2.py:47
 msgid "Bearer Token"
-msgstr "Token de portador"
+msgstr "Token do portador"
 
 #: udata/api/oauth2.py:51
 msgid "Default scope"
@@ -67,7 +67,7 @@ msgstr "Contexto padrão"
 
 #: udata/api/oauth2.py:52
 msgid "System administrator rights"
-msgstr "Direitos de administrador de sistema"
+msgstr "Direitos do administrador de sistema"
 
 #: udata/commands/init.py:30
 msgid "Do you want to create a superadmin user?"
