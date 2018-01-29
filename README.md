@@ -5,6 +5,7 @@ uData
 [![Python Requirements Status][requires-io-badge]][requires-io-url]
 [![JavaScript Dependencies Status][david-dm-badge]][david-dm-url]
 [![JavaScript Development Dependencies Status][david-dm-dev-badge]][david-dm-dev-url]
+[![Translation progress][crowdin-badge]][crowdin-url]
 [![Read the documentation][readthedocs-badge]][readthedocs-url]
 [![Join the chat at https://gitter.im/opendatateam/udata][gitter-badge]][gitter-url]
 
@@ -24,3 +25,5 @@ The [full documentation][readthedocs-url] is hosted on Read the Docs.
 [gitter-url]: https://gitter.im/opendatateam/udata
 [readthedocs-badge]: https://readthedocs.org/projects/udata/badge/?version=latest
 [readthedocs-url]: https://udata.readthedocs.io/en/latest/
+[crowdin-badge]: https://d322cqt584bo4o.cloudfront.net/udata/localized.svg
+[crowdin-url]: https://crowdin.com/project/udata
