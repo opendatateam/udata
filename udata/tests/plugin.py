@@ -78,7 +78,6 @@ def get_settings(request):
 
 def drop_db(app):
     '''Clear the database'''
-    print('MONGODB_HOST', app.config['MONGODB_HOST'])
     parsed_url = urlparse(app.config['MONGODB_HOST'])
 
     # drop the leading /
