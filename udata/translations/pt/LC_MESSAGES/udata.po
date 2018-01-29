@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-29 11:21-0500\n"
+"PO-Revision-Date: 2018-01-29 11:31-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -75,45 +75,45 @@ msgstr "Deseja criar um utilizador administrador?"
 
 #: udata/commands/init.py:35
 msgid "Do you want to import some data-related license?"
-msgstr ""
+msgstr "Quer importar dados relacionados com licenças?"
 
 #: udata/commands/init.py:39
 msgid "Do you want to create some sample data?"
-msgstr ""
+msgstr "Quer criar alguns dados de exemplo?"
 
 #: udata/commands/init.py:43
 msgid "Your udata instance is ready!"
-msgstr ""
+msgstr "A sua instância udata está pronta!"
 
 #: udata/core/badges/forms.py:17
 msgid "Kind"
-msgstr ""
+msgstr "Tipo"
 
 #: udata/core/badges/forms.py:19
 msgid "Kind of badge (certified, etc)"
-msgstr ""
+msgstr "Tipo de insígnia (certificada, etc)"
 
 #: udata/core/badges/tasks.py:40
 #, python-format
 msgid "Your organization \"%(name)s\" has been certified"
-msgstr ""
+msgstr "A sua organização \"%(name)s\" foi certificada"
 
 #: udata/core/badges/tasks.py:67
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as public service"
-msgstr ""
+msgstr "A sua organização \"%(name)s\" foi identificada como serviço público"
 
 #: udata/core/dataset/activities.py:25
 msgid "created a dataset"
-msgstr ""
+msgstr "criou um dataset"
 
 #: udata/core/dataset/activities.py:31
 msgid "updated a dataset"
-msgstr ""
+msgstr "atualizou um dataset"
 
 #: udata/core/dataset/activities.py:38
 msgid "deleted a dataset"
-msgstr ""
+msgstr "apagou um dataset"
 
 #: udata/core/dataset/forms.py:27 udata/core/dataset/forms.py:73
 #: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
@@ -123,14 +123,14 @@ msgstr ""
 #: udata/templates/search.html:73 udata/templates/search.html:87
 #: udata/templates/topic/datasets.html:33 udata/templates/topic/reuses.html:32
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 #: udata/core/dataset/forms.py:28 udata/core/dataset/forms.py:75
 #: udata/core/jobs/forms.py:31 udata/core/organization/forms.py:27
 #: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:20
 #: udata/harvest/forms.py:17
 msgid "Description"
-msgstr ""
+msgstr "Descrição"
 
 #: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
 #: udata/templates/reuse/card.html:34 udata/templates/reuse/display.html:182
@@ -138,28 +138,28 @@ msgstr ""
 #: udata/templates/reuse/search-panel.html:6
 #: udata/templates/reuse/search-result.html:18
 msgid "Type"
-msgstr ""
+msgstr "Tipo"
 
 #: udata/core/dataset/forms.py:32
 msgid "Whether the resource is an uploaded file, a remote file or an API"
-msgstr ""
+msgstr "Seja o recurso um arquivo carregado, um arquivo remoto ou uma API"
 
 #: udata/core/dataset/forms.py:35 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:19
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: udata/core/dataset/forms.py:36 udata/templates/dataset/search-labels.html:24
 msgid "Format"
-msgstr ""
+msgstr "Formato"
 
 #: udata/core/dataset/forms.py:39
 msgid "Mime type"
-msgstr ""
+msgstr "Formato de ficheiro"
 
 #: udata/core/dataset/forms.py:40
 msgid "The mime type associated to the extension. (ex: text/plain)"
-msgstr ""
+msgstr "O formato de ficheiro associado à extensão. (ex: texto/sem formatação)"
 
 #: udata/core/dataset/forms.py:43
 msgid "Size"
@@ -251,7 +251,7 @@ msgstr ""
 #: udata/templates/post/display.html:61 udata/templates/post/display.html:64
 #: udata/templates/reuse/display.html:56 udata/templates/reuse/display.html:59
 msgid "Private"
-msgstr ""
+msgstr "Privado"
 
 #: udata/core/dataset/forms.py:96 udata/core/reuse/forms.py:36
 msgid "Restrict the dataset visibility to you or your organization only."
@@ -278,11 +278,11 @@ msgstr ""
 
 #: udata/core/dataset/models.py:29
 msgid "Punctual"
-msgstr ""
+msgstr "Pontual"
 
 #: udata/core/dataset/models.py:30
 msgid "Real time"
-msgstr ""
+msgstr "Tempo real"
 
 #: udata/core/dataset/models.py:31
 msgid "Hourly"
@@ -302,11 +302,11 @@ msgstr ""
 
 #: udata/core/dataset/models.py:35 udata/harvest/models.py:18
 msgid "Daily"
-msgstr ""
+msgstr "Diário"
 
 #: udata/core/dataset/models.py:36
 msgid "Four times a week"
-msgstr ""
+msgstr "Quatro vezes por semana"
 
 #: udata/core/dataset/models.py:37
 msgid "Three times a week"
@@ -370,19 +370,19 @@ msgstr ""
 
 #: udata/core/dataset/models.py:52
 msgid "Irregular"
-msgstr ""
+msgstr "Irregular"
 
 #: udata/core/dataset/models.py:53
 msgid "Unknown"
-msgstr ""
+msgstr "Desconhecido"
 
 #: udata/core/dataset/models.py:76
 msgid "Uploaded file"
-msgstr ""
+msgstr "Ficheiro enviado"
 
 #: udata/core/dataset/models.py:77
 msgid "Remote file"
-msgstr ""
+msgstr "Ficheiro remoto"
 
 #: udata/core/dataset/models.py:78 udata/core/reuse/models.py:19
 msgid "API"
@@ -391,7 +391,7 @@ msgstr ""
 #: udata/core/dataset/models.py:268 udata/core/dataset/rdf.py:285
 #: udata/templates/dataset/resource/list-item.html:17
 msgid "Nameless resource"
-msgstr ""
+msgstr "Recurso sem nome"
 
 #: udata/core/dataset/models.py:317 udata/models/datetime_fields.py:58
 #: udata/templates/dataset/display.html:229 udata/templates/dataset/list.html:41
@@ -399,7 +399,7 @@ msgstr ""
 #: udata/templates/search.html:74 udata/templates/search.html:88
 #: udata/templates/topic/datasets.html:34 udata/templates/topic/reuses.html:33
 msgid "Creation date"
-msgstr ""
+msgstr "Data de criação"
 
 #: udata/core/dataset/models.py:319 udata/models/datetime_fields.py:60
 #: udata/templates/dataset/list.html:42 udata/templates/organization/list.html:36
@@ -419,7 +419,7 @@ msgstr ""
 
 #: udata/core/dataset/models.py:369 udata/templates/dataset/display.html:11
 msgid "dataset"
-msgstr ""
+msgstr "conjunto de dados"
 
 #: udata/core/dataset/rdf.py:283
 msgid "{format} resource"
@@ -447,7 +447,7 @@ msgstr ""
 
 #: udata/core/dataset/views.py:28 udata/templates/home.html:122
 msgid "Last datasets"
-msgstr ""
+msgstr "Últimos conjunto de dados"
 
 #: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:21
 #: udata/core/issues/forms.py:16 udata/core/issues/forms.py:21
@@ -459,17 +459,17 @@ msgstr ""
 #: udata/templates/mail/new_discussion_comment.html:31
 #: udata/templates/mail/new_issue_comment.html:31
 msgid "Comment"
-msgstr ""
+msgstr "Comentário"
 
 #: udata/core/discussions/forms.py:17 udata/core/issues/forms.py:17
 msgid "Subject"
-msgstr ""
+msgstr "Assunto"
 
 #: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
 #: udata/templates/dataset/display.html:348 udata/templates/post/display.html:198
 #: udata/templates/reuse/display.html:269 udata/templates/site/dashboard.html:25
 msgid "Discussions"
-msgstr ""
+msgstr "Discussões"
 
 #: udata/core/discussions/tasks.py:41
 #, python-format
@@ -483,7 +483,7 @@ msgstr ""
 
 #: udata/core/discussions/tasks.py:72
 msgid "A discussion has been closed"
-msgstr ""
+msgstr "Uma discussão foi fechada"
 
 #: udata/core/followers/metrics.py:29 udata/core/site/metrics.py:102
 #: udata/templates/dataset/followers.html:6
