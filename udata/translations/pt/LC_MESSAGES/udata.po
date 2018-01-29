@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-29 11:42-0500\n"
+"PO-Revision-Date: 2018-01-29 11:54-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -318,11 +318,11 @@ msgstr ""
 
 #: udata/core/dataset/models.py:39 udata/harvest/models.py:17
 msgid "Weekly"
-msgstr ""
+msgstr "Semanal"
 
 #: udata/core/dataset/models.py:40
 msgid "Biweekly"
-msgstr ""
+msgstr "Quinzenal"
 
 #: udata/core/dataset/models.py:41
 msgid "Semimonthly"
@@ -443,7 +443,7 @@ msgstr "Fortemente reutilizado"
 
 #: udata/core/dataset/tasks.py:69
 msgid "You need to update some frequency-based datasets"
-msgstr ""
+msgstr "Você precisa atualizar alguns datasets baseados em frequência"
 
 #: udata/core/dataset/views.py:28 udata/templates/home.html:122
 msgid "Last datasets"
@@ -474,12 +474,12 @@ msgstr "Discussões"
 #: udata/core/discussions/tasks.py:41
 #, python-format
 msgid "Your %(type)s have a new discussion"
-msgstr ""
+msgstr "O seu %(type)s tem uma nova discussão"
 
 #: udata/core/discussions/tasks.py:56
 #, python-format
 msgid "%(user)s commented your discussion"
-msgstr ""
+msgstr "%(user)s comentou a sua discussão"
 
 #: udata/core/discussions/tasks.py:72
 msgid "A discussion has been closed"
@@ -501,94 +501,94 @@ msgstr "Uma discussão foi fechada"
 #: udata/templates/topic/reuses.html:36 udata/templates/user/followers.html:7
 #: udata/templates/user/list.html:34
 msgid "Followers"
-msgstr ""
+msgstr "Seguidores"
 
 #: udata/core/followers/tasks.py:22 udata/templates/mail/new_follower.html:8
 #, python-format
 msgid "%(user)s followed you"
-msgstr ""
+msgstr "%(user)s seguiu-te"
 
 #: udata/core/followers/tasks.py:25
 #, python-format
 msgid "%(user)s followed your organization"
-msgstr ""
+msgstr "%(user)s seguiu a sua organização"
 
 #: udata/core/issues/metrics.py:13 udata/core/reuse/views.py:57
 msgid "Issues"
-msgstr ""
+msgstr "Problemas"
 
 #: udata/core/issues/tasks.py:25
 #, python-format
 msgid "Your %(type)s have a new issue"
-msgstr ""
+msgstr "O seu %(type)s tem um novo problema"
 
 #: udata/core/issues/tasks.py:39
 #, python-format
 msgid "%(user)s commented your issue"
-msgstr ""
+msgstr "%(user)s comentou o seu problema"
 
 #: udata/core/issues/tasks.py:54
 msgid "An issue has been closed"
-msgstr ""
+msgstr "Um problema foi fechado"
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
 #: udata/harvest/forms.py:15 udata/templates/api/admin.html:10
 #: udata/templates/search.html:101 udata/templates/user/list.html:35
 msgid "Name"
-msgstr ""
+msgstr "Nome"
 
 #: udata/core/jobs/forms.py:32
 msgid "Tasks"
-msgstr ""
+msgstr "Tarefas"
 
 #: udata/core/jobs/forms.py:33
 msgid "Enabled"
-msgstr ""
+msgstr "Activado"
 
 #: udata/core/jobs/models.py:21
 msgid "every {0.period_singular}"
-msgstr ""
+msgstr "todos os {0.period_singular}"
 
 #: udata/core/jobs/models.py:22
 msgid "every {0.every} {0.period}"
-msgstr ""
+msgstr "todos os {0.period} {0.every}"
 
 #: udata/core/organization/activities.py:25
 msgid "created an organization"
-msgstr ""
+msgstr "criou uma organização"
 
 #: udata/core/organization/activities.py:32
 msgid "updated an organization"
-msgstr ""
+msgstr "atualizou uma organização"
 
 #: udata/core/organization/forms.py:25
 msgid "Acronym"
-msgstr ""
+msgstr "Sigla"
 
 #: udata/core/organization/forms.py:25
 msgid "Shorter organization name"
-msgstr ""
+msgstr "Nome simplificado da organização"
 
 #: udata/core/organization/forms.py:28
 msgid "The details about your organization"
-msgstr ""
+msgstr "Os detalhes da sua organização"
 
 #: udata/core/organization/forms.py:30 udata/core/user/forms.py:20
 msgid "Website"
-msgstr ""
+msgstr "Página Web"
 
 #: udata/core/organization/forms.py:30
 msgid "The organization website URL"
-msgstr ""
+msgstr "A URL da página da organização"
 
 #: udata/core/organization/forms.py:31
 msgid "Logo"
-msgstr ""
+msgstr "Logotipo"
 
 #: udata/core/organization/forms.py:63
 msgid "Role"
-msgstr ""
+msgstr "Perfil"
 
 #: udata/core/organization/metrics.py:17 udata/core/reuse/metrics.py:24
 #: udata/core/site/metrics.py:42 udata/core/site/views.py:128
@@ -606,53 +606,53 @@ msgstr ""
 #: udata/templates/user/following.html:15 udata/templates/user/list.html:32
 #: udata/theme/__init__.py:39
 msgid "Datasets"
-msgstr ""
+msgstr "Conjunto de dados"
 
 #: udata/core/organization/metrics.py:50
 msgid "Permitted reuses"
-msgstr ""
+msgstr "Reutilizações permitidas"
 
 #: udata/core/organization/metrics.py:61
 #: udata/templates/organization/display.html:54
 msgid "Members"
-msgstr ""
+msgstr "Membros"
 
 #: udata/core/organization/models.py:25
 #: udata/templates/organization/display_base.html:127
 msgid "Administrator"
-msgstr ""
+msgstr "Administrador"
 
 #: udata/core/organization/models.py:26
 #: udata/templates/organization/display_base.html:134
 msgid "Editor"
-msgstr ""
+msgstr "Editor"
 
 #: udata/core/organization/models.py:32 udata/features/transfer/models.py:17
 #: udata/harvest/models.py:22 udata/harvest/models.py:32 udata/harvest/models.py:69
 msgid "Pending"
-msgstr ""
+msgstr "Pendente"
 
 #: udata/core/organization/models.py:33 udata/features/transfer/models.py:18
 #: udata/harvest/models.py:70
 msgid "Accepted"
-msgstr ""
+msgstr "Aceite"
 
 #: udata/core/organization/models.py:34 udata/features/transfer/models.py:19
 #: udata/harvest/models.py:71
 msgid "Refused"
-msgstr ""
+msgstr "Recusado"
 
 #: udata/core/organization/models.py:128
 msgid "Public Service"
-msgstr ""
+msgstr "Serviço público"
 
 #: udata/core/organization/models.py:129
 msgid "Certified"
-msgstr ""
+msgstr "Certificado"
 
 #: udata/core/organization/search.py:74
 msgid "No reuses"
-msgstr ""
+msgstr "Sem reutilizações"
 
 #: udata/core/organization/search.py:75
 msgid "Few reuses"
