@@ -1,0 +1,19 @@
+# Portuguese translations for udata.
+# Copyright (C) 2018 Open Data Team
+# This file is distributed under the same license as the udata project.
+#
+
+msgid ""
+msgstr ""
+"Project-Id-Version: udata\n"
+"Report-Msgid-Bugs-To: i18n@opendata.team\n"
+"POT-Creation-Date: 2018-01-29 11:24+0100\n"
+"PO-Revision-Date: 2018-01-29 11:24+0100\n"
+"Last-Translator: Open Data Team <i18n@opendata.team>\n"
+"Language: pt\n"
+"Language-Team: Portuguese\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.0\n"

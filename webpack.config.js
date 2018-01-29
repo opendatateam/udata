@@ -7,7 +7,7 @@ const node_path = path.join(__dirname, 'node_modules');
 const css_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 
-const languages = ['en', 'es', 'fr'];
+const languages = ['en', 'es', 'fr', 'pt'];
 
 module.exports = {
     entry: {
