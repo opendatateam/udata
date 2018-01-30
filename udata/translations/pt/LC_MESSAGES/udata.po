@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-30 09:14-0500\n"
+"PO-Revision-Date: 2018-01-30 09:22-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1129,111 +1129,111 @@ msgstr "Fonte"
 
 #: udata/harvest/forms.py:18
 msgid "Some optionnal details about this harvester"
-msgstr ""
+msgstr "Alguns detalhes opcionais sobre este coletor"
 
 #: udata/harvest/forms.py:20
 msgid "Backend"
-msgstr ""
+msgstr "Backend"
 
 #: udata/harvest/models.py:15
 msgid "Manual"
-msgstr ""
+msgstr "Manual"
 
 #: udata/harvest/models.py:23
 msgid "Initializing"
-msgstr ""
+msgstr "A iniciar"
 
 #: udata/harvest/models.py:24
 msgid "Initialized"
-msgstr ""
+msgstr "Iniciado"
 
 #: udata/harvest/models.py:25
 msgid "Processing"
-msgstr ""
+msgstr "Processando"
 
 #: udata/harvest/models.py:26 udata/harvest/models.py:34
 msgid "Done"
-msgstr ""
+msgstr "Concluído"
 
 #: udata/harvest/models.py:27
 msgid "Done with errors"
-msgstr ""
+msgstr "Concluído com erros"
 
 #: udata/harvest/models.py:28 udata/harvest/models.py:35
 msgid "Failed"
-msgstr ""
+msgstr "Falhou"
 
 #: udata/harvest/models.py:33
 msgid "Started"
-msgstr ""
+msgstr "Iniciado"
 
 #: udata/harvest/models.py:36
 msgid "Skipped"
-msgstr ""
+msgstr "Ignorado"
 
 #: udata/search/fields.py:37
 msgid "OR"
-msgstr ""
+msgstr "OU"
 
 #: udata/search/fields.py:116 udata/tests/test_search.py:803
 #: udata/tests/test_search.py:806
 msgid "yes"
-msgstr ""
+msgstr "sim"
 
 #: udata/search/fields.py:116 udata/tests/test_search.py:804
 #: udata/tests/test_search.py:807
 msgid "no"
-msgstr ""
+msgstr "não"
 
 #: udata/search/fields.py:287
 msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
-msgstr ""
+msgstr "Um intervalo de datas, expresso como inicial-final, onde ambas as datas estão no formato iso (ie. YYYY-MM-DD-YYYY-MM-DD)"
 
 #: udata/templates/admin.html:6
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: udata/templates/apidoc.html:4
 msgid "API Documentation"
-msgstr ""
+msgstr "Documentação da API"
 
 #: udata/templates/apidoc.html:5
 #, python-format
 msgid "%(site)s dynamic API documentation"
-msgstr ""
+msgstr "Documentação de API dinâmica do %(site)s"
 
 #: udata/templates/apidoc.html:24
 msgid "This page describe this website's free and open RESTful API's behavior"
-msgstr ""
+msgstr "Esta página descreve o comportamento da API"
 
 #: udata/templates/apidoc.html:30
 msgid "Authentication"
-msgstr ""
+msgstr "Autenticação"
 
 #: udata/templates/apidoc.html:35
 msgid "In order to be able to execute write operations,"
-msgstr ""
+msgstr "De forma a ser capaz de executar as operações de escrita,"
 
 #: udata/templates/apidoc.html:37
 #, python-format
 msgid "you first need to obtain an %(apikey)s in your profile settings."
-msgstr ""
+msgstr "precisa de obter primeiro uma %(apikey)s nas configurações do seu perfil."
 
 #: udata/templates/apidoc.html:41
 msgid "API Key"
-msgstr ""
+msgstr "Chave da API"
 
 #: udata/templates/apidoc.html:44
 msgid "you first need to authenticate and obtain an API Key in your profile settings."
-msgstr ""
+msgstr "primeiro você precisa de obter uma chave de API nas configurações do seu perfil."
 
 #: udata/templates/apidoc.html:47
 msgid "This key should be provided on each call in the <code>X-API-KEY</code> HTTP header."
-msgstr ""
+msgstr "Esta chave deve ser fornecida em cada chamada no cabeçalho HTTP <code>X-API-KEY</code>."
 
 #: udata/templates/apidoc.html:53
 msgid "Authorizations"
-msgstr ""
+msgstr "Autorizações"
 
 #: udata/templates/apidoc.html:57
 msgid "API calls are subject to the same permissions than the web interface."
