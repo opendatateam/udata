@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-30 09:22-0500\n"
+"PO-Revision-Date: 2018-01-30 09:35-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1237,21 +1237,21 @@ msgstr "Autorizações"
 
 #: udata/templates/apidoc.html:57
 msgid "API calls are subject to the same permissions than the web interface."
-msgstr ""
+msgstr "Chamadas de API estão sujeitos ás mesmas permissões que a interface web."
 
 #: udata/templates/apidoc.html:58
 msgid "By example, you need to be part of the organization to modify one of its datasets."
-msgstr ""
+msgstr "Por exemplo, você precisa fazer parte da organização para modificar um dos seus conjuntos de dados."
 
 #: udata/templates/apidoc.html:64
 msgid "Pagination"
-msgstr ""
+msgstr "Paginação"
 
 #: udata/templates/apidoc.html:68
 msgid "Some method are paginated and always follow the same pattern.\n"
 "                The object list is wrapped in a <code>Page</code> object.\n"
 "                "
-msgstr ""
+msgstr "Alguns métodos são paginados e seguem sempre o mesmo padrão.                 A lista de objetos é encapsulada num objeto <code>Page</code>.                "
 
 #: udata/templates/apidoc.html:72
 msgid "You don't have to compute yourself the previous and next pages\n"
@@ -1262,11 +1262,11 @@ msgstr ""
 
 #: udata/templates/apidoc.html:77
 msgid "Example"
-msgstr ""
+msgstr "Exemplo"
 
 #: udata/templates/apidoc.html:90
 msgid "Examples"
-msgstr ""
+msgstr "Exemplos"
 
 #: udata/templates/apidoc.html:94
 msgid "All examples use the <a href=\"http://httpie.org\">httpie</a> and <a href=\"http://stedolan.github.io/jq/\">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.\n"
