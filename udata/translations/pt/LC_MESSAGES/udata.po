@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-29 11:54-0500\n"
+"PO-Revision-Date: 2018-01-30 08:52-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -656,145 +656,145 @@ msgstr "Sem reutilizações"
 
 #: udata/core/organization/search.py:75
 msgid "Few reuses"
-msgstr ""
+msgstr "Algumas reutilizações"
 
 #: udata/core/organization/search.py:76
 msgid "Many reuses"
-msgstr ""
+msgstr "Muitas reutilizações"
 
 #: udata/core/organization/search.py:85 udata/core/reuse/search.py:95
 #: udata/core/user/search.py:61
 msgid "No datasets"
-msgstr ""
+msgstr "Não há conjuntos de dados"
 
 #: udata/core/organization/search.py:86 udata/core/reuse/search.py:96
 #: udata/core/user/search.py:62
 msgid "Few datasets"
-msgstr ""
+msgstr "Alguns conjuntos de dados"
 
 #: udata/core/organization/search.py:87 udata/core/reuse/search.py:97
 #: udata/core/user/search.py:63
 msgid "Many datasets"
-msgstr ""
+msgstr "Muitos conjuntos de dados"
 
 #: udata/core/organization/search.py:94 udata/core/reuse/search.py:104
 #: udata/core/user/search.py:70
 msgid "No followers"
-msgstr ""
+msgstr "Sem seguidores"
 
 #: udata/core/organization/search.py:95 udata/core/reuse/search.py:105
 #: udata/core/user/search.py:71
 msgid "Few followers"
-msgstr ""
+msgstr "Alguns seguidores"
 
 #: udata/core/organization/search.py:96 udata/core/reuse/search.py:106
 #: udata/core/user/search.py:72
 msgid "Many followers"
-msgstr ""
+msgstr "Muitos seguidores"
 
 #: udata/core/organization/tasks.py:37
 msgid "New membership request"
-msgstr ""
+msgstr "Novo pedido de adesão"
 
 #: udata/core/organization/tasks.py:44 udata/core/organization/tasks.py:54
 #, python-format
 msgid "You are now a member of the organization \"%(org)s\""
-msgstr ""
+msgstr "Você é agora um membro da organização \"%(org)s\""
 
 #: udata/core/organization/tasks.py:48
 msgid "Membership refused"
-msgstr ""
+msgstr "Associação recusada"
 
 #: udata/core/post/forms.py:19
 msgid "Headline"
-msgstr ""
+msgstr "Cabeçalho"
 
 #: udata/core/post/forms.py:20
 msgid "Content"
-msgstr ""
+msgstr "Conteúdo"
 
 #: udata/core/post/forms.py:22 udata/core/topic/forms.py:22
 #: udata/templates/post/display.html:147
 msgid "Associated datasets"
-msgstr ""
+msgstr "Conjuntos de dados associados"
 
 #: udata/core/post/forms.py:23 udata/core/topic/forms.py:23
 #: udata/templates/post/display.html:134
 msgid "Associated reuses"
-msgstr ""
+msgstr "Reutilizações associadas"
 
 #: udata/core/post/forms.py:25 udata/core/reuse/forms.py:31
 msgid "Image"
-msgstr ""
+msgstr "Imagem"
 
 #: udata/core/post/forms.py:26
 msgid "Image credits"
-msgstr ""
+msgstr "Créditos da imagem"
 
 #: udata/core/post/forms.py:27
 msgid "Credit URL"
-msgstr ""
+msgstr "URL de créditos"
 
 #: udata/core/post/models.py:43
 msgid "post"
-msgstr ""
+msgstr "publicação"
 
 #: udata/core/reuse/activities.py:26
 msgid "created a reuse"
-msgstr ""
+msgstr "criou uma reutilização"
 
 #: udata/core/reuse/activities.py:32
 msgid "updated a reuse"
-msgstr ""
+msgstr "atualizou uma reutilização"
 
 #: udata/core/reuse/activities.py:39
 msgid "deleted a reuse"
-msgstr ""
+msgstr "apagou uma reutilização"
 
 #: udata/core/reuse/forms.py:16
 msgid "This URL is already registered"
-msgstr ""
+msgstr "O domínio já está registado"
 
 #: udata/core/reuse/forms.py:25
 msgid "The details about the reuse (build process, specifics, self-critics...)."
-msgstr ""
+msgstr "Os detalhes da reutilização (processo de compilação, especificidades, autocrítica...)."
 
 #: udata/core/reuse/forms.py:33 udata/templates/home.html:92
 #: udata/templates/reuse/display.html:236
 msgid "Used datasets"
-msgstr ""
+msgstr "Conjuntos de dados usados"
 
 #: udata/core/reuse/models.py:20
 msgid "Application"
-msgstr ""
+msgstr "Aplicação"
 
 #: udata/core/reuse/models.py:21
 msgid "Idea"
-msgstr ""
+msgstr "Ideia"
 
 #: udata/core/reuse/models.py:22
 msgid "News Article"
-msgstr ""
+msgstr "Artigo de notícias"
 
 #: udata/core/reuse/models.py:23
 msgid "Paper"
-msgstr ""
+msgstr "Papel"
 
 #: udata/core/reuse/models.py:24
 msgid "Post"
-msgstr ""
+msgstr "Publicação"
 
 #: udata/core/reuse/models.py:25
 msgid "Visualization"
-msgstr ""
+msgstr "Visualização"
 
 #: udata/core/reuse/models.py:26
 msgid "Connected device"
-msgstr ""
+msgstr "Dispositivo ligado"
 
 #: udata/core/reuse/models.py:88 udata/templates/reuse/display.html:10
 msgid "reuse"
-msgstr ""
+msgstr "reutilização"
 
 #: udata/core/reuse/tasks.py:41
 msgid "New reuse"
