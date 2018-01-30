@@ -137,7 +137,9 @@ class Defaults(object):
 
     STATIC_DIRS = []
 
+    # OAuth 2 settings
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth.oauth_error'
+    OAUTH2_REFRESH_TOKEN_GENERATOR = True
 
     MD_ALLOWED_TAGS = [
         'a',

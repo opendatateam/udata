@@ -1,13 +1,33 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+'''
+OAuth 2 serveur implementation based on Authlib.
+
+See the documentatiosn here:
+ - https://docs.authlib.org/en/latest/flask/oauth2.html
+ - https://docs.authlib.org/en/latest/spec/rfc6749.html
+ - https://docs.authlib.org/en/latest/spec/rfc6750.html
+ - https://docs.authlib.org/en/latest/spec/rfc7009.html
+
+Authlib provides SqlAlchemny mixins which help understanding:
+ - https://github.com/lepture/authlib/blob/master/authlib/flask/oauth2/sqla.py
+
+As well as a sample application:
+ - https://github.com/authlib/playground
+'''
 
 from bson import ObjectId
+
 from datetime import datetime, timedelta
 
+from authlib.common.security import generate_token
+from authlib.flask.oauth2 import (
+    AuthorizationServer, ResourceProtector, current_token
+)
+from authlib.specs.rfc6749 import grants, ClientMixin
 from flask import abort, request
-from flask_oauthlib.provider import OAuth2Provider
-from werkzeug.security import gen_salt
 from werkzeug.exceptions import Unauthorized
+from werkzeug.security import gen_salt
 
 from udata import theme
 from udata.app import csrf
@@ -17,12 +37,14 @@ from udata.models import db
 from udata.core.storages import images, default_image_basename
 
 
-oauth = OAuth2Provider()
-blueprint = I18nBlueprint('oauth', __name__)
+blueprint = I18nBlueprint('oauth', __name__, url_prefix='/oauth')
+oauth = AuthorizationServer()
 
 
 GRANT_EXPIRATION = 100  # 100 seconds
-TOKEN_EXPIRATION = 30 * 24  # 30 days
+TOKEN_EXPIRATION = 30 * 24 * 60 * 60  # 30 days in seconds
+REFRESH_EXPIRATION = 30  # days
+EPOCH = datetime.fromtimestamp(0)
 
 
 CLIENT_TYPES = {
@@ -32,8 +54,8 @@ CLIENT_TYPES = {
 
 CLIENT_PROFILES = {
     'web': _('Web Application'),
-    'user': _('User Agent'),
-    'native': _('Native'),
+    'user': _('User Agent application (Browser)'),
+    'native': _('Native Application'),
 }
 
 GRANT_TYPES = {
@@ -53,7 +75,7 @@ SCOPES = {
 }
 
 
-class OAuth2Client(db.Datetimed, db.Document):
+class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     secret = db.StringField(default=lambda: gen_salt(50), required=True)
 
     type = db.StringField(choices=CLIENT_TYPES.keys(), default='public',
@@ -72,7 +94,7 @@ class OAuth2Client(db.Datetimed, db.Document):
                           thumbnails=[150, 25])
 
     redirect_uris = db.ListField(db.StringField())
-    default_scopes = db.ListField(db.StringField(), default=SCOPES.keys())
+    scopes = db.ListField(db.StringField(), default=SCOPES.keys())
 
     meta = {
         'collection': 'oauth2_client'
@@ -93,6 +115,32 @@ class OAuth2Client(db.Datetimed, db.Document):
     def default_redirect_uri(self):
         return self.redirect_uris[0]
 
+    def get_default_redirect_uri(self):
+        '''Implement required ClientMixin method'''
+        return self.default_redirect_uri
+
+    def check_redirect_uri(self, redirect_uri):
+        '''Implement required ClientMixin method'''
+        return redirect_uri in self.redirect_uris
+
+    def check_client_type(self, client_type):
+        if client_type not in CLIENT_TYPES:
+            raise ValueError('Invalid client_type')
+        return client_type == self.type
+
+    def check_client_secret(self, client_secret):
+        return self.secret == client_secret
+
+    def check_response_type(self, response_type):
+        return True
+
+    def check_grant_type(self, grant_type):
+        return True
+
+    def check_requested_scopes(self, scopes):
+        allowed = set(self.scopes)
+        return allowed.issuperset(set(scopes))
+
 
 class OAuth2Grant(db.Document):
     user = db.ReferenceField('User', required=True)
@@ -100,7 +148,7 @@ class OAuth2Grant(db.Document):
 
     code = db.StringField(required=True)
 
-    redirect_uri = db.StringField()
+    redirect_uri = db.StringField(required=True)
     expires = db.DateTimeField()
 
     scopes = db.ListField(db.StringField())
@@ -112,6 +160,15 @@ class OAuth2Grant(db.Document):
     def __unicode__(self):
         return '<OAuth2Grant({0.client.name}, {0.user.fullname})>'.format(self)
 
+    def is_expired(self):
+        return self.expires < datetime.utcnow()
+
+    def get_redirect_uri(self):
+        return self.redirect_uri
+
+    def get_scope(self):
+        return ' '.join(self.scopes)
+
 
 class OAuth2Token(db.Document):
     client = db.ReferenceField('OAuth2Client', required=True)
@@ -122,8 +179,8 @@ class OAuth2Token(db.Document):
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True)
-    expires = db.DateTimeField(
-        default=lambda: datetime.utcnow() + timedelta(hours=TOKEN_EXPIRATION))
+    created_at = db.DateTimeField(default=datetime.utcnow, required=True)
+    expires_in = db.IntField(required=True, default=TOKEN_EXPIRATION)
     scopes = db.ListField(db.StringField())
 
     meta = {
@@ -133,100 +190,110 @@ class OAuth2Token(db.Document):
     def __unicode__(self):
         return '<OAuth2Token({0.client.name})>'.format(self)
 
+    def get_scope(self):
+        return ' '.join(self.scopes)
 
-@oauth.clientgetter
-def load_client(client_id):
-    try:
-        return OAuth2Client.objects.get(id=ObjectId(client_id))
-    except OAuth2Client.DoesNotExist:
-        pass
+    def get_expires_in(self):
+        return self.expires_in
 
+    def get_expires_at(self):
+        return (self.created_at - EPOCH).total_seconds() + self.expires_in
 
-@oauth.grantgetter
-def load_grant(client_id, code):
-    try:
-        return OAuth2Grant.objects.get(client=ObjectId(client_id), code=code)
-    except OAuth2Grant.DoesNotExist:
-        pass
+    def is_refresh_token_expired(self):
+        expired_at = datetime.fromtimestamp(self.get_expires_at())
+        expired_at += timedelta(days=REFRESH_EXPIRATION)
+        return expired_at < datetime.utcnow()
 
 
-@oauth.grantsetter
-def save_grant(client_id, code, request, *args, **kwargs):
-    # decide the expires time yourself
-    expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
-    return OAuth2Grant.objects.create(
-        client=ObjectId(client_id),
-        code=code['code'],
-        redirect_uri=request.redirect_uri,
-        scopes=request.scopes,
-        user=current_user._get_current_object(),
-        expires=expires
-    )
+class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
+    def create_authorization_code(self, client, grant_user, request):
+        code = generate_token(48)
+        expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
+        OAuth2Grant.objects.create(
+            code=code,
+            client=client,
+            redirect_uri=request.redirect_uri,
+            scopes=request.scope.split(' '),
+            user=ObjectId(grant_user.id),
+            expires=expires,
+        )
+        return code
+
+    def parse_authorization_code(self, code, client):
+        item = OAuth2Grant.objects(code=code, client=client).first()
+        if item and not item.is_expired():
+            return item
+
+    def delete_authorization_code(self, authorization_code):
+        authorization_code.delete()
+
+    def create_access_token(self, token, client, authorization_code):
+        scopes = token.pop('scope').split(' ')
+        OAuth2Token.objects.create(
+            client=client,
+            user=authorization_code.user,
+            scopes=scopes,
+            **token
+        )
 
 
-@oauth.tokengetter
-def load_token(access_token=None, refresh_token=None):
-    try:
-        if access_token:
-            return OAuth2Token.objects.get(access_token=access_token)
-        elif refresh_token:
-            return OAuth2Token.objects.get(refresh_token=refresh_token)
-    except OAuth2Token.DoesNotExist:
-        pass
+class RefreshTokenGrant(grants.RefreshTokenGrant):
+    def authenticate_refresh_token(self, refresh_token):
+        token = OAuth2Token.objects(refresh_token=refresh_token).first()
+        if token and not token.is_refresh_token_expired():
+            return token
+
+    def create_access_token(self, token, client, authenticated_token):
+        authenticated_token.update(**token)
 
 
-@oauth.tokensetter
-def save_token(token, request, *args, **kwargs):
-    # make sure that every client has only one token connected to a user
-    OAuth2Token.objects(client=request.client, user=request.user).delete()
-
-    expires_in = token.pop('expires_in')
-    expires = datetime.utcnow() + timedelta(seconds=expires_in)
-
-    return OAuth2Token.objects.create(
-        access_token=token['access_token'],
-        refresh_token=token['refresh_token'],
-        token_type=token['token_type'],
-        scopes=token['scope'].split(),
-        expires=expires,
-        client=request.client,
-        user=request.user,
-    )
+oauth.register_grant_endpoint(AuthorizationCodeGrant)
+oauth.register_grant_endpoint(RefreshTokenGrant)
 
 
-@blueprint.route('/oauth/token', methods=['POST'], localize=False)
+@blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')
 @csrf.exempt
-@oauth.token_handler
 def access_token():
-    return None
+    return oauth.create_token_response()
 
 
-@blueprint.route('/oauth/authorize', methods=['GET', 'POST'])
-@oauth.authorize_handler
+@blueprint.route('/authorize', methods=['GET', 'POST'])
 @login_required
 def authorize(*args, **kwargs):
     if request.method == 'GET':
-        client_id = kwargs.get('client_id')
-        client = OAuth2Client.objects.get(id=ObjectId(client_id))
-        kwargs['client'] = client
-        return theme.render('api/oauth_authorize.html', oauth=kwargs)
+        grant = oauth.validate_authorization_request()
+        return theme.render('api/oauth_authorize.html', grant=grant)
     elif request.method == 'POST':
         accept = 'accept' in request.form
         decline = 'decline' in request.form
-        return accept and not decline
+        if accept and not decline:
+            return oauth.create_authorization_response(current_user)
+        return oauth.create_authorization_response(None)
     else:
         abort(405)
 
 
-@blueprint.route('/oauth/error')
+@blueprint.route('/error')
 def oauth_error():
     return theme.render('api/oauth_error.html')
 
 
+def query_client(client_id):
+    '''Fetch client by ID'''
+    return OAuth2Client.objects(id=ObjectId(client_id)).first()
+
+
+def query_token(access_token=access_token):
+    return OAuth2Token.objects(access_token=access_token).first()
+
+
+require_oauth = ResourceProtector(query_token)
+
+
 def check_credentials():
-    @oauth.require_oauth()
+    @require_oauth(None)
     def log_user_from_oauth_credentials():
-        login_user(request.oauth.user)
+        login_user(current_token.user)
 
     try:
         log_user_from_oauth_credentials()
@@ -236,5 +303,5 @@ def check_credentials():
 
 
 def init_app(app):
-    oauth.init_app(app)
+    oauth.init_app(app, query_client=query_client)
     app.register_blueprint(blueprint)

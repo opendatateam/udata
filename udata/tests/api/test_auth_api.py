@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from unittest import skip
+from base64 import b64encode
 
 from flask import url_for
-
 
 from udata.auth import PermissionDenied
 from udata.api import api, API
@@ -37,6 +36,11 @@ class FakeAPI(API):
         return {'success': True}
 
 
+def basic_header(client):
+        payload = ':'.join((client.client_id, client.secret))
+        return {'Authorization': 'Basic ' + b64encode(payload)}
+
+
 class APIAuthTest(APITestCase):
     modules = ['admin', 'search', 'core.dataset', 'core.reuse', 'core.site',
                'core.organization', 'core.user']
@@ -46,6 +50,7 @@ class APIAuthTest(APITestCase):
         return OAuth2Client.objects.create(
             name=name,
             owner=owner,
+            type='confidential',
             redirect_uris=['https://test.org/callback']
         )
 
@@ -85,7 +90,7 @@ class APIAuthTest(APITestCase):
             client=client,
             user=user,
             access_token='access-token',
-            refresh_token='refresh-token'
+            refresh_token='refresh-token',
         )
 
         response = self.post(url_for('api.fake'), headers={
@@ -198,6 +203,25 @@ class APIAuthTest(APITestCase):
         uri, params = response.location.split('?')
         self.assertEqual(uri, client.default_redirect_uri)
 
+    def test_refresh_token(self):
+        user = UserFactory()
+        client = self.oauth_app()
+        token = OAuth2Token.objects.create(
+            client=client,
+            user=user,
+            access_token='access-token',
+            refresh_token='refresh-token',
+        )
+
+        response = self.post(url_for('oauth.token'), {
+            'grant_type': 'refresh_token',
+            'refresh_token': token.refresh_token,
+        }, headers=basic_header(client), json=False)
+
+        self.assert200(response)
+        self.assertEqual(response.content_type, 'application/json')
+        self.assertIn('access_token', response.json)
+
     def test_value_error(self):
         @ns.route('/exception', endpoint='exception')
         class ExceptionAPI(API):
@@ -209,7 +233,6 @@ class APIAuthTest(APITestCase):
         self.assert400(response)
         self.assertEqual(response.json['message'], 'Not working')
 
-    @skip('Need flask-restplus handling')
     def test_permission_denied(self):
         @ns.route('/exception', endpoint='exception')
         class ExceptionAPI(API):
