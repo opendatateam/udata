@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-30 08:52-0500\n"
+"PO-Revision-Date: 2018-01-30 09:02-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -798,33 +798,33 @@ msgstr "reutilização"
 
 #: udata/core/reuse/tasks.py:41
 msgid "New reuse"
-msgstr ""
+msgstr "Nova reutilização"
 
 #: udata/core/reuse/views.py:22 udata/templates/home.html:139
 msgid "Last reuses"
-msgstr ""
+msgstr "Ultimas reutilizações"
 
 #: udata/core/reuse/views.py:58
 msgid "Transfer"
-msgstr ""
+msgstr "Transferência"
 
 #: udata/core/site/forms.py:16
 msgid "Some SEO keywords"
-msgstr ""
+msgstr "Algumas palavras-chave"
 
 #: udata/core/site/forms.py:18
 msgid "Feed size"
-msgstr ""
+msgstr "Tamanho do feed"
 
 #: udata/core/site/forms.py:18
 msgid "Number of elements in feeds"
-msgstr ""
+msgstr "Número de elementos nos feeds"
 
 #: udata/core/site/metrics.py:63 udata/core/site/views.py:140
 #: udata/templates/dataset/display.html:87 udata/templates/dataset/list.html:38
 #: udata/templates/search.html:71 udata/templates/site/dashboard.html:21
 msgid "Resources"
-msgstr ""
+msgstr "Recursos"
 
 #: udata/core/site/metrics.py:82 udata/core/site/views.py:155
 #: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
