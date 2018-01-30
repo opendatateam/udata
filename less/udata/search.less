@@ -5,7 +5,6 @@ ul.search-results {
 
     .search-result {
         position: relative;
-        background: white;
         border-bottom: 1px solid #F0F0F0;
         overflow: hidden;
         zoom: 1;
@@ -136,6 +135,34 @@ ul.search-results {
 .advanced-search-panel {
     .list-group {
         margin-bottom: 0;
+
+        .list-group-item {
+            // Fix the badge position on long facet labels
+            &:not(.more) {
+                @padding:15px; // Hard coded in bootstrap list-group component
+                padding-right: @padding + 37px;
+                position: relative;
+
+                .badge {
+                    position: absolute;
+                    top: 50%;
+                    right: @padding;
+                    transform: translateY(-50%);
+                }
+            }
+
+            // Center the more button
+            &.more {
+                text-align: center;
+            }
+        }
+
+        .list-group-more {
+            // Fix bootstrap hiding first border
+            .list-group-item:first-child {
+                border-top-width: 1px;
+            }
+        }
     }
 
     .btn-remove:hover {
