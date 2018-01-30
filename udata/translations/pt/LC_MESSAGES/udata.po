@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2017-12-14 11:54+0100\n"
-"PO-Revision-Date: 2018-01-29 11:54-0500\n"
+"PO-Revision-Date: 2018-01-30 09:35-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -656,182 +656,182 @@ msgstr "Sem reutilizações"
 
 #: udata/core/organization/search.py:75
 msgid "Few reuses"
-msgstr ""
+msgstr "Algumas reutilizações"
 
 #: udata/core/organization/search.py:76
 msgid "Many reuses"
-msgstr ""
+msgstr "Muitas reutilizações"
 
 #: udata/core/organization/search.py:85 udata/core/reuse/search.py:95
 #: udata/core/user/search.py:61
 msgid "No datasets"
-msgstr ""
+msgstr "Não há conjuntos de dados"
 
 #: udata/core/organization/search.py:86 udata/core/reuse/search.py:96
 #: udata/core/user/search.py:62
 msgid "Few datasets"
-msgstr ""
+msgstr "Alguns conjuntos de dados"
 
 #: udata/core/organization/search.py:87 udata/core/reuse/search.py:97
 #: udata/core/user/search.py:63
 msgid "Many datasets"
-msgstr ""
+msgstr "Muitos conjuntos de dados"
 
 #: udata/core/organization/search.py:94 udata/core/reuse/search.py:104
 #: udata/core/user/search.py:70
 msgid "No followers"
-msgstr ""
+msgstr "Sem seguidores"
 
 #: udata/core/organization/search.py:95 udata/core/reuse/search.py:105
 #: udata/core/user/search.py:71
 msgid "Few followers"
-msgstr ""
+msgstr "Alguns seguidores"
 
 #: udata/core/organization/search.py:96 udata/core/reuse/search.py:106
 #: udata/core/user/search.py:72
 msgid "Many followers"
-msgstr ""
+msgstr "Muitos seguidores"
 
 #: udata/core/organization/tasks.py:37
 msgid "New membership request"
-msgstr ""
+msgstr "Novo pedido de adesão"
 
 #: udata/core/organization/tasks.py:44 udata/core/organization/tasks.py:54
 #, python-format
 msgid "You are now a member of the organization \"%(org)s\""
-msgstr ""
+msgstr "Você é agora um membro da organização \"%(org)s\""
 
 #: udata/core/organization/tasks.py:48
 msgid "Membership refused"
-msgstr ""
+msgstr "Associação recusada"
 
 #: udata/core/post/forms.py:19
 msgid "Headline"
-msgstr ""
+msgstr "Cabeçalho"
 
 #: udata/core/post/forms.py:20
 msgid "Content"
-msgstr ""
+msgstr "Conteúdo"
 
 #: udata/core/post/forms.py:22 udata/core/topic/forms.py:22
 #: udata/templates/post/display.html:147
 msgid "Associated datasets"
-msgstr ""
+msgstr "Conjuntos de dados associados"
 
 #: udata/core/post/forms.py:23 udata/core/topic/forms.py:23
 #: udata/templates/post/display.html:134
 msgid "Associated reuses"
-msgstr ""
+msgstr "Reutilizações associadas"
 
 #: udata/core/post/forms.py:25 udata/core/reuse/forms.py:31
 msgid "Image"
-msgstr ""
+msgstr "Imagem"
 
 #: udata/core/post/forms.py:26
 msgid "Image credits"
-msgstr ""
+msgstr "Créditos da imagem"
 
 #: udata/core/post/forms.py:27
 msgid "Credit URL"
-msgstr ""
+msgstr "URL de créditos"
 
 #: udata/core/post/models.py:43
 msgid "post"
-msgstr ""
+msgstr "publicação"
 
 #: udata/core/reuse/activities.py:26
 msgid "created a reuse"
-msgstr ""
+msgstr "criou uma reutilização"
 
 #: udata/core/reuse/activities.py:32
 msgid "updated a reuse"
-msgstr ""
+msgstr "atualizou uma reutilização"
 
 #: udata/core/reuse/activities.py:39
 msgid "deleted a reuse"
-msgstr ""
+msgstr "apagou uma reutilização"
 
 #: udata/core/reuse/forms.py:16
 msgid "This URL is already registered"
-msgstr ""
+msgstr "O domínio já está registado"
 
 #: udata/core/reuse/forms.py:25
 msgid "The details about the reuse (build process, specifics, self-critics...)."
-msgstr ""
+msgstr "Os detalhes da reutilização (processo de compilação, especificidades, autocrítica...)."
 
 #: udata/core/reuse/forms.py:33 udata/templates/home.html:92
 #: udata/templates/reuse/display.html:236
 msgid "Used datasets"
-msgstr ""
+msgstr "Conjuntos de dados usados"
 
 #: udata/core/reuse/models.py:20
 msgid "Application"
-msgstr ""
+msgstr "Aplicação"
 
 #: udata/core/reuse/models.py:21
 msgid "Idea"
-msgstr ""
+msgstr "Ideia"
 
 #: udata/core/reuse/models.py:22
 msgid "News Article"
-msgstr ""
+msgstr "Artigo de notícias"
 
 #: udata/core/reuse/models.py:23
 msgid "Paper"
-msgstr ""
+msgstr "Papel"
 
 #: udata/core/reuse/models.py:24
 msgid "Post"
-msgstr ""
+msgstr "Publicação"
 
 #: udata/core/reuse/models.py:25
 msgid "Visualization"
-msgstr ""
+msgstr "Visualização"
 
 #: udata/core/reuse/models.py:26
 msgid "Connected device"
-msgstr ""
+msgstr "Dispositivo ligado"
 
 #: udata/core/reuse/models.py:88 udata/templates/reuse/display.html:10
 msgid "reuse"
-msgstr ""
+msgstr "reutilização"
 
 #: udata/core/reuse/tasks.py:41
 msgid "New reuse"
-msgstr ""
+msgstr "Nova reutilização"
 
 #: udata/core/reuse/views.py:22 udata/templates/home.html:139
 msgid "Last reuses"
-msgstr ""
+msgstr "Ultimas reutilizações"
 
 #: udata/core/reuse/views.py:58
 msgid "Transfer"
-msgstr ""
+msgstr "Transferência"
 
 #: udata/core/site/forms.py:16
 msgid "Some SEO keywords"
-msgstr ""
+msgstr "Algumas palavras-chave"
 
 #: udata/core/site/forms.py:18
 msgid "Feed size"
-msgstr ""
+msgstr "Tamanho do feed"
 
 #: udata/core/site/forms.py:18
 msgid "Number of elements in feeds"
-msgstr ""
+msgstr "Número de elementos nos feeds"
 
 #: udata/core/site/metrics.py:63 udata/core/site/views.py:140
 #: udata/templates/dataset/display.html:87 udata/templates/dataset/list.html:38
 #: udata/templates/search.html:71 udata/templates/site/dashboard.html:21
 msgid "Resources"
-msgstr ""
+msgstr "Recursos"
 
 #: udata/core/site/metrics.py:82 udata/core/site/views.py:155
 #: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:8
 #: udata/templates/user/list.html:18
 msgid "Users"
-msgstr ""
+msgstr "Utilizadores"
 
 #: udata/core/site/metrics.py:92 udata/core/site/views.py:149
 #: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:47
@@ -844,35 +844,35 @@ msgstr ""
 #: udata/templates/site/dashboard.html:24 udata/templates/user/base.html:92
 #: udata/templates/user/following.html:17 udata/theme/__init__.py:38
 msgid "Organizations"
-msgstr ""
+msgstr "Organizações"
 
 #: udata/core/site/metrics.py:112
 msgid "Maximum dataset followers"
-msgstr ""
+msgstr "Máximo de seguidores do conjunto de dados"
 
 #: udata/core/site/metrics.py:125
 msgid "Maximum dataset reuses"
-msgstr ""
+msgstr "Máximo de reutilizações do conjunto de dados"
 
 #: udata/core/site/metrics.py:138
 msgid "Maximum datasets in reuses"
-msgstr ""
+msgstr "Máximo de conjuntos de dados em reutilizações"
 
 #: udata/core/site/metrics.py:151
 msgid "Maximum reuse followers"
-msgstr ""
+msgstr "Máximo de seguidores da reutilização"
 
 #: udata/core/site/metrics.py:164
 msgid "Maximum organization followers"
-msgstr ""
+msgstr "Número máximo de seguidores da organização"
 
 #: udata/core/site/metrics.py:178
 msgid "Maximum organization reuses"
-msgstr ""
+msgstr "Número máximo de reutilizações da organização"
 
 #: udata/core/site/metrics.py:192
 msgid "Maximum organization datasets"
-msgstr ""
+msgstr "Número máximo de conjunto de dados da organização"
 
 #: udata/core/site/views.py:125
 msgid "Data"
@@ -1073,40 +1073,40 @@ msgstr ""
 
 #: udata/forms/fields.py:397
 msgid "{0} is not a valid identifier"
-msgstr ""
+msgstr "{0} não é um identificador válido"
 
 #: udata/forms/fields.py:423
 msgid "Model for {0} not found"
-msgstr ""
+msgstr "Modelo para {0} não foi encontrado"
 
 #: udata/forms/fields.py:458
 msgid "Unknown identifiers: {identifiers}"
-msgstr ""
+msgstr "Identificadores desconhecidos: {identifiers}"
 
 #: udata/forms/fields.py:589
 msgid "Unable to parse date range"
-msgstr ""
+msgstr "Não é possível verificar o intervalo de datas"
 
 #: udata/forms/fields.py:616 udata/forms/fields.py:639
 msgid "You must be authenticated"
-msgstr ""
+msgstr "Você deve estar autenticado"
 
 #: udata/forms/fields.py:619
 msgid "You can only set yourself as owner"
-msgstr ""
+msgstr "Você só pode definir-se como proprietário"
 
 #: udata/forms/fields.py:642
 msgid "Permission denied for this organization"
-msgstr ""
+msgstr "Permissão recusada para esta organização"
 
 #: udata/forms/validators.py:48
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
-msgstr ""
+msgstr "Este campo requer \"%(name)s\" definidos"
 
 #: udata/frontend/helpers.py:173
 msgid "Anonymous user"
-msgstr ""
+msgstr "Utilizador Anónimo"
 
 #: udata/frontend/helpers.py:267
 msgctxt "month-format"
@@ -1121,137 +1121,137 @@ msgstr ""
 #: udata/frontend/helpers.py:294
 #, python-format
 msgid "%(start)s to %(end)s"
-msgstr ""
+msgstr "%(start)s até %(end)s"
 
 #: udata/frontend/markdown.py:30
 msgid "Source"
-msgstr ""
+msgstr "Fonte"
 
 #: udata/harvest/forms.py:18
 msgid "Some optionnal details about this harvester"
-msgstr ""
+msgstr "Alguns detalhes opcionais sobre este coletor"
 
 #: udata/harvest/forms.py:20
 msgid "Backend"
-msgstr ""
+msgstr "Backend"
 
 #: udata/harvest/models.py:15
 msgid "Manual"
-msgstr ""
+msgstr "Manual"
 
 #: udata/harvest/models.py:23
 msgid "Initializing"
-msgstr ""
+msgstr "A iniciar"
 
 #: udata/harvest/models.py:24
 msgid "Initialized"
-msgstr ""
+msgstr "Iniciado"
 
 #: udata/harvest/models.py:25
 msgid "Processing"
-msgstr ""
+msgstr "Processando"
 
 #: udata/harvest/models.py:26 udata/harvest/models.py:34
 msgid "Done"
-msgstr ""
+msgstr "Concluído"
 
 #: udata/harvest/models.py:27
 msgid "Done with errors"
-msgstr ""
+msgstr "Concluído com erros"
 
 #: udata/harvest/models.py:28 udata/harvest/models.py:35
 msgid "Failed"
-msgstr ""
+msgstr "Falhou"
 
 #: udata/harvest/models.py:33
 msgid "Started"
-msgstr ""
+msgstr "Iniciado"
 
 #: udata/harvest/models.py:36
 msgid "Skipped"
-msgstr ""
+msgstr "Ignorado"
 
 #: udata/search/fields.py:37
 msgid "OR"
-msgstr ""
+msgstr "OU"
 
 #: udata/search/fields.py:116 udata/tests/test_search.py:803
 #: udata/tests/test_search.py:806
 msgid "yes"
-msgstr ""
+msgstr "sim"
 
 #: udata/search/fields.py:116 udata/tests/test_search.py:804
 #: udata/tests/test_search.py:807
 msgid "no"
-msgstr ""
+msgstr "não"
 
 #: udata/search/fields.py:287
 msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
-msgstr ""
+msgstr "Um intervalo de datas, expresso como inicial-final, onde ambas as datas estão no formato iso (ie. YYYY-MM-DD-YYYY-MM-DD)"
 
 #: udata/templates/admin.html:6
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: udata/templates/apidoc.html:4
 msgid "API Documentation"
-msgstr ""
+msgstr "Documentação da API"
 
 #: udata/templates/apidoc.html:5
 #, python-format
 msgid "%(site)s dynamic API documentation"
-msgstr ""
+msgstr "Documentação de API dinâmica do %(site)s"
 
 #: udata/templates/apidoc.html:24
 msgid "This page describe this website's free and open RESTful API's behavior"
-msgstr ""
+msgstr "Esta página descreve o comportamento da API"
 
 #: udata/templates/apidoc.html:30
 msgid "Authentication"
-msgstr ""
+msgstr "Autenticação"
 
 #: udata/templates/apidoc.html:35
 msgid "In order to be able to execute write operations,"
-msgstr ""
+msgstr "De forma a ser capaz de executar as operações de escrita,"
 
 #: udata/templates/apidoc.html:37
 #, python-format
 msgid "you first need to obtain an %(apikey)s in your profile settings."
-msgstr ""
+msgstr "precisa de obter primeiro uma %(apikey)s nas configurações do seu perfil."
 
 #: udata/templates/apidoc.html:41
 msgid "API Key"
-msgstr ""
+msgstr "Chave da API"
 
 #: udata/templates/apidoc.html:44
 msgid "you first need to authenticate and obtain an API Key in your profile settings."
-msgstr ""
+msgstr "primeiro você precisa de obter uma chave de API nas configurações do seu perfil."
 
 #: udata/templates/apidoc.html:47
 msgid "This key should be provided on each call in the <code>X-API-KEY</code> HTTP header."
-msgstr ""
+msgstr "Esta chave deve ser fornecida em cada chamada no cabeçalho HTTP <code>X-API-KEY</code>."
 
 #: udata/templates/apidoc.html:53
 msgid "Authorizations"
-msgstr ""
+msgstr "Autorizações"
 
 #: udata/templates/apidoc.html:57
 msgid "API calls are subject to the same permissions than the web interface."
-msgstr ""
+msgstr "Chamadas de API estão sujeitos ás mesmas permissões que a interface web."
 
 #: udata/templates/apidoc.html:58
 msgid "By example, you need to be part of the organization to modify one of its datasets."
-msgstr ""
+msgstr "Por exemplo, você precisa fazer parte da organização para modificar um dos seus conjuntos de dados."
 
 #: udata/templates/apidoc.html:64
 msgid "Pagination"
-msgstr ""
+msgstr "Paginação"
 
 #: udata/templates/apidoc.html:68
 msgid "Some method are paginated and always follow the same pattern.\n"
 "                The object list is wrapped in a <code>Page</code> object.\n"
 "                "
-msgstr ""
+msgstr "Alguns métodos são paginados e seguem sempre o mesmo padrão.                 A lista de objetos é encapsulada num objeto <code>Page</code>.                "
 
 #: udata/templates/apidoc.html:72
 msgid "You don't have to compute yourself the previous and next pages\n"
@@ -1262,11 +1262,11 @@ msgstr ""
 
 #: udata/templates/apidoc.html:77
 msgid "Example"
-msgstr ""
+msgstr "Exemplo"
 
 #: udata/templates/apidoc.html:90
 msgid "Examples"
-msgstr ""
+msgstr "Exemplos"
 
 #: udata/templates/apidoc.html:94
 msgid "All examples use the <a href=\"http://httpie.org\">httpie</a> and <a href=\"http://stedolan.github.io/jq/\">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.\n"
