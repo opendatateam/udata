@@ -1,0 +1,5 @@
+---
+branch: master
+pin: False
+update: all
+label_prs: update
