@@ -47,11 +47,9 @@ class TestClient(FlaskClient):
 
 @pytest.fixture
 def app(request):
-    test_settings, extra = get_settings(request)
+    test_settings = get_settings(request)
     app = create_app(settings.Defaults, override=test_settings)
     app.test_client_class = TestClient
-    for key, value in extra.items():
-        app.config[key] = value
 
     if request.cls and hasattr(request.cls, 'modules'):
         from udata import frontend, api
@@ -74,9 +72,8 @@ def get_settings(request):
     '''
     marker = request.node.get_marker('settings')
     if marker:
-        cls = marker.args[0] if len(marker.args) else settings.Testing
-        return cls, marker.kwargs
-    return getattr(request.cls, 'settings', settings.Testing), {}
+        return marker.args[0]
+    return getattr(request.cls, 'settings', settings.Testing)
 
 
 def drop_db(app):
