@@ -5,13 +5,15 @@ import logging
 import sys
 import signal
 
+import click
+
 from contextlib import contextmanager
 from datetime import datetime
 
 from flask import current_app
 from flask_script import prompt_bool
 
-from udata.commands import submanager, IS_INTERACTIVE
+from udata.commands import cli, IS_TTY
 from udata.search import es, adapter_catalog
 
 
@@ -19,15 +21,14 @@ from elasticsearch.helpers import reindex as es_reindex, streaming_bulk
 
 log = logging.getLogger(__name__)
 
-m = submanager(
-    'search',
-    help='Search/Indexation related operations',
-    description='Handle search and indexation related operations'
-)
+
+@cli.group('search')
+def grp():
+    '''Search/Indexation related operations'''
+    pass
+
 
 TIMESTAMP_FORMAT = '%Y-%m-%d-%H-%M'
-
-DEPRECATION_MSG = '{cmd} command will be removed in udata 1.4, use index command instead'
 
 
 def default_index_name():
@@ -154,36 +155,18 @@ def handle_error(index_name, keep=False):
         sys.exit(-1)
 
 
-@m.option('-t', '--type', dest='doc_type', required=True,
-          help='Only reindex a given type')
-def reindex(doc_type):
-    '''[DEPRECATED] Reindex models'''
-    log.warn(DEPRECATION_MSG.format(cmd='reindex'))
-    index([doc_type], force=True, keep=False)
-
-
-@m.option('-n', '--name', default=None, help='Optionnal index name')
-@m.option('-d', '--delete', default=False, action='store_true',
-          help='Delete previously aliased indices')
-@m.option('-f', '--force', default=False, action='store_true',
-          help='Do not prompt on deletion')
-@m.option('-k', '--keep', default=False, action='store_true',
-          help='Keep index in case of error')
-def init(name=None, delete=False, force=False, keep=False):
-    '''[DEPRECATED] Initialize or rebuild the search index'''
-    log.warn(DEPRECATION_MSG.format(cmd='init'))
-    index(name=name, force=force, keep=not delete)
-
-
-@m.option(dest='models', nargs='*', metavar='model',
-          help='Model to reindex')
-@m.option('-n', '--name', default=None, help='Optionnal index name')
-@m.option('-f', '--force', default=False, action='store_true',
-          help='Do not prompt on deletion')
-@m.option('-k', '--keep', default=False, action='store_true',
-          help='Do not delete indexes')
+@grp.command()
+@click.argument('models', nargs=-1, metavar='[<model> ...]')
+@click.option('-n', '--name', default=None, help='Optionnal index name')
+@click.option('-f', '--force', is_flag=True, help='Do not prompt on deletion')
+@click.option('-k', '--keep', is_flag=True, help='Do not delete indexes')
 def index(models=None, name=None, force=False, keep=False):
-    '''Initialize or rebuild the search index'''
+    '''
+    Initialize or rebuild the search index
+
+    Models to reindex can optionnaly be specified as arguments.
+    If not, all models are reindexed.
+    '''
     index_name = name or default_index_name()
 
     doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
@@ -195,7 +178,7 @@ def index(models=None, name=None, force=False, keep=False):
 
     log.info('Initiliazing index "{0}"'.format(index_name))
     if es.indices.exists(index_name):
-        if IS_INTERACTIVE and not force:
+        if IS_TTY and not force:
             msg = 'Index {0} will be deleted, are you sure?'
             delete = prompt_bool(msg.format(index_name))
         else:

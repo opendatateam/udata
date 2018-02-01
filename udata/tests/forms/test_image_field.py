@@ -2,18 +2,16 @@
 from __future__ import unicode_literals
 
 import logging
-import shutil
-import tempfile
 
-from flask import url_for
+import pytest
+
 import flask_fs as fs
 
 from udata.models import db
 from udata.forms import Form
 from udata.forms.fields import ImageField
-from udata.tests import DBTestMixin, FSTestMixin, TestCase
+from udata.tests.helpers import data_path
 from udata.core.storages import tmp
-from udata.core.storages.views import blueprint
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +28,8 @@ class PostData(dict):
         return value
 
 
-class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
+@pytest.mark.usefixtures('clean_db')
+class ImageFieldTest:
     class D(db.Document):
         image = db.ImageField(fs=storage)
         thumbnail = db.ImageField(fs=storage, thumbnails=SIZES)
@@ -39,79 +38,69 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
         image = ImageField()
         thumbnail = ImageField(sizes=SIZES)
 
-    def create_app(self):
-        app = super(ImageFieldTest, self).create_app()
-        self._instance_path = app.instance_path
-        app.instance_path = tempfile.mkdtemp()
+    @pytest.fixture(autouse=True)
+    def fs_root(self, instance_path, app):
+        app.config['FS_ROOT'] = str(instance_path / 'fs')
         fs.init_app(app, storage, tmp)
-        app.register_blueprint(blueprint)
-        return app
-
-    def tearsDown(self):
-        '''Cleanup the mess'''
-        shutil.rmtree(self.app.instance_path)
-        self.app.instance_path = self._instance_path
-        super(ImageFieldTest, self).tearsDown()
 
     def test_empty(self):
         form = self.F()
-        endpoint = url_for('storage.upload', name=tmp.name)
-        self.assertEqual(form.image.filename.data, None)
-        self.assertEqual(form.image.bbox.data, None)
+        assert form.image.filename.data is None
+        assert form.image.bbox.data is None
 
-        self.assertEqual(form.thumbnail.filename.data, None)
-        self.assertEqual(form.thumbnail.bbox.data, None)
+        assert form.thumbnail.filename.data is None
+        assert form.thumbnail.bbox.data is None
 
     def test_with_unbound_image(self):
         doc = self.D()
         form = self.F(None, obj=doc)
-        self.assertEqual(form.image.filename.data, None)
-        self.assertEqual(form.image.bbox.data, None)
+        assert form.image.filename.data is None
+        assert form.image.bbox.data is None
 
-        self.assertEqual(form.thumbnail.filename.data, None)
-        self.assertEqual(form.thumbnail.bbox.data, None)
+        assert form.thumbnail.filename.data is None
+        assert form.thumbnail.bbox.data is None
 
     def test_with_image(self):
         doc = self.D()
-        with open(self.data('image.png')) as img:
+        with open(data_path('image.png')) as img:
             doc.image.save(img, 'image.jpg')
         doc.save()
         form = self.F(None, obj=doc)
-        self.assertEqual(form.image.filename.data, 'image.jpg')
-        self.assertEqual(form.image.bbox.data, None)
+        assert form.image.filename.data == 'image.jpg'
+        assert form.image.bbox.data is None
 
     def test_with_image_and_bbox(self):
         doc = self.D()
-        with open(self.data('image.png')) as img:
+        with open(data_path('image.png')) as img:
             doc.thumbnail.save(img, 'image.jpg', bbox=[10, 10, 100, 100])
         doc.save()
         form = self.F(None, obj=doc)
-        self.assertEqual(form.thumbnail.filename.data, 'image.jpg')
-        self.assertEqual(form.thumbnail.bbox.data, [10, 10, 100, 100])
+        assert form.thumbnail.filename.data == 'image.jpg'
+        assert form.thumbnail.bbox.data == [10, 10, 100, 100]
 
     def test_post_new(self):
         tmp_filename = 'xyz/image.png'
-        with open(self.data('image.png')) as img:
+        with open(data_path('image.png')) as img:
             tmp_filename = tmp.save(img, tmp_filename)
 
         form = self.F(PostData({
             'image-filename': tmp_filename,
         }))
 
-        self.assertEqual(form.image.filename.data, tmp_filename)
-        self.assertEqual(form.image.bbox.data, None)
+        assert form.image.filename.data == tmp_filename
+        assert form.image.bbox.data is None
 
         doc = self.D()
         form.populate_obj(doc)
 
-        self.assertIsNone(doc.image.bbox)
-        self.assertTrue(doc.image.filename.endswith('.png'))
-        self.assertIn(doc.image.filename, storage)
-        self.assertNotIn(tmp_filename, tmp)
+        assert doc.image.bbox is None
+        assert doc.image.filename.endswith('.png')
+        assert doc.image.filename in storage
+        assert tmp_filename not in tmp
 
     def test_post_new_with_crop(self):
         tmp_filename = 'xyz/image.png'
-        with open(self.data('image.png')) as img:
+        with open(data_path('image.png')) as img:
             tmp_filename = tmp.save(img, tmp_filename)
 
         form = self.F(PostData({
@@ -119,13 +108,13 @@ class ImageFieldTest(DBTestMixin, FSTestMixin, TestCase):
             'thumbnail-bbox': '10,10,100,100',
         }))
 
-        self.assertEqual(form.thumbnail.filename.data, tmp_filename)
-        self.assertEqual(form.thumbnail.bbox.data, [10, 10, 100, 100])
+        assert form.thumbnail.filename.data == tmp_filename
+        assert form.thumbnail.bbox.data == [10, 10, 100, 100]
 
         doc = self.D()
         form.populate_obj(doc)
 
-        self.assertEqual(doc.thumbnail.bbox, [10, 10, 100, 100])
-        self.assertTrue(doc.thumbnail.filename.endswith('.png'))
-        self.assertIn(doc.thumbnail.filename, storage)
-        self.assertNotIn(tmp_filename, tmp)
+        assert doc.thumbnail.bbox == [10, 10, 100, 100]
+        assert doc.thumbnail.filename.endswith('.png')
+        assert doc.thumbnail.filename in storage
+        assert tmp_filename not in tmp

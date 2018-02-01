@@ -46,7 +46,6 @@ def mock_pagination(path, pattern):
 
 class DcatBackendTest(DBTestMixin, TestCase):
     def setUp(self):
-        super(DcatBackendTest, self).setUp()
         # Create fake licenses
         for license_id in 'lool', 'fr-lo':
             License.objects.create(id=license_id, title=license_id)

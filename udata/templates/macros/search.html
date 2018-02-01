@@ -108,21 +108,20 @@
     {% for term, count, selected in terms[:nb_displayed_aggregations] %}
         <a href="{{ result.query.to_url(url, **{name: term}) }}"
             class="list-group-item">
+            <span class="badge">{{ count }}</span>
             {{ result.query.facets[name].labelize(term) }}
-            <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
     {% if terms|length > nb_displayed_aggregations %}
-        <button class="list-group-item" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
+        <button class="list-group-item more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
             {{ _('More results…') }}
-            <span class="fa fa-chevron-right pull-right"></span>
         </button>
         <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
         {% for term, count, selected in terms[nb_displayed_aggregations:] %}
             <a href="{{ result.query.to_url(url, **{name: term}) }}"
                 class="list-group-item">
+                <span class="badge">{{ count }}</span>
                 {{ result.query.facets[name].labelize(term) }}
-                <span class="badge pull-right">{{ count }}</span>
             </a>
         {% endfor %}
         </div>
@@ -139,21 +138,20 @@
     {% for obj, count, selected in objects[:nb_displayed_aggregations] %}
         <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
             class="list-group-item">
+            <span class="badge">{{ count }}</span>
             {{ result.query.facets[name].labelize(obj) }}
-            <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
     {% if objects|length > nb_displayed_aggregations %}
-        <button class="list-group-item list-group-more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
+        <button class="list-group-item more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
             {{ _('More results…') }}
-            <span class="fa fa-chevron-right pull-right"></span>
         </button>
         <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
         {% for obj, count, selected in objects[nb_displayed_aggregations:] %}
             <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
                 class="list-group-item">
+                <span class="badge">{{ count }}</span>
                 {{ result.query.facets[name].labelize(obj) }}
-                <span class="badge pull-right">{{ count }}</span>
             </a>
         {% endfor %}
         </div>
@@ -169,8 +167,8 @@
     {% for key, count, selected in ranges %}
         <a href="{{ result.query.to_url(url, **{name: key}) }}"
             class="list-group-item">
+            <span class="badge">{{ count }}</span>
             {{ result.query.facets[name].labelize(key) }}
-            <span class="badge pull-right">{{ count }}</span>
         </a>
     {% endfor %}
     {% endcall %}

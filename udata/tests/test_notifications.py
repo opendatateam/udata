@@ -14,7 +14,6 @@ from .api import APITestCase
 
 class NotificationsMixin(object):
     def setUp(self):
-        super(NotificationsMixin, self).setUp()
         actions._providers = {}
 
 

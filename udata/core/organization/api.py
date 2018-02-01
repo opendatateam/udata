@@ -30,8 +30,9 @@ from .api_fields import (
     refuse_membership_fields,
 )
 
-from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
+from udata.core.dataset.search import DatasetSearch
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
 from udata.core.issues.api import issue_fields
@@ -44,6 +45,7 @@ from udata.core.storages.api import (
 
 ns = api.namespace('organizations', 'Organization related operations')
 search_parser = OrganizationSearch.as_request_parser()
+dataset_search_parser = DatasetSearch.as_request_parser()
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
@@ -355,24 +357,25 @@ class AvatarAPI(API):
         return {'image': org.logo}
 
 
-dataset_parser = api.parser()
+dataset_parser = api.page_parser()
 dataset_parser.add_argument(
-    'size', type=int, help='The amount of datasets to fetch',
-    location='args', default=25)
+    'sort', type=str, default='-created', location='args',
+    help='The sorting attribute')
 
 
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
 class OrgDatasetsAPI(API):
     @api.doc('list_organization_datasets')
-    @api.marshal_list_with(dataset_fields)
     @api.expect(dataset_parser)
+    @api.marshal_with(dataset_page_fields)
     def get(self, org):
         '''List organization datasets (including private ones when member)'''
         args = dataset_parser.parse_args()
         qs = Dataset.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return list(qs.limit(args['size']))
+        return (qs.order_by(args['sort'].replace('created', 'created_at'))
+                .paginate(args['page'], args['page_size']))
 
 
 @ns.route('/<org:org>/reuses/', endpoint='org_reuses')

@@ -69,7 +69,7 @@ def connect(signal):
 
 
 @job('log-test')
-def helloworld(self):
+def log_test(self):
     self.log.debug('This is a DEBUG message')
     self.log.info('This is an INFO message')
     self.log.warning('This is a WARNING message')
@@ -77,7 +77,7 @@ def helloworld(self):
 
 
 @job('error-test')
-def error_test_task(self):
+def error_test(self):
     self.log.info('There should be an error soon')
     raise Exception('There is an error')
 

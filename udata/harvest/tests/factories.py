@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import factory
+import pytest
 
 from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
@@ -61,12 +62,8 @@ class FactoryBackend(backends.BaseBackend):
 
 class MockBackendsMixin(object):
     '''A mixin mocking the harvest backend'''
-    def setUp(self):
-        super(MockBackendsMixin, self).setUp()
-        self.patcher = patch('udata.harvest.backends.get_all')
-        mock_get_all = self.patcher.start()
-        mock_get_all.return_value = {'factory': FactoryBackend}
-
-    def tearDown(self):
-        super(MockBackendsMixin, self).tearDown()
-        self.patcher.stop()
+    @pytest.fixture(autouse=True)
+    def mock_backend(self, mocker):
+        return_value = {'factory': FactoryBackend}
+        mocker.patch('udata.harvest.backends.get_all',
+                     return_value=return_value)

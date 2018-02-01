@@ -7,29 +7,41 @@ import logging
 import lzma
 import tarfile
 import shutil
+
+from collections import Counter
+from datetime import date
+from string import Formatter
 from urllib import urlretrieve
 
+import click
 import msgpack
 import slugify
+
 from mongoengine import errors
 
-from udata.commands import submanager
-from udata.core.storages import tmp
-from udata.models import GeoLevel, GeoZone
+from udata.commands import cli
+from udata.core.dataset.models import Dataset
+from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
+from udata.core.storages import logos, tmp
 
 log = logging.getLogger(__name__)
 
 
-m = submanager(
-    'spatial',
-    help='Geospatial related operations',
-    description='Handle all geospatial related operations and maintenance'
-)
+@cli.group('spatial')
+def grp():
+    '''Geospatial related operations'''
+    pass
 
 
-@m.command
+@grp.command()
+@click.argument('filename', metavar='<filename>')
+@click.option('-d', '--drop', is_flag=True, help='Drop existing data')
 def load(filename, drop=False):
-    '''Load a GeoZones Bundle'''
+    '''
+    Load a geozones archive from <filename>
+
+    <filename> can be either a local path or a remote URL.
+    '''
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
         filename, _ = urlretrieve(filename, tmp.path('geozones.tar.xz'))
@@ -104,3 +116,116 @@ def load(filename, drop=False):
     log.info('Loaded {total} zones'.format(total=i))
 
     shutil.rmtree(tmp.path('translations'))  # Not in use for now.
+
+
+@grp.command()
+@click.argument('filename', metavar='<filename>')
+def load_logos(filename):
+    '''
+    Load logos from a geologos archive from <filename>
+
+    <filename> can be either a local path or a remote URL.
+    '''
+    if filename.startswith('http'):
+        log.info('Downloading GeoLogos bundle: %s', filename)
+        filename, _ = urlretrieve(filename, tmp.path('geologos.tar.xz'))
+
+    log.info('Extracting GeoLogos bundle')
+    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
+        with tarfile.open(fileobj=xz) as f:
+            f.extractall(tmp.root)
+
+    log.info('Moving to the final location and cleaning up')
+    if os.path.exists(logos.root):
+        shutil.rmtree(logos.root)
+    shutil.move(tmp.path('logos'), logos.root)
+    log.info('Done')
+
+
+@grp.command()
+def migrate():
+    '''
+    Migrate zones from old to new ids in datasets.
+
+    Should only be run once with the new version of geozones w/ geohisto.
+    '''
+    counter = Counter()
+    drom_zone = GeoZone.objects(id='country-subset:fr:drom').first()
+    dromcom_zone = GeoZone.objects(id='country-subset:fr:dromcom').first()
+    # Iter over datasets with zones
+    for dataset in Dataset.objects(spatial__zones__gt=[]):
+        counter['datasets'] += 1
+        new_zones = []
+        for zone in dataset.spatial.zones:
+            if zone.id.startswith('fr/'):
+                counter['zones'] += 1
+                country, kind, zone_id = zone.id.split('/')
+                zone_id = zone_id.upper()  # Corsica 2a/b case.
+                if kind == 'town':
+                    counter['towns'] += 1
+                    new_zones.append(
+                        GeoZone
+                        .objects(code=zone_id, level='fr:commune')
+                        .valid_at(date.today())
+                        .first())
+                elif kind == 'county':
+                    counter['counties'] += 1
+                    new_zones.append(
+                        GeoZone
+                        .objects(code=zone_id, level='fr:departement')
+                        .valid_at(date.today())
+                        .first())
+                elif kind == 'region':
+                    counter['regions'] += 1
+                    # Only link to pre-2016 regions which kept the same id.
+                    new_zones.append(
+                        GeoZone
+                        .objects(code=zone_id, level='fr:region')
+                        .first())
+                elif kind == 'epci':
+                    counter['epcis'] += 1
+                    new_zones.append(
+                        GeoZone
+                        .objects(code=zone_id, level='fr:epci')
+                        .valid_at(dataset.created_at.date())
+                        .first())
+                else:
+                    new_zones.append(zone)
+            elif zone.id.startswith('country-subset/fr'):
+                counter['zones'] += 1
+                subset, country, kind = zone.id.split('/')
+                if kind == 'dom':
+                    counter['drom'] += 1
+                    new_zones.append(drom_zone)
+                elif kind == 'domtom':
+                    counter['dromcom'] += 1
+                    new_zones.append(dromcom_zone)
+            elif zone.id.startswith('country/'):
+                counter['zones'] += 1
+                counter['countries'] += 1
+                new_zones.append(zone.id.replace('/', ':'))
+            elif zone.id.startswith('country-group/'):
+                counter['zones'] += 1
+                counter['countrygroups'] += 1
+                new_zones.append(zone.id.replace('/', ':'))
+            else:
+                new_zones.append(zone)
+        dataset.update(
+            spatial=SpatialCoverage(
+                granularity=dataset.spatial.granularity,
+                zones=[getattr(z, 'id', z) for z in new_zones if z]
+            )
+        )
+    log.info(Formatter().vformat('''Summary
+    Processed {zones} zones in {datasets} datasets:
+    - {countrygroups} country groups (World/UE)
+    - {countries} countries
+    - France:
+        - {regions} regions
+        - {counties} counties
+        - {epcis} EPCIs
+        - {towns} towns
+        - {drom} DROM
+        - {dromcom} DROM-COM
+    ''', (), counter))
+    log.info('Done')

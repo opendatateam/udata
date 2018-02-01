@@ -119,7 +119,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'udata = udata.commands:console_script',
+            'udata = udata.commands:cli',
         ],
         'udata.themes': [
             'default = udata.theme.default',
@@ -134,6 +134,9 @@ setup(
         ],
         'udata.linkcheckers': [
             'no_check = udata.linkchecker.backends:NoCheckLinkchecker',
+        ],
+        'pytest11': [
+            'udata = udata.tests.plugin',
         ],
     },
     license='GNU AGPLv3+',

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import click
 import json
 import logging
 import requests
 
-from udata.commands import manager
+from udata.commands import cli, success
 from udata.models import License, DEFAULT_LICENSE
 from .tasks import send_frequency_reminder
 
@@ -24,7 +25,8 @@ FLAGS_MAP = {
 DEFAULT_LICENSE_FILE = 'http://licenses.opendefinition.org/licenses/groups/ckan.json'  # noqa
 
 
-@manager.command
+@cli.command()
+@click.argument('source', default=DEFAULT_LICENSE_FILE)
 def licenses(source=DEFAULT_LICENSE_FILE):
     '''Feed the licenses from a JSON file'''
     if source.startswith('http'):
@@ -57,10 +59,10 @@ def licenses(source=DEFAULT_LICENSE_FILE):
     except License.DoesNotExist:
         License.objects.create(**DEFAULT_LICENSE)
         log.info('Added license "%s"', DEFAULT_LICENSE['title'])
-    log.info('Done')
+    success('Done')
 
 
-@manager.command
+@cli.command()
 def frequency_reminder():
     """Send a unique email per organization to members
 

@@ -10,6 +10,7 @@ from werkzeug.datastructures import MultiDict
 from udata.forms import Form
 from udata.models import db
 from udata.tests import TestCase
+from udata.tests.helpers import assert_json_equal
 from udata.utils import faker
 
 from ..factories import GeoZoneFactory
@@ -173,7 +174,7 @@ class SpatialCoverageFieldTest(TestCase):
 
         form.populate_obj(fake)
 
-        self.assertJsonEqual(fake.spatial.geom, geom)
+        assert_json_equal(fake.spatial.geom, geom)
 
     def test_with_valid_geom_from_json(self):
         Fake, FakeForm = self.factory()
@@ -187,7 +188,7 @@ class SpatialCoverageFieldTest(TestCase):
 
         form.populate_obj(fake)
 
-        self.assertJsonEqual(fake.spatial.geom, geom)
+        assert_json_equal(fake.spatial.geom, geom)
 
     def test_with_invalid_geom_from_json(self):
         Fake, FakeForm = self.factory()
@@ -275,7 +276,7 @@ class SpatialCoverageFieldTest(TestCase):
 
         form.populate_obj(fake)
 
-        self.assertJsonEqual(fake.spatial.geom, geom)
+        assert_json_equal(fake.spatial.geom, geom)
 
     def test_with_initial_none(self):
         Fake, FakeForm = self.factory()

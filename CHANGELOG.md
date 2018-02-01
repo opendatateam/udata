@@ -2,6 +2,14 @@
 
 ## Current (in progress)
 
+- Fix organization admin pagination [#1372](https://github.com/opendatateam/udata/issues/1372)
+- Switch to `flask-cli` and drop `flask-script`. Deprecated commands have been removed. [#1364](https://github.com/opendatateam/udata/pull/1364) [breaking]
+- Fix missing spinners on loading datatables [#1401](https://github.com/opendatateam/udata/pull/1401)
+- Switch to pytest as testing tool and expose a `udata` pytest plugin [#1400](https://github.com/opendatateam/udata/pull/1400)
+- Fixes on the search facets [#1410](https://github.com/opendatateam/udata/pull/1410)
+
+## 1.2.10 (2018-01-24)
+
 - Markdown rendering is now the same between the back and the frontend. [#604](https://github.com/opendatateam/udata/issues/604)
 - Make the dataset page reuses section and cards themable. [#1378](https://github.com/opendatateam/udata/pull/1378)
 - `ValueError`s are not hidden anymore by the Bad Request error page, they are logged. [#1382](https://github.com/opendatateam/udata/pull/1382)

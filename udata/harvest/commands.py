@@ -3,26 +3,29 @@ from __future__ import unicode_literals
 
 import logging
 
-from argparse import SUPPRESS
+import click
+
+from udata.commands import cli
 
 from . import actions
 
-from udata.commands import submanager
 
 log = logging.getLogger(__name__)
 
-m = submanager('harvest',
-               help='Remote repositories harvesting operations',
-               description='Handle remote repositories harvesting operations'
-               )
+
+@cli.group('harvest')
+def grp():
+    '''Remote repositories harvesting operations'''
+    pass
 
 
-@m.option('backend')
-@m.option('url')
-@m.option('name')
-@m.option('-f', '--frequency', default=None)
-@m.option('-u', '--owner', dest='owner', default=None)
-@m.option('-o', '--org', dest='org', default=None)
+@grp.command()
+@click.argument('backend')
+@click.argument('url')
+@click.argument('name')
+@click.option('-f', '--frequency', default=None)
+@click.option('-u', '--owner', default=None)
+@click.option('-o', '--org', default=None)
 def create(name, url, backend, frequency=None, owner=None, org=None):
     '''Create a new harvest source'''
     log.info('Creating a new Harvest source "%s"', name)
@@ -40,14 +43,15 @@ def create(name, url, backend, frequency=None, owner=None, org=None):
     organization: {0.organization}'''.format(source))
 
 
-@m.option('identifier')
+@grp.command()
+@click.argument('identifier')
 def validate(identifier):
     '''Validate a source given its identifier'''
     source = actions.validate_source(identifier)
     log.info('Source %s (%s) has been validated', source.slug, str(source.id))
 
 
-@m.command
+@grp.command()
 def delete(identifier):
     '''Delete a harvest source'''
     log.info('Deleting source "%s"', identifier)
@@ -55,9 +59,9 @@ def delete(identifier):
     log.info('Deleted source "%s"', identifier)
 
 
-@m.option('-s', '--scheduled',
-          action='store_true',
-          help='list only scheduled source')
+@grp.command()
+@click.option('-s', '--scheduled', is_flag=True,
+              help='list only scheduled source')
 def sources(scheduled=False):
     '''List all harvest sources'''
     sources = actions.list_sources()
@@ -77,7 +81,7 @@ def sources(scheduled=False):
         log.info('No sources defined yet')
 
 
-@m.command
+@grp.command()
 def backends():
     '''List available backends'''
     log.info('Available backends:')
@@ -85,36 +89,39 @@ def backends():
         log.info('%s (%s)', backend.name, backend.display_name or backend.name)
 
 
-@m.command
+@grp.command()
 def jobs():
     '''List started harvest jobs'''
 
 
-@m.option('identifier', help='The Harvest source identifier or slug')
+@grp.command()
+@click.argument('identifier')
 def launch(identifier):
     '''Launch a source harvesting on the workers'''
     log.info('Launching harvest job for source "%s"', identifier)
     actions.launch(identifier)
 
 
-@m.option('identifier', help='The Harvest source identifier or slug')
+@grp.command()
+@click.argument('identifier')
 def run(identifier):
     '''Run a harvester synchronously'''
     log.info('Harvesting source "%s"', identifier)
     actions.run(identifier)
 
 
-@m.option('identifier', help='The Harvest source identifier or slug')
-@m.option('-m', '--minute', default=SUPPRESS,
-          help='The crontab expression for minute')
-@m.option('-h', '--hour', default=SUPPRESS,
-          help='The crontab expression for hour')
-@m.option('-d', '--day', dest='day_of_week', default=SUPPRESS,
-          help='The crontab expression for day of week')
-@m.option('-D', '--day-of-month', dest='day_of_month', default=SUPPRESS,
-          help='The crontab expression for day of month')
-@m.option('-M', '--month-of-year', default=SUPPRESS,
-          help='The crontab expression for month of year')
+@grp.command()
+@click.argument('identifier')
+@click.option('-m', '--minute', default='*',
+              help='The crontab expression for minute')
+@click.option('-h', '--hour', default='*',
+              help='The crontab expression for hour')
+@click.option('-d', '--day', 'day_of_week', default='*',
+              help='The crontab expression for day of week')
+@click.option('-D', '--day-of-month', default='*',
+              help='The crontab expression for day of month')
+@click.option('-M', '--month-of-year', default='*',
+              help='The crontab expression for month of year')
 def schedule(identifier, **kwargs):
     '''Schedule a harvest job to run periodically'''
     source = actions.schedule(identifier, **kwargs)
@@ -122,14 +129,15 @@ def schedule(identifier, **kwargs):
     log.info(msg.format(source=source, cron=source.periodic_task.crontab))
 
 
-@m.option('identifier', help='The Harvest source identifier or slug')
+@grp.command()
+@click.argument('identifier')
 def unschedule(identifier):
     '''Unschedule a periodical harvest job'''
     source = actions.unschedule(identifier)
     log.info('Unscheduled harvest source "%s"', source.name)
 
 
-@m.command
+@grp.command()
 def purge():
     '''Permanently remove deleted harvest sources'''
     log.info('Purging deleted harvest sources')
@@ -137,10 +145,15 @@ def purge():
     log.info('Purged %s source(s)', count)
 
 
-@m.option('filename', help='The mapping CSV filename')
-@m.option('domain', help='The remote domain')
+@grp.command()
+@click.argument('filename')
+@click.argument('domain')
 def attach(domain, filename):
-    '''Attach existing datasets to their harvest remote id'''
+    '''
+    Attach existing datasets to their harvest remote id
+
+    Mapping between identifiers should be in FILENAME CSV file.
+    '''
     log.info('Attaching datasets for domain %s', domain)
     result = actions.attach(domain, filename)
     log.info('Attached %s datasets to %s', result.success, domain)

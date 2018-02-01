@@ -5,7 +5,11 @@ uData development Launcher
 '''
 from __future__ import unicode_literals
 
-from udata.commands import run_manager
+import os
+
+from udata.commands import cli
 
 if __name__ == '__main__':
-    run_manager('udata.settings.Debug')
+    # Run the application in debug mode
+    os.environ['FLASK_DEBUG'] = 'true'
+    cli(settings='udata.settings.Debug')

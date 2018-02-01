@@ -20,6 +20,8 @@ from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 
+from udata.tests.helpers import capture_mails, assert_emit, assert_not_emit
+
 import udata.core.badges.tasks  # noqa
 
 
@@ -543,7 +545,7 @@ class OrganizationDatasetsAPITest(APITestCase):
         response = self.get(url_for('api.org_datasets', org=org))
 
         self.assert200(response)
-        self.assertEqual(len(response.json), len(datasets))
+        self.assertEqual(len(response.json['data']), len(datasets))
 
     def test_list_org_datasets_private(self):
         '''Should include private datasets when member'''
@@ -556,7 +558,7 @@ class OrganizationDatasetsAPITest(APITestCase):
         response = self.get(url_for('api.org_datasets', org=org))
 
         self.assert200(response)
-        self.assertEqual(len(response.json), len(datasets))
+        self.assertEqual(len(response.json['data']), len(datasets))
 
     def test_list_org_datasets_hide_private(self):
         '''Should not include private datasets when not member'''
@@ -567,7 +569,7 @@ class OrganizationDatasetsAPITest(APITestCase):
         response = self.get(url_for('api.org_datasets', org=org))
 
         self.assert200(response)
-        self.assertEqual(len(response.json), len(datasets))
+        self.assertEqual(len(response.json['data']), len(datasets))
 
     def test_list_org_datasets_with_size(self):
         '''Should list organization datasets'''
@@ -575,10 +577,10 @@ class OrganizationDatasetsAPITest(APITestCase):
         DatasetFactory.create_batch(3, organization=org)
 
         response = self.get(
-            url_for('api.org_datasets', org=org), qs={'size': 2})
+            url_for('api.org_datasets', org=org), qs={'page_size': 2})
 
         self.assert200(response)
-        self.assertEqual(len(response.json), 2)
+        self.assertEqual(len(response.json['data']), 2)
 
 
 class OrganizationReusesAPITest(APITestCase):
@@ -699,10 +701,9 @@ class OrganizationBadgeAPITest(APITestCase):
 
     def test_create(self):
         data = self.factory.as_dict()
-        with self.api_user(), self.assert_emit(on_badge_added):
-                response = self.post(
-                    url_for('api.organization_badges', org=self.organization),
-                    data)
+        url = url_for('api.organization_badges', org=self.organization)
+        with self.api_user(), assert_emit(on_badge_added):
+            response = self.post(url, data)
         self.assert201(response)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
@@ -714,7 +715,7 @@ class OrganizationBadgeAPITest(APITestCase):
         data = self.factory.as_dict()
         data['kind'] = CERTIFIED
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             self.post(
                 url_for('api.organization_badges', org=org),
                 data)
@@ -731,7 +732,7 @@ class OrganizationBadgeAPITest(APITestCase):
         data = self.factory.as_dict()
         data['kind'] = PUBLIC_SERVICE
 
-        with self.capture_mails() as mails:
+        with capture_mails() as mails:
             self.post(
                 url_for('api.organization_badges', org=org),
                 data)
@@ -747,15 +748,12 @@ class OrganizationBadgeAPITest(APITestCase):
 
     def test_create_same(self):
         data = self.factory.as_dict()
+        url = url_for('api.organization_badges', org=self.organization)
         with self.api_user():
-            with self.assert_emit(on_badge_added):
-                self.post(
-                    url_for('api.organization_badges', org=self.organization),
-                    data)
-            with self.assert_not_emit(on_badge_added):
-                response = self.post(
-                    url_for('api.organization_badges', org=self.organization),
-                    data)
+            with assert_emit(on_badge_added):
+                self.post(url, data)
+            with assert_not_emit(on_badge_added):
+                response = self.post(url, data)
         self.assertStatus(response, 200)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 1)
@@ -781,11 +779,12 @@ class OrganizationBadgeAPITest(APITestCase):
         badge = self.factory()
         self.organization.badges.append(badge)
         self.organization.save()
+        url = url_for('api.organization_badge',
+                      org=self.organization,
+                      badge_kind=str(badge.kind))
         with self.api_user():
-            with self.assert_emit(on_badge_removed):
-                response = self.delete(
-                    url_for('api.organization_badge', org=self.organization,
-                            badge_kind=str(badge.kind)))
+            with assert_emit(on_badge_removed):
+                response = self.delete(url)
         self.assertStatus(response, 204)
         self.organization.reload()
         self.assertEqual(len(self.organization.badges), 0)
