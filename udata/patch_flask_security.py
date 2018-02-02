@@ -15,8 +15,13 @@ def sendmail(subject, email, template, **context):
     mail.send(subject, user, tpl, **context)
 
 
-changeable.send_mail = sendmail.delay
-confirmable.send_mail = sendmail.delay
-passwordless.send_mail = sendmail.delay
-recoverable.send_mail = sendmail.delay
-registerable.send_mail = sendmail.delay
+def sendmail_proxy(subject, email, template, **context):
+    """Cast the lazy_gettext'ed subject to string before passing to Celery"""
+    sendmail.delay(subject[0].value, email, template, **context)
+
+
+changeable.send_mail = sendmail_proxy
+confirmable.send_mail = sendmail_proxy
+passwordless.send_mail = sendmail_proxy
+recoverable.send_mail = sendmail_proxy
+registerable.send_mail = sendmail_proxy
