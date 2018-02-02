@@ -13,7 +13,7 @@
 
     <div class="card-body">
         <h4>
-            <a :title="organization.name">
+            <a :href="organization.page" :title="organization.name">
                 {{ organization.name }}
             </a>
         </h4>
