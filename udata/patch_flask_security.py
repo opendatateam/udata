@@ -17,7 +17,7 @@ def sendmail(subject, email, template, **context):
 
 def sendmail_proxy(subject, email, template, **context):
     """Cast the lazy_gettext'ed subject to string before passing to Celery"""
-    sendmail.delay(str(subject[0]), email, template, **context)
+    sendmail.delay(subject[0].decode('utf-8'), email, template, **context)
 
 
 changeable.send_mail = sendmail_proxy
