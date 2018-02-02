@@ -67,7 +67,6 @@ export default {
             this._build_uploader();
         }
     },
-
     filters: {
         fileext(filename) {
             return filename.split('.').pop();

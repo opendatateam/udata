@@ -46,9 +46,10 @@
                 <tr>
                     <th v-if="reordering" width="30"></th>
                     <th v-i18n="Name"></th>
-                    <th width="120" v-i18n="Format"></th>
+                    <th width="100" v-i18n="Type"></th>
+                    <th width="100" v-i18n="Format"></th>
                     <th width="100" v-i18n="Size"></th>
-                    <th width="130" v-i18n="Downloads"></th>
+                    <th width="120" v-i18n="Downloads"></th>
                     <th width="100" v-i18n="Availability"></th>
                 </tr>
             </thead>
@@ -58,6 +59,7 @@
                     <td>
                         <div class="ellipsis">{{ file.name }}</div>
                     </td>
+                    <td><!-- resource.type --></td>
                     <td>{{ file.name | fileext }}</td>
                     <td>{{ file.size | filesize }}</td>
                     <td colspan="2">
@@ -74,6 +76,7 @@
                         <span class="fa fa-bars"></span>
                     </td>
                     <td class="ellipsis">{{ resource.title }}</td>
+                    <td>{{ resource | resource_type_label }}</td>
                     <td>{{ resource.format }}</td>
                     <td>{{ resource.filesize | filesize }}</td>
                     <td class="text-center">
@@ -137,10 +140,11 @@ import Resource from 'models/resource';
 import Box from 'components/containers/box.vue';
 import PaginationWidget from 'components/pagination.vue';
 import ResourceAvailability from './availability.vue';
+import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'resources-list',
-    mixins: [Uploader, Sorter],
+    mixins: [Uploader, Sorter, DatasetFilters],
     components: {Box, PaginationWidget, ResourceAvailability},
     props: {
         dataset: {

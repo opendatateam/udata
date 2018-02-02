@@ -8,8 +8,8 @@ from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
 
 from .models import (
-    UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY,
-    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE
+    UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
+    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE, RESOURCE_TYPES
 )
 
 checksum_fields = api.model('Checksum', {
@@ -41,6 +41,9 @@ resource_fields = api.model('Resource', {
     'filetype': fields.String(
         description=('Whether the resource is an uploaded file, '
                      'a remote file or an API'),
+        required=True, enum=RESOURCE_FILETYPES.keys()),
+    'type': fields.String(
+        description=('Resource type (documentation, API...)'),
         required=True, enum=RESOURCE_TYPES.keys()),
     'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
@@ -187,4 +190,9 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
         description='The web page URL for this dataset', readonly=True),
     'score': fields.Float(
         description='The internal match score', required=True),
+})
+
+resource_type_fields = api.model('ResourceType', {
+    'id': fields.String(description='The resource type identifier'),
+    'label': fields.String(description='The resource type display name')
 })

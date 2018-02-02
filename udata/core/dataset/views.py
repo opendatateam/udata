@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from collections import defaultdict, OrderedDict
+
 from flask import abort, request, url_for, redirect
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.core.site.models import current_site
 from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
-from udata.models import Dataset, Follow, Reuse, CommunityResource
+from udata.models import (Dataset, Follow, Reuse, CommunityResource,
+                          RESOURCE_TYPES)
 from udata.rdf import (
     RDF_MIME_TYPES, RDF_EXTENSIONS,
     negociate_content, want_rdf, graph_response
@@ -162,3 +165,16 @@ def sitemap_urls():
     for dataset in Dataset.objects.visible().only('id', 'slug'):
         yield ('datasets.show_redirect', {'dataset': dataset},
                None, 'weekly', 0.8)
+
+
+@blueprint.app_template_filter()
+def group_resources_by_type(resources):
+    """Group a list of `resources` by `type` with order"""
+    groups = defaultdict(list)
+    for resource in resources:
+        groups[getattr(resource, 'type')].append(resource)
+    ordered = OrderedDict()
+    for rtype, rtype_label in RESOURCE_TYPES.items():
+        if groups[rtype]:
+            ordered[(rtype, rtype_label)] = groups[rtype]
+    return ordered

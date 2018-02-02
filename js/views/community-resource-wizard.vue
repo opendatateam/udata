@@ -10,7 +10,7 @@ import API from 'api';
 export default {
     data: function() {
         return {
-            communityResource: new CommunityResource(),
+            communityResource: new CommunityResource({data: {filetype: 'remote'}}),
             dataset: new Dataset(),
             publish_as: null,
             steps: [{

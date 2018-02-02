@@ -90,28 +90,31 @@
                 <div class="list-group resources-list">
                     <h3>{{ _('Resources') }}</h3>
 
+                    {% set grouped_resources = dataset.resources|group_resources_by_type %}
+                    {% set nb_groups = grouped_resources.keys()|length %}
                     {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
-                    {% for resource in dataset.resources %}
-                        {% if loop.index0 == max_resources %}
-                        <div id="collapsed-resources" class="collapse">
+                    {% for (type, type_label), resources in grouped_resources.items() %}
+                        {% if nb_groups > 1 %}<h4 class="resource-type">{{ type_label }}</h4>{% endif %}
+                        {% for resource in resources %}
+                            {% if loop.index0 == max_resources %}
+                            <div id="collapsed-resources-{{ type }}" class="collapse">
+                            {% endif %}
+                            {% include theme('dataset/resource/list-item.html') %}
+                        {% endfor %}
+                        {% if resources|length > max_resources %}
+                            </div>
+                            <p class="text-center expander">
+                                <button type="button" class="btn btn-default"
+                                    data-toggle="collapse" href="#collapsed-resources-{{ type }}"
+                                    @click.prevent="expandResources($event, '{{ type }}')">
+                                    <span class="fa fa-list" ></span>
+                                    {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
+                                </button>
+                            </p>
                         {% endif %}
-                        {% include theme('dataset/resource/list-item.html') %}
                     {% else %}
                     <p class="text-center">{{ _('No resources') }}</p>
                     {% endfor %}
-
-                    {% if dataset.resources|length > max_resources %}
-                        </div>
-
-                        <p class="text-center expander">
-                            <button id="more-resources" type="button" class="btn btn-default"
-                                data-toggle="collapse" href="#collapsed-resources"
-                                @click.prevent="expandResources($event)">
-                                <span class="fa fa-list" ></span>
-                                {{ _('See the %(nb)d resources', nb=dataset.resources|length) }}
-                            </button>
-                        </p>
-                    {% endif %}
 
                     {% if can_edit %}
                     <a class="list-group-item add"

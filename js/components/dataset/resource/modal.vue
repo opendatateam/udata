@@ -1,7 +1,10 @@
 <style lang="less">
 .resource-modal {
-    a {
-        color: white;
+    dd {
+        a {
+            color: white;
+            text-decoration: underline;
+        }
     }
 
     .dl-wide dd {
@@ -22,14 +25,13 @@
 
             <dl class="dl-horizontal dl-wide">
                 <dt>{{ _('Type') }}</dt>
+                <dd>{{ resource | resource_type_label }}</dd>
+                <dt>{{ _('Location') }}</dt>
                 <dd v-if="resource.filetype == 'file'">
                     {{ _('This resource is hosted on our servers') }}
                 </dd>
                 <dd v-if="resource.filetype == 'remote'">
                     {{ _('This resource is hosted on an external server') }}
-                </dd>
-                <dd v-if="resource.filetype == 'api'">
-                    {{ _('This resource is an API') }}
                 </dd>
                 <dt>{{ _('URL') }}</dt>
                 <dd><a :href="resource.url">{{resource.url}}</a></dd>
@@ -120,10 +122,12 @@ import Modal from 'components/modal.vue'
 import ResourceForm from 'components/dataset/resource/form.vue'
 import OrgCard from 'components/organization/card.vue'
 import UserCard from 'components/user/card.vue'
+import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'resource-modal',
     components: {Modal, ResourceForm, OrgCard, UserCard},
+    mixins: [DatasetFilters],
     data() {
         return {
             edit: false,

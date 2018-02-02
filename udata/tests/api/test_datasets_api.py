@@ -10,7 +10,8 @@ from uuid import uuid4
 from flask import url_for
 
 from udata.models import (
-    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES, LEGACY_FREQUENCIES
+    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES,
+    LEGACY_FREQUENCIES, RESOURCE_TYPES
 )
 
 from . import APITestCase
@@ -1100,3 +1101,12 @@ class CommunityResourceAPITest(APITestCase):
         self.assertIn('errors', data)
         self.assertIn('dataset', data['errors'])
         self.assertEqual(CommunityResource.objects.count(), 0)
+
+
+class ResourcesTypesAPITest(APITestCase):
+
+    def test_resource_types_list(self):
+        '''It should fetch the resource types list from the API'''
+        response = self.get(url_for('api.resource_types'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(RESOURCE_TYPES))

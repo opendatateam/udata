@@ -86,11 +86,11 @@ new Vue({
         /**
          * Expand the resource list and hide the expander
          */
-        expandResources(e) {
+        expandResources(e, type) {
             new Velocity(e.target, {height: 0, opacity: 0}, {complete(els) {
                 els[0].remove();
             }});
-            this.checkResourcesCollapsed();
+            this.checkResourcesCollapsed(type);
         },
 
         /**
@@ -147,18 +147,25 @@ new Vue({
          */
         checkResources() {
             if (config.check_urls) {
-                this.dataset.resources
-                    .slice(0, config.dataset_max_resources_uncollapsed)
-                    .forEach(this.checkResource);
+                const types = this.dataset.resources
+                    .map(r => r.type)
+                    .filter((v, i, a) => a.indexOf(v) === i);
+                types.forEach(type => {
+                    this.dataset.resources
+                        .filter(r => r.type == type)
+                        .slice(0, config.dataset_max_resources_uncollapsed)
+                        .forEach(this.checkResource);
+                })
             }
         },
 
         /**
          * Asynchronously check collapsed resources status
          */
-        checkResourcesCollapsed() {
+        checkResourcesCollapsed(type) {
             if (config.check_urls) {
                 this.dataset.resources
+                    .filter(r => r.type == type)
                     .slice(config.dataset_max_resources_uncollapsed)
                     .forEach(this.checkResource);
             }

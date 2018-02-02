@@ -18,8 +18,8 @@ from udata.utils import hash_url
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
-    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_TYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE'
+    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
+    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
 )
 
 #: Udata frequencies with their labels
@@ -73,9 +73,17 @@ DEFAULT_LICENSE = {
 }
 
 RESOURCE_TYPES = OrderedDict([
+    ('main', 'Main file'),
+    ('documentation', _('Documentation')),
+    ('update', _('Update')),
+    ('api', _('API')),
+    ('code', _('Code repository')),
+    ('other', _('Other')),
+])
+
+RESOURCE_FILETYPES = OrderedDict([
     ('file', _('Uploaded file')),
     ('remote', _('Remote file')),
-    ('api', _('API')),
 ])
 
 CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
@@ -184,7 +192,9 @@ class ResourceMixin(object):
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     filetype = db.StringField(
-        choices=RESOURCE_TYPES.keys(), default='file', required=True)
+        choices=RESOURCE_FILETYPES.keys(), default='file', required=True)
+    type = db.StringField(
+        choices=RESOURCE_TYPES.keys(), default='main', required=True)
     url = db.URLField(required=True)
     urlhash = db.StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
@@ -272,7 +282,8 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
-            'needCheck': self.need_check()
+            'needCheck': self.need_check(),
+            'type': self.type,
         }
 
         if 'views' in self.metrics:
