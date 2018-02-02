@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Translate Flask-Security email subjects
+- Translate Flask-Security email subjects [#1413](https://github.com/opendatateam/udata/pull/1413)
 
 ## 1.2.10 (2018-01-24)
 
