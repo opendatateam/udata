@@ -10,7 +10,7 @@
     </div>
     {% else %}
     <a class="card-logo" href="{{ url_for('reuses.show', reuse=reuse) }}">
-        <img alt=""
+        <img alt="{{ reuse.title }}"
             src="{{ reuse.image(86)|placeholder('reuse') }}"
             width="86" height="86">
     </a>
