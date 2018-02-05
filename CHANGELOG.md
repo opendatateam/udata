@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.11 (2018-02-05)
 
 - Translate Flask-Security email subjects [#1413](https://github.com/opendatateam/udata/pull/1413)
