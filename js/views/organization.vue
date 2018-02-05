@@ -57,7 +57,7 @@ import Followers from 'models/followers';
 import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
-import {PageList} from 'models/base';
+import {PageList, ModelPage} from 'models/base';
 // Widgets
 import DatasetList from 'components/dataset/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
@@ -80,7 +80,8 @@ export default {
                 search: 'title',
                 mask: ReuseList.MASK
             }),
-            datasets: new PageList({
+            datasets: new ModelPage({
+                query: {page_size: 10, sort: '-created'},
                 ns: 'organizations',
                 fetch: 'list_organization_datasets',
                 search: 'title',

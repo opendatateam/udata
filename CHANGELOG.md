@@ -3,6 +3,9 @@
 ## Current (in progress)
 
 - Translate Flask-Security email subjects [#1413](https://github.com/opendatateam/udata/pull/1413)
+- Fix organization admin pagination [#1372](https://github.com/opendatateam/udata/issues/1372)
+- Fix missing spinners on loading datatables [#1401](https://github.com/opendatateam/udata/pull/1401)
+- Fixes on the search facets [#1410](https://github.com/opendatateam/udata/pull/1410)
 
 ## 1.2.10 (2018-01-24)
 
