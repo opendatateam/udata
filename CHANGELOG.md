@@ -3,6 +3,9 @@
 ## Current (in progress)
 
 - Make use of [udata pytest plugin](https://github.com/opendatateam/udata#1400) [#254](https://github.com/etalab/udata-gouvfr/pull/254)
+
+## 1.2.5 (2018-02-05)
+
 - Small fixes on search facets related to [opendatateam/udata#1410](https://github.com/opendatateam/udata/pull/1410) [#255](https://github.com/etalab/udata-gouvfr/pull/255)
 
 ## 1.2.4 (2018-01-24)
