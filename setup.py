@@ -91,7 +91,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'udata>=1.2.0',
+        'udata>=1.2.0,<1.3.0.dev',
         'feedparser',
     ],
     entry_points={
