@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Small fixes on search facets related to [opendatateam/udata#1410](https://github.com/opendatateam/udata/pull/1410) [#255](https://github.com/etalab/udata-gouvfr/pull/255)
 
 ## 1.2.4 (2018-01-24)
 
