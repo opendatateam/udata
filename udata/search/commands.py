@@ -11,7 +11,6 @@ from contextlib import contextmanager
 from datetime import datetime
 
 from flask import current_app
-from flask_script import prompt_bool
 
 from udata.commands import cli, IS_TTY
 from udata.search import es, adapter_catalog
@@ -180,13 +179,8 @@ def index(models=None, name=None, force=False, keep=False):
     if es.indices.exists(index_name):
         if IS_TTY and not force:
             msg = 'Index {0} will be deleted, are you sure?'
-            delete = prompt_bool(msg.format(index_name))
-        else:
-            delete = True
-        if delete:
-            es.indices.delete(index_name)
-        else:
-            sys.exit(-1)
+            click.confirm(msg.format(index_name), abort=True)
+        es.indices.delete(index_name)
 
     es.initialize(index_name)
 
