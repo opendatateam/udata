@@ -2,8 +2,11 @@
     margin: 0;
 
     .list-group-item {
+        
         @vspacing: 10px;
         @base-color: #eaeaea;
+        @border-color: #fafafa;
+
         height: 54px;
         cursor: pointer;
         background-color: @base-color;
@@ -55,12 +58,12 @@
         }
 
         &.expanded {
-            border-bottom-color: #fafafa;
+            border-bottom-color: @border-color;
         }
 
         &.body-only {
             margin-top: -@vspacing;
-            border-color: #fafafa;
+            border-color: @border-color;
 
             .list-group-item-heading {
                 margin: 5px;
