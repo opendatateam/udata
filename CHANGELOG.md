@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.5 (2018-02-05)
 
 - Small fixes on search facets related to [opendatateam/udata#1410](https://github.com/opendatateam/udata/pull/1410) [#255](https://github.com/etalab/udata-gouvfr/pull/255)
 
