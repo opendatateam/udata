@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.11 (2018-02-05)
 
 - Translate Flask-Security email subjects [#1413](https://github.com/opendatateam/udata/pull/1413)
 - Fix organization admin pagination [#1372](https://github.com/opendatateam/udata/issues/1372)
