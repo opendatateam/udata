@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-06 10:42-0500\n"
+"PO-Revision-Date: 2018-02-06 10:51-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -2486,7 +2486,7 @@ msgstr "Nombre d'abonnés"
 #, python-format
 msgid "%(num)s follower"
 msgid_plural "%(num)s followers"
-msgstr[0] ""
+msgstr[0] "%(num)s abonné"
 msgstr[1] "%(num)s abonnés"
 
 #: udata/templates/organization/search-result.html:65
@@ -2497,8 +2497,8 @@ msgstr "Nombre de membres"
 #, python-format
 msgid "%(num)s members"
 msgid_plural "%(num)s members"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)s membre"
+msgstr[1] "%(num)s membres"
 
 #: udata/templates/organization/sidebar-producer.html:17
 #: udata/templates/reuse/display.html:161
@@ -2906,7 +2906,7 @@ msgstr "profil"
 #, python-format
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"
-msgstr[0] ""
+msgstr[0] "%(num)d suivi"
 msgstr[1] "%(num)d suivis"
 
 #: udata/templates/user/datasets.html:39
@@ -2923,28 +2923,28 @@ msgstr "%(user)s n'a pas d'abonnés"
 #, python-format
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
-msgstr[0] ""
+msgstr[0] "Suit %(num)d jeu de données"
 msgstr[1] "Suit %(num)d jeux de données"
 
 #: udata/templates/user/following.html:63
 #, python-format
 msgid "Follow %(num)d reuse"
 msgid_plural "Follow %(num)d reuses"
-msgstr[0] ""
+msgstr[0] "Suit %(num)d réutilisations"
 msgstr[1] "Suit %(num)d réutilisations"
 
 #: udata/templates/user/following.html:83
 #, python-format
 msgid "Follow %(num)d organization"
 msgid_plural "Follow %(num)d organizations"
-msgstr[0] ""
+msgstr[0] "Suit %(num)d organisation"
 msgstr[1] "Suit %(num)d organisations"
 
 #: udata/templates/user/following.html:103
 #, python-format
 msgid "Follow %(num)d user"
 msgid_plural "Follow %(num)d users"
-msgstr[0] ""
+msgstr[0] "Suit %(num)d utilisateur"
 msgstr[1] "Suit %(num)d utilisateurs"
 
 #: udata/templates/user/following.html:129
