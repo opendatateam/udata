@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-01 16:16+0100\n"
-"PO-Revision-Date: 2018-02-06 06:01-0500\n"
+"PO-Revision-Date: 2018-02-06 09:31-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: udata/settings.py:109
 msgid "Welcome"
-msgstr ""
+msgstr "Bienvenue"
 
 #: udata/settings.py:110
 msgid "Please confirm your email"
@@ -27,19 +27,19 @@ msgstr ""
 
 #: udata/settings.py:111
 msgid "Login instructions"
-msgstr ""
+msgstr "Instructions de connexion"
 
 #: udata/settings.py:112
 msgid "Your password has been reset"
-msgstr ""
+msgstr "Votre mot de passe a été réinitialisé"
 
 #: udata/settings.py:113
 msgid "Your password has been changed"
-msgstr ""
+msgstr "Votre mot de passe a été modifié"
 
 #: udata/settings.py:115
 msgid "Password reset instructions"
-msgstr ""
+msgstr "Instructions de réinitialisation du mot de passe"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
@@ -1608,7 +1608,7 @@ msgstr ""
 #: udata/templates/search.html:49
 #, python-format
 msgid "Territory: %(name)s"
-msgstr ""
+msgstr "Territoire : %(name)s"
 
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
