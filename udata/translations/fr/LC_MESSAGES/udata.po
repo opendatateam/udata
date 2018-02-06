@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-02-01 16:16+0100\n"
-"PO-Revision-Date: 2018-02-06 10:12-0500\n"
+"POT-Creation-Date: 2018-02-06 15:59+0100\n"
+"PO-Revision-Date: 2018-02-06 10:20-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -17,27 +17,27 @@ msgstr ""
 "X-Crowdin-Language: fr\n"
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 
-#: udata/settings.py:109
+#: udata/settings.py:110
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:110
+#: udata/settings.py:111
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:111
+#: udata/settings.py:112
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/settings.py:112
+#: udata/settings.py:113
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/settings.py:113
+#: udata/settings.py:114
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:115
+#: udata/settings.py:116
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
@@ -93,19 +93,19 @@ msgstr "Scope par défaut"
 msgid "System administrator rights"
 msgstr "Droits de l'administrateur système"
 
-#: udata/commands/init.py:30
+#: udata/commands/init.py:31
 msgid "Do you want to create a superadmin user?"
 msgstr "Souhaitez-vous créer un super utilisateur ?"
 
-#: udata/commands/init.py:35
+#: udata/commands/init.py:36
 msgid "Do you want to import some data-related license?"
 msgstr "Souhaitez-vous importer des licences de données ?"
 
-#: udata/commands/init.py:39
+#: udata/commands/init.py:40
 msgid "Do you want to create some sample data?"
 msgstr "Souhaitez-vous générer des données d'exemple ?"
 
-#: udata/commands/init.py:43
+#: udata/commands/init.py:44
 msgid "Your udata instance is ready!"
 msgstr "Votre instance udata est prête !"
 
@@ -1046,7 +1046,7 @@ msgstr "Rôles"
 msgid "Following"
 msgstr "Abonné à"
 
-#: udata/core/user/models.py:240 udata/tests/api/test_me_api.py:373
+#: udata/core/user/models.py:240 udata/tests/api/test_me_api.py:374
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -1129,11 +1129,13 @@ msgid "Anonymous user"
 msgstr "Utilisateur anonyme"
 
 #: udata/frontend/helpers.py:269
-msgid "month-format"
+msgctxt "month-format"
+msgid "yyyy/MM"
 msgstr ""
 
 #: udata/frontend/helpers.py:273
-msgid "day-format"
+msgctxt "day-format"
+msgid "yyyy/MM/dd"
 msgstr ""
 
 #: udata/frontend/helpers.py:296
@@ -1569,7 +1571,7 @@ msgstr "Jeux de données recents"
 msgid "Recent reuses"
 msgstr "Réutilisations récentes"
 
-#: udata/templates/macros/search.html:217 udata/templates/post/subnav.html:13
+#: udata/templates/macros/search.html:215 udata/templates/post/subnav.html:13
 #: udata/templates/search.html:8
 msgid "Search"
 msgstr "Recherche"
@@ -1591,24 +1593,32 @@ msgstr "recherche"
 #: udata/templates/user/base.html:79
 #, python-format
 msgid "%(num)d dataset"
-msgstr ""
+msgid_plural "%(num)d datasets"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:52
 #: udata/templates/organization/display_base.html:87 udata/templates/search.html:34
 #: udata/templates/user/base.html:85
 #, python-format
 msgid "%(num)d reuse"
-msgstr ""
+msgid_plural "%(num)d reuses"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/search.html:41
 #, python-format
 msgid "%(num)d organization"
-msgstr ""
+msgid_plural "%(num)d organizations"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/search.html:49
 #, python-format
 msgid "Territory: %(name)s"
-msgstr "Territoire : %(name)s"
+msgid_plural "%(num)d territories"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
@@ -1857,7 +1867,9 @@ msgstr "Vous avez réutilisé ces données et publié un article, une infographi
 #: udata/templates/user/followers.html:15
 #, python-format
 msgid "%(num)d follower"
-msgstr ""
+msgid_plural "%(num)d followers"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/dataset/list.html:9
 #, python-format
@@ -1921,7 +1933,9 @@ msgstr "avec"
 #: udata/templates/discussion/item.html:13
 #, python-format
 msgid "%(nb)s message"
-msgstr ""
+msgid_plural "%(nb)s messages"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/discussion/item.html:28
 msgid "Deleted message"
@@ -2064,16 +2078,16 @@ msgstr "Exporter"
 msgid "Clear filter"
 msgstr "Effacer le filter"
 
-#: udata/templates/macros/search.html:117 udata/templates/macros/search.html:148
+#: udata/templates/macros/search.html:117 udata/templates/macros/search.html:147
 msgid "More results…"
 msgstr "Plus de résultats…"
 
-#: udata/templates/macros/search.html:194
+#: udata/templates/macros/search.html:192
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
 msgstr "Résultats %(start)s à %(end)s sur %(total)s trouvés"
 
-#: udata/templates/macros/search.html:209
+#: udata/templates/macros/search.html:207
 msgid "No result found"
 msgstr "Aucun résultat trouvé"
 
@@ -2281,7 +2295,9 @@ msgstr "Nombre de jeux de données"
 #: udata/templates/reuse/search-result.html:27 udata/templates/user/card.html:23
 #, python-format
 msgid "%(num)s dataset"
-msgstr ""
+msgid_plural "%(num)s datasets"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/card.html:30 udata/templates/user/card.html:29
 msgid "Number of reuses"
@@ -2292,7 +2308,9 @@ msgstr "Nombre de réutilisations"
 #: udata/templates/user/card.html:31
 #, python-format
 msgid "%(num)s reuse"
-msgstr ""
+msgid_plural "%(num)s reuses"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:8
 msgid "organization"
@@ -2305,12 +2323,16 @@ msgstr "Cette organisation a été supprimée. Cela sera définitif dans les pro
 #: udata/templates/organization/display.html:49
 #, python-format
 msgid "%(num)d private dataset"
-msgstr ""
+msgid_plural "%(num)d private datasets"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:53
 #, python-format
 msgid "%(num)d private reuse"
-msgstr ""
+msgid_plural "%(num)d private reuses"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:80
 #, python-format
@@ -2346,7 +2368,9 @@ msgstr "Voir les %(nb)s réutilisations"
 #: udata/templates/organization/display_base.html:67
 #, python-format
 msgid "%(num)d member"
-msgstr ""
+msgid_plural "%(num)d members"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display.html:170
 msgid "Display all followers"
@@ -2372,7 +2396,9 @@ msgstr "Usage des données de cette organisation par la communauté."
 #: udata/templates/organization/display_base.html:97
 #, python-format
 msgid "%(num)d reappropriation"
-msgstr ""
+msgid_plural "%(num)d reappropriations"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/display_base.html:109
 msgid "I belong to this organization"
@@ -2435,7 +2461,9 @@ msgstr "Nombre de réappropriations par la communauté"
 #: udata/templates/organization/search-result.html:41
 #, python-format
 msgid "%(num)s reappropriation"
-msgstr ""
+msgid_plural "%(num)s reappropriations"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/search-result.html:48
 #: udata/templates/reuse/search-result.html:32
@@ -2446,7 +2474,9 @@ msgstr "Nombre de favoris"
 #: udata/templates/reuse/search-result.html:34
 #, python-format
 msgid "%(num)s star"
-msgstr ""
+msgid_plural "%(num)s stars"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/search-result.html:57
 msgid "Number of followers"
@@ -2455,7 +2485,9 @@ msgstr "Nombre d'abonnés"
 #: udata/templates/organization/search-result.html:59
 #, python-format
 msgid "%(num)s follower"
-msgstr ""
+msgid_plural "%(num)s followers"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/search-result.html:65
 msgid "Number of members"
@@ -2464,7 +2496,9 @@ msgstr "Nombre de membres"
 #: udata/templates/organization/search-result.html:67
 #, python-format
 msgid "%(num)s members"
-msgstr ""
+msgid_plural "%(num)s members"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/sidebar-producer.html:17
 #: udata/templates/reuse/display.html:161
@@ -2871,7 +2905,9 @@ msgstr "profil"
 #: udata/templates/user/base.html:73
 #, python-format
 msgid "%(num)d followed"
-msgstr ""
+msgid_plural "%(num)d followed"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/user/datasets.html:39
 #, python-format
@@ -2886,22 +2922,30 @@ msgstr "%(user)s n'a pas d'abonnés"
 #: udata/templates/user/following.html:43
 #, python-format
 msgid "Follow %(num)d dataset"
-msgstr ""
+msgid_plural "Follow %(num)d datasets"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/user/following.html:63
 #, python-format
 msgid "Follow %(num)d reuse"
-msgstr ""
+msgid_plural "Follow %(num)d reuses"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/user/following.html:83
 #, python-format
 msgid "Follow %(num)d organization"
-msgstr ""
+msgid_plural "Follow %(num)d organizations"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/user/following.html:103
 #, python-format
 msgid "Follow %(num)d user"
-msgstr ""
+msgid_plural "Follow %(num)d users"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/user/following.html:129
 #, python-format
