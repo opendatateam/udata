@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-06 10:20-0500\n"
+"PO-Revision-Date: 2018-02-06 10:22-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1131,12 +1131,12 @@ msgstr "Utilisateur anonyme"
 #: udata/frontend/helpers.py:269
 msgctxt "month-format"
 msgid "yyyy/MM"
-msgstr ""
+msgstr "MM/yyyy"
 
 #: udata/frontend/helpers.py:273
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
-msgstr ""
+msgstr "dd/MM/yyyy"
 
 #: udata/frontend/helpers.py:296
 #, python-format
@@ -1595,7 +1595,7 @@ msgstr "recherche"
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d jeux de données"
 
 #: udata/templates/organization/display.html:52
 #: udata/templates/organization/display_base.html:87 udata/templates/search.html:34
@@ -1604,14 +1604,14 @@ msgstr[1] ""
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d réutilisations"
 
 #: udata/templates/search.html:41
 #, python-format
 msgid "%(num)d organization"
 msgid_plural "%(num)d organizations"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d organisations"
 
 #: udata/templates/search.html:49
 #, python-format
@@ -1869,7 +1869,7 @@ msgstr "Vous avez réutilisé ces données et publié un article, une infographi
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d abonnés"
 
 #: udata/templates/dataset/list.html:9
 #, python-format
@@ -1935,7 +1935,7 @@ msgstr "avec"
 msgid "%(nb)s message"
 msgid_plural "%(nb)s messages"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(nb)s messages"
 
 #: udata/templates/discussion/item.html:28
 msgid "Deleted message"
