@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-06 10:51-0500\n"
+"PO-Revision-Date: 2018-02-06 11:01-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -2930,7 +2930,7 @@ msgstr[1] "Suit %(num)d jeux de données"
 #, python-format
 msgid "Follow %(num)d reuse"
 msgid_plural "Follow %(num)d reuses"
-msgstr[0] "Suit %(num)d réutilisations"
+msgstr[0] "Suit %(num)d réutilisation"
 msgstr[1] "Suit %(num)d réutilisations"
 
 #: udata/templates/user/following.html:83
