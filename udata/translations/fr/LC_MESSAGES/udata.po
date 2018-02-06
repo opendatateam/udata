@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-06 10:31-0500\n"
+"PO-Revision-Date: 2018-02-06 10:42-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1594,7 +1594,7 @@ msgstr "recherche"
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
-msgstr[0] ""
+msgstr[0] "%(num)d jeu de données"
 msgstr[1] "%(num)d jeux de données"
 
 #: udata/templates/organization/display.html:52
@@ -1603,14 +1603,14 @@ msgstr[1] "%(num)d jeux de données"
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
-msgstr[0] ""
+msgstr[0] "%(num)d réutilisation"
 msgstr[1] "%(num)d réutilisations"
 
 #: udata/templates/search.html:41
 #, python-format
 msgid "%(num)d organization"
 msgid_plural "%(num)d organizations"
-msgstr[0] ""
+msgstr[0] "%(num)d organisation"
 msgstr[1] "%(num)d organisations"
 
 #: udata/templates/search.html:49
@@ -1618,7 +1618,7 @@ msgstr[1] "%(num)d organisations"
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
 msgstr[0] "Territoire : %(name)s"
-msgstr[1] ""
+msgstr[1] "%(num)d territoires"
 
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
@@ -1868,7 +1868,7 @@ msgstr "Vous avez réutilisé ces données et publié un article, une infographi
 #, python-format
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
-msgstr[0] ""
+msgstr[0] "%(num)d abonné"
 msgstr[1] "%(num)d abonnés"
 
 #: udata/templates/dataset/list.html:9
@@ -1934,7 +1934,7 @@ msgstr "avec"
 #, python-format
 msgid "%(nb)s message"
 msgid_plural "%(nb)s messages"
-msgstr[0] ""
+msgstr[0] "%(nb)s message"
 msgstr[1] "%(nb)s messages"
 
 #: udata/templates/discussion/item.html:28
@@ -2296,7 +2296,7 @@ msgstr "Nombre de jeux de données"
 #, python-format
 msgid "%(num)s dataset"
 msgid_plural "%(num)s datasets"
-msgstr[0] ""
+msgstr[0] "%(num)s jeu de données"
 msgstr[1] "%(num)s jeux de données"
 
 #: udata/templates/organization/card.html:30 udata/templates/user/card.html:29
@@ -2309,7 +2309,7 @@ msgstr "Nombre de réutilisations"
 #, python-format
 msgid "%(num)s reuse"
 msgid_plural "%(num)s reuses"
-msgstr[0] ""
+msgstr[0] "%(num)s réutilisation"
 msgstr[1] "%(num)s réutilisations"
 
 #: udata/templates/organization/display.html:8
@@ -2324,14 +2324,14 @@ msgstr "Cette organisation a été supprimée. Cela sera définitif dans les pro
 #, python-format
 msgid "%(num)d private dataset"
 msgid_plural "%(num)d private datasets"
-msgstr[0] ""
+msgstr[0] "%(num)d jeu de données privé"
 msgstr[1] "%(num)d jeux de données privés"
 
 #: udata/templates/organization/display.html:53
 #, python-format
 msgid "%(num)d private reuse"
 msgid_plural "%(num)d private reuses"
-msgstr[0] ""
+msgstr[0] "%(num)d réutilisation privée"
 msgstr[1] "%(num)d réutilisations privées"
 
 #: udata/templates/organization/display.html:80
@@ -2369,7 +2369,7 @@ msgstr "Voir les %(nb)s réutilisations"
 #, python-format
 msgid "%(num)d member"
 msgid_plural "%(num)d members"
-msgstr[0] ""
+msgstr[0] "%(num)d membre"
 msgstr[1] "%(num)d membres"
 
 #: udata/templates/organization/display.html:170
@@ -2397,7 +2397,7 @@ msgstr "Usage des données de cette organisation par la communauté."
 #, python-format
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
-msgstr[0] ""
+msgstr[0] "%(num)d réappropriation"
 msgstr[1] "%(num)d réappropriations"
 
 #: udata/templates/organization/display_base.html:109
@@ -2462,7 +2462,7 @@ msgstr "Nombre de réappropriations par la communauté"
 #, python-format
 msgid "%(num)s reappropriation"
 msgid_plural "%(num)s reappropriations"
-msgstr[0] ""
+msgstr[0] "%(num)s réappropriation"
 msgstr[1] "%(num)s réappropriations"
 
 #: udata/templates/organization/search-result.html:48
@@ -2475,7 +2475,7 @@ msgstr "Nombre de favoris"
 #, python-format
 msgid "%(num)s star"
 msgid_plural "%(num)s stars"
-msgstr[0] ""
+msgstr[0] "%(num)s favori"
 msgstr[1] "%(num)s favoris"
 
 #: udata/templates/organization/search-result.html:57
