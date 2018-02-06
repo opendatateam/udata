@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-06 10:22-0500\n"
+"PO-Revision-Date: 2018-02-06 10:31-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1617,7 +1617,7 @@ msgstr[1] "%(num)d organisations"
 #, python-format
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
-msgstr[0] ""
+msgstr[0] "Territoire : %(name)s"
 msgstr[1] ""
 
 #: udata/templates/dataset/search-labels.html:6
@@ -2297,7 +2297,7 @@ msgstr "Nombre de jeux de données"
 msgid "%(num)s dataset"
 msgid_plural "%(num)s datasets"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)s jeux de données"
 
 #: udata/templates/organization/card.html:30 udata/templates/user/card.html:29
 msgid "Number of reuses"
@@ -2310,7 +2310,7 @@ msgstr "Nombre de réutilisations"
 msgid "%(num)s reuse"
 msgid_plural "%(num)s reuses"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)s réutilisations"
 
 #: udata/templates/organization/display.html:8
 msgid "organization"
@@ -2325,14 +2325,14 @@ msgstr "Cette organisation a été supprimée. Cela sera définitif dans les pro
 msgid "%(num)d private dataset"
 msgid_plural "%(num)d private datasets"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d jeux de données privés"
 
 #: udata/templates/organization/display.html:53
 #, python-format
 msgid "%(num)d private reuse"
 msgid_plural "%(num)d private reuses"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d réutilisations privées"
 
 #: udata/templates/organization/display.html:80
 #, python-format
@@ -2370,7 +2370,7 @@ msgstr "Voir les %(nb)s réutilisations"
 msgid "%(num)d member"
 msgid_plural "%(num)d members"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d membres"
 
 #: udata/templates/organization/display.html:170
 msgid "Display all followers"
@@ -2398,7 +2398,7 @@ msgstr "Usage des données de cette organisation par la communauté."
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d réappropriations"
 
 #: udata/templates/organization/display_base.html:109
 msgid "I belong to this organization"
@@ -2463,7 +2463,7 @@ msgstr "Nombre de réappropriations par la communauté"
 msgid "%(num)s reappropriation"
 msgid_plural "%(num)s reappropriations"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)s réappropriations"
 
 #: udata/templates/organization/search-result.html:48
 #: udata/templates/reuse/search-result.html:32
@@ -2476,7 +2476,7 @@ msgstr "Nombre de favoris"
 msgid "%(num)s star"
 msgid_plural "%(num)s stars"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)s favoris"
 
 #: udata/templates/organization/search-result.html:57
 msgid "Number of followers"
@@ -2487,7 +2487,7 @@ msgstr "Nombre d'abonnés"
 msgid "%(num)s follower"
 msgid_plural "%(num)s followers"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)s abonnés"
 
 #: udata/templates/organization/search-result.html:65
 msgid "Number of members"
@@ -2907,7 +2907,7 @@ msgstr "profil"
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "%(num)d suivis"
 
 #: udata/templates/user/datasets.html:39
 #, python-format
@@ -2924,28 +2924,28 @@ msgstr "%(user)s n'a pas d'abonnés"
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "Suit %(num)d jeux de données"
 
 #: udata/templates/user/following.html:63
 #, python-format
 msgid "Follow %(num)d reuse"
 msgid_plural "Follow %(num)d reuses"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "Suit %(num)d réutilisations"
 
 #: udata/templates/user/following.html:83
 #, python-format
 msgid "Follow %(num)d organization"
 msgid_plural "Follow %(num)d organizations"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "Suit %(num)d organisations"
 
 #: udata/templates/user/following.html:103
 #, python-format
 msgid "Follow %(num)d user"
 msgid_plural "Follow %(num)d users"
 msgstr[0] ""
-msgstr[1] ""
+msgstr[1] "Suit %(num)d utilisateurs"
 
 #: udata/templates/user/following.html:129
 #, python-format
