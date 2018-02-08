@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from udata.api import api, fields, base_reference
 
 from udata.core.badges.api import badge_fields
-from udata.core.dataset.api_fields import dataset_ref_fields
+from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
@@ -44,7 +44,7 @@ reuse_fields = api.model('Reuse', {
     'deleted': fields.ISODateTime(
         description='The organization identifier', readonly=True),
     'datasets': fields.List(
-        fields.Nested(dataset_ref_fields), description='The reused datasets'),
+        fields.Nested(dataset_fields), description='The reused datasets'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The publishing organization', readonly=True),
@@ -58,7 +58,7 @@ reuse_fields = api.model('Reuse', {
     'page': fields.UrlFor(
         'reuses.show', lambda o: {'reuse': o},
         description='The reuse page URL', readonly=True),
-})
+}, mask='*,datasets{title,uri,page}')
 
 reuse_page_fields = api.model('ReusePage', fields.pager(reuse_fields))
 
