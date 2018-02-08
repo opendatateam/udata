@@ -225,7 +225,7 @@ class Defaults(object):
         # Images
         'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz', 'jp2',
         # Geo
-        'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson',
+        'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson', 'gpkg',
         # Meteorology
         'grib2',
         # Misc
