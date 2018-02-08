@@ -46,7 +46,9 @@ venv
 pip-log.txt
 
 # Unit test / coverage reports
+.cache
 .coverage
+.pytest_cache
 .tox
 cover
 nosetests.xml
