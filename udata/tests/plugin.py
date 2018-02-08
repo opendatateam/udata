@@ -263,6 +263,14 @@ def httpretty():
     httpretty.disable()
 
 
+@pytest.fixture
+def m():  # Use m to follow requests-mock doc samples
+    '''A requests-mock fixture'''
+    import requests_mock
+    with requests_mock.Mocker() as m:
+        yield m
+
+
 class SitemapClient:
     # Needed for lxml XPath not supporting default namespace
     NAMESPACES = {'s': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
