@@ -392,8 +392,10 @@
                         {% include theme('reuse/card.html') %}
                     </div>
                     {% endfor %}
-                    <div class="col-sm-6 col-lg-4">
-                        <a class="thumbnail reuse add" v-el:add-reuse
+                
+                    <div class="col-sm-12">
+                        <a class="list-group-item add"
+                            v-el:add-reuse
                             href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
                             @click="addReuse($event)">
                             <div class="format-label pull-left">+</div>
@@ -401,9 +403,9 @@
                                 {{ _('Add a reuse') }}
                             </h4>
                         </a>
-                    </div>
+					</div>
+ 
                 </div>
-
             </div>
             <div class="col-sm-3 note">
                 <p>{% trans %}You reused these data and published an article, a computer graphics, or an application?
