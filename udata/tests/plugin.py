@@ -151,18 +151,32 @@ def api(client):
     return api_client
 
 
+class AutoIndex(object):
+    '''
+    Allows to write both::
+        with autoindex():
+            pass
+    and::
+        with autoindex:
+            pass
+    '''
+    def __enter__(self):
+        pass
+
+    def __exit__(self, type, value, traceback):
+        es.indices.refresh(index=es.index_name)
+
+    def __call__(self):
+        return self
+
+
 @pytest.fixture
 def autoindex(app, clean_db):
     app.config['AUTO_INDEX'] = True
     es.initialize()
     es.cluster.health(wait_for_status='yellow', request_timeout=10)
 
-    @contextmanager
-    def cm():
-        yield
-        es.indices.refresh(index=es.index_name)
-
-    yield cm
+    yield AutoIndex()
 
     if es.indices.exists(index=es.index_name):
         es.indices.delete(index=es.index_name)
@@ -264,7 +278,7 @@ def httpretty():
 
 
 @pytest.fixture
-def m():  # Use m to follow requests-mock doc samples
+def rmock():
     '''A requests-mock fixture'''
     import requests_mock
     with requests_mock.Mocker() as m:
