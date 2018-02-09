@@ -64,3 +64,14 @@ def get_plugins_dists(app):
         d for d in known_dists()
         if any(set(v.keys()) & plugins for v in d.get_entry_map().values())
     ]
+
+
+def get_roots():
+    '''
+    Returns the list of root packages/modules exposing endpoints.
+    '''
+    roots = set()
+    for name in ENTRYPOINTS.keys():
+        for ep in iter(name):
+            roots.add(ep.module_name.split('.', 1)[0])
+    return list(roots)

@@ -139,19 +139,19 @@ def init_logging(app):
     logger = logging.getLogger()
     logger.addHandler(handler)
 
-    app.logger.setLevel(log_level)
-    app.logger.handlers = []
-    app.logger.addHandler(handler)
-
     logger = logging.getLogger('__main__')
     logger.setLevel(log_level)
     logger.handlers = []
     logger.addHandler(handler)
 
-    for name in app.config['PLUGINS']:
-        logger = logging.getLogger('udata_{0}'.format(name))
+    for name in entrypoints.get_roots():  # Entrypoints loggers
+        logger = logging.getLogger(name)
         logger.setLevel(log_level)
         logger.handlers = []
+
+    app.logger.setLevel(log_level)
+    app.logger.handlers = []
+    app.logger.addHandler(handler)
 
     for name in VERBOSE_LOGGERS:
         logger = logging.getLogger(name)
