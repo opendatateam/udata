@@ -2,6 +2,10 @@
 @bg-gray: #F0F0F0;
 @title-font: Arial, Arial, Helvetica, sans-serif;
 
+@card-padding: 8px;
+@cover-height: 110px;
+@card-footer-size: 24px;
+
 .card {
     background-color: white;
     border: 1px solid darken(@gray-lighter, 16%);
@@ -12,8 +16,6 @@
     @card-font-size: 14px;
     @logo-size: 60px;
     @logo-margin: 5px;
-    @card-padding: 8px;
-    @card-footer-size: 24px;
     @footer-line-height: 25px;
 
     display: flex;
@@ -50,8 +52,6 @@
     }
 
     .card__cover {
-        @cover-height: 110px;
-
         flex: 1 0 100%;
         height: @cover-height;
         margin-bottom: @card-padding;
@@ -194,6 +194,28 @@
 
         .card {
             height: 100%;
+        }
+
+        .list-group-item.add {
+
+            @label-height: 60px;
+
+            height: @cover-height + @label-height;
+
+            div, h4 {
+                width: 100%;
+            }
+
+            div {
+                height: @cover-height;
+                line-height: @cover-height;
+            }
+
+            h4 {
+                margin: 0;
+                line-height: @label-height;
+                text-align: center;
+            }
         }
     }
 }
