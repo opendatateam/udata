@@ -132,9 +132,6 @@ setup(
             'adorable = udata.features.identicon.backends:adorable',
             'robohash = udata.features.identicon.backends:robohash',
         ],
-        'udata.linkcheckers': [
-            'no_check = udata.linkchecker.backends:NoCheckLinkchecker',
-        ],
         'pytest11': [
             'udata = udata.tests.plugin',
         ],
