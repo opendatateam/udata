@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import pytest
 
 from contextlib import contextmanager
 from urlparse import urlparse
 
-from flask import json, template_rendered
+from flask import json, template_rendered, url_for
 from flask.testing import FlaskClient
+from lxml import etree
 from werkzeug.urls import url_encode
 
 from udata import settings
@@ -12,6 +16,8 @@ from udata.app import create_app
 from udata.core.user.factories import UserFactory
 from udata.models import db
 from udata.search import es
+
+from .helpers import assert200
 
 
 class TestClient(FlaskClient):
@@ -145,18 +151,32 @@ def api(client):
     return api_client
 
 
+class AutoIndex(object):
+    '''
+    Allows to write both::
+        with autoindex():
+            pass
+    and::
+        with autoindex:
+            pass
+    '''
+    def __enter__(self):
+        pass
+
+    def __exit__(self, type, value, traceback):
+        es.indices.refresh(index=es.index_name)
+
+    def __call__(self):
+        return self
+
+
 @pytest.fixture
 def autoindex(app, clean_db):
     app.config['AUTO_INDEX'] = True
     es.initialize()
     es.cluster.health(wait_for_status='yellow', request_timeout=10)
 
-    @contextmanager
-    def cm():
-        yield
-        es.indices.refresh(index=es.index_name)
-
-    yield cm
+    yield AutoIndex()
 
     if es.indices.exists(index=es.index_name):
         es.indices.delete(index=es.index_name)
@@ -255,3 +275,60 @@ def httpretty():
     httpretty.enable()
     yield httpretty
     httpretty.disable()
+
+
+@pytest.fixture
+def rmock():
+    '''A requests-mock fixture'''
+    import requests_mock
+    with requests_mock.Mocker() as m:
+        yield m
+
+
+class SitemapClient:
+    # Needed for lxml XPath not supporting default namespace
+    NAMESPACES = {'s': 'http://www.sitemaps.org/schemas/sitemap/0.9'}
+    MISMATCH = 'URL "{0}" {1} mismatch: expected "{2}" found "{3}"'
+
+    def __init__(self, client):
+        self.client = client
+        self._sitemap = None
+
+    def fetch(self):
+        response = self.client.get('sitemap.xml')
+        assert200(response)
+        self._sitemap = etree.fromstring(response.data)
+        return self._sitemap
+
+    def xpath(self, query):
+        return self._sitemap.xpath(query, namespaces=self.NAMESPACES)
+
+    def get_by_url(self, endpoint, **kwargs):
+        url = url_for(endpoint, _external=True, **kwargs)
+        query = 's:url[s:loc="{url}"]'.format(url=url)
+        result = self.xpath(query)
+        return result[0] if result else None
+
+    def assert_url(self, url, priority, changefreq):
+        '''
+        Check than a URL is present in the sitemap
+        with given `priority` and `changefreq`
+        '''
+        __tracebackhide__ = True
+        r = url.xpath('s:priority', namespaces=self.NAMESPACES)
+        assert len(r) == 1, 'URL "{0}" should have one priority'.format(url)
+        found = r[0].text
+        msg = self.MISMATCH.format(url, 'priority', priority, found)
+        assert found == str(priority), msg
+
+        r = url.xpath('s:changefreq', namespaces=self.NAMESPACES)
+        assert len(r) == 1, 'URL "{0}" should have one changefreq'.format(url)
+        found = r[0].text
+        msg = self.MISMATCH.format(url, 'changefreq', changefreq, found)
+        assert found == changefreq, msg
+
+
+@pytest.fixture
+def sitemap(client):
+    sitemap_client = SitemapClient(client)
+    return sitemap_client
