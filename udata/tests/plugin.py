@@ -282,6 +282,7 @@ def rmock():
     '''A requests-mock fixture'''
     import requests_mock
     with requests_mock.Mocker() as m:
+        m.ANY = requests_mock.ANY
         yield m
 
 
