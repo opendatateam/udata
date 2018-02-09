@@ -5,6 +5,7 @@
 - Switch to `flask-cli` and drop `flask-script`. Deprecated commands have been removed. [#1364](https://github.com/opendatateam/udata/pull/1364) [breaking]
 - Switch to pytest as testing tool and expose a `udata` pytest plugin [#1400](https://github.com/opendatateam/udata/pull/1400)
 - Added Geopackage as default allowed file formats [#1425](https://github.com/opendatateam/udata/pull/1425)
+- Added more entrypoints and document them. There is no more automatically enabled plugin by installation. Plugins can now properly contribute translations. [#1431](https://github.com/opendatateam/udata/pull/1431)
 
 ## 1.2.11 (2018-02-05)
 
