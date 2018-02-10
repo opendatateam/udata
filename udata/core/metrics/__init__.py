@@ -13,7 +13,7 @@ __all__ = ('Metric', 'MetricMetaClass')
 
 metric_catalog = {}
 
-
+from udata import entrypoints
 from udata.models import db  # noqa: need metrics refactoring
 
 from .tasks import update_metric, archive_metric  # noqa
@@ -146,12 +146,5 @@ def init_app(app):
     import udata.core.organization.metrics  # noqa
     import udata.core.followers.metrics  # noqa
 
-    # Load plugins API
-    for plugin in app.config['PLUGINS']:
-        name = 'udata_{0}.metrics'.format(plugin)
-        try:
-            __import__(name)
-        except ImportError:
-            pass
-        except Exception as e:
-            log.error('Error importing %s: %s', name, e)
+    # Load metrics from plugins
+    entrypoints.get_enabled('udata.metrics', app)
