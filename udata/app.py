@@ -176,12 +176,6 @@ def standalone(app):
 
     register_features(app)
 
-    for plugin in app.config['PLUGINS']:
-        name = 'udata_{0}'.format(plugin)
-        plugin = import_module(name)
-        if hasattr(plugin, 'init_app') and callable(plugin.init_app):
-            plugin.init_app(app)
-
     return app
 
 
