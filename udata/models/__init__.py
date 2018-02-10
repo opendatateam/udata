@@ -14,6 +14,7 @@ from mongoengine.signals import pre_save, post_save
 
 from flask_fs.mongo import FileField, ImageField
 
+from udata import entrypoints
 from udata.errors import ConfigError
 
 from .badges_field import BadgesField
@@ -143,11 +144,4 @@ def init_app(app):
     if app.config['TESTING']:
         build_test_config(app.config)
     db.init_app(app)
-    for plugin in app.config['PLUGINS']:
-        name = 'udata_{0}.models'.format(plugin)
-        try:
-            importlib.import_module(name)
-        except ImportError as e:
-            pass
-        except Exception as e:
-            log.error('Error during import of %s: %s', name, e)
+    entrypoints.get_enabled('udata.models', app)
