@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pkgutil
+
 from contextlib import contextmanager
-from importlib import import_module
-from os.path import exists, join, dirname
+from os.path import exists, join
+from glob import iglob
 
 from flask import (  # noqa
     g, request, current_app, abort, redirect, url_for, has_request_context
@@ -23,6 +25,7 @@ from flask_babelex import get_locale as get_current_locale  # noqa
 
 from werkzeug.local import LocalProxy
 
+from udata import entrypoints
 from udata.app import Blueprint
 from udata.auth import current_user
 from udata.errors import ConfigError
@@ -67,16 +70,14 @@ class PluggableDomain(Domain):
                 )
                 translations.merge(flask_security_translations)
 
-                for plugin_name in current_app.config['PLUGINS']:
-                    module_name = 'udata_{0}'.format(plugin_name)
-                    module = import_module(module_name)
-                    translations_dir = join(dirname(module.__file__),
-                                            'translations')
-                    if exists(translations_dir):
-                        domain = '-'.join((self.domain, plugin_name))
-                        plugins_translations = Translations.load(
-                            translations_dir, locale, domain=domain)
-                        translations.merge(plugins_translations)
+                for pkg in entrypoints.get_roots(current_app):
+                    package = pkgutil.get_loader(pkg)
+                    path = join(package.filename, 'translations')
+                    domains = [f.replace(path, '').replace('.pot', '')[1:]
+                               for f in iglob(join(path, '*.pot'))]
+                    for domain in domains:
+                        translations.merge(Translations.load(path, locale,
+                                                             domain=domain))
 
                 # Allows the theme to provide or override translations
                 from . import theme
