@@ -11,6 +11,7 @@ from glob import iglob
 import click
 
 from flask.cli import FlaskGroup, shell_command, ScriptInfo
+from udata import entrypoints
 from udata.app import create_app, standalone, VERBOSE_LOGGERS
 
 log = logging.getLogger(__name__)
@@ -221,9 +222,7 @@ class UdataGroup(FlaskGroup):
 
         # Load commands from entry points for enabled plugins
         app = ctx.ensure_object(ScriptInfo).load_app()
-        for ep in pkg_resources.iter_entry_points('udata.commands'):
-            if ep.name in app.config['PLUGINS']:
-                ep.load()
+        entrypoints.get_enabled('udata.commands', app)
 
         # Ensure loading happens once
         self._udata_commands_loaded = False
