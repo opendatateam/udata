@@ -2,11 +2,12 @@
 from __future__ import unicode_literals
 
 import logging
-import pkg_resources
 import re
 
 from werkzeug.exceptions import HTTPException
+from udata import entrypoints
 from .auth import PermissionDenied
+
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def init_app(app):
                 register_signal, register_logger_signal
             )
             from raven.contrib.flask import Sentry
-        except:
+        except Exception:
             log.error('raven[flask] is required to use sentry')
             return
 
@@ -61,13 +62,9 @@ def init_app(app):
         app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
 
         # Versions Management: uData and plugins versions as tags.
-        packages = ['udata']
-        packages += ['udata_{0}'.format(p) for p in app.config['PLUGINS']]
-
-        for package in packages:
-            version = pkg_resources.get_distribution(package).version
-            if version:
-                tags[package] = version
+        for dist in entrypoints.get_plugins_dists(app):
+            if dist.version:
+                tags[dist.project_name] = dist.version
 
         sentry.init_app(app)
 
