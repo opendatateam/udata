@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-import pkg_resources
-
-from udata.entrypoints import get_all as get_all_entrypoints
+from udata.entrypoints import get_enabled, EntrypointError
 
 
-def get(name):
+def get(app, name):
     '''Get a backend given its name'''
-    return get_all().get(name)
+    backend = get_all(app).get(name)
+    if not backend:
+        msg = 'Harvest backend "{0}" is not registered'.format(name)
+        raise EntrypointError(msg)
+    return backend
 
 
-def get_all():
-    return get_all_entrypoints('udata.harvesters')
+def get_all(app):
+    return get_enabled('udata.harvesters', app)
 
 
 from .base import BaseBackend  # flake8: noqa
