@@ -7,8 +7,10 @@ import pkg_resources
 ENTRYPOINTS = {
     'udata.avatars': 'Avatar rendering backends',
     'udata.harvesters': 'Harvest backends',
-    'udata.i18n': 'Extra translations',
     'udata.linkcheckers': 'Link checker backends',
+    'udata.metrics': 'Extra metrics',
+    'udata.models': 'Models and migrations',
+    'udata.tasks': 'Tasks and jobs',
     'udata.themes': 'Themes',
     'udata.views': 'Extra views',
 }
@@ -66,12 +68,16 @@ def get_plugins_dists(app):
     ]
 
 
-def get_roots():
+def get_roots(app=None):
     '''
     Returns the list of root packages/modules exposing endpoints.
+
+    If app is provided, only returns those of enabled plugins
     '''
     roots = set()
+    plugins = app.config['PLUGINS'] if app else None
     for name in ENTRYPOINTS.keys():
         for ep in iter(name):
-            roots.add(ep.module_name.split('.', 1)[0])
+            if plugins is None or ep.name in plugins:
+                roots.add(ep.module_name.split('.', 1)[0])
     return list(roots)
