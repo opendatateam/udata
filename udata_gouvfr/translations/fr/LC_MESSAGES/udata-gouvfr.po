@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata-gouvfr\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
 "POT-Creation-Date: 2018-02-10 13:45+0100\n"
-"PO-Revision-Date: 2018-02-12 07:01-0500\n"
+"PO-Revision-Date: 2018-02-12 07:13-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -39,11 +39,11 @@ msgstr "Lauréat Dataconnexions 6"
 
 #: udata_gouvfr/models.py:33
 msgid "C³"
-msgstr ""
+msgstr "C³"
 
 #: udata_gouvfr/models.py:34
 msgid "Nec Mergitur"
-msgstr ""
+msgstr "Nec Mergitur"
 
 #: udata_gouvfr/models.py:36 udata_gouvfr/templates/spd.html:8
 msgid "Reference Data"
