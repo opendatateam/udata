@@ -117,7 +117,7 @@ def mdstrip(value, length=None, end='…'):
 
 def init_app(app):
     parser = CommonMark.Parser  # Not an instance because not thread-safe(?)
-    renderer = CommonMark.HtmlRenderer()
+    renderer = CommonMark.HtmlRenderer({'softbreak': '<br/>'})
     app.extensions['markdown'] = UDataMarkdown(app, parser, renderer)
 
     app.add_template_filter(mdstrip)
