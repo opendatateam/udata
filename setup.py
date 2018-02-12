@@ -107,6 +107,15 @@ setup(
         'udata.themes': [
             'gouvfr = udata_gouvfr.theme',
         ],
+        'udata.metrics': [
+            'gouvfr = udata_gouvfr.metrics',
+        ],
+        'udata.models': [
+            'gouvfr = udata_gouvfr.models',
+        ],
+        'udata.views': [
+            'gouvfr = udata_gouvfr.views',
+        ],
         'udata.harvesters': [
             'maaf = udata_gouvfr.harvesters.maaf:MaafBackend',
         ]
