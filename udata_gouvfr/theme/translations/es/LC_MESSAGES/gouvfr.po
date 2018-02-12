@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata-gouvfr\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
 "POT-Creation-Date: 2018-02-10 13:45+0100\n"
-"PO-Revision-Date: 2018-02-12 07:01-0500\n"
+"PO-Revision-Date: 2018-02-12 07:13-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: es_ES\n"
 "Language-Team: Spanish\n"
@@ -19,27 +19,27 @@ msgstr ""
 
 #: __init__.py:27
 msgid "Discover OpenData"
-msgstr ""
+msgstr "Descubrir los Datos Abiertos"
 
 #: __init__.py:28
 msgid "Data"
-msgstr ""
+msgstr "Datos"
 
 #: __init__.py:29 templates/footer.html:68 templates/footer.html:70
 msgid "Datasets"
-msgstr ""
+msgstr "Conjunto de datos"
 
 #: __init__.py:30 templates/footer.html:73 templates/footer.html:75
 msgid "Reuses"
-msgstr ""
+msgstr "Reutilizaciones"
 
 #: __init__.py:31 templates/header.html:78
 msgid "Organizations"
-msgstr ""
+msgstr "Organizaciones"
 
 #: __init__.py:33
 msgid "Dashboard"
-msgstr ""
+msgstr "Tablero de mando"
 
 #: __init__.py:40
 msgid "Documentation"
@@ -59,23 +59,23 @@ msgstr ""
 
 #: __init__.py:44
 msgid "Credits"
-msgstr ""
+msgstr "Créditos"
 
 #: __init__.py:45
 msgid "Terms of use"
-msgstr ""
+msgstr "Términos de uso"
 
 #: templates/footer.html:9
 msgid "The Open Data"
-msgstr ""
+msgstr "Los datos abiertos"
 
 #: templates/footer.html:26 templates/subnav-small.html:26
 msgid "Topics"
-msgstr ""
+msgstr "Temas"
 
 #: templates/footer.html:39
 msgid "Network"
-msgstr ""
+msgstr "Vínculo"
 
 #: templates/footer.html:48
 msgid "Contact Us"
@@ -83,7 +83,7 @@ msgstr ""
 
 #: templates/footer.html:64
 msgid "Feeds"
-msgstr ""
+msgstr "Alimentaciones"
 
 #: templates/footer.html:82
 msgid "Go to Etalab’s blog"
@@ -103,7 +103,7 @@ msgstr ""
 
 #: templates/footer.html:92
 msgid "Back to top"
-msgstr ""
+msgstr "Volver arriba"
 
 #: templates/header.html:4
 msgid "Internet Explorer 8 and below are not anymore supported. Please upgrade or change your browser to access the website."
@@ -115,7 +115,7 @@ msgstr ""
 
 #: templates/header.html:12
 msgid "Toggle navigation"
-msgstr ""
+msgstr "Navegador"
 
 #: templates/header.html:18
 msgid "Open platform for French public data"
@@ -123,51 +123,51 @@ msgstr ""
 
 #: templates/header.html:74
 msgid "My profile"
-msgstr ""
+msgstr "Mi perfil"
 
 #: templates/header.html:93
 msgid "Administration"
-msgstr ""
+msgstr "Administración"
 
 #: templates/header.html:100
 msgid "Logout"
-msgstr ""
+msgstr "Cerrar sesión"
 
 #: templates/header.html:107 templates/header.html:110
 msgid "Sign In / Register"
-msgstr ""
+msgstr "Conexión / Registro"
 
 #: templates/home.html:20
 msgid "Best reuse cases"
-msgstr ""
+msgstr "Los mejores casos de reutilización "
 
 #: templates/home.html:53 templates/home.html:54
 msgid "Latest reuses"
-msgstr ""
+msgstr "Ultimas reutilizaciones"
 
 #: templates/home.html:93
 msgid "News in data"
-msgstr ""
+msgstr "Novedades en los datos"
 
 #: templates/home.html:111
 msgid "Featured datasets"
-msgstr ""
+msgstr "Conjuntos de datos destacados"
 
 #: templates/home.html:112
 msgid "Latest datasets"
-msgstr ""
+msgstr "Ultimos conjuntos de datos "
 
 #: templates/home.html:148
 msgid "See more"
-msgstr ""
+msgstr "Ver más"
 
 #: templates/home.html:167
 msgid "The blog"
-msgstr ""
+msgstr "El blog"
 
 #: templates/home.html:186
 msgid "more"
-msgstr ""
+msgstr "más"
 
 #: templates/home.html:200
 msgid "Latest forum discussions"
@@ -175,15 +175,15 @@ msgstr ""
 
 #: templates/home.html:209
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 #: templates/home.html:210
 msgid "Users"
-msgstr ""
+msgstr "Usuarios"
 
 #: templates/home.html:211
 msgid "Created at"
-msgstr ""
+msgstr "Creado el"
 
 #: templates/home.html:212
 msgid "Replies"
@@ -191,7 +191,7 @@ msgstr ""
 
 #: templates/home.html:213
 msgid "Views"
-msgstr ""
+msgstr "Vistas"
 
 #: templates/home.html:214
 msgid "Likes"
@@ -199,13 +199,13 @@ msgstr ""
 
 #: templates/subnav-large.html:33
 msgid "Share, improve and reuse public data"
-msgstr ""
+msgstr "Comparta, mejore y reutilice datos públicos"
 
 #: templates/subnav-large.html:36 templates/subnav-large.html:39
 #: templates/subnav-small.html:44 templates/subnav-small.html:47
 #: templates/topic/subnav.html:37 templates/topic/subnav.html:40
 msgid "Contribute!"
-msgstr ""
+msgstr "Contribuya!"
 
 #: templates/subnav-small.html:10
 msgid "Search in datasets"
@@ -217,12 +217,12 @@ msgstr ""
 
 #: templates/subnav-small.html:16
 msgid "Search"
-msgstr ""
+msgstr "Buscar"
 
 #: templates/dataset/display.html:3 templates/reuse/display.html:3
 #, python-format
 msgid "Explore with %(certifier)s"
-msgstr ""
+msgstr "Explore con %(certifier)s"
 
 #: templates/dataset/display.html:9
 msgid "See also"
@@ -230,32 +230,32 @@ msgstr ""
 
 #: templates/mail/base.html:45
 msgid "on your browser."
-msgstr ""
+msgstr "en su navegador. "
 
 #: templates/mail/base.html:48
 #, python-format
 msgid "View this email %(link)s"
-msgstr ""
+msgstr "Ver este correo %(link)s "
 
 #: templates/mail/base.html:81
 #, python-format
 msgid "Hi %(user)s"
-msgstr ""
+msgstr "Hola %(user)s"
 
 #: templates/mail/base.html:92
 msgid "See you soon on the platform"
-msgstr ""
+msgstr "Hasts pronto en la plataforma "
 
 #: templates/mail/base.html:93
 #, python-format
 msgid "The %(site)s team"
-msgstr ""
+msgstr "El equipo de %(site)s"
 
 #: templates/organization/sidebar-producer.html:3
 msgid "The identity of this public service public is certified by Etalab"
-msgstr ""
+msgstr "Servicio público certificado"
 
 #: templates/organization/sidebar-producer.html:4
 msgid "Certified public service"
-msgstr ""
+msgstr "Servicio público certificado"
 
