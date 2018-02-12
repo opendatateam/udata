@@ -5,7 +5,7 @@ import logging
 
 import click
 
-from udata.commands import cli, success
+from udata.commands import cli, success, echo, white
 from udata.models import User, Dataset, Reuse, Organization
 
 from . import metric_catalog
@@ -64,3 +64,13 @@ def update(site=False, organizations=False, users=False, datasets=False,
             update_metrics_for(user)
 
     success('All metrics have been updated')
+
+
+@grp.command()
+def list():
+    '''List all known metrics'''
+    for cls, metrics in metric_catalog.items():
+        echo(white(cls.__name__))
+
+        for metric in metrics.keys():
+            echo('> {0}'.format(metric))

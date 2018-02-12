@@ -17,13 +17,3 @@ def init_app(app):
 
     # Load feature notifications
     import udata.features.transfer.notifications  # noqa
-
-    # Load all plugins views and blueprints
-    for plugin in app.config['PLUGINS']:
-        module = 'udata_{0}.notifications'.format(plugin)
-        try:
-            import_module(module)
-        except ImportError:
-            pass
-        except:
-            log.exception('Error importing %s notifications', module)

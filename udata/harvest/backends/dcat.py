@@ -67,7 +67,7 @@ class DcatBackend(BaseBackend):
 
     def parse_graph(self, url, fmt):
         graph = Graph(namespace_manager=namespace_manager)
-        graph.parse(url, format=fmt)
+        graph.parse(data=requests.get(url).text, format=fmt)
         for id, data in self.dcat_datasets(graph):
             self.add_item(id, graph=data)
 

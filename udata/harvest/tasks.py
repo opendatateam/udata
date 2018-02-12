@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from celery import chord
+from flask import current_app
 
 from udata.tasks import job, get_logger, task
 
@@ -16,7 +17,7 @@ def harvest(self, ident):
     log.info('Launching harvest job for source "%s"', ident)
 
     source = HarvestSource.get(ident)
-    Backend = backends.get(source.backend)
+    Backend = backends.get(current_app, source.backend)
     backend = Backend(source)
     items = backend.perform_initialization()
     if items > 0:
@@ -35,7 +36,7 @@ def harvest_item(source_id, item_id):
 
     source = HarvestSource.get(source_id)
     job = source.get_last_job()
-    Backend = backends.get(source.backend)
+    Backend = backends.get(current_app, source.backend)
     backend = Backend(source, job)
 
     item = filter(lambda i: i.remote_id == item_id, job.items)[0]
@@ -49,7 +50,7 @@ def harvest_finalize(results, source_id):
     log.info('Finalize harvesting for source "%s"', source_id)
     source = HarvestSource.get(source_id)
     job = source.get_last_job()
-    Backend = backends.get(source.backend)
+    Backend = backends.get(current_app, source.backend)
     backend = Backend(source, job)
     backend.finalize()
 
