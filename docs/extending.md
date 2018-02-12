@@ -9,7 +9,7 @@ there may already be some details you can easily customize with a simple setting
 
 ## Themes
 
-You can totally customize the udata apparence with themes.
+You can totally customize the udata appearence with themes.
 
 See the [dedicated section](creating-theme.md) for more details.
 
@@ -34,7 +34,7 @@ Plugins can expose extra view features via the `udata.views` module entrypoint i
 
 ### Metrics (`udata.metrics`)
 
-A module entrypoint allowing to register new metrics
+A module entrypoint allowing to register new metrics.
 
 ### Models (`udata.models`)
 
@@ -53,12 +53,12 @@ This module entrypoint allows to register new asynchronous tasks and schedulable
 
 ### Translations
 
-Any registered plugin may also expose translations in its roots module `translations` directory.
-They will automatically discovered and loaded if the plugin is enabled.
+Any registered plugin may also expose translations in its root module `translations` directory.
+They will be automatically discovered and loaded if the plugin is enabled.
 
 ## Contributing
 
-At last but not least, if none of hte above match your needs,
+Last but not least, if none of the above match your needs,
 you can also contribute to the core udata project and submit some contributions.
 
 See [the Contributing Guide](contributing-guide)

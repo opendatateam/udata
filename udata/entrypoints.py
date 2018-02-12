@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 import pkg_resources
 
-# Here for documention purpose
+# Here for documentation purpose
 ENTRYPOINTS = {
     'udata.avatars': 'Avatar rendering backends',
     'udata.harvesters': 'Harvest backends',
@@ -20,14 +20,14 @@ class EntrypointError(Exception):
     pass
 
 
-def iter(name):
+def iter_all(name):
     '''Iter all entrypoints registered on a given key'''
     return pkg_resources.iter_entry_points(name)
 
 
 def get_all(entrypoint_key):
     '''Load all entrypoints registered on a given key'''
-    return dict(_ep_to_kv(e) for e in iter(entrypoint_key))
+    return dict(_ep_to_kv(e) for e in iter_all(entrypoint_key))
 
 
 def get_enabled(name, app):
@@ -36,7 +36,7 @@ def get_enabled(name, app):
     and enabled for the given app.
     '''
     plugins = app.config['PLUGINS']
-    return dict(_ep_to_kv(e) for e in iter(name) if e.name in plugins)
+    return dict(_ep_to_kv(e) for e in iter_all(name) if e.name in plugins)
 
 
 def _ep_to_kv(entrypoint):
@@ -77,7 +77,7 @@ def get_roots(app=None):
     roots = set()
     plugins = app.config['PLUGINS'] if app else None
     for name in ENTRYPOINTS.keys():
-        for ep in iter(name):
+        for ep in iter_all(name):
             if plugins is None or ep.name in plugins:
                 roots.add(ep.module_name.split('.', 1)[0])
     return list(roots)

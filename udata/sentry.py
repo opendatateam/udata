@@ -33,7 +33,7 @@ def init_app(app):
                 register_signal, register_logger_signal
             )
             from raven.contrib.flask import Sentry
-        except Exception:
+        except ImportError:
             log.error('raven[flask] is required to use sentry')
             return
 

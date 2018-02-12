@@ -53,5 +53,5 @@ def plugins():
             actives = [avatar_config('provider')]
         else:
             actives = plugins
-        for ep in sorted(entrypoints.iter(name), key=by_name):
+        for ep in sorted(entrypoints.iter_all(name), key=by_name):
             echo('> {0}: {1}'.format(ep.name, is_active(ep, actives)))
