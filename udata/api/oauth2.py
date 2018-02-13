@@ -141,6 +141,9 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         allowed = set(self.scopes)
         return allowed.issuperset(set(scopes))
 
+    def has_client_secret(self):
+        return bool(self.secret)
+
 
 class OAuth2Grant(db.Document):
     user = db.ReferenceField('User', required=True)
@@ -148,7 +151,7 @@ class OAuth2Grant(db.Document):
 
     code = db.StringField(required=True)
 
-    redirect_uri = db.StringField(required=True)
+    redirect_uri = db.StringField()
     expires = db.DateTimeField()
 
     scopes = db.ListField(db.StringField())
