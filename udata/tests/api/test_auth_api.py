@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from base64 import b64encode
 
 from flask import url_for
 
-from udata.auth import PermissionDenied
 from udata.api import api, API
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
-from udata.forms import Form, fields, validators
-
-from . import APITestCase
+from udata.auth import PermissionDenied
 from udata.core.user.factories import UserFactory
+from udata.forms import Form, fields, validators
+from udata.tests.helpers import (
+    assert200, assert400, assert401, assert403, assert_status
+)
 
 ns = api.namespace('fake', 'A Fake namespace')
 
@@ -41,205 +44,200 @@ def basic_header(client):
         return {'Authorization': 'Basic ' + b64encode(payload)}
 
 
-class APIAuthTest(APITestCase):
-    modules = ['admin', 'search', 'core.dataset', 'core.reuse', 'core.site',
-               'core.organization', 'core.user']
+@pytest.fixture
+def oauth(app):
+    return OAuth2Client.objects.create(
+        name='test-client',
+        owner=UserFactory(),
+        type='confidential',
+        redirect_uris=['https://test.org/callback']
+    )
 
-    def oauth_app(self, name='test-client'):
-        owner = UserFactory()
-        return OAuth2Client.objects.create(
-            name=name,
-            owner=owner,
-            type='confidential',
-            redirect_uris=['https://test.org/callback']
-        )
 
-    def test_no_auth(self):
+@pytest.mark.usefixtures('clean_db')
+class APIAuthTest:
+    modules = []
+
+    def test_no_auth(self, api):
         '''Should not return a content type if there is no content on delete'''
-        response = self.get(url_for('api.fake'))
+        response = api.get(url_for('api.fake'))
 
-        self.assert200(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'success': True})
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
 
-    def test_session_auth(self):
+    def test_session_auth(self, api):
         '''Should handle session authentication'''
-        self.login()
+        api.client.login()  # Session auth
 
-        response = self.post(url_for('api.fake'))
+        response = api.post(url_for('api.fake'))
 
-        self.assert200(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'success': True})
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
 
-    def test_header_auth(self):
+    def test_header_auth(self, api):
         '''Should handle header API Key authentication'''
-        user = UserFactory(apikey='apikey')
-        response = self.post(url_for('api.fake'),
-                             headers={'X-API-KEY': user.apikey})
+        with api.user() as user:  # API Key auth
+            response = api.post(url_for('api.fake'),
+                                headers={'X-API-KEY': user.apikey})
 
-        self.assert200(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'success': True})
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
 
-    def test_oauth_auth(self):
+    def test_oauth_auth(self, api, oauth):
         '''Should handle  OAuth header authentication'''
         user = UserFactory()
-        client = self.oauth_app()
         token = OAuth2Token.objects.create(
-            client=client,
+            client=oauth,
             user=user,
             access_token='access-token',
             refresh_token='refresh-token',
         )
 
-        response = self.post(url_for('api.fake'), headers={
+        response = api.post(url_for('api.fake'), headers={
             'Authorization': ' '.join(['Bearer', token.access_token])
         })
 
-        self.assert200(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertEqual(response.json, {'success': True})
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
 
-    def test_no_apikey(self):
+    def test_no_apikey(self, api):
         '''Should raise a HTTP 401 if no API Key is provided'''
-        response = self.post(url_for('api.fake'))
+        response = api.post(url_for('api.fake'))
 
-        self.assert401(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertIn('message', response.json)
+        assert401(response)
+        assert response.content_type == 'application/json'
+        assert 'message' in response.json
 
-    def test_invalid_apikey(self):
+    def test_invalid_apikey(self, api):
         '''Should raise a HTTP 401 if an invalid API Key is provided'''
-        response = self.post(url_for('api.fake'),
-                             headers={'X-API-KEY': 'fake'})
+        response = api.post(url_for('api.fake'), headers={'X-API-KEY': 'fake'})
 
-        self.assert401(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertIn('message', response.json)
+        assert401(response)
+        assert response.content_type == 'application/json'
+        assert 'message' in response.json
 
-    def test_inactive_user(self):
+    def test_inactive_user(self, api):
         '''Should raise a HTTP 401 if the user is inactive'''
-        user = UserFactory(apikey='apikey', active=False)
-        response = self.post(url_for('api.fake'),
-                             headers={'X-API-KEY': user.apikey})
+        user = UserFactory(active=False)
+        with api.user(user) as user:
+            response = api.post(url_for('api.fake'),
+                                headers={'X-API-KEY': user.apikey})
 
-        self.assert401(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertIn('message', response.json)
+        assert401(response)
+        assert response.content_type == 'application/json'
+        assert 'message' in response.json
 
-    def test_validation_errors(self):
+    def test_validation_errors(self, api):
         '''Should raise a HTTP 400 and returns errors on validation error'''
-        response = self.put(url_for('api.fake'), {'email': 'wrong'})
+        response = api.put(url_for('api.fake'), {'email': 'wrong'})
 
-        self.assert400(response)
-        self.assertEqual(response.content_type, 'application/json')
+        assert400(response)
+        assert response.content_type == 'application/json'
 
         for field in 'required', 'email', 'choices':
-            self.assertIn(field, response.json['errors'])
-            self.assertIsInstance(response.json['errors'][field], list)
+            assert field in response.json['errors']
+            assert isinstance(response.json['errors'][field], list)
 
-    def test_no_validation_error(self):
+    def test_no_validation_error(self, api):
         '''Should pass if no validation error'''
-        response = self.put(url_for('api.fake'), {
+        response = api.put(url_for('api.fake'), {
             'required': 'value',
             'email': 'coucou@cmoi.fr',
             'choices': 'first',
         })
 
-        self.assert200(response)
-        self.assertEqual(response.json, {'success': True})
+        assert200(response)
+        assert response.json == {'success': True}
 
-    def test_authorization_display(self):
+    def test_authorization_display(self, client, oauth):
         '''Should display the OAuth authorization page'''
-        self.login()
+        client.login()
 
-        client = self.oauth_app()
-        response = self.get(url_for(
+        response = client.get(url_for(
             'oauth.authorize',
             response_type='code',
-            client_id=client.client_id,
-            redirect_uri=client.default_redirect_uri
+            client_id=oauth.client_id,
+            redirect_uri=oauth.default_redirect_uri
         ))
 
-        self.assert200(response)
+        assert200(response)
 
-    def test_authorization_decline(self):
+    def test_authorization_decline(self, client, oauth):
         '''Should redirect to the redirect_uri on authorization denied'''
-        self.login()
+        client.login()
 
-        client = self.oauth_app()
-        response = self.post(url_for(
+        response = client.post(url_for(
             'oauth.authorize',
             response_type='code',
-            client_id=client.client_id,
-            redirect_uri=client.default_redirect_uri
+            client_id=oauth.client_id,
+            redirect_uri=oauth.default_redirect_uri
         ), {
-            'scopes': ['default'],
+            'scope': 'default',
             'refuse': '',
         })
 
-        self.assertStatus(response, 302)
+        assert_status(response, 302)
         uri, params = response.location.split('?')
-        self.assertEqual(uri, client.default_redirect_uri)
+        assert uri == oauth.default_redirect_uri
 
-    def test_authorization_accept(self):
+    def test_authorization_accept(self, client, oauth):
         '''Should redirect to the redirect_uri on authorization accepted'''
-        self.login()
+        client.login()
 
-        client = self.oauth_app()
-
-        response = self.post(url_for(
+        response = client.post(url_for(
             'oauth.authorize',
             response_type='code',
-            client_id=client.client_id,
-            redirect_uri=client.default_redirect_uri
+            client_id=oauth.client_id,
+            redirect_uri=oauth.default_redirect_uri
         ), {
-            'scopes': ['default'],
+            'scope': 'default',
             'accept': '',
         })
 
-        self.assertStatus(response, 302)
+        assert_status(response, 302)
         uri, params = response.location.split('?')
-        self.assertEqual(uri, client.default_redirect_uri)
+        assert uri == oauth.default_redirect_uri
 
-    def test_refresh_token(self):
+    def test_refresh_token(self, client, oauth):
         user = UserFactory()
-        client = self.oauth_app()
         token = OAuth2Token.objects.create(
-            client=client,
+            client=oauth,
             user=user,
             access_token='access-token',
             refresh_token='refresh-token',
         )
 
-        response = self.post(url_for('oauth.token'), {
+        response = client.post(url_for('oauth.token'), {
             'grant_type': 'refresh_token',
             'refresh_token': token.refresh_token,
-        }, headers=basic_header(client), json=False)
+        }, headers=basic_header(oauth))
 
-        self.assert200(response)
-        self.assertEqual(response.content_type, 'application/json')
-        self.assertIn('access_token', response.json)
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
 
-    def test_value_error(self):
+    def test_value_error(self, api):
         @ns.route('/exception', endpoint='exception')
         class ExceptionAPI(API):
             def get(self):
                 raise ValueError('Not working')
 
-        response = self.get(url_for('api.exception'))
+        response = api.get(url_for('api.exception'))
 
-        self.assert400(response)
-        self.assertEqual(response.json['message'], 'Not working')
+        assert400(response)
+        assert response.json['message'] == 'Not working'
 
-    def test_permission_denied(self):
+    def test_permission_denied(self, api):
         @ns.route('/exception', endpoint='exception')
         class ExceptionAPI(API):
             def get(self):
                 raise PermissionDenied('Permission denied')
 
-        response = self.get(url_for('api.exception'))
+        response = api.get(url_for('api.exception'))
 
-        self.assert403(response)
-        self.assertIn('message', response.json)
+        assert403(response)
+        assert 'message' in response.json
