@@ -13,13 +13,3 @@ def init_app(app):
     import udata.core.dataset.activities  # noqa
     import udata.core.reuse.activities  # noqa
     import udata.core.organization.activities  # noqa
-
-    # Load plugins API
-    for plugin in app.config['PLUGINS']:
-        name = 'udata_{0}.activities'.format(plugin)
-        try:
-            __import__(name)
-        except ImportError:
-            pass
-        except Exception as e:
-            log.error('Error importing %s: %s', name, e)

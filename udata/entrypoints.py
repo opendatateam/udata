@@ -3,11 +3,40 @@ from __future__ import unicode_literals, absolute_import
 
 import pkg_resources
 
+# Here for documentation purpose
+ENTRYPOINTS = {
+    'udata.avatars': 'Avatar rendering backends',
+    'udata.harvesters': 'Harvest backends',
+    'udata.linkcheckers': 'Link checker backends',
+    'udata.metrics': 'Extra metrics',
+    'udata.models': 'Models and migrations',
+    'udata.tasks': 'Tasks and jobs',
+    'udata.themes': 'Themes',
+    'udata.views': 'Extra views',
+}
+
+
+class EntrypointError(Exception):
+    pass
+
+
+def iter_all(name):
+    '''Iter all entrypoints registered on a given key'''
+    return pkg_resources.iter_entry_points(name)
+
 
 def get_all(entrypoint_key):
-    return dict(
-        _ep_to_kv(e) for e in pkg_resources.iter_entry_points(entrypoint_key)
-    )
+    '''Load all entrypoints registered on a given key'''
+    return dict(_ep_to_kv(e) for e in iter_all(entrypoint_key))
+
+
+def get_enabled(name, app):
+    '''
+    Get (and load) entrypoints registered on name
+    and enabled for the given app.
+    '''
+    plugins = app.config['PLUGINS']
+    return dict(_ep_to_kv(e) for e in iter_all(name) if e.name in plugins)
 
 
 def _ep_to_kv(entrypoint):
@@ -20,3 +49,35 @@ def _ep_to_kv(entrypoint):
     cls = entrypoint.load()
     cls.name = entrypoint.name
     return (entrypoint.name, cls)
+
+
+def known_dists():
+    '''Return a list of all Distributions exporting udata.* entrypoints'''
+    return (
+        dist for dist in pkg_resources.working_set
+        if any(k in ENTRYPOINTS for k in dist.get_entry_map().keys())
+    )
+
+
+def get_plugins_dists(app):
+    '''Return a list of Distributions with enabled udata plugins'''
+    plugins = set(app.config['PLUGINS'])
+    return [
+        d for d in known_dists()
+        if any(set(v.keys()) & plugins for v in d.get_entry_map().values())
+    ]
+
+
+def get_roots(app=None):
+    '''
+    Returns the list of root packages/modules exposing endpoints.
+
+    If app is provided, only returns those of enabled plugins
+    '''
+    roots = set()
+    plugins = app.config['PLUGINS'] if app else None
+    for name in ENTRYPOINTS.keys():
+        for ep in iter_all(name):
+            if plugins is None or ep.name in plugins:
+                roots.add(ep.module_name.split('.', 1)[0])
+    return list(roots)

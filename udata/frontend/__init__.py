@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import inspect
 import logging
 
 from importlib import import_module
 
 from flask import abort, current_app
 
+from udata import entrypoints
 from udata.i18n import I18nBlueprint
 
 from .markdown import init_app as init_markdown
@@ -44,15 +46,10 @@ def inject_cache_duration():
 
 
 def _load_views(app, module):
-    try:
-        views = import_module(module)
-        blueprint = getattr(views, 'blueprint', None)
-        if blueprint:
-            app.register_blueprint(blueprint)
-    except ImportError as e:
-        pass
-    except Exception as e:
-        log.error('Error importing %s views: %s', module, e)
+    views = module if inspect.ismodule(module) else import_module(module)
+    blueprint = getattr(views, 'blueprint', None)
+    if blueprint:
+        app.register_blueprint(blueprint)
 
 
 VIEWS = ['core.storages', 'core.user', 'core.site', 'core.dataset',
@@ -72,8 +69,7 @@ def init_app(app, views=None):
         _load_views(app, 'udata.{}.views'.format(view))
 
     # Load all plugins views and blueprints
-    for plugin in app.config['PLUGINS']:
-        module = 'udata_{0}.views'.format(plugin)
+    for module in entrypoints.get_enabled('udata.views', app).values():
         _load_views(app, module)
 
     # Optionnaly register debug views

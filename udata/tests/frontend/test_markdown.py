@@ -120,6 +120,14 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             expected = '<p>an &lt;script&gt;evil()&lt;/script&gt;</p>'
             self.assert_md_equal(result, expected)
 
+    def test_soft_break(self):
+        '''Markdown should treat soft breaks as br tag'''
+        text = 'line 1\nline 2'
+        with self.app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            expected = '<p>line 1<br>line 2</p>'
+            self.assert_md_equal(result, expected)
+
     def test_mdstrip_filter(self):
         '''mdstrip should truncate the text before rendering'''
         text = '1 2 3 4 5 6 7 8 9 0'

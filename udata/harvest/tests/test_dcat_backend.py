@@ -4,12 +4,11 @@ from __future__ import unicode_literals
 import logging
 import os
 
-import httpretty
+import pytest
 
 from datetime import date
 
 from udata.models import Dataset, License
-from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
 
 from .factories import HarvestSourceFactory
@@ -23,37 +22,40 @@ DCAT_URL_PATTERN = 'http://{domain}/{path}'
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'dcat')
 
 
-def mock_dcat(filename):
+def mock_dcat(rmock, filename):
     url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
     with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
         body = dcatfile.read()
-    httpretty.register_uri(httpretty.GET, url, body=body)
+    rmock.get(url, text=body)
     return url
 
 
-def mock_pagination(path, pattern):
+def mock_pagination(rmock, path, pattern):
     url = DCAT_URL_PATTERN.format(path=path, domain=TEST_DOMAIN)
 
-    def callback(request, uri, headers):
-        page = request.querystring.get('page', [1])[0]
+    def callback(request, context):
+        page = request.qs.get('page', [1])[0]
         filename = pattern.format(page=page)
+        context.status_code = 200
         with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
-            return 200, {}, dcatfile.read()
+            return dcatfile.read()
 
-    httpretty.register_uri(httpretty.GET, url, body=callback)
+    rmock.get(rmock.ANY, text=callback)
     return url
 
 
-class DcatBackendTest(DBTestMixin, TestCase):
-    def setUp(self):
+@pytest.mark.usefixtures('clean_db')
+@pytest.mark.options(PLUGINS=['dcat'])
+class DcatBackendTest:
+    @pytest.fixture(autouse=True)
+    def inject_licenses(self):
         # Create fake licenses
         for license_id in 'lool', 'fr-lo':
             License.objects.create(id=license_id, title=license_id)
 
-    @httpretty.activate
-    def test_simple_flat(self):
+    def test_simple_flat(self, rmock):
         filename = 'flat.jsonld'
-        url = mock_dcat(filename)
+        url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='dcat',
                                       url=url,
@@ -64,39 +66,37 @@ class DcatBackendTest(DBTestMixin, TestCase):
         source.reload()
 
         job = source.get_last_job()
-        self.assertEqual(len(job.items), 3)
+        assert len(job.items) == 3
 
         datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
 
-        self.assertEqual(len(datasets), 3)
+        assert len(datasets) == 3
 
         for i in '1 2 3'.split():
             d = datasets[i]
-            self.assertEqual(d.title, 'Dataset {0}'.format(i))
-            self.assertEqual(d.description,
-                             'Dataset {0} description'.format(i))
-            self.assertEqual(d.extras['dct:identifier'], i)
+            assert d.title == 'Dataset {0}'.format(i)
+            assert d.description == 'Dataset {0} description'.format(i)
+            assert d.extras['dct:identifier'] == i
 
         # First dataset
         dataset = datasets['1']
-        self.assertEqual(dataset.tags, ['tag-1', 'tag-2', 'tag-3', 'tag-4',
-                                        'theme-1', 'theme-2'])
-        self.assertEqual(len(dataset.resources), 2)
+        assert dataset.tags == ['tag-1', 'tag-2', 'tag-3', 'tag-4',
+                                'theme-1', 'theme-2']
+        assert len(dataset.resources) == 2
 
         # Second dataset
         dataset = datasets['2']
-        self.assertEqual(dataset.tags, ['tag-1', 'tag-2', 'tag-3'])
-        self.assertEqual(len(dataset.resources), 2)
+        assert dataset.tags == ['tag-1', 'tag-2', 'tag-3']
+        assert len(dataset.resources) == 2
 
         # Third dataset
         dataset = datasets['3']
-        self.assertEqual(dataset.tags, ['tag-1', 'tag-2'])
-        self.assertEqual(len(dataset.resources), 1)
+        assert dataset.tags == ['tag-1', 'tag-2']
+        assert len(dataset.resources) == 1
 
-    @httpretty.activate
-    def test_simple_nested_attributes(self):
+    def test_simple_nested_attributes(self, rmock):
         filename = 'nested.jsonld'
-        url = mock_dcat(filename)
+        url = mock_dcat(rmock, filename)
         source = HarvestSourceFactory(backend='dcat',
                                       url=url,
                                       organization=OrganizationFactory())
@@ -106,25 +106,24 @@ class DcatBackendTest(DBTestMixin, TestCase):
         source.reload()
 
         job = source.get_last_job()
-        self.assertEqual(len(job.items), 1)
+        assert len(job.items) == 1
 
         dataset = Dataset.objects.first()
-        self.assertIsNotNone(dataset.temporal_coverage)
-        self.assertEqual(dataset.temporal_coverage.start, date(2016, 1, 1))
-        self.assertEqual(dataset.temporal_coverage.end, date(2016, 12, 5))
+        assert dataset.temporal_coverage is not None
+        assert dataset.temporal_coverage.start == date(2016, 1, 1)
+        assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
-        self.assertEqual(len(dataset.resources), 1)
+        assert len(dataset.resources) == 1
 
         resource = dataset.resources[0]
-        self.assertIsNotNone(resource.checksum)
-        self.assertEqual(resource.checksum.type, 'sha1')
-        self.assertEqual(resource.checksum.value,
-                         'fb4106aa286a53be44ec99515f0f0421d4d7ad7d')
+        assert resource.checksum is not None
+        assert resource.checksum.type == 'sha1'
+        assert (resource.checksum.value
+                == 'fb4106aa286a53be44ec99515f0f0421d4d7ad7d')
 
-    @httpretty.activate
-    def test_idempotence(self):
+    def test_idempotence(self, rmock):
         filename = 'flat.jsonld'
-        url = mock_dcat(filename)
+        url = mock_dcat(rmock, filename)
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='dcat',
                                       url=url,
@@ -136,14 +135,13 @@ class DcatBackendTest(DBTestMixin, TestCase):
 
         datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
 
-        self.assertEqual(len(datasets), 3)
-        self.assertEqual(len(datasets['1'].resources), 2)
-        self.assertEqual(len(datasets['2'].resources), 2)
-        self.assertEqual(len(datasets['3'].resources), 1)
+        assert len(datasets) == 3
+        assert len(datasets['1'].resources) == 2
+        assert len(datasets['2'].resources) == 2
+        assert len(datasets['3'].resources) == 1
 
-    @httpretty.activate
-    def test_hydra_partial_collection_view_pagination(self):
-        url = mock_pagination('catalog.jsonld',
+    def test_hydra_partial_collection_view_pagination(self, rmock):
+        url = mock_pagination(rmock, 'catalog.jsonld',
                               'partial-collection-{page}.jsonld')
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='dcat',
@@ -155,11 +153,10 @@ class DcatBackendTest(DBTestMixin, TestCase):
         source.reload()
 
         job = source.get_last_job()
-        self.assertEqual(len(job.items), 4)
+        assert len(job.items) == 4
 
-    @httpretty.activate
-    def test_hydra_legacy_paged_collection_pagination(self):
-        url = mock_pagination('catalog.jsonld',
+    def test_hydra_legacy_paged_collection_pagination(self, rmock):
+        url = mock_pagination(rmock, 'catalog.jsonld',
                               'paged-collection-{page}.jsonld')
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='dcat',
@@ -171,12 +168,11 @@ class DcatBackendTest(DBTestMixin, TestCase):
         source.reload()
 
         job = source.get_last_job()
-        self.assertEqual(len(job.items), 4)
+        assert len(job.items) == 4
 
-    @httpretty.activate
-    def test_failure_on_initialize(self):
+    def test_failure_on_initialize(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
-        httpretty.register_uri(httpretty.GET, url, body='should fail')
+        rmock.get(url, text='should fail')
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='dcat',
                                       url=url,
@@ -188,12 +184,11 @@ class DcatBackendTest(DBTestMixin, TestCase):
 
         job = source.get_last_job()
 
-        self.assertEqual(job.status, 'failed')
+        assert job.status == 'failed'
 
-    @httpretty.activate
-    def test_unsupported_mime_type(self):
+    def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
-        httpretty.register_uri(httpretty.HEAD, url, content_type='text/html; charset=utf-8')
+        rmock.head(url, headers={'Content-Type': 'text/html; charset=utf-8'})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='dcat',
                                       url=url,
@@ -205,16 +200,15 @@ class DcatBackendTest(DBTestMixin, TestCase):
 
         job = source.get_last_job()
 
-        self.assertEqual(job.status, 'failed')
-        self.assertEqual(len(job.errors), 1)
+        assert job.status == 'failed'
+        assert len(job.errors) == 1
 
         error = job.errors[0]
-        self.assertEqual(error.message, 'Unsupported mime type "text/html"')
+        assert error.message == 'Unsupported mime type "text/html"'
 
-    @httpretty.activate
-    def test_unable_to_detect_format(self):
+    def test_unable_to_detect_format(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
-        httpretty.register_uri(httpretty.HEAD, url, content_type='')
+        rmock.head(url, headers={'Content-Type': ''})
         org = OrganizationFactory()
         source = HarvestSourceFactory(backend='dcat',
                                       url=url,
@@ -226,9 +220,9 @@ class DcatBackendTest(DBTestMixin, TestCase):
 
         job = source.get_last_job()
 
-        self.assertEqual(job.status, 'failed')
-        self.assertEqual(len(job.errors), 1)
+        assert job.status == 'failed'
+        assert len(job.errors) == 1
 
         error = job.errors[0]
         expected = 'Unable to detect format from extension or mime type'
-        self.assertEqual(error.message, expected)
+        assert error.message == expected

@@ -20,6 +20,7 @@ pages:
     - Developping:
         - Development environment: development-environment.md
         - Testing your code: testing-code.md
+        - Extending uData: extending.md
         - Adding translations: adding-translations.md
         - Creating a custom theme: creating-theme.md
         - Building the documentation: building-documentation.md

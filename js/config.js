@@ -158,6 +158,11 @@ export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
  */
 export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
 
+/**
+ * Markdown configuration.
+ */
+export const markdown = _jsonMeta('markdown-config');
+
 
 export default {
     user,
@@ -181,4 +186,5 @@ export default {
     tiles_url,
     tiles_config,
     dataset_max_resources_uncollapsed,
+    markdown,
 };

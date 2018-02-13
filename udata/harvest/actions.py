@@ -27,7 +27,7 @@ DEFAULT_PAGE_SIZE = 10
 
 def list_backends():
     '''List all available backends'''
-    return backends.get_all().values()
+    return backends.get_all(current_app).values()
 
 
 def _sources_queryset(owner=None):
@@ -135,7 +135,7 @@ def purge_sources():
 def run(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     source = get_source(ident)
-    cls = backends.get(source.backend)
+    cls = backends.get(current_app, source.backend)
     backend = cls(source)
     backend.harvest()
 
@@ -148,7 +148,7 @@ def launch(ident):
 def preview(ident):
     '''Launch or resume an harvesting for a given source if none is running'''
     source = get_source(ident)
-    cls = backends.get(source.backend)
+    cls = backends.get(current_app, source.backend)
     max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
     backend = cls(source, dryrun=True, max_items=max_items)
     return backend.harvest()

@@ -20,6 +20,8 @@ from flask_navigation import Navigation
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
 
+from udata import entrypoints
+
 
 APP_NAME = __name__.split('.')[0]
 ROOT_DIR = abspath(join(dirname(__file__)))
@@ -134,8 +136,8 @@ def init_logging(app):
     debug = app.debug or app.config.get('TESTING')
     log_level = logging.DEBUG if debug else logging.WARNING
     app.logger.setLevel(log_level)
-    for name in app.config['PLUGINS']:
-        logging.getLogger('udata_{0}'.format(name)).setLevel(log_level)
+    for name in entrypoints.get_roots():  # Entrypoints loggers
+        logging.getLogger(name).setLevel(log_level)
     for logger in VERBOSE_LOGGERS:
         logging.getLogger(logger).setLevel(logging.WARNING)
     return app
@@ -175,12 +177,6 @@ def standalone(app):
     api.init_app(app)
 
     register_features(app)
-
-    for plugin in app.config['PLUGINS']:
-        name = 'udata_{0}'.format(plugin)
-        plugin = import_module(name)
-        if hasattr(plugin, 'init_app') and callable(plugin.init_app):
-            plugin.init_app(app)
 
     return app
 

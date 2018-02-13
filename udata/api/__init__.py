@@ -331,16 +331,6 @@ def init_app(app):
     import udata.features.territories.api  # noqa
     import udata.harvest.api  # noqa
 
-    # Load plugins API
-    for plugin in app.config['PLUGINS']:
-        name = 'udata_{0}.api'.format(plugin)
-        try:
-            __import__(name)
-        except ImportError:
-            pass
-        except Exception as e:
-            log.error('Error importing %s: %s', name, e)
-
     # api.init_app(app)
     app.register_blueprint(apidoc)
     app.register_blueprint(apiv1)

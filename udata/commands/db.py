@@ -13,6 +13,7 @@ from flask import current_app
 from pymongo.errors import PyMongoError, OperationFailure
 from mongoengine.connection import get_db
 
+from udata import entrypoints
 from udata.commands import cli, green, yellow, cyan, red, magenta
 
 log = logging.getLogger(__name__)
@@ -121,12 +122,12 @@ def available_migrations():
         if filename.endswith('.js'):
             migrations.append(('udata', 'udata', filename))
 
-    for plugin in current_app.config['PLUGINS']:
-        name = 'udata_{0}'.format(plugin)
-        if resource_isdir(name, 'migrations'):
-            for filename in resource_listdir(name, 'migrations'):
+    plugins = entrypoints.get_enabled('udata.models', current_app)
+    for plugin, module in plugins.items():
+        if resource_isdir(module.__name__, 'migrations'):
+            for filename in resource_listdir(module.__name__, 'migrations'):
                 if filename.endswith('.js'):
-                    migrations.append((plugin, name, filename))
+                    migrations.append((plugin, module.__name__, filename))
     return sorted(migrations, key=lambda r: r[2])
 
 
