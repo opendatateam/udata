@@ -3,10 +3,8 @@ from __future__ import unicode_literals
 
 import pytest
 
-from urlparse import urlparse, parse_qs
-# from urllib2 import urlun
-
 from base64 import b64encode
+from urlparse import parse_qs
 
 from flask import url_for
 
@@ -248,6 +246,41 @@ class APIAuthTest:
 
         assert uri == oauth.default_redirect_uri
         assert 'code' in parse_qs(params)
+
+    def test_client_credentials_grant_token(self, client, oauth):
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'client_credentials',
+        }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+    def test_password_grant_token(self, client, oauth):
+        user = UserFactory(password='password')
+
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'password',
+            'username': user.email,
+            'password': 'password',
+        }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+    def test_implicit_grant_token(self, client, oauth):
+        client.login()
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='token',
+            client_id=oauth.client_id,
+        ), {
+            'accept': '',
+        })
+
+        assert_status(response, 302)
+        assert 'access_token=' in response.location
 
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):

@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import factory
 
+from flask_security.utils import hash_password
+
 from udata.factories import ModelFactory
 
 from .models import User, Role
@@ -16,6 +18,13 @@ class UserFactory(ModelFactory):
     last_name = factory.Faker('last_name')
     email = factory.Faker('email')
     active = True
+
+    @classmethod
+    def _adjust_kwargs(cls, **kwargs):
+        if 'password' in kwargs:
+            # Password is stored hashed
+            kwargs['password'] = hash_password(kwargs['password'])
+        return kwargs
 
 
 class AdminFactory(UserFactory):

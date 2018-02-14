@@ -26,6 +26,7 @@ from authlib.flask.oauth2 import (
 )
 from authlib.specs.rfc6749 import grants, ClientMixin
 from flask import abort, request
+from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import gen_salt
 
@@ -34,6 +35,7 @@ from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import db
+from udata.core.user.models import User
 from udata.core.storages import images, default_image_basename
 
 
@@ -211,10 +213,48 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         authorization_code.delete()
 
     def create_access_token(self, token, client, authorization_code):
-        scopes = token.pop('scope').split(' ')
+        scopes = token.pop('scope', '').split(' ')
         OAuth2Token.objects.create(
             client=client,
             user=authorization_code.user,
+            scopes=scopes,
+            **token
+        )
+
+
+class ClientCredentialsGrant(grants.ClientCredentialsGrant):
+    def create_access_token(self, token, client):
+        scopes = token.pop('scope', '').split(' ')
+        OAuth2Token.objects.create(
+            client=client,
+            user=client.owner,
+            scopes=scopes,
+            **token
+        )
+
+
+class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
+    def authenticate_user(self, username, password):
+        user = User.objects(email=username).first()
+        if user and verify_password(password, user.password):
+            return user
+
+    def create_access_token(self, token, client, user):
+        scopes = token.pop('scope', '').split(' ')
+        OAuth2Token.objects.create(
+            client=client,
+            user=user,
+            scopes=scopes,
+            **token
+        )
+
+
+class ImplicitGrant(grants.ImplicitGrant):
+    def create_access_token(self, token, client, grant_user):
+        scopes = token.pop('scope', '').split(' ')
+        OAuth2Token.objects.create(
+            client=client,
+            user=grant_user._get_current_object(),
             scopes=scopes,
             **token
         )
@@ -231,6 +271,9 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
 
 oauth.register_grant_endpoint(AuthorizationCodeGrant)
+oauth.register_grant_endpoint(ClientCredentialsGrant)
+oauth.register_grant_endpoint(PasswordGrant)
+oauth.register_grant_endpoint(ImplicitGrant)
 oauth.register_grant_endpoint(RefreshTokenGrant)
 
 
