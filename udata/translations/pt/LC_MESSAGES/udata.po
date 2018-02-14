@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 08:01-0500\n"
+"PO-Revision-Date: 2018-02-14 08:12-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2205,84 +2205,84 @@ msgstr "Ver o perfil"
 #: udata/templates/mail/new_follower_org.html:8
 #, python-format
 msgid "%(user)s followed your organization %(org)s"
-msgstr ""
+msgstr "%(user)s seguiu a sua organização %(org)s"
 
 #: udata/templates/mail/new_issue.html:6
 #, python-format
 msgid "%(user)s submitted a new issue on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s submeteu um problema sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/new_issue_comment.html:6
 #, python-format
 msgid "%(user)s commented an issue on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s comentou uma discussão sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/new_member.html:7
 #, python-format
 msgid "Congratulations, you are now a member of the organization \"%(org)s\""
-msgstr ""
+msgstr "Parabéns, você é agora um membro da organização \"%(org)s\""
 
 #: udata/templates/mail/new_member.html:21
 msgid "See the organization page"
-msgstr ""
+msgstr "Consulte a página da organização"
 
 #: udata/templates/mail/new_reuse.html:7
 #, python-format
 msgid "A new reuse of your dataset %(dataset)s has been published"
-msgstr ""
+msgstr "Foi publicada uma nova reutilização do seu dataset %(dataset)s"
 
 #: udata/templates/mail/new_reuse.html:31 udata/templates/reuse/display.html:83
 msgid "See the reuse"
-msgstr ""
+msgstr "Consulte a reutilização"
 
 #: udata/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
-msgstr ""
+msgstr "Consulte na página do dataset"
 
 #: udata/templates/mail/test.html:4
 msgid "This is a test mail"
-msgstr ""
+msgstr "Este é um e-mail de teste"
 
 #: udata/templates/mail/test.html:5
 msgid "If you read this, your mail configuration is working"
-msgstr ""
+msgstr "Se você ler isto, a sua configuração de correio está a funcionar"
 
 #: udata/templates/mail/security/reset_instructions.html:7
 #, python-format
 msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
-msgstr ""
+msgstr "Alguém pediu uma redefinição de senha para sua %(site)s conta. Se não foi você, por favor, ignore este e-mail."
 
 #: udata/templates/mail/security/reset_instructions.html:10
 msgid "To reset your password, please confirm your request through the link below:"
-msgstr ""
+msgstr "Para redefinir a sua senha, por favor, confirme o seu pedido através do link abaixo:"
 
 #: udata/templates/mail/security/reset_instructions.html:18
 msgid "Reset my password"
-msgstr ""
+msgstr "Redefinir a minha senha"
 
 #: udata/templates/mail/security/reset_notice.html:7
 #, python-format
 msgid "Your password for %(site)s has been reset."
-msgstr ""
+msgstr "A sua senha para o %(site)s foi redefinida."
 
 #: udata/templates/mail/security/welcome.html:7
 #, python-format
 msgid "Welcome to %(site)s!"
-msgstr ""
+msgstr "Bem-vindo ao %(site)s!"
 
 #: udata/templates/mail/security/welcome.html:10
 msgid "To activate your account, please confirm your email address through the link below:"
-msgstr ""
+msgstr "Para ativar a sua conta, por favor, confirme o seu endereço de e-mail através do link seguinte:"
 
 #: udata/templates/mail/security/welcome.html:18
 msgid "Confirm now"
-msgstr ""
+msgstr "Confirmar agora"
 
 #: udata/templates/organization/card.html:22
 #: udata/templates/organization/search-result.html:21
 #: udata/templates/user/card.html:21
 msgid "Number of datasets"
-msgstr ""
+msgstr "Número de conjuntos de dados"
 
 #: udata/templates/organization/card.html:24
 #: udata/templates/organization/search-result.html:23
@@ -2290,12 +2290,12 @@ msgstr ""
 #, python-format
 msgid "%(num)s dataset"
 msgid_plural "%(num)s datasets"
-msgstr[0] ""
+msgstr[0] "%(num)s conjuntos de dados"
 msgstr[1] ""
 
 #: udata/templates/organization/card.html:30 udata/templates/user/card.html:29
 msgid "Number of reuses"
-msgstr ""
+msgstr "Número de reutilizações"
 
 #: udata/templates/organization/card.html:32
 #: udata/templates/organization/search-result.html:32
@@ -2303,72 +2303,72 @@ msgstr ""
 #, python-format
 msgid "%(num)s reuse"
 msgid_plural "%(num)s reuses"
-msgstr[0] ""
+msgstr[0] "%(num)s reutilização"
 msgstr[1] ""
 
 #: udata/templates/organization/display.html:8
 msgid "organization"
-msgstr ""
+msgstr "organização"
 
 #: udata/templates/organization/display.html:37
 msgid "This organization has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
+msgstr "Esta organização foi apagada. Esta alteração será definitiva dentro de 24 horas"
 
 #: udata/templates/organization/display.html:49
 #, python-format
 msgid "%(num)d private dataset"
 msgid_plural "%(num)d private datasets"
-msgstr[0] ""
+msgstr[0] "%(num)d conjuntos de dados privados"
 msgstr[1] ""
 
 #: udata/templates/organization/display.html:53
 #, python-format
 msgid "%(num)d private reuse"
 msgid_plural "%(num)d private reuses"
-msgstr[0] ""
+msgstr[0] "%(num)d reutilizações privadas"
 msgstr[1] ""
 
 #: udata/templates/organization/display.html:80
 #, python-format
 msgid "See the %(nb)s datasets"
-msgstr ""
+msgstr "Ver os %(nb)s conjuntos de dados"
 
 #: udata/templates/organization/display.html:87
 msgid "Download as CSV"
-msgstr ""
+msgstr "Transferir como CSV"
 
 #: udata/templates/organization/display.html:92
 msgid "Datasets list"
-msgstr ""
+msgstr "Lista de dados"
 
 #: udata/templates/organization/display.html:97
 msgid "Resources list"
-msgstr ""
+msgstr "Lista de recursos"
 
 #: udata/templates/organization/display.html:102
 msgid "Issues list"
-msgstr ""
+msgstr "Lista de problemas"
 
 #: udata/templates/organization/display.html:107
 msgid "Discussions list"
-msgstr ""
+msgstr "Lista de discussões"
 
 #: udata/templates/organization/display.html:136
 #, python-format
 msgid "See the %(nb)s reuses"
-msgstr ""
+msgstr "Ver as %(nb)s reutilizações"
 
 #: udata/templates/organization/display.html:145
 #: udata/templates/organization/display_base.html:67
 #, python-format
 msgid "%(num)d member"
 msgid_plural "%(num)d members"
-msgstr[0] ""
+msgstr[0] "%(num)d membros"
 msgstr[1] ""
 
 #: udata/templates/organization/display.html:170
 msgid "Display all followers"
-msgstr ""
+msgstr "Mostrar todos os seguidores"
 
 #: udata/templates/organization/display.html:190
 #: udata/templates/site/dashboard.html:51
@@ -2602,16 +2602,16 @@ msgstr ""
 
 #: udata/templates/reuse/list.html:10 udata/templates/topic/reuses.html:9
 msgid "reuses"
-msgstr ""
+msgstr "reutilizações"
 
 #: udata/templates/reuse/search-result.html:25
 msgid "Number of dataset"
-msgstr ""
+msgstr "Número de conjuntos de dados"
 
 #: udata/templates/security/change_password.html:12
 #: udata/templates/security/change_password.html:19
 msgid "Change Password"
-msgstr ""
+msgstr "Alterar senha"
 
 #: udata/templates/security/forgot_password.html:12
 #: udata/templates/security/forgot_password.html:18
