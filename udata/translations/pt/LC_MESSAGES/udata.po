@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 07:42-0500\n"
+"PO-Revision-Date: 2018-02-14 07:51-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1969,137 +1969,137 @@ msgstr "Começar uma nova discussão"
 
 #: udata/templates/errors/400.html:3
 msgid "Bad request"
-msgstr ""
+msgstr "Pedido inválido"
 
 #: udata/templates/errors/400.html:8 udata/templates/errors/500.html:8
 msgid "The error identifier is {id}"
-msgstr ""
+msgstr "O identificador do erro é {id}"
 
 #: udata/templates/errors/403.html:3
 msgid "Forbidden"
-msgstr ""
+msgstr "Proibido"
 
 #: udata/templates/errors/403.html:6
 msgid "You are not allowed to display this page."
-msgstr ""
+msgstr "Não tem autorização para aceder a esta página."
 
 #: udata/templates/errors/404.html:3 udata/templates/errors/410.html:3
 msgid "Page Not Found"
-msgstr ""
+msgstr "Página não encontrada"
 
 #: udata/templates/errors/404.html:6
 msgid "The page you're looking for could not be found."
-msgstr ""
+msgstr "A página que procura não foi encontrada."
 
 #: udata/templates/errors/410.html:6
 msgid "The page you're looking has been deleted."
-msgstr ""
+msgstr "A página que procura foi excluída."
 
 #: udata/templates/errors/500.html:3
 msgid "Internal server error"
-msgstr ""
+msgstr "Erro interno do servidor"
 
 #: udata/templates/errors/500.html:6
 msgid "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application."
-msgstr ""
+msgstr "O servidor encontrou um erro interno e não pôde concluir o seu pedido. O servidor está sobrecarregado ou há um erro no aplicativo."
 
 #: udata/templates/errors/base.html:11
 #, python-format
 msgid "Error %(code)s"
-msgstr ""
+msgstr "Erro %(code)s"
 
 #: udata/templates/follow/follower-card.html:6
 #, python-format
 msgid "Following since %(date)s"
-msgstr ""
+msgstr "A seguir desde %(date)s"
 
 #: udata/templates/macros/certified.html:4
 #: udata/templates/organization/display_base.html:30
 #, python-format
 msgid "The identity of this public service is certified by %(certifier)s"
-msgstr ""
+msgstr "A identidade deste serviço público é certificada pela %(certifier)s"
 
 #: udata/templates/macros/certified.html:5
 #: udata/templates/organization/display_base.html:31
 msgid "Certified public service"
-msgstr ""
+msgstr "Certificados de serviço público"
 
 #: udata/templates/macros/forms.html:106
 msgid "required fields"
-msgstr ""
+msgstr "campos obrigatórios"
 
 #: udata/templates/macros/integrate.html:4
 msgid "Integrate"
-msgstr ""
+msgstr "Integridade"
 
 #: udata/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
-msgstr ""
+msgstr "Partilhar, melhorar e reutilizar dados públicos"
 
 #: udata/templates/macros/paginator.html:8
 msgid "First page"
-msgstr ""
+msgstr "Primeira página"
 
 #: udata/templates/macros/paginator.html:13
 msgid "Previous page"
-msgstr ""
+msgstr "Página anterior"
 
 #: udata/templates/macros/paginator.html:23
 msgid "Next page"
-msgstr ""
+msgstr "Página seguinte"
 
 #: udata/templates/macros/paginator.html:28
 msgid "Last page"
-msgstr ""
+msgstr "Última página"
 
 #: udata/templates/macros/search.html:17
 msgid "Sort by"
-msgstr ""
+msgstr "Ordenar por"
 
 #: udata/templates/macros/search.html:43
 msgid "Ascending"
-msgstr ""
+msgstr "Ascendente"
 
 #: udata/templates/macros/search.html:43
 msgid "Descending"
-msgstr ""
+msgstr "Descendente"
 
 #: udata/templates/macros/search.html:53
 msgid "Export"
-msgstr ""
+msgstr "Exportar"
 
 #: udata/templates/macros/search.html:92
 msgid "Clear filter"
-msgstr ""
+msgstr "Limpar filtro"
 
 #: udata/templates/macros/search.html:117 udata/templates/macros/search.html:147
 msgid "More results…"
-msgstr ""
+msgstr "Mais resultados…"
 
 #: udata/templates/macros/search.html:192
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
-msgstr ""
+msgstr "Resultados %(start)s a %(end)s de %(total)s encontrados"
 
 #: udata/templates/macros/search.html:207
 msgid "No result found"
-msgstr ""
+msgstr "Nenhum resultado encontrado"
 
 #: udata/templates/macros/uploader.html:8
 msgid "Drag a file here"
-msgstr ""
+msgstr "Arraste um ficheiro para aqui"
 
 #: udata/templates/macros/uploader.html:11
 msgid "or"
-msgstr ""
+msgstr "ou"
 
 #: udata/templates/macros/uploader.html:15
 msgid "Select a file from your computer"
-msgstr ""
+msgstr "Selecione um ficheiro do seu computador"
 
 #: udata/templates/mail/account_deleted.html:4
 msgid "Your account has now been deleted"
-msgstr ""
+msgstr "A sua conta foi eliminada"
 
 #: udata/templates/mail/badge_added_certified.html:6
 #, python-format
