@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 06:44-0500\n"
+"PO-Revision-Date: 2018-02-14 06:49-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1483,106 +1483,106 @@ msgstr "Perfil"
 
 #: udata/templates/header.html:44
 msgid "Change password"
-msgstr ""
+msgstr "Alterar senha"
 
 #: udata/templates/header.html:60
 msgid "Settings"
-msgstr ""
+msgstr "Configurações"
 
 #: udata/templates/header.html:68 udata/templates/header.html:71
 #: udata/templates/territories/territory.html:41
 msgid "Sign In / Register"
-msgstr ""
+msgstr "Entrar / Registar"
 
 #: udata/templates/api/oauth_error.html:13 udata/templates/errors/base.html:18
 #: udata/templates/home.html:4 udata/templates/macros/breadcrumb.html:16
 #: udata/templates/macros/metadata.html:2
 msgid "Home"
-msgstr ""
+msgstr "Início"
 
 #: udata/templates/home.html:5
 #, python-format
 msgid "%(site)s home"
-msgstr ""
+msgstr "%(site)s inicio"
 
 #: udata/templates/home.html:6
 msgid "home"
-msgstr ""
+msgstr "início"
 
 #: udata/templates/home.html:53 udata/templates/topic/display.html:74
 msgid "Featured datasets"
-msgstr ""
+msgstr "Conjuntos de dados em destaque"
 
 #: udata/templates/home.html:78
 msgid "Reuse"
-msgstr ""
+msgstr "Reutilização"
 
 #: udata/templates/metrics.html:4 udata/templates/metrics.html:10
 msgid "Metrics"
-msgstr ""
+msgstr "Métricas"
 
 #: udata/templates/metrics.html:5
 msgid "Site metrics"
-msgstr ""
+msgstr "Métricas da página"
 
 #: udata/templates/metrics.html:6 udata/templates/site/dashboard.html:6
 msgid "metrics"
-msgstr ""
+msgstr "métricas"
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:10
 msgid "Publish a dataset"
-msgstr ""
+msgstr "Publicar um conjunto de dados"
 
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:14
 msgid "Contribute and add a new dataset to this site catalog."
-msgstr ""
+msgstr "Contribuir e adicionar um novo dataset."
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:24
 msgid "Publish a reuse"
-msgstr ""
+msgstr "Publicar uma reutilização"
 
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:28
 msgid "Contribute and add a new reuse to this site catalog."
-msgstr ""
+msgstr "Contribuir e adicionar uma nova reutilização."
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:38
 msgid "Create or find your organization"
-msgstr ""
+msgstr "Criar ou encontrar a sua organização"
 
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:42
 msgid "You can create a new organization or find yours."
-msgstr ""
+msgstr "Você pode criar uma nova organização ou encontrar a sua."
 
 #: udata/templates/raw.html:16
 msgid "Recent datasets"
-msgstr ""
+msgstr "Conjuntos de dados recentes"
 
 #: udata/templates/raw.html:20
 msgid "Recent reuses"
-msgstr ""
+msgstr "Reutilizações recentes"
 
 #: udata/templates/macros/search.html:215 udata/templates/post/subnav.html:13
 #: udata/templates/search.html:8
 msgid "Search"
-msgstr ""
+msgstr "Pesquisar"
 
 #: udata/templates/search.html:9
 #, python-format
 msgid "%(site)s search"
-msgstr ""
+msgstr "%(site)s pesquisa"
 
 #: udata/templates/dataset/list.html:10 udata/templates/organization/list.html:10
 #: udata/templates/reuse/list.html:10 udata/templates/search.html:10
 #: udata/templates/topic/datasets.html:9 udata/templates/topic/reuses.html:9
 #: udata/templates/user/list.html:10
 msgid "search"
-msgstr ""
+msgstr "pesquisar"
 
 #: udata/templates/organization/display.html:48
 #: udata/templates/organization/display_base.html:58 udata/templates/search.html:27
@@ -1590,8 +1590,8 @@ msgstr ""
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d conjunto de dados"
+msgstr[1] "%(num)d conjunto de dados"
 
 #: udata/templates/organization/display.html:52
 #: udata/templates/organization/display_base.html:87 udata/templates/search.html:34
@@ -1599,27 +1599,27 @@ msgstr[1] ""
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
-msgstr[0] ""
+msgstr[0] "%(num)d reutilização"
 msgstr[1] ""
 
 #: udata/templates/search.html:41
 #, python-format
 msgid "%(num)d organization"
 msgid_plural "%(num)d organizations"
-msgstr[0] ""
+msgstr[0] "%(num)d organização"
 msgstr[1] ""
 
 #: udata/templates/search.html:49
 #, python-format
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
-msgstr[0] ""
+msgstr[0] "Território: %(name)s"
 msgstr[1] ""
 
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
 msgid "Tag"
-msgstr ""
+msgstr "Etiqueta"
 
 #: udata/templates/dataset/search-labels.html:12
 #: udata/templates/organization/search-labels.html:3 udata/templates/search.html:59
