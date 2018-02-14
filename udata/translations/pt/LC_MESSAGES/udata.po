@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 09:00-0500\n"
+"PO-Revision-Date: 2018-02-14 09:03-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1945,7 +1945,7 @@ msgstr "A comentar neste tópico"
 
 #: udata/templates/discussion/item.html:55
 msgid "You're about to answer to this particular thread about:"
-msgstr ""
+msgstr "Está prestes a responder a este tema particular sobre:"
 
 #: udata/templates/discussion/item.html:64
 msgid "Submit your comment"
@@ -2391,12 +2391,12 @@ msgstr ""
 #, python-format
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
-msgstr[0] ""
+msgstr[0] "%(num)d reappropriações"
 msgstr[1] ""
 
 #: udata/templates/organization/display_base.html:109
 msgid "I belong to this organization"
-msgstr ""
+msgstr "Eu pertenço a esta organização"
 
 #: udata/templates/organization/display_base.html:112
 msgid "Join"
@@ -2412,11 +2412,11 @@ msgstr "Pedido pendente"
 
 #: udata/templates/organization/display_base.html:125
 msgid "You are an administrator of this organization"
-msgstr ""
+msgstr "Você é um administrador desta organização"
 
 #: udata/templates/organization/display_base.html:132
 msgid "You are editor in this organization"
-msgstr ""
+msgstr "Você é um editor desta organização"
 
 #: udata/templates/organization/display_base.html:139
 msgid "You are a member of this organization"
@@ -2429,7 +2429,7 @@ msgstr "Membro"
 #: udata/templates/organization/display_base.html:149
 #: udata/templates/organization/sidebar-producer.html:28
 msgid "I'll be informed about this organization news"
-msgstr ""
+msgstr "Serei informado sobre novidades desta organização"
 
 #: udata/templates/organization/list.html:9
 #, python-format
@@ -2450,13 +2450,13 @@ msgstr "Numero de reutilizações pela organização"
 
 #: udata/templates/organization/search-result.html:39
 msgid "Number of reappropriations by the community"
-msgstr ""
+msgstr "Numero de reapopriações pela comunidade"
 
 #: udata/templates/organization/search-result.html:41
 #, python-format
 msgid "%(num)s reappropriation"
 msgid_plural "%(num)s reappropriations"
-msgstr[0] ""
+msgstr[0] "%(num)s reapopriações"
 msgstr[1] ""
 
 #: udata/templates/organization/search-result.html:48
