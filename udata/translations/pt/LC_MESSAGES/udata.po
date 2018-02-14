@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 06:49-0500\n"
+"PO-Revision-Date: 2018-02-14 06:51-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1624,46 +1624,46 @@ msgstr "Etiqueta"
 #: udata/templates/dataset/search-labels.html:12
 #: udata/templates/organization/search-labels.html:3 udata/templates/search.html:59
 msgid "Badge"
-msgstr ""
+msgstr "Emblema"
 
 #: udata/templates/dataset/card.html:45 udata/templates/dataset/list.html:44
 #: udata/templates/organization/card.html:43 udata/templates/reuse/card.html:47
 #: udata/templates/search.html:77 udata/templates/search.html:91
 #: udata/templates/topic/datasets.html:37 udata/templates/user/card.html:36
 msgid "Stars"
-msgstr ""
+msgstr "Favoritos"
 
 #: udata/templates/search.html:90
 msgid "Datasets used"
-msgstr ""
+msgstr "Conjuntos de dados utilizados"
 
 #: udata/templates/dataset/list.html:73 udata/templates/search.html:116
 msgid "No results found, try to be less specific."
-msgstr ""
+msgstr "Nenhum resultado encontrado, tente ser menos específico."
 
 #: udata/templates/search.html:133 udata/templates/search.html:158
 #: udata/templates/search.html:185 udata/templates/topic/browse.html:34
 #: udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
-msgstr ""
+msgstr "Consulte o %(total)s de resultados"
 
 #: udata/templates/search.html:169 udata/templates/search.html:196
 #: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
-msgstr ""
+msgstr "Não foram encontrados resultados"
 
 #: udata/templates/terms.html:4 udata/templates/terms.html:5
 msgid "Terms"
-msgstr ""
+msgstr "Termos de Utilização"
 
 #: udata/templates/terms.html:7
 msgid "terms"
-msgstr ""
+msgstr "termos de utilização"
 
 #: udata/templates/api/admin.html:11
 msgid "Maintainer"
-msgstr ""
+msgstr "Mantido por"
 
 #: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:133
 #: udata/templates/dataset/resource/list-item.html:36
@@ -1673,23 +1673,23 @@ msgstr ""
 #: udata/templates/post/display.html:118 udata/templates/reuse/display.html:109
 #: udata/templates/user/base.html:23
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: udata/templates/api/admin.html:34
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: udata/templates/api/admin.html:42
 msgid "No OAuth clients"
-msgstr ""
+msgstr "Nenhum cliente OAuth"
 
 #: udata/templates/api/admin.html:53
 msgid "Add a client"
-msgstr ""
+msgstr "Adicionar um cliente"
 
 #: udata/templates/api/oauth_authorize.html:4
 msgid "External application authorization"
-msgstr ""
+msgstr "Autorização de aplicação externa"
 
 #: udata/templates/api/oauth_authorize.html:14
 #, python-format
