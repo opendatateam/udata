@@ -50,6 +50,11 @@ class TestClient(FlaskClient):
             session['_fresh'] = True
         return user
 
+    def logout(self):
+        with self.session_transaction() as session:
+            del session['user_id']
+            del session['_fresh']
+
 
 @pytest.fixture
 def app(request):
