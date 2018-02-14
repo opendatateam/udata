@@ -41,9 +41,11 @@
 <div class="row">
     <div class="col-lg-8">
 
-        <ul class="search-results">
+        <ul class="search-results row">
             {% for user in users %}
-            {% include theme('user/search-result.html') %}
+            <li class="col-xs-12">
+            {% include theme('user/card.html') %}
+            </li>
             {% endfor %}
         </ul>
 

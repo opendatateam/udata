@@ -10,9 +10,9 @@
     </div>
     <div class="row">
         <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
-        <dataset-cards id="datasets-list" :datasets="reuse.datasets"
+        <dataset-card-list id="datasets-list" :datasets="reuse.datasets"
             class="col-xs-12 col-md-6">
-        </dataset-cards>
+        </dataset-card-list>
     </div>
 
     <div class="row">
@@ -35,6 +35,7 @@
 <script>
 import moment from 'moment';
 import Reuse from 'models/reuse';
+import Dataset from 'models/dataset';
 import Followers from 'models/followers';
 import Metrics from 'models/metrics';
 import Vue from 'vue';
@@ -43,7 +44,7 @@ import Discussions from 'models/discussions';
 import mask from 'models/mask';
 // Widgets
 import Chart from 'components/charts/widget.vue';
-import DatasetCards from 'components/dataset/card-list.vue';
+import DatasetCardList from 'components/dataset/card-list.vue';
 import DiscussionList from 'components/discussions/list.vue';
 import FollowerList from 'components/follow/list.vue';
 import IssueList from 'components/issues/list.vue';
@@ -51,14 +52,23 @@ import Layout from 'components/layout.vue';
 import ReuseDetails from 'components/reuse/details.vue';
 import SmallBox from 'components/containers/small-box.vue';
 
-const MASK = `datasets{${mask(DatasetCards.MASK)}},*`;
+const MASK = `datasets{${mask(DatasetCardList.MASK)}},*`;
 
 export default {
     name: 'reuse-view',
-    components: {SmallBox, Chart, ReuseDetails, FollowerList, DiscussionList, IssueList, DatasetCards, Layout},
+    components: {
+        SmallBox,
+        Chart,
+        ReuseDetails,
+        FollowerList,
+        DiscussionList,
+        IssueList,
+        DatasetCardList,
+        Layout
+    },
     data() {
         return {
-            reuse: new Reuse({mask: MASK}),
+            reuse: new Reuse({mask: MASK}), 
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')

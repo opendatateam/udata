@@ -32,7 +32,7 @@
     <div class="container dataset-container">
         <div class="row">
 
-            <div class="col-md-9 col-sm-9 smaller">
+            <div class="col-md-9 col-sm-9">
                 <div class="page-header">
                     <h2>{{ dataset.title }}</h2>
 
@@ -333,7 +333,7 @@
     </div>
 </section>
 
-<section class="community_container">
+<section class="community_container" id="community">
     <header>
         <div class="container">
             <div class="cover-communaute"></div>
@@ -346,7 +346,7 @@
 
     <div class="container">
 
-        <h3>{{ _('Discussions') }}</h3>
+        <h3 id="community-discussions">{{ _('Discussions') }}</h3>
         <div class="row">
             <div class="col-sm-9">
                 <discussion-threads v-ref:discussions
@@ -359,7 +359,7 @@
             </div>
         </div>
 
-        <h3>{{ _('Community resources') }}</h3>
+        <h3 id="community-resources">{{ _('Community resources') }}</h3>
         <div class="row">
             <div class="col-sm-9">
                 <div class="list-group community-resources-list resources-list smaller">
@@ -382,27 +382,30 @@
         </div>
 
         {% block reuses_section %}
-        <h3>{{ _('Reuses') }}</h3>
+        <h3 id="community-reuses">{{ _('Reuses') }}</h3>
         <div class="row">
-            <div class="col-sm-9 reuses-list smaller">
-                <div class="row">
+            <div class="col-sm-9 resources-list">
+                <div class="card-list card-list--columned">
                     {% for reuse in reuses %}
-                    <div class="col-sm-6 col-lg-4">
-                        {% include theme('dataset/reuse-card.html') %}
+                    {% set features = ['preview'] %}
+                    <div class="col-sm-6">
+                        {% include theme('reuse/card.html') %}
                     </div>
                     {% endfor %}
-                    <div class="col-sm-6 col-lg-4">
-                        <a class="thumbnail reuse add" v-el:add-reuse
+                
+                    <div class="col-sm-6">
+                        <a class="list-group-item add"
+                            v-el:add-reuse
                             href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
                             @click="addReuse($event)">
-                            <div class="preview">+</div>
-                            <div class="caption">
-                                <h4>{{ _('Add a reuse') }}</h4>
-                            </div>
+                            <div class="format-label">+</div>
+                            <h4 class="list-group-item-heading">
+                                {{ _('Add a reuse') }}
+                            </h4>
                         </a>
-                    </div>
+					</div>
+ 
                 </div>
-
             </div>
             <div class="col-sm-3 note">
                 <p>{% trans %}You reused these data and published an article, a computer graphics, or an application?

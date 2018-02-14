@@ -1,8 +1,8 @@
 {% cache cache_duration, 'user-card', user.id|string, g.lang_code %}
 {% set user_url = url_for('users.show', user=user) %}
-<div class="card">
+<div class="card user-card">
     <a class="card-logo" href="{{ user_url }}">
-        <img src="{{ user|avatar_url(60) }}" alt="{{ user.fullname }}"
+        <img src="{{ user|avatar_url(60) }}" alt=""
             width="60" height="60">
     </a>
 
@@ -12,44 +12,29 @@
                 {{ user.fullname }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{ user.about|mdstrip(180) }}</div>
     </div>
 
-    <footer>
+    <footer class="card__footer">
         <ul>
             {% if user.metrics.datasets %}
-            <li>
-                <a href class="btn btn-xs" v-tooltip title="{{ _('Number of datasets') }}">
-                    <span class="{{ ficon('fa-cubes') }}"></span>
-                    {{ ngettext('%(num)s dataset', '%(num)s datasets', user.metrics.datasets or 0) }}
-                </a>
+            <li v-tooltip title="{{ _('Number of datasets') }}">
+                <span class="{{ ficon('fa-cubes') }}"></span>
+                {{ user.metrics.datasets or 0 }}
             </li>
             {% endif %}
             {% if user.metrics.reuses %}
-            <li>
-                <a href class="btn btn-xs" v-tooltip title="{{ _('Number of reuses') }}">
-                    <span class="{{ ficon('fa-retweet') }}"></span>
-                    {{ ngettext('%(num)s reuse', '%(num)s reuses', user.metrics.reuses or 0) }}
-                </a>
+            <li v-tooltip title="{{ _('Number of reuses') }}">
+                <span class="{{ ficon('fa-retweet') }}"></span>
+                {{ user.metrics.reuses or 0 }}
             </li>
             {% endif %}
-            <li>
-                <a href class="btn btn-xs" v-tooltip title="{{ _('Stars') }}">
-                    <span class="{{ ficon('fa-star') }}"></span>
-                    {{ user.metrics.followers or 0 }}
-                </a>
+            <li v-tooltip title="{{ _('Stars') }}">
+                <span class="{{ ficon('fa-star') }}"></span>
+                {{ user.metrics.followers or 0 }}
             </li>
         </ul>
     </footer>
-
-    <a class="rollover fade in" href="{{url_for('users.show', user=user)}}"
-        title="{{ user.fullname }}">
-        {{ user.about|mdstrip(180) }}
-    </a>
-
-    {% if self.footer() %}
-    <footer class="rollover fade in">
-    {% block footer %}{% endblock %}
-    </footer>
-    {% endif %}
 </div>
 {% endcache %}

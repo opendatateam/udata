@@ -241,13 +241,17 @@
     </header>
 
     <div class="container">
-        <ul class="row card-list">
-            {% for dataset in reuse.datasets %}
-            <li class="col-md-4 col-sm-6">
-                {% include theme('dataset/card.html') %}
-            </li>
-            {% endfor %}
-        </ul>
+        <div class="row">
+            <div class="col-xs-12">
+                <ul class="row card-list card-list--columned">
+                    {% for dataset in reuse.datasets %}
+                    <li class="col-md-4 col-sm-6">
+                    {% include theme('dataset/card.html') %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
 </section>
 

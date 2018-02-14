@@ -65,8 +65,8 @@
     <box :title="title" icon="retwett"
         boxclass="box-solid reuses-cards-widget"
         footerclass="text-center" :footer="true" :loading="loading">
-        <div class="row" v-el:sortable>
-            <div class="col-md-6 reuse-card-container"
+        <div v-el:sortable>
+            <div class="reuse-card-container"
                 v-for="reuse in (editing ? sorted : reuses)"
                 :data-id="reuse.id"
             >

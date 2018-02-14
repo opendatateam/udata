@@ -17,6 +17,9 @@
 import moment from 'moment';
 
 import Topic from 'models/topic';
+import Dataset from 'models/dataset';
+import Reuse from 'models/reuse';
+import mask from 'models/mask';
 
 import Layout from 'components/layout.vue';
 import TopicDetails from 'components/topic/details.vue';
@@ -24,11 +27,13 @@ import DeleteModal from 'components/topic/delete-modal.vue';
 import DatasetsList from 'components/dataset/card-list.vue';
 import ReusesList from 'components/reuse/card-list.vue';
 
+const MASK = `datasets{${mask(DatasetsList.MASK)}},reuses{${mask(ReusesList.MASK)}},*`;
+
 export default {
     name: 'TopicView',
     data() {
         return {
-            topic: new Topic(),
+            topic: new Topic({mask: MASK}),
             actions: [{
                 label: this._('Edit'),
                 icon: 'edit',

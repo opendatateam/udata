@@ -2,8 +2,11 @@
     margin: 0;
 
     .list-group-item {
+        
         @vspacing: 10px;
         @base-color: #eaeaea;
+        @border-color: #fafafa;
+
         height: 54px;
         cursor: pointer;
         background-color: @base-color;
@@ -55,11 +58,16 @@
         }
 
         &.expanded {
-            border-bottom-color: @base-color;
+            border-bottom-color: @border-color;
         }
 
         &.body-only {
-            border-top-color: @base-color;
+            margin-top: -@vspacing;
+            border-color: @border-color;
+
+            .list-group-item-heading {
+                margin: 5px;
+            }
         }
 
         &.discussion-messages-list .list-group-item-heading{

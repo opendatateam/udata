@@ -65,8 +65,8 @@
     <box :title="title" icon="cubes"
         boxclass="box-solid datasets-cards-widget"
         footerclass="text-center" :footer="true" :loading="loading">
-        <div class="row" v-el:sortable>
-            <div class="col-md-6 dataset-card-container"
+        <div v-el:sortable>
+            <div class="dataset-card-container"
                 v-for="dataset in (editing ? sorted : datasets)"
                 :data-id="dataset.id"
             >

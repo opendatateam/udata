@@ -1,55 +1,62 @@
 {% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
-<div class="card reuse-card">
+{% set features = features or [] %}
+<div class="card reuse-card {% if 'preview' in features %}card--with-cover{% endif %}">
+    {% if 'preview' in features %}
+    <div class="card__cover">
+        <a href="{{ url_for('reuses.show', reuse=reuse) }}">
+            <img class="media-object img-responsive" alt="{{ reuse.title }}"
+                src="{{ reuse.image|placeholder('reuse') }}">
+        </a>
+    </div>
+    {% else %}
     <a class="card-logo" href="{{ url_for('reuses.show', reuse=reuse) }}">
         <img alt="{{ reuse.title }}"
             src="{{ reuse.image(86)|placeholder('reuse') }}"
             width="86" height="86">
     </a>
+    {% endif %}
 
     <div class="card-body">
         <h4>
             <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
-                {{ reuse.title|truncate(100) }}
+                {{ reuse.title }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{ reuse.description|mdstrip(180) }}</div>
     </div>
-    <footer>
-        <div class="author">
-            {{ reuse|owner_avatar(20) }}
-            <a class="user" href="{{ reuse|owner_url }}" title="{{ reuse|owner_name }}">
-            {{ reuse|owner_name }}
-            </a>
-            <span class="date">{{ reuse.created_at|dateformat('long') }}</span>
-        </div>
-    </footer>
 
-    <a class="rollover fade in" href="{{url_for('reuses.show', reuse=reuse)}}"
-        title="{{ reuse.title }}">
-        {{ reuse.description|mdstrip(180) }}
-    </a>
-
-    <footer class="rollover fade in">
+    {% if 'footer' in features or 'no-footer' not in features %}
+    <footer class="card__footer">
         <ul>
-            <li>
-                <a class="btn btn-xs" v-tooltip title="{{ _('Type') }}">
-                    <span class="fa fa-file fa-fw"></span>
-                    {{ reuse.type_label }}
-                </a>
+            <li v-tooltip title="{{ _('Type') }}">
+                <span class="fa fa-file fa-fw"></span>
+                {{ reuse.type_label }}
             </li>
-            <li>
-                <a class="btn btn-xs" v-tooltip title="{{ _('Number of datasets used') }}">
-                    <span class="fa fa-cubes fa-fw"></span>
-                    {{ reuse.datasets|length or 0 }}
-                </a>
+            <li v-tooltip title="{{ _('Number of datasets used') }}">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ reuse.datasets|length or 0 }}
             </li>
 
-            <li>
-                <a class="btn btn-xs" v-tooltip title="{{ _('Stars') }}">
-                    <span class="fa fa-star fa-fw"></span>
-                    {{ reuse.metrics.followers or 0 }}
-                </a>
+            <li v-tooltip title="{{ _('Stars') }}">
+                <span class="fa fa-star fa-fw"></span>
+                {{ reuse.metrics.followers or 0 }}
             </li>
+
+            <li v-tooltip title="{{ _('Published on %(date)s',
+                date=reuse.created_at|dateformat(format='long')) }}">
+                <span class="fa fa-calendar fa-fw"></span>
+                {{ reuse.created_at|dateformat(format='YYYY') }}
+            </li>
+
+            {% if 'preview' in features %}
+            <li v-tooltip title="{{ _('Created by %(user)s', user=owner_name(reuse)) }}">
+                <span class="fa fa-user fa-fw"></span>
+                {{ _('%(user)s', user=owner_name_acronym(reuse)) }}
+            </li>
+            {% endif %}
         </ul>
     </footer>
+    {% endif %}
 </div>
 {% endcache %}

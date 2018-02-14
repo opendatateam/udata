@@ -7,7 +7,7 @@
 </div>
 <div class="row" v-if="$root.me.organizations && $root.me.organizations.length">
     <p class="col-xs-12">{{ _('Publish as an organization') }}</p>
-    <div v-for="organization in $root.me.organizations" class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+    <div v-for="organization in $root.me.organizations" class="col-xs-12 col-sm-6 col-lg-4">
         <org-card :organization="organization" :selected="selected == organization"></org-card>
     </div>
 </div>
@@ -24,7 +24,7 @@
 </div>
 <div class="row">
     <p class="col-xs-12">{{ _('Publish in your own name') }}</p>
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+    <div class="col-xs-12 col-sm-6 col-lg-4">
         <user-card :user="$root.me" :selected="!selected"></user-card>
     </div>
 </div>
@@ -32,7 +32,7 @@
     <p class="col-xs-12 text-center lead">
        {{ _('As administrator you can choose any organization to publish') }}
     </p>
-    <org-filter cardclass="col-xs-12 col-sm-6 col-md-4 col-lg-3" :selected="selected"></org-filter>
+    <org-filter cardclass="col-xs-12 col-sm-6 col-lg-4" :selected="selected"></org-filter>
 </div>
 </div>
 </template>

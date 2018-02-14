@@ -4,45 +4,39 @@
     <a class="card-logo">
         <img :alt="organization.name" :src="logo">
     </a>
+
     <img v-if="organization.public_service"
         :src="certified_stamp" alt="certified" class="certified"
         v-popover="_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)"
         :popover-title="_('Certified public service')"
         popover-trigger="hover"/>
+
     <div class="card-body">
         <h4>
-            <a :title="organization.name">
-                {{ organization.name | truncate 120 }}
+            <a :href="organization.page" :title="organization.name">
+                {{ organization.name }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{{ organization.description | markdown 180 }}}</div>
     </div>
-    <footer>
+
+    <footer v-if="organization.metrics" class="card__footer">
         <ul>
-            <li v-if="organization.metrics">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Datasets')">
-                    <span class="fa fa-cubes fa-fw"></span>
-                    {{ organization.metrics.datasets || 0 }}
-                </a>
+            <li v-tooltip :title="_('Datasets')">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ organization.metrics.datasets || 0 }}
             </li>
-            <li v-if="organization.metrics">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Reuses')">
-                    <span class="fa fa-retweet fa-fw"></span>
-                    {{ organization.metrics.reuses || 0 }}
-                </a>
+            <li v-tooltip :title="_('Reuses')">
+                <span class="fa fa-retweet fa-fw"></span>
+                {{ organization.metrics.reuses || 0 }}
             </li>
-            <li v-if="organization.metrics">
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top" :title="_('Followers')">
-                    <span class="fa fa-star fa-fw"></span>
-                    {{ organization.metrics.followers || 0 }}
-                </a>
+            <li v-tooltip :title="_('Followers')">
+                <span class="fa fa-star fa-fw"></span>
+                {{ organization.metrics.followers || 0 }}
             </li>
         </ul>
     </footer>
-
-    <a v-if="organization.description" class="rollover fade in"
-        :title="organization.name">
-        {{{ organization.description | markdown 180 }}}
-    </a>
 </div>
 </template>
 

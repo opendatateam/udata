@@ -118,16 +118,17 @@
 <div class="section">
   <div class="container">
     <div class="row">
-      <div class="col-lg-12 text-center">
-        <h2>{{ _('Last datasets') }}</h2>
-      </div>
-      <ul class="card-list">
-          {% for dataset in recent_datasets[:9] %}
-          <li class="col-md-4 col-sm-6">
-            {% include theme('dataset/card.html') %}
-          </li>
-          {% endfor %}
-      </ul>
+        <div class="col-xs-12">
+            <h2>{{ _('Last datasets') }}</h2>
+
+            <ul class="card-list card-list--columned">
+                {% for dataset in recent_datasets[:9] %}
+                <li class="col-sm-4 col-xs-12">
+                    {% include theme('dataset/card.html') %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div><!-- /.row -->
   </div><!-- /.container -->
 </div><!-- /.section -->
@@ -135,14 +136,18 @@
 <div class="section-colored">
   <div class="container">
     <div class="row">
-      <div class="col-lg-12 text-center">
+      <div class="col-xs-12">
         <h2>{{ _('Last reuses') }}</h2>
-      </div>
-      <ul class="card-list">
-        {% for reuse in recent_reuses[:9] %}
-        <li class="col-md-4 col-sm-6">{% include theme('reuse/card.html') %}</li>
+
+        <ul class="card-list card-list--columned">
+        {% for reuse in recent_reuses[:5] %}
+            {% set features = ['preview'] %}
+            <li class="col-md-4 col-sm-6">
+                {% include theme('reuse/card.html') %}
+            </li>
         {% endfor %}
-      </ul>
+        </ul>
+      </div>
     </div><!-- /.row -->
   </div><!-- /.container -->
 </div><!-- /.section -->

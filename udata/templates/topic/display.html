@@ -48,26 +48,36 @@
                 </div>
             </div>
             {# end carousel #}
-
-            {# Last reuses #}
-            <div class="col-md-4 single-column">
-                <ul class="card-list">
-                    {% for reuse in topic.reuses %}
-                    <li class="col-xs-12">
-                        {% include theme('reuse/card.html') %}
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {# End last reuses #}
-
-
         </div>
         {# end first row #}
     </div>
 
 </section>
 {# End Carousels section #}
+
+
+<section class="default">
+    <div class="container">
+
+        <div class="row">
+            {# Last reuses #}
+            <div class="col-xs-12">
+
+                <h3>{{ _('Latest reuses') }}</h3>
+
+                <ul class="card-list row card-list--columned">
+                    {% for reuse in topic.reuses %}
+                    {% set features = ['no-footer'] %}
+                    <li class="col-xs-12 col-sm-4">
+                        {% include theme('reuse/card.html') %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {# End last reuses #}
+        </div>
+    </div>
+</section>
 
 {# Datasets section #}
 {% set dataset_tabs = (
@@ -78,7 +88,7 @@
 <section class="default spaced">
       <div class="container">
             {# Dataset tabs #}
-            <div class="row">
+            <div class="row first-row">
                 <div class="col-xs-12">
                     <ul class="nav nav-pills" data-tabs="tabs">
                         {% for tab_id, label, _, _ in dataset_tabs %}
@@ -95,7 +105,7 @@
 
                     {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
                     <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-                        <ul class="card-list">
+                        <ul class="card-list card-list--columned">
 
                             {% for dataset in datasets %}
                             <li class="col-md-4 col-sm-6">

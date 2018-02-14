@@ -10,37 +10,26 @@
                 {{ user | display }}
             </a>
         </h4>
+
+        <div class="clamp-3">{{{ user.about | markdown 180 }}}</div>
     </div>
-    <footer v-if="user.metrics">
+
+    <footer v-if="user.metrics" class="card__footer">
         <ul>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    :title="_('Datasets')">
-                    <span class="fa fa-cubes fa-fw"></span>
-                    {{ user.metrics.datasets || 0 }}
-                </a>
+            <li v-tooltip :title="_('Datasets')">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ user.metrics.datasets || 0 }}
             </li>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    :title="_('Reuses')">
-                    <span class="fa fa-retweet fa-fw"></span>
-                    {{ user.metrics.reuses || 0 }}
-                </a>
+            <li v-tooltip :title="_('Reuses')">
+                <span class="fa fa-retweet fa-fw"></span>
+                {{ user.metrics.reuses || 0 }}
             </li>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    :title="_('Followers')">
-                    <span class="fa fa-star fa-fw"></span>
-                    {{ user.metrics.followers || 0 }}
-                </a>
+            <li v-tooltip :title="_('Followers')">
+                <span class="fa fa-star fa-fw"></span>
+                {{ user.metrics.followers || 0 }}
             </li>
         </ul>
     </footer>
-
-    <a v-if="user.about" class="rollover fade in"
-        :title="user | display">
-        {{{ user.about | markdown 180 }}}
-    </a>
 </div>
 </template>
 

@@ -209,6 +209,14 @@ def owner_name(obj):
         return obj.owner.fullname
     return ''
 
+@front.app_template_global()
+@front.app_template_filter()
+def owner_name_acronym(obj):
+    if hasattr(obj, 'organization') and obj.organization:
+        return obj.organization.acronym if obj.organization.acronym  else obj.organization.name
+    elif hasattr(obj, 'owner') and obj.owner:
+        return obj.owner.fullname
+    return ''
 
 @front.app_template_global()
 @front.app_template_filter()
