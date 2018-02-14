@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-13 10:30-0500\n"
+"PO-Revision-Date: 2018-02-14 06:51-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -23,23 +23,23 @@ msgstr "Bem-vindo"
 
 #: udata/settings.py:111
 msgid "Please confirm your email"
-msgstr ""
+msgstr "Por favor confirme o seu email"
 
 #: udata/settings.py:112
 msgid "Login instructions"
-msgstr ""
+msgstr "Instruções de login"
 
 #: udata/settings.py:113
 msgid "Your password has been reset"
-msgstr ""
+msgstr "A sua password for redefinida"
 
 #: udata/settings.py:114
 msgid "Your password has been changed"
-msgstr ""
+msgstr "A sua palavra-passe foi alterada"
 
 #: udata/settings.py:116
 msgid "Password reset instructions"
-msgstr ""
+msgstr "Instruções para recuperação da palavra-passe"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
@@ -900,11 +900,11 @@ msgstr "Número máximo de conjunto de dados da organização"
 
 #: udata/core/site/views.py:125
 msgid "Data"
-msgstr ""
+msgstr "Dados"
 
 #: udata/core/site/views.py:146
 msgid "Community"
-msgstr ""
+msgstr "Comunidade"
 
 #: udata/core/spatial/api.py:59
 msgid "payloadname"
@@ -912,55 +912,55 @@ msgstr ""
 
 #: udata/core/spatial/forms.py:51
 msgid "Unknown geoid(s): {identifiers}"
-msgstr ""
+msgstr "Identificador(es) desconhecido(s): {identifiers}"
 
 #: udata/core/spatial/forms.py:70
 msgid "Not a valid GeoJSON"
-msgstr ""
+msgstr "Não é um GeoJSON válido"
 
 #: udata/core/spatial/forms.py:85
 msgid "A list of covered territories"
-msgstr ""
+msgstr "Uma lista de territórios cobertos"
 
 #: udata/core/spatial/forms.py:87 udata/templates/dataset/search-labels.html:21
 msgid "Spatial granularity"
-msgstr ""
+msgstr "Granularidade espacial"
 
 #: udata/core/spatial/forms.py:88
 msgid "The size of the data increment"
-msgstr ""
+msgstr "O tamanho do incremento de dados"
 
 #: udata/core/spatial/models.py:25
 msgid "POI"
-msgstr ""
+msgstr "POI"
 
 #: udata/core/spatial/models.py:26
 msgid "Other"
-msgstr ""
+msgstr "Outro"
 
 #: udata/core/spatial/translations.py:8
 msgid "French region"
-msgstr ""
+msgstr "Região francesa"
 
 #: udata/core/spatial/translations.py:9
 msgid "French intermunicipal (EPCI)"
-msgstr ""
+msgstr "Intermunicipal francês (EPCI)"
 
 #: udata/core/spatial/translations.py:10
 msgid "French county"
-msgstr ""
+msgstr "Condado francês"
 
 #: udata/core/spatial/translations.py:11
 msgid "French district"
-msgstr ""
+msgstr "Bairro francês"
 
 #: udata/core/spatial/translations.py:12
 msgid "French town"
-msgstr ""
+msgstr "Cidade francesa"
 
 #: udata/core/spatial/translations.py:13
 msgid "French canton"
-msgstr ""
+msgstr "Cantão francês"
 
 #: udata/core/spatial/translations.py:14
 msgid "Iris (Insee districts)"
@@ -968,111 +968,111 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:15
 msgid "Country"
-msgstr ""
+msgstr "País"
 
 #: udata/core/spatial/translations.py:16
 msgid "World"
-msgstr ""
+msgstr "Mundo"
 
 #: udata/core/spatial/translations.py:17
 msgid "Country group"
-msgstr ""
+msgstr "Grupo de países"
 
 #: udata/core/spatial/translations.py:18
 msgid "Country subset"
-msgstr ""
+msgstr "Subconjunto de países"
 
 #: udata/core/spatial/translations.py:19
 msgid "European Union"
-msgstr ""
+msgstr "União Europeia"
 
 #: udata/core/spatial/translations.py:20
 msgid "Metropolitan France"
-msgstr ""
+msgstr "França metropolitana"
 
 #: udata/core/spatial/translations.py:21
 msgid "Overseas France"
-msgstr ""
+msgstr "França no exterior"
 
 #: udata/core/topic/forms.py:27
 msgid "Featured"
-msgstr ""
+msgstr "Em Destaque"
 
 #: udata/core/user/activities.py:36 udata/core/user/activities.py:68
 msgid "followed an organization"
-msgstr ""
+msgstr "seguiu uma organização"
 
 #: udata/core/user/activities.py:41
 msgid "followed a user"
-msgstr ""
+msgstr "seguiu um utilizador"
 
 #: udata/core/user/activities.py:48
 msgid "discussed a dataset"
-msgstr ""
+msgstr "discutiu um conjunto de dados"
 
 #: udata/core/user/activities.py:53
 msgid "discussed a reuse"
-msgstr ""
+msgstr "discutiu uma reutilização"
 
 #: udata/core/user/activities.py:58
 msgid "followed a dataset"
-msgstr ""
+msgstr "seguiu um conjunto de dados"
 
 #: udata/core/user/activities.py:63
 msgid "followed a reuse"
-msgstr ""
+msgstr "seguiu uma reutilização"
 
 #: udata/core/user/forms.py:17
 msgid "First name"
-msgstr ""
+msgstr "Nome"
 
 #: udata/core/user/forms.py:18 udata/templates/user/list.html:31
 msgid "Last name"
-msgstr ""
+msgstr "Apelido"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
-msgstr ""
+msgstr "Avatar"
 
 #: udata/core/user/forms.py:21
 msgid "About"
-msgstr ""
+msgstr "Sobre"
 
 #: udata/core/user/forms.py:25
 msgid "Roles"
-msgstr ""
+msgstr "Perfís"
 
 #: udata/core/user/metrics.py:72 udata/templates/user/following.html:7
 msgid "Following"
-msgstr ""
+msgstr "A seguir"
 
 #: udata/core/user/models.py:240 udata/tests/api/test_me_api.py:374
 msgid "Account deletion"
-msgstr ""
+msgstr "Conta eliminada"
 
 #: udata/core/user/permissions.py:8
 msgid "System administrator"
-msgstr ""
+msgstr "Administrator de sistema"
 
 #: udata/core/user/permissions.py:9
 msgid "Site editorialist"
-msgstr ""
+msgstr "Editorialista da página"
 
 #: udata/core/user/permissions.py:10
 msgid "Site moderator"
-msgstr ""
+msgstr "Moderador da página"
 
 #: udata/core/user/tasks.py:15
 msgid "Test mail"
-msgstr ""
+msgstr "Email de teste"
 
 #: udata/forms/fields.py:93
 msgid "The role {role} does not exist"
-msgstr ""
+msgstr "O perfil {role}, não existe"
 
 #: udata/forms/fields.py:110
 msgid "Not a valid UUID"
-msgstr ""
+msgstr "Identificador (UUID) inválido"
 
 #: udata/forms/fields.py:135
 msgid "Invalid URL"
@@ -1479,110 +1479,110 @@ msgstr ""
 
 #: udata/templates/header.html:41
 msgid "Profile"
-msgstr ""
+msgstr "Perfil"
 
 #: udata/templates/header.html:44
 msgid "Change password"
-msgstr ""
+msgstr "Alterar senha"
 
 #: udata/templates/header.html:60
 msgid "Settings"
-msgstr ""
+msgstr "Configurações"
 
 #: udata/templates/header.html:68 udata/templates/header.html:71
 #: udata/templates/territories/territory.html:41
 msgid "Sign In / Register"
-msgstr ""
+msgstr "Entrar / Registar"
 
 #: udata/templates/api/oauth_error.html:13 udata/templates/errors/base.html:18
 #: udata/templates/home.html:4 udata/templates/macros/breadcrumb.html:16
 #: udata/templates/macros/metadata.html:2
 msgid "Home"
-msgstr ""
+msgstr "Início"
 
 #: udata/templates/home.html:5
 #, python-format
 msgid "%(site)s home"
-msgstr ""
+msgstr "%(site)s inicio"
 
 #: udata/templates/home.html:6
 msgid "home"
-msgstr ""
+msgstr "início"
 
 #: udata/templates/home.html:53 udata/templates/topic/display.html:74
 msgid "Featured datasets"
-msgstr ""
+msgstr "Conjuntos de dados em destaque"
 
 #: udata/templates/home.html:78
 msgid "Reuse"
-msgstr ""
+msgstr "Reutilização"
 
 #: udata/templates/metrics.html:4 udata/templates/metrics.html:10
 msgid "Metrics"
-msgstr ""
+msgstr "Métricas"
 
 #: udata/templates/metrics.html:5
 msgid "Site metrics"
-msgstr ""
+msgstr "Métricas da página"
 
 #: udata/templates/metrics.html:6 udata/templates/site/dashboard.html:6
 msgid "metrics"
-msgstr ""
+msgstr "métricas"
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:10
 msgid "Publish a dataset"
-msgstr ""
+msgstr "Publicar um conjunto de dados"
 
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:14
 msgid "Contribute and add a new dataset to this site catalog."
-msgstr ""
+msgstr "Contribuir e adicionar um novo dataset."
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:24
 msgid "Publish a reuse"
-msgstr ""
+msgstr "Publicar uma reutilização"
 
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:28
 msgid "Contribute and add a new reuse to this site catalog."
-msgstr ""
+msgstr "Contribuir e adicionar uma nova reutilização."
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:38
 msgid "Create or find your organization"
-msgstr ""
+msgstr "Criar ou encontrar a sua organização"
 
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:42
 msgid "You can create a new organization or find yours."
-msgstr ""
+msgstr "Você pode criar uma nova organização ou encontrar a sua."
 
 #: udata/templates/raw.html:16
 msgid "Recent datasets"
-msgstr ""
+msgstr "Conjuntos de dados recentes"
 
 #: udata/templates/raw.html:20
 msgid "Recent reuses"
-msgstr ""
+msgstr "Reutilizações recentes"
 
 #: udata/templates/macros/search.html:215 udata/templates/post/subnav.html:13
 #: udata/templates/search.html:8
 msgid "Search"
-msgstr ""
+msgstr "Pesquisar"
 
 #: udata/templates/search.html:9
 #, python-format
 msgid "%(site)s search"
-msgstr ""
+msgstr "%(site)s pesquisa"
 
 #: udata/templates/dataset/list.html:10 udata/templates/organization/list.html:10
 #: udata/templates/reuse/list.html:10 udata/templates/search.html:10
 #: udata/templates/topic/datasets.html:9 udata/templates/topic/reuses.html:9
 #: udata/templates/user/list.html:10
 msgid "search"
-msgstr ""
+msgstr "pesquisar"
 
 #: udata/templates/organization/display.html:48
 #: udata/templates/organization/display_base.html:58 udata/templates/search.html:27
@@ -1590,8 +1590,8 @@ msgstr ""
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d conjunto de dados"
+msgstr[1] "%(num)d conjunto de dados"
 
 #: udata/templates/organization/display.html:52
 #: udata/templates/organization/display_base.html:87 udata/templates/search.html:34
@@ -1599,71 +1599,71 @@ msgstr[1] ""
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
-msgstr[0] ""
+msgstr[0] "%(num)d reutilização"
 msgstr[1] ""
 
 #: udata/templates/search.html:41
 #, python-format
 msgid "%(num)d organization"
 msgid_plural "%(num)d organizations"
-msgstr[0] ""
+msgstr[0] "%(num)d organização"
 msgstr[1] ""
 
 #: udata/templates/search.html:49
 #, python-format
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
-msgstr[0] ""
+msgstr[0] "Território: %(name)s"
 msgstr[1] ""
 
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
 msgid "Tag"
-msgstr ""
+msgstr "Etiqueta"
 
 #: udata/templates/dataset/search-labels.html:12
 #: udata/templates/organization/search-labels.html:3 udata/templates/search.html:59
 msgid "Badge"
-msgstr ""
+msgstr "Emblema"
 
 #: udata/templates/dataset/card.html:45 udata/templates/dataset/list.html:44
 #: udata/templates/organization/card.html:43 udata/templates/reuse/card.html:47
 #: udata/templates/search.html:77 udata/templates/search.html:91
 #: udata/templates/topic/datasets.html:37 udata/templates/user/card.html:36
 msgid "Stars"
-msgstr ""
+msgstr "Favoritos"
 
 #: udata/templates/search.html:90
 msgid "Datasets used"
-msgstr ""
+msgstr "Conjuntos de dados utilizados"
 
 #: udata/templates/dataset/list.html:73 udata/templates/search.html:116
 msgid "No results found, try to be less specific."
-msgstr ""
+msgstr "Nenhum resultado encontrado, tente ser menos específico."
 
 #: udata/templates/search.html:133 udata/templates/search.html:158
 #: udata/templates/search.html:185 udata/templates/topic/browse.html:34
 #: udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
-msgstr ""
+msgstr "Consulte o %(total)s de resultados"
 
 #: udata/templates/search.html:169 udata/templates/search.html:196
 #: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
-msgstr ""
+msgstr "Não foram encontrados resultados"
 
 #: udata/templates/terms.html:4 udata/templates/terms.html:5
 msgid "Terms"
-msgstr ""
+msgstr "Termos de Utilização"
 
 #: udata/templates/terms.html:7
 msgid "terms"
-msgstr ""
+msgstr "termos de utilização"
 
 #: udata/templates/api/admin.html:11
 msgid "Maintainer"
-msgstr ""
+msgstr "Mantido por"
 
 #: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:133
 #: udata/templates/dataset/resource/list-item.html:36
@@ -1673,23 +1673,23 @@ msgstr ""
 #: udata/templates/post/display.html:118 udata/templates/reuse/display.html:109
 #: udata/templates/user/base.html:23
 msgid "Edit"
-msgstr ""
+msgstr "Editar"
 
 #: udata/templates/api/admin.html:34
 msgid "Delete"
-msgstr ""
+msgstr "Eliminar"
 
 #: udata/templates/api/admin.html:42
 msgid "No OAuth clients"
-msgstr ""
+msgstr "Nenhum cliente OAuth"
 
 #: udata/templates/api/admin.html:53
 msgid "Add a client"
-msgstr ""
+msgstr "Adicionar um cliente"
 
 #: udata/templates/api/oauth_authorize.html:4
 msgid "External application authorization"
-msgstr ""
+msgstr "Autorização de aplicação externa"
 
 #: udata/templates/api/oauth_authorize.html:14
 #, python-format
