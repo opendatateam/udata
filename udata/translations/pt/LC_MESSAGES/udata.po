@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 08:12-0500\n"
+"PO-Revision-Date: 2018-02-14 08:21-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2326,7 +2326,7 @@ msgstr[1] ""
 msgid "%(num)d private reuse"
 msgid_plural "%(num)d private reuses"
 msgstr[0] "%(num)d reutilizações privadas"
-msgstr[1] ""
+msgstr[1] "%(num)d reutilizações privadas"
 
 #: udata/templates/organization/display.html:80
 #, python-format
@@ -2364,7 +2364,7 @@ msgstr "Ver as %(nb)s reutilizações"
 msgid "%(num)d member"
 msgid_plural "%(num)d members"
 msgstr[0] "%(num)d membros"
-msgstr[1] ""
+msgstr[1] "%(num)d membros"
 
 #: udata/templates/organization/display.html:170
 msgid "Display all followers"
@@ -2618,49 +2618,49 @@ msgstr "Alterar senha"
 #: udata/templates/security/reset_password.html:13
 #: udata/templates/security/reset_password.html:19
 msgid "Reset Password"
-msgstr ""
+msgstr "Redefinir Senha"
 
 #: udata/templates/security/forgot_password.html:13
 msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr ""
+msgstr "Esqueceu a senha? Introduza o seu endereço de email, e enviaremos intruções para redefinir uma nova."
 
 #: udata/templates/security/login_user.html:14
 msgid "Sign In"
-msgstr ""
+msgstr "Iniciar sessão"
 
 #: udata/templates/security/login_user.html:18
 msgid "Sign in"
-msgstr ""
+msgstr "Iniciar sessão"
 
 #: udata/templates/security/login_user.html:22
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Esqueceu sua senha?"
 
 #: udata/templates/security/login_user.html:24
 msgid "Recover your password"
-msgstr ""
+msgstr "Recuperar senha"
 
 #: udata/templates/security/login_user.html:33
 #: udata/templates/security/register_user.html:30
 msgid "Sign up"
-msgstr ""
+msgstr "Criar conta"
 
 #: udata/templates/security/login_user.html:36
 msgid "Register"
-msgstr ""
+msgstr "Registar"
 
 #: udata/templates/security/login_user.html:40
 msgid "Create an account"
-msgstr ""
+msgstr "Criar uma conta"
 
 #: udata/templates/security/register_user.html:12
 msgid "Sign Up"
-msgstr ""
+msgstr "Criar conta"
 
 #: udata/templates/security/register_user.html:21
 #, python-format
 msgid "I have read and accept <a href=\"%(url)s\"> the terms and conditions of the service.</a>"
-msgstr ""
+msgstr "Li e aceitei <a href=\"%(url)s\"> os termos e condições do serviço.</a>"
 
 #: udata/templates/security/register_user.html:23
 msgid "In particular, I understand that this site\n"
@@ -2670,7 +2670,7 @@ msgstr ""
 
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
-msgstr ""
+msgstr "Painel de controlo"
 
 #: udata/templates/site/dashboard.html:5
 msgid "Site metrics and activity"
@@ -2678,23 +2678,23 @@ msgstr ""
 
 #: udata/templates/site/dashboard.html:6
 msgid "activity"
-msgstr ""
+msgstr "atividade"
 
 #: udata/templates/site/map.html:5 udata/templates/site/map.html:13
 msgid "Coverage map"
-msgstr ""
+msgstr "Mapa de cobertura"
 
 #: udata/templates/site/map.html:6
 msgid "Display datasets on a map"
-msgstr ""
+msgstr "Mostrar os dados num mapa"
 
 #: udata/templates/site/map.html:7
 msgid "coverage"
-msgstr ""
+msgstr "cobertura"
 
 #: udata/templates/site/map.html:7
 msgid "map"
-msgstr ""
+msgstr "mapa"
 
 #: udata/templates/territories/commune.html:5
 #, python-format
@@ -2705,22 +2705,22 @@ msgstr ""
 #: udata/templates/territories/departement.html:12
 #: udata/templates/territories/region.html:12
 msgid "Region:"
-msgstr ""
+msgstr "Região:"
 
 #: udata/templates/territories/commune.html:13
 #: udata/templates/territories/departement.html:13
 msgid "County:"
-msgstr ""
+msgstr "Concelho:"
 
 #: udata/templates/territories/commune.html:14
 msgid "Town:"
-msgstr ""
+msgstr "Cidade:"
 
 #: udata/templates/territories/commune.html:22
 #: udata/templates/territories/departement.html:21
 #: udata/templates/territories/region.html:20
 msgid "Source:"
-msgstr ""
+msgstr "Fonte:"
 
 #: udata/templates/territories/commune.html:29
 #: udata/templates/territories/departement.html:28
@@ -2745,13 +2745,13 @@ msgstr ""
 #: udata/templates/territories/region.html:44
 #: udata/templates/territories/search-result.html:15
 msgid "Postal code:"
-msgstr ""
+msgstr "Código postal:"
 
 #: udata/templates/territories/commune.html:53
 #: udata/templates/territories/departement.html:45
 #: udata/templates/territories/region.html:51
 msgid "Population:"
-msgstr ""
+msgstr "População:"
 
 #: udata/templates/territories/departement.html:5
 #, python-format
@@ -2764,7 +2764,7 @@ msgstr ""
 
 #: udata/templates/territories/home.html:4 udata/templates/territories/home.html:5
 msgid "French regions"
-msgstr ""
+msgstr "Regiões"
 
 #: udata/templates/territories/home.html:13
 msgid "Click to navigate to the given region:"
@@ -2772,7 +2772,7 @@ msgstr ""
 
 #: udata/templates/territories/home.html:15
 msgid "Or sorted alphabetically:"
-msgstr ""
+msgstr "Ordenar alfabeticamente:"
 
 #: udata/templates/territories/region.html:5
 #, python-format
@@ -2781,19 +2781,19 @@ msgstr ""
 
 #: udata/templates/territories/region.html:57
 msgid "Previously:"
-msgstr ""
+msgstr "Anteriormente:"
 
 #: udata/templates/territories/region.html:64
 msgid "Counties:"
-msgstr ""
+msgstr "Condados:"
 
 #: udata/templates/territories/search-result.html:22
 msgid "Administrative level"
-msgstr ""
+msgstr "Nivel administrativo"
 
 #: udata/templates/territories/search-result.html:30
 msgid "Population"
-msgstr ""
+msgstr "População"
 
 #: udata/templates/territories/territory.html:17
 msgid "This territory has been replaced by:"
@@ -2801,7 +2801,7 @@ msgstr ""
 
 #: udata/templates/territories/territory.html:19
 msgid "since"
-msgstr ""
+msgstr "desde"
 
 #: udata/templates/territories/territory.html:33
 msgid "Some of your datasets have an exact match!"
@@ -2826,7 +2826,7 @@ msgstr ""
 
 #: udata/templates/territories/territory.html:43
 msgid "Log in"
-msgstr ""
+msgstr "Iniciar sessão"
 
 #: udata/templates/territories/territory.html:44
 msgid "and create resources for that territory."
@@ -2845,23 +2845,23 @@ msgstr ""
 #: udata/templates/topic/datasets.html:9 udata/templates/topic/display_base.html:7
 #: udata/templates/topic/reuses.html:9
 msgid "topic"
-msgstr ""
+msgstr "tópico"
 
 #: udata/templates/topic/display.html:5
 msgid "Topics"
-msgstr ""
+msgstr "Tópicos"
 
 #: udata/templates/topic/display.html:17
 msgid "Best reuse cases"
-msgstr ""
+msgstr "Reutilizações em destaque"
 
 #: udata/templates/topic/display.html:75
 msgid "Latest datasets"
-msgstr ""
+msgstr "Conjuntos de dados mais recentes"
 
 #: udata/templates/topic/display.html:111
 msgid "See more"
-msgstr ""
+msgstr "Ver mais"
 
 #: udata/templates/topic/display_base.html:23
 msgid "Related tags"
