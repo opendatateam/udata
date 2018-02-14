@@ -232,6 +232,23 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
+    @pytest.mark.oauth(internal=True)
+    def test_authorization_redirects_for_internal_clients(self, client, oauth):
+        client.login()
+
+        response = client.get(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            redirect_uri=oauth.default_redirect_uri
+        ))
+
+        assert_status(response, 302)
+        uri, params = response.location.split('?')
+
+        assert uri == oauth.default_redirect_uri
+        assert 'code' in parse_qs(params)
+
     @pytest.mark.oauth(type='confidential')
     def test_refresh_token(self, client, oauth):
         user = UserFactory()

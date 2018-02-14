@@ -96,6 +96,8 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     redirect_uris = db.ListField(db.StringField())
     scopes = db.ListField(db.StringField(), default=SCOPES.keys())
 
+    internal = db.BooleanField(default=False)
+
     meta = {
         'collection': 'oauth2_client'
     }
@@ -212,11 +214,12 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def create_authorization_code(self, client, grant_user, request):
         code = generate_token(48)
         expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
+        scopes = request.scope.split(' ') if request.scope else client.scopes
         OAuth2Grant.objects.create(
             code=code,
             client=client,
             redirect_uri=request.redirect_uri,
-            scopes=request.scope.split(' '),
+            scopes=scopes,
             user=ObjectId(grant_user.id),
             expires=expires,
         )
@@ -265,6 +268,9 @@ def access_token():
 def authorize(*args, **kwargs):
     if request.method == 'GET':
         grant = oauth.validate_authorization_request()
+        # Bypass authorization screen for internal clients
+        if grant.client.internal:
+            return oauth.create_authorization_response(current_user)
         return theme.render('api/oauth_authorize.html', grant=grant)
     elif request.method == 'POST':
         accept = 'accept' in request.form
