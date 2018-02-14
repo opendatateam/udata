@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 08:31-0500\n"
+"PO-Revision-Date: 2018-02-14 08:42-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1076,16 +1076,16 @@ msgstr "Identificador (UUID) inválido"
 
 #: udata/forms/fields.py:135
 msgid "Invalid URL"
-msgstr ""
+msgstr "URL inválido"
 
 #: udata/forms/fields.py:330
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
-msgstr ""
+msgstr "A tag \"%(tag)s\" deve ter entre %(min)d e %(max)d caracteres."
 
 #: udata/forms/fields.py:370 udata/forms/fields.py:394
 msgid "{0} does not exists"
-msgstr ""
+msgstr "{0} não existe"
 
 #: udata/forms/fields.py:383
 msgid "Expect both class and identifier"
@@ -1372,7 +1372,7 @@ msgstr ""
 
 #: udata/templates/apidoc.html:260
 msgid "Modifying and deleting data"
-msgstr ""
+msgstr "Modificar e apagar dados"
 
 #: udata/templates/apidoc.html:262
 msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
@@ -1421,20 +1421,20 @@ msgstr ""
 
 #: udata/templates/apidoc.html:369
 msgid "Reference"
-msgstr ""
+msgstr "Referência"
 
 #: udata/templates/embed-dataset.html:169
 msgid "Download from "
-msgstr ""
+msgstr "Descarregar de "
 
 #: udata/templates/dataset/display.html:174 udata/templates/embed-dataset.html:177
 #: udata/templates/reuse/display.html:131
 msgid "Producer"
-msgstr ""
+msgstr "Produtor"
 
 #: udata/templates/embed-dataset.html:183
 msgid "Uploader"
-msgstr ""
+msgstr "Carregador"
 
 #: udata/templates/embed-dataset.html:205
 msgid "Add to your own website"
@@ -1442,15 +1442,15 @@ msgstr ""
 
 #: udata/templates/embed-dataset.html:206
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 #: udata/templates/embed-dataset.html:206
 msgid "Embed"
-msgstr ""
+msgstr "Incorporar"
 
 #: udata/templates/embed-dataset.html:213
 msgid "to"
-msgstr ""
+msgstr "a"
 
 #: udata/templates/embed-dataset.html:221
 msgid "Granularity"
@@ -1458,24 +1458,24 @@ msgstr ""
 
 #: udata/templates/embed-dataset.html:225
 msgid "Territory"
-msgstr ""
+msgstr "Território"
 
 #: udata/templates/dataset/card.html:85 udata/templates/dataset/display.html:222
 #: udata/templates/dataset/search-result.html:42
 #: udata/templates/embed-dataset.html:232
 msgid "Frequency"
-msgstr ""
+msgstr "Frequência"
 
 #: udata/templates/embed-dataset.html:237
 #: udata/templates/territories/commune.html:23
 #: udata/templates/territories/departement.html:22
 #: udata/templates/territories/region.html:21
 msgid "License:"
-msgstr ""
+msgstr "Licença:"
 
 #: udata/templates/header.html:29
 msgid "Contribute"
-msgstr ""
+msgstr "Contribuir"
 
 #: udata/templates/header.html:41
 msgid "Profile"
@@ -1933,15 +1933,15 @@ msgstr[1] ""
 
 #: udata/templates/discussion/item.html:28
 msgid "Deleted message"
-msgstr ""
+msgstr "Mensagem eliminada"
 
 #: udata/templates/discussion/item.html:38
 msgid "Add a comment"
-msgstr ""
+msgstr "Adicionar comentário"
 
 #: udata/templates/discussion/item.html:52
 msgid "Commenting on this thread"
-msgstr ""
+msgstr "A comentar neste tópico"
 
 #: udata/templates/discussion/item.html:55
 msgid "You're about to answer to this particular thread about:"
@@ -1949,15 +1949,15 @@ msgstr ""
 
 #: udata/templates/discussion/item.html:64
 msgid "Submit your comment"
-msgstr ""
+msgstr "Submeter comentário"
 
 #: udata/templates/discussion/threads.html:20
 msgid "Start a new discussion"
-msgstr ""
+msgstr "Começar uma nova discussão"
 
 #: udata/templates/discussion/threads.html:32
 msgid "Starting a new discussion thread"
-msgstr ""
+msgstr "A começar um novo tópico de discussão"
 
 #: udata/templates/discussion/threads.html:35
 msgid "You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above."
@@ -2119,11 +2119,11 @@ msgstr "%(user)s identificou sua organização \"%(name)s\" como serviço públi
 #: udata/templates/mail/base.html:14
 #, python-format
 msgid "Hi %(user)s"
-msgstr ""
+msgstr "Olá %(user)s,"
 
 #: udata/templates/mail/base.html:18
 msgid "See you soon on the platform"
-msgstr ""
+msgstr "Esperamos a sua visita na plataforma"
 
 #: udata/templates/mail/base.html:19
 #, python-format
@@ -2373,7 +2373,7 @@ msgstr "Mostrar todos os seguidores"
 #: udata/templates/organization/display.html:190
 #: udata/templates/site/dashboard.html:51
 msgid "Community activity"
-msgstr ""
+msgstr "Actividade da comunidade"
 
 #: udata/templates/organization/display_base.html:46
 msgid "See all organizations with that badge."
@@ -2442,11 +2442,11 @@ msgstr "organizações"
 
 #: udata/templates/organization/search-panel.html:7
 msgid "Reappropriations"
-msgstr ""
+msgstr "Reapropriações"
 
 #: udata/templates/organization/search-result.html:30
 msgid "Number of reuses by the organization"
-msgstr ""
+msgstr "Numero de reutilizações pela organização"
 
 #: udata/templates/organization/search-result.html:39
 msgid "Number of reappropriations by the community"
@@ -2474,14 +2474,14 @@ msgstr[1] "%(num)s estrelas"
 
 #: udata/templates/organization/search-result.html:57
 msgid "Number of followers"
-msgstr ""
+msgstr "Numero de seguidores"
 
 #: udata/templates/organization/search-result.html:59
 #, python-format
 msgid "%(num)s follower"
 msgid_plural "%(num)s followers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)s seguidor(es)"
+msgstr[1] "%(num)s seguidor(es)"
 
 #: udata/templates/organization/search-result.html:65
 msgid "Number of members"
@@ -2510,16 +2510,16 @@ msgstr "Notícias"
 
 #: udata/templates/post/display.html:32 udata/templates/post/display.html:86
 msgid "Photo credit"
-msgstr ""
+msgstr "Créditos da fotografia"
 
 #: udata/templates/post/display.html:56
 #, python-format
 msgid "Published on %(date)s"
-msgstr ""
+msgstr "Publicado em %(date)s"
 
 #: udata/templates/post/display.html:62
 msgid "This post is private and will not be visible by other users"
-msgstr ""
+msgstr "Esta publicação é privada e não será vista por outros utilizadores"
 
 #: udata/templates/post/display.html:68
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
@@ -2539,7 +2539,7 @@ msgstr "Próxima publicação"
 
 #: udata/templates/post/display.html:211
 msgid "Comments about this post."
-msgstr ""
+msgstr "Comentários sobre esta publicação."
 
 #: udata/templates/post/list.html:5 udata/templates/post/list.html:15
 msgid "Posts"
@@ -2548,7 +2548,7 @@ msgstr "Publicações"
 #: udata/templates/post/list.html:6
 #, python-format
 msgid "%(site)s posts"
-msgstr ""
+msgstr "%(site)s publicações"
 
 #: udata/templates/post/list.html:7
 msgid "posts"
@@ -2569,11 +2569,11 @@ msgstr "Número de conjuntos de dados utilizados"
 #: udata/templates/reuse/display.html:48
 #, python-format
 msgid "Published on %(date)s by %(user)s"
-msgstr ""
+msgstr "Publicado em %(date)s por %(user)s"
 
 #: udata/templates/reuse/display.html:58
 msgid "This reuse is private and will not be visible by other users"
-msgstr ""
+msgstr "Esta reutilização é privada e não será vista por outros utilizadores"
 
 #: udata/templates/reuse/display.html:65
 msgid "This reuse has been deleted. This will be permanent in the next 24 hours"
@@ -2589,7 +2589,7 @@ msgstr "mais"
 
 #: udata/templates/reuse/display.html:166
 msgid "I'll be informed about this user news"
-msgstr ""
+msgstr "Serei informado sobre noticias deste utilizador"
 
 #: udata/templates/reuse/display.html:220
 msgid "No followers yet"
@@ -2598,7 +2598,7 @@ msgstr "Sem seguidores"
 #: udata/templates/reuse/list.html:9
 #, python-format
 msgid "%(site)s reuse search"
-msgstr ""
+msgstr "%(site)s pesquisa de reutilizações"
 
 #: udata/templates/reuse/list.html:10 udata/templates/topic/reuses.html:9
 msgid "reuses"
@@ -2674,7 +2674,7 @@ msgstr "Painel de controlo"
 
 #: udata/templates/site/dashboard.html:5
 msgid "Site metrics and activity"
-msgstr ""
+msgstr "Métricas e actividade na página"
 
 #: udata/templates/site/dashboard.html:6
 msgid "activity"
