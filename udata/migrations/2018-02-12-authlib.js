@@ -7,20 +7,14 @@ const TOKEN_EXPIRATION = 30 * 24 * 60 * 60;  // 30 days in seconds
 
 var nbClients = 0;
 db.oauth2_client.find({}).forEach(client => {
-    client.scope = client.default_scopes || 'default';
+    client.scopes = client.default_scopes;
     client.confidential = client.type === 'confidential';
     delete client.default_scopes;
     delete client.grant_type;
     delete client.profile;
-    delete clients.type;
+    delete client.type;
     nbClients++;
 })
-
-// const result = db.oauth2_client.update(
-//     {},
-//     {$rename: {'default_scopes': 'scopes'}, $unset: {'grant_type': '', 'profile': ''}},
-//     {multi: true}
-// );
 print(`Updated ${nbClients} OAuth2 clients`);
 
 var nbTokens = 0
@@ -31,5 +25,4 @@ db.oauth2_token.find().forEach(token => {
     db.oauth2_token.save(token);
     nbTokens++;
 });
-
 print(`Updated ${nbTokens} OAuth2 token(s)`);
