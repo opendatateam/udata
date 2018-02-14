@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 06:51-0500\n"
+"PO-Revision-Date: 2018-02-14 07:42-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1694,7 +1694,7 @@ msgstr "Autorização de aplicação externa"
 #: udata/templates/api/oauth_authorize.html:14
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
-msgstr ""
+msgstr "%(app)s deseja acessar sua conta no %(site)s."
 
 #: udata/templates/api/oauth_authorize.html:26
 #: udata/templates/dataset/display.html:293
@@ -1706,31 +1706,31 @@ msgstr ""
 #: udata/templates/mail/new_issue.html:25
 #: udata/templates/mail/new_issue_comment.html:26
 msgid "Details"
-msgstr ""
+msgstr "Detalhes"
 
 #: udata/templates/api/oauth_authorize.html:36
 msgid "Access your profile"
-msgstr ""
+msgstr "Aceder ao seu perfil"
 
 #: udata/templates/api/oauth_authorize.html:37
 msgid "Read your profile, the orgnization you belong to, your publications"
-msgstr ""
+msgstr "Ler o seu perfil, a organização a que você pertence, as suas publicações"
 
 #: udata/templates/api/oauth_authorize.html:45
 msgid "Publish data"
-msgstr ""
+msgstr "Publicar dados"
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr ""
+msgstr "Publicar dados, reutilizações, seguir ou deixar de seguir"
 
 #: udata/templates/api/oauth_authorize.html:56
 msgid "Accept"
-msgstr ""
+msgstr "Aceitar"
 
 #: udata/templates/api/oauth_authorize.html:58
 msgid "Refuse"
-msgstr ""
+msgstr "Recusar"
 
 #: udata/templates/api/oauth_error.html:8
 msgid "OAuth Authentication Error"
@@ -1965,7 +1965,7 @@ msgstr ""
 
 #: udata/templates/discussion/threads.html:49
 msgid "Start a discussion"
-msgstr ""
+msgstr "Começar uma nova discussão"
 
 #: udata/templates/errors/400.html:3
 msgid "Bad request"
