@@ -54,7 +54,7 @@
     'tags': config.MD_ALLOWED_TAGS,
     'attributes': config.MD_ALLOWED_ATTRIBUTES,
     'styles': config.MD_ALLOWED_STYLES,
-}|tojson }}" />
+}|tojson|urlencode }}" />
 
 {% if json_ld %}
 <script id="json_ld" type="application/ld+json">{{ json_ld|safe }}</script>
