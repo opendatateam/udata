@@ -301,6 +301,55 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
+    @pytest.mark.parametrize('token_type', ['access_token', 'refresh_token'])
+    def test_revoke_token(self, client, oauth, token_type):
+        user = UserFactory()
+        token = OAuth2Token.objects.create(
+            client=oauth,
+            user=user,
+            access_token='access-token',
+            refresh_token='refresh-token',
+        )
+        response = client.post(url_for('oauth.revoke_token'), {
+            'token': getattr(token, token_type),
+        }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+    @pytest.mark.parametrize('token_type', ['access_token', 'refresh_token'])
+    def test_revoke_token_with_hint(self, client, oauth, token_type):
+        user = UserFactory()
+        token = OAuth2Token.objects.create(
+            client=oauth,
+            user=user,
+            access_token='access-token',
+            refresh_token='refresh-token',
+        )
+        response = client.post(url_for('oauth.revoke_token'), {
+            'token': getattr(token, token_type),
+            'token_type_hint': token_type
+        }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+    def test_revoke_token_with_bad_hint(self, client, oauth):
+        user = UserFactory()
+        token = OAuth2Token.objects.create(
+            client=oauth,
+            user=user,
+            access_token='access-token',
+            refresh_token='refresh-token',
+        )
+        response = client.post(url_for('oauth.revoke_token'), {
+            'token': token.access_token,
+            'token_type_hint': 'refresh_token',
+        }, headers=basic_header(oauth))
+
+        assert400(response)
+        assert OAuth2Token.objects(pk=token.pk).first() == token
+
     def test_value_error(self, api):
         @ns.route('/exception', endpoint='exception')
         class ExceptionAPI(API):

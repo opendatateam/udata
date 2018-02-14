@@ -25,6 +25,7 @@ from authlib.flask.oauth2 import (
     AuthorizationServer, ResourceProtector, current_token
 )
 from authlib.specs.rfc6749 import grants, ClientMixin
+from authlib.specs.rfc7009 import RevocationEndpoint
 from flask import abort, request
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
@@ -270,17 +271,36 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         authenticated_token.update(**token)
 
 
+class RevokeToken(RevocationEndpoint):
+    def query_token(self, token, token_type_hint, client):
+        qs = OAuth2Token.objects(client=client)
+        if token_type_hint:
+            qs = qs(**{token_type_hint: token})
+        else:
+            qs = qs(db.Q(access_token=token) | db.Q(refresh_token=token))
+        return qs.first()
+
+    def invalidate_token(self, token):
+        token.delete()
+
+
 oauth.register_grant_endpoint(AuthorizationCodeGrant)
 oauth.register_grant_endpoint(ClientCredentialsGrant)
 oauth.register_grant_endpoint(PasswordGrant)
 oauth.register_grant_endpoint(ImplicitGrant)
 oauth.register_grant_endpoint(RefreshTokenGrant)
+oauth.register_revoke_token_endpoint(RevokeToken)
 
 
 @blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')
 @csrf.exempt
 def access_token():
     return oauth.create_token_response()
+
+
+@blueprint.route('/revoke', methods=['POST'], localize=False)
+def revoke_token():
+    return oauth.create_revocation_response()
 
 
 @blueprint.route('/authorize', methods=['GET', 'POST'])
