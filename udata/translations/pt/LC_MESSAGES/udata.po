@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 07:51-0500\n"
+"PO-Revision-Date: 2018-02-14 08:01-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1756,7 +1756,7 @@ msgstr ""
 
 #: udata/templates/dataset/display.html:60
 msgid "See all datasets with that badge."
-msgstr ""
+msgstr "Ver todos os conjuntos de dados com esse emblema."
 
 #: udata/templates/dataset/display.html:67
 msgid "This dataset is private and will not be visible by other users"
@@ -1802,7 +1802,7 @@ msgstr ""
 #: udata/templates/organization/search-panel.html:5
 #: udata/templates/reuse/search-panel.html:5
 msgid "Badges"
-msgstr ""
+msgstr "Emblemas"
 
 #: udata/templates/dataset/display.html:237
 msgid "Modification date"
@@ -2104,17 +2104,17 @@ msgstr "A sua conta foi eliminada"
 #: udata/templates/mail/badge_added_certified.html:6
 #, python-format
 msgid "%(user)s has certified your organization \"%(name)s\""
-msgstr ""
+msgstr "%(user)s certificou a sua organização \"%(name)s\""
 
 #: udata/templates/mail/badge_added_certified.html:27
 #: udata/templates/mail/badge_added_public_service.html:27
 msgid "See the badge"
-msgstr ""
+msgstr "Ver o emblema"
 
 #: udata/templates/mail/badge_added_public_service.html:6
 #, python-format
 msgid "%(user)s has identified your organization \"%(name)s\" as public service"
-msgstr ""
+msgstr "%(user)s identificou sua organização \"%(name)s\" como serviço público"
 
 #: udata/templates/mail/base.html:14
 #, python-format
@@ -2128,79 +2128,79 @@ msgstr ""
 #: udata/templates/mail/base.html:19
 #, python-format
 msgid "The %(site)s team"
-msgstr ""
+msgstr "A equipa %(site)s"
 
 #: udata/templates/mail/discussion_closed.html:6
 #, python-format
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s fechou uma discussão sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/discussion_closed.html:40
 #: udata/templates/mail/new_discussion.html:32
 #: udata/templates/mail/new_discussion_comment.html:40
 msgid "See the discussion"
-msgstr ""
+msgstr "Consulte a discussão"
 
 #: udata/templates/mail/frequency_reminder.html:6
 msgid "Some of your datasets need to be updated according to the frequency you set:"
-msgstr ""
+msgstr "Alguns dos seus conjuntos de dados precisam de ser atualizadas de acordo com a frequência que definiu:"
 
 #: udata/templates/mail/frequency_reminder.html:12
 #, python-format
 msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
-msgstr ""
+msgstr "A última actualização do conjunto de dados \"%(dataset_title)s\" foi em %(published_date)s."
 
 #: udata/templates/mail/frequency_reminder.html:17
 #, python-format
 msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
-msgstr ""
+msgstr "Dada a frequência ajustada (%(dataset_frequency)s) os dados deveriam ter sido atualizados %(due_update_days)s dias atrás."
 
 #: udata/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
-msgstr ""
+msgstr "Atualizar o dataset e recursos associados"
 
 #: udata/templates/mail/issue_closed.html:6
 #, python-format
 msgid "%(user)s closed an issue on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s fechou uma discussão sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/issue_closed.html:40 udata/templates/mail/new_issue.html:32
 #: udata/templates/mail/new_issue_comment.html:40
 msgid "See the issue"
-msgstr ""
+msgstr "Ver o problema"
 
 #: udata/templates/mail/membership_refused.html:7
 #, python-format
 msgid "Your membership for the organization \"%(org)s\" has been refused"
-msgstr ""
+msgstr "A sua inscrição na organização \"%(org)s\" foi recusada"
 
 #: udata/templates/mail/membership_refused.html:18
 msgid "Refusal reason"
-msgstr ""
+msgstr "Motivo de recusa"
 
 #: udata/templates/mail/membership_request.html:8
 #, python-format
 msgid "As an administrator of \"%(org)s\" you are being informed than a new membership request from %(user)s is pending for validation"
-msgstr ""
+msgstr "Como administrador da organização \"%(org)s\", está sendo informado de que um novo pedido de adesão do utilizador %(user)s está pendente de validação"
 
 #: udata/templates/mail/membership_request.html:40
 msgid "See the request"
-msgstr ""
+msgstr "Verificar o pedido"
 
 #: udata/templates/mail/new_discussion.html:6
 #, python-format
 msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s submeteu uma nova discussão sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/new_discussion_comment.html:6
 #, python-format
 msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s comentou uma discussão sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/new_follower.html:33
 #: udata/templates/mail/new_follower_org.html:40
 msgid "See his profile"
-msgstr ""
+msgstr "Ver o perfil"
 
 #: udata/templates/mail/new_follower_org.html:8
 #, python-format
@@ -2377,7 +2377,7 @@ msgstr ""
 
 #: udata/templates/organization/display_base.html:46
 msgid "See all organizations with that badge."
-msgstr ""
+msgstr "Ver todas as organizações com esse emblema."
 
 #: udata/templates/organization/display_base.html:86
 msgid "Use of data by that organization for the community"
