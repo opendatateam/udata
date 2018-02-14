@@ -299,11 +299,14 @@
 
 .nav-pills,
 .nav-tabs {
+    @spacing: .5em;
+
     border-bottom: 1px solid @brand-primary;
+    margin-bottom: @spacing;
     margin-top: 0;
 
     > li {
-        margin-right: .5em;
+        margin-right: @spacing;
     }
 
     & > li > a {

@@ -4,6 +4,7 @@
 
 - Make use of [udata pytest plugin](https://github.com/opendatateam/udata#1400) [#254](https://github.com/etalab/udata-gouvfr/pull/254)
 - Expose new entrypoints. Plugins and theme translations are now splitted [#263](https://github.com/etalab/udata-gouvfr/pull/263)
+- Align card components design [#252](https://github.com/etalab/udata-gouvfr/pull/252)
 
 ## 1.2.5 (2018-02-05)
 

@@ -37,7 +37,12 @@
     }
 
     h3:not(.popover-title) {
+        color: white;
         margin-top: 30px;
+        margin-bottom: 10px;
+        font-family: @title-font;
+        text-transform: uppercase;
+        font-size: 13px;
     }
 
     .resources-list {
@@ -93,33 +98,6 @@
                 background-color: @color-body;
             }
         }
-
-        .add {
-            @base-color: #7d8489;
-            border: 2px dashed @base-color;
-            background-color: transparent;
-
-            h4 {
-                color: @base-color;
-            }
-
-            .format-label {
-                color: @base-color;
-                background-color: rgba(255,255,255,0.05);
-            }
-
-            &:hover {
-                background-color: rgba(255,255,255,0.04);
-            }
-        }
-    }
-
-    h3:not(.popover-title) {
-        color: white;
-        margin-bottom: 10px;
-        font-family: @title-font;
-        text-transform: uppercase;
-        font-size: 13px;
     }
 
     .reuses-list {
@@ -266,7 +244,7 @@
                 bottom: 10px;
             }
         }
-    }
+	}
 
     .note p {
         color: #dfdfdf;
