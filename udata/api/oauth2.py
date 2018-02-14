@@ -46,25 +46,6 @@ TOKEN_EXPIRATION = 30 * 24 * 60 * 60  # 30 days in seconds
 REFRESH_EXPIRATION = 30  # days
 EPOCH = datetime.fromtimestamp(0)
 
-
-CLIENT_TYPES = {
-    'public': _('Public'),
-    'confidential': _('Confidential'),
-}
-
-CLIENT_PROFILES = {
-    'web': _('Web Application'),
-    'user': _('User Agent application (Browser)'),
-    'native': _('Native Application'),
-}
-
-GRANT_TYPES = {
-    'code': _('Authorization Code'),
-    'implicit': _('Implicit'),
-    'password': _('Resource Owner Password Credentials'),
-    'client': _('Client Credentials'),
-}
-
 TOKEN_TYPES = {
     'Bearer': _('Bearer Token'),
 }
@@ -78,13 +59,6 @@ SCOPES = {
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     secret = db.StringField(default=lambda: gen_salt(50), required=True)
 
-    type = db.StringField(choices=CLIENT_TYPES.keys(), default='public',
-                          required=True)
-    profile = db.StringField(choices=CLIENT_PROFILES.keys(), default='web',
-                             required=True)
-    grant_type = db.StringField(choices=GRANT_TYPES.keys(), default='code',
-                                required=True)
-
     name = db.StringField(required=True)
     description = db.StringField()
 
@@ -94,8 +68,9 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
                           thumbnails=[150, 25])
 
     redirect_uris = db.ListField(db.StringField())
-    scopes = db.ListField(db.StringField(), default=SCOPES.keys())
+    scopes = db.ListField(db.StringField(), default=['default'])
 
+    confidential = db.BooleanField(default=False)
     internal = db.BooleanField(default=False)
 
     meta = {
@@ -126,9 +101,11 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         return redirect_uri in self.redirect_uris
 
     def check_client_type(self, client_type):
-        if client_type not in CLIENT_TYPES:
-            raise ValueError('Invalid client_type')
-        return client_type == self.type
+        if client_type == 'confidential':
+            return self.confidential
+        elif client_type == 'public':
+            return not self.confidential
+        raise ValueError('Invalid client_type')
 
     def check_client_secret(self, client_secret):
         return self.secret == client_secret

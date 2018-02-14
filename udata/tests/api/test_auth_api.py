@@ -249,7 +249,7 @@ class APIAuthTest:
         assert uri == oauth.default_redirect_uri
         assert 'code' in parse_qs(params)
 
-    @pytest.mark.oauth(type='confidential')
+    @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):
         user = UserFactory()
         token = OAuth2Token.objects.create(
