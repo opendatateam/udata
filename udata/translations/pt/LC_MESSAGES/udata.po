@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 09:12-0500\n"
+"PO-Revision-Date: 2018-02-14 09:31-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1343,12 +1343,12 @@ msgstr "Navegando e recolhendo dados"
 #: udata/templates/apidoc.html:164
 msgid "You can retrieve a list of organization (filtered or not) or a unique organization. When you reach an endpoint, the default page size is 20. Let's fetch the first 20 organization from the API:\n"
 "                "
-msgstr ""
+msgstr "Você pode selecionar uma lista de organizações (filtrada ou não) ou uma organização unica. Quando você alcança um \"endpoint\", o tamanho da página padrão é 20. Vamos buscar as 20 primeiras organizações a partir da API:                "
 
 #: udata/templates/apidoc.html:192
 msgid "That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:\n"
 "                "
-msgstr ""
+msgstr "Esta lista é ótima, e se nós quisermos caminhar pelas organizações retornadas? Vamos buscar as 5 primeiras URIs de organizações:                "
 
 #: udata/templates/apidoc.html:205
 msgid "Now we'll be able to retrieve a unique organization thanks to the returned URI:\n"
@@ -1368,7 +1368,7 @@ msgstr "Ou talvez apenas o nome dos membros dessa organização:                
 #: udata/templates/apidoc.html:256
 msgid "It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href=\"http://stedolan.github.io/jq/tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/\">manual</a> if you want to browse the API through the command-line in depth.\n"
 "                "
-msgstr ""
+msgstr "É realmente útil para recuperar os dados que interessam ao seu projeto. Não hesite em percorrer o <a href=\"http://stedolan.github.io/jq/tutorial/\"> tutorial do jq </a> e <a href = \"http://stedolan.github.io/ jq / manual / \"> manual </a> se quiser navegar pela API através da linha de comando em profundidade.                "
 
 #: udata/templates/apidoc.html:260
 msgid "Modifying and deleting data"
@@ -1377,47 +1377,47 @@ msgstr "Modificar e apagar dados"
 #: udata/templates/apidoc.html:262
 msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
 "                "
-msgstr ""
+msgstr "Atenção, você está entrando em uma zona de perigo. As modificações ou eliminações de dados com a API são definitivas e não fornecemos qualquer sandbox para testar a execução anterior (por enquanto). Esteja ciente dessas responsabilidades antes de usar seus grandes poderes.                "
 
 #: udata/templates/apidoc.html:265
 msgid "If you try to modify a resource without an authentication token, a 401 will be returned:\n"
 "                "
-msgstr ""
+msgstr "Se você tentar modificar um recurso sem um token de autenticação, um erro 401 será retornado:                "
 
 #: udata/templates/apidoc.html:280
 msgid "You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:\n"
 "                "
-msgstr ""
+msgstr "Você precisa especificar sua chave de API (veja acima) e use o cabeçalho HTTP <code> X-API-KEY </ code>. Se você tentar modificar um recurso no qual você não tenha controle, um 400 será retornado em vez disso:                "
 
 #: udata/templates/apidoc.html:295
 msgid "This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:\n"
 "                "
-msgstr ""
+msgstr "Esta é a mensagem que receberá se especificou a chave de API errada. Existe outra mensagem de erro potencial que também pode encontrar:                "
 
 #: udata/templates/apidoc.html:308
 msgid "It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:\n"
 "                "
-msgstr ""
+msgstr "Ocorre se tentar acessar um recurso que não pode editar com as suas credenciais. Se a sua chave será válida você deve ter algo parecido com isto:                "
 
 #: udata/templates/apidoc.html:321
 msgid "But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.\n"
 "                "
-msgstr ""
+msgstr "Mas isso não muda nada! Isso é perfeitamente normal, esquecemos de especificar os dados certos para enviar para o servidor.                "
 
 #: udata/templates/apidoc.html:333
 msgid "The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):\n"
 "                "
-msgstr ""
+msgstr "O recurso foi modificado com seus novos valores. Finalmente, você pode excluir um recurso com o verbo HTTP apropriado (cuidado, a reversão não é possível usando a API no momento):                "
 
 #: udata/templates/apidoc.html:345
 msgid "Once you did it, you can verify that it's effective issuing a GET against the previous URI:\n"
 "                "
-msgstr ""
+msgstr "Uma vez que efectuar isso, pode verificar que é eficaz emitindo um pedido GET contra o URI anterior:                "
 
 #: udata/templates/apidoc.html:362
 msgid "Please consult the reference documentation below for further interactions with the API or ask us for questions related to it!\n"
 "                "
-msgstr ""
+msgstr "Por favor, consulte a documentação de referência abaixo para mais interações com a API ou para questões relacionadas!                "
 
 #: udata/templates/apidoc.html:369
 msgid "Reference"
@@ -1743,16 +1743,16 @@ msgstr "Cobertura territorial"
 #: udata/templates/dataset/card.html:75 udata/templates/dataset/display.html:254
 #: udata/templates/dataset/search-result.html:89
 msgid "Territorial coverage granularity"
-msgstr ""
+msgstr "Granularidade de cobertura territorial"
 
 #: udata/templates/dataset/display.html:44
 msgid "This dataset comes from a certified public service"
-msgstr ""
+msgstr "Este conjunto de dados vem de um serviço público certificado"
 
 #: udata/templates/dataset/display.html:49
 #, python-format
 msgid "This dataset has been published on %(date)s and updated on %(update)s on the initiative and under the responsibility of <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
-msgstr ""
+msgstr "Este conjunto de dados foi publicado na %(date)s e atualizado na %(update)s por iniciativa e sob a responsabilidade de <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 
 #: udata/templates/dataset/display.html:60
 msgid "See all datasets with that badge."
@@ -1760,7 +1760,7 @@ msgstr "Ver todos os conjuntos de dados com esse emblema."
 
 #: udata/templates/dataset/display.html:67
 msgid "This dataset is private and will not be visible by other users"
-msgstr ""
+msgstr "Este dataset é privado e não será visível por outros utilizadores"
 
 #: udata/templates/dataset/display.html:73
 msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
@@ -1852,7 +1852,8 @@ msgstr "Adicionar reutilização"
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
-msgstr ""
+msgstr "Reutilizou estes dados e publicou um artigo, uma demonstração gráfica ou um aplicativo?                 É hora para que você saiba!                 Referêncie o seu trabalho em apenas alguns cliques e aumente a sua visibilidade.\n"
+"Os membros da comunidade estão encarregados de cuidar da qualidade do conteúdo que produz."
 
 #: udata/templates/dataset/followers.html:13
 #: udata/templates/organization/display.html:157
@@ -1961,7 +1962,7 @@ msgstr "A começar um novo tópico de discussão"
 
 #: udata/templates/discussion/threads.html:35
 msgid "You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above."
-msgstr ""
+msgstr "Está prestes a iniciar um novo tópico de discussão. Certifique-se que uma discussão sobre o mesmo tema ainda não existe logo acima."
 
 #: udata/templates/discussion/threads.html:49
 msgid "Start a discussion"
@@ -2381,11 +2382,11 @@ msgstr "Ver todas as organizações com esse emblema."
 
 #: udata/templates/organization/display_base.html:86
 msgid "Use of data by that organization for the community"
-msgstr ""
+msgstr "Utilização dos dados pela organização para a comunidade"
 
 #: udata/templates/organization/display_base.html:96
 msgid "Use of data from that organization by the community"
-msgstr ""
+msgstr "Utilização de dados dessa organização pela comunidade"
 
 #: udata/templates/organization/display_base.html:97
 #, python-format
@@ -2434,7 +2435,7 @@ msgstr "Serei informado sobre novidades desta organização"
 #: udata/templates/organization/list.html:9
 #, python-format
 msgid "%(site)s organization search"
-msgstr ""
+msgstr "%(site)s pesquisa de organização"
 
 #: udata/templates/organization/list.html:10
 msgid "organizations"
@@ -2666,7 +2667,7 @@ msgstr "Li e aceitei <a href=\"%(url)s\"> os termos e condições do serviço.</
 msgid "In particular, I understand that this site\n"
 "                    values the production and enrichment of datasets over definitive or partisan interpretations.\n"
 "                    The members of the community are in charge of looking after the quality of the content it produces."
-msgstr ""
+msgstr "Em particular, entendo que este site valoriza a produção e o enriquecimento de conjuntos de dados através de interpretações definitivas ou partidárias. Os membros da comunidade estão encarregados de cuidar da qualidade do conteúdo que produz."
 
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
@@ -2699,7 +2700,7 @@ msgstr "mapa"
 #: udata/templates/territories/commune.html:5
 #, python-format
 msgid "Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s"
-msgstr ""
+msgstr "Conjuntos de dados relacionados com a cidade %(name)s com o código INSEE %(code)s e código postal %(postal)s"
 
 #: udata/templates/territories/commune.html:12
 #: udata/templates/territories/departement.html:12
@@ -2756,7 +2757,7 @@ msgstr "População:"
 #: udata/templates/territories/departement.html:5
 #, python-format
 msgid "Datasets related to the county of %(name)s with INSEE code %(code)s"
-msgstr ""
+msgstr "Conjunto de dados relacionados com o concelho de %(name)s com o código INSEE %(code)s"
 
 #: udata/templates/territories/departement.html:50
 msgid "Main towns:"
@@ -2777,7 +2778,7 @@ msgstr "Ordenar alfabeticamente:"
 #: udata/templates/territories/region.html:5
 #, python-format
 msgid "Datasets related to the region of %(name)s with INSEE code %(code)s"
-msgstr ""
+msgstr "Conjunto de dados relacionados com a região de %(name)s com o código INSEE %(code)s"
 
 #: udata/templates/territories/region.html:57
 msgid "Previously:"
@@ -2818,7 +2819,7 @@ msgstr "e os seus conjuntos de dados aparecerão primeiro."
 #: udata/templates/territories/territory.html:37
 #, python-format
 msgid "If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s)."
-msgstr ""
+msgstr "Se desejar que os seus conjuntos de dados apareçam nessa lista, a zona geográfica associada deve ser exatamente a mesma desse território (%(code)s)."
 
 #: udata/templates/territories/territory.html:40
 msgid "You want to add your own datasets to that list?"
