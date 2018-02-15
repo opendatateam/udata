@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-06 15:59+0100\n"
-"PO-Revision-Date: 2018-02-14 09:31-0500\n"
+"PO-Revision-Date: 2018-02-15 06:41-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2392,7 +2392,7 @@ msgstr "Utilização de dados dessa organização pela comunidade"
 #, python-format
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
-msgstr[0] "%(num)d reappropriações"
+msgstr[0] "%(num)d reapropriações"
 msgstr[1] ""
 
 #: udata/templates/organization/display_base.html:109
