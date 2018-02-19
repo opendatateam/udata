@@ -1302,7 +1302,7 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
 
         # query + facets selector + tag and other facets + sorts + pagination
         self.assertEqual(len(parser.args), 7)
-        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'q', unicode)
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
         self.assertHasArgument(parser, 'tag', str)
@@ -1316,7 +1316,7 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
 
         # query + facets selector + boolean facet + sorts + pagination
         self.assertEqual(len(parser.args), 6)
-        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'q', unicode)
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
         self.assertHasArgument(parser, 'boolean', inputs.boolean)
@@ -1330,7 +1330,7 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
 
         # query + facets selector + range facet + sorts + pagination
         self.assertEqual(len(parser.args), 6)
-        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'q', unicode)
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
         self.assertHasArgument(parser, 'range', facet.validate_parameter,
@@ -1345,7 +1345,7 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
 
         # query + facets selector + range facet + sorts + pagination
         self.assertEqual(len(parser.args), 6)
-        self.assertHasArgument(parser, 'q', str)
+        self.assertHasArgument(parser, 'q', unicode)
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
         self.assertHasArgument(parser, 'coverage', facet.validate_parameter)
