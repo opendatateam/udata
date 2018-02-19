@@ -47,6 +47,17 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
 
+    def test_dataset_api_search(self):
+        '''It should search datasets from the API'''
+        with self.autoindex():
+            [VisibleDatasetFactory() for i in range(2)]
+            dataset = VisibleDatasetFactory(title="some spécial chars")
+
+        response = self.get(url_for('api.datasets', q='spécial'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(dataset.id))
+
     def test_dataset_api_list_filtered_by_org(self):
         '''It should fetch a dataset list for a given org'''
         self.login()
