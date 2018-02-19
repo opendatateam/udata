@@ -41,7 +41,7 @@ me = api.namespace('me', 'Connected user related operations')
 search_parser = UserSearch.as_request_parser()
 filter_parser = api.parser()
 filter_parser.add_argument(
-    'q', type=str, help='The string to filter items',
+    'q', type=unicode, help='The string to filter items',
     location='args', required=False)
 
 
@@ -130,7 +130,7 @@ class MyOrgDatasetsAPI(API):
         owners = list(current_user.organizations) + [current_user.id]
         datasets = Dataset.objects.owned_by(*owners).order_by('-last_modified')
         if q:
-            datasets = datasets.filter(title__icontains=q.decode('utf-8'))
+            datasets = datasets.filter(title__icontains=q)
         return list(datasets)
 
 
@@ -147,7 +147,7 @@ class MyOrgCommunityResourcesAPI(API):
                                .order_by('-last_modified'))
         if q:
             community_resources = community_resources.filter(
-                title__icontains=q.decode('utf-8'))
+                title__icontains=q)
         return list(community_resources)
 
 
@@ -162,7 +162,7 @@ class MyOrgReusesAPI(API):
         owners = list(current_user.organizations) + [current_user.id]
         reuses = Reuse.objects.owned_by(*owners).order_by('-last_modified')
         if q:
-            reuses = reuses.filter(title__icontains=q.decode('utf-8'))
+            reuses = reuses.filter(title__icontains=q)
         return list(reuses)
 
 
@@ -177,7 +177,7 @@ class MyOrgIssuesAPI(API):
         issues = issues_for(current_user._get_current_object())
         issues = issues.order_by('-created')
         if q:
-            issues = issues.filter(title__icontains=q.decode('utf-8'))
+            issues = issues.filter(title__icontains=q)
         return list(issues)
 
 
@@ -192,7 +192,7 @@ class MyOrgDiscussionsAPI(API):
         discussions = discussions_for(current_user._get_current_object())
         discussions = discussions.order_by('-created')
         if q:
-            decoded = q.decode('utf-8')
+            decoded = q
             discussions = discussions.filter(title__icontains=decoded)
         return list(discussions)
 

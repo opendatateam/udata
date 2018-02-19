@@ -202,6 +202,28 @@ class SpatialApiTest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
+    def test_suggest_zones_unicode(self):
+        '''It should suggest zones based on its name'''
+        with self.autoindex():
+            for i in range(4):
+                GeoZoneFactory(name='testé-{0}'.format(i)
+                               if i % 2 else faker.word())
+
+        response = self.get(
+            url_for('api.suggest_zones'), qs={'q': 'testé', 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 2)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('code', suggestion)
+            self.assertIn('level', suggestion)
+            self.assertIn('keys', suggestion)
+            self.assertIsInstance(suggestion['keys'], dict)
+            self.assertTrue(suggestion['name'].startswith('testé'))
+
     def test_suggest_zones_empty(self):
         '''It should not provide zones suggestion if no data is present'''
         self.init_search()

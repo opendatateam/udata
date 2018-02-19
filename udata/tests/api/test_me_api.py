@@ -110,10 +110,10 @@ class MeAPITest(APITestCase):
         member = Member(user=user, role='editor')
         organization = OrganizationFactory(members=[member])
         datasets = [
-            VisibleDatasetFactory(owner=user, title='foo'),
+            VisibleDatasetFactory(owner=user, title='foô'),
         ]
         org_datasets = [
-            VisibleDatasetFactory(organization=organization, title='foo'),
+            VisibleDatasetFactory(organization=organization, title='foô'),
         ]
 
         # Should not be listed.
@@ -121,7 +121,7 @@ class MeAPITest(APITestCase):
         VisibleDatasetFactory(organization=organization)
 
         response = self.get(url_for('api.my_org_datasets'),
-                            qs={'q': 'foo'})
+                            qs={'q': 'foô'})
         self.assert200(response)
         self.assertEqual(len(response.json), len(datasets) + len(org_datasets))
 
@@ -146,10 +146,10 @@ class MeAPITest(APITestCase):
         member = Member(user=user, role='editor')
         organization = OrganizationFactory(members=[member])
         community_resources = [
-            CommunityResourceFactory(owner=user, title='foo'),
+            CommunityResourceFactory(owner=user, title='foô'),
         ]
         org_community_resources = [
-            CommunityResourceFactory(organization=organization, title='foo'),
+            CommunityResourceFactory(organization=organization, title='foô'),
         ]
 
         # Should not be listed.
@@ -157,7 +157,7 @@ class MeAPITest(APITestCase):
         CommunityResourceFactory(organization=organization)
 
         response = self.get(url_for('api.my_org_community_resources'),
-                            qs={'q': 'foo'})
+                            qs={'q': 'foô'})
         self.assert200(response)
         self.assertEqual(
             len(response.json),
@@ -180,17 +180,17 @@ class MeAPITest(APITestCase):
         member = Member(user=user, role='editor')
         organization = OrganizationFactory(members=[member])
         reuses = [
-            ReuseFactory(owner=user, title='foo'),
+            ReuseFactory(owner=user, title='foô'),
         ]
         org_reuses = [
-            ReuseFactory(organization=organization, title='foo'),
+            ReuseFactory(organization=organization, title='foô'),
         ]
 
         # Should not be listed.
         ReuseFactory(owner=user)
         ReuseFactory(organization=organization)
 
-        response = self.get(url_for('api.my_org_reuses'), qs={'q': 'foo'})
+        response = self.get(url_for('api.my_org_reuses'), qs={'q': 'foô'})
         self.assert200(response)
         self.assertEqual(len(response.json), len(reuses) + len(org_reuses))
 
@@ -227,8 +227,8 @@ class MeAPITest(APITestCase):
         org_dataset = VisibleDatasetFactory(organization=organization)
 
         issues = [
-            Issue.objects.create(subject=org_dataset, title='foo', user=user),
-            Issue.objects.create(subject=reuse, title='foo', user=user),
+            Issue.objects.create(subject=org_dataset, title='foô', user=user),
+            Issue.objects.create(subject=reuse, title='foô', user=user),
         ]
 
         # Should not be listed.
@@ -239,7 +239,7 @@ class MeAPITest(APITestCase):
         Issue.objects.create(subject=VisibleDatasetFactory(), title='', user=user)
         Issue.objects.create(subject=ReuseFactory(), title='', user=user)
 
-        response = self.get(url_for('api.my_org_issues'), qs={'q': 'foo'})
+        response = self.get(url_for('api.my_org_issues'), qs={'q': 'foô'})
         self.assert200(response)
         self.assertEqual(len(response.json), len(issues))
 
@@ -277,8 +277,8 @@ class MeAPITest(APITestCase):
         org_dataset = VisibleDatasetFactory(organization=organization)
 
         discussions = [
-            Discussion.objects.create(subject=dataset, title='foo', user=user),
-            Discussion.objects.create(subject=org_reuse, title='foo', user=user),
+            Discussion.objects.create(subject=dataset, title='foô', user=user),
+            Discussion.objects.create(subject=org_reuse, title='foô', user=user),
         ]
 
         # Should not be listed.
@@ -286,10 +286,10 @@ class MeAPITest(APITestCase):
         Discussion.objects.create(subject=org_dataset, title='', user=user),
 
         # Should really not be listed.
-        Discussion.objects.create(subject=VisibleDatasetFactory(), title='foo', user=user)
-        Discussion.objects.create(subject=ReuseFactory(), title='foo', user=user)
+        Discussion.objects.create(subject=VisibleDatasetFactory(), title='foô', user=user)
+        Discussion.objects.create(subject=ReuseFactory(), title='foô', user=user)
 
-        response = self.get(url_for('api.my_org_discussions'), qs={'q': 'foo'})
+        response = self.get(url_for('api.my_org_discussions'), qs={'q': 'foô'})
         self.assert200(response)
         self.assertEqual(len(response.json), len(discussions))
 

@@ -4,13 +4,15 @@ from __future__ import unicode_literals
 from udata import search
 from udata.api import api, API
 
+from udata.tags import normalize  # TODO: merge this into this package
+
 DEFAULT_SIZE = 8
 
 ns = api.namespace('tags', 'Tags related operations')
 
 parser = api.parser()
 parser.add_argument(
-    'q', type=str, help='The string to autocomplete/suggest',
+    'q', type=unicode, help='The string to autocomplete/suggest',
     location='args', required=True)
 parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',
@@ -23,5 +25,6 @@ class SuggestTagsAPI(API):
     def get(self):
         '''Suggest tags'''
         args = parser.parse_args()
-        result = search.suggest(args['q'], 'tag_suggest', args['size'])
+        q = normalize(args['q'])
+        result = search.suggest(q, 'tag_suggest', args['size'])
         return sorted(result, key=lambda o: len(o['text']))
