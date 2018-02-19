@@ -116,6 +116,11 @@ describe('Markdown backend compliance', function() {
         expect(markdown(source)).to.have.html('<p>line 1<br>line 2</p>');
     });
 
+    it('should properly render markdown tags not in allowed tags', function() {
+        const source = '### titre';
+        expect(markdown(source)).to.have.html('<h3>titre</h3>');
+    });
+
     it('should not render github tables', function() {
         const source = [
             '| first | second |',

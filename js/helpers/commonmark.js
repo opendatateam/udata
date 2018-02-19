@@ -41,31 +41,25 @@ function nodeToStr(node) {
     return div.innerHTML;
 }
 
+/**
+ * Sanitize Markdown-it source tags
+ * @param  {String} html markdown-it rendered html
+ * @return {String}      Sanitized html
+ */
 function escapeTags(content, config) {
-    const doc = document.createRange().createContextualFragment(content);
-    const it = document.createNodeIterator(doc, NodeFilter.SHOW_ELEMENT);
+    const fragment = new DOMParser().parseFromString(content, 'text/html')
+    const it = document.createNodeIterator(fragment.body, NodeFilter.SHOW_ELEMENT);
     let node;
 
     while (node = it.nextNode()) {
-        // Skip p tags and allowed tags
-        if (node.nodeName === 'P' || config.tags.indexOf(node.nodeName.toLowerCase()) >= 0) continue;
+        // Skip body tag and allowed tags
+        if (node.nodeName === 'BODY' || config.tags.indexOf(node.nodeName.toLowerCase()) >= 0) continue;
         const html = nodeToStr(node)
         const escaped = document.createTextNode(escapeHtml(html));
         node.parentNode.replaceChild(escaped, node)
     }
 
-    return nodeToStr(doc);
-}
-
-/**
- * Sanitize Markdown-it rendered html
- * @param  {String} html markdown-it rendered html
- * @return {String}      Sanitized html
- */
-function sanitize(html, config) {
-    // Markdown-it does not removes the "\n" on soft breaks
-    html = html.replace(/\n/g, '');
-    return escapeTags(html, config);
+    return fragment.body.innerHTML;
 }
 
 options.linkify = true;
@@ -77,5 +71,7 @@ const markdown = markdownit().configure({options, components}).enable('linkify')
 markdown.linkify.add('mailto:', null)
 
 export default function(text, config) {
-    return sanitize(markdown.render(text), config || DEFAULTS);
+    const source = escapeTags(text, config || DEFAULTS);
+    // Markdown-it does not removes the "\n" on soft breaks
+    return markdown.render(source).replace(/\n/g, '');
 }
