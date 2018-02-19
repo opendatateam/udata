@@ -72,6 +72,15 @@ function(oid) {{
 DATE_FORMAT = '%Y-%m-%d %H:%M'
 
 
+def normalize_migration(plugin_or_specs, filename):
+    if filename is None and ':' in plugin_or_specs:
+        plugin, filename = plugin_or_specs.split(':')
+    else:
+        plugin = plugin_or_specs
+    if not filename.endswith('.js'):
+        filename += '.js'
+    return plugin, filename
+
 def get_migration(plugin, filename):
     '''Get an existing migration record if exists'''
     db = get_db()
@@ -170,8 +179,20 @@ def migrate(record, dry_run=False):
 
 
 @grp.command()
-def unrecord(plugin, filename):
-    '''Remove a database migration record'''
+@click.argument('plugin_or_specs')
+@click.argument('filename', default=None, required=False, metavar='[FILENAME]')
+def unrecord(plugin_or_specs, filename):
+    '''
+    Remove a database migration record.
+
+    \b
+    A record can be expressed with the following syntaxes:
+     - plugin filename
+     - plugin fliename.js
+     - plugin:filename
+     - plugin:fliename.js 
+    '''
+    plugin, filename = normalize_migration(plugin_or_specs, filename)
     migration = get_migration(plugin, filename)
     if migration:
         log.info('Removing migration %s:%s', plugin, filename)
