@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import pytest
+import sys
 
 from contextlib import contextmanager
 from urlparse import urlparse
@@ -61,13 +62,42 @@ def app(request):
     test_settings = get_settings(request)
     app = create_app(settings.Defaults, override=test_settings)
     app.test_client_class = TestClient
-
-    if request.cls and hasattr(request.cls, 'modules'):
-        from udata import frontend, api
-        api.init_app(app)
-        frontend.init_app(app, request.cls.modules)
     return app
 
+
+@pytest.fixture(autouse=True)
+def _load_frontend(request):
+    '''
+    Use `pytest.mark.frontend` to specify that frontend/api should be loaded
+    Pass an optionnal list of modules as parameter to restrict loaded modules.
+
+    Handle backward compatibility with Class.modules attribute too
+
+    Properly unload themes when enabled.
+    '''
+    if 'app' not in request.fixturenames:
+        return
+
+    app = request.getfixturevalue('app')
+    marker = request.node.get_marker('frontend')
+    modules = set(marker.args[0] if marker and marker.args else [])
+
+    if getattr(request.cls, 'modules', None):
+        modules |= set(request.cls.modules)
+
+    if marker or hasattr(request.cls, 'modules'):
+        from udata import frontend, api
+        api.init_app(app)
+        frontend.init_app(app, modules)
+
+    if app.config['THEME'] != 'default':
+        # Unload theme to allow multiple run with initialization
+        from udata import theme
+        theme_module = theme.current.entrypoint.module_name
+        def unload_theme():
+            if theme_module in sys.modules:
+                del sys.modules[theme_module]
+        request.addfinalizer(unload_theme)
 
 @pytest.fixture
 def client(app):
