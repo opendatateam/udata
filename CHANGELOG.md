@@ -9,6 +9,7 @@
 - Soft breaks in markdown is rendered as line return as allowed by the [commonmark specifications](http://spec.commonmark.org/0.28/#soft-line-breaks), client-side rendering follows the same security rules [#1432](https://github.com/opendatateam/udata/pull/1432)
 - Update card components to make them more consistent [#1383](https://github.com/opendatateam/udata/pull/1383)
 - Switch from OAuthlib/Flask-OUAhtlib to Authlib and support all grants type as well as token revocation [#1434](https://github.com/opendatateam/udata/pull/1434)
+- Fix completion/suggestion unicode handling [#1452](https://github.com/opendatateam/udata/pull/1452)
 
 ## 1.2.11 (2018-02-05)
 

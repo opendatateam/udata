@@ -224,3 +224,13 @@ class TerritoriesAPITest(APITestCase):
         self.assert200(response)
         results = response.json
         self.assertEqual(len(results), 0)
+
+    def test_suggest_unicode(self):
+        response = self.get(url_for('api.suggest_territory'),
+                                    qs={'q': 'Bouches-du-Rhône'})
+        self.assert200(response)
+        result = response.json[0]
+        self.assertEqual(result['title'], self.bdr.name)
+        self.assertEqual(result['id'], self.bdr.id)
+        self.assertIn('page', result)
+        self.assertIn('image_url', result)
