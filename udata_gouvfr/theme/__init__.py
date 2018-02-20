@@ -101,6 +101,24 @@ def get_blog_post(lang):
     return blogpost
 
 
+def _discourse_request(url):
+    """Helper for discourse requests"""
+    timeout = current_app.config.get('DISCOURSE_TIMEOUT', 15)
+    try:
+        response = requests.get(url, timeout=timeout)
+    except requests.exceptions.RequestException:
+        log.exception('Unable to fetch discourse content for url %s' % url)
+        return
+    except requests.exceptions.Timeout:
+        log.exception('Timeout while fetching discourse url %s' % url)
+        return
+    try:
+        return response.json()
+    except ValueError:
+        log.exception('Unable to parse discourse JSON for url %s' % url)
+        return
+
+
 @cache.cached(50)
 def get_discourse_posts():
     base_url = current_app.config.get('DISCOURSE_URL')
@@ -112,12 +130,9 @@ def get_discourse_posts():
 
     # Fetch site wide configuration (including all categories labels)
     site_url = '{url}/site.json'.format(url=base_url)
-    try:
-        response = requests.get(site_url)
-    except requests.exceptions.RequestException:
-        log.exception('Unable to fetch discourses categories')
+    data = _discourse_request(site_url)
+    if not data:
         return
-    data = response.json()
 
     # Resolve categories names
     categories = {}
@@ -133,12 +148,9 @@ def get_discourse_posts():
                          category=category_id,
                          listing=listing,
                          limit=limit)
-    try:
-        response = requests.get(url)
-    except requests.exceptions.RequestException:
-        log.exception('Unable to fetch discourses topics')
+    data = _discourse_request(url)
+    if not data:
         return
-    data = response.json()
 
     # Resolve posters avatars
     users = {}
