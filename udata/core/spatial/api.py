@@ -45,6 +45,12 @@ dataset_parser.add_argument(
     location='args', default=25)
 
 
+def payload_name(payload):
+    '''extract payload name and localize it'''
+    name = payload['name']
+    return _(name)  # Avoid dict quotes in gettext
+
+
 @ns.route('/zones/suggest', endpoint='suggest_zones')
 class SuggestZonesAPI(API):
     @api.marshal_list_with(zone_suggestion_fields)
@@ -56,7 +62,7 @@ class SuggestZonesAPI(API):
         return [
             {
                 'id': opt['text'],
-                'name': _(opt['payload']['name']),
+                'name': payload_name(opt['payload']),
                 'code': opt['payload']['code'],
                 'level': opt['payload']['level'],
                 'keys': opt['payload']['keys'],
