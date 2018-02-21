@@ -66,7 +66,7 @@ def app(request):
 
 
 @pytest.fixture(autouse=True)
-def _load_frontend(request):
+def _load_frontend(request, _configure_application):
     '''
     Use `pytest.mark.frontend` to specify that frontend/api should be loaded
     Pass an optionnal list of modules as parameter to restrict loaded modules.
@@ -95,10 +95,12 @@ def _load_frontend(request):
         from udata import theme
         with app.app_context():
             theme_module = theme.current.entrypoint.module_name
+
         def unload_theme():
             if theme_module in sys.modules:
                 del sys.modules[theme_module]
         request.addfinalizer(unload_theme)
+
 
 @pytest.fixture
 def client(app):
