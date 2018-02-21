@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-20 21:03+0100\n"
-"PO-Revision-Date: 2018-02-21 06:12-0500\n"
+"PO-Revision-Date: 2018-02-21 06:22-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -47,7 +47,7 @@ msgstr "Erreur de validation : vos données ne peuvent être sauvegardées pour
 
 #: udata/api/oauth2.py:53
 msgid "Bearer Token"
-msgstr ""
+msgstr "Bearer Token"
 
 #: udata/api/oauth2.py:57
 msgid "Default scope"
@@ -1706,7 +1706,7 @@ msgstr "Erreur d'authentification OAuth"
 
 #: udata/templates/dataset/card.html:29
 msgid "Number of resources"
-msgstr ""
+msgstr "Nombre de ressources"
 
 #: udata/templates/dataset/card.html:54 udata/templates/dataset/display.html:262
 msgid "Territorial coverage"
@@ -2542,12 +2542,12 @@ msgstr "Nombre de jeux de données utilisés"
 #: udata/templates/reuse/card.html:53
 #, python-format
 msgid "Created by %(user)s"
-msgstr ""
+msgstr "Créé par %(user)s"
 
 #: udata/templates/reuse/card.html:55
 #, python-format
 msgid "%(user)s"
-msgstr ""
+msgstr "%(user)s"
 
 #: udata/templates/reuse/display.html:48
 #, python-format
@@ -2842,7 +2842,7 @@ msgstr "Meilleures réutilisations"
 
 #: udata/templates/topic/display.html:66
 msgid "Latest reuses"
-msgstr ""
+msgstr "Dernières réutilisations"
 
 #: udata/templates/topic/display.html:85
 msgid "Latest datasets"
@@ -2893,7 +2893,7 @@ msgstr[1] "%(num)d suivis"
 #: udata/templates/user/datasets.html:36
 #, python-format
 msgid "%(user)s has not yet published any dataset"
-msgstr ""
+msgstr "%(user)s n'a pas encore publié de jeu de données"
 
 #: udata/templates/user/followers.html:34
 #, python-format
@@ -2945,7 +2945,7 @@ msgstr "utilisateurs"
 #: udata/templates/user/reuses.html:35
 #, python-format
 msgid "%(user)s has not yet published any resuse"
-msgstr ""
+msgstr "%(user)s n'a pas encore publié de réutilisation"
 
 #: udata/theme/__init__.py:41
 msgid "Map"
