@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 import cgi
 import json
-import sys
 
 import pytest
 import requests
@@ -38,20 +37,11 @@ class GouvFrSettings(Testing):
     TEST_WITH_PLUGINS = True
     PLUGINS = ['gouvfr']
     THEME = 'gouvfr'
+    WP_ATOM_URL = None  # Only activated on specific tests
+    DISCOURSE_URL = None  # Only activated on specific tests
 
 
-class UnloadTheme(object):
-    '''
-    As setuptools entrypoint is loaded only once,
-    this mixin ensure theme is reloaded.
-    '''
-    @pytest.fixture(autouse=True)
-    def unload_theme(self):
-        yield
-        del sys.modules['udata_gouvfr.theme']
-
-
-class GouvFrThemeTest(UnloadTheme):
+class GouvFrThemeTest:
     '''Ensure themed views render'''
     settings = GouvFrSettings
     modules = []
@@ -135,7 +125,7 @@ WP_ATOM_URL = 'http://somewhere.test/feed.atom'
 
 
 @pytest.mark.options(WP_ATOM_URL=WP_ATOM_URL)
-class GouvFrHomeBlogTest(UnloadTheme):
+class GouvFrHomeBlogTest:
     '''Ensure home page render with blog'''
     settings = GouvFrSettings
     modules = []
@@ -177,7 +167,7 @@ DISCOURSE_URL = 'http://somewhere.test/discourse'
 @pytest.mark.options(DISCOURSE_URL=DISCOURSE_URL,
                      DISCOURSE_LISTING_TYPE='latest',
                      DISCOURSE_CATEGORY_ID=None)
-class GouvFrHomeDiscourseTest(UnloadTheme):
+class GouvFrHomeDiscourseTest:
     '''Ensure home page render with forum'''
     settings = GouvFrSettings
     modules = []
