@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-02-20 21:03+0100\n"
-"PO-Revision-Date: 2018-02-21 06:22-0500\n"
+"POT-Creation-Date: 2018-02-21 12:45+0100\n"
+"PO-Revision-Date: 2018-02-21 08:37-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -106,10 +106,10 @@ msgstr "a supprimé un jeu de données"
 #: udata/core/dataset/forms.py:27 udata/core/dataset/forms.py:73
 #: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
-#: udata/templates/dataset/list.html:40 udata/templates/discussion/threads.html:43
-#: udata/templates/organization/list.html:34 udata/templates/reuse/list.html:36
-#: udata/templates/search.html:73 udata/templates/search.html:87
-#: udata/templates/topic/datasets.html:33 udata/templates/topic/reuses.html:32
+#: udata/templates/dataset/list.html:40 udata/templates/organization/list.html:34
+#: udata/templates/reuse/list.html:36 udata/templates/search.html:73
+#: udata/templates/search.html:87 udata/templates/topic/datasets.html:33
+#: udata/templates/topic/reuses.html:32
 msgid "Title"
 msgstr "Titre"
 
@@ -440,9 +440,7 @@ msgstr "Derniers jeux de données"
 #: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:22
 #: udata/core/issues/forms.py:16 udata/core/issues/forms.py:21
 #: udata/core/organization/forms.py:52 udata/core/organization/forms.py:56
-#: udata/harvest/forms.py:29 udata/templates/discussion/item.html:60
-#: udata/templates/discussion/threads.html:45
-#: udata/templates/mail/discussion_closed.html:31
+#: udata/harvest/forms.py:29 udata/templates/mail/discussion_closed.html:31
 #: udata/templates/mail/issue_closed.html:31
 #: udata/templates/mail/new_discussion_comment.html:31
 #: udata/templates/mail/new_issue_comment.html:31
@@ -869,10 +867,6 @@ msgstr "Données"
 #: udata/core/site/views.py:146
 msgid "Community"
 msgstr "Communauté"
-
-#: udata/core/spatial/api.py:59
-msgid "payloadname"
-msgstr ""
 
 #: udata/core/spatial/forms.py:51
 msgid "Unknown geoid(s): {identifiers}"
@@ -1552,8 +1546,11 @@ msgstr "%(site)s recherche"
 msgid "search"
 msgstr "recherche"
 
+#: udata/templates/organization/card.html:25
 #: udata/templates/organization/display.html:49
-#: udata/templates/organization/display_base.html:58 udata/templates/search.html:27
+#: udata/templates/organization/display_base.html:58
+#: udata/templates/organization/search-result.html:23
+#: udata/templates/reuse/search-result.html:27 udata/templates/search.html:27
 #: udata/templates/user/base.html:79
 #, python-format
 msgid "%(num)d dataset"
@@ -1561,9 +1558,11 @@ msgid_plural "%(num)d datasets"
 msgstr[0] "%(num)d jeu de données"
 msgstr[1] "%(num)d jeux de données"
 
+#: udata/templates/organization/card.html:31
 #: udata/templates/organization/display.html:53
-#: udata/templates/organization/display_base.html:87 udata/templates/search.html:34
-#: udata/templates/user/base.html:85
+#: udata/templates/organization/display_base.html:87
+#: udata/templates/organization/search-result.html:32
+#: udata/templates/search.html:34 udata/templates/user/base.html:85
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
@@ -1831,8 +1830,9 @@ msgstr "Vous avez réutilisé ces données et publié un article, une infographi
 #: udata/templates/dataset/followers.html:13
 #: udata/templates/organization/display.html:158
 #: udata/templates/organization/display_base.html:76
-#: udata/templates/organization/followers.html:26 udata/templates/user/base.html:67
-#: udata/templates/user/followers.html:15
+#: udata/templates/organization/followers.html:26
+#: udata/templates/organization/search-result.html:59
+#: udata/templates/user/base.html:67 udata/templates/user/followers.html:15
 #, python-format
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
@@ -1889,57 +1889,6 @@ msgstr "Nombre de réutilisations"
 #, python-format
 msgid "Last modified on %(date)s"
 msgstr "Dernière modification le %(date)s"
-
-#: udata/templates/discussion/item.html:12
-msgid "Discussion started on"
-msgstr "Discussion commencée le"
-
-#: udata/templates/discussion/item.html:12
-msgid "with"
-msgstr "avec"
-
-#: udata/templates/discussion/item.html:13
-#, python-format
-msgid "%(nb)s message"
-msgid_plural "%(nb)s messages"
-msgstr[0] "%(nb)s message"
-msgstr[1] "%(nb)s messages"
-
-#: udata/templates/discussion/item.html:28
-msgid "Deleted message"
-msgstr "Message supprimé"
-
-#: udata/templates/discussion/item.html:38
-msgid "Add a comment"
-msgstr "Ajouter un commentaire"
-
-#: udata/templates/discussion/item.html:52
-msgid "Commenting on this thread"
-msgstr "Commenter cette discussion"
-
-#: udata/templates/discussion/item.html:55
-msgid "You're about to answer to this particular thread about:"
-msgstr "Vous êtes sur le point de répondre à cette discussion sur :"
-
-#: udata/templates/discussion/item.html:64
-msgid "Submit your comment"
-msgstr "Soumettre votre commentaire"
-
-#: udata/templates/discussion/threads.html:20
-msgid "Start a new discussion"
-msgstr "Démarrer une nouvelle discussion"
-
-#: udata/templates/discussion/threads.html:32
-msgid "Starting a new discussion thread"
-msgstr "Démarrer une nouvelle discussion"
-
-#: udata/templates/discussion/threads.html:35
-msgid "You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above."
-msgstr "Vous êtes sur le point de démarrer un nouveau fil de discussion. Vérifiez qu'une discussion sur le même sujet n'existe pas déjà."
-
-#: udata/templates/discussion/threads.html:49
-msgid "Start a discussion"
-msgstr "Démarrer une discussion"
 
 #: udata/templates/errors/400.html:3
 msgid "Bad request"
@@ -2258,26 +2207,9 @@ msgstr "Confirmer maintenant"
 msgid "Number of datasets"
 msgstr "Nombre de jeux de données"
 
-#: udata/templates/organization/card.html:25
-#: udata/templates/organization/search-result.html:23
-#: udata/templates/reuse/search-result.html:27
-#, python-format
-msgid "%(num)s dataset"
-msgid_plural "%(num)s datasets"
-msgstr[0] "%(num)s jeu de données"
-msgstr[1] "%(num)s jeux de données"
-
 #: udata/templates/organization/card.html:29 udata/templates/user/card.html:28
 msgid "Number of reuses"
 msgstr "Nombre de réutilisations"
-
-#: udata/templates/organization/card.html:31
-#: udata/templates/organization/search-result.html:32
-#, python-format
-msgid "%(num)s reuse"
-msgid_plural "%(num)s reuses"
-msgstr[0] "%(num)s réutilisation"
-msgstr[1] "%(num)s réutilisations"
 
 #: udata/templates/organization/display.html:8
 msgid "organization"
@@ -2303,8 +2235,8 @@ msgstr[1] "%(num)d réutilisations privées"
 
 #: udata/templates/organization/display.html:81
 #, python-format
-msgid "See the %(nb)s datasets"
-msgstr "Voir les %(nb)s jeux de données"
+msgid "See the %(nb)d datasets"
+msgstr ""
 
 #: udata/templates/organization/display.html:88
 msgid "Download as CSV"
@@ -2328,8 +2260,8 @@ msgstr "Liste des discussions"
 
 #: udata/templates/organization/display.html:137
 #, python-format
-msgid "See the %(nb)s reuses"
-msgstr "Voir les %(nb)s réutilisations"
+msgid "See the %(nb)d reuses"
+msgstr ""
 
 #: udata/templates/organization/display.html:146
 #: udata/templates/organization/display_base.html:67
@@ -2361,6 +2293,7 @@ msgid "Use of data from that organization by the community"
 msgstr "Usage des données de cette organisation par la communauté."
 
 #: udata/templates/organization/display_base.html:97
+#: udata/templates/organization/search-result.html:41
 #, python-format
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
@@ -2425,13 +2358,6 @@ msgstr "Nombre de réutilisations par cette organisation"
 msgid "Number of reappropriations by the community"
 msgstr "Nombre de réappropriations par la communauté"
 
-#: udata/templates/organization/search-result.html:41
-#, python-format
-msgid "%(num)s reappropriation"
-msgid_plural "%(num)s reappropriations"
-msgstr[0] "%(num)s réappropriation"
-msgstr[1] "%(num)s réappropriations"
-
 #: udata/templates/organization/search-result.html:48
 #: udata/templates/reuse/search-result.html:32
 msgid "Number of stars"
@@ -2440,21 +2366,14 @@ msgstr "Nombre de favoris"
 #: udata/templates/organization/search-result.html:50
 #: udata/templates/reuse/search-result.html:34
 #, python-format
-msgid "%(num)s star"
-msgid_plural "%(num)s stars"
-msgstr[0] "%(num)s favori"
-msgstr[1] "%(num)s favoris"
+msgid "%(num)d star"
+msgid_plural "%(num)d stars"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/search-result.html:57
 msgid "Number of followers"
 msgstr "Nombre d'abonnés"
-
-#: udata/templates/organization/search-result.html:59
-#, python-format
-msgid "%(num)s follower"
-msgid_plural "%(num)s followers"
-msgstr[0] "%(num)s abonné"
-msgstr[1] "%(num)s abonnés"
 
 #: udata/templates/organization/search-result.html:65
 msgid "Number of members"
@@ -2462,10 +2381,10 @@ msgstr "Nombre de membres"
 
 #: udata/templates/organization/search-result.html:67
 #, python-format
-msgid "%(num)s members"
-msgid_plural "%(num)s members"
-msgstr[0] "%(num)s membre"
-msgstr[1] "%(num)s membres"
+msgid "%(num)d members"
+msgid_plural "%(num)d members"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata/templates/organization/sidebar-producer.html:17
 #: udata/templates/reuse/display.html:161
@@ -2543,11 +2462,6 @@ msgstr "Nombre de jeux de données utilisés"
 #, python-format
 msgid "Created by %(user)s"
 msgstr "Créé par %(user)s"
-
-#: udata/templates/reuse/card.html:55
-#, python-format
-msgid "%(user)s"
-msgstr "%(user)s"
 
 #: udata/templates/reuse/display.html:48
 #, python-format
@@ -2944,8 +2858,8 @@ msgstr "utilisateurs"
 
 #: udata/templates/user/reuses.html:35
 #, python-format
-msgid "%(user)s has not yet published any resuse"
-msgstr "%(user)s n'a pas encore publié de réutilisation"
+msgid "%(user)s has not yet published any reuse"
+msgstr ""
 
 #: udata/theme/__init__.py:41
 msgid "Map"
