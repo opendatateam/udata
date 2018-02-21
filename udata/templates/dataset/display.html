@@ -384,7 +384,7 @@
         {% block reuses_section %}
         <h3 id="community-reuses">{{ _('Reuses') }}</h3>
         <div class="row">
-            <div class="col-sm-9 resources-list">
+            <div class="col-sm-9 reuses-list">
                 <div class="card-list card-list--columned">
                     {% for reuse in reuses %}
                     {% set features = ['preview'] %}
@@ -394,15 +394,7 @@
                     {% endfor %}
                 
                     <div class="col-sm-6">
-                        <a class="list-group-item add"
-                            v-el:add-reuse
-                            href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
-                            @click="addReuse($event)">
-                            <div class="format-label">+</div>
-                            <h4 class="list-group-item-heading">
-                                {{ _('Add a reuse') }}
-                            </h4>
-                        </a>
+                         {% include theme('dataset/add-reuse-card.html') %}
 					</div>
  
                 </div>
