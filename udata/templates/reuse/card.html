@@ -52,7 +52,7 @@
             {% if 'preview' in features %}
             <li v-tooltip title="{{ _('Created by %(user)s', user=owner_name(reuse)) }}">
                 <span class="fa fa-user fa-fw"></span>
-                {{ _('%(user)s', user=owner_name_acronym(reuse)) }}
+                {{ owner_name_acronym(reuse) }}
             </li>
             {% endif %}
         </ul>
