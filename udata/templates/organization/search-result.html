@@ -20,7 +20,7 @@
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Number of datasets') }}">
                     <span class="fa fa-cubes fa-fw"></span>
-                    {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
+                    {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
                 </a>
             </li>
             {% endif %}
@@ -29,7 +29,7 @@
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Number of reuses by the organization') }}">
                     <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
-                    {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
+                    {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
                 </a>
             </li>
             {% endif %}
@@ -38,7 +38,7 @@
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Number of reappropriations by the community') }}">
                     <span class="{{ ficon('fa-lightbulb-o') }} fa-fw"></span>
-                    {{ ngettext('%(num)s reappropriation', '%(num)s reappropriations', organization.metrics.permitted_reuses or 0) }}
+                    {{ ngettext('%(num)d reappropriation', '%(num)d reappropriations', organization.metrics.permitted_reuses or 0) }}
                 </a>
             </li>
             {% endif %}
@@ -47,7 +47,7 @@
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Number of stars') }}">
                     <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                    {{ ngettext('%(num)s star', '%(num)s stars', organization.metrics.stars or 0) }}
+                    {{ ngettext('%(num)d star', '%(num)d stars', organization.metrics.stars or 0) }}
                 </a>
             </li>
             {% endif %}
@@ -56,7 +56,7 @@
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Number of followers') }}">
                     <span class="{{ ficon('fa-eye') }} fa-fw"></span>
-                    {{ ngettext('%(num)s follower', '%(num)s followers', organization.metrics.followers or 0) }}
+                    {{ ngettext('%(num)d follower', '%(num)d followers', organization.metrics.followers or 0) }}
                 </a>
             </li>
             {% endif %}
@@ -64,7 +64,7 @@
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Number of members') }}">
                     <span class="fa fa-users fa-fw"></span>
-                    {{ ngettext('%(num)s members', '%(num)s members', organization.members|length) }}
+                    {{ ngettext('%(num)d members', '%(num)d members', organization.members|length) }}
                 </a>
             </li>
         </ul>

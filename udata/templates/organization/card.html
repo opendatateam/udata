@@ -22,13 +22,13 @@
             {% if organization.metrics.datasets %}
             <li v-tooltip title="{{ _('Number of datasets') }}">
                 <span class="{{ ficon('fa-cubes') }} fa-fw"></span>
-                {{ ngettext('%(num)s dataset', '%(num)s datasets', organization.metrics.datasets or 0) }}
+                {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
             </li>
             {% endif %}
             {% if organization.metrics.reuses %}
             <li v-tooltip title="{{ _('Number of reuses') }}">
                 <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
-                {{ ngettext('%(num)s reuse', '%(num)s reuses', organization.metrics.reuses or 0) }}
+                {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
             </li>
             {% endif %}
             <li v-tooltip title="{{ _('Stars') }}">
