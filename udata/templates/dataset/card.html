@@ -1,7 +1,7 @@
 {% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
-{% set dataset_url = url_for('datasets.show', dataset=dataset) %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
-<div class="card dataset-card">
+<a class="card dataset-card"  href="{{ url_for('datasets.show', dataset=dataset) }}"
+     href="{{ url_for('datasets.show', dataset=dataset) }}">
     {% if dataset.organization %}
         <div class="card-logo">
             <img alt="{{ dataset.organization.name }}"
@@ -15,11 +15,7 @@
     </div>
     {% endif %}
     <div class="card-body">
-        <h4>
-            <a href="{{ dataset_url }}" title="{{dataset.title}}">
-                {{ dataset.title }}
-            </a>
-        </h4>
+        <h4>{{ dataset.title }}</h4>
 
         <div class="clamp-3">{{ dataset.description|mdstrip(180) }}</div>
     </div>
@@ -67,5 +63,5 @@
         </ul>
 
     </footer>
-</div>
+</a>
 {% endcache %}
