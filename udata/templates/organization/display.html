@@ -78,7 +78,7 @@
             <a class="btn btn-default"
                 href="{{ url_for('datasets.list', sort='-created', **kwargs) }}">
                 <span class="fa fa-fw fa-list"></span>
-                {{ _('See the %(nb)s datasets', nb=datasets.total) }}
+                {{ _('See the %(nb)d datasets', nb=datasets.total) }}
             </a>
             {% endif %}
             <div class="dropdown">
@@ -134,7 +134,7 @@
             <a class="btn btn-default"
                 href="{{ url_for('reuses.list', sort='-created', **kwargs) }}">
                 <span class="fa fa-fw fa-list" ></span>
-                {{ _('See the %(nb)s reuses', nb=reuses.total) }}
+                {{ _('See the %(nb)d reuses', nb=reuses.total) }}
             </a>
         </p>
         {% endif %}
