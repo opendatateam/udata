@@ -93,7 +93,8 @@ def _load_frontend(request):
     if app.config['THEME'] != 'default':
         # Unload theme to allow multiple run with initialization
         from udata import theme
-        theme_module = theme.current.entrypoint.module_name
+        with app.app_context():
+            theme_module = theme.current.entrypoint.module_name
         def unload_theme():
             if theme_module in sys.modules:
                 del sys.modules[theme_module]
