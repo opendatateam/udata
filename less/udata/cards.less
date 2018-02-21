@@ -33,14 +33,12 @@
     &:hover {
         color: @color;
         text-decoration: none;
-        border: 1px solid @link-hover-color;
-        border-bottom-width: 2px;
+        border-color: @link-hover-color;
     }
 
     .card-logo {
-        .pull-left();
         background-color: white;
-        flex: 0 0 (@logo-size + @card-padding);
+        flex: 0 0 @logo-size;
 
         img {
             border: 1px solid @gray-lighter;
@@ -79,16 +77,20 @@
     }
 
     .card-body {
-        flex: 1 0 80%;
+        @body-padding: @logo-size + @card-padding;
+        flex: 1 0 calc(100% ~"-" @body-padding);
+        max-width: calc(100% ~"-" @body-padding);
         font-size: @card-font-size;
         line-height: 1.3em;
         min-height: 6em;
+        margin-left: @card-padding;
     }
     &.card--with-cover {
         .card-body,
         .card__footer {
             flex: 1 0 100%;
             margin-left: 0;
+            max-width: 100%;
         }
     }
 
@@ -96,15 +98,13 @@
         @color: rgb(126, 126, 126);
 
         color: @color;
-        flex: 1 0 80%;
+        flex: 1 0 100%;
         font-size: .9em;
         font-weight: bold;
-        margin-left: @logo-size + @card-padding;
         margin-top: auto;
         padding: @card-padding 0 0;
         position: relative;
         white-space: nowrap;
-        width: 100%;
         .clamp-uniline;
 
         &:after {
