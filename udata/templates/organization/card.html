@@ -13,7 +13,7 @@
         <div class="clamp-3">{{ organization.description|mdstrip(180) }}</div>
     </div>
 
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             {% if organization.metrics.datasets %}
             <li v-tooltip title="{{ _('Number of datasets') }}">

@@ -4,7 +4,7 @@
     href="{{ url_for('reuses.show', reuse=reuse) }}"
     title="{{ reuse.title }}">
     {% if 'preview' in features %}
-    <div class="card__cover">
+    <div class="card-cover">
         <img class="media-object img-responsive" alt="{{ reuse.title }}"
             src="{{ reuse.image|placeholder('reuse') }}">
     </div>
@@ -22,7 +22,7 @@
     </div>
 
     {% if 'footer' in features or 'no-footer' not in features %}
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             <li v-tooltip title="{{ _('Type') }}">
                 <span class="fa fa-file fa-fw"></span>

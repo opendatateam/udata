@@ -21,7 +21,7 @@
         <div class="clamp-3">{{{ organization.description | markdown 180 }}}</div>
     </div>
 
-    <footer v-if="organization.metrics" class="card__footer">
+    <footer v-if="organization.metrics" class="card-footer">
         <ul>
             <li v-tooltip :title="_('Datasets')">
                 <span class="fa fa-cubes fa-fw"></span>

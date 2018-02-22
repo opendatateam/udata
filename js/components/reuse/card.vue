@@ -13,7 +13,7 @@
         <div class="clamp-3">{{{ reuse.description | markdown 120 }}}</div>
     </div>
 
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             <li v-tooltip :title="_('Type')">
                 <span class="fa fa-file fa-fw"></span>

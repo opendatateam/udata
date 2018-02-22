@@ -20,7 +20,7 @@
         <div class="clamp-3">{{{ dataset.description | markdown 180 }}}</div>
     </div>
 
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             <li v-tooltip :title="_('Resources count')">
                 <span class="fa fa-files-o fa-fw"></span>
