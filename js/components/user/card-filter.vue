@@ -21,7 +21,7 @@
         </form>
     </div>
 </div>
-<div class="row user-card-filter-cardlist" v-if="completions">
+<div class="card-list card-list--columned user-card-filter-cardlist" v-if="completions">
     <div :class="cardclass" v-for="user in users">
         <user-card :user="user"></user-card>
     </div>

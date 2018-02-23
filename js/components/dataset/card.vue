@@ -1,8 +1,8 @@
 <template>
-<div class="card dataset-card">
-    <a v-if="dataset.organization" class="card-logo" :href="dataset.page">
+<a class="card dataset-card" :href="dataset.page" :title="dataset.title">
+    <div v-if="dataset.organization" class="card-logo">
         <img :alt="dataset.organization.name" :src="logo">
-    </a>
+    </div>
 
     <img v-if="dataset.organization && dataset.organization.public_service"
         :src="certified" alt="certified" class="certified"
@@ -11,12 +11,7 @@
         popover-trigger="hover"/>
 
     <div class="card-body">
-        <h4>
-            <a :href="dataset.page" :title="dataset.title">
-                {{ dataset.title }}
-            </a>
-        </h4>
-
+        <h4>{{ dataset.title }}</h4>
         <div class="clamp-3">{{{ dataset.description | markdown 180 }}}</div>
     </div>
 
@@ -53,7 +48,7 @@
         </ul>
 
     </footer>
-</div>
+</a>
 </template>
 
 <script>

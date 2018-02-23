@@ -29,17 +29,21 @@
 
     zoom: 1;
 
-    &:hover {
+    &:hover, &.selected {
         color: @color;
         text-decoration: none;
         border-color: @link-hover-color;
     }
 
-    .card-logo {
-        background-color: white;
-        flex: 0 0 @logo-size;
+    &.selected {
+        background-color: lighten(blue, 45%);
+    }
 
+    .card-logo {
+        flex: 0 0 @logo-size;
+        
         img {
+            background-color: white;
             border: 1px solid @gray-lighter;
             max-width: @logo-size;
             max-height: @logo-size;
@@ -159,37 +163,37 @@
 
     &.dataset-card {
         border-bottom-color: @dataset-color;
-        &:hover {
+        &:hover, &.selected {
             border-color: @dataset-color;
         }
     }
     &.reuse-card {
         border-bottom-color: @reuse-color;
-        &:hover {
+        &:hover, &.selected {
             border-color: @reuse-color;
         }
     }
     &.resource-card {
         border-bottom-color: @resource-color;
-        &:hover {
+        &:hover, &.selected {
             border-color: @resource-color;
         }
     }
     &.organization-card {
         border-bottom-color: @organization-color;
-        &:hover {
+        &:hover, &.selected {
             border-color: @organization-color;
         }
     }
     &.territory-card {
         border-bottom-color: @territory-color;
-        &:hover {
+        &:hover, &.selected {
             border-color: @territory-color;
         }
     }
     &.user-card {
         border-bottom-color: @user-color;
-        &:hover {
+        &:hover, &.selected {
             border-color: @user-color;
         }
     }

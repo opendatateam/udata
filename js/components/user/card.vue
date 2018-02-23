@@ -1,16 +1,11 @@
 <template>
-<div class="card user-card"
-    :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
-    <a class="card-logo">
+<a class="card user-card" :title="user | display"
+    :class="{ 'pointer': clickable, 'selected': selected }" @click.prevent="click">
+    <div class="card-logo">
         <img :alt="user | display" :src="user | avatar_url 60">
-    </a>
+    </div>
     <div class="card-body">
-        <h4>
-            <a :title="user | display">
-                {{ user | display }}
-            </a>
-        </h4>
-
+        <h4>{{ user | display }}</h4>
         <div class="clamp-3">{{{ user.about | markdown 180 }}}</div>
     </div>
 
@@ -30,7 +25,7 @@
             </li>
         </ul>
     </footer>
-</div>
+</a>
 </template>
 
 <script>

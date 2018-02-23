@@ -20,7 +20,7 @@
         </form>
     </div>
 </div>
-<div class="row org-card-filter-cardlist" v-if="completions">
+<div class="card-list card-list--columned org-card-filter-cardlist" v-if="completions">
     <div :class="cardclass" v-for="organization in organizations">
         <card :organization="organization" :selected="selected == organization">
         </card>

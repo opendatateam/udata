@@ -1,15 +1,10 @@
 <template>
-<div class="card reuse-card">
-    <a class="card-logo" :href="reuse.page">
+<a class="card reuse-card" :href="reuse.page" :title="reuse.title">
+    <div class="card-logo">
         <img :alt="reuse.title" :src="reuse.image">
-    </a>
+    </div>
     <div class="card-body">
-        <h4>
-            <a :href="reuse.page" :title="reuse.title">
-                {{ reuse.title | truncate 100 }}
-            </a>
-        </h4>
-
+        <h4>{{ reuse.title | truncate 100 }}</h4>
         <div class="clamp-3">{{{ reuse.description | markdown 120 }}}</div>
     </div>
 
@@ -30,7 +25,7 @@
             </li>
         </ul>
     </footer>
-</div>
+</a>
 </template>
 
 <script>

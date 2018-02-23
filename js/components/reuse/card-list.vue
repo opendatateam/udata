@@ -1,6 +1,7 @@
 <style lang="less">
 .reuses-cards-widget {
     @field-height: 34px;
+    @card-padding: 8px;
 
     .box-footer {
         padding: 0;
@@ -31,15 +32,15 @@
 
     .reuse-card-container {
         button.close {
-            position: relative;
-            right: 10px;
+            position: absolute;
+            right: @card-padding + 12px;
             top: 5px;
             z-index: 15;
             color: red;
             opacity: 1;
 
             &:hover {
-                right: 8px;
+                right: @card-padding + 10px;
                 top: 2px;
                 font-size: 2em;
             }
@@ -65,8 +66,8 @@
     <box :title="title" icon="retwett"
         boxclass="box-solid reuses-cards-widget"
         footerclass="text-center" :footer="true" :loading="loading">
-        <div v-el:sortable>
-            <div class="reuse-card-container"
+        <div class="card-list card-list--columned" v-el:sortable>
+            <div class="col-xs-12 reuse-card-container"
                 v-for="reuse in (editing ? sorted : reuses)"
                 :data-id="reuse.id"
             >
