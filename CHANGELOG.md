@@ -4,7 +4,7 @@
 
 - Make use of [udata pytest plugin](https://github.com/opendatateam/udata#1400) [#254](https://github.com/etalab/udata-gouvfr/pull/254)
 - Expose new entrypoints. Plugins and theme translations are now splitted [#263](https://github.com/etalab/udata-gouvfr/pull/263)
-- Align card components design [#252](https://github.com/etalab/udata-gouvfr/pull/252)
+- Align card components design [#252](https://github.com/etalab/udata-gouvfr/pull/252) [#272](https://github.com/etalab/udata-gouvfr/pull/272)
 - Discourse timeout and response parse error catch [#267](https://github.com/etalab/udata-gouvfr/pull/267)
 - Add tracking on home page call to action [#271](https://github.com/etalab/udata-gouvfr/pull/271)
 - Add tracking on carousel elements [#268](https://github.com/etalab/udata-gouvfr/pull/268)
