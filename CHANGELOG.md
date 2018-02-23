@@ -6,6 +6,7 @@
 - Expose new entrypoints. Plugins and theme translations are now splitted [#263](https://github.com/etalab/udata-gouvfr/pull/263)
 - Align card components design [#252](https://github.com/etalab/udata-gouvfr/pull/252)
 - Discourse timeout and response parse error catch [#267](https://github.com/etalab/udata-gouvfr/pull/267)
+- Add tracking on carousel elements [#268](https://github.com/etalab/udata-gouvfr/pull/268)
 
 ## 1.2.5 (2018-02-05)
 
