@@ -1,19 +1,15 @@
 <template>
-<div class="card reuse-card">
-    <a class="card-logo" :href="reuse.page">
+<a class="card reuse-card" :class="{ 'selected': selected }" :title="reuse.title"
+    :href="clickable" @click.prevent="click">
+    <div class="card-logo">
         <img :alt="reuse.title" :src="reuse.image">
-    </a>
+    </div>
     <div class="card-body">
-        <h4>
-            <a :href="reuse.page" :title="reuse.title">
-                {{ reuse.title | truncate 100 }}
-            </a>
-        </h4>
-
+        <h4>{{ reuse.title | truncate 100 }}</h4>
         <div class="clamp-3">{{{ reuse.description | markdown 120 }}}</div>
     </div>
 
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             <li v-tooltip :title="_('Type')">
                 <span class="fa fa-file fa-fw"></span>
@@ -30,7 +26,7 @@
             </li>
         </ul>
     </footer>
-</div>
+</a>
 </template>
 
 <script>
@@ -61,9 +57,13 @@ export default {
             default: () => new Reuse({mask: MASK})
         },
         reuseid: null,
-        reactive: {
+        clickable: {
             type: Boolean,
             default: true
+        },
+        selected: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -103,6 +103,11 @@ export default {
         fetch() {
             if (this.reuseid) {
                 this.reuse.fetch(this.reuseid);
+            }
+        },
+        click() {
+            if (this.clickable) {
+                this.$dispatch('reuse:clicked', this.reuse);
             }
         }
     },

@@ -1,9 +1,9 @@
 <template>
-<div class="card organization-card"
-    :class="{ 'pointer': clickable, 'selected': selected }" @click="click">
-    <a class="card-logo">
+<a class="card organization-card" :class="{ selected: selected }" :title="organization.name"
+    :href="clickable" @click.prevent="click">
+    <div class="card-logo">
         <img :alt="organization.name" :src="logo">
-    </a>
+    </div>
 
     <img v-if="organization.public_service"
         :src="certified_stamp" alt="certified" class="certified"
@@ -12,16 +12,11 @@
         popover-trigger="hover"/>
 
     <div class="card-body">
-        <h4>
-            <a :href="organization.page" :title="organization.name">
-                {{ organization.name }}
-            </a>
-        </h4>
-
+        <h4>{{ organization.name }}</h4>
         <div class="clamp-3">{{{ organization.description | markdown 180 }}}</div>
     </div>
 
-    <footer v-if="organization.metrics" class="card__footer">
+    <footer v-if="organization.metrics" class="card-footer">
         <ul>
             <li v-tooltip :title="_('Datasets')">
                 <span class="fa fa-cubes fa-fw"></span>
@@ -37,7 +32,7 @@
             </li>
         </ul>
     </footer>
-</div>
+</a>
 </template>
 
 <script>
@@ -54,7 +49,7 @@ export default {
         orgid: null,
         clickable: {
             type: Boolean,
-            default: true
+            default: false
         },
         selected: {
             type: Boolean,

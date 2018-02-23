@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="publish-as">
 <div class="row">
     <p class="col-xs-12 text-center lead">
         {{ _('Choose under which identity you want to publish') }}
@@ -7,8 +7,12 @@
 </div>
 <div class="row" v-if="$root.me.organizations && $root.me.organizations.length">
     <p class="col-xs-12">{{ _('Publish as an organization') }}</p>
-    <div v-for="organization in $root.me.organizations" class="col-xs-12 col-sm-6 col-lg-4">
-        <org-card :organization="organization" :selected="selected == organization"></org-card>
+    
+    <div v-for="organization in $root.me.organizations" :key="organization.id"
+        class="col-xs-12 col-sm-6 col-lg-4">
+        <org-card clickable :organization="organization"
+            :selected="selected == organization">
+        </org-card>
     </div>
 </div>
 <div class="row text-center" v-if="$root.me.organizations && !$root.me.organizations.length">
@@ -25,15 +29,15 @@
 <div class="row">
     <p class="col-xs-12">{{ _('Publish in your own name') }}</p>
     <div class="col-xs-12 col-sm-6 col-lg-4">
-        <user-card :user="$root.me" :selected="!selected"></user-card>
+        <user-card :user="$root.me" :selected="!selected" clickable></user-card>
     </div>
 </div>
 <div class="row" v-if="$root.me.is_admin">
     <p class="col-xs-12 text-center lead">
        {{ _('As administrator you can choose any organization to publish') }}
     </p>
-    <org-filter cardclass="col-xs-12 col-sm-6 col-lg-4" :selected="selected"></org-filter>
 </div>
+<org-filter cardclass="col-xs-12 col-sm-6 col-lg-4" :selected="selected"></org-filter>
 </div>
 </template>
 
@@ -67,3 +71,12 @@ export default {
     }
 };
 </script>
+
+<style lang="less">
+.publish-as {
+    .card {
+        margin-bottom: 10px;
+    }
+}
+</style>
+

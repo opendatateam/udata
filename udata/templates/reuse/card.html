@@ -1,33 +1,28 @@
 {% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
 {% set features = features or [] %}
-<div class="card reuse-card {% if 'preview' in features %}card--with-cover{% endif %}">
+<a class="card reuse-card {% if 'preview' in features %}card--with-cover{% endif %}"
+    href="{{ url_for('reuses.show', reuse=reuse) }}"
+    title="{{ reuse.title }}">
     {% if 'preview' in features %}
-    <div class="card__cover">
-        <a href="{{ url_for('reuses.show', reuse=reuse) }}">
-            <img class="media-object img-responsive" alt="{{ reuse.title }}"
-                src="{{ reuse.image|placeholder('reuse') }}">
-        </a>
+    <div class="card-cover">
+        <img class="media-object img-responsive" alt="{{ reuse.title }}"
+            src="{{ reuse.image|placeholder('reuse') }}">
     </div>
     {% else %}
-    <a class="card-logo" href="{{ url_for('reuses.show', reuse=reuse) }}">
+    <div class="card-logo">
         <img alt="{{ reuse.title }}"
             src="{{ reuse.image(86)|placeholder('reuse') }}"
             width="86" height="86">
-    </a>
+    </div>
     {% endif %}
 
     <div class="card-body">
-        <h4>
-            <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
-                {{ reuse.title }}
-            </a>
-        </h4>
-
+        <h4>{{ reuse.title }}</h4>
         <div class="clamp-3">{{ reuse.description|mdstrip(180) }}</div>
     </div>
 
     {% if 'footer' in features or 'no-footer' not in features %}
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             <li v-tooltip title="{{ _('Type') }}">
                 <span class="fa fa-file fa-fw"></span>
@@ -58,5 +53,5 @@
         </ul>
     </footer>
     {% endif %}
-</div>
+</a>
 {% endcache %}

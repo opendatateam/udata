@@ -5,6 +5,7 @@
 </style>
 
 <template>
+<div>
 <div class="page-header">
   <h1>{{ _('Ensure your organization does not exists') }}</h1>
 </div>
@@ -13,7 +14,8 @@
         <form class="search-form">
             <div class="input-group">
                 <input type="text" name="search" class="form-control" autocomplete="off"
-                    :placeholder="_('Search')" v-model="search_query">
+                    :placeholder="_('Search')" v-model="search_query"
+                />
                 <div class="input-group-btn">
                     <button type="submit" name="submit" class="btn btn-warning btn-flat">
                         <span class="fa fa-search"></span>
@@ -23,15 +25,16 @@
         </form>
     </div>
 </div>
-<div class="row" v-if="completions">
-    <div v-for="organization in organizations" class="col-xs-12 col-md-4 col-lg-3">
-        <organization-card :organization="organization"></organization-card>
+<div class="card-list card-list--columned" v-if="completions">
+    <div v-for="organization in organizations" :key="organization.id" class="col-xs-12 col-md-4 col-lg-3">
+        <organization-card :organization="organization" clickable></organization-card>
     </div>
 </div>
 <div class="row" v-if="search_query && !organizations.length">
     <p class="col-xs-12 lead text-center">
         {{ _('No organization found. You can go to the next step to create your own one.') }}
     </p>
+</div>
 </div>
 </template>
 
