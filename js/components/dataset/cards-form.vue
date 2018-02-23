@@ -70,8 +70,8 @@
     <div class="row" v-show="!datasets.length">
         <p class="lead text-center">{{ _('No related datasets') }}</p>
     </div>
-    <div class="row" v-el:sortable v-show="datasets.length">
-        <div class="col-md-6 dataset-card-container"
+    <div class="card-list card-list--columned" v-el:sortable v-show="datasets.length">
+        <div class="col-xs-12 col-md-6 col-lg-4 dataset-card-container"
             v-for="datasetid in datasets | ids"
             :data-id="datasetid">
             <button type="button" class="close" @click="on_remove(datasetid)">
