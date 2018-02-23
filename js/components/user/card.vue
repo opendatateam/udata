@@ -1,6 +1,6 @@
 <template>
-<a class="card user-card" :title="user | display"
-    :class="{ 'pointer': clickable, 'selected': selected }" @click.prevent="click">
+<a class="card user-card" :class="{ selected: selected }" :title="user | display"
+    :href="clickable" @click.prevent="click">
     <div class="card-logo">
         <img :alt="user | display" :src="user | avatar_url 60">
     </div>
@@ -40,7 +40,7 @@ export default {
         userid: null,
         clickable: {
             type: Boolean,
-            default: true
+            default: false
         },
         selected: {
             type: Boolean,

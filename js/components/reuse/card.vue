@@ -1,5 +1,6 @@
 <template>
-<a class="card reuse-card" :href="reuse.page" :title="reuse.title">
+<a class="card reuse-card" :class="{ 'selected': selected }" :title="reuse.title"
+    :href="clickable" @click.prevent="click">
     <div class="card-logo">
         <img :alt="reuse.title" :src="reuse.image">
     </div>
@@ -56,9 +57,13 @@ export default {
             default: () => new Reuse({mask: MASK})
         },
         reuseid: null,
-        reactive: {
+        clickable: {
             type: Boolean,
             default: true
+        },
+        selected: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -98,6 +103,11 @@ export default {
         fetch() {
             if (this.reuseid) {
                 this.reuse.fetch(this.reuseid);
+            }
+        },
+        click() {
+            if (this.clickable) {
+                this.$dispatch('reuse:clicked', this.reuse);
             }
         }
     },

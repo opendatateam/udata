@@ -1,5 +1,6 @@
 <template>
-<a class="card dataset-card" :href="dataset.page" :title="dataset.title">
+<a class="card dataset-card" :class="{ selected: selected }" :title="dataset.title"
+    :href="clickable" @click.prevent="click">
     <div v-if="dataset.organization" class="card-logo">
         <img :alt="dataset.organization.name" :src="logo">
     </div>
@@ -72,9 +73,13 @@ export default {
             default: () => new Dataset({mask: MASK})
         },
         datasetid: null,
-        reactive: {
+        clickable: {
             type: Boolean,
-            default: true
+            default: false
+        },
+        selected: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -96,6 +101,11 @@ export default {
         fetch() {
             if (this.datasetid) {
                 this.dataset.fetch(this.datasetid);
+            }
+        },
+        click() {
+            if (this.clickable) {
+                this.$dispatch('dataset:clicked', this.dataset);
             }
         }
     },

@@ -1,6 +1,6 @@
 <template>
-<a class="card organization-card" :href="organization.page" :title="organization.name"
-    :class="{ 'pointer': clickable, 'selected': selected }" @click.prevent="click">
+<a class="card organization-card" :class="{ selected: selected }" :title="organization.name"
+    :href="clickable" @click.prevent="click">
     <div class="card-logo">
         <img :alt="organization.name" :src="logo">
     </div>
@@ -49,7 +49,7 @@ export default {
         orgid: null,
         clickable: {
             type: Boolean,
-            default: true
+            default: false
         },
         selected: {
             type: Boolean,

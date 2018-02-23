@@ -69,7 +69,7 @@
         <div class="card-list card-list--columned" v-el:sortable>
             <div class="col-xs-12 reuse-card-container"
                 v-for="reuse in (editing ? sorted : reuses)"
-                :data-id="reuse.id"
+                :key="reuse.id" :data-id="reuse.id"
             >
                 <button type="button" class="close"
                     v-if="editing"

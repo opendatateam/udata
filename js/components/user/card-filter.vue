@@ -11,7 +11,7 @@
         <form class="search-form">
             <div class="input-group">
                 <input type="text" name="search" class="form-control"
-                    :placeholder="_('Search')" v-model="search_query">
+                    :placeholder="_('Search')" v-model="search_query" />
                 <div class="input-group-btn">
                     <button type="submit" name="submit" class="btn btn-warning btn-flat">
                         <span class="fa fa-search"></span>
@@ -22,8 +22,8 @@
     </div>
 </div>
 <div class="card-list card-list--columned user-card-filter-cardlist" v-if="completions">
-    <div :class="cardclass" v-for="user in users">
-        <user-card :user="user"></user-card>
+    <div :class="cardclass" v-for="user in users" :key="user.id">
+        <user-card :user="user" clickable></user-card>
     </div>
 </div>
 <div class="row" v-if="!search_query">
