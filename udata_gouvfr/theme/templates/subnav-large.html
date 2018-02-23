@@ -34,7 +34,8 @@
             <div class="collapse subnav-collapse">
                 <button class="btn btn-primary btn-big btn-transparent btn-left"
                         title="{{ _('Contribute!') }}"
-                        @click="$refs.publishActionModal.show">
+                        @click="$refs.publishActionModal.show"
+                        data-track-content data-content-name="CTA" data-content-piece="home/contribute">
                     <span class="fa fa-plus"></span>
                     {{ _('Contribute!' )}}
                 </button>
