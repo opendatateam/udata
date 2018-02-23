@@ -10,8 +10,6 @@
     color: @color;
     background-color: white;
     border: 1px solid darken(@gray-lighter, 16%);
-    border-bottom-color: @default-concept-color;
-    border-bottom-width: 2px;
     border-radius: 3px;
 
     @card-font-size: 14px;
@@ -160,46 +158,9 @@
         margin-bottom: 10px;
     }
 
-
-    &.dataset-card {
-        border-bottom-color: @dataset-color;
-        &:hover, &.selected {
-            border-color: @dataset-color;
-        }
-    }
-    &.reuse-card {
-        border-bottom-color: @reuse-color;
-        &:hover, &.selected {
-            border-color: @reuse-color;
-        }
-    }
-    &.resource-card {
-        border-bottom-color: @resource-color;
-        &:hover, &.selected {
-            border-color: @resource-color;
-        }
-    }
-    &.organization-card {
-        border-bottom-color: @organization-color;
-        &:hover, &.selected {
-            border-color: @organization-color;
-        }
-    }
-    &.territory-card {
-        border-bottom-color: @territory-color;
-        &:hover, &.selected {
-            border-color: @territory-color;
-        }
-    }
-    &.user-card {
-        border-bottom-color: @user-color;
-        &:hover, &.selected {
-            border-color: @user-color;
-        }
-    }
-
     &.add {
         text-align: center;
+        border-style: dashed;
 
         .card-cover {
             background-color: @gray-lighter;
