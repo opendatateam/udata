@@ -25,12 +25,6 @@ A boolean specifying the debug mode.
 
 A boolean specifying if the emails should actually be sent.
 
-### USE_SSL
-
-**default**: `False`
-
-A boolean used to force SSL usage for logged in users.
-
 ### DEFAULT_LANGUAGE
 
 **default**: `'en'`
@@ -98,6 +92,7 @@ The duration used for templates' cache, in minutes.
 ```
 
 This is the allowed resources extensions list that user can upload.
+
 
 ## Spatial configuration
 
@@ -439,7 +434,6 @@ SEND_MAIL = False
 
 SECRET_KEY = 'A unique secret key'
 
-USE_SSL = True
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'

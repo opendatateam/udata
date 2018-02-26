@@ -7,7 +7,6 @@ import logging
 import os
 import types
 
-from importlib import import_module
 from os.path import abspath, join, dirname, isfile, exists
 
 from flask import (

@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import Blueprint
-from flask import current_app
-from flask import redirect
-from flask import request
-
-from udata.auth import current_user
-
 from flask_security.views import change_password
 from flask_security.views import confirm_email
 from flask_security.views import forgot_password
@@ -88,15 +81,3 @@ def create_security_blueprint(state, import_name):
         )(confirm_email)
 
     return bp
-
-auth = Blueprint('auth', __name__)
-
-
-@auth.before_app_request
-def ensure_https_authenticated_users():
-    # Force authenticated users to use https
-    if (not current_app.config.get('TESTING', False) and
-            current_app.config.get('USE_SSL', False) and
-            current_user.is_authenticated and not
-            request.is_secure):
-        return redirect(request.url.replace('http://', 'https://'))
