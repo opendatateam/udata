@@ -1,8 +1,9 @@
 <template>
-<div class="card dataset-card">
-    <a v-if="dataset.organization" class="card-logo" :href="dataset.page">
+<a class="card dataset-card" :class="{ selected: selected }" :title="dataset.title"
+    :href="clickable" @click.prevent="click">
+    <div v-if="dataset.organization" class="card-logo">
         <img :alt="dataset.organization.name" :src="logo">
-    </a>
+    </div>
 
     <img v-if="dataset.organization && dataset.organization.public_service"
         :src="certified" alt="certified" class="certified"
@@ -11,16 +12,11 @@
         popover-trigger="hover"/>
 
     <div class="card-body">
-        <h4>
-            <a :href="dataset.page" :title="dataset.title">
-                {{ dataset.title }}
-            </a>
-        </h4>
-
+        <h4>{{ dataset.title }}</h4>
         <div class="clamp-3">{{{ dataset.description | markdown 180 }}}</div>
     </div>
 
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             <li v-tooltip :title="_('Resources count')">
                 <span class="fa fa-files-o fa-fw"></span>
@@ -53,7 +49,7 @@
         </ul>
 
     </footer>
-</div>
+</a>
 </template>
 
 <script>
@@ -77,9 +73,13 @@ export default {
             default: () => new Dataset({mask: MASK})
         },
         datasetid: null,
-        reactive: {
+        clickable: {
             type: Boolean,
-            default: true
+            default: false
+        },
+        selected: {
+            type: Boolean,
+            default: false
         }
     },
     computed: {
@@ -101,6 +101,11 @@ export default {
         fetch() {
             if (this.datasetid) {
                 this.dataset.fetch(this.datasetid);
+            }
+        },
+        click() {
+            if (this.clickable) {
+                this.$dispatch('dataset:clicked', this.dataset);
             }
         }
     },

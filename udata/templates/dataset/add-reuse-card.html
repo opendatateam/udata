@@ -1,0 +1,8 @@
+<a class="card reuse-card card--with-cover add" v-el:add-reuse
+    href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}"
+    @click="addReuse($event)">
+    <div class="card-cover"><span>+</span></div>
+    <div class="card-body">
+        <h4>{{ _('Add a reuse') }}</h4>
+    </div>
+</a>

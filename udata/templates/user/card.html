@@ -1,22 +1,17 @@
 {% cache cache_duration, 'user-card', user.id|string, g.lang_code %}
 {% set user_url = url_for('users.show', user=user) %}
-<div class="card user-card">
-    <a class="card-logo" href="{{ user_url }}">
+<a class="card user-card" href="{{ user_url }}" title="{{user.fullname}}">
+    <div class="card-logo">
         <img src="{{ user|avatar_url(60) }}" alt=""
             width="60" height="60">
-    </a>
+    </div>
 
     <div class="card-body">
-        <h4>
-            <a href="{{ user_url }}" title="{{user.fullname}}">
-                {{ user.fullname }}
-            </a>
-        </h4>
-
+        <h4>{{ user.fullname }}</h4>
         <div class="clamp-3">{{ user.about|mdstrip(180) }}</div>
     </div>
 
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             {% if user.metrics.datasets %}
             <li v-tooltip title="{{ _('Number of datasets') }}">
@@ -36,5 +31,5 @@
             </li>
         </ul>
     </footer>
-</div>
+</a>
 {% endcache %}

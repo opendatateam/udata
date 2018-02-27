@@ -25,11 +25,11 @@
             <dd><span class="label label-{{ item.status | statusClass }}">{{ item.status | statusI18n }}</span></dd>
             <dt v-if="item.dataset">{{ _('Dataset') }}</dt>
             <dd v-if="item.dataset">
-                <dataset-card class="col-xs-12"
+                <dataset-card class="col-xs-12" clickable
                     v-if="item.dataset.id"
                     :datasetid="item.dataset.id">
                 </dataset-card>
-                <dataset-card class="col-xs-12"
+                <dataset-card class="col-xs-12" clickable
                     v-if="!item.dataset.id"
                     :dataset="item.dataset">
                 </dataset-card>
@@ -62,6 +62,11 @@ export default {
     components: {Modal, DatasetCard},
     props: {
         item: Object,
+    },
+    events: {
+        'dataset:clicked': function(dataset) {
+            document.location = dataset.page;
+        }
     },
     filters: {
         statusClass(value) {

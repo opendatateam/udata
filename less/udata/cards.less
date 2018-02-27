@@ -1,22 +1,22 @@
 
 @bg-gray: #F0F0F0;
-@title-font: Arial, Arial, Helvetica, sans-serif;
 
 @card-padding: 8px;
 @cover-height: 110px;
 @card-footer-size: 24px;
 
 .card {
+    @color: #494949; 
+    color: @color;
     background-color: white;
     border: 1px solid darken(@gray-lighter, 16%);
-    border-bottom-color: @default-concept-color;
-    border-bottom-width: 2px;
     border-radius: 3px;
 
     @card-font-size: 14px;
     @logo-size: 60px;
     @logo-margin: 5px;
     @footer-line-height: 25px;
+
 
     display: flex;
     flex-direction: row;
@@ -27,12 +27,21 @@
 
     zoom: 1;
 
-    .card-logo {
-        .pull-left();
-        background-color: white;
-        flex: 0 0 (@logo-size + @card-padding);
+    &:hover, &.selected {
+        color: @color;
+        text-decoration: none;
+        border-color: @link-hover-color;
+    }
 
+    &.selected {
+        background-color: lighten(blue, 45%);
+    }
+
+    .card-logo {
+        flex: 0 0 @logo-size;
+        
         img {
+            background-color: white;
             border: 1px solid @gray-lighter;
             max-width: @logo-size;
             max-height: @logo-size;
@@ -51,7 +60,7 @@
         cursor: pointer;
     }
 
-    .card__cover {
+    .card-cover {
         flex: 1 0 100%;
         height: @cover-height;
         margin-bottom: @card-padding;
@@ -69,32 +78,34 @@
     }
 
     .card-body {
-        flex: 1 0 80%;
+        @body-padding: @logo-size + @card-padding;
+        flex: 1 0 calc(100% ~"-" @body-padding);
+        max-width: calc(100% ~"-" @body-padding);
         font-size: @card-font-size;
         line-height: 1.3em;
         min-height: 6em;
+        margin-left: @card-padding;
     }
     &.card--with-cover {
         .card-body,
-        .card__footer {
+        .card-footer {
             flex: 1 0 100%;
             margin-left: 0;
+            max-width: 100%;
         }
     }
 
-    .card__footer {
+    .card-footer {
         @color: rgb(126, 126, 126);
 
         color: @color;
-        flex: 1 0 80%;
+        flex: 1 0 100%;
         font-size: .9em;
         font-weight: bold;
-        margin-left: @logo-size + @card-padding;
         margin-top: auto;
         padding: @card-padding 0 0;
         position: relative;
         white-space: nowrap;
-        width: 100%;
         .clamp-uniline;
 
         &:after {
@@ -138,38 +149,32 @@
 
     h4 {
         font-size: 16px;
-        margin-top: 0;
+        font-weight: bold;
         line-height: inherit;
-
-        a {
-            color: #494949;
-            font-family: @title-font;
-            font-weight: bold;
-        }
+        margin-top: 0;
     }
 
     &.follower-card {
         margin-bottom: 10px;
     }
 
+    &.add {
+        text-align: center;
+        border-style: dashed;
 
-    &.dataset-card {
-        border-bottom-color: @dataset-color;
-    }
-    &.reuse-card {
-        border-bottom-color: @reuse-color;
-    }
-    &.resource-card {
-        border-bottom-color: @resource-color;
-    }
-    &.organization-card {
-        border-bottom-color: @organization-color;
-    }
-    &.territory-card {
-        border-bottom-color: @territory-color;
-    }
-    &.user-card {
-        border-bottom-color: @user-color;
+        .card-cover {
+            background-color: @gray-lighter;
+            font-size: 5em;
+            display: flex;
+            justify-content: center; /* align horizontal */
+            align-items: center; /* align vertical */
+        }
+
+        .card-body {
+            display: flex;
+            justify-content: center; /* align horizontal */
+            align-items: center; /* align vertical */
+        }
     }
 
 }
@@ -194,28 +199,6 @@
 
         .card {
             height: 100%;
-        }
-
-        .list-group-item.add {
-
-            @label-height: 60px;
-
-            height: @cover-height + @label-height;
-
-            div, h4 {
-                width: 100%;
-            }
-
-            div {
-                height: @cover-height;
-                line-height: @cover-height;
-            }
-
-            h4 {
-                margin: 0;
-                line-height: @label-height;
-                text-align: center;
-            }
         }
     }
 }

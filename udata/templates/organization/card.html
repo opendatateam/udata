@@ -1,6 +1,7 @@
 {% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
-<div class="card organization-card">
+<a class="card organization-card" title="{{organization.name}}"
+     href="{{ url_for('organizations.show', org=organization) }}">
     <div class="card-logo">
         <img alt=""
             src="{{ organization.logo(60)|placeholder('organization') }}"
@@ -8,16 +9,11 @@
     </div>
     {{ badge_if_certified(organization) }}
     <div class="card-body">
-        <h4>
-            <a href="{{ url_for('organizations.show', org=organization) }}" title="{{organization.name}}">
-                {{ organization.name }}
-            </a>
-        </h4>
-
+        <h4>{{ organization.name }}</h4>
         <div class="clamp-3">{{ organization.description|mdstrip(180) }}</div>
     </div>
 
-    <footer class="card__footer">
+    <footer class="card-footer">
         <ul>
             {% if organization.metrics.datasets %}
             <li v-tooltip title="{{ _('Number of datasets') }}">
@@ -37,5 +33,5 @@
             </li>
         </ul>
     </footer>
-</div>
+</a>
 {% endcache %}

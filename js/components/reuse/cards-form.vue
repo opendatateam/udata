@@ -1,4 +1,6 @@
 <style lang="less">
+@card-padding: 8px;
+
 .completer-row {
     @field-height: 34px;
     margin-bottom: 10px;
@@ -22,15 +24,15 @@
 
     .reuse-card-container {
         button.close {
-            position: relative;
-            right: 10px;
+            position: absolute;
+            right: @card-padding + 12px;
             top: 5px;
             z-index: 15;
             color: red;
             opacity: 1;
 
             &:hover {
-                right: 8px;
+                right: @card-padding + 10px;
                 top: 2px;
                 font-size: 2em;
             }
@@ -65,8 +67,8 @@
     <div class="row" v-show="!reuses.length">
         <p class="lead text-center">{{ _('No related reuses') }}</p>
     </div>
-    <div class="row" v-el:sortable v-show="reuses.length">
-        <div class="col-md-6 reuse-card-container"
+    <div class="card-list card-list--columned" v-el:sortable v-show="reuses.length">
+        <div class="col-xs-12 col-md-6 col-lg-4 reuse-card-container"
             v-for="reuseid in reuses | ids"
             :data-id="reuseid">
             <button type="button" class="close" @click="on_remove(reuseid)">
