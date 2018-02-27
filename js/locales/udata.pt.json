@@ -492,7 +492,7 @@
     "valid-date": "Por favor, introduza uma data válida.",
     "valid-date-iso": "Por favor, introduza uma data válida (ISO).",
     "valid-digits": "Introduza apenas números.",
-    "valid-email": "Por favor introduza um email válido.",
+    "valid-email": "Por favor, introduza um email válido.",
     "valid-equal-to": "Por favor, introduza o mesmo valor novamente.",
     "valid-max": "Por favor, introduza um valor menor ou igual a {0}.",
     "valid-maxlength": "Por favor, insira um máximo de {0} caracteres.",
@@ -506,12 +506,12 @@
     "valid-url": "Introduza um URL válido.",
     "{count} New Requests": "{count} Novo Pedido",
     "{file} has an invalid extension. Valid extension(s): {extensions}.": "O ficheiro {file} não tem uma extensão válida. As extensões permitidas são: {extensions}.",
-    "{file} is empty, please select files again without it.": "{file} está vazio, tente novamente.",
+    "{file} is empty, please select files again without it.": "{file} está vazio, por favo seleccione outros ficheiros.",
     "{file} is too large, maximum file size is {sizeLimit}.": "{file} é muito grande, o tamanho máximo permitido é {sizeLimit}.",
     "{file} is too small, minimum file size is {minSizeLimit}.": "{file} é muito pequeno, o tamanho mínimo permitido é {minSizeLimit}.",
     "{name} has been scheduled on {schedule}": "{name} foi agendado para {schedule}",
     "{name} has been unscheduled": "{name} foi removido da agenda",
     "{start} to {end}": "{start} até {end}",
-    "{user} is not a member of this organization anymore": "{user} não é mais membro dessa organização",
+    "{user} is not a member of this organization anymore": "{user} não é mais membro desta organização",
     "{user} is now {role} of this organization": "{user} é agora um {role} desta organização"
 }
