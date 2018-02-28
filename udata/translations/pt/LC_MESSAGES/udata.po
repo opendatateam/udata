@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-28 14:10-0500\n"
+"PO-Revision-Date: 2018-02-28 14:20-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1178,11 +1178,11 @@ msgstr "Documentação da API"
 #: udata/templates/apidoc.html:5
 #, python-format
 msgid "%(site)s dynamic API documentation"
-msgstr "Documentação de API dinâmica do %(site)s"
+msgstr "Documentação de API dinâmica de %(site)s"
 
 #: udata/templates/apidoc.html:24
 msgid "This page describe this website's free and open RESTful API's behavior"
-msgstr "Esta página descreve o comportamento da API"
+msgstr "Esta página descreve o comportamento da API aberta e gratuita deste site"
 
 #: udata/templates/apidoc.html:30
 msgid "Authentication"
@@ -1203,7 +1203,7 @@ msgstr "Chave da API"
 
 #: udata/templates/apidoc.html:44
 msgid "you first need to authenticate and obtain an API Key in your profile settings."
-msgstr "primeiro você precisa de obter uma chave de API nas configurações do seu perfil."
+msgstr "primeiro precisa de se autenticar e obter uma chave de API nas configurações do seu perfil."
 
 #: udata/templates/apidoc.html:47
 msgid "This key should be provided on each call in the <code>X-API-KEY</code> HTTP header."
@@ -1215,7 +1215,7 @@ msgstr "Autorizações"
 
 #: udata/templates/apidoc.html:57
 msgid "API calls are subject to the same permissions than the web interface."
-msgstr "Chamadas de API estão sujeitos ás mesmas permissões que a interface web."
+msgstr "As chamadas de API estão sujeitas às mesmas permissões que a interface web."
 
 #: udata/templates/apidoc.html:58
 msgid "By example, you need to be part of the organization to modify one of its datasets."
@@ -1229,14 +1229,15 @@ msgstr "Paginação"
 msgid "Some method are paginated and always follow the same pattern.\n"
 "                The object list is wrapped in a <code>Page</code> object.\n"
 "                "
-msgstr "Alguns métodos são paginados e seguem sempre o mesmo padrão.                 A lista de objetos é encapsulada num objeto <code>Page</code>.                "
+msgstr "Alguns métodos são paginados e seguem sempre o mesmo padrão. \n"
+"A lista de objetos é encapsulada num objeto <code>Page</code>.                "
 
 #: udata/templates/apidoc.html:72
 msgid "You don't have to compute yourself the previous and next pages\n"
 "                because the URLs are available in the response under the\n"
 "                <code>previous_page</code> and <code>next_page</code> attributes.\n"
 "                They will be set to <code>null</code> if there is no previous and/or next page."
-msgstr "Não precisa calcular as páginas anterior e próxima porque as URLs estão disponíveis na resposta sob os atributos <code>previous_page</code> e <code>next_page</code>.                 Eles serão definidos como <code>null</code> se não existir nenhuma página anterior ou seguinte."
+msgstr "Não é necessário calcular as páginas anteriores e próximas porque as URLs estão disponíveis na resposta sob os atributos <code>previous_page</code> e <code>next_page</code>.                 Eles serão definidos como <code>null</code> se não existir nenhuma página anterior ou seguinte."
 
 #: udata/templates/apidoc.html:77
 msgid "Example"
@@ -1249,7 +1250,7 @@ msgstr "Exemplos"
 #: udata/templates/apidoc.html:94
 msgid "All examples use the <a href=\"http://httpie.org\">httpie</a> and <a href=\"http://stedolan.github.io/jq/\">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.\n"
 "                "
-msgstr "Todos os exemplos utilizam <a href=\"http://httpie.org\"> httpie</a> e <a href=\"http://stedolan.github.io/jq/\"> jq</a> utilitários para fins de legibilidade. Você não precisa usar essas ferramentas em seu código, porém, eles são apenas assistentes para compreender melhor a API.                "
+msgstr "Todos os exemplos utilizam <a href=\"http://httpie.org\"> httpie</a> e <a href=\"http://stedolan.github.io/jq/\"> jq</a> utilitários para fins de legibilidade. Não é necessário utilizar essas ferramentas no seu código, porém, são apenas formas de compreender melhor a API.                "
 
 #: udata/templates/apidoc.html:97
 msgid "Verifying that httpie is working"
@@ -1258,12 +1259,12 @@ msgstr "Verificar que o httpie está a funcionar"
 #: udata/templates/apidoc.html:99
 msgid "Once httpie is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
-msgstr "Quando o httpie estiver instalado, você pode verificar que ele funciona conforme o esperado, digitando esse comando na shell:                "
+msgstr "Quando o httpie estiver instalado, você pode verificar que ele funciona conforme o esperado, digitando este comando na shell:                "
 
 #: udata/templates/apidoc.html:104 udata/templates/apidoc.html:143
 msgid "It should return something in this vein:\n"
 "                "
-msgstr "Deve retornar algo neste contexto:                "
+msgstr "Deve retornar algo deste género:                "
 
 #: udata/templates/apidoc.html:133
 msgid "This is very verbose and we don't need all that information yet. That's why we use jq.\n"
@@ -1277,7 +1278,7 @@ msgstr "Verificando que o jq está funcionando"
 #: udata/templates/apidoc.html:138
 msgid "Once jq is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
-msgstr "Uma vez que jq está instalado, você pode verificar que ele funciona conforme o esperado, digitando esse comando na shell:                "
+msgstr "Uma vez que jq está instalado, pode verificar que ele funciona consoante o esperado, digitando este comando na shell:                "
 
 #: udata/templates/apidoc.html:148
 msgid "That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:\n"
@@ -1301,22 +1302,22 @@ msgstr "Navegando e recolhendo dados"
 #: udata/templates/apidoc.html:164
 msgid "You can retrieve a list of organization (filtered or not) or a unique organization. When you reach an endpoint, the default page size is 20. Let's fetch the first 20 organization from the API:\n"
 "                "
-msgstr "Você pode selecionar uma lista de organizações (filtrada ou não) ou uma organização unica. Quando você alcança um \"endpoint\", o tamanho da página padrão é 20. Vamos buscar as 20 primeiras organizações a partir da API:                "
+msgstr "Você pode selecionar uma lista de organizações (filtrada ou não) ou uma única organização. Quando alcança um \"endpoint\", o tamanho da página padrão é 20. Vamos recolher as 20 primeiras organizações a partir da API:                "
 
 #: udata/templates/apidoc.html:192
 msgid "That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:\n"
 "                "
-msgstr "Esta lista é ótima, e se nós quisermos caminhar pelas organizações retornadas? Vamos buscar as 5 primeiras URIs de organizações:                "
+msgstr "Esta lista é ótima, mas e se nós quisermos verificar as organizações retornadas? Vamos buscar as 5 primeiras URIs de organizações:                "
 
 #: udata/templates/apidoc.html:205
 msgid "Now we'll be able to retrieve a unique organization thanks to the returned URI:\n"
 "                "
-msgstr "Agora vamos conseguir recolher uma unica organização graças ao URI retornado:                "
+msgstr "Agora vamos conseguir recolher uma única organização graças ao URI retornado:                "
 
 #: udata/templates/apidoc.html:210
 msgid "That's a lot of data to compute. Let's refine these data, if we want only metrics:\n"
 "                "
-msgstr "Isso é uma grande quantidade de dados para calcular. Vamos refinar esses dados, se queremos apenas métricas:                "
+msgstr "Isto é uma grande quantidade de dados para calcular. Vamos refinar estes dados, se queremos apenas métricas:                "
 
 #: udata/templates/apidoc.html:232
 msgid "Or maybe just the name of the members of that organization:\n"
@@ -1326,11 +1327,11 @@ msgstr "Ou talvez apenas o nome dos membros dessa organização:                
 #: udata/templates/apidoc.html:256
 msgid "It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href=\"http://stedolan.github.io/jq/tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/\">manual</a> if you want to browse the API through the command-line in depth.\n"
 "                "
-msgstr "É realmente útil para recuperar os dados que interessam ao seu projeto. Não hesite em percorrer o <a href=\"http://stedolan.github.io/jq/tutorial/\"> tutorial do jq </a> e <a href = \"http://stedolan.github.io/ jq / manual / \"> manual </a> se quiser navegar pela API através da linha de comando em profundidade.                "
+msgstr "Depende de si a obtenção de dados que interessam ao seu projeto. Não hesite em percorrer o <a href=\"http://stedolan.github.io/jq/tutorial/\"> tutorial do jq </a> e <a href = \"http://stedolan.github.io/ jq / manual / \"> manual </a> se quiser navegar pela API através da linha de comando em profundidade.                "
 
 #: udata/templates/apidoc.html:260
 msgid "Modifying and deleting data"
-msgstr "Modificar e apagar dados"
+msgstr "Modificando e apagando dados"
 
 #: udata/templates/apidoc.html:262
 msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
