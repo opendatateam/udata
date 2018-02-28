@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-28 14:00-0500\n"
+"PO-Revision-Date: 2018-02-28 14:10-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -768,7 +768,7 @@ msgstr "Papel"
 
 #: udata/core/reuse/models.py:24
 msgid "Post"
-msgstr "Publicação"
+msgstr "Artigo"
 
 #: udata/core/reuse/models.py:25
 msgid "Visualization"
@@ -796,7 +796,7 @@ msgstr "Transferência"
 
 #: udata/core/site/forms.py:16
 msgid "Some SEO keywords"
-msgstr "Algumas palavras-chave"
+msgstr "Algumas palavras-chave (SEO)"
 
 #: udata/core/site/forms.py:18
 msgid "Feed size"
@@ -804,7 +804,7 @@ msgstr "Tamanho do feed"
 
 #: udata/core/site/forms.py:18
 msgid "Number of elements in feeds"
-msgstr "Número de elementos nos feeds"
+msgstr "Número de elementos nos fluxos"
 
 #: udata/core/site/metrics.py:63 udata/core/site/views.py:140
 #: udata/templates/dataset/display.html:88 udata/templates/dataset/list.html:38
@@ -834,19 +834,19 @@ msgstr "Organizações"
 
 #: udata/core/site/metrics.py:112
 msgid "Maximum dataset followers"
-msgstr "Máximo de seguidores do conjunto de dados"
+msgstr "Número máximo de seguidores do conjunto de dados"
 
 #: udata/core/site/metrics.py:125
 msgid "Maximum dataset reuses"
-msgstr "Máximo de reutilizações do conjunto de dados"
+msgstr "Número máximo de reutilizações do conjunto de dados"
 
 #: udata/core/site/metrics.py:138
 msgid "Maximum datasets in reuses"
-msgstr "Máximo de conjuntos de dados em reutilizações"
+msgstr "Número máximo de conjuntos de dados em reutilizações"
 
 #: udata/core/site/metrics.py:151
 msgid "Maximum reuse followers"
-msgstr "Máximo de seguidores da reutilização"
+msgstr "Número máximo de seguidores da reutilização"
 
 #: udata/core/site/metrics.py:164
 msgid "Maximum organization followers"
@@ -870,7 +870,7 @@ msgstr "Comunidade"
 
 #: udata/core/spatial/forms.py:51
 msgid "Unknown geoid(s): {identifiers}"
-msgstr "Identificador(es) desconhecido(s): {identifiers}"
+msgstr "Identificador(es) GeoID desconhecido(s): {identifiers}"
 
 #: udata/core/spatial/forms.py:70
 msgid "Not a valid GeoJSON"
@@ -878,7 +878,7 @@ msgstr "Não é um GeoJSON válido"
 
 #: udata/core/spatial/forms.py:85
 msgid "A list of covered territories"
-msgstr "Uma lista de territórios cobertos"
+msgstr "Lista de territórios abrangidos"
 
 #: udata/core/spatial/forms.py:87 udata/templates/dataset/search-labels.html:21
 msgid "Spatial granularity"
@@ -902,7 +902,7 @@ msgstr "Região francesa"
 
 #: udata/core/spatial/translations.py:9
 msgid "French intermunicipal (EPCI)"
-msgstr "Intermunicipal francês (EPCI)"
+msgstr "Intermunicipalidade"
 
 #: udata/core/spatial/translations.py:10
 msgid "French county"
@@ -998,7 +998,7 @@ msgstr "Sobre"
 
 #: udata/core/user/forms.py:25
 msgid "Roles"
-msgstr "Perfís"
+msgstr "Perfis"
 
 #: udata/core/user/metrics.py:72 udata/templates/user/following.html:7
 msgid "Following"
@@ -1010,23 +1010,23 @@ msgstr "Conta eliminada"
 
 #: udata/core/user/permissions.py:8
 msgid "System administrator"
-msgstr "Administrator de sistema"
+msgstr "Administrador de sistema"
 
 #: udata/core/user/permissions.py:9
 msgid "Site editorialist"
-msgstr "Editorialista da página"
+msgstr "Editor do site"
 
 #: udata/core/user/permissions.py:10
 msgid "Site moderator"
-msgstr "Moderador da página"
+msgstr "Moderador do site"
 
 #: udata/core/user/tasks.py:15
 msgid "Test mail"
-msgstr "Email de teste"
+msgstr "E-mail de teste"
 
 #: udata/forms/fields.py:93
 msgid "The role {role} does not exist"
-msgstr "O perfil {role}, não existe"
+msgstr "O perfil {role} não existe"
 
 #: udata/forms/fields.py:110
 msgid "Not a valid UUID"
@@ -1047,7 +1047,7 @@ msgstr "{0} não existe"
 
 #: udata/forms/fields.py:383
 msgid "Expect both class and identifier"
-msgstr "Esperados ambos classe e identificador"
+msgstr "Esperados uma classe e um identificador"
 
 #: udata/forms/fields.py:397
 msgid "{0} is not a valid identifier"
@@ -1063,7 +1063,7 @@ msgstr "Identificadores desconhecidos: {identifiers}"
 
 #: udata/forms/fields.py:589
 msgid "Unable to parse date range"
-msgstr "Não é possível verificar o intervalo de datas"
+msgstr "Não é possível analisar o intervalo de datas"
 
 #: udata/forms/fields.py:616 udata/forms/fields.py:639
 msgid "You must be authenticated"
@@ -1071,7 +1071,7 @@ msgstr "Você deve estar autenticado"
 
 #: udata/forms/fields.py:619
 msgid "You can only set yourself as owner"
-msgstr "Você só pode definir-se como proprietário"
+msgstr "Apenas pode definir-se como proprietário"
 
 #: udata/forms/fields.py:642
 msgid "Permission denied for this organization"
@@ -1107,7 +1107,7 @@ msgstr "Fonte"
 
 #: udata/harvest/forms.py:18
 msgid "Some optionnal details about this harvester"
-msgstr "Alguns detalhes opcionais sobre este coletor"
+msgstr "Alguns detalhes opcionais sobre este harvester"
 
 #: udata/harvest/forms.py:20
 msgid "Backend"
