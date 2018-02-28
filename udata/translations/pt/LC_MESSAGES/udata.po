@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-28 14:20-0500\n"
+"PO-Revision-Date: 2018-02-28 14:30-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1336,17 +1336,17 @@ msgstr "Modificando e apagando dados"
 #: udata/templates/apidoc.html:262
 msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
 "                "
-msgstr "Atenção, você está entrando em uma zona de perigo. As modificações ou eliminações de dados com a API são definitivas e não fornecemos qualquer sandbox para testar a execução anterior (por enquanto). Esteja ciente dessas responsabilidades antes de usar seus grandes poderes.                "
+msgstr "Atenção, você está a entrar numa zona de perigo. As modificações ou eliminações de dados com a API são definitivas e não disponibilizamos nenhum ambiente para testar a execução anterior (por enquanto). Esteja ciente destas responsabilidades, antes de usar os seus grandes poderes.                "
 
 #: udata/templates/apidoc.html:265
 msgid "If you try to modify a resource without an authentication token, a 401 will be returned:\n"
 "                "
-msgstr "Se você tentar modificar um recurso sem um token de autenticação, um erro 401 será retornado:                "
+msgstr "Se tentar modificar um recurso sem um token de autenticação, será devolvido um erro 401:                "
 
 #: udata/templates/apidoc.html:280
 msgid "You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:\n"
 "                "
-msgstr "Você precisa especificar sua chave de API (veja acima) e use o cabeçalho HTTP <code> X-API-KEY </ code>. Se você tentar modificar um recurso no qual você não tenha controle, um 400 será retornado em vez disso:                "
+msgstr "É necessário a especificar sua chave de API (veja acima) e utilizar o cabeçalho HTTP <code> X-API-KEY</code>. Se tentar modificar um recurso sem permissão, será devolvido um erro 400:                "
 
 #: udata/templates/apidoc.html:295
 msgid "This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:\n"
@@ -1356,27 +1356,27 @@ msgstr "Esta é a mensagem que receberá se especificou a chave de API errada. E
 #: udata/templates/apidoc.html:308
 msgid "It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:\n"
 "                "
-msgstr "Ocorre se tentar acessar um recurso que não pode editar com as suas credenciais. Se a sua chave será válida você deve ter algo parecido com isto:                "
+msgstr "Ocorre se tentar aceder um recurso que não pode editar com as suas credenciais. Se a sua chave for válida, deverá aparecer algo parecido com isto:                "
 
 #: udata/templates/apidoc.html:321
 msgid "But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.\n"
 "                "
-msgstr "Mas isso não muda nada! Isso é perfeitamente normal, esquecemos de especificar os dados certos para enviar para o servidor.                "
+msgstr "Mas nada está diferente! É perfeitamente normal, não nos lembrámos de especificar os dados corretos para enviar para o servidor.                "
 
 #: udata/templates/apidoc.html:333
 msgid "The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):\n"
 "                "
-msgstr "O recurso foi modificado com seus novos valores. Finalmente, você pode excluir um recurso com o verbo HTTP apropriado (cuidado, a reversão não é possível usando a API no momento):                "
+msgstr "O recurso foi modificado com valores novos. Já pode pode apagar um recurso com o verbo HTTP apropriado (atenção, não é possível reverter algo através da API neste momento):                "
 
 #: udata/templates/apidoc.html:345
 msgid "Once you did it, you can verify that it's effective issuing a GET against the previous URI:\n"
 "                "
-msgstr "Uma vez que efectuar isso, pode verificar que é eficaz emitindo um pedido GET contra o URI anterior:                "
+msgstr "Uma vez efectuado, pode verificar que funciona emitindo um pedido GET contra o URI anterior:                "
 
 #: udata/templates/apidoc.html:362
 msgid "Please consult the reference documentation below for further interactions with the API or ask us for questions related to it!\n"
 "                "
-msgstr "Por favor, consulte a documentação de referência abaixo para mais interações com a API ou para questões relacionadas!                "
+msgstr "Por favor, consulte a documentação de referência abaixo para mais interações com a API ou contacte-nos para questões relacionadas!                "
 
 #: udata/templates/apidoc.html:369
 msgid "Reference"
