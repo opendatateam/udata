@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-21 08:37-0500\n"
+"PO-Revision-Date: 2018-02-28 13:41-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -23,7 +23,7 @@ msgstr "Bem-vindo"
 
 #: udata/settings.py:111
 msgid "Please confirm your email"
-msgstr "Por favor confirme o seu email"
+msgstr "Por favor confirme o seu e-mail"
 
 #: udata/settings.py:112
 msgid "Login instructions"
