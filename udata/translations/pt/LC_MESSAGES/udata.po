@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-28 13:51-0500\n"
+"PO-Revision-Date: 2018-02-28 14:00-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -274,7 +274,7 @@ msgstr "Tempo real"
 
 #: udata/core/dataset/models.py:31
 msgid "Hourly"
-msgstr "Horária"
+msgstr "Hora a hora"
 
 #: udata/core/dataset/models.py:32
 msgid "Four times a day"
@@ -286,7 +286,7 @@ msgstr "Três vezes por dia"
 
 #: udata/core/dataset/models.py:34
 msgid "Semidaily"
-msgstr "Semi-diária"
+msgstr "Duas vezes por dia"
 
 #: udata/core/dataset/models.py:35 udata/harvest/models.py:18
 msgid "Daily"
@@ -302,7 +302,7 @@ msgstr "Três vezes por semana"
 
 #: udata/core/dataset/models.py:38
 msgid "Semiweekly"
-msgstr "Semi-semanal"
+msgstr "Duas vezes por semana"
 
 #: udata/core/dataset/models.py:39 udata/harvest/models.py:17
 msgid "Weekly"
@@ -314,7 +314,7 @@ msgstr "Quinzenal"
 
 #: udata/core/dataset/models.py:41
 msgid "Semimonthly"
-msgstr "Quinzenalmente"
+msgstr "Duas vezes por mês"
 
 #: udata/core/dataset/models.py:42
 msgid "Three times a month"
@@ -326,7 +326,7 @@ msgstr "Mensal"
 
 #: udata/core/dataset/models.py:44
 msgid "Bimonthly"
-msgstr "Bimestral"
+msgstr "Bimensal"
 
 #: udata/core/dataset/models.py:45
 msgid "Quarterly"
@@ -366,7 +366,7 @@ msgstr "Desconhecido"
 
 #: udata/core/dataset/models.py:76
 msgid "Uploaded file"
-msgstr "Ficheiro enviado"
+msgstr "Ficheiro carregado"
 
 #: udata/core/dataset/models.py:77
 msgid "Remote file"
@@ -403,7 +403,7 @@ msgstr "Data futura de atualização"
 
 #: udata/core/dataset/models.py:347
 msgid "Pivotal data"
-msgstr "Dados pivô"
+msgstr "Dados centrais"
 
 #: udata/core/dataset/models.py:369 udata/templates/dataset/display.html:11
 msgid "dataset"
@@ -423,15 +423,15 @@ msgstr "Pouco reutilizado"
 
 #: udata/core/dataset/search.py:151 udata/tests/test_search.py:97
 msgid "Quite reused"
-msgstr "Muito reutilizado"
+msgstr "Bastante reutilizado"
 
 #: udata/core/dataset/search.py:152 udata/tests/test_search.py:98
 msgid "Heavily reused"
-msgstr "Fortemente reutilizado"
+msgstr "Muito reutilizado"
 
 #: udata/core/dataset/tasks.py:69
 msgid "You need to update some frequency-based datasets"
-msgstr "Você precisa atualizar alguns datasets baseados em frequência"
+msgstr "É necessário atualizar alguns datasets baseados em frequência"
 
 #: udata/core/dataset/views.py:28 udata/templates/home.html:122
 msgid "Last datasets"
@@ -534,11 +534,11 @@ msgstr "Activado"
 
 #: udata/core/jobs/models.py:21
 msgid "every {0.period_singular}"
-msgstr "todos os {0.period_singular}"
+msgstr "cada {0.period_singular}"
 
 #: udata/core/jobs/models.py:22
 msgid "every {0.every} {0.period}"
-msgstr "todos os {0.period} {0.every}"
+msgstr "cada {0.period} {0.every}"
 
 #: udata/core/organization/activities.py:25
 msgid "created an organization"
@@ -554,7 +554,7 @@ msgstr "Sigla"
 
 #: udata/core/organization/forms.py:25
 msgid "Shorter organization name"
-msgstr "Nome simplificado da organização"
+msgstr "Nome curto da organização"
 
 #: udata/core/organization/forms.py:28
 msgid "The details about your organization"
@@ -562,15 +562,15 @@ msgstr "Os detalhes da sua organização"
 
 #: udata/core/organization/forms.py:30 udata/core/user/forms.py:20
 msgid "Website"
-msgstr "Página Web"
+msgstr "Sítio web"
 
 #: udata/core/organization/forms.py:30
 msgid "The organization website URL"
-msgstr "A URL da página da organização"
+msgstr "O URL da página da organização"
 
 #: udata/core/organization/forms.py:31
 msgid "Logo"
-msgstr "Logotipo"
+msgstr "Logótipo"
 
 #: udata/core/organization/forms.py:63
 msgid "Role"
@@ -651,12 +651,12 @@ msgstr "Muitas reutilizações"
 #: udata/core/organization/search.py:85 udata/core/reuse/search.py:95
 #: udata/core/user/search.py:61
 msgid "No datasets"
-msgstr "Não há conjuntos de dados"
+msgstr "Nenhum conjuntos de dados"
 
 #: udata/core/organization/search.py:86 udata/core/reuse/search.py:96
 #: udata/core/user/search.py:62
 msgid "Few datasets"
-msgstr "Alguns conjuntos de dados"
+msgstr "Pouco conjuntos de dados"
 
 #: udata/core/organization/search.py:87 udata/core/reuse/search.py:97
 #: udata/core/user/search.py:63
@@ -689,7 +689,7 @@ msgstr "Você é agora um membro da organização \"%(org)s\""
 
 #: udata/core/organization/tasks.py:48
 msgid "Membership refused"
-msgstr "Associação recusada"
+msgstr "Pedido de adesão recusado"
 
 #: udata/core/post/forms.py:19
 msgid "Headline"
@@ -723,7 +723,7 @@ msgstr "URL de créditos"
 
 #: udata/core/post/models.py:43
 msgid "post"
-msgstr "publicação"
+msgstr "artigo"
 
 #: udata/core/reuse/activities.py:26
 msgid "created a reuse"
@@ -739,7 +739,7 @@ msgstr "apagou uma reutilização"
 
 #: udata/core/reuse/forms.py:16
 msgid "This URL is already registered"
-msgstr "O domínio já está registado"
+msgstr "Este URL já está registado"
 
 #: udata/core/reuse/forms.py:25
 msgid "The details about the reuse (build process, specifics, self-critics...)."
