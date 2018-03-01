@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-03-01 14:30-0500\n"
+"PO-Revision-Date: 2018-03-01 14:40-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2236,11 +2236,11 @@ msgstr ""
 
 #: udata/templates/organization/display.html:88
 msgid "Download as CSV"
-msgstr "Transferir como CSV"
+msgstr "Descarregar como CSV"
 
 #: udata/templates/organization/display.html:93
 msgid "Datasets list"
-msgstr "Lista de dados"
+msgstr "Lista de conjuntos de dados"
 
 #: udata/templates/organization/display.html:98
 msgid "Resources list"
@@ -2274,11 +2274,11 @@ msgstr "Mostrar todos os seguidores"
 #: udata/templates/organization/display.html:191
 #: udata/templates/site/dashboard.html:51
 msgid "Community activity"
-msgstr "Actividade da comunidade"
+msgstr "Atividade da comunidade"
 
 #: udata/templates/organization/display_base.html:46
 msgid "See all organizations with that badge."
-msgstr "Ver todas as organizações com esse emblema."
+msgstr "Ver todas as organizações com este emblema."
 
 #: udata/templates/organization/display_base.html:86
 msgid "Use of data by that organization for the community"
@@ -2336,7 +2336,7 @@ msgstr "Serei informado sobre novidades desta organização"
 #: udata/templates/organization/list.html:9
 #, python-format
 msgid "%(site)s organization search"
-msgstr "%(site)s pesquisa de organização"
+msgstr "Pesquisar organizações em %(site)s"
 
 #: udata/templates/organization/list.html:10
 msgid "organizations"
@@ -2352,7 +2352,7 @@ msgstr "Numero de reutilizações pela organização"
 
 #: udata/templates/organization/search-result.html:39
 msgid "Number of reappropriations by the community"
-msgstr "Numero de reapopriações pela comunidade"
+msgstr "Numero de reapropriações pela comunidade"
 
 #: udata/templates/organization/search-result.html:48
 #: udata/templates/reuse/search-result.html:32
@@ -2407,23 +2407,23 @@ msgstr "Publicado em %(date)s"
 
 #: udata/templates/post/display.html:62
 msgid "This post is private and will not be visible by other users"
-msgstr "Esta publicação é privada e não será vista por outros utilizadores"
+msgstr "Este artigo é privado e não será visto por outros utilizadores"
 
 #: udata/templates/post/display.html:68
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
-msgstr "Esta publicação foi apagada. Esta alteração será definitiva dentro de 24 horas"
+msgstr "Este artigo foi apagado. A alteração será definitiva dentro de 24 horas"
 
 #: udata/templates/post/display.html:169 udata/templates/post/display.html:171
 msgid "Previous post"
-msgstr "Publicação anterior"
+msgstr "Artigo anterior"
 
 #: udata/templates/post/display.html:178
 msgid "All posts"
-msgstr "Todas as publicações"
+msgstr "Todos os artigos"
 
 #: udata/templates/post/display.html:183 udata/templates/post/display.html:184
 msgid "Next post"
-msgstr "Próxima publicação"
+msgstr "Próximo artigo"
 
 #: udata/templates/post/display.html:211
 msgid "Comments about this post."
@@ -2431,16 +2431,16 @@ msgstr "Comentários sobre esta publicação."
 
 #: udata/templates/post/list.html:5 udata/templates/post/list.html:15
 msgid "Posts"
-msgstr "Publicações"
+msgstr "Artigos"
 
 #: udata/templates/post/list.html:6
 #, python-format
 msgid "%(site)s posts"
-msgstr "%(site)s publicações"
+msgstr "Artigos de %(site)s"
 
 #: udata/templates/post/list.html:7
 msgid "posts"
-msgstr "publicações"
+msgstr "artigos"
 
 #: udata/templates/post/search-result.html:18
 msgid "Posted on"
@@ -2482,7 +2482,7 @@ msgstr "mais"
 
 #: udata/templates/reuse/display.html:166
 msgid "I'll be informed about this user news"
-msgstr "Serei informado sobre noticias deste utilizador"
+msgstr "Serei informado sobre notícias deste utilizador"
 
 #: udata/templates/reuse/display.html:220
 msgid "No followers yet"
@@ -2491,7 +2491,7 @@ msgstr "Sem seguidores"
 #: udata/templates/reuse/list.html:9
 #, python-format
 msgid "%(site)s reuse search"
-msgstr "%(site)s pesquisa de reutilizações"
+msgstr "Pesquisar reutilizações em %(site)s"
 
 #: udata/templates/reuse/list.html:10 udata/templates/topic/reuses.html:9
 msgid "reuses"
@@ -2504,18 +2504,18 @@ msgstr "Número de conjuntos de dados"
 #: udata/templates/security/change_password.html:12
 #: udata/templates/security/change_password.html:19
 msgid "Change Password"
-msgstr "Alterar senha"
+msgstr "Alterar palavra-passe"
 
 #: udata/templates/security/forgot_password.html:12
 #: udata/templates/security/forgot_password.html:18
 #: udata/templates/security/reset_password.html:13
 #: udata/templates/security/reset_password.html:19
 msgid "Reset Password"
-msgstr "Redefinir Senha"
+msgstr "Redefinir palavra-passe"
 
 #: udata/templates/security/forgot_password.html:13
 msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr "Esqueceu a senha? Introduza o seu endereço de email, e enviaremos intruções para redefinir uma nova."
+msgstr "Esqueceu a palavra-passe? Introduza o seu endereço de email e enviaremos instruções para redefinir uma nova."
 
 #: udata/templates/security/login_user.html:14
 msgid "Sign In"
@@ -2527,11 +2527,11 @@ msgstr "Iniciar sessão"
 
 #: udata/templates/security/login_user.html:22
 msgid "Forgot your password?"
-msgstr "Esqueceu sua senha?"
+msgstr "Esqueceu a sua palavra-passe?"
 
 #: udata/templates/security/login_user.html:24
 msgid "Recover your password"
-msgstr "Recuperar senha"
+msgstr "Recuperar palavra-passe"
 
 #: udata/templates/security/login_user.html:33
 #: udata/templates/security/register_user.html:30
@@ -2540,7 +2540,7 @@ msgstr "Criar conta"
 
 #: udata/templates/security/login_user.html:36
 msgid "Register"
-msgstr "Registar"
+msgstr "Registar-se"
 
 #: udata/templates/security/login_user.html:40
 msgid "Create an account"
