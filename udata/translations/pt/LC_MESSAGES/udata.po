@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-03-01 11:03-0500\n"
+"PO-Revision-Date: 2018-03-01 14:10-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1393,11 +1393,11 @@ msgstr "Produtor"
 
 #: udata/templates/embed-dataset.html:183
 msgid "Uploader"
-msgstr "Carregador"
+msgstr "Uploader"
 
 #: udata/templates/embed-dataset.html:205
 msgid "Add to your own website"
-msgstr "Adicionar á sua página"
+msgstr "Adicionar ao seu website"
 
 #: udata/templates/embed-dataset.html:206
 msgid "Close"
@@ -1405,7 +1405,7 @@ msgstr "Fechar"
 
 #: udata/templates/embed-dataset.html:206
 msgid "Embed"
-msgstr "Incorporar"
+msgstr "Embed"
 
 #: udata/templates/embed-dataset.html:213
 msgid "to"
