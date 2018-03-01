@@ -2,11 +2,9 @@
 from __future__ import unicode_literals
 
 import hashlib
-import zlib
-import logging
 import mimetypes
-
-log = logging.getLogger(__name__)
+import os
+import zlib
 
 
 CHUNK_SIZE = 2 ** 16
@@ -41,3 +39,17 @@ def crc32(file):
 def mime(url):
     '''Get the mimetype from an url or a filename'''
     return mimetypes.guess_type(url)[0]
+
+
+def extension(filename):
+    '''Properly extract the extension from filename'''
+    filename = os.path.basename(filename)
+    extension = None
+
+    while '.' in filename:
+        filename, ext = os.path.splitext(filename)
+        if ext.startswith('.'):
+            ext = ext[1:]
+        extension = ext if not extension else ext + '.' + extension
+
+    return extension

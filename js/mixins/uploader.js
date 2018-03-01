@@ -50,43 +50,12 @@ export default {
         };
     },
     ready() {
-        this.$uploader = new qq.FineUploaderBasic({
-            debug: DEBUG,
-            multiple: this.$options.hasOwnProperty('upload_multiple') ? this.$options.upload_multiple : true,
-            uploaderType: 'basic',
-            autoUpload: this.$options.hasOwnProperty('autoUpload') ? this.$options.autoUpload : true,
-            button: this.$els.uploadBtn,
-            request: {
-                endpoint: this.upload_endpoint,
-                inputName: 'file'
-            },
-            callbacks: {
-                onUpload: this.on_upload,
-                onSubmitted: this.on_submit,
-                onProgress: this.on_progress,
-                onComplete: this.on_complete,
-                onError: this.on_error,
-            },
-            messages: messages,
-            validation: {allowedExtensions: allowedExtensions.items}
-        });
-
-        this.$dnd = new qq.DragAndDrop({
-            dropZoneElements: [this.$el],
-            classes: {
-                dropActive: this.$options.dropActive || 'drop-active'
-            },
-            callbacks: {
-                processingDroppedFilesComplete: this.on_dropped_files_complete
-            }
-        });
+        this._build_uploader();
     },
 
     watch: {
-        upload_endpoint(endpoint) {
-            if (endpoint && this.$uploader) {
-                this.$uploader.setEndpoint(endpoint);
-            }
+        upload_endpoint() {
+            this._build_uploader();
         }
     },
 
@@ -111,6 +80,58 @@ export default {
     },
 
     methods: {
+        _build_uploader() {
+            if (!this.upload_endpoint) return;
+            this.$uploader = new qq.FineUploaderBasic({
+                debug: DEBUG,
+                multiple: this.$options.hasOwnProperty('upload_multiple') ? this.$options.upload_multiple : true,
+                uploaderType: 'basic',
+                autoUpload: this.$options.hasOwnProperty('autoUpload') ? this.$options.autoUpload : true,
+                button: this.$els.uploadBtn,
+                request: {
+                    endpoint: this.upload_endpoint,
+                    inputName: 'file',
+                    uuidName: 'uuid',
+                    totalFileSizeName: 'size',
+                    filenameParam: 'filename',
+                },
+                chunking: {
+                    enabled: true,
+                    concurrent: {
+                        enabled: true
+                    },
+                    paramNames: {
+                        chunkSize: 'chunksize',
+                        partByteOffset: 'partbyteoffset',
+                        partIndex: 'partindex',
+                        totalParts: 'totalparts'
+                    },
+                    success: {
+                        endpoint: this.upload_endpoint,
+                    }
+                },
+                callbacks: {
+                    onUpload: this.on_upload,
+                    onSubmitted: this.on_submit,
+                    onProgress: this.on_progress,
+                    onComplete: this.on_complete,
+                    onError: this.on_error,
+                },
+                messages: messages,
+                validation: {allowedExtensions: allowedExtensions.items}
+            });
+
+            this.$dnd = new qq.DragAndDrop({
+                dropZoneElements: [this.$el],
+                classes: {
+                    dropActive: this.$options.dropActive || 'drop-active'
+                },
+                callbacks: {
+                    processingDroppedFilesComplete: this.on_dropped_files_complete
+                }
+            });
+        },
+
         /**
          * Manually start uploading
          */
@@ -186,7 +207,8 @@ export default {
             // If there is a JSON message display it instead of the non-explicit default one
             if (xhr) {
                 try {
-                    reason = JSON.parse(xhr.responseText).message || reason;
+                    const data = JSON.parse(xhr.responseText);
+                    reason = data.error || data.message || reason;
                 } catch(e) {
                     log.error('Unable to parse error', xhr.responseText);
                 }

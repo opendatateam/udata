@@ -29,7 +29,7 @@ resources = fs.Storage('resources', CONFIGURABLE_AUTHORIZED_TYPES)
 avatars = fs.Storage('avatars', fs.IMAGES)
 logos = fs.Storage('logos', fs.IMAGES)
 images = fs.Storage('images', fs.IMAGES)
-chunks = fs.Storage('resources', AUTHORIZED_TYPES)
+chunks = fs.Storage('chunks', AUTHORIZED_TYPES)
 tmp = fs.Storage('tmp', fs.ALL, upload_to=tmp_upload_to)
 references = fs.Storage('references', AUTHORIZED_TYPES)
 
