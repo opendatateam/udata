@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-03-01 14:40-0500\n"
+"PO-Revision-Date: 2018-03-01 14:55-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2548,7 +2548,7 @@ msgstr "Criar uma conta"
 
 #: udata/templates/security/register_user.html:12
 msgid "Sign Up"
-msgstr "Criar conta"
+msgstr "Registar-se"
 
 #: udata/templates/security/register_user.html:21
 #, python-format
@@ -2559,15 +2559,15 @@ msgstr "Li e aceitei <a href=\"%(url)s\"> os termos e condições do serviço.</
 msgid "In particular, I understand that this site\n"
 "                    values the production and enrichment of datasets over definitive or partisan interpretations.\n"
 "                    The members of the community are in charge of looking after the quality of the content it produces."
-msgstr "Em particular, entendo que este site valoriza a produção e o enriquecimento de conjuntos de dados através de interpretações definitivas ou partidárias. Os membros da comunidade estão encarregados de cuidar da qualidade do conteúdo que produz."
+msgstr "Em particular, entendo que este site valoriza a produção e o enriquecimento de conjuntos de dados através de interpretações subjetivas ou partidárias. Os membros da comunidade são responsáveis por cuidar da qualidade do conteúdo que é produzido."
 
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
-msgstr "Painel de controlo"
+msgstr "Dashboard"
 
 #: udata/templates/site/dashboard.html:5
 msgid "Site metrics and activity"
-msgstr "Métricas e actividade na página"
+msgstr "Métricas e atividade do sítio"
 
 #: udata/templates/site/dashboard.html:6
 msgid "activity"
@@ -2579,7 +2579,7 @@ msgstr "Mapa de cobertura"
 
 #: udata/templates/site/map.html:6
 msgid "Display datasets on a map"
-msgstr "Mostrar os dados num mapa"
+msgstr "Mostrar os conjuntos de dados num mapa"
 
 #: udata/templates/site/map.html:7
 msgid "coverage"
