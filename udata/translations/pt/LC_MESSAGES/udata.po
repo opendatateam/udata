@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-03-01 14:20-0500\n"
+"PO-Revision-Date: 2018-03-01 14:30-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1867,7 +1867,7 @@ msgstr "Licenças"
 
 #: udata/templates/dataset/search-panel.html:16
 msgid "Territorial granularity"
-msgstr "Granulidade territorial"
+msgstr "Granularidade territorial"
 
 #: udata/templates/dataset/search-panel.html:17
 msgid "Formats"
@@ -1912,7 +1912,7 @@ msgstr "A página que procura não foi encontrada."
 
 #: udata/templates/errors/410.html:6
 msgid "The page you're looking has been deleted."
-msgstr "A página que procura foi excluída."
+msgstr "A página que procura foi apagada."
 
 #: udata/templates/errors/500.html:3
 msgid "Internal server error"
@@ -1936,12 +1936,12 @@ msgstr "A seguir desde %(date)s"
 #: udata/templates/organization/display_base.html:30
 #, python-format
 msgid "The identity of this public service is certified by %(certifier)s"
-msgstr "A identidade deste serviço público é certificada pela %(certifier)s"
+msgstr "A identidade deste serviço público é certificada por %(certifier)s"
 
 #: udata/templates/macros/certified.html:5
 #: udata/templates/organization/display_base.html:31
 msgid "Certified public service"
-msgstr "Certificados de serviço público"
+msgstr "Serviço público certificado"
 
 #: udata/templates/macros/forms.html:106
 msgid "required fields"
@@ -1949,7 +1949,7 @@ msgstr "campos obrigatórios"
 
 #: udata/templates/macros/integrate.html:4
 msgid "Integrate"
-msgstr "Integridade"
+msgstr "Integrar"
 
 #: udata/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
@@ -2042,23 +2042,23 @@ msgstr "Olá %(user)s,"
 
 #: udata/templates/mail/base.html:18
 msgid "See you soon on the platform"
-msgstr "Esperamos a sua visita na plataforma"
+msgstr "Até breve na plataforma"
 
 #: udata/templates/mail/base.html:19
 #, python-format
 msgid "The %(site)s team"
-msgstr "A equipa %(site)s"
+msgstr "A equipa do %(site)s"
 
 #: udata/templates/mail/discussion_closed.html:6
 #, python-format
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
-msgstr "%(user)s fechou uma discussão sobre %(type)s %(subject)s"
+msgstr "%(user)s encerrou uma discussão sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/discussion_closed.html:40
 #: udata/templates/mail/new_discussion.html:32
 #: udata/templates/mail/new_discussion_comment.html:40
 msgid "See the discussion"
-msgstr "Consulte a discussão"
+msgstr "Ver a discussão"
 
 #: udata/templates/mail/frequency_reminder.html:6
 msgid "Some of your datasets need to be updated according to the frequency you set:"
@@ -2067,12 +2067,12 @@ msgstr "Alguns dos seus conjuntos de dados precisam de ser atualizadas de acordo
 #: udata/templates/mail/frequency_reminder.html:12
 #, python-format
 msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
-msgstr "A última actualização do conjunto de dados \"%(dataset_title)s\" foi em %(published_date)s."
+msgstr "A última atualização do conjunto de dados \"%(dataset_title)s\" foi em %(published_date)s."
 
 #: udata/templates/mail/frequency_reminder.html:17
 #, python-format
 msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
-msgstr "Dada a frequência ajustada (%(dataset_frequency)s) os dados deveriam ter sido atualizados %(due_update_days)s dias atrás."
+msgstr "Dada a frequência definida (%(dataset_frequency)s), os dados deveriam ter sido atualizados %(due_update_days)s dias atrás."
 
 #: udata/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
@@ -2095,16 +2095,16 @@ msgstr "A sua inscrição na organização \"%(org)s\" foi recusada"
 
 #: udata/templates/mail/membership_refused.html:18
 msgid "Refusal reason"
-msgstr "Motivo de recusa"
+msgstr "Motivo da recusa"
 
 #: udata/templates/mail/membership_request.html:8
 #, python-format
 msgid "As an administrator of \"%(org)s\" you are being informed than a new membership request from %(user)s is pending for validation"
-msgstr "Como administrador da organização \"%(org)s\", está sendo informado de que um novo pedido de adesão do utilizador %(user)s está pendente de validação"
+msgstr "Como administrador da organização \"%(org)s\" está a ser notificado que um pedido de adesão do utilizador %(user)s está pendente de validação"
 
 #: udata/templates/mail/membership_request.html:40
 msgid "See the request"
-msgstr "Verificar o pedido"
+msgstr "Ver o pedido"
 
 #: udata/templates/mail/new_discussion.html:6
 #, python-format
@@ -2129,34 +2129,34 @@ msgstr "%(user)s seguiu a sua organização %(org)s"
 #: udata/templates/mail/new_issue.html:6
 #, python-format
 msgid "%(user)s submitted a new issue on your %(type)s %(subject)s"
-msgstr "%(user)s submeteu um problema sobre %(type)s %(subject)s"
+msgstr "%(user)s submeteu um novo problema sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/new_issue_comment.html:6
 #, python-format
 msgid "%(user)s commented an issue on your %(type)s %(subject)s"
-msgstr "%(user)s comentou uma discussão sobre %(type)s %(subject)s"
+msgstr "%(user)s comentou um problema em %(type)s %(subject)s"
 
 #: udata/templates/mail/new_member.html:7
 #, python-format
 msgid "Congratulations, you are now a member of the organization \"%(org)s\""
-msgstr "Parabéns, você é agora um membro da organização \"%(org)s\""
+msgstr "Parabéns, foi adicionado como membro da organização \"%(org)s\""
 
 #: udata/templates/mail/new_member.html:21
 msgid "See the organization page"
-msgstr "Consulte a página da organização"
+msgstr "Ver a página da organização"
 
 #: udata/templates/mail/new_reuse.html:7
 #, python-format
 msgid "A new reuse of your dataset %(dataset)s has been published"
-msgstr "Foi publicada uma nova reutilização do seu dataset %(dataset)s"
+msgstr "Foi publicada uma nova reutilização do seu conjunto de dados %(dataset)s"
 
 #: udata/templates/mail/new_reuse.html:31 udata/templates/reuse/display.html:83
 msgid "See the reuse"
-msgstr "Consulte a reutilização"
+msgstr "Ver a reutilização"
 
 #: udata/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
-msgstr "Consulte na página do dataset"
+msgstr "Ver na página do dataset"
 
 #: udata/templates/mail/test.html:4
 msgid "This is a test mail"
@@ -2164,34 +2164,34 @@ msgstr "Este é um e-mail de teste"
 
 #: udata/templates/mail/test.html:5
 msgid "If you read this, your mail configuration is working"
-msgstr "Se você ler isto, a sua configuração de correio está a funcionar"
+msgstr "Se estiver a ler isto a sua configuração de correio está operacional"
 
 #: udata/templates/mail/security/reset_instructions.html:7
 #, python-format
 msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
-msgstr "Alguém pediu uma redefinição de senha para sua %(site)s conta. Se não foi você, por favor, ignore este e-mail."
+msgstr "Alguém pediu uma redefinição de palavra-passe para a conta %(site)s. Se não foi você, por favor, ignore este e-mail."
 
 #: udata/templates/mail/security/reset_instructions.html:10
 msgid "To reset your password, please confirm your request through the link below:"
-msgstr "Para redefinir a sua senha, por favor, confirme o seu pedido através do link abaixo:"
+msgstr "Para redefinir a sua palavra-passe, por favor confirme o seu pedido através do link abaixo:"
 
 #: udata/templates/mail/security/reset_instructions.html:18
 msgid "Reset my password"
-msgstr "Redefinir a minha senha"
+msgstr "Redefinir a minha palavra-passe"
 
 #: udata/templates/mail/security/reset_notice.html:7
 #, python-format
 msgid "Your password for %(site)s has been reset."
-msgstr "A sua senha para o %(site)s foi redefinida."
+msgstr "A sua palavra-passe para o %(site)s foi redefinida."
 
 #: udata/templates/mail/security/welcome.html:7
 #, python-format
 msgid "Welcome to %(site)s!"
-msgstr "Bem-vindo ao %(site)s!"
+msgstr "Bem-vindo a %(site)s!"
 
 #: udata/templates/mail/security/welcome.html:10
 msgid "To activate your account, please confirm your email address through the link below:"
-msgstr "Para ativar a sua conta, por favor, confirme o seu endereço de e-mail através do link seguinte:"
+msgstr "Para ativar a sua conta, por favor confirme o seu endereço de e-mail através do seguinte link:"
 
 #: udata/templates/mail/security/welcome.html:18
 msgid "Confirm now"
@@ -2213,7 +2213,7 @@ msgstr "organização"
 
 #: udata/templates/organization/display.html:38
 msgid "This organization has been deleted. This will be permanent in the next 24 hours"
-msgstr "Esta organização foi apagada. Esta alteração será definitiva dentro de 24 horas"
+msgstr "Esta organização foi apagada. A alteração será definitiva dentro de 24 horas"
 
 #: udata/templates/organization/display.html:50
 #, python-format
