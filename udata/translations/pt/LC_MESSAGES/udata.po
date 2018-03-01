@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-28 14:30-0500\n"
+"PO-Revision-Date: 2018-03-01 11:03-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1920,7 +1920,7 @@ msgstr "Erro interno do servidor"
 
 #: udata/templates/errors/500.html:6
 msgid "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application."
-msgstr "O servidor encontrou um erro interno e não pôde concluir o seu pedido. O servidor está sobrecarregado ou há um erro no aplicativo."
+msgstr "O servidor encontrou um erro interno e não foi possível concluir o pedido. O servidor está sobrecarregado ou há um erro na aplicação."
 
 #: udata/templates/errors/base.html:11
 #, python-format
