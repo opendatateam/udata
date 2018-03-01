@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-03-01 14:10-0500\n"
+"PO-Revision-Date: 2018-03-01 14:20-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1442,7 +1442,7 @@ msgstr "Perfil"
 
 #: udata/templates/header.html:44
 msgid "Change password"
-msgstr "Alterar senha"
+msgstr "Alterar palavra-passe"
 
 #: udata/templates/header.html:60
 msgid "Settings"
@@ -1462,7 +1462,7 @@ msgstr "Início"
 #: udata/templates/home.html:5
 #, python-format
 msgid "%(site)s home"
-msgstr "%(site)s inicio"
+msgstr "%(site)s início"
 
 #: udata/templates/home.html:6
 msgid "home"
@@ -1482,7 +1482,7 @@ msgstr "Métricas"
 
 #: udata/templates/metrics.html:5
 msgid "Site metrics"
-msgstr "Métricas da página"
+msgstr "Métricas do site"
 
 #: udata/templates/metrics.html:6 udata/templates/site/dashboard.html:6
 msgid "metrics"
@@ -1496,7 +1496,7 @@ msgstr "Publicar um conjunto de dados"
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:14
 msgid "Contribute and add a new dataset to this site catalog."
-msgstr "Contribuir e adicionar um novo dataset."
+msgstr "Contribuir e adicionar um novo dataset ao catálogo do site."
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:24
@@ -1534,7 +1534,7 @@ msgstr "Pesquisar"
 #: udata/templates/search.html:9
 #, python-format
 msgid "%(site)s search"
-msgstr "%(site)s pesquisa"
+msgstr "%(site)s pesquisar"
 
 #: udata/templates/dataset/list.html:10 udata/templates/organization/list.html:10
 #: udata/templates/reuse/list.html:10 udata/templates/search.html:10
@@ -1686,7 +1686,7 @@ msgstr "Publicar dados"
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr "Publicar dados, reutilizações, seguir ou deixar de seguir"
+msgstr "Publicar conjuntos de dados, reutilizações, seguir ou deixar de seguir"
 
 #: udata/templates/api/oauth_authorize.html:56
 msgid "Accept"
@@ -1698,7 +1698,7 @@ msgstr "Recusar"
 
 #: udata/templates/api/oauth_error.html:8
 msgid "OAuth Authentication Error"
-msgstr "Erro de autentificação OAuth"
+msgstr "Erro de autenticação OAuth"
 
 #: udata/templates/dataset/card.html:29
 msgid "Number of resources"
@@ -1724,15 +1724,15 @@ msgstr "Este conjunto de dados foi publicado na %(date)s e atualizado na %(updat
 
 #: udata/templates/dataset/display.html:60
 msgid "See all datasets with that badge."
-msgstr "Ver todos os conjuntos de dados com esse emblema."
+msgstr "Ver todos os conjuntos de dados com o emblema."
 
 #: udata/templates/dataset/display.html:67
 msgid "This dataset is private and will not be visible by other users"
-msgstr "Este dataset é privado e não será visível por outros utilizadores"
+msgstr "Este conjunto de dados é privado e não será visível por outros utilizadores"
 
 #: udata/templates/dataset/display.html:73
 msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr "Este dataset foi apagado. Esta alteração será definitiva dentro de 24 horas"
+msgstr "Este conjunto de dados foi apagado. Esta alteração será definitiva dentro de 24 horas"
 
 #: udata/templates/dataset/display.html:74 udata/templates/dataset/display.html:75
 #: udata/templates/organization/display.html:37
@@ -1778,7 +1778,7 @@ msgstr "Data de modificação"
 
 #: udata/templates/dataset/display.html:244
 msgid "Latest resource update"
-msgstr "Ultima actualização"
+msgstr "Última atualização"
 
 #: udata/templates/dataset/display.html:284 udata/templates/reuse/display.html:204
 msgid "Suggest a tag with a new discussion thread"
@@ -1802,7 +1802,7 @@ msgstr "Discussão ente a organização e a comunidade sobre este conjunto de da
 
 #: udata/templates/dataset/display.html:362
 msgid "Community resources"
-msgstr "Recursos da Comunidade"
+msgstr "Recursos da comunidade"
 
 #: udata/templates/dataset/display.html:373
 msgid "New community resource"
@@ -1820,8 +1820,8 @@ msgstr "Adicionar reutilização"
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
-msgstr "Reutilizou estes dados e publicou um artigo, uma demonstração gráfica ou um aplicativo?                 É hora para que você saiba!                 Referêncie o seu trabalho em apenas alguns cliques e aumente a sua visibilidade.\n"
-"Os membros da comunidade estão encarregados de cuidar da qualidade do conteúdo que produz."
+msgstr "Reutilizou estes dados e publicou um artigo, uma infografia ou aplicação?\n"
+"Com uns cliques apenas, promova o seu trabalho e aumente a sua visibilidade."
 
 #: udata/templates/dataset/followers.html:13
 #: udata/templates/organization/display.html:158
@@ -1838,7 +1838,7 @@ msgstr[1] ""
 #: udata/templates/dataset/list.html:9
 #, python-format
 msgid "%(site)s dataset search"
-msgstr "%(site)s pesquisa de dados"
+msgstr "Pesquisar conjuntos de dados em %(site)s"
 
 #: udata/templates/dataset/list.html:10 udata/templates/topic/datasets.html:9
 msgid "datasets"
