@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-28 14:30-0500\n"
+"PO-Revision-Date: 2018-03-01 14:55-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1393,11 +1393,11 @@ msgstr "Produtor"
 
 #: udata/templates/embed-dataset.html:183
 msgid "Uploader"
-msgstr "Carregador"
+msgstr "Uploader"
 
 #: udata/templates/embed-dataset.html:205
 msgid "Add to your own website"
-msgstr "Adicionar á sua página"
+msgstr "Adicionar ao seu website"
 
 #: udata/templates/embed-dataset.html:206
 msgid "Close"
@@ -1405,7 +1405,7 @@ msgstr "Fechar"
 
 #: udata/templates/embed-dataset.html:206
 msgid "Embed"
-msgstr "Incorporar"
+msgstr "Embed"
 
 #: udata/templates/embed-dataset.html:213
 msgid "to"
@@ -1442,7 +1442,7 @@ msgstr "Perfil"
 
 #: udata/templates/header.html:44
 msgid "Change password"
-msgstr "Alterar senha"
+msgstr "Alterar palavra-passe"
 
 #: udata/templates/header.html:60
 msgid "Settings"
@@ -1462,7 +1462,7 @@ msgstr "Início"
 #: udata/templates/home.html:5
 #, python-format
 msgid "%(site)s home"
-msgstr "%(site)s inicio"
+msgstr "%(site)s início"
 
 #: udata/templates/home.html:6
 msgid "home"
@@ -1482,7 +1482,7 @@ msgstr "Métricas"
 
 #: udata/templates/metrics.html:5
 msgid "Site metrics"
-msgstr "Métricas da página"
+msgstr "Métricas do site"
 
 #: udata/templates/metrics.html:6 udata/templates/site/dashboard.html:6
 msgid "metrics"
@@ -1496,7 +1496,7 @@ msgstr "Publicar um conjunto de dados"
 #. This is a call to action details.
 #: udata/templates/publish-action-modal.html:14
 msgid "Contribute and add a new dataset to this site catalog."
-msgstr "Contribuir e adicionar um novo dataset."
+msgstr "Contribuir e adicionar um novo dataset ao catálogo do site."
 
 #. This is a call to action.
 #: udata/templates/publish-action-modal.html:24
@@ -1534,7 +1534,7 @@ msgstr "Pesquisar"
 #: udata/templates/search.html:9
 #, python-format
 msgid "%(site)s search"
-msgstr "%(site)s pesquisa"
+msgstr "%(site)s pesquisar"
 
 #: udata/templates/dataset/list.html:10 udata/templates/organization/list.html:10
 #: udata/templates/reuse/list.html:10 udata/templates/search.html:10
@@ -1686,7 +1686,7 @@ msgstr "Publicar dados"
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr "Publicar dados, reutilizações, seguir ou deixar de seguir"
+msgstr "Publicar conjuntos de dados, reutilizações, seguir ou deixar de seguir"
 
 #: udata/templates/api/oauth_authorize.html:56
 msgid "Accept"
@@ -1698,7 +1698,7 @@ msgstr "Recusar"
 
 #: udata/templates/api/oauth_error.html:8
 msgid "OAuth Authentication Error"
-msgstr "Erro de autentificação OAuth"
+msgstr "Erro de autenticação OAuth"
 
 #: udata/templates/dataset/card.html:29
 msgid "Number of resources"
@@ -1724,15 +1724,15 @@ msgstr "Este conjunto de dados foi publicado na %(date)s e atualizado na %(updat
 
 #: udata/templates/dataset/display.html:60
 msgid "See all datasets with that badge."
-msgstr "Ver todos os conjuntos de dados com esse emblema."
+msgstr "Ver todos os conjuntos de dados com o emblema."
 
 #: udata/templates/dataset/display.html:67
 msgid "This dataset is private and will not be visible by other users"
-msgstr "Este dataset é privado e não será visível por outros utilizadores"
+msgstr "Este conjunto de dados é privado e não será visível por outros utilizadores"
 
 #: udata/templates/dataset/display.html:73
 msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr "Este dataset foi apagado. Esta alteração será definitiva dentro de 24 horas"
+msgstr "Este conjunto de dados foi apagado. Esta alteração será definitiva dentro de 24 horas"
 
 #: udata/templates/dataset/display.html:74 udata/templates/dataset/display.html:75
 #: udata/templates/organization/display.html:37
@@ -1778,7 +1778,7 @@ msgstr "Data de modificação"
 
 #: udata/templates/dataset/display.html:244
 msgid "Latest resource update"
-msgstr "Ultima actualização"
+msgstr "Última atualização"
 
 #: udata/templates/dataset/display.html:284 udata/templates/reuse/display.html:204
 msgid "Suggest a tag with a new discussion thread"
@@ -1802,7 +1802,7 @@ msgstr "Discussão ente a organização e a comunidade sobre este conjunto de da
 
 #: udata/templates/dataset/display.html:362
 msgid "Community resources"
-msgstr "Recursos da Comunidade"
+msgstr "Recursos da comunidade"
 
 #: udata/templates/dataset/display.html:373
 msgid "New community resource"
@@ -1820,8 +1820,8 @@ msgstr "Adicionar reutilização"
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
-msgstr "Reutilizou estes dados e publicou um artigo, uma demonstração gráfica ou um aplicativo?                 É hora para que você saiba!                 Referêncie o seu trabalho em apenas alguns cliques e aumente a sua visibilidade.\n"
-"Os membros da comunidade estão encarregados de cuidar da qualidade do conteúdo que produz."
+msgstr "Reutilizou estes dados e publicou um artigo, uma infografia ou aplicação?\n"
+"Com uns cliques apenas, promova o seu trabalho e aumente a sua visibilidade."
 
 #: udata/templates/dataset/followers.html:13
 #: udata/templates/organization/display.html:158
@@ -1838,7 +1838,7 @@ msgstr[1] ""
 #: udata/templates/dataset/list.html:9
 #, python-format
 msgid "%(site)s dataset search"
-msgstr "%(site)s pesquisa de dados"
+msgstr "Pesquisar conjuntos de dados em %(site)s"
 
 #: udata/templates/dataset/list.html:10 udata/templates/topic/datasets.html:9
 msgid "datasets"
@@ -1867,7 +1867,7 @@ msgstr "Licenças"
 
 #: udata/templates/dataset/search-panel.html:16
 msgid "Territorial granularity"
-msgstr "Granulidade territorial"
+msgstr "Granularidade territorial"
 
 #: udata/templates/dataset/search-panel.html:17
 msgid "Formats"
@@ -1912,7 +1912,7 @@ msgstr "A página que procura não foi encontrada."
 
 #: udata/templates/errors/410.html:6
 msgid "The page you're looking has been deleted."
-msgstr "A página que procura foi excluída."
+msgstr "A página que procura foi apagada."
 
 #: udata/templates/errors/500.html:3
 msgid "Internal server error"
@@ -1920,7 +1920,7 @@ msgstr "Erro interno do servidor"
 
 #: udata/templates/errors/500.html:6
 msgid "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application."
-msgstr "O servidor encontrou um erro interno e não pôde concluir o seu pedido. O servidor está sobrecarregado ou há um erro no aplicativo."
+msgstr "O servidor encontrou um erro interno e não foi possível concluir o pedido. O servidor está sobrecarregado ou há um erro na aplicação."
 
 #: udata/templates/errors/base.html:11
 #, python-format
@@ -1936,12 +1936,12 @@ msgstr "A seguir desde %(date)s"
 #: udata/templates/organization/display_base.html:30
 #, python-format
 msgid "The identity of this public service is certified by %(certifier)s"
-msgstr "A identidade deste serviço público é certificada pela %(certifier)s"
+msgstr "A identidade deste serviço público é certificada por %(certifier)s"
 
 #: udata/templates/macros/certified.html:5
 #: udata/templates/organization/display_base.html:31
 msgid "Certified public service"
-msgstr "Certificados de serviço público"
+msgstr "Serviço público certificado"
 
 #: udata/templates/macros/forms.html:106
 msgid "required fields"
@@ -1949,7 +1949,7 @@ msgstr "campos obrigatórios"
 
 #: udata/templates/macros/integrate.html:4
 msgid "Integrate"
-msgstr "Integridade"
+msgstr "Integrar"
 
 #: udata/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
@@ -2042,23 +2042,23 @@ msgstr "Olá %(user)s,"
 
 #: udata/templates/mail/base.html:18
 msgid "See you soon on the platform"
-msgstr "Esperamos a sua visita na plataforma"
+msgstr "Até breve na plataforma"
 
 #: udata/templates/mail/base.html:19
 #, python-format
 msgid "The %(site)s team"
-msgstr "A equipa %(site)s"
+msgstr "A equipa do %(site)s"
 
 #: udata/templates/mail/discussion_closed.html:6
 #, python-format
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
-msgstr "%(user)s fechou uma discussão sobre %(type)s %(subject)s"
+msgstr "%(user)s encerrou uma discussão sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/discussion_closed.html:40
 #: udata/templates/mail/new_discussion.html:32
 #: udata/templates/mail/new_discussion_comment.html:40
 msgid "See the discussion"
-msgstr "Consulte a discussão"
+msgstr "Ver a discussão"
 
 #: udata/templates/mail/frequency_reminder.html:6
 msgid "Some of your datasets need to be updated according to the frequency you set:"
@@ -2067,12 +2067,12 @@ msgstr "Alguns dos seus conjuntos de dados precisam de ser atualizadas de acordo
 #: udata/templates/mail/frequency_reminder.html:12
 #, python-format
 msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
-msgstr "A última actualização do conjunto de dados \"%(dataset_title)s\" foi em %(published_date)s."
+msgstr "A última atualização do conjunto de dados \"%(dataset_title)s\" foi em %(published_date)s."
 
 #: udata/templates/mail/frequency_reminder.html:17
 #, python-format
 msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
-msgstr "Dada a frequência ajustada (%(dataset_frequency)s) os dados deveriam ter sido atualizados %(due_update_days)s dias atrás."
+msgstr "Dada a frequência definida (%(dataset_frequency)s), os dados deveriam ter sido atualizados %(due_update_days)s dias atrás."
 
 #: udata/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
@@ -2095,16 +2095,16 @@ msgstr "A sua inscrição na organização \"%(org)s\" foi recusada"
 
 #: udata/templates/mail/membership_refused.html:18
 msgid "Refusal reason"
-msgstr "Motivo de recusa"
+msgstr "Motivo da recusa"
 
 #: udata/templates/mail/membership_request.html:8
 #, python-format
 msgid "As an administrator of \"%(org)s\" you are being informed than a new membership request from %(user)s is pending for validation"
-msgstr "Como administrador da organização \"%(org)s\", está sendo informado de que um novo pedido de adesão do utilizador %(user)s está pendente de validação"
+msgstr "Como administrador da organização \"%(org)s\" está a ser notificado que um pedido de adesão do utilizador %(user)s está pendente de validação"
 
 #: udata/templates/mail/membership_request.html:40
 msgid "See the request"
-msgstr "Verificar o pedido"
+msgstr "Ver o pedido"
 
 #: udata/templates/mail/new_discussion.html:6
 #, python-format
@@ -2129,34 +2129,34 @@ msgstr "%(user)s seguiu a sua organização %(org)s"
 #: udata/templates/mail/new_issue.html:6
 #, python-format
 msgid "%(user)s submitted a new issue on your %(type)s %(subject)s"
-msgstr "%(user)s submeteu um problema sobre %(type)s %(subject)s"
+msgstr "%(user)s submeteu um novo problema sobre %(type)s %(subject)s"
 
 #: udata/templates/mail/new_issue_comment.html:6
 #, python-format
 msgid "%(user)s commented an issue on your %(type)s %(subject)s"
-msgstr "%(user)s comentou uma discussão sobre %(type)s %(subject)s"
+msgstr "%(user)s comentou um problema em %(type)s %(subject)s"
 
 #: udata/templates/mail/new_member.html:7
 #, python-format
 msgid "Congratulations, you are now a member of the organization \"%(org)s\""
-msgstr "Parabéns, você é agora um membro da organização \"%(org)s\""
+msgstr "Parabéns, foi adicionado como membro da organização \"%(org)s\""
 
 #: udata/templates/mail/new_member.html:21
 msgid "See the organization page"
-msgstr "Consulte a página da organização"
+msgstr "Ver a página da organização"
 
 #: udata/templates/mail/new_reuse.html:7
 #, python-format
 msgid "A new reuse of your dataset %(dataset)s has been published"
-msgstr "Foi publicada uma nova reutilização do seu dataset %(dataset)s"
+msgstr "Foi publicada uma nova reutilização do seu conjunto de dados %(dataset)s"
 
 #: udata/templates/mail/new_reuse.html:31 udata/templates/reuse/display.html:83
 msgid "See the reuse"
-msgstr "Consulte a reutilização"
+msgstr "Ver a reutilização"
 
 #: udata/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
-msgstr "Consulte na página do dataset"
+msgstr "Ver na página do dataset"
 
 #: udata/templates/mail/test.html:4
 msgid "This is a test mail"
@@ -2164,34 +2164,34 @@ msgstr "Este é um e-mail de teste"
 
 #: udata/templates/mail/test.html:5
 msgid "If you read this, your mail configuration is working"
-msgstr "Se você ler isto, a sua configuração de correio está a funcionar"
+msgstr "Se estiver a ler isto a sua configuração de correio está operacional"
 
 #: udata/templates/mail/security/reset_instructions.html:7
 #, python-format
 msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
-msgstr "Alguém pediu uma redefinição de senha para sua %(site)s conta. Se não foi você, por favor, ignore este e-mail."
+msgstr "Alguém pediu uma redefinição de palavra-passe para a conta %(site)s. Se não foi você, por favor, ignore este e-mail."
 
 #: udata/templates/mail/security/reset_instructions.html:10
 msgid "To reset your password, please confirm your request through the link below:"
-msgstr "Para redefinir a sua senha, por favor, confirme o seu pedido através do link abaixo:"
+msgstr "Para redefinir a sua palavra-passe, por favor confirme o seu pedido através do link abaixo:"
 
 #: udata/templates/mail/security/reset_instructions.html:18
 msgid "Reset my password"
-msgstr "Redefinir a minha senha"
+msgstr "Redefinir a minha palavra-passe"
 
 #: udata/templates/mail/security/reset_notice.html:7
 #, python-format
 msgid "Your password for %(site)s has been reset."
-msgstr "A sua senha para o %(site)s foi redefinida."
+msgstr "A sua palavra-passe para o %(site)s foi redefinida."
 
 #: udata/templates/mail/security/welcome.html:7
 #, python-format
 msgid "Welcome to %(site)s!"
-msgstr "Bem-vindo ao %(site)s!"
+msgstr "Bem-vindo a %(site)s!"
 
 #: udata/templates/mail/security/welcome.html:10
 msgid "To activate your account, please confirm your email address through the link below:"
-msgstr "Para ativar a sua conta, por favor, confirme o seu endereço de e-mail através do link seguinte:"
+msgstr "Para ativar a sua conta, por favor confirme o seu endereço de e-mail através do seguinte link:"
 
 #: udata/templates/mail/security/welcome.html:18
 msgid "Confirm now"
@@ -2213,7 +2213,7 @@ msgstr "organização"
 
 #: udata/templates/organization/display.html:38
 msgid "This organization has been deleted. This will be permanent in the next 24 hours"
-msgstr "Esta organização foi apagada. Esta alteração será definitiva dentro de 24 horas"
+msgstr "Esta organização foi apagada. A alteração será definitiva dentro de 24 horas"
 
 #: udata/templates/organization/display.html:50
 #, python-format
@@ -2236,11 +2236,11 @@ msgstr ""
 
 #: udata/templates/organization/display.html:88
 msgid "Download as CSV"
-msgstr "Transferir como CSV"
+msgstr "Descarregar como CSV"
 
 #: udata/templates/organization/display.html:93
 msgid "Datasets list"
-msgstr "Lista de dados"
+msgstr "Lista de conjuntos de dados"
 
 #: udata/templates/organization/display.html:98
 msgid "Resources list"
@@ -2274,11 +2274,11 @@ msgstr "Mostrar todos os seguidores"
 #: udata/templates/organization/display.html:191
 #: udata/templates/site/dashboard.html:51
 msgid "Community activity"
-msgstr "Actividade da comunidade"
+msgstr "Atividade da comunidade"
 
 #: udata/templates/organization/display_base.html:46
 msgid "See all organizations with that badge."
-msgstr "Ver todas as organizações com esse emblema."
+msgstr "Ver todas as organizações com este emblema."
 
 #: udata/templates/organization/display_base.html:86
 msgid "Use of data by that organization for the community"
@@ -2336,7 +2336,7 @@ msgstr "Serei informado sobre novidades desta organização"
 #: udata/templates/organization/list.html:9
 #, python-format
 msgid "%(site)s organization search"
-msgstr "%(site)s pesquisa de organização"
+msgstr "Pesquisar organizações em %(site)s"
 
 #: udata/templates/organization/list.html:10
 msgid "organizations"
@@ -2352,7 +2352,7 @@ msgstr "Numero de reutilizações pela organização"
 
 #: udata/templates/organization/search-result.html:39
 msgid "Number of reappropriations by the community"
-msgstr "Numero de reapopriações pela comunidade"
+msgstr "Numero de reapropriações pela comunidade"
 
 #: udata/templates/organization/search-result.html:48
 #: udata/templates/reuse/search-result.html:32
@@ -2407,23 +2407,23 @@ msgstr "Publicado em %(date)s"
 
 #: udata/templates/post/display.html:62
 msgid "This post is private and will not be visible by other users"
-msgstr "Esta publicação é privada e não será vista por outros utilizadores"
+msgstr "Este artigo é privado e não será visto por outros utilizadores"
 
 #: udata/templates/post/display.html:68
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
-msgstr "Esta publicação foi apagada. Esta alteração será definitiva dentro de 24 horas"
+msgstr "Este artigo foi apagado. A alteração será definitiva dentro de 24 horas"
 
 #: udata/templates/post/display.html:169 udata/templates/post/display.html:171
 msgid "Previous post"
-msgstr "Publicação anterior"
+msgstr "Artigo anterior"
 
 #: udata/templates/post/display.html:178
 msgid "All posts"
-msgstr "Todas as publicações"
+msgstr "Todos os artigos"
 
 #: udata/templates/post/display.html:183 udata/templates/post/display.html:184
 msgid "Next post"
-msgstr "Próxima publicação"
+msgstr "Próximo artigo"
 
 #: udata/templates/post/display.html:211
 msgid "Comments about this post."
@@ -2431,16 +2431,16 @@ msgstr "Comentários sobre esta publicação."
 
 #: udata/templates/post/list.html:5 udata/templates/post/list.html:15
 msgid "Posts"
-msgstr "Publicações"
+msgstr "Artigos"
 
 #: udata/templates/post/list.html:6
 #, python-format
 msgid "%(site)s posts"
-msgstr "%(site)s publicações"
+msgstr "Artigos de %(site)s"
 
 #: udata/templates/post/list.html:7
 msgid "posts"
-msgstr "publicações"
+msgstr "artigos"
 
 #: udata/templates/post/search-result.html:18
 msgid "Posted on"
@@ -2482,7 +2482,7 @@ msgstr "mais"
 
 #: udata/templates/reuse/display.html:166
 msgid "I'll be informed about this user news"
-msgstr "Serei informado sobre noticias deste utilizador"
+msgstr "Serei informado sobre notícias deste utilizador"
 
 #: udata/templates/reuse/display.html:220
 msgid "No followers yet"
@@ -2491,7 +2491,7 @@ msgstr "Sem seguidores"
 #: udata/templates/reuse/list.html:9
 #, python-format
 msgid "%(site)s reuse search"
-msgstr "%(site)s pesquisa de reutilizações"
+msgstr "Pesquisar reutilizações em %(site)s"
 
 #: udata/templates/reuse/list.html:10 udata/templates/topic/reuses.html:9
 msgid "reuses"
@@ -2504,18 +2504,18 @@ msgstr "Número de conjuntos de dados"
 #: udata/templates/security/change_password.html:12
 #: udata/templates/security/change_password.html:19
 msgid "Change Password"
-msgstr "Alterar senha"
+msgstr "Alterar palavra-passe"
 
 #: udata/templates/security/forgot_password.html:12
 #: udata/templates/security/forgot_password.html:18
 #: udata/templates/security/reset_password.html:13
 #: udata/templates/security/reset_password.html:19
 msgid "Reset Password"
-msgstr "Redefinir Senha"
+msgstr "Redefinir palavra-passe"
 
 #: udata/templates/security/forgot_password.html:13
 msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr "Esqueceu a senha? Introduza o seu endereço de email, e enviaremos intruções para redefinir uma nova."
+msgstr "Esqueceu a palavra-passe? Introduza o seu endereço de email e enviaremos instruções para redefinir uma nova."
 
 #: udata/templates/security/login_user.html:14
 msgid "Sign In"
@@ -2527,11 +2527,11 @@ msgstr "Iniciar sessão"
 
 #: udata/templates/security/login_user.html:22
 msgid "Forgot your password?"
-msgstr "Esqueceu sua senha?"
+msgstr "Esqueceu a sua palavra-passe?"
 
 #: udata/templates/security/login_user.html:24
 msgid "Recover your password"
-msgstr "Recuperar senha"
+msgstr "Recuperar palavra-passe"
 
 #: udata/templates/security/login_user.html:33
 #: udata/templates/security/register_user.html:30
@@ -2540,7 +2540,7 @@ msgstr "Criar conta"
 
 #: udata/templates/security/login_user.html:36
 msgid "Register"
-msgstr "Registar"
+msgstr "Registar-se"
 
 #: udata/templates/security/login_user.html:40
 msgid "Create an account"
@@ -2548,7 +2548,7 @@ msgstr "Criar uma conta"
 
 #: udata/templates/security/register_user.html:12
 msgid "Sign Up"
-msgstr "Criar conta"
+msgstr "Registar-se"
 
 #: udata/templates/security/register_user.html:21
 #, python-format
@@ -2559,15 +2559,15 @@ msgstr "Li e aceitei <a href=\"%(url)s\"> os termos e condições do serviço.</
 msgid "In particular, I understand that this site\n"
 "                    values the production and enrichment of datasets over definitive or partisan interpretations.\n"
 "                    The members of the community are in charge of looking after the quality of the content it produces."
-msgstr "Em particular, entendo que este site valoriza a produção e o enriquecimento de conjuntos de dados através de interpretações definitivas ou partidárias. Os membros da comunidade estão encarregados de cuidar da qualidade do conteúdo que produz."
+msgstr "Em particular, entendo que este site valoriza a produção e o enriquecimento de conjuntos de dados através de interpretações subjetivas ou partidárias. Os membros da comunidade são responsáveis por cuidar da qualidade do conteúdo que é produzido."
 
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
-msgstr "Painel de controlo"
+msgstr "Dashboard"
 
 #: udata/templates/site/dashboard.html:5
 msgid "Site metrics and activity"
-msgstr "Métricas e actividade na página"
+msgstr "Métricas e atividade do sítio"
 
 #: udata/templates/site/dashboard.html:6
 msgid "activity"
@@ -2579,7 +2579,7 @@ msgstr "Mapa de cobertura"
 
 #: udata/templates/site/map.html:6
 msgid "Display datasets on a map"
-msgstr "Mostrar os dados num mapa"
+msgstr "Mostrar os conjuntos de dados num mapa"
 
 #: udata/templates/site/map.html:7
 msgid "coverage"
