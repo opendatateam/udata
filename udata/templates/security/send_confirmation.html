@@ -1,0 +1,24 @@
+{% extends theme('layouts/1-column.html') %}
+{% import 'macros/forms.html' as forms with context %}
+
+{% set section_class = 'form' %}
+
+{% block main_content %}
+
+<div class="container auth-container">
+    <form class="form-horizontal validate col-md-offset-2 col-md-8"
+          action="{{ url_for('security.send_confirmation') }}" method="POST" name="send_confirmation_form">
+        <fieldset>
+            <legend>{{ _('Resend confirmation instructions') }}</legend>
+              {{ send_confirmation_form.hidden_tag() }}
+
+              {{ forms.field(send_confirmation_form.email) }}
+            <div class="form-group">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary btn-block">{{ _('Submit') }}</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}
