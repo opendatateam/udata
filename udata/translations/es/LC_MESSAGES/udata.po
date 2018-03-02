@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-02-21 08:37-0500\n"
+"POT-Creation-Date: 2018-02-26 10:54+0100\n"
+"PO-Revision-Date: 2018-03-02 04:53-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -121,7 +121,7 @@ msgid "Description"
 msgstr "Descripción"
 
 #: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
-#: udata/templates/reuse/card.html:32 udata/templates/reuse/display.html:183
+#: udata/templates/reuse/card.html:27 udata/templates/reuse/display.html:183
 #: udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:6
 #: udata/templates/reuse/search-result.html:18
@@ -195,7 +195,7 @@ msgstr "La frecuencia con la que se actualizan los datos."
 msgid "Expected frequency date"
 msgstr "Fecha de frecuencia esperada"
 
-#: udata/core/dataset/forms.py:88 udata/templates/dataset/card.html:46
+#: udata/core/dataset/forms.py:88 udata/templates/dataset/card.html:41
 #: udata/templates/dataset/display.html:213
 #: udata/templates/dataset/search-labels.html:15
 #: udata/templates/dataset/search-panel.html:13
@@ -247,7 +247,7 @@ msgstr "Restringa la visibilidad del conjunto de datos solo para usted o su orga
 
 #: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:34
 #: udata/core/site/metrics.py:53 udata/core/site/views.py:134
-#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:34
+#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:29
 #: udata/templates/dataset/display.html:385 udata/templates/dataset/list.html:43
 #: udata/templates/dataset/search-labels.html:25
 #: udata/templates/organization/list.html:38
@@ -1548,7 +1548,7 @@ msgstr "%(site)s buscar"
 msgid "search"
 msgstr "buscar"
 
-#: udata/templates/organization/card.html:25
+#: udata/templates/organization/card.html:21
 #: udata/templates/organization/display.html:49
 #: udata/templates/organization/display_base.html:58
 #: udata/templates/organization/search-result.html:23
@@ -1560,7 +1560,7 @@ msgid_plural "%(num)d datasets"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata/templates/organization/card.html:31
+#: udata/templates/organization/card.html:27
 #: udata/templates/organization/display.html:53
 #: udata/templates/organization/display_base.html:87
 #: udata/templates/organization/search-result.html:32
@@ -1595,10 +1595,10 @@ msgstr "Etiqueta"
 msgid "Badge"
 msgstr "Insignia"
 
-#: udata/templates/dataset/card.html:38 udata/templates/dataset/list.html:44
-#: udata/templates/organization/card.html:34 udata/templates/reuse/card.html:41
+#: udata/templates/dataset/card.html:33 udata/templates/dataset/list.html:44
+#: udata/templates/organization/card.html:30 udata/templates/reuse/card.html:36
 #: udata/templates/search.html:77 udata/templates/search.html:91
-#: udata/templates/topic/datasets.html:37 udata/templates/user/card.html:33
+#: udata/templates/topic/datasets.html:37 udata/templates/user/card.html:28
 msgid "Stars"
 msgstr "Estrellas"
 
@@ -1705,15 +1705,19 @@ msgstr "Rechazar"
 msgid "OAuth Authentication Error"
 msgstr "OAuth Error de Autentificación "
 
-#: udata/templates/dataset/card.html:29
+#: udata/templates/dataset/add-reuse-card.html:6
+msgid "Add a reuse"
+msgstr "Agregar una reutilización"
+
+#: udata/templates/dataset/card.html:24
 msgid "Number of resources"
 msgstr ""
 
-#: udata/templates/dataset/card.html:54 udata/templates/dataset/display.html:262
+#: udata/templates/dataset/card.html:49 udata/templates/dataset/display.html:262
 msgid "Territorial coverage"
 msgstr "Cobertura territorial"
 
-#: udata/templates/dataset/card.html:62 udata/templates/dataset/display.html:254
+#: udata/templates/dataset/card.html:57 udata/templates/dataset/display.html:254
 #: udata/templates/dataset/search-result.html:89
 msgid "Territorial coverage granularity"
 msgstr "Cobertura de granuralidad territorial"
@@ -1818,10 +1822,6 @@ msgid "You have built a more comprehensive database than those presented here? T
 msgstr "¿Usted ha constuído un conjunto de datos más comprensible que los que aparecen aquí? ¡Es momento de compartilo!"
 
 #: udata/templates/dataset/display.html:403
-msgid "Add a reuse"
-msgstr "Agregar una reutilización"
-
-#: udata/templates/dataset/display.html:411
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
@@ -2203,13 +2203,13 @@ msgstr ""
 msgid "Confirm now"
 msgstr ""
 
-#: udata/templates/organization/card.html:23
+#: udata/templates/organization/card.html:19
 #: udata/templates/organization/search-result.html:21
-#: udata/templates/user/card.html:22
+#: udata/templates/user/card.html:17
 msgid "Number of datasets"
 msgstr "Número de conjuntos de datos"
 
-#: udata/templates/organization/card.html:29 udata/templates/user/card.html:28
+#: udata/templates/organization/card.html:25 udata/templates/user/card.html:23
 msgid "Number of reuses"
 msgstr "Número de reutilizaciones "
 
@@ -2406,7 +2406,7 @@ msgstr "Noticias"
 msgid "Photo credit"
 msgstr "Créditos de la foto"
 
-#: udata/templates/post/display.html:56 udata/templates/reuse/card.html:46
+#: udata/templates/post/display.html:56 udata/templates/reuse/card.html:41
 #, python-format
 msgid "Published on %(date)s"
 msgstr "Publicado en %(date)s"
@@ -2456,11 +2456,11 @@ msgstr ""
 msgid "Read more"
 msgstr "Leer más"
 
-#: udata/templates/reuse/card.html:36
+#: udata/templates/reuse/card.html:31
 msgid "Number of datasets used"
 msgstr "Cantidad de conjuntos de datos utilizados"
 
-#: udata/templates/reuse/card.html:53
+#: udata/templates/reuse/card.html:48
 #, python-format
 msgid "Created by %(user)s"
 msgstr ""
