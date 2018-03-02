@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-02-21 12:45+0100\n"
-"PO-Revision-Date: 2018-03-01 14:55-0500\n"
+"POT-Creation-Date: 2018-02-26 10:54+0100\n"
+"PO-Revision-Date: 2018-03-02 05:32-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -121,7 +121,7 @@ msgid "Description"
 msgstr "Descrição"
 
 #: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
-#: udata/templates/reuse/card.html:32 udata/templates/reuse/display.html:183
+#: udata/templates/reuse/card.html:27 udata/templates/reuse/display.html:183
 #: udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:6
 #: udata/templates/reuse/search-result.html:18
@@ -195,7 +195,7 @@ msgstr "A frequência com que os dados são atualizados."
 msgid "Expected frequency date"
 msgstr "Data de frequência esperada"
 
-#: udata/core/dataset/forms.py:88 udata/templates/dataset/card.html:46
+#: udata/core/dataset/forms.py:88 udata/templates/dataset/card.html:41
 #: udata/templates/dataset/display.html:213
 #: udata/templates/dataset/search-labels.html:15
 #: udata/templates/dataset/search-panel.html:13
@@ -247,7 +247,7 @@ msgstr "Restringir a visibilidade do dataset para si ou para a sua organização
 
 #: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:34
 #: udata/core/site/metrics.py:53 udata/core/site/views.py:134
-#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:34
+#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:29
 #: udata/templates/dataset/display.html:385 udata/templates/dataset/list.html:43
 #: udata/templates/dataset/search-labels.html:25
 #: udata/templates/organization/list.html:38
@@ -1543,7 +1543,7 @@ msgstr "%(site)s pesquisar"
 msgid "search"
 msgstr "pesquisar"
 
-#: udata/templates/organization/card.html:25
+#: udata/templates/organization/card.html:21
 #: udata/templates/organization/display.html:49
 #: udata/templates/organization/display_base.html:58
 #: udata/templates/organization/search-result.html:23
@@ -1555,7 +1555,7 @@ msgid_plural "%(num)d datasets"
 msgstr[0] "%(num)d conjunto de dados"
 msgstr[1] "%(num)d conjunto de dados"
 
-#: udata/templates/organization/card.html:31
+#: udata/templates/organization/card.html:27
 #: udata/templates/organization/display.html:53
 #: udata/templates/organization/display_base.html:87
 #: udata/templates/organization/search-result.html:32
@@ -1564,21 +1564,21 @@ msgstr[1] "%(num)d conjunto de dados"
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
 msgstr[0] "%(num)d reutilização"
-msgstr[1] ""
+msgstr[1] "%(num)d reutilizações"
 
 #: udata/templates/search.html:41
 #, python-format
 msgid "%(num)d organization"
 msgid_plural "%(num)d organizations"
 msgstr[0] "%(num)d organização"
-msgstr[1] ""
+msgstr[1] "%(num)d organizações"
 
 #: udata/templates/search.html:49
 #, python-format
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
 msgstr[0] "Território: %(name)s"
-msgstr[1] ""
+msgstr[1] "%(num)d territórios"
 
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
@@ -1590,10 +1590,10 @@ msgstr "Etiqueta"
 msgid "Badge"
 msgstr "Emblema"
 
-#: udata/templates/dataset/card.html:38 udata/templates/dataset/list.html:44
-#: udata/templates/organization/card.html:34 udata/templates/reuse/card.html:41
+#: udata/templates/dataset/card.html:33 udata/templates/dataset/list.html:44
+#: udata/templates/organization/card.html:30 udata/templates/reuse/card.html:36
 #: udata/templates/search.html:77 udata/templates/search.html:91
-#: udata/templates/topic/datasets.html:37 udata/templates/user/card.html:33
+#: udata/templates/topic/datasets.html:37 udata/templates/user/card.html:28
 msgid "Stars"
 msgstr "Favoritos"
 
@@ -1700,15 +1700,19 @@ msgstr "Recusar"
 msgid "OAuth Authentication Error"
 msgstr "Erro de autenticação OAuth"
 
-#: udata/templates/dataset/card.html:29
-msgid "Number of resources"
-msgstr ""
+#: udata/templates/dataset/add-reuse-card.html:6
+msgid "Add a reuse"
+msgstr "Adicionar reutilização"
 
-#: udata/templates/dataset/card.html:54 udata/templates/dataset/display.html:262
+#: udata/templates/dataset/card.html:24
+msgid "Number of resources"
+msgstr "Número de recursos"
+
+#: udata/templates/dataset/card.html:49 udata/templates/dataset/display.html:262
 msgid "Territorial coverage"
 msgstr "Cobertura territorial"
 
-#: udata/templates/dataset/card.html:62 udata/templates/dataset/display.html:254
+#: udata/templates/dataset/card.html:57 udata/templates/dataset/display.html:254
 #: udata/templates/dataset/search-result.html:89
 msgid "Territorial coverage granularity"
 msgstr "Granularidade de cobertura territorial"
@@ -1813,10 +1817,6 @@ msgid "You have built a more comprehensive database than those presented here? T
 msgstr "Construiu uma base de dados mais compreensiva que a apresentada aqui? Então é a altura ideal para a partilhar!"
 
 #: udata/templates/dataset/display.html:403
-msgid "Add a reuse"
-msgstr "Adicionar reutilização"
-
-#: udata/templates/dataset/display.html:411
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
@@ -1832,8 +1832,8 @@ msgstr "Reutilizou estes dados e publicou um artigo, uma infografia ou aplicaç�
 #, python-format
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
-msgstr[0] "%(num)d seguidor(es)"
-msgstr[1] ""
+msgstr[0] "%(num)d seguidor"
+msgstr[1] "%(num)d seguidores"
 
 #: udata/templates/dataset/list.html:9
 #, python-format
@@ -2197,13 +2197,13 @@ msgstr "Para ativar a sua conta, por favor confirme o seu endereço de e-mail at
 msgid "Confirm now"
 msgstr "Confirmar agora"
 
-#: udata/templates/organization/card.html:23
+#: udata/templates/organization/card.html:19
 #: udata/templates/organization/search-result.html:21
-#: udata/templates/user/card.html:22
+#: udata/templates/user/card.html:17
 msgid "Number of datasets"
 msgstr "Número de conjuntos de dados"
 
-#: udata/templates/organization/card.html:29 udata/templates/user/card.html:28
+#: udata/templates/organization/card.html:25 udata/templates/user/card.html:23
 msgid "Number of reuses"
 msgstr "Número de reutilizações"
 
@@ -2219,8 +2219,8 @@ msgstr "Esta organização foi apagada. A alteração será definitiva dentro de
 #, python-format
 msgid "%(num)d private dataset"
 msgid_plural "%(num)d private datasets"
-msgstr[0] "%(num)d conjuntos de dados privados"
-msgstr[1] ""
+msgstr[0] "%(num)d conjunto de dados privados"
+msgstr[1] "%(num)d conjuntos de dados privados"
 
 #: udata/templates/organization/display.html:54
 #, python-format
@@ -2232,7 +2232,7 @@ msgstr[1] "%(num)d reutilizações privadas"
 #: udata/templates/organization/display.html:81
 #, python-format
 msgid "See the %(nb)d datasets"
-msgstr ""
+msgstr "Ver os %(nb)d conjuntos de dados"
 
 #: udata/templates/organization/display.html:88
 msgid "Download as CSV"
@@ -2257,7 +2257,7 @@ msgstr "Lista de discussões"
 #: udata/templates/organization/display.html:137
 #, python-format
 msgid "See the %(nb)d reuses"
-msgstr ""
+msgstr "Ver as %(nb)d reutilizações"
 
 #: udata/templates/organization/display.html:146
 #: udata/templates/organization/display_base.html:67
@@ -2293,8 +2293,8 @@ msgstr "Utilização de dados dessa organização pela comunidade"
 #, python-format
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
-msgstr[0] "%(num)d reapropriações"
-msgstr[1] ""
+msgstr[0] "%(num)d reapropriação"
+msgstr[1] "%(num)d reapropriações"
 
 #: udata/templates/organization/display_base.html:109
 msgid "I belong to this organization"
@@ -2357,15 +2357,15 @@ msgstr "Numero de reapropriações pela comunidade"
 #: udata/templates/organization/search-result.html:48
 #: udata/templates/reuse/search-result.html:32
 msgid "Number of stars"
-msgstr "Número de estrelas"
+msgstr "Número de favoritos"
 
 #: udata/templates/organization/search-result.html:50
 #: udata/templates/reuse/search-result.html:34
 #, python-format
 msgid "%(num)d star"
 msgid_plural "%(num)d stars"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d favorito"
+msgstr[1] "%(num)d favoritos"
 
 #: udata/templates/organization/search-result.html:57
 msgid "Number of followers"
@@ -2379,8 +2379,8 @@ msgstr "Número de membros"
 #, python-format
 msgid "%(num)d members"
 msgid_plural "%(num)d members"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d membros"
+msgstr[1] "%(num)d membros"
 
 #: udata/templates/organization/sidebar-producer.html:17
 #: udata/templates/reuse/display.html:161
@@ -2400,7 +2400,7 @@ msgstr "Notícias"
 msgid "Photo credit"
 msgstr "Créditos da fotografia"
 
-#: udata/templates/post/display.html:56 udata/templates/reuse/card.html:46
+#: udata/templates/post/display.html:56 udata/templates/reuse/card.html:41
 #, python-format
 msgid "Published on %(date)s"
 msgstr "Publicado em %(date)s"
@@ -2450,14 +2450,14 @@ msgstr "Publicado em"
 msgid "Read more"
 msgstr "Ler mais"
 
-#: udata/templates/reuse/card.html:36
+#: udata/templates/reuse/card.html:31
 msgid "Number of datasets used"
 msgstr "Número de conjuntos de dados utilizados"
 
-#: udata/templates/reuse/card.html:53
+#: udata/templates/reuse/card.html:48
 #, python-format
 msgid "Created by %(user)s"
-msgstr ""
+msgstr "Criado por %(user)s"
 
 #: udata/templates/reuse/display.html:48
 #, python-format
@@ -2619,13 +2619,13 @@ msgstr "Fonte:"
 #: udata/templates/territories/departement.html:28
 #: udata/templates/territories/region.html:27
 msgid "Submit your logo through:"
-msgstr "Submeta o seu logotipo através:"
+msgstr "Submeta o seu logótipo através de:"
 
 #: udata/templates/territories/commune.html:30
 #: udata/templates/territories/departement.html:29
 #: udata/templates/territories/region.html:28
 msgid "we only expose logos under an open license"
-msgstr "apenas publicamos logos em licença aberta"
+msgstr "apenas publicamos imagens em licença aberta"
 
 #: udata/templates/territories/commune.html:40
 #: udata/templates/territories/departement.html:39
@@ -2682,7 +2682,7 @@ msgstr "Condados:"
 
 #: udata/templates/territories/search-result.html:22
 msgid "Administrative level"
-msgstr "Nivel administrativo"
+msgstr "Nível administrativo"
 
 #: udata/templates/territories/search-result.html:30
 msgid "Population"
@@ -2690,7 +2690,7 @@ msgstr "População"
 
 #: udata/templates/territories/territory.html:17
 msgid "This territory has been replaced by:"
-msgstr "Este território foi substituido por:"
+msgstr "Este território foi substituído por:"
 
 #: udata/templates/territories/territory.html:19
 msgid "since"
@@ -2698,11 +2698,11 @@ msgstr "desde"
 
 #: udata/templates/territories/territory.html:33
 msgid "Some of your datasets have an exact match!"
-msgstr "Alguns dos seus conjuntos de dados teem uma combinação exacta!"
+msgstr "Alguns dos seus conjuntos de dados têm uma correspondência exacta!"
 
 #: udata/templates/territories/territory.html:35
 msgid "Claim that territory"
-msgstr "Reclamar território"
+msgstr "Reivindicar território"
 
 #: udata/templates/territories/territory.html:35
 msgid "and your datasets will appear first."
@@ -2715,7 +2715,7 @@ msgstr "Se desejar que os seus conjuntos de dados apareçam nessa lista, a zona 
 
 #: udata/templates/territories/territory.html:40
 msgid "You want to add your own datasets to that list?"
-msgstr "Deseja adicionar os seus conjuntos de dados á lista?"
+msgstr "Deseja adicionar os seus conjuntos de dados à lista?"
 
 #: udata/templates/territories/territory.html:43
 msgid "Log in"
@@ -2750,7 +2750,7 @@ msgstr "Reutilizações em destaque"
 
 #: udata/templates/topic/display.html:66
 msgid "Latest reuses"
-msgstr ""
+msgstr "Últimas reutilizações"
 
 #: udata/templates/topic/display.html:85
 msgid "Latest datasets"
@@ -2776,12 +2776,12 @@ msgstr "%(site)s %(topic)s reutilizações relacionadas"
 
 #: udata/templates/user/activity.html:5 udata/templates/user/base.html:62
 msgid "Activity"
-msgstr "Actividade"
+msgstr "Atividade"
 
 #: udata/templates/user/base.html:8
 #, python-format
 msgid "%(site)s %(username)s profile"
-msgstr "%(site)s %(username)s perfil"
+msgstr "Perfil de %(username)s em %(site)s"
 
 #: udata/templates/user/base.html:9
 msgid "user"
@@ -2801,40 +2801,40 @@ msgstr[1] "%(num)d seguiram"
 #: udata/templates/user/datasets.html:36
 #, python-format
 msgid "%(user)s has not yet published any dataset"
-msgstr ""
+msgstr "%(user)s ainda não publicou conjuntos de dados"
 
 #: udata/templates/user/followers.html:34
 #, python-format
 msgid "%(user)s has no follower"
-msgstr "%(user)s não tem seguidor"
+msgstr "%(user)s não tem seguidores"
 
 #: udata/templates/user/following.html:43
 #, python-format
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
-msgstr[0] "Siguindo %(num)d conjunto(s) de dados"
-msgstr[1] ""
+msgstr[0] "Seguindo %(num)d conjunto de dados"
+msgstr[1] "Seguindo %(num)d conjuntos de dados"
 
 #: udata/templates/user/following.html:63
 #, python-format
 msgid "Follow %(num)d reuse"
 msgid_plural "Follow %(num)d reuses"
-msgstr[0] "Siguindo %(num)d reutilização(ões)"
-msgstr[1] ""
+msgstr[0] "Seguindo %(num)d reutilização"
+msgstr[1] "Seguindo %(num)d reutilizações"
 
 #: udata/templates/user/following.html:83
 #, python-format
 msgid "Follow %(num)d organization"
 msgid_plural "Follow %(num)d organizations"
-msgstr[0] "Seguindo %(num)d organização(ões)"
-msgstr[1] ""
+msgstr[0] "Seguindo %(num)d organização"
+msgstr[1] "Seguindo %(num)d organizações"
 
 #: udata/templates/user/following.html:103
 #, python-format
 msgid "Follow %(num)d user"
 msgid_plural "Follow %(num)d users"
-msgstr[0] "Siguindo %(num)d utilizador(es)"
-msgstr[1] ""
+msgstr[0] "Seguindo %(num)d utilizador"
+msgstr[1] "Seguindo %(num)d utilizadores"
 
 #: udata/templates/user/following.html:129
 #, python-format
@@ -2853,7 +2853,7 @@ msgstr "utilizadores"
 #: udata/templates/user/reuses.html:35
 #, python-format
 msgid "%(user)s has not yet published any reuse"
-msgstr ""
+msgstr "%(user)s ainda não publicou reutilizações"
 
 #: udata/theme/__init__.py:41
 msgid "Map"
