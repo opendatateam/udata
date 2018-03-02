@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-26 10:54+0100\n"
-"PO-Revision-Date: 2018-03-02 05:25-0500\n"
+"PO-Revision-Date: 2018-03-02 05:32-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2232,7 +2232,7 @@ msgstr[1] "%(num)d reutilizações privadas"
 #: udata/templates/organization/display.html:81
 #, python-format
 msgid "See the %(nb)d datasets"
-msgstr ""
+msgstr "Ver os %(nb)d conjuntos de dados"
 
 #: udata/templates/organization/display.html:88
 msgid "Download as CSV"
@@ -2257,7 +2257,7 @@ msgstr "Lista de discussões"
 #: udata/templates/organization/display.html:137
 #, python-format
 msgid "See the %(nb)d reuses"
-msgstr ""
+msgstr "Ver as %(nb)d reutilizações"
 
 #: udata/templates/organization/display.html:146
 #: udata/templates/organization/display_base.html:67
@@ -2357,15 +2357,15 @@ msgstr "Numero de reapropriações pela comunidade"
 #: udata/templates/organization/search-result.html:48
 #: udata/templates/reuse/search-result.html:32
 msgid "Number of stars"
-msgstr "Número de estrelas"
+msgstr "Número de favoritos"
 
 #: udata/templates/organization/search-result.html:50
 #: udata/templates/reuse/search-result.html:34
 #, python-format
 msgid "%(num)d star"
 msgid_plural "%(num)d stars"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d favorito"
+msgstr[1] "%(num)d favoritos"
 
 #: udata/templates/organization/search-result.html:57
 msgid "Number of followers"
@@ -2812,8 +2812,8 @@ msgstr "%(user)s não tem seguidores"
 #, python-format
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
-msgstr[0] "Siguindo %(num)d conjunto de dados"
-msgstr[1] "Siguindo %(num)d conjuntos de dados"
+msgstr[0] "Seguindo %(num)d conjunto de dados"
+msgstr[1] "Seguindo %(num)d conjuntos de dados"
 
 #: udata/templates/user/following.html:63
 #, python-format
