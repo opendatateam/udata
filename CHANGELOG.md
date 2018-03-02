@@ -11,6 +11,8 @@
 - Switch from OAuthlib/Flask-OUAhtlib to Authlib and support all grants type as well as token revocation [#1434](https://github.com/opendatateam/udata/pull/1434)
 - Fix completion/suggestion unicode handling [#1452](https://github.com/opendatateam/udata/pull/1452)
 - Added a link to change password into the admin [#1462](https://github.com/opendatateam/udata/pull/1462)
+- Chunked upload support (big files support) [#1468](https://github.com/opendatateam/udata/pull/1468)
+- udata is now protocol (`http`/`https`) agnostic. This is now fully the reverse-proxy responsibility (please ensure that you are using SSL only in production for security purpose). [#1463](https://github.com/opendatateam/udata/pull/1463) [breaking]
 
 ## 1.2.11 (2018-02-05)
 
@@ -23,7 +25,7 @@
 
 - Markdown rendering is now the same between the back and the frontend. [#604](https://github.com/opendatateam/udata/issues/604)
 - Make the dataset page reuses section and cards themable. [#1378](https://github.com/opendatateam/udata/pull/1378)
-- `ValueError`s are not hidden anymore by the Bad Request error page, they are logged. [#1382](https://github.com/opendatateam/udata/pull/1382)
+- `ValueError` is not hidden anymore by the Bad Request error page, it is logged. [#1382](https://github.com/opendatateam/udata/pull/1382)
 - Spatial encoding fixes: prevent breaking unicode errors. [#1381](https://github.com/opendatateam/udata/pull/1381)
 - Ensure the multiple term search uses a `AND` operator [#1384](https://github.com/opendatateam/udata/pull/1384)
 - Facets encoding fixes: ensure lazy strings are propery encoded. [#1388](https://github.com/opendatateam/udata/pull/1388)

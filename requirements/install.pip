@@ -46,5 +46,5 @@ wtforms-json==0.3.3
 wtforms==2.1
 xmltodict==0.11.0
 geojson==2.3.0
-pymongo==3.6.0
+pymongo==3.6.1
 Jinja2==2.10
