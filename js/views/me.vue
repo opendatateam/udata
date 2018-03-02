@@ -46,8 +46,12 @@ export default  {
                 label: this._('Edit'),
                 icon: 'edit',
                 method: this.edit
+            }, {
+                label: this._('Change password'),
+                icon: 'key',
+                method: this.change_password
             }].concat(config.is_delete_me_enabled ? [{
-                label: this._('Delete'),
+                label: this._('Delete profile'),
                 icon: 'trash',
                 method: this.confirm_delete
             }] : []),
@@ -81,6 +85,9 @@ export default  {
         this._handler.remove();
     },
     methods: {
+        change_password() {
+            document.location = '/change';
+        },
         confirm_delete() {
             this.$root.$modal(
                 require('components/user/delete-me-modal.vue'),

@@ -2,9 +2,10 @@
 from __future__ import unicode_literals
 
 import json
-from StringIO import StringIO
 
 from datetime import datetime
+from StringIO import StringIO
+from uuid import uuid4
 
 from flask import url_for
 
@@ -586,6 +587,49 @@ class DatasetResourceAPITest(APITestCase):
         dataset.reload()
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
+
+    def test_create_with_file_chunks(self):
+        '''It should create a resource from the API with a chunked file'''
+        user = self.login()
+        with self.autoindex():
+            org = OrganizationFactory(members=[
+                Member(user=user, role='admin')
+            ])
+            dataset = DatasetFactory(organization=org)
+
+        uuid = str(uuid4())
+        parts = 4
+        url = url_for('api.upload_new_dataset_resource', dataset=dataset)
+
+        for i in range(parts):
+            response = self.post(url, {
+                'file': (StringIO(b'a'), 'blob'),
+                'uuid': uuid,
+                'filename': 'test.txt',
+                'partindex': i,
+                'partbyteoffset': 0,
+                'totalfilesize': parts,
+                'totalparts': parts,
+                'chunksize': 1,
+            }, json=False)
+
+            self.assert200(response)
+            assert response.json['success']
+            assert 'filename' not in response.json
+            assert 'url' not in response.json
+            assert 'size' not in response.json
+            assert 'sha1' not in response.json
+            assert 'url' not in response.json
+
+        response = self.post(url, {
+            'uuid': uuid,
+            'filename': 'test.txt',
+            'totalfilesize': parts,
+            'totalparts': parts,
+        }, json=False)
+        self.assert201(response)
+        data = json.loads(response.data)
+        self.assertEqual(data['title'], 'test.txt')
 
     def test_reorder(self):
         self.dataset.resources = ResourceFactory.build_batch(3)

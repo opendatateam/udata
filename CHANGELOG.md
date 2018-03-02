@@ -10,6 +10,8 @@
 - Update card components to make them more consistent [#1383](https://github.com/opendatateam/udata/pull/1383) [#1460](https://github.com/opendatateam/udata/pull/1460)
 - Switch from OAuthlib/Flask-OUAhtlib to Authlib and support all grants type as well as token revocation [#1434](https://github.com/opendatateam/udata/pull/1434)
 - Fix completion/suggestion unicode handling [#1452](https://github.com/opendatateam/udata/pull/1452)
+- Added a link to change password into the admin [#1462](https://github.com/opendatateam/udata/pull/1462)
+- Chunked upload support (big files support) [#1468](https://github.com/opendatateam/udata/pull/1468)
 
 ## 1.2.11 (2018-02-05)
 

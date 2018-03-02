@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-import tempfile
 import pytest
 
 from StringIO import StringIO
+from uuid import uuid4
 
 from flask import url_for
 
 from udata.core import storages
 from udata.core.storages import utils
 
-from . import TestCase, WebTestMixin
+from .helpers import assert200, assert400
 
 
 from os.path import basename
@@ -22,16 +21,16 @@ from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
 
-class TestStorageUtils(TestCase):
+class StorageUtilsTest:
     '''
     Perform all tests on a file of size 2 * CHUNCK_SIZE = 2 * (2 ** 16).
     Expected values are precomputed with shell `md5sum`, `sha1sum`...
     '''
-    def setUp(self):
-        _, self.filename = tempfile.mkstemp()
-        with open(self.filename, 'wb') as out:
-            out.write(b'a' * 2 * (2 ** 16))
-        self.file = self.filestorage(self.filename)
+    @pytest.fixture(autouse=True)
+    def write_file(self, tmpdir):
+        tmpfile = tmpdir.join('test.txt')
+        tmpfile.write_binary(b'a' * 2 * (2 ** 16))
+        self.file = self.filestorage(str(tmpfile))
 
     def filestorage(self, filename):
         data = open(filename)
@@ -42,70 +41,122 @@ class TestStorageUtils(TestCase):
         req = Request(env)
         return req.files['file']
 
-    def tearDown(self):
-        os.remove(self.filename)
-
     def test_sha1(self):
         # Output of sha1sum
         expected = 'ce5653590804baa9369f72d483ed9eba72f04d29'
-        self.assertEqual(utils.sha1(self.file), expected)
+        assert utils.sha1(self.file) == expected
 
     def test_md5(self):
         expected = '81615449a98aaaad8dc179b3bec87f38'  # Output of md5sum
-        self.assertEqual(utils.md5(self.file), expected)
+        assert utils.md5(self.file) == expected
 
     def test_crc32(self):
         expected = 'CA975130'  # Output of cksfv
-        self.assertEqual(utils.crc32(self.file), expected)
+        assert utils.crc32(self.file) == expected
 
     def test_mime(self):
-        self.assertEqual(utils.mime('test.txt'), 'text/plain')
-        self.assertIsNone(utils.mime('test'))
+        assert utils.mime('test.txt') == 'text/plain'
+        assert utils.mime('test') is None
+
+    def test_extension_default(self):
+        assert utils.extension('test.txt') == 'txt'
+        assert utils.extension('prefix/test.txt') == 'txt'
+        assert utils.extension('prefix.with.dot/test.txt') == 'txt'
+
+    def test_extension_compound(self):
+        assert utils.extension('test.tar.gz') == 'tar.gz'
+        assert utils.extension('prefix.with.dot/test.tar.gz') == 'tar.gz'
+
+    def test_no_extension(self):
+        assert utils.extension('test') is None
+        assert utils.extension('prefix/test') is None
 
 
-class TestConfigurableAllowedExtensions(TestCase):
+@pytest.mark.usefixtures('app')
+class ConfigurableAllowedExtensionsTest:
     def test_has_default(self):
-        self.assertIn('csv', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertIn('xml', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertIn('json', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertNotIn('exe', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertNotIn('bat', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        assert 'csv' in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'xml' in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'json' in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'exe' not in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'bat' not in storages.CONFIGURABLE_AUTHORIZED_TYPES
 
+    @pytest.mark.options(ALLOWED_RESOURCES_EXTENSIONS=['csv', 'json'])
     def test_with_config(self):
-        self.app.config['ALLOWED_RESOURCES_EXTENSIONS'] = ['csv', 'json']
-        self.assertIn('csv', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertIn('json', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertNotIn('xml', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertNotIn('exe', storages.CONFIGURABLE_AUTHORIZED_TYPES)
-        self.assertNotIn('bat', storages.CONFIGURABLE_AUTHORIZED_TYPES)
+        assert 'csv' in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'json' in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'xml' not in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'exe' not in storages.CONFIGURABLE_AUTHORIZED_TYPES
+        assert 'bat' not in storages.CONFIGURABLE_AUTHORIZED_TYPES
 
 
 @pytest.mark.usefixtures('instance_path')
-class StorageUploadViewTest(WebTestMixin, TestCase):
-    def test_upload(self):
-        self.login()
-        response = self.post(
+class StorageUploadViewTest:
+    def test_standard_upload(self, client):
+        client.login()
+        response = client.post(
             url_for('storage.upload', name='tmp'),
             {'file': (StringIO(b'aaa'), 'test.txt')})
 
-        self.assert200(response)
-        self.assertTrue(response.json['success'])
-        self.assertIn('filename', response.json)
-        self.assertIn('url', response.json)
-        self.assertIn('mime', response.json)
-        self.assertIn('size', response.json)
-        self.assertIn('sha1', response.json)
-        self.assertEqual(response.json['url'],
-                         storages.tmp.url(response.json['filename'],
-                                          external=True))
-        self.assertEqual(response.json['mime'], 'text/plain')
+        assert200(response)
+        assert response.json['success']
+        assert 'filename' in response.json
+        assert 'url' in response.json
+        assert 'size' in response.json
+        assert 'sha1' in response.json
+        assert response.json['filename'].endswith('test.txt')
+        assert response.json['mime'] == 'text/plain'
+        expected = storages.tmp.url(response.json['filename'], external=True)
+        assert response.json['url'] == expected
 
-    def test_upload_resource_bad_request(self):
-        self.login()
-        response = self.post(
+    def test_chunked_upload(self, client):
+        client.login()
+        url = url_for('storage.upload', name='tmp')
+        uuid = str(uuid4())
+        parts = 4
+
+        for i in range(parts):
+            response = client.post(url, {
+                'file': (StringIO(b'a'), 'blob'),
+                'uuid': uuid,
+                'filename': 'test.txt',
+                'partindex': i,
+                'partbyteoffset': 0,
+                'totalfilesize': parts,
+                'totalparts': parts,
+                'chunksize': 1,
+            })
+
+            assert200(response)
+            assert response.json['success']
+            assert 'filename' not in response.json
+            assert 'url' not in response.json
+            assert 'size' not in response.json
+            assert 'sha1' not in response.json
+            assert 'url' not in response.json
+
+        response = client.post(url, {
+            'uuid': uuid,
+            'filename': 'test.txt',
+            'totalfilesize': parts,
+            'totalparts': parts,
+        })
+        assert 'filename' in response.json
+        assert 'url' in response.json
+        assert 'size' in response.json
+        assert response.json['size'] == parts
+        assert 'sha1' in response.json
+        expected = storages.tmp.url(response.json['filename'], external=True)
+        assert response.json['url'] == expected
+        assert response.json['mime'] == 'text/plain'
+        assert storages.tmp.read(response.json['filename']) == 'aaaa'
+
+    def test_upload_resource_bad_request(self, client):
+        client.login()
+        response = client.post(
             url_for('storage.upload', name='tmp'),
             {'bad': (StringIO(b'aaa'), 'test.txt')})
 
-        self.assert400(response)
-        self.assertFalse(response.json['success'])
-        self.assertIn('error', response.json)
+        assert400(response)
+        assert not response.json['success']
+        assert 'error' in response.json

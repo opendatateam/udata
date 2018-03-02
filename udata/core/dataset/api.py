@@ -25,12 +25,11 @@ from datetime import datetime
 from flask import request, current_app
 from flask_security import current_user
 
-from werkzeug.datastructures import FileStorage
-
-from udata import fileutils, search
+from udata import search
 from udata.auth import admin_permission
 from udata.api import api, API, errors
 from udata.core import storages
+from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
@@ -232,34 +231,18 @@ class ResourcesAPI(API):
         return dataset.resources, 200
 
 
-upload_parser = api.parser()
-upload_parser.add_argument('file', type=FileStorage, location='files',
-                           required=True)
-
-
 class UploadMixin(object):
-    def extract_infos_from_args(self, args, dataset):
+    def handle_upload(self, dataset):
         prefix = '/'.join((dataset.slug,
                            datetime.now().strftime('%Y%m%d-%H%M%S')))
-        storage = storages.resources
-        uploaded_file = args['file']
-        mimetype = uploaded_file.mimetype or ''
-        if 'html' in mimetype:
+        infos = handle_upload(storages.resources, prefix)
+        if 'html' in infos['mime']:
             api.abort(415, 'Incorrect file content type: HTML')
-        filename = storage.save(uploaded_file, prefix=prefix)
-        extension = fileutils.extension(filename)
-        uploaded_file.seek(0)
-        sha1 = storages.utils.sha1(uploaded_file)
-        filesize = (os.path.getsize(storage.path(filename))
-                    if storage.root else None)
-        return {
-            'title': os.path.basename(filename),
-            'url': storage.url(filename, external=True),
-            'checksum': Checksum(type='sha1', value=sha1),
-            'format': extension,
-            'mime': storages.utils.mime(filename),
-            'filesize': filesize
-        }
+        infos['title'] = os.path.basename(infos['filename'])
+        infos['checksum'] = Checksum(type='sha1', value=infos.pop('sha1'))
+        infos['filesize'] = infos.pop('size')
+        del infos['filename']
+        return infos
 
 
 @ns.route('/<dataset:dataset>/upload/', endpoint='upload_new_dataset_resource')
@@ -271,8 +254,7 @@ class UploadNewDatasetResource(UploadMixin, API):
     def post(self, dataset):
         '''Upload a new dataset resource'''
         ResourceEditPermission(dataset).test()
-        args = upload_parser.parse_args()
-        infos = self.extract_infos_from_args(args, dataset)
+        infos = self.handle_upload(dataset)
         resource = Resource(**infos)
         dataset.add_resource(resource)
         dataset.last_modified = datetime.now()
@@ -289,8 +271,7 @@ class UploadNewCommunityResources(UploadMixin, API):
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new community resource'''
-        args = upload_parser.parse_args()
-        infos = self.extract_infos_from_args(args, dataset)
+        infos = self.handle_upload(dataset)
         infos['owner'] = current_user._get_current_object()
         community_resource = CommunityResource.objects.create(**infos)
         return community_resource, 201
@@ -316,8 +297,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         '''Upload a file related to a given resource on a given dataset'''
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
-        args = upload_parser.parse_args()
-        infos = self.extract_infos_from_args(args, dataset)
+        infos = self.handle_upload(dataset)
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
@@ -336,8 +316,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     def post(self, community):
         '''Update the file related to a given community resource'''
         ResourceEditPermission(community).test()
-        args = upload_parser.parse_args()
-        infos = self.extract_infos_from_args(args, community.dataset)
+        infos = self.handle_upload(community.dataset)
         community.update(**infos)
         community.reload()
         return community
