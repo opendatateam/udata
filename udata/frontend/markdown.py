@@ -5,10 +5,9 @@ from urlparse import urlparse
 
 import bleach
 import CommonMark
-from flask import current_app, Markup
+from flask import current_app, Markup, request
 from werkzeug.local import LocalProxy
 from jinja2.filters import do_truncate, do_striptags
-from jinja2.utils import escape
 
 from udata.i18n import _
 
@@ -42,7 +41,7 @@ def nofollow_callback(attrs, new=False):
     parsed_url = urlparse(attrs[(None, 'href')])
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
         attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
-            scheme=current_app.config['USE_SSL'] and 'https' or 'http',
+            scheme='https' if request.is_secure else 'http',
             netloc=current_app.config['SERVER_NAME'],
             path=parsed_url.path)
         return attrs

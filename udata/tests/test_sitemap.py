@@ -97,3 +97,13 @@ class SitemapTest:
 
         url = sitemap.get_by_url('site.terms_redirect')
         assert url is not None
+
+    def test_https_sitemap(self, sitemap):
+        '''It should handle https sitemap.'''
+        sitemap.fetch(secure=True)
+
+        url = sitemap.get_by_url('site.home_redirect', _scheme='https')
+        assert url is not None
+        sitemap.assert_url(url, 1, 'daily')
+        loc = url.xpath('s:loc', namespaces=sitemap.NAMESPACES)[0].text
+        assert loc.startswith('https://')

@@ -37,12 +37,12 @@ class Permission(BasePermission):
         '''Let administrator bypass all permissions'''
         super(Permission, self).__init__(RoleNeed('admin'), *needs)
 
+
 admin_permission = Permission()
 
 
 def init_app(app):
     from .forms import ExtendedRegisterForm
-    from .views import auth
     from .views import create_security_blueprint
     from udata.models import datastore
     state = security.init_app(app, datastore, register_blueprint=False,
@@ -51,4 +51,3 @@ def init_app(app):
     security_bp = create_security_blueprint(state, 'security_blueprint')
 
     app.register_blueprint(security_bp)
-    app.register_blueprint(auth)

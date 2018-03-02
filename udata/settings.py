@@ -130,8 +130,6 @@ class Defaults(object):
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
     SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
 
-    USE_SSL = False
-
     PLUGINS = []
     THEME = 'default'
 

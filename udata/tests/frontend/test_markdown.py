@@ -8,18 +8,11 @@ from flask import render_template_string
 from .. import TestCase, WebTestMixin
 
 from udata.frontend.markdown import md, init_app, EXCERPT_TOKEN
-from udata.settings import Testing
 
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
 
-class MarkdownSettings(Testing):
-    USE_SSL = False
-
-
 class MarkdownTestCase(TestCase, WebTestMixin):
-    settings = MarkdownSettings
-
     def create_app(self):
         app = super(MarkdownTestCase, self).create_app()
         init_app(app)
@@ -73,6 +66,18 @@ class MarkdownTestCase(TestCase, WebTestMixin):
             el = parsed.getElementsByTagName('a')[0]
             self.assertEqual(el.getAttribute('rel'), '')
             self.assertEqual(el.getAttribute('href'), 'http://localhost/')
+            self.assertEqual(el.getAttribute('data-tooltip'), '')
+            self.assertEqual(el.firstChild.data, 'foo')
+
+    def test_markdown_linkify_https(self):
+        '''Markdown filter should transform relative urls with HTTPS'''
+        text = '[foo](/foo)'
+        with self.app.test_request_context('/', base_url='https://localhost'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            parsed = parser.parse(result)
+            el = parsed.getElementsByTagName('a')[0]
+            self.assertEqual(el.getAttribute('rel'), '')
+            self.assertEqual(el.getAttribute('href'), 'https://localhost/foo')
             self.assertEqual(el.getAttribute('data-tooltip'), '')
             self.assertEqual(el.firstChild.data, 'foo')
 

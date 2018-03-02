@@ -8,13 +8,14 @@ import re
 from setuptools import setup, find_packages
 
 RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
-RE_MD_CODE_BLOCK = re.compile(r'```(?P<language>\w+)?\n(?P<lines>.*?)```', re.S)
-RE_SELF_LINK = re.compile(r'\[(.*?)\]\[\]')
-RE_LINK_TO_URL = re.compile(r'\[(?P<text>.*?)\]\((?P<url>.*?)\)')
-RE_LINK_TO_REF = re.compile(r'\[(?P<text>.*?)\]\[(?P<ref>.*?)\]')
-RE_LINK_REF = re.compile(r'^\[(?P<key>[^!].*?)\]:\s*(?P<url>.*)$', re.M)
-RE_BADGE = re.compile(r'^\[\!\[(?P<text>.*?)\]\[(?P<badge>.*?)\]\]\[(?P<target>.*?)\]$', re.M)
-RE_TITLE = re.compile(r'^(?P<level>#+)\s*(?P<title>.*)$', re.M)
+RE_MD_CODE_BLOCK = re.compile(r'```(?P<language>\w+)?\n(?P<lines>.+?)```', re.S)
+RE_CODE = re.compile(r'`(?P<code>[^`]+)`')
+RE_SELF_LINK = re.compile(r'\[([^\]]+)\]\[\]')
+RE_LINK_TO_URL = re.compile(r'\[(?P<text>[^\]]+)\]\((?P<url>[^\)]+)\)')
+RE_LINK_TO_REF = re.compile(r'\[(?P<text>[^\]]+)\]\[(?P<ref>[^\]]+)\]')
+RE_LINK_REF = re.compile(r'^\[(?P<key>[^!].+?)\]:\s*(?P<url>.*)$', re.M)
+RE_BADGE = re.compile(r'^\[\!\[(?P<text>[^\]]+)\]\[(?P<badge>[^\]]+)\]\]\[(?P<target>[^\]]+)\]$', re.M)
+RE_TITLE = re.compile(r'^(?P<level>#+)\s*(?P<title>.+)$', re.M)
 
 BADGES_TO_KEEP = ['gitter-badge', 'readthedocs-badge']
 
@@ -35,6 +36,10 @@ def md2pypi(filename):
      - travis ci build badges
     '''
     content = io.open(filename).read()
+
+    for match in RE_CODE.finditer(content):
+        rst_code = '``{code}``'.format(**match.groupdict())
+        content = content.replace(match.group(0), rst_code)
 
     for match in RE_MD_CODE_BLOCK.finditer(content):
         rst_block = '\n'.join(
