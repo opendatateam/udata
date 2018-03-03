@@ -384,10 +384,10 @@ global.udataScript = {
     const organizationId = organizationElement.dataset[camelCaseData(DATA_ORGANIZATION)]
     const url = `${apiURL}organizations/${organizationId}/datasets/?size=${_MAX_SIZE}`
     return fetchJSON(url)
-      .then((datasets) => {
+      .then((res) => {
         // Create a div for each returned item ready to be filled with
         // the usual script dedicated to datasets ids.
-        datasets = datasets
+        const datasets = res.data
           .map((item) => {
             const fragment = document.createElement('div')
             fragment.dataset[camelCaseData(DATA_DATASET_ID)] = item.id

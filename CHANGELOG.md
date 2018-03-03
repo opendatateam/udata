@@ -13,6 +13,7 @@
 - Added a link to change password into the admin [#1462](https://github.com/opendatateam/udata/pull/1462)
 - Chunked upload support (big files support) [#1468](https://github.com/opendatateam/udata/pull/1468)
 - udata is now protocol (`http`/`https`) agnostic. This is now fully the reverse-proxy responsibility (please ensure that you are using SSL only in production for security purpose). [#1463](https://github.com/opendatateam/udata/pull/1463) [breaking]
+- Fix organization widget (embed) [#1474](https://github.com/opendatateam/udata/pull/1474)
 
 ## 1.2.11 (2018-02-05)
 
