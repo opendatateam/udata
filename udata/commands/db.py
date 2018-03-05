@@ -14,7 +14,7 @@ from pymongo.errors import PyMongoError, OperationFailure
 from mongoengine.connection import get_db
 
 from udata import entrypoints
-from udata.commands import cli, green, yellow, cyan, red, magenta
+from udata.commands import cli, green, yellow, cyan, red, magenta, echo
 
 log = logging.getLogger(__name__)
 
@@ -81,6 +81,7 @@ def normalize_migration(plugin_or_specs, filename):
         filename += '.js'
     return plugin, filename
 
+
 def get_migration(plugin, filename):
     '''Get an existing migration record if exists'''
     db = get_db()
@@ -102,12 +103,12 @@ def execute_migration(plugin, filename, script, dryrun=False):
         except PyMongoError as e:
             log.error('Unable to apply migration: %s', str(e))
             success = False
-    print('│')
+    echo('│'.encode('utf8'))
     for line in lines:
-        print('│ {0}'.format(line))
-    print('│')
-    print('└──[{0}]'.format(green('OK') if success else red('KO')))
-    print('')
+        echo('│ {0}'.format(line).encode('utf8'))
+    echo('│'.encode('utf8'))
+    echo('└──[{0}]'.format(green('OK') if success else red('KO')).encode('utf8'))
+    echo('')
     return success
 
 
@@ -190,7 +191,7 @@ def unrecord(plugin_or_specs, filename):
      - plugin filename
      - plugin fliename.js
      - plugin:filename
-     - plugin:fliename.js 
+     - plugin:fliename.js
     '''
     plugin, filename = normalize_migration(plugin_or_specs, filename)
     migration = get_migration(plugin, filename)

@@ -334,7 +334,7 @@ class SitemapClient:
         self._sitemap = None
 
     def fetch(self, secure=False):
-        base_url = '{0}://localhost'.format('https' if secure else False)
+        base_url = '{0}://localhost'.format('https' if secure else 'http')
         response = self.client.get('sitemap.xml', base_url=base_url)
         assert200(response)
         self._sitemap = etree.fromstring(response.data)
