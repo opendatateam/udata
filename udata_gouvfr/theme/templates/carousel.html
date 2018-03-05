@@ -1,0 +1,36 @@
+{# First row #}
+<div class="row first-row">
+
+    {# Carousel #}
+    <div class="col-xs-12">
+        <h3>{{ _('Best reuse cases') }}</h3>
+        <div id="home-carousel" class="carousel slide" data-ride="carousel" data-interval="6000">
+            <!-- Wrapper for slides -->
+            <div class="carousel-inner">
+                {% for reuse in current_site.settings.home_reuses %}
+                <div class="item {% if loop.first %}active{% endif %}" data-track-content data-content-name="carousel" data-content-piece="slide {{ loop.index }}">
+                    <img class="slide" src="{{ reuse.image|placeholder('reuse') }}" alt="{{ reuse.title }}" data-track-content data-content-name="carousel" data-content-piece="slide {{ loop.index }} - image">
+                    <div class="carousel-caption">
+                        <div class="slide-logo pull-left">{{ reuse|owner_avatar(40) }}</div>
+                        <span class="author">{{ reuse|owner_name}}</span>
+                        <h4 class="title">
+                            <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}" data-content-target>
+                            {{ reuse.title }}
+                            </a>
+                        </h4>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a class="left carousel-control" href="#home-carousel" data-slide="prev" data-track-content data-content-name="carousel" data-content-piece="previous">
+                <span class="icon-prev"></span>
+            </a>
+            <a class="right carousel-control" href="#home-carousel" data-slide="next" data-track-content data-content-name="carousel" data-content-piece="next">
+                <span class="icon-next"></span>
+            </a>
+        </div>
+    </div>
+    {# end carousel #}
+
+</div>
+{# end first row #}

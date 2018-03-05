@@ -8,6 +8,7 @@
 - Discourse timeout and response parse error catch [#267](https://github.com/etalab/udata-gouvfr/pull/267)
 - Add tracking on home page call to action [#271](https://github.com/etalab/udata-gouvfr/pull/271)
 - Add tracking on carousel elements [#268](https://github.com/etalab/udata-gouvfr/pull/268)
+- Temporary carousel layout [#274](https://github.com/etalab/udata-gouvfr/pull/274)
 
 ## 1.2.5 (2018-02-05)
 
