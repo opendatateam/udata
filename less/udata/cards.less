@@ -6,7 +6,7 @@
 @card-footer-size: 24px;
 
 .card {
-    @color: #494949; 
+    @color: #494949;
     color: @color;
     background-color: white;
     border: 1px solid darken(@gray-lighter, 16%);
@@ -39,7 +39,7 @@
 
     .card-logo {
         flex: 0 0 @logo-size;
-        
+
         img {
             background-color: white;
             border: 1px solid @gray-lighter;
@@ -78,13 +78,24 @@
     }
 
     .card-body {
+        @line-height: 1.3em;
         @body-padding: @logo-size + @card-padding;
         flex: 1 0 calc(100% ~"-" @body-padding);
         max-width: calc(100% ~"-" @body-padding);
         font-size: @card-font-size;
-        line-height: 1.3em;
+        line-height: @line-height;
         min-height: 6em;
         margin-left: @card-padding;
+
+        .clamp-2 {
+            .clamp-sizing(2, @line-height);
+            .clamp-width(30%);
+        }
+
+        .clamp-3 {
+            .clamp-sizing(3, @line-height);
+            .clamp-width(30%);
+        }
     }
     &.card--with-cover {
         .card-body,
