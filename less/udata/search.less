@@ -73,10 +73,6 @@ ul.search-results {
             }
         }
 
-        &:hover .result-body .result-description.clamp-2 {
-            .clamp-color(@hover-bg-color);
-        }
-
         a:hover {
             text-decoration: none;
 
@@ -96,6 +92,10 @@ ul.search-results {
             font-size: 12px;
             color: @color;
             margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            position: absolute;
+            bottom: 16px;
 
             li {
                 margin-left: -5px;
@@ -111,6 +111,26 @@ ul.search-results {
                 }
             }
 
+            &:after {
+                background: linear-gradient(to right, rgba(255, 255, 255, 0), white 80%);
+                content: "";
+                height: 100%;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 35px;
+            }
+
+        }
+
+
+        &:hover {
+            .result-body .result-description.clamp-2 {
+                .clamp-color(@hover-bg-color);
+            }
+            .result-infos {
+                .clamp-color(@hover-bg-color);
+            }
         }
     }
 }

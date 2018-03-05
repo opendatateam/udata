@@ -56,7 +56,7 @@
         right: 0;
         width: 10%; // Override this to change size
         height: @line-height;  // Override this locally to have the right size
-        background: linear-gradient(to right, fade(@color, 0), fade(@color, 100%) 80%);
+        background: linear-gradient(to right, fade(@color, 0), @color 80%);
     }
 }
 
@@ -86,7 +86,7 @@
  */
  .clamp-color(@color) {
     &:after {
-        background: linear-gradient(to right, fade(@color, 0), fade(@color, 100%) 80%);
+        background: linear-gradient(to right, fade(@color, 0), @color 80%);
     }
 }
 
