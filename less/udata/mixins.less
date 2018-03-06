@@ -22,14 +22,72 @@
 }
 
 /**
- * Dirty tricks for Webkit based browsers
- * to perform multiline ellipsis
+ * CSS line clamping with improved dedicated support for Webkit and Opera
+ * Other browsers fallback on gradient and needs predefined height.
+ *
+ * As lessc can't process @supports directive, the mixin is splitted
+ * in two parts and the caller should declare the proper @supports directive
+ * and call .clamp-fallback in it
+ *
+ * See .clamp-line-size() for local fix
  */
-.clamp(@lines) {
+.clamp(@lines, @line-height: @line-height-computed) {
+    position: relative;
+    height: @lines * @line-height;  // Override this locally to have the right size
     overflow: hidden;
+    text-overflow: ellipsis;
+    text-overflow: -o-ellipsis-lastline;  // Only Opera
     display: -webkit-box;
     -webkit-line-clamp: @lines;
     -webkit-box-orient: vertical;
+}
+
+/**
+ * CSS line clamping with improved dedicated support for Webkit and Opera
+ * Other browsers fallback on gradient and needs predefined height.
+ * See .clamp-line-size() for local fix
+ */
+ .clamp-fallback(@line-height: @line-height-computed, @color: white) {
+    &:after {
+        content: "";
+        text-align: right;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 10%; // Override this to change size
+        height: @line-height;  // Override this locally to have the right size
+        background: linear-gradient(to right, fade(@color, 0), @color 80%);
+    }
+}
+
+/**
+ * Local clamp height fix
+ */
+.clamp-sizing(@lines, @line-height) {
+    line-height: @line-height;
+    height: @lines * @line-height;
+
+    &:after {
+        height: @line-height;
+    }
+}
+
+/**
+ * Local clamp width fix
+ */
+ .clamp-width(@width) {
+    &:after {
+        width: @width;
+    }
+}
+
+/**
+ * Local clamp color fix
+ */
+ .clamp-color(@color) {
+    &:after {
+        background: linear-gradient(to right, fade(@color, 0), @color 80%);
+    }
 }
 
 .clamp-uniline {
@@ -39,8 +97,20 @@
     white-space: nowrap;
 }
 
-.clamp-2 { .clamp(2) }
-.clamp-3 { .clamp(3) }
+.clamp-2 {
+    .clamp(2);
+    @supports not ((-webkit-line-clamp: 2) or (text-overflow: -o-ellipsis-lastline)) {
+        .clamp-fallback();
+    }
+}
+
+.clamp-3 {
+    .clamp(3);
+    @supports not ((-webkit-line-clamp: 3) or (text-overflow: -o-ellipsis-lastline)) {
+        .clamp-fallback();
+    }
+}
+// .clamp-3 { .clamp(3) }
 
 .square-stamp(@color) {
     padding: 2px 4px;
