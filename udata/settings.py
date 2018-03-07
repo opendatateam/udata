@@ -72,7 +72,7 @@ class Defaults(object):
             'queue': 'high',
             'routing_key': 'high.sendmail',
         },
-        # Low priority for harvest operations
+        # Low priority for harvest operations and udata-piwik tasks
         'harvest': {
             'queue': 'low',
             'routing_key': 'low.harvest',
@@ -84,6 +84,10 @@ class Defaults(object):
         'udata.harvest.tasks.harvest_finalize': {
             'queue': 'low',
             'routing_key': 'low.harvest',
+        },
+        'udata_piwik.tasks.*': {
+            'queue': 'low',
+            'routing_key': 'low.piwik',
         },
     }
 
