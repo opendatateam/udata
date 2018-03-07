@@ -111,8 +111,12 @@ class Index(ESIndex):
 
 
 def get_i18n_analyzer():
+    # Get a specific i18n analyser or fallback to the standard if it doesn't exist
     language = current_app.config['DEFAULT_LANGUAGE']
-    return getattr(analysis, '{0}_analyzer'.format(language))
+    try:
+        return getattr(analysis, '{0}_analyzer'.format(language))
+    except AttributeError:
+        return getattr(analysis, 'standard')
 
 i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
