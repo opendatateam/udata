@@ -84,7 +84,7 @@ class Defaults(object):
         'udata.harvest.tasks.harvest_finalize': {
             'queue': 'low',
             'routing_key': 'low.harvest',
-        }
+        },
     }
 
     CACHE_KEY_PREFIX = 'udata-cache'
