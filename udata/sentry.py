@@ -6,6 +6,7 @@ import re
 
 from werkzeug.exceptions import HTTPException
 from udata import entrypoints
+from udata.core.storages.api import UploadProgress
 from .auth import PermissionDenied
 
 
@@ -14,6 +15,9 @@ log = logging.getLogger(__name__)
 RE_DSN = re.compile(
     r'(?P<scheme>https?)://(?P<client_id>[0-9a-f]+):[0-9a-f]+'
     '@(?P<domain>.+)/(?P<site_id>\d+)')
+
+# Controlled exceptions that Sentry should ignore
+IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
 
 
 def public_dsn(dsn):
@@ -52,12 +56,10 @@ def init_app(app):
                 sentry.level = log_level
 
         # Do not send HTTPExceptions
-        exceptions = app.config.get('RAVEN_IGNORE_EXCEPTIONS', [])
-        if HTTPException not in exceptions:
-            exceptions.append(HTTPException)
-        if PermissionDenied not in exceptions:
-            exceptions.append(PermissionDenied)
-        app.config['RAVEN_IGNORE_EXCEPTIONS'] = exceptions
+        exceptions = set(app.config.get('RAVEN_IGNORE_EXCEPTIONS', []))
+        for exception in IGNORED_EXCEPTIONS:
+            exceptions.add(exception)
+        app.config['RAVEN_IGNORE_EXCEPTIONS'] = list(exceptions)
 
         app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
 

@@ -45,6 +45,17 @@ class UploadStatus(Exception):
         self.error = error
 
 
+class UploadProgress(UploadStatus):
+    '''Raised on successful chunk uploaded'''
+    pass
+
+
+class UploadError(UploadStatus):
+    '''Raised on any upload error'''
+    def __init__(self, error=None):
+        super(UploadError, self).__init__(ok=False, error=error)
+
+
 def on_upload_status(status):
     '''Not an error, just raised when chunk is processed'''
     if status.ok:
@@ -90,11 +101,11 @@ def handle_upload(storage, prefix=None):
     if is_chunk:
         if uploaded_file:
             save_chunk(uploaded_file, args)
-            raise UploadStatus()
+            raise UploadProgress()
         else:
             uploaded_file = combine_chunks(args)
     elif not uploaded_file:
-        raise UploadStatus(False, 'Missing file parameter')
+        raise UploadError('Missing file parameter')
 
     filename = storage.save(uploaded_file, prefix=prefix)
     uploaded_file.seek(0)
