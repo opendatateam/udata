@@ -16,6 +16,7 @@
 - Fix organization widget (embed) [#1474](https://github.com/opendatateam/udata/pull/1474)
 - High priority for sendmail tasks [#1484](https://github.com/opendatateam/udata/pull/1484)
 - Improve tasks/jobs queues routing [#1487](https://github.com/opendatateam/udata/pull/1487)
+- Add security.send_confirmation template [#1475](https://github.com/opendatateam/udata/pull/1475)
 
 ## 1.2.11 (2018-02-05)
 
