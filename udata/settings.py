@@ -62,30 +62,7 @@ class Defaults(object):
     CELERY_TASK_DEFAULT_EXCHANGE = 'default'
     CELERY_TASK_DEFAULT_EXCHANGE_TYPE = 'topic'
     CELERY_TASK_DEFAULT_ROUTING_KEY = 'task.default'
-    CELERY_TASK_ROUTES = {
-        # High priority for search tasks and mails
-        'udata.search.reindex': {
-            'queue': 'high',
-            'routing_key': 'high.search',
-        },
-        'udata.patch_flask_security.sendmail': {
-            'queue': 'high',
-            'routing_key': 'high.sendmail',
-        },
-        # Low priority for harvest operations
-        'harvest': {
-            'queue': 'low',
-            'routing_key': 'low.harvest',
-        },
-        'udata.harvest.tasks.harvest_item': {
-            'queue': 'low',
-            'routing_key': 'low.harvest',
-        },
-        'udata.harvest.tasks.harvest_finalize': {
-            'queue': 'low',
-            'routing_key': 'low.harvest',
-        },
-    }
+    CELERY_TASK_ROUTES = 'udata.tasks.router'
 
     CACHE_KEY_PREFIX = 'udata-cache'
     CACHE_TYPE = 'redis'
