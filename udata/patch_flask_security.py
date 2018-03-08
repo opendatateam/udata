@@ -8,7 +8,7 @@ from .tasks import task
 from udata.models import datastore
 
 
-@task
+@task(route='high.mail')
 def sendmail(subject, email, template, **context):
     user = datastore.get_user(email)
     tpl = 'security/{0}'.format(template)
