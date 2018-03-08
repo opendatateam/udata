@@ -19,6 +19,11 @@ es_stop_filter = token_filter(
 es_stem_filter = token_filter(
     'es_stem_filter', type='stemmer', language='light_spanish')
 
+pt_stop_filter = token_filter(
+    'pt_stop_filter', type='stop', stopwords='_portuguese_')
+pt_stem_filter = token_filter(
+    'pt_stem_filter', type='stemmer', language='light_portuguese')
+
 fr_stop_filter = token_filter(
     'fr_stop_filter', type='stop', stopwords='_french_')
 fr_stem_filter = token_filter(
@@ -63,14 +68,21 @@ fr_analyzer = analyzer(
     char_filter=[char_filter('html_strip')]
 )
 
+pt_analyzer = analyzer(
+    'pt_analyzer',
+    tokenizer=tokenizer('icu_tokenizer'),
+    filter=['icu_folding', 'icu_normalizer', pt_stop_filter, pt_stem_filter],
+    char_filter=[char_filter('html_strip')]
+)
+
 simple = analyzer('simple')
 standard = analyzer('standard')
 
 
 # Custom analysers
-analyzers = (de_analyzer, en_analyzer, es_analyzer, fr_analyzer)
+analyzers = (de_analyzer, en_analyzer, es_analyzer, fr_analyzer, pt_analyzer)
 
 # Custom filters
 filters = (de_stop_filter, de_stem_filter, en_stop_filter, en_stem_filter,
            es_stop_filter, es_stem_filter, fr_stop_filter, fr_stem_filter,
-           fr_elision)
+           fr_elision, pt_stop_filter, pt_stem_filter)
