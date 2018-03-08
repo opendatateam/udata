@@ -206,3 +206,6 @@ def register_features(app):
     from udata.features import notifications
 
     notifications.init_app(app)
+
+    for ep in entrypoints.get_enabled('udata.plugins', app).values():
+        ep.init_app(app)
