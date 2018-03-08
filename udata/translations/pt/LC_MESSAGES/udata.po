@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-26 10:54+0100\n"
-"PO-Revision-Date: 2018-03-02 05:32-0500\n"
+"PO-Revision-Date: 2018-03-08 10:43-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2738,11 +2738,11 @@ msgstr "%(site)s %(topic)s dados relacionados"
 #: udata/templates/topic/datasets.html:9 udata/templates/topic/display_base.html:7
 #: udata/templates/topic/reuses.html:9
 msgid "topic"
-msgstr "tópico"
+msgstr "tema"
 
 #: udata/templates/topic/display.html:5
 msgid "Topics"
-msgstr "Tópicos"
+msgstr "Temas"
 
 #: udata/templates/topic/display.html:17
 msgid "Best reuse cases"
