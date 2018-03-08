@@ -30,7 +30,7 @@ def purge_organizations(self):
             reindex(dataset)
 
 
-@task
+@task(route='high.mail')
 def notify_membership_request(org, request):
     recipients = [m.user for m in org.by_role('admin')]
     mail.send(
@@ -38,7 +38,7 @@ def notify_membership_request(org, request):
         org=org, request=request)
 
 
-@task
+@task(route='high.mail')
 def notify_membership_response(org, request):
     if request.status == 'accepted':
         subject = _('You are now a member of the organization "%(org)s"',
