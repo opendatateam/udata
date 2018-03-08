@@ -12,7 +12,7 @@ from .models import HarvestSource
 log = get_logger(__name__)
 
 
-@job('harvest')
+@job('harvest', route='low.harvest')
 def harvest(self, ident):
     log.info('Launching harvest job for source "%s"', ident)
 
@@ -30,7 +30,7 @@ def harvest(self, ident):
         backend.finalize()
 
 
-@task(ignore_result=False)
+@task(ignore_result=False, route='low.harvest')
 def harvest_item(source_id, item_id):
     log.info('Harvesting item %s for source "%s"', item_id, source_id)
 
@@ -45,7 +45,7 @@ def harvest_item(source_id, item_id):
     return (item_id, result)
 
 
-@task(ignore_result=False)
+@task(ignore_result=False, route='low.harvest')
 def harvest_finalize(results, source_id):
     log.info('Finalize harvesting for source "%s"', source_id)
     source = HarvestSource.get(source_id)
@@ -55,7 +55,7 @@ def harvest_finalize(results, source_id):
     backend.finalize()
 
 
-@task
+@task(route='low.harvest')
 def purge_harvest_sources():
     log.info('Purging HarvestSources flagged as deleted')
     from .actions import purge_sources

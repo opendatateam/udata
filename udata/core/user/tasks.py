@@ -10,6 +10,6 @@ from udata.tasks import task
 log = logging.getLogger(__name__)
 
 
-@task
+@task(route='high.mail')
 def send_test_mail(user):
     mail.send(_('Test mail'), user, 'test')

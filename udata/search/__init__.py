@@ -15,7 +15,7 @@ from mongoengine.signals import post_save
 from speaklater import is_lazy_string
 from werkzeug.local import LocalProxy
 
-from udata.tasks import celery
+from udata.tasks import task
 
 
 from . import analysis
@@ -121,7 +121,7 @@ def get_i18n_analyzer():
 i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
 
-@celery.task
+@task(route='high.search')
 def reindex(obj):
     model = obj.__class__
     adapter_class = adapter_catalog.get(model)
