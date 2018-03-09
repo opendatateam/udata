@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-26 10:54+0100\n"
-"PO-Revision-Date: 2018-03-08 10:43-0500\n"
+"PO-Revision-Date: 2018-03-09 07:21-0500\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2390,7 +2390,7 @@ msgstr "Ver perfil"
 #. This is an action (present indicative).
 #: udata/templates/organization/sidebar-producer.html:23
 msgid "Contact"
-msgstr "Contacto"
+msgstr "Contactos"
 
 #: udata/templates/post/display.html:18
 msgid "News"
