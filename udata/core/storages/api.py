@@ -3,11 +3,17 @@ from __future__ import unicode_literals
 
 import os
 
+from datetime import datetime
+
+from flask import json
 from werkzeug.datastructures import FileStorage
 
 from udata.api import api, fields
 
 from . import utils, chunks
+
+
+META = 'meta.json'
 
 
 uploaded_image_fields = api.model('UploadedImage', {
@@ -73,9 +79,20 @@ def api_upload_status(status):
     return on_upload_status(status)
 
 
+def chunk_filename(uuid, part):
+    return os.path.join(str(uuid), str(part))
+
+
 def save_chunk(file, args):
-    filename = os.path.join(args['uuid'], str(args['partindex']))
+    filename = chunk_filename(args['uuid'], args['partindex'])
     chunks.save(file, filename=filename)
+    meta_filename = chunk_filename(args['uuid'], META)
+    chunks.write(meta_filename, json.dumps({
+        'uuid': str(args['uuid']),
+        'filename': args['filename'],
+        'totalparts': args['totalparts'],
+        'lastchunk': datetime.now(),
+    }), overwrite=True)
 
 
 def combine_chunks(storage, args, prefix=None):
@@ -85,15 +102,16 @@ def combine_chunks(storage, args, prefix=None):
     and appends that part's bytes to another destination file.
     Chunks are stored in the chunks storage.
     '''
-    chunks_prefix = args['uuid']
+    uuid = args['uuid']
     target = args['filename']
     if prefix:
         target = os.path.join(prefix, target)
     with storage.open(target, 'wb') as out:
         for i in xrange(args['totalparts']):
-            partname = os.path.join(chunks_prefix, str(i))
+            partname = chunk_filename(uuid, i)
             out.write(chunks.read(partname))
             chunks.delete(partname)
+    chunks.delete(chunk_filename(uuid, META))
     return target
 
 

@@ -165,6 +165,7 @@ def init_app(app):
     import udata.core.issues.tasks  # noqa
     import udata.core.discussions.tasks  # noqa
     import udata.core.badges.tasks  # noqa
+    import udata.core.storages.tasks  # noqa
     import udata.harvest.tasks  # noqa
 
     entrypoints.get_enabled('udata.tasks', app)
