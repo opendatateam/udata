@@ -214,6 +214,10 @@ class Defaults(object):
         # RDF
         'rdf', 'ttl', 'n3',
     ]
+
+    # How much time upload chunks are kept before cleanup
+    UPLOAD_MAX_RETENTION = 24 * HOUR
+
     USE_METRICS = True
 
     # Avatar providers parameters
