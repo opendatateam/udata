@@ -95,19 +95,20 @@ class StorageUploadViewTest:
     def test_standard_upload(self, client):
         client.login()
         response = client.post(
-            url_for('storage.upload', name='tmp'),
+            url_for('storage.upload', name='resources'),
             {'file': (StringIO(b'aaa'), 'test.txt')})
 
         assert200(response)
         assert response.json['success']
-        assert 'filename' in response.json
         assert 'url' in response.json
         assert 'size' in response.json
         assert 'sha1' in response.json
-        assert response.json['filename'].endswith('test.txt')
-        assert response.json['mime'] == 'text/plain'
-        expected = storages.tmp.url(response.json['filename'], external=True)
+        assert 'filename' in response.json
+        filename = response.json['filename']
+        assert filename.endswith('test.txt')
+        expected = storages.resources.url(filename, external=True)
         assert response.json['url'] == expected
+        assert response.json['mime'] == 'text/plain'
 
     def test_chunked_upload(self, client):
         client.login()
@@ -150,6 +151,7 @@ class StorageUploadViewTest:
         assert response.json['url'] == expected
         assert response.json['mime'] == 'text/plain'
         assert storages.tmp.read(response.json['filename']) == 'aaaa'
+        assert list(storages.chunks.list_files()) == []
 
     def test_upload_resource_bad_request(self, client):
         client.login()

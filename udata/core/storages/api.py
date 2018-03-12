@@ -65,6 +65,8 @@ def on_upload_status(status):
 
 
 @api.errorhandler(UploadStatus)
+@api.errorhandler(UploadError)
+@api.errorhandler(UploadProgress)
 @api.marshal_with(chunk_status_fields, code=200)
 def api_upload_status(status):
     '''API Upload response handler'''
@@ -76,21 +78,23 @@ def save_chunk(file, args):
     chunks.save(file, filename=filename)
 
 
-def combine_chunks(args):
+def combine_chunks(storage, args, prefix=None):
     '''
     Combine a chunked file into a whole file again.
     Goes through each part, in order,
     and appends that part's bytes to another destination file.
     Chunks are stored in the chunks storage.
     '''
-    prefix = args['uuid']
-    filename = os.path.join(prefix, args['filename'])
-    chunks.write(filename, '')
-    with chunks.open(filename, 'wb+') as out:
+    chunks_prefix = args['uuid']
+    target = args['filename']
+    if prefix:
+        target = os.path.join(prefix, target)
+    with storage.open(target, 'wb') as out:
         for i in xrange(args['totalparts']):
-            partname = os.path.join(prefix, str(i))
+            partname = os.path.join(chunks_prefix, str(i))
             out.write(chunks.read(partname))
-    return FileStorage(chunks.open(filename, 'rb'), args['filename'])
+            chunks.delete(partname)
+    return target
 
 
 def handle_upload(storage, prefix=None):
@@ -103,21 +107,18 @@ def handle_upload(storage, prefix=None):
             save_chunk(uploaded_file, args)
             raise UploadProgress()
         else:
-            uploaded_file = combine_chunks(args)
+            filename = combine_chunks(storage, args, prefix=prefix)
     elif not uploaded_file:
         raise UploadError('Missing file parameter')
+    else:
+        filename = storage.save(uploaded_file, prefix=prefix)
 
-    filename = storage.save(uploaded_file, prefix=prefix)
-    uploaded_file.seek(0)
-    size = os.path.getsize(storage.path(filename)) if storage.root else None
-    return {
-        'url': storage.url(filename, True),
-        'filename': filename,
-        'sha1': utils.sha1(uploaded_file),
-        'size': size,
-        'mime': utils.mime(filename),
-        'format': utils.extension(filename),
-    }
+    metadata = storage.metadata(filename)
+    checksum = metadata.pop('checksum')
+    algo, checksum = checksum.split(':', 1)
+    metadata[algo] = checksum
+    metadata['format'] = utils.extension(filename)
+    return metadata
 
 
 def parse_uploaded_image(field):
