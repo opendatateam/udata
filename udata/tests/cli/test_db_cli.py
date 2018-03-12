@@ -47,12 +47,12 @@ def test_unrecord_with_single_parameter_without_extension(cli, migrations):
 
 def test_unrecord_without_parameters(cli, migrations):
     '''Should display help without errors'''
-    result = cli('db unrecord')
+    result = cli('db unrecord', check=False)
     assert result.exit_code != 0
     assert migrations.count() == 1
 
 def test_unrecord_with_too_many_parameters(cli, migrations):
     '''Should display help without errors'''
-    result = cli('db unrecord udata test.js too many')
+    result = cli('db unrecord udata test.js too many', check=False)
     assert result.exit_code != 0
     assert migrations.count() == 1

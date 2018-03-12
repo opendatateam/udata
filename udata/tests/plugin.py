@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import pytest
+import shlex
 import sys
 
 from contextlib import contextmanager
@@ -18,7 +19,7 @@ from udata.core.user.factories import UserFactory
 from udata.models import db
 from udata.search import es
 
-from .helpers import assert200
+from .helpers import assert200, assert_command_ok
 
 
 class TestClient(FlaskClient):
@@ -223,16 +224,19 @@ def autoindex(app, clean_db):
 @pytest.fixture(name='cli')
 def cli_fixture(mocker, app):
 
-    def mock_runner(*args):
+    def mock_runner(*args, **kwargs):
         from click.testing import CliRunner
         from udata.commands import cli
 
         if len(args) == 1 and ' ' in args[0]:
-            args = args[0].split()
+            args = shlex.split(args[0])
         runner = CliRunner()
         # Avoid instanciating another app and reuse the app fixture
         with mocker.patch.object(cli, 'create_app', return_value=app):
-            return runner.invoke(cli, args, catch_exceptions=False)
+            result = runner.invoke(cli, args, catch_exceptions=False)
+        if kwargs.get('assert', True):
+            assert_command_ok(result)
+        return result
 
     return mock_runner
 
