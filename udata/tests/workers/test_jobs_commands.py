@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import logging
 import pytest
 
+from udata.core.jobs.commands import job_label
 from udata.core.jobs.models import PeriodicTask
 from udata.tasks import job
 
@@ -14,7 +15,12 @@ JOB_NAME = 'fake-job'
 
 @job(JOB_NAME)
 def do_nothing(self, *args, **kwargs):
-    log.info('Fake is running')
+    pass
+
+
+@job('not-scheduled')
+def not_scheduled(self):
+    pass
 
 
 @pytest.fixture
@@ -76,3 +82,33 @@ class JobsCommandsTest:
         # kwargs are sorted
         expected = 'Job {0}(arg0, arg1, key0=value0, key1=value1)'
         assert task.name == expected.format(JOB_NAME)
+
+    def test_scheduled_jobs(self, cli):
+        tasks = [
+            PeriodicTask.objects.create(
+                task=JOB_NAME,
+                name='job-1',
+                description='I\'m a scheduled job',
+                enabled=True,
+                crontab=PeriodicTask.Crontab.parse('0 0 0 0 0'),
+            ),
+            PeriodicTask.objects.create(
+                task=JOB_NAME,
+                name='job-2',
+                description='I\'m a scheduled job',
+                enabled=True,
+                args=['arg'],
+                kwargs={'key': 'value'},
+                crontab=PeriodicTask.Crontab.parse('0 0 0 0 0'),
+            )
+        ]
+        result = cli('job scheduled')
+
+        assert len(result.output.splitlines()) == len(tasks)
+
+        assert 'not-scheduled' not in result.output
+        for task in tasks:
+            label = job_label(task.task, task.args, task.kwargs)
+            assert label in result.output
+            assert task.name in result.output
+            assert task.schedule_display in result.output

@@ -5,7 +5,7 @@ import logging
 
 import click
 
-from udata.commands import cli, exit_with_error, echo
+from udata.commands import cli, exit_with_error, echo, white
 from udata.tasks import schedulables, celery
 
 from .models import PeriodicTask
@@ -99,3 +99,21 @@ def schedule(name, cron, params):
 
     msg = 'Scheduled {label} with the following crontab: {cron}'
     log.info(msg.format(label=label, cron=periodic_task.crontab))
+
+
+SCHEDULE_LINE = '{name}: {label} ↦ {schedule}'
+
+
+@grp.command()
+def scheduled():
+    '''
+    List scheduled jobs.
+    '''
+    for job in sorted(schedulables()):
+        for task in PeriodicTask.objects(task=job.name):
+            label = job_label(task.task, task.args, task.kwargs)
+            echo(SCHEDULE_LINE.format(
+                name=white(task.name.encode('utf8')),
+                label=label,
+                schedule=task.schedule_display
+            ).encode('utf8'))
