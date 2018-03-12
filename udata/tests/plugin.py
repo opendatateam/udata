@@ -244,6 +244,13 @@ def instance_path(app, tmpdir):
     from udata.core.storages.views import blueprint
 
     app.instance_path = str(tmpdir)
+    app.config['FS_ROOT'] = str(tmpdir / 'fs')
+    # Force local storage:
+    for s in 'resources', 'avatars', 'logos', 'images', 'chunks', 'tmp':
+        key = '{0}_FS_{{0}}'.format(s.upper())
+        app.config[key.format('BACKEND')] = 'local'
+        app.config.pop(key.format('ROOT'), None)
+
     storages.init_app(app)
     app.register_blueprint(blueprint)
 
