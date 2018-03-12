@@ -41,7 +41,7 @@ you log into its account:
 
 ```shell
 $ virtualenv --python=python2.7 $HOME
-$ . bin/activate  
+$ . bin/activate
 $ pip install Cython  # Enable optimizations on some packages
 $ pip install --upgrade setuptools  # Make sure setuptools is up to date
 $ pip install udata
@@ -91,9 +91,12 @@ All you need to remember is that uData requires at least 3 services to run:
 - a worker service using [celery][]
 - a beat/cron service using [celery][] too
 
-We give you an example using [nginx][] + [uWSGI][] to run these 3 parts,
-expose the frontend on the `data.example.com` domain
-(and having the middlewares running on the same host)
+We give you an example for a `udata` user serving a `data.example.com` domain from `/srv/udata` on a single server with:
+
+- [nginx][] + [uWSGI][] to run the frontend,
+- systemd handling both the worker and the beat services,
+- the middlewares running on the same host.
+
 
 Install nginx and uWSGI with root privileges:
 
@@ -101,7 +104,7 @@ Install nginx and uWSGI with root privileges:
 $ apt-get install nginx-full uwsgi uwsgi-plugin-python
 ```
 
-Let's start with the uwsgi configuration files. We write 3 ini files, one for each service.
+Let's start with the uwsgi configuration file:
 
 **`/etc/uwsgi/apps-available/udata-front.ini`**
 
@@ -109,7 +112,6 @@ Let's start with the uwsgi configuration files. We write 3 ini files, one for ea
 ##
 # uWSGI configuration for data.example.com front
 ##
-
 
 [uwsgi]
 master= true
@@ -154,67 +156,65 @@ vacuum = true
 reload-mercy = 8
 ```
 
-**`/etc/uwsgi/apps-available/udata-worker.ini`**
-
-```inifile
-##
-# uWSGI configuration for data.example.com worker
-##
-
-[uwsgi]
-master = true
-plugin = python
-home = /srv/udata
-chdir = %(home)
-virtualenv = %(home)
-pythonpath = %(home)/bin
-socket = /tmp/udata-worker.sock
-chmod-socket = 666
-processes = 1
-uid = udata
-gid = www-data
-smart-attach-daemon = /tmp/celery-worker.pid %(home)/bin/celery -A udata.worker worker --pidfile=/tmp/celery-worker.pid
-exec-as-user-atexit = kill -TERM `cat /tmp/celery-worker.pid`
-```
-
-**note:** You can handle tasks priorities by starting 3 workers
-with the following `smart-attach-daemon` commands:
-```
-/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high worker
-/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high,default worker
-/tmp/celery-worker.pid %(home)/bin/celery -A udata.worker -Q high,default,low worker
-```
-
-
-**`/etc/uwsgi/apps-available/udata-beat.ini`**
-
-```inifile
-##
-# uWSGI configuration for data.example.com beat
-##
-
-[uwsgi]
-master = true
-plugin = python
-home = /srv/udata
-chdir = %(home)
-virtualenv = %(home)
-pythonpath = %(home)/bin
-socket = /tmp/udata-beat.sock
-chmod-socket = 660
-processes = 1
-uid = udata
-gid = www-data
-smart-attach-daemon = /tmp/celery-beat.pid %(home)/bin/celery -A udata.worker beat --pidfile=/tmp/celery-beat.pid
-exec-as-user-atexit = kill -TERM `cat /tmp/celery-beat.pid`
-```
-
-Then create symlinks to activate these configurations:
+Then create the symlink to activate this configuration:
 
 ```shell
 $ ln -s /etc/uwsgi/apps-{available,enabled}/udata-front.ini
-$ ln -s /etc/uwsgi/apps-{available,enabled}/udata-worker.ini
-$ ln -s /etc/uwsgi/apps-{available,enabled}/udata-beat.ini
+```
+
+You can now create the systemd unit file for Celery:
+
+**`/etc/systemd/system/celery.service`**
+
+```inifile
+##
+# A systemd unit file for udata celery services
+#
+# This launch 4 processes:
+# - a beat service
+# - a high queue consumer/worker
+# - a default queue consumer/worker
+# - a low queue consumer/worker
+##
+
+[Unit]
+Description=udata celery services
+After=network.target
+
+[Service]
+Type=forking
+User=udata
+WorkingDirectory=/srv/udata
+LogsDirectory=udata-celery
+RuntimeDirectory=udata-celery
+ExecStart=/srv/udata/bin/celery multi start high default low \
+  -c 1 -Q:high high -Q:default high,default -Q high,default,low \
+  -A udata.worker --beat:1 \
+  --pidfile=/var/run/udata-celery/worker-%%n.pid \
+  --logfile=/var/log/udata-celery/worker-%%n%%I.log \
+  --loglevel=INFO
+ExecStop=/srv/udata/bin/celery multi stopwait high default low \
+  --pidfile=/var/run/udata-celery/worker-%%n.pid \
+ExecReload=/srv/udata/bin/celery multi restart worker \
+  -A udata.worker --beat:1 \
+  --pidfile=/var/run/udata-celery/worker-%%n.pid \
+  --logfile=/var/log/udata-celery/worker-%%n%%I.log \
+  --loglevel=INFO
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Note:** This unit file handle tasks priorities and beat.
+Adapt it to your needs according to the [Celery daemonizing documentation](http://docs.celeryproject.org/en/latest/userguide/daemonizing.html).
+You might need to allow more workers on a queue
+or extract the beat service into its own unit if you have multiple workers.
+
+Then load it into systemd and enable it:
+
+```shell
+$ systemctl daemon-reload
+$ systemctl enable celery
 ```
 
 Then define a nginx server host configuration in `/etc/nginx/sites-available/data.example.com`:
@@ -383,6 +383,7 @@ Alright, everything is ready to run uData so logout from the `udata` account and
 
 ```shell
 $ service uwsgi restart
+$ service celery restart
 $ service nginx restart
 ```
 And then go see your awesome open data portal on <http://data.example.com>.
