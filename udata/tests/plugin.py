@@ -234,7 +234,7 @@ def cli_fixture(mocker, app):
         # Avoid instanciating another app and reuse the app fixture
         with mocker.patch.object(cli, 'create_app', return_value=app):
             result = runner.invoke(cli, args, catch_exceptions=False)
-        if kwargs.get('assert', True):
+        if kwargs.get('check', True):
             assert_command_ok(result)
         return result
 

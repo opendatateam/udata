@@ -12,6 +12,8 @@ from .models import PeriodicTask
 
 log = logging.getLogger(__name__)
 
+SCHEDULE_LINE = '{name}: {label} ↦ {schedule}'
+
 
 def job_label(name, args, kwargs):
     label = name
@@ -68,10 +70,10 @@ def list():
 
 
 @grp.command()
-@click.argument('name', metavar='<name>')
 @click.argument('cron', metavar='<cron>')
+@click.argument('name', metavar='<name>')
 @click.argument('params', nargs=-1,  metavar='<arg key=value ...>')
-def schedule(name, cron, params):
+def schedule(cron, name, params):
     '''
     Schedule the job <name> to run periodically given the <cron> expression.
 
@@ -87,21 +89,51 @@ def schedule(name, cron, params):
     kwargs = dict(p.split('=') for p in params if '=' in p)
     label = 'Job {0}'.format(job_label(name, args, kwargs))
 
-    periodic_task = PeriodicTask.objects.create(
-        task=name,
-        name=label,
-        description='Periodic {0} job'.format(name),
-        enabled=True,
-        args=args,
-        kwargs=kwargs,
-        crontab=PeriodicTask.Crontab.parse(cron),
-    )
+    try:
+        task = PeriodicTask.objects.get(task=name, args=args, kwargs=kwargs)
+        task.modify(crontab=PeriodicTask.Crontab.parse(cron))
+    except PeriodicTask.DoesNotExist:
+        task = PeriodicTask.objects.create(
+            task=name,
+            name=label,
+            description='Periodic {0} job'.format(name),
+            enabled=True,
+            args=args,
+            kwargs=kwargs,
+            crontab=PeriodicTask.Crontab.parse(cron),
+        )
 
     msg = 'Scheduled {label} with the following crontab: {cron}'
-    log.info(msg.format(label=label, cron=periodic_task.crontab))
+    log.info(msg.format(label=label, cron=task.schedule_display))
 
 
-SCHEDULE_LINE = '{name}: {label} ↦ {schedule}'
+@grp.command()
+@click.argument('name', metavar='<name>')
+@click.argument('params', nargs=-1,  metavar='<arg key=value ...>')
+def unschedule(name, params):
+    '''
+    Unschedule the job <name> with the given given parameters.
+
+    Jobs args and kwargs are given as parameters without dashes.
+
+    Ex:
+        udata job unschedule my-job arg1 arg2 key1=value key2=value
+    '''
+    if name not in celery.tasks:
+        exit_with_error('Job %s not found', name)
+
+    args = [p for p in params if '=' not in p]
+    kwargs = dict(p.split('=') for p in params if '=' in p)
+    label = 'Job {0}'.format(job_label(name, args, kwargs))
+
+    try:
+        task = PeriodicTask.objects.get(task=name, args=args, kwargs=kwargs)
+    except PeriodicTask.DoesNotExist:
+        exit_with_error('No scheduled job match {0}'.format(label))
+
+    task.delete()
+    msg = 'Unscheduled {label} with the following crontab: {cron}'
+    log.info(msg.format(label=label, cron=task.schedule_display))
 
 
 @grp.command()
