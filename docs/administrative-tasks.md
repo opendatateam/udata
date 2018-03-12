@@ -82,16 +82,16 @@ You can list available jobs with:
 
 ```shell
 $ udata job list
--> log-test
--> purge-organizations
--> purge-datasets
--> bump-metrics
--> purge-reuses
--> error-test
--> harvest
--> send-frequency-reminder
--> crawl-resources
--> count-tags
+log-test
+purge-organizations
+purge-datasets
+bump-metrics
+purge-reuses
+error-test
+harvest
+send-frequency-reminder
+crawl-resources
+count-tags
 ```
 
 You can launch a job with:
@@ -114,6 +114,37 @@ $ udata job run job-name arg1 arg2 key1=value key2=value
 Most of the time, you won't need it because there will be a dedicated command
 to perform the task you need.
 
+You can also schedule or unschedule jobs (and list scheduled jobs):
+
+```shell
+$ udata job scheduled
+# No scheduled jobs
+$ udata job schedule "0 * * * *" count-tags
+➢ Scheduled Job count-tags with the following crontab: 0 * * * *
+$ udata job scheduled
+Count tags: count-tags ↦ 0 * * * *
+# Same command to reschedule
+$ udata job schedule "1 * * * *" count-tags
+➢ Scheduled Job count-tags with the following crontab: 1 * * * *
+$ udata job scheduled
+Count tags: count-tags ↦ 1 * * * *
+$ udata job unschedule count-tags
+➢ Unscheduled Job count-tags with the following crontab: 0 * * * *
+$ udata job scheduled
+# No scheduled jobs
+```
+
+Because a job can be scheduled multiple time with different parameters,
+you need to provide the same parameters to unschedule:
+
+```shell
+$ udata job schedule my-job "0 * * * *" arg key=value
+➢ Scheduled Job my-job(arg, key=value) with the following crontab: 0 * * * *
+$ udata job unschedule my-job
+✘ No scheduled job match Job my-job
+$ udata job unschedule my-job arg key=value
+➢ Unscheduled Job my-job(arg, key=value) with the following crontab: 0 * * * *
+```
 
 ## Reindexing data
 
