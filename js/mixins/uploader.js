@@ -110,6 +110,9 @@ export default {
                         endpoint: this.upload_endpoint,
                     }
                 },
+                retry: {
+                    enableAuto: true
+                },
                 callbacks: {
                     onUpload: this.on_upload,
                     onSubmitted: this.on_submit,
