@@ -134,7 +134,7 @@ $ udata job scheduled
 # No scheduled jobs
 ```
 
-Because a job can be scheduled multiple time with different parameters,
+Because a job can be scheduled multiple times with different parameters,
 you need to provide the same parameters to unschedule:
 
 ```shell

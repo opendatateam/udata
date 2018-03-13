@@ -112,7 +112,7 @@ def schedule(cron, name, params):
 @click.argument('params', nargs=-1,  metavar='<arg key=value ...>')
 def unschedule(name, params):
     '''
-    Unschedule the job <name> with the given given parameters.
+    Unschedule the job <name> with the given parameters.
 
     Jobs args and kwargs are given as parameters without dashes.
 
