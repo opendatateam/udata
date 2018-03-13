@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.0 (2018-03-13)
 
 ### Breaking changes
 
