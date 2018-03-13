@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.3.0 (2018-03-13)
 
 - Make use of [udata pytest plugin](https://github.com/opendatateam/udata#1400) [#254](https://github.com/etalab/udata-gouvfr/pull/254)
