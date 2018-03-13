@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.0 (2018-03-13)
 
 - Make use of [udata pytest plugin](https://github.com/opendatateam/udata#1400) [#254](https://github.com/etalab/udata-gouvfr/pull/254)
 - Expose new entrypoints. Plugins and theme translations are now splitted [#263](https://github.com/etalab/udata-gouvfr/pull/263)
