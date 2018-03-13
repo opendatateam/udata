@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 1.3.0 (2018-03-13)
+
 - Make use of [udata pytest plugin](https://github.com/opendatateam/udata#1400) [#254](https://github.com/etalab/udata-gouvfr/pull/254)
 - Expose new entrypoints. Plugins and theme translations are now splitted [#263](https://github.com/etalab/udata-gouvfr/pull/263)
 - Align card components design [#252](https://github.com/etalab/udata-gouvfr/pull/252) [#272](https://github.com/etalab/udata-gouvfr/pull/272)
@@ -9,6 +13,7 @@
 - Add tracking on home page call to action [#271](https://github.com/etalab/udata-gouvfr/pull/271)
 - Add tracking on carousel elements [#268](https://github.com/etalab/udata-gouvfr/pull/268)
 - Temporary carousel layout [#274](https://github.com/etalab/udata-gouvfr/pull/274)
+- Add tracking of dataset recommendations [#277](https://github.com/etalab/udata-gouvfr/pull/277)
 
 ## 1.2.5 (2018-02-05)
 

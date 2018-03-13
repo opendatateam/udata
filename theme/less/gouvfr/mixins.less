@@ -63,3 +63,15 @@
     }
 
 }
+
+/**
+ * Local clamp height fix
+ */
+ .clamp-sizing(@lines, @line-height) {
+    line-height: @line-height;
+    height: @lines * @line-height;
+
+    &:after {
+        height: @line-height;
+    }
+}

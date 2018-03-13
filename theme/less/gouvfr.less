@@ -417,9 +417,6 @@ ul.search-results {
         padding: 23px 10px 20px 0;
 
         .result-infos {
-            position: absolute;
-            bottom: 16px;
-
             li {
                 margin-left: -5px;
                 font-size: 12px;
@@ -430,8 +427,8 @@ ul.search-results {
 
         .result-description {
             color: rgb(119, 119, 119);
-            line-height: 1.4em;
             font-size: 12px;
+            .clamp-sizing(2, 1.4em);
         }
     }
 }
