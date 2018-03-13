@@ -25,6 +25,17 @@ class PeriodicTask(BasePeriodicTask):
         def __unicode__(self):
             return CRON.format(**self._data)
 
+        @classmethod
+        def parse(cls, cron):
+            m, h, d, M, W = cron.split()
+            return cls(
+                minute=m,
+                hour=h,
+                day_of_month=d,
+                month_of_year=M,
+                day_of_week=W,
+            )
+
     @property
     def schedule_display(self):
         if self.interval:

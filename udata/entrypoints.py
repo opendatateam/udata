@@ -10,6 +10,7 @@ ENTRYPOINTS = {
     'udata.linkcheckers': 'Link checker backends',
     'udata.metrics': 'Extra metrics',
     'udata.models': 'Models and migrations',
+    'udata.plugins': 'Generic plugin',
     'udata.tasks': 'Tasks and jobs',
     'udata.themes': 'Themes',
     'udata.views': 'Extra views',

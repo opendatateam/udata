@@ -51,6 +51,13 @@ This class entrypoint allows to register new link checkers that udata will recog
 
 This module entrypoint allows to register new asynchronous tasks and schedulable jobs.
 
+### Generic plugins (`udata.plugins`)
+
+A module entrypoint for generic plugins. They just have to expose a `init_app(app)` function
+and can perform any manual initialization.
+
+Use this entrypoint if you want to perform something not handled by previous entrypoints.
+
 ### Translations
 
 Any registered plugin may also expose translations in its root module `translations` directory.

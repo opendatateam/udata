@@ -3,11 +3,17 @@ from __future__ import unicode_literals
 
 import os
 
+from datetime import datetime
+
+from flask import json
 from werkzeug.datastructures import FileStorage
 
 from udata.api import api, fields
 
 from . import utils, chunks
+
+
+META = 'meta.json'
 
 
 uploaded_image_fields = api.model('UploadedImage', {
@@ -45,6 +51,17 @@ class UploadStatus(Exception):
         self.error = error
 
 
+class UploadProgress(UploadStatus):
+    '''Raised on successful chunk uploaded'''
+    pass
+
+
+class UploadError(UploadStatus):
+    '''Raised on any upload error'''
+    def __init__(self, error=None):
+        super(UploadError, self).__init__(ok=False, error=error)
+
+
 def on_upload_status(status):
     '''Not an error, just raised when chunk is processed'''
     if status.ok:
@@ -54,32 +71,48 @@ def on_upload_status(status):
 
 
 @api.errorhandler(UploadStatus)
+@api.errorhandler(UploadError)
+@api.errorhandler(UploadProgress)
 @api.marshal_with(chunk_status_fields, code=200)
 def api_upload_status(status):
     '''API Upload response handler'''
     return on_upload_status(status)
 
 
+def chunk_filename(uuid, part):
+    return os.path.join(str(uuid), str(part))
+
+
 def save_chunk(file, args):
-    filename = os.path.join(args['uuid'], str(args['partindex']))
+    filename = chunk_filename(args['uuid'], args['partindex'])
     chunks.save(file, filename=filename)
+    meta_filename = chunk_filename(args['uuid'], META)
+    chunks.write(meta_filename, json.dumps({
+        'uuid': str(args['uuid']),
+        'filename': args['filename'],
+        'totalparts': args['totalparts'],
+        'lastchunk': datetime.now(),
+    }), overwrite=True)
 
 
-def combine_chunks(args):
+def combine_chunks(storage, args, prefix=None):
     '''
     Combine a chunked file into a whole file again.
     Goes through each part, in order,
     and appends that part's bytes to another destination file.
     Chunks are stored in the chunks storage.
     '''
-    prefix = args['uuid']
-    filename = os.path.join(prefix, args['filename'])
-    chunks.write(filename, '')
-    with chunks.open(filename, 'wb+') as out:
+    uuid = args['uuid']
+    target = args['filename']
+    if prefix:
+        target = os.path.join(prefix, target)
+    with storage.open(target, 'wb') as out:
         for i in xrange(args['totalparts']):
-            partname = os.path.join(prefix, str(i))
+            partname = chunk_filename(uuid, i)
             out.write(chunks.read(partname))
-    return FileStorage(chunks.open(filename, 'rb'), args['filename'])
+            chunks.delete(partname)
+    chunks.delete(chunk_filename(uuid, META))
+    return target
 
 
 def handle_upload(storage, prefix=None):
@@ -90,23 +123,20 @@ def handle_upload(storage, prefix=None):
     if is_chunk:
         if uploaded_file:
             save_chunk(uploaded_file, args)
-            raise UploadStatus()
+            raise UploadProgress()
         else:
-            uploaded_file = combine_chunks(args)
+            filename = combine_chunks(storage, args, prefix=prefix)
     elif not uploaded_file:
-        raise UploadStatus(False, 'Missing file parameter')
+        raise UploadError('Missing file parameter')
+    else:
+        filename = storage.save(uploaded_file, prefix=prefix)
 
-    filename = storage.save(uploaded_file, prefix=prefix)
-    uploaded_file.seek(0)
-    size = os.path.getsize(storage.path(filename)) if storage.root else None
-    return {
-        'url': storage.url(filename, True),
-        'filename': filename,
-        'sha1': utils.sha1(uploaded_file),
-        'size': size,
-        'mime': utils.mime(filename),
-        'format': utils.extension(filename),
-    }
+    metadata = storage.metadata(filename)
+    checksum = metadata.pop('checksum')
+    algo, checksum = checksum.split(':', 1)
+    metadata[algo] = checksum
+    metadata['format'] = utils.extension(filename)
+    return metadata
 
 
 def parse_uploaded_image(field):

@@ -3,19 +3,21 @@ from __future__ import unicode_literals
 
 import pytest
 
+from datetime import datetime, timedelta
 from StringIO import StringIO
 from uuid import uuid4
 
-from flask import url_for
+from flask import url_for, json
 
 from udata.core import storages
 from udata.core.storages import utils
+from udata.core.storages.api import chunk_filename, META
+from udata.core.storages.tasks import purge_chunks
+from udata.utils import faker
 
 from .helpers import assert200, assert400
 
-
 from os.path import basename
-
 
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
@@ -95,19 +97,20 @@ class StorageUploadViewTest:
     def test_standard_upload(self, client):
         client.login()
         response = client.post(
-            url_for('storage.upload', name='tmp'),
+            url_for('storage.upload', name='resources'),
             {'file': (StringIO(b'aaa'), 'test.txt')})
 
         assert200(response)
         assert response.json['success']
-        assert 'filename' in response.json
         assert 'url' in response.json
         assert 'size' in response.json
         assert 'sha1' in response.json
-        assert response.json['filename'].endswith('test.txt')
-        assert response.json['mime'] == 'text/plain'
-        expected = storages.tmp.url(response.json['filename'], external=True)
+        assert 'filename' in response.json
+        filename = response.json['filename']
+        assert filename.endswith('test.txt')
+        expected = storages.resources.url(filename, external=True)
         assert response.json['url'] == expected
+        assert response.json['mime'] == 'text/plain'
 
     def test_chunked_upload(self, client):
         client.login()
@@ -150,6 +153,7 @@ class StorageUploadViewTest:
         assert response.json['url'] == expected
         assert response.json['mime'] == 'text/plain'
         assert storages.tmp.read(response.json['filename']) == 'aaaa'
+        assert list(storages.chunks.list_files()) == []
 
     def test_upload_resource_bad_request(self, client):
         client.login()
@@ -160,3 +164,39 @@ class StorageUploadViewTest:
         assert400(response)
         assert not response.json['success']
         assert 'error' in response.json
+
+
+@pytest.mark.usefixtures('instance_path')
+class ChunksRetentionTest:
+    def create_chunks(self, uuid, nb=3, last=None):
+        for i in range(nb):
+            storages.chunks.write(chunk_filename(uuid, i), faker.word())
+        storages.chunks.write(chunk_filename(uuid, META), json.dumps({
+            'uuid': str(uuid),
+            'filename': faker.file_name(),
+            'totalparts': nb + 1,
+            'lastchunk': last or datetime.now(),
+        }))
+
+    @pytest.mark.options(UPLOAD_MAX_RETENTION=0)
+    def test_chunks_cleanup_after_max_retention(self, client):
+        uuid = str(uuid4())
+        self.create_chunks(uuid)
+        purge_chunks.apply()
+        assert list(storages.chunks.list_files()) == []
+
+    @pytest.mark.options(UPLOAD_MAX_RETENTION=60 * 60)  # 1 hour
+    def test_chunks_kept_before_max_retention(self, client):
+        not_expired = datetime.now()
+        expired = datetime.now() - timedelta(hours=2)
+        expired_uuid = str(uuid4())
+        active_uuid = str(uuid4())
+        parts = 3
+        self.create_chunks(expired_uuid, nb=parts, last=expired)
+        self.create_chunks(active_uuid, nb=parts, last=not_expired)
+        purge_chunks.apply()
+        expected = set([
+            chunk_filename(active_uuid, i) for i in range(parts)
+        ])
+        expected.add(chunk_filename(active_uuid, META))
+        assert set(storages.chunks.list_files()) == expected
