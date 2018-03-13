@@ -2,22 +2,34 @@
 
 ## Current (in progress)
 
-- Switch to `flask-cli` and drop `flask-script`. Deprecated commands have been removed. [#1364](https://github.com/opendatateam/udata/pull/1364) [breaking]
-- Switch to pytest as testing tool and expose a `udata` pytest plugin [#1400](https://github.com/opendatateam/udata/pull/1400)
-- Added Geopackage as default allowed file formats [#1425](https://github.com/opendatateam/udata/pull/1425)
-- Added more entrypoints and document them. There is no more automatically enabled plugin by installation. Plugins can now properly contribute translations. [#1431](https://github.com/opendatateam/udata/pull/1431)
-- Soft breaks in markdown is rendered as line return as allowed by the [commonmark specifications](http://spec.commonmark.org/0.28/#soft-line-breaks), client-side rendering follows the same security rules [#1432](https://github.com/opendatateam/udata/pull/1432)
+### Breaking changes
+
+- Switch to `flask-cli` and drop `flask-script`. Deprecated commands have been removed. [#1364](https://github.com/opendatateam/udata/pull/1364)
 - Update card components to make them more consistent [#1383](https://github.com/opendatateam/udata/pull/1383) [#1460](https://github.com/opendatateam/udata/pull/1460)
+- udata is now protocol (`http`/`https`) agnostic. This is now fully the reverse-proxy responsibility (please ensure that you are using SSL only in production for security purpose). [#1463](https://github.com/opendatateam/udata/pull/1463)
+- Added more entrypoints and document them. There is no more automatically enabled plugin by installation. Plugins can now properly contribute translations. [#1431](https://github.com/opendatateam/udata/pull/1431)
+
+### New features
+
+- Soft breaks in markdown is rendered as line return as allowed by the [commonmark specifications](http://spec.commonmark.org/0.28/#soft-line-breaks), client-side rendering follows the same security rules [#1432](https://github.com/opendatateam/udata/pull/1432)
 - Switch from OAuthlib/Flask-OUAhtlib to Authlib and support all grants type as well as token revocation [#1434](https://github.com/opendatateam/udata/pull/1434)
+- Chunked upload support (big files support) [#1468](https://github.com/opendatateam/udata/pull/1468)
+- Improve tasks/jobs queues routing [#1487](https://github.com/opendatateam/udata/pull/1487)
+- Add the `udata schedule|unschedule|scheduled` commands [#1497](https://github.com/opendatateam/udata/pull/1497)
+
+### Bug fixes and minor changes
+
+- Added Geopackage as default allowed file formats [#1425](https://github.com/opendatateam/udata/pull/1425)
 - Fix completion/suggestion unicode handling [#1452](https://github.com/opendatateam/udata/pull/1452)
 - Added a link to change password into the admin [#1462](https://github.com/opendatateam/udata/pull/1462)
-- Chunked upload support (big files support) [#1468](https://github.com/opendatateam/udata/pull/1468)
-- udata is now protocol (`http`/`https`) agnostic. This is now fully the reverse-proxy responsibility (please ensure that you are using SSL only in production for security purpose). [#1463](https://github.com/opendatateam/udata/pull/1463) [breaking]
 - Fix organization widget (embed) [#1474](https://github.com/opendatateam/udata/pull/1474)
 - High priority for sendmail tasks [#1484](https://github.com/opendatateam/udata/pull/1484)
-- Improve tasks/jobs queues routing [#1487](https://github.com/opendatateam/udata/pull/1487)
 - Add security.send_confirmation template [#1475](https://github.com/opendatateam/udata/pull/1475)
-- Add the `udata schedule|unschedule|scheduled` commands [#1497](https://github.com/opendatateam/udata/pull/1497)
+
+### Internals
+
+- Switch to pytest as testing tool and expose a `udata` pytest plugin [#1400](https://github.com/opendatateam/udata/pull/1400)
+
 
 ## 1.2.11 (2018-02-05)
 
