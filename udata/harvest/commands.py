@@ -90,11 +90,6 @@ def backends():
 
 
 @grp.command()
-def jobs():
-    '''List started harvest jobs'''
-
-
-@grp.command()
 @click.argument('identifier')
 def launch(identifier):
     '''Launch a source harvesting on the workers'''
