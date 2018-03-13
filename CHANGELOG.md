@@ -9,6 +9,7 @@
 - Add tracking on home page call to action [#271](https://github.com/etalab/udata-gouvfr/pull/271)
 - Add tracking on carousel elements [#268](https://github.com/etalab/udata-gouvfr/pull/268)
 - Temporary carousel layout [#274](https://github.com/etalab/udata-gouvfr/pull/274)
+- Add tracking of dataset recommendations [#277](https://github.com/etalab/udata-gouvfr/pull/277)
 
 ## 1.2.5 (2018-02-05)
 
