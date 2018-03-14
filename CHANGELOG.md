@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix some geozones/geoids bugs [#1505](https://github.com/opendatateam/udata/pull/1505)
 
 ## 1.3.0 (2018-03-13)
 
