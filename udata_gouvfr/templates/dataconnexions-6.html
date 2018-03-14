@@ -94,9 +94,9 @@
             <h3 class="col-xs-12">{{ cat.label }}</h3>
             <p class="col-xs-12"><em>{{ cat.description }}</em></p>
             {% if cat.reuses %}
-            <ul class="card-list">
+            <ul class="card-list card-list--columned">
                 {% for reuse in cat.reuses %}
-                <li class="col-md-4 col-sm-6">
+                <li class="col-xs-12 col-sm-6 col-md-4">
                     {% include theme('reuse/card.html') %}
                 </li>
                 {% endfor %}

@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix some cards positionning
 
 ## 1.3.0 (2018-03-13)
 

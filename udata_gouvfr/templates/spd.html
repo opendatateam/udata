@@ -43,11 +43,12 @@
             <p class="col-xs-12">À ce jour, neuf jeux de données, qui couvrent un large champ thématique
                 ont été identifiés comme des données de référence.</p>
         </div>
-            <ul class="card-list">
-                {% for dataset in datasets %}
-                <li class="col-md-4 col-sm-6">{% include theme('dataset/card.html') %}</li>
-                {% endfor %}
-            </ul>
+
+        <ul class="card-list card-list--columned">
+            {% for dataset in datasets %}
+            <li class="col-xs-12 col-sm-6 col-md-4">{% include theme('dataset/card.html') %}</li>
+            {% endfor %}
+        </ul>
     </div>
 </section>
 {% endif %}
