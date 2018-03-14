@@ -126,15 +126,15 @@
 
                     {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
                     <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-                        <ul class="card-list card-list--columned">
+                        <div class="card-list card-list--columned">
 
                             {% for dataset in datasets %}
-                            <li class="col-md-4 col-sm-6">
+                            <div class="col-xs-12 col-md-4 col-sm-6">
                                 {% include theme('dataset/card.html') %}
-                            </li>
+                            </div>
                             {% endfor %}
 
-                        </ul>
+                        </div>
                         <div class="clearfix"></div>
                         <p class="text-center">
                             <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default">
