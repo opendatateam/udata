@@ -87,7 +87,7 @@ class GeoZone(db.Document):
     name = db.StringField(required=True)
     level = db.StringField(required=True)
     code = db.StringField(required=True)
-    geom = db.MultiPolygonField()
+    geom = db.MultiPolygonField(null=True)
     parents = db.ListField()
     keys = db.DictField()
     validity = db.EmbeddedDocumentField(db.DateRange)
