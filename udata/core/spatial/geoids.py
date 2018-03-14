@@ -30,7 +30,11 @@ def parse(text):
         validity = 'latest'
     if ':' not in spatial:
         raise GeoIDError('Bad GeoID format: {0}'.format(text))
-    level, code = spatial.rsplit(':', 1)
+    # country-subset is a special case:
+    if spatial.startswith('country-subset:'):
+        level, code = spatial.split(':', 1)
+    else:
+        level, code = spatial.rsplit(':', 1)
     return level, code, validity
 
 
