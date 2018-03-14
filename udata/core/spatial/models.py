@@ -135,8 +135,12 @@ class GeoZone(db.Document):
         for value in self.keys.values():
             if isinstance(value, list):
                 keys_values += value
-            elif not str(value).startswith('-'):  # Avoid -99.
+            elif isinstance(value, basestring) and not value.startswith('-'):
+                # Avoid -99. Should be fixed in geozones
                 keys_values.append(value)
+            elif isinstance(value, int) and value >= 0:
+                # Avoid -99. Should be fixed in geozones
+                keys_values.append(str(value))
         return keys_values
 
     @cached_property
