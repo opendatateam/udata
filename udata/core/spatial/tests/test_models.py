@@ -182,3 +182,11 @@ class SpatialTemporalResolutionTest(DBTestMixin, TestCase):
         result = GeoZone.objects.resolve(geoid, id_only=True)
 
         self.assertEqual(result, zone.id)
+
+    def test_resolve_latest_without_validity(self):
+        zone = GeoZoneFactory()
+        zone.update(unset__validity=True)
+        geoid = '{0.level}:{0.code}'.format(zone)
+        result = GeoZone.objects.resolve(geoid)
+
+        self.assertEqual(result, zone)

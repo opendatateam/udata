@@ -1,46 +1,54 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-
-from udata.tests import TestCase
+import pytest
 
 from .. import geoids
 from ..models import GeoZone
 from udata.utils import faker
 
 
-class GeoIDTests(TestCase):
+class GeoIDTest:
     def test_parse_full_geoid(self):
         geoid = 'level:code@1984-06-07'
 
         level, code, validity = geoids.parse(geoid)
 
-        self.assertEqual(level, 'level')
-        self.assertEqual(code, 'code')
-        self.assertEqual(validity, '1984-06-07')
+        assert level == 'level'
+        assert code == 'code'
+        assert validity == '1984-06-07'
 
     def test_parse_implicit_latest(self):
         geoid = 'level:code'
 
         level, code, validity = geoids.parse(geoid)
 
-        self.assertEqual(level, 'level')
-        self.assertEqual(code, 'code')
-        self.assertEqual(validity, 'latest')
+        assert level == 'level'
+        assert code == 'code'
+        assert validity == 'latest'
 
     def test_parse_nested_levels(self):
         geoid = 'nested:level:code@1984-06-07'
 
         level, code, validity = geoids.parse(geoid)
 
-        self.assertEqual(level, 'nested:level')
-        self.assertEqual(code, 'code')
-        self.assertEqual(validity, '1984-06-07')
+        assert level == 'nested:level'
+        assert code == 'code'
+        assert validity == '1984-06-07'
+
+    def test_parse_country_subset_levels(self):
+        geoid = 'country-subset:country:code@1984-06-07'
+
+        level, code, validity = geoids.parse(geoid)
+
+        assert level == 'country-subset'
+        assert code == 'country:code'
+        assert validity == '1984-06-07'
 
     def test_parse_invalid_geoid(self):
         geoid = 'this-is-not-a-geoid'
 
-        with self.assertRaises(geoids.GeoIDError):
+        with pytest.raises(geoids.GeoIDError):
             geoids.parse(geoid)
 
     def test_build_without_validity(self):
@@ -49,7 +57,7 @@ class GeoIDTests(TestCase):
 
         geoid = geoids.build(level, code)
 
-        self.assertEqual(geoid, 'level:code')
+        assert geoid == 'level:code'
 
     def test_build_with_validity_as_string(self):
         level = 'level'
@@ -58,7 +66,7 @@ class GeoIDTests(TestCase):
 
         geoid = geoids.build(level, code, validity)
 
-        self.assertEqual(geoid, 'level:code@latest')
+        assert geoid == 'level:code@latest'
 
     def test_build_with_validity_as_date(self):
         level = 'level'
@@ -67,7 +75,7 @@ class GeoIDTests(TestCase):
 
         geoid = geoids.build(level, code, validity)
 
-        self.assertEqual(geoid, 'level:code@{0:%Y-%m-%d}'.format(validity))
+        assert geoid == 'level:code@{0:%Y-%m-%d}'.format(validity)
 
     def test_build_with_validity_as_datetime(self):
         level = 'level'
@@ -76,14 +84,14 @@ class GeoIDTests(TestCase):
 
         geoid = geoids.build(level, code, validity)
 
-        self.assertEqual(geoid, 'level:code@{0:%Y-%m-%d}'.format(validity))
+        assert geoid == 'level:code@{0:%Y-%m-%d}'.format(validity)
 
     def test_build_with_invalid_validity_type(self):
         level = 'level'
         code = 'code'
         validity = object()
 
-        with self.assertRaises(geoids.GeoIDError):
+        with pytest.raises(geoids.GeoIDError):
             geoids.build(level, code, validity)
 
     def test_from_zone_with_validity(self):
@@ -95,7 +103,7 @@ class GeoIDTests(TestCase):
 
         geoid = geoids.from_zone(zone)
 
-        self.assertEqual(geoid, 'level:code@{0:%Y-%m-%d}'.format(start))
+        assert geoid == 'level:code@{0:%Y-%m-%d}'.format(start)
 
     def test_from_zone_without_validity(self):
         level = 'level'
@@ -104,4 +112,4 @@ class GeoIDTests(TestCase):
 
         geoid = geoids.from_zone(zone)
 
-        self.assertEqual(geoid, 'level:code')
+        assert geoid == 'level:code'

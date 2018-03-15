@@ -17,6 +17,7 @@ import click
 import msgpack
 import slugify
 
+from bson import DBRef
 from mongoengine import errors
 
 from udata.commands import cli
@@ -25,6 +26,10 @@ from udata.core.spatial.models import GeoLevel, GeoZone, SpatialCoverage
 from udata.core.storages import logos, tmp
 
 log = logging.getLogger(__name__)
+
+
+def level_ref(level):
+    return DBRef(GeoLevel._get_collection_name(), level)
 
 
 @cli.group('spatial')
@@ -62,11 +67,11 @@ def load(filename, drop=False):
     with open(levels_filepath) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
         for i, level in enumerate(unpacker, start=1):
-            GeoLevel.objects.create(
-                id=level['id'],
-                name=level['label'],
-                parents=level['parents'],
-                admin_level=level.get('admin_level')
+            GeoLevel.objects(id=level['id']).modify(
+                upsert=True,
+                set__name=level['label'],
+                set__parents=[level_ref(p) for p in level['parents']],
+                set__admin_level=level.get('admin_level')
             )
     os.remove(levels_filepath)
     log.info('Loaded {total} levels'.format(total=i))
@@ -81,22 +86,15 @@ def load(filename, drop=False):
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
         unpacker.next()  # Skip headers.
         for i, geozone in enumerate(unpacker):
-            if not geozone.get('geom') or (
-                geozone['geom']['type'] == 'GeometryCollection' and
-                    not geozone['geom']['geometries']):
-                geom = None
-            else:
-                geom = geozone['geom']
             params = {
-                'id': geozone['_id'],
                 'slug': slugify.slugify(geozone['name'], separator='-'),
                 'level': geozone['level'],
                 'code': geozone['code'],
                 'name': geozone['name'],
                 'keys': geozone.get('keys'),
-                'parents': geozone.get('parents'),
-                'ancestors': geozone.get('ancestors'),
-                'successors': geozone.get('successors'),
+                'parents': geozone.get('parents', []),
+                'ancestors': geozone.get('ancestors', []),
+                'successors': geozone.get('successors', []),
                 'validity': geozone.get('validity'),
                 'population': geozone.get('population'),
                 'dbpedia': geozone.get('dbpedia'),
@@ -104,13 +102,18 @@ def load(filename, drop=False):
                 'blazon': geozone.get('blazon'),
                 'wikipedia': geozone.get('wikipedia'),
                 'area': geozone.get('area'),
-                'geom': geom
             }
+            if geozone.get('geom') and (
+                geozone['geom']['type'] != 'GeometryCollection' or
+                    geozone['geom']['geometries']):
+                params['geom'] = geozone['geom']
             try:
-                GeoZone.objects.create(**params)
+                GeoZone.objects(id=geozone['_id']).modify(upsert=True, **{
+                    'set__{0}'.format(k): v for k, v in params.items()
+                })
             except errors.ValidationError as e:
                 log.warning('Validation error (%s) for %s with %s',
-                            e, geozone, params)
+                            e, geozone['_id'], params)
                 continue
     os.remove(zones_filepath)
     log.info('Loaded {total} zones'.format(total=i))
