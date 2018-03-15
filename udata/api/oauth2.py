@@ -25,6 +25,7 @@ from authlib.flask.oauth2 import (
     AuthorizationServer, ResourceProtector, current_token
 )
 from authlib.specs.rfc6749 import grants, ClientMixin
+from authlib.specs.rfc6749.errors import InvalidClientError
 from authlib.specs.rfc7009 import RevocationEndpoint
 from flask import abort, request
 from flask_security.utils import verify_password
@@ -221,6 +222,27 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
             scopes=scopes,
             **token
         )
+
+    def authenticate_client(self):
+        '''
+        Parse the authenticated client.
+
+        Support both Basic Auth credentials and request-body credentials.
+
+        See: https://github.com/lepture/authlib/blob/v0.5.1/authlib/specs/rfc6749/grants/authorization_code.py#L292-L331
+        '''
+        client_params = self.request.extract_authorization_header()
+        params = client_params or self.request.data
+        if params:
+            # authenticate the client if client authentication is included
+            client_id = params.get('client_id')
+            client_secret = params.get('client_secret')
+            client = self.get_and_validate_client(client_id)
+            if not client.check_client_secret(client_secret):
+                raise InvalidClientError()
+            return client
+
+        raise InvalidClientError('Missing client authentication')
 
 
 class ClientCredentialsGrant(grants.ClientCredentialsGrant):
