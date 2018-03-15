@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.3.1 (2018-03-15)
 
 - Fix some geozones/geoids bugs [#1505](https://github.com/opendatateam/udata/pull/1505)
