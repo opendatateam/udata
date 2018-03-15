@@ -7,6 +7,7 @@ from uuid import UUID
 from flask import request
 from mongoengine.errors import InvalidQueryError
 from werkzeug.routing import BaseConverter, NotFound, PathConverter
+from werkzeug.urls import url_quote
 
 from udata import models
 from udata.i18n import ISO_639_1_CODES
@@ -70,10 +71,12 @@ class ModelConverter(BaseConverter):
             return e
 
     def to_url(self, obj):
-        if isinstance(obj, (basestring, ObjectId, UUID)):
+        if isinstance(obj, basestring):
+            return url_quote(obj)
+        elif isinstance(obj, (ObjectId, UUID)):
             return str(obj)
         elif getattr(obj, 'slug', None):
-            return obj.slug
+            return url_quote(obj.slug)
         elif getattr(obj, 'id', None):
             return str(obj.id)
         else:
