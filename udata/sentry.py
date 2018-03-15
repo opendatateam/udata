@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+import pkg_resources
 import re
 
 from werkzeug.exceptions import HTTPException
@@ -67,6 +68,8 @@ def init_app(app):
         for dist in entrypoints.get_plugins_dists(app):
             if dist.version:
                 tags[dist.project_name] = dist.version
+        # Do not forget udata itself
+        tags['udata'] = pkg_resources.get_distribution('udata').version
 
         sentry.init_app(app)
 
