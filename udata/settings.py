@@ -27,6 +27,7 @@ class Defaults(object):
     TERRITORIES_EMAIL = 'territories@example.org'
 
     MONGODB_HOST = 'mongodb://localhost:27017/udata'
+    MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
     # Elasticsearch configuration
     ELASTICSEARCH_URL = 'localhost:9200'
