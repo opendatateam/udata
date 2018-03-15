@@ -6,6 +6,7 @@
 - Fix oauth scopes serialization in authorization template [#1506](https://github.com/opendatateam/udata/pull/1506)
 - Prevent error on site ressources metric [#1507](https://github.com/opendatateam/udata/pull/1507)
 - Fix some routing errors [#1508](https://github.com/opendatateam/udata/pull/1508)
+- Mongo connection is now lazy by default, preventing non fork-safe usage in celery as well as preventing commands not using the database to hit it [#1509](https://github.com/opendatateam/udata/pull/1509)
 
 ## 1.3.0 (2018-03-13)
 
