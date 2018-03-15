@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.3.1 (2018-03-15)
 
 - Fix some cards positionning
