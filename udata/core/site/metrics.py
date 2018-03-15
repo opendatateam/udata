@@ -67,7 +67,9 @@ class ResourcesMetric(SiteMetric):
         function() {
             var total = 0
             db[collection].find(query).forEach(function(doc) {
-                total += doc.resources.length;
+                if (doc.resources && doc.resources.length) {
+                    total += doc.resources.length;
+                }
             });
             return total;
         }
