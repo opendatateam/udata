@@ -52,7 +52,7 @@
 <div class="panel-body">
     <form class="form text-center" method="post">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <input type="hidden" name="scope" value="{{ grant.scopes or ['default'] | join(' ') }}" />
+        <input type="hidden" name="scope" value="{{ (grant.scopes or ['default']) | join(' ') }}" />
         <input type="submit" name="accept" value="{{ _('Accept') }}"
             class="btn btn-success btn-lg" />
         <input type="submit" name="decline" value="{{ _('Refuse') }}"

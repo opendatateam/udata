@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix some geozones/geoids bugs [#1505](https://github.com/opendatateam/udata/pull/1505)
+- Fix oauth scopes serialization in authorization template [#1506](https://github.com/opendatateam/udata/pull/1506)
 
 ## 1.3.0 (2018-03-13)
 
