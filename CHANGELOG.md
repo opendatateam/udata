@@ -5,7 +5,7 @@
 - Fix some geozones/geoids bugs [#1505](https://github.com/opendatateam/udata/pull/1505)
 - Fix oauth scopes serialization in authorization template [#1506](https://github.com/opendatateam/udata/pull/1506)
 - Prevent error on site ressources metric [#1507](https://github.com/opendatateam/udata/pull/1507)
-- Fix some routing errors
+- Fix some routing errors [#1508](https://github.com/opendatateam/udata/pull/1508)
 
 ## 1.3.0 (2018-03-13)
 
