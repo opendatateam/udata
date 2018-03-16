@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Support request-body credential in OAuth2 (Fix a regression introduced in 1.3.0) [#1511](https://github.com/opendatateam/udata/pull/1511)
 
 ## 1.3.1 (2018-03-15)
 
