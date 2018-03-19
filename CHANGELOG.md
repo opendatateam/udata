@@ -2,9 +2,16 @@
 
 ## Current (in progress)
 
+- Support request-body credential in OAuth2 (Fix a regression introduced in 1.3.0) [#1511](https://github.com/opendatateam/udata/pull/1511)
+
+## 1.3.1 (2018-03-15)
+
 - Fix some geozones/geoids bugs [#1505](https://github.com/opendatateam/udata/pull/1505)
 - Fix oauth scopes serialization in authorization template [#1506](https://github.com/opendatateam/udata/pull/1506)
 - Prevent error on site ressources metric [#1507](https://github.com/opendatateam/udata/pull/1507)
+- Fix some routing errors [#1508](https://github.com/opendatateam/udata/pull/1508)
+- Mongo connection is now lazy by default, preventing non fork-safe usage in celery as well as preventing commands not using the database to hit it [#1509](https://github.com/opendatateam/udata/pull/1509)
+- Fix udata version not exposed on Sentry [#1510](https://github.com/opendatateam/udata/pull/1510)
 
 ## 1.3.0 (2018-03-13)
 
