@@ -37,7 +37,7 @@ Vue.use(require('plugins/util'));
 Vue.use(require('plugins/location'));
 Vue.use(require('plugins/outside'));
 Vue.use(require('plugins/scroll-to'));
-
+Vue.use(require('plugins/clipboard'));
 
 /**
 * Frontend views common behavior

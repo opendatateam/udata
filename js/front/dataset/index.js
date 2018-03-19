@@ -13,6 +13,7 @@ import Velocity from 'velocity-animate';
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
+import AvailabilityFromStatus from './resource/availability-from-status.vue';
 import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
@@ -33,12 +34,14 @@ const RESOURCE_REGEX = /^#resource(-community)?-([0-9a-f-]{36})$/;
 new Vue({
     mixins: [FrontMixin],
     components: {
-        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton, ShareButton, FollowButton
+        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton,
+        ShareButton, FollowButton, AvailabilityFromStatus,
     },
     data() {
         return {
             dataset: this.extractDataset(),
-            userReuses: []
+            userReuses: [],
+            checkResults: [],
         };
     },
     ready() {
@@ -155,7 +158,7 @@ new Vue({
                         .filter(r => r.type == type)
                         .slice(0, config.dataset_max_resources_uncollapsed)
                         .forEach(this.checkResource);
-                })
+                });
             }
         },
 
@@ -216,30 +219,18 @@ new Vue({
         checkResource(resource) {
             const url = parseUrl(resource.contentUrl);
             const resource_el = document.querySelector(`#resource-${resource['@id']}`);
-            const el = resource_el.querySelector('.format-label');
+            const el = resource_el.querySelector('.healthcheck-container');
             const checkurl = resource_el.dataset.checkurl;
-            if (url.protocol.startsWith('ftp')) {
-                el.classList.add('format-label-warning');
-                el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
-            } else {
-                this.getResourceCheckStatus(resource, checkurl)
+            this.getResourceCheckStatus(resource, checkurl)
                 .then((res) => {
-                    const status = res['check:status'];
-                    if (status >= 200 && status < 400) {
-                        el.classList.add('format-label-success')
-                    } else if (status >= 400 && status < 500) {
-                        el.classList.add('format-label-danger');
-                        el.setTooltip(this._('The resource cannot be found.'), true);
-                    } else if (status >= 500) {
-                        el.classList.add('format-label-warning');
-                        el.setTooltip(this._('An error occured on the remote server. This may be temporary.'), true);
-                    }
+                    this.checkResults.push({
+                        id: resource['@id'],
+                        status: res['check:status']
+                    });
                 })
                 .catch(error => {
-                    el.classList.add('format-label-unchecked');
                     console.log('Something went wrong with the linkchecker', error);
                 });
-            }
         },
 
         /**
@@ -262,6 +253,15 @@ new Vue({
                 const [, isCommunity, id] = hash.match(RESOURCE_REGEX);
                 this.showResource(id, isCommunity);
             }
+        },
+
+        /**
+         * Return currently computed check result for resourceId
+         */
+        checkResultFor(resourceId) {
+            return this.checkResults.find((res) => {
+                return res.id == resourceId;
+            })
         },
     }
 });

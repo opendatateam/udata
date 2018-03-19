@@ -1,147 +1,58 @@
 .resources-list {
-    margin: 0;
+    h3 {
+        display: inline;
+    }
+}
 
-    .list-group-item {
-
-        @vspacing: 10px;
-        @base-color: #eaeaea;
-        @border-color: #fafafa;
-
-        height: 54px;
-        cursor: pointer;
-        background-color: @base-color;
-        margin: 0px 0px @vspacing;
-        border-color: @base-color;
-        border-radius: 0px;
-        padding: 0;
-        position: relative;
-
-        a {
-            color: inherit;
-
-            &:hover, &:active, &:focus {
-                text-decoration: none;
-            }
-        }
-
-        &:hover {
-            background-color: #ddd;
-        }
-
-        &.add {
-            @add-base-color: darken(@base-color, 30%);
-            background-color: fadeout(@add-base-color, 92%);
-            border: 2px dashed @add-base-color;
-            height: 56px;
-
-            h4 {
-                color: @add-base-color;
-                line-height: 30px;
-            }
-
-            .format-label {
-                color: #7d8489;
-                background-color: fadeout(@add-base-color, 80%);
-                text-align: center;
-                font-size: 34px;
-                font-weight: bold;
-                line-height: 44px;
-            }
-
-            &:hover {
-                background-color: fadeout(@add-base-color, 87%);
-            }
-
-            &:not(:first-child) {
-                margin-top: 13px;
-            }
-        }
-
-        &.expanded {
-            border-bottom-color: @border-color;
-        }
-
-        &.body-only {
-            margin-top: -@vspacing;
-            border-color: @border-color;
-
-            .list-group-item-heading {
-                margin: 5px;
-            }
-        }
-
-        &.discussion-messages-list .list-group-item-heading{
-            font-weight: normal;
+.resource-card.add {
+    .card-logo {
+        background-color: @gray-lighter;
+        font-size: 2em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 60px;
+    }
+    .card-body {
+        justify-content: left;
+        h4 {
+            margin-bottom: 0;
         }
     }
+}
 
-    .list-group-item-text {
-        margin-left: 60px;
-        font-size: 12px;
-        font-weight: normal;
+// account for absence of card-logo when not community or add
+:not(.resource-card-community):not(.add) {
+    > .card-body {
+        margin-left: 0;
+        flex: 1 0 100%;
+        max-width: 100%;
     }
+}
 
-    .list-group-item-heading {
-        margin-left: 60px;
-        margin-top: 9px;
-        margin-bottom: 3px;
-        font-size: 14px;
-        font-weight: bold;
-
-        &.dual{
-            line-height: 2;
-        }
+.resource-card {
+    cursor: pointer;
+    margin-bottom: 15px;
+    .card-body {
+        min-height: auto;
     }
-
-    .list-group-item-link {
-        float: right;
-        margin-top: 5px;
-        margin-right: 5px;
-    }
-
-    .format-label {
-        width: 52px;
-        height: 52px;
-        background-color: #f9f9f9;
-        margin: 0px;
-
-        span {
-            line-height: 52px;
-            text-align: center;
-            font-weight: bold;
-            text-transform: uppercase;
-            display: block;
-        }
-    }
-
-    .resource-frame {
-        margin-top: 10px;
+    footer {
+        // to display resource-card-actions and card-footer side by side
+        display: flex;
         width: 100%;
-        height: 600px;
-        border: 1px solid @panel-inner-border;
-    }
-
-    .popover {
-        width: 70%;
-        max-width: 70%;
-    }
-
-    .tools {
-        position: absolute;
-        right: 5px;
-        bottom: 5px;
-
-        .btn-default {
-            background: fadeout(white, 50%) !important;
+        margin-top: 10px;
+        .resource-card-actions {
+            // align right
+            margin-left: auto;
+            // avoid wrap
+            display: flex;
+        }
+        .card-footer {
+            flex: 1 1 auto;
+            // vertical align with action buttons
+            align-self: center;
+            margin-top: initial;
+            padding: 0;
         }
     }
-
-    .resource-type {
-        margin-top: 15px;
-    }
-
-    .expander > .btn {
-        font-size: 12px;
-    }
-
 }
