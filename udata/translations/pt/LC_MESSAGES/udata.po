@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-02-26 10:54+0100\n"
-"PO-Revision-Date: 2018-03-19 14:01-0400\n"
+"PO-Revision-Date: 2018-03-20 15:01-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1190,7 +1190,7 @@ msgstr "Autenticação"
 
 #: udata/templates/apidoc.html:35
 msgid "In order to be able to execute write operations,"
-msgstr "De forma a ser capaz de executar as operações de escrita,"
+msgstr "Para que seja possível executar as operações de escrita,"
 
 #: udata/templates/apidoc.html:37
 #, python-format
