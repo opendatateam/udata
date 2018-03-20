@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.3 (2018-03-20)
 
 - Fixes on upload: prevent double upload and bad chunks upload [#1516](https://github.com/opendatateam/udata/pull/1516)
 - Ensure OAuth2 tokens can be saved without `refresh_token` [#1517](https://github.com/opendatateam/udata/pull/1517)
