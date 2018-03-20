@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.2 (2018-03-20)
 
 - Support request-body credential in OAuth2 (Fix a regression introduced in 1.3.0) [#1511](https://github.com/opendatateam/udata/pull/1511)
 
