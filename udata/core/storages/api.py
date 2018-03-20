@@ -83,7 +83,17 @@ def chunk_filename(uuid, part):
     return os.path.join(str(uuid), str(part))
 
 
+def get_file_size(file):
+    file.seek(0, os.SEEK_END)
+    size = file.tell()
+    file.seek(0)
+    return size
+
+
 def save_chunk(file, args):
+    # Check file size
+    if get_file_size(file) != args['chunksize']:
+        raise UploadProgress(ok=False, error='Chunk size mismatch')
     filename = chunk_filename(args['uuid'], args['partindex'])
     chunks.save(file, filename=filename)
     meta_filename = chunk_filename(args['uuid'], META)
@@ -93,6 +103,7 @@ def save_chunk(file, args):
         'totalparts': args['totalparts'],
         'lastchunk': datetime.now(),
     }), overwrite=True)
+    raise UploadProgress()
 
 
 def combine_chunks(storage, args, prefix=None):
@@ -123,7 +134,6 @@ def handle_upload(storage, prefix=None):
     if is_chunk:
         if uploaded_file:
             save_chunk(uploaded_file, args)
-            raise UploadProgress()
         else:
             filename = combine_chunks(storage, args, prefix=prefix)
     elif not uploaded_file:

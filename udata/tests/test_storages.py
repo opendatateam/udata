@@ -155,6 +155,33 @@ class StorageUploadViewTest:
         assert storages.tmp.read(response.json['filename']) == 'aaaa'
         assert list(storages.chunks.list_files()) == []
 
+    def test_chunked_upload_bad_chunk(self, client):
+        client.login()
+        url = url_for('storage.upload', name='tmp')
+        uuid = str(uuid4())
+        parts = 4
+
+        response = client.post(url, {
+            'file': (StringIO(b'a'), 'blob'),
+            'uuid': uuid,
+            'filename': 'test.txt',
+            'partindex': 0,
+            'partbyteoffset': 0,
+            'totalfilesize': parts,
+            'totalparts': parts,
+            'chunksize': 10,  # Does not match
+        })
+
+        assert400(response)
+        assert not response.json['success']
+        assert 'filename' not in response.json
+        assert 'url' not in response.json
+        assert 'size' not in response.json
+        assert 'sha1' not in response.json
+        assert 'url' not in response.json
+
+        assert list(storages.chunks.list_files()) == []
+
     def test_upload_resource_bad_request(self, client):
         client.login()
         response = client.post(
