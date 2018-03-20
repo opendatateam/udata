@@ -50,6 +50,15 @@ export default {
         };
     },
     ready() {
+        this.$dnd = new qq.DragAndDrop({
+            dropZoneElements: [this.$el],
+            classes: {
+                dropActive: this.$options.dropActive || 'drop-active'
+            },
+            callbacks: {
+                processingDroppedFilesComplete: this.on_dropped_files_complete
+            }
+        });
         this._build_uploader();
     },
 
@@ -122,16 +131,6 @@ export default {
                 },
                 messages: messages,
                 validation: {allowedExtensions: allowedExtensions.items}
-            });
-
-            this.$dnd = new qq.DragAndDrop({
-                dropZoneElements: [this.$el],
-                classes: {
-                    dropActive: this.$options.dropActive || 'drop-active'
-                },
-                callbacks: {
-                    processingDroppedFilesComplete: this.on_dropped_files_complete
-                }
             });
         },
 
