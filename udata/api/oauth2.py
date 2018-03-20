@@ -164,7 +164,7 @@ class OAuth2Token(db.Document):
     token_type = db.StringField(choices=TOKEN_TYPES.keys(), default='Bearer')
 
     access_token = db.StringField(unique=True)
-    refresh_token = db.StringField(unique=True)
+    refresh_token = db.StringField(unique=True, sparse=True)
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     expires_in = db.IntField(required=True, default=TOKEN_EXPIRATION)
     scopes = db.ListField(db.StringField())

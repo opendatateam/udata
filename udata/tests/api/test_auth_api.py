@@ -230,6 +230,32 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
+    def test_authorization_multiple_grant_token(self, client, oauth):
+
+        for i in range(3):
+            client.login()
+            response = client.post(url_for(
+                'oauth.authorize',
+                response_type='code',
+                client_id=oauth.client_id,
+            ), {
+                'scope': 'default',
+                'accept': '',
+            })
+
+            uri, params = response.location.split('?')
+            code = parse_qs(params)['code'][0]
+
+            client.logout()
+            response = client.post(url_for('oauth.token'), {
+                'grant_type': 'authorization_code',
+                'code': code,
+            }, headers=basic_header(oauth))
+
+            assert200(response)
+            assert response.content_type == 'application/json'
+            assert 'access_token' in response.json
+
     def test_authorization_grant_token_body_credentials(self, client, oauth):
         client.login()
 

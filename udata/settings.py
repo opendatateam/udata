@@ -100,8 +100,6 @@ class Defaults(object):
     # Flask WTF settings
     CSRF_SESSION_KEY = 'Default uData csrf key'
 
-    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * HOUR  # 30 days
-
     AUTO_INDEX = True
 
     SITE_ID = 'default'
@@ -120,6 +118,7 @@ class Defaults(object):
     # OAuth 2 settings
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth.oauth_error'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
+    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * HOUR  # 30 days
 
     MD_ALLOWED_TAGS = [
         'a',
