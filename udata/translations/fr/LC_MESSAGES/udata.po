@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-03-21 06:51-0400\n"
+"PO-Revision-Date: 2018-03-21 10:01-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -2568,11 +2568,11 @@ msgstr "En particulier, je comprends que ce site\n"
 
 #: udata/templates/security/send_confirmation.html:12
 msgid "Resend confirmation instructions"
-msgstr ""
+msgstr "Renvoyer les instructions de confirmation"
 
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
-msgstr ""
+msgstr "Soumettre"
 
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
