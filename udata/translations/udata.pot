@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 1.3.0.dev0\n"
+"Project-Id-Version: udata 1.3.4.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-02-26 10:54+0100\n"
-"PO-Revision-Date: 2018-02-26 10:54+0100\n"
+"POT-Creation-Date: 2018-03-21 10:36+0100\n"
+"PO-Revision-Date: 2018-03-21 10:36+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -17,29 +17,29 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.0\n"
+"Generated-By: Babel 2.5.3\n"
 
-#: udata/settings.py:110
+#: udata/settings.py:92
 msgid "Welcome"
 msgstr ""
 
-#: udata/settings.py:111
+#: udata/settings.py:93
 msgid "Please confirm your email"
 msgstr ""
 
-#: udata/settings.py:112
+#: udata/settings.py:94
 msgid "Login instructions"
 msgstr ""
 
-#: udata/settings.py:113
+#: udata/settings.py:95
 msgid "Your password has been reset"
 msgstr ""
 
-#: udata/settings.py:114
+#: udata/settings.py:96
 msgid "Your password has been changed"
 msgstr ""
 
-#: udata/settings.py:116
+#: udata/settings.py:98
 msgid "Password reset instructions"
 msgstr ""
 
@@ -49,15 +49,15 @@ msgid ""
 "of the error and we will fix it as soon as possible."
 msgstr ""
 
-#: udata/api/oauth2.py:53
+#: udata/api/oauth2.py:54
 msgid "Bearer Token"
 msgstr ""
 
-#: udata/api/oauth2.py:57
+#: udata/api/oauth2.py:58
 msgid "Default scope"
 msgstr ""
 
-#: udata/api/oauth2.py:58
+#: udata/api/oauth2.py:59
 msgid "System administrator rights"
 msgstr ""
 
@@ -475,7 +475,7 @@ msgstr ""
 msgid "A discussion has been closed"
 msgstr ""
 
-#: udata/core/followers/metrics.py:29 udata/core/site/metrics.py:102
+#: udata/core/followers/metrics.py:29 udata/core/site/metrics.py:104
 #: udata/templates/dataset/followers.html:6
 #: udata/templates/dataset/search-labels.html:28
 #: udata/templates/dataset/search-panel.html:19
@@ -816,14 +816,14 @@ msgstr ""
 msgid "Resources"
 msgstr ""
 
-#: udata/core/site/metrics.py:82 udata/core/site/views.py:155
+#: udata/core/site/metrics.py:84 udata/core/site/views.py:155
 #: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:8
 #: udata/templates/user/list.html:18
 msgid "Users"
 msgstr ""
 
-#: udata/core/site/metrics.py:92 udata/core/site/views.py:149
+#: udata/core/site/metrics.py:94 udata/core/site/views.py:149
 #: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:47
 #: udata/templates/organization/display_base.html:8
 #: udata/templates/organization/followers.html:5
@@ -836,31 +836,31 @@ msgstr ""
 msgid "Organizations"
 msgstr ""
 
-#: udata/core/site/metrics.py:112
+#: udata/core/site/metrics.py:114
 msgid "Maximum dataset followers"
 msgstr ""
 
-#: udata/core/site/metrics.py:125
+#: udata/core/site/metrics.py:127
 msgid "Maximum dataset reuses"
 msgstr ""
 
-#: udata/core/site/metrics.py:138
+#: udata/core/site/metrics.py:140
 msgid "Maximum datasets in reuses"
 msgstr ""
 
-#: udata/core/site/metrics.py:151
+#: udata/core/site/metrics.py:153
 msgid "Maximum reuse followers"
 msgstr ""
 
-#: udata/core/site/metrics.py:164
+#: udata/core/site/metrics.py:166
 msgid "Maximum organization followers"
 msgstr ""
 
-#: udata/core/site/metrics.py:178
+#: udata/core/site/metrics.py:180
 msgid "Maximum organization reuses"
 msgstr ""
 
-#: udata/core/site/metrics.py:192
+#: udata/core/site/metrics.py:194
 msgid "Maximum organization datasets"
 msgstr ""
 
@@ -1105,7 +1105,7 @@ msgstr ""
 msgid "%(start)s to %(end)s"
 msgstr ""
 
-#: udata/frontend/markdown.py:31
+#: udata/frontend/markdown.py:30
 msgid "Source"
 msgstr ""
 
@@ -1449,6 +1449,10 @@ msgstr ""
 msgid "Reference"
 msgstr ""
 
+#: udata/templates/carousel.html:4
+msgid "Best reuse cases"
+msgstr ""
+
 #: udata/templates/embed-dataset.html:169
 msgid "Download from "
 msgstr ""
@@ -1516,7 +1520,7 @@ msgid "Settings"
 msgstr ""
 
 #: udata/templates/header.html:68 udata/templates/header.html:71
-#: udata/templates/territories/territory.html:41
+#: udata/templates/territories/territory.html:35
 msgid "Sign In / Register"
 msgstr ""
 
@@ -1535,7 +1539,7 @@ msgstr ""
 msgid "home"
 msgstr ""
 
-#: udata/templates/home.html:53 udata/templates/topic/display.html:84
+#: udata/templates/home.html:53 udata/templates/topic/display.html:47
 msgid "Featured datasets"
 msgstr ""
 
@@ -1698,7 +1702,6 @@ msgstr ""
 
 #: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:133
 #: udata/templates/dataset/resource/list-item.html:36
-#: udata/templates/dataset/reuse-card.html:32
 #: udata/templates/organization/display.html:28
 #: udata/templates/organization/followers.html:15
 #: udata/templates/post/display.html:118 udata/templates/reuse/display.html:109
@@ -1924,10 +1927,6 @@ msgstr ""
 #: udata/templates/user/list.html:19
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
-msgstr ""
-
-#: udata/templates/dataset/reuse-card.html:28
-msgid "Open in a new window"
 msgstr ""
 
 #: udata/templates/dataset/search-labels.html:3
@@ -2655,6 +2654,14 @@ msgid ""
 "after the quality of the content it produces."
 msgstr ""
 
+#: udata/templates/security/send_confirmation.html:12
+msgid "Resend confirmation instructions"
+msgstr ""
+
+#: udata/templates/security/send_confirmation.html:18
+msgid "Submit"
+msgstr ""
+
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
 msgstr ""
@@ -2792,34 +2799,22 @@ msgstr ""
 msgid "since"
 msgstr ""
 
-#: udata/templates/territories/territory.html:33
-msgid "Some of your datasets have an exact match!"
-msgstr ""
-
-#: udata/templates/territories/territory.html:35
-msgid "Claim that territory"
-msgstr ""
-
-#: udata/templates/territories/territory.html:35
-msgid "and your datasets will appear first."
-msgstr ""
-
-#: udata/templates/territories/territory.html:37
+#: udata/templates/territories/territory.html:32
 #, python-format
 msgid ""
 "If you want your datasets to appear in that list, the geographical zone "
 "associated must be the exact same one of that territory (%(code)s)."
 msgstr ""
 
-#: udata/templates/territories/territory.html:40
+#: udata/templates/territories/territory.html:34
 msgid "You want to add your own datasets to that list?"
 msgstr ""
 
-#: udata/templates/territories/territory.html:43
+#: udata/templates/territories/territory.html:37
 msgid "Log in"
 msgstr ""
 
-#: udata/templates/territories/territory.html:44
+#: udata/templates/territories/territory.html:38
 msgid "and create resources for that territory."
 msgstr ""
 
@@ -2842,19 +2837,15 @@ msgstr ""
 msgid "Topics"
 msgstr ""
 
-#: udata/templates/topic/display.html:17
-msgid "Best reuse cases"
-msgstr ""
-
-#: udata/templates/topic/display.html:66
+#: udata/templates/topic/display.html:29
 msgid "Latest reuses"
 msgstr ""
 
-#: udata/templates/topic/display.html:85
+#: udata/templates/topic/display.html:48
 msgid "Latest datasets"
 msgstr ""
 
-#: udata/templates/topic/display.html:121
+#: udata/templates/topic/display.html:84
 msgid "See more"
 msgstr ""
 

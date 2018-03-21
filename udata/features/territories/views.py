@@ -130,7 +130,6 @@ def render_territory(territory):
     # Retrieving datasets from old regions.
     territory_datasets = []
     other_datasets = []
-    editable_datasets = []
     if datasets:
         for dataset in datasets:
             if (dataset.organization and
@@ -138,14 +137,11 @@ def render_territory(territory):
                 territory_datasets.append(dataset)
             else:
                 other_datasets.append(dataset)
-            editable_datasets.append(current_user.is_authenticated and
-                                     DatasetEditPermission(dataset).can())
     context = {
         'territory': territory,
         'present_territory': present_territory,
         'base_datasets': base_datasets,
         'other_datasets': other_datasets,
-        'has_pertinent_datasets': any(editable_datasets),
         'territory_datasets': territory_datasets
     }
     template = 'territories/{level_name}.html'.format(

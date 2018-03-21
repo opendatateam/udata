@@ -29,13 +29,7 @@
             <div class="format-label pull-left">+</div>
             <p>
                 {% if current_user.is_authenticated %}
-                    {% if has_pertinent_datasets %}
-                        {{ _('Some of your datasets have an exact match!') }}<br/>
-                        <a href="m&#x61;ilto:{{ config.TERRITORIES_EMAIL|obfuscate|safe }}">
-                            {{ _('Claim that territory') }}</a> {{ _('and your datasets will appear first.') }}
-                    {% else %}
-                        {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s).', code=territory.code) }}
-                    {% endif %}
+                    {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s).', code=territory.code) }}
                 {% else %}
                     {{ _('You want to add your own datasets to that list?') }}<br/>
                     <a title="{{ _('Sign In / Register') }}"

@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove territory claim banner [#1521](https://github.com/opendatateam/udata/pull/1521)
 
 ## 1.3.3 (2018-03-20)
 
