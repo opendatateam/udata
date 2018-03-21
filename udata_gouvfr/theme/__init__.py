@@ -164,7 +164,7 @@ def get_discourse_posts():
     # Parse topics
     topics = []
     topic_pattern = '{url}/t/{slug}/{id}'
-    for topic in data['topic_list']['topics']:
+    for topic in data['topic_list']['topics'][:limit]:
         last_posted = topic['last_posted_at']
         last_posted = parse(last_posted) if last_posted else None
         topics.append({
