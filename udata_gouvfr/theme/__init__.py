@@ -140,14 +140,13 @@ def get_discourse_posts():
         categories[category['id']] = category['name']
 
     # Fetch last topic from selected category (if any)
-    pattern = '{url}/l/{listing}.json?limit={limit}'
+    pattern = '{url}/l/{listing}.json'
     if category_id:
-        pattern = '{url}/c/{category}/l/{listing}.json?limit={limit}'
+        pattern = '{url}/c/{category}/l/{listing}.json'
         # return topics
     url = pattern.format(url=base_url,
                          category=category_id,
-                         listing=listing,
-                         limit=limit)
+                         listing=listing)
     data = _discourse_request(url)
     if not data:
         return
