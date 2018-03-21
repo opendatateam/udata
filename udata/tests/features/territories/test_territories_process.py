@@ -66,7 +66,6 @@ class TerritoriesTest(FrontTestCase):
         self.assertIn(self.arles.name, data)
         base_datasets = self.get_context_variable('base_datasets')
         self.assertEqual(len(base_datasets), 0)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertIn('You want to add your own datasets to that list?', data)
@@ -80,7 +79,6 @@ class TerritoriesTest(FrontTestCase):
         self.assertIn(self.bdr.name, data)
         base_datasets = self.get_context_variable('base_datasets')
         self.assertEqual(len(base_datasets), 0)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertIn('You want to add your own datasets to that list?', data)
@@ -93,7 +91,6 @@ class TerritoriesTest(FrontTestCase):
         self.assertIn(self.paca.name, data)
         base_datasets = self.get_context_variable('base_datasets')
         self.assertEqual(len(base_datasets), 0)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertIn('You want to add your own datasets to that list?', data)
@@ -118,7 +115,6 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertIn('You want to add your own datasets to that list?', data)
 
@@ -142,7 +138,6 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertIn('You want to add your own datasets to that list?', data)
 
@@ -166,7 +161,6 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertIn('You want to add your own datasets to that list?', data)
 
@@ -185,7 +179,6 @@ class TerritoriesTest(FrontTestCase):
         self.assertEqual(len(base_datasets), 0)
         other_datasets = self.get_context_variable('other_datasets')
         self.assertEqual(len(other_datasets), 3)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertIn('If you want your datasets to appear in that list', data)
 
@@ -204,7 +197,6 @@ class TerritoriesTest(FrontTestCase):
         self.assertEqual(len(base_datasets), 0)
         other_datasets = self.get_context_variable('other_datasets')
         self.assertEqual(len(other_datasets), 3)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertIn('If you want your datasets to appear in that list', data)
 
@@ -223,7 +215,6 @@ class TerritoriesTest(FrontTestCase):
         self.assertEqual(len(base_datasets), 0)
         other_datasets = self.get_context_variable('other_datasets')
         self.assertEqual(len(other_datasets), 3)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
         self.assertIn('If you want your datasets to appear in that list', data)
 
@@ -249,9 +240,8 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertTrue(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
-        self.assertIn('Some of your datasets have an exact match!', data)
+        self.assertIn('If you want your datasets to appear in that list', data)
 
     def test_counties_with_other_datasets_and_pertinent_ones(self):
         user = self.login()
@@ -275,9 +265,8 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertTrue(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
-        self.assertIn('Some of your datasets have an exact match!', data)
+        self.assertIn('If you want your datasets to appear in that list', data)
 
     def test_regions_with_other_datasets_and_pertinent_ones(self):
         user = self.login()
@@ -301,9 +290,7 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertTrue(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('territory_datasets'), [])
-        self.assertIn('Some of your datasets have an exact match!', data)
 
     def test_with_town_datasets(self):
         with self.autoindex():
@@ -325,7 +312,6 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertNotIn('dataset-item--cta', data)
 
@@ -349,7 +335,6 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertNotIn('dataset-item--cta', data)
 
@@ -373,7 +358,6 @@ class TerritoriesTest(FrontTestCase):
                 '<div data-udata-dataset-id="{dataset.id}"'.format(
                     dataset=dataset),
                 data)
-        self.assertFalse(self.get_context_variable('has_pertinent_datasets'))
         self.assertEqual(self.get_context_variable('other_datasets'), [])
         self.assertNotIn('dataset-item--cta', data)
 
