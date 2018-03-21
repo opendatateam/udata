@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-03-21 10:41-0400\n"
+"PO-Revision-Date: 2018-03-21 13:01-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1203,7 +1203,7 @@ msgstr "Chave da API"
 
 #: udata/templates/apidoc.html:44
 msgid "you first need to authenticate and obtain an API Key in your profile settings."
-msgstr "primeiro precisa de se autenticar e obter uma chave de API nas configurações do seu perfil."
+msgstr "precisa primeiro de se autenticar e obter uma chave de API nas configurações do seu perfil."
 
 #: udata/templates/apidoc.html:47
 msgid "This key should be provided on each call in the <code>X-API-KEY</code> HTTP header."
@@ -1215,7 +1215,7 @@ msgstr "Autorizações"
 
 #: udata/templates/apidoc.html:57
 msgid "API calls are subject to the same permissions than the web interface."
-msgstr "As chamadas de API estão sujeitas às mesmas permissões que a interface web."
+msgstr "As chamadas à API estão sujeitas às mesmas permissões que a interface web."
 
 #: udata/templates/apidoc.html:58
 msgid "By example, you need to be part of the organization to modify one of its datasets."
@@ -1237,7 +1237,7 @@ msgid "You don't have to compute yourself the previous and next pages\n"
 "                because the URLs are available in the response under the\n"
 "                <code>previous_page</code> and <code>next_page</code> attributes.\n"
 "                They will be set to <code>null</code> if there is no previous and/or next page."
-msgstr "Não é necessário calcular as páginas anteriores e próximas porque as URLs estão disponíveis na resposta sob os atributos <code>previous_page</code> e <code>next_page</code>.                 Eles serão definidos como <code>null</code> se não existir nenhuma página anterior ou seguinte."
+msgstr "Não é necessário calcular as páginas anterior e seguinte porque as URLs estão disponíveis na resposta sob os atributos <code>previous_page</code> e <code>next_page</code>.                 Estes serão definidos como <code>null</code> se não existir nenhuma página anterior ou seguinte."
 
 #: udata/templates/apidoc.html:77
 msgid "Example"
@@ -1259,7 +1259,7 @@ msgstr "Verificar que o httpie está a funcionar"
 #: udata/templates/apidoc.html:99
 msgid "Once httpie is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
-msgstr "Quando o httpie estiver instalado, você pode verificar que ele funciona conforme o esperado, digitando este comando na shell:                "
+msgstr "Quando o httpie estiver instalado, pode verificar que ele funciona conforme o esperado, digitando este comando na shell:                "
 
 #: udata/templates/apidoc.html:104 udata/templates/apidoc.html:143
 msgid "It should return something in this vein:\n"
@@ -1278,7 +1278,7 @@ msgstr "Verificando que o jq está a funcionar"
 #: udata/templates/apidoc.html:138
 msgid "Once jq is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
-msgstr "Uma vez que jq está instalado, pode verificar que ele funciona consoante o esperado, digitando este comando na shell:                "
+msgstr "Assim que o jq estiver instalado, pode verificar que ele funciona como esperado, digitando este comando na shell:                "
 
 #: udata/templates/apidoc.html:148
 msgid "That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:\n"
@@ -1307,7 +1307,7 @@ msgstr "Você pode selecionar uma lista de organizações (filtrada ou não) ou 
 #: udata/templates/apidoc.html:192
 msgid "That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:\n"
 "                "
-msgstr "Esta lista é ótima, mas e se nós quisermos verificar as organizações retornadas? Vamos buscar as 5 primeiras URIs de organizações:                "
+msgstr "Este é um bom exemplo de uma listagem, mas e se quisermos percorrer as organizações retornadas? Vamos recolher apenas as 5 primeiras URIs de organizações:                "
 
 #: udata/templates/apidoc.html:205
 msgid "Now we'll be able to retrieve a unique organization thanks to the returned URI:\n"
@@ -1317,7 +1317,7 @@ msgstr "Agora vamos conseguir recolher uma única organização graças ao URI r
 #: udata/templates/apidoc.html:210
 msgid "That's a lot of data to compute. Let's refine these data, if we want only metrics:\n"
 "                "
-msgstr "Isto é uma grande quantidade de dados para calcular. Vamos refinar estes dados, se queremos apenas métricas:                "
+msgstr "É uma grande quantidade de dados para calcular. Vamos refinar estes dados, se apenas necessitarmos de métricas:                "
 
 #: udata/templates/apidoc.html:232
 msgid "Or maybe just the name of the members of that organization:\n"
@@ -1327,7 +1327,7 @@ msgstr "Ou talvez apenas o nome dos membros dessa organização:                
 #: udata/templates/apidoc.html:256
 msgid "It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href=\"http://stedolan.github.io/jq/tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/\">manual</a> if you want to browse the API through the command-line in depth.\n"
 "                "
-msgstr "Depende de si a obtenção de dados que interessam ao seu projeto. Não hesite em percorrer o <a href=\"http://stedolan.github.io/jq/tutorial/\"> tutorial do jq </a> e <a href = \"http://stedolan.github.io/ jq / manual / \"> manual </a> se quiser navegar pela API através da linha de comando em profundidade.                "
+msgstr "Depende de si a obtenção de dados que interessem ao seu projeto. Não hesite em percorrer o <a href=\"http://stedolan.github.io/jq/tutorial/\"> tutorial do jq </a> e o <a href = \"http://stedolan.github.io/ jq / manual / \"> manual </a> se quiser navegar pela API através da linha de comandos em profundidade.                "
 
 #: udata/templates/apidoc.html:260
 msgid "Modifying and deleting data"
@@ -1336,7 +1336,7 @@ msgstr "Modificando e apagando dados"
 #: udata/templates/apidoc.html:262
 msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
 "                "
-msgstr "Atenção, você está a entrar numa zona de perigo. As modificações ou eliminações de dados com a API são definitivas e não disponibilizamos nenhum ambiente para testar a execução anterior (por enquanto). Esteja ciente destas responsabilidades, antes de usar os seus grandes poderes.                "
+msgstr "Atenção, esta é uma área perigosa. A modificação ou eliminação de dados com a API é definitiva e não é disponibilizado nenhum ambiente de testes (por enquanto). Esteja ciente destas responsabilidades antes de utilizar os seus grandes poderes.                "
 
 #: udata/templates/apidoc.html:265
 msgid "If you try to modify a resource without an authentication token, a 401 will be returned:\n"
@@ -1346,27 +1346,27 @@ msgstr "Se tentar modificar um recurso sem um token de autenticação, será dev
 #: udata/templates/apidoc.html:280
 msgid "You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:\n"
 "                "
-msgstr "É necessário a especificar sua chave de API (veja acima) e utilizar o cabeçalho HTTP <code> X-API-KEY</code>. Se tentar modificar um recurso sem permissão, será devolvido um erro 400:                "
+msgstr "É necessário a especificar a sua chave de API (veja acima) e utilizar o cabeçalho HTTP <code> X-API-KEY</code>. Se tentar modificar um recurso sem permissão, será devolvido um erro 400:                "
 
 #: udata/templates/apidoc.html:295
 msgid "This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:\n"
 "                "
-msgstr "Esta é a mensagem que receberá se especificou a chave de API errada. Existe outra mensagem de erro potencial que também pode encontrar:                "
+msgstr "Esta é a mensagem que receberá se especificou uma chave de API errada. Existe outra mensagem de erro que também poderá encontrar:                "
 
 #: udata/templates/apidoc.html:308
 msgid "It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:\n"
 "                "
-msgstr "Ocorre se tentar aceder um recurso que não pode editar com as suas credenciais. Se a sua chave for válida, deverá aparecer algo parecido com isto:                "
+msgstr "Esta mensagem ocorre se tentar aceder a um recurso que não pode editar com as suas credenciais. Se a sua chave for válida, deverá receber algo parecido com isto:                "
 
 #: udata/templates/apidoc.html:321
 msgid "But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.\n"
 "                "
-msgstr "Mas nada está diferente! É perfeitamente normal, não nos lembrámos de especificar os dados corretos para enviar para o servidor.                "
+msgstr "Mas não alterou nada! É perfeitamente normal, não especificámos os dados corretos a enviar para o servidor.                "
 
 #: udata/templates/apidoc.html:333
 msgid "The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):\n"
 "                "
-msgstr "O recurso foi modificado com valores novos. Já pode pode apagar um recurso com o verbo HTTP apropriado (atenção, não é possível reverter algo através da API neste momento):                "
+msgstr "O recurso foi modificado com sucesso. Finalmente, pode apagar um recurso com o pedido HTTP apropriado (atenção que não é possível reverter algo feito através da API neste momento):                "
 
 #: udata/templates/apidoc.html:345
 msgid "Once you did it, you can verify that it's effective issuing a GET against the previous URI:\n"
@@ -1393,7 +1393,7 @@ msgstr "Descarregar de "
 #: udata/templates/dataset/display.html:174 udata/templates/embed-dataset.html:177
 #: udata/templates/reuse/display.html:131
 msgid "Producer"
-msgstr "Produtor"
+msgstr "Fornecedor"
 
 #: udata/templates/embed-dataset.html:183
 msgid "Uploader"
@@ -1766,7 +1766,7 @@ msgstr "Adicionar recurso"
 #: udata/templates/organization/sidebar-producer.html:20
 #: udata/templates/reuse/display.html:102
 msgid "Contact the producer"
-msgstr "Contactar o produtor"
+msgstr "Contactar o fornecedor"
 
 #: udata/templates/dataset/display.html:185 udata/templates/reuse/display.html:176
 msgid "Informations"
@@ -2562,11 +2562,11 @@ msgstr "Aceito igualmente que este site valoriza a produção e o enriquecimento
 
 #: udata/templates/security/send_confirmation.html:12
 msgid "Resend confirmation instructions"
-msgstr ""
+msgstr "Reenviar instruções de confirmação"
 
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
-msgstr ""
+msgstr "Submeter"
 
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
