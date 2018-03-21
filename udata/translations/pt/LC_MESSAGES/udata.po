@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-03-21 09:23-0400\n"
+"PO-Revision-Date: 2018-03-21 10:41-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1273,7 +1273,7 @@ msgstr "Este resultado é muito detalhado e não precisamos de tanta informaçã
 
 #: udata/templates/apidoc.html:136
 msgid "Verifying that jq is working"
-msgstr "Verificar que o jq está a funcionar"
+msgstr "Verificando que o jq está a funcionar"
 
 #: udata/templates/apidoc.html:138
 msgid "Once jq is installed, you can verify that it works as expected by typing that command in your shell:\n"
