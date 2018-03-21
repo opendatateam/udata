@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-03-21 10:41-0400\n"
+"PO-Revision-Date: 2018-03-21 12:32-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1393,7 +1393,7 @@ msgstr "Descarregar de "
 #: udata/templates/dataset/display.html:174 udata/templates/embed-dataset.html:177
 #: udata/templates/reuse/display.html:131
 msgid "Producer"
-msgstr "Produtor"
+msgstr "Fornecedor"
 
 #: udata/templates/embed-dataset.html:183
 msgid "Uploader"
@@ -1766,7 +1766,7 @@ msgstr "Adicionar recurso"
 #: udata/templates/organization/sidebar-producer.html:20
 #: udata/templates/reuse/display.html:102
 msgid "Contact the producer"
-msgstr "Contactar o produtor"
+msgstr "Contactar o fornecedor"
 
 #: udata/templates/dataset/display.html:185 udata/templates/reuse/display.html:176
 msgid "Informations"
@@ -2562,11 +2562,11 @@ msgstr "Aceito igualmente que este site valoriza a produção e o enriquecimento
 
 #: udata/templates/security/send_confirmation.html:12
 msgid "Resend confirmation instructions"
-msgstr ""
+msgstr "Reenviar instruções de confirmação"
 
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
-msgstr ""
+msgstr "Submeter"
 
 #: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
