@@ -4,7 +4,7 @@
     {% if dataset.organization %}
         <div class="card-logo">
             <img alt="{{ dataset.organization.name }}"
-                src="{{ dataset.organization.logo(70)|placeholder('organization', external=True) }}"
+                src="{{ dataset.organization.logo(70, external=True)|placeholder('organization', external=True) }}"
                 width="70" height="70">
         </div>
         {{ badge_if_certified(dataset.organization) }}

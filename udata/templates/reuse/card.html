@@ -1,17 +1,17 @@
 {% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
 {% set features = features or [] %}
 <a class="card reuse-card {% if 'preview' in features %}card--with-cover{% endif %}"
-    href="{{ url_for('reuses.show', reuse=reuse) }}"
+    href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}"
     title="{{ reuse.title }}">
     {% if 'preview' in features %}
     <div class="card-cover">
         <img class="media-object img-responsive" alt="{{ reuse.title }}"
-            src="{{ reuse.image|placeholder('reuse') }}">
+            src="{{ reuse.image|placeholder('reuse', external=True) }}">
     </div>
     {% else %}
     <div class="card-logo">
         <img alt="{{ reuse.title }}"
-            src="{{ reuse.image(86)|placeholder('reuse') }}"
+            src="{{ reuse.image(86, external=True)|placeholder('reuse', external=True) }}"
             width="86" height="86">
     </div>
     {% endif %}

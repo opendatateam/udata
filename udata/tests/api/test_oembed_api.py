@@ -8,6 +8,7 @@ from flask import url_for
 
 from udata import theme
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
@@ -21,7 +22,7 @@ from udata.tests.helpers import assert200, assert400, assert404, assert_status
 
 
 class OEmbedAPITest:
-    modules = ['core.organization', 'core.dataset']
+    modules = ['core.dataset', 'core.reuse']
 
     def test_oembed_for_dataset(self, api):
         '''It should fetch a dataset in the oembed format.'''
@@ -59,6 +60,23 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url=dataset_url)
         response = api.get(url)
         assert404(response)
+
+    def test_oembed_for_reuse(self, api):
+        '''It should fetch a reuse in the oembed format.'''
+        reuse = ReuseFactory()
+
+        url = url_for('api.oembed', url=reuse.external_url)
+        response = api.get(url)
+        assert200(response)
+        assert 'html' in response.json
+        assert 'width' in response.json
+        assert 'maxwidth' in response.json
+        assert 'height' in response.json
+        assert 'maxheight' in response.json
+        assert response.json['type'] == 'rich'
+        assert response.json['version'] == '1.0'
+        card = theme.render('reuse/card.html', reuse=reuse)
+        assert card in response.json['html']
 
     def test_oembed_without_url(self, api):
         '''It should fail at fetching an oembed without a dataset.'''

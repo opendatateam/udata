@@ -36,6 +36,7 @@ oembeds_parser.add_argument(
 class OEmbedAPI(API):
     ROUTES = {
         'datasets.show': 'dataset',
+        'reuses.show': 'reuse',
     }
 
     @api.doc('oembed', parser=oembeds_parser)
