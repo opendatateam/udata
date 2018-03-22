@@ -14,7 +14,7 @@ from flask_restplus import Api, Resource, inputs, cors
 
 from udata import search, theme, tracking
 from udata.app import csrf
-from udata.i18n import I18nBlueprint
+from udata.i18n import I18nBlueprint, get_locale
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
@@ -191,6 +191,8 @@ def output_json(data, code, headers=None):
 def set_api_language():
     if 'lang' in request.args:
         g.lang_code = request.args['lang']
+    else:
+        g.lang_code = get_locale()
 
 
 def extract_name_from_path(path):
