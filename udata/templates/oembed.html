@@ -1,1 +1,4 @@
-{% include theme(type + '/oembed.html') with context %}
+<div class="udata-oembed">
+    <link rel="stylesheet" href="{{ static('oembed.css', _external=True) }}" />
+    {% include theme(type + '/oembed.html') with context %}
+</div>
