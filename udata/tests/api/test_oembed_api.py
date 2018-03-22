@@ -6,6 +6,7 @@ import json
 
 from flask import url_for
 
+from udata import theme
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.core.user.factories import UserFactory
@@ -18,6 +19,69 @@ from udata.settings import Testing
 from udata.utils import faker
 
 from . import APITestCase
+
+
+class OEmbedAPITest(APITestCase):
+    modules = ['core.organization', 'core.dataset']
+
+    def test_oembed_for_dataset(self):
+        '''It should fetch a dataset in the oembed format.'''
+        dataset = DatasetFactory()
+
+        url = url_for('api.oembed', url=dataset.external_url)
+        response = self.get(url)
+        self.assert200(response)
+        data = response.json
+        self.assertIn('html', data)
+        self.assertIn('width', data)
+        self.assertIn('maxwidth', data)
+        self.assertIn('height', data)
+        self.assertIn('maxheight', data)
+        self.assertTrue(data['type'], 'rich')
+        self.assertTrue(data['version'], '1.0')
+        card = theme.render('dataset/card.html', dataset=dataset)
+        self.assertIn(card, data['html'])
+
+    def test_oembed_for_dataset_with_organization(self):
+        '''It should fetch a dataset in the oembed format with org.'''
+        organization = OrganizationFactory()
+        dataset = DatasetFactory(organization=organization)
+
+        url = url_for('api.oembed', url=dataset.external_url)
+        response = self.get(url)
+        self.assert200(response)
+
+        card = theme.render('dataset/card.html', dataset=dataset)
+        self.assertIn(card, response.json['html'])
+
+    def test_oembed_for_unknown_dataset(self):
+        '''It should raise a 404 on missing dataset.'''
+        dataset_url = url_for('datasets.show', dataset='unknown', _external=True)
+        url = url_for('api.oembed', url=dataset_url)
+        response = self.get(url)
+        self.assert404(response)
+
+    def test_oembed_without_url(self):
+        '''It should fail at fetching an oembed without a dataset.'''
+        response = self.get(url_for('api.oembed'))
+        self.assert400(response)
+        self.assertIn('url', response.json['errors'])
+
+    def test_oembed_with_an_invalid_url(self):
+        '''It should fail at fetching an oembed with an invalid URL.'''
+        response = self.get(url_for('api.oembed', url='123456789'))
+        self.assert400(response)
+        # self.assertEqual(response.json['message'], 'Invalid URL')
+        self.assertIn('url', response.json['errors'])
+
+    def test_oembed_does_not_support_xml(self):
+        '''It does not support xml format.'''
+        dataset = DatasetFactory()
+        url = url_for('api.oembed', url=dataset.external_url, format='xml')
+        response = self.get(url)
+        self.assertStatus(response, 501)
+        self.assertEqual(response.json['message'],
+                         'Only JSON format is supported')
 
 
 def territory_dataset_factory():
