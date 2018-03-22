@@ -1,17 +1,16 @@
 {% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
-<a class="card dataset-card"  href="{{ url_for('datasets.show', dataset=dataset) }}"
-     href="{{ url_for('datasets.show', dataset=dataset) }}">
+<a class="card dataset-card"  href="{{ url_for('datasets.show', dataset=dataset, _external=True) }}">
     {% if dataset.organization %}
         <div class="card-logo">
             <img alt="{{ dataset.organization.name }}"
-                src="{{ dataset.organization.logo(70)|placeholder('organization') }}"
+                src="{{ dataset.organization.logo(70)|placeholder('organization', external=True) }}"
                 width="70" height="70">
         </div>
         {{ badge_if_certified(dataset.organization) }}
     {% else %}
     <div class="card-logo">
-        <img src="{{ ''|placeholder('organization') }}" alt="">
+        <img src="{{ ''|placeholder('organization', external=True) }}" alt="">
     </div>
     {% endif %}
     <div class="card-body">
