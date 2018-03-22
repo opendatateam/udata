@@ -18,6 +18,9 @@
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('reuses.show', reuse=reuse) }}" />
 <link rel="stylesheet" type="text/css" href="{{ static('reuse.css') }}">
+<link rel="alternate" type="application/json+oembed"
+    href="{{ url_for('api.oembed', url=reuse.external_url) }}"
+    title="{{ reuse.title | urlencode }}" />
 {% endblock %}
 
 {% block breadcrumb %}

@@ -18,6 +18,9 @@
 
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
+<link rel="alternate" type="application/json+oembed"
+    href="{{ url_for('api.oembed', url=dataset.external_url) }}"
+    title="{{ dataset.title | urlencode }}" />
 {% endblock %}
 
 {% block breadcrumb %}
@@ -392,11 +395,11 @@
                         {% include theme('reuse/card.html') %}
                     </div>
                     {% endfor %}
-                
+
                     <div class="col-sm-6">
                          {% include theme('dataset/add-reuse-card.html') %}
 					</div>
- 
+
                 </div>
             </div>
             <div class="col-sm-3 note">
