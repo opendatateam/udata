@@ -140,14 +140,13 @@ def get_discourse_posts():
         categories[category['id']] = category['name']
 
     # Fetch last topic from selected category (if any)
-    pattern = '{url}/l/{listing}.json?limit={limit}'
+    pattern = '{url}/l/{listing}.json'
     if category_id:
-        pattern = '{url}/c/{category}/l/{listing}.json?limit={limit}'
+        pattern = '{url}/c/{category}/l/{listing}.json'
         # return topics
     url = pattern.format(url=base_url,
                          category=category_id,
-                         listing=listing,
-                         limit=limit)
+                         listing=listing)
     data = _discourse_request(url)
     if not data:
         return
@@ -164,7 +163,7 @@ def get_discourse_posts():
     # Parse topics
     topics = []
     topic_pattern = '{url}/t/{slug}/{id}'
-    for topic in data['topic_list']['topics']:
+    for topic in data['topic_list']['topics'][:limit]:
         last_posted = topic['last_posted_at']
         last_posted = parse(last_posted) if last_posted else None
         topics.append({

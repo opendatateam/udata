@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Limit number of forum topics [284](https://github.com/etalab/udata-gouvfr/pull/284)
 
 ## 1.3.1 (2018-03-15)
 
