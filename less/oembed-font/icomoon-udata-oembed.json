@@ -1248,7 +1248,10 @@
         {
           "name": "spinner",
           "id": 244,
-          "order": 0
+          "order": 10,
+          "prevSize": 28,
+          "code": 61712,
+          "tempChar": ""
         },
         {
           "name": "circle",
@@ -1461,7 +1464,7 @@
           "order": 7,
           "prevSize": 28,
           "code": 61760,
-          "tempChar": ""
+          "tempChar": ""
         },
         {
           "name": "ellipsis-h",
@@ -2004,7 +2007,7 @@
           "order": 3,
           "prevSize": 28,
           "code": 61875,
-          "tempChar": ""
+          "tempChar": ""
         },
         {
           "name": "behance",
@@ -24146,6 +24149,5 @@
     "showCodes": true,
     "gridSize": 16
   },
-  "uid": -1,
-  "time": 1521741600363
+  "uid": -1
 }

@@ -69,6 +69,7 @@ function toTitle(txt) {
     // Load cards for supported attributes
     ATTRS.forEach(function(attr) {
         [].forEach.call(document.querySelectorAll(`[data-udata-${attr}]`), function(div) {
+            div.innerHTML = '<span class="fa fa-spin fa-spinner"></span>';
             const id = div.dataset[`udata${toTitle(attr)}`];
             fetchOEmbed(`${BASE_URL}/${LANG}/${attr}s/${id}/`)
                 .then(oembed => {
