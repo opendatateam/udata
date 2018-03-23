@@ -101,6 +101,7 @@ jobs:
             nvm use
             npm run assets:build
             npm run widgets:build
+            npm run oembed:build
 
       - persist_to_workspace:
           root: .
