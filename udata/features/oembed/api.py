@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from flask import current_app, request
+from flask import current_app
 from flask_restplus import inputs
 
 from udata import theme
@@ -42,17 +42,11 @@ class OEmbedAPI(API):
     @api.doc('oembed', parser=oembeds_parser)
     def get(self):
         """
-        The returned payload is a list of OEmbed formatted responses.
+        En OEmbed compliant API endpoint
 
         See: http://oembed.com/
 
-        The `references` are composed by a keyword (`kind`) followed by
-        the `id` each of those separated by commas.
-        E.g:
-        dataset-5369992aa3a729239d205183,
-        territory-fr:departement:33@1860-07-01:emploi_dep
-
-        Only datasets and territories are supported for now.
+        Support datasets and reuses URLs
         """
         args = oembed_parser.parse_args()
         if args['format'] != 'json':
@@ -61,7 +55,7 @@ class OEmbedAPI(API):
         url = args['url']
 
         with current_app.test_request_context(url) as ctx:
-            endpoint = ctx.request.endpoint
+            endpoint = ctx.request.endpoint.replace('_redirect', '')
             view_args = ctx.request.view_args
 
         if endpoint not in self.ROUTES:

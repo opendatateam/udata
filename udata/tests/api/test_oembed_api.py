@@ -53,6 +53,25 @@ class OEmbedAPITest:
         card = theme.render('dataset/card.html', dataset=dataset)
         assert card in response.json['html']
 
+    def test_oembed_for_dataset_redirect_link(self, api):
+        '''It should fetch an oembed dataset using the redirect link.'''
+        dataset = DatasetFactory()
+        redirect_url = url_for('datasets.show_redirect',
+                               dataset=dataset, _external=True)
+
+        url = url_for('api.oembed', url=redirect_url)
+        response = api.get(url)
+        assert200(response)
+        assert 'html' in response.json
+        assert 'width' in response.json
+        assert 'maxwidth' in response.json
+        assert 'height' in response.json
+        assert 'maxheight' in response.json
+        assert response.json['type'] == 'rich'
+        assert response.json['version'] == '1.0'
+        card = theme.render('dataset/card.html', dataset=dataset)
+        assert card in response.json['html']
+
     def test_oembed_for_unknown_dataset(self, api):
         '''It should raise a 404 on missing dataset.'''
         dataset_url = url_for('datasets.show', dataset='unknown',
