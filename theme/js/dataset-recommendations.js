@@ -20,13 +20,10 @@ function addRecos(recos) {
         recoChildContainer.setAttribute('data-content-name', 'dataset recommendations');
         recoChildContainer.setAttribute('data-content-piece', 'reco ' + idx);
         recoChildContainer.setAttribute('data-content-target', 'datasets/' + reco[0]);
+        recoChildContainer.setAttribute('data-udata-dataset', reco[0]);
 
-        recoChildContainer.classList.add('recommendation');
+        recoChildContainer.classList.add('recommendation', 'col-xs-12', 'col-md-6');
 
-        recoChildEmbed = document.createElement('div');
-        recoChildEmbed.setAttribute('data-udata-dataset-id', reco[0]);
-
-        recoChildContainer.appendChild(recoChildEmbed);
         recoContainer.appendChild(recoChildContainer);
     });
 
@@ -35,17 +32,8 @@ function addRecos(recos) {
 
 function addWidgetScript() {
     const scriptElm = document.createElement('script');
-    scriptElm.type = 'application/javascript';
-    scriptElm.src = '/static/widgets.js';
-    scriptElm.id = 'udata';
-    scriptElm.onload = loadDatasets;
+    scriptElm.src = '/static/oembed.js';
     document.body.appendChild(scriptElm);
-}
-
-function loadDatasets() {
-    udataScript.loadDatasets();
-    const recoParent = document.getElementById('dataset-recommendations');
-    recoParent.style.display = 'block';
 }
 
 function fetchRecos(datasetId) {
@@ -58,6 +46,7 @@ function fetchRecos(datasetId) {
         if (recos) {
             addRecos(recos);
             addWidgetScript();
+            document.getElementById('dataset-recommendations').style.display = 'block';
         }
     }).catch((err) => {
         console.log('Error while fetching recommendations:', err);
