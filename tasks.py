@@ -219,6 +219,13 @@ def widgets_build(ctx):
 
 
 @task
+def oembed_build(ctx):
+    '''Compile and minify OEmbed assets'''
+    header('Building OEmbed assets')
+    lrun('npm run oembed:build', pty=True)
+
+
+@task
 def assets_watch(ctx):
     '''Build assets on change'''
     lrun('npm run assets:watch', pty=True)
@@ -230,7 +237,13 @@ def widgets_watch(ctx):
     lrun('npm run widgets:watch', pty=True)
 
 
-@task(clean, i18nc, assets_build, widgets_build, default=True)
+@task
+def oembed_watch(ctx):
+    '''Build OEmbed assets on changes'''
+    lrun('npm run oembed:watch', pty=True)
+
+
+@task(clean, i18nc, assets_build, widgets_build, oembed_build, default=True)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
     perform_dist(buildno)

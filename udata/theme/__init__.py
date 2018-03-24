@@ -48,7 +48,7 @@ def theme_static_with_version(ctx, filename, external=False):
     url = global_theme_static(ctx, filename, external=external)
     if url.endswith('/'):  # this is a directory, no need for cache burst
         return url
-    if current_app.config['DEBUG'] or current_app.config['TESTING']:
+    if current_app.config['DEBUG']:
         burst = time()
     else:
         burst = current.entrypoint.dist.version

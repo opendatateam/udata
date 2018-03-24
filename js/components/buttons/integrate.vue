@@ -41,8 +41,8 @@ export default {
     computed: {
         snippet() {
             const tag = 'script'; // Due to vue-loader failing on closing script tag, we interpolate it
-            return `<div data-udata-${this.objectType}-id="${this.objectId}"></div>
-<${tag} src="${this.widgetUrl}" id="udata" async defer onload="udataScript.loadDatasets()"></${tag}>`;
+            return `<div data-udata-${this.objectType}="${this.objectId}"></div>
+<${tag} src="${this.widgetUrl}" async defer></${tag}>`;
         }
     },
     methods: {

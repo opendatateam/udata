@@ -1,0 +1,20 @@
+.udata-oembed {
+    * {
+        box-sizing: border-box;
+    }
+    @import "oembed-font/style";
+    @import "udata/variables";
+    @import "udata/mixins";
+    @import "udata/cards";
+
+
+    // Spin animation extracted from Font Awesome
+    .fa-spin {
+        animation: fa-spin 2s infinite linear;
+    }
+
+    @keyframes fa-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(359deg); }
+    }
+}

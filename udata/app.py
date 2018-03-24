@@ -10,7 +10,8 @@ import types
 from os.path import abspath, join, dirname, isfile, exists
 
 from flask import (
-    Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint
+    Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint,
+    make_response
 )
 from flask_caching import Cache
 
@@ -30,6 +31,14 @@ log = logging.getLogger(__name__)
 cache = Cache()
 csrf = CSRFProtect()
 nav = Navigation()
+
+
+def send_static(directory, filename, cache_timeout):
+    out = send_from_directory(directory, filename, cache_timeout=cache_timeout)
+    response = make_response(out)
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 class UDataApp(Flask):
@@ -52,8 +61,8 @@ class UDataApp(Flask):
 
         # Default behavior
         if isfile(join(self.static_folder, filename)):
-            return send_from_directory(self.static_folder, filename,
-                                       cache_timeout=cache_timeout)
+            return send_static(self.static_folder, filename,
+                               cache_timeout=cache_timeout)
 
         # Handle aliases
         for prefix, directory in self.config.get('STATIC_DIRS', tuple()):
@@ -62,8 +71,8 @@ class UDataApp(Flask):
                 if real_filename.startswith('/'):
                     real_filename = real_filename[1:]
                 if isfile(join(directory, real_filename)):
-                    return send_from_directory(directory, real_filename,
-                                               cache_timeout=cache_timeout)
+                    return send_static(directory, real_filename,
+                                       cache_timeout=cache_timeout)
         abort(404)
 
     def handle_http_exception(self, e):
