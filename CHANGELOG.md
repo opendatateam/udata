@@ -6,6 +6,7 @@
 - Expose an [OEmbed](https://oembed.com/) API endpoint using the new cards [#1525](https://github.com/opendatateam/udata/pull/1525)
 - Small topic fixes [#1529](https://github.com/opendatateam/udata/pull/1529)
 - Fixes the search result vertical cut off [#1530](https://github.com/opendatateam/udata/pull/1530)
+- Prevent visually disabled pagination buttons from being clicked [#1539](https://github.com/opendatateam/udata/pull/1539)
 
 ## 1.3.3 (2018-03-20)
 
