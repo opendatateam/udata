@@ -7,7 +7,7 @@
 </div>
 <div class="row" v-if="$root.me.organizations && $root.me.organizations.length">
     <p class="col-xs-12">{{ _('Publish as an organization') }}</p>
-    
+
     <div v-for="organization in $root.me.organizations" :key="organization.id"
         class="col-xs-12 col-sm-6 col-lg-4">
         <org-card clickable :organization="organization"
@@ -37,7 +37,9 @@
        {{ _('As administrator you can choose any organization to publish') }}
     </p>
 </div>
-<org-filter cardclass="col-xs-12 col-sm-6 col-lg-4" :selected="selected"></org-filter>
+<org-filter v-if="$root.me.is_admin"
+    cardclass="col-xs-12 col-sm-6 col-lg-4" :selected="selected">
+</org-filter>
 </div>
 </template>
 

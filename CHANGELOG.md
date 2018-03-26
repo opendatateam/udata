@@ -8,6 +8,7 @@
 - Fixes the search result vertical cut off [#1530](https://github.com/opendatateam/udata/pull/1530)
 - Prevent visually disabled pagination buttons from being clicked [#1539](https://github.com/opendatateam/udata/pull/1539)
 - Fixes "sort organization by name" not working [#1537](https://github.com/opendatateam/udata/pull/1537)
+- Non-admin users should not see the "publish as anyone" filter field on "publish as" screen [#1538](https://github.com/opendatateam/udata/pull/1538)
 
 ## 1.3.3 (2018-03-20)
 
