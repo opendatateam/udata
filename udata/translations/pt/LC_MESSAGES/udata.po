@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-03-26 10:32-0400\n"
+"PO-Revision-Date: 2018-03-26 10:41-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1278,12 +1278,12 @@ msgstr "Verificando que o jq está a funcionar"
 #: udata/templates/apidoc.html:138
 msgid "Once jq is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
-msgstr "Assim que o jq estiver instalado, pode verificar que ele funciona como esperado, digitando este comando na shell:                "
+msgstr "Assim que o jq estiver instalado, podemos verificar que ele funciona como esperado, inserindo este comando na shell:                "
 
 #: udata/templates/apidoc.html:148
 msgid "That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:\n"
 "                "
-msgstr "Isso é definitivamente melhor! Agora que temos a certeza de que ele funciona conforme o esperado, vamos encurtar um pouco a linha de comando:                "
+msgstr "Bem melhor. Agora que temos a certeza de que ele funciona conforme o esperado, vamos encurtar um pouco a linha de comando:                "
 
 #: udata/templates/apidoc.html:153
 msgid "The previous command is now equivalent to the more readable (don't forget the quotes):\n"
@@ -1331,12 +1331,12 @@ msgstr "Depende de si a obtenção de dados que interessem ao seu projeto. Não 
 
 #: udata/templates/apidoc.html:260
 msgid "Modifying and deleting data"
-msgstr "Modificando e apagando dados"
+msgstr "Modificar e apagar dados"
 
 #: udata/templates/apidoc.html:262
 msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
 "                "
-msgstr "Atenção, esta é uma área perigosa. A modificação ou eliminação de dados com a API é definitiva e não é disponibilizado nenhum ambiente de testes (por enquanto). Esteja ciente destas responsabilidades antes de utilizar os seus grandes poderes.                "
+msgstr "Atenção: a modificação ou eliminação de dados com a API é definitiva e não é disponibilizado nenhum ambiente de testes (por enquanto). Esteja ciente destas responsabilidades antes de utilizar os seus grandes poderes.                "
 
 #: udata/templates/apidoc.html:265
 msgid "If you try to modify a resource without an authentication token, a 401 will be returned:\n"
