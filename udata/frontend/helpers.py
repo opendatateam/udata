@@ -132,40 +132,41 @@ def obfuscate(email):
 
 @front.app_template_filter()
 @contextfilter
-def avatar_url(ctx, obj, size):
+def avatar_url(ctx, obj, size, external=False):
     if hasattr(obj, 'avatar') and obj.avatar:
-        return obj.avatar(size)
+        return obj.avatar(size, external=external)
     elif hasattr(obj, 'logo') and obj.logo:
-        return obj.logo(size)
+        return obj.logo(size, external=external)
     else:
-        return url_for('api.avatar', identifier=str(obj.id), size=size)
+        return url_for('api.avatar', identifier=str(obj.id),
+                       size=size, _external=external)
 
 
 @front.app_template_filter()
 @contextfilter
-def owner_avatar_url(ctx, obj, size=32):
+def owner_avatar_url(ctx, obj, size=32, external=False):
     if hasattr(obj, 'organization') and obj.organization:
-        return (obj.organization.logo(size)
+        return (obj.organization.logo(size, external=external)
                 if obj.organization.logo
-                else placeholder(ctx, None, name='organization'))
+                else placeholder(ctx, None, name='organization', external=external))
     elif hasattr(obj, 'owner') and obj.owner:
-        return avatar_url(ctx, obj.owner, size)
-    return placeholder(ctx, None, name='user')
+        return avatar_url(ctx, obj.owner, size, external=external)
+    return placeholder(ctx, None, name='user', external=external)
 
 
 @front.app_template_global()
 @front.app_template_filter()
-def owner_url(obj):
+def owner_url(obj, external=False):
     if hasattr(obj, 'organization') and obj.organization:
-        return url_for('organizations.show', org=obj.organization)
+        return url_for('organizations.show', org=obj.organization, _external=external)
     elif hasattr(obj, 'owner') and obj.owner:
-        return url_for('users.show', user=obj.owner)
+        return url_for('users.show', user=obj.owner, _external=external)
     return ''
 
 
 @front.app_template_filter()
 @contextfilter
-def avatar(ctx, user, size, classes=''):
+def avatar(ctx, user, size, classes='', external=False):
     markup = ''.join((
         '<a class="avatar {classes}" href="{url}" title="{title}">',
         '<img src="{avatar_url}" class="avatar" alt="{title}" ',
@@ -173,10 +174,10 @@ def avatar(ctx, user, size, classes=''):
         '</a>'
     )).format(
         title=getattr(user, 'fullname', _('Anonymous user')),
-        url=(url_for('users.show', user=user)
+        url=(url_for('users.show', user=user, _external=external)
              if user and getattr(user, 'id', None) else '#'),
         size=size,
-        avatar_url=avatar_url(ctx, user, size),
+        avatar_url=avatar_url(ctx, user, size, external=external),
         classes=classes
     )
     return Markup(markup)
@@ -184,7 +185,7 @@ def avatar(ctx, user, size, classes=''):
 
 @front.app_template_filter()
 @contextfilter
-def owner_avatar(ctx, obj, size=32, classes=''):
+def owner_avatar(ctx, obj, size=32, classes='', external=False):
     markup = '''
         <a class="avatar {classes}" href="{url}" title="{title}">
             <img src="{avatar_url}" class="avatar" alt="{title}"
@@ -193,9 +194,9 @@ def owner_avatar(ctx, obj, size=32, classes=''):
     '''
     return Markup(markup.format(
         title=owner_name(obj),
-        url=owner_url(obj),
+        url=owner_url(obj, external=external),
         size=size,
-        avatar_url=owner_avatar_url(ctx, obj, size),
+        avatar_url=owner_avatar_url(ctx, obj, size, external=external),
         classes=classes
     ))
 
@@ -209,6 +210,7 @@ def owner_name(obj):
         return obj.owner.fullname
     return ''
 
+
 @front.app_template_global()
 @front.app_template_filter()
 def owner_name_acronym(obj):
@@ -217,6 +219,7 @@ def owner_name_acronym(obj):
     elif hasattr(obj, 'owner') and obj.owner:
         return obj.owner.fullname
     return ''
+
 
 @front.app_template_global()
 @front.app_template_filter()
