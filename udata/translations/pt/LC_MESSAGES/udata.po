@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-03-23 08:42-0400\n"
+"PO-Revision-Date: 2018-03-26 10:32-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1182,7 +1182,7 @@ msgstr "Documentação de API dinâmica de %(site)s"
 
 #: udata/templates/apidoc.html:24
 msgid "This page describe this website's free and open RESTful API's behavior"
-msgstr "Esta página descreve o comportamento da API aberta e gratuita deste site"
+msgstr "Esta página descreve o comportamento da API do dados.gov."
 
 #: udata/templates/apidoc.html:30
 msgid "Authentication"
@@ -1203,7 +1203,7 @@ msgstr "Chave da API"
 
 #: udata/templates/apidoc.html:44
 msgid "you first need to authenticate and obtain an API Key in your profile settings."
-msgstr "precisa primeiro de se autenticar e obter uma chave de API nas configurações do seu perfil."
+msgstr "precisa primeiro de se autenticar/registar e obter uma chave de API nas configurações do seu perfil."
 
 #: udata/templates/apidoc.html:47
 msgid "This key should be provided on each call in the <code>X-API-KEY</code> HTTP header."
@@ -1215,11 +1215,11 @@ msgstr "Autorizações"
 
 #: udata/templates/apidoc.html:57
 msgid "API calls are subject to the same permissions than the web interface."
-msgstr "As chamadas à API estão sujeitas às mesmas permissões que a interface web."
+msgstr "As chamadas à API estão sujeitas às mesmas permissões que a interface web (frontend)."
 
 #: udata/templates/apidoc.html:58
 msgid "By example, you need to be part of the organization to modify one of its datasets."
-msgstr "Por exemplo, é necessário pertencer à organização para modificar um dos seus conjuntos de dados."
+msgstr "Por exemplo, é necessário pertencer a uma organização para modificar os seus conjuntos de dados."
 
 #: udata/templates/apidoc.html:64
 msgid "Pagination"
