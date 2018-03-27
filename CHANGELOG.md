@@ -5,6 +5,7 @@
 - Limit number of forum topics [284](https://github.com/etalab/udata-gouvfr/pull/284)
 - Use new OEmbed cards in datasets recommandations [#285](https://github.com/etalab/udata-gouvfr/pull/285)
 - Fix the RSS popover not being clickable [#287](https://github.com/etalab/udata-gouvfr/pull/287)
+- Drop the custom style for non-certified datasets [#288](https://github.com/etalab/udata-gouvfr/pull/288)
 
 ## 1.3.1 (2018-03-15)
 
