@@ -14,6 +14,7 @@ module.exports = {
     entry: {
         theme: "theme",
         admin: "admin",
+        oembed: 'oembed',
         "dataset-recommendations": "js/dataset-recommendations.js",
     },
     output: {
