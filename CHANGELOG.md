@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.4 (2018-03-28)
 
 - Remove territory claim banner [#1521](https://github.com/opendatateam/udata/pull/1521)
 - Expose an [OEmbed](https://oembed.com/) API endpoint using the new cards [#1525](https://github.com/opendatateam/udata/pull/1525)
