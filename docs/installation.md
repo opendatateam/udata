@@ -277,11 +277,11 @@ server {
         try_files $uri @wsgi;
 
         location ~ /static/ {
-            expires 1M;
+            include /etc/nginx/static-common.conf;
         }
 
         location ~ /_themes/ {
-            expires 1M;
+            include /etc/nginx/static-common.conf;
         }
 
         location ~ /s/ {
@@ -289,10 +289,8 @@ server {
             alias /srv/udata/fs/;
             # Disable disk buffering for downloads
             proxy_max_temp_file_size 0;
-            expires 1M;
 
-            add_header 'Access-Control-Allow-Origin' '*';
-            add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS';
+            include /etc/nginx/static-common.conf;
         }
     }
 
@@ -307,6 +305,48 @@ server {
         proxy_set_header   X-Forwarded-Host $server_name;
     }
 }
+```
+
+Create the reusable static cache and CORS snippet in `/etc/nginx/static-common.conf`
+(feel free to adjust values to your needs):
+
+```nginx
+##
+#  Common options to properly serve udata static content.
+#
+#  This content as long cache duration and is accessible
+#  by external JS (CORS)
+#
+#  This includes:
+#   - udata assets (for external loading of embeds)
+#   - theme assets (for external loading of embeds)
+#   - uploaded content (direct access to resources)
+##
+
+# Cache static assets
+expires 1M;
+
+# Allow pre-flight requests
+if ($request_method = OPTIONS) {
+    add_header 'Access-Control-Allow-Origin' '*';
+    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS';
+    add_header 'Access-Control-Allow-Headers' 'Origin,Authorization,Accept,DNT,User-Agent,If-Modified-Since,Cache-Control,Content-Type,Range';
+    add_header 'Access-Control-Allow-Credentials' 'true';
+    #
+    # Tell client that this pre-flight info is valid
+    # for 20 days
+    #
+    add_header 'Access-Control-Max-Age' 1728000;
+    # Returns a response on OPTIONS (enable pre-flight requests)
+    add_header 'Content-Type' 'text/plain; charset=utf-8';
+    add_header 'Content-Length' 0;
+    return 204;
+}
+
+add_header 'Access-Control-Allow-Origin' '*';
+add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS';
+add_header 'Access-Control-Allow-Headers' 'Origin,Authorization,Accept,DNT,User-Agent,If-Modified-Since,Cache-Control,Content-Type,Range';
+add_header 'Access-Control-Allow-Credentials' 'true';
 ```
 
 Then create a symlink to activate it:
