@@ -4,5 +4,5 @@ uData customizations for Data.gouv.fr
 '''
 from __future__ import unicode_literals
 
-__version__ = '1.3.2.dev'
+__version__ = '1.3.2'
 __description__ = 'uData customizations for Data.gouv.fr'

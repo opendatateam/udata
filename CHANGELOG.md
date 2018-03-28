@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.2 (2018-03-28)
 
 - Limit number of forum topics [284](https://github.com/etalab/udata-gouvfr/pull/284)
 - Use new OEmbed cards in datasets recommandations [#285](https://github.com/etalab/udata-gouvfr/pull/285)
