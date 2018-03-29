@@ -327,6 +327,15 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
           doc=common_doc)
 @api.doc(params={'rid': 'The resource unique identifier'})
 class ResourceAPI(ResourceMixin, API):
+    @api.doc('get_resource')
+    @api.marshal_with(resource_fields)
+    def get(self, dataset, rid):
+        '''Get a resource given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            api.abort(410, 'Dataset has been deleted')
+        resource = self.get_resource_or_404(dataset, rid)
+        return resource
+
     @api.secure
     @api.doc('update_resource', body=resource_fields)
     @api.marshal_with(resource_fields)

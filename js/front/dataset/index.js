@@ -90,7 +90,7 @@ new Vue({
             const resource = this.dataset[attr].find(resource => resource['@id'] === id);
             const communityPrefix = isCommunity ? '-community' : '';
             location.hash = `resource${communityPrefix}-${id}`;
-            const modal = this.$modal(ResourceModal, {resource});
+            const modal = this.$modal(ResourceModal, {datasetId: this.dataset['@id'], resourceId: id, resourceJsonLd: resource});
             modal.$on('modal:closed', () => {
                 // prevent scrolling to top
                 location.hash = '_';

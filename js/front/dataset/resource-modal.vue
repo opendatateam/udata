@@ -1,36 +1,36 @@
 <template>
 <modal class="resource-modal" v-ref:modal
-    :title="resource.name">
+    :title="resource.title">
 
     <div class="modal-body">
-        {{{ resource.description }}}
+        {{{ resource.description|markdown }}}
 
         <dl class="dl-horizontal dl-wide">
           <dt>{{ _('URL') }}</dt>
-          <dd><a :href="resource.contentUrl" @click="onClick">{{resource.contentUrl}}</a></dd>
+          <dd><a :href="resourceJsonLd.contentUrl" @click="onClick">{{resourceJsonLd.contentUrl}}</a></dd>
           <dt>{{ _('Latest URL') }}</dt>
-          <dd><a :href="resource.url" @click="onClick">{{resource.url}}</a></dd>
-          <dt v-if="resource.encodingFormat">{{ _('Format') }}</dt>
-          <dd v-if="resource.encodingFormat">{{resource.encodingFormat}}</dd>
-          <dt v-if="resource.fileFormat">{{ _('MimeType') }}</dt>
-          <dd v-if="resource.fileFormat">{{resource.fileFormat}}</dd>
-          <dt v-if="resource.contentSize">{{ _('Size') }}</dt>
-          <dd v-if="resource.contentSize">{{ resource.contentSize|size }}</dd>
-          <dt v-if="resource.checksum">{{ resource.checksumType || 'sha1'}}</dt>
-          <dd v-if="resource.checksum">{{ resource.checksum }}</dd>
-          <dt v-if="resource.dateCreated">{{ _('Created on') }}</dt>
-          <dd v-if="resource.dateCreated"> {{ resource.dateCreated|dt }}</dd>
-          <dt v-if="resource.dateModified">{{ _('Modified on') }}</dt>
-          <dd v-if="resource.dateModified"> {{ resource.dateModified|dt }}</dd>
-          <dt v-if="resource.datePublished">{{ _('Published on') }}</dt>
-          <dd v-if="resource.datePublished"> {{ resource.datePublished|dt }}</dd>
-          <dt v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
-          <dd v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount"> {{ resource.interactionStatistic.userInteractionCount }}</dd>
-          <dt v-if="checkResults['check:date']">{{ _('Last checked on') }}</dt>
-          <dd v-if="checkResults['check:date']"> {{ checkResults['check:date']|dt }}</dd>
-          <dt v-if="checkResults['check:status']">{{ _('Last checked result') }}</dt>
-          <dd v-if="checkResults['check:status']">
-              <availability :status="checkResults['check:status']"></availability>
+          <dd><a :href="resourceJsonLd.url" @click="onClick">{{resourceJsonLd.url}}</a></dd>
+          <dt v-if="resourceJsonLd.encodingFormat">{{ _('Format') }}</dt>
+          <dd v-if="resourceJsonLd.encodingFormat">{{resourceJsonLd.encodingFormat}}</dd>
+          <dt v-if="resourceJsonLd.fileFormat">{{ _('MimeType') }}</dt>
+          <dd v-if="resourceJsonLd.fileFormat">{{resourceJsonLd.fileFormat}}</dd>
+          <dt v-if="resourceJsonLd.contentSize">{{ _('Size') }}</dt>
+          <dd v-if="resourceJsonLd.contentSize">{{ resourceJsonLd.contentSize|size }}</dd>
+          <dt v-if="resourceJsonLd.checksum">{{ resourceJsonLd.checksumType || 'sha1'}}</dt>
+          <dd v-if="resourceJsonLd.checksum">{{ resourceJsonLd.checksum }}</dd>
+          <dt v-if="resourceJsonLd.dateCreated">{{ _('Created on') }}</dt>
+          <dd v-if="resourceJsonLd.dateCreated"> {{ resourceJsonLd.dateCreated|dt }}</dd>
+          <dt v-if="resourceJsonLd.dateModified">{{ _('Modified on') }}</dt>
+          <dd v-if="resourceJsonLd.dateModified"> {{ resourceJsonLd.dateModified|dt }}</dd>
+          <dt v-if="resourceJsonLd.datePublished">{{ _('Published on') }}</dt>
+          <dd v-if="resourceJsonLd.datePublished"> {{ resourceJsonLd.datePublished|dt }}</dd>
+          <dt v-if="resourceJsonLd.interactionStatistic && resourceJsonLd.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
+          <dd v-if="resourceJsonLd.interactionStatistic && resourceJsonLd.interactionStatistic.userInteractionCount"> {{ resourceJsonLd.interactionStatistic.userInteractionCount }}</dd>
+          <dt v-if="resource.extras && resource.extras['check:date']">{{ _('Last checked on') }}</dt>
+          <dd v-if="resource.extras && resource.extras['check:date']"> {{ resource.extras['check:date']|dt }}</dd>
+          <dt v-if="resource.extras && resource.extras['check:status']">{{ _('Last checked result') }}</dt>
+          <dd v-if="resource.extras && resource.extras['check:status']">
+                <availability :status="resource.extras['check:status']"></availability>
           </dd>
         </dl>
     </div>
@@ -45,23 +45,33 @@
 
 <script>
 import Modal from 'components/modal.vue';
+import Resource from 'models/resource';
 import Availability from './resource/availability.vue';
 import pubsub from 'pubsub';
 
 export default {
     props: {
-        resource: Object
+        datasetId: {
+            type: String,
+            required: true,
+        },
+        resourceId: {
+            type: String,
+            required: true,
+        },
+        resourceJsonLd: {
+            type: Object,
+            required: true,
+        }
+    },
+    data() {
+        return {
+            resource: new Resource(),
+        }
     },
     components: {Modal, Availability},
-    computed: {
-        checkResults() {
-            return this.resource.extras.reduce((obj, extra) => {
-                if (extra.name.startsWith('check:')) {
-                    obj[extra.name] = extra.value;
-                }
-                return obj;
-            }, {});
-        },
+    created() {
+        this.resource.fetch(this.datasetId, this.resourceId);
     },
     methods: {
         onClick() {
