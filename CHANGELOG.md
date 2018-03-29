@@ -4,6 +4,7 @@
 
 - Upgrade `sifter` to `0.5.3` [#1548](https://github.com/opendatateam/udata/pull/1548)
 - Upgrade `jquery-validation` to 1.17.0 and fixes some issues with client-side URL validation [#1550](https://github.com/opendatateam/udata/pull/1550)
+- Minor change on OEmbed cards to avoid theme to override the cards `font-family` [#1549](https://github.com/opendatateam/udata/pull/1549)
 
 ## 1.3.4 (2018-03-28)
 
