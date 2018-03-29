@@ -37,7 +37,7 @@
         </span>
         <h4 class="list-group-item-heading ellipsis open-discussion-thread">
             <span>{{ discussion.title }}</span>
-            <span v-if="discussion.closed" class="fa fa-microphone-slash"></span>
+            <span v-if="discussion.closed" class="fa fa-close"></span>
         </h4>
         <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
             <span v-if="!discussion.closed">{{ _('Discussion started on {created} with {count} messages.',
