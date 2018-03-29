@@ -1,73 +1,32 @@
 <style lang="less">
-.discussion-thread {
-    @vspacing: 10px;
-
-    .list-group-item {
-        p.list-group-item-heading {
-            a, a:hover {
-                text-decoration: underline;
-            }
-        }
-
-        &.list-group-indent {
-            margin-left: 54px;
-            height: inherit;
-            min-height: 54px;
-        }
-
-        &.body-only {
-            margin-top: -@vspacing;
-
-            .list-group-item-heading {
-                margin: 5px;
-            }
-        }
-    }
-}
 </style>
 <template>
-<div class="discussion-thread">
-    <div class="list-group-item" :id="discussionIdAttr" @click="toggleDiscussions"
-        :class="{expanded: detailed}">
-        <div class="format-label pull-left">
-            <avatar :user="discussion.user"></avatar>
+<div class="discussion-thread panel panel-default">
+    <div class="panel-heading">
+        <div>
+            <strong>{{ discussion.title }}</strong> <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a> 
         </div>
-        <span class="list-group-item-link">
-            <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a>
-        </span>
-        <h4 class="list-group-item-heading ellipsis open-discussion-thread">
-            <span>{{ discussion.title }}</span>
-            <span v-if="discussion.closed" class="fa fa-close"></span>
-        </h4>
-        <p class="list-group-item-text ellipsis open-discussion-thread list-group-message-number-{{ discussion.id }}">
-            <span v-if="!discussion.closed">{{ _('Discussion started on {created} with {count} messages.',
-                 {created: createdDate, count: discussion.discussion.length})
-            }}</span>
-            <span v-if="discussion.closed">{{ _('Discussion closed on {closed} with {count} messages.',
-                 {closed: closedDate, count: discussion.discussion.length})
-            }}</span>
-        </p>
     </div>
-    <div v-for="(index, response) in discussion.discussion" id="{{ discussionIdAttr }}-{{ index }}"
-        class="list-group-item list-group-indent animated discussion-messages-list"
-        :class="{'body-only': index == 0}" v-show="detailed">
-        <template v-if="index > 0">
-            <div class="format-label pull-left">
-                <avatar :user="response.posted_by"></avatar>
-            </div>
-            <span class="list-group-item-link">
+    <div class="list-group">
+        <div v-for="(index, response) in discussion.discussion"
+            id="{{ discussionIdAttr }}-{{ index }}"
+            class="list-group-item list-group-indent animated discussion-messages-list"
+            v-show="detailed">
+
+            <div>{{{ response.content | markdown }}}</div>
+            
+            <div>
+                <avatar :user="response.posted_by" :size="18"></avatar>
+                {{ response.posted_by.first_name }} {{ response.posted_by.last_name }}
+                {{ formatDate(response.posted_on) }} 
                 <a href="#{{ discussionIdAttr }}-{{ index }}"><span class="fa fa-link"></span></a>
-            </span>
-
-            <div class="list-group-item-text ellipsis">{{ _('Comment posted on {posted_on}', { posted_on: formatDate(response.posted_on) })  }}</div>
-
-        </template>
-        <p class="list-group-item-heading">
-            {{{ response.content | markdown }}}
-        </p>
+            </div>
+        </div>
     </div>
+
+    <div class="panel-footer">
     <a v-if="!discussion.closed"
-        class="list-group-item add new-comment list-group-indent animated"
+        class="list-group-item add new-comment animated"
         v-show="!formDisplayed && detailed" @click="displayForm">
         <div class="format-label pull-left">+</div>
         <h4 class="list-group-item-heading">
@@ -75,22 +34,9 @@
         </h4>
     </a>
     <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
-        class="list-group-item list-group-form list-group-indent animated">
-        <div class="format-label pull-left">
-            <avatar :user="currentUser"></avatar>
-        </div>
-        <span class="list-group-item-link">
-            <a href="#{{ discussionIdAttr }}-new-comment"><span class="fa fa-link"></span></a>
-            <a @click="hideForm"><span class="fa fa-times"></span></a>
-        </span>
-        <h4 class="list-group-item-heading">
-            {{ _('Commenting on this thread') }}
-        </h4>
-        <p class="list-group-item-text">
-            {{ _("You're about to answer to this particular thread about:") }}<br />
-            {{ discussion.title }}
-        </p>
+        class="list-group-item animated">
         <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
+    </div>
     </div>
 </div>
 </template>
@@ -101,7 +47,6 @@ import Avatar from 'components/avatar.vue';
 import ThreadForm from 'components/discussions/thread-form.vue';
 import moment from 'moment';
 
-
 export default {
     components: {Avatar, ThreadForm},
     props: {
@@ -110,7 +55,7 @@ export default {
     },
     data() {
         return {
-            detailed: false,
+            detailed: true,
             formDisplayed: false,
             currentUser: config.user,
         }
