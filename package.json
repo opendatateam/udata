@@ -89,7 +89,7 @@
     "icheck": "^1.0.2",
     "jquery": "~3.0.0",
     "jquery-jcrop": "^0.9.13",
-    "jquery-validation-dist": "^1.13.2-pre",
+    "jquery-validation": "^1.17.0",
     "jquery.browser": "0.1.0",
     "leaflet": "^0.7.7",
     "leaflet-spin": "^1.1.0",
