@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 
+import pytest
+
 from udata.tests import TestCase
 
 
-from udata.rdf import negociate_content, want_rdf, ACCEPTED_MIME_TYPES
+from udata.rdf import (
+    guess_format, negociate_content, want_rdf, ACCEPTED_MIME_TYPES, FORMAT_MAP
+)
 
 
 class ContentNegociationTest(TestCase):
@@ -52,3 +56,19 @@ class ContentNegociationTest(TestCase):
 
         with self.app.test_request_context():
             self.assertFalse(want_rdf())
+
+
+class GuessFormatTest(object):
+    @pytest.mark.parametrize('suffix,expected', FORMAT_MAP.items())
+    def test_guess_from_extension(self, suffix, expected):
+        assert guess_format('resource.{0}'.format(suffix)) == expected
+
+    @pytest.mark.parametrize('mime,expected', ACCEPTED_MIME_TYPES.items())
+    def test_guess_from_mime_type(self, mime, expected):
+        assert guess_format(mime) == expected
+
+    def test_unkown_extension(self):
+        assert guess_format('resource.unknonn') is None
+
+    def test_unkown_mime(self):
+        assert guess_format('unknown/mime') is None
