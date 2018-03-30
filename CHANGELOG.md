@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Upgrade `sifter` to `0.5.3` [#1548](https://github.com/opendatateam/udata/pull/1548)
+- Upgrade `jquery-validation` to 1.17.0 and fixes some issues with client-side URL validation [#1550](https://github.com/opendatateam/udata/pull/1550)
 
 ## 1.3.4 (2018-03-28)
 

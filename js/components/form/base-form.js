@@ -3,8 +3,7 @@ import {_} from 'i18n';
 import {setattr, isObject, isString} from 'utils';
 import log from 'logger';
 import moment from 'moment';
-import $ from 'jquery';
-import 'jquery-validation-dist';
+import $ from 'jquery-validation';  // Ensure jquery & jquery.validate plugin are both loaded
 
 // Remove warning for non-interpolated variables
 const interpolation = {defaultVariables: {'O': '{O}', '1': '{1}', 'ISO': '{ISO}'}};
