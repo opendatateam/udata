@@ -22,8 +22,8 @@ DCAT_URL_PATTERN = 'http://{domain}/{path}'
 DCAT_FILES_DIR = os.path.join(os.path.dirname(__file__), 'dcat')
 
 
-def mock_dcat(rmock, filename):
-    url = DCAT_URL_PATTERN.format(path=filename, domain=TEST_DOMAIN)
+def mock_dcat(rmock, filename, path=None):
+    url = DCAT_URL_PATTERN.format(path=path or filename, domain=TEST_DOMAIN)
     with open(os.path.join(DCAT_FILES_DIR, filename)) as dcatfile:
         body = dcatfile.read()
     rmock.get(url, text=body)
@@ -185,6 +185,24 @@ class DcatBackendTest:
         job = source.get_last_job()
 
         assert job.status == 'failed'
+
+    def test_supported_mime_type(self, rmock):
+        url = mock_dcat(rmock, 'catalog.xml', path='without/extension')
+        rmock.head(url, headers={'Content-Type': 'application/xml; charset=utf-8'})
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        source.reload()
+
+        job = source.get_last_job()
+
+        assert job.status == 'done'
+        assert job.errors == []
+        assert len(job.items) == 3
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)

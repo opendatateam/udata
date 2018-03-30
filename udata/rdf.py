@@ -51,7 +51,7 @@ RDF_MIME_TYPES = {
     'nt': 'application/n-triples',
     'json-ld': 'application/ld+json',
     'trig': 'application/trig',
-    # Available but no activated
+    # Available but not activated
     # 'nquads': 'application/n-quads',
     # 'trix': 'text/xml',
 }
@@ -67,7 +67,7 @@ ACCEPTED_MIME_TYPES = {
     'application/ld+json': 'json-ld',
     'application/json': 'json-ld',
     'application/trig': 'trig',
-    # Available but no activated
+    # Available but not activated
     # 'application/n-quads': 'nquads',
     # 'text/xml': 'trix',
 }
@@ -80,7 +80,7 @@ RDF_EXTENSIONS = {
     'nt': 'nt',
     'trig': 'trig',
     'json-ld': 'json',
-    # Available but no activated
+    # Available but not activated
     # 'nquads': 'nq',
     # 'trix': 'trix',
 }
@@ -88,6 +88,8 @@ RDF_EXTENSIONS = {
 
 def guess_format(string):
     '''Guess format given an extension or a mime-type'''
+    if string in ACCEPTED_MIME_TYPES:
+        return ACCEPTED_MIME_TYPES[string]
     return raw_guess_format(string, FORMAT_MAP)
 
 
