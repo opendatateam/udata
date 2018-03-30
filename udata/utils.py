@@ -243,3 +243,12 @@ class UDataProvider(BaseProvider):
 class UnicodeLoremProvider(LoremProvider):
     '''A Lorem provider that forces unicode in words'''
     word_list = map(lambda w: w + 'é', LoremProvider.word_list)
+
+
+def safe_unicode(string):
+    '''Safely transform any object into utf8 encoded bytes'''
+    if not isinstance(string, basestring):
+        string = unicode(string)
+    if isinstance(string, unicode):
+        string = string.encode('utf8')
+    return string

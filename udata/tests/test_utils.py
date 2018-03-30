@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 from udata.utils import (
     get_by, daterange_start, daterange_end, to_bool, to_iso, to_iso_date,
-    to_iso_datetime, recursive_get
+    to_iso_datetime, recursive_get, safe_unicode
 )
 
 TEST_LIST = [
@@ -198,3 +198,17 @@ class RecursiveGetTest:
         tester = {'key': 'value'}
         assert recursive_get(tester, None) is None
         assert recursive_get(tester, '') is None
+
+
+class SafeUnicodeTest(object):
+    def test_unicode_is_encoded(self):
+        assert safe_unicode('ééé') == 'ééé'.encode('utf8')
+
+    def test_bytes_stays_bytes(self):
+        assert safe_unicode(b'xxx') == b'xxx'
+
+    def test_object_to_string(self):
+        assert safe_unicode({}) == b'{}'
+
+    def test_unicode_to_string(self):
+        assert safe_unicode(ValueError('é')) == 'é'.encode('utf8')
