@@ -13,6 +13,7 @@ import click
 from flask.cli import FlaskGroup, shell_command, ScriptInfo
 from udata import entrypoints
 from udata.app import create_app, standalone, VERBOSE_LOGGERS
+from udata.utils import safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,8 @@ OK = '✔'.encode('utf8')
 KO = '✘'.encode('utf8')
 WARNING = '⚠'.encode('utf8')
 HEADER = '✯'.encode('utf8')
+
+NO_CAST = (int, float, bool)
 
 CONTEXT_SETTINGS = {
     'auto_envvar_prefix': 'udata',
@@ -48,19 +51,20 @@ echo = click.echo
 
 def header(msg):
     '''Display an header'''
-    echo(' '.join((yellow(HEADER), white(msg), yellow(HEADER))))
+    echo(' '.join((yellow(HEADER), white(safe_unicode(msg)), yellow(HEADER))))
 
 
 def success(msg):
     '''Display a success message'''
-    echo('{0} {1}'.format(green(OK), white(msg)))
+    echo('{0} {1}'.format(green(OK), white(safe_unicode(msg))))
 
 
 def error(msg, details=None):
     '''Display an error message with optionnal details'''
-    msg = '{0} {1}'.format(red(KO), white(msg))
+    msg = '{0} {1}'.format(red(KO), white(safe_unicode(msg)))
+    msg = safe_unicode(msg)
     if details:
-        msg = '\n'.join((msg, str(details)))
+        msg = b'\n'.join((msg, safe_unicode(details)))
     echo(format_multiline(msg))
 
 
@@ -84,11 +88,15 @@ LEVELS_PREFIX = {
 
 
 def format_multiline(string):
-    string = string.replace('\n', '\n│ ')
-    return replace_last(string, '│', '└')
+    string = safe_unicode(string)
+    string = string.replace(b'\n', b'\n│ ')
+    return safe_unicode(replace_last(string, '│', '└'))
 
 
 def replace_last(string, char, replacement):
+    char = safe_unicode(char)
+    replacement = safe_unicode(replacement)
+    string = safe_unicode(string)
     return replacement.join(string.rsplit(char, 1))
 
 
@@ -100,21 +108,23 @@ class CliFormatter(logging.Formatter):
     def format(self, record):
         if not IS_TTY:
             return super(CliFormatter, self).format(record)
-        record.msg = format_multiline(str(record.msg))
-        record.msg = ' '.join((self._prefix(record), record.msg))
+        record.msg = format_multiline(record.msg)
+        record.msg = b' '.join((self._prefix(record), record.msg))
+        record.args = tuple(a if isinstance(a, NO_CAST) else safe_unicode(a)
+                            for a in record.args)
         return super(CliFormatter, self).format(record)
 
     def formatException(self, ei):
         '''Indent traceback info for better readability'''
         out = super(CliFormatter, self).formatException(ei)
-        return '│' + format_multiline(out)
+        return b'│' + format_multiline(out)
 
     def _prefix(self, record):
         if record.levelno in LEVELS_PREFIX:
-            return LEVELS_PREFIX[record.levelno]
+            return safe_unicode(LEVELS_PREFIX[record.levelno])
         else:
             color = LEVEL_COLORS.get(record.levelno, white)
-            return '{0}:'.format(color(record.levelname.upper()))
+            return safe_unicode('{0}:'.format(color(record.levelname.upper())))
 
 
 class CliHandler(logging.Handler):
