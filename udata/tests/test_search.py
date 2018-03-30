@@ -38,6 +38,9 @@ class Fake(db.Document):
     def __unicode__(self):
         return self.title
 
+    def __str__(self):
+        return self.title
+
     def __html__(self):
         return '<span>{0}</span>'.format(self.title)
 
@@ -872,6 +875,9 @@ class TestTermsFacet(FacetTestCase):
     def test_labelize(self):
         self.assertEqual(self.facet.labelize('fake'), 'fake')
 
+    def test_labelize_unicode(self):
+        self.assertEqual(self.facet.labelize('é'), 'é')
+
     def test_labelize_with_or(self):
         self.assertEqual(self.facet.labelize('fake-1|fake-2'),
                          'fake-1 OR fake-2')
@@ -927,6 +933,10 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
     def test_labelize_object(self):
         fake = FakeFactory()
         self.assertEqual(self.facet.labelize(fake), fake.title)
+
+    def test_labelize_object_with_unicode(self):
+        fake = FakeFactory(title='ééé')
+        self.assertEqual(self.facet.labelize(fake), 'ééé')
 
     def test_labelize_object_with_or(self):
         fake_1 = FakeFactory()

@@ -18,7 +18,7 @@ from jinja2 import Markup
 from speaklater import is_lazy_string
 
 from udata.i18n import lazy_gettext as _, format_date
-from udata.utils import to_bool
+from udata.utils import to_bool, safe_unicode
 
 log = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class Facet(object):
         return Markup(obj_to_string(labelize(value)))
 
     def default_labelizer(self, value):
-        return str(value)
+        return safe_unicode(value)
 
     def as_request_parser_kwargs(self):
         return {'type': str}
@@ -155,7 +155,7 @@ class ModelTermsFacet(TermsFacet):
             self.validate_parameter(value)
             id = self.model_field.to_mongo(value)
             value = self.model.objects.get(id=id)
-        return str(value)
+        return safe_unicode(value)
 
     def validate_parameter(self, value):
         if isinstance(value, ObjectId):
