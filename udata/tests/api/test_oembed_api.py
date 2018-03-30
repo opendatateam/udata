@@ -109,6 +109,21 @@ class OEmbedAPITest:
         assert400(response)
         assert 'url' in response.json['errors']
 
+    def test_oembed_with_an_unknown_url(self, api):
+        '''It should fail at fetching an oembed with an invalid URL.'''
+        url = url_for('api.oembed', url='http://localhost/somewhere')
+        response = api.get(url)
+        assert404(response)
+
+    def test_oembed_with_port_in_https_url(self, api):
+        '''It should works on HTTPS URLs with explicit port.'''
+        dataset = DatasetFactory()
+        url = dataset.external_url.replace('http://localhost/',
+                                           'https://localhost:443/')
+        api_url = url_for('api.oembed', url=url)
+
+        assert200(api.get(api_url, base_url='https://localhost:443/'))
+
     def test_oembed_does_not_support_xml(self, api):
         '''It does not support xml format.'''
         dataset = DatasetFactory()
