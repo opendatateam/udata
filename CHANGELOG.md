@@ -7,6 +7,7 @@
 - Minor change on OEmbed cards to avoid theme to override the cards `font-family` [#1549](https://github.com/opendatateam/udata/pull/1549)
 - Improve cli unicode handling [#1551](https://github.com/opendatateam/udata/pull/1551)
 - Fix DCAT harvester mime type detection [#1552](https://github.com/opendatateam/udata/pull/1552)
+- Use nb_hits instead of views to count downloads [#1560](https://github.com/opendatateam/udata/pull/1560)
 
 ## 1.3.4 (2018-03-28)
 
