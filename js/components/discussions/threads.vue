@@ -1,5 +1,15 @@
+<style lang="less">
+.loading {
+    margin: 2em;
+    text-align: center;
+}
+</style>
 <template>
-<div class="list-group smaller discussion-threads">
+<div class="discussion-threads">
+    <div class="loading" v-if="loading">
+        <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
+        <span class="sr-only">Loading...</span>
+    </div>
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
@@ -43,6 +53,7 @@ export default {
     data() {
         return {
             discussions: [],
+            loading: true,
             formDisplayed: false,
             currentUser: config.user,
         }
@@ -78,7 +89,10 @@ export default {
     },
     ready() {
         this.$api.get('discussions/', {for: this.subjectId}).then(response => {
+            
+            this.loading = false;
             this.discussions = response.data;
+
             if (document.location.hash) {
                 this.$nextTick(() => { // Wait for data to be binded
                     this.jumpToHash(document.location.hash);
