@@ -78,10 +78,10 @@
                     <td>{{ resource.filesize | filesize }}</td>
                     <td class="text-center">
                         <span class="badge" :class="{
-                            'bg-green': resource.metrics.views > 0,
-                            'bg-red': (resource.metrics.views || 0) === 0
+                            'bg-green': resource.metrics.nb_hits > 0,
+                            'bg-red': (resource.metrics.nb_hits || 0) === 0
                             }">
-                            {{ resource.metrics.views || 0 }}
+                            {{ resource.metrics.nb_hits || 0 }}
                         </span>
                     </td>
                     <td class="text-center">
