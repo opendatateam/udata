@@ -1,8 +1,7 @@
 <style lang="less">
 .datatable-widget {
-    header.datatable-header > header{
+    .datatable-header > .row {
         width: 100%;
-        padding: 10px;
     }
 }
 </style>

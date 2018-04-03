@@ -8,6 +8,7 @@
 - Improve cli unicode handling [#1551](https://github.com/opendatateam/udata/pull/1551)
 - Fix DCAT harvester mime type detection [#1552](https://github.com/opendatateam/udata/pull/1552)
 - Add the missing harvester URL in admin [#1554](https://github.com/opendatateam/udata/pull/1554)
+- Fix harvester preview/job layout [#1553](https://github.com/opendatateam/udata/pull/1553)
 
 ## 1.3.4 (2018-03-28)
 
