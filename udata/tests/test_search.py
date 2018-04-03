@@ -16,11 +16,10 @@ from flask_restplus.reqparse import RequestParser
 
 from udata import search
 from udata.core.metrics import Metric
-from udata.models import db
-from udata.utils import multi_to_dict
 from udata.i18n import gettext as _, format_date
+from udata.models import db
 from udata.tests import TestCase, DBTestMixin, SearchTestMixin
-from udata.utils import faker
+from udata.utils import faker, clean_string, multi_to_dict
 
 
 #############################################################################
@@ -1315,8 +1314,8 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
         self.assertHasArgument(parser, 'q', unicode)
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
-        self.assertHasArgument(parser, 'tag', str)
-        self.assertHasArgument(parser, 'other', str)
+        self.assertHasArgument(parser, 'tag', clean_string)
+        self.assertHasArgument(parser, 'other', clean_string)
         self.assertHasArgument(parser, 'page', int)
         self.assertHasArgument(parser, 'page_size', int)
 

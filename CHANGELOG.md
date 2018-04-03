@@ -12,6 +12,7 @@
 - Fix some search unicode issues [#1555](https://github.com/opendatateam/udata/pull/1555)
 - Small fixes on OEmbed URL detection [#1556](https://github.com/opendatateam/udata/pull/1556)
 - Use nb_hits instead of views to count downloads [#1560](https://github.com/opendatateam/udata/pull/1560)
+- Prevent an XSS in TermFacet [#1561](https://github.com/opendatateam/udata/pull/1561)
 
 ## 1.3.4 (2018-03-28)
 

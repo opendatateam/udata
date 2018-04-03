@@ -29,3 +29,10 @@ class SearchFrontTest:
         '''It should render the search page without data'''
         response = client.get(url_for('search.index'))
         assert200(response)
+
+    def test_render_search_wihtout_xss(self, client, autoindex):
+        '''It should render the search page without data'''
+        xss = '/><script src="whatever.js">'
+        response = client.get(url_for('search.index', tag=xss))
+        assert200(response)
+        assert xss not in response.data.decode('utf8')

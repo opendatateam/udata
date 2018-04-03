@@ -18,7 +18,7 @@ from jinja2 import Markup
 from speaklater import is_lazy_string
 
 from udata.i18n import lazy_gettext as _, format_date
-from udata.utils import to_bool, safe_unicode
+from udata.utils import to_bool, safe_unicode, clean_string
 
 log = logging.getLogger(__name__)
 
@@ -70,10 +70,10 @@ class Facet(object):
         return Markup(obj_to_string(labelize(value)))
 
     def default_labelizer(self, value):
-        return safe_unicode(value)
+        return clean_string(safe_unicode(value))
 
     def as_request_parser_kwargs(self):
-        return {'type': str}
+        return {'type': clean_string}
 
     def validate_parameter(self, value):
         return value
