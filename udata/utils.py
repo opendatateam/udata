@@ -11,6 +11,7 @@ from uuid import uuid4
 from datetime import date, datetime
 from calendar import monthrange
 from math import ceil
+from xml.sax.saxutils import escape
 from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
@@ -179,6 +180,18 @@ def to_bool(value):
         return value > 0
     else:
         return False
+
+
+def clean_string(value):
+    '''
+    Clean an user input string (Prevent it from containing XSS)
+    '''
+    return escape(value)
+
+
+def not_none_dict(d):
+    '''Filter out None values from a dict'''
+    return {k: v for k, v in d.iteritems() if v is not None}
 
 
 def hash_url(url):

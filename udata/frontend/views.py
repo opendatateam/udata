@@ -5,7 +5,7 @@ from flask import request, redirect, abort, g, json
 from flask.views import MethodView
 
 from udata import search, auth, theme
-from udata.utils import multi_to_dict
+from udata.utils import not_none_dict
 
 
 class Templated(object):
@@ -96,7 +96,9 @@ class SearchView(Templated, BaseView):
     search_adapter = None
 
     def get_queryset(self):
-        params = multi_to_dict(request.args)
+        adapter = search.adapter_for(self.search_adapter or self.model)
+        parser = adapter.as_request_parser()
+        params = not_none_dict(parser.parse_args())
         params['facets'] = True
         adapter = self.search_adapter or self.model
         result = search.query(adapter, **params)

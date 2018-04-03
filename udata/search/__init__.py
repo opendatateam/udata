@@ -184,14 +184,17 @@ def facets_for(adapter, params):
         ]
 
 
+def adapter_for(model_or_adapter):
+    if issubclass(model_or_adapter, ModelSearchAdapter):
+        return model_or_adapter
+    else:
+        return adapter_catalog[model_or_adapter]
+
+
 def search_for(model_or_adapter, **params):
     if isinstance(model_or_adapter, FacetedSearch):
         return model_or_adapter
-    is_adapter = issubclass(model_or_adapter, ModelSearchAdapter)
-    if is_adapter:
-        adapter = model_or_adapter
-    else:
-        adapter = adapter_catalog[model_or_adapter]
+    adapter = adapter_for(model_or_adapter)
     facets = facets_for(adapter, params)
     facet_search = adapter.facet_search(*facets)
     return facet_search(params)
