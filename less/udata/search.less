@@ -224,23 +224,13 @@ ul.search-results {
 .multisearch {
 
     section.breadcrumb-bar {
-        height: 42px;
-        // min-height: 42px;
-
-        @media (max-width: @screen-md-min) {
-            height: 84px;
-        }
-
-        @media (max-width: @screen-sm-min) {
-            height: 120px;
-        }
+        @height: 42px;
+        height: @height;
 
         .left-bar {
-            // line-height: 1px;
             background: none;
             padding: 0;
-            // height: 100%;
-            // height: auto;
+            min-height: @height;
         }
 
         .search-toolbar {
@@ -248,6 +238,21 @@ ul.search-results {
             padding-bottom: 9px;
         }
 
+        @media (max-width: @screen-md-min) {
+            @height: 84px;
+            height: @height;
+            .left-bar {
+                min-height: @height;
+            }
+        }
+
+        @media (max-width: @screen-sm-min) {
+            @height: 120px;
+            height: @height;
+            .left-bar {
+                min-height: @height;
+            }
+        }
     }
 
     .nav-tabs {
