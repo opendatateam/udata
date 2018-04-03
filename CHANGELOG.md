@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Normalize resource.format (migration - :warning: need reindexing) [#1563](https://github.com/opendatateam/udata/pull/1563)
 
 ## 1.3.5 (2018-04-03)
 

@@ -23,6 +23,12 @@ class ChecksumForm(ModelForm):
     value = fields.StringField()
 
 
+def normalize_format(data):
+    '''Normalize format field: strip and lowercase'''
+    if data:
+        return data.strip().lower()
+
+
 class BaseResourceForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'))
@@ -33,7 +39,10 @@ class BaseResourceForm(ModelForm):
                       'a remote file or an API'))
     url = fields.UploadableURLField(
         _('URL'), [validators.required()], storage=resources)
-    format = fields.StringField(_('Format'))
+    format = fields.StringField(
+        _('Format'),
+        filters=[normalize_format],
+    )
     checksum = fields.FormField(ChecksumForm)
     mime = fields.StringField(
         _('Mime type'),
