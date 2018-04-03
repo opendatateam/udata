@@ -9,11 +9,11 @@
     track="remote_id"
     :empty="empty"
     :tint="job.status | statusClass">
-    <header class="row" slot="header">
-        <div class="col-xs-12" :class="{ 'col-md-6': job.created, 'col-md-12': job.created }">
+    <div class="row" slot="header">
+        <div class="col-xs-12" :class="{'col-lg-6': job.created}" v-show="withSlot">
             <slot></slot>
         </div>
-        <dl class="dl-horizontal col-xs-12 col-md-6" v-show="job.created">
+        <dl class="dl-horizontal col-xs-12" :class="{'col-lg-6': withSlot}" v-show="job.created">
             <dt>{{ _('Created at') }}</dt>
             <dd>{{ job.created | dt }}</dd>
             <dt>{{ _('Ended at') }}</dt>
@@ -46,7 +46,7 @@
                 <strong>{{job.items.length}}</strong>
             </dd>
         </dl>
-    </header>
+    </div>
 </datatable>
 </div>
 </template>
@@ -69,7 +69,8 @@ export default {
             type: Boolean,
             default: undefined
         },
-        empty: String
+        empty: String,
+        withSlot: {type: Boolean, default: false}
     },
     components: {Datatable},
     data() {

@@ -11,6 +11,8 @@
             <dl class="dl-horizontal">
                 <dt>{{ _('Backend') }}</dt>
                 <dd>{{ source.backend }}</dd>
+                <dt>{{ _('URL') }}</dt>
+                <dd>{{ source.url }}</dd>
                 <dt>{{ _('Scheduling') }}</dt>
                 <dd v-if="source.schedule">{{ source.schedule }}</dd>
                 <dd v-else>{{ _('Not scheduled') }}</dd>
