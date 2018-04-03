@@ -1,6 +1,6 @@
 <template>
 <div>
-<job-widget :job="job" :loading="loading" :empty="empty">
+<job-widget :job="job" :loading="loading" :empty="empty" with-slot>
     <div class="text-center">
         <button class="btn btn-primary btn-flat" @click="preview">
             <span class="fa fa-cog"></span>

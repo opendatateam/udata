@@ -39,10 +39,10 @@ class OEmbedAPI(API):
         'reuses.show': 'reuse',
     }
 
-    @api.doc('oembed', parser=oembeds_parser)
+    @api.doc('oembed', parser=oembed_parser)
     def get(self):
         """
-        En OEmbed compliant API endpoint
+        An OEmbed compliant API endpoint
 
         See: http://oembed.com/
 
@@ -54,7 +54,13 @@ class OEmbedAPI(API):
 
         url = args['url']
 
+        # Fix flask not detecting URL with https://domain:443/
+        if 'https:' in url and ':443/' in url:
+            url = url.replace(':443/', '/')
+
         with current_app.test_request_context(url) as ctx:
+            if not ctx.request.endpoint:
+                api.abort(404, 'Unknown URL')
             endpoint = ctx.request.endpoint.replace('_redirect', '')
             view_args = ctx.request.view_args
 
