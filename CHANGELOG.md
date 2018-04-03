@@ -10,6 +10,7 @@
 - Add the missing harvester URL in admin [#1554](https://github.com/opendatateam/udata/pull/1554)
 - Fix harvester preview/job layout [#1553](https://github.com/opendatateam/udata/pull/1553)
 - Fix some search unicode issues [#1555](https://github.com/opendatateam/udata/pull/1555)
+- Small fixes on OEmbed URL detection [#1556](https://github.com/opendatateam/udata/pull/1556)
 
 ## 1.3.4 (2018-03-28)
 
