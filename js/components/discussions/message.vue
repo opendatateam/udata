@@ -31,6 +31,14 @@
         flex-basis: 100%;
     }
 }
+
+@media only screen and (max-width: 480px){
+    .avatar img {
+        width : 32px;
+        height: 32px;
+    }
+}
+
 </style>
 <template>
     <div class="message">
