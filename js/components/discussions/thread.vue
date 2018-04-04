@@ -8,20 +8,14 @@
         </div>
     </div>
     <div class="list-group">
-        <div v-for="(index, response) in discussion.discussion"
-            id="{{ discussionIdAttr }}-{{ index }}"
-            class="list-group-item list-group-indent animated discussion-messages-list"
-            v-show="detailed">
-
-            <div>{{{ response.content | markdown }}}</div>
-            
-            <div>
-                <avatar :user="response.posted_by" :size="18"></avatar>
-                {{ response.posted_by.first_name }} {{ response.posted_by.last_name }}
-                {{ formatDate(response.posted_on) }} 
-                <a href="#{{ discussionIdAttr }}-{{ index }}"><span class="fa fa-link"></span></a>
-            </div>
-        </div>
+       <thread-message
+           v-for="(index, response) in discussion.discussion"
+           id="{{ discussionIdAttr }}-{{ index }}"
+           :discussion="discussionIdAttr"
+           :index="index"
+           :message="response"
+           class="list-group-item list-group-indent animated discussion-messages-list"
+       ></threadmessage>
     </div>
 
     <div class="panel-footer">
@@ -43,12 +37,13 @@
 
 <script>
 import config from 'config';
-import Avatar from 'components/avatar.vue';
+import ThreadMessage from 'components/discussions/message.vue';
 import ThreadForm from 'components/discussions/thread-form.vue';
 import moment from 'moment';
+import Avatar from 'components/avatar.vue';
 
 export default {
-    components: {Avatar, ThreadForm},
+    components: {ThreadMessage, ThreadForm},
     props: {
         discussion: Object,
         position: Number,
@@ -123,9 +118,6 @@ export default {
             } else {
                 this.$scrollTo(this);
             }
-        },
-        formatDate(val) {
-            return moment(val).format('LL');
         }
     }
 }
