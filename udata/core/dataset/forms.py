@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import ModelForm, fields, validators, widgets
+from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
@@ -9,8 +9,8 @@ from udata.core.spatial.forms import SpatialCoverageField
 
 from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
-    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES,
-    LEGACY_FREQUENCIES
+    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
+    LEGACY_FREQUENCIES, RESOURCE_TYPES
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
@@ -33,10 +33,14 @@ class BaseResourceForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'))
     filetype = fields.RadioField(
-        _('Type'), [validators.required()],
-        choices=RESOURCE_TYPES.items(), default='file',
+        _('File type'), [validators.required()],
+        choices=RESOURCE_FILETYPES.items(), default='file',
         description=_('Whether the resource is an uploaded file, '
                       'a remote file or an API'))
+    type = fields.RadioField(
+        _('Type'), [validators.required()],
+        choices=RESOURCE_TYPES.items(), default='other',
+        description=_('Resource type (documentation, API...)'))
     url = fields.UploadableURLField(
         _('URL'), [validators.required()], storage=resources)
     format = fields.StringField(
