@@ -369,21 +369,9 @@ def format_number(number):
 @front.app_template_filter()
 def filesize(value):
     '''Display a human readable filesize'''
-
-    if value < 1000:
-        filesize = '1'
-        metric = _('KB')
-    elif 1000000 > value >= 1000:
-        filesize = '%.0f' % float(value/1000)
-        metric = _('KB')
-    elif 1000000000 > value >= 1000000:
-        filesize = '%.0f' % float(value/1000000)
-        metric = _('MB')
-    elif 1000000000000 > value >= 1000000000:
-        filesize = '%.1f' % float(value/1000000000)
-        metric = _('GB')
-    elif value >= 1000000000000:
-        filesize = '%.1f' % float(value/1000000000000)
-        metric = _('TB')
-
-    return '{0}{1}'.format(format_number(filesize), metric)
+    suffix = 'o'
+    for unit in '', 'K', 'M', 'G', 'T', 'P', 'E', 'Z':
+        if abs(value) < 1024.0:
+            return "%3.1f%s%s" % (value, unit, suffix)
+        value /= 1024.0
+    return "%.1f%s%s" % (value, 'Y', suffix)
