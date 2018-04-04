@@ -1,13 +1,56 @@
+<style lang="less">
+.message {
+    display: flex;
+    flex-direction: row;
+    
+    padding-top: 1.25em;
+
+    & > div {
+        display: flex;
+        flex-grow: 1;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        flex-basis: 100%;
+    }
+    
+    & > .avatar {
+        margin-right: 1em;
+        flex-basis: auto;
+    }
+
+    div.author {
+        font-weight: bold;
+        margin-bottom: 0.5em;
+    }
+
+    div.posted_on {
+        text-align: right;
+    }
+
+    div.body {
+        flex-basis: 100%;
+    }
+}
+</style>
 <template>
-    <div>
-        <div>{{{ message.content | markdown }}}</div>
-        
-        <div>
-            <avatar :user="message.posted_by" :size="18"></avatar>
-            {{ message.posted_by.first_name }} {{ message.posted_by.last_name }}
-            {{ formatDate(message.posted_on) }} 
-            <a href="#{{ discussion }}-{{ index }}"><span class="fa fa-link"></span></a>
+    <div class="message">
+        <div class="avatar">
+            <avatar :user="message.posted_by"></avatar>
         </div>
+        <div>
+            <div class="author">
+                {{ message.posted_by.first_name }} {{ message.posted_by.last_name }}
+            </div>
+           
+            <div class="posted_on">
+                {{ formatDate(message.posted_on) }} 
+                <a href="#{{ discussion }}-{{ index }}"><span class="fa fa-link"></span></a>
+            </div>
+
+            <div class="body">
+                {{{ message.content | markdown }}}
+            </div> 
+       </div>
     </div>
 </template>
 <script>

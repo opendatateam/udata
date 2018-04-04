@@ -14,7 +14,7 @@
            :discussion="discussionIdAttr"
            :index="index"
            :message="response"
-           class="list-group-item list-group-indent animated discussion-messages-list"
+           class="list-group-item"
        ></threadmessage>
     </div>
 
