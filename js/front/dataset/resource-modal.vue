@@ -30,7 +30,7 @@
           <dd v-if="checkResults['check:date']"> {{ checkResults['check:date']|dt }}</dd>
           <dt v-if="checkResults['check:status']">{{ _('Last checked result') }}</dt>
           <dd v-if="checkResults['check:status']">
-              <availability-from-status :status="checkResults['check:status']"></availability-from-status>
+              <availability :status="checkResults['check:status']"></availability>
           </dd>
         </dl>
     </div>
@@ -45,14 +45,14 @@
 
 <script>
 import Modal from 'components/modal.vue';
-import AvailabilityFromStatus from './resource/availability-from-status.vue';
+import Availability from './resource/availability.vue';
 import pubsub from 'pubsub';
 
 export default {
     props: {
         resource: Object
     },
-    components: {Modal, AvailabilityFromStatus},
+    components: {Modal, Availability},
     computed: {
         checkResults() {
             return this.resource.extras.reduce((obj, extra) => {

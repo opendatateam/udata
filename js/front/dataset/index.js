@@ -13,7 +13,7 @@ import Velocity from 'velocity-animate';
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
-import AvailabilityFromStatus from './resource/availability-from-status.vue';
+import Availability from './resource/availability.vue';
 import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
@@ -21,6 +21,7 @@ import ShareButton from 'components/buttons/share.vue';
 import IntegrateButton from 'components/buttons/integrate.vue';
 import IssuesButton from 'components/buttons/issues.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
+import resource_types from 'models/resource_types';
 
 
 function parseUrl(url) {
@@ -35,18 +36,18 @@ new Vue({
     mixins: [FrontMixin],
     components: {
         LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton,
-        ShareButton, FollowButton, AvailabilityFromStatus,
+        ShareButton, FollowButton, Availability,
     },
     data() {
         return {
             dataset: this.extractDataset(),
             userReuses: [],
-            checkResults: [],
+            checkUrlEnabled: config.check_urls,
+            visibleTypeLists: [],
         };
     },
     ready() {
         this.loadCoverageMap();
-        this.checkResources();
         this.fetchReuses();
         if (document.location.hash) {
             this.$nextTick(() => { // Wait for data to be binded
@@ -56,6 +57,15 @@ new Vue({
         log.debug('Dataset display page ready');
     },
     methods: {
+        /**
+         * Is a resource type list collapsed
+         * @type {String}
+         * @return {Boolean}
+         */
+        isTypeListVisible(type) {
+            return this.visibleTypeLists.indexOf(type) !== -1;
+        },
+
         /**
          * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
@@ -93,7 +103,7 @@ new Vue({
             new Velocity(e.target, {height: 0, opacity: 0}, {complete(els) {
                 els[0].remove();
             }});
-            this.checkResourcesCollapsed(type);
+            this.visibleTypeLists.push(type);
         },
 
         /**
@@ -146,94 +156,6 @@ new Vue({
         },
 
         /**
-         * Asynchronously check non-collapsed resources status
-         */
-        checkResources() {
-            if (config.check_urls) {
-                const types = this.dataset.resources
-                    .map(r => r.type)
-                    .filter((v, i, a) => a.indexOf(v) === i);
-                types.forEach(type => {
-                    this.dataset.resources
-                        .filter(r => r.type == type)
-                        .slice(0, config.dataset_max_resources_uncollapsed)
-                        .forEach(this.checkResource);
-                });
-            }
-        },
-
-        /**
-         * Asynchronously check collapsed resources status
-         */
-        checkResourcesCollapsed(type) {
-            if (config.check_urls) {
-                this.dataset.resources
-                    .filter(r => r.type == type)
-                    .slice(config.dataset_max_resources_uncollapsed)
-                    .forEach(this.checkResource);
-            }
-        },
-
-        /**
-         * Get check related extras from JSON-LD
-         * @param {Array} extras A list of extras in JSON-LD format
-         * @return {Object} Check extras as a hash, if any
-         */
-        getCheckExtras(extras) {
-            return extras.reduce((obj, extra) => {
-                if (extra.name.startsWith('check:')) {
-                    obj[extra.name] = extra.value;
-                }
-                return obj;
-            }, {});
-        },
-
-        /**
-         * Get a cached checked result from extras if resource is not flagged
-         * as needing a new check
-         * @param  {Object} resource A resource as extracted from JSON-LD
-         */
-        getCachedCheck(resource) {
-            if (!resource.needCheck) {
-                const extras = this.getCheckExtras(resource.extras || []);
-                if (extras['check:status']) {
-                    return extras
-                }
-            }
-        },
-
-        /**
-         * Get cached check or API check
-         * @param  {Object} resource A resource element from DOM
-         * @param  {String} checkurl The API check url
-         */
-        getResourceCheckStatus(resource_el, checkurl) {
-            const cachedCheck = this.getCachedCheck(resource_el);
-            return (cachedCheck && Promise.resolve(cachedCheck)) || this.$api.get(checkurl);
-        },
-
-        /**
-         * Asynchronously check a displayed resource status
-         * @param  {Object} resource A resource as extracted from JSON-LD
-         */
-        checkResource(resource) {
-            const url = parseUrl(resource.contentUrl);
-            const resource_el = document.querySelector(`#resource-${resource['@id']}`);
-            const el = resource_el.querySelector('.healthcheck-container');
-            const checkurl = resource_el.dataset.checkurl;
-            this.getResourceCheckStatus(resource, checkurl)
-                .then((res) => {
-                    this.checkResults.push({
-                        id: resource['@id'],
-                        status: res['check:status']
-                    });
-                })
-                .catch(error => {
-                    console.log('Something went wrong with the linkchecker', error);
-                });
-        },
-
-        /**
          * Suggest a tag aka.trigger a new discussion
          */
         suggestTag() {
@@ -256,12 +178,10 @@ new Vue({
         },
 
         /**
-         * Return currently computed check result for resourceId
+         * Get resource by id from dataset JSON-LD
          */
-        checkResultFor(resourceId) {
-            return this.checkResults.find((res) => {
-                return res.id == resourceId;
-            })
+        getResourceById(resourceId) {
+            return this.dataset.resources.find(r => r['@id'] === resourceId);
         },
     }
 });
