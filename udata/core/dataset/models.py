@@ -81,8 +81,9 @@ RESOURCE_TYPES = OrderedDict([
     ('other', _('Other')),
 ])
 
+RESOURCE_FILETYPE_FILE = 'file'
 RESOURCE_FILETYPES = OrderedDict([
-    ('file', _('Uploaded file')),
+    (RESOURCE_FILETYPE_FILE, _('Uploaded file')),
     ('remote', _('Remote file')),
 ])
 
