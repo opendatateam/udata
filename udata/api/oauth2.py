@@ -235,6 +235,9 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         if token and not token.is_refresh_token_expired():
             return token
 
+    def authenticate_user(self, credential):
+        return credential.user
+
 
 class RevokeToken(RevocationEndpoint):
     def query_token(self, token, token_type_hint, client):
