@@ -7,6 +7,8 @@
 } %}
 
 {% set bundle = 'apidoc' %}
+{% set org_list = organizations | list %}
+{% set main_org = org_list | first %} 
 
 {% block extra_head %}
 <meta name="swagger-specs" content="{{ specs_url }}" />
@@ -79,7 +81,7 @@
     "data": [{...}, {...}],
     "page": 1,
     "page_size": 20,
-    "total": 43,
+    "total": {{ org_list|count }},
     "next_page": "https://{{config.SERVER_NAME}}/api/endpoint/?page=2",
     "previous_page": null
 }</code></pre>
@@ -115,18 +117,18 @@ Access-Control-Allow-Credentials: true
 
             ... LOTS OF DATA ...
 
-            "name": "Organization Name",
-            "page": "https://{{config.SERVER_NAME}}/organizations/organization-name/",
-            "slug": "organization-name",
-            "uri": "https://{{config.SERVER_NAME}}/api/1/organizations/organization-name/",
-            "url": null
+            "name": "{{ main_org.name }}",
+            "page": "https://{{config.SERVER_NAME}}/organizations/{{ main_org.slug }}/",
+            "slug": "{{ main_org.slug }}",
+            "uri": "https://{{config.SERVER_NAME}}/api/1/organizations/{{ main_org.slug }}/",
+            "url": "{{ main_org.url }}"
         }
     ],
     "next_page": "https://{{config.SERVER_NAME}}/api/1/organizations/?page=2&page_size=1",
     "page": 1,
     "page_size": 1,
     "previous_page": null,
-    "total": 529
+    "total": "{{ org_list|count }}"
 }
 </code></pre>
 
@@ -143,7 +145,7 @@ Access-Control-Allow-Credentials: true
                 <p>{% trans %}It should return something in this vein:
                 {% endtrans %}</p>
 
-                <pre><code class="json">"Organization Name"</code></pre>
+                <pre><code class="json">"{{ main_org.name }}"</code></pre>
 
                 <p>{% trans %}That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:
                 {% endtrans %}</p>
@@ -167,18 +169,8 @@ Access-Control-Allow-Credentials: true
                 <pre><code class="json">$ http $API'organizations/' | jq '.data[].name'</code></pre>
 
 <pre><code class="json">
-"Organization name 1"
-"Organization name 2"
-"Organization name 3"
-"Organization name 4"
-"Organization name 5"
-"Organization name 6"
-"Organization name 7"
-"Organization name 8"
-"Organization name 9"
-"Organization name 10"
-...
-"Organization name X"
+{% for org in org_list[0:20] %}"{{ org.name }}"
+{% endfor %}
 </code></pre>
 
                 <p>{% trans %}That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:
@@ -187,62 +179,35 @@ Access-Control-Allow-Credentials: true
                 <pre><code class="json">$ http $API'organizations/?page_size=5' | jq '.data[].uri'</code></pre>
 
 <pre><code class="json">
-"https://{{config.SERVER_NAME}}/api/1/organizations/organization-uri-1/"
-"https://{{config.SERVER_NAME}}/api/1/organizations/organization-uri-2/"
-"https://{{config.SERVER_NAME}}/api/1/organizations/organization-uri-3/"
-"https://{{config.SERVER_NAME}}/api/1/organizations/organization-uri-4/"
-"https://{{config.SERVER_NAME}}/api/1/organizations/organization-uri-5/"
+{% for org in org_list[0:5] %}"https://{{config.SERVER_NAME}}/api/1/organizations/{{ org.slug }}/"
+{% endfor %}
 </code></pre>
 
                 <p>{% trans %}Now we'll be able to retrieve a unique organization thanks to the returned URI:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http $API'organizations/organization-uri-x/' | jq '.'</code></pre>
+                <pre><code class="json">$ http $API'organizations/{{main_org.slug}}/' | jq '.'</code></pre>
 
                 <p>{% trans %}That's a lot of data to compute. Let's refine these data, if we want only metrics:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http $API'organizations/organization-uri-x/' | jq '.metrics'</code></pre>
+                <pre><code class="json">$ http $API'organizations/{{main_org.slug}}/' | jq '.metrics'</code></pre>
 
 <pre><code class="json">
 {
-  "dataset_views": 16345,
-  "datasets": 178,
-  "followers": 79,
-  "members": 16,
-  "nb_hits": 0,
-  "nb_uniq_visitors": 0,
-  "nb_visits": 0,
-  "permitted_reuses": 82,
-  "resource_downloads": 4316,
-  "reuse_views": 257,
-  "reuses": 3,
-  "views": 699
+ {% for metric, value in main_org.metrics.iteritems() %}"{{ metric }}": {{ value }},
+ {% endfor %}
 }
 </code></pre>
 
                 <p>{% trans %}Or maybe just the name of the members of that organization:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http $API'organizations/organization-uri-x/' | jq '.members[].user.last_name'</code></pre>
+                <pre><code class="json">$ http $API'organizations/{{main_org.slug}}/' | jq '.members[].user.last_name'</code></pre>
 
 <pre><code class="json">
-"Martin"
-"Lee"
-"Zhang"
-"Wang"
-"Nguyen"
-"Garcia"
-"Fernandes"
-...
-"Tales"
-"Gonzalez"
-"Hernandez"
-"Smith"
-"Smirnov"
-"Müller"
-"Santos"
-"Bernard"
+{% for member in main_org.members|list %}"{{member.user.last_name}}"
+{% endfor %}
 </code></pre>
 
                 <p>{% trans %}It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href="http://stedolan.github.io/jq/tutorial/">jq's tutorial</a> and <a href="http://stedolan.github.io/jq/manual/">manual</a> if you want to browse the API through the command-line in depth.
