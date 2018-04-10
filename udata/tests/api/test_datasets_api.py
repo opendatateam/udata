@@ -646,7 +646,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(data['title'], 'test.txt')
 
     def test_create_filetype_file_unallowed_domain(self):
-        self.app.config['RESOURCES_FILETYPE_FILE_ALLOWED_DOMAINS'] = []
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
         data = ResourceFactory.as_dict()
         data['filetype'] = RESOURCE_FILETYPE_FILE
         with self.api_user():
@@ -655,7 +655,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assert400(response)
 
     def test_create_filetype_file_allowed_domain(self):
-        self.app.config['RESOURCES_FILETYPE_FILE_ALLOWED_DOMAINS'] = [
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = [
             'udata.gouv.fr',
         ]
         data = ResourceFactory.as_dict()
@@ -667,7 +667,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
 
     def test_create_filetype_file_server_name(self):
-        self.app.config['RESOURCES_FILETYPE_FILE_ALLOWED_DOMAINS'] = []
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
         data = ResourceFactory.as_dict()
         data['filetype'] = RESOURCE_FILETYPE_FILE
         data['url'] = 'http://%s/resource' % self.app.config['SERVER_NAME']

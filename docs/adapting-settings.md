@@ -93,7 +93,7 @@ The duration used for templates' cache, in minutes.
 
 This is the allowed resources extensions list that user can upload.
 
-### RESOURCES_FILETYPE_FILE_ALLOWED_DOMAINS
+### RESOURCES_FILE_ALLOWED_DOMAINS
 
 **default**: `tuple()`
 

@@ -216,7 +216,7 @@ class Defaults(object):
     ]
     # Whitelist of urls domains for resource with filetype `file`
     # SERVER_NAME is always included, `*` is a supported value (wildcard)
-    RESOURCES_FILETYPE_FILE_ALLOWED_DOMAINS = tuple()
+    RESOURCES_FILE_ALLOWED_DOMAINS = tuple()
 
     # How much time upload chunks are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
@@ -275,7 +275,7 @@ class Testing(object):
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
     USE_METRICS = False
-    RESOURCES_FILETYPE_FILE_ALLOWED_DOMAINS = ['*']
+    RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
 
 
 class Debug(Defaults):

@@ -40,7 +40,7 @@ def enforce_filetype_file(form, field):
     url = form._fields.get('url').data
     domain = urlparse(url).netloc
     allowed_domains = current_app.config.get(
-        'RESOURCES_FILETYPE_FILE_ALLOWED_DOMAINS', [])
+        'RESOURCES_FILE_ALLOWED_DOMAINS', [])
     allowed_domains += [current_app.config.get('SERVER_NAME')]
     if '*' in allowed_domains:
         return
