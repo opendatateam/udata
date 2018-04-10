@@ -93,6 +93,15 @@ The duration used for templates' cache, in minutes.
 
 This is the allowed resources extensions list that user can upload.
 
+### RESOURCES_FILE_ALLOWED_DOMAINS
+
+**default**: `tuple()`
+
+Whitelist of urls domains allowed for resources with `filetype` equals to `file`.
+
+`SERVER_NAME` is always included.
+
+`*` is a supported value as a wildcard allowing all domains.
 
 ## Spatial configuration
 

@@ -4,6 +4,7 @@
 
 - Normalize resource.format (migration - :warning: need reindexing) [#1563](https://github.com/opendatateam/udata/pull/1563)
 - Typed resources [#1398](https://github.com/opendatateam/udata/issues/1398)
+- [breaking] Enforce a domain whitelist when resource.filetype is file [#1567](https://github.com/opendatateam/udata/issues/1567)
 
 ## 1.3.5 (2018-04-03)
 

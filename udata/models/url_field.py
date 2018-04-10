@@ -55,7 +55,7 @@ URL_REGEX = re.compile(
 class URLField(MEURLField):
     '''
     An URL field that automatically strips extra spaces
-    and support uncode domain and paths.
+    and support unicode domain and paths.
 
     Public URL can be enforced with `public=True`
 

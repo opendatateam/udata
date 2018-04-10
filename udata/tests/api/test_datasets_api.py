@@ -19,6 +19,7 @@ from . import APITestCase
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
+from udata.core.dataset.models import RESOURCE_FILETYPE_FILE
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
@@ -643,6 +644,37 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data['title'], 'test.txt')
+
+    def test_create_filetype_file_unallowed_domain(self):
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
+        data = ResourceFactory.as_dict()
+        data['filetype'] = RESOURCE_FILETYPE_FILE
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert400(response)
+
+    def test_create_filetype_file_allowed_domain(self):
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = [
+            'udata.gouv.fr',
+        ]
+        data = ResourceFactory.as_dict()
+        data['filetype'] = RESOURCE_FILETYPE_FILE
+        data['url'] = 'http://udata.gouv.fr/resource'
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert201(response)
+
+    def test_create_filetype_file_server_name(self):
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
+        data = ResourceFactory.as_dict()
+        data['filetype'] = RESOURCE_FILETYPE_FILE
+        data['url'] = 'http://%s/resource' % self.app.config['SERVER_NAME']
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert201(response)
 
     def test_reorder(self):
         self.dataset.resources = ResourceFactory.build_batch(3)
