@@ -28,9 +28,9 @@
           <dd v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount"> {{ resource.interactionStatistic.userInteractionCount }}</dd>
           <dt v-if="checkResults['check:date']">{{ _('Last checked on') }}</dt>
           <dd v-if="checkResults['check:date']"> {{ checkResults['check:date']|dt }}</dd>
-          <dt v-if="checkAvailability">{{ _('Last checked result') }}</dt>
-          <dd v-if="checkAvailability">
-              <span :class="['label', checkAvailability.class]">{{ checkAvailability.message }}</span>
+          <dt v-if="checkResults['check:status']">{{ _('Last checked result') }}</dt>
+          <dd v-if="checkResults['check:status']">
+              <availability :status="checkResults['check:status']"></availability>
           </dd>
         </dl>
     </div>
@@ -45,13 +45,14 @@
 
 <script>
 import Modal from 'components/modal.vue';
+import Availability from './resource/availability.vue';
 import pubsub from 'pubsub';
 
 export default {
     props: {
         resource: Object
     },
-    components: {Modal},
+    components: {Modal, Availability},
     computed: {
         checkResults() {
             return this.resource.extras.reduce((obj, extra) => {
@@ -61,25 +62,6 @@ export default {
                 return obj;
             }, {});
         },
-        checkAvailability() {
-            const status = this.checkResults['check:status'];
-            if (status >= 200 && status < 400) {
-                return {
-                    message: this._('Available'),
-                    class: 'label-success'
-                }
-            } else if (status >= 400 && status < 500) {
-                return {
-                    message: this._('Unavailable'),
-                    class: 'label-danger'
-                }
-            } else if (status >= 500) {
-                return {
-                    message: this._('Unavailable (maybe temporary)'),
-                    class: 'label-warning'
-                }
-            }
-        }
     },
     methods: {
         onClick() {

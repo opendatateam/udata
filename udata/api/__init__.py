@@ -19,6 +19,7 @@ from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.core.user.models import User
+from udata.core.organization.models import Organization
 from udata.sitemap import sitemap
 
 from . import fields, oauth2
@@ -267,7 +268,9 @@ def default_api():
 
 @apidoc.route('/apidoc/')
 def swaggerui():
-    return theme.render('apidoc.html', specs_url=api.specs_url)
+    params = {"datasets": "many"}
+    organizations = search.iter(Organization, **params)
+    return theme.render('apidoc.html', specs_url=api.specs_url, organizations=organizations)
 
 
 @sitemap.register_generator
