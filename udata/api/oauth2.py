@@ -280,10 +280,10 @@ def revoke_token():
 @login_required
 def authorize(*args, **kwargs):
     if request.method == 'GET':
-        grant = oauth.validate_authorization_request()
+        grant = oauth.validate_consent_request(end_user=current_user)
         # Bypass authorization screen for internal clients
         if grant.client.internal:
-            return oauth.create_authorization_response(current_user)
+            return oauth.create_authorization_response(grant_user=current_user)
         return theme.render('api/oauth_authorize.html', grant=grant)
     elif request.method == 'POST':
         accept = 'accept' in request.form
