@@ -322,6 +322,7 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
+    @pytest.mark.oauth(secret='')
     def test_implicit_grant_token(self, client, oauth):
         client.login()
         response = client.post(url_for(
