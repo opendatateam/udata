@@ -9,11 +9,11 @@ See the documentatiosn here:
  - https://docs.authlib.org/en/latest/spec/rfc6750.html
  - https://docs.authlib.org/en/latest/spec/rfc7009.html
 
-Authlib provides SqlAlchemny mixins which help understanding:
+Authlib provides SQLAlchemny mixins which help understanding:
  - https://github.com/lepture/authlib/blob/master/authlib/flask/oauth2/sqla.py
 
 As well as a sample application:
- - https://github.com/authlib/playground
+ - https://github.com/authlib/example-oauth2-server
 '''
 
 from bson import ObjectId
@@ -25,7 +25,7 @@ from authlib.flask.oauth2 import (
     AuthorizationServer, ResourceProtector, current_token
 )
 from authlib.specs.rfc6749 import grants, ClientMixin
-from authlib.specs.rfc6749.errors import InvalidClientError
+from authlib.specs.rfc6750 import BearerTokenValidator
 from authlib.specs.rfc7009 import RevocationEndpoint
 from flask import abort, request
 from flask_security.utils import verify_password
@@ -43,6 +43,7 @@ from udata.core.storages import images, default_image_basename
 
 blueprint = I18nBlueprint('oauth', __name__, url_prefix='/oauth')
 oauth = AuthorizationServer()
+require_oauth = ResourceProtector()
 
 
 GRANT_EXPIRATION = 100  # 100 seconds
@@ -61,7 +62,7 @@ SCOPES = {
 
 
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
-    secret = db.StringField(default=lambda: gen_salt(50), required=True)
+    secret = db.StringField(default=lambda: gen_salt(50))
 
     name = db.StringField(required=True)
     description = db.StringField()
@@ -104,15 +105,13 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         '''Implement required ClientMixin method'''
         return redirect_uri in self.redirect_uris
 
-    def check_client_type(self, client_type):
-        if client_type == 'confidential':
-            return self.confidential
-        elif client_type == 'public':
-            return not self.confidential
-        raise ValueError('Invalid client_type')
-
     def check_client_secret(self, client_secret):
         return self.secret == client_secret
+
+    def check_token_endpoint_auth_method(self, method):
+        if not self.has_client_secret():
+            return method == 'none'
+        return method in ('client_secret_post', 'client_secret_basic')
 
     def check_response_type(self, response_type):
         return True
@@ -192,6 +191,11 @@ class OAuth2Token(db.Document):
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        'client_secret_basic',
+        'client_secret_post',
+    ]
+
     def create_authorization_code(self, client, grant_user, request):
         code = generate_token(48)
         expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
@@ -214,46 +218,8 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def delete_authorization_code(self, authorization_code):
         authorization_code.delete()
 
-    def create_access_token(self, token, client, authorization_code):
-        scopes = token.pop('scope', '').split(' ')
-        OAuth2Token.objects.create(
-            client=client,
-            user=authorization_code.user,
-            scopes=scopes,
-            **token
-        )
-
-    def authenticate_client(self):
-        '''
-        Parse the authenticated client.
-
-        Support both Basic Auth credentials and request-body credentials.
-
-        See: https://github.com/lepture/authlib/blob/v0.5.1/authlib/specs/rfc6749/grants/authorization_code.py#L292-L331
-        '''
-        client_params = self.request.extract_authorization_header()
-        params = client_params or self.request.data
-        if params:
-            # authenticate the client if client authentication is included
-            client_id = params.get('client_id')
-            client_secret = params.get('client_secret')
-            client = self.get_and_validate_client(client_id)
-            if not client.check_client_secret(client_secret):
-                raise InvalidClientError()
-            return client
-
-        raise InvalidClientError('Missing client authentication')
-
-
-class ClientCredentialsGrant(grants.ClientCredentialsGrant):
-    def create_access_token(self, token, client):
-        scopes = token.pop('scope', '').split(' ')
-        OAuth2Token.objects.create(
-            client=client,
-            user=client.owner,
-            scopes=scopes,
-            **token
-        )
+    def authenticate_user(self, authorization_code):
+        return authorization_code.user
 
 
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
@@ -262,26 +228,6 @@ class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
         if user and verify_password(password, user.password):
             return user
 
-    def create_access_token(self, token, client, user):
-        scopes = token.pop('scope', '').split(' ')
-        OAuth2Token.objects.create(
-            client=client,
-            user=user,
-            scopes=scopes,
-            **token
-        )
-
-
-class ImplicitGrant(grants.ImplicitGrant):
-    def create_access_token(self, token, client, grant_user):
-        scopes = token.pop('scope', '').split(' ')
-        OAuth2Token.objects.create(
-            client=client,
-            user=grant_user._get_current_object(),
-            scopes=scopes,
-            **token
-        )
-
 
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     def authenticate_refresh_token(self, refresh_token):
@@ -289,8 +235,8 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         if token and not token.is_refresh_token_expired():
             return token
 
-    def create_access_token(self, token, client, authenticated_token):
-        authenticated_token.update(**token)
+    def authenticate_user(self, credential):
+        return credential.user
 
 
 class RevokeToken(RevocationEndpoint):
@@ -302,16 +248,21 @@ class RevokeToken(RevocationEndpoint):
             qs = qs(db.Q(access_token=token) | db.Q(refresh_token=token))
         return qs.first()
 
-    def invalidate_token(self, token):
+    def revoke_token(self, token):
+        # TODO: mark token as revoked
         token.delete()
 
 
-oauth.register_grant_endpoint(AuthorizationCodeGrant)
-oauth.register_grant_endpoint(ClientCredentialsGrant)
-oauth.register_grant_endpoint(PasswordGrant)
-oauth.register_grant_endpoint(ImplicitGrant)
-oauth.register_grant_endpoint(RefreshTokenGrant)
-oauth.register_revoke_token_endpoint(RevokeToken)
+class BearerToken(BearerTokenValidator):
+    def authenticate_token(self, token_string):
+        return OAuth2Token.objects(access_token=token_string).first()
+
+    def request_invalid(self, request):
+        return False
+
+    def token_revoked(self, token):
+        # TODO: return token.revoked
+        return False
 
 
 @blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')
@@ -322,24 +273,26 @@ def access_token():
 
 @blueprint.route('/revoke', methods=['POST'], localize=False)
 def revoke_token():
-    return oauth.create_revocation_response()
+    return oauth.create_endpoint_response(RevokeToken.ENDPOINT_NAME)
 
 
 @blueprint.route('/authorize', methods=['GET', 'POST'])
 @login_required
 def authorize(*args, **kwargs):
     if request.method == 'GET':
-        grant = oauth.validate_authorization_request()
+        grant = oauth.validate_consent_request(end_user=current_user)
         # Bypass authorization screen for internal clients
         if grant.client.internal:
-            return oauth.create_authorization_response(current_user)
+            return oauth.create_authorization_response(grant_user=current_user)
         return theme.render('api/oauth_authorize.html', grant=grant)
     elif request.method == 'POST':
         accept = 'accept' in request.form
         decline = 'decline' in request.form
         if accept and not decline:
-            return oauth.create_authorization_response(current_user)
-        return oauth.create_authorization_response(None)
+            grant_user = current_user
+        else:
+            grant_user = None
+        return oauth.create_authorization_response(grant_user=grant_user)
     else:
         abort(405)
 
@@ -354,11 +307,20 @@ def query_client(client_id):
     return OAuth2Client.objects(id=ObjectId(client_id)).first()
 
 
-def query_token(access_token=access_token):
-    return OAuth2Token.objects(access_token=access_token).first()
-
-
-require_oauth = ResourceProtector(query_token)
+def save_token(token, request):
+    scopes = token.pop('scope', '').split(' ')
+    if request.grant_type == 'refresh_token':
+        credential = request.credential
+        credential.update(scopes=scopes, **token)
+    else:
+        client = request.client
+        user = request.user or client.owner
+        OAuth2Token.objects.create(
+            client=client,
+            user=user.id,
+            scopes=scopes,
+            **token
+        )
 
 
 def check_credentials():
@@ -374,5 +336,17 @@ def check_credentials():
 
 
 def init_app(app):
-    oauth.init_app(app, query_client=query_client)
+    oauth.init_app(app, query_client=query_client, save_token=save_token)
+
+    # support all grants
+    oauth.register_grant(AuthorizationCodeGrant)
+    oauth.register_grant(PasswordGrant)
+    oauth.register_grant(RefreshTokenGrant)
+    oauth.register_grant(grants.ClientCredentialsGrant)
+    oauth.register_grant(grants.ImplicitGrant)
+
+    # support revocation endpoint
+    oauth.register_endpoint(RevokeToken)
+
+    require_oauth.register_token_validator(BearerToken())
     app.register_blueprint(blueprint)
