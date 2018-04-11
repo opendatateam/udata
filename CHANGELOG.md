@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Prevent OEmbed card to be styled when loaded in bootstrap 4 [#1569](https://github.com/opendatateam/udata/pull/1569)
+- Fix organization sorting on creation date [#1577](https://github.com/opendatateam/udata/pull/1577)
 
 ## 1.3.5 (2018-04-03)
 
