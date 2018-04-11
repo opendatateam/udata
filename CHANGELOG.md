@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Dynamic API documentation, Enhancement to Pull #1542 - [#1542](https://github.com/opendatateam/udata/pull/1542)
 - Normalize resource.format (migration - :warning: need reindexing) [#1563](https://github.com/opendatateam/udata/pull/1563)
 - Typed resources [#1398](https://github.com/opendatateam/udata/issues/1398)
 - [breaking] Enforce a domain whitelist when resource.filetype is file [#1567](https://github.com/opendatateam/udata/issues/1567)
