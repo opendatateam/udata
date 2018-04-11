@@ -87,8 +87,9 @@
                     </div>
                 </div>
 
-                <div class="list-group resources-list">
+                <div class="resources-list">
                     <h3>{{ _('Resources') }}</h3>
+                    <small> • <a href="#community-resources">{{ _('Community resources') }}</a></small>
 
                     {% set grouped_resources = dataset.resources|group_resources_by_type %}
                     {% set nb_groups = grouped_resources.keys()|length %}
@@ -97,9 +98,9 @@
                         {% if nb_groups > 1 %}<h4 class="resource-type">{{ type_label }}</h4>{% endif %}
                         {% for resource in resources %}
                             {% if loop.index0 == max_resources %}
-                            <div id="collapsed-resources-{{ type }}" class="collapse">
+                            <div v-if="isTypeListVisible('{{ type }}')" id="collapsed-resources-{{ type }}" class="collapse">
                             {% endif %}
-                            {% include theme('dataset/resource/list-item.html') %}
+                            {% include theme('dataset/resource/card.html') %}
                         {% endfor %}
                         {% if resources|length > max_resources %}
                             </div>
@@ -117,12 +118,12 @@
                     {% endfor %}
 
                     {% if can_edit %}
-                    <a class="list-group-item add"
+                    <a class="card resource-card add"
                         href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
-                        <div class="format-label pull-left">+</div>
-                        <h4 class="list-group-item-heading">
-                            {{ _('Add a resource') }}
-                        </h4>
+                        <div class="card-logo"><span>+</span></div>
+                        <div class="card-body">
+                            <h4>{{ _('Add a resource') }}</h4>
+                        </div>
                     </a>
                     {% endif %}
 
@@ -368,17 +369,17 @@
         <h3 id="community-resources">{{ _('Community resources') }}</h3>
         <div class="row">
             <div class="col-sm-9">
-                <div class="list-group community-resources-list resources-list smaller">
+                <div class="resources-list">
                 {% for resource in dataset.community_resources %}
-                    {% include theme('dataset/resource/list-item.html') %}
+                    {% include theme('dataset/resource/card.html') %}
                 {% endfor %}
-                    <a class="list-group-item add"
-                        href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                        <div class="format-label pull-left">+</div>
-                        <h4 class="list-group-item-heading">
-                            {{ _('New community resource') }}
-                        </h4>
-                    </a>
+                <a class="card resource-card add"
+                    href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                    <div class="card-logo"><span>+</span></div>
+                    <div class="card-body">
+                        <h4>{{ _('New community resource') }}</h4>
+                    </div>
+                </a>
                 </div>
             </div>
 
