@@ -62,7 +62,7 @@ SCOPES = {
 
 
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
-    secret = db.StringField(default=lambda: gen_salt(50), required=True)
+    secret = db.StringField(default=lambda: gen_salt(50))
 
     name = db.StringField(required=True)
     description = db.StringField()
@@ -317,7 +317,7 @@ def save_token(token, request):
         user = request.user or client.owner
         OAuth2Token.objects.create(
             client=client,
-            user=user,
+            user=user.id,
             scopes=scopes,
             **token
         )
