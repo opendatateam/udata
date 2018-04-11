@@ -31,6 +31,27 @@ export default {
             checkStatus: undefined,
         }
     },
+    computed:{
+        checkAvailability() {
+            if (!this.checkStatus) return;
+            if (this.checkStatus >= 200 && this.checkStatus < 400) {
+                return {
+                    message: this._('Available'),
+                    class: 'label-success'
+                }
+            } else if (this.checkStatus >= 400 && this.checkStatus < 500) {
+                return {
+                    message: this._('Unavailable'),
+                    class: 'label-danger'
+                }
+            } else if (this.checkStatus >= 500) {
+                return {
+                    message: this._('Unavailable (maybe temporary)'),
+                    class: 'label-warning'
+                }
+            }
+        },
+    },
     created() {
         if (this.status) {
             this.checkStatus = this.status;
@@ -81,26 +102,5 @@ export default {
             }, {});
         },
     },
-    computed:{
-        checkAvailability() {
-            if (!this.checkStatus) return;
-            if (this.checkStatus >= 200 && this.checkStatus < 400) {
-                return {
-                    message: this._('Available'),
-                    class: 'label-success'
-                }
-            } else if (this.checkStatus >= 400 && this.checkStatus < 500) {
-                return {
-                    message: this._('Unavailable'),
-                    class: 'label-danger'
-                }
-            } else if (this.checkStatus >= 500) {
-                return {
-                    message: this._('Unavailable (maybe temporary)'),
-                    class: 'label-warning'
-                }
-            }
-        },
-    }
 }
 </script>
