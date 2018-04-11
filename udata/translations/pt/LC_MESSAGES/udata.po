@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-03-26 10:41-0400\n"
+"PO-Revision-Date: 2018-04-10 06:42-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1817,7 +1817,7 @@ msgstr "Novo recurso comunitário"
 
 #: udata/templates/dataset/display.html:380
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
-msgstr "Construiu uma base de dados mais compreensiva que a apresentada aqui? Então é a altura ideal para a partilhar!"
+msgstr "Se criou, ou pretende criar, uma interpretação diferente deste conjunto de dados (i.e. com colunas adicionais, outra ordenação, etc.), pode carregar o recurso e partilhá-lo nesta área."
 
 #: udata/templates/dataset/display.html:403
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
