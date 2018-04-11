@@ -4,7 +4,9 @@
 <div class="discussion-thread panel panel-default">
     <div class="panel-heading">
         <div>
-            <strong>{{ discussion.title }}</strong> <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a> 
+            <strong>{{ discussion.title }}</strong>
+            <span class="label label-warning" v-if="discussion.closed"><i class="fa fa-minus-circle" aria-hidden="true"></i> {{ _('closed discussion') }}</span>
+            <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a> 
         </div>
     </div>
     <div class="list-group">
@@ -27,6 +29,10 @@
             {{ _('Add a comment') }}
         </h4>
     </a>
+    <div class="text-muted" v-if="discussion.closed">
+        {{ _('Discussion has beend closed') }}
+        {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
+        {{ _('on') }} {{ closedDate }}</div>
     <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
         class="list-group-item animated">
         <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
@@ -53,6 +59,8 @@ export default {
             detailed: true,
             formDisplayed: false,
             currentUser: config.user,
+            closed_by_name: null,
+            closed_by_url: null
         }
     },
     events: {
@@ -71,6 +79,16 @@ export default {
         },
         closedDate() {
             return moment(this.discussion.closed).format('LL');
+        }
+    },
+    ready: function(){
+        if(this.discussion.closed_by){
+            const user_id = this.discussion.closed_by; 
+ 
+            this.$api.get('users/'+user_id).then(response =>{
+                this.closed_by_url = response.page;
+                this.closed_by_name = response.first_name + " " + response.last_name;
+            });
         }
     },
     methods: {
