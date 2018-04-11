@@ -13,6 +13,7 @@ import Velocity from 'velocity-animate';
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
 import ResourceModal from './resource-modal.vue';
+import Availability from './resource/availability.vue';
 import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
@@ -20,6 +21,7 @@ import ShareButton from 'components/buttons/share.vue';
 import IntegrateButton from 'components/buttons/integrate.vue';
 import IssuesButton from 'components/buttons/issues.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
+import resource_types from 'models/resource_types';
 
 
 function parseUrl(url) {
@@ -33,17 +35,19 @@ const RESOURCE_REGEX = /^#resource(-community)?-([0-9a-f-]{36})$/;
 new Vue({
     mixins: [FrontMixin],
     components: {
-        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton, ShareButton, FollowButton
+        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton,
+        ShareButton, FollowButton, Availability,
     },
     data() {
         return {
             dataset: this.extractDataset(),
-            userReuses: []
+            userReuses: [],
+            checkUrlEnabled: config.check_urls,
+            visibleTypeLists: [],
         };
     },
     ready() {
         this.loadCoverageMap();
-        this.checkResources();
         this.fetchReuses();
         if (document.location.hash) {
             this.$nextTick(() => { // Wait for data to be binded
@@ -53,6 +57,15 @@ new Vue({
         log.debug('Dataset display page ready');
     },
     methods: {
+        /**
+         * Is a resource type list collapsed
+         * @type {String}
+         * @return {Boolean}
+         */
+        isTypeListVisible(type) {
+            return this.visibleTypeLists.indexOf(type) !== -1;
+        },
+
         /**
          * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
@@ -90,7 +103,7 @@ new Vue({
             new Velocity(e.target, {height: 0, opacity: 0}, {complete(els) {
                 els[0].remove();
             }});
-            this.checkResourcesCollapsed(type);
+            this.visibleTypeLists.push(type);
         },
 
         /**
@@ -143,106 +156,6 @@ new Vue({
         },
 
         /**
-         * Asynchronously check non-collapsed resources status
-         */
-        checkResources() {
-            if (config.check_urls) {
-                const types = this.dataset.resources
-                    .map(r => r.type)
-                    .filter((v, i, a) => a.indexOf(v) === i);
-                types.forEach(type => {
-                    this.dataset.resources
-                        .filter(r => r.type == type)
-                        .slice(0, config.dataset_max_resources_uncollapsed)
-                        .forEach(this.checkResource);
-                })
-            }
-        },
-
-        /**
-         * Asynchronously check collapsed resources status
-         */
-        checkResourcesCollapsed(type) {
-            if (config.check_urls) {
-                this.dataset.resources
-                    .filter(r => r.type == type)
-                    .slice(config.dataset_max_resources_uncollapsed)
-                    .forEach(this.checkResource);
-            }
-        },
-
-        /**
-         * Get check related extras from JSON-LD
-         * @param {Array} extras A list of extras in JSON-LD format
-         * @return {Object} Check extras as a hash, if any
-         */
-        getCheckExtras(extras) {
-            return extras.reduce((obj, extra) => {
-                if (extra.name.startsWith('check:')) {
-                    obj[extra.name] = extra.value;
-                }
-                return obj;
-            }, {});
-        },
-
-        /**
-         * Get a cached checked result from extras if resource is not flagged
-         * as needing a new check
-         * @param  {Object} resource A resource as extracted from JSON-LD
-         */
-        getCachedCheck(resource) {
-            if (!resource.needCheck) {
-                const extras = this.getCheckExtras(resource.extras || []);
-                if (extras['check:status']) {
-                    return extras
-                }
-            }
-        },
-
-        /**
-         * Get cached check or API check
-         * @param  {Object} resource A resource element from DOM
-         * @param  {String} checkurl The API check url
-         */
-        getResourceCheckStatus(resource_el, checkurl) {
-            const cachedCheck = this.getCachedCheck(resource_el);
-            return (cachedCheck && Promise.resolve(cachedCheck)) || this.$api.get(checkurl);
-        },
-
-        /**
-         * Asynchronously check a displayed resource status
-         * @param  {Object} resource A resource as extracted from JSON-LD
-         */
-        checkResource(resource) {
-            const url = parseUrl(resource.contentUrl);
-            const resource_el = document.querySelector(`#resource-${resource['@id']}`);
-            const el = resource_el.querySelector('.format-label');
-            const checkurl = resource_el.dataset.checkurl;
-            if (url.protocol.startsWith('ftp')) {
-                el.classList.add('format-label-warning');
-                el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
-            } else {
-                this.getResourceCheckStatus(resource, checkurl)
-                .then((res) => {
-                    const status = res['check:status'];
-                    if (status >= 200 && status < 400) {
-                        el.classList.add('format-label-success')
-                    } else if (status >= 400 && status < 500) {
-                        el.classList.add('format-label-danger');
-                        el.setTooltip(this._('The resource cannot be found.'), true);
-                    } else if (status >= 500) {
-                        el.classList.add('format-label-warning');
-                        el.setTooltip(this._('An error occured on the remote server. This may be temporary.'), true);
-                    }
-                })
-                .catch(error => {
-                    el.classList.add('format-label-unchecked');
-                    console.log('Something went wrong with the linkchecker', error);
-                });
-            }
-        },
-
-        /**
          * Suggest a tag aka.trigger a new discussion
          */
         suggestTag() {
@@ -262,6 +175,13 @@ new Vue({
                 const [, isCommunity, id] = hash.match(RESOURCE_REGEX);
                 this.showResource(id, isCommunity);
             }
+        },
+
+        /**
+         * Get resource by id from dataset JSON-LD
+         */
+        getResourceById(resourceId) {
+            return this.dataset.resources.find(r => r['@id'] === resourceId);
         },
     }
 });
