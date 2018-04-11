@@ -10,6 +10,11 @@
         <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
         <span class="sr-only">Loading...</span>
     </div>
+
+    <div class="sort">
+        sort by: <a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a> <a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a>
+    </div>
+    
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
     
@@ -142,6 +147,18 @@ export default {
          */
         threadFor(id) {
             return this.$refs.threads.find($thread => $thread.discussion.id == id);
+        },
+
+        /**
+         * Sort threads by creation date or by last response date
+         */
+
+        sortBy(key){
+            if (key == 'created') {
+                this.discussions.sort((a,b) => a['created'] < b['created']);
+            } else if ( key== 'response'){
+                this.discussions.sort((a,b) => a.discussion.slice(-1)[0]['posted_on'] <  b.discussion.slice(-1)[0]['posted_on'] );
+            }
         },
 
         /**
