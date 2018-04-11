@@ -64,6 +64,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
         'followers': 'metrics.followers',
         'views': 'metrics.views',
         'created': 'created',
+        'last_modified': 'last_modified',
     }
     facets = {
         'reuses': RangeFacet(field='metrics.reuses',
