@@ -21,7 +21,11 @@
     }
 
     &.resource-card {
-        border-bottom-color: @resource-color;
+        &:not(.add) {
+            border-left-color: @resource-color;
+            border-bottom-width: 1px;
+            border-left-width: 2px;
+        }
         &:hover, &.selected {
             border-color: @resource-color;
         }

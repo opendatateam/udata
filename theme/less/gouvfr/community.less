@@ -45,62 +45,7 @@
         font-size: 13px;
     }
 
-    .resources-list {
-        @color-sides: #e9e9e9;
-        @color-body: #fafafa;
-
-        .list-group-item {
-            background-color: @color-body;
-
-            .format-label {
-                background-color: @color-sides;
-            }
-            .format-label-success {
-                background-color: lighten(#3f903f, 40%);
-            }
-            .format-label-warning {
-                background-color: lighten(#f0ad4e, 20%);
-            }
-            .format-label-danger {
-                background-color: lighten(#d9534f, 20%);
-            }
-
-
-            &.expanded {
-                border-bottom-color: @color-body;
-            }
-
-            &.body-only {
-                border-top-color: @color-body;
-            }
-        }
-
-        .list-group-item-text, .list-group-item-heading {
-            margin-right: 60px;
-        }
-
-        .list-group-item-link {
-            float: right;
-            margin-top: 9px;
-            margin-right: 5px;
-        }
-
-        .tools {
-            .btn-default {
-                background: fadeout(@gray-lighter, 50%) !important;
-            }
-        }
-
-        .resource-owner {
-            background-color: @color-sides;
-
-            .frame {
-                background-color: @color-body;
-            }
-        }
-    }
-
-    .reuses-list {
+    .reuses-list, .resources-list {
         .add {
             @border-size: 2px;
             background: none;
@@ -110,7 +55,7 @@
                 color: #7d8489;
             }
 
-            .card-cover {
+            .card-cover, .card-logo {
                 color: #7d8489;
                 background-color: rgba(255,255,255,0.05);
             }
