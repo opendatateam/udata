@@ -34,21 +34,36 @@
                 </li>
             </ul>
         </div>
-        <div class="resource-card-actions btn-group">
-            <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary" download>{{ _('Download') }}</a>
-            <button @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Copy permalink to clipboard') }}" v-clipboard="{{ resource.latest }}">
-                <span class="fa fa-clipboard"></span>
-            </button>
-        {% if can_edit_resource(resource if resource.from_community else dataset) %}
-            {% if resource.from_community %}
-                {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
-            {% else %}
-                {% set edit_path = 'dataset/{id}/resource/{rid}' %}
+        <div class="resource-card-actions btn-toolbar">
+            {% if config.PREVIEW_MODE and resource.preview_url %}
+            <div class="btn-group">
+                <a class="btn btn-sm btn-primary"
+                    {% if config.PREVIEW_MODE == 'iframe' %}
+                    @click.stop="showPreview('{{ resource.preview_url }}')"
+                    {% else %}
+                    @click.stop href="{{ resource.preview_url }}" target="_blank"
+                    {% endif %}
+                    >
+                    {{ _('Preview') }}
+                </a>
+            </div>
             {% endif %}
-            <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Edit this resource') }}"
-                href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
-                <span class="fa fa-pencil"></span>
-            </a>
+            <div class="btn-group">
+                <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary" download>{{ _('Download') }}</a>
+                <button @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Copy permalink to clipboard') }}" v-clipboard="{{ resource.latest }}">
+                    <span class="fa fa-clipboard"></span>
+                </button>
+            {% if can_edit_resource(resource if resource.from_community else dataset) %}
+                {% if resource.from_community %}
+                    {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
+                {% else %}
+                    {% set edit_path = 'dataset/{id}/resource/{rid}' %}
+                {% endif %}
+                <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Edit this resource') }}"
+                    href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
+                    <span class="fa fa-pencil"></span>
+                </a>
+            </div>
         {% endif %}
         </div>
     </footer>

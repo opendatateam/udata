@@ -12,6 +12,7 @@ import Velocity from 'velocity-animate';
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
+import PreviewModal from './preview-modal.vue';
 import ResourceModal from './resource-modal.vue';
 import Availability from './resource/availability.vue';
 import LeafletMap from 'components/leaflet-map.vue';
@@ -36,7 +37,7 @@ new Vue({
     mixins: [FrontMixin],
     components: {
         LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton,
-        ShareButton, FollowButton, Availability,
+        ShareButton, FollowButton, Availability, PreviewModal,
     },
     data() {
         return {
@@ -111,6 +112,13 @@ new Vue({
          */
         showDetails() {
             this.$modal(DetailsModal, {dataset: this.dataset});
+        },
+
+        /**
+         * Display a preview URL
+         */
+        showPreview(url) {
+            this.$modal(PreviewModal, {url});
         },
 
         /**

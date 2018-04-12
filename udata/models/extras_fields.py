@@ -12,7 +12,7 @@ from mongoengine.fields import DictField
 log = logging.getLogger(__name__)
 
 
-ALLOWED_TYPES = (basestring, int, float, bool, datetime, date)
+ALLOWED_TYPES = (basestring, int, float, bool, datetime, date, list)
 
 
 class ExtrasField(DictField):
@@ -66,3 +66,6 @@ class DefaultExtra(Extra):
             types = ', '.join(t.__name__ for t in ALLOWED_TYPES)
             raise ValidationError('Value should be an instance of: {types}',
                                   types=types)
+        if isinstance(value, (list, tuple)):
+            for _value in value:
+                self.validate(_value)

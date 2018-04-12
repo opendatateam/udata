@@ -103,6 +103,16 @@ Whitelist of urls domains allowed for resources with `filetype` equals to `file`
 
 `*` is a supported value as a wildcard allowing all domains.
 
+### PREVIEW_MODE
+
+**default**: `'iframe'`
+
+Define the resources preview mode. Can be one of:
+- `'iframe'`: preview are displayed into an iframe modal
+- `'page'`: preview is displayed into a new page
+
+If you want to disable preview, set `PREVIEW_MODE` to `None`
+
 ## Spatial configuration
 
 ### SPATIAL_SEARCH_EXCLUDE_LEVELS
