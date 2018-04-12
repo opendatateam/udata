@@ -254,6 +254,11 @@ class Defaults(object):
     # Max number of resources to display uncollapsed in dataset view
     DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
 
+    # Preview settings
+    ###########################################################################
+    # Preview mode can be either `iframe` or `page` or `None`
+    PREVIEW_MODE = 'iframe'
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

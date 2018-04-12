@@ -14,7 +14,7 @@ from werkzeug import cached_property
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
-from udata.utils import hash_url
+from udata.utils import get_by, hash_url
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
@@ -203,6 +203,8 @@ class ResourceMixin(object):
     mime = db.StringField()
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     extras = db.ExtrasField()
+
+    preview_url = db.URLField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
@@ -646,3 +648,12 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     @property
     def from_community(self):
         return True
+
+
+def get_resource(id):
+    '''Fetch a resource given its UUID'''
+    dataset = Dataset.objects(resources__id=id).first()
+    if dataset:
+        return get_by(dataset.resources, 'id', id)
+    else:
+        return CommunityResource.objects(id=id).first()
