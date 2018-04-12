@@ -1,16 +1,3 @@
 {% extends 'dataset/display.html' %}
 
 {% set community_subtitle = _('Explore with %(certifier)s', certifier=config.SITE_TITLE ) %}
-
-{% block extra_js %}
-{{ super() }}
-<script src="{{ theme_static('dataset-recommendations.js') }}" type="text/javascript" onload="udataDatasetRecos.load()"></script>
-{% endblock %}
-
-{% block left_column_bottom %}
-<!-- dataset recommendations -->
-<div id="dataset-recommendations" class="hidden-xs">
-    <h3>{{ _('See also') }}</h3>
-    <div id="dataset-recommendations-container" class="card-list card-list--columned"></div>
-</div>
-{% endblock %}
