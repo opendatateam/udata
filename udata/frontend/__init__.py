@@ -36,7 +36,7 @@ def template_hook(func):
 
 @front.app_context_processor
 def inject_template_hooks():
-    return {'hook_%s' % k: v for (k, v) in _template_hooks.iteritems()}
+    return {'hook_%s' % k: v for (k, v) in _template_hooks.items()}
 
 
 @front.app_context_processor
