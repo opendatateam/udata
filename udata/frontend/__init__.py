@@ -21,11 +21,22 @@ log = logging.getLogger(__name__)
 front = I18nBlueprint('front', __name__)
 
 _footer_snippets = []
+_template_hooks = {}
 
 
 def footer_snippet(func):
     _footer_snippets.append(func)
     return func
+
+
+def template_hook(func):
+    _template_hooks[func.__name__] = func
+    return func
+
+
+@front.app_context_processor
+def inject_template_hooks():
+    return {'hook_%s' % k: v for (k, v) in _template_hooks.items()}
 
 
 @front.app_context_processor
