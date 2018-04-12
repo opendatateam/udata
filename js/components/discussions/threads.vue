@@ -12,26 +12,32 @@
     </div>
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
+    
+    
+    <!-- New discussion -->
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
         <div class="format-label pull-left">+</div>
         <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
     </a>
+
     <div v-el:form id="discussion-create" v-show="formDisplayed" v-if="currentUser"
-        class="list-group-item list-group-form list-group-form-discussion animated">
-        <div class="format-label pull-left">
+        class="list-group-item animated">
+        <div class="avatar">
             <avatar :user="currentUser"></avatar>
         </div>
-        <span class="list-group-item-link">
+        <span>
             <a href="#discussion-create"><span class="fa fa-link"></span></a>
             <a @click="hideForm"><span class="fa fa-times"></span></a>
         </span>
+
         <h4 class="list-group-item-heading">
             {{ _('Starting a new discussion thread') }}
         </h4>
+        
         <p class="list-group-item-text">
             {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
         </p>
-        <threads-form v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></threads-form>
+        <thread-form-create v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></thread-form-create>
     </div>
 </div>
 </template>
@@ -40,7 +46,7 @@
 import config from 'config';
 import Avatar from 'components/avatar.vue';
 import DiscussionThread from 'components/discussions/thread.vue';
-import ThreadsForm from 'components/discussions/threads-form.vue';
+import ThreadFormCreate from 'components/discussions/thread-create.vue';
 import log from 'logger';
 
 const DISCUSSION_REGEX = /^#discussion-([0-9a-f]{24})$/;
@@ -49,13 +55,14 @@ const NEW_COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-new-comment$/;
 
 
 export default {
-    components: {Avatar, DiscussionThread, ThreadsForm},
+    components: {Avatar, DiscussionThread, ThreadFormCreate},
     data() {
         return {
             discussions: [],
             loading: true,
             formDisplayed: false,
             currentUser: config.user,
+
         }
     },
     props: {
