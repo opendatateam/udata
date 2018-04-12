@@ -4,6 +4,7 @@
 
 - Typed resources related styles [#265](https://github.com/etalab/udata-gouvfr/pull/265)
 - Enforce a domain whitelist when resource.filetype is file (migration) [#292](https://github.com/etalab/udata-gouvfr/pull/292)
+- Use new pypi.org links [#295](https://github.com/etalab/udata-gouvfr/pull/295)
 
 ## 1.3.2 (2018-03-28)
 
@@ -142,7 +143,7 @@
 
 - Remove some main menu entries (events, CADA, Etalab)
 - Use a new SVG logo
-- Apply changes from [uData 1.0.0](https://pypi.python.org/pypi/udata/1.0.0#changelog)
+- Apply changes from [uData 1.0.0](https://pypi.org/project/udata/1.0.0#changelog)
 
 ## 0.9.1 (2017-01-10)
 
