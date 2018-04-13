@@ -93,6 +93,39 @@ The duration used for templates' cache, in minutes.
 
 This is the allowed resources extensions list that user can upload.
 
+## URLs validation
+
+### URLS_ALLOW_PRIVATE
+
+**default**:  `False`
+
+Whether or not to allow private URLs (private IPs...) submission
+
+### URLS_ALLOW_LOCAL
+
+**default**: `False`
+
+Whether or not to allow local URLs (localhost...) submission.
+When developping you might need to set this to `True`.
+
+### URLS_ALLOWED_SCHEMES
+
+**default**: `('http', 'https', 'ftp', 'ftps')`
+
+List of allowed URL schemes.
+
+### URLS_ALLOWED_TLDS
+
+**default**: All IANA registered TLDs
+
+List of allowed TLDs.
+When using udata on an intranet, you might want to add you custom TLDs:
+
+```python
+from udata.uris import TLDS
+
+URLS_ALLOWED_TLDS = TLDS + set(['custom', 'company'])
+```
 
 ## Spatial configuration
 

@@ -2,8 +2,12 @@
 from __future__ import unicode_literals
 
 import re
+
+from flask import current_app
 from netaddr import IPAddress, AddrFormatError
-from tlds import tld_set as TLDS
+
+from udata.settings import Defaults
+# from tlds import tld_set as TLDS
 
 URL_REGEX = re.compile(
     r'^'
@@ -38,7 +42,8 @@ URL_REGEX = re.compile(
     re.UNICODE | re.IGNORECASE
 )
 
-SCHEMES = ('http', 'https', 'ftp', 'ftps')
+# SCHEMES = Defaults.URLS_ALLOWED_SCHEMES
+# TLDS = Defaults.URLS_ALLOWED_TLDS
 
 
 class ValidationError(ValueError):
@@ -54,7 +59,16 @@ def error(url, reason=None):
     raise ValidationError(msg)
 
 
-def validate(url, schemes=SCHEMES, tlds=TLDS, private=False, local=False):
+def config_for(value, key):
+    if value is not None:
+        return value
+    try:
+        return current_app.config[key]
+    except RuntimeError:
+        return getattr(Defaults, key)
+
+
+def validate(url, schemes=None, tlds=None, private=None, local=None):
     '''
     Validate and normalize an URL
 
@@ -63,6 +77,12 @@ def validate(url, schemes=SCHEMES, tlds=TLDS, private=False, local=False):
     :raises ValidationError: when URL does not validate
     '''
     url = url.strip()
+
+    private = config_for(private, 'URLS_ALLOW_PRIVATE')
+    local = config_for(local, 'URLS_ALLOW_LOCAL')
+    schemes = config_for(schemes, 'URLS_ALLOWED_SCHEMES')
+    tlds = config_for(tlds, 'URLS_ALLOWED_TLDS')
+
     match = URL_REGEX.match(url)
     if not match:
         error(url)

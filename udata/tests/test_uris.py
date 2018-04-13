@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import pytest
 
 from udata import uris
+from udata.settings import Defaults
 
 
 PUBLIC_HOSTS = [
@@ -152,9 +153,12 @@ INVALID = [
     'http://[::]:8080/index.html',
 ]
 
+DEFAULT_SCHEMES = Defaults.URLS_ALLOWED_SCHEMES
 # Custom schemes not in uris.SCHEMES
 CUSTOM_SCHEMES = ['irc', 'unknown']
 
+# Extract some default TLDs
+DEFAULT_TLDS = list(Defaults.URLS_ALLOWED_TLDS)[:2]
 # Custom TLDs not in IANA official list
 CUSTOM_TLDS = ['i2', 'unknown']
 
@@ -178,7 +182,7 @@ def test_default_should_validate_public_ips(url):
     assert uris.validate(url) == url
 
 
-@pytest.mark.parametrize('scheme', uris.SCHEMES)
+@pytest.mark.parametrize('scheme', DEFAULT_SCHEMES)
 def test_default_should_validate_default_schemes(scheme):
     url = '{0}://somewhere.com'.format(scheme)
     assert uris.validate(url) == url
@@ -255,7 +259,7 @@ def test_custom_schemes(scheme):
     assert uris.validate(url, schemes=CUSTOM_SCHEMES) == url
 
 
-@pytest.mark.parametrize('scheme', uris.SCHEMES)
+@pytest.mark.parametrize('scheme', DEFAULT_SCHEMES)
 def test_custom_schemes_should_not_validate_defaults(scheme):
     url = '{0}://somewhere.com'.format(scheme)
     with pytest.raises(uris.ValidationError):
@@ -268,7 +272,7 @@ def test_custom_tlds(tld):
     assert uris.validate(url, tlds=CUSTOM_TLDS) == url
 
 
-@pytest.mark.parametrize('tld', list(uris.TLDS)[:2])
+@pytest.mark.parametrize('tld', DEFAULT_TLDS)
 def test_custom_tlds_should_not_validate_defaults(tld):
     url = 'http://somewhere.{0}'.format(tld)
     with pytest.raises(uris.ValidationError):
