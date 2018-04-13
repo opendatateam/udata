@@ -9,7 +9,6 @@ from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
 from flask_fs.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields
-from wtforms.fields import html5
 from wtforms.utils import unset_value
 from wtforms_json import flatten_json
 
@@ -20,7 +19,7 @@ from udata.models import db, User, Organization, Dataset, Reuse, datastore
 from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
-from udata import tags
+from udata import tags, uris
 from udata.utils import to_iso_date, get_by
 
 
@@ -130,8 +129,8 @@ class URLField(EmptyNone, Field):
     def pre_validate(self, form):
         if self.data:
             try:
-                db.URLField().validate(self.data)
-            except db.ValidationError:
+                uris.validate(self.data)
+            except uris.ValidationError:
                 raise validators.ValidationError(_('Invalid URL'))
         return True
 

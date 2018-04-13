@@ -57,8 +57,8 @@ class URLTester(db.Document):
     url = db.URLField()
 
 
-class PublicURLTester(db.Document):
-    url = db.URLField(public=True)
+class PrivateURLTester(db.Document):
+    url = db.URLField(private=True)
 
 
 class AutoUUIDFieldTest(DBTestMixin, TestCase):
@@ -261,14 +261,14 @@ class URLFieldTest(DBTestMixin, TestCase):
         obj.save().reload()
         self.assertEqual(obj.url, url)
 
-    def test_public(self):
+    def test_public_private(self):
         url = 'http://10.10.0.2/path/'
-        URLTester(url=url).save()
+        PrivateURLTester(url=url).save()
         with self.assertRaises(ValidationError):
-            PublicURLTester(url=url).save()
+            URLTester(url=url).save()
 
 
-class DatetimedTest(DBTestMixin, TestCase):
+class Darivate(DBTestMixin, TestCase):
     def test_class(self):
         self.assertIsInstance(DatetimedTester.created_at, db.DateTimeField)
         self.assertIsInstance(DatetimedTester.last_modified, db.DateTimeField)
