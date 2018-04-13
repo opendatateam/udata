@@ -3,6 +3,24 @@
     margin: 2em;
     text-align: center;
 }
+
+.sort {
+    margin-bottom: 1em;
+
+    a:hover {
+        cursor: pointer;    
+    }
+}
+
+.add {
+    h4 {
+        line-height: 30px;
+        margin-top: 9px;
+        margin-left: 60px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+}
 </style>
 <template>
 <div class="discussion-threads">

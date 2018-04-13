@@ -1,4 +1,13 @@
 <style lang="less">
+.panel-footer {
+    .add {
+        margin: -10px -15px;
+    }
+
+    & > div.form {
+        margin: -10px -15px;
+    }
+}
 </style>
 <template>
 <div class="discussion-thread panel panel-default">
@@ -34,7 +43,7 @@
         {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
         {{ _('on') }} {{ closedDate }}</div>
     <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
-        class="list-group-item animated">
+        class="list-group-item animated form">
         <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
     </div>
     </div>
