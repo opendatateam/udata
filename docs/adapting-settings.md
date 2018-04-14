@@ -108,6 +108,12 @@ Whether or not to allow private URLs (private IPs...) submission
 Whether or not to allow local URLs (localhost...) submission.
 When developping you might need to set this to `True`.
 
+### URLS_ALLOW_CREDENTIALS
+
+**default**: `True`
+
+Whether or not to allow credentials in URLs submission.
+
 ### URLS_ALLOWED_SCHEMES
 
 **default**: `('http', 'https', 'ftp', 'ftps')`
@@ -119,12 +125,12 @@ List of allowed URL schemes.
 **default**: All IANA registered TLDs
 
 List of allowed TLDs.
-When using udata on an intranet, you might want to add you custom TLDs:
+When using udata on an intranet, you might want to add your own custom TLDs:
 
 ```python
-from udata.uris import TLDS
+from udata.settings import Defaults
 
-URLS_ALLOWED_TLDS = TLDS + set(['custom', 'company'])
+URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 ```
 
 ## Spatial configuration

@@ -15,14 +15,6 @@ PUBLIC_HOSTS = [
     'http://www.example.com/wpstyle/?p=364',
     'https://www.example.com/foo/?bar=baz&inga=42&quux',
     'http://✪df.ws/123',
-    'http://userid:password@example.com:8080',
-    'http://userid:password@example.com:8080/',
-    'http://userid@example.com',
-    'http://userid@example.com/',
-    'http://userid@example.com:8080',
-    'http://userid@example.com:8080/',
-    'http://userid:password@example.com',
-    'http://userid:password@example.com/',
     'http://➡.ws/䨹',
     'http://⌘.ws',
     'http://⌘.ws/',
@@ -50,6 +42,17 @@ PUBLIC_HOSTS_IDN = [
     'http://somewhere.укр',
 ]
 
+WITH_CREDENTIALS = [
+    'http://userid:password@example.com:8080',
+    'http://userid:password@example.com:8080/',
+    'http://userid@example.com',
+    'http://userid@example.com/',
+    'http://userid@example.com:8080',
+    'http://userid@example.com:8080/',
+    'http://userid:password@example.com',
+    'http://userid:password@example.com/',
+]
+
 PUBLIC_IPS = [
     'http://142.42.1.1/',
     'http://142.42.1.1:8080',
@@ -60,7 +63,7 @@ PUBLIC_IPS = [
     'http://[2a00:1450:4007:80e::2004]:8080/',
 ]
 
-PUBLIC = PUBLIC_HOSTS + PUBLIC_HOSTS_IDN + PUBLIC_IPS
+PUBLIC = PUBLIC_HOSTS + PUBLIC_HOSTS_IDN + PUBLIC_IPS + WITH_CREDENTIALS
 
 PRIVATE_IPS = [
     'http://10.1.1.1',
@@ -277,3 +280,15 @@ def test_custom_tlds_should_not_validate_defaults(tld):
     url = 'http://somewhere.{0}'.format(tld)
     with pytest.raises(uris.ValidationError):
         uris.validate(url, tlds=CUSTOM_TLDS)
+
+
+@pytest.mark.parametrize('url', WITH_CREDENTIALS)
+def test_with_credentials(url):
+    assert uris.validate(url) == url
+
+
+@pytest.mark.parametrize('url', WITH_CREDENTIALS)
+def test_with_credentials_disabled(url):
+    with pytest.raises(uris.ValidationError):
+        uris.validate(url, credentials=False)
+

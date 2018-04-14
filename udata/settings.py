@@ -260,7 +260,7 @@ class Defaults(object):
     # Whether or not to allow local URLs (localhost...) submission.
     URLS_ALLOW_LOCAL = False
     # Whether or not to allow credentials in URLs submission.
-    URLS_ALLOW_CREDENTIALS = False
+    URLS_ALLOW_CREDENTIALS = True
     # List of allowed URL schemes.
     URLS_ALLOWED_SCHEMES = ('http', 'https', 'ftp', 'ftps')
     # List of allowed TLDs.

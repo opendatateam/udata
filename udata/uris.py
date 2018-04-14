@@ -68,7 +68,8 @@ def config_for(value, key):
         return getattr(Defaults, key)
 
 
-def validate(url, schemes=None, tlds=None, private=None, local=None):
+def validate(url, schemes=None, tlds=None, private=None, local=None,
+             credentials=None):
     '''
     Validate and normalize an URL
 
@@ -80,6 +81,7 @@ def validate(url, schemes=None, tlds=None, private=None, local=None):
 
     private = config_for(private, 'URLS_ALLOW_PRIVATE')
     local = config_for(local, 'URLS_ALLOW_LOCAL')
+    credentials = config_for(credentials, 'URLS_ALLOW_CREDENTIALS')
     schemes = config_for(schemes, 'URLS_ALLOWED_SCHEMES')
     tlds = config_for(tlds, 'URLS_ALLOWED_TLDS')
 
@@ -90,6 +92,9 @@ def validate(url, schemes=None, tlds=None, private=None, local=None):
     scheme = match.group('scheme').lower()
     if scheme not in schemes:
         error(url, 'Invalid scheme {0}'.format(scheme))
+
+    if not credentials and match.group('credentials'):
+        error(url, 'Credentials in URL are not allowed')
 
     tld = match.group('tld')
     if tld and tld not in tlds and tld.encode('idna') not in tlds:
