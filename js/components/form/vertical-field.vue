@@ -16,9 +16,9 @@
         'form-group': !is_bool && !is_hidden,
         'has-error': errors.length
         }">
-        <span v-show="description" class="form-help"
-            :data-content="description"
-            v-if="!is_hidden"></span>
+        <span v-if="!is_hidden" v-show="description" class="form-help"
+            v-popover="description" popover-trigger="hover" popover-placement="left">
+        </span>
         <label :for="field.id" :class="{ 'required': required }"
             v-if="!is_hidden && !is_bool">
             {{ field.label }}

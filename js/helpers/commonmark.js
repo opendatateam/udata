@@ -35,11 +35,6 @@ function escapeHtml(html) {
          .replace(/'/g, '&#039;');
 }
 
-function nodeToStr(node) {
-    const div = document.createElement('div');
-    div.appendChild(node.cloneNode(true));
-    return div.innerHTML;
-}
 
 /**
  * Sanitize Markdown-it source tags
@@ -47,18 +42,17 @@ function nodeToStr(node) {
  * @return {String}      Sanitized html
  */
 function escapeTags(content, config) {
-    const fragment = new DOMParser().parseFromString(content, 'text/html')
+    const fragment = new DOMParser().parseFromString(content, 'text/html');
     const it = document.createNodeIterator(fragment.body, NodeFilter.SHOW_ELEMENT);
     let node;
 
-    while (node = it.nextNode()) {
+    while (node = it.nextNode()) { // eslint-disable-line no-cond-assign
         // Skip body tag and allowed tags
         if (node.nodeName === 'BODY' || config.tags.indexOf(node.nodeName.toLowerCase()) >= 0) continue;
-        const html = nodeToStr(node)
+        const html = node.outerHTML;
         const escaped = document.createTextNode(escapeHtml(html));
-        node.parentNode.replaceChild(escaped, node)
+        node.parentNode.replaceChild(escaped, node);
     }
-
     return fragment.body.innerHTML;
 }
 

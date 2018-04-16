@@ -88,6 +88,7 @@
         line-height: @line-height;
         min-height: 6em;
         margin-left: @card-padding;
+        padding: 0;
 
         .clamp-2 {
             .clamp-sizing(2, @line-height);
@@ -119,6 +120,8 @@
         padding: @card-padding 0 0;
         position: relative;
         white-space: nowrap;
+        background-color: inherit;
+        border: none;
         .clamp-uniline;
 
         &:after {

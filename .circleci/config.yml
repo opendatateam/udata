@@ -183,19 +183,34 @@ workflows:
     jobs:
       - python:
           filters:
+            branches:
+              only:
+                - master
+                - /[0-9]+(\.[0-9]+)+/
+                - /pull/[0-9]+/
             tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+              only: /v[0-9]+(\.[0-9]+)+/
       - assets:
           filters:
+            branches:
+              only:
+                - master
+                - /[0-9]+(\.[0-9]+)+/
+                - /pull/[0-9]+/
             tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+              only: /v[0-9]+(\.[0-9]+)+/
       - dist:
           requires:
             - python
             - assets
           filters:
+            branches:
+              only:
+                - master
+                - /[0-9]+(\.[0-9]+)+/
+                - /pull/[0-9]+/
             tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+              only: /v[0-9]+(\.[0-9]+)+/
       - publish:
           requires:
             - dist
@@ -203,9 +218,9 @@ workflows:
             branches:
               only:
                 - master
-                - /v[0-9]+(\.[0-9]+)*/
+                - /[0-9]+(\.[0-9]+)+/
             tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+              only: /v[0-9]+(\.[0-9]+)+/
           context: org-global
       - github:
           requires:
@@ -214,5 +229,5 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /v[0-9]+(\.[0-9]+)*/
+              only: /v[0-9]+(\.[0-9]+)+/
           context: org-global

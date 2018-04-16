@@ -16,8 +16,9 @@
             class="col-sm-3 control-label">
             <i v-if="errors.length" class="fa fa-times-circle-o"></i>
             {{ is_bool ? '' : field.label }}
-            <span v-show="description" class="form-help"
-                :data-content="description"></span>
+            <span v-if="!is_hidden" v-show="description" class="form-help"
+                v-popover="description" popover-trigger="hover" popover-placement="left">
+            </span>
         </label>
         <div class="col-sm-9">
             <component :is="widget"
