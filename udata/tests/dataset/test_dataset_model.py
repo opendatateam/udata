@@ -323,6 +323,46 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_exact_match_by_alternate_title(self):
+        alternate_title = faker.sentence()
+        license = LicenseFactory(alternate_titles=[alternate_title])
+        found = License.guess(alternate_title)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_exact_match_by_alternate_title_with_spaces(self):
+        alternate_title = faker.sentence()
+        license = LicenseFactory(alternate_titles=[alternate_title])
+        found = License.guess(' {0} '.format(alternate_title))
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_alternate_title_with_low_edit_distance(self):
+        license = LicenseFactory(alternate_titles=['License'])
+        found = License.guess('Licence')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_alternate_title_with_extra_inner_space(self):
+        license = LicenseFactory(alternate_titles=['License ODBl'])
+        found = License.guess('License  ODBl')  # 2 spaces instead of 1
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_alternate_title_with_mismatching_case(self):
+        license = LicenseFactory(alternate_titles=['License ODBl'])
+        found = License.guess('License ODBL')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_prioritize_title_over_alternate_title(self):
+        title = faker.sentence()
+        license = LicenseFactory(title=title)
+        LicenseFactory(alternate_titles=[title])
+        found = License.guess(title)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_multiple_strings(self):
         license = LicenseFactory()
         found = License.guess('should not match', license.id)
