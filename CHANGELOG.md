@@ -6,6 +6,7 @@
 - Fix organizations sort by last_modified [#1576](https://github.com/opendatateam/udata/pull/1576)
 - Fix dataset creation form (and any other form) [#1584](https://github.com/opendatateam/udata/pull/1584)
 - Fix an XSS on client-side markdown parsing [#1585](https://github.com/opendatateam/udata/pull/1585)
+- Ensure URLs validation is the same everywhere [#1586](https://github.com/opendatateam/udata/pull/1586)
 
 ## 1.3.5 (2018-04-03)
 

@@ -77,3 +77,8 @@ class IsUrlFilterTest(TestCase):
         f = filters.is_url()
         with self.assertRaises(Invalid):
             f('not-allowed://somewhere.com')
+
+    def test_valid_url_with_default_scheme(self):
+        f = filters.is_url()
+        self.assertEqual(f('somewhere.com/path'),
+                         'http://somewhere.com/path')

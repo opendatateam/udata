@@ -4,8 +4,10 @@ from __future__ import unicode_literals
 import pkg_resources
 
 from kombu import Exchange, Queue
+from tlds import tld_set
 
 from udata.i18n import lazy_gettext as _
+
 
 
 HOUR = 60 * 60
@@ -251,6 +253,19 @@ class Defaults(object):
     # Max number of resources to display uncollapsed in dataset view
     DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
 
+    # URLs validation settings
+    ###########################################################################
+    # Whether or not to allow private URLs (private IPs...) submission
+    URLS_ALLOW_PRIVATE = False
+    # Whether or not to allow local URLs (localhost...) submission.
+    URLS_ALLOW_LOCAL = False
+    # Whether or not to allow credentials in URLs submission.
+    URLS_ALLOW_CREDENTIALS = True
+    # List of allowed URL schemes.
+    URLS_ALLOWED_SCHEMES = ('http', 'https', 'ftp', 'ftps')
+    # List of allowed TLDs.
+    URLS_ALLOWED_TLDS = tld_set
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
@@ -272,6 +287,7 @@ class Testing(object):
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
     USE_METRICS = False
+    URLS_ALLOW_LOCAL = True  # Test server URL is localhost
 
 
 class Debug(Defaults):
