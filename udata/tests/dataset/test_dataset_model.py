@@ -2,6 +2,8 @@
 from __future__ import unicode_literals, absolute_import
 from datetime import datetime, timedelta
 
+import pytest
+
 from mongoengine import post_save
 
 from udata.models import db, Dataset, License, LEGACY_FREQUENCIES
@@ -12,12 +14,13 @@ from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
 )
 from udata.core.user.factories import UserFactory
-from udata.tests.helpers import assert_emit
-
-from .. import TestCase, DBTestMixin
+from udata.tests.helpers import assert_emit, assert_equal_dates
 
 
-class DatasetModelTest(TestCase, DBTestMixin):
+pytestmark = pytest.mark.usefixtures('clean_db')
+
+
+class DatasetModelTest:
     def test_add_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
@@ -26,12 +29,12 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
         with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory())
-        self.assertEqual(len(dataset.resources), 1)
+        assert len(dataset.resources) == 1
 
         with assert_emit(*expected_signals):
             dataset.add_resource(resource)
-        self.assertEqual(len(dataset.resources), 2)
-        self.assertEqual(dataset.resources[0].id, resource.id)
+        assert len(dataset.resources) == 2
+        assert dataset.resources[0].id == resource.id
 
     def test_add_resource_without_checksum(self):
         user = UserFactory()
@@ -41,12 +44,12 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
         with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory(checksum=None))
-        self.assertEqual(len(dataset.resources), 1)
+        assert len(dataset.resources) == 1
 
         with assert_emit(*expected_signals):
             dataset.add_resource(resource)
-        self.assertEqual(len(dataset.resources), 2)
-        self.assertEqual(dataset.resources[0].id, resource.id)
+        assert len(dataset.resources) == 2
+        assert dataset.resources[0].id == resource.id
 
     def test_add_resource_missing_checksum_type(self):
         user = UserFactory()
@@ -54,7 +57,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
         resource = ResourceFactory()
         resource.checksum.type = None
 
-        with self.assertRaises(db.ValidationError):
+        with pytest.raises(db.ValidationError):
             dataset.add_resource(resource)
 
     def test_update_resource(self):
@@ -67,9 +70,9 @@ class DatasetModelTest(TestCase, DBTestMixin):
 
         with assert_emit(*expected_signals):
             dataset.update_resource(resource)
-        self.assertEqual(len(dataset.resources), 1)
-        self.assertEqual(dataset.resources[0].id, resource.id)
-        self.assertEqual(dataset.resources[0].description, 'New description')
+        assert len(dataset.resources) == 1
+        assert dataset.resources[0].id == resource.id
+        assert dataset.resources[0].description == 'New description'
 
     def test_update_resource_missing_checksum_type(self):
         user = UserFactory()
@@ -77,7 +80,7 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(owner=user, resources=[resource])
         resource.checksum.type = None
 
-        with self.assertRaises(db.ValidationError):
+        with pytest.raises(db.ValidationError):
             dataset.update_resource(resource)
 
     def test_last_update_with_resource(self):
@@ -85,12 +88,12 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
         dataset.add_resource(resource)
-        self.assertEqualDates(dataset.last_update, resource.published)
+        assert_equal_dates(dataset.last_update, resource.published)
 
     def test_last_update_without_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
-        self.assertEqualDates(dataset.last_update, dataset.last_modified)
+        assert_equal_dates(dataset.last_update, dataset.last_modified)
 
     def test_community_resource(self):
         user = UserFactory()
@@ -98,70 +101,68 @@ class DatasetModelTest(TestCase, DBTestMixin):
         community_resource1 = CommunityResourceFactory()
         community_resource1.dataset = dataset
         community_resource1.save()
-        self.assertEqual(len(dataset.community_resources), 1)
+        assert len(dataset.community_resources) == 1
 
         community_resource2 = CommunityResourceFactory()
         community_resource2.dataset = dataset
         community_resource2.save()
-        self.assertEqual(len(dataset.community_resources), 2)
-        self.assertEqual(dataset.community_resources[1].id,
-                         community_resource1.id)
-        self.assertEqual(dataset.community_resources[0].id,
-                         community_resource2.id)
+        assert len(dataset.community_resources) == 2
+        assert dataset.community_resources[1].id == community_resource1.id
+        assert dataset.community_resources[0].id == community_resource2.id
 
     def test_next_update_empty(self):
         dataset = DatasetFactory()
-        self.assertEqual(dataset.next_update, None)
+        assert dataset.next_update is None
 
     def test_next_update_weekly(self):
         dataset = DatasetFactory(frequency='weekly')
-        self.assertEqualDates(dataset.next_update,
-                              datetime.now() + timedelta(days=7))
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(days=7))
 
     def test_quality_default(self):
         dataset = DatasetFactory(description='')
-        self.assertEqual(dataset.quality, {'score': 0})
+        assert dataset.quality == {'score': 0}
 
     def test_quality_next_update(self):
         dataset = DatasetFactory(description='', frequency='weekly')
-        self.assertEqual(-6, dataset.quality['update_in'])
-        self.assertEqual(dataset.quality['frequency'], 'weekly')
-        self.assertEqual(dataset.quality['score'], 2)
+        assert -6 == dataset.quality['update_in']
+        assert dataset.quality['frequency'] == 'weekly'
+        assert dataset.quality['score'] == 2
 
     def test_quality_tags_count(self):
         dataset = DatasetFactory(description='', tags=['foo', 'bar'])
-        self.assertEqual(dataset.quality['tags_count'], 2)
-        self.assertEqual(dataset.quality['score'], 0)
+        assert dataset.quality['tags_count'] == 2
+        assert dataset.quality['score'] == 0
         dataset = DatasetFactory(description='',
                                  tags=['foo', 'bar', 'baz', 'quux'])
-        self.assertEqual(dataset.quality['score'], 2)
+        assert dataset.quality['score'] == 2
 
     def test_quality_description_length(self):
         dataset = DatasetFactory(description='a' * 42)
-        self.assertEqual(dataset.quality['description_length'], 42)
-        self.assertEqual(dataset.quality['score'], 0)
+        assert dataset.quality['description_length'] == 42
+        assert dataset.quality['score'] == 0
         dataset = DatasetFactory(description='a' * 420)
-        self.assertEqual(dataset.quality['score'], 2)
+        assert dataset.quality['score'] == 2
 
     def test_quality_has_only_closed_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
-        self.assertTrue(dataset.quality['has_only_closed_or_no_formats'])
-        self.assertEqual(dataset.quality['score'], 0)
+        assert dataset.quality['has_only_closed_or_no_formats']
+        assert dataset.quality['score'] == 0
 
     def test_quality_has_opened_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
-        self.assertFalse(dataset.quality['has_only_closed_or_no_formats'])
-        self.assertEqual(dataset.quality['score'], 4)
+        assert not dataset.quality['has_only_closed_or_no_formats']
+        assert dataset.quality['score'] == 4
 
     def test_quality_has_undefined_and_closed_format(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format=None))
         dataset.add_resource(ResourceFactory(format='xls'))
-        self.assertTrue(dataset.quality['has_only_closed_or_no_formats'])
-        self.assertEqual(dataset.quality['score'], 0)
+        assert dataset.quality['has_only_closed_or_no_formats']
+        assert dataset.quality['score'] == 0
 
     def test_quality_has_untreated_discussions(self):
         user = UserFactory()
@@ -169,9 +170,9 @@ class DatasetModelTest(TestCase, DBTestMixin):
         dataset = DatasetFactory(description='', owner=user)
         messages = MessageDiscussionFactory.build_batch(2, posted_by=visitor)
         DiscussionFactory(subject=dataset, user=visitor, discussion=messages)
-        self.assertEqual(dataset.quality['discussions'], 1)
-        self.assertTrue(dataset.quality['has_untreated_discussions'])
-        self.assertEqual(dataset.quality['score'], 0)
+        assert dataset.quality['discussions'] == 1
+        assert dataset.quality['has_untreated_discussions']
+        assert dataset.quality['score'] == 0
 
     def test_quality_has_treated_discussions(self):
         user = UserFactory()
@@ -183,9 +184,9 @@ class DatasetModelTest(TestCase, DBTestMixin):
                 MessageDiscussionFactory(posted_by=user)
             ] + MessageDiscussionFactory.build_batch(2, posted_by=visitor)
         )
-        self.assertEqual(dataset.quality['discussions'], 1)
-        self.assertFalse(dataset.quality['has_untreated_discussions'])
-        self.assertEqual(dataset.quality['score'], 2)
+        assert dataset.quality['discussions'] == 1
+        assert not dataset.quality['has_untreated_discussions']
+        assert dataset.quality['score'] == 2
 
     def test_quality_all(self):
         user = UserFactory()
@@ -196,32 +197,30 @@ class DatasetModelTest(TestCase, DBTestMixin):
         DiscussionFactory(
             subject=dataset, user=visitor,
             discussion=[MessageDiscussionFactory(posted_by=visitor)])
-        self.assertEqual(dataset.quality['score'], 0)
-        self.assertEqual(
-            sorted(dataset.quality.keys()),
-            [
-                'description_length',
-                'discussions',
-                'frequency',
-                'has_only_closed_or_no_formats',
-                'has_resources',
-                'has_unavailable_resources',
-                'has_untreated_discussions',
-                'score',
-                'tags_count',
-                'update_in'
-            ])
+        assert dataset.quality['score'] == 0
+        assert sorted(dataset.quality.keys()) == [
+            'description_length',
+            'discussions',
+            'frequency',
+            'has_only_closed_or_no_formats',
+            'has_resources',
+            'has_unavailable_resources',
+            'has_untreated_discussions',
+            'score',
+            'tags_count',
+            'update_in'
+        ]
 
     def test_tags_normalized(self):
         tags = [' one another!', ' one another!', 'This IS a "tag"…']
         dataset = DatasetFactory(tags=tags)
-        self.assertEqual(len(dataset.tags), 2)
-        self.assertEqual(dataset.tags[1], 'this-is-a-tag')
+        assert len(dataset.tags) == 2
+        assert dataset.tags[1] == 'this-is-a-tag'
 
     def test_legacy_frequencies(self):
         for oldFreq, newFreq in LEGACY_FREQUENCIES.items():
             dataset = DatasetFactory(frequency=oldFreq)
-            self.assertEqual(dataset.frequency, newFreq)
+            assert dataset.frequency == newFreq
 
     def test_send_on_delete(self):
         dataset = DatasetFactory()
@@ -230,93 +229,94 @@ class DatasetModelTest(TestCase, DBTestMixin):
             dataset.save()
 
 
-class ResourceModelTest(TestCase, DBTestMixin):
+class ResourceModelTest:
     def test_url_is_required(self):
-        with self.assertRaises(db.ValidationError):
+        with pytest.raises(db.ValidationError):
             DatasetFactory(resources=[ResourceFactory(url=None)])
 
     def test_bad_url(self):
-        with self.assertRaises(db.ValidationError):
+        with pytest.raises(db.ValidationError):
             DatasetFactory(resources=[ResourceFactory(url='not-an-url')])
 
     def test_url_is_stripped(self):
         url = 'http://www.somewhere.com/with/spaces/   '
         dataset = DatasetFactory(resources=[ResourceFactory(url=url)])
-        self.assertEqual(dataset.resources[0].url, url.strip())
+        assert dataset.resources[0].url == url.strip()
 
 
-class LicenseModelTest(DBTestMixin, TestCase):
+class LicenseModelTest:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         # Feed the DB with random data to ensure true matching
         LicenseFactory.create_batch(3)
 
     def test_not_found(self):
         found = License.guess('should not be found')
-        self.assertIsNone(found)
+        assert found is None
 
     def test_not_found_with_default(self):
         license = LicenseFactory()
         found = License.guess('should not be found', default=license)
-        self.assertEqual(found.id, license.id)
+        assert found.id == license.id
 
     def test_none(self):
         found = License.guess(None)
-        self.assertIsNone(found)
+        assert found is None
 
     def test_empty_string(self):
         found = License.guess('')
-        self.assertIsNone(found)
+        assert found is None
 
     def test_exact_match_by_id(self):
         license = LicenseFactory()
         found = License.guess(license.id)
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_exact_match_by_id_with_spaces(self):
         license = LicenseFactory()
         found = License.guess(' {0} '.format(license.id))
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_exact_match_by_url(self):
         license = LicenseFactory()
         found = License.guess(license.url)
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_exact_match_by_title(self):
         license = LicenseFactory()
         found = License.guess(license.title)
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_exact_match_by_title_with_spaces(self):
         license = LicenseFactory()
         found = License.guess(' {0} '.format(license.title))
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_match_by_title_with_low_edit_distance(self):
         license = LicenseFactory(title='License')
         found = License.guess('Licence')
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_match_by_title_with_extra_inner_space(self):
         license = LicenseFactory(title='License ODBl')
         found = License.guess('License  ODBl')  # 2 spaces instead of 1
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_match_by_title_with_mismatching_case(self):
         license = LicenseFactory(title='License ODBl')
         found = License.guess('License ODBL')
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
 
     def test_multiple_strings(self):
         license = LicenseFactory()
         found = License.guess('should not match', license.id)
-        self.assertIsInstance(found, License)
-        self.assertEqual(license.id, found.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
