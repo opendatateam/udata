@@ -7,6 +7,7 @@
 - Typed resources [#1398](https://github.com/opendatateam/udata/issues/1398)
 - [breaking] Enforce a domain whitelist when resource.filetype is file [#1567](https://github.com/opendatateam/udata/issues/1567)
 - Initial data preview implementation [#1581](https://github.com/opendatateam/udata/pull/1581)
+- Switch to PyPI.org for package links [#1583](https://github.com/opendatateam/udata/pull/1583)
 
 ## 1.3.5 (2018-04-03)
 
@@ -375,7 +376,7 @@
   [#871](https://github.com/opendatateam/udata/pull/871)
   [#903](https://github.com/opendatateam/udata/pull/903)
 - Upgrade to Flask-Login 0.4.0 and switch from Flask-Security to the latest
-  [Flask-Security-Fork](https://pypi.python.org/pypi/Flask-Security-Fork)
+  [Flask-Security-Fork](https://pypi.org/project/Flask-Security-Fork)
   [#813](https://github.com/opendatateam/udata/pull/813)
 - Migrated remaining widgets to Vue.js [#828](https://github.com/opendatateam/udata/pull/828):
 

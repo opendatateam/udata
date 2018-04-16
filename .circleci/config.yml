@@ -122,7 +122,7 @@ jobs:
           command: |
             source venv/bin/activate
             # Check long description renders properly
-            python setup.py check -r -s
+            python setup.py check -m -s
             # Build a wheel release
             if [[ $CIRCLE_TAG ]]; then
                 # This is a tagged release

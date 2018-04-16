@@ -64,7 +64,7 @@ The step to perform a release are:
     - push (commits and tags)
 7. check on [github][] that everything has been pushed
 8. wait for [CircleCI][] tagged build to succeed
-9. check on [PyPI](https://pypi.python.org/pypi/udata) that the new release is present
+9. check on [PyPI](https://pypi.org/project/udata/#history) that the new release is present
 10. celebrate
 
 ## Branching

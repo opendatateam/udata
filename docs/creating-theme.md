@@ -302,7 +302,7 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
 [cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-theme
 [Babel]: http://babel.pocoo.org/
-[PyPI]: https://pypi.python.org/
+[PyPI]: https://pypi.org/
 [gitter-chan]: https://gitter.im/opendatateam/udata
 [gouvfr-hooks]: https://github.com/etalab/udata-gouvfr/blob/master/udata_gouvfr/theme/__init__.py
 [Poedit]: https://poedit.net/
