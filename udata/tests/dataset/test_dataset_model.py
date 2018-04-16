@@ -14,6 +14,7 @@ from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
 )
 from udata.core.user.factories import UserFactory
+from udata.utils import faker
 from udata.tests.helpers import assert_emit, assert_equal_dates
 
 
@@ -282,6 +283,13 @@ class LicenseModelTest:
     def test_exact_match_by_url(self):
         license = LicenseFactory()
         found = License.guess(license.url)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_exact_match_by_alternate_url(self):
+        alternate_url = faker.uri()
+        license = LicenseFactory(alternate_urls=[alternate_url])
+        found = License.guess(alternate_url)
         assert isinstance(found, License)
         assert license.id == found.id
 

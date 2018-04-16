@@ -117,6 +117,7 @@ class License(db.Document):
     title = db.StringField(required=True)
     slug = db.SlugField(required=True, populate_from='title')
     url = db.URLField()
+    alternate_urls = db.ListField(db.URLField())
     maintainer = db.StringField()
     flags = db.ListField(db.StringField())
 
@@ -153,7 +154,10 @@ class License(db.Document):
         qs = cls.objects
         text = text.strip().lower()  # Stored identifiers are lower case
         slug = cls.slug.slugify(text)  # Use slug as it normalize string
-        license = qs(db.Q(id=text) | db.Q(slug=slug) | db.Q(url=text)).first()
+        license = qs(
+            db.Q(id=text) | db.Q(slug=slug) | db.Q(url=text)
+            | db.Q(alternate_urls=text)
+        ).first()
         if license is None:
             # Try to single match with a low Damerau-Levenshtein distance
             computed = ((l, rdlevenshtein(l.slug, slug)) for l in cls.objects)
