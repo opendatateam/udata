@@ -38,7 +38,7 @@
 <script>
 import Calendar from 'components/calendar.vue';
 import {FieldComponentMixin} from 'components/form/base-field';
-import $ from 'jquery';
+import $ from 'jquery-validation';  // Ensure jquery & jquery.validate plugin are both loaded
 
 const DEFAULT_FORMAT = 'L';
 const ISO_FORMAT = 'YYYY-MM-DD';

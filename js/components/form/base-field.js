@@ -1,5 +1,4 @@
 import log from 'logger';
-import $ from 'jquery';
 import u from 'utils';
 import Vue from 'vue';
 
@@ -124,15 +123,6 @@ export const BaseField = {
             }
             return widget;
         }
-    },
-    ready() {
-        // Form help messages as popover on info sign
-        $(this.$el).find('.form-help').popover({
-            placement: 'left',
-            trigger: 'hover',
-            container: 'body',
-            html: true
-        });
     }
 };
 

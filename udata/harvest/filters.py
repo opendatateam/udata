@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-import urlparse
-
 import dateutil.parser
 
 from voluptuous import Invalid
 
-from udata import tags
+from udata import tags, uris
 
 
 def boolean(value):
@@ -88,34 +86,17 @@ def normalize_string(value):
     return strip(line_endings(value))
 
 
-def is_url(add_prefix='http://', full=False, remove_fragment=False,
-           schemes=('http', 'https')):
+def is_url(default_scheme='http', **kwargs):
     """Return a converter that converts a clean string to an URL."""
     def converter(value):
         if value is None:
             return value
-        split_url = list(urlparse.urlsplit(value))
-        if full and add_prefix \
-                and not all((split_url[0], split_url[1], split_url[2])) \
-                and not split_url[2].startswith('/'):
-            split_url = list(urlparse.urlsplit(add_prefix + value))
-        scheme = split_url[0]
-        if scheme != scheme.lower():
-            split_url[0] = scheme = scheme.lower()
-        if full and not scheme:
-            raise Invalid('URL must be complete')
-        if scheme and schemes is not None and scheme not in schemes:
-            raise Invalid('Scheme must belong to {0}'.format(sorted(schemes)))
-        network_location = split_url[1]
-        if network_location != network_location.lower():
-            split_url[1] = network_location = network_location.lower()
-        if scheme in ('http', 'https') and not split_url[2]:
-            # By convention a full HTTP URL must always have
-            # at least a "/" in its path.
-            split_url[2] = '/'
-        if remove_fragment and split_url[4]:
-            split_url[4] = ''
-        return unicode(urlparse.urlunsplit(split_url))
+        if '://' not in value and default_scheme:
+            value = '://'.join((default_scheme, value.strip()))
+        try:
+            return uris.validate(value)
+        except uris.ValidationError as e:
+            raise Invalid(e.message)
     return converter
 
 
