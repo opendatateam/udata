@@ -7,7 +7,6 @@ from flask import current_app
 from netaddr import IPAddress, AddrFormatError
 
 from udata.settings import Defaults
-# from tlds import tld_set as TLDS
 
 URL_REGEX = re.compile(
     r'^'
@@ -41,9 +40,6 @@ URL_REGEX = re.compile(
     r'$',
     re.UNICODE | re.IGNORECASE
 )
-
-# SCHEMES = Defaults.URLS_ALLOWED_SCHEMES
-# TLDS = Defaults.URLS_ALLOWED_TLDS
 
 
 class ValidationError(ValueError):

@@ -268,7 +268,7 @@ class URLFieldTest(DBTestMixin, TestCase):
             URLTester(url=url).save()
 
 
-class Darivate(DBTestMixin, TestCase):
+class DatetimedTest(DBTestMixin, TestCase):
     def test_class(self):
         self.assertIsInstance(DatetimedTester.created_at, db.DateTimeField)
         self.assertIsInstance(DatetimedTester.last_modified, db.DateTimeField)
