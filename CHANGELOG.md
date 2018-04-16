@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.6 (2018-04-16)
 
 - Prevent OEmbed card to be styled when loaded in bootstrap 4 [#1569](https://github.com/opendatateam/udata/pull/1569)
 - Fix organizations sort by last_modified [#1576](https://github.com/opendatateam/udata/pull/1576)
