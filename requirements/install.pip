@@ -41,7 +41,7 @@ rdflib-jsonld==0.4.0
 redis==2.10.6
 requests==2.18.4
 StringDist==1.0.9
-tlds==2018041600
+tlds
 unicodecsv==0.14.1
 voluptuous==0.10.5
 wtforms-json==0.3.3
