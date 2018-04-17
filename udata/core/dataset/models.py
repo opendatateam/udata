@@ -302,7 +302,6 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
-            'needCheck': self.need_check(),
             'type': self.type,
         }
 
@@ -326,11 +325,6 @@ class ResourceMixin(object):
 
         if self.description:
             result['description'] = mdstrip(self.description)
-
-        # These 2 values are not standard
-        if self.checksum:
-            result['checksum'] = self.checksum.value,
-            result['checksumType'] = self.checksum.type or 'sha1'
 
         return result
 

@@ -1,36 +1,36 @@
 <template>
 <modal class="resource-modal" v-ref:modal
-    :title="resource.name">
+    :title="resource.title">
 
     <div class="modal-body">
-        {{{ resource.description }}}
+        {{{ resource.description|markdown }}}
 
         <dl class="dl-horizontal dl-wide">
           <dt>{{ _('URL') }}</dt>
-          <dd><a :href="resource.contentUrl" @click="onClick">{{resource.contentUrl}}</a></dd>
-          <dt>{{ _('Latest URL') }}</dt>
           <dd><a :href="resource.url" @click="onClick">{{resource.url}}</a></dd>
-          <dt v-if="resource.encodingFormat">{{ _('Format') }}</dt>
-          <dd v-if="resource.encodingFormat">{{resource.encodingFormat}}</dd>
-          <dt v-if="resource.fileFormat">{{ _('MimeType') }}</dt>
-          <dd v-if="resource.fileFormat">{{resource.fileFormat}}</dd>
-          <dt v-if="resource.contentSize">{{ _('Size') }}</dt>
-          <dd v-if="resource.contentSize">{{ resource.contentSize|size }}</dd>
+          <dt>{{ _('Latest URL') }}</dt>
+          <dd><a :href="resource.latest" @click="onClick">{{resource.latest}}</a></dd>
+          <dt v-if="resource.format">{{ _('Format') }}</dt>
+          <dd v-if="resource.format">{{resource.format}}</dd>
+          <dt v-if="resource.mime">{{ _('MimeType') }}</dt>
+          <dd v-if="resource.mime">{{resource.mime}}</dd>
+          <dt v-if="resource.filesize">{{ _('Size') }}</dt>
+          <dd v-if="resource.filesize">{{ resource.filesize|size }}</dd>
           <dt v-if="resource.checksum">{{ resource.checksumType || 'sha1'}}</dt>
           <dd v-if="resource.checksum">{{ resource.checksum }}</dd>
-          <dt v-if="resource.dateCreated">{{ _('Created on') }}</dt>
-          <dd v-if="resource.dateCreated"> {{ resource.dateCreated|dt }}</dd>
-          <dt v-if="resource.dateModified">{{ _('Modified on') }}</dt>
-          <dd v-if="resource.dateModified"> {{ resource.dateModified|dt }}</dd>
-          <dt v-if="resource.datePublished">{{ _('Published on') }}</dt>
-          <dd v-if="resource.datePublished"> {{ resource.datePublished|dt }}</dd>
-          <dt v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
-          <dd v-if="resource.interactionStatistic && resource.interactionStatistic.userInteractionCount"> {{ resource.interactionStatistic.userInteractionCount }}</dd>
-          <dt v-if="checkResults['check:date']">{{ _('Last checked on') }}</dt>
-          <dd v-if="checkResults['check:date']"> {{ checkResults['check:date']|dt }}</dd>
-          <dt v-if="checkResults['check:status']">{{ _('Last checked result') }}</dt>
-          <dd v-if="checkResults['check:status']">
-              <availability :status="checkResults['check:status']"></availability>
+          <dt v-if="resource.created_at">{{ _('Created on') }}</dt>
+          <dd v-if="resource.created_at"> {{ resource.created_at|dt }}</dd>
+          <dt v-if="resource.modified">{{ _('Modified on') }}</dt>
+          <dd v-if="resource.modified"> {{ resource.modified|dt }}</dd>
+          <dt v-if="resource.published">{{ _('Published on') }}</dt>
+          <dd v-if="resource.published"> {{ resource.published|dt }}</dd>
+          <dt v-if="resource.metrics && resource.metrics.views">{{ _('Downloads') }}</dt>
+          <dd v-if="resource.metrics && resource.metrics.views"> {{ resource.metrics.views }}</dd>
+          <dt v-if="resource.extras && resource.extras['check:date']">{{ _('Last checked on') }}</dt>
+          <dd v-if="resource.extras && resource.extras['check:date']"> {{ resource.extras['check:date']|dt }}</dd>
+          <dt v-if="resource.extras && resource.extras['check:status']">{{ _('Last checked result') }}</dt>
+          <dd v-if="resource.extras && resource.extras['check:status']">
+                <availability :status="resource.extras['check:status']"></availability>
           </dd>
         </dl>
     </div>
@@ -45,23 +45,27 @@
 
 <script>
 import Modal from 'components/modal.vue';
+import Resource from 'models/resource';
 import Availability from './resource/availability.vue';
 import pubsub from 'pubsub';
 
 export default {
     props: {
-        resource: Object
+        datasetId: {
+            type: String,
+            required: true,
+        },
+        resource: {
+            type: Object,
+            required: true,
+        }
     },
     components: {Modal, Availability},
-    computed: {
-        checkResults() {
-            return this.resource.extras.reduce((obj, extra) => {
-                if (extra.name.startsWith('check:')) {
-                    obj[extra.name] = extra.value;
-                }
-                return obj;
-            }, {});
-        },
+    created() {
+        const url = `datasets/${this.datasetId}/resources/${this.resource.id}/`;
+        this.$api.get(url).then(resource => {
+            Object.assign(this.resource, resource);
+        });
     },
     methods: {
         onClick() {

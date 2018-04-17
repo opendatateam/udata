@@ -9,6 +9,7 @@
 - Initial data preview implementation [#1581](https://github.com/opendatateam/udata/pull/1581)
 - Switch to PyPI.org for package links [#1583](https://github.com/opendatateam/udata/pull/1583)
 - Handle some alternate titles and alternate URLs on licenses for improved match on harvesting [#1592](https://github.com/opendatateam/udata/pull/1592)
+- Resource modals: use new single resource API call [#1547](https://github.com/opendatateam/udata/pull/1547)
 
 ## 1.3.6 (2018-04-16)
 

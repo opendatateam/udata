@@ -30,7 +30,11 @@
                     {{ resource.metrics.nb_hits or 0 }}
                 </li>
                 <li class="healthcheck-container">
-                    <availability v-if="checkUrlEnabled" :resource="getResourceById('{{ resource.id }}')" :checkurl="'{{ url_for('api.check_dataset_resource', dataset=dataset.id, rid=resource.id) }}'"></availability>
+                    <availability v-if="checkUrlEnabled"
+                                  :resource="getResourceById('{{ resource.id }}')"
+                                  :checkurl="'{{ url_for('api.check_dataset_resource', dataset=dataset.id, rid=resource.id) }}'"
+                                  :need-check="{{ resource.need_check()|tojson }}">
+                    </availability>
                 </li>
             </ul>
         </div>

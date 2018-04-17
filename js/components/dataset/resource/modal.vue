@@ -132,7 +132,7 @@ export default {
         return {
             edit: false,
             confirm: false,
-            dataset: new Dataset(),
+            dataset: this.$parent.$parent.dataset,
             resource: new Resource(),
             next_route: null
         };
@@ -167,10 +167,11 @@ export default {
                     params: parent.params
                 };
             }
-            this.dataset.fetch(this.$route.params.oid);
             if (this.$route.name.includes('community')) {
                 this.resource = new CommunityResource();
                 this.resource.fetch(this.$route.params.rid);
+            } else {
+                this.resource.fetch(this.$route.params.oid, this.$route.params.rid);
             }
         }
     },

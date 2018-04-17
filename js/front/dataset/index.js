@@ -83,14 +83,45 @@ new Vue({
         },
 
         /**
+         * Get a resource object conform to model (but not a Model instance) from JSON-LD
+         * @param  {Object} resourceJsonLd  Resource as in JSON-LD
+         * @return {Object}                 Resource object as it would be in model
+         */
+        resourceFromJsonLd(resourceJsonLd) {
+            const resource = {
+                id: resourceJsonLd['@id'],
+                url: resourceJsonLd.contentUrl,
+                latest: resourceJsonLd.url,
+                title: resourceJsonLd.name,
+                format: resourceJsonLd.encodingFormat,
+                mime: resourceJsonLd.fileFormat,
+                filesize: resourceJsonLd.contentSize,
+                created_at: resourceJsonLd.dateCreated,
+                modified: resourceJsonLd.dateModified,
+                published: resourceJsonLd.datePublished,
+                description: resourceJsonLd.description,
+            };
+            if (resourceJsonLd.interactionStatistic) {
+                resource.metrics = {
+                    views: resourceJsonLd.interactionStatistic.userInteractionCount,
+                }
+            }
+            resource.extras = {};
+            return resource;
+        },
+
+        /**
          * Display a resource or a community ressource in a modal
          */
         showResource(id, isCommunity) {
             const attr = isCommunity ? 'communityResources' : 'resources';
-            const resource = this.dataset[attr].find(resource => resource['@id'] === id);
+            const resourceJsonLd = this.dataset[attr].find(resource => resource['@id'] === id);
             const communityPrefix = isCommunity ? '-community' : '';
             location.hash = `resource${communityPrefix}-${id}`;
-            const modal = this.$modal(ResourceModal, {resource});
+            const modal = this.$modal(
+                ResourceModal,
+                {datasetId: this.dataset['@id'], resource: this.resourceFromJsonLd(resourceJsonLd)}
+            );
             modal.$on('modal:closed', () => {
                 // prevent scrolling to top
                 location.hash = '_';

@@ -548,6 +548,18 @@ class DatasetResourceAPITest(APITestCase):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
 
+    def test_get(self):
+        '''It should fetch a resource from the API'''
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        response = self.get(url_for('api.resource', dataset=dataset,
+                                    rid=resource.id))
+        self.assert200(response)
+        data = json.loads(response.data)
+        assert data['title'] == resource.title
+        assert data['latest'] == resource.latest
+        assert data['url'] == resource.url
+
     def test_create(self):
         data = ResourceFactory.as_dict()
         with self.api_user():
