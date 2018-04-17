@@ -6,6 +6,15 @@
         margin-top: 20px;
         margin-bottom: 10px;
     }
+
+    // account for absence of card-logo when not community or add
+    :not(.resource-card-community):not(.add) {
+        > .card-body {
+            margin-left: 0;
+            flex: 1 0 100%;
+            max-width: 100%;
+        }
+    }
 }
 
 .resource-card.add {
@@ -22,15 +31,6 @@
         h4 {
             margin-bottom: 0;
         }
-    }
-}
-
-// account for absence of card-logo when not community or add
-:not(.resource-card-community):not(.add) {
-    > .card-body {
-        margin-left: 0;
-        flex: 1 0 100%;
-        max-width: 100%;
     }
 }
 
