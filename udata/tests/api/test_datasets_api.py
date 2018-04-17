@@ -550,9 +550,8 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_get(self):
         '''It should fetch a resource from the API'''
-        with self.autoindex():
-            resource = ResourceFactory()
-            dataset = DatasetFactory(resources=[resource])
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
         response = self.get(url_for('api.resource', dataset=dataset,
                                     rid=resource.id))
         self.assert200(response)
