@@ -88,8 +88,10 @@
                 </div>
 
                 <div class="resources-list">
-                    <h3>{{ _('Resources') }}</h3>
-                    <small> • <a href="#community-resources">{{ _('Community resources') }}</a></small>
+                    <div class="resources-list-header">
+                        <h3>{{ _('Resources') }}</h3>
+                        <small> • <a href="#community-resources">{{ _('Community resources') }}</a></small>
+                    </div>
 
                     {% set grouped_resources = dataset.resources|group_resources_by_type %}
                     {% set nb_groups = grouped_resources.keys()|length %}
