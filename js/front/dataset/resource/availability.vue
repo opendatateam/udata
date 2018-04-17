@@ -24,7 +24,13 @@ export default {
          */
         status: {
             type: Number,
-        }
+        },
+        /**
+         * Does the resource need a refreshed check?
+         */
+        needCheck: {
+            type: Boolean,
+        },
     },
     data() {
         return {
@@ -81,7 +87,7 @@ export default {
          * @param  {Object} resource A resource as extracted from JSON-LD
          */
         getCachedCheck(resource) {
-            if (!resource.needCheck) {
+            if (!this.needCheck) {
                 const extras = this.getCheckExtras(resource.extras || []);
                 if (extras['check:status']) {
                     return extras;

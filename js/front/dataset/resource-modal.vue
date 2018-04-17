@@ -7,25 +7,25 @@
 
         <dl class="dl-horizontal dl-wide">
           <dt>{{ _('URL') }}</dt>
-          <dd><a :href="resourceJsonLd.contentUrl" @click="onClick">{{resourceJsonLd.contentUrl}}</a></dd>
+          <dd><a :href="resource.url" @click="onClick">{{resource.url}}</a></dd>
           <dt>{{ _('Latest URL') }}</dt>
-          <dd><a :href="resourceJsonLd.url" @click="onClick">{{resourceJsonLd.url}}</a></dd>
-          <dt v-if="resourceJsonLd.encodingFormat">{{ _('Format') }}</dt>
-          <dd v-if="resourceJsonLd.encodingFormat">{{resourceJsonLd.encodingFormat}}</dd>
-          <dt v-if="resourceJsonLd.fileFormat">{{ _('MimeType') }}</dt>
-          <dd v-if="resourceJsonLd.fileFormat">{{resourceJsonLd.fileFormat}}</dd>
-          <dt v-if="resourceJsonLd.contentSize">{{ _('Size') }}</dt>
-          <dd v-if="resourceJsonLd.contentSize">{{ resourceJsonLd.contentSize|size }}</dd>
-          <dt v-if="resourceJsonLd.checksum">{{ resourceJsonLd.checksumType || 'sha1'}}</dt>
-          <dd v-if="resourceJsonLd.checksum">{{ resourceJsonLd.checksum }}</dd>
-          <dt v-if="resourceJsonLd.dateCreated">{{ _('Created on') }}</dt>
-          <dd v-if="resourceJsonLd.dateCreated"> {{ resourceJsonLd.dateCreated|dt }}</dd>
-          <dt v-if="resourceJsonLd.dateModified">{{ _('Modified on') }}</dt>
-          <dd v-if="resourceJsonLd.dateModified"> {{ resourceJsonLd.dateModified|dt }}</dd>
-          <dt v-if="resourceJsonLd.datePublished">{{ _('Published on') }}</dt>
-          <dd v-if="resourceJsonLd.datePublished"> {{ resourceJsonLd.datePublished|dt }}</dd>
-          <dt v-if="resourceJsonLd.interactionStatistic && resourceJsonLd.interactionStatistic.userInteractionCount">{{ _('Downloads') }}</dt>
-          <dd v-if="resourceJsonLd.interactionStatistic && resourceJsonLd.interactionStatistic.userInteractionCount"> {{ resourceJsonLd.interactionStatistic.userInteractionCount }}</dd>
+          <dd><a :href="resource.latest" @click="onClick">{{resource.latest}}</a></dd>
+          <dt v-if="resource.format">{{ _('Format') }}</dt>
+          <dd v-if="resource.format">{{resource.format}}</dd>
+          <dt v-if="resource.mime">{{ _('MimeType') }}</dt>
+          <dd v-if="resource.mime">{{resource.mime}}</dd>
+          <dt v-if="resource.filesize">{{ _('Size') }}</dt>
+          <dd v-if="resource.filesize">{{ resource.filesize|size }}</dd>
+          <dt v-if="resource.checksum">{{ resource.checksumType || 'sha1'}}</dt>
+          <dd v-if="resource.checksum">{{ resource.checksum }}</dd>
+          <dt v-if="resource.created_at">{{ _('Created on') }}</dt>
+          <dd v-if="resource.created_at"> {{ resource.created_at|dt }}</dd>
+          <dt v-if="resource.modified">{{ _('Modified on') }}</dt>
+          <dd v-if="resource.modified"> {{ resource.modified|dt }}</dd>
+          <dt v-if="resource.published">{{ _('Published on') }}</dt>
+          <dd v-if="resource.published"> {{ resource.published|dt }}</dd>
+          <dt v-if="resource.metrics && resource.metrics.views">{{ _('Downloads') }}</dt>
+          <dd v-if="resource.metrics && resource.metrics.views"> {{ resource.metrics.views }}</dd>
           <dt v-if="resource.extras && resource.extras['check:date']">{{ _('Last checked on') }}</dt>
           <dd v-if="resource.extras && resource.extras['check:date']"> {{ resource.extras['check:date']|dt }}</dd>
           <dt v-if="resource.extras && resource.extras['check:status']">{{ _('Last checked result') }}</dt>
@@ -55,23 +55,17 @@ export default {
             type: String,
             required: true,
         },
-        resourceId: {
-            type: String,
-            required: true,
-        },
-        resourceJsonLd: {
+        resource: {
             type: Object,
             required: true,
         }
     },
-    data() {
-        return {
-            resource: new Resource(),
-        }
-    },
     components: {Modal, Availability},
     created() {
-        this.resource.fetch(this.datasetId, this.resourceId);
+        const url = `datasets/${this.datasetId}/resources/${this.resource.id}/`;
+        this.$api.get(url).then(resource => {
+            Object.assign(this.resource, resource);
+        });
     },
     methods: {
         onClick() {
