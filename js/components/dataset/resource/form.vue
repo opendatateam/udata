@@ -202,7 +202,12 @@ export default {
                     label: this._('URL'),
                     readonly: false,
                     widget: 'url-field',
-                },{
+                }, {
+                    id: 'preview_url',
+                    label: this._('Preview URL'),
+                    readonly: false,
+                    widget: 'url-field',
+                }, {
                     id: 'filesize',
                     label: this._('Size'),
                     readonly: false
