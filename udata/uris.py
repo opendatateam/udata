@@ -11,7 +11,7 @@ from udata.settings import Defaults
 URL_REGEX = re.compile(
     r'^'
     # scheme
-    r'^(?P<scheme>[a-z0-9\.\-]*)://'
+    r'^(?:(?P<scheme>[a-z0-9\.\-]*):)?//'
     # user:pass authentication
     r'(?P<credentials>\S+(?::\S*)?@)?'
     r'(?:'
@@ -85,8 +85,8 @@ def validate(url, schemes=None, tlds=None, private=None, local=None,
     if not match:
         error(url)
 
-    scheme = match.group('scheme').lower()
-    if scheme not in schemes:
+    scheme = (match.group('scheme') or '').lower()
+    if scheme and scheme not in schemes:
         error(url, 'Invalid scheme {0}'.format(scheme))
 
     if not credentials and match.group('credentials'):
