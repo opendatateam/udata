@@ -5,6 +5,7 @@
 - Typed resources related styles [#265](https://github.com/etalab/udata-gouvfr/pull/265)
 - Enforce a domain whitelist when resource.filetype is file (migration) [#292](https://github.com/etalab/udata-gouvfr/pull/292)
 - Use new pypi.org links [#295](https://github.com/etalab/udata-gouvfr/pull/295)
+- Ensure active users have a confirmed_at date (migration) [#298](https://github.com/etalab/udata-gouvfr/pull/298)
 
 ## 1.3.2 (2018-03-28)
 
