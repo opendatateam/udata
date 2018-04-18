@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix some search parameters validation [#1601](https://github.com/opendatateam/udata/pull/1601)
 
 ## 1.3.6 (2018-04-16)
 
