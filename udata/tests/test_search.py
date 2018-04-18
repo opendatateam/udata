@@ -979,7 +979,7 @@ class TestModelTermsFacet(FacetTestCase, DBTestMixin):
         for value in [str(fake.id), fake.id]:
             self.assertTrue(self.facet.validate_parameter(value))
 
-        bad_values = ['xyz']
+        bad_values = ['xyz', True, 42]
         for value in bad_values:
             with self.assertRaises(Exception):
                 self.facet.validate_parameter(value)
@@ -1111,7 +1111,7 @@ class TestRangeFacet(FacetTestCase):
         for value in self.facet.labels.keys():
             self.assertTrue(self.facet.validate_parameter(value))
 
-        bad_values = ['xyz']
+        bad_values = ['xyz', True, 45]
         for value in bad_values:
             with self.assertRaises(Exception):
                 self.facet.validate_parameter(value)
@@ -1205,9 +1205,9 @@ class TestTemporalCoverageFacet(FacetTestCase):
     def test_validate_parameters(self):
         self.assertTrue(self.facet.validate_parameter('1940-01-01-2014-12-31'))
 
-        bad_values = ['xyz']
+        bad_values = ['xyz', True, 42]
         for value in bad_values:
-            with self.assertRaises(Exception):
+            with self.assertRaises(ValueError):
                 self.facet.validate_parameter(value)
 
 
