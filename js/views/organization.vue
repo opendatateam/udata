@@ -71,7 +71,7 @@ export default {
         return {
             org: new Organization(),
             metrics: new Metrics({query: {
-                start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
+                start: moment().subtract(365*2, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
             reuses: new PageList({
@@ -105,13 +105,13 @@ export default {
                     title: this._('Traffic'),
                     default: 'Area',
                     y: [{
-                        id: 'nb_uniq_visitors',
+                        id: 'views',
                         label: this._('Organization')
                     }, {
-                        id: 'datasets_nb_uniq_visitors',
+                        id: 'datasets_views',
                         label: this._('Datasets')
                     }, {
-                        id: 'reuses_nb_uniq_visitors',
+                        id: 'reuses_views',
                         label: this._('Reuses')
                     }]
                 },
