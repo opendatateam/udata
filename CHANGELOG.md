@@ -11,6 +11,7 @@
 - Handle some alternate titles and alternate URLs on licenses for improved match on harvesting [#1592](https://github.com/opendatateam/udata/pull/1592)
 - Resource modals: use new single resource API call [#1547](https://github.com/opendatateam/udata/pull/1547)
 - Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
+- Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
 
 ## 1.3.6 (2018-04-16)
 
