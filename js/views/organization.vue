@@ -71,7 +71,7 @@ export default {
         return {
             org: new Organization(),
             metrics: new Metrics({query: {
-                start: moment().subtract(365*2, 'days').format('YYYY-MM-DD'),
+                start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
             reuses: new PageList({
