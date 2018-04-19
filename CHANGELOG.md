@@ -4,6 +4,7 @@
 
 - Fix some search parameters validation [#1601](https://github.com/opendatateam/udata/pull/1601)
 - Prevent API tracking errors with unicode [#1602](https://github.com/opendatateam/udata/pull/1602)
+- Prevent a race condition error when uploading file with concurrent chunking [#1606](https://github.com/opendatateam/udata/pull/1606)
 
 ## 1.3.6 (2018-04-16)
 
