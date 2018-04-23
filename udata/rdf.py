@@ -3,7 +3,7 @@ from __future__ import unicode_literals, print_function
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
-from flask import request, url_for
+from flask import request, url_for, abort
 
 from rdflib import Graph, Literal, URIRef
 from rdflib.resource import Resource as RdfResource
@@ -237,6 +237,8 @@ def graph_response(graph, format):
     Return a proper flask response for a RDF resource given an expected format.
     '''
     fmt = guess_format(format)
+    if not fmt:
+        abort(404)
     headers = {
         'Content-Type': RDF_MIME_TYPES[fmt]
     }

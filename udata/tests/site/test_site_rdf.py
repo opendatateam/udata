@@ -142,7 +142,7 @@ class CatalogTest(FrontTestCase):
 
 
 class SiteRdfViewsTest(FrontTestCase):
-    modules = ['core.site', 'core.dataset']
+    modules = ['admin', 'search', 'core.site', 'core.dataset', 'core.reuse', 'core.organization']
 
     def test_expose_jsonld_context(self):
         url = url_for('site.jsonld_context')
@@ -231,3 +231,8 @@ class SiteRdfViewsTest(FrontTestCase):
         self.assertFalse(pagination.value(HYDRA.previous))
         self.assertEqual(pagination.value(HYDRA.next).identifier,
                          URIRef(next_url))
+
+    def test_catalog_format_unknown(self):
+        url = url_for('site.rdf_catalog_format', format='unknown')
+        response = self.get(url)
+        self.assert404(response)
