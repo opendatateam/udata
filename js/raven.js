@@ -6,9 +6,9 @@ if (config.sentry) {
         logger: 'admin',
         release: config.sentry.release,
         tags: config.sentry.tags,
-    }
+    };
 
-    Raven.config(config.sentry.dsn, options).install()
+    Raven.config(config.sentry.dsn, options).install();
 }
 
 export default Raven;
