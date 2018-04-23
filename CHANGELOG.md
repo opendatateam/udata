@@ -7,6 +7,7 @@
 - Prevent a race condition error when uploading file with concurrent chunking [#1606](https://github.com/opendatateam/udata/pull/1606)
 - Disallow resources dict in API [#1603](https://github.com/opendatateam/udata/pull/1603)
 - Test and fix territories routing [#1611](https://github.com/opendatateam/udata/pull/1611)
+- Fix the client-side Raven/Sentry configuration [#1612](https://github.com/opendatateam/udata/pull/1612)
 
 ## 1.3.6 (2018-04-16)
 
