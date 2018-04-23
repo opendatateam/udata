@@ -6,10 +6,7 @@
 
 .sort {
     margin-bottom: 1em;
-
-    a:hover {
-        cursor: pointer;    
-    }
+    text-align: right;
 }
 
 .add {
@@ -29,8 +26,18 @@
         <span class="sr-only">Loading...</span>
     </div>
 
-    <div class="sort">
-        sort by: <a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a> <a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a>
+    <div class="sort" v-show="discussions.length > 1">
+        <div class="btn-group">
+            <button class="btn btn-default btn-sm dropdown-toogle" type="button"
+                data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                {{ _("sort by") }} <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a></li>
+                <li><a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a></li>
+            </ul>
+        </div>
     </div>
     
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
@@ -85,7 +92,6 @@ export default {
             loading: true,
             formDisplayed: false,
             currentUser: config.user,
-
         }
     },
     props: {
@@ -172,6 +178,7 @@ export default {
          */
 
         sortBy(key){
+
             if (key == 'created') {
                 this.discussions.sort((a,b) => a['created'] < b['created']);
             } else if ( key== 'response'){
