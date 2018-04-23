@@ -187,6 +187,9 @@ workflows:
               only:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
+                - /pull/[0-9]+/
+                - /pyup-update-.+/
+                - l10n_master
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - assets:
@@ -195,6 +198,9 @@ workflows:
               only:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
+                - /pull/[0-9]+/
+                - /pyup-update-.+/
+                - l10n_master
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - dist:
@@ -206,6 +212,9 @@ workflows:
               only:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
+                - /pull/[0-9]+/
+                - /pyup-update-.+/
+                - l10n_master
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - publish:

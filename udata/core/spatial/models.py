@@ -82,6 +82,8 @@ class GeoZoneQuerySet(db.BaseQuerySet):
 
 
 class GeoZone(db.Document):
+    SEPARATOR = ':'
+
     id = db.StringField(primary_key=True)
     slug = db.StringField(required=True)
     name = db.StringField(required=True)
