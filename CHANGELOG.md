@@ -9,6 +9,7 @@
 - Test and fix territories routing [#1611](https://github.com/opendatateam/udata/pull/1611)
 - Fix the client-side Raven/Sentry configuration [#1612](https://github.com/opendatateam/udata/pull/1612)
 - Raise a 404 in case of unknown RDF content type [#1613](https://github.com/opendatateam/udata/pull/1613)
+- Ensure current theme is available to macros requiring it in mails [#1614](https://github.com/opendatateam/udata/pull/1614)
 
 ## 1.3.6 (2018-04-16)
 
