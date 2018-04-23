@@ -7,7 +7,6 @@ from flask import url_for, current_app
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF
 
-from udata.core.dataset.models import Dataset
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.rdf import DCAT, DCT, HYDRA, namespace_manager
 from udata.utils import Paginable
