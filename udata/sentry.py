@@ -32,24 +32,19 @@ def public_dsn(dsn):
 
 
 def init_app(app):
-    if 'SENTRY_DSN' in app.config:
+    if app.config['SENTRY_DSN']:
         try:
             from raven.contrib.celery import (
                 register_signal, register_logger_signal
             )
             from raven.contrib.flask import Sentry
         except ImportError:
-            log.error('raven[flask] is required to use sentry')
+            log.error('raven is required to use Sentry')
             return
 
         sentry = Sentry()
-        tags = app.config['SENTRY_TAGS'] = app.config.get('SENTRY_TAGS', {})
-
-        app.config.setdefault('SENTRY_USER_ATTRS',
-                              ['slug', 'email', 'fullname'])
-        app.config.setdefault('SENTRY_LOGGING', 'WARNING')
-
-        log_level_name = app.config.get('SENTRY_LOGGING')
+        tags = app.config['SENTRY_TAGS']
+        log_level_name = app.config['SENTRY_LOGGING']
         if log_level_name:
             log_level = getattr(logging, log_level_name.upper())
             if log_level:
@@ -57,10 +52,10 @@ def init_app(app):
                 sentry.level = log_level
 
         # Do not send HTTPExceptions
-        exceptions = set(app.config.get('RAVEN_IGNORE_EXCEPTIONS', []))
+        exceptions = set(app.config['SENTRY_IGNORE_EXCEPTIONS'])
         for exception in IGNORED_EXCEPTIONS:
             exceptions.add(exception)
-        app.config['RAVEN_IGNORE_EXCEPTIONS'] = list(exceptions)
+        app.config['SENTRY_IGNORE_EXCEPTIONS'] = list(exceptions)
 
         app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
 

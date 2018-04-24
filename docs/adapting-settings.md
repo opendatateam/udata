@@ -477,6 +477,43 @@ The default page size for post listing
 
 Max number of resources to display uncollapsed in dataset view.
 
+## Sentry configuration
+
+### SENTRY_DSN
+
+**default**: `None`
+
+The Sentry DSN associated to this udata instance.
+If defined, the Sentry support is automatically activated.
+
+### SENTRY_TAGS
+
+**default**: `{}`
+
+A key-value map of extra tags to pass as Sentry context.
+See: <https://docs.sentry.io/learn/context/>
+
+### SENTRY_USER_ATTRS
+
+**default**: `['slug', 'email', 'fullname']`
+
+Extra user attributes to add the Sentry context.
+See: <https://docs.sentry.io/learn/context/>
+
+### SENTRY_LOGGING
+
+**default**: `'WARNING'`
+
+Minimum log level to be reported to Sentry.
+
+### SENTRY_IGNORE_EXCEPTIONS
+
+**default**: `[]`
+
+A list of extra exceptions to ignore.
+udata already ignores Werkzeug `HTTPException` and some internal ones
+that don't need to be listed here.
+
 
 ## Example configuration file
 
