@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.7 (2018-04-24)
 
 - Fix some search parameters validation [#1601](https://github.com/opendatateam/udata/pull/1601)
 - Prevent API tracking errors with unicode [#1602](https://github.com/opendatateam/udata/pull/1602)
