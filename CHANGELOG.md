@@ -11,6 +11,7 @@
 - Raise a 404 in case of unknown RDF content type [#1613](https://github.com/opendatateam/udata/pull/1613)
 - Ensure current theme is available to macros requiring it in mails [#1614](https://github.com/opendatateam/udata/pull/1614)
 - Fix documentation about NGinx configuration for https [#1615](https://github.com/opendatateam/udata/pull/1615)
+- Remove unwanted commas in default `SECURITY_EMAIL_SUBJECT_*` parameters [#1616](https://github.com/opendatateam/udata/pull/1616)
 
 ## 1.3.6 (2018-04-16)
 
