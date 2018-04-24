@@ -475,9 +475,11 @@ class NestedModelList(fields.FieldList):
     def process(self, formdata, data=unset_value):
         self._formdata = formdata
         self.initial_data = data
-        self.has_data = formdata and any(
+        self.is_list_data = formdata and self.name in formdata
+        self.is_dict_data = formdata and any(
             k.startswith(self.prefix) for k in formdata
         )
+        self.has_data = self.is_list_data or self.is_dict_data
         if self.has_data:
             super(NestedModelList, self).process(formdata, data)
         else:
@@ -486,9 +488,11 @@ class NestedModelList(fields.FieldList):
 
     def validate(self, form, extra_validators=tuple()):
         '''Perform validation only if data has been submitted'''
-        # Run normal validation only if there is data for this form
         if not self.has_data:
             return True
+        if self.is_list_data:
+            if not isinstance(self._formdata[self.name], (list, tuple)):
+                return False
         return super(NestedModelList, self).validate(form, extra_validators)
 
     def populate_obj(self, obj, name):

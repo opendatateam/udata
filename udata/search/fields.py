@@ -279,7 +279,8 @@ class TemporalCoverageFacet(Facet, DSLFacet):
         }
 
     def validate_parameter(self, value):
-        if not RE_TIME_COVERAGE.match(value):
+        if not isinstance(value, basestring) \
+                or not RE_TIME_COVERAGE.match(value):
             msg = '"{0}" does not match YYYY-MM-DD-YYYY-MM-DD'.format(value)
             raise ValueError(msg)
         return True

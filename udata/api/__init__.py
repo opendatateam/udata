@@ -10,9 +10,9 @@ from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
 from flask_fs import UnauthorizedFileType
-from flask_restplus import Api, Resource, inputs, cors
+from flask_restplus import Api, Resource, cors
 
-from udata import search, theme, tracking
+from udata import theme, tracking
 from udata.app import csrf
 from udata.i18n import I18nBlueprint, get_locale
 from udata.auth import (
@@ -21,6 +21,7 @@ from udata.auth import (
 from udata.core.user.models import User
 from udata.core.organization.models import Organization
 from udata.sitemap import sitemap
+from udata.utils import safe_unicode
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -211,7 +212,7 @@ def extract_name_from_path(path):
         )
     else:  # This is a collection.
         name = '{category}'.format(category=infos[0].title())
-    return name
+    return safe_unicode(name)
 
 
 @apiv1.after_request
