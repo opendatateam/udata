@@ -98,6 +98,13 @@ class Defaults(object):
                                     'Your password has been changed')
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
 
+    # Sentry configuration
+    SENTRY_DSN = None
+    SENTRY_TAGS = {}
+    SENTRY_USER_ATTRS = ['slug', 'email', 'fullname']
+    SENTRY_LOGGING = 'WARNING'
+    SENTRY_IGNORE_EXCEPTIONS = []
+
     # Flask WTF settings
     CSRF_SESSION_KEY = 'Default uData csrf key'
 
