@@ -10,6 +10,7 @@ from werkzeug.routing import BaseConverter, NotFound, PathConverter
 from werkzeug.urls import url_quote
 
 from udata import models
+from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
 
 
@@ -111,8 +112,8 @@ class PostConverter(ModelConverter):
     model = models.Post
 
 
-class TerritoryConverter(ModelConverter, PathConverter):
-    model = models.GeoZone
+class TerritoryConverter(PathConverter):
+    DEFAULT_PREFIX = 'fr'  # TODO: make it a setting parameter
 
     def to_python(self, value):
         """
@@ -126,10 +127,18 @@ class TerritoryConverter(ModelConverter, PathConverter):
         if '/' not in value:
             return
 
-        level, code, slug = value.split('/')
-        return self.model.objects.get_or_404(
-            id=':'.join(['fr', level, code]),
-            level='fr:{level}'.format(level=level))
+        level, code = value.split('/')[:2]  # Ignore optionnal slug
+
+        geoid = GeoZone.SEPARATOR.join([level, code])
+        zone = GeoZone.objects.resolve(geoid)
+
+        if not zone and GeoZone.SEPARATOR not in level:
+            # Try implicit default prefix
+            level = GeoZone.SEPARATOR.join([self.DEFAULT_PREFIX, level])
+            geoid = GeoZone.SEPARATOR.join([level, code])
+            zone = GeoZone.objects.resolve(geoid)
+
+        return zone or NotFound()
 
     def to_url(self, obj):
         """
@@ -139,18 +148,6 @@ class TerritoryConverter(ModelConverter, PathConverter):
         if not level_name:
             raise ValueError('Unable to serialize "%s" to url' % obj)
 
-        zone_id = getattr(obj, 'id', None)
-        if not zone_id:
-            # Fallback on code for old redirections.
-            code = getattr(obj, 'code', None)
-            if not code:
-                raise ValueError('Unable to serialize "%s" to url' % obj)
-            territory = self.model.objects.get_or_404(
-                code=code, level='fr:{level}'.format(level=level_name))
-            return '{level_name}/{code}/{slug}'.format(
-                level_name=level_name, code=territory.code,
-                slug=territory.slug)
-
         code = getattr(obj, 'code', None)
         slug = getattr(obj, 'slug', None)
         validity = getattr(obj, 'validity', None)
@@ -158,7 +155,7 @@ class TerritoryConverter(ModelConverter, PathConverter):
             return '{level_name}/{code}@{start_date}/{slug}'.format(
                 level_name=level_name,
                 code=code,
-                start_date=getattr(validity, 'start') or 'latest',
+                start_date=getattr(validity, 'start', None) or 'latest',
                 slug=slug
             )
         else:

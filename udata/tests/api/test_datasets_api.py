@@ -247,6 +247,20 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), 3)
 
+    def test_dataset_api_create_with_resources_dict(self):
+        """Create a dataset w/ resources in a dict instead of list,
+        should fail
+        """
+        data = DatasetFactory.as_dict()
+        data['resources'] = {
+            k: v for k, v in enumerate([
+                ResourceFactory.as_dict() for _ in range(3)
+            ])
+        }
+        with self.api_user():
+            response = self.post(url_for('api.datasets'), data)
+        self.assert400(response)
+
     def test_dataset_api_create_with_geom(self):
         '''It should create a dataset with resources from the API'''
         data = DatasetFactory.as_dict()

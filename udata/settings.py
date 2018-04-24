@@ -90,13 +90,13 @@ class Defaults(object):
 
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
-    SECURITY_EMAIL_SUBJECT_REGISTER = _('Welcome'),
-    SECURITY_EMAIL_SUBJECT_CONFIRM = _('Please confirm your email'),
-    SECURITY_EMAIL_SUBJECT_PASSWORDLESS = _('Login instructions'),
-    SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE = _('Your password has been reset'),
+    SECURITY_EMAIL_SUBJECT_REGISTER = _('Welcome')
+    SECURITY_EMAIL_SUBJECT_CONFIRM = _('Please confirm your email')
+    SECURITY_EMAIL_SUBJECT_PASSWORDLESS = _('Login instructions')
+    SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE = _('Your password has been reset')
     SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE = _(
-                                    'Your password has been changed'),
-    SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions'),
+                                    'Your password has been changed')
+    SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
 
     # Flask WTF settings
     CSRF_SESSION_KEY = 'Default uData csrf key'

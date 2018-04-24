@@ -102,11 +102,11 @@ export const auth_url = _meta('auth-url');
 /**
  * Sentry configuration (as json) if available
  */
-const sentryEl = document.querySelector('link[rel=sentry]');
+const sentryEl = document.querySelector('meta[name=sentry]');
 export const sentry = {};
 
 if (sentryEl) {
-    sentry.dsn = sentryEl.getAttribute('href');
+    sentry.dsn = sentryEl.getAttribute('content');
     sentry.release = sentryEl.dataset.release || undefined;
     sentry.tags = JSON.parse(decodeURIComponent(sentryEl.dataset.tags || '{}'));
 }

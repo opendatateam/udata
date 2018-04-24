@@ -13,6 +13,19 @@
 - Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
 - Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
 
+## 1.3.7 (2018-04-24)
+
+- Fix some search parameters validation [#1601](https://github.com/opendatateam/udata/pull/1601)
+- Prevent API tracking errors with unicode [#1602](https://github.com/opendatateam/udata/pull/1602)
+- Prevent a race condition error when uploading file with concurrent chunking [#1606](https://github.com/opendatateam/udata/pull/1606)
+- Disallow resources dict in API [#1603](https://github.com/opendatateam/udata/pull/1603)
+- Test and fix territories routing [#1611](https://github.com/opendatateam/udata/pull/1611)
+- Fix the client-side Raven/Sentry configuration [#1612](https://github.com/opendatateam/udata/pull/1612)
+- Raise a 404 in case of unknown RDF content type [#1613](https://github.com/opendatateam/udata/pull/1613)
+- Ensure current theme is available to macros requiring it in mails [#1614](https://github.com/opendatateam/udata/pull/1614)
+- Fix documentation about NGinx configuration for https [#1615](https://github.com/opendatateam/udata/pull/1615)
+- Remove unwanted commas in default `SECURITY_EMAIL_SUBJECT_*` parameters [#1616](https://github.com/opendatateam/udata/pull/1616)
+
 ## 1.3.6 (2018-04-16)
 
 - Prevent OEmbed card to be styled when loaded in bootstrap 4 [#1569](https://github.com/opendatateam/udata/pull/1569)
