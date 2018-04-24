@@ -11,14 +11,14 @@
 </style>
 <template>
 <div class="discussion-thread panel panel-default">
-    <div class="panel-heading">
+    <div class="panel-heading" @click="toggleDiscussions">
         <div>
             <strong>{{ discussion.title }}</strong>
             <span class="label label-warning" v-if="discussion.closed"><i class="fa fa-minus-circle" aria-hidden="true"></i> {{ _('closed discussion') }}</span>
             <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a> 
         </div>
     </div>
-    <div class="list-group">
+    <div class="list-group" v-show="detailed">
        <thread-message
            v-for="(index, response) in discussion.discussion"
            id="{{ discussionIdAttr }}-{{ index }}"
@@ -39,7 +39,7 @@
         </h4>
     </a>
     <div class="text-muted" v-if="discussion.closed">
-        {{ _('Discussion has beend closed') }}
+        {{ _('Discussion has been closed') }}
         {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
         {{ _('on') }} {{ closedDate }}</div>
     <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
@@ -92,8 +92,10 @@ export default {
     },
     ready: function(){
         if(this.discussion.closed_by){
-            const user_id = this.discussion.closed_by; 
- 
+            const user_id = this.discussion.closed_by;
+
+            this.detailed = false;
+
             this.$api.get('users/'+user_id).then(response =>{
                 this.closed_by_url = response.page;
                 this.closed_by_name = response.first_name + " " + response.last_name;
