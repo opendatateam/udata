@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.3.7 (2018-04-24)
 
 - Fix some search parameters validation [#1601](https://github.com/opendatateam/udata/pull/1601)
