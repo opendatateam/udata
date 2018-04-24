@@ -66,8 +66,10 @@ resource_fields = api.model('Resource', {
         description='The resource last modification date'),
     'metrics': fields.Raw(description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
-    'preview_url': fields.String(description='An optionnal preview URL to be loaded '
-                                 'as a standalone page (ie. iframe or new page'),
+    'preview_url': fields.String(description='An optionnal preview URL to be '
+                                 'loaded as a standalone page (ie. iframe or '
+                                 'new page)',
+                                 readonly=True),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {

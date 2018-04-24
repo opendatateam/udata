@@ -1,0 +1,72 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals, absolute_import
+
+from abc import ABCMeta, abstractmethod
+
+from flask import current_app
+
+from udata import entrypoints
+
+
+class PreviewPlugin:
+    '''
+    An abstract preview plugin.
+
+    In order to register a functionnal PreviewPlugin,
+    extension developpers needs to:
+    - inherit this class
+    - implement abstract methods
+    - expose the class on the ``udata.preview`` endpoint
+    '''
+    __metaclass__ = ABCMeta
+
+    #: Default previews are given only if no specific preview match.
+    #: Typically plugins only relying on mimetype or format
+    #: should have `default = True`
+    default = False
+
+    @abstractmethod
+    def can_preview(self, resource):
+        '''
+        Whether or not this plugin can provide a preview for the given resource.
+
+        :param ResourceMixin resource: the (community) resource to preview
+        :return: ``True`` if this plugin can provide a preview
+        :rtype: bool
+        '''
+        pass
+
+    @abstractmethod
+    def preview_url(self, resource):
+        '''
+        Returns the absolute preview URL associated to the resource
+
+        :param ResourceMixin resource: the (community) resource to preview
+        :return: a preview url to be displayed into an iframe or a new window
+        :rtype: HttpResponse
+        '''
+        pass
+
+
+def get_enabled_plugins():
+    '''
+    Returns enabled preview plugins.
+
+    Plugins are sorted, defaults come last
+    '''
+    plugins = entrypoints.get_enabled('udata.preview', current_app).values()
+    return [p() for p in sorted(plugins, key=lambda p: 1 if p.default else 0)]
+
+
+def get_preview_url(resource):
+    '''
+    Returns the most pertinent preview URL associated to the resource, if any.
+
+    :param ResourceMixin resource: the (community) resource to preview
+    :return: a preview url to be displayed into an iframe or a new window
+    :rtype: HttpResponse
+    '''
+    candidates = (p.preview_url(resource)
+                  for p in get_enabled_plugins()
+                  if p.can_preview(resource))
+    return next(iter(candidates), None)
