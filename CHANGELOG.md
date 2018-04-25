@@ -13,6 +13,10 @@
 - Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
 - Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
 
+## 1.3.8 (2018-04-25)
+
+- Fix sendmail regression [#1620](https://github.com/opendatateam/udata/pull/1620)
+
 ## 1.3.7 (2018-04-24)
 
 - Fix some search parameters validation [#1601](https://github.com/opendatateam/udata/pull/1601)
