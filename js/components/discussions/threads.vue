@@ -18,6 +18,24 @@
         font-weight: bold;
     }
 }
+
+.create {
+    & > div:first-child {
+        display: flex;
+        flex-direction: row;
+
+        & > div:nth-child(3) {
+            padding: 0 1em;
+        }
+
+        .control {
+            text-align: right;
+            width: 4em;
+            order: 3;
+        }
+    }
+}
+
 </style>
 <template>
 <div class="discussion-threads">
@@ -42,8 +60,7 @@
     
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
-    
-    
+
     <!-- New discussion -->
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
         <div class="format-label pull-left">+</div>
@@ -51,22 +68,27 @@
     </a>
 
     <div v-el:form id="discussion-create" v-show="formDisplayed" v-if="currentUser"
-        class="list-group-item animated">
-        <div class="avatar">
-            <avatar :user="currentUser"></avatar>
-        </div>
-        <span>
-            <a href="#discussion-create"><span class="fa fa-link"></span></a>
-            <a @click="hideForm"><span class="fa fa-times"></span></a>
-        </span>
+        class="create list-group-item animated">
+        <div>
+            <div class="avatar">
+                <avatar :user="currentUser"></avatar>
+            </div>
 
-        <h4 class="list-group-item-heading">
-            {{ _('Starting a new discussion thread') }}
-        </h4>
-        
-        <p class="list-group-item-text">
-            {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
-        </p>
+            <div class="control">
+                <a href="#discussion-create"><span class="fa fa-link"></span></a>
+                <a @click="hideForm"><span class="fa fa-times"></span></a>
+            </div>
+
+            <div>
+                <h4 class="list-group-item-heading">
+                    {{ _('Starting a new discussion thread') }}
+                </h4>
+                
+                <p class="list-group-item-text">
+                    {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
+                </p>
+            </div>
+        </div>
         <thread-form-create v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></thread-form-create>
     </div>
 </div>
