@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix sendmail regression [#1620](https://github.com/opendatateam/udata/pull/1620)
 
 ## 1.3.7 (2018-04-24)
 
