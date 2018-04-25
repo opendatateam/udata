@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.8 (2018-04-25)
 
 - Fix sendmail regression [#1620](https://github.com/opendatateam/udata/pull/1620)
 
