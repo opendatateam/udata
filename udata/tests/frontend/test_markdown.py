@@ -6,7 +6,8 @@ import pytest
 
 from flask import render_template_string
 
-from udata.frontend.markdown import md, EXCERPT_TOKEN
+from udata.frontend.markdown import md, parse_html, EXCERPT_TOKEN
+from udata.utils import faker
 
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
@@ -53,6 +54,17 @@ class MarkdownTest:
             assert el.getAttribute('rel') == 'nofollow'
             assert el.getAttribute('href') == 'http://example.net/'
             assert el.firstChild.data == 'http://example.net/'
+
+    def test_markdown_linkify_angle_brackets(self, app):
+        '''Markdown filter should transform urls to anchors'''
+        text = '<http://example.net/path>'
+        with app.test_request_context('/'):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            parsed = parser.parse(result)
+            el = parsed.getElementsByTagName('a')[0]
+            assert el.getAttribute('rel') == 'nofollow'
+            assert el.getAttribute('href') == 'http://example.net/path'
+            assert el.firstChild.data == 'http://example.net/path'
 
     def test_markdown_linkify_relative(self, app):
         '''Markdown filter should transform relative urls to external ones'''
@@ -179,3 +191,41 @@ class MarkdownTest:
             result = render_template_string(template, text=text)
 
         assert result.strip() == '1234$'
+
+
+class HtmlToMarkdownTest:
+    def test_string_is_untouched(self):
+        assert parse_html('foo') == 'foo'
+
+    def test_empty_string_is_untouched(self):
+        assert parse_html('') == ''
+
+    def test_none_is_empty_string(self):
+        assert parse_html(None) == ''
+
+    def test_parse_basic_html(self):
+        text = faker.paragraph()
+        html = '<div>{0}</div>'.format(text)
+
+        assert parse_html(html) == text
+
+    def test_content_is_stripped(self):
+        text = faker.paragraph()
+        spacer = '\n  ' * 3
+        assert parse_html(spacer + text + spacer) == text
+
+    def test_parse_html_anchors(self):
+        html = '<a href="http://somewhere.com">title</a>'
+        assert parse_html(html) == '[title](http://somewhere.com)'
+
+    def test_parse_html_anchors_with_link_title(self):
+        url = 'http://somewhere.com/some/path'
+        html = '<a href="{0}">{0}</a>'.format(url)
+        assert parse_html(html) == '<{0}>'.format(url)
+
+    def test_parse_html_anchors_with_attribute(self):
+        url = 'http://somewhere.com/some/path'
+        html = '<a href="{0}" target="_blank" title="a title">title</a>'
+        expected = '[title]({0} "a title")'
+
+        assert parse_html(html.format(url)) == expected.format(url)
