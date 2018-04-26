@@ -13,8 +13,8 @@
             <p class="lead prompt">
             {{ _(
                 '%(app)s want to access your %(site)s account.',
-                app='<span class="app">{0}</span>'.format(grant.client.name)|safe,
-                site='<span class="site">{0}</span>'.format(config.SITE_TITLE)|safe
+                app='<span class="app">%s</span>'|format(grant.client.name)|safe,
+                site='<span class="site">%s</span>'|format(config.SITE_TITLE)|safe
             ) }}
             </p>
         </div>
