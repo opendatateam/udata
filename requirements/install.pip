@@ -43,7 +43,7 @@ requests==2.18.4
 StringDist==1.0.9
 tlds
 unicodecsv==0.14.1
-voluptuous==0.10.5
+voluptuous==0.11.1
 wtforms-json==0.3.3
 wtforms==2.1
 xmltodict==0.11.0
