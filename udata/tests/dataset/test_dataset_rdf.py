@@ -20,7 +20,7 @@ from udata.core.dataset.rdf import (
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
-from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA
+from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA, SKOS
 from udata.tests import TestCase, DBTestMixin
 from udata.tests.frontend import FrontTestCase
 from udata.utils import faker
@@ -49,7 +49,7 @@ class DatasetToRdfTest(FrontTestCase):
     def test_all_dataset_fields(self):
         resources = ResourceFactory.build_batch(3)
         dataset = DatasetFactory(tags=faker.words(nb=3), resources=resources,
-                                 frequency='daily')
+                                 frequency='daily', acronym='acro')
         d = dataset_to_rdf(dataset)
         g = d.graph
 
@@ -64,6 +64,7 @@ class DatasetToRdfTest(FrontTestCase):
         self.assertEqual(str(d.identifier), uri)
         self.assertEqual(d.value(DCT.identifier), Literal(dataset.id))
         self.assertEqual(d.value(DCT.title), Literal(dataset.title))
+        self.assertEqual(d.value(SKOS.altLabel), Literal(dataset.acronym))
         self.assertEqual(d.value(DCT.description),
                          Literal(dataset.description))
         self.assertEqual(d.value(DCT.issued), Literal(dataset.created_at))
@@ -240,6 +241,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
 
         id = faker.uuid4()
         title = faker.sentence()
+        acronym = faker.word()
         description = faker.paragraph()
         tags = faker.words(nb=3)
         start = faker.past_date(start_date='-30d')
@@ -247,6 +249,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
         g.set((node, RDF.type, DCAT.Dataset))
         g.set((node, DCT.identifier, Literal(id)))
         g.set((node, DCT.title, Literal(title)))
+        g.set((node, SKOS.altLabel, Literal(acronym)))
         g.set((node, DCT.description, Literal(description)))
         g.set((node, DCT.accrualPeriodicity, FREQ.daily))
         pot = BNode()
@@ -262,6 +265,7 @@ class RdfToDatasetTest(DBTestMixin, TestCase):
 
         self.assertIsInstance(dataset, Dataset)
         self.assertEqual(dataset.title, title)
+        self.assertEqual(dataset.acronym, acronym)
         self.assertEqual(dataset.description, description)
         self.assertEqual(dataset.frequency, 'daily')
         self.assertEqual(set(dataset.tags), set(tags))

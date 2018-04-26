@@ -914,7 +914,7 @@ class DatasetResourceAPITest(APITestCase):
             for i in range(4):
                 DatasetFactory(
                     title='test-{0}'.format(i) if i % 2 else faker.word(),
-                    resources=[ResourceFactory()])
+                    visible=True)
 
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'tes', 'size': '5'})
@@ -930,6 +930,30 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
+
+    def test_suggest_datasets_acronym_api(self):
+        '''It should suggest datasets from their acronyms'''
+        with self.autoindex():
+            for i in range(4):
+                DatasetFactory(
+                    acronym='test-{0}'.format(i) if i % 2 else None,
+                    visible=True)
+
+        response = self.get(url_for('api.suggest_datasets'),
+                            qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('title', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertNotIn('tes', suggestion['title'])
+            self.assertTrue(suggestion['acronym'].startswith('test'))
 
     def test_suggest_datasets_api_unicode(self):
         '''It should suggest datasets with special characters'''

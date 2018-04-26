@@ -106,6 +106,8 @@ class DatasetForm(ModelForm):
     model_class = Dataset
 
     title = fields.StringField(_('Title'), [validators.required()])
+    acronym = fields.StringField(_('Acronym'),
+                                 description=_('An optionnal acronym'))
     description = fields.MarkdownField(
         _('Description'), [validators.required()],
         description=_('The details about the dataset '

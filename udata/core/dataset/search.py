@@ -115,6 +115,7 @@ class DatasetSearch(ModelSearchAdapter):
     fields = (
         'geozones.keys^9',
         'geozones.name^9',
+        'acronym^7',
         'title^6',
         'tags.i18n^3',
         'description',
@@ -219,6 +220,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'payload': {
                     'id': str(dataset.id),
                     'slug': dataset.slug,
+                    'acronym': dataset.acronym,
                     'image_url': image_url,
                 },
             },
@@ -269,5 +271,8 @@ class DatasetSearch(ModelSearchAdapter):
 
         document['dataset_suggest']['weight'] = cls.get_suggest_weight(
             temporal_weight, spatial_weight, dataset.featured)
+
+        if dataset.acronym:
+            document['dataset_suggest']['input'].append(dataset.acronym)
 
         return document

@@ -167,7 +167,7 @@
 </style>
 <article class="dataset-card" id="{{ item_reference }}">
     <h4 class="udata-title" data-tooltip="{{ _('Download from ') }}{{ config.SERVER_NAME }}">
-        <a href="{{ item.external_url or item.url }}" title="{{ item.title }}">
+        <a href="{{ item.external_url or item.url }}" title="{{ item.full_title or item.title }}">
             {{ item.title|mdstrip(80) }}
         </a>
     </h4>
