@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
 import calendar
-import html2text
 import logging
 
 from datetime import date
@@ -16,6 +15,7 @@ from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
 
 from udata import i18n
+from udata.frontend.markdown import parse_html
 from udata.models import db
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
@@ -62,7 +62,7 @@ def is_html(text):
 def sanitize_html(text):
     text = text.toPython() if isinstance(text, Literal) else ''
     if is_html(text):
-        return html2text.html2text(text.strip(), bodywidth=0).strip()
+        return parse_html(text)
     else:
         return text.strip()
 

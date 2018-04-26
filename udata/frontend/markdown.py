@@ -5,6 +5,8 @@ from urlparse import urlparse
 
 import bleach
 import CommonMark
+import html2text
+import re
 from flask import current_app, Markup, request
 from werkzeug.local import LocalProxy
 from jinja2.filters import do_truncate, do_striptags
@@ -14,6 +16,10 @@ from udata.i18n import _
 md = LocalProxy(lambda: current_app.extensions['markdown'])
 
 EXCERPT_TOKEN = '<!--- --- -->'
+
+RE_AUTOLINK = re.compile(
+    r'^<([A-Za-z][A-Za-z0-9.+-]{1,31}:[^<>\x00-\x20]*)>',
+    re.IGNORECASE)
 
 
 def avoid_mailto_callback(attrs, new=False):
@@ -64,6 +70,9 @@ class UDataMarkdown(object):
     def __call__(self, stream, source_tooltip=False, wrap=True):
         if not stream:
             return ''
+
+        # Prepare angle bracket autolinks to avoir bleach to treat them as tag
+        stream = RE_AUTOLINK.sub(r'[\g<1>](\g<1>)', stream)
         stream = bleach_clean(stream)
         # Turn markdown to HTML.
         ast = self.parser().parse(stream)
@@ -112,6 +121,15 @@ def mdstrip(value, length=None, end='…'):
     if length > 0:
         text = do_truncate(None, text, length, end=end, leeway=2)
     return text
+
+
+def parse_html(html):
+    '''
+    Parse HTML and convert it into a udata-compatible markdown string
+    '''
+    if not html:
+        return ''
+    return html2text.html2text(html.strip(), bodywidth=0).strip()
 
 
 def init_app(app):
