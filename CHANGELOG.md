@@ -12,6 +12,7 @@
 - Resource modals: use new single resource API call [#1547](https://github.com/opendatateam/udata/pull/1547)
 - Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
 - Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
+- Fix OAuth authorization screen failing with unicode `SITE_TITLE` [#1624](https://github.com/opendatateam/udata/pull/1624)
 
 ## 1.3.8 (2018-04-25)
 
