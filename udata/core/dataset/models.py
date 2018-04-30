@@ -16,6 +16,8 @@ from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url
 
+from .preview import get_preview_url
+
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
@@ -221,8 +223,6 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     extras = db.ExtrasField()
 
-    preview_url = db.URLField()
-
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
     published = db.DateTimeField(default=datetime.now, required=True)
@@ -232,6 +232,10 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
+
+    @cached_property  # Accessed at least 2 times in front rendering
+    def preview_url(self):
+        return get_preview_url(self)
 
     @property
     def closed_or_no_format(self):
@@ -336,6 +340,10 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     '''
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
+
+    @property
+    def dataset(self):
+        return self._instance
 
 
 class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
