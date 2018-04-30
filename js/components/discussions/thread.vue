@@ -3,13 +3,13 @@
     padding: 10px 15px;
 }
 
-.panel-footer {
-    .add {
-        margin: -10px -15px;
-    }
-
-    & > div.form {
-        margin: -10px -15px;
+.add-comment {
+    
+    padding: 10px 15px;
+    
+    & > button.btn {
+        margin: 0 auto;
+        display: block;
     }
 }
 </style>
@@ -33,23 +33,25 @@
        ></threadmessage>
     </div>
 
-    <div class="panel-footer">
-    <a v-if="!discussion.closed"
-        class="list-group-item add new-comment animated"
-        v-show="!formDisplayed && detailed" @click="displayForm">
-        <div class="format-label pull-left">+</div>
-        <h4 class="list-group-item-heading">
+    <div class="add-comment" v-show="detailed">
+        <button v-if="!discussion.closed"
+            type="button"
+            class="btn btn-primary"
+            v-show="!formDisplayed && detailed" @click="displayForm">
             {{ _('Add a comment') }}
-        </h4>
-    </a>
-    <div class="text-muted" v-if="discussion.closed">
-        {{ _('Discussion has been closed') }}
-        {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
-        {{ _('on') }} {{ closedDate }}</div>
-    <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
-        class="list-group-item animated form">
-        <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
+        </button>
+        <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
+            class="animated form">
+            <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
+        </div>
     </div>
+
+    <div class="panel-footer" v-if="discussion.closed">
+        <div class="text-muted">
+            {{ _('Discussion has been closed') }}
+            {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
+            {{ _('on') }} {{ closedDate }}
+        </div>
     </div>
 </div>
 </template>
