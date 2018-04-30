@@ -11,7 +11,7 @@ pytestmark = [
 ]
 
 PREVIEW_URL = 'http://preview'
-DEFAULT_PREVIEW_URL = 'http://preview/default'
+FALLBACK_PREVIEW_URL = 'http://preview/default'
 
 
 class AlwaysPreview(PreviewPlugin):
@@ -38,18 +38,18 @@ class PreviewFromDataset(PreviewPlugin):
         return resource.dataset.extras['preview']
 
 
-class DefaultPreview(PreviewPlugin):
-    default = True
+class FallbackPreview(PreviewPlugin):
+    fallback = True
 
     def can_preview(self, resource):
         return True
 
     def preview_url(self, resource):
-        return DEFAULT_PREVIEW_URL
+        return FALLBACK_PREVIEW_URL
 
 
 class NotAValidPlugin(object):
-    default = False
+    fallback = False
 
     def can_preview(self, resource):
         return True
@@ -105,17 +105,17 @@ class ResourcePreviewTest:
         assert resource.preview_url == PREVIEW_URL
 
     # order matters to ensure test is failing
-    @pytest.mark.preview([NeverPreview, DefaultPreview, AlwaysPreview])
-    def test_default_preview_comes_after(self):
+    @pytest.mark.preview([NeverPreview, FallbackPreview, AlwaysPreview])
+    def test_fallback_preview_comes_after(self):
         dataset = DatasetFactory(visible=True)
         resource = dataset.resources[0]
         assert resource.preview_url == PREVIEW_URL
 
-    @pytest.mark.preview([NeverPreview, DefaultPreview])
+    @pytest.mark.preview([NeverPreview, FallbackPreview])
     def test_fallback_on_default_preview(self):
         dataset = DatasetFactory(visible=True)
         resource = dataset.resources[0]
-        assert resource.preview_url == DEFAULT_PREVIEW_URL
+        assert resource.preview_url == FALLBACK_PREVIEW_URL
 
     @pytest.mark.preview([NotAValidPlugin])
     def test_warn_but_ignore_invalid_plugins(self, recwarn):

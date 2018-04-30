@@ -21,7 +21,7 @@ class PreviewPlugin:
     An abstract preview plugin.
 
     In order to register a functionnal PreviewPlugin,
-    extension developpers needs to:
+    extension developpers need to:
     - inherit this class
     - implement abstract methods
     - expose the class on the ``udata.preview`` endpoint
@@ -30,8 +30,8 @@ class PreviewPlugin:
 
     #: Default previews are given only if no specific preview match.
     #: Typically plugins only relying on mimetype or format
-    #: should have `default = True`
-    default = False
+    #: should have `fallback = True`
+    fallback = False
 
     @abstractmethod
     def can_preview(self, resource):
@@ -51,7 +51,7 @@ class PreviewPlugin:
 
         :param ResourceMixin resource: the (community) resource to preview
         :return: a preview url to be displayed into an iframe or a new window
-        :rtype: HttpResponse
+        :rtype: str
         '''
         pass
 
@@ -69,7 +69,7 @@ def get_enabled_plugins():
         if plugin not in valid:
             clsname = plugin.__name__
             warnings.warn('{0} is not a valid preview plugin'.format(clsname))
-    return [p() for p in sorted(valid, key=lambda p: 1 if p.default else 0)]
+    return [p() for p in sorted(valid, key=lambda p: 1 if p.fallback else 0)]
 
 
 def get_preview_url(resource):
