@@ -36,6 +36,7 @@ class DatasetModelTest:
             dataset.add_resource(resource)
         assert len(dataset.resources) == 2
         assert dataset.resources[0].id == resource.id
+        assert dataset.resources[0].dataset == dataset
 
     def test_add_resource_without_checksum(self):
         user = UserFactory()

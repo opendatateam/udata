@@ -79,7 +79,6 @@ class BaseResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
-    preview_url = fields.URLField(_('Preview URL'))
 
 
 class ResourceForm(BaseResourceForm):
