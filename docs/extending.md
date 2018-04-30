@@ -85,6 +85,10 @@ class MyGenericPreview(PreviewPlugin):
     default = True
 ```
 
+Enabled plugins are cached so don't forget to flush cache when:
+- you change your `PLUGINS` configuration
+- you deliver new plugin versions
+
 
 ### Generic plugins (`udata.plugins`)
 

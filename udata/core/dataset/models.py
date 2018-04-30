@@ -233,7 +233,7 @@ class ResourceMixin(object):
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
-    @property
+    @cached_property  # Accessed at least 2 times in front rendering
     def preview_url(self):
         return get_preview_url(self)
 

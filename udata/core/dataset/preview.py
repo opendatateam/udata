@@ -8,6 +8,12 @@ from abc import ABCMeta, abstractmethod
 from flask import current_app
 
 from udata import entrypoints
+from udata.app import cache
+
+# Cache available plugins for a day
+# Don't forget to flush cache on new configuration or plugin
+CACHE_DURATION = 60 * 60 * 24
+CACHE_KEY = 'udata.preview.enabled_plugins'
 
 
 class PreviewPlugin:
@@ -50,6 +56,7 @@ class PreviewPlugin:
         pass
 
 
+@cache.cached(timeout=CACHE_DURATION, key_prefix=CACHE_KEY)
 def get_enabled_plugins():
     '''
     Returns enabled preview plugins.
