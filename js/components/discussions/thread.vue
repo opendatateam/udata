@@ -1,4 +1,8 @@
 <style lang="less">
+.panel .panel-heading {
+    padding: 10px 15px;
+}
+
 .panel-footer {
     .add {
         margin: -10px -15px;
@@ -13,9 +17,9 @@
 <div class="discussion-thread panel panel-default">
     <div class="panel-heading" @click="toggleDiscussions">
         <div>
+            <a href="#{{ discussionIdAttr }}" class="pull-right"><span class="fa fa-link"></span></a> 
             <strong>{{ discussion.title }}</strong>
             <span class="label label-warning" v-if="discussion.closed"><i class="fa fa-minus-circle" aria-hidden="true"></i> {{ _('closed discussion') }}</span>
-            <a href="#{{ discussionIdAttr }}"><span class="fa fa-link"></span></a> 
         </div>
     </div>
     <div class="list-group" v-show="detailed">
