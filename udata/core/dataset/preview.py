@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import warnings
+
 from abc import ABCMeta, abstractmethod
 
 from flask import current_app
@@ -28,7 +30,7 @@ class PreviewPlugin:
     @abstractmethod
     def can_preview(self, resource):
         '''
-        Whether or not this plugin can provide a preview for the given resource.
+        Whether or not this plugin can provide a preview for the given resource
 
         :param ResourceMixin resource: the (community) resource to preview
         :return: ``True`` if this plugin can provide a preview
@@ -55,7 +57,12 @@ def get_enabled_plugins():
     Plugins are sorted, defaults come last
     '''
     plugins = entrypoints.get_enabled('udata.preview', current_app).values()
-    return [p() for p in sorted(plugins, key=lambda p: 1 if p.default else 0)]
+    valid = [p for p in plugins if issubclass(p, PreviewPlugin)]
+    for plugin in plugins:
+        if plugin not in valid:
+            clsname = plugin.__name__
+            warnings.warn('{0} is not a valid preview plugin'.format(clsname))
+    return [p() for p in sorted(valid, key=lambda p: 1 if p.default else 0)]
 
 
 def get_preview_url(resource):

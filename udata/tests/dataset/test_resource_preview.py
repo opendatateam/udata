@@ -4,10 +4,7 @@ from __future__ import unicode_literals
 import pytest
 
 from udata.core.dataset.preview import PreviewPlugin
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
-
-from udata.utils import faker
-
+from udata.core.dataset.factories import DatasetFactory
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db')
@@ -51,6 +48,16 @@ class DefaultPreview(PreviewPlugin):
         return DEFAULT_PREVIEW_URL
 
 
+class NotAValidPlugin(object):
+    default = False
+
+    def can_preview(self, resource):
+        return True
+
+    def preview_url(self, resource):
+        return PREVIEW_URL
+
+
 class ResourcePreviewTest:
     @pytest.fixture(autouse=True)
     def patch_entrypoint(self, request, mocker, app):
@@ -70,7 +77,7 @@ class ResourcePreviewTest:
     def test_resource_has_no_preview(self):
         dataset = DatasetFactory(visible=True)
         resource = dataset.resources[0]
-        assert resource.preview_url == None
+        assert resource.preview_url is None
 
     @pytest.mark.preview([AlwaysPreview])
     def test_resource_has_preview(self):
@@ -109,3 +116,13 @@ class ResourcePreviewTest:
         dataset = DatasetFactory(visible=True)
         resource = dataset.resources[0]
         assert resource.preview_url == DEFAULT_PREVIEW_URL
+
+    @pytest.mark.preview([NotAValidPlugin])
+    def test_warn_but_ignore_invalid_plugins(self, recwarn):
+        dataset = DatasetFactory(visible=True)
+        resource = dataset.resources[0]
+        assert resource.preview_url is None
+
+        assert len(recwarn) == 1
+        msg = str(recwarn[0].message)
+        assert msg == 'NotAValidPlugin is not a valid preview plugin'
