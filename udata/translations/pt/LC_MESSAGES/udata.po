@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-04-10 06:42-0400\n"
+"PO-Revision-Date: 2018-05-02 11:25-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2786,7 +2786,7 @@ msgstr "perfil"
 #, python-format
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"
-msgstr[0] "%(num)d seguiram"
+msgstr[0] "%(num)d a seguir"
 msgstr[1] "%(num)d seguiram"
 
 #: udata/templates/user/datasets.html:36
@@ -2803,7 +2803,7 @@ msgstr "%(user)s não tem seguidores"
 #, python-format
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
-msgstr[0] "Seguindo %(num)d conjunto de dados"
+msgstr[0] "A seguir %(num)d conjunto de dados"
 msgstr[1] "Seguindo %(num)d conjuntos de dados"
 
 #: udata/templates/user/following.html:63
@@ -2830,7 +2830,7 @@ msgstr[1] "Seguindo %(num)d utilizadores"
 #: udata/templates/user/following.html:129
 #, python-format
 msgid "%(user)s is not following anyone"
-msgstr "%(user)s não está seguindo ninguém"
+msgstr "%(user)s não está a seguir ninguém"
 
 #: udata/templates/user/list.html:9
 #, python-format
