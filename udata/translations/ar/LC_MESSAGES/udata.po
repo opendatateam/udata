@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-02 17:31+0200\n"
-"PO-Revision-Date: 2018-05-02 11:37-0400\n"
+"PO-Revision-Date: 2018-05-02 17:10-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -1205,7 +1205,7 @@ msgstr "مشرف"
 
 #: udata/templates/apidoc.html:4
 msgid "API Documentation"
-msgstr ""
+msgstr "توثيق API"
 
 #: udata/templates/apidoc.html:5
 #, python-format
@@ -1231,7 +1231,7 @@ msgstr ""
 
 #: udata/templates/apidoc.html:43
 msgid "API Key"
-msgstr ""
+msgstr "مفتاح API"
 
 #: udata/templates/apidoc.html:46
 msgid "you first need to authenticate and obtain an API Key in your profile settings."
