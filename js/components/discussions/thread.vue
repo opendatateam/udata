@@ -3,6 +3,17 @@
     padding: 10px 15px;
 }
 
+.read-more {
+    text-align: center;
+
+    /*
+    & > span:before {
+        content:"↓";
+        font-size: inherit;
+    }
+    */
+}
+
 .add-comment {
     
     padding: 10px 15px;
@@ -33,7 +44,7 @@
        ></threadmessage>
     </div>
 
-    <div class="add-comment" v-show="detailed">
+    <div class="add-comment" v-show="detailed && !discussion.closed">
         <button v-if="!discussion.closed"
             type="button"
             class="btn btn-primary"
@@ -46,8 +57,12 @@
         </div>
     </div>
 
-    <div class="panel-footer" v-if="discussion.closed">
-        <div class="text-muted">
+    <div class="panel-footer read-more" v-if="!detailed" @click="toggleDiscussions">
+        <span class="text-muted">{{ discussion.discussion.length }} {{ _('messages') }}</span>
+    </div>
+
+    <div class="panel-footer" v-if="!detailed">
+        <div class="text-muted" v-if="discussion.closed">
             {{ _('Discussion has been closed') }}
             {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
             {{ _('on') }} {{ closedDate }}
