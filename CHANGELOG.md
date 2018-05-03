@@ -16,6 +16,7 @@
 - Fix markdown handling of autolinks with angle brackets and factorize (and test) markdown `parse_html()` [#1625](https://github.com/opendatateam/udata/pull/1625)
 - Allow to specify a dataset acronym [#1217](https://github.com/opendatateam/udata/pull/1217)
 - Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
+- Fix timeline order [#1642](https://github.com/opendatateam/udata/pull/1642)
 
 ## 1.3.8 (2018-04-25)
 

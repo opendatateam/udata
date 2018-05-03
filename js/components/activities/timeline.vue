@@ -73,7 +73,7 @@ export default {
             // using the previousActivity accumulator.
             return this.activities.data ? this.activities.data.sort((a, b) => {
                 return new Date(a.created_at) - Date(b.created_at);
-            }).map((activity, idx) => {
+            }).map((activity) => {
                 // Add URLs to the organization or actor.
                 if (activity.organization) {
                     activity.organization.url = URLs.build('organizations.show', {org: activity.organization});
@@ -105,7 +105,7 @@ export default {
                 }
                 previousActivity = activity;
                 return activity;
-            }).filter((activity, idx) => {
+            }).filter((activity) => {
                 return !!activity;
             }).sort((a, b) => {
                 return new Date(b.created_at) - new Date(a.created_at);
