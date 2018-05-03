@@ -72,8 +72,8 @@ export default {
             // Sort twice by created date to keep creations over updates
             // using the previousActivity accumulator.
             return this.activities.data ? this.activities.data.sort((a, b) => {
-                return a.created_at > b.created_at;
-            }).map((activity) => {
+                return new Date(a.created_at) - Date(b.created_at);
+            }).map((activity, idx) => {
                 // Add URLs to the organization or actor.
                 if (activity.organization) {
                     activity.organization.url = URLs.build('organizations.show', {org: activity.organization});
@@ -92,7 +92,7 @@ export default {
                         if (activity.key === 'organization:followed') {
                             previousActivity.aggregatedFollowing = true;
                             previousActivity.aggregaterActors.push(activity.actor);
-                            previousActivity.aggregatedLabel = this._("followed organization");
+                            previousActivity.aggregatedLabel = this._('followed organization');
                             return;
                         } else if (this.updateOrgTheSameDay(activity, previousActivity)) {
                             return;
@@ -103,13 +103,12 @@ export default {
                         return;
                     }
                 }
-
                 previousActivity = activity;
                 return activity;
-            }).filter((activity) => {
+            }).filter((activity, idx) => {
                 return !!activity;
             }).sort((a, b) => {
-                return a.created_at < b.created_at;
+                return new Date(b.created_at) - new Date(a.created_at);
             }) : [];
         },
         hasMore: function() {
