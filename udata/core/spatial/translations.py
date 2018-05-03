@@ -20,5 +20,5 @@ TRANSLATIONS = (
     _('Metropolitan France'),
     _('Overseas France'),
     _('French overseas collectivities'),
-    _('French arrondissemnt'),
+    _('French arrondissement'),
 )
