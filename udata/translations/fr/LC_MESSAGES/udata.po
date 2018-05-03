@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-02 17:31+0200\n"
-"PO-Revision-Date: 2018-05-02 11:37-0400\n"
+"PO-Revision-Date: 2018-05-03 03:12-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -121,7 +121,7 @@ msgstr "Description"
 
 #: udata/core/dataset/forms.py:57
 msgid "File type"
-msgstr ""
+msgstr "Type de fichier"
 
 #: udata/core/dataset/forms.py:59
 msgid "Whether the resource is an uploaded file, a remote file or an API"
@@ -137,7 +137,7 @@ msgstr "Type"
 
 #: udata/core/dataset/forms.py:64
 msgid "Resource type (documentation, API...)"
-msgstr ""
+msgstr "Type de ressource (documentation, API...)"
 
 #: udata/core/dataset/forms.py:66 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:19
@@ -187,7 +187,7 @@ msgstr "Sigle"
 
 #: udata/core/dataset/forms.py:109
 msgid "An optionnal acronym"
-msgstr ""
+msgstr "Un acronyme facultatif"
 
 #: udata/core/dataset/forms.py:112
 msgid "The details about the dataset (collection process, specifics...)."
@@ -381,11 +381,11 @@ msgstr "Inconnu"
 
 #: udata/core/dataset/models.py:79
 msgid "Documentation"
-msgstr ""
+msgstr "Documentation"
 
 #: udata/core/dataset/models.py:80
 msgid "Update"
-msgstr ""
+msgstr "Mise à jour"
 
 #: udata/core/dataset/models.py:81 udata/core/reuse/models.py:19
 msgid "API"
@@ -393,7 +393,7 @@ msgstr "API"
 
 #: udata/core/dataset/models.py:82
 msgid "Code repository"
-msgstr ""
+msgstr "Dépôt de code"
 
 #: udata/core/dataset/models.py:83 udata/core/spatial/models.py:26
 msgid "Other"
@@ -978,11 +978,11 @@ msgstr "France d'outre-mer"
 
 #: udata/core/spatial/translations.py:22
 msgid "French overseas collectivities"
-msgstr ""
+msgstr "Collectivités d'outre-mer françaises"
 
 #: udata/core/spatial/translations.py:23
 msgid "French arrondissemnt"
-msgstr ""
+msgstr "Arrondissement français"
 
 #: udata/core/topic/forms.py:27
 msgid "Featured"
@@ -1790,7 +1790,7 @@ msgstr "Ressources communautaires"
 #: udata/templates/dataset/display.html:116
 #, python-format
 msgid "See the %(nb)d resources of type %(type)s"
-msgstr ""
+msgstr "Voir les %(nb)d ressources de type %(type)s"
 
 #: udata/templates/dataset/display.html:121
 msgid "No resources"
@@ -1917,27 +1917,27 @@ msgstr "Nombre de réutilisations"
 
 #: udata/templates/dataset/resource/card.html:21
 msgid "File informations"
-msgstr ""
+msgstr "Information du fichier"
 
 #: udata/templates/dataset/resource/card.html:28
 msgid "Download count"
-msgstr ""
+msgstr "Nombre de téléchargements"
 
 #: udata/templates/dataset/resource/card.html:51
 msgid "Preview"
-msgstr ""
+msgstr "Prévisualiser"
 
 #: udata/templates/dataset/resource/card.html:56
 msgid "Download"
-msgstr ""
+msgstr "Télécharger"
 
 #: udata/templates/dataset/resource/card.html:57
 msgid "Copy permalink to clipboard"
-msgstr ""
+msgstr "Copier le lien dans le presse-papiers"
 
 #: udata/templates/dataset/resource/card.html:66
 msgid "Edit this resource"
-msgstr ""
+msgstr "Modifier cette ressource"
 
 #: udata/templates/errors/400.html:3
 msgid "Bad request"
