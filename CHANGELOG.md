@@ -5,6 +5,7 @@
 - Prevent linkchecker to pollute timeline as a side-effect. (migration). **Warning, the migration will delete all dataset update activities** [#1643](https://github.com/opendatateam/udata/pull/1643)
 - Fix OAuth authorization screen failing with unicode `SITE_TITLE` [#1624](https://github.com/opendatateam/udata/pull/1624)
 - Fix markdown handling of autolinks with angle brackets and factorize (and test) markdown `parse_html()` [#1625](https://github.com/opendatateam/udata/pull/1625)
+- Fix timeline order [#1642](https://github.com/opendatateam/udata/pull/1642)
 
 ## 1.3.8 (2018-04-25)
 
