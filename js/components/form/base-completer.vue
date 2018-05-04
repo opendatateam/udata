@@ -14,13 +14,13 @@ import API from 'api';
 import Vue from 'vue';
 import $ from 'jquery';
 import log from 'logger';
-import BaseError from 'models/error';
+import CustomError from 'error';
 import utils from 'utils';
 import {FieldComponentMixin} from 'components/form/base-field';
 
 import 'selectize';
 
-class CompleterError extends BaseError {};
+class CompleterError extends CustomError {};
 
 function lst2str(value) {
     if (Array.isArray(value)) {
