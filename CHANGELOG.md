@@ -10,6 +10,7 @@
 - Consider bad UUID as 404 in routing [#1646](https://github.com/opendatateam/udata/pull/1646)
 - Add missing email templates [#1647](https://github.com/opendatateam/udata/pull/1647)
 - Polyfill `ChildNode.remove()` for IE11 [#1648](https://github.com/opendatateam/udata/pull/1648)
+- Improve Raven-js/Sentry error handling [#1649](https://github.com/opendatateam/udata/pull/1649)
 
 ## 1.3.8 (2018-04-25)
 
