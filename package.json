@@ -96,7 +96,7 @@
     "leaflet-spin": "^1.1.0",
     "markdown-it": "8.4.0",
     "moment": "^2.14.1",
-    "raven-js": "^3.1.1",
+    "raven-js": "^3.24.2",
     "respond.js": "^1.4.2",
     "selectize": "^0.12.2",
     "sifter": "^0.5.3",
