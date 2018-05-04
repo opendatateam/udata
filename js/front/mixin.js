@@ -15,6 +15,7 @@ import 'raven';
 import 'babel-polyfill';
 import 'whatwg-fetch';
 import 'url-search-params-polyfill';
+import 'dom-polyfills';
 
 import config from 'config';
 import Vue from 'vue';
