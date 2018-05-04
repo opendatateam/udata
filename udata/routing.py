@@ -40,7 +40,10 @@ class PathListConverter(PathConverter):
 
 class UUIDConverter(BaseConverter):
     def to_python(self, value):
-        return value if isinstance(value, UUID) else UUID(value.strip())
+        try:
+            return value if isinstance(value, UUID) else UUID(value.strip())
+        except ValueError:
+            return NotFound()
 
 
 class ModelConverter(BaseConverter):
