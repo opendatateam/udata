@@ -1,5 +1,5 @@
 import config from 'config';
-import CustomError from 'error'
+import CustomError from 'error';
 import log from 'logger';
 
 
