@@ -1,8 +1,9 @@
 import config from 'config';
+import CustomError from 'error'
 import log from 'logger';
 
 
-export class ApiError extends Error {
+export class ApiError extends CustomError {
     constructor(response, data) {
         const message = data.hasOwnProperty('message')
             ? data.message
