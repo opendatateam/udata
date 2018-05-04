@@ -12,7 +12,7 @@ from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
 )
 from udata.core.user.factories import UserFactory
-from udata.tests.helpers import assert_emit
+from udata.tests.helpers import assert_emit, assert_not_emit
 
 from .. import TestCase, DBTestMixin
 
@@ -229,6 +229,14 @@ class DatasetModelTest(TestCase, DBTestMixin):
             dataset.deleted = datetime.now()
             dataset.save()
 
+    def test_ignore_post_save_signal(self):
+        dataset = DatasetFactory()
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+
+        with assert_not_emit(*unexpected_signals), assert_emit(post_save):
+            dataset.title = 'New title'
+            dataset.save(signal_kwargs={'ignores': ['post_save']})
+
 
 class ResourceModelTest(TestCase, DBTestMixin):
     def test_url_is_required(self):
@@ -243,6 +251,15 @@ class ResourceModelTest(TestCase, DBTestMixin):
         url = 'http://www.somewhere.com/with/spaces/   '
         dataset = DatasetFactory(resources=[ResourceFactory(url=url)])
         self.assertEqual(dataset.resources[0].url, url.strip())
+
+    def test_ignore_post_save_signal(self):
+        resource = ResourceFactory()
+        DatasetFactory(resources=[resource])
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+
+        with assert_not_emit(*unexpected_signals), assert_emit(post_save):
+            resource.title = 'New title'
+            resource.save(signal_kwargs={'ignores': ['post_save']})
 
 
 class LicenseModelTest(DBTestMixin, TestCase):

@@ -2,19 +2,51 @@
 from __future__ import unicode_literals
 
 import mock
+import pytest
 from datetime import datetime, timedelta
 
+from udata.auth import login_user
 from udata.tests import TestCase
+from udata.core.activity import init_app as init_activity
+from udata.core.activity.models import Activity
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.user.factories import UserFactory
 from udata.linkchecker.checker import check_resource
+from udata.settings import Testing
 
 
-class LinkcheckerTestSettings():
+class LinkcheckerTestSettings(Testing):
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = ['example-ignore.com']
     LINKCHECKING_MIN_CACHE_DURATION = 0.5
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_MAX_CACHE_DURATION = 100
+
+
+@pytest.fixture
+def activity_app(app):
+    init_activity(app)
+    yield app
+
+
+def test_check_resource_creates_no_activity(activity_app, mocker):
+    resource = ResourceFactory()
+    dataset = DatasetFactory(resources=[resource])
+    user = UserFactory()
+    login_user(user)
+    check_res = {'check:status': 200, 'check:available': True,
+                 'check:date': datetime.now()}
+
+    class DummyLinkchecker:
+        def check(self, _):
+            return check_res
+    mocker.patch('udata.linkchecker.checker.get_linkchecker',
+                 return_value=DummyLinkchecker)
+
+    check_resource(resource)
+
+    activities = Activity.objects.filter(related_to=dataset)
+    assert len(activities) == 0
 
 
 class LinkcheckerTest(TestCase):
