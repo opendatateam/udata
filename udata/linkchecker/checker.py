@@ -70,5 +70,5 @@ def check_resource(resource):
     previous_status = resource.extras.get('check:available')
     check_keys = _get_check_keys(result, resource, previous_status)
     resource.extras.update(check_keys)
-    resource.save(signal_kwargs={'ignore': True})  # Prevent signal triggering on dataset
+    resource.save(signal_kwargs={'ignores': ['post_save']})  # Prevent signal triggering on dataset
     return result

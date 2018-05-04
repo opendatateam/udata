@@ -374,7 +374,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
-        if kwargs.get('ignore'):
+        if 'post_save' in kwargs.get('ignores', []):
             return
         cls.after_save.send(document)
         if kwargs.get('created'):
