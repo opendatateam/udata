@@ -8,6 +8,7 @@
 - Fix timeline order [#1642](https://github.com/opendatateam/udata/pull/1642)
 - Fix markdown rendering on IE11 [#1645](https://github.com/opendatateam/udata/pull/1645)
 - Consider bad UUID as 404 in routing [#1646](https://github.com/opendatateam/udata/pull/1646)
+- Add missing email templates [#1647](https://github.com/opendatateam/udata/pull/1647)
 
 ## 1.3.8 (2018-04-25)
 
