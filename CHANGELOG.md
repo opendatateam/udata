@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Prevent linkchecker to pollute timeline as a side-effect. (migration). **Warning, the migration will delete all dataset update activities** [#1643](https://github.com/opendatateam/udata/pull/1643)
 
 ## 1.3.8 (2018-04-25)
 
