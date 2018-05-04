@@ -113,4 +113,15 @@ describe('Utils', function() {
             expect(u.parseQS('?key%2Fencoded=value')).to.eql({'key/encoded': 'value'});
         });
     });
+
+    describe('escapeRegex', function() {
+        it('should escape any special chars', function() {
+            expect(u.escapeRegex('Chars: |\\{}()[]^$+*?.'))
+                .to.eql('Chars: \\|\\\\\\{\\}\\(\\)\\[\\]\\^\\$\\+\\*\\?\\.');
+        });
+
+        it('should not touch other chars', function() {
+            expect(u.escapeRegex('noop')).to.eql('noop');
+        });
+    });
 });
