@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.9 (2018-05-07)
 
 - Prevent linkchecker to pollute timeline as a side-effect. (migration). **Warning, the migration will delete all dataset update activities** [#1643](https://github.com/opendatateam/udata/pull/1643)
 - Fix OAuth authorization screen failing with unicode `SITE_TITLE` [#1624](https://github.com/opendatateam/udata/pull/1624)
