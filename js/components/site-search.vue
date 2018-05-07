@@ -44,6 +44,7 @@
 
 <script>
 import { Cache } from 'cache';
+import { escapeRegex } from 'utils';
 import placeholders from 'helpers/placeholders';
 
 function group(id, name, template) {
@@ -150,10 +151,11 @@ export default {
     },
     filters: {
         highlight(value, phrase) {
-            return value.replace(new RegExp('('+phrase+')', 'gi'), '<strong>$1</strong>')
+            const pattern = escapeRegex(phrase);
+            return value.replace(new RegExp(`(${pattern})`, 'gi'), '<strong>$1</strong>')
         },
         stripTags(value) {
-            let regex = /(<([^>]+)>)/ig;
+            const regex = /(<([^>]+)>)/ig;
             return value.replace(regex, '');
         }
     },

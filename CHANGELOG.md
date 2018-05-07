@@ -12,12 +12,22 @@
 - Resource modals: use new single resource API call [#1547](https://github.com/opendatateam/udata/pull/1547)
 - Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
 - Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
-- Fix OAuth authorization screen failing with unicode `SITE_TITLE` [#1624](https://github.com/opendatateam/udata/pull/1624)
-- Fix markdown handling of autolinks with angle brackets and factorize (and test) markdown `parse_html()` [#1625](https://github.com/opendatateam/udata/pull/1625)
 - Allow to specify a dataset acronym [#1217](https://github.com/opendatateam/udata/pull/1217)
 - Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
-- Fix timeline order [#1642](https://github.com/opendatateam/udata/pull/1642)
 - Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
+
+## 1.3.9 (2018-05-07)
+
+- Prevent linkchecker to pollute timeline as a side-effect. (migration). **Warning, the migration will delete all dataset update activities** [#1643](https://github.com/opendatateam/udata/pull/1643)
+- Fix OAuth authorization screen failing with unicode `SITE_TITLE` [#1624](https://github.com/opendatateam/udata/pull/1624)
+- Fix markdown handling of autolinks with angle brackets and factorize (and test) markdown `parse_html()` [#1625](https://github.com/opendatateam/udata/pull/1625)
+- Fix timeline order [#1642](https://github.com/opendatateam/udata/pull/1642)
+- Fix markdown rendering on IE11 [#1645](https://github.com/opendatateam/udata/pull/1645)
+- Consider bad UUID as 404 in routing [#1646](https://github.com/opendatateam/udata/pull/1646)
+- Add missing email templates [#1647](https://github.com/opendatateam/udata/pull/1647)
+- Polyfill `ChildNode.remove()` for IE11 [#1648](https://github.com/opendatateam/udata/pull/1648)
+- Improve Raven-js/Sentry error handling [#1649](https://github.com/opendatateam/udata/pull/1649)
+- Prevent regex special characters to break site search [#1650](https://github.com/opendatateam/udata/pull/1650)
 
 ## 1.3.8 (2018-04-25)
 

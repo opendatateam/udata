@@ -63,6 +63,9 @@ module.exports = function(config) {
             babel: {
                 presets: ['es2015'],
                 comments: false,
+                plugins: [
+                    ['transform-builtin-extend', {globals: ['Error']}],
+                ],
             },
             plugins: [
                 new webpack.IgnorePlugin(/moment\/locale\/.*/),
