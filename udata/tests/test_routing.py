@@ -43,6 +43,9 @@ class UUIDConverterTest:
         url = '/uuid/{0} '.format(str(uuid))
         assert client.get(url).data == 'ok'
 
+    def test_bad_uuid_is_404(self, client):
+        assert client.get('/uuid/bad').status_code == 404
+
 
 class Tester(db.Document):
     slug = db.StringField()

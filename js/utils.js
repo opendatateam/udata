@@ -64,6 +64,15 @@ export function parseQS(qs) {
     return result;
 }
 
+/**
+ * Escape special characters from a string for usage in a regex
+ * @param  {String} str An unscaped string
+ * @return {String}     The regex escaped string
+ */
+export function escapeRegex(str) {
+    return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+}
+
 
 export default {
     isFunction,
@@ -72,4 +81,5 @@ export default {
     getattr,
     setattr,
     parseQS,
+    escapeRegex,
 };

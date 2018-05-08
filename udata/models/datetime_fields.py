@@ -62,6 +62,6 @@ class Datetimed(object):
 
 
 @pre_save.connect
-def set_modified_datetime(sender, document):
+def set_modified_datetime(sender, document, **kwargs):
     if isinstance(document, Datetimed):
         document.last_modified = datetime.now()

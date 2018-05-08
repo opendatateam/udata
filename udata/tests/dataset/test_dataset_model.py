@@ -15,8 +15,9 @@ from udata.core.discussions.factories import (
 )
 from udata.core.user.factories import UserFactory
 from udata.utils import faker
-from udata.tests.helpers import assert_emit, assert_equal_dates
-
+from udata.tests.helpers import (
+    assert_emit, assert_not_emit, assert_equal_dates
+)
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 
@@ -230,6 +231,14 @@ class DatasetModelTest:
             dataset.deleted = datetime.now()
             dataset.save()
 
+    def test_ignore_post_save_signal(self):
+        dataset = DatasetFactory()
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+
+        with assert_not_emit(*unexpected_signals), assert_emit(post_save):
+            dataset.title = 'New title'
+            dataset.save(signal_kwargs={'ignores': ['post_save']})
+
 
 class ResourceModelTest:
     def test_url_is_required(self):
@@ -244,6 +253,15 @@ class ResourceModelTest:
         url = 'http://www.somewhere.com/with/spaces/   '
         dataset = DatasetFactory(resources=[ResourceFactory(url=url)])
         assert dataset.resources[0].url == url.strip()
+
+    def test_ignore_post_save_signal(self):
+        resource = ResourceFactory()
+        DatasetFactory(resources=[resource])
+        unexpected_signals = Dataset.after_save, Dataset.on_update
+
+        with assert_not_emit(*unexpected_signals), assert_emit(post_save):
+            resource.title = 'New title'
+            resource.save(signal_kwargs={'ignores': ['post_save']})
 
 
 class LicenseModelTest:

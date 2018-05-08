@@ -1,7 +1,7 @@
 import API from 'api';
-import BaseError from 'models/error';
+import CustomError from 'error';
 
-export class BadgeError extends BaseError {}
+export class BadgeError extends CustomError {}
 
 /**
  * Known badges
