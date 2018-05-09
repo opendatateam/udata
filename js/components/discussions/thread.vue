@@ -5,13 +5,6 @@
 
 .read-more {
     text-align: center;
-
-    /*
-    & > span:before {
-        content:"↓";
-        font-size: inherit;
-    }
-    */
 }
 
 .add-comment {
