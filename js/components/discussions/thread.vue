@@ -110,9 +110,9 @@ export default {
 
             this.detailed = false;
 
-            this.$api.get('users/'+user_id).then(response => {
+            this.$api.get(`users/${user_id}`).then(response => {
                 this.closed_by_url = response.page;
-                this.closed_by_name = response.first_name + " " + response.last_name;
+                this.closed_by_name = `${response.first_name} ${response.last_name}`;
             });
         }
     },
