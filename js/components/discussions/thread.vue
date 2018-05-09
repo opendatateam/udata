@@ -38,13 +38,13 @@
     </div>
 
     <div class="add-comment" v-show="detailed && !discussion.closed">
-        <button v-if="!discussion.closed"
+        <button v-show="!formDisplayed && detailed && !discussion.closed"
             type="button"
             class="btn btn-primary"
-            v-show="!formDisplayed && detailed" @click="displayForm">
+            @click="displayForm">
             {{ _('Add a comment') }}
         </button>
-        <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed" v-if="currentUser"
+        <div v-el:form id="{{ discussionIdAttr }}-new-comment" v-show="formDisplayed && currentUser"
             class="animated form">
             <thread-form v-ref:form :discussion-id="discussion.id"></thread-form>
         </div>
@@ -104,7 +104,7 @@ export default {
             return moment(this.discussion.closed).format('LL');
         }
     },
-    ready: function() {
+    ready() {
         if( this.discussion.closed_by ){
             const user_id = this.discussion.closed_by;
 
