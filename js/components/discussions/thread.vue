@@ -1,4 +1,4 @@
-<style lang="less">
+<style scoped lang="less">
 .panel .panel-heading {
     padding: 10px 15px;
 }

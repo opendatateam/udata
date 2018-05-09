@@ -1,4 +1,4 @@
-<style lang="less">
+<style scoped lang="less">
 .loading {
     margin: 2em;
     text-align: center;

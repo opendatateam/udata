@@ -1,4 +1,4 @@
-<style lang="less">
+<style scoped lang="less">
 .message {
     display: flex;
     flex-direction: row;
