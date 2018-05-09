@@ -198,13 +198,12 @@ export default {
         /**
          * Sort threads by creation date or by last response date
          */
+        sortBy(key) {
 
-        sortBy(key){
-
-            if (key == 'created') {
-                this.discussions.sort((a,b) => a['created'] < b['created']);
-            } else if ( key== 'response'){
-                this.discussions.sort((a,b) => a.discussion.slice(-1)[0]['posted_on'] <  b.discussion.slice(-1)[0]['posted_on'] );
+            if ( key == 'created' ) {
+                this.discussions.sort( (a,b) => a['created'] < b['created'] );
+            } else if ( key== 'response' ) {
+                this.discussions.sort( (a,b) => a.discussion.slice(-1)[0]['posted_on'] <  b.discussion.slice(-1)[0]['posted_on'] );
             }
         },
 

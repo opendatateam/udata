@@ -111,13 +111,13 @@ export default {
             return moment(this.discussion.closed).format('LL');
         }
     },
-    ready: function(){
-        if(this.discussion.closed_by){
+    ready: function() {
+        if( this.discussion.closed_by ){
             const user_id = this.discussion.closed_by;
 
             this.detailed = false;
 
-            this.$api.get('users/'+user_id).then(response =>{
+            this.$api.get('users/'+user_id).then(response => {
                 this.closed_by_url = response.page;
                 this.closed_by_name = response.first_name + " " + response.last_name;
             });
