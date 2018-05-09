@@ -41,7 +41,7 @@
 <div class="discussion-threads">
     <div class="loading" v-if="loading">
         <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
-        <span class="sr-only">Loading...</span>
+        <span class="sr-only">{{ _('Loading') }}...</span>
     </div>
 
     <div class="sort" v-show="discussions.length > 1">
@@ -49,7 +49,7 @@
             <button class="btn btn-default btn-sm dropdown-toogle" type="button"
                 data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-                {{ _("sort by") }} <span class="caret"></span>
+                {{ _('sort by') }} <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropdown-menu-right">
                 <li><a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a></li>
