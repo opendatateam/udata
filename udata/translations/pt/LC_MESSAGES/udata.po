@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-02 17:31+0200\n"
-"PO-Revision-Date: 2018-05-02 11:37-0400\n"
+"PO-Revision-Date: 2018-05-10 13:30-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -121,7 +121,7 @@ msgstr "Descrição"
 
 #: udata/core/dataset/forms.py:57
 msgid "File type"
-msgstr ""
+msgstr "Tipo de ficheiro"
 
 #: udata/core/dataset/forms.py:59
 msgid "Whether the resource is an uploaded file, a remote file or an API"
@@ -137,7 +137,7 @@ msgstr "Tipo"
 
 #: udata/core/dataset/forms.py:64
 msgid "Resource type (documentation, API...)"
-msgstr ""
+msgstr "Tipo de recurso (documentação, API...)"
 
 #: udata/core/dataset/forms.py:66 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:19
@@ -187,7 +187,7 @@ msgstr "Sigla"
 
 #: udata/core/dataset/forms.py:109
 msgid "An optionnal acronym"
-msgstr ""
+msgstr "Acrónimo opcional"
 
 #: udata/core/dataset/forms.py:112
 msgid "The details about the dataset (collection process, specifics...)."
@@ -381,11 +381,11 @@ msgstr "Desconhecido"
 
 #: udata/core/dataset/models.py:79
 msgid "Documentation"
-msgstr ""
+msgstr "Documentação"
 
 #: udata/core/dataset/models.py:80
 msgid "Update"
-msgstr ""
+msgstr "Atualização"
 
 #: udata/core/dataset/models.py:81 udata/core/reuse/models.py:19
 msgid "API"
@@ -393,7 +393,7 @@ msgstr "API"
 
 #: udata/core/dataset/models.py:82
 msgid "Code repository"
-msgstr ""
+msgstr "Repositório de código"
 
 #: udata/core/dataset/models.py:83 udata/core/spatial/models.py:26
 msgid "Other"
@@ -1787,7 +1787,7 @@ msgstr "Recursos da comunidade"
 #: udata/templates/dataset/display.html:116
 #, python-format
 msgid "See the %(nb)d resources of type %(type)s"
-msgstr ""
+msgstr "Ver os %(nb)d resources do tipo %(type)s"
 
 #: udata/templates/dataset/display.html:121
 msgid "No resources"
@@ -1840,7 +1840,7 @@ msgstr "Contribuições da comunidade"
 
 #: udata/templates/dataset/display.html:371 udata/templates/reuse/display.html:285
 msgid "Discussion between the organization and the community about this dataset."
-msgstr "Discussão ente a organização e a comunidade sobre este conjunto de dados."
+msgstr "Troca de mensagens ente a organização e a comunidade sobre este conjunto de dados. Utilize este formulário para interagir com os fornecedores de dados."
 
 #: udata/templates/dataset/display.html:386
 msgid "New community resource"
@@ -1913,27 +1913,27 @@ msgstr "Numero de reutilizações"
 
 #: udata/templates/dataset/resource/card.html:21
 msgid "File informations"
-msgstr ""
+msgstr "Informação sobre o ficheiro"
 
 #: udata/templates/dataset/resource/card.html:28
 msgid "Download count"
-msgstr ""
+msgstr "Número de downloads"
 
 #: udata/templates/dataset/resource/card.html:51
 msgid "Preview"
-msgstr ""
+msgstr "Pré-visualizar"
 
 #: udata/templates/dataset/resource/card.html:56
 msgid "Download"
-msgstr ""
+msgstr "Download"
 
 #: udata/templates/dataset/resource/card.html:57
 msgid "Copy permalink to clipboard"
-msgstr ""
+msgstr "Copiar permalink para a área de transferência"
 
 #: udata/templates/dataset/resource/card.html:66
 msgid "Edit this resource"
-msgstr ""
+msgstr "Editar este recurso"
 
 #: udata/templates/errors/400.html:3
 msgid "Bad request"
