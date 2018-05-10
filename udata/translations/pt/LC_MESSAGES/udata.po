@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-02 17:31+0200\n"
-"PO-Revision-Date: 2018-05-10 13:20-0400\n"
+"PO-Revision-Date: 2018-05-10 13:30-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -1840,7 +1840,7 @@ msgstr "Contribuições da comunidade"
 
 #: udata/templates/dataset/display.html:371 udata/templates/reuse/display.html:285
 msgid "Discussion between the organization and the community about this dataset."
-msgstr "Discussão ente a organização e a comunidade sobre este conjunto de dados."
+msgstr "Troca de mensagens ente a organização e a comunidade sobre este conjunto de dados. Utilize este formulário para interagir com os fornecedores de dados."
 
 #: udata/templates/dataset/display.html:386
 msgid "New community resource"
