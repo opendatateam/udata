@@ -970,6 +970,8 @@ class DatasetResourceAPITest(APITestCase):
         with self.autoindex():
             for i in range(4):
                 DatasetFactory(
+                    # Ensure title does not contains 'tes'
+                    title=faker.unique_string(),
                     acronym='test-{0}'.format(i) if i % 2 else None,
                     visible=True)
 
