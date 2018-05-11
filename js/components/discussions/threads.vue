@@ -1,27 +1,95 @@
+<style scoped lang="less">
+.loading {
+    margin: 2em;
+    text-align: center;
+}
+
+.sort {
+    margin-bottom: 1em;
+    text-align: right;
+}
+
+.add {
+    h4 {
+        line-height: 30px;
+        margin-top: 9px;
+        margin-left: 60px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+}
+
+.create {
+    & > div:first-child {
+        display: flex;
+        flex-direction: row;
+
+        & > div:nth-child(3) {
+            padding: 0 1em;
+        }
+
+        .control {
+            text-align: right;
+            width: 4em;
+            order: 3;
+        }
+    }
+}
+
+</style>
 <template>
-<div class="list-group resources-list smaller discussion-threads">
+<div class="discussion-threads">
+    <div class="loading" v-if="loading">
+        <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
+        <span class="sr-only">{{ _('Loading') }}...</span>
+    </div>
+
+    <div class="sort" v-show="discussions.length > 1">
+        <div class="btn-group">
+            <button class="btn btn-default btn-sm dropdown-toogle" type="button"
+                data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                {{ _('sort by') }} <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right">
+                <li><a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a></li>
+                <li><a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a></li>
+            </ul>
+        </div>
+    </div>
+    
     <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
     </discussion-thread>
+
+    <!-- New discussion -->
     <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
         <div class="format-label pull-left">+</div>
         <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
     </a>
+
     <div v-el:form id="discussion-create" v-show="formDisplayed" v-if="currentUser"
-        class="list-group-item list-group-form list-group-form-discussion animated">
-        <div class="format-label pull-left">
-            <avatar :user="currentUser"></avatar>
+        class="create list-group-item animated">
+        <div>
+            <div class="avatar">
+                <avatar :user="currentUser"></avatar>
+            </div>
+
+            <div class="control">
+                <a href="#discussion-create"><span class="fa fa-link"></span></a>
+                <a @click="hideForm"><span class="fa fa-times"></span></a>
+            </div>
+
+            <div>
+                <h4 class="list-group-item-heading">
+                    {{ _('Starting a new discussion thread') }}
+                </h4>
+                
+                <p class="list-group-item-text">
+                    {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
+                </p>
+            </div>
         </div>
-        <span class="list-group-item-link">
-            <a href="#discussion-create"><span class="fa fa-link"></span></a>
-            <a @click="hideForm"><span class="fa fa-times"></span></a>
-        </span>
-        <h4 class="list-group-item-heading">
-            {{ _('Starting a new discussion thread') }}
-        </h4>
-        <p class="list-group-item-text">
-            {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
-        </p>
-        <threads-form v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></threads-form>
+        <thread-form-create v-ref:form :subject-id="subjectId" :subject-class="subjectClass"></thread-form-create>
     </div>
 </div>
 </template>
@@ -30,7 +98,7 @@
 import config from 'config';
 import Avatar from 'components/avatar.vue';
 import DiscussionThread from 'components/discussions/thread.vue';
-import ThreadsForm from 'components/discussions/threads-form.vue';
+import ThreadFormCreate from 'components/discussions/thread-create.vue';
 import log from 'logger';
 
 const DISCUSSION_REGEX = /^#discussion-([0-9a-f]{24})$/;
@@ -39,10 +107,11 @@ const NEW_COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-new-comment$/;
 
 
 export default {
-    components: {Avatar, DiscussionThread, ThreadsForm},
+    components: {Avatar, DiscussionThread, ThreadFormCreate},
     data() {
         return {
             discussions: [],
+            loading: true,
             formDisplayed: false,
             currentUser: config.user,
         }
@@ -78,7 +147,10 @@ export default {
     },
     ready() {
         this.$api.get('discussions/', {for: this.subjectId}).then(response => {
+            
+            this.loading = false;
             this.discussions = response.data;
+
             if (document.location.hash) {
                 this.$nextTick(() => { // Wait for data to be binded
                     this.jumpToHash(document.location.hash);
@@ -121,6 +193,18 @@ export default {
          */
         threadFor(id) {
             return this.$refs.threads.find($thread => $thread.discussion.id == id);
+        },
+
+        /**
+         * Sort threads by creation date or by last response date
+         */
+        sortBy(key) {
+
+            if ( key == 'created' ) {
+                this.discussions.sort( (a,b) => a['created'] < b['created'] );
+            } else if ( key== 'response' ) {
+                this.discussions.sort( (a,b) => a.discussion.slice(-1)[0]['posted_on'] <  b.discussion.slice(-1)[0]['posted_on'] );
+            }
         },
 
         /**
