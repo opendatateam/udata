@@ -278,10 +278,6 @@ class SpecificUrlsTest:
         response = client.get(url_for('site.terms'))
         assert200(response)
 
-    def test_credits(self, client):
-        response = client.get(url_for('gouvfr.credits'))
-        assert200(response)
-
     def test_licences(self, client):
         response = client.get(url_for('gouvfr.licences'))
         assert200(response)
@@ -636,7 +632,6 @@ class SitemapTest:
         assert200(response)
 
         urls = [
-            url_for('gouvfr.credits_redirect', _external=True),
             url_for('gouvfr.redevances_redirect', _external=True),
             url_for('gouvfr.faq_redirect', _external=True),
         ]
