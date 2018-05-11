@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.3.10 (2018-05-11)
 
 - Expose Resource.extras as writable in the API [#1660](https://github.com/opendatateam/udata/pull/1660)
