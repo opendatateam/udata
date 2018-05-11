@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Expose Resource.extras as writable in the API [#1660](https://github.com/opendatateam/udata/pull/1660)
 
 ## 1.3.9 (2018-05-07)
 

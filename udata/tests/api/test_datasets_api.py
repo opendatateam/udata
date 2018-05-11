@@ -309,6 +309,34 @@ class DatasetAPITest(APITestCase):
         dataset = Dataset.objects.first()
         self.assertEqual(len(dataset.resources), initial_length + 1)
 
+    def test_dataset_api_update_new_resource_with_extras(self):
+        '''It should update a dataset with a new resource with extras'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        data = dataset.to_dict()
+        resource_data = ResourceFactory.as_dict()
+        resource_data['extras'] = {'extra:id': 'id'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        resource = (
+            r for r in dataset.resources if r.title == resource_data['title']
+        ).next()
+        self.assertEqual(resource.extras, {'extra:id': 'id'})
+
+    def test_dataset_api_update_existing_resource_with_extras(self):
+        '''It should update a dataset's existing resource with extras'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data['resources'][0]['extras'] = {'extra:id': 'id'}
+        response = self.put(url_for('api.dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        resource = dataset.resources[0]
+        self.assertEqual(resource.extras, {'extra:id': 'id'})
+
     def test_dataset_api_update_without_resources(self):
         '''It should update a dataset from the API without resources'''
         user = self.login()
@@ -562,12 +590,14 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_create(self):
         data = ResourceFactory.as_dict()
+        data['extras'] = {'extra:id': 'id'}
         with self.api_user():
             response = self.post(url_for('api.resources',
                                          dataset=self.dataset), data)
         self.assert201(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
+        self.assertEqual(self.dataset.resources[0].extras, {'extra:id': 'id'})
 
     def test_create_2nd(self):
         self.dataset.resources.append(ResourceFactory())
@@ -675,6 +705,9 @@ class DatasetResourceAPITest(APITestCase):
             'description': faker.text(),
             'url': faker.url(),
             'published': now.isoformat(),
+            'extras': {
+                'extra:id': 'id',
+            }
         }
         with self.api_user():
             response = self.put(url_for('api.resource',
@@ -687,6 +720,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(updated.title, data['title'])
         self.assertEqual(updated.description, data['description'])
         self.assertEqual(updated.url, data['url'])
+        self.assertEqual(updated.extras, {'extra:id': 'id'})
         self.assertEqualDates(updated.published, now)
 
     def test_bulk_update(self):

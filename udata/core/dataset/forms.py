@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from udata.forms import ModelForm, fields, validators, widgets
+from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
 from udata.core.storages import resources
@@ -45,6 +45,7 @@ class BaseResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
+    extras = fields.ExtrasField(extras=Resource.extras)
 
 
 class ResourceForm(BaseResourceForm):
