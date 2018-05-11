@@ -79,6 +79,7 @@ class BaseResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
+    extras = fields.ExtrasField(extras=Resource.extras)
 
 
 class ResourceForm(BaseResourceForm):

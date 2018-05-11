@@ -7,6 +7,12 @@ export default class CustomError extends Error {
     constructor(...args) {
         super(...args);
         this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
+        if (typeof Error.captureStackTrace === 'function') {
+            // Stack trace in V8
+            Error.captureStackTrace(this, this.constructor);
+        } else {
+            // Firefox and other browser not supporting Error.captureStackTrace
+            this.stack = (new Error(message)).stack;
+        }
     }
 }
