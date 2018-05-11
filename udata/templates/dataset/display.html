@@ -5,7 +5,7 @@
 {% from theme('macros/issues.html') import issues_btn with context %}
 
 {% set meta = {
-    'title': dataset.title,
+    'title': dataset.full_title,
     'description': dataset.description|mdstrip(60)|forceescape,
     'image': dataset.organization and dataset.organization.logo(external=True) or '',
     'keywords': [_('dataset')] + dataset.tags,
@@ -25,7 +25,7 @@
 
 {% block breadcrumb %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
-    <li class="active">{{ dataset.title|truncate(128) }}</li>
+    <li class="active">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
 {% endblock %}
 
 {% block content %}
@@ -37,7 +37,9 @@
 
             <div class="col-md-9 col-sm-9">
                 <div class="page-header">
-                    <h2>{{ dataset.title }}</h2>
+                    <h2>{{ dataset.title }}
+                        {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
+                    </h2>
 
                     <div class="row">
                         <p class="col-md-12">

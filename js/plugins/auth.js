@@ -2,11 +2,12 @@
 * Handle authentication and permissions
 */
 import config from 'config';
+import CustomError from 'error';
 import i18n from 'i18n';
 
 const DEFAULT_NEED_ROLE = i18n._('Role "{role}" is required', {role: 'ROLE'});
 
-export class AuthenticationRequired extends Error {}
+export class AuthenticationRequired extends CustomError {}
 
 /**
  * Build the authentication URL given the current page and an optionnal message.

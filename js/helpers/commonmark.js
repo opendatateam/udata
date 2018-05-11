@@ -43,7 +43,7 @@ function escapeHtml(html) {
  */
 function escapeTags(content, config) {
     const fragment = new DOMParser().parseFromString(content, 'text/html');
-    const it = document.createNodeIterator(fragment.body, NodeFilter.SHOW_ELEMENT);
+    const it = document.createNodeIterator(fragment.body, NodeFilter.SHOW_ELEMENT, null, false);
     let node;
 
     while (node = it.nextNode()) { // eslint-disable-line no-cond-assign

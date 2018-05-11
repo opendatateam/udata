@@ -79,7 +79,7 @@ class BaseResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
-    preview_url = fields.URLField(_('Preview URL'))
+    extras = fields.ExtrasField(extras=Resource.extras)
 
 
 class ResourceForm(BaseResourceForm):
@@ -106,6 +106,8 @@ class DatasetForm(ModelForm):
     model_class = Dataset
 
     title = fields.StringField(_('Title'), [validators.required()])
+    acronym = fields.StringField(_('Acronym'),
+                                 description=_('An optionnal acronym'))
     description = fields.MarkdownField(
         _('Description'), [validators.required()],
         description=_('The details about the dataset '

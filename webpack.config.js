@@ -68,7 +68,10 @@ module.exports = {
     babel: {
         presets: ['es2015'],
         comments: false,
-        plugins: ['transform-runtime']
+        plugins: [
+            ['transform-builtin-extend', {globals: ['Error']}],
+            'transform-runtime',
+        ]
     },
     // Store initial values for easier inheritance
     defaults: {

@@ -19,6 +19,11 @@ export default class Dataset extends Model {
         return this;
     }
 
+    get full_title() {
+        if (!this.acronym) return this.title;
+        return `${this.title} (${this.acronym})`;
+    }
+
     /**
      * Create or update the given dataset.
      */

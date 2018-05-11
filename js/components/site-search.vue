@@ -44,6 +44,7 @@
 
 <script>
 import { Cache } from 'cache';
+import { escapeRegex } from 'utils';
 import placeholders from 'helpers/placeholders';
 
 function group(id, name, template) {
@@ -102,7 +103,8 @@ export default {
         default: `<div class="logo">
             <img :src="item.image_url || placeholders.generic" class="avatar" width="30" height="30" alt="">
             </div>
-            <p v-html="item.title | stripTags | highlight query"></p>`,
+            <p v-html="item.title | stripTags | highlight query"></p>
+            <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,
         organization: `<div class="logo"><img :src="item.image_url || placeholders.organization" class="avatar" width="30" height="30" alt=""></div>
             <p v-html="item.name | stripTags | highlight query"></p>
             <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,
@@ -149,10 +151,11 @@ export default {
     },
     filters: {
         highlight(value, phrase) {
-            return value.replace(new RegExp('('+phrase+')', 'gi'), '<strong>$1</strong>')
+            const pattern = escapeRegex(phrase);
+            return value.replace(new RegExp(`(${pattern})`, 'gi'), '<strong>$1</strong>')
         },
         stripTags(value) {
-            let regex = /(<([^>]+)>)/ig;
+            const regex = /(<([^>]+)>)/ig;
             return value.replace(regex, '');
         }
     },

@@ -224,7 +224,7 @@ class Defaults(object):
     ]
     # Whitelist of urls domains for resource with filetype `file`
     # SERVER_NAME is always included, `*` is a supported value (wildcard)
-    RESOURCES_FILE_ALLOWED_DOMAINS = tuple()
+    RESOURCES_FILE_ALLOWED_DOMAINS = []
 
     # How much time upload chunks are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR

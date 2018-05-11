@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-03-21 10:36+0100\n"
-"PO-Revision-Date: 2018-04-11 06:53-0400\n"
+"POT-Creation-Date: 2018-05-02 17:31+0200\n"
+"PO-Revision-Date: 2018-05-02 17:10-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -17,27 +17,27 @@ msgstr ""
 "X-Crowdin-Language: ar\n"
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 
-#: udata/settings.py:92
+#: udata/settings.py:93
 msgid "Welcome"
 msgstr "مرحبًا"
 
-#: udata/settings.py:93
+#: udata/settings.py:94
 msgid "Please confirm your email"
 msgstr "الرجاء التأكد من البريد الإلكتروني الخاص بك"
 
-#: udata/settings.py:94
+#: udata/settings.py:95
 msgid "Login instructions"
 msgstr "تعليمات تسجيل الدخول"
 
-#: udata/settings.py:95
+#: udata/settings.py:96
 msgid "Your password has been reset"
 msgstr "لقد تم إعادة تعيين كلمة المرور الخاصة بك"
 
-#: udata/settings.py:96
+#: udata/settings.py:97
 msgid "Your password has been changed"
 msgstr "تم تغيير كلمة المرور الخاصه بك"
 
-#: udata/settings.py:98
+#: udata/settings.py:99
 msgid "Password reset instructions"
 msgstr "إرشادات إعادة تعيين كلمة المرور"
 
@@ -45,15 +45,15 @@ msgstr "إرشادات إعادة تعيين كلمة المرور"
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
 msgstr "خطأ في التحقق من صحة: لا يمكن تحديث البيانات الخاصة بك في الوقت الراهن، لقد تم إعلامنا من الخطأ وسوف نقوم بإصلاحه في أقرب وقت ممكن."
 
-#: udata/api/oauth2.py:54
+#: udata/api/oauth2.py:55
 msgid "Bearer Token"
 msgstr "رمز حامل"
 
-#: udata/api/oauth2.py:58
+#: udata/api/oauth2.py:59
 msgid "Default scope"
 msgstr "النطاق الافتراضي"
 
-#: udata/api/oauth2.py:59
+#: udata/api/oauth2.py:60
 msgid "System administrator rights"
 msgstr "حقوق مسؤول النظام"
 
@@ -103,100 +103,115 @@ msgstr "قام بتحديث مجموعة بيانات"
 msgid "deleted a dataset"
 msgstr "قام بحذف مجموعة بيانات"
 
-#: udata/core/dataset/forms.py:27 udata/core/dataset/forms.py:73
+#: udata/core/dataset/forms.py:54 udata/core/dataset/forms.py:107
 #: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
-#: udata/templates/dataset/list.html:40 udata/templates/organization/list.html:34
-#: udata/templates/reuse/list.html:36 udata/templates/search.html:73
-#: udata/templates/search.html:87 udata/templates/topic/datasets.html:33
-#: udata/templates/topic/reuses.html:32
+#: udata/templates/dataset/list.html:40 udata/templates/reuse/list.html:36
+#: udata/templates/search.html:73 udata/templates/search.html:87
+#: udata/templates/topic/datasets.html:33 udata/templates/topic/reuses.html:32
 msgid "Title"
 msgstr "عنوان"
 
-#: udata/core/dataset/forms.py:28 udata/core/dataset/forms.py:75
+#: udata/core/dataset/forms.py:55 udata/core/dataset/forms.py:111
 #: udata/core/jobs/forms.py:31 udata/core/organization/forms.py:27
 #: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:20
 #: udata/harvest/forms.py:17
 msgid "Description"
 msgstr "وصف"
 
-#: udata/core/dataset/forms.py:30 udata/core/reuse/forms.py:27
-#: udata/templates/reuse/card.html:27 udata/templates/reuse/display.html:183
+#: udata/core/dataset/forms.py:57
+msgid "File type"
+msgstr ""
+
+#: udata/core/dataset/forms.py:59
+msgid "Whether the resource is an uploaded file, a remote file or an API"
+msgstr "إذا كان المورد ملف تم تحميله أو ملف بعيد أو واجهة برمجة تطبيقات"
+
+#: udata/core/dataset/forms.py:62 udata/core/reuse/forms.py:27
+#: udata/templates/reuse/card.html:27 udata/templates/reuse/display.html:190
 #: udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:6
 #: udata/templates/reuse/search-result.html:18
 msgid "Type"
 msgstr "نوع"
 
-#: udata/core/dataset/forms.py:32
-msgid "Whether the resource is an uploaded file, a remote file or an API"
-msgstr "إذا كان المورد ملف تم تحميله أو ملف بعيد أو واجهة برمجة تطبيقات"
+#: udata/core/dataset/forms.py:64
+msgid "Resource type (documentation, API...)"
+msgstr ""
 
-#: udata/core/dataset/forms.py:35 udata/core/reuse/forms.py:29
+#: udata/core/dataset/forms.py:66 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:19
 msgid "URL"
 msgstr "عنوان إليكتروني"
 
-#: udata/core/dataset/forms.py:36 udata/templates/dataset/search-labels.html:24
+#: udata/core/dataset/forms.py:68 udata/templates/dataset/search-labels.html:24
 msgid "Format"
 msgstr "شكل"
 
-#: udata/core/dataset/forms.py:39
+#: udata/core/dataset/forms.py:73
 msgid "Mime type"
 msgstr "نوع الـMime"
 
-#: udata/core/dataset/forms.py:40
+#: udata/core/dataset/forms.py:74
 msgid "The mime type associated to the extension. (ex: text/plain)"
 msgstr ""
 
-#: udata/core/dataset/forms.py:43
+#: udata/core/dataset/forms.py:77
 msgid "Size"
 msgstr "حجم"
 
-#: udata/core/dataset/forms.py:44
+#: udata/core/dataset/forms.py:78
 msgid "The file size in bytes"
 msgstr "حجم الملف بالبايت"
 
-#: udata/core/dataset/forms.py:46
+#: udata/core/dataset/forms.py:80
 msgid "Publication date"
 msgstr "تاريخ النشر"
 
-#: udata/core/dataset/forms.py:47
+#: udata/core/dataset/forms.py:81
 msgid "The publication date of the resource"
 msgstr "تاريخ نشر المورد"
 
-#: udata/core/dataset/forms.py:59
+#: udata/core/dataset/forms.py:93
 msgid "Related dataset"
 msgstr "مجموعة البيانات متعلقة"
 
-#: udata/core/dataset/forms.py:61 udata/core/dataset/forms.py:100
+#: udata/core/dataset/forms.py:95 udata/core/dataset/forms.py:136
 #: udata/core/reuse/forms.py:40 udata/harvest/forms.py:24
 msgid "Publish as"
 msgstr "نشر بإسم"
 
-#: udata/core/dataset/forms.py:76
+#: udata/core/dataset/forms.py:108 udata/core/organization/forms.py:25
+msgid "Acronym"
+msgstr "اختصار"
+
+#: udata/core/dataset/forms.py:109
+msgid "An optionnal acronym"
+msgstr ""
+
+#: udata/core/dataset/forms.py:112
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "تفاصيل حول مجموعة البيانات (عملية الجمع، تفاصيل ...)."
 
-#: udata/core/dataset/forms.py:79 udata/templates/dataset/display.html:203
+#: udata/core/dataset/forms.py:115 udata/templates/dataset/display.html:216
 #: udata/templates/dataset/search-labels.html:9
 msgid "License"
 msgstr "رخصة"
 
-#: udata/core/dataset/forms.py:81
+#: udata/core/dataset/forms.py:117
 msgid "Update frequency"
 msgstr "تردد التحديث"
 
-#: udata/core/dataset/forms.py:85
+#: udata/core/dataset/forms.py:121
 msgid "The frequency at which data are updated."
 msgstr "تردد تحديث البيانات."
 
-#: udata/core/dataset/forms.py:86
+#: udata/core/dataset/forms.py:122
 msgid "Expected frequency date"
 msgstr "تاريخ التردد المتوقع"
 
-#: udata/core/dataset/forms.py:88 udata/templates/dataset/card.html:41
-#: udata/templates/dataset/display.html:213
+#: udata/core/dataset/forms.py:124 udata/templates/dataset/card.html:40
+#: udata/templates/dataset/display.html:226
 #: udata/templates/dataset/search-labels.html:15
 #: udata/templates/dataset/search-panel.html:13
 #: udata/templates/dataset/search-result.html:31
@@ -204,12 +219,12 @@ msgstr "تاريخ التردد المتوقع"
 msgid "Temporal coverage"
 msgstr "التغطية الزمنية"
 
-#: udata/core/dataset/forms.py:89
+#: udata/core/dataset/forms.py:125
 msgid "The period covered by the data"
 msgstr "الفترة التي تغطيها البيانات."
 
-#: udata/core/dataset/forms.py:91 udata/core/spatial/forms.py:84
-#: udata/templates/dataset/display.html:305
+#: udata/core/dataset/forms.py:127 udata/core/spatial/forms.py:84
+#: udata/templates/dataset/display.html:318
 #: udata/templates/dataset/search-labels.html:18
 #: udata/templates/dataset/search-panel.html:15
 #: udata/templates/dataset/search-result.html:55
@@ -218,42 +233,42 @@ msgstr "الفترة التي تغطيها البيانات."
 msgid "Spatial coverage"
 msgstr "التغطية المكانية"
 
-#: udata/core/dataset/forms.py:92
+#: udata/core/dataset/forms.py:128
 msgid "The geographical area covered by the data."
 msgstr "المنطقة الجغرافية التي تغطيها البيانات."
 
-#: udata/core/dataset/forms.py:93 udata/core/post/forms.py:29
+#: udata/core/dataset/forms.py:129 udata/core/post/forms.py:29
 #: udata/core/reuse/forms.py:32 udata/core/site/forms.py:16
 #: udata/core/topic/forms.py:25 udata/templates/dataset/search-panel.html:10
 #: udata/templates/reuse/search-panel.html:7
 msgid "Tags"
 msgstr "علامات"
 
-#: udata/core/dataset/forms.py:93 udata/core/reuse/forms.py:32
+#: udata/core/dataset/forms.py:129 udata/core/reuse/forms.py:32
 msgid "Some taxonomy keywords"
 msgstr "بعض الكلمات الرئيسية للتصنيف"
 
-#: udata/core/dataset/forms.py:95 udata/core/post/forms.py:31
+#: udata/core/dataset/forms.py:131 udata/core/post/forms.py:31
 #: udata/core/reuse/forms.py:35 udata/core/topic/forms.py:26
-#: udata/templates/dataset/display.html:68 udata/templates/dataset/display.html:69
+#: udata/templates/dataset/display.html:73 udata/templates/dataset/display.html:74
 #: udata/templates/post/display.html:61 udata/templates/post/display.html:64
-#: udata/templates/reuse/display.html:57 udata/templates/reuse/display.html:60
+#: udata/templates/reuse/display.html:61 udata/templates/reuse/display.html:64
 msgid "Private"
 msgstr "خاص"
 
-#: udata/core/dataset/forms.py:96 udata/core/reuse/forms.py:36
+#: udata/core/dataset/forms.py:132 udata/core/reuse/forms.py:36
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "قم بتقييد رؤية البيانات لك أو لمؤسستك فقط."
 
 #: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:34
 #: udata/core/site/metrics.py:53 udata/core/site/views.py:134
-#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:29
-#: udata/templates/dataset/display.html:385 udata/templates/dataset/list.html:43
+#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:28
+#: udata/templates/dataset/display.html:398 udata/templates/dataset/list.html:43
 #: udata/templates/dataset/search-labels.html:25
 #: udata/templates/organization/list.html:38
 #: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:6
-#: udata/templates/reuse/display.html:24 udata/templates/reuse/list.html:8
+#: udata/templates/reuse/display.html:28 udata/templates/reuse/list.html:8
 #: udata/templates/reuse/list.html:18 udata/templates/reuse/list.html:34
 #: udata/templates/search.html:76 udata/templates/search.html:85
 #: udata/templates/search.html:103 udata/templates/site/dashboard.html:22
@@ -264,132 +279,148 @@ msgstr "قم بتقييد رؤية البيانات لك أو لمؤسستك ف�
 msgid "Reuses"
 msgstr "استخدامات"
 
-#: udata/core/dataset/models.py:29
+#: udata/core/dataset/models.py:31
 msgid "Punctual"
 msgstr "في وقت محدد"
 
-#: udata/core/dataset/models.py:30
+#: udata/core/dataset/models.py:32
 msgid "Real time"
 msgstr "في الوقت الحالى"
 
-#: udata/core/dataset/models.py:31
+#: udata/core/dataset/models.py:33
 msgid "Hourly"
 msgstr "كل ساعة"
 
-#: udata/core/dataset/models.py:32
+#: udata/core/dataset/models.py:34
 msgid "Four times a day"
 msgstr "أربع مرات في اليوم"
 
-#: udata/core/dataset/models.py:33
+#: udata/core/dataset/models.py:35
 msgid "Three times a day"
 msgstr "ثلاث مرات في اليوم"
 
-#: udata/core/dataset/models.py:34
+#: udata/core/dataset/models.py:36
 msgid "Semidaily"
 msgstr "مرتين فى اليوم"
 
-#: udata/core/dataset/models.py:35 udata/harvest/models.py:18
+#: udata/core/dataset/models.py:37 udata/harvest/models.py:18
 msgid "Daily"
 msgstr "يوميا"
 
-#: udata/core/dataset/models.py:36
+#: udata/core/dataset/models.py:38
 msgid "Four times a week"
 msgstr "اربع مرات في الاسبوع"
 
-#: udata/core/dataset/models.py:37
+#: udata/core/dataset/models.py:39
 msgid "Three times a week"
 msgstr "ثلاث مرات في الاسبوع"
 
-#: udata/core/dataset/models.py:38
+#: udata/core/dataset/models.py:40
 msgid "Semiweekly"
 msgstr "مرتين في الأسبوع"
 
-#: udata/core/dataset/models.py:39 udata/harvest/models.py:17
+#: udata/core/dataset/models.py:41 udata/harvest/models.py:17
 msgid "Weekly"
 msgstr "أسبوعيا"
 
-#: udata/core/dataset/models.py:40
+#: udata/core/dataset/models.py:42
 msgid "Biweekly"
 msgstr "كل أسبوعين"
 
-#: udata/core/dataset/models.py:41
+#: udata/core/dataset/models.py:43
 msgid "Semimonthly"
 msgstr "مرتين في الشهر"
 
-#: udata/core/dataset/models.py:42
+#: udata/core/dataset/models.py:44
 msgid "Three times a month"
 msgstr "ثلاث مرات في الشهر"
 
-#: udata/core/dataset/models.py:43 udata/harvest/models.py:16
+#: udata/core/dataset/models.py:45 udata/harvest/models.py:16
 msgid "Monthly"
 msgstr "شهريا"
 
-#: udata/core/dataset/models.py:44
+#: udata/core/dataset/models.py:46
 msgid "Bimonthly"
 msgstr "كل شهرين"
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:47
 msgid "Quarterly"
 msgstr "ربع سنوي"
 
-#: udata/core/dataset/models.py:46
+#: udata/core/dataset/models.py:48
 msgid "Three times a year"
 msgstr "ثلاث مرات في السنة"
 
-#: udata/core/dataset/models.py:47
+#: udata/core/dataset/models.py:49
 msgid "Biannual"
 msgstr "نصف سنوي"
 
-#: udata/core/dataset/models.py:48
+#: udata/core/dataset/models.py:50
 msgid "Annual"
 msgstr "سنويا"
 
-#: udata/core/dataset/models.py:49
+#: udata/core/dataset/models.py:51
 msgid "Biennial"
 msgstr "كل سنتين"
 
-#: udata/core/dataset/models.py:50
+#: udata/core/dataset/models.py:52
 msgid "Triennial"
 msgstr "كل ثلاث سنوات"
 
-#: udata/core/dataset/models.py:51
+#: udata/core/dataset/models.py:53
 msgid "Quinquennial"
 msgstr "كل خمس سنوات"
 
-#: udata/core/dataset/models.py:52
+#: udata/core/dataset/models.py:54
 msgid "Irregular"
 msgstr "غير منتظم"
 
-#: udata/core/dataset/models.py:53
+#: udata/core/dataset/models.py:55
 msgid "Unknown"
 msgstr "غير معروف"
 
-#: udata/core/dataset/models.py:76
-msgid "Uploaded file"
-msgstr "الملف الذي تم تحميله"
+#: udata/core/dataset/models.py:79
+msgid "Documentation"
+msgstr ""
 
-#: udata/core/dataset/models.py:77
-msgid "Remote file"
-msgstr "ملف بعيد"
+#: udata/core/dataset/models.py:80
+msgid "Update"
+msgstr ""
 
-#: udata/core/dataset/models.py:78 udata/core/reuse/models.py:19
+#: udata/core/dataset/models.py:81 udata/core/reuse/models.py:19
 msgid "API"
 msgstr "واجهة برمجة تطبيق (API)"
 
-#: udata/core/dataset/models.py:268 udata/core/dataset/rdf.py:285
-#: udata/templates/dataset/resource/list-item.html:17
+#: udata/core/dataset/models.py:82
+msgid "Code repository"
+msgstr ""
+
+#: udata/core/dataset/models.py:83 udata/core/spatial/models.py:26
+msgid "Other"
+msgstr "آخر"
+
+#: udata/core/dataset/models.py:88
+msgid "Uploaded file"
+msgstr "الملف الذي تم تحميله"
+
+#: udata/core/dataset/models.py:89
+msgid "Remote file"
+msgstr "ملف بعيد"
+
+#: udata/core/dataset/models.py:302 udata/core/dataset/rdf.py:290
+#: udata/templates/dataset/resource/card.html:14
 msgid "Nameless resource"
 msgstr "مورد مجهول"
 
-#: udata/core/dataset/models.py:317 udata/models/datetime_fields.py:58
-#: udata/templates/dataset/display.html:230 udata/templates/dataset/list.html:41
+#: udata/core/dataset/models.py:350 udata/models/datetime_fields.py:58
+#: udata/templates/dataset/display.html:243 udata/templates/dataset/list.html:41
 #: udata/templates/organization/list.html:35 udata/templates/reuse/list.html:37
 #: udata/templates/search.html:74 udata/templates/search.html:88
 #: udata/templates/topic/datasets.html:34 udata/templates/topic/reuses.html:33
 msgid "Creation date"
 msgstr "تاريخ الإنشاء"
 
-#: udata/core/dataset/models.py:319 udata/models/datetime_fields.py:60
+#: udata/core/dataset/models.py:352 udata/models/datetime_fields.py:60
 #: udata/templates/dataset/list.html:42 udata/templates/organization/list.html:36
 #: udata/templates/reuse/list.html:38 udata/templates/search.html:75
 #: udata/templates/search.html:89 udata/templates/topic/datasets.html:35
@@ -397,35 +428,35 @@ msgstr "تاريخ الإنشاء"
 msgid "Last modification date"
 msgstr "تاريخ التعديل الأخير"
 
-#: udata/core/dataset/models.py:332
+#: udata/core/dataset/models.py:366
 msgid "Future date of update"
 msgstr "تاريخ التحديث في المستقبل"
 
-#: udata/core/dataset/models.py:347
+#: udata/core/dataset/models.py:381
 msgid "Pivotal data"
 msgstr "بيانات محورية"
 
-#: udata/core/dataset/models.py:369 udata/templates/dataset/display.html:11
+#: udata/core/dataset/models.py:403 udata/templates/dataset/display.html:11
 msgid "dataset"
 msgstr "مجموعة البيانات"
 
-#: udata/core/dataset/rdf.py:283
+#: udata/core/dataset/rdf.py:288
 msgid "{format} resource"
 msgstr ""
 
-#: udata/core/dataset/search.py:149 udata/tests/test_search.py:95
+#: udata/core/dataset/search.py:150 udata/tests/test_search.py:97
 msgid "Never reused"
 msgstr "لم تستخدم قط"
 
-#: udata/core/dataset/search.py:150 udata/tests/test_search.py:96
+#: udata/core/dataset/search.py:151 udata/tests/test_search.py:98
 msgid "Little reused"
 msgstr "مستخدم قليلا"
 
-#: udata/core/dataset/search.py:151 udata/tests/test_search.py:97
+#: udata/core/dataset/search.py:152 udata/tests/test_search.py:99
 msgid "Quite reused"
 msgstr "مستخدم"
 
-#: udata/core/dataset/search.py:152 udata/tests/test_search.py:98
+#: udata/core/dataset/search.py:153 udata/tests/test_search.py:100
 msgid "Heavily reused"
 msgstr "مستخدم بشكل كبير"
 
@@ -433,7 +464,7 @@ msgstr "مستخدم بشكل كبير"
 msgid "You need to update some frequency-based datasets"
 msgstr "يجب تحديث بعض مجموعات البيانات المستندة إلى الترددات"
 
-#: udata/core/dataset/views.py:28 udata/templates/home.html:122
+#: udata/core/dataset/views.py:30 udata/templates/home.html:122
 msgid "Last datasets"
 msgstr "مجموعات البيانات الأخيرة"
 
@@ -452,8 +483,8 @@ msgid "Subject"
 msgstr "موضوع"
 
 #: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
-#: udata/templates/dataset/display.html:349 udata/templates/post/display.html:198
-#: udata/templates/reuse/display.html:270 udata/templates/site/dashboard.html:25
+#: udata/templates/dataset/display.html:362 udata/templates/post/display.html:198
+#: udata/templates/reuse/display.html:277 udata/templates/site/dashboard.html:25
 msgid "Discussions"
 msgstr "مناقشات"
 
@@ -481,7 +512,7 @@ msgstr "وقع إغلاق نقاش"
 #: udata/templates/organization/list.html:39
 #: udata/templates/organization/search-labels.html:12
 #: udata/templates/organization/search-panel.html:8
-#: udata/templates/reuse/display.html:216 udata/templates/reuse/list.html:40
+#: udata/templates/reuse/display.html:223 udata/templates/reuse/list.html:40
 #: udata/templates/reuse/search-labels.html:15
 #: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:104
 #: udata/templates/topic/reuses.html:36 udata/templates/user/followers.html:7
@@ -520,7 +551,8 @@ msgstr "تم إغلاق إحدى المسائل"
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
 #: udata/harvest/forms.py:15 udata/templates/api/admin.html:10
-#: udata/templates/search.html:101 udata/templates/user/list.html:35
+#: udata/templates/organization/list.html:34 udata/templates/search.html:101
+#: udata/templates/user/list.html:35
 msgid "Name"
 msgstr "اسم"
 
@@ -549,10 +581,6 @@ msgid "updated an organization"
 msgstr "قام بتحديث منظمة"
 
 #: udata/core/organization/forms.py:25
-msgid "Acronym"
-msgstr "اختصار"
-
-#: udata/core/organization/forms.py:25
 msgid "Shorter organization name"
 msgstr "الاسم المختصر للمنظمة"
 
@@ -578,7 +606,7 @@ msgstr "دور"
 
 #: udata/core/organization/metrics.py:17 udata/core/reuse/metrics.py:24
 #: udata/core/site/metrics.py:42 udata/core/site/views.py:128
-#: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:24
+#: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:27
 #: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:8
 #: udata/templates/dataset/list.html:19 udata/templates/dataset/list.html:37
 #: udata/templates/organization/list.html:37
@@ -636,44 +664,44 @@ msgstr "خدمات عامة"
 msgid "Certified"
 msgstr "معتمد"
 
-#: udata/core/organization/search.py:74
+#: udata/core/organization/search.py:75
 msgid "No reuses"
 msgstr "دون استخدامات"
 
-#: udata/core/organization/search.py:75
+#: udata/core/organization/search.py:76
 msgid "Few reuses"
 msgstr "استخدامات قليلة"
 
-#: udata/core/organization/search.py:76
+#: udata/core/organization/search.py:77
 msgid "Many reuses"
 msgstr "استخدامات عديدة"
 
-#: udata/core/organization/search.py:85 udata/core/reuse/search.py:95
+#: udata/core/organization/search.py:86 udata/core/reuse/search.py:95
 #: udata/core/user/search.py:61
 msgid "No datasets"
 msgstr "دون مجموعة البيانات"
 
-#: udata/core/organization/search.py:86 udata/core/reuse/search.py:96
+#: udata/core/organization/search.py:87 udata/core/reuse/search.py:96
 #: udata/core/user/search.py:62
 msgid "Few datasets"
 msgstr "مجموعة البيانات قليلة"
 
-#: udata/core/organization/search.py:87 udata/core/reuse/search.py:97
+#: udata/core/organization/search.py:88 udata/core/reuse/search.py:97
 #: udata/core/user/search.py:63
 msgid "Many datasets"
 msgstr "مجموعات البيانات عديدة"
 
-#: udata/core/organization/search.py:94 udata/core/reuse/search.py:104
+#: udata/core/organization/search.py:95 udata/core/reuse/search.py:104
 #: udata/core/user/search.py:70
 msgid "No followers"
 msgstr "دون متابعين"
 
-#: udata/core/organization/search.py:95 udata/core/reuse/search.py:105
+#: udata/core/organization/search.py:96 udata/core/reuse/search.py:105
 #: udata/core/user/search.py:71
 msgid "Few followers"
 msgstr "متابعون قليلون"
 
-#: udata/core/organization/search.py:96 udata/core/reuse/search.py:106
+#: udata/core/organization/search.py:97 udata/core/reuse/search.py:106
 #: udata/core/user/search.py:72
 msgid "Many followers"
 msgstr "متابعون عديدون"
@@ -746,7 +774,7 @@ msgid "The details about the reuse (build process, specifics, self-critics...)."
 msgstr ""
 
 #: udata/core/reuse/forms.py:33 udata/templates/home.html:92
-#: udata/templates/reuse/display.html:237
+#: udata/templates/reuse/display.html:244
 msgid "Used datasets"
 msgstr "مجموعة البيانات المستعملة"
 
@@ -778,7 +806,7 @@ msgstr "تصور"
 msgid "Connected device"
 msgstr "جهاز متصل"
 
-#: udata/core/reuse/models.py:88 udata/templates/reuse/display.html:10
+#: udata/core/reuse/models.py:88 udata/templates/reuse/display.html:11
 msgid "reuse"
 msgstr "استخدام"
 
@@ -807,7 +835,7 @@ msgid "Number of elements in feeds"
 msgstr "عدد العناصر في الخلاصات"
 
 #: udata/core/site/metrics.py:63 udata/core/site/views.py:140
-#: udata/templates/dataset/display.html:88 udata/templates/dataset/list.html:38
+#: udata/templates/dataset/display.html:94 udata/templates/dataset/list.html:38
 #: udata/templates/search.html:71 udata/templates/site/dashboard.html:21
 msgid "Resources"
 msgstr "موارد"
@@ -892,10 +920,6 @@ msgstr "حجم زيادة البيانات"
 msgid "POI"
 msgstr "نقطة أهتمام"
 
-#: udata/core/spatial/models.py:26
-msgid "Other"
-msgstr "آخر"
-
 #: udata/core/spatial/translations.py:8
 msgid "French region"
 msgstr "المنطقة الفرنسية"
@@ -951,6 +975,14 @@ msgstr "فرنسا القارية"
 #: udata/core/spatial/translations.py:21
 msgid "Overseas France"
 msgstr "فرنسا ما وراء البحار"
+
+#: udata/core/spatial/translations.py:22
+msgid "French overseas collectivities"
+msgstr ""
+
+#: udata/core/spatial/translations.py:23
+msgid "French arrondissemnt"
+msgstr ""
 
 #: udata/core/topic/forms.py:27
 msgid "Featured"
@@ -1024,56 +1056,56 @@ msgstr "مشرف الموقع"
 msgid "Test mail"
 msgstr "بريد إلكتروني اختباري"
 
-#: udata/forms/fields.py:93
+#: udata/forms/fields.py:92
 msgid "The role {role} does not exist"
 msgstr "دور {role} غير موجود"
 
-#: udata/forms/fields.py:110
+#: udata/forms/fields.py:109
 msgid "Not a valid UUID"
 msgstr ""
 
-#: udata/forms/fields.py:135
+#: udata/forms/fields.py:134
 msgid "Invalid URL"
 msgstr "عنوان إليكتروني غير صالح"
 
-#: udata/forms/fields.py:330
+#: udata/forms/fields.py:329
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr ""
 
-#: udata/forms/fields.py:370 udata/forms/fields.py:394
+#: udata/forms/fields.py:369 udata/forms/fields.py:393
 msgid "{0} does not exists"
 msgstr ""
 
-#: udata/forms/fields.py:383
+#: udata/forms/fields.py:382
 msgid "Expect both class and identifier"
 msgstr ""
 
-#: udata/forms/fields.py:397
+#: udata/forms/fields.py:396
 msgid "{0} is not a valid identifier"
 msgstr ""
 
-#: udata/forms/fields.py:423
+#: udata/forms/fields.py:422
 msgid "Model for {0} not found"
 msgstr ""
 
-#: udata/forms/fields.py:458
+#: udata/forms/fields.py:457
 msgid "Unknown identifiers: {identifiers}"
 msgstr ""
 
-#: udata/forms/fields.py:589
+#: udata/forms/fields.py:592
 msgid "Unable to parse date range"
 msgstr ""
 
-#: udata/forms/fields.py:616 udata/forms/fields.py:639
+#: udata/forms/fields.py:619 udata/forms/fields.py:642
 msgid "You must be authenticated"
 msgstr "يجب ان تكون موثق"
 
-#: udata/forms/fields.py:619
+#: udata/forms/fields.py:622
 msgid "You can only set yourself as owner"
 msgstr "يمكنك تعيين نفسك فقط كمالك"
 
-#: udata/forms/fields.py:642
+#: udata/forms/fields.py:645
 msgid "Permission denied for this organization"
 msgstr "تم رفض الإذن لهذه المؤسسة"
 
@@ -1082,26 +1114,26 @@ msgstr "تم رفض الإذن لهذه المؤسسة"
 msgid "This field requires \"%(name)s\" to be set"
 msgstr ""
 
-#: udata/frontend/helpers.py:175
+#: udata/frontend/helpers.py:176
 msgid "Anonymous user"
 msgstr "مستخدم مجهول"
 
-#: udata/frontend/helpers.py:277
+#: udata/frontend/helpers.py:280
 msgctxt "month-format"
 msgid "yyyy/MM"
 msgstr ""
 
-#: udata/frontend/helpers.py:281
+#: udata/frontend/helpers.py:284
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
 msgstr ""
 
-#: udata/frontend/helpers.py:304
+#: udata/frontend/helpers.py:307
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr ""
 
-#: udata/frontend/markdown.py:30
+#: udata/frontend/markdown.py:36
 msgid "Source"
 msgstr "مصدر"
 
@@ -1153,17 +1185,17 @@ msgstr "تم تخطيه"
 msgid "OR"
 msgstr "أو"
 
-#: udata/search/fields.py:119 udata/tests/test_search.py:848
-#: udata/tests/test_search.py:851
+#: udata/search/fields.py:119 udata/tests/test_search.py:850
+#: udata/tests/test_search.py:853
 msgid "yes"
 msgstr "نعم"
 
-#: udata/search/fields.py:119 udata/tests/test_search.py:849
-#: udata/tests/test_search.py:852
+#: udata/search/fields.py:119 udata/tests/test_search.py:851
+#: udata/tests/test_search.py:854
 msgid "no"
 msgstr "لا"
 
-#: udata/search/fields.py:290
+#: udata/search/fields.py:291
 msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
 msgstr ""
 
@@ -1173,211 +1205,211 @@ msgstr "مشرف"
 
 #: udata/templates/apidoc.html:4
 msgid "API Documentation"
-msgstr ""
+msgstr "توثيق API"
 
 #: udata/templates/apidoc.html:5
 #, python-format
 msgid "%(site)s dynamic API documentation"
 msgstr ""
 
-#: udata/templates/apidoc.html:24
+#: udata/templates/apidoc.html:26
 msgid "This page describe this website's free and open RESTful API's behavior"
 msgstr ""
 
-#: udata/templates/apidoc.html:30
+#: udata/templates/apidoc.html:32
 msgid "Authentication"
 msgstr "توثيق"
 
-#: udata/templates/apidoc.html:35
+#: udata/templates/apidoc.html:37
 msgid "In order to be able to execute write operations,"
 msgstr ""
 
-#: udata/templates/apidoc.html:37
+#: udata/templates/apidoc.html:39
 #, python-format
 msgid "you first need to obtain an %(apikey)s in your profile settings."
 msgstr ""
 
-#: udata/templates/apidoc.html:41
+#: udata/templates/apidoc.html:43
 msgid "API Key"
-msgstr ""
+msgstr "مفتاح API"
 
-#: udata/templates/apidoc.html:44
+#: udata/templates/apidoc.html:46
 msgid "you first need to authenticate and obtain an API Key in your profile settings."
 msgstr ""
 
-#: udata/templates/apidoc.html:47
+#: udata/templates/apidoc.html:49
 msgid "This key should be provided on each call in the <code>X-API-KEY</code> HTTP header."
 msgstr ""
 
-#: udata/templates/apidoc.html:53
+#: udata/templates/apidoc.html:55
 msgid "Authorizations"
 msgstr "ترخيص"
 
-#: udata/templates/apidoc.html:57
+#: udata/templates/apidoc.html:59
 msgid "API calls are subject to the same permissions than the web interface."
 msgstr ""
 
-#: udata/templates/apidoc.html:58
+#: udata/templates/apidoc.html:60
 msgid "By example, you need to be part of the organization to modify one of its datasets."
 msgstr "على سبيل المثال، يجب أن تكون عضو من المؤسسة لتعديل إحدى مجموعات البيانات الخاصة بها"
 
-#: udata/templates/apidoc.html:64
+#: udata/templates/apidoc.html:66
 msgid "Pagination"
 msgstr "ترقيم الصفحات"
 
-#: udata/templates/apidoc.html:68
+#: udata/templates/apidoc.html:70
 msgid "Some method are paginated and always follow the same pattern.\n"
 "                The object list is wrapped in a <code>Page</code> object.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:72
+#: udata/templates/apidoc.html:74
 msgid "You don't have to compute yourself the previous and next pages\n"
 "                because the URLs are available in the response under the\n"
 "                <code>previous_page</code> and <code>next_page</code> attributes.\n"
 "                They will be set to <code>null</code> if there is no previous and/or next page."
 msgstr ""
 
-#: udata/templates/apidoc.html:77
+#: udata/templates/apidoc.html:79
 msgid "Example"
 msgstr "مثال"
 
-#: udata/templates/apidoc.html:90
+#: udata/templates/apidoc.html:92
 msgid "Examples"
 msgstr "أمثلة"
 
-#: udata/templates/apidoc.html:94
+#: udata/templates/apidoc.html:96
 msgid "All examples use the <a href=\"http://httpie.org\">httpie</a> and <a href=\"http://stedolan.github.io/jq/\">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:97
+#: udata/templates/apidoc.html:99
 msgid "Verifying that httpie is working"
 msgstr ""
 
-#: udata/templates/apidoc.html:99
+#: udata/templates/apidoc.html:101
 msgid "Once httpie is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:104 udata/templates/apidoc.html:143
+#: udata/templates/apidoc.html:106 udata/templates/apidoc.html:145
 msgid "It should return something in this vein:\n"
 "                "
 msgstr "يجب أن يعود شيئا في هذا السياق: "
 
-#: udata/templates/apidoc.html:133
+#: udata/templates/apidoc.html:135
 msgid "This is very verbose and we don't need all that information yet. That's why we use jq.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:136
+#: udata/templates/apidoc.html:138
 msgid "Verifying that jq is working"
 msgstr ""
 
-#: udata/templates/apidoc.html:138
+#: udata/templates/apidoc.html:140
 msgid "Once jq is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:148
+#: udata/templates/apidoc.html:150
 msgid "That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:153
+#: udata/templates/apidoc.html:155
 msgid "The previous command is now equivalent to the more readable (don't forget the quotes):\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:158
+#: udata/templates/apidoc.html:160
 msgid "That's a good start, now let's dig into the API itself. We don't know it yet but we already fetched our first organization.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:162
+#: udata/templates/apidoc.html:164
 msgid "Browsing and retrieving data"
 msgstr "تصفح واسترجاع البيانات"
 
-#: udata/templates/apidoc.html:164
+#: udata/templates/apidoc.html:166
 msgid "You can retrieve a list of organization (filtered or not) or a unique organization. When you reach an endpoint, the default page size is 20. Let's fetch the first 20 organization from the API:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:192
+#: udata/templates/apidoc.html:176
 msgid "That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:205
+#: udata/templates/apidoc.html:186
 msgid "Now we'll be able to retrieve a unique organization thanks to the returned URI:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:210
+#: udata/templates/apidoc.html:191
 msgid "That's a lot of data to compute. Let's refine these data, if we want only metrics:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:232
+#: udata/templates/apidoc.html:203
 msgid "Or maybe just the name of the members of that organization:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:256
+#: udata/templates/apidoc.html:213
 msgid "It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href=\"http://stedolan.github.io/jq/tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/\">manual</a> if you want to browse the API through the command-line in depth.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:260
+#: udata/templates/apidoc.html:217
 msgid "Modifying and deleting data"
 msgstr "تعديل وحذف البيانات "
 
-#: udata/templates/apidoc.html:262
+#: udata/templates/apidoc.html:219
 msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:265
+#: udata/templates/apidoc.html:222
 msgid "If you try to modify a resource without an authentication token, a 401 will be returned:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:280
+#: udata/templates/apidoc.html:237
 msgid "You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:295
+#: udata/templates/apidoc.html:252
 msgid "This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:308
+#: udata/templates/apidoc.html:265
 msgid "It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:321
+#: udata/templates/apidoc.html:278
 msgid "But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:333
+#: udata/templates/apidoc.html:290
 msgid "The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:345
+#: udata/templates/apidoc.html:302
 msgid "Once you did it, you can verify that it's effective issuing a GET against the previous URI:\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:362
+#: udata/templates/apidoc.html:319
 msgid "Please consult the reference documentation below for further interactions with the API or ask us for questions related to it!\n"
 "                "
 msgstr ""
 
-#: udata/templates/apidoc.html:369
+#: udata/templates/apidoc.html:326
 msgid "Reference"
 msgstr "مرجع"
 
@@ -1389,8 +1421,8 @@ msgstr ""
 msgid "Download from "
 msgstr "تحميل من"
 
-#: udata/templates/dataset/display.html:174 udata/templates/embed-dataset.html:177
-#: udata/templates/reuse/display.html:131
+#: udata/templates/dataset/display.html:187 udata/templates/embed-dataset.html:177
+#: udata/templates/reuse/display.html:138
 msgid "Producer"
 msgstr "منتج"
 
@@ -1422,7 +1454,7 @@ msgstr "تقسيمات"
 msgid "Territory"
 msgstr "منطقة"
 
-#: udata/templates/dataset/display.html:222
+#: udata/templates/dataset/display.html:235
 #: udata/templates/dataset/search-result.html:42
 #: udata/templates/embed-dataset.html:232
 msgid "Frequency"
@@ -1609,7 +1641,7 @@ msgstr "علامة"
 msgid "Badge"
 msgstr "شارة"
 
-#: udata/templates/dataset/card.html:33 udata/templates/dataset/list.html:44
+#: udata/templates/dataset/card.html:32 udata/templates/dataset/list.html:44
 #: udata/templates/organization/card.html:30 udata/templates/reuse/card.html:36
 #: udata/templates/search.html:77 udata/templates/search.html:91
 #: udata/templates/topic/datasets.html:37 udata/templates/user/card.html:28
@@ -1648,11 +1680,10 @@ msgstr "شروط"
 msgid "Maintainer"
 msgstr "معيل"
 
-#: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:133
-#: udata/templates/dataset/resource/list-item.html:36
+#: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:144
 #: udata/templates/organization/display.html:28
 #: udata/templates/organization/followers.html:15
-#: udata/templates/post/display.html:118 udata/templates/reuse/display.html:109
+#: udata/templates/post/display.html:118 udata/templates/reuse/display.html:116
 #: udata/templates/user/base.html:23
 msgid "Edit"
 msgstr "صحح"
@@ -1679,8 +1710,8 @@ msgid "%(app)s want to access your %(site)s account."
 msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:26
-#: udata/templates/dataset/display.html:293
-#: udata/templates/dataset/display.html:295
+#: udata/templates/dataset/display.html:306
+#: udata/templates/dataset/display.html:308
 #: udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/issue_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
@@ -1722,119 +1753,119 @@ msgstr ""
 msgid "Add a reuse"
 msgstr "إضافة استخدام"
 
-#: udata/templates/dataset/card.html:24
+#: udata/templates/dataset/card.html:23
 msgid "Number of resources"
 msgstr ""
 
-#: udata/templates/dataset/card.html:49 udata/templates/dataset/display.html:262
+#: udata/templates/dataset/card.html:48 udata/templates/dataset/display.html:275
 msgid "Territorial coverage"
 msgstr "التغطية الإقليمية"
 
-#: udata/templates/dataset/card.html:57 udata/templates/dataset/display.html:254
+#: udata/templates/dataset/card.html:56 udata/templates/dataset/display.html:267
 #: udata/templates/dataset/search-result.html:89
 msgid "Territorial coverage granularity"
 msgstr "دقة التغطية الإقليمية"
 
-#: udata/templates/dataset/display.html:44
+#: udata/templates/dataset/display.html:49
 msgid "This dataset comes from a certified public service"
 msgstr "تأتي مجموعة البيانات من خدمة عامة مشهود بها"
 
-#: udata/templates/dataset/display.html:49
+#: udata/templates/dataset/display.html:54
 #, python-format
 msgid "This dataset has been published on %(date)s and updated on %(update)s on the initiative and under the responsibility of <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 msgstr ""
 
-#: udata/templates/dataset/display.html:60
+#: udata/templates/dataset/display.html:65
 msgid "See all datasets with that badge."
 msgstr "لع على جميع مجموعات البيانات التي تحمل الشارة"
 
-#: udata/templates/dataset/display.html:67
+#: udata/templates/dataset/display.html:72
 msgid "This dataset is private and will not be visible by other users"
 msgstr "مجموعة البيانات هذه خاصة ولن تكون مرئية من قبل مستخدمين آخرين"
 
-#: udata/templates/dataset/display.html:73
+#: udata/templates/dataset/display.html:78
 msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
 msgstr "تم حذف هذه مجموعة البيانات. وسيكون هذا دائما في ال 24 ساعة القادمة"
 
-#: udata/templates/dataset/display.html:74 udata/templates/dataset/display.html:75
+#: udata/templates/dataset/display.html:79 udata/templates/dataset/display.html:80
 #: udata/templates/organization/display.html:37
 #: udata/templates/organization/display.html:39
 #: udata/templates/post/display.html:67 udata/templates/post/display.html:70
-#: udata/templates/reuse/display.html:64 udata/templates/reuse/display.html:67
+#: udata/templates/reuse/display.html:68 udata/templates/reuse/display.html:71
 msgid "Deleted"
 msgstr "محذوف"
 
-#: udata/templates/dataset/display.html:97
+#: udata/templates/dataset/display.html:95 udata/templates/dataset/display.html:375
+msgid "Community resources"
+msgstr "موارد المجتمع"
+
+#: udata/templates/dataset/display.html:116
+#, python-format
+msgid "See the %(nb)d resources of type %(type)s"
+msgstr ""
+
+#: udata/templates/dataset/display.html:121
 msgid "No resources"
 msgstr "دون مورد"
 
-#: udata/templates/dataset/display.html:108
-#, python-format
-msgid "See the %(nb)d resources"
-msgstr ""
-
-#: udata/templates/dataset/display.html:118
+#: udata/templates/dataset/display.html:129
 msgid "Add a resource"
 msgstr "إضافة مورد"
 
-#: udata/templates/dataset/display.html:145
+#: udata/templates/dataset/display.html:156
 #: udata/templates/organization/sidebar-producer.html:20
-#: udata/templates/reuse/display.html:102
+#: udata/templates/reuse/display.html:109
 msgid "Contact the producer"
 msgstr ""
 
-#: udata/templates/dataset/display.html:185 udata/templates/reuse/display.html:176
+#: udata/templates/dataset/display.html:198 udata/templates/reuse/display.html:183
 msgid "Informations"
 msgstr "معلومات"
 
-#: udata/templates/dataset/display.html:192
+#: udata/templates/dataset/display.html:205
 #: udata/templates/dataset/search-panel.html:8
 #: udata/templates/organization/search-panel.html:5
 #: udata/templates/reuse/search-panel.html:5
 msgid "Badges"
 msgstr "شارات"
 
-#: udata/templates/dataset/display.html:237
+#: udata/templates/dataset/display.html:250
 msgid "Modification date"
 msgstr "تاريخ التعديل"
 
-#: udata/templates/dataset/display.html:244
+#: udata/templates/dataset/display.html:257
 msgid "Latest resource update"
 msgstr "آخر تعديل للمورد"
 
-#: udata/templates/dataset/display.html:284 udata/templates/reuse/display.html:204
+#: udata/templates/dataset/display.html:297 udata/templates/reuse/display.html:211
 msgid "Suggest a tag with a new discussion thread"
 msgstr ""
 
-#: udata/templates/dataset/display.html:286 udata/templates/reuse/display.html:206
+#: udata/templates/dataset/display.html:299 udata/templates/reuse/display.html:213
 msgid "Suggest a tag"
 msgstr "اقتراح علامة"
 
-#: udata/templates/dataset/display.html:323
+#: udata/templates/dataset/display.html:336
 msgid "Territories"
 msgstr "مناطق"
 
-#: udata/templates/dataset/display.html:341 udata/templates/reuse/display.html:263
+#: udata/templates/dataset/display.html:354 udata/templates/reuse/display.html:270
 msgid "Community contributions"
 msgstr ""
 
-#: udata/templates/dataset/display.html:358 udata/templates/reuse/display.html:278
+#: udata/templates/dataset/display.html:371 udata/templates/reuse/display.html:285
 msgid "Discussion between the organization and the community about this dataset."
 msgstr "مناقشة بين المنظمة ومجتمع التواصل الاجتماعي حول مجموعة البيانات هذه."
 
-#: udata/templates/dataset/display.html:362
-msgid "Community resources"
-msgstr "موارد المجتمع"
-
-#: udata/templates/dataset/display.html:373
+#: udata/templates/dataset/display.html:386
 msgid "New community resource"
 msgstr "مورد مجتمع جديدة"
 
-#: udata/templates/dataset/display.html:380
+#: udata/templates/dataset/display.html:393
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
 msgstr ""
 
-#: udata/templates/dataset/display.html:403
+#: udata/templates/dataset/display.html:416
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
@@ -1898,9 +1929,28 @@ msgstr ""
 msgid "Reuse number"
 msgstr "رقم استخدام"
 
-#: udata/templates/dataset/resource/list-item.html:21
-#, python-format
-msgid "Last modified on %(date)s"
+#: udata/templates/dataset/resource/card.html:21
+msgid "File informations"
+msgstr ""
+
+#: udata/templates/dataset/resource/card.html:28
+msgid "Download count"
+msgstr ""
+
+#: udata/templates/dataset/resource/card.html:51
+msgid "Preview"
+msgstr ""
+
+#: udata/templates/dataset/resource/card.html:56
+msgid "Download"
+msgstr ""
+
+#: udata/templates/dataset/resource/card.html:57
+msgid "Copy permalink to clipboard"
+msgstr ""
+
+#: udata/templates/dataset/resource/card.html:66
+msgid "Edit this resource"
 msgstr ""
 
 #: udata/templates/errors/400.html:3
@@ -1972,19 +2022,19 @@ msgstr ""
 msgid "Share, improve and reuse public data"
 msgstr ""
 
-#: udata/templates/macros/paginator.html:8
+#: udata/templates/macros/paginator.html:9
 msgid "First page"
 msgstr ""
 
-#: udata/templates/macros/paginator.html:13
+#: udata/templates/macros/paginator.html:15
 msgid "Previous page"
 msgstr ""
 
-#: udata/templates/macros/paginator.html:23
+#: udata/templates/macros/paginator.html:26
 msgid "Next page"
 msgstr ""
 
-#: udata/templates/macros/paginator.html:28
+#: udata/templates/macros/paginator.html:32
 msgid "Last page"
 msgstr ""
 
@@ -2167,7 +2217,7 @@ msgstr ""
 msgid "A new reuse of your dataset %(dataset)s has been published"
 msgstr ""
 
-#: udata/templates/mail/new_reuse.html:31 udata/templates/reuse/display.html:83
+#: udata/templates/mail/new_reuse.html:31 udata/templates/reuse/display.html:87
 msgid "See the reuse"
 msgstr ""
 
@@ -2424,7 +2474,7 @@ msgstr[4] ""
 msgstr[5] ""
 
 #: udata/templates/organization/sidebar-producer.html:17
-#: udata/templates/reuse/display.html:161
+#: udata/templates/reuse/display.html:168
 msgid "View Profile"
 msgstr ""
 
@@ -2500,32 +2550,32 @@ msgstr ""
 msgid "Created by %(user)s"
 msgstr ""
 
-#: udata/templates/reuse/display.html:48
+#: udata/templates/reuse/display.html:52
 #, python-format
 msgid "Published on %(date)s by %(user)s"
 msgstr ""
 
-#: udata/templates/reuse/display.html:58
+#: udata/templates/reuse/display.html:62
 msgid "This reuse is private and will not be visible by other users"
 msgstr ""
 
-#: udata/templates/reuse/display.html:65
+#: udata/templates/reuse/display.html:69
 msgid "This reuse has been deleted. This will be permanent in the next 24 hours"
 msgstr ""
 
-#: udata/templates/reuse/display.html:140
+#: udata/templates/reuse/display.html:147
 msgid "Author"
 msgstr ""
 
-#: udata/templates/reuse/display.html:158
+#: udata/templates/reuse/display.html:165
 msgid "more"
 msgstr ""
 
-#: udata/templates/reuse/display.html:166
+#: udata/templates/reuse/display.html:173
 msgid "I'll be informed about this user news"
 msgstr ""
 
-#: udata/templates/reuse/display.html:220
+#: udata/templates/reuse/display.html:227
 msgid "No followers yet"
 msgstr ""
 

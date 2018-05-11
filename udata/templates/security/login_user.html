@@ -24,6 +24,12 @@
                             {{ _('Recover your password') }}
                         </a>
                     </p>
+                    <p>
+                        {{ _('Confirmation instructions not received?') }}
+                        <a href="{{ url_for('security.send_confirmation') }}">
+                            {{ _('Send the instructions again') }}
+                        </a>
+                    </p>
                 </fieldset>
             </form>
     </div>

@@ -15,12 +15,15 @@ import Datatable from 'components/datatable/widget.vue';
 export default {
     name: 'dataset-list',
     components: {Datatable},
-    MASK: ['id', 'title', 'created_at', 'last_update', 'last_modified', 'metrics', 'private', 'quality'],
+    MASK: ['id', 'title', 'acronym', 'created_at', 'last_update', 'last_modified', 'metrics', 'private', 'quality'],
     data() {
         return {
             fields: [{
                 label: this._('Title'),
-                key: 'title',
+                key(dataset) {
+                    if (!dataset.acronym) return dataset.title;
+                    return `${dataset.title} (${dataset.acronym})`;
+                },
                 sort: 'title',
                 align: 'left',
                 type: 'text'
