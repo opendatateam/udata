@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Expose Resource.extras as writable in the API [#1660](https://github.com/opendatateam/udata/pull/1660)
+- Fix Firefox custom errors handling [#1662](https://github.com/opendatateam/udata/pull/1662)
 
 ## 1.3.9 (2018-05-07)
 
