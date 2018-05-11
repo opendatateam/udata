@@ -16,6 +16,11 @@
 - Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
 - Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
 
+## 1.3.10 (2018-05-11)
+
+- Expose Resource.extras as writable in the API [#1660](https://github.com/opendatateam/udata/pull/1660)
+- Fix Firefox custom errors handling [#1662](https://github.com/opendatateam/udata/pull/1662)
+
 ## 1.3.9 (2018-05-07)
 
 - Prevent linkchecker to pollute timeline as a side-effect. (migration). **Warning, the migration will delete all dataset update activities** [#1643](https://github.com/opendatateam/udata/pull/1643)
