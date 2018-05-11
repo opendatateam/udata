@@ -15,6 +15,7 @@
 - Allow to specify a dataset acronym [#1217](https://github.com/opendatateam/udata/pull/1217)
 - Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
 - Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
+- Refactoring of discussions code base [#1623](https://github.com/opendatateam/udata/pull/1623)
 
 ## 1.3.10 (2018-05-11)
 
