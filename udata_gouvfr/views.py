@@ -192,6 +192,7 @@ def faq(section):
     except TemplateNotFound:
         abort(404)
 
+
 @sitemap.register_generator
 def gouvfr_sitemap_urls():
     yield 'gouvfr.faq_redirect', {}, None, 'weekly', 1
