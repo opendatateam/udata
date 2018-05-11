@@ -95,7 +95,7 @@ This is the allowed resources extensions list that user can upload.
 
 ### RESOURCES_FILE_ALLOWED_DOMAINS
 
-**default**: `tuple()`
+**default**: `[]`
 
 Whitelist of urls domains allowed for resources with `filetype` equals to `file`.
 
