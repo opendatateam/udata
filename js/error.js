@@ -12,7 +12,7 @@ export default class CustomError extends Error {
             Error.captureStackTrace(this, this.constructor);
         } else {
             // Firefox and other browser not supporting Error.captureStackTrace
-            this.stack = (new Error(message)).stack;
+            this.stack = (new Error()).stack;
         }
     }
 }

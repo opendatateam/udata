@@ -16,6 +16,7 @@
 - Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
 - Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
 - Refactoring of discussions code base [#1623](https://github.com/opendatateam/udata/pull/1623)
+- Fix Firefox custom error handling, part 2 [#1671](https://github.com/opendatateam/udata/pull/1671)
 
 ## 1.3.10 (2018-05-11)
 
