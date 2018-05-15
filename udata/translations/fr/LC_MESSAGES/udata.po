@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-15 14:54+0200\n"
-"PO-Revision-Date: 2018-05-15 09:50-0400\n"
+"PO-Revision-Date: 2018-05-15 10:00-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -2225,27 +2225,27 @@ msgstr "Votre mot de passe a été changé."
 
 #: udata/templates/mail/security/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
-msgstr ""
+msgstr "Si vous n’avez pas modifié votre mot de passe, cliquez ci-dessous pour le réinitialiser."
 
 #: udata/templates/mail/security/change_notice.html:15
 msgid "Reset password"
-msgstr ""
+msgstr "Réinitialiser votre mot de passe"
 
 #: udata/templates/mail/security/confirmation_instructions.html:6
 msgid "Please confirm your email through the link below:"
-msgstr ""
+msgstr "Veuillez confirmer votre adresse email en suivant le lien ci-dessous :"
 
 #: udata/templates/mail/security/confirmation_instructions.html:14
 msgid "Confirm my account"
-msgstr ""
+msgstr "Confirmer mon compte"
 
 #: udata/templates/mail/security/login_instructions.html:6
 msgid "You can log into your account through the link below:"
-msgstr ""
+msgstr "Vous pouvez vous connecter à votre compte via le lien ci-dessous :"
 
 #: udata/templates/mail/security/login_instructions.html:13
 msgid "Login now"
-msgstr ""
+msgstr "Se connecter maintenant"
 
 #: udata/templates/mail/security/reset_instructions.html:7
 #, python-format
@@ -2616,11 +2616,11 @@ msgstr "Récupérer votre mot de passe"
 
 #: udata/templates/security/login_user.html:28
 msgid "Confirmation instructions not received?"
-msgstr ""
+msgstr "Instructions de confirmation non reçues ?"
 
 #: udata/templates/security/login_user.html:30
 msgid "Send the instructions again"
-msgstr ""
+msgstr "Renvoyer les instructions"
 
 #: udata/templates/security/login_user.html:39
 #: udata/templates/security/register_user.html:30
