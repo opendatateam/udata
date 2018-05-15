@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-15 14:54+0200\n"
-"PO-Revision-Date: 2018-05-15 09:01-0400\n"
+"PO-Revision-Date: 2018-05-15 09:50-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -982,7 +982,7 @@ msgstr "Collectivités d'outre-mer françaises"
 
 #: udata/core/spatial/translations.py:23
 msgid "French arrondissement"
-msgstr ""
+msgstr "Arrondissement français"
 
 #: udata/core/topic/forms.py:27
 msgid "Featured"
@@ -2221,7 +2221,7 @@ msgstr "Si vous lisez ceci, votre configuration fonctionne"
 
 #: udata/templates/mail/security/change_notice.html:6
 msgid "Your password has been changed."
-msgstr ""
+msgstr "Votre mot de passe a été changé."
 
 #: udata/templates/mail/security/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
