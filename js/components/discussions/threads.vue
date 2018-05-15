@@ -1,4 +1,8 @@
 <style scoped lang="less">
+.discussion-threads {
+    margin-top: -32px;
+}
+
 .loading {
     margin: 2em;
     text-align: center;
