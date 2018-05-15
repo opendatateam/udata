@@ -4,10 +4,10 @@ from __future__ import unicode_literals
 from flask_security.forms import RegisterForm
 from udata.forms import fields
 from udata.forms import validators
-
+from udata.i18n import lazy_gettext as _
 
 class ExtendedRegisterForm(RegisterForm):
     first_name = fields.StringField(
-        'First Name', [validators.Required('First name is required')])
+        _('First name'), [validators.Required(_('First name is required'))])
     last_name = fields.StringField(
-        'Last Name', [validators.Required('Last name is required')])
+        _('Last name'), [validators.Required(_('Last name is required'))])
