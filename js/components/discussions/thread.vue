@@ -21,7 +21,7 @@
 <div class="discussion-thread panel panel-default">
     <div class="panel-heading" @click="toggleDiscussions">
         <div>
-            <a href="#{{ discussionIdAttr }}" class="pull-right"><span class="fa fa-link"></span></a> 
+            <a href="#{{ discussionIdAttr }}" class="pull-right" v-on:click.stop><span class="fa fa-link"></span></a> 
             <strong>{{ discussion.title }}</strong>
             <span class="label label-warning" v-if="discussion.closed"><i class="fa fa-minus-circle" aria-hidden="true"></i> {{ _('closed discussion') }}</span>
         </div>
