@@ -17,6 +17,7 @@
 - Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
 - Refactoring of discussions code base [#1623](https://github.com/opendatateam/udata/pull/1623)
 - Fix Firefox custom error handling, part 2 [#1671](https://github.com/opendatateam/udata/pull/1671)
+- The map widget can now be configured (tiles URL, initial position...) [#1672](https://github.com/opendatateam/udata/pull/1672)
 
 ## 1.3.10 (2018-05-11)
 

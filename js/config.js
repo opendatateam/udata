@@ -130,22 +130,9 @@ export const hidpi = (window.devicePixelRatio > 1 || (
 );
 
 /**
- * Attributions for map tiles
+ * Map configuration
  */
-export const tiles_attributions = '&copy;' + [
-    '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>',
-    '<a href="https://cartodb.com/attributions">CartoDB</a>'
-].join('/');
-
-/**
- * Map tiles URL
- */
-export const tiles_url = `https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}${hidpi ? '@2x' : ''}.png`;
-
-/**
- * Leaflet base config
- */
-export const tiles_config = {subdomains: 'abcd', attribution: tiles_attributions};
+export const map = _jsonMeta('map-config');
 
 /**
  * Tags constraints
@@ -181,10 +168,8 @@ export default {
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
+    map,
     tags,
-    tiles_attributions,
-    tiles_url,
-    tiles_config,
     dataset_max_resources_uncollapsed,
     markdown,
 };
