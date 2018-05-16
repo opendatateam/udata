@@ -283,7 +283,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
                 or not RE_TIME_COVERAGE.match(value):
             msg = '"{0}" does not match YYYY-MM-DD-YYYY-MM-DD'.format(value)
             raise ValueError(msg)
-        return True
+        return value
 
     def as_request_parser_kwargs(self):
         return {
