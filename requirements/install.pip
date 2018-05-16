@@ -18,7 +18,7 @@ Flask-Login==0.4.1
 Flask-Mail==0.9.1
 flask-mongoengine==0.9.5
 Flask-Navigation==0.2.0
-flask-restplus==0.10.1
+flask-restplus==0.11.0
 Flask-Security==3.0.0
 Flask-Sitemap==0.2.0
 Flask-Themes2==0.1.4
@@ -43,6 +43,7 @@ requests==2.18.4
 StringDist==1.0.9
 tlds
 unicodecsv==0.14.1
+ujson==1.35
 voluptuous==0.10.5
 wtforms-json==0.3.3
 wtforms==2.1

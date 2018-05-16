@@ -35,12 +35,12 @@ class UrlFor(String):
     def default_mapper(self, obj):
         return {'id': str(obj.id)}
 
-    def output(self, key, obj):
+    def output(self, key, obj, **kwargs):
         return url_for(self.endpoint, _external=True, **self.mapper(obj))
 
 
 class NextPageUrl(String):
-    def output(self, key, obj):
+    def output(self, key, obj, **kwargs):
         if not getattr(obj, 'has_next', None):
             return None
         args = multi_to_dict(request.args)
@@ -50,7 +50,7 @@ class NextPageUrl(String):
 
 
 class PreviousPageUrl(String):
-    def output(self, key, obj):
+    def output(self, key, obj, **kwargs):
         if not getattr(obj, 'has_prev', None):
             return None
         args = multi_to_dict(request.args)
