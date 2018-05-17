@@ -43,11 +43,11 @@
 <template>
     <div class="message">
         <div class="avatar">
-            <avatar :user="message.posted_by"></avatar>
+            <a href="{{ message.posted_by.page }}"><avatar :user="message.posted_by"></avatar></a>
         </div>
         <div>
             <div class="author">
-                {{ message.posted_by.first_name }} {{ message.posted_by.last_name }}
+                <a href="{{ message.posted_by.page }}">{{ message.posted_by.first_name }} {{ message.posted_by.last_name }}</a>
             </div>
            
             <div class="posted_on">
