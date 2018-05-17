@@ -6,6 +6,7 @@ from udata.forms import fields
 from udata.forms import validators
 from udata.i18n import lazy_gettext as _
 
+
 class ExtendedRegisterForm(RegisterForm):
     first_name = fields.StringField(
         _('First name'), [validators.Required(_('First name is required'))])
