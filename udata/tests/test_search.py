@@ -1203,7 +1203,8 @@ class TestTemporalCoverageFacet(FacetTestCase):
         self.assertEqual(label, expected)
 
     def test_validate_parameters(self):
-        self.assertTrue(self.facet.validate_parameter('1940-01-01-2014-12-31'))
+        value = '1940-01-01-2014-12-31'
+        self.assertEqual(self.facet.validate_parameter(value), value)
 
         bad_values = ['xyz', True, 42]
         for value in bad_values:
