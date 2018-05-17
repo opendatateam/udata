@@ -1,10 +1,12 @@
 <style scoped lang="less">
 .panel .panel-heading {
     padding: 10px 15px;
+    cursor: pointer;
 }
 
 .read-more {
     text-align: center;
+    cursor: pointer;
 }
 
 .add-comment {
