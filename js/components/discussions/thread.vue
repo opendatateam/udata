@@ -50,12 +50,12 @@
         </div>
     </div>
 
-    <div class="panel-footer read-more" v-if="!detailed" @click="toggleDiscussions">
+    <div class="panel-footer read-more" v-show="!detailed" @click="toggleDiscussions">
         <span class="text-muted">{{ discussion.discussion.length }} {{ _('messages') }}</span>
     </div>
 
-    <div class="panel-footer" v-if="!detailed">
-        <div class="text-muted" v-if="discussion.closed">
+    <div class="panel-footer" v-show="discussion.closed">
+        <div class="text-muted">
             {{ _('Discussion has been closed') }}
             {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
             {{ _('on') }} {{ closedDate }}
