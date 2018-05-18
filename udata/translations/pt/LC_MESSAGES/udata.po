@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-15 14:54+0200\n"
-"PO-Revision-Date: 2018-05-15 09:01-0400\n"
+"PO-Revision-Date: 2018-05-18 07:00-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2241,7 +2241,7 @@ msgstr ""
 
 #: udata/templates/mail/security/login_instructions.html:13
 msgid "Login now"
-msgstr ""
+msgstr "Iniciar sessão agora"
 
 #: udata/templates/mail/security/reset_instructions.html:7
 #, python-format
@@ -2612,11 +2612,11 @@ msgstr "Recuperar palavra-passe"
 
 #: udata/templates/security/login_user.html:28
 msgid "Confirmation instructions not received?"
-msgstr ""
+msgstr "Não recebeu as instruções de confirmação?"
 
 #: udata/templates/security/login_user.html:30
 msgid "Send the instructions again"
-msgstr ""
+msgstr "Reenviar instruções"
 
 #: udata/templates/security/login_user.html:39
 #: udata/templates/security/register_user.html:30
