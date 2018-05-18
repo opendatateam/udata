@@ -197,6 +197,12 @@ Initial map center position coordinates
 
 Initial map zoom level
 
+### MAP_INITIAL_LEVEL
+
+**default**: `0`
+
+Initial map territory level
+
 ## Spatial configuration
 
 ### SPATIAL_SEARCH_EXCLUDE_LEVELS

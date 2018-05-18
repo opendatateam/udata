@@ -300,7 +300,8 @@ class Defaults(object):
     MAP_INITIAL_CENTER = [42, 2.4]
     # Initial map zoom level
     MAP_INITIAL_ZOOM = 4
-
+    # Initial map territory level
+    MAP_INITIAL_LEVEL = 0
 
 
 class Testing(object):
