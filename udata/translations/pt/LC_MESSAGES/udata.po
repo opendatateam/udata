@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-05-15 14:54+0200\n"
-"PO-Revision-Date: 2018-05-18 07:00-0400\n"
+"PO-Revision-Date: 2018-05-18 07:10-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -2217,27 +2217,27 @@ msgstr "Se estiver a ler isto a sua configuração de correio está operacional"
 
 #: udata/templates/mail/security/change_notice.html:6
 msgid "Your password has been changed."
-msgstr ""
+msgstr "A sua palavra-passe foi alterada."
 
 #: udata/templates/mail/security/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
-msgstr ""
+msgstr "Se não alterou a sua senha, clique abaixo para redefini-la."
 
 #: udata/templates/mail/security/change_notice.html:15
 msgid "Reset password"
-msgstr ""
+msgstr "Redefinir palavra-passe"
 
 #: udata/templates/mail/security/confirmation_instructions.html:6
 msgid "Please confirm your email through the link below:"
-msgstr ""
+msgstr "Por favor, confirme o seu e-mail através do link abaixo:"
 
 #: udata/templates/mail/security/confirmation_instructions.html:14
 msgid "Confirm my account"
-msgstr ""
+msgstr "Confirmar a minha conta"
 
 #: udata/templates/mail/security/login_instructions.html:6
 msgid "You can log into your account through the link below:"
-msgstr ""
+msgstr "Pode entrar na sua conta através do link abaixo:"
 
 #: udata/templates/mail/security/login_instructions.html:13
 msgid "Login now"
