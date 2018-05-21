@@ -2,7 +2,7 @@ awesome-slugify==1.6.5
 authlib==0.7
 bleach==2.1.3
 blinker==1.4
-celery==4.1.0
+celery==4.1.1
 celerybeat-mongo==0.1.0
 chardet==3.0.4
 CommonMark==0.7.5
