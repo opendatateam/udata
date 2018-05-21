@@ -8,6 +8,7 @@ import Vue from 'vue';
 import log from 'logger';
 
 import L from 'leaflet';
+import config from 'config';
 import 'leaflet-spin';
 
 import LeafletMap from 'components/leaflet-map.vue';
@@ -83,7 +84,7 @@ new Vue({
                 this.switchLevel(ev.layer.level);
             });
 
-            this.switchLevel(this.levels[0]);
+            this.switchLevel(this.levels[config.map.init.level]);
         },
 
         /**
