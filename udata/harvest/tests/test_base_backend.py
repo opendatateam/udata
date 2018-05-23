@@ -1,63 +1,68 @@
-# # -*- coding: utf-8 -*-
-# from __future__ import unicode_literals
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-# from udata.models import Dataset, Organization, Reuse
-# from udata.tests import TestCase, DBTestMixin, factories
+import pytest
 
-# from .factories import HarvesterFactory
+from datetime import datetime
 
-# from ..backends import BaseBackend
+from udata.utils import faker
+from udata.core.dataset.factories import DatasetFactory
+from udata.models import Dataset
 
+from .factories import HarvestSourceFactory
 
-# class FakeBackend(BaseBackend):
-#     def __init__(self, harvester, orgs=3, datasets=3, reuses=3):
-#         self.nb_orgs = orgs
-#         self.nb_datasets = datasets
-#         self.nb_reuses = reuses
-#         super(FakeBackend, self).__init__(harvester)
-
-#     def remote_organizations(self):
-#         for i in range(self.nb_orgs):
-#             yield factories.OrganizationFactory.build()
-
-#     def remote_datasets(self):
-#         for i in range(self.nb_datasets):
-#             yield factories.DatasetFactory.build()
-
-#     def remote_reuses(self):
-#         for i in range(self.nb_reuses):
-#             yield factories.ReuseFactory.build()
+from ..backends import BaseBackend, HarvestFilter
 
 
-# class BaseBackendTest(DBTestMixin, TestCase):
-#     def create_app(self):
-#         app = super(BaseBackendTest, self).create_app()
-#         app.config['PLUGINS'] = ['harvest']
-#         return app
+class Unknown:
+    pass
 
-#     def test_harvest_all(self):
-#         backend = FakeBackend(HarvesterFactory())
 
-#         backend.harvest()
+class FakeBackend(BaseBackend):
+    def initialize(self):
+        for i in range(self.source.config.get('nb_datasets', 3)):
+            self.add_item('fake-{0}'.format(i))
 
-#         self.assertEqual(Organization.objects.count(), backend.nb_orgs)
-#         self.assertEqual(Dataset.objects.count(), backend.nb_datasets)
-#         self.assertEqual(Reuse.objects.count(), backend.nb_reuses)
+    def process(self, item):
+        dataset = self.get_dataset(item.remote_id)
+        for key, value in DatasetFactory.as_dict(visible=True).items():
+            setattr(dataset, key, value)
+        return dataset
 
-#     def test_harvest_one(self):
-#         backend = FakeBackend(HarvesterFactory())
 
-#         backend.harvest(reuses=True)
+class HarvestFilterTest:
+    @pytest.mark.parametrize('type,expected', HarvestFilter.TYPES.items())
+    def test_type_ok(self, type, expected):
+        label = faker.word()
+        key = faker.word()
+        description = faker.sentence()
+        hf = HarvestFilter(label, key, type, description)
+        assert hf.as_dict() == {
+            'label': label,
+            'key': key,
+            'type': expected,
+            'description': description,
+        }
 
-#         self.assertEqual(Organization.objects.count(), 0)
-#         self.assertEqual(Dataset.objects.count(), 0)
-#         self.assertEqual(Reuse.objects.count(), backend.nb_reuses)
+    @pytest.mark.parametrize('type', [dict, list, tuple, Unknown])
+    def test_type_ko(self, type):
+        with pytest.raises(TypeError):
+            HarvestFilter(faker.word(), faker.word(), type, faker.sentence())
 
-#     def test_harvest_two(self):
-#         backend = FakeBackend(HarvesterFactory())
 
-#         backend.harvest(datasets=True, reuses=True)
+class BaseBackendTest:
+    def test_simple_harvest(self):
+        nb_datasets = 3
+        source = HarvestSourceFactory(config={'nb_datasets': nb_datasets})
+        backend = FakeBackend(source)
 
-#         self.assertEqual(Organization.objects.count(), 0)
-#         self.assertEqual(Dataset.objects.count(), backend.nb_datasets)
-#         self.assertEqual(Reuse.objects.count(), backend.nb_reuses)
+        job = backend.harvest()
+
+        assert len(job.items) == nb_datasets
+        assert Dataset.objects.count() == nb_datasets
+        for dataset in Dataset.objects():
+            assert dataset.extras['harvest:source_id'] == str(source.id)
+            assert dataset.extras['harvest:domain'] == source.domain
+            assert dataset.extras['harvest:remote_id'].startswith('fake-')
+            datetime.strptime(dataset.extras['harvest:last_update'],
+                              '%Y-%m-%dT%H:%M:%S.%f')

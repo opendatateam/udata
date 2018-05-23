@@ -34,6 +34,8 @@ class HarvestAPITest(MockBackendsMixin):
         for data in response.json:
             assert 'id' in data
             assert 'label' in data
+            assert 'filters' in data
+            assert isinstance(data['filters'], (list, tuple))
 
     def test_list_sources(self, api):
         sources = HarvestSourceFactory.create_batch(3)
