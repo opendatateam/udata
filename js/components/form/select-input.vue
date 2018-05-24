@@ -5,7 +5,8 @@
     :name="field.id"
     :placeholder="placeholder"
     :required="required"
-    :disabled="readonly">
+    :disabled="readonly"
+    @change="onChange">
     <option v-for="option in options | extract" :value="option.value">
         {{option.text || option.value}}
     </option>
@@ -48,6 +49,6 @@ export default {
             }
             return items;
         }
-    }
+    },
 };
 </script>
