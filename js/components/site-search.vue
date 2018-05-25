@@ -31,8 +31,8 @@
             <span v-if="group.loading" class="fa fa-spin fa-spinner group-status"></span>
             <strong class="search-header">{{ group.name }}</strong>
             <ul>
-                <li v-for="item in group.items" track-by="id" :class="{'active': isActive(item)}">
-                    <a @mousedown.prevent="hit" @mousemove="setActive(item)">
+                <li v-for="item in group.items" track-by="id" :class="{'active': isActive(item)}" @mousedown.prevent="hit" @mousemove="setActive(item)">
+                    <a>
                         <partial :name="group.template || 'default'"></partial>
                     </a>
                 </li>
