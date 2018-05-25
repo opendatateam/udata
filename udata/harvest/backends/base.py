@@ -26,6 +26,7 @@ requests.packages.urllib3.disable_warnings()
 class HarvestFilter(object):
     TYPES = {
         str: 'string',
+        unicode: 'string',
         basestring: 'string',
         int: 'integer',
         bool: 'boolean',
