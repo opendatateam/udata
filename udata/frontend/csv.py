@@ -6,6 +6,7 @@ import logging
 from cStringIO import StringIO
 import itertools
 import unicodecsv
+import re
 
 from datetime import datetime, date
 
@@ -33,6 +34,8 @@ def safestr(value):
         return value
     elif isinstance(value, (date, datetime)):
         return value.isoformat()
+    elif isinstance(value, basestring):
+        return unicode(re.sub("\n|\r", " ", value))
     else:
         return unicode(value)
 
