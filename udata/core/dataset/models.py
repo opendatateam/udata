@@ -250,7 +250,7 @@ class ResourceMixin(object):
             if not isinstance(check_date, datetime):
                 try:
                     check_date = parse_dt(check_date)
-                except ValueError:
+                except (ValueError, TypeError):
                     return True
             if check_date >= limit_date:
                 return False
