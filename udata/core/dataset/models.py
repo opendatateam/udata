@@ -5,10 +5,11 @@ from datetime import datetime, timedelta
 from collections import OrderedDict
 
 from blinker import signal
-from stringdist import rdlevenshtein
+from dateutil.parser import parse as parse_dt
 from flask import url_for, current_app
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
+from stringdist import rdlevenshtein
 from werkzeug import cached_property
 
 from udata.frontend.markdown import mdstrip
@@ -245,7 +246,13 @@ class ResourceMixin(object):
             delta = min_cache_duration
         if self.extras.get('check:date'):
             limit_date = datetime.now() - timedelta(minutes=delta)
-            if self.extras['check:date'] >= limit_date:
+            check_date = self.extras['check:date']
+            if not isinstance(check_date, datetime):
+                try:
+                    check_date = parse_dt(check_date)
+                except ValueError:
+                    return True
+            if check_date >= limit_date:
                 return False
         return True
 

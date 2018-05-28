@@ -151,6 +151,24 @@ class LinkcheckerTest(TestCase):
         }
         self.assertTrue(self.resource.need_check())
 
+    def test_is_need_check_date_string(self):
+        check_date = (datetime.now() - timedelta(seconds=3600)).isoformat()
+        self.resource.extras = {
+            'check:available': True,
+            'check:date': check_date,
+            'check:status': 42
+        }
+        self.assertTrue(self.resource.need_check())
+
+    def test_is_need_check_wrong_check_date(self):
+        check_date = '123azerty'
+        self.resource.extras = {
+            'check:available': True,
+            'check:date': check_date,
+            'check:status': 42
+        }
+        self.assertTrue(self.resource.need_check())
+
     def test_is_need_check_count_availability(self):
         self.resource.extras = {
             # should need a new check after 100 * 30s = 3000s < 3600s
