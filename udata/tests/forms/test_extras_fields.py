@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from datetime import date, datetime
 
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields
 from udata.models import db
-from udata.tests import TestCase
+
+pytestmark = [
+    pytest.mark.usefixtures('app')
+]
 
 
-class ExtrasFieldTest(TestCase):
+class ExtrasFieldTest:
 
     def factory(self):
         class Fake(db.Document):
@@ -28,7 +33,7 @@ class ExtrasFieldTest(TestCase):
         form = FakeForm()
         form.populate_obj(fake)
 
-        self.assertEqual(fake.extras, {})
+        assert fake.extras == {}
 
     def test_with_valid_data(self):
         Fake, FakeForm = self.factory()
@@ -47,18 +52,18 @@ class ExtrasFieldTest(TestCase):
         }}))
 
         form.validate()
-        self.assertEqual(form.errors, {})
+        assert form.errors == {}
 
         form.populate_obj(fake)
 
-        self.assertEqual(fake.extras, {
+        assert fake.extras == {
             'integer': 42,
             'float': 42.0,
             'string': 'value',
             'datetime': now,
             'date': today,
             'bool': True
-        })
+        }
 
     def test_with_invalid_data(self):
         Fake, FakeForm = self.factory()
@@ -72,8 +77,8 @@ class ExtrasFieldTest(TestCase):
         }}))
 
         form.validate()
-        self.assertIn('extras', form.errors)
-        self.assertEqual(len(form.errors['extras']), 1)
+        assert 'extras' in form.errors
+        assert len(form.errors['extras']) == 1
 
     def test_with_valid_registered_data(self):
         Fake, FakeForm = self.factory()
@@ -94,16 +99,16 @@ class ExtrasFieldTest(TestCase):
         }}))
 
         form.validate()
-        self.assertEqual(form.errors, {})
+        assert form.errors == {}
 
         form.populate_obj(fake)
-        self.assertEqual(fake.extras, {
+        assert fake.extras == {
             'dict': {
                 'integer': 42,
                 'float': 42.0,
                 'string': 'value',
             }
-        })
+        }
 
     def test_with_invalid_registered_data(self):
         Fake, FakeForm = self.factory()
@@ -119,5 +124,5 @@ class ExtrasFieldTest(TestCase):
         }}))
 
         form.validate()
-        self.assertIn('extras', form.errors)
-        self.assertEqual(len(form.errors['extras']), 1)
+        assert 'extras' in form.errors
+        assert len(form.errors['extras']) == 1
