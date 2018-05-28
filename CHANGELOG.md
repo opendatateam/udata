@@ -19,6 +19,7 @@
 - Fix Firefox custom error handling, part 2 [#1671](https://github.com/opendatateam/udata/pull/1671)
 - The map widget can now be configured (tiles URL, initial position...) [#1672](https://github.com/opendatateam/udata/pull/1672)
 - Fix the temporal coverage facet query string parsing [#1676](https://github.com/opendatateam/udata/pull/1676)
+- Fix search auto-complete hitbox [#1687](https://github.com/opendatateam/udata/pull/1687)
 
 ## 1.3.10 (2018-05-11)
 
