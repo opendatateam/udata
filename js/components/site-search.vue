@@ -18,6 +18,7 @@
         <input name="q" type="search" class="form-control" autocomplete="off"
             :placeholder="placeholder || _('Search')"
             v-model="query" debounce="200"
+            @keydown="show = true"
             @keydown.up.prevent="up"
             @keydown.down.prevent="down"
             @keydown.enter="hit"
@@ -167,7 +168,6 @@ export default {
             }
 
             this.current = -1;
-            this.show = true;
 
             this.groups.forEach(group => {
                 const cached = this.cache.get(`${group.id}-${query}`);
