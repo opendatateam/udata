@@ -1,5 +1,5 @@
 <style scoped lang="less">
-.discussion-threads {
+.sort {
     margin-top: -32px;
 }
 
