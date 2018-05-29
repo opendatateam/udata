@@ -22,6 +22,11 @@
 - Fix search auto-complete hitbox [#1687](https://github.com/opendatateam/udata/pull/1687)
 - Fix search auto-complete loading on new page [#1693](https://github.com/opendatateam/udata/pull/1693)
 
+## 1.3.11 (2018-05-29)
+
+- Protect Resource.need_check against malformed/string dates [#1691](https://github.com/opendatateam/udata/pull/1691)
+- Fix search auto-complete loading on new page [#1693](https://github.com/opendatateam/udata/pull/1693)
+
 ## 1.3.10 (2018-05-11)
 
 - Expose Resource.extras as writable in the API [#1660](https://github.com/opendatateam/udata/pull/1660)
