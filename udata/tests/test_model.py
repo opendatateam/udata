@@ -328,6 +328,37 @@ class ExtrasFieldTest:
         with pytest.raises(ValidationError):
             tester.validate()
 
+    @pytest.mark.parametrize('dbtype,value', [
+        (db.IntField, 42),
+        (db.FloatField, 0.42),
+        (db.BooleanField, True),
+        (db.DateTimeField, datetime.now()),
+        (db.DateField, date.today()),
+    ])
+    def test_validate_registered_db_type(self, dbtype, value):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        Tester.extras.register('test', dbtype)
+
+        Tester(extras={'test': value}).validate()
+
+    @pytest.mark.parametrize('dbtype,value', [
+        (db.IntField, datetime.now()),
+        (db.FloatField, datetime.now()),
+        (db.BooleanField, 42),
+        (db.DateTimeField, 42),
+        (db.DateField, 42),
+    ])
+    def test_fail_to_validate_wrong_type(self, dbtype, value):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        Tester.extras.register('test', dbtype)
+
+        with pytest.raises(db.ValidationError):
+            Tester(extras={'test': value}).validate()
+
     def test_validate_registered_type(self):
         class Tester(db.Document):
             extras = db.ExtrasField()
