@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from udata.forms import ModelForm, Form, fields, validators
 from udata.i18n import lazy_gettext as _

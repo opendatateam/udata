@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import itertools
 import logging
@@ -95,7 +95,7 @@ class ModelSearchAdapter(DocType):
     def as_request_parser(cls, paginate=True):
         parser = RequestParser()
         # q parameter
-        parser.add_argument('q', type=unicode, location='args',
+        parser.add_argument('q', type=str, location='args',
                             help='The search query')
         # Expected facets
         # (ie. I want all facets or I want both tags and licenses facets)

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import calendar
 import logging
@@ -97,7 +97,7 @@ def url_del(url=None, *args, **kwargs):
         params.poplist(key)
     for key, value in kwargs.items():
         lst = params.poplist(key)
-        if unicode(value) in lst:
+        if str(value) in lst:
             lst.remove(unicode(value))
         params.setlist(key, lst)
     return Markup(urlunsplit((scheme, netloc, path, url_encode(params),

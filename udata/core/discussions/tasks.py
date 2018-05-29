@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
+
+
 
 from udata import mail
 from udata.i18n import lazy_gettext as _

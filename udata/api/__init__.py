@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import logging
 import urllib
@@ -83,7 +83,7 @@ class UDataApi(Api):
         '''Enforce authentication on a given method/verb
         and optionnaly check a given permission
         '''
-        if isinstance(func, basestring):
+        if isinstance(func, str):
             return self._apply_permission(Permission(RoleNeed(func)))
         elif isinstance(func, Permission):
             return self._apply_permission(func)

@@ -81,7 +81,7 @@ As it's still planned to migrate to Python 3 some day,
 try to always use a forward compatible syntax in order
 to ensure an easy future migration:
 
-* unicode by default, starts any file with `from __future__ import unicode_literals`
+* unicode by default, starts any file with ``
 * Python 3 compatible `print` statement with `from __future__ import print_function`
 * use `io.open` instead of `codecs.open` to manipulate utf-8 files
 

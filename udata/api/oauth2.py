@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 '''
 OAuth 2 serveur implementation based on Authlib.
 

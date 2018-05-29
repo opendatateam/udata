@@ -366,8 +366,8 @@ su - udata
 Edit your `udata.cfg` configuration with these parameters:
 
 ```python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 DEBUG = False
 

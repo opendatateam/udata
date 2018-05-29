@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from flask import g, current_app
 from werkzeug.local import LocalProxy

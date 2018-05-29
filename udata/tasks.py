@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import logging
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from celery import Celery, Task
 from celery.utils.log import get_task_logger

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import logging
 
@@ -34,7 +34,7 @@ def safestr(value):
     elif isinstance(value, (date, datetime)):
         return value.isoformat()
     else:
-        return unicode(value)
+        return str(value)
 
 
 class Adapter(object):
@@ -51,14 +51,14 @@ class Adapter(object):
                 raise ValueError('Unsupported fields format')
             self._fields = []
             for field in itertools.chain(self.fields, self.dynamic_fields()):
-                name = field if isinstance(field, basestring) else field[0]
+                name = field if isinstance(field, str) else field[0]
                 # Retrieving (dynamically) fields is prone to errors,
                 # we don't want to break the CSV generation for a unique
                 # error so we skip it and introduce a blank to the given
                 # field.
                 field_tuple = (name, None)
                 try:
-                    if isinstance(field, basestring):
+                    if isinstance(field, str):
                         field_tuple = (name, self.getter(field))
                     else:
                         field_tuple = (name, self.getter(*field))
@@ -75,7 +75,7 @@ class Adapter(object):
                     if hasattr(self, method)
                     else lambda o: recursive_get(o, name))
         return ((lambda o: recursive_get(o, getter))
-                if isinstance(getter, basestring) else getter)
+                if isinstance(getter, str) else getter)
 
     def header(self):
         '''Generate the CSV header row'''
@@ -123,14 +123,14 @@ class NestedAdapter(Adapter):
             self._nested_fields = []
             for field in itertools.chain(self.nested_fields,
                                          self.nested_dynamic_fields()):
-                name = field if isinstance(field, basestring) else field[0]
+                name = field if isinstance(field, str) else field[0]
                 # Retrieving (dynamically) fields is prone to errors,
                 # we don't want to break the CSV generation for a unique
                 # error so we skip it and introduce a blank to the given
                 # field.
                 field_tuple = (name, None)
                 try:
-                    if isinstance(field, basestring):
+                    if isinstance(field, str):
                         field_tuple = (name, self.getter(field))
                     else:
                         field_tuple = (name, self.getter(*field))

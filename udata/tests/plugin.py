@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import pytest
 import shlex
 import sys
 
 from contextlib import contextmanager
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from flask import json, template_rendered, url_for
 from flask.testing import FlaskClient

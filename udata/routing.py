@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from bson import ObjectId
 from uuid import UUID
@@ -75,7 +75,7 @@ class ModelConverter(BaseConverter):
             return e
 
     def to_url(self, obj):
-        if isinstance(obj, basestring):
+        if isinstance(obj, str):
             return url_quote(obj)
         elif isinstance(obj, (ObjectId, UUID)):
             return str(obj)

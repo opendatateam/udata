@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 import logging
 
 from collections import Iterable
@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 def serialize(value):
     if hasattr(value, 'to_dict'):
         return value.to_dict()
-    elif isinstance(value, Iterable) and not isinstance(value, basestring):
+    elif isinstance(value, Iterable) and not isinstance(value, str):
         return [serialize(val) for val in value]
     else:
         return value

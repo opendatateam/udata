@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import hashlib
 import math
@@ -190,7 +190,7 @@ def to_bool(value):
     '''
     if isinstance(value, bool):
         return value
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         return value.lower() == 'true' or value.lower() == 't'
     elif isinstance(value, int):
         return value > 0
@@ -226,7 +226,7 @@ def recursive_get(obj, key):
     '''
     if not obj or not key:
         return
-    parts = key.split('.') if isinstance(key, basestring) else key
+    parts = key.split('.') if isinstance(key, str) else key
     key = parts.pop(0)
     if isinstance(obj, dict):
         value = obj.get(key, None)
@@ -276,8 +276,9 @@ class UnicodeLoremProvider(LoremProvider):
 
 def safe_unicode(string):
     '''Safely transform any object into utf8 encoded bytes'''
-    if not isinstance(string, basestring):
-        string = unicode(string)
+    return str(string)
+    if not isinstance(string, str):
+        string = str(string)
     if isinstance(string, unicode):
         string = string.encode('utf8')
     return string

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from datetime import date, timedelta
 
@@ -867,7 +867,7 @@ class TestTermsFacet(FacetTestCase):
 
         self.assertEqual(len(result), 10)
         for row in result:
-            self.assertIsInstance(row[0], basestring)
+            self.assertIsInstance(row[0], str)
             self.assertIsInstance(row[1], int)
             self.assertIsInstance(row[2], bool)
 

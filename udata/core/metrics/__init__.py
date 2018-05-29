@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import logging
 
@@ -101,7 +101,7 @@ class Metric(object):
         return last.values[self.name]
 
     def iso(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         elif isinstance(value, datetime):
             return value.date().isoformat()

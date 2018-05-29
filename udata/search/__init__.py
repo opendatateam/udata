@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import bson
 import datetime
@@ -31,7 +31,7 @@ class EsJSONSerializer(AttrJSONSerializer):
     # TODO: find a way to reuse UDataJsonEncoder?
     def default(self, data):
         if is_lazy_string(data):
-            return unicode(data)
+            return str(data)
         elif isinstance(data, bson.objectid.ObjectId):
             return str(data)
         elif isinstance(data, datetime.datetime):
@@ -171,7 +171,7 @@ def facets_for(adapter, params):
     facets = params.pop('facets', [])
     if not adapter.facets:
         return []
-    if isinstance(facets, basestring):
+    if isinstance(facets, str):
         facets = [facets]
     if facets is True or 'all' in facets:
         return adapter.facets.keys()

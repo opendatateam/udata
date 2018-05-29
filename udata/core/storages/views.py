@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from flask import Blueprint, jsonify
 from flask_security import login_required
