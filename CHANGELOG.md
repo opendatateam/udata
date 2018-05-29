@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.11 (2018-05-29)
 
 - Protect Resource.need_check against malformed/string dates [#1691](https://github.com/opendatateam/udata/pull/1691)
 - Fix search auto-complete loading on new page [#1693](https://github.com/opendatateam/udata/pull/1693)
