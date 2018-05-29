@@ -32,7 +32,6 @@ netaddr==0.7.19
 pillow==5.1.0
 bcrypt==3.1.4
 pydenticon==0.3.1
-pyliblzma==0.5.3
 python-dateutil==2.7.3
 pytz==2018.4
 PyYAML==3.12
