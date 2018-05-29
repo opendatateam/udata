@@ -10,6 +10,13 @@ from werkzeug import cached_property
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
 
+# Register harvest extras
+Dataset.extras.register('harvest:source_id', db.StringField)
+Dataset.extras.register('harvest:remote_id', db.StringField)
+Dataset.extras.register('harvest:domain', db.StringField)
+Dataset.extras.register('harvest:last_update', db.DateTimeField)
+Dataset.extras.register('remote_url', db.URLField)
+
 
 HARVEST_FREQUENCIES = OrderedDict((
     ('manual', _('Manual')),
