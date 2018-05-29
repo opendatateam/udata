@@ -8,7 +8,7 @@ from udata.mail import mail_sent
 
 from contextlib import contextmanager
 from datetime import timedelta
-from urlparse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse
 
 from flask import request, url_for, json
 

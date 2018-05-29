@@ -1,6 +1,3 @@
-
-
-
 from udata.api import api, fields, base_reference
 
 from .models import AVATAR_SIZES

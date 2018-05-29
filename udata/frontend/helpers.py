@@ -7,7 +7,7 @@ import pkg_resources
 
 from datetime import date, datetime
 from time import time
-from urlparse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from babel.numbers import format_number as format_number_babel
 from flask import g, url_for, request, current_app, json

@@ -217,7 +217,7 @@ class RangeFacet(Facet, DSLRangeFacet):
         return self.labels.get(value, value)
 
     def as_request_parser_kwargs(self):
-        return {'type': self.validate_parameter, 'choices': self.labels.keys()}
+        return {'type': self.validate_parameter, 'choices': list(self.labels)}
 
     def validate_parameter(self, value):
         if value not in self.labels:
