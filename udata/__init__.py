@@ -5,5 +5,5 @@ uData
 '''
 from __future__ import unicode_literals
 
-__version__ = '1.3.11'
+__version__ = '1.3.12.dev'
 __description__ = 'Open data portal'
