@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization

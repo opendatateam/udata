@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from datetime import date, timedelta
 
@@ -28,7 +28,7 @@ class MetricsQuerySet(db.BaseQuerySet):
         oid = obj.id if hasattr(obj, 'id') else obj
         if not oid:
             raise ValueError('Unable to get identifier for {0}'.format(obj))
-        if isinstance(date, basestring):
+        if isinstance(date, str):
             day = date
         else:
             day = (date or self._today()).isoformat()

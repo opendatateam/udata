@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 import contextlib
 import logging
@@ -11,7 +8,7 @@ import shutil
 from collections import Counter
 from datetime import date
 from string import Formatter
-from urllib import urlretrieve
+from urllib.request import urlretrieve
 
 import click
 import msgpack

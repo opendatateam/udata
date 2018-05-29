@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 '''
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''

@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from collections import OrderedDict
 from datetime import datetime
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from werkzeug import cached_property
 

@@ -570,8 +570,8 @@ that don't need to be listed here.
 Here a sample configuration file:
 
 ```python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 
 DEBUG = True

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
 

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from udata.api import api, API, fields
 from udata.models import db, Activity

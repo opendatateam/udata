@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
-from urlparse import urlparse
+
+
+from urllib.parse import urlparse
 
 import bleach
 import CommonMark

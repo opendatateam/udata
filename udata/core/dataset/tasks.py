@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from compiler.ast import flatten
+import collections
 from datetime import datetime, timedelta
-from sets import Set
 
 from celery.utils.log import get_task_logger
 from flask import current_app
@@ -17,6 +14,14 @@ from udata.tasks import job
 from .models import Dataset, UPDATE_FREQUENCIES
 
 log = get_task_logger(__name__)
+
+
+def flatten(iterable):
+    for el in iterable:
+        if isinstance(el, collections.Iterable) and not isinstance(el, str):
+            yield from flatten(el)
+        else:
+            yield el
 
 
 @job('purge-datasets')
@@ -71,8 +76,8 @@ def send_frequency_reminder(self):
                   org=reminded_org, datasets=datasets)
 
     print('{nb_orgs} orgs concerned'.format(nb_orgs=len(reminded_orgs)))
-    reminded_people = flatten(reminded_people)
+    reminded_people = list(flatten(reminded_people))
     print('{nb_emails} people contacted ({nb_emails_twice} twice)'.format(
         nb_emails=len(reminded_people),
-        nb_emails_twice=len(reminded_people) - len(Set(reminded_people))))
+        nb_emails_twice=len(reminded_people) - len(set(reminded_people))))
     print('Done')

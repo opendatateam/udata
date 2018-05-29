@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from datetime import date
 
@@ -137,7 +137,7 @@ class GeoZone(db.Document):
         for value in self.keys.values():
             if isinstance(value, list):
                 keys_values += value
-            elif isinstance(value, basestring) and not value.startswith('-'):
+            elif isinstance(value, str) and not value.startswith('-'):
                 # Avoid -99. Should be fixed in geozones
                 keys_values.append(value)
             elif isinstance(value, int) and value >= 0:

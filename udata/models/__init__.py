@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+import importlib
 import logging
 import warnings
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from bson import ObjectId, DBRef
 from flask_mongoengine import MongoEngine, MongoEngineSessionInterface
@@ -65,7 +64,7 @@ class UDataMongoEngine(MongoEngine):
         '''
         if not model:
             raise ValueError('Unsupported model specifications')
-        if isinstance(model, basestring):
+        if isinstance(model, str):
             classname = model
         elif isinstance(model, dict) and 'class' in model:
             classname = model['class']

@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 import os
 
@@ -37,7 +37,7 @@ image_parser.add_argument('bbox', type=str, location='form')
 upload_parser = api.parser()
 upload_parser.add_argument('file', type=FileStorage, location='files')
 upload_parser.add_argument('uuid', type=str, location='form')
-upload_parser.add_argument('filename', type=unicode, location='form')
+upload_parser.add_argument('filename', type=str, location='form')
 upload_parser.add_argument('partindex', type=int, location='form')
 upload_parser.add_argument('partbyteoffset', type=int, location='form')
 upload_parser.add_argument('totalparts', type=int, location='form')

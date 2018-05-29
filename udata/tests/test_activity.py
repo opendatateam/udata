@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from udata.models import db, Activity
 from udata.tests import TestCase, DBTestMixin, WebTestMixin

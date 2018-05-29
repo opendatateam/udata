@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+
 
 from elasticsearch_dsl import (
     Boolean, Completion, Date, Long, Object, String, Nested
@@ -49,7 +49,7 @@ def granularity_labelizer(value):
 
 
 def zone_labelizer(value):
-    if value and isinstance(value, basestring):
+    if value and isinstance(value, str):
         return GeoZone.objects(id=value).first() or value
     return value
 
