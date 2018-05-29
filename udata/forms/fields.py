@@ -664,7 +664,24 @@ class PublishAsField(ModelFieldMixin, Field):
         return True
 
 
+def field_parse(cls, value, *args, **kwargs):
+    kwargs['_form'] = Form()
+    kwargs['_name'] = 'extra'
+    field = cls(*args, **kwargs)
+    field.process_formdata([value])
+    return field.data
+
+
 class ExtrasField(Field):
+    TYPES = {
+        db.DateTimeField: DateTimeField,
+        db.DateField: DateField,
+        db.IntField: IntegerField,
+        db.BooleanField: BooleanField,
+        db.StringField: StringField,
+        db.FloatField: FloatField,
+    }
+
     def __init__(self, *args, **kwargs):
         super(ExtrasField, self).__init__(*args, **kwargs)
         if not isinstance(self._form, ModelForm):
@@ -678,16 +695,29 @@ class ExtrasField(Field):
     def extras(self):
         return getattr(self._form.model_class, self.short_name)
 
+    def parse(self, data):
+        return dict(
+            (k, self._parse_value(k, v)) for k, v in data.items()
+        )
+
+    def _parse_value(self, key, value):
+        if key not in self.extras.registered:
+            return value
+        expected = self.extras.registered[key]
+        if expected in self.TYPES:
+            return field_parse(self.TYPES[expected], value)
+        else:
+            return value
 
     def process_formdata(self, valuelist):
         if valuelist:
             data = valuelist[0]
             if isinstance(data, dict):
-                self.data = data
+                self.data = self.parse(data)
             else:
                 raise 'Unsupported datatype'
         else:
-            self.data = self.data or {}
+            self.data = self.parse(self.data or {})
 
     def pre_validate(self, form):
         if self.data:
