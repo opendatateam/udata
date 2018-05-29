@@ -37,8 +37,8 @@ class ExtrasField(DictField):
                      else extra_cls(**value).validate())
                 else:
                     extra_cls().validate(value)
-            except ValidationError as e:
-                errors[key] = e.message
+            except Exception as e:
+                errors[key] = getattr(e, 'message', str(e))
 
         if errors:
             self.error('Unsupported types', errors=errors)

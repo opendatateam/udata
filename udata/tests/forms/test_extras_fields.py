@@ -137,6 +137,25 @@ class ExtrasFieldTest:
         assert isinstance(fake.extras['my:extra'], type)
         assert fake.extras['my:extra'] == expected
 
+    @pytest.mark.parametrize('dbfield,value', [
+        pytest.param(*p, id=p[0].__name__) for p in [
+            (db.DateTimeField, 'xxxx'),
+            (db.DateField, 'xxxx'),
+            (db.IntField, 'xxxx'),
+            (db.StringField, 42),
+            (db.FloatField, 'xxxx'),
+    ]])
+    def test_fail_bad_registered_data(self, dbfield, value):
+        Fake, FakeForm = self.factory()
+
+        Fake.extras.register('my:extra', dbfield)
+
+        form = FakeForm(MultiDict({'extras': {'my:extra': value}}))
+
+        form.validate()
+        assert 'extras' in form.errors
+        assert 'my:extra' in form.errors['extras']
+
     def test_with_invalid_registered_data(self):
         Fake, FakeForm = self.factory()
 

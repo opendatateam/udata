@@ -693,9 +693,12 @@ class ExtrasField(Field):
 
     @property
     def extras(self):
+        '''Getter to the model extras field'''
         return getattr(self._form.model_class, self.short_name)
 
     def parse(self, data):
+        '''Parse fields and store individual errors'''
+        self.field_errors = {}
         return dict(
             (k, self._parse_value(k, v)) for k, v in data.items()
         )
@@ -705,7 +708,10 @@ class ExtrasField(Field):
             return value
         expected = self.extras.registered[key]
         if expected in self.TYPES:
-            return field_parse(self.TYPES[expected], value)
+            try:
+                return field_parse(self.TYPES[expected], value)
+            except Exception as e:
+                self.field_errors[key] = getattr(e, 'message', str(e))
         else:
             return value
 
@@ -715,17 +721,22 @@ class ExtrasField(Field):
             if isinstance(data, dict):
                 self.data = self.parse(data)
             else:
-                raise 'Unsupported datatype'
+                raise ValueError('Unsupported data type')
         else:
             self.data = self.parse(self.data or {})
 
-    def pre_validate(self, form):
-        if self.data:
+    def validate(self, form, extra_validators=tuple()):
+        if self.process_errors:
+            self.errors = list(self.process_errors)
+        elif self.field_errors:
+            self.errors = self.field_errors
+        elif self.data:
             try:
                 self.extras.validate(self.data)
             except db.ValidationError as e:
-                if e.errors:
-                    self.errors.extend([': '.join((k, v))
-                                        for k, v in e.errors.items()])
-                else:
-                    self.errors.append(e.message)
+                self.errors = e.errors if e.errors else [e.message]
+        else:
+            self.errors = None
+
+        return bool(self.errors)
+
