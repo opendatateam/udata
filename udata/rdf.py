@@ -1,5 +1,3 @@
-
-
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''

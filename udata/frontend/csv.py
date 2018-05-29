@@ -1,9 +1,6 @@
-
-
-
 import logging
 
-from cStringIO import StringIO
+from io import StringIO
 import itertools
 import unicodecsv
 
@@ -62,7 +59,7 @@ class Adapter(object):
                         field_tuple = (name, self.getter(field))
                     else:
                         field_tuple = (name, self.getter(*field))
-                except Exception, e:  # Catch all errors intentionally.
+                except Exception as e:  # Catch all errors intentionally.
                     log.error('Error exporting CSV for {name}: {error}'.format(
                         name=self.__class__.__name__, error=e))
                 self._fields.append(field_tuple)
@@ -93,7 +90,7 @@ class Adapter(object):
             if getter is not None:
                 try:
                     content = safestr(getter(obj))
-                except Exception, e:  # Catch all errors intentionally.
+                except Exception as e:  # Catch all errors intentionally.
                     log.error('Error exporting CSV for {name}: {error}'.format(
                         name=self.__class__.__name__, error=e))
             row.append(content)
@@ -134,7 +131,7 @@ class NestedAdapter(Adapter):
                         field_tuple = (name, self.getter(field))
                     else:
                         field_tuple = (name, self.getter(*field))
-                except Exception, e:  # Catch all errors intentionally.
+                except Exception as e:  # Catch all errors intentionally.
                     log.error('Error exporting CSV for {name}: {error}'.format(
                         name=self.__class__.__name__, error=e))
                 self._nested_fields.append(field_tuple)
@@ -159,7 +156,7 @@ class NestedAdapter(Adapter):
             if getter is not None:
                 try:
                     content = safestr(getter(nested))
-                except Exception, e:  # Catch all errors intentionally.
+                except Exception as e:  # Catch all errors intentionally.
                     log.error('Error exporting CSV for {name}: {error}'.format(
                         name=self.__class__.__name__, error=e))
             row.append(content)

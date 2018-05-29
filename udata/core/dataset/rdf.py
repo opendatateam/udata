@@ -1,5 +1,3 @@
-
-
 '''
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
@@ -7,7 +5,7 @@ import calendar
 import logging
 
 from datetime import date
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
 from rdflib import Graph, URIRef, Literal, BNode

@@ -4,7 +4,7 @@
 import pytest
 
 from base64 import b64encode
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 from flask import url_for
 

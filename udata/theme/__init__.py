@@ -1,4 +1,5 @@
 import logging
+import os
 import pkg_resources
 import pkgutil
 
@@ -62,8 +63,8 @@ class ConfigurableTheme(Theme):
     def __init__(self, entrypoint):
         self.entrypoint = entrypoint
         # Compute path without loading the module
-        path = pkgutil.get_loader(entrypoint.module_name).filename
-        super(ConfigurableTheme, self).__init__(path)
+        path = pkgutil.get_loader(entrypoint.module_name).path
+        super(ConfigurableTheme, self).__init__(os.path.dirname(path))
 
         self.variants = self.info.get('variants', [])
         if 'default' not in self.variants:

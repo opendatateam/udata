@@ -1,6 +1,3 @@
-
-
-
 from flask import request
 from flask_security import current_user, logout_user
 

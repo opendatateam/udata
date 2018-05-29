@@ -66,7 +66,7 @@ transfer_fields = api.model('Transfer', {
     'created': fields.ISODateTime(
         description='The transfer request date', readonly=True),
     'status': fields.String(
-        enum=TRANSFER_STATUS.keys(),
+        enum=list(TRANSFER_STATUS),
         description='The current transfer request status'),
     'responded': fields.ISODateTime(
         description='The transfer response date', readonly=True),

@@ -1,6 +1,3 @@
-
-
-
 import itertools
 import logging
 
@@ -99,10 +96,11 @@ class ModelSearchAdapter(DocType):
                             help='The search query')
         # Expected facets
         # (ie. I want all facets or I want both tags and licenses facets)
-        facets = cls.facets.keys()
+        facets = list(cls.facets)
         if facets:
             parser.add_argument('facets', type=str, location='args',
-                                choices=['all'] + facets, action='append',
+                                choices=['all'] + facets,
+                                action='append',
                                 help='Selected facets to fetch')
         # Add facets filters arguments
         # (apply a value to a facet ie. tag=value)
@@ -110,7 +108,7 @@ class ModelSearchAdapter(DocType):
             kwargs = facet.as_request_parser_kwargs()
             parser.add_argument(name, location='args', **kwargs)
         # Sort arguments
-        keys = cls.sorts.keys()
+        keys = list(cls.sorts)
         choices = keys + ['-' + k for k in keys]
         help_msg = 'The field (and direction) on which sorting apply'
         parser.add_argument('sort', type=str, location='args', choices=choices,
