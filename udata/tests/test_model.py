@@ -7,6 +7,7 @@ from uuid import uuid4, UUID
 from datetime import date, datetime, timedelta
 
 from mongoengine.errors import ValidationError
+from mongoengine.fields import BaseField
 
 from udata.settings import Defaults
 from udata.models import db, Dataset, validate_config, build_test_config
@@ -328,6 +329,13 @@ class ExtrasFieldTest:
         with pytest.raises(ValidationError):
             tester.validate()
 
+    def test_can_only_register_db_type(self):
+        class Tester(db.Document):
+            extras = db.ExtrasField()
+
+        with pytest.raises(TypeError):
+            Tester.extras.register('test', datetime)
+
     @pytest.mark.parametrize('dbtype,value', [
         (db.IntField, 42),
         (db.FloatField, 0.42),
@@ -359,12 +367,12 @@ class ExtrasFieldTest:
         with pytest.raises(db.ValidationError):
             Tester(extras={'test': value}).validate()
 
-    def test_validate_registered_type(self):
+    def test_validate_custom_type(self):
         class Tester(db.Document):
             extras = db.ExtrasField()
 
         @Tester.extras('test')
-        class ExtraDict(db.Extra):
+        class Custom(BaseField):
             def validate(self, value):
                 if not isinstance(value, dict):
                     raise db.ValidationError('Should be a dict instance')
@@ -393,12 +401,6 @@ class ExtrasFieldTest:
     def test_is_json_serializable(self):
         class Tester(db.Document):
             extras = db.ExtrasField()
-
-        @Tester.extras('dict')
-        class ExtraDict(db.Extra):
-            def validate(self, value):
-                if not isinstance(value, dict):
-                    raise db.ValidationError('Should be a dict instance')
 
         @Tester.extras('embedded')
         class EmbeddedExtra(db.EmbeddedDocument):

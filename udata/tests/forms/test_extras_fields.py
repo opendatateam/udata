@@ -85,10 +85,8 @@ class ExtrasFieldTest:
         Fake, FakeForm = self.factory()
 
         @Fake.extras('dict')
-        class ExtraDict(db.Extra):
-            def validate(self, value):
-                if not isinstance(value, dict):
-                    raise db.ValidationError('Should be a dict instance')
+        class Custom(db.DictField):
+            pass
 
         fake = Fake()
         form = FakeForm(MultiDict({'extras': {
@@ -155,20 +153,3 @@ class ExtrasFieldTest:
         form.validate()
         assert 'extras' in form.errors
         assert 'my:extra' in form.errors['extras']
-
-    def test_with_invalid_registered_data(self):
-        Fake, FakeForm = self.factory()
-
-        @Fake.extras('dict')
-        class ExtraDict(db.Extra):
-            def validate(self, value):
-                if not isinstance(value, dict):
-                    raise db.ValidationError('Should be a dict instance')
-
-        form = FakeForm(MultiDict({'extras': {
-            'dict': 42
-        }}))
-
-        form.validate()
-        assert 'extras' in form.errors
-        assert len(form.errors['extras']) == 1

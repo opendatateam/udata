@@ -738,5 +738,5 @@ class ExtrasField(Field):
         else:
             self.errors = None
 
-        return bool(self.errors)
+        return not bool(self.errors)
 

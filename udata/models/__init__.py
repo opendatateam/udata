@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import importlib
 import logging
 import warnings
 
@@ -20,7 +19,7 @@ from udata.errors import ConfigError
 from .badges_field import BadgesField
 from .taglist_field import TagListField
 from .datetime_fields import DateField, DateRange, Datetimed
-from .extras_fields import ExtrasField, Extra
+from .extras_fields import ExtrasField
 from .slug_fields import SlugField
 from .url_field import URLField
 from .uuid_fields import AutoUUIDField
@@ -39,7 +38,6 @@ class UDataMongoEngine(MongoEngine):
         self.TagListField = TagListField
         self.DateField = DateField
         self.Datetimed = Datetimed
-        self.Extra = Extra
         self.ExtrasField = ExtrasField
         self.SlugField = SlugField
         self.AutoUUIDField = AutoUUIDField
