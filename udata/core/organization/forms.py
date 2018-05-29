@@ -30,6 +30,8 @@ class OrganizationForm(ModelForm):
         _('Website'), description=_('The organization website URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
 
+    extras = fields.ExtrasField()
+
     def save(self, commit=True, **kwargs):
         '''Register the current user as admin on creation'''
         org = super(OrganizationForm, self).save(commit=False, **kwargs)

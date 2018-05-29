@@ -27,5 +27,7 @@ class Form(CommonFormMixin, FlaskForm):
 
 
 class ModelForm(CommonFormMixin, MEModelForm):
+    model_class = None
+
     def _get_translations(self):
         return i18n.domain.get_translations()

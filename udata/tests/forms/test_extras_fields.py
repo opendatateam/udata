@@ -7,7 +7,7 @@ from datetime import date, datetime
 
 from werkzeug.datastructures import MultiDict
 
-from udata.forms import Form, fields
+from udata.forms import fields, ModelForm
 from udata.models import db
 
 pytestmark = [
@@ -21,8 +21,9 @@ class ExtrasFieldTest:
         class Fake(db.Document):
             extras = db.ExtrasField()
 
-        class FakeForm(Form):
-            extras = fields.ExtrasField(extras=Fake.extras)
+        class FakeForm(ModelForm):
+            model_class = Fake
+            extras = fields.ExtrasField()
 
         return Fake, FakeForm
 

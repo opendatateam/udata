@@ -9,6 +9,7 @@ from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
 from flask_fs.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields
+from wtforms.ext.dateutil import fields as dtfields
 from wtforms.utils import unset_value
 from wtforms_json import flatten_json
 
@@ -20,6 +21,7 @@ from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
 from udata import tags, uris
+from udata.forms import ModelForm, Form
 from udata.utils import to_iso_date, get_by
 
 
@@ -77,6 +79,14 @@ class StringField(FieldHelper, EmptyNone, fields.StringField):
 
 
 class IntegerField(FieldHelper, fields.IntegerField):
+    pass
+
+
+class FloatField(FieldHelper, fields.FloatField):
+    pass
+
+
+class DateField(FieldHelper, dtfields.DateField):
     pass
 
 
@@ -656,10 +666,18 @@ class PublishAsField(ModelFieldMixin, Field):
 
 class ExtrasField(Field):
     def __init__(self, *args, **kwargs):
-        if 'extras' not in kwargs:
-            raise ValueError('extras parameter should be specified')
-        self.extras = kwargs.pop('extras')
         super(ExtrasField, self).__init__(*args, **kwargs)
+        if not isinstance(self._form, ModelForm):
+            raise ValueError('ExtrasField can only be used within a ModelForm')
+        model_field = getattr(self._form.model_class, self.short_name, None)
+        if not model_field or not isinstance(model_field, db.ExtrasField):
+            msg = 'Form ExtrasField can only be mapped to a model ExtraField'
+            raise ValueError(msg)
+
+    @property
+    def extras(self):
+        return getattr(self._form.model_class, self.short_name)
+
 
     def process_formdata(self, valuelist):
         if valuelist:

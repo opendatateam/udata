@@ -79,7 +79,7 @@ class BaseResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
-    extras = fields.ExtrasField(extras=Resource.extras)
+    extras = fields.ExtrasField()
 
 
 class ResourceForm(BaseResourceForm):
@@ -135,7 +135,7 @@ class DatasetForm(ModelForm):
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
-    extras = fields.ExtrasField(extras=Dataset.extras)
+    extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
 
 

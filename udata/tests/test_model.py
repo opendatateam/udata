@@ -319,7 +319,7 @@ class ExtrasFieldTest:
         })
         tester.validate()
 
-    def test_validate_unregistered_type(self):
+    def test_default_dont_validate_complex_types(self):
         class Tester(db.Document):
             extras = db.ExtrasField()
 
