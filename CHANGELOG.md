@@ -21,6 +21,7 @@
 - Fix the temporal coverage facet query string parsing [#1676](https://github.com/opendatateam/udata/pull/1676)
 - Fix search auto-complete hitbox [#1687](https://github.com/opendatateam/udata/pull/1687)
 - Fix search auto-complete loading on new page [#1693](https://github.com/opendatateam/udata/pull/1693)
+- Simplify `ExtrasField` form field signature (no need anymore for the `extras` parameter) [#1698](https://github.com/opendatateam/udata/pull/1698)
 
 ## 1.3.11 (2018-05-29)
 
