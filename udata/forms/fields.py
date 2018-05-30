@@ -673,7 +673,7 @@ def field_parse(cls, value, *args, **kwargs):
 
 
 class ExtrasField(Field):
-    TYPES = {
+    KNOWN_TYPES = {
         db.DateTimeField: DateTimeField,
         db.DateField: DateField,
         db.IntField: IntegerField,
@@ -707,9 +707,9 @@ class ExtrasField(Field):
         if key not in self.extras.registered:
             return value
         expected = self.extras.registered[key]
-        if expected in self.TYPES:
+        if expected in self.KNOWN_TYPES:
             try:
-                return field_parse(self.TYPES[expected], value)
+                return field_parse(self.KNOWN_TYPES[expected], value)
             except Exception as e:
                 self.field_errors[key] = getattr(e, 'message', str(e))
         else:
