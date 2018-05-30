@@ -76,7 +76,7 @@ class MetricsAPI(API):
                 current_values = metric.values.copy()
                 metric.values = {
                     name: count - reference_values[name]
-                    for name, count in current_values.iteritems()
+                    for name, count in current_values.items()
                     if name in reference_values
                 }
                 reference_values = current_values
