@@ -39,7 +39,8 @@ class FakeAPI(API):
 
 def basic_header(client):
         payload = ':'.join((client.client_id, client.secret))
-        return {'Authorization': 'Basic ' + b64encode(payload)}
+        return {'Authorization': 'Basic {}'.format(
+                    b64encode(payload.encode('utf-8')))}
 
 
 @pytest.fixture
