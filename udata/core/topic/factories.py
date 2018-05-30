@@ -1,6 +1,3 @@
-
-
-
 import factory
 
 from udata import utils

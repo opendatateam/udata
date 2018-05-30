@@ -1,6 +1,3 @@
-
-
-
 import csv
 import logging
 import pytest

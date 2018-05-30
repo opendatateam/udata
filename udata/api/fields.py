@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 from dateutil.parser import parse

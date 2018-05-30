@@ -1,7 +1,3 @@
-
-
-
-
 from udata.models import db, Metrics, WithMetrics, Site
 from udata.core.site.metrics import SiteMetric
 from udata.tests import TestCase, DBTestMixin

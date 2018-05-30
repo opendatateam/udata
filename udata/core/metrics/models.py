@@ -1,6 +1,3 @@
-
-
-
 from datetime import date, timedelta
 
 from udata.models import db

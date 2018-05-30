@@ -1,6 +1,3 @@
-
-
-
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse, User, Organization, Resource, Follow
 from udata.core.metrics import Metric

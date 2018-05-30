@@ -1,6 +1,3 @@
-
-
-
 from flask import url_for
 
 from udata.tests.features.territories.test_territories_process import (

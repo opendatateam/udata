@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 from . import cli, success, error, header

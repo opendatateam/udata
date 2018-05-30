@@ -1,5 +1,3 @@
-
-
 '''
 OAuth 2 serveur implementation based on Authlib.
 

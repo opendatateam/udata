@@ -1,6 +1,3 @@
-
-
-
 from celerybeatmongo.models import PeriodicTask as BasePeriodicTask, PERIODS
 
 from udata.i18n import lazy_gettext as _

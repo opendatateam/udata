@@ -1,6 +1,3 @@
-
-
-
 from urllib.parse import urlparse
 
 from flask import current_app

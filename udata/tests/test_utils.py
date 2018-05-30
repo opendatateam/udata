@@ -1,6 +1,3 @@
-
-
-
 from datetime import date, datetime
 
 from udata.utils import (

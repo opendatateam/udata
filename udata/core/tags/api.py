@@ -1,6 +1,3 @@
-
-
-
 from udata import search
 from udata.api import api, API
 

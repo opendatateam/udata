@@ -1,6 +1,3 @@
-
-
-
 from udata.features.notifications.actions import notifier
 
 from .actions import issues_for

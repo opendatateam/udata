@@ -1,6 +1,3 @@
-
-
-
 from udata.auth import Permission
 
 

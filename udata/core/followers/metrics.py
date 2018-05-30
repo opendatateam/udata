@@ -1,6 +1,3 @@
-
-
-
 from udata.core.metrics import Metric, MetricMetaClass
 from udata.i18n import lazy_gettext as _
 from udata.models import Follow

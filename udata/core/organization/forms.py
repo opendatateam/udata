@@ -1,6 +1,3 @@
-
-
-
 from udata.auth import current_user
 from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _

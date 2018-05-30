@@ -1,6 +1,3 @@
-
-
-
 import factory
 
 from faker.providers import BaseProvider

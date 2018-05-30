@@ -1,6 +1,3 @@
-
-
-
 from flask import url_for
 
 from udata.core.user.factories import AdminFactory, UserFactory

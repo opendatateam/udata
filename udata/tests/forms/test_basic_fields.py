@@ -1,6 +1,3 @@
-
-
-
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields

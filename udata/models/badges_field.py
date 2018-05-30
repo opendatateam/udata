@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 from mongoengine.fields import ListField, StringField

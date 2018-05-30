@@ -1,5 +1,3 @@
-
-
 import logging
 
 from bson import ObjectId, DBRef

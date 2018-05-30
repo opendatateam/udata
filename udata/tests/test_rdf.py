@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from udata.tests import TestCase

@@ -1,5 +1,3 @@
-
-
 from .. import TestCase, SearchTestMixin
 
 from udata.models import Dataset, Organization

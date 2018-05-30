@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from contextlib import contextmanager

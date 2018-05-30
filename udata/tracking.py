@@ -1,7 +1,3 @@
-
-
-
-
 def send_signal(signal, request, user, **kwargs):
     '''Generic method to send signals to Piwik
 

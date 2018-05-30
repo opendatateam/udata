@@ -1,6 +1,3 @@
-
-
-
 from unittest import skip
 
 from flask import url_for

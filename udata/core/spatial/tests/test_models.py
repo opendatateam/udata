@@ -1,6 +1,3 @@
-
-
-
 from datetime import timedelta, date
 
 from udata.tests import TestCase, DBTestMixin

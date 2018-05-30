@@ -1,6 +1,3 @@
-
-
-
 import dateutil.parser
 
 from voluptuous import Invalid

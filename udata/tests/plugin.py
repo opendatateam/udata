@@ -1,6 +1,3 @@
-
-
-
 import pytest
 import shlex
 import sys

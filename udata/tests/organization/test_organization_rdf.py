@@ -1,6 +1,3 @@
-
-
-
 from flask import url_for
 
 from rdflib import URIRef, Literal, BNode

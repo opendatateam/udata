@@ -1,6 +1,3 @@
-
-
-
 from udata.auth import current_user
 
 from udata.i18n import I18nBlueprint

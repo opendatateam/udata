@@ -1,6 +1,3 @@
-
-
-
 from udata.api import api, fields, API
 from udata.auth import current_user
 

@@ -1,6 +1,3 @@
-
-
-
 from udata.models import Transfer
 from udata.features.notifications.actions import notifier
 

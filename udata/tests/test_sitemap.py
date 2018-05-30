@@ -1,6 +1,3 @@
-
-
-
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory

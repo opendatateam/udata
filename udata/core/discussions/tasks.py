@@ -1,6 +1,3 @@
-
-
-
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.core.dataset.models import Dataset

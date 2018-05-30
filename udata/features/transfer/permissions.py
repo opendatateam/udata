@@ -1,6 +1,3 @@
-
-
-
 from udata.auth import Permission, UserNeed
 
 from udata.models import User, Organization

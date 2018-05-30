@@ -1,6 +1,3 @@
-
-
-
 from udata.api import api, API
 from udata.features.territories import check_for_territories
 

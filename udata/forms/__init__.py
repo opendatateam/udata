@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 import wtforms_json

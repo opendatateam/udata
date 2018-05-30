@@ -1,6 +1,3 @@
-
-
-
 import mock
 import pytest
 from datetime import datetime, timedelta

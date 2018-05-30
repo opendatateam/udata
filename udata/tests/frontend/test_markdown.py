@@ -1,6 +1,3 @@
-
-
-
 import html5lib
 import pytest
 

@@ -1,6 +1,3 @@
-
-
-
 import StringIO
 
 from datetime import datetime

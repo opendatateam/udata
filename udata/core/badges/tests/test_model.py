@@ -1,6 +1,3 @@
-
-
-
 from udata.auth import login_user
 from udata.models import db
 from udata.tests import TestCase, DBTestMixin

@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from udata.auth import login_user, PermissionDenied

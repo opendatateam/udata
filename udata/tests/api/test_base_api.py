@@ -1,6 +1,3 @@
-
-
-
 from flask import url_for
 
 from udata.api import api, API

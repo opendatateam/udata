@@ -1,6 +1,3 @@
-
-
-
 from flask import current_app
 
 from udata.models import db, GeoZone

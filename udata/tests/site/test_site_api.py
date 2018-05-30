@@ -1,6 +1,3 @@
-
-
-
 from datetime import date
 
 from flask import url_for

@@ -1,6 +1,3 @@
-
-
-
 from flask_security.forms import RegisterForm
 from udata.forms import fields
 from udata.forms import validators

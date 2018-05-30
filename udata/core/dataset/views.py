@@ -1,6 +1,3 @@
-
-
-
 from collections import defaultdict, OrderedDict
 
 from flask import abort, request, url_for, redirect

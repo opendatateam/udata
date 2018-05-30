@@ -1,6 +1,3 @@
-
-
-
 import bson
 import datetime
 import logging

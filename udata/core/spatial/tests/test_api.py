@@ -1,6 +1,3 @@
-
-
-
 from flask import url_for
 
 from udata.utils import get_by

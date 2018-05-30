@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from udata.features.identicon.backends import internal

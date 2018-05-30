@@ -1,6 +1,3 @@
-
-
-
 import click
 import json
 import logging
