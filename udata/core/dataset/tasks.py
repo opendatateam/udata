@@ -66,7 +66,7 @@ def send_frequency_reminder(self):
                 outdated_datasets.append(dataset)
         if outdated_datasets:
             reminded_orgs[org] = outdated_datasets
-    for reminded_org, datasets in reminded_orgs.iteritems():
+    for reminded_org, datasets in reminded_orgs.items():
         print('{org.name} will be emailed for {datasets_nb} datasets'.format(
               org=reminded_org, datasets_nb=len(datasets)))
         recipients = [m.user for m in reminded_org.members]

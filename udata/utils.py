@@ -207,7 +207,7 @@ def clean_string(value):
 
 def not_none_dict(d):
     '''Filter out None values from a dict'''
-    return {k: v for k, v in d.iteritems() if v is not None}
+    return {k: v for k, v in d.items() if v is not None}
 
 
 def hash_url(url):
