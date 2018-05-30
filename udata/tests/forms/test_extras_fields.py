@@ -85,10 +85,8 @@ class ExtrasFieldTest:
         Fake, FakeForm = self.factory()
 
         @Fake.extras('dict')
-        class ExtraDict(db.Extra):
-            def validate(self, value):
-                if not isinstance(value, dict):
-                    raise db.ValidationError('Should be a dict instance')
+        class Custom(db.DictField):
+            pass
 
         fake = Fake()
         form = FakeForm(MultiDict({'extras': {
@@ -111,19 +109,47 @@ class ExtrasFieldTest:
             }
         }
 
-    def test_with_invalid_registered_data(self):
+    @pytest.mark.parametrize('dbfield,value,type,expected', [
+        pytest.param(*p, id=p[0].__name__) for p in [
+            (db.DateTimeField, '2018-05-29T13:15:04.397603', datetime,
+                datetime(2018, 5, 29, 13, 15, 4, 397603)),
+            (db.DateField, '2018-05-29', date, date(2018, 5, 29)),
+            (db.BooleanField, 'true', bool, True),
+            (db.IntField, 42, int, 42),
+            (db.StringField, '42', basestring, '42'),
+            (db.FloatField, '42.0', float, 42.0),
+    ]])
+    def test_can_parse_registered_data(self, dbfield, value, type, expected):
         Fake, FakeForm = self.factory()
 
-        @Fake.extras('dict')
-        class ExtraDict(db.Extra):
-            def validate(self, value):
-                if not isinstance(value, dict):
-                    raise db.ValidationError('Should be a dict instance')
+        Fake.extras.register('my:extra', dbfield)
 
-        form = FakeForm(MultiDict({'extras': {
-            'dict': 42
-        }}))
+        fake = Fake()
+        form = FakeForm(MultiDict({'extras': {'my:extra': value}}))
+
+        form.validate()
+        assert form.errors == {}
+
+        form.populate_obj(fake)
+
+        assert isinstance(fake.extras['my:extra'], type)
+        assert fake.extras['my:extra'] == expected
+
+    @pytest.mark.parametrize('dbfield,value', [
+        pytest.param(*p, id=p[0].__name__) for p in [
+            (db.DateTimeField, 'xxxx'),
+            (db.DateField, 'xxxx'),
+            (db.IntField, 'xxxx'),
+            (db.StringField, 42),
+            (db.FloatField, 'xxxx'),
+    ]])
+    def test_fail_bad_registered_data(self, dbfield, value):
+        Fake, FakeForm = self.factory()
+
+        Fake.extras.register('my:extra', dbfield)
+
+        form = FakeForm(MultiDict({'extras': {'my:extra': value}}))
 
         form.validate()
         assert 'extras' in form.errors
-        assert len(form.errors['extras']) == 1
+        assert 'my:extra' in form.errors['extras']

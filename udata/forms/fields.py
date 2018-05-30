@@ -664,7 +664,24 @@ class PublishAsField(ModelFieldMixin, Field):
         return True
 
 
+def field_parse(cls, value, *args, **kwargs):
+    kwargs['_form'] = Form()
+    kwargs['_name'] = 'extra'
+    field = cls(*args, **kwargs)
+    field.process_formdata([value])
+    return field.data
+
+
 class ExtrasField(Field):
+    KNOWN_TYPES = {
+        db.DateTimeField: DateTimeField,
+        db.DateField: DateField,
+        db.IntField: IntegerField,
+        db.BooleanField: BooleanField,
+        db.StringField: StringField,
+        db.FloatField: FloatField,
+    }
+
     def __init__(self, *args, **kwargs):
         super(ExtrasField, self).__init__(*args, **kwargs)
         if not isinstance(self._form, ModelForm):
@@ -676,26 +693,50 @@ class ExtrasField(Field):
 
     @property
     def extras(self):
+        '''Getter to the model extras field'''
         return getattr(self._form.model_class, self.short_name)
 
+    def parse(self, data):
+        '''Parse fields and store individual errors'''
+        self.field_errors = {}
+        return dict(
+            (k, self._parse_value(k, v)) for k, v in data.items()
+        )
+
+    def _parse_value(self, key, value):
+        if key not in self.extras.registered:
+            return value
+        expected = self.extras.registered[key]
+        if expected in self.KNOWN_TYPES:
+            try:
+                return field_parse(self.KNOWN_TYPES[expected], value)
+            except (validators.ValidationError, ValueError) as e:
+                self.field_errors[key] = getattr(e, 'message', str(e))
+        else:
+            return value
 
     def process_formdata(self, valuelist):
         if valuelist:
             data = valuelist[0]
             if isinstance(data, dict):
-                self.data = data
+                self.data = self.parse(data)
             else:
-                raise 'Unsupported datatype'
+                raise ValueError('Unsupported data type')
         else:
-            self.data = self.data or {}
+            self.data = self.parse(self.data or {})
 
-    def pre_validate(self, form):
-        if self.data:
+    def validate(self, form, extra_validators=tuple()):
+        if self.process_errors:
+            self.errors = list(self.process_errors)
+        elif self.field_errors:
+            self.errors = self.field_errors
+        elif self.data:
             try:
                 self.extras.validate(self.data)
             except db.ValidationError as e:
-                if e.errors:
-                    self.errors.extend([': '.join((k, v))
-                                        for k, v in e.errors.items()])
-                else:
-                    self.errors.append(e.message)
+                self.errors = e.errors if e.errors else [e.message]
+        else:
+            self.errors = None
+
+        return not bool(self.errors)
+
