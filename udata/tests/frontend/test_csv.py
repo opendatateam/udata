@@ -1,5 +1,5 @@
 import re
-import StringIO
+from io import StringIO
 
 import factory
 
@@ -293,7 +293,7 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data)
         reader = csv.get_reader(csvfile)
         header = reader.next()
         self.assertEqual(header, ['title', 'description'])
@@ -356,7 +356,7 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data)
         reader = csv.get_reader(csvfile)
         header = reader.next()
         self.assertEqual(header, ['title', 'description', 'key', 'alias'])
@@ -378,7 +378,7 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data)
         reader = csv.get_reader(csvfile)
         header = reader.next()
         self.assertEqual(header, ['title', 'description'])

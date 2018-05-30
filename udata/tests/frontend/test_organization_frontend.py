@@ -1,4 +1,4 @@
-import StringIO
+from io import StringIO
 
 from datetime import datetime
 
@@ -197,7 +197,7 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data)
         reader = reader = csv.get_reader(csvfile)
         header = reader.next()
 
@@ -238,7 +238,7 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data)
         reader = reader = csv.get_reader(csvfile)
         header = reader.next()
 
