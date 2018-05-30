@@ -41,6 +41,10 @@ RDF_FREQUENCIES = {
 }
 
 
+Dataset.extras.register('uri', db.StringField)
+Dataset.extras.register('dct:identifier', db.StringField)
+
+
 class HTMLDetector(HTMLParser):
     def __init__(self, *args, **kwargs):
         HTMLParser.__init__(self, *args, **kwargs)

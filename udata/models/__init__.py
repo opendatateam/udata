@@ -103,6 +103,8 @@ from udata.core.jobs.models import *  # noqa
 from udata.features.transfer.models import *  # noqa
 from udata.features.territories.models import *  # noqa
 
+import udata.linkchecker.models  # noqa
+
 
 MONGODB_DEPRECATED_SETTINGS = 'MONGODB_PORT', 'MONGODB_DB'
 MONGODB_DEPRECATED_MSG = '{0} is deprecated, use the MONGODB_HOST url syntax'

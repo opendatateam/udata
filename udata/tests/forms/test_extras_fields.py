@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import pytest
 
 from datetime import date, datetime
+from uuid import UUID
 
 from werkzeug.datastructures import MultiDict
 
@@ -118,6 +119,9 @@ class ExtrasFieldTest:
             (db.IntField, 42, int, 42),
             (db.StringField, '42', basestring, '42'),
             (db.FloatField, '42.0', float, 42.0),
+            (db.URLField, 'http://test.com', basestring, 'http://test.com'),
+            (db.UUIDField, 'e3b06d6d-90c0-4407-adc0-de81d327f181', UUID,
+                UUID('e3b06d6d-90c0-4407-adc0-de81d327f181')),
     ]])
     def test_can_parse_registered_data(self, dbfield, value, type, expected):
         Fake, FakeForm = self.factory()
@@ -142,6 +146,8 @@ class ExtrasFieldTest:
             (db.IntField, 'xxxx'),
             (db.StringField, 42),
             (db.FloatField, 'xxxx'),
+            (db.URLField, 'not-an-url'),
+            (db.UUIDField, 'not-a-uuid'),
     ]])
     def test_fail_bad_registered_data(self, dbfield, value):
         Fake, FakeForm = self.factory()

@@ -680,6 +680,8 @@ class ExtrasField(Field):
         db.BooleanField: BooleanField,
         db.StringField: StringField,
         db.FloatField: FloatField,
+        db.URLField: URLField,
+        db.UUIDField: UUIDField,
     }
 
     def __init__(self, *args, **kwargs):
