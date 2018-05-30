@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix update frequency field [#1702](https://github.com/opendatateam/udata/pull/1702)
 
 ## 1.3.11 (2018-05-29)
 
