@@ -19,7 +19,7 @@
 <div v-el:wrapper class="scrollbox__wrapper" :class="{dragging: dragging}">
     <div v-el:area class="scrollbox__area"
         @wheel.prevent="onScroll"
-        @touchstart.prevent.stop="startDrag"
+        @touchstart.stop="startDrag"
         @touchmove="onDrag" @touchend="stopDrag"
         :style="{'margin-top': `${top * -1}px`, 'margin-left': `${left * -1}px` }">
         <slot></slot>

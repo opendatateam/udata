@@ -20,8 +20,8 @@
 </style>
 
 <template>
-<li :class="{ 'treeview': children, 'active': active }">
-    <a @click="click">
+<li :class="{'treeview': children, 'active': active}">
+    <a href="" @click.prevent="click">
         <i v-if="icon" class="fa fa-fw fa-{{icon}}"></i>
         <img v-if="image" :src="image" />
         <span>{{ label | truncate 25 }}</span>
