@@ -1,6 +1,3 @@
-
-
-
 from flask import g, current_app
 from werkzeug.local import LocalProxy
 

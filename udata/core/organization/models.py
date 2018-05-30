@@ -1,6 +1,3 @@
-
-
-
 from datetime import datetime
 from itertools import chain
 

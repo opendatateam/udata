@@ -1,6 +1,3 @@
-
-
-
 import logging
 import pkg_resources
 import re

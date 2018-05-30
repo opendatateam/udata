@@ -1,6 +1,3 @@
-
-
-
 from flask_security.views import change_password
 from flask_security.views import confirm_email
 from flask_security.views import forgot_password

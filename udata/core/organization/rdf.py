@@ -1,5 +1,3 @@
-
-
 '''
 This module centralize organization helpers
 for RDF/DCAT serialization and parsing

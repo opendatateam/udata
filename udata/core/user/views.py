@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 from flask import abort, g

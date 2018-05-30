@@ -1,6 +1,3 @@
-
-
-
 from datetime import datetime
 
 from udata.models import db

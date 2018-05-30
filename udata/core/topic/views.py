@@ -1,6 +1,3 @@
-
-
-
 from flask import g, request
 
 from elasticsearch_dsl import Q

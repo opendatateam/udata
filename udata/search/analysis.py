@@ -1,6 +1,3 @@
-
-
-
 from elasticsearch_dsl import analyzer, tokenizer, token_filter, char_filter
 
 # Custom filters for analyzers.

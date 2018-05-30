@@ -1,6 +1,3 @@
-
-
-
 from factory.fuzzy import FuzzyChoice
 
 from udata.factories import ModelFactory

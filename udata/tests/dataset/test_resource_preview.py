@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from udata.core.dataset.preview import PreviewPlugin

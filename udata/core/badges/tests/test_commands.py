@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from tempfile import NamedTemporaryFile

@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 from udata.commands import cli, success

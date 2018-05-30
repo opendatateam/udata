@@ -1,6 +1,3 @@
-
-
-
 from udata.core.metrics import Metric
 from udata.i18n import lazy_gettext as _
 

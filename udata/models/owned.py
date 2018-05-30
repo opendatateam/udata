@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 from blinker import signal

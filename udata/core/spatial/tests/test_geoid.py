@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from .. import geoids

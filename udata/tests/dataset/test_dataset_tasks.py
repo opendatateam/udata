@@ -1,5 +1,3 @@
-
-
 from .. import TestCase, DBTestMixin
 
 from udata.models import Dataset, Topic

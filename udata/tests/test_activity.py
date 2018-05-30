@@ -1,6 +1,3 @@
-
-
-
 from udata.models import db, Activity
 from udata.tests import TestCase, DBTestMixin, WebTestMixin
 from udata.core.user.factories import UserFactory

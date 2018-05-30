@@ -1,6 +1,3 @@
-
-
-
 import factory
 import pytest
 

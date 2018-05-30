@@ -1,6 +1,3 @@
-
-
-
 from flask import abort, url_for, Blueprint
 
 from . import FrontTestCase

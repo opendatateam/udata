@@ -1,6 +1,3 @@
-
-
-
 from slugify import slugify
 
 from mongoengine.fields import ListField, StringField

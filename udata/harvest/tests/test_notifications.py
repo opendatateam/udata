@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from udata.core.user.factories import UserFactory, AdminFactory

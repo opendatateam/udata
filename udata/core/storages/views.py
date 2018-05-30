@@ -1,6 +1,3 @@
-
-
-
 from flask import Blueprint, jsonify
 from flask_security import login_required
 import flask_fs as fs

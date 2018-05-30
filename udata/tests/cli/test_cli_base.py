@@ -1,7 +1,3 @@
-
-
-
-
 def test_cli_help(cli):
     '''Should display help without errors'''
     cli()

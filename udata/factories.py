@@ -1,6 +1,3 @@
-
-
-
 import factory
 
 from .models import DateRange

@@ -1,7 +1,3 @@
-
-
-
-
 from wtforms import validators
 from wtforms.validators import *  # noqa
 from wtforms.validators import ValidationError, StopValidation  # noqa

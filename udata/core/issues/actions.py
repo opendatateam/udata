@@ -1,6 +1,3 @@
-
-
-
 from udata.models import Reuse, Dataset
 
 from .models import Issue

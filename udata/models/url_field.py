@@ -1,6 +1,3 @@
-
-
-
 from mongoengine.fields import StringField
 
 from udata import uris

@@ -1,6 +1,3 @@
-
-
-
 import logging
 
 from flask.signals import Namespace

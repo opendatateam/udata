@@ -1,6 +1,3 @@
-
-
-
 from flask import g, url_for
 from werkzeug.routing import BuildError
 

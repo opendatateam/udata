@@ -1,8 +1,5 @@
-
-
-
-import requests
 import pytest
+import requests
 
 from datetime import date
 

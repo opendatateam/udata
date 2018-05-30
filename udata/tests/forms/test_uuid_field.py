@@ -1,6 +1,3 @@
-
-
-
 import uuid
 
 from werkzeug.datastructures import MultiDict

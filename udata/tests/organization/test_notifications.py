@@ -1,6 +1,3 @@
-
-
-
 from udata.models import MembershipRequest, Member
 
 from udata.core.user.factories import UserFactory

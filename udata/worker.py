@@ -1,6 +1,3 @@
-
-
-
 from udata.app import create_app, standalone
 
 _app = standalone(create_app())

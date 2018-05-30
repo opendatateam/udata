@@ -1,6 +1,3 @@
-
-
-
 from celery import chord
 from flask import current_app
 

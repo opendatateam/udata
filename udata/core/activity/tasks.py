@@ -1,6 +1,3 @@
-
-
-
 # from celery.utils.log import get_task_logger
 from udata.tasks import celery
 

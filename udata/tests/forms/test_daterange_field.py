@@ -1,6 +1,3 @@
-
-
-
 from datetime import date, timedelta
 
 from werkzeug.datastructures import MultiDict

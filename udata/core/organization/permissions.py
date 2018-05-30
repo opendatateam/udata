@@ -1,6 +1,3 @@
-
-
-
 from collections import namedtuple
 from functools import partial
 

@@ -1,4 +1,3 @@
-
 '''
 TODO: We need to cleanup and give more coherence to these APIs
 - upload enpoints should be singular instead of plural

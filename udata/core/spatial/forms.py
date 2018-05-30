@@ -1,6 +1,3 @@
-
-
-
 import geojson
 import json
 import logging

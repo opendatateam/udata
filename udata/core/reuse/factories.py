@@ -1,6 +1,3 @@
-
-
-
 import factory
 
 from factory.fuzzy import FuzzyChoice

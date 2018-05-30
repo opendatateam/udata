@@ -1,6 +1,3 @@
-
-
-
 from bson import ObjectId
 
 from flask import request

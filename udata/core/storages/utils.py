@@ -1,6 +1,3 @@
-
-
-
 import hashlib
 import mimetypes
 import os

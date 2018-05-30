@@ -1,6 +1,3 @@
-
-
-
 from flask import request
 
 from udata.api import api, fields, API, base_reference

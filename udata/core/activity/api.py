@@ -1,6 +1,3 @@
-
-
-
 from udata.api import api, API, fields
 from udata.models import db, Activity
 

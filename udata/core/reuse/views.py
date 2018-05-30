@@ -1,6 +1,3 @@
-
-
-
 from flask import abort, request, url_for
 from werkzeug.contrib.atom import AtomFeed
 

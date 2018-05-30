@@ -1,6 +1,3 @@
-
-
-
 import factory
 
 from flask_security.utils import hash_password

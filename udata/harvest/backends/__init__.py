@@ -1,6 +1,3 @@
-
-
-
 from udata.entrypoints import get_enabled, EntrypointError
 
 

@@ -1,5 +1,3 @@
-
-
 from collections import namedtuple
 from datetime import date, datetime
 import unicodedata

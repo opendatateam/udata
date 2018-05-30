@@ -1,6 +1,3 @@
-
-
-
 from wtforms import widgets
 
 MIN_TAG_LENGTH = 2

@@ -1,6 +1,3 @@
-
-
-
 from datetime import datetime
 
 from flask_security import current_user

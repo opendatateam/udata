@@ -1,6 +1,3 @@
-
-
-
 import calendar
 import logging
 import pkg_resources

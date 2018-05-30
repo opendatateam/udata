@@ -1,6 +1,3 @@
-
-
-
 from datetime import date, timedelta
 
 from celery.utils.log import get_task_logger

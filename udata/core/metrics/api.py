@@ -1,6 +1,3 @@
-
-
-
 from bson import ObjectId
 from datetime import date
 

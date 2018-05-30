@@ -1,4 +1,3 @@
-
 '''
 This module centralize GeoID resources and helpers.
 

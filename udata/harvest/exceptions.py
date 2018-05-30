@@ -1,7 +1,3 @@
-
-
-
-
 class HarvestException(Exception):
     '''Base class for all harvest exception'''
     pass

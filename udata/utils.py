@@ -1,6 +1,3 @@
-
-
-
 import hashlib
 import math
 import re

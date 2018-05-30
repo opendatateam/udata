@@ -1,6 +1,3 @@
-
-
-
 import mock
 import os
 

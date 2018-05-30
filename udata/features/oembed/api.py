@@ -1,6 +1,3 @@
-
-
-
 from flask import current_app
 from flask_restplus import inputs
 

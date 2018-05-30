@@ -1,6 +1,3 @@
-
-
-
 import logging
 import sys
 import signal

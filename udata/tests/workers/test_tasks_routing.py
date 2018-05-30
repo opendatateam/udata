@@ -1,6 +1,3 @@
-
-
-
 import pytest
 
 from udata.tasks import celery, task, job

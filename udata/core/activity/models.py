@@ -1,6 +1,3 @@
-
-
-
 from datetime import datetime
 
 from blinker import Signal

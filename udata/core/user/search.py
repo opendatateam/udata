@@ -1,6 +1,3 @@
-
-
-
 from elasticsearch_dsl import Completion, Date, String, Boolean
 
 from udata.i18n import lazy_gettext as _

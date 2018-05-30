@@ -1,6 +1,3 @@
-
-
-
 from blinker import Namespace
 
 namespace = Namespace()

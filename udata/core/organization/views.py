@@ -1,6 +1,3 @@
-
-
-
 import itertools
 
 from flask import g, abort, redirect, url_for

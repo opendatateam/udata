@@ -1,5 +1,3 @@
-
-
 '''
 This module centralize user helpers for RDF/DCAT serialization and parsing
 '''

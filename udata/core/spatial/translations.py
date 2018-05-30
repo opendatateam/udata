@@ -1,6 +1,3 @@
-
-
-
 # Here to force translations by gettext
 _ = lambda s: s  # noqa: force translations
 

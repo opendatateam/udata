@@ -1,6 +1,3 @@
-
-
-
 from udata import search, theme
 from udata.models import Dataset, Organization, Reuse
 from udata.utils import not_none_dict

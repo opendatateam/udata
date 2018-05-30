@@ -1,6 +1,3 @@
-
-
-
 from elasticsearch_dsl import Completion
 
 from flask import current_app

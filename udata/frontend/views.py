@@ -1,6 +1,3 @@
-
-
-
 from flask import request, redirect, abort, g, json
 from flask.views import MethodView
 

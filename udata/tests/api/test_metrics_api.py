@@ -1,6 +1,3 @@
-
-
-
 from datetime import date, timedelta
 
 from flask import url_for
