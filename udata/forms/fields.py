@@ -710,7 +710,7 @@ class ExtrasField(Field):
         if expected in self.KNOWN_TYPES:
             try:
                 return field_parse(self.KNOWN_TYPES[expected], value)
-            except Exception as e:
+            except (validators.ValidationError, ValueError) as e:
                 self.field_errors[key] = getattr(e, 'message', str(e))
         else:
             return value
