@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.3.12 (2018-05-31)
 
 - Fix side menu on mobile [#1701](https://github.com/opendatateam/udata/pull/1701)
 - Fix update frequency field [#1702](https://github.com/opendatateam/udata/pull/1702)
