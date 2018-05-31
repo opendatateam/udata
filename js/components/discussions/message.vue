@@ -28,6 +28,9 @@
     }
 
     div.body {
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-all;
         flex-basis: 100%;
     }
 }
