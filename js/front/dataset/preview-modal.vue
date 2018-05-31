@@ -23,3 +23,15 @@ export default {
     components: {Modal}
 };
 </script>
+
+<style lang="less">
+@import "~less/udata/variables.less";
+
+@media (min-width: @screen-sm-min) {
+    .preview-modal {
+        .modal-dialog {
+            width: 99%;
+        }
+    }
+}
+</style>
