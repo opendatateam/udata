@@ -62,7 +62,12 @@
         </div>
     </div>
     
-    <discussion-thread v-ref:threads v-for="discussion in discussions" :discussion="discussion" track-by="id">
+    <discussion-thread
+        v-ref:threads
+        v-for="discussion in discussions"
+        :discussion="discussion"
+        id="discussion-{{ discussion.id }}"
+        track-by="id">
     </discussion-thread>
 
     <!-- New discussion -->
