@@ -1,6 +1,5 @@
 <template>
-<modal class="resource-modal" v-ref:modal
-    :title="resource.title">
+<modal class="resource-modal" v-ref:modal :title="resource.title">
 
     <div class="modal-body">
         {{{ resource.description|markdown }}}
