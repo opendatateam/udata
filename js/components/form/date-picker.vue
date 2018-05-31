@@ -20,7 +20,7 @@
     <div class="dropdown-menu dropdown-menu-right">
         <calendar v-ref:calendar :selected="value"></calendar>
     </div>
-    <input v-if="serializable" type="hidden"
+    <input v-if="serializable" v-el:hidden type="hidden"
         :name="field.id"
         :value="value|dt ISO_FORMAT ''">
     </input>

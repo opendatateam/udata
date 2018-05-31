@@ -26,6 +26,11 @@
 - Register known extras types [#1700](https://github.com/opendatateam/udata/pull/1700)
 - Fix side menu on mobile [#1701](https://github.com/opendatateam/udata/pull/1701)
 
+## 1.3.12 (2018-05-31)
+
+- Fix side menu on mobile [#1701](https://github.com/opendatateam/udata/pull/1701)
+- Fix update frequency field [#1702](https://github.com/opendatateam/udata/pull/1702)
+
 ## 1.3.11 (2018-05-29)
 
 - Protect Resource.need_check against malformed/string dates [#1691](https://github.com/opendatateam/udata/pull/1691)
