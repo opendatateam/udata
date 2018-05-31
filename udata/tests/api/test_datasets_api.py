@@ -10,7 +10,8 @@ from uuid import uuid4
 from flask import url_for
 
 from udata.models import (
-    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES, LEGACY_FREQUENCIES
+    CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES,
+    LEGACY_FREQUENCIES, RESOURCE_TYPES
 )
 
 from . import APITestCase
@@ -18,6 +19,7 @@ from . import APITestCase
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
+from udata.core.dataset.models import RESOURCE_FILETYPE_FILE
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
@@ -588,6 +590,18 @@ class DatasetResourceAPITest(APITestCase):
         self.login()
         self.dataset = DatasetFactory(owner=self.user)
 
+    def test_get(self):
+        '''It should fetch a resource from the API'''
+        resource = ResourceFactory()
+        dataset = DatasetFactory(resources=[resource])
+        response = self.get(url_for('api.resource', dataset=dataset,
+                                    rid=resource.id))
+        self.assert200(response)
+        data = json.loads(response.data)
+        assert data['title'] == resource.title
+        assert data['latest'] == resource.latest
+        assert data['url'] == resource.url
+
     def test_create(self):
         data = ResourceFactory.as_dict()
         data['extras'] = {'extra:id': 'id'}
@@ -598,6 +612,18 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
         self.assertEqual(self.dataset.resources[0].extras, {'extra:id': 'id'})
+
+    def test_create_normalize_format(self):
+        _format = ' FORMAT '
+        data = ResourceFactory.as_dict()
+        data['format'] = _format
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert201(response)
+        self.dataset.reload()
+        self.assertEqual(self.dataset.resources[0].format,
+                         _format.strip().lower())
 
     def test_create_2nd(self):
         self.dataset.resources.append(ResourceFactory())
@@ -674,6 +700,37 @@ class DatasetResourceAPITest(APITestCase):
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data['title'], 'test.txt')
+
+    def test_create_filetype_file_unallowed_domain(self):
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
+        data = ResourceFactory.as_dict()
+        data['filetype'] = RESOURCE_FILETYPE_FILE
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert400(response)
+
+    def test_create_filetype_file_allowed_domain(self):
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = [
+            'udata.gouv.fr',
+        ]
+        data = ResourceFactory.as_dict()
+        data['filetype'] = RESOURCE_FILETYPE_FILE
+        data['url'] = 'http://udata.gouv.fr/resource'
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert201(response)
+
+    def test_create_filetype_file_server_name(self):
+        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
+        data = ResourceFactory.as_dict()
+        data['filetype'] = RESOURCE_FILETYPE_FILE
+        data['url'] = 'http://%s/resource' % self.app.config['SERVER_NAME']
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert201(response)
 
     def test_reorder(self):
         self.dataset.resources = ResourceFactory.build_batch(3)
@@ -891,7 +948,7 @@ class DatasetResourceAPITest(APITestCase):
             for i in range(4):
                 DatasetFactory(
                     title='test-{0}'.format(i) if i % 2 else faker.word(),
-                    resources=[ResourceFactory()])
+                    visible=True)
 
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'tes', 'size': '5'})
@@ -907,6 +964,32 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
+
+    def test_suggest_datasets_acronym_api(self):
+        '''It should suggest datasets from their acronyms'''
+        with self.autoindex():
+            for i in range(4):
+                DatasetFactory(
+                    # Ensure title does not contains 'tes'
+                    title=faker.unique_string(),
+                    acronym='test-{0}'.format(i) if i % 2 else None,
+                    visible=True)
+
+        response = self.get(url_for('api.suggest_datasets'),
+                            qs={'q': 'tes', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('title', suggestion)
+            self.assertIn('slug', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertIn('image_url', suggestion)
+            self.assertNotIn('tes', suggestion['title'])
+            self.assertTrue(suggestion['acronym'].startswith('test'))
 
     def test_suggest_datasets_api_unicode(self):
         '''It should suggest datasets with special characters'''
@@ -1136,3 +1219,12 @@ class CommunityResourceAPITest(APITestCase):
         self.assertIn('errors', data)
         self.assertIn('dataset', data['errors'])
         self.assertEqual(CommunityResource.objects.count(), 0)
+
+
+class ResourcesTypesAPITest(APITestCase):
+
+    def test_resource_types_list(self):
+        '''It should fetch the resource types list from the API'''
+        response = self.get(url_for('api.resource_types'))
+        self.assert200(response)
+        self.assertEqual(len(response.json), len(RESOURCE_TYPES))

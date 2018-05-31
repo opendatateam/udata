@@ -7,6 +7,10 @@
     .direct-chat-messages {
         height: auto;
     }
+
+    .card-container {
+        margin-bottom: 1em;
+    }
 }
 </style>
 
@@ -14,7 +18,7 @@
 <modal v-ref:modal :title="title" class="discussion-modal" large
     :class="{'modal-danger': deleting}">
     <div class="modal-body" v-show="!deleting">
-        <div class="row">
+        <div class="row card-container">
             <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
                 v-if="discussion.subject | is 'dataset'"
                 :datasetid="discussion.subject.id"></dataset-card>

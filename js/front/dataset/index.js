@@ -12,7 +12,9 @@ import Velocity from 'velocity-animate';
 // Components
 import AddReuseModal from './add-reuse-modal.vue';
 import DetailsModal from './details-modal.vue';
+import PreviewModal from './preview-modal.vue';
 import ResourceModal from './resource-modal.vue';
+import Availability from './resource/availability.vue';
 import LeafletMap from 'components/leaflet-map.vue';
 import FollowButton from 'components/buttons/follow.vue';
 import FeaturedButton from 'components/buttons/featured.vue';
@@ -20,6 +22,7 @@ import ShareButton from 'components/buttons/share.vue';
 import IntegrateButton from 'components/buttons/integrate.vue';
 import IssuesButton from 'components/buttons/issues.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
+import resource_types from 'models/resource_types';
 
 
 function parseUrl(url) {
@@ -33,17 +36,19 @@ const RESOURCE_REGEX = /^#resource(-community)?-([0-9a-f-]{36})$/;
 new Vue({
     mixins: [FrontMixin],
     components: {
-        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton, ShareButton, FollowButton
+        LeafletMap, DiscussionThreads, FeaturedButton, IntegrateButton, IssuesButton,
+        ShareButton, FollowButton, Availability, PreviewModal,
     },
     data() {
         return {
             dataset: this.extractDataset(),
-            userReuses: []
+            userReuses: [],
+            checkUrlEnabled: config.check_urls,
+            visibleTypeLists: [],
         };
     },
     ready() {
         this.loadCoverageMap();
-        this.checkResources();
         this.fetchReuses();
         if (document.location.hash) {
             this.$nextTick(() => { // Wait for data to be binded
@@ -53,6 +58,15 @@ new Vue({
         log.debug('Dataset display page ready');
     },
     methods: {
+        /**
+         * Is a resource type list collapsed
+         * @type {String}
+         * @return {Boolean}
+         */
+        isTypeListVisible(type) {
+            return this.visibleTypeLists.indexOf(type) !== -1;
+        },
+
         /**
          * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
@@ -69,14 +83,45 @@ new Vue({
         },
 
         /**
+         * Get a resource object conform to model (but not a Model instance) from JSON-LD
+         * @param  {Object} resourceJsonLd  Resource as in JSON-LD
+         * @return {Object}                 Resource object as it would be in model
+         */
+        resourceFromJsonLd(resourceJsonLd) {
+            const resource = {
+                id: resourceJsonLd['@id'],
+                url: resourceJsonLd.contentUrl,
+                latest: resourceJsonLd.url,
+                title: resourceJsonLd.name,
+                format: resourceJsonLd.encodingFormat,
+                mime: resourceJsonLd.fileFormat,
+                filesize: resourceJsonLd.contentSize,
+                created_at: resourceJsonLd.dateCreated,
+                modified: resourceJsonLd.dateModified,
+                published: resourceJsonLd.datePublished,
+                description: resourceJsonLd.description,
+            };
+            if (resourceJsonLd.interactionStatistic) {
+                resource.metrics = {
+                    views: resourceJsonLd.interactionStatistic.userInteractionCount,
+                }
+            }
+            resource.extras = {};
+            return resource;
+        },
+
+        /**
          * Display a resource or a community ressource in a modal
          */
         showResource(id, isCommunity) {
             const attr = isCommunity ? 'communityResources' : 'resources';
-            const resource = this.dataset[attr].find(resource => resource['@id'] === id);
+            const resourceJsonLd = this.dataset[attr].find(resource => resource['@id'] === id);
             const communityPrefix = isCommunity ? '-community' : '';
             location.hash = `resource${communityPrefix}-${id}`;
-            const modal = this.$modal(ResourceModal, {resource});
+            const modal = this.$modal(
+                ResourceModal,
+                {datasetId: this.dataset['@id'], resource: this.resourceFromJsonLd(resourceJsonLd)}
+            );
             modal.$on('modal:closed', () => {
                 // prevent scrolling to top
                 location.hash = '_';
@@ -86,11 +131,11 @@ new Vue({
         /**
          * Expand the resource list and hide the expander
          */
-        expandResources(e) {
+        expandResources(e, type) {
             new Velocity(e.target, {height: 0, opacity: 0}, {complete(els) {
                 els[0].remove();
             }});
-            this.checkResourcesCollapsed();
+            this.visibleTypeLists.push(type);
         },
 
         /**
@@ -98,6 +143,13 @@ new Vue({
          */
         showDetails() {
             this.$modal(DetailsModal, {dataset: this.dataset});
+        },
+
+        /**
+         * Display a preview URL
+         */
+        showPreview(url) {
+            this.$modal(PreviewModal, {url});
         },
 
         /**
@@ -143,99 +195,6 @@ new Vue({
         },
 
         /**
-         * Asynchronously check non-collapsed resources status
-         */
-        checkResources() {
-            if (config.check_urls) {
-                this.dataset.resources
-                    .slice(0, config.dataset_max_resources_uncollapsed)
-                    .forEach(this.checkResource);
-            }
-        },
-
-        /**
-         * Asynchronously check collapsed resources status
-         */
-        checkResourcesCollapsed() {
-            if (config.check_urls) {
-                this.dataset.resources
-                    .slice(config.dataset_max_resources_uncollapsed)
-                    .forEach(this.checkResource);
-            }
-        },
-
-        /**
-         * Get check related extras from JSON-LD
-         * @param {Array} extras A list of extras in JSON-LD format
-         * @return {Object} Check extras as a hash, if any
-         */
-        getCheckExtras(extras) {
-            return extras.reduce((obj, extra) => {
-                if (extra.name.startsWith('check:')) {
-                    obj[extra.name] = extra.value;
-                }
-                return obj;
-            }, {});
-        },
-
-        /**
-         * Get a cached checked result from extras if resource is not flagged
-         * as needing a new check
-         * @param  {Object} resource A resource as extracted from JSON-LD
-         */
-        getCachedCheck(resource) {
-            if (!resource.needCheck) {
-                const extras = this.getCheckExtras(resource.extras || []);
-                if (extras['check:status']) {
-                    return extras
-                }
-            }
-        },
-
-        /**
-         * Get cached check or API check
-         * @param  {Object} resource A resource element from DOM
-         * @param  {String} checkurl The API check url
-         */
-        getResourceCheckStatus(resource_el, checkurl) {
-            const cachedCheck = this.getCachedCheck(resource_el);
-            return (cachedCheck && Promise.resolve(cachedCheck)) || this.$api.get(checkurl);
-        },
-
-        /**
-         * Asynchronously check a displayed resource status
-         * @param  {Object} resource A resource as extracted from JSON-LD
-         */
-        checkResource(resource) {
-            const url = parseUrl(resource.contentUrl);
-            const resource_el = document.querySelector(`#resource-${resource['@id']}`);
-            const el = resource_el.querySelector('.format-label');
-            const checkurl = resource_el.dataset.checkurl;
-            if (url.protocol.startsWith('ftp')) {
-                el.classList.add('format-label-warning');
-                el.setTooltip(this._('The server may be hard to reach (FTP).'), true);
-            } else {
-                this.getResourceCheckStatus(resource, checkurl)
-                .then((res) => {
-                    const status = res['check:status'];
-                    if (status >= 200 && status < 400) {
-                        el.classList.add('format-label-success')
-                    } else if (status >= 400 && status < 500) {
-                        el.classList.add('format-label-danger');
-                        el.setTooltip(this._('The resource cannot be found.'), true);
-                    } else if (status >= 500) {
-                        el.classList.add('format-label-warning');
-                        el.setTooltip(this._('An error occured on the remote server. This may be temporary.'), true);
-                    }
-                })
-                .catch(error => {
-                    el.classList.add('format-label-unchecked');
-                    console.log('Something went wrong with the linkchecker', error);
-                });
-            }
-        },
-
-        /**
          * Suggest a tag aka.trigger a new discussion
          */
         suggestTag() {
@@ -255,6 +214,13 @@ new Vue({
                 const [, isCommunity, id] = hash.match(RESOURCE_REGEX);
                 this.showResource(id, isCommunity);
             }
+        },
+
+        /**
+         * Get resource by id from dataset JSON-LD
+         */
+        getResourceById(resourceId) {
+            return this.dataset.resources.find(r => r['@id'] === resourceId);
         },
     }
 });

@@ -205,3 +205,12 @@ $ udata worker status --munin-config -q default
 ```
 
 [munin-plugin]: https://github.com/etalab/munin-plugins/tree/master/udata-worker-status
+
+
+## Cache
+
+Flush the cache with:
+
+```shell
+$ udata cache flush
+```

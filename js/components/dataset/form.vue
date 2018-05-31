@@ -26,6 +26,9 @@ export default {
                     id: 'title',
                     label: this._('Title')
                 }, {
+                    id: 'acronym',
+                    label: this._('Acronym')
+                }, {
                     id: 'description',
                     label: this._('Description'),
                 }, {

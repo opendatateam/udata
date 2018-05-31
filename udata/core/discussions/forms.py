@@ -15,7 +15,7 @@ class DiscussionCreateForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.required()])
     comment = fields.StringField(_('Comment'), [validators.required()])
     subject = fields.ModelField(_('Subject'), [validators.required()])
-    extras = fields.ExtrasField(extras=Discussion.extras)
+    extras = fields.ExtrasField()
 
 
 class DiscussionCommentForm(Form):

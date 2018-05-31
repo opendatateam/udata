@@ -105,13 +105,13 @@ export default {
                     title: this._('Traffic'),
                     default: 'Area',
                     y: [{
-                        id: 'nb_uniq_visitors',
+                        id: 'views',
                         label: this._('Organization')
                     }, {
-                        id: 'datasets_nb_uniq_visitors',
+                        id: 'datasets_views',
                         label: this._('Datasets')
                     }, {
-                        id: 'reuses_nb_uniq_visitors',
+                        id: 'reuses_views',
                         label: this._('Reuses')
                     }]
                 },

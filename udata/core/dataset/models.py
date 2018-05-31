@@ -15,12 +15,14 @@ from werkzeug import cached_property
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
-from udata.utils import hash_url
+from udata.utils import get_by, hash_url
+
+from .preview import get_preview_url
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
-    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_TYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE'
+    'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
+    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
 )
 
 #: Udata frequencies with their labels
@@ -74,9 +76,18 @@ DEFAULT_LICENSE = {
 }
 
 RESOURCE_TYPES = OrderedDict([
-    ('file', _('Uploaded file')),
-    ('remote', _('Remote file')),
+    ('main', 'Main file'),
+    ('documentation', _('Documentation')),
+    ('update', _('Update')),
     ('api', _('API')),
+    ('code', _('Code repository')),
+    ('other', _('Other')),
+])
+
+RESOURCE_FILETYPE_FILE = 'file'
+RESOURCE_FILETYPES = OrderedDict([
+    (RESOURCE_FILETYPE_FILE, _('Uploaded file')),
+    ('remote', _('Remote file')),
 ])
 
 CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
@@ -107,8 +118,10 @@ class License(db.Document):
     id = db.StringField(primary_key=True)
     created_at = db.DateTimeField(default=datetime.now, required=True)
     title = db.StringField(required=True)
+    alternate_titles = db.ListField(db.StringField())
     slug = db.SlugField(required=True, populate_from='title')
     url = db.URLField()
+    alternate_urls = db.ListField(db.URLField())
     maintainer = db.StringField()
     flags = db.ListField(db.StringField())
 
@@ -145,10 +158,25 @@ class License(db.Document):
         qs = cls.objects
         text = text.strip().lower()  # Stored identifiers are lower case
         slug = cls.slug.slugify(text)  # Use slug as it normalize string
-        license = qs(db.Q(id=text) | db.Q(slug=slug) | db.Q(url=text)).first()
+        license = qs(
+            db.Q(id=text) | db.Q(slug=slug) | db.Q(url=text)
+            | db.Q(alternate_urls=text)
+        ).first()
         if license is None:
             # Try to single match with a low Damerau-Levenshtein distance
             computed = ((l, rdlevenshtein(l.slug, slug)) for l in cls.objects)
+            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            # If there is more that one match, we cannot determinate
+            # which one is closer to safely choose between candidates
+            if len(candidates) == 1:
+                license = candidates[0]
+        if license is None:
+            # Try to single match with a low Damerau-Levenshtein distance
+            computed = (
+                (l, rdlevenshtein(cls.slug.slugify(t), slug))
+                for l in cls.objects
+                for t in l.alternate_titles
+            )
             candidates = [l for l, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates
@@ -185,7 +213,9 @@ class ResourceMixin(object):
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     filetype = db.StringField(
-        choices=RESOURCE_TYPES.keys(), default='file', required=True)
+        choices=RESOURCE_FILETYPES.keys(), default='file', required=True)
+    type = db.StringField(
+        choices=RESOURCE_TYPES.keys(), default='main', required=True)
     url = db.URLField(required=True)
     urlhash = db.StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
@@ -203,6 +233,10 @@ class ResourceMixin(object):
         super(ResourceMixin, self).clean()
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
+
+    @cached_property  # Accessed at least 2 times in front rendering
+    def preview_url(self):
+        return get_preview_url(self)
 
     @property
     def closed_or_no_format(self):
@@ -279,7 +313,7 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
-            'needCheck': self.need_check()
+            'type': self.type,
         }
 
         if 'views' in self.metrics:
@@ -303,11 +337,6 @@ class ResourceMixin(object):
         if self.description:
             result['description'] = mdstrip(self.description)
 
-        # These 2 values are not standard
-        if self.checksum:
-            result['checksum'] = self.checksum.value,
-            result['checksumType'] = self.checksum.type or 'sha1'
-
         return result
 
 
@@ -319,6 +348,10 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
 
+    @property
+    def dataset(self):
+        return self._instance
+
 
 class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     created_at = DateTimeField(verbose_name=_('Creation date'),
@@ -326,6 +359,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     last_modified = DateTimeField(verbose_name=_('Last modification date'),
                                   default=datetime.now, required=True)
     title = db.StringField(required=True)
+    acronym = db.StringField(max_length=128)
     slug = db.SlugField(max_length=255, required=True,
                         populate_from='title', update=True)
     description = db.StringField(required=True, default='')
@@ -408,6 +442,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     @property
     def is_hidden(self):
         return len(self.resources) == 0 or self.private or self.deleted
+
+    @property
+    def full_title(self):
+        if not self.acronym:
+            return self.title
+        return '{title} ({acronym})'.format(**self._data)
 
     @property
     def external_url(self):
@@ -643,3 +683,12 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     @property
     def from_community(self):
         return True
+
+
+def get_resource(id):
+    '''Fetch a resource given its UUID'''
+    dataset = Dataset.objects(resources__id=id).first()
+    if dataset:
+        return get_by(dataset.resources, 'id', id)
+    else:
+        return CommunityResource.objects(id=id).first()

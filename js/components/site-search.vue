@@ -32,8 +32,8 @@
             <span v-if="group.loading" class="fa fa-spin fa-spinner group-status"></span>
             <strong class="search-header">{{ group.name }}</strong>
             <ul>
-                <li v-for="item in group.items" track-by="id" :class="{'active': isActive(item)}">
-                    <a @mousedown.prevent="hit" @mousemove="setActive(item)">
+                <li v-for="item in group.items" track-by="id" :class="{'active': isActive(item)}" @mousedown.prevent="hit" @mousemove="setActive(item)">
+                    <a>
                         <partial :name="group.template || 'default'"></partial>
                     </a>
                 </li>
@@ -104,7 +104,8 @@ export default {
         default: `<div class="logo">
             <img :src="item.image_url || placeholders.generic" class="avatar" width="30" height="30" alt="">
             </div>
-            <p v-html="item.title | stripTags | highlight query"></p>`,
+            <p v-html="item.title | stripTags | highlight query"></p>
+            <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,
         organization: `<div class="logo"><img :src="item.image_url || placeholders.organization" class="avatar" width="30" height="30" alt=""></div>
             <p v-html="item.name | stripTags | highlight query"></p>
             <small v-if="item.acronym" v-html="item.acronym | highlight query"></small>`,

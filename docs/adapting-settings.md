@@ -93,6 +93,26 @@ The duration used for templates' cache, in minutes.
 
 This is the allowed resources extensions list that user can upload.
 
+### RESOURCES_FILE_ALLOWED_DOMAINS
+
+**default**: `[]`
+
+Whitelist of urls domains allowed for resources with `filetype` equals to `file`.
+
+`SERVER_NAME` is always included.
+
+`*` is a supported value as a wildcard allowing all domains.
+
+### PREVIEW_MODE
+
+**default**: `'iframe'`
+
+Define the resources preview mode. Can be one of:
+- `'iframe'`: preview are displayed into an iframe modal
+- `'page'`: preview is displayed into a new page
+
+If you want to disable preview, set `PREVIEW_MODE` to `None`
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
@@ -132,6 +152,56 @@ from udata.settings import Defaults
 
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 ```
+
+## Map widget configuration
+
+### MAP_TILES_URL
+
+**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'`
+
+Tiles URL for SD displays
+
+### MAP_TILES_URL_HIDPI
+
+**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'`
+
+Tiles URL for HD/HiDPI displays
+
+### MAP_TILES_CONFIG
+
+**default**:
+```python
+{
+    'subdomains': 'abcd',
+    'attribution': (
+        '&copy;'
+        '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
+        '/'
+        '<a href="https://cartodb.com/attributions">CartoDB</a>'
+    )
+}
+```
+
+Tiles configuration object given as Leaflet tile layer parameter,
+see https://leafletjs.com/reference-0.7.7.html#tilelayer
+
+### MAP_INITIAL_CENTER
+
+**default**: `[42, 2.4]`
+
+Initial map center position coordinates
+
+### MAP_INITIAL_ZOOM
+
+**default**: `4`
+
+Initial map zoom level
+
+### MAP_INITIAL_LEVEL
+
+**default**: `0`
+
+Initial map territory level
 
 ## Spatial configuration
 
@@ -456,6 +526,43 @@ The default page size for post listing
 **default** `6`
 
 Max number of resources to display uncollapsed in dataset view.
+
+## Sentry configuration
+
+### SENTRY_DSN
+
+**default**: `None`
+
+The Sentry DSN associated to this udata instance.
+If defined, the Sentry support is automatically activated.
+
+### SENTRY_TAGS
+
+**default**: `{}`
+
+A key-value map of extra tags to pass as Sentry context.
+See: <https://docs.sentry.io/learn/context/>
+
+### SENTRY_USER_ATTRS
+
+**default**: `['slug', 'email', 'fullname']`
+
+Extra user attributes to add the Sentry context.
+See: <https://docs.sentry.io/learn/context/>
+
+### SENTRY_LOGGING
+
+**default**: `'WARNING'`
+
+Minimum log level to be reported to Sentry.
+
+### SENTRY_IGNORE_EXCEPTIONS
+
+**default**: `[]`
+
+A list of extra exceptions to ignore.
+udata already ignores Werkzeug `HTTPException` and some internal ones
+that don't need to be listed here.
 
 
 ## Example configuration file

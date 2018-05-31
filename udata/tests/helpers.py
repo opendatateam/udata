@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import json
 import mock
 import os
 
@@ -11,7 +10,7 @@ from contextlib import contextmanager
 from datetime import timedelta
 from urlparse import urljoin, urlparse
 
-from flask import request, url_for
+from flask import request, url_for, json
 
 
 def assert_equal_dates(datetime1, datetime2, limit=1):  # Seconds.

@@ -19,4 +19,6 @@ TRANSLATIONS = (
     _('European Union'),
     _('Metropolitan France'),
     _('Overseas France'),
+    _('French overseas collectivities'),
+    _('French arrondissement'),
 )

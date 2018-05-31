@@ -49,6 +49,7 @@ class BaseResourceFactory(ModelFactory):
     title = factory.Faker('sentence')
     description = factory.Faker('text')
     filetype = 'file'
+    type = 'documentation'
     url = factory.Faker('url')
     checksum = factory.SubFactory(ChecksumFactory)
     mime = factory.Faker('mime_type', category='text')

@@ -149,7 +149,7 @@ $ watai specs/integration/  --config '{"ignore":[1,2,3,5,6,7], "email":"name@exa
 Check out the [Watai tutorial][] to add your own tests!
 
 [nosetest]: https://nose.readthedocs.org/en/latest/
-[nose-mocha-reporter]: https://pypi.python.org/pypi/nose-mocha-reporter
+[nose-mocha-reporter]: https://pypi.org/project/nose-mocha-reporter
 [watai]: https://github.com/MattiSG/Watai
 [webdriver api]: https://github.com/admc/wd/blob/master/doc/api.md
 [selenium]: http://docs.seleniumhq.org/

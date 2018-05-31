@@ -1,12 +1,12 @@
 <template>
-<form role="form" class="clearfix animated" @submit.prevent="submit">
+<form role="form" class="animated" @submit.prevent="submit">
     <div class="form-group">
         <label for="title-new-discussion">{{ _('Title') }}</label>
         <input v-el:title type="text" id="title-new-discussion" v-model="title" class="form-control" required />
         <label for="comment-new-discussion">{{ _('Comment') }}</label>
         <textarea v-el:textarea id="comment-new-discussion" v-model="comment" class="form-control" rows="3" required></textarea>
     </div>
-    <button type="submit" :disabled="this.sending || !this.title || !this.comment" class="btn btn-primary btn-block pull-right submit-new-discussion">
+    <button type="submit" :disabled="this.sending || !this.title || !this.comment" class="btn btn-primary btn-block submit-new-discussion">
         {{ _('Start a discussion') }}
     </button>
 </form>

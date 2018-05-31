@@ -5,8 +5,6 @@
 import L from 'leaflet';
 import config from 'config';
 
-const INITIAL_SETTINGS = {center: [42, 2.4], zoom: 4, zoomControl: false};
-
 export default {
     name: 'leaflet-map',
     props: {
@@ -23,7 +21,11 @@ export default {
         geojson: null
     },
     ready() {
-        this.map = L.map(this.$el, INITIAL_SETTINGS);
+        this.map = L.map(this.$el, {
+            center: config.map.init.center,
+            zoom: config.map.init.zoom,
+            zoomControl: false
+        });
 
         if (this.fixed) {
             // Disable drag and zoom handlers.
@@ -36,7 +38,8 @@ export default {
             if (this.map.tap) this.map.tap.disable();
         }
 
-        L.tileLayer(config.tiles_url, config.tiles_config).addTo(this.map);
+        const tiles_url = config.hidpi ? config.map.tiles.hidpi : config.map.tiles.url;
+        L.tileLayer(tiles_url, config.map.tiles.config).addTo(this.map);
     },
     watch: {
         geojson: function(json) {

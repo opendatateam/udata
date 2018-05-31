@@ -98,6 +98,13 @@ class Defaults(object):
                                     'Your password has been changed')
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = _('Password reset instructions')
 
+    # Sentry configuration
+    SENTRY_DSN = None
+    SENTRY_TAGS = {}
+    SENTRY_USER_ATTRS = ['slug', 'email', 'fullname']
+    SENTRY_LOGGING = 'WARNING'
+    SENTRY_IGNORE_EXCEPTIONS = []
+
     # Flask WTF settings
     CSRF_SESSION_KEY = 'Default uData csrf key'
 
@@ -215,6 +222,9 @@ class Defaults(object):
         # RDF
         'rdf', 'ttl', 'n3',
     ]
+    # Whitelist of urls domains for resource with filetype `file`
+    # SERVER_NAME is always included, `*` is a supported value (wildcard)
+    RESOURCES_FILE_ALLOWED_DOMAINS = []
 
     # How much time upload chunks are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
@@ -252,6 +262,11 @@ class Defaults(object):
     # Max number of resources to display uncollapsed in dataset view
     DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
 
+    # Preview settings
+    ###########################################################################
+    # Preview mode can be either `iframe` or `page` or `None`
+    PREVIEW_MODE = 'iframe'
+
     # URLs validation settings
     ###########################################################################
     # Whether or not to allow private URLs (private IPs...) submission
@@ -264,6 +279,29 @@ class Defaults(object):
     URLS_ALLOWED_SCHEMES = ('http', 'https', 'ftp', 'ftps')
     # List of allowed TLDs.
     URLS_ALLOWED_TLDS = tld_set
+
+    # Map/Tiles configuration
+    ###########################################################################
+    # Tiles URL for SD displays
+    MAP_TILES_URL = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'
+    # Tiles URL for HD/HiDPI displays
+    MAP_TILES_URL_HIDPI = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'
+    # Leaflet tiles config, see https://leafletjs.com/reference-0.7.7.html#tilelayer
+    MAP_TILES_CONFIG = {
+        'subdomains': 'abcd',
+        'attribution': (
+            '&copy;'
+            '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
+            '/'
+            '<a href="https://cartodb.com/attributions">CartoDB</a>'
+        )
+    }
+    # Initial map center position
+    MAP_INITIAL_CENTER = [42, 2.4]
+    # Initial map zoom level
+    MAP_INITIAL_ZOOM = 4
+    # Initial map territory level
+    MAP_INITIAL_LEVEL = 0
 
 
 class Testing(object):
@@ -286,6 +324,7 @@ class Testing(object):
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
     USE_METRICS = False
+    RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
     URLS_ALLOW_LOCAL = True  # Test server URL is localhost
 
 

@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from urlparse import urlparse
+
+from flask import current_app
+
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 
@@ -9,8 +13,8 @@ from udata.core.spatial.forms import SpatialCoverageField
 
 from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
-    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_TYPES, CHECKSUM_TYPES,
-    LEGACY_FREQUENCIES
+    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
+    LEGACY_FREQUENCIES, RESOURCE_TYPES, RESOURCE_FILETYPE_FILE,
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
@@ -23,17 +27,47 @@ class ChecksumForm(ModelForm):
     value = fields.StringField()
 
 
+def normalize_format(data):
+    '''Normalize format field: strip and lowercase'''
+    if data:
+        return data.strip().lower()
+
+
+def enforce_filetype_file(form, field):
+    '''Only allowed domains in resource.url when filetype is file'''
+    if field.data != RESOURCE_FILETYPE_FILE:
+        return
+    url = form._fields.get('url').data
+    domain = urlparse(url).netloc
+    allowed_domains = current_app.config.get(
+        'RESOURCES_FILE_ALLOWED_DOMAINS', [])
+    allowed_domains += [current_app.config.get('SERVER_NAME')]
+    if '*' in allowed_domains:
+        return
+    if domain and domain not in allowed_domains:
+        message = 'URL domain not allowed for filetype {}'.format(
+            RESOURCE_FILETYPE_FILE)
+        raise validators.ValidationError(_(message))
+
+
 class BaseResourceForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'))
     filetype = fields.RadioField(
-        _('Type'), [validators.required()],
-        choices=RESOURCE_TYPES.items(), default='file',
+        _('File type'), [validators.required(), enforce_filetype_file],
+        choices=RESOURCE_FILETYPES.items(), default='file',
         description=_('Whether the resource is an uploaded file, '
                       'a remote file or an API'))
+    type = fields.RadioField(
+        _('Type'), [validators.required()],
+        choices=RESOURCE_TYPES.items(), default='other',
+        description=_('Resource type (documentation, API...)'))
     url = fields.UploadableURLField(
         _('URL'), [validators.required()], storage=resources)
-    format = fields.StringField(_('Format'))
+    format = fields.StringField(
+        _('Format'),
+        filters=[normalize_format],
+    )
     checksum = fields.FormField(ChecksumForm)
     mime = fields.StringField(
         _('Mime type'),
@@ -45,7 +79,7 @@ class BaseResourceForm(ModelForm):
     published = fields.DateTimeField(
         _('Publication date'),
         description=_('The publication date of the resource'))
-    extras = fields.ExtrasField(extras=Resource.extras)
+    extras = fields.ExtrasField()
 
 
 class ResourceForm(BaseResourceForm):
@@ -72,6 +106,8 @@ class DatasetForm(ModelForm):
     model_class = Dataset
 
     title = fields.StringField(_('Title'), [validators.required()])
+    acronym = fields.StringField(_('Acronym'),
+                                 description=_('An optionnal acronym'))
     description = fields.MarkdownField(
         _('Description'), [validators.required()],
         description=_('The details about the dataset '
@@ -99,7 +135,7 @@ class DatasetForm(ModelForm):
 
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
-    extras = fields.ExtrasField(extras=Dataset.extras)
+    extras = fields.ExtrasField()
     resources = fields.NestedModelList(ResourceForm)
 
 

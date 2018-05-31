@@ -9,6 +9,7 @@ from flask import url_for
 from flask_mongoengine.wtf import fields as mefields
 from flask_fs.mongo import ImageReference
 from wtforms import Form as WTForm, Field as WTField, validators, fields
+from wtforms.ext.dateutil import fields as dtfields
 from wtforms.utils import unset_value
 from wtforms_json import flatten_json
 
@@ -20,6 +21,7 @@ from udata.core.storages import tmp
 from udata.core.organization.permissions import OrganizationPrivatePermission
 from udata.i18n import lazy_gettext as _
 from udata import tags, uris
+from udata.forms import ModelForm, Form
 from udata.utils import to_iso_date, get_by
 
 
@@ -77,6 +79,14 @@ class StringField(FieldHelper, EmptyNone, fields.StringField):
 
 
 class IntegerField(FieldHelper, fields.IntegerField):
+    pass
+
+
+class FloatField(FieldHelper, fields.FloatField):
+    pass
+
+
+class DateField(FieldHelper, dtfields.DateField):
     pass
 
 
@@ -654,30 +664,81 @@ class PublishAsField(ModelFieldMixin, Field):
         return True
 
 
+def field_parse(cls, value, *args, **kwargs):
+    kwargs['_form'] = Form()
+    kwargs['_name'] = 'extra'
+    field = cls(*args, **kwargs)
+    field.process_formdata([value])
+    return field.data
+
+
 class ExtrasField(Field):
+    KNOWN_TYPES = {
+        db.DateTimeField: DateTimeField,
+        db.DateField: DateField,
+        db.IntField: IntegerField,
+        db.BooleanField: BooleanField,
+        db.StringField: StringField,
+        db.FloatField: FloatField,
+        db.URLField: URLField,
+        db.UUIDField: UUIDField,
+    }
+
     def __init__(self, *args, **kwargs):
-        if 'extras' not in kwargs:
-            raise ValueError('extras parameter should be specified')
-        self.extras = kwargs.pop('extras')
         super(ExtrasField, self).__init__(*args, **kwargs)
+        if not isinstance(self._form, ModelForm):
+            raise ValueError('ExtrasField can only be used within a ModelForm')
+        model_field = getattr(self._form.model_class, self.short_name, None)
+        if not model_field or not isinstance(model_field, db.ExtrasField):
+            msg = 'Form ExtrasField can only be mapped to a model ExtraField'
+            raise ValueError(msg)
+
+    @property
+    def extras(self):
+        '''Getter to the model extras field'''
+        return getattr(self._form.model_class, self.short_name)
+
+    def parse(self, data):
+        '''Parse fields and store individual errors'''
+        self.field_errors = {}
+        return dict(
+            (k, self._parse_value(k, v)) for k, v in data.items()
+        )
+
+    def _parse_value(self, key, value):
+        if key not in self.extras.registered:
+            return value
+        expected = self.extras.registered[key]
+        if expected in self.KNOWN_TYPES:
+            try:
+                return field_parse(self.KNOWN_TYPES[expected], value)
+            except (validators.ValidationError, ValueError) as e:
+                self.field_errors[key] = getattr(e, 'message', str(e))
+        else:
+            return value
 
     def process_formdata(self, valuelist):
         if valuelist:
             data = valuelist[0]
             if isinstance(data, dict):
-                self.data = data
+                self.data = self.parse(data)
             else:
-                raise 'Unsupported datatype'
+                raise ValueError('Unsupported data type')
         else:
-            self.data = self.data or {}
+            self.data = self.parse(self.data or {})
 
-    def pre_validate(self, form):
-        if self.data:
+    def validate(self, form, extra_validators=tuple()):
+        if self.process_errors:
+            self.errors = list(self.process_errors)
+        elif self.field_errors:
+            self.errors = self.field_errors
+        elif self.data:
             try:
                 self.extras.validate(self.data)
             except db.ValidationError as e:
-                if e.errors:
-                    self.errors.extend([': '.join((k, v))
-                                        for k, v in e.errors.items()])
-                else:
-                    self.errors.append(e.message)
+                self.errors = e.errors if e.errors else [e.message]
+        else:
+            self.errors = None
+
+        return not bool(self.errors)
+

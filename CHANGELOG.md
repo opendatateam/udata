@@ -2,7 +2,29 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Dynamic API documentation, Enhancement to Pull #1542 - [#1542](https://github.com/opendatateam/udata/pull/1542)
+- Normalize resource.format (migration - :warning: need reindexing) [#1563](https://github.com/opendatateam/udata/pull/1563)
+- Typed resources [#1398](https://github.com/opendatateam/udata/issues/1398)
+- [breaking] Enforce a domain whitelist when resource.filetype is file [#1567](https://github.com/opendatateam/udata/issues/1567)
+- Initial data preview implementation [#1581](https://github.com/opendatateam/udata/pull/1581) [#1632](https://github.com/opendatateam/udata/pull/1632)
+- Switch to PyPI.org for package links [#1583](https://github.com/opendatateam/udata/pull/1583)
+- Handle some alternate titles and alternate URLs on licenses for improved match on harvesting [#1592](https://github.com/opendatateam/udata/pull/1592)
+- Resource modals: use new single resource API call [#1547](https://github.com/opendatateam/udata/pull/1547)
+- Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
+- Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
+- Allow to specify a dataset acronym [#1217](https://github.com/opendatateam/udata/pull/1217)
+- Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
+- Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
+- Refactoring of discussions code base [#1623](https://github.com/opendatateam/udata/pull/1623)
+- Fix Firefox custom error handling, part 2 [#1671](https://github.com/opendatateam/udata/pull/1671)
+- The map widget can now be configured (tiles URL, initial position...) [#1672](https://github.com/opendatateam/udata/pull/1672)
+- Fix the temporal coverage facet query string parsing [#1676](https://github.com/opendatateam/udata/pull/1676)
+- Fix search auto-complete hitbox [#1687](https://github.com/opendatateam/udata/pull/1687)
+- Fix search auto-complete loading on new page [#1693](https://github.com/opendatateam/udata/pull/1693)
+- Simplify `ExtrasField` form field signature (no need anymore for the `extras` parameter) [#1698](https://github.com/opendatateam/udata/pull/1698)
+- Ensure registered extras types are properly parsed from JSON. Remove the need for custom `db.Extra` classes [#1699](https://github.com/opendatateam/udata/pull/1699)
+- Register known extras types [#1700](https://github.com/opendatateam/udata/pull/1700)
+- Fix side menu on mobile [#1701](https://github.com/opendatateam/udata/pull/1701)
 
 ## 1.3.12 (2018-05-31)
 
@@ -424,7 +446,7 @@
   [#871](https://github.com/opendatateam/udata/pull/871)
   [#903](https://github.com/opendatateam/udata/pull/903)
 - Upgrade to Flask-Login 0.4.0 and switch from Flask-Security to the latest
-  [Flask-Security-Fork](https://pypi.python.org/pypi/Flask-Security-Fork)
+  [Flask-Security-Fork](https://pypi.org/project/Flask-Security-Fork)
   [#813](https://github.com/opendatateam/udata/pull/813)
 - Migrated remaining widgets to Vue.js [#828](https://github.com/opendatateam/udata/pull/828):
 

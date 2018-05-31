@@ -43,12 +43,13 @@ from .api_fields import (
     frequency_fields,
     license_fields,
     resource_fields,
+    resource_type_fields,
     upload_fields,
 )
 from udata.linkchecker.checker import check_resource
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
-    CommunityResource
+    CommunityResource, RESOURCE_TYPES
 )
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
@@ -326,6 +327,15 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
           doc=common_doc)
 @api.doc(params={'rid': 'The resource unique identifier'})
 class ResourceAPI(ResourceMixin, API):
+    @api.doc('get_resource')
+    @api.marshal_with(resource_fields)
+    def get(self, dataset, rid):
+        '''Get a resource given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            api.abort(410, 'Dataset has been deleted')
+        resource = self.get_resource_or_404(dataset, rid)
+        return resource
+
     @api.secure
     @api.doc('update_resource', body=resource_fields)
     @api.marshal_with(resource_fields)
@@ -451,6 +461,7 @@ class SuggestDatasetsAPI(API):
             {
                 'id': opt['payload']['id'],
                 'title': opt['text'],
+                'acronym': opt['payload'].get('acronym'),
                 'score': opt['score'],
                 'slug': opt['payload']['slug'],
                 'image_url': opt['payload']['image_url'],
@@ -508,3 +519,13 @@ class CheckDatasetResource(API, ResourceMixin):
         '''Checks that a resource's URL exists and returns metadata.'''
         resource = self.get_resource_or_404(dataset, rid)
         return check_resource(resource)
+
+
+@ns.route('/resource_types/', endpoint='resource_types')
+class ResourceTypesAPI(API):
+    @api.doc('resource_types')
+    @api.marshal_list_with(resource_type_fields)
+    def get(self):
+        '''List all resource types'''
+        return [{'id': id, 'label': label}
+                for id, label in RESOURCE_TYPES.items()]

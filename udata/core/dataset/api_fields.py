@@ -8,8 +8,8 @@ from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
 
 from .models import (
-    UPDATE_FREQUENCIES, RESOURCE_TYPES, DEFAULT_FREQUENCY,
-    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE
+    UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
+    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE, RESOURCE_TYPES
 )
 
 checksum_fields = api.model('Checksum', {
@@ -41,6 +41,9 @@ resource_fields = api.model('Resource', {
     'filetype': fields.String(
         description=('Whether the resource is an uploaded file, '
                      'a remote file or an API'),
+        required=True, enum=RESOURCE_FILETYPES.keys()),
+    'type': fields.String(
+        description=('Resource type (documentation, API...)'),
         required=True, enum=RESOURCE_TYPES.keys()),
     'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
@@ -63,6 +66,10 @@ resource_fields = api.model('Resource', {
         description='The resource last modification date'),
     'metrics': fields.Raw(description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
+    'preview_url': fields.String(description='An optionnal preview URL to be '
+                                 'loaded as a standalone page (ie. iframe or '
+                                 'new page)',
+                                 readonly=True),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {
@@ -82,6 +89,8 @@ temporal_coverage_fields = api.model('TemporalCoverage', {
 
 dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
     'title': fields.String(description='The dataset title', readonly=True),
+    'acronym': fields.String(description='An optionnal dataset acronym',
+                             readonly=True),
     'uri': fields.UrlFor(
         'api.dataset', lambda d: {'dataset': d},
         description='The API URI for this dataset', readonly=True),
@@ -107,7 +116,7 @@ community_resource_page_fields = api.model(
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK = ','.join((
-    'id', 'title', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
+    'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
     'uri', 'page', 'last_update'
@@ -116,6 +125,7 @@ DEFAULT_MASK = ','.join((
 dataset_fields = api.model('Dataset', {
     'id': fields.String(description='The dataset identifier', readonly=True),
     'title': fields.String(description='The dataset title', required=True),
+    'acronym': fields.String(description='An optionnal dataset acronym'),
     'slug': fields.String(
         description='The dataset permalink string', required=True),
     'description': fields.Markdown(
@@ -176,15 +186,20 @@ dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
 
 
 dataset_suggestion_fields = api.model('DatasetSuggestion', {
-    'id': fields.String(description='The dataset identifier', required=True),
-    'title': fields.String(description='The dataset title', required=True),
+    'id': fields.String(description='The dataset identifier'),
+    'title': fields.String(description='The dataset title'),
+    'acronym': fields.String(description='An optionnal dataset acronym'),
     'slug': fields.String(
-        description='The dataset permalink string', required=True),
+        description='The dataset permalink string'),
     'image_url': fields.String(
         description='The dataset (organization) logo URL'),
     'page': fields.UrlFor(
         'datasets.show_redirect', lambda d: {'dataset': d['slug']},
-        description='The web page URL for this dataset', readonly=True),
-    'score': fields.Float(
-        description='The internal match score', required=True),
+        description='The web page URL for this dataset'),
+    'score': fields.Float(description='The internal match score'),
+})
+
+resource_type_fields = api.model('ResourceType', {
+    'id': fields.String(description='The resource type identifier'),
+    'label': fields.String(description='The resource type display name')
 })

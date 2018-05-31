@@ -1,6 +1,6 @@
 <template>
 <div>
-<layout :title="dataset.title || ''" :subtitle="_('Dataset')"
+<layout :title="dataset.full_title || ''" :subtitle="_('Dataset')"
     :actions="actions" :badges="badges" :page="dataset.page || ''">
     <div class="row">
         <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"

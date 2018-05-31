@@ -35,6 +35,7 @@ PUBLIC_HOSTS = [
     'http://a.b-c.de',
     'https://foo_bar.example.com/',
     'ftps://foo.bar/',
+    '//foo.bar/',
 ]
 
 PUBLIC_HOSTS_IDN = [
