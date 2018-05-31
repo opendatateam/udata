@@ -92,7 +92,11 @@
                 <div class="resources-list">
                     <div class="resources-list-header">
                         <h3>{{ _('Resources') }}</h3>
-                        <small> • <a href="#community-resources">{{ _('Community resources') }}</a></small>
+                        {% if dataset.community_resources|length %}
+                        <span class="community-resources-anchor">
+                            <small><a href="#community-resources">{{ _('See also: community resources') }}</a></small>
+                        </span>
+                        {% endif %}
                     </div>
 
                     {% set grouped_resources = dataset.resources|group_resources_by_type %}
