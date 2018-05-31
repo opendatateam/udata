@@ -20,11 +20,14 @@
 - The map widget can now be configured (tiles URL, initial position...) [#1672](https://github.com/opendatateam/udata/pull/1672)
 - Fix the temporal coverage facet query string parsing [#1676](https://github.com/opendatateam/udata/pull/1676)
 - Fix search auto-complete hitbox [#1687](https://github.com/opendatateam/udata/pull/1687)
-- Fix search auto-complete loading on new page [#1693](https://github.com/opendatateam/udata/pull/1693)
 - Simplify `ExtrasField` form field signature (no need anymore for the `extras` parameter) [#1698](https://github.com/opendatateam/udata/pull/1698)
 - Ensure registered extras types are properly parsed from JSON. Remove the need for custom `db.Extra` classes [#1699](https://github.com/opendatateam/udata/pull/1699)
 - Register known extras types [#1700](https://github.com/opendatateam/udata/pull/1700)
+
+## 1.3.12 (2018-05-31)
+
 - Fix side menu on mobile [#1701](https://github.com/opendatateam/udata/pull/1701)
+- Fix update frequency field [#1702](https://github.com/opendatateam/udata/pull/1702)
 
 ## 1.3.11 (2018-05-29)
 
