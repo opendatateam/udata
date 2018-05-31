@@ -93,7 +93,9 @@
                     <div class="resources-list-header">
                         <h3>{{ _('Resources') }}</h3>
                         {% if dataset.community_resources|length %}
-                        <small> • <a href="#community-resources">{{ _('Community resources') }}</a></small>
+                        <span class="community-resources-anchor">
+                            <small><a href="#community-resources">{{ _('See also: community resources') }}</a></small>
+                        </span>
                         {% endif %}
                     </div>
 
