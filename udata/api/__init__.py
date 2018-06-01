@@ -12,7 +12,7 @@ from flask import (
 from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource, cors
 
-from udata import theme, tracking
+from udata import search, theme, tracking
 from udata.app import csrf
 from udata.i18n import I18nBlueprint, get_locale
 from udata.auth import (
