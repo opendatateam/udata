@@ -742,3 +742,12 @@ class ExtrasField(Field):
 
         return not bool(self.errors)
 
+
+class DictField(Field):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            data = valuelist[0]
+            if isinstance(data, dict):
+                self.data = data
+            else:
+                raise ValueError('Unsupported data type')

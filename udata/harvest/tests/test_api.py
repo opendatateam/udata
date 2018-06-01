@@ -11,7 +11,9 @@ from udata.models import Member, PeriodicTask
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.utils import faker
-from udata.tests.helpers import assert200, assert201, assert204, assert403
+from udata.tests.helpers import (
+    assert200, assert201, assert204, assert400, assert403
+)
 
 from ..models import (
     HarvestSource, VALIDATION_ACCEPTED, VALIDATION_REFUSED, VALIDATION_PENDING,
@@ -116,6 +118,100 @@ class HarvestAPITest(MockBackendsMixin):
         response = api.post(url_for('api.harvest_sources'), data)
 
         assert403(response)
+
+    def test_create_source_with_config(self,api):
+        '''It should create anew source with configuration'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'filters': [
+                    {'key': 'test', 'value': 1},
+                    {'key': 'test', 'value': 42},
+                    {'key': 'tag', 'value': 'my-tag'},
+                ]
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert201(response)
+
+        source = response.json
+        assert source['config'] == {
+            'filters': [
+                {'key': 'test', 'value': 1},
+                {'key': 'test', 'value': 42},
+                {'key': 'tag', 'value': 'my-tag'},
+            ]
+        }
+
+    def test_create_source_with_unknown_filter(self, api):
+        '''Can only use known filters in config'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'filters': [
+                    {'key': 'unknown', 'value': 'any'},
+                ]
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert400(response)
+
+    def test_create_source_with_bad_filter_type(self, api):
+        '''Can only use the xpected filter type'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'filters': [
+                    {'key': 'test', 'value': 'not-an-integer'},
+                ]
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert400(response)
+
+    def test_create_source_with_bad_filter_format(self, api):
+        '''Filters should have the right format'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'filters': [
+                    {'key': 'unknown', 'notvalue': 'any'},
+                ]
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert400(response)
+
+    def test_create_source_with_config_with_custom_key(self, api):
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {'custom': 'value'}
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert201(response)
+
+        source = response.json
+        assert source['config'] == {'custom': 'value'}
 
     def test_update_source(self, api):
         '''It should update a source'''
