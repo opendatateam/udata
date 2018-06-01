@@ -1,6 +1,8 @@
 /**
  * Reuse display page JS module
  */
+import 'less/front/reuse.less';
+
 import FrontMixin from 'front/mixin';
 
 import log from 'logger';

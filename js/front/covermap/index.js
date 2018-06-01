@@ -1,6 +1,8 @@
 /**
  * Coverage map page JS module
  */
+import 'less/front/covermap.less';
+
 import FrontMixin from 'front/mixin';
 
 import Vue from 'vue';

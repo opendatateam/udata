@@ -1,6 +1,8 @@
 /**
  * Topic display page JS module
  */
+import 'less/front/topic.less';
+
 import FrontMixin from 'front/mixin';
 import FacetsMixin from 'front/mixins/facets';
 
