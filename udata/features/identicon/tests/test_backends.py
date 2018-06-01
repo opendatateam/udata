@@ -23,6 +23,8 @@ class InternalBackendTest:
         assert200(response)
         assert response.mimetype == 'image/png'
         assert response.is_streamed
+        etag, weak = response.get_etag()
+        assert etag is not None
 
     def test_render_twice_the_same(self):
         identifier = faker.word()
