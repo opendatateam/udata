@@ -1,6 +1,8 @@
 /*
  * User display page
  */
+import 'less/front/user.less';
+
 import FrontMixin from 'front/mixin';
 
 import log from 'logger';

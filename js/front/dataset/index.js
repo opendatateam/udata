@@ -1,6 +1,8 @@
 /**
  * Dataset display page JS module
  */
+import 'less/front/dataset.less';
+
 import FrontMixin from 'front/mixin';
 
 import Vue from 'vue';

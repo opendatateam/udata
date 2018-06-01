@@ -1,6 +1,8 @@
 /**
  * Generic site display page JS module
  */
+import 'less/front/site.less';
+
 import FrontMixin from 'front/mixin';
 
 import log from 'logger';

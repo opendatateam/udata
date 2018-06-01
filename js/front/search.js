@@ -1,6 +1,8 @@
 /**
  * Search display page JS module
  */
+import 'less/front/search.less';
+
 import FrontMixin from 'front/mixin';
 import FacetsMixin from 'front/mixins/facets';
 

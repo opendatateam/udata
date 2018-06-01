@@ -1,6 +1,8 @@
 /**
  * Organization display page JS module
  */
+import 'less/front/organization.less';
+
 import FrontMixin from 'front/mixin';
 
 import log from 'logger';

@@ -23,6 +23,7 @@
 - Simplify `ExtrasField` form field signature (no need anymore for the `extras` parameter) [#1698](https://github.com/opendatateam/udata/pull/1698)
 - Ensure registered extras types are properly parsed from JSON. Remove the need for custom `db.Extra` classes [#1699](https://github.com/opendatateam/udata/pull/1699)
 - Register known extras types [#1700](https://github.com/opendatateam/udata/pull/1700)
+- Fix 404/missing css on front pages [#1709](https://github.com/opendatateam/udata/pull/1709)
 
 ## 1.3.12 (2018-05-31)
 
