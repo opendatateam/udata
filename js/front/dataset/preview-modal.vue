@@ -27,11 +27,17 @@ export default {
 <style lang="less">
 @import "~less/udata/variables.less";
 
-@media (min-width: @screen-sm-min) {
-    .preview-modal {
-        .modal-dialog {
+.preview-modal {
+    .modal-dialog {
+        @media (min-width: @screen-sm-min) {
+            // Full width on sm+ devices
             width: 99%;
         }
+    }
+
+    .modal-body {
+        // Thinner padding
+        padding: 1px;
     }
 }
 </style>
