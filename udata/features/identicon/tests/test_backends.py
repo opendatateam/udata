@@ -1,24 +1,30 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from udata.features.identicon.backends import internal
-
-from udata.tests import TestCase, WebTestMixin
 from udata.utils import faker
+from udata.tests.helpers import assert200
+
+pytestmark = pytest.mark.usefixtures('app')
 
 
-class InternalBackendTests(WebTestMixin, TestCase):
-    def assert_stream_equal(self, response1, response2):
-        self.assertEqual(list(response1.iter_encoded()),
-                         list(response2.iter_encoded()))
+def assert_stream_equal(response1, response2):
+    __tracebackhide__ = True
+    stream1 = list(response1.iter_encoded())
+    stream2 = list(response2.iter_encoded())
+    assert stream1 == stream2
 
+
+class InternalBackendTest:
     def test_base_rendering(self):
         response = internal(faker.word(), 32)
-        self.assert200(response)
-        self.assertEqual(response.mimetype, 'image/png')
-        self.assertTrue(response.is_streamed)
+        assert200(response)
+        assert response.mimetype == 'image/png'
+        assert response.is_streamed
 
     def test_render_twice_the_same(self):
         identifier = faker.word()
-        self.assert_stream_equal(internal(identifier, 32),
-                                 internal(identifier, 32))
+        assert_stream_equal(internal(identifier, 32),
+                            internal(identifier, 32))
