@@ -108,6 +108,11 @@ class Defaults(object):
     # Flask WTF settings
     CSRF_SESSION_KEY = 'Default uData csrf key'
 
+    # Flask-Sitemap settings
+    # TODO: chose between explicit or automagic for params-less endpoints
+    # SITEMAP_INCLUDE_RULES_WITHOUT_PARAMS = False
+    SITEMAP_BLUEPRINT_URL_PREFIX = None
+
     AUTO_INDEX = True
 
     SITE_ID = 'default'
