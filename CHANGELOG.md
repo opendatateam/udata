@@ -25,6 +25,7 @@
 - Register known extras types [#1700](https://github.com/opendatateam/udata/pull/1700)
 - Fix 404/missing css on front pages [#1709](https://github.com/opendatateam/udata/pull/1709)
 - Fix markdown max image width (front) [#1707](https://github.com/opendatateam/udata/pull/1707)
+- Show resource type in modal (front) [#1714](https://github.com/opendatateam/udata/pull/1714)
 
 ## 1.3.12 (2018-05-31)
 
