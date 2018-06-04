@@ -222,18 +222,15 @@ def autoindex(app, clean_db):
 
 
 @pytest.fixture(name='cli')
-def cli_fixture(mocker, app):
+def cli_fixture(app):
 
     def mock_runner(*args, **kwargs):
-        from click.testing import CliRunner
         from udata.commands import cli
 
         if len(args) == 1 and ' ' in args[0]:
             args = shlex.split(args[0])
-        runner = CliRunner()
-        # Avoid instanciating another app and reuse the app fixture
-        with mocker.patch.object(cli, 'create_app', return_value=app):
-            result = runner.invoke(cli, args, catch_exceptions=False)
+        runner = app.test_cli_runner()
+        result = runner.invoke(cli, args, catch_exceptions=False)
         if kwargs.get('check', True):
             assert_command_ok(result)
         return result
