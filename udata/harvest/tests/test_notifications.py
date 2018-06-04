@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
-from udata.tests import TestCase, DBTestMixin
+import pytest
+
 from udata.core.user.factories import UserFactory, AdminFactory
 
 from .factories import HarvestSourceFactory
 
-from udata.tests.test_notifications import NotificationsMixin
-
 from udata.harvest.notifications import validate_harvester_notifications
+from udata.tests.helpers import assert_equal_dates
 
 
-class HarvestNotificationsTest(NotificationsMixin, DBTestMixin, TestCase):
+@pytest.mark.usefixtures('clean_db')
+class HarvestNotificationsTest:
     def test_pending_harvester_validations(self):
         source = HarvestSourceFactory()
         admin = AdminFactory()
         user = UserFactory()
 
-        self.assertEqual(len(validate_harvester_notifications(user)), 0)
+        assert len(validate_harvester_notifications(user)) == 0
 
         notifications = validate_harvester_notifications(admin)
 
-        self.assertEqual(len(notifications), 1)
+        assert len(notifications) == 1
         dt, details = notifications[0]
-        self.assertEqualDates(dt, source.created_at)
-        self.assertEqual(details['id'], source.id)
-        self.assertEqual(details['name'], source.name)
+        assert_equal_dates(dt, source.created_at)
+        assert details['id'] == source.id
+        assert details['name'] == source.name
