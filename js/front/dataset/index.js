@@ -24,7 +24,6 @@ import ShareButton from 'components/buttons/share.vue';
 import IntegrateButton from 'components/buttons/integrate.vue';
 import IssuesButton from 'components/buttons/issues.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
-import resource_types from 'models/resource_types';
 
 
 function parseUrl(url) {
@@ -102,6 +101,7 @@ new Vue({
                 modified: resourceJsonLd.dateModified,
                 published: resourceJsonLd.datePublished,
                 description: resourceJsonLd.description,
+                type: resourceJsonLd.type,
             };
             if (resourceJsonLd.interactionStatistic) {
                 resource.metrics = {
