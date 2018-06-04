@@ -107,7 +107,10 @@ def internal(identifier, size):
     Use pydenticon to generate an identicon.
     '''
     identicon = generate_pydenticon(identifier, size)
-    return send_file(io.BytesIO(identicon), mimetype='image/png')
+    response = send_file(io.BytesIO(identicon), mimetype='image/png')
+    etag = hashlib.sha1(identicon).hexdigest()
+    response.set_etag(etag)
+    return response
 
 
 def adorable(identifier, size):
