@@ -142,6 +142,9 @@ class ApiClient(object):
         self.client = client
         self._user = None
 
+    def login(self, *args, **kwargs):
+        return self.client.login(*args, **kwargs)
+
     @contextmanager
     def user(self, user=None):
         self._user = user or UserFactory()

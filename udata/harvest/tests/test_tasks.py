@@ -2,19 +2,17 @@
 from __future__ import unicode_literals
 
 import logging
-
-from mock import patch
-
-from udata.tests import TestCase, DBTestMixin
+import pytest
 
 from ..tasks import purge_harvest_sources
 
 log = logging.getLogger(__name__)
 
 
-class HarvestActionsTest(DBTestMixin, TestCase):
-    @patch('udata.harvest.actions.purge_sources')
-    def test_purge(self, mock):
+@pytest.mark.usefixtures('clean_db')
+class HarvestActionsTest:
+    def test_purge(self, mocker):
         '''It should purge from DB sources flagged as deleted'''
+        mock = mocker.patch('udata.harvest.actions.purge_sources')
         purge_harvest_sources()
         mock.assert_called_once_with()

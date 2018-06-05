@@ -2,8 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import logging
-
-from unittest import TestCase
+import pytest
 
 from voluptuous import Invalid
 
@@ -12,7 +11,7 @@ from udata.harvest import filters
 log = logging.getLogger(__name__)
 
 
-class FiltersTest(TestCase):
+class FiltersTest:
     def test_boolean(self):
         true_values = ('1', 'on', 't', 'TRUE', 'true', 'y', 'yes', '  1  ',
                        '  tRuE  ', True, 1, 2, -1)
@@ -21,15 +20,15 @@ class FiltersTest(TestCase):
         none_values = ('', '   ', None)
 
         for value in true_values:
-            self.assertTrue(filters.boolean(value))
+            assert filters.boolean(value)
 
         for value in false_values:
-            self.assertFalse(filters.boolean(value))
+            assert filters.boolean(value) is False
 
         for value in none_values:
-            self.assertIsNone(filters.boolean(value))
+            assert filters.boolean(value) is None
 
-        with self.assertRaises(Invalid):
+        with pytest.raises(Invalid):
             filters.boolean('vrai')
 
     def test_empty_none(self):
@@ -37,18 +36,18 @@ class FiltersTest(TestCase):
         non_empty_values = 'hello', '  hello  '
 
         for value in empty_values:
-            self.assertIsNone(filters.empty_none(value))
+            assert filters.empty_none(value) is None
 
         for value in non_empty_values:
-            self.assertEqual(filters.empty_none(value), value)
+            assert filters.empty_none(value) == value
 
     def test_strip(self):
-        self.assertEqual(filters.strip('  hello   '), 'hello')
-        self.assertIsNone(filters.strip('    '))
+        assert filters.strip('  hello   ') == 'hello'
+        assert filters.strip('    ') is None
 
     def test_line_endings(self):
-        self.assertEqual(filters.line_endings('hello\r\nworld!\r '),
-                         'hello\nworld!\n ')
+        result = filters.line_endings('hello\r\nworld!\r ')
+        assert result == 'hello\nworld!\n '
 
     def test_hash(self):
         hashes = {
@@ -59,26 +58,23 @@ class FiltersTest(TestCase):
         }
 
         for type, value in hashes.items():
-            self.assertEqual(filters.hash(value),
-                             {'type': type, 'value': value})
+            assert filters.hash(value) == {'type': type, 'value': value}
 
     def test_unknown_hash(self):
-        self.assertEqual(filters.hash('xxxx'), None)
-        self.assertEqual(filters.hash(None), None)
+        assert filters.hash('xxxx') is None
+        assert filters.hash(None) is None
 
 
-class IsUrlFilterTest(TestCase):
+class IsUrlFilterTest:
     def test_valid_url_with_defaults(self):
         f = filters.is_url()
-        self.assertEqual(f('https://somewhere.com/path'),
-                         'https://somewhere.com/path')
+        assert f('https://somewhere.com/path') == 'https://somewhere.com/path'
 
     def test_allowed_scheme_not_allowed(self):
         f = filters.is_url()
-        with self.assertRaises(Invalid):
+        with pytest.raises(Invalid):
             f('not-allowed://somewhere.com')
 
     def test_valid_url_with_default_scheme(self):
         f = filters.is_url()
-        self.assertEqual(f('somewhere.com/path'),
-                         'http://somewhere.com/path')
+        assert f('somewhere.com/path') == 'http://somewhere.com/path'
