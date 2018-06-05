@@ -141,6 +141,18 @@ class HarvestActionsTest:
         assert source.validation.by is None
         assert source.validation.comment is None
 
+    def test_create_source_with_config(self):
+        source_url = faker.url()
+        config = {'filters': [{'key': 'test', 'value': 42}]}
+
+        with assert_emit(signals.harvest_source_created):
+            source = actions.create_source('Test source',
+                                           source_url,
+                                           'factory',
+                                           config=config)
+
+        assert source.config == config
+
     def test_update_source(self):
         source = HarvestSourceFactory()
         data = source.to_dict()

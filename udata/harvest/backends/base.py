@@ -4,7 +4,8 @@ from __future__ import unicode_literals, print_function
 import logging
 import traceback
 
-from datetime import datetime
+from datetime import datetime, date
+from uuid import UUID
 
 import requests
 
@@ -22,10 +23,32 @@ log = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings()
 
 
-MAPPABLE = (
-    'tags',
-    'license',
-)
+class HarvestFilter(object):
+    TYPES = {
+        str: 'string',
+        basestring: 'string',
+        int: 'integer',
+        bool: 'boolean',
+        UUID: 'uuid',
+        datetime: 'date-time',
+        date: 'date',
+    }
+
+    def __init__(self, label, key, type, description=None):
+        if type not in self.TYPES:
+            raise TypeError('Unsupported type {0}'.format(type))
+        self.label = label
+        self.key = key
+        self.type = type
+        self.description = description
+
+    def as_dict(self):
+        return {
+            'label': self.label,
+            'key': self.key,
+            'type': self.TYPES[self.type],
+            'description': self.description,
+        }
 
 
 class BaseBackend(object):
@@ -34,6 +57,10 @@ class BaseBackend(object):
     name = None
     display_name = None
     verify_ssl = True
+
+    # Define some allowed filters on the backend
+    # This a Sequence[HarvestFilter]
+    filters = tuple()
 
     def __init__(self, source, job=None, dryrun=False, max_items=None):
         self.source = source

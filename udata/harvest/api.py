@@ -121,9 +121,19 @@ source_fields = api.model('HarvestSource', {
 source_page_fields = api.model('HarvestSourcePage',
                                fields.pager(source_fields))
 
+
+filter_fields = api.model('HarvestFilter', {
+    'label': fields.String(description='A localized human-readable label'),
+    'key': fields.String(description='The filter key'),
+    'type': fields.String(description='The filter expected type'),
+    'description': fields.String(description='The filter details'),
+})
+
 backend_fields = api.model('HarvestBackend', {
     'id': fields.String(description='The backend identifier'),
-    'label': fields.String(description='The backend display name')
+    'label': fields.String(description='The backend display name'),
+    'filters': fields.List(fields.Nested(filter_fields),
+                           description='The backend supported filters'),
 })
 
 preview_dataset_fields = api.clone('DatasetPreview', dataset_fields, {
@@ -289,8 +299,11 @@ class ListBackendsAPI(API):
     def get(self):
         '''List all available harvest backends'''
         return sorted([
-            {'id': b.name, 'label': b.display_name}
-            for b in actions.list_backends()
+            {
+                'id': b.name,
+                'label': b.display_name,
+                'filters': [f.as_dict() for f in b.filters],
+            } for b in actions.list_backends()
         ], key=lambda b: b['label'])
 
 

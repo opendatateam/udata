@@ -49,6 +49,10 @@ DEFAULT_COUNT = 3
 
 class FactoryBackend(backends.BaseBackend):
     name = 'factory'
+    filters = (
+        backends.HarvestFilter('Test', 'test', int),
+        backends.HarvestFilter('Tag', 'tag', basestring),
+    )
 
     def initialize(self):
         mock_initialize.send(self)
