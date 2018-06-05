@@ -1,0 +1,50 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': "Suivi d'audience et vie privée",
+    'description': "Suivi d'audience et vie privée sur data.gouv.fr",
+} %}
+
+{% block breadcrumb %}
+    <li class="active">Redevances</li>
+{% endblock %}
+
+{% block content %}
+<section class="default">
+    <div class="container">
+        <div class="row">
+            <article class="suivi col-sm-12">
+                <h1>Suivi d'audience et vie privée</h1>
+
+                <h2>Cookies déposés et opt-out</h2>
+
+                <p class="text-justify">
+                Ce site dépose un petit fichier texte (un « cookie ») sur votre ordinateur lorsque vous le consultez.
+                Cela nous permet de mesurer le nombre de visites et de comprendre quelles sont les pages les plus consultées.
+                </p>
+
+                <iframe class="optout" src="https://stats.data.gouv.fr/index.php?module=CoreAdminHome&action=optOut&language=fr"></iframe>
+
+                <h2>Ce site n'affiche pas de bannière de consentement aux cookies, pourquoi ?</h2>
+
+                <p class="text-justify">
+                Nous respectons simplement la loi, qui dit que certains outils de suivi d'audience, correctement configurés pour respecter la vie privée, sont exemptés d'autorisation préalable.
+                </p>
+
+                <p class="text-justify">
+                Nous utilisons pour cela <a href="https://matomo.org">Matomo</a>, un outil <a href="https://matomo.org/free-software/">libre</a>,
+                paramétré pour être en conformité avec la <a href="https://www.cnil.fr/fr/solutions-pour-la-mesure-daudience">recommandation « Cookies »</a>
+                de la <abbr title="Commission Nationale de l'Informatique et des Libertés">CNIL</abbr>. Cela signifie que votre adresse IP, par exemple, est anonymisée avant d'être enregistrée.
+                Il est donc impossible d'associer vos visites sur ce site à votre personne.
+                </p>
+
+                <h2>Je contribue à enrichir vos données, puis-je y accéder ?</h2>
+                <p class="text-justify">
+                Bien sûr ! Les statistiques d’usage sont disponibles en accès libre sur <a href="https://stats.data.gouv.fr">stats.data.gouv.fr</a>.
+                </p>
+
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}

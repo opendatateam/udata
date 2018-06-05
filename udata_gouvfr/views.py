@@ -184,6 +184,14 @@ def licences():
         abort(404)
 
 
+@blueprint.route('/suivi')
+def suivi():
+    try:
+        return theme.render('suivi.html')
+    except TemplateNotFound:
+        abort(404)
+
+
 @blueprint.route('/faq/', defaults={'section': 'home'})
 @blueprint.route('/faq/<string:section>/')
 def faq(section):

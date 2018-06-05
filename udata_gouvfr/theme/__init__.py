@@ -42,6 +42,7 @@ nav.Bar('gouvfr_footer', [
     nav.Item(_('Licences'), 'gouvfr.licences'),
     nav.Item(_('API'), 'apidoc.swaggerui'),
     nav.Item(_('Terms of use'), 'site.terms'),
+    nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
 ])
 
 NETWORK_LINKS = [
