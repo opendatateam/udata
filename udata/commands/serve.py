@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 @click.option('--eager-loading/--lazy-loader', default=None,
               help='Enable or disable eager loading.  By default eager '
               'loading is enabled if the reloader is disabled.')
-@click.option('--with-threads/--without-threads', default=False,
+@click.option('--with-threads/--without-threads', default=True,
               help='Enable or disable multithreading.')
 @pass_script_info
 def serve(info, host, port, reload, debugger, eager_loading, with_threads):
