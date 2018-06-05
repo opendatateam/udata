@@ -11,7 +11,6 @@
     </button>
 </form>
 </template>
-
 <script>
 import log from 'logger';
 
