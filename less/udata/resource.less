@@ -39,9 +39,11 @@
 .resource-card {
     cursor: pointer;
     margin-bottom: 15px;
+
     .card-body {
         min-height: auto;
     }
+
     footer {
         // to display resource-card-actions and card-footer side by side
         display: flex;
@@ -52,6 +54,10 @@
             margin-left: auto;
             // avoid wrap
             display: flex;
+
+            .btn:first-child {
+                margin-right: 0.5em;
+            }
         }
         .card-footer {
             flex: 1 1 auto;
@@ -59,6 +65,24 @@
             align-self: center;
             margin-top: initial;
             padding: 0;
+        }
+    }
+}
+
+@media screen and (max-width: 320px){
+    .resource-card {
+        footer {
+            flex-direction: column;
+
+            .card-footer {
+                flex: 1 0 100%;
+                align-self: normal;
+                padding-bottom: 0.5em;
+            }
+
+            .resource-card-actions {
+                margin-left: -5px;
+            }
         }
     }
 }
