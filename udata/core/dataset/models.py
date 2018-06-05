@@ -76,7 +76,7 @@ DEFAULT_LICENSE = {
 }
 
 RESOURCE_TYPES = OrderedDict([
-    ('main', 'Main file'),
+    ('main', _('Main file')),
     ('documentation', _('Documentation')),
     ('update', _('Update')),
     ('api', _('API')),
