@@ -28,6 +28,7 @@
 - Adds ETag to internal avatar for efficient caching control [#1712](https://github.com/opendatateam/udata/pull/1712)
 - Show resource type in modal (front) [#1714](https://github.com/opendatateam/udata/pull/1714)
 - Starts using harvest backend `config` (validation, API exposition, `HarvestFilters`...) [#1716](https://github.com/opendatateam/udata/pull/1716)
+- Remove extras from datasets search index [#1718](https://github.com/opendatateam/udata/pull/1718)
 
 ## 1.3.12 (2018-05-31)
 
