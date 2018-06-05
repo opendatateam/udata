@@ -109,7 +109,6 @@ class DatasetSearch(ModelSearchAdapter):
     })
     granularity = String(index='not_analyzed')
     spatial_weight = Long()
-    extras = Object()
     from_certified = Boolean()
 
     fields = (
@@ -228,7 +227,6 @@ class DatasetSearch(ModelSearchAdapter):
             'last_modified': dataset.last_modified.strftime(
                 '%Y-%m-%dT%H:%M:%S'),
             'metrics': dataset.metrics,
-            'extras': dataset.extras,
             'featured': dataset.featured,
             'from_certified': certified,
         }
