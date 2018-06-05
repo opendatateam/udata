@@ -36,10 +36,13 @@
             text-align: right;
             width: 4em;
             order: 3;
+
+            a:hover {
+                cursor: pointer;
+            }
         }
     }
 }
-
 </style>
 <template>
 <div class="discussion-threads">
