@@ -119,8 +119,8 @@ class HarvestAPITest(MockBackendsMixin):
 
         assert403(response)
 
-    def test_create_source_with_config(self,api):
-        '''It should create anew source with configuration'''
+    def test_create_source_with_config(self, api):
+        '''It should create a new source with configuration'''
         api.login()
         data = {
             'name': faker.word(),

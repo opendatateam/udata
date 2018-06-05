@@ -59,7 +59,7 @@ class BaseBackend(object):
     verify_ssl = True
 
     # Define some allowed filters on the backend
-    # This a  Sequence[HarvestFilter]
+    # This a Sequence[HarvestFilter]
     filters = tuple()
 
     def __init__(self, source, job=None, dryrun=False, max_items=None):

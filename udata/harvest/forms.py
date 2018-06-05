@@ -16,19 +16,17 @@ class HarvestConfigField(fields.DictField):
     A DictField with extras validations on known configurations
     '''
     def get_backend(self, form):
-        return [
-            b for b in list_backends() if b.name == form.backend.data
-        ][0]
+        return next(b for b in list_backends() if b.name == form.backend.data)
 
     def get_specs(self, backend, key):
-        candidates = [f for f in backend.filters if f.key == key]
-        return candidates[0] if len(candidates) == 1 else None
+        candidates = (f for f in backend.filters if f.key == key)
+        return next(candidates, None)
 
     def pre_validate(self, form):
         if self.data:
             backend = self.get_backend(form)
             # Validate filters
-            for f in (self.data.get('filters', None) or []):
+            for f in (self.data.get('filters') or []):
                 if not ('key' in f and 'value' in f):
                     msg = 'A field should have both key and value properties'
                     raise validators.ValidationError(msg)

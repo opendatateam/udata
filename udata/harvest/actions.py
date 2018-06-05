@@ -64,7 +64,8 @@ def create_source(name, url, backend,
                   frequency=DEFAULT_HARVEST_FREQUENCY,
                   owner=None,
                   organization=None,
-                  config=None):
+                  config=None,
+                  ):
     '''Create a new harvest source'''
     if owner and not isinstance(owner, User):
         owner = User.get(owner)
