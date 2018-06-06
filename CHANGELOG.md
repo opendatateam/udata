@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.4.0 (2018-06-06)
 
 - Typed resources related styles [#265](https://github.com/etalab/udata-gouvfr/pull/265)
 - Enforce a domain whitelist when resource.filetype is file (migration) [#292](https://github.com/etalab/udata-gouvfr/pull/292)
