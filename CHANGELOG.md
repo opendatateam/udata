@@ -16,8 +16,8 @@
 
 ### Breaking changes
 
-- Normalize resource.format (migration - :warning: need reindexing). See [`RESOURCES_FILE_ALLOWED_DOMAINS`](https://udata.readthedocs.io/en/latest/adapting-settings/#resources_file_allowed_domains) settings variable for details and configuration. [#1563](https://github.com/opendatateam/udata/pull/1563)
-- Enforce a domain whitelist when resource.filetype is file [#1567](https://github.com/opendatateam/udata/issues/1567)
+- Normalize resource.format (migration - :warning: need reindexing). [#1563](https://github.com/opendatateam/udata/pull/1563)
+- Enforce a domain whitelist when resource.filetype is file. See [`RESOURCES_FILE_ALLOWED_DOMAINS`](https://udata.readthedocs.io/en/latest/adapting-settings/#resources_file_allowed_domains) settings variable for details and configuration. [#1567](https://github.com/opendatateam/udata/issues/1567)
 - Remove extras from datasets search index (needs reindexation) [#1718](https://github.com/opendatateam/udata/pull/1718)
 
 ### Bug fixes and minor changes
