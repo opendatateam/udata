@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix packaging
 
 ## 1.4.0 (2018-06-06)
 
