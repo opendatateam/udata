@@ -2,33 +2,44 @@
 
 ## Current (in progress)
 
-- Dynamic API documentation, Enhancement to Pull #1542 - [#1542](https://github.com/opendatateam/udata/pull/1542)
-- Normalize resource.format (migration - :warning: need reindexing) [#1563](https://github.com/opendatateam/udata/pull/1563)
+### New features
+
 - Typed resources [#1398](https://github.com/opendatateam/udata/issues/1398)
-- [breaking] Enforce a domain whitelist when resource.filetype is file [#1567](https://github.com/opendatateam/udata/issues/1567)
 - Initial data preview implementation [#1581](https://github.com/opendatateam/udata/pull/1581) [#1632](https://github.com/opendatateam/udata/pull/1632)
-- Switch to PyPI.org for package links [#1583](https://github.com/opendatateam/udata/pull/1583)
 - Handle some alternate titles and alternate URLs on licenses for improved match on harvesting [#1592](https://github.com/opendatateam/udata/pull/1592)
-- Resource modals: use new single resource API call [#1547](https://github.com/opendatateam/udata/pull/1547)
-- Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
-- Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
 - Allow to specify a dataset acronym [#1217](https://github.com/opendatateam/udata/pull/1217)
-- Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
-- Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
-- Refactoring of discussions code base [#1623](https://github.com/opendatateam/udata/pull/1623)
-- Fix Firefox custom error handling, part 2 [#1671](https://github.com/opendatateam/udata/pull/1671)
+- Starts using harvest backend `config` (validation, API exposition, `HarvestFilters`...) [#1716](https://github.com/opendatateam/udata/pull/1716)
 - The map widget can now be configured (tiles URL, initial position...) [#1672](https://github.com/opendatateam/udata/pull/1672)
-- Fix the temporal coverage facet query string parsing [#1676](https://github.com/opendatateam/udata/pull/1676)
-- Fix search auto-complete hitbox [#1687](https://github.com/opendatateam/udata/pull/1687)
-- Simplify `ExtrasField` form field signature (no need anymore for the `extras` parameter) [#1698](https://github.com/opendatateam/udata/pull/1698)
-- Ensure registered extras types are properly parsed from JSON. Remove the need for custom `db.Extra` classes [#1699](https://github.com/opendatateam/udata/pull/1699)
-- Register known extras types [#1700](https://github.com/opendatateam/udata/pull/1700)
+- New discussions layout [#1623](https://github.com/opendatateam/udata/pull/1623)
+- Dynamic API documentation, Enhancement to Pull #1542 - [#1542](https://github.com/opendatateam/udata/pull/1542)
+- Resource modal overhaul with markdown support [#1547](https://github.com/opendatateam/udata/pull/1547)
+
+### Breaking changes
+
+- Normalize resource.format (migration - :warning: need reindexing). See [`RESOURCES_FILE_ALLOWED_DOMAINS`](https://udata.readthedocs.io/en/latest/adapting-settings/#resources_file_allowed_domains) settings variable for details and configuration. [#1563](https://github.com/opendatateam/udata/pull/1563)
+- Enforce a domain whitelist when resource.filetype is file [#1567](https://github.com/opendatateam/udata/issues/1567)
+- Remove extras from datasets search index (needs reindexation) [#1718](https://github.com/opendatateam/udata/pull/1718)
+
+### Bug fixes and minor changes
+
+- Switch to PyPI.org for package links [#1583](https://github.com/opendatateam/udata/pull/1583)
+- Show resource type in modal (front) [#1714](https://github.com/opendatateam/udata/pull/1714)
+- Adds ETag to internal avatar for efficient caching control [#1712](https://github.com/opendatateam/udata/pull/1712)
 - Fix 404/missing css on front pages [#1709](https://github.com/opendatateam/udata/pull/1709)
 - Fix markdown max image width (front) [#1707](https://github.com/opendatateam/udata/pull/1707)
-- Adds ETag to internal avatar for efficient caching control [#1712](https://github.com/opendatateam/udata/pull/1712)
-- Show resource type in modal (front) [#1714](https://github.com/opendatateam/udata/pull/1714)
-- Starts using harvest backend `config` (validation, API exposition, `HarvestFilters`...) [#1716](https://github.com/opendatateam/udata/pull/1716)
-- Remove extras from datasets search index (needs reindexation) [#1718](https://github.com/opendatateam/udata/pull/1718)
+- Ensure registered extras types are properly parsed from JSON. Remove the need for custom `db.Extra` classes [#1699](https://github.com/opendatateam/udata/pull/1699)
+- Fix the temporal coverage facet query string parsing [#1676](https://github.com/opendatateam/udata/pull/1676)
+- Fix search auto-complete hitbox [#1687](https://github.com/opendatateam/udata/pull/1687)
+- Fix Firefox custom error handling, part 2 [#1671](https://github.com/opendatateam/udata/pull/1671)
+- Add resend confirmation email link to login screen [#1653](https://github.com/opendatateam/udata/pull/1653)
+- Audience metrics: use only `views` [#1607](https://github.com/opendatateam/udata/pull/1607)
+- Add missing spatial granularities translations [#1636](https://github.com/opendatateam/udata/pull/1636)
+- Protocol-relative URLs support [#1599](https://github.com/opendatateam/udata/pull/1599)
+
+### Internals
+
+- Simplify `ExtrasField` form field signature (no need anymore for the `extras` parameter) [#1698](https://github.com/opendatateam/udata/pull/1698)
+- Register known extras types [#1700](https://github.com/opendatateam/udata/pull/1700)
 
 ## 1.3.12 (2018-05-31)
 
