@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.4.0 (2018-06-06)
 
 ### New features
 
