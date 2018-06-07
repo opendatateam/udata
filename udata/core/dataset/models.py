@@ -673,7 +673,7 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     Local file, remote file or API added by the community of the users to the
     original dataset
     '''
-    dataset = db.ReferenceField(Dataset)
+    dataset = db.ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
 
     meta = {
         'ordering': ['-created_at'],
