@@ -122,7 +122,11 @@ new Vue({
             location.hash = `resource${communityPrefix}-${id}`;
             const modal = this.$modal(
                 ResourceModal,
-                {datasetId: this.dataset['@id'], resource: this.resourceFromJsonLd(resourceJsonLd)}
+                {
+                    datasetId: this.dataset['@id'],
+                    resource: this.resourceFromJsonLd(resourceJsonLd),
+                    isCommunity: isCommunity,
+                }
             );
             modal.$on('modal:closed', () => {
                 // prevent scrolling to top
@@ -214,7 +218,7 @@ new Vue({
         openResourceFromHash(hash) {
             if (RESOURCE_REGEX.test(hash)) {
                 const [, isCommunity, id] = hash.match(RESOURCE_REGEX);
-                this.showResource(id, isCommunity);
+                this.showResource(id, !!isCommunity);
             }
         },
 

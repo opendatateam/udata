@@ -60,7 +60,11 @@ export default {
         resource: {
             type: Object,
             required: true,
-        }
+        },
+        isCommunity: {
+            type: Boolean,
+            default: false,
+        },
     },
     components: {Modal, Availability},
     data() {
@@ -69,7 +73,9 @@ export default {
         }
     },
     created() {
-        const url = `datasets/${this.datasetId}/resources/${this.resource.id}/`;
+        const url = this.isCommunity ?
+            `datasets/community_resources/${this.resource.id}/` :
+            `datasets/${this.datasetId}/resources/${this.resource.id}/`;
         this.$api.get(url).then(resource => {
             Object.assign(this.resource, resource);
         });
