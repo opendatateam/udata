@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix community resource creation and display [#1733](https://github.com/opendatateam/udata/pull/1733)
 
 ## 1.4.0 (2018-06-06)
 
