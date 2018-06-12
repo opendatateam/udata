@@ -60,10 +60,12 @@ export class Cache {
         this.rekey = new RegExp(`^${this.prefix}`);
         try {
             this.storage = sessionStorage;
+            // Force error if sessions storage is simply not defined
+            if (!this.storage) throw Error('Session storage is missing');
         } catch(e) {
             // Session storage access is not allowed (browser privacy settings)
             // A warning is issued in the console
-            const msg = `Access to sessionStorage is not allowed.\
+            const msg = `Access to sessionStorage is not possible.\
             "${namespace}" cache performances will be degraded`;
             console.warn(msg);  // eslint-disable-line no-console
             this.storage = new ShimStorage();
