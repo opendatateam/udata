@@ -7,19 +7,41 @@ function now() {
 }
 
 /**
- * A fake WebStorage doing nothing.
+ * A WebStorage shim.
  *
  * To use as fallback when WebStorage is not available
+ * or when access to webstorage is not allowed.
+ *
+ * This storage has poor performance and won't survive page change or reload.
  */
-export class NullStorage {
+export class ShimStorage {
     constructor() {
-        this.length = 0;
+        this.store = {};
     }
-    key() {}
-    getItem() {}
-    setItem() {}
-    removeItem() {}
-    clear() {}
+
+    get length() {
+        return Object.keys(this.store).length;
+    }
+
+    key(idx) {
+        return Object.keys(this.storage)[idx] || null;
+    }
+
+    getItem(key) {
+        return this.store[key] || null;
+    }
+
+    setItem(key, value) {
+        this.store[key] = value;
+    }
+
+    removeItem(key) {
+        delete this.store[key];
+    }
+
+    clear() {
+        this.store = {};
+    }
 }
 
 /**
@@ -40,11 +62,11 @@ export class Cache {
             this.storage = sessionStorage;
         } catch(e) {
             // Session storage access is not allowed (browser privacy settings)
-            // A warning is issued in the console and cache is disabled
+            // A warning is issued in the console
             const msg = `Access to sessionStorage is not allowed.\
-            "${namespace}" cache is disabled`;
+            "${namespace}" cache performances will be degraded`;
             console.warn(msg);  // eslint-disable-line no-console
-            this.storage = new NullStorage();
+            this.storage = new ShimStorage();
         }
     }
 
@@ -136,8 +158,6 @@ export class Cache {
      * @return {Boolean}     true if the cached value expired
      */
     isExpired(key) {
-        // const value = this.storage.getItem(this._ttl(key));
-        // if (!value) return false;
         const ttl = JSON.parse(this.storage.getItem(this._ttl(key)));
         return Number.isInteger(ttl) && now() > ttl;
     }
