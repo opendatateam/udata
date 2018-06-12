@@ -53,7 +53,7 @@ export default {
                 subtitle: this._('Communicate about your publication'),
                 component: require('components/dataset/communityresource/post-create.vue'),
                 init: (component) => {
-                    this.communityResource._set('url', this.dataset.page + '#resource-' + this.communityResource.id);
+                    this.communityResource._set('url', this.dataset.page + '#resource-community-' + this.communityResource.id);
                     component.communityResource = this.communityResource;
                 }
             }],
