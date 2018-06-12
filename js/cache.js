@@ -7,21 +7,69 @@ function now() {
 }
 
 /**
+ * A WebStorage shim.
+ *
+ * To use as fallback when WebStorage is not available
+ * or when access to webstorage is not allowed.
+ *
+ * This storage has poor performance and won't survive page change or reload.
+ */
+export class ShimStorage {
+    constructor() {
+        this.store = {};
+    }
+
+    get length() {
+        return Object.keys(this.store).length;
+    }
+
+    key(idx) {
+        return Object.keys(this.storage)[idx] || null;
+    }
+
+    getItem(key) {
+        return this.store[key] || null;
+    }
+
+    setItem(key, value) {
+        this.store[key] = value;
+    }
+
+    removeItem(key) {
+        delete this.store[key];
+    }
+
+    clear() {
+        this.store = {};
+    }
+}
+
+/**
  * A WebStorage based cache with optionnal TTL (expressed in seconds).
  */
 export class Cache {
     /**
      * Constructor
      * @param  {String} namespace The namespace key meant to isolate keys
-     * @param  {WebStorage} storage     The target storage for values
      * @param  {int} ttl                An optionnal default TTL
      */
-    constructor(namespace, storage, ttl) {
+    constructor(namespace, ttl) {
         this.namespace = namespace;
-        this.storage = storage;
         this.ttl = ttl;
         this.prefix = `__${this.namespace}__`;
         this.rekey = new RegExp(`^${this.prefix}`);
+        try {
+            this.storage = sessionStorage;
+            // Force error if sessions storage is simply not defined
+            if (!this.storage) throw Error('Session storage is missing');
+        } catch(e) {
+            // Session storage access is not allowed (browser privacy settings)
+            // A warning is issued in the console
+            const msg = `Access to sessionStorage is not possible.\
+            "${namespace}" cache performances will be degraded`;
+            console.warn(msg);  // eslint-disable-line no-console
+            this.storage = new ShimStorage();
+        }
     }
 
     /**
@@ -117,9 +165,7 @@ export class Cache {
     }
 }
 
-/**
- * A default global session cache
- */
-export const cache = new Cache('udata', sessionStorage);
+
+export const cache = new Cache('udata');
 
 export default cache;

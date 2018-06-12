@@ -75,7 +75,7 @@ export default {
             current: -1,
             query: null,
             show: false,
-            cache: new Cache('site-search', sessionStorage),
+            cache: new Cache('site-search'),
             groups: [
                 group('datasets', this._('Datasets')),
                 group('reuses', this._('Reuses')),
