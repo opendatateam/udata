@@ -113,6 +113,13 @@ class DatasetModelTest:
         assert dataset.community_resources[1].id == community_resource1.id
         assert dataset.community_resources[0].id == community_resource2.id
 
+    def test_community_resource_deleted_dataset(self):
+        dataset = DatasetFactory()
+        community_resource = CommunityResourceFactory(dataset=dataset)
+        community_resource.dataset.delete()
+        community_resource.reload()
+        assert community_resource.dataset is None
+
     def test_next_update_empty(self):
         dataset = DatasetFactory()
         assert dataset.next_update is None
