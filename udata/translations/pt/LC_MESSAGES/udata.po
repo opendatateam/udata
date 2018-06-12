@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-06-05 18:02+0200\n"
-"PO-Revision-Date: 2018-06-05 12:09-0400\n"
+"PO-Revision-Date: 2018-06-08 10:31-0400\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -63,7 +63,7 @@ msgstr "Nome"
 
 #: udata/auth/forms.py:12
 msgid "First name is required"
-msgstr ""
+msgstr "O nome próprio é obrigatório"
 
 #: udata/auth/forms.py:14 udata/core/user/forms.py:18
 #: udata/templates/user/list.html:31
@@ -72,7 +72,7 @@ msgstr "Apelido"
 
 #: udata/auth/forms.py:14
 msgid "Last name is required"
-msgstr ""
+msgstr "O apelido é obrigatório"
 
 #: udata/commands/init.py:31
 msgid "Do you want to create a superadmin user?"
@@ -398,7 +398,7 @@ msgstr "Desconhecido"
 
 #: udata/core/dataset/models.py:79
 msgid "Main file"
-msgstr ""
+msgstr "Arquivo principal"
 
 #: udata/core/dataset/models.py:80
 msgid "Documentation"
@@ -1795,7 +1795,7 @@ msgstr "Eliminado"
 
 #: udata/templates/dataset/display.html:97
 msgid "See also: community resources"
-msgstr ""
+msgstr "Veja também: recursos da comunidade"
 
 #: udata/templates/dataset/display.html:120
 #, python-format
