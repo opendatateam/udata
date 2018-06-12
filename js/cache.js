@@ -7,21 +7,45 @@ function now() {
 }
 
 /**
+ * A fake WebStorage doing nothing.
+ *
+ * To use as fallback when WebStorage is not available
+ */
+export class NullStorage {
+    constructor() {
+        this.length = 0;
+    }
+    key() {}
+    getItem() {}
+    setItem() {}
+    removeItem() {}
+    clear() {}
+}
+
+/**
  * A WebStorage based cache with optionnal TTL (expressed in seconds).
  */
 export class Cache {
     /**
      * Constructor
      * @param  {String} namespace The namespace key meant to isolate keys
-     * @param  {WebStorage} storage     The target storage for values
      * @param  {int} ttl                An optionnal default TTL
      */
-    constructor(namespace, storage, ttl) {
+    constructor(namespace, ttl) {
         this.namespace = namespace;
-        this.storage = storage;
         this.ttl = ttl;
         this.prefix = `__${this.namespace}__`;
         this.rekey = new RegExp(`^${this.prefix}`);
+        try {
+            this.storage = sessionStorage;
+        } catch(e) {
+            // Session storage access is not allowed (browser privacy settings)
+            // A warning is issued in the console and cache is disabled
+            const msg = `Access to sessionStorage is not allowed.\
+            "${namespace}" cache is disabled`;
+            console.warn(msg);  // eslint-disable-line no-console
+            this.storage = new NullStorage();
+        }
     }
 
     /**
@@ -112,14 +136,14 @@ export class Cache {
      * @return {Boolean}     true if the cached value expired
      */
     isExpired(key) {
+        // const value = this.storage.getItem(this._ttl(key));
+        // if (!value) return false;
         const ttl = JSON.parse(this.storage.getItem(this._ttl(key)));
         return Number.isInteger(ttl) && now() > ttl;
     }
 }
 
-/**
- * A default global session cache
- */
-export const cache = new Cache('udata', sessionStorage);
+
+export const cache = new Cache('udata');
 
 export default cache;

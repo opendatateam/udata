@@ -10,14 +10,20 @@ describe('Cache', function() {
     });
 
     it('store and retrieve value', function() {
-        const cache = new Cache('cache', sessionStorage);
+        const cache = new Cache('cache');
 
         cache.set('key', 'value');
         expect(cache.get('key')).to.equal('value');
     });
 
+    it('returns undefined if key does not exists', function() {
+        const cache = new Cache('cache');
+
+        expect(cache.get('key')).to.be.undefined;
+    });
+
     it('store and retrieve value with TTL', function() {
-        const cache = new Cache('cache', sessionStorage);
+        const cache = new Cache('cache');
 
         cache.set('key', 'value', 10);
         expect(cache.get('key')).to.equal('value');
@@ -25,7 +31,7 @@ describe('Cache', function() {
 
     it('expire value with default TTL', function(done) {
         const TTL = 1;
-        const cache = new Cache('cache', sessionStorage, TTL);
+        const cache = new Cache('cache', TTL);
 
         cache.set('key', 'value');
 
@@ -37,7 +43,7 @@ describe('Cache', function() {
 
     it('expire value with TTL', function(done) {
         const TTL = 1;
-        const cache = new Cache('cache', sessionStorage);
+        const cache = new Cache('cache');
 
         cache.set('key', 'value', TTL);
 
@@ -48,7 +54,7 @@ describe('Cache', function() {
     });
 
     it('list all keys', function() {
-        const cache = new Cache('cache', sessionStorage);
+        const cache = new Cache('cache');
         const nbkeys = 3;
 
         sessionStorage.setItem('unrelated-key', 'value');
@@ -61,7 +67,7 @@ describe('Cache', function() {
     });
 
     it('remove a value', function() {
-        const cache = new Cache('cache', sessionStorage);
+        const cache = new Cache('cache');
 
         cache.set('key', 'value');
         cache.remove('key');
@@ -69,7 +75,7 @@ describe('Cache', function() {
     });
 
     it('clear/remove all keys', function() {
-        const cache = new Cache('cache', sessionStorage);
+        const cache = new Cache('cache');
         const nbkeys = 3;
 
         sessionStorage.setItem('unrelated-key', 'value');
