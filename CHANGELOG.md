@@ -5,6 +5,7 @@
 - Fix community resource creation and display [#1733](https://github.com/opendatateam/udata/pull/1733)
 - Failsafe JS cache storage: use a custom in-memory storage as fallback when access to `sessionStorage` is not allowed [#1742](https://github.com/opendatateam/udata/pull/1742)
 - Prevent errors when handling API errors without data/payload [#1743](https://github.com/opendatateam/udata/pull/1743)
+- Improve/fix validation error formatting on harvesting [#1745](https://github.com/opendatateam/udata/pull/1745)
 
 ## 1.4.0 (2018-06-06)
 
