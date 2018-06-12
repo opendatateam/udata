@@ -5,7 +5,7 @@ import log from 'logger';
 
 export class ApiError extends CustomError {
     constructor(response, data) {
-        const message = data.hasOwnProperty('message')
+        const message = data && data.hasOwnProperty('message')
             ? data.message
             : response.statusText || 'API Error';
 
