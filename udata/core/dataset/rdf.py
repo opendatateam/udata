@@ -14,13 +14,14 @@ from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
 
-from udata import i18n
+from udata import i18n, uris
 from udata.frontend.markdown import parse_html
 from udata.models import db
 from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
 from udata.rdf import (
-    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, namespace_manager, url_from_rdf
+    DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
+    namespace_manager, url_from_rdf
 )
 from udata.utils import get_by
 
@@ -38,6 +39,37 @@ RDF_FREQUENCIES = {
     'fourTimesAWeek': FREQ.threeTimesAWeek,
     'quinquennial': None,
     'unknown': None,
+}
+
+# Map european frequencies to their closest equivalent
+# See:
+#  - http://publications.europa.eu/mdr/resource/authority/frequency/html/frequencies-eng.html # noqa: E501
+#  - https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency # noqa: E501
+EU_RDF_REQUENCIES = {
+    # Match Dublin Core name
+    EUFREQ.ANNUAL: 'annual',
+    EUFREQ.BIENNIAL: 'biennial',
+    EUFREQ.TRIENNIAL: 'triennial',
+    EUFREQ.QUARTERLY: 'quarterly',
+    EUFREQ.MONTHLY: 'monthly',
+    EUFREQ.BIMONTHLY: 'bimonthly',
+    EUFREQ.WEEKLY: 'weekly',
+    EUFREQ.BIWEEKLY: 'biweekly',
+    EUFREQ.DAILY: 'daily',
+    # Name differs from Dublin Core
+    EUFREQ.ANNUAL_2: 'semiannual',
+    EUFREQ.ANNUAL_3: 'threeTimesAYear',
+    EUFREQ.MONTHLY_2: 'semimonthly',
+    EUFREQ.MONTHLY_3: 'threeTimesAMonth',
+    EUFREQ.WEEKLY_2: 'semiweekly',
+    EUFREQ.WEEKLY_3: 'threeTimesAWeek',
+    EUFREQ.DAILY_2: 'semidaily',
+    EUFREQ.CONT: 'continuous',
+    EUFREQ.UPDATE_CONT: 'continuous',
+    EUFREQ.IRREG: 'irregular',
+    EUFREQ.UNKNOWN: 'unknown',
+    EUFREQ.OTHER: 'unknown',
+    EUFREQ.NEVER: 'punctual',
 }
 
 
@@ -264,9 +296,16 @@ def temporal_from_rdf(period_of_time):
 
 
 def frequency_from_rdf(term):
+    if isinstance(term, basestring):
+        try:
+            term = URIRef(uris.validate(term))
+        except uris.ValidationError:
+            pass
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
+        if EUFREQ in term:
+            return EU_RDF_REQUENCIES.get(term)
         _, _, freq = namespace_manager.compute_qname(term)
         return freq
 
