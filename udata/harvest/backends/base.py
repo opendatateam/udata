@@ -9,7 +9,7 @@ from uuid import UUID
 
 import requests
 
-from voluptuous import MultipleInvalid
+from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata.models import Dataset
 
@@ -217,12 +217,12 @@ class BaseBackend(object):
         '''
         try:
             return schema(data)
-        except MultipleInvalid as e:
+        except MultipleInvalid as ie:
             errors = []
-            for error in e.errors:
-                if e.path:
-                    field = '.'.join(str(p) for p in e.path)
-                    path = e.path
+            for error in ie.errors:
+                if error.path:
+                    field = '.'.join(str(p) for p in error.path)
+                    path = error.path
                     value = data
                     while path:
                         attr = path.pop(0)
@@ -230,15 +230,22 @@ class BaseBackend(object):
                             if isinstance(value, (list, tuple)):
                                 attr = int(attr)
                             value = value[attr]
-                        except:
+                        except Exception:
                             value = None
+
+                    txt = str(error).replace('for dictionary value', '')
+                    txt = txt.strip()
+                    if isinstance(error, RequiredFieldInvalid):
+                        msg = '[{0}] {1}'
+                    else:
+                        msg = '[{0}] {1}: {2}'
                     try:
-                        msg = '[{0}] {1}: {2}'.format(field, e, str(value))
-                    except Exception as e:
-                        msg = '[{0}] {1}'.format(field, e)
+                        msg = msg.format(field, txt, str(value))
+                    except Exception:
+                        msg = '[{0}] {1}'.format(field, txt)
 
                 else:
-                    msg = str(e)
+                    msg = str(error)
                 errors.append(msg)
             msg = '\n- '.join(['Validation error:'] + errors)
             raise HarvestException(msg)
