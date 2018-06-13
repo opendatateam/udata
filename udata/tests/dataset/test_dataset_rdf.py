@@ -18,7 +18,8 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.rdf import (
     dataset_to_rdf, dataset_from_rdf, resource_to_rdf, resource_from_rdf,
-    temporal_from_rdf, frequency_to_rdf, frequency_from_rdf
+    temporal_from_rdf, frequency_to_rdf, frequency_from_rdf,
+    EU_RDF_REQUENCIES
 )
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
@@ -28,6 +29,13 @@ from udata.tests.helpers import assert200, assert_redirects
 
 
 pytestmark = pytest.mark.usefixtures('app')
+
+FREQ_SAMPLE = [
+    (FREQ.annual, 'annual'),
+    (FREQ.monthly, 'monthly'),
+    (FREQ.daily, 'daily'),
+    (FREQ.continuous, 'continuous'),
+]
 
 
 @pytest.mark.frontend
@@ -305,14 +313,33 @@ class RdfToDatasetTest:
         assert isinstance(dataset, Dataset)
         assert set(dataset.tags) == set(tags + themes)
 
-    @pytest.mark.parametrize('freq,expected', [
-        (FREQ.yearly, 'yearly'),
-        (FREQ.monthly, 'monthly'),
-        (FREQ.daily, 'daily'),
-        (FREQ.continuous, 'continuous'),
-    ])
-    def test_parse_purl_dublin_core_frequencies(self, freq, expected):
+    @pytest.mark.parametrize('freq,expected', FREQ_SAMPLE)
+    def test_parse_dublin_core_frequencies(self, freq, expected):
         assert frequency_from_rdf(freq) == expected
+
+    @pytest.mark.parametrize('freq,expected', FREQ_SAMPLE)
+    def test_parse_dublin_core_frequencies_as_resource(self, freq, expected):
+        g = Graph()
+        resource = RdfResource(g, freq)
+        assert frequency_from_rdf(resource) == expected
+
+    @pytest.mark.parametrize('freq,expected', FREQ_SAMPLE)
+    def test_parse_dublin_core_frequencies_as_url(self, freq, expected):
+        assert frequency_from_rdf(str(freq)) == expected
+
+    @pytest.mark.parametrize('freq,expected', EU_RDF_REQUENCIES.items())
+    def test_parse_european_frequencies(self, freq, expected):
+        assert frequency_from_rdf(freq) == expected
+
+    @pytest.mark.parametrize('freq,expected', EU_RDF_REQUENCIES.items())
+    def test_parse_european_frequencies_as_resource(self, freq, expected):
+        g = Graph()
+        resource = RdfResource(g, freq)
+        assert frequency_from_rdf(resource) == expected
+
+    @pytest.mark.parametrize('freq,expected', EU_RDF_REQUENCIES.items())
+    def test_parse_european_frequencies_as_url(self, freq, expected):
+        assert frequency_from_rdf(str(freq)) == expected
 
     def test_minimal_resource_fields(self):
         node = BNode()
