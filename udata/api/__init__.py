@@ -135,6 +135,9 @@ class UDataApi(Api):
 
     def validate(self, form_cls, obj=None):
         '''Validate a form from the request and handle errors'''
+        if 'application/json' not in request.headers.get('Content-Type'):
+            errors = {'Content-Type': 'expecting application/json'}
+            self.abort(400, errors=errors)
         form = form_cls.from_json(request.json, obj=obj, instance=obj,
                                   csrf_enabled=False)
         if not form.validate():
