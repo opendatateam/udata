@@ -51,6 +51,28 @@ class DateRangeTest:
         assert daterange_end(None) is None
         assert daterange_end('') is None
 
+    def test_parse_daterange_start_date(self):
+        today = date.today()
+        assert daterange_start(today) == today
+
+    def test_parse_daterange_end_date(self):
+        today = date.today()
+        assert daterange_end(today) == today
+
+    def test_parse_daterange_start_datetime(self):
+        now = datetime.now()
+        assert daterange_start(now) == now.date()
+
+    def test_parse_daterange_end_datetime(self):
+        now = datetime.now()
+        assert daterange_end(now) == now.date()
+
+    def test_parse_daterange_start_full_iso(self):
+        assert daterange_start('1984-06-07T00:00:00+00:00') == date(1984, 6, 7)
+
+    def test_parse_daterange_end_full_iso(self):
+        assert daterange_end('1984-06-07T00:00:00+00:00') == date(1984, 6, 7)
+
     def test_parse_daterange_start_full(self):
         assert daterange_start('1984-06-07') == date(1984, 6, 7)
 

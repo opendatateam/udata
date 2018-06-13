@@ -7,15 +7,16 @@ import re
 
 import factory
 
-from uuid import uuid4
 from datetime import date, datetime
-from calendar import monthrange
-from math import ceil
-from xml.sax.saxutils import escape
+from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse as parse_dt
 from faker import Faker
 from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
+from math import ceil
+from uuid import uuid4
+from xml.sax.saxutils import escape
 
 
 def get_by(lst, field, value):
@@ -96,34 +97,49 @@ class Paginator(Paginable):
         self.total = total
 
 
-def daterange_start(string):
+def daterange_start(value):
     '''Parse a date range start boundary'''
-    if not string:
+    if not value:
         return None
-    parts = string.split('-')
+    elif isinstance(value, datetime):
+        return value.date()
+    elif isinstance(value, date):
+        return value
 
-    if len(parts) == 3:
-        return date(*(int(part) for part in parts))
-    elif len(parts) == 2:
-        return date(int(parts[0]), int(parts[1]), 1)
+    result = parse_dt(value).date()
+    dashes = value.count('-')
+
+    if dashes >= 2:
+        return result
+    elif dashes == 1:
+        # Year/Month only
+        return result.replace(day=1)
     else:
-        return date(int(parts[0]), 1, 1)
+        # Year only
+        return result.replace(day=1, month=1)
 
 
-def daterange_end(string):
+def daterange_end(value):
     '''Parse a date range end boundary'''
-    if not string:
+    if not value:
         return None
-    parts = string.split('-')
+    elif isinstance(value, datetime):
+        return value.date()
+    elif isinstance(value, date):
+        return value
 
-    if len(parts) == 3:
-        return date(*(int(part) for part in parts))
-    elif len(parts) == 2:
-        year, month = int(parts[0]), int(parts[1])
-        _, end_of_month = monthrange(year, month)
-        return date(year, month, end_of_month)
+    result = parse_dt(value).date()
+    dashes = value.count('-')
+
+    if dashes >= 2:
+        # Full date
+        return result
+    elif dashes == 1:
+        # Year/Month
+        return result + relativedelta(months=+1, days=-1, day=1)
     else:
-        return date(int(parts[0]), 12, 31)
+        # Year only
+        return result.replace(month=12, day=31)
 
 
 def to_iso(dt):
