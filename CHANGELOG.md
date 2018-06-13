@@ -7,6 +7,7 @@
 - Prevent errors when handling API errors without data/payload [#1743](https://github.com/opendatateam/udata/pull/1743)
 - Improve/fix validation error formatting on harvesting [#1745](https://github.com/opendatateam/udata/pull/1745)
 - Ensure daterange can be parsed from full iso datetime [#1748](https://github.com/opendatateam/udata/pull/1748)
+- API: enforce application/json content-type for forms [#1751](https://github.com/opendatateam/udata/pull/1751)
 
 ## 1.4.0 (2018-06-06)
 
