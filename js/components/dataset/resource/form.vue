@@ -221,7 +221,7 @@ export default {
                     widget: 'checksum',
                     readonly: false
                 }],
-            upload_multiple: false,
+            uploadMultiple: false,
             progress: 0,
         };
     },

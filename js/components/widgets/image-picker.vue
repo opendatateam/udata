@@ -77,6 +77,7 @@ import Thumbnailer from 'components/widgets/thumbnailer.vue';
 export default {
     name: 'image-picker',
     autoUpload: false,
+    chunk: false,
     mixins: [UploaderMixin],
     components: {Thumbnailer},
     data() {

@@ -41,6 +41,18 @@ const messages = {
  * http://docs.fineuploader.com/
  */
 export default {
+    /*
+     * Default options
+     */
+    // Start upload as soon as file is dropped
+    autoUpload: true,
+    // Allow multiple uploads
+    uploadMultiple: true,
+    // The class added to the active drop zone
+    dropActive: 'drop-active',
+    // Wther or not to allow chunked uploads
+    chunk: true,
+
     data() {
         return {
             files: [],
@@ -92,9 +104,9 @@ export default {
             if (!this.upload_endpoint) return;
             this.$uploader = new qq.FineUploaderBasic({
                 debug: DEBUG,
-                multiple: this.$options.hasOwnProperty('upload_multiple') ? this.$options.upload_multiple : true,
+                multiple: this.$options.uploadMultiple,
                 uploaderType: 'basic',
-                autoUpload: this.$options.hasOwnProperty('autoUpload') ? this.$options.autoUpload : true,
+                autoUpload: this.$options.autoUpload,
                 button: this.$els.uploadBtn,
                 request: {
                     endpoint: this.upload_endpoint,
@@ -104,9 +116,9 @@ export default {
                     filenameParam: 'filename',
                 },
                 chunking: {
-                    enabled: true,
+                    enabled:  this.$options.chunk,
                     concurrent: {
-                        enabled: true
+                        enabled:  this.$options.chunk,
                     },
                     paramNames: {
                         chunkSize: 'chunksize',
