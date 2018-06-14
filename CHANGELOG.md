@@ -9,6 +9,7 @@
 - Ensure daterange can be parsed from full iso datetime [#1748](https://github.com/opendatateam/udata/pull/1748)
 - API: enforce application/json content-type for forms [#1751](https://github.com/opendatateam/udata/pull/1751)
 - RDF parser can now process [european frequencies](https://publications.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/frequency) [#1752](https://github.com/opendatateam/udata/pull/1752)
+- Fix images upload broken by chunked upload [#1756](https://github.com/opendatateam/udata/pull/1756)
 
 ## 1.4.0 (2018-06-06)
 
