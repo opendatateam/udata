@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.4.1 (2018-06-15)
 
 - Fix community resource creation and display [#1733](https://github.com/opendatateam/udata/pull/1733)
