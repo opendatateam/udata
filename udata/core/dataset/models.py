@@ -28,33 +28,33 @@ __all__ = (
 #: Udata frequencies with their labels
 #:
 #: See: http://dublincore.org/groups/collections/frequency/
-UPDATE_FREQUENCIES = {                              # Dublin core equivalent
-    'punctual': _('Punctual'),                      # N/A
-    'continuous': _('Real time'),                   # freq:continuous
-    'hourly': _('Hourly'),                          # N/A
-    'fourTimesADay': _('Four times a day'),         # N/A
-    'threeTimesADay': _('Three times a day'),       # N/A
-    'semidaily': _('Semidaily'),                    # N/A
-    'daily': _('Daily'),                            # freq:daily
-    'fourTimesAWeek': _('Four times a week'),       # N/A
-    'threeTimesAWeek': _('Three times a week'),     # freq:threeTimesAWeek
-    'semiweekly': _('Semiweekly'),                  # freq:semiweekly
-    'weekly': _('Weekly'),                          # freq:weekly
-    'biweekly': _('Biweekly'),                      # freq:bimonthly
-    'semimonthly': _('Semimonthly'),                # freq:semimonthly
-    'threeTimesAMonth': _('Three times a month'),   # freq:threeTimesAMonth
-    'monthly': _('Monthly'),                        # freq:monthly
-    'bimonthly': _('Bimonthly'),                    # freq:bimonthly
-    'quarterly': _('Quarterly'),                    # freq:quarterly
-    'threeTimesAYear': _('Three times a year'),     # freq:threeTimesAYear
-    'semiannual': _('Biannual'),                    # freq:semiannual
-    'annual': _('Annual'),                          # freq:annual
-    'biennial': _('Biennial'),                      # freq:biennial
-    'triennial': _('Triennial'),                    # freq:triennial
-    'quinquennial': _('Quinquennial'),              # N/A
-    'irregular': _('Irregular'),                    # freq:irregular
-    'unknown': _('Unknown'),                        # N/A
-}
+UPDATE_FREQUENCIES = OrderedDict([                              # Dublin core equivalent
+    ('unknown', _('Unknown')),                        # N/A
+    ('punctual', _('Punctual')),                      # N/A
+    ('continuous', _('Real time')),                   # freq:continuous
+    ('hourly', _('Hourly')),                          # N/A
+    ('fourTimesADay', _('Four times a day')),         # N/A
+    ('threeTimesADay', _('Three times a day')),       # N/A
+    ('semidaily', _('Semidaily')),                    # N/A
+    ('daily', _('Daily')),                            # freq:daily
+    ('fourTimesAWeek', _('Four times a week')),       # N/A
+    ('threeTimesAWeek', _('Three times a week')),     # freq:threeTimesAWeek
+    ('semiweekly', _('Semiweekly')),                  # freq:semiweekly
+    ('weekly', _('Weekly')),                          # freq:weekly
+    ('biweekly', _('Biweekly')),                      # freq:bimonthly
+    ('threeTimesAMonth', _('Three times a month')),   # freq:threeTimesAMonth
+    ('semimonthly', _('Semimonthly')),                # freq:semimonthly
+    ('monthly', _('Monthly')),                        # freq:monthly
+    ('bimonthly', _('Bimonthly')),                    # freq:bimonthly
+    ('quarterly', _('Quarterly')),                    # freq:quarterly
+    ('threeTimesAYear', _('Three times a year')),     # freq:threeTimesAYear
+    ('semiannual', _('Biannual')),                    # freq:semiannual
+    ('annual', _('Annual')),                          # freq:annual
+    ('biennial', _('Biennial')),                      # freq:biennial
+    ('triennial', _('Triennial')),                    # freq:triennial
+    ('quinquennial', _('Quinquennial')),              # N/A
+    ('irregular', _('Irregular')),                    # freq:irregular
+])
 
 #: Map legacy frequencies to currents
 LEGACY_FREQUENCIES = {
