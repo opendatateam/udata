@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.4.1 (2018-06-15)
 
 - Fix community resource creation and display [#1733](https://github.com/opendatateam/udata/pull/1733)
 - Failsafe JS cache storage: use a custom in-memory storage as fallback when access to `sessionStorage` is not allowed [#1742](https://github.com/opendatateam/udata/pull/1742)
