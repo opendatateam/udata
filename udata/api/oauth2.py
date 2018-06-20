@@ -137,7 +137,7 @@ class OAuth2Grant(db.Document):
         'collection': 'oauth2_grant'
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return '<OAuth2Grant({0.client.name}, {0.user.fullname})>'.format(self)
 
     def is_expired(self):
@@ -167,7 +167,7 @@ class OAuth2Token(db.Document):
         'collection': 'oauth2_token'
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return '<OAuth2Token({0.client.name})>'.format(self)
 
     def get_scope(self):

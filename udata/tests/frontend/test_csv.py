@@ -39,7 +39,7 @@ class Fake(db.Document):
     sub = db.EmbeddedDocumentField(NestedFake)
     metrics = db.DictField()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'fake'
 
 

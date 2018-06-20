@@ -69,7 +69,7 @@ class Metrics(db.Document):
         'queryset_class': MetricsQuerySet,
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return 'Metrics for object {0} on {1} ({2})'.format(
             self.object_id, self.date, self.level
         )

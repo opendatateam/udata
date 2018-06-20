@@ -39,7 +39,7 @@ class Post(db.Datetimed, db.Document):
 
     verbose_name = _('post')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
     def url_for(self, *args, **kwargs):

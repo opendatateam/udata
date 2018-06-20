@@ -26,7 +26,7 @@ class Site(WithMetrics, db.Document):
     themes = db.DictField()
     settings = db.EmbeddedDocumentField(SiteSettings, default=SiteSettings)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title or ''
 
 
