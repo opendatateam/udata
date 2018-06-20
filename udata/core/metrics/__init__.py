@@ -44,7 +44,7 @@ class MetricMetaClass(type):
         return new_class
 
 
-class Metric(object):
+class Metric(object, metaclass=MetricMetaClass):
     model = None
     name = None
     display_name = None
@@ -52,8 +52,6 @@ class Metric(object):
     default = 0
     value_type = int
     archived = True
-
-    __metaclass__ = MetricMetaClass
 
     def __init__(self, target, data=None):
         self.target = target
