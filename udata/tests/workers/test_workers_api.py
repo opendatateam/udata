@@ -283,7 +283,7 @@ class JobsAPITest(APITestCase):
     def test_get_task(self):
         @celery.task
         def test_task():
-            print 'hello'
+            print('hello')
 
         result = test_task.delay()  # Always eager so no async
 
