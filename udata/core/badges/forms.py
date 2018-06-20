@@ -12,7 +12,7 @@ def badge_form(model):
 
         kind = fields.RadioField(
             _('Kind'), [validators.required()],
-            choices=model.__badges__.items(),
+            choices=list(model.__badges__.items()),
             description=_('Kind of badge (certified, etc)'))
 
     return BadgeForm

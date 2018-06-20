@@ -1341,7 +1341,7 @@ class SearchAdaptorTest(SearchTestMixin, TestCase):
         self.assertHasArgument(parser, 'sort', str)
         self.assertHasArgument(parser, 'facets', str)
         self.assertHasArgument(parser, 'range', facet.validate_parameter,
-                               choices=RANGE_LABELS.keys())
+                               choices=list(RANGE_LABELS))
         self.assertHasArgument(parser, 'page', int)
         self.assertHasArgument(parser, 'page_size', int)
 
