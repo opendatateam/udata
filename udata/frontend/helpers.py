@@ -95,7 +95,7 @@ def url_del(url=None, *args, **kwargs):
     for key, value in kwargs.items():
         lst = params.poplist(key)
         if str(value) in lst:
-            lst.remove(unicode(value))
+            lst.remove(str(value))
         params.setlist(key, lst)
     return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
                               fragments)))

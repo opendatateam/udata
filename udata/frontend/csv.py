@@ -2,7 +2,7 @@ import logging
 
 from io import StringIO
 import itertools
-import unicodecsv
+import csv
 
 from datetime import datetime, date
 
@@ -18,15 +18,14 @@ log = logging.getLogger(__name__)
 _adapters = {}
 
 CONFIG = {
-    'encoding': 'utf-8',
-    'delimiter': b';',
-    'quotechar': b'"',
+    'delimiter': ';',
+    'quotechar': '"',
 }
 
 
 def safestr(value):
     '''Ensure type to string serialization'''
-    if not value or isinstance(value, (int, float, bool, long)):
+    if not value or isinstance(value, (int, float, bool)):
         return value
     elif isinstance(value, (date, datetime)):
         return value.isoformat()
@@ -191,13 +190,12 @@ def metric_fields(cls):
 
 def get_writer(out):
     '''Get a preconfigured CSV writer for a given output file'''
-    return unicodecsv.writer(out, quoting=unicodecsv.QUOTE_NONNUMERIC,
-                             **CONFIG)
+    return csv.writer(out, quoting=csv.QUOTE_NONNUMERIC, **CONFIG)
 
 
 def get_reader(infile):
     '''Get a preconfigured CSV reader for a given input file'''
-    return unicodecsv.reader(infile, **CONFIG)
+    return csv.reader(infile, **CONFIG)
 
 
 def yield_rows(adapter):
@@ -238,7 +236,7 @@ def stream(queryset_or_adapter, basename=None):
 
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M')
     headers = {
-        b'Content-Disposition': 'attachment; filename={0}-{1}.csv'.format(
+        'Content-Disposition': 'attachment; filename={0}-{1}.csv'.format(
             basename or 'export', timestamp),
     }
     streamer = stream_with_context(yield_rows(adapter))
