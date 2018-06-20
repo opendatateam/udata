@@ -59,5 +59,5 @@ class MemberForm(ModelForm):
     model_class = Member
 
     role = fields.SelectField(
-        _('Role'), default='editor', choices=ORG_ROLES.items(),
+        _('Role'), default='editor', choices=list(ORG_ROLES.items()),
         validators=[validators.required()])

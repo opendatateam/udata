@@ -54,7 +54,7 @@ class HarvestSourceForm(Form):
 
 
 class HarvestSourceValidationForm(Form):
-    state = fields.SelectField(choices=VALIDATION_STATES.items())
+    state = fields.SelectField(choices=list(VALIDATION_STATES.items()))
     comment = fields.StringField(_('Comment'),
                                  [validators.RequiredIfVal('state',
                                                            VALIDATION_REFUSED

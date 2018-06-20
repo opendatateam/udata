@@ -21,7 +21,7 @@ class ReuseForm(ModelForm):
         _('Description'), [validators.required()],
         description=_('The details about the reuse (build process, specifics, '
                       'self-critics...).'))
-    type = fields.SelectField(_('Type'), choices=REUSE_TYPES.items())
+    type = fields.SelectField(_('Type'), choices=list(REUSE_TYPES.items()))
     url = fields.URLField(
         _('URL'), [validators.required(), check_url_does_not_exists])
     image = fields.ImageField(

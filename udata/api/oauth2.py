@@ -80,9 +80,6 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         'collection': 'oauth2_client'
     }
 
-    def __unicode__(self):
-        return self.name
-
     @property
     def client_id(self):
         return str(self.id)
@@ -158,7 +155,7 @@ class OAuth2Token(db.Document):
     user = db.ReferenceField('User')
 
     # currently only bearer is supported
-    token_type = db.StringField(choices=TOKEN_TYPES.keys(), default='Bearer')
+    token_type = db.StringField(choices=list(TOKEN_TYPES), default='Bearer')
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True, sparse=True)
