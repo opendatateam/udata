@@ -28,7 +28,7 @@ class EmitNewActivityMetaClass(db.BaseDocumentMetaclass):
         sender.on_new.send(sender, activity=document)
 
 
-class Activity(db.Document):
+class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
     '''Store the activity entries for a single related object'''
     actor = db.ReferenceField('User', required=True)
     organization = db.ReferenceField('Organization')
@@ -38,8 +38,6 @@ class Activity(db.Document):
     kwargs = db.DictField()
 
     on_new = Signal()
-
-    __metaclass__ = EmitNewActivityMetaClass
 
     meta = {
         'indexes': [
