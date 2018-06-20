@@ -118,7 +118,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         'queryset_class': OrganizationQuerySet,
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
     __badges__ = {

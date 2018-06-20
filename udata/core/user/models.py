@@ -32,8 +32,6 @@ class Role(db.Document, RoleMixin):
     def __str__(self):
         return self.name
 
-    __unicode__ = __str__
-
 
 class UserSettings(db.EmbeddedDocument):
     prefered_language = db.StringField()
@@ -91,7 +89,7 @@ class User(WithMetrics, UserMixin, db.Document):
         'ordering': ['-created_at']
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.fullname
 
     @property

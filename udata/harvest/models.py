@@ -143,7 +143,7 @@ class HarvestSource(db.Owned, db.Document):
         'queryset_class': HarvestSourceQuerySet,
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
 

@@ -109,7 +109,7 @@ class GeoZone(db.Document):
         'queryset_class': GeoZoneQuerySet
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.id
 
     def __html__(self):

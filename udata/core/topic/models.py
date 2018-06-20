@@ -24,7 +24,7 @@ class Topic(db.Document):
     featured = db.BooleanField()
     private = db.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @property

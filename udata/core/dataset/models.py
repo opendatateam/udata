@@ -124,7 +124,7 @@ class License(db.Document):
 
     active = db.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     @classmethod
@@ -378,7 +378,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     deleted = db.DateTimeField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title or ''
 
     __badges__ = {

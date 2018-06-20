@@ -17,7 +17,7 @@ from udata.tests.api import APITestCase
 class FakeModel(db.Document, WithMetrics):
     name = db.StringField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
 
