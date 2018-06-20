@@ -20,7 +20,7 @@ from udata.core.user.factories import UserFactory, AdminFactory
 from udata.utils import faker
 
 
-from frontend import FrontTestCase
+from .frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
