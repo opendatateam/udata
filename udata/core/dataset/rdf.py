@@ -294,7 +294,7 @@ def temporal_from_rdf(period_of_time):
 
 
 def frequency_from_rdf(term):
-    if isinstance(term, basestring):
+    if isinstance(term, str):
         try:
             term = URIRef(uris.validate(term))
         except uris.ValidationError:
