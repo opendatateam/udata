@@ -36,7 +36,7 @@ def harvest_item(source_id, item_id):
     Backend = backends.get(current_app, source.backend)
     backend = Backend(source, job)
 
-    item = filter(lambda i: i.remote_id == item_id, job.items)[0]
+    item = next(i for i in job.items if i.remote_id == item_id)
 
     result = backend.process_item(item)
     return (item_id, result)

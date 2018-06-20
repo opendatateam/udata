@@ -90,7 +90,7 @@ class DcatBackend(BaseBackend):
 
     def process(self, item):
         graph = Graph(namespace_manager=namespace_manager)
-        graph.parse(data=item.kwargs['graph'], format='json-ld')
+        graph.parse(data=bytes(item.kwargs['graph']), format='json-ld')
         dataset = self.get_dataset(item.remote_id)
         dataset = dataset_from_rdf(graph, dataset)
         return dataset
