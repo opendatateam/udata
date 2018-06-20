@@ -93,7 +93,7 @@ def is_url(default_scheme='http', **kwargs):
         try:
             return uris.validate(value)
         except uris.ValidationError as e:
-            raise Invalid(e.message)
+            raise Invalid(str(e))
     return converter
 
 
