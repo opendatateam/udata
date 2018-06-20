@@ -213,10 +213,8 @@ def attach(domain, filename):
     '''
     count = 0
     errors = 0
-    with open(filename) as csvfile:
-        reader = csv.DictReader(csvfile,
-                                delimiter=b';',
-                                quotechar=b'"')
+    with open(filename, 'rb') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         for row in reader:
             try:
                 dataset = Dataset.objects.get(id=ObjectId(row['local']))

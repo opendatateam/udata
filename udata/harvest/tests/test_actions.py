@@ -336,11 +336,11 @@ class HarvestActionsTest:
     def test_attach(self):
         datasets = DatasetFactory.create_batch(3)
 
-        with NamedTemporaryFile() as csvfile:
+        with NamedTemporaryFile(mode='w') as csvfile:
             writer = csv.DictWriter(csvfile,
                                     fieldnames=['local', 'remote'],
-                                    delimiter=b';',
-                                    quotechar=b'"')
+                                    delimiter=';',
+                                    quotechar='"')
 
             writer.writeheader()
             for index, dataset in enumerate(datasets):
@@ -371,11 +371,11 @@ class HarvestActionsTest:
 
         datasets = DatasetFactory.create_batch(3)
 
-        with NamedTemporaryFile() as csvfile:
+        with NamedTemporaryFile(mode='w') as csvfile:
             writer = csv.DictWriter(csvfile,
                                     fieldnames=['local', 'remote'],
-                                    delimiter=b';',
-                                    quotechar=b'"')
+                                    delimiter=';',
+                                    quotechar='"')
 
             writer.writeheader()
             for index, dataset in enumerate(datasets):
@@ -400,11 +400,11 @@ class HarvestActionsTest:
     def test_attach_skip_not_found(self):
         datasets = DatasetFactory.create_batch(3)
 
-        with NamedTemporaryFile() as csvfile:
+        with NamedTemporaryFile(mode='w') as csvfile:
             writer = csv.DictWriter(csvfile,
                                     fieldnames=['local', 'remote'],
-                                    delimiter=b';',
-                                    quotechar=b'"')
+                                    delimiter=';',
+                                    quotechar='"')
 
             writer.writeheader()
             writer.writerow({
