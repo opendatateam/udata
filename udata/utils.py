@@ -268,7 +268,7 @@ class UDataProvider(BaseProvider):
 @faker_provider  # Replace the default lorem provider with a unicode one
 class UnicodeLoremProvider(LoremProvider):
     '''A Lorem provider that forces unicode in words'''
-    word_list = map(lambda w: w + 'é', LoremProvider.word_list)
+    word_list = [w + 'é' for w in LoremProvider.word_list]
 
 
 def safe_unicode(string):

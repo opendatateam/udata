@@ -48,7 +48,7 @@ class FactoryBackend(backends.BaseBackend):
     name = 'factory'
     filters = (
         backends.HarvestFilter('Test', 'test', int),
-        backends.HarvestFilter('Tag', 'tag', basestring),
+        backends.HarvestFilter('Tag', 'tag', str),
     )
 
     def initialize(self):
