@@ -252,7 +252,7 @@ class FrontEndRootTest(FrontTestCase):
                 'href="/{lang}/i18n/value/?param=other" '
                 'hreflang="{lang}" />')
         self.assertEqual(
-            response.data,
+            response.data.decode('utf-8'),
             ''.join([link.format(lang='fr'), link.format(lang='de')]))
 
     def test_i18n_alternate_links_outside_i18n_blueprint(self):
@@ -271,4 +271,4 @@ class FrontEndRootTest(FrontTestCase):
         }
 
         response = self.get(url_for('test.i18n', key='value', param='other'))
-        self.assertEqual(response.data, '')
+        self.assertEqual(response.data.decode('utf-8'), '')
