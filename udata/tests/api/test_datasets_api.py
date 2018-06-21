@@ -548,7 +548,7 @@ class DatasetBadgeAPITest(APITestCase):
     def test_create_2nd(self):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
-        kinds_keys = Dataset.__badges__.keys()
+        kinds_keys = list(Dataset.__badges__)
         self.dataset.badges.append(self.factory(kind=kinds_keys[0]))
         self.dataset.save()
         data = self.factory.as_dict()
