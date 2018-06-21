@@ -40,7 +40,7 @@ We create a virtualenv in the `udata` home directory so it is activated each tim
 you log into its account:
 
 ```shell
-$ python3 -m venv $HOME
+$ python3.6 -m venv $HOME
 $ . bin/activate
 $ pip install Cython  # Enable optimizations on some packages
 $ pip install --upgrade setuptools  # Make sure setuptools is up to date

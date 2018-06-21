@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Install python dependencies
           command: |
-            python3 -m venv venv
+            python3.6 -m venv venv
             source venv/bin/activate
             pip3 install -e . || pip3 install -e .
             pip3 install -r requirements/circleci.pip
@@ -122,7 +122,7 @@ jobs:
           command: |
             source venv/bin/activate
             # Check long description renders properly
-            python3 setup.py check -m -s
+            python3.6 setup.py check -m -s
             # Build a wheel release
             if [[ $CIRCLE_TAG ]]; then
                 # This is a tagged release
