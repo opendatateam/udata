@@ -74,19 +74,19 @@ class MarkdownTest:
             parsed = parser.parse(result)
             el = parsed.getElementsByTagName('a')[0]
             assert el.getAttribute('rel') == ''
-            assert el.getAttribute('href') == 'http://localhost/'
+            assert el.getAttribute('href') == 'http://local.test/'
             assert el.getAttribute('data-tooltip') == ''
             assert el.firstChild.data == 'foo'
 
     def test_markdown_linkify_https(self, app):
         '''Markdown filter should transform relative urls with HTTPS'''
         text = '[foo](/foo)'
-        with app.test_request_context('/', base_url='https://localhost'):
+        with app.test_request_context('/', base_url='https://local.test'):
             result = render_template_string('{{ text|markdown }}', text=text)
             parsed = parser.parse(result)
             el = parsed.getElementsByTagName('a')[0]
             assert el.getAttribute('rel') == ''
-            assert el.getAttribute('href') == 'https://localhost/foo'
+            assert el.getAttribute('href') == 'https://local.test/foo'
             assert el.getAttribute('data-tooltip') == ''
             assert el.firstChild.data == 'foo'
 
@@ -99,7 +99,7 @@ class MarkdownTest:
             parsed = parser.parse(result)
             el = parsed.getElementsByTagName('a')[0]
             assert el.getAttribute('rel') == ''
-            assert el.getAttribute('href') == 'http://localhost/'
+            assert el.getAttribute('href') == 'http://local.test/'
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 

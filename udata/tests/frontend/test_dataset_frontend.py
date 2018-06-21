@@ -109,7 +109,7 @@ class DatasetBlueprintTest(FrontTestCase):
                           dataset.created_at.isoformat()[:16])
         self.assertEquals(json_ld['dateModified'][:16],
                           dataset.last_modified.isoformat()[:16])
-        self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
+        self.assertEquals(json_ld['url'], 'http://local.test{}'.format(url))
         self.assertEquals(json_ld['name'], dataset.title)
         self.assertEquals(json_ld['keywords'], 'bar,foo')
         self.assertEquals(len(json_ld['distribution']), 1)

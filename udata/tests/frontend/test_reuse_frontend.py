@@ -67,7 +67,7 @@ class ReuseBlueprintTest(FrontTestCase):
                           reuse.created_at.isoformat()[:16])
         self.assertEquals(json_ld['dateModified'][:16],
                           reuse.last_modified.isoformat()[:16])
-        self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
+        self.assertEquals(json_ld['url'], 'http://local.test{}'.format(url))
         self.assertEquals(json_ld['name'], reuse.title)
         self.assertEquals(json_ld['description'], 'Title 1 Title 2')
         self.assertEquals(json_ld['isBasedOnUrl'], reuse.url)

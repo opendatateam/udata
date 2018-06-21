@@ -4,6 +4,7 @@
 
 - Sort dataset update frequencies by ascending frequency [#1758](https://github.com/opendatateam/udata/pull/1758)
 - Skip gov.uk references tests when site is unreachable [#1767](https://github.com/opendatateam/udata/pull/1767)
+- Tests are now run against `local.test` instead of `localhost` to avoid pytest warnings
 
 ## 1.4.1 (2018-06-15)
 
