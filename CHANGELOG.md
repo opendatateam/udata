@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Sort dataset update frequencies by ascending frequency [#1758](https://github.com/opendatateam/udata/pull/1758)
+- Skip gov.uk references tests when site is unreachable [#1767](https://github.com/opendatateam/udata/pull/1767)
 
 ## 1.4.1 (2018-06-15)
 
