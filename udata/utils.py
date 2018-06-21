@@ -272,10 +272,5 @@ class UnicodeLoremProvider(LoremProvider):
 
 
 def safe_unicode(string):
-    '''Safely transform any object into utf8 encoded bytes'''
-    return str(string)
-    if not isinstance(string, str):
-        string = str(string)
-    if isinstance(string, unicode):
-        string = string.encode('utf8')
-    return string
+    '''Safely transform any object into utf8 decoded str'''
+    return string.decode('utf8') if isinstance(string, bytes) else str(string)
