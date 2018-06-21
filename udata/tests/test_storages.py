@@ -1,7 +1,7 @@
 import pytest
 
 from datetime import datetime, timedelta
-from io import StringIO
+from io import BytesIO
 from uuid import uuid4
 
 from flask import url_for, json
@@ -32,7 +32,7 @@ class StorageUtilsTest:
         self.file = self.filestorage(str(tmpfile))
 
     def filestorage(self, filename):
-        data = open(filename)
+        data = open(filename, 'rb')
         builder = EnvironBuilder(method='POST', data={
             'file': (data, basename(filename))
         })
@@ -95,7 +95,7 @@ class StorageUploadViewTest:
         client.login()
         response = client.post(
             url_for('storage.upload', name='resources'),
-            {'file': (StringIO(b'aaa'), 'test.txt')})
+            {'file': (BytesIO(b'aaa'), 'test.txt')})
 
         assert200(response)
         assert response.json['success']
@@ -117,7 +117,7 @@ class StorageUploadViewTest:
 
         for i in range(parts):
             response = client.post(url, {
-                'file': (StringIO(b'a'), 'blob'),
+                'file': (BytesIO(b'a'), 'blob'),
                 'uuid': uuid,
                 'filename': 'test.txt',
                 'partindex': i,
@@ -149,7 +149,7 @@ class StorageUploadViewTest:
         expected = storages.tmp.url(response.json['filename'], external=True)
         assert response.json['url'] == expected
         assert response.json['mime'] == 'text/plain'
-        assert storages.tmp.read(response.json['filename']) == 'aaaa'
+        assert storages.tmp.read(response.json['filename']) == b'aaaa'
         assert list(storages.chunks.list_files()) == []
 
     def test_chunked_upload_bad_chunk(self, client):
@@ -159,7 +159,7 @@ class StorageUploadViewTest:
         parts = 4
 
         response = client.post(url, {
-            'file': (StringIO(b'a'), 'blob'),
+            'file': (BytesIO(b'a'), 'blob'),
             'uuid': uuid,
             'filename': 'test.txt',
             'partindex': 0,
@@ -183,7 +183,7 @@ class StorageUploadViewTest:
         client.login()
         response = client.post(
             url_for('storage.upload', name='tmp'),
-            {'bad': (StringIO(b'aaa'), 'test.txt')})
+            {'bad': (BytesIO(b'aaa'), 'test.txt')})
 
         assert400(response)
         assert not response.json['success']
