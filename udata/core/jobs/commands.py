@@ -62,8 +62,8 @@ def run(name, params, delay):
 @grp.command()
 def list():
     '''List all availables jobs'''
-    for job in sorted(schedulables()):
-        echo(job.name)
+    for job in sorted([s.name for s in schedulables()]):
+        echo(job)
 
 
 @grp.command()
@@ -138,7 +138,7 @@ def scheduled():
     '''
     List scheduled jobs.
     '''
-    for job in sorted(schedulables()):
+    for job in sorted(schedulables(), key=lambda s: s.name):
         for task in PeriodicTask.objects(task=job.name):
             label = job_label(task.task, task.args, task.kwargs)
             echo(SCHEDULE_LINE.format(
