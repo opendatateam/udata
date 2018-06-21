@@ -40,7 +40,7 @@ We create a virtualenv in the `udata` home directory so it is activated each tim
 you log into its account:
 
 ```shell
-$ virtualenv --python=python2.7 $HOME
+$ python3 -m venv $HOME
 $ . bin/activate
 $ pip install Cython  # Enable optimizations on some packages
 $ pip install --upgrade setuptools  # Make sure setuptools is up to date
@@ -366,9 +366,6 @@ su - udata
 Edit your `udata.cfg` configuration with these parameters:
 
 ```python
-
-
-
 DEBUG = False
 
 SITE_ID = 'data.example.com'  # Used to store metrics and portal configuration
