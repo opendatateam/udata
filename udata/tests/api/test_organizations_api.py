@@ -758,7 +758,7 @@ class OrganizationBadgeAPITest(APITestCase):
     def test_create_2nd(self):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
-        kinds_keys = Organization.__badges__.keys()
+        kinds_keys = list(Organization.__badges__)
         self.organization.badges.append(
             self.factory(kind=kinds_keys[0]))
         self.organization.save()
