@@ -570,10 +570,6 @@ that don't need to be listed here.
 Here a sample configuration file:
 
 ```python
-
-
-
-
 DEBUG = True
 
 SEND_MAIL = False

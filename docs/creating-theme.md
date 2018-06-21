@@ -166,9 +166,6 @@ You can also expose extras menus using the `udata.app.nav` extension.
 They will be available in the template context under the `nav` object.
 
 ```python
-
-
-
 from udata import theme
 from udata.app import nav
 from udata.i18n import lazy_gettext as _
@@ -255,9 +252,6 @@ These settings take precedence over default values but are still overridable by 
 Simply declare your theme default values in your theme file:
 
 ```
-
-
-
 AVATAR_INTERNAL_FOREGROUND = ['rgb(45,79,255)', 'rgb(254,180,44)']
 AVATAR_INTERNAL_BACKGROUND = 'rgb(141,69,170)'
 
