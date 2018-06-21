@@ -214,19 +214,19 @@ or compile them.
 You can extract translations from your own templates using:
 
 ```bash
-python setup.py extract_messages  # Extract messages in your pot file
+python3 setup.py extract_messages  # Extract messages in your pot file
 ```
 
 Then you can either add new supported locale:
 
 ```bash
-python setup.py init_catalog -l xx  # where XX is the locale you want to add. ex: fr
+python3 setup.py init_catalog -l xx  # where XX is the locale you want to add. ex: fr
 ```
 
 or update the existing ones:
 
 ```bash
-python setup.py update_catalog
+python3 setup.py update_catalog
 ```
 
 You can then translate the po file using the editor of your choice
@@ -235,7 +235,7 @@ You can then translate the po file using the editor of your choice
 When translation is done, you can compile translations catalogs using:
 
 ```bash
-python setup.py compile_catalog  # Compile .mo files for each language
+python3 setup.py compile_catalog  # Compile .mo files for each language
 ```
 
 !!! warning
@@ -269,7 +269,7 @@ Once your theme is ready, you can publish it on [PyPI][] to share it to the worl
 To do so, simply execute the following command at the root of your theme project:
 
 ```bash
-python setup.py bdist_wheel upload
+python3 setup.py bdist_wheel upload
 ```
 
 Then it will be available on [PyPI][] and you can use it on your platform by installing it
