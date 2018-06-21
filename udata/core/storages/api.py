@@ -125,7 +125,7 @@ def combine_chunks(storage, args, prefix=None):
 
 def handle_upload(storage, prefix=None):
     args = upload_parser.parse_args()
-    is_chunk = args['totalparts'] > 1
+    is_chunk = args['totalparts'] and args['totalparts'] > 1
     uploaded_file = args['file']
 
     if is_chunk:
