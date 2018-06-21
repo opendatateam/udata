@@ -67,7 +67,7 @@ class GeoZoneSearch(ModelSearchAdapter):
         # NB: to be realy progressive, we should take the max population
         # by administrative level but it would either to much time consumption
         # or too much refactoring (storing the max population by level)
-        population = min(max(0, zone.population), MAX_POPULATION)
+        population = min(max(0, zone.population or 0), MAX_POPULATION)
         population_weight = (population / MAX_POPULATION) * PONDERATION_STEP
         return int(level_weight + population_weight)
 
