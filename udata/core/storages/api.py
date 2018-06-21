@@ -115,7 +115,7 @@ def combine_chunks(storage, args, prefix=None):
     if prefix:
         target = os.path.join(prefix, target)
     with storage.open(target, 'wb') as out:
-        for i in xrange(args['totalparts']):
+        for i in range(args['totalparts']):
             partname = chunk_filename(uuid, i)
             out.write(chunks.read(partname))
             chunks.delete(partname)

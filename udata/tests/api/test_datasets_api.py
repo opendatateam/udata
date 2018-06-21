@@ -1,7 +1,7 @@
 import json
 
 from datetime import datetime
-from io import StringIO
+from io import BytesIO
 from uuid import uuid4
 
 from flask import url_for
@@ -644,7 +644,7 @@ class DatasetResourceAPITest(APITestCase):
             dataset = DatasetFactory(organization=org)
         response = self.post(
             url_for('api.upload_new_dataset_resource', dataset=dataset),
-            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data['title'], 'test.txt')
@@ -670,7 +670,7 @@ class DatasetResourceAPITest(APITestCase):
 
         for i in range(parts):
             response = self.post(url, {
-                'file': (StringIO(b'a'), 'blob'),
+                'file': (BytesIO(b'a'), 'blob'),
                 'uuid': uuid,
                 'filename': 'test.txt',
                 'partindex': i,
@@ -833,7 +833,7 @@ class DatasetResourceAPITest(APITestCase):
         response = self.post(
             url_for('api.upload_dataset_resource',
                     dataset=dataset, rid=resource.id),
-            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(data['title'], 'test.txt')
@@ -1086,7 +1086,7 @@ class CommunityResourceAPITest(APITestCase):
         self.login()
         response = self.post(
             url_for('api.upload_new_community_resource', dataset=dataset),
-            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
         self.assert201(response)
         data = json.loads(response.data)
         resource_id = data['id']
@@ -1109,7 +1109,7 @@ class CommunityResourceAPITest(APITestCase):
         ])
         response = self.post(
             url_for('api.upload_new_community_resource', dataset=dataset),
-            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
         self.assert201(response)
         data = json.loads(response.data)
         self.assertEqual(data['title'], 'test.txt')
@@ -1147,7 +1147,7 @@ class CommunityResourceAPITest(APITestCase):
         response = self.post(
             url_for('api.upload_community_resource',
                     community=community_resource),
-            {'file': (StringIO(b'aaa'), 'test.txt')}, json=False)
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(data['id'], str(community_resource.id))
