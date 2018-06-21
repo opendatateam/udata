@@ -20,9 +20,9 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py-cache-{{ arch }}-{{ checksum "python.deps" }}
-          - py-cache-{{ arch }}-{{ .Branch }}
-          - py-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py3-cache-v1-{{ arch }}-{{ checksum "python.deps" }}
+          - py3-cache-v1-{{ arch }}-{{ .Branch }}
+          - py3-cache-v1-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
@@ -31,11 +31,11 @@ jobs:
             pip3 install -e . || pip3 install -e .
             pip3 install -r requirements/circleci.pip
       - save_cache:
-          key: py-cache-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v1-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py-cache-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v1-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
