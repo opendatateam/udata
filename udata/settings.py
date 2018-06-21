@@ -328,6 +328,7 @@ class Testing(object):
     USE_METRICS = False
     RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
     URLS_ALLOW_LOCAL = True  # Test server URL is localhost
+    URLS_ALLOW_PRIVATE = False
 
 
 class Debug(Defaults):
