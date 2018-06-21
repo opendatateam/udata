@@ -142,7 +142,7 @@ class ModelTermsFacet(TermsFacet):
         ids = [key for (key, doc_count, selected) in values]
         # Perform a model resolution: models are feched from DB
         # We use model field to cast IDs
-        ids = map(self.model_field.to_mongo, ids)
+        ids = [self.model_field.to_mongo(id) for id in ids]
         objects = self.model.objects.in_bulk(ids)
 
         return [
