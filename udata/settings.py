@@ -323,14 +323,15 @@ class Testing(object):
     CACHE_TYPE = 'null'
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False
-    SERVER_NAME = 'localhost'
+    SERVER_NAME = 'local.test'
     DEFAULT_LANGUAGE = 'en'
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
     USE_METRICS = False
     RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
-    URLS_ALLOW_LOCAL = True  # Test server URL is localhost
+    URLS_ALLOW_LOCAL = True  # Test server URL is local.test
+    URLS_ALLOWED_TLDS = tld_set | set(['test'])
 
 
 class Debug(Defaults):
