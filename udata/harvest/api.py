@@ -72,7 +72,7 @@ job_page_fields = api.model('HarvestJobPage', fields.pager(job_fields))
 
 validation_fields = api.model('HarvestSourceValidation', {
     'state': fields.String(description='Is it validated or not',
-                           enum=(VALIDATION_STATES),
+                           enum=list(VALIDATION_STATES),
                            required=True),
     'by': fields.Nested(user_ref_fields, allow_null=True, readonly=True,
                         description='Who performed the validation'),
