@@ -104,7 +104,8 @@ class JobsCommandsTest:
         ]
         result = cli('job scheduled')
 
-        assert len(result.output.splitlines()) == len(tasks)
+        filtered = [l for l in result.output.splitlines() if 'Tip' not in l]
+        assert len(filtered) == len(tasks)
 
         assert 'not-scheduled' not in result.output
         for task in tasks:
