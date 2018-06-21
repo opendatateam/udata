@@ -120,6 +120,6 @@ class ResourcePreviewTest:
         resource = dataset.resources[0]
         assert resource.preview_url is None
 
-        assert len(recwarn) == 1
-        msg = str(recwarn[0].message)
-        assert msg == 'NotAValidPlugin is not a valid preview plugin'
+        assert len(recwarn) >= 1
+        assert ('NotAValidPlugin is not a valid preview plugin' in
+                [str(r.message) for r in recwarn])
