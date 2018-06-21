@@ -1,4 +1,5 @@
 import pytest
+import requests
 
 from datetime import date
 
@@ -33,6 +34,15 @@ FREQ_SAMPLE = [
     (FREQ.daily, 'daily'),
     (FREQ.continuous, 'continuous'),
 ]
+
+GOV_UK_REF = 'http://reference.data.gov.uk/id/year/2017'
+
+try:
+    requests.head(GOV_UK_REF, timeout=0.1)
+except requests.exceptions.RequestException:
+    GOV_UK_REF_IS_UP = False
+else:
+    GOV_UK_REF_IS_UP = True
 
 
 @pytest.mark.frontend
@@ -699,6 +709,8 @@ class RdfToDatasetTest:
         assert daterange.start, date(2017, 6 == 1)
         assert daterange.end, date(2017, 6 == 30)
 
+    @pytest.mark.skipif(not GOV_UK_REF_IS_UP,
+                        reason='Gov.uk references is unreachable')
     def test_parse_temporal_as_gov_uk_format(self):
         node = URIRef('http://reference.data.gov.uk/id/year/2017')
         g = Graph()
