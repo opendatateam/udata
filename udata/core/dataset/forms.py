@@ -22,8 +22,8 @@ __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
 
 class ChecksumForm(ModelForm):
     model_class = Checksum
-    type = fields.SelectField(choices=zip(CHECKSUM_TYPES, CHECKSUM_TYPES),
-                              default='sha1')
+    choices = list(zip(CHECKSUM_TYPES, CHECKSUM_TYPES))
+    type = fields.SelectField(choices=choices, default='sha1')
     value = fields.StringField()
 
 
