@@ -61,6 +61,10 @@ def config_for(value, key):
         return getattr(Defaults, key)
 
 
+def idna(string):
+    return string.encode('idna').decode('utf8')
+
+
 def validate(url, schemes=None, tlds=None, private=None, local=None,
              credentials=None):
     '''
@@ -90,7 +94,7 @@ def validate(url, schemes=None, tlds=None, private=None, local=None,
         error(url, 'Credentials in URL are not allowed')
 
     tld = match.group('tld')
-    if tld and tld not in tlds and tld.encode('idna') not in tlds:
+    if tld and tld not in tlds and idna(tld) not in tlds:
         error(url, 'Invalid TLD {0}'.format(tld))
 
     ip = match.group('ipv6') or match.group('ipv4')
