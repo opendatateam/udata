@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Install python dependencies
           command: |
-            python3.6 -m venv venv
+            virtualenv -ppython3.6 venv
             source venv/bin/activate
             pip3 install -e . || pip3 install -e .
             pip3 install -r requirements/circleci.pip
