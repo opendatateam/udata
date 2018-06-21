@@ -35,7 +35,7 @@ def notify_new_issue_comment(issue, **kwargs):
         comment = kwargs['message']
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
-        recipients = filter(lambda u: u != comment.posted_by, set(recipients))
+        recipients = [u for u in set(recipients) if u != comment.posted_by]
         subject = _('%(user)s commented your issue',
                     user=comment.posted_by.fullname)
         mail.send(subject, recipients, 'new_issue_comment',
@@ -50,7 +50,7 @@ def notify_issue_closed(issue, **kwargs):
         comment = kwargs['message']
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
-        recipients = filter(lambda u: u != comment.posted_by, set(recipients))
+        recipients = [u for u in set(recipients) if u != comment.posted_by]
         subject = _('An issue has been closed')
         mail.send(subject, recipients, 'issue_closed',
                   issue=issue, comment=comment)

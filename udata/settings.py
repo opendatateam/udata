@@ -332,6 +332,7 @@ class Testing(object):
     RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
+    URLS_ALLOW_PRIVATE = False
 
 
 class Debug(Defaults):

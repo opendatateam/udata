@@ -36,12 +36,12 @@ class UUIDConverterTest:
     def test_resolve_uuid(self, client):
         uuid = uuid4()
         url = '/uuid/{0}'.format(str(uuid))
-        assert client.get(url).data == 'ok'
+        assert client.get(url).data == b'ok'
 
     def test_resolve_uuid_with_spaces(self, client):
         uuid = uuid4()
         url = '/uuid/{0} '.format(str(uuid))
-        assert client.get(url).data == 'ok'
+        assert client.get(url).data == b'ok'
 
     def test_bad_uuid_is_404(self, client):
         assert client.get('/uuid/bad').status_code == 404
@@ -105,15 +105,15 @@ class ObjectIdModelConverterTest:
     def test_resolve_model_from_id(self, client):
         tester = Tester.objects.create(slug='slug')
         url = '/model/{0}'.format(str(tester.id))
-        assert client.get(url).data == 'ok'
+        assert client.get(url).data == b'ok'
 
     def test_resolve_model_from_slug(self, client):
         Tester.objects.create(slug='slug')
-        assert client.get('/model/slug').data == 'ok'
+        assert client.get('/model/slug').data == b'ok'
 
     def test_resolve_model_from_utf8_slug(self, client):
         Tester.objects.create(slug='slüg')
-        assert client.get('/model/slüg').data == 'ok'
+        assert client.get('/model/slüg').data == b'ok'
 
     def test_model_not_found(self, client):
         assert client.get('/model/not-found').status_code == 404

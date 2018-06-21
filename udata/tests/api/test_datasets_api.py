@@ -322,9 +322,9 @@ class DatasetAPITest(APITestCase):
         response = self.put(url_for('api.dataset', dataset=dataset), data)
         self.assert200(response)
         dataset.reload()
-        resource = (
+        resource = next((
             r for r in dataset.resources if r.title == resource_data['title']
-        ).next()
+        ))
         self.assertEqual(resource.extras, {'extra:id': 'id'})
 
     def test_dataset_api_update_existing_resource_with_extras(self):

@@ -5,6 +5,12 @@
 - Sort dataset update frequencies by ascending frequency [#1758](https://github.com/opendatateam/udata/pull/1758)
 - Skip gov.uk references tests when site is unreachable [#1767](https://github.com/opendatateam/udata/pull/1767)
 - Tests are now run against `local.test` instead of `localhost` to avoid pytest warnings
+- Backports some Python 3 forward compatible changes and fixes some bugs [#1769](https://github.com/opendatateam/udata/pull/1769):
+    - avoid `filter` and `map` usage instead of list comprehension
+    - explicit encoding handling
+    - avoid comparison to `None`
+    - use `next()` instead of `.next()` to iterate
+    - unhide some implicit casts (in particular search weight)
 
 ## 1.4.1 (2018-06-15)
 

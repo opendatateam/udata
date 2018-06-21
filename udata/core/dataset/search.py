@@ -174,7 +174,7 @@ class DatasetSearch(ModelSearchAdapter):
     def get_suggest_weight(cls, temporal_weight, spatial_weight, featured):
         '''Compute the suggest part of the indexation payload'''
         featured_weight = 1 if not featured else FEATURED_WEIGHT
-        return temporal_weight * spatial_weight * featured_weight
+        return int(temporal_weight * spatial_weight * featured_weight * 10)
 
     @classmethod
     def serialize(cls, dataset):
@@ -214,7 +214,7 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': str(organization.id) if organization else None,
             'owner': str(owner.id) if owner else None,
             'dataset_suggest': {
-                'input': cls.completer_tokenize(dataset.title) + [dataset.id],
+                'input': cls.completer_tokenize(dataset.title) + [str(dataset.id)],
                 'output': dataset.title,
                 'payload': {
                     'id': str(dataset.id),

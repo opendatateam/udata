@@ -22,8 +22,9 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         pattern = ('<script id="json_ld" type="application/ld\+json">'
                    '(?P<json_ld>[\s\S]*?)'
                    '</script>')
-        search = re.search(pattern, response.data)
-        self.assertIsNotNone(search, (pattern, response.data))
+        data = response.data.decode('utf8')
+        search = re.search(pattern, data)
+        self.assertIsNotNone(search, (pattern, data))
         json_ld = search.group('json_ld')
         return json.loads(json_ld)
 

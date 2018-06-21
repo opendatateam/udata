@@ -10,6 +10,7 @@ from . import FrontTestCase
 from udata.i18n import I18nBlueprint
 from udata.models import db
 from udata.frontend.helpers import in_url
+from udata.tests.helpers import assert_urls_equal
 
 
 def iso2date(string):
@@ -32,7 +33,7 @@ class FrontEndRootTest(FrontTestCase):
             result = render_template_string(
                 "{{ url_rewrite(one='other-value', two=2) }}")
 
-        self.assertEqual(result, expected)
+        assert_urls_equal(result, expected)
 
     def test_rewrite_append(self):
         '''url_rewrite should replace a parameter in the URL if present'''
@@ -42,7 +43,7 @@ class FrontEndRootTest(FrontTestCase):
         with self.app.test_request_context(url):
             result = render_template_string("{{ url_rewrite(one='value') }}")
 
-        self.assertEqual(result, expected)
+        assert_urls_equal(result, expected)
 
     def test_url_add(self):
         '''url_add should add a parameter to the URL'''
@@ -51,8 +52,8 @@ class FrontEndRootTest(FrontTestCase):
         result = render_template_string(
             "{{ url|url_add(two='other') }}", url=url)
 
-        self.assertEqual(result,
-                         url_for('site.home', one='value', two='other'))
+        assert_urls_equal(result,
+                          url_for('site.home', one='value', two='other'))
 
     def test_url_add_append(self):
         '''url_add should add a parameter to the URL even if exists'''
@@ -62,7 +63,7 @@ class FrontEndRootTest(FrontTestCase):
         result = render_template_string(
             "{{ url|url_add(one='other-value') }}", url=url)
 
-        self.assertEqual(result, expected)
+        assert_urls_equal(result, expected)
 
     def test_url_del_by_name(self):
         '''url_del should delete a parameter by name from the URL'''
@@ -71,7 +72,7 @@ class FrontEndRootTest(FrontTestCase):
 
         result = render_template_string("{{ url|url_del('one') }}", url=url)
 
-        self.assertEqual(result, expected)
+        assert_urls_equal(result, expected)
 
     def test_url_del_by_value(self):
         '''url_del should delete a parameter by value from the URL'''
@@ -81,7 +82,7 @@ class FrontEndRootTest(FrontTestCase):
         result = render_template_string(
             "{{ url|url_del(one='other-value') }}", url=url)
 
-        self.assertEqual(result, expected)
+        assert_urls_equal(result, expected)
 
     def test_url_del_by_value_not_string(self):
         '''url_del should delete a parameter by value from the URL'''
@@ -90,7 +91,7 @@ class FrontEndRootTest(FrontTestCase):
 
         result = render_template_string("{{ url|url_del(one=42) }}", url=url)
 
-        self.assertEqual(result, expected)
+        assert_urls_equal(result, expected)
 
     def test_args_in_url(self):
         '''in_url() should test the presence of a key in url'''
@@ -119,17 +120,17 @@ class FrontEndRootTest(FrontTestCase):
         '''URL helpers should exists as filter'''
         url = url_for('site.home', one='value')
 
-        self.assertEqual(
+        assert_urls_equal(
             render_template_string(
                 "{{ url|url_rewrite(one='other-value') }}", url=url),
             url_for('site.home', one='other-value')
         )
-        self.assertEqual(
+        assert_urls_equal(
             render_template_string(
                 "{{ url|url_add(two='other-value') }}", url=url),
             url_for('site.home', one='value', two='other-value')
         )
-        self.assertEqual(
+        assert_urls_equal(
             render_template_string("{{ url|url_del('one') }}", url=url),
             url_for('site.home')
         )
@@ -138,17 +139,17 @@ class FrontEndRootTest(FrontTestCase):
         '''URL helpers should exists as global function'''
         url = url_for('site.home', one='value')
 
-        self.assertEqual(
+        assert_urls_equal(
             render_template_string(
                 "{{ url_rewrite(url, one='other-value') }}", url=url),
             url_for('site.home', one='other-value')
         )
-        self.assertEqual(
+        assert_urls_equal(
             render_template_string(
                 "{{ url_add(url, two='other-value') }}", url=url),
             url_for('site.home', one='value', two='other-value')
         )
-        self.assertEqual(
+        assert_urls_equal(
             render_template_string("{{ url_del(url, 'one') }}", url=url),
             url_for('site.home')
         )
@@ -158,15 +159,15 @@ class FrontEndRootTest(FrontTestCase):
         url = url_for('site.home', one='value')
 
         with self.app.test_request_context(url):
-            self.assertEqual(
+            assert_urls_equal(
                 render_template_string("{{ url_rewrite(one='other-value') }}"),
                 self.full_url('site.home', one='other-value')
             )
-            self.assertEqual(
+            assert_urls_equal(
                 render_template_string("{{ url_add(two='other-value') }}"),
                 self.full_url('site.home', one='value', two='other-value')
             )
-            self.assertEqual(
+            assert_urls_equal(
                 render_template_string("{{ url_del(None, 'one') }}"),
                 self.full_url('site.home')
             )

@@ -345,9 +345,9 @@ class IssueCsvTest(FrontTestCase):
         self.assert200(response)
 
         self.assertEqual(
-            response.data,
+            response.data.decode('utf8').strip(),
             ('"id";"user";"subject";"title";"size";"messages";"created";'
-             '"closed";"closed_by"\r\n')
+             '"closed";"closed_by"')
         )
 
     def test_issues_csv_content_filled(self):

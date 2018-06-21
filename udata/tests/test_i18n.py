@@ -63,8 +63,8 @@ class I18nBlueprintTest(WebTestMixin, DBTestMixin, TestCase):
         self.assertRedirects(response, '/en/lang/test/?q=test')
 
     def test_do_not_redirect_and_set_lang(self):
-        self.assertEqual(self.get('/fr/lang/test/').data, 'fr')
-        self.assertEqual(self.get('/en/lang/test/').data, 'en')
+        self.assertEqual(self.get('/fr/lang/test/').data, b'fr')
+        self.assertEqual(self.get('/en/lang/test/').data, b'en')
 
     def test_redirect_on_default_lang_for_unknown_lang(self):
         self.assertRedirects(self.get('/sk/lang/test/'), '/en/lang/test/')
@@ -73,8 +73,8 @@ class I18nBlueprintTest(WebTestMixin, DBTestMixin, TestCase):
         self.assert404(self.get('/sk/not-found/'))
 
     def test_language_contact_manager(self):
-        self.assertEqual(self.get('/fr/hardcoded/').data, 'fr-fr')
-        self.assertEqual(self.get('/en/hardcoded/').data, 'en-fr')
+        self.assertEqual(self.get('/fr/hardcoded/').data, b'fr-fr')
+        self.assertEqual(self.get('/en/hardcoded/').data, b'en-fr')
 
     def test_redirect_user_prefered_lang(self):
         self.login(UserFactory(prefered_language='fr'))
