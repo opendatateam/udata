@@ -52,7 +52,7 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertEquals(json_ld['@context'], 'http://schema.org')
         self.assertEquals(json_ld['@type'], 'Organization')
         self.assertEquals(json_ld['alternateName'], organization.slug)
-        self.assertEquals(json_ld['url'], 'http://localhost{}'.format(url))
+        self.assertEquals(json_ld['url'], 'http://local.test{}'.format(url))
         self.assertEquals(json_ld['name'], organization.name)
         self.assertEquals(json_ld['description'], 'Title 1 Title 2')
 

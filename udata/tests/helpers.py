@@ -115,7 +115,7 @@ def assert_redirects(response, location, message=None):
     if parts.netloc:
         expected_location = location
     else:
-        expected_location = urljoin('http://localhost', location)
+        expected_location = urljoin('http://local.test', location)
     not_redirect = REDIRECT_MSG.format(response.status_code)
     assert response.status_code in REDIRECT_CODES, message or not_redirect
     assert response.location == expected_location, message
