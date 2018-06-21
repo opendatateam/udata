@@ -43,8 +43,8 @@ def update(ctx, migrate=False):
         msg += ' and migrate data'
     header(msg)
     info('Updating Python dependencies')
-    lrun('pip install -r requirements/develop.pip')
-    lrun('pip install -e .')
+    lrun('pip3 install -r requirements/develop.pip')
+    lrun('pip3 install -e .')
     info('Updating JavaScript dependencies')
     lrun('npm install')
     if migrate:
@@ -111,7 +111,7 @@ def qa(ctx):
 @task
 def serve(ctx, host='localhost'):
     '''Run a development server'''
-    lrun('python manage.py serve -d -r -h %s' % host)
+    lrun('python3 manage.py serve -d -r -h %s' % host)
 
 
 @task
@@ -133,7 +133,7 @@ def i18n(ctx, update=False):
     header('Extract translatable strings')
 
     info('Extract Python strings')
-    lrun('python setup.py extract_messages')
+    lrun('python3 setup.py extract_messages')
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
@@ -150,7 +150,7 @@ def i18n(ctx, update=False):
         write_po(outfile, catalog, width=80)
 
     if update:
-        lrun('python setup.py update_catalog')
+        lrun('python3 setup.py update_catalog')
 
     info('Extract JavaScript strings')
     keys = set()
@@ -198,7 +198,7 @@ def i18n(ctx, update=False):
 def i18nc(ctx):
     '''Compile translations'''
     header('Compiling translations')
-    lrun('python setup.py compile_catalog')
+    lrun('python3 setup.py compile_catalog')
 
 
 @task
@@ -254,7 +254,7 @@ def pydist(ctx, buildno=None):
 
 def perform_dist(buildno=None):
     header('Building a distribuable package')
-    cmd = ['python setup.py']
+    cmd = ['python3 setup.py']
     if buildno:
         cmd.append('egg_info -b {0}'.format(buildno))
     cmd.append('bdist_wheel')
