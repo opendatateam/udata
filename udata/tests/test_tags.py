@@ -29,9 +29,9 @@ class TagsTests(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         rows = list(reader)
 
         self.assertEqual(header, ['name', 'datasets', 'reuses', 'total'])
