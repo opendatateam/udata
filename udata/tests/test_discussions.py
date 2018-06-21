@@ -410,7 +410,7 @@ class DiscussionCsvTest(FrontTestCase):
         self.assert200(response)
 
         self.assertEqual(
-            response.data,
+            response.data.decode('utf8'),
             ('"id";"user";"subject";"title";"size";"messages";"created";'
              '"closed";"closed_by"\r\n')
         )

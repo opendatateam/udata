@@ -52,7 +52,7 @@ def notify_new_discussion_comment(discussion, **kwargs):
         comment = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = filter(lambda u: u != comment.posted_by, set(recipients))
+        recipients = [u for u in set(recipients) if u != comment.posted_by]
         subject = _('%(user)s commented your discussion',
                     user=comment.posted_by.fullname)
         mail.send(subject, recipients, 'new_discussion_comment',
@@ -68,7 +68,7 @@ def notify_discussion_closed(discussion, **kwargs):
         comment = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = filter(lambda u: u != comment.posted_by, set(recipients))
+        recipients = [u for u in set(recipients) if u != comment.posted_by]
         subject = _('A discussion has been closed')
         mail.send(subject, recipients, 'discussion_closed',
                   discussion=discussion, comment=comment)
