@@ -4,7 +4,6 @@
 uData development Launcher
 '''
 
-
 import os
 
 from udata.commands import cli
