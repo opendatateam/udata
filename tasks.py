@@ -254,7 +254,7 @@ def pydist(ctx, buildno=None):
 
 def perform_dist(buildno=None):
     header('Building a distribuable package')
-    cmd = ['python3.6 setup.py']
+    cmd = ['python3 setup.py']
     if buildno:
         cmd.append('egg_info -b {0}'.format(buildno))
     cmd.append('bdist_wheel')
