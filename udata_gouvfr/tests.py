@@ -445,7 +445,7 @@ class OEmbedsTerritoryAPITest:
             assert cgi.escape(territory.url) in html
             assert 'alt="{name}"'.format(name=organization.name) in html
             assert md(territory.description, source_tooltip=True) in html
-            assert 'Download from localhost' in html
+            assert 'Download from local.test' in html
             assert 'Add to your own website' in html
             if territory_dataset_class not in (town_datasets['comptes_com'],):
                 if territory_dataset_class == town_datasets['ban_odbl_com']:
@@ -455,7 +455,7 @@ class OEmbedsTerritoryAPITest:
                 assert 'License: {title}'.format(title=license.title) in html
                 assert '© {license_id}'.format(license_id=license.id) in html
                 assert (
-                    '<a data-tooltip="Source" href="http://localhost/datasets'
+                    '<a data-tooltip="Source" href="http://local.test/datasets'
                     in html)
 
     def test_oembed_county_territory_api_get(self, api):
@@ -484,7 +484,7 @@ class OEmbedsTerritoryAPITest:
             assert cgi.escape(territory.url) in html
             assert 'alt="{name}"'.format(name=organization.name) in html
             assert md(territory.description, source_tooltip=True) in html
-            assert 'Download from localhost' in html
+            assert 'Download from local.test' in html
             assert 'Add to your own website' in html
             if dataset_class not in (
                     TERRITORY_DATASETS['departement']['comptes_dep'],
@@ -492,7 +492,7 @@ class OEmbedsTerritoryAPITest:
                 assert 'License: {0}'.format(licence_ouverte.title) in html
                 assert '© {0}'.format(licence_ouverte.id) in html
                 assert (
-                    '<a data-tooltip="Source" href="http://localhost/datasets'
+                    '<a data-tooltip="Source" href="http://local.test/datasets'
                     in html)
 
     def test_oembed_region_territory_api_get(self, api):
@@ -521,7 +521,7 @@ class OEmbedsTerritoryAPITest:
             assert cgi.escape(territory.url) in html
             assert 'alt="{name}"'.format(name=organization.name) in html
             assert md(territory.description, source_tooltip=True) in html
-            assert 'Download from localhost' in html
+            assert 'Download from local.test' in html
             assert 'Add to your own website' in html
             if territory_dataset_class not in (
                     TERRITORY_DATASETS['region']['comptes_reg'],
@@ -529,7 +529,7 @@ class OEmbedsTerritoryAPITest:
                 assert 'License: {0}'.format(licence_ouverte.title) in html
                 assert '© {0}'.format(licence_ouverte.id) in html
                 assert (
-                    '<a data-tooltip="Source" href="http://localhost/datasets'
+                    '<a data-tooltip="Source" href="http://local.test/datasets'
                     in html)
 
 
