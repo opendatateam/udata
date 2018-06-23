@@ -71,8 +71,16 @@ class ModelConverter(BaseConverter):
 
     model = None
 
+    @property
+    def has_slug(self):
+        return hasattr(self.model, 'slug') and isinstance(self.model.slug, db.SlugField)
+
+    @property
+    def has_redirected_slug(self):
+        return self.has_slug and self.model.slug.follow
+
     def quote(self, value):
-        if hasattr(self.model, 'slug') and isinstance(self.model.slug, db.SlugField):
+        if self.has_slug:
             return self.model.slug.slugify(value)
         else:
             return url_quote(value)
@@ -83,7 +91,7 @@ class ModelConverter(BaseConverter):
             query = db.Q(slug=value) | db.Q(slug=quoted)
             obj = self.model.objects(query).get()
         except (InvalidQueryError, self.model.DoesNotExist):
-            # If the model doesn't have a slug or matching slug doesn't exists.
+            # If the model doesn't have a slug or matching slug doesn't exist.
             obj = None
         else:
             if obj.slug != value:
@@ -91,6 +99,10 @@ class ModelConverter(BaseConverter):
         try:
             return obj or self.model.objects.get_or_404(id=value)
         except NotFound as e:
+            if self.has_redirected_slug:
+                latest = self.model.slug.latest(value)
+                if latest:
+                    return LazyRedirect(latest)
             return e
 
     def to_url(self, obj):

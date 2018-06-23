@@ -12,7 +12,8 @@ from udata import routing
 from udata.core.spatial.models import GeoZone
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.models import db
-from udata.tests.helpers import assert200, assert_redirects
+from udata.models.slug_fields import SlugFollow
+from udata.tests.helpers import assert200, assert404, assert_redirects
 
 
 class UUIDConverterTest:
@@ -36,15 +37,15 @@ class UUIDConverterTest:
     def test_resolve_uuid(self, client):
         uuid = uuid4()
         url = '/uuid/{0}'.format(str(uuid))
-        assert client.get(url).data == b'ok'
+        assert200(client.get(url))
 
     def test_resolve_uuid_with_spaces(self, client):
         uuid = uuid4()
         url = '/uuid/{0} '.format(str(uuid))
-        assert client.get(url).data == b'ok'
+        assert200(client.get(url))
 
     def test_bad_uuid_is_404(self, client):
-        assert client.get('/uuid/bad').status_code == 404
+        assert404(client.get('/uuid/bad'))
 
 
 class Tester(db.Document):
@@ -110,14 +111,14 @@ class ModelConverterMixin:
     def test_resolve_model_from_id(self, client):
         tester = self.model.objects.create(slug='slug')
         url = '/model/{0}'.format(str(tester.id))
-        assert client.get(url).data == b'ok'
+        assert200(client.get(url))
 
     def test_resolve_model_from_slug(self, client):
         self.model.objects.create(slug='slug')
-        assert client.get('/model/slug').data == b'ok'
+        assert200(client.get('/model/slug'))
 
     def test_model_not_found(self, client):
-        assert client.get('/model/not-found').status_code == 404
+        assert404(client.get('/model/not-found'))
 
 
 class SlugAsStringFieldTest(ModelConverterMixin):
@@ -167,10 +168,102 @@ class SlugAsSlugFieldTest(AsSlugMixin):
     model = SlugTester
     converter = SlugTesterConverter
 
+    def test_renaming(self, client):
+        tester = self.model.objects.create(slug='old')
+        old_url = url_for('model_tester', model=tester)
+        assert200(client.get(old_url))
+
+        tester.slug = 'new'
+        tester.save()
+        new_url = url_for('model_tester', model=tester)
+        assert200(client.get(new_url))
+        assert404(client.get(old_url))
+
 
 class SlugAsSLugFieldWithFollowTest(AsSlugMixin):
     model = RedirectTester
     converter = RedirectTesterConverter
+
+    def test_renaming_redirect(self, client):
+        tester = self.model.objects.create(slug='old')
+        old_url = url_for('model_tester', model=tester)
+        assert200(client.get(old_url))
+
+        tester.slug = 'new'
+        tester.save().reload()
+
+        new_url = url_for('model_tester', model=tester)
+        assert200(client.get(new_url))
+        assert_redirects(client.get(old_url), new_url)
+
+    def test_multiple_renaming_redirect(self, client):
+        tester = self.model.objects.create(slug='first')
+        first_url = url_for('model_tester', model=tester)
+
+        tester.slug = 'second'
+        tester.save().reload()
+        second_url = url_for('model_tester', model=tester)
+        assert200(client.get(second_url))
+        assert_redirects(client.get(first_url), second_url)
+
+        tester.slug = 'last'
+        tester.save().reload()
+        last_url = url_for('model_tester', model=tester)
+        assert200(client.get(last_url))
+        assert_redirects(client.get(first_url), last_url)
+        assert_redirects(client.get(second_url), last_url)
+
+    def test_last_slug_has_priority(self, client):
+        tester = self.model.objects.create(slug='first')
+        first_url = url_for('model_tester', model=tester)
+
+        tester.slug = 'second'
+        tester.save().reload()
+        second_url = url_for('model_tester', model=tester)
+
+        tester.slug = 'third'
+        tester.save().reload()
+        third_url = url_for('model_tester', model=tester)
+
+        new_tester = self.model.objects.create(slug='second')
+        # Second slug should not be redirected anymore
+        assert200(client.get(second_url))
+
+        new_tester.slug = 'last'
+        new_tester.save().reload()
+        last_url = url_for('model_tester', model=new_tester)
+
+        # Current state should be:
+        # - first redirects to third (tester)
+        # - second redirects to last (new tester)
+        # - third display tester
+        # - last display new tester
+
+        # Display or redirect to new_tester
+        assert200(client.get(last_url))
+        assert_redirects(client.get(second_url), last_url)
+        # Display or redirect to tester
+        assert200(client.get(third_url))
+        assert_redirects(client.get(first_url), third_url)
+
+    def test_redirects_destroyed_on_object_deleted(self, client):
+        tester = self.model.objects.create(slug='first')
+        first_url = url_for('model_tester', model=tester)
+
+        tester.slug = 'second'
+        tester.save().reload()
+        second_url = url_for('model_tester', model=tester)
+
+        tester.slug = 'last'
+        tester.save().reload()
+        last_url = url_for('model_tester', model=tester)
+
+        tester.delete()
+        assert404(client.get(first_url))
+        assert404(client.get(second_url))
+        assert404(client.get(last_url))
+
+        assert SlugFollow.objects.count() is 0
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -252,5 +345,5 @@ class TerritoryConverterTest:
         assert200(response)
 
     def test_model_not_found(self, client):
-        assert client.get('/territory/l/c@latest').status_code == 404
+        assert404(client.get('/territory/l/c@latest'))
 

@@ -151,7 +151,7 @@ class SlugFieldTest:
         assert obj.slug == 'other'
 
     def test_unchanged(self):
-        '''SlugField should not chnage on save if not needed'''
+        '''SlugField should not change on save if not needed'''
         obj = SlugTester(title="A Title")
         assert obj.slug is None
         obj.save()
