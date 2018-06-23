@@ -7,6 +7,8 @@ import slugify
 from flask_mongoengine import Document
 from mongoengine.fields import StringField
 
+from .queryset import UDataQuerySet
+
 log = logging.getLogger(__name__)
 
 
@@ -69,9 +71,10 @@ class SlugFollow(Document):
     new_slug = StringField()  # In case slug was changed after a name change.
 
     meta = {
-        "indexes": [
-            ("namespace", "old_slug"),
-        ]
+        'indexes': [
+            ('namespace', 'old_slug'),
+        ],
+        'queryset_class': UDataQuerySet,
     }
 
 
@@ -83,7 +86,7 @@ def populate_slug(instance, field):
 
     try:
         previous = instance.__class__.objects.get(id=instance.id)
-    except:
+    except Exception:
         previous = None
 
     manual = (not previous and value or
@@ -131,7 +134,7 @@ def populate_slug(instance, field):
 
     # Track old slugs for this class
     if field.follow and slug != old_slug:
-        slug_follower, created = SlugFollow.get_or_create(
+        slug_follower, created = SlugFollow.objects.get_or_create(
             namespace=instance.__class__.__name__,
             old_slug=old_slug
         )

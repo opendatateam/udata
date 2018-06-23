@@ -12,7 +12,7 @@ from udata import routing
 from udata.core.spatial.models import GeoZone
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.models import db
-from udata.tests.helpers import assert200
+from udata.tests.helpers import assert200, assert_redirects
 
 
 class UUIDConverterTest:
@@ -51,36 +51,46 @@ class Tester(db.Document):
     slug = db.StringField()
 
 
+class SlugTester(db.Document):
+    slug = db.SlugField()
+
+
+class RedirectTester(db.Document):
+    slug = db.SlugField(follow=True)
+
+
 class TesterConverter(routing.ModelConverter):
     model = Tester
 
 
-@pytest.mark.usefixtures('clean_db')
-class ObjectIdModelConverterTest:
+class SlugTesterConverter(routing.ModelConverter):
+    model = SlugTester
 
+
+class RedirectTesterConverter(routing.ModelConverter):
+    model = RedirectTester
+
+
+@pytest.mark.usefixtures('clean_db')
+class ModelConverterMixin:
     @pytest.fixture(autouse=True)
     def setup(self, app):
-        app.url_map.converters['tester'] = TesterConverter
+        app.url_map.converters['tester'] = self.converter
 
         @app.route('/model/<tester:model>')
         def model_tester(model):
-            assert isinstance(model, Tester)
+            assert isinstance(model, self.model)
             return 'ok'
 
     def test_serialize_model_id_to_url(self):
-        tester = Tester.objects.create()
+        tester = self.model.objects.create()
         url = url_for('model_tester', model=tester)
         assert url == '/model/{0}'.format(str(tester.id))
 
     def test_serialize_model_slug_to_url(self):
-        tester = Tester.objects.create(slug='slug')
+        tester = self.model.objects.create(slug='slug')
         url = url_for('model_tester', model=tester)
         assert url == '/model/slug'
-
-    def test_serialize_model_slug_with_unicode_to_url(self):
-        tester = Tester.objects.create(slug='slüg')
-        url = url_for('model_tester', model=tester)
-        assert url == '/model/sl%C3%BCg'
 
     def test_serialize_object_id_to_url(self):
         id = ObjectId()
@@ -92,31 +102,75 @@ class ObjectIdModelConverterTest:
         url = url_for('model_tester', model=slug)
         assert url == '/model/slug'
 
-    def test_serialize_unicode_string_to_url(self):
-        slug = 'slüg'
-        url = url_for('model_tester', model=slug)
-        assert url == '/model/sl%C3%BCg'
-
     def test_cant_serialize_model_to_url(self):
-        tester = Tester()
+        tester = self.model()
         with pytest.raises(ValueError):
             url_for('model_tester', model=tester)
 
     def test_resolve_model_from_id(self, client):
-        tester = Tester.objects.create(slug='slug')
+        tester = self.model.objects.create(slug='slug')
         url = '/model/{0}'.format(str(tester.id))
         assert client.get(url).data == b'ok'
 
     def test_resolve_model_from_slug(self, client):
-        Tester.objects.create(slug='slug')
+        self.model.objects.create(slug='slug')
         assert client.get('/model/slug').data == b'ok'
-
-    def test_resolve_model_from_utf8_slug(self, client):
-        Tester.objects.create(slug='slüg')
-        assert client.get('/model/slüg').data == b'ok'
 
     def test_model_not_found(self, client):
         assert client.get('/model/not-found').status_code == 404
+
+
+class SlugAsStringFieldTest(ModelConverterMixin):
+    model = Tester
+    converter = TesterConverter
+
+    def test_quote_model_slug_with_unicode_to_url(self):
+        tester = Tester.objects.create(slug='slüg')
+        url = url_for('model_tester', model=tester)
+        assert url == '/model/sl%C3%BCg'
+
+    def test_quote_unicode_string_to_url(self):
+        slug = 'slüg'
+        url = url_for('model_tester', model=slug)
+        assert url == '/model/sl%C3%BCg'
+
+    def test_match_utf8_slug(self, client):
+        slug = 'slüg'
+        Tester.objects.create(slug=slug)
+        assert200(client.get('/model/slüg'))
+
+    def test_match_normalized_utf8_slug(self, client):
+        slug = 'slüg'
+        Tester.objects.create(slug=slug)
+        assert200(client.get('/model/sl%C3%BCg'))
+
+
+class AsSlugMixin(ModelConverterMixin):
+    def test_serialize_model_slug_with_unicode_to_url(self):
+        tester = self.model.objects.create(slug='slüg')
+        url = url_for('model_tester', model=tester)
+        assert url == '/model/slug'
+
+    def test_serialize_unicode_string_to_url(self):
+        slug = 'slüg'
+        url = url_for('model_tester', model=slug)
+        assert url == '/model/slug'
+
+    def test_redirect_to_normalized_utf8_slug(self, client):
+        slug = 'slüg'
+        url = url_for('model_tester', model=slug)
+        self.model.objects.create(slug=slug)
+        assert_redirects(client.get('/model/slüg'), url)
+
+
+class SlugAsSlugFieldTest(AsSlugMixin):
+    model = SlugTester
+    converter = SlugTesterConverter
+
+
+class SlugAsSLugFieldWithFollowTest(AsSlugMixin):
+    model = RedirectTester
+    converter = RedirectTesterConverter
 
 
 @pytest.mark.usefixtures('clean_db')

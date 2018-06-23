@@ -208,6 +208,10 @@ class SlugFieldTest:
         field = db.SlugField()
         assert field.slugify('  ab  ') == 'ab'
 
+    def test_special_chars_are_normalized(self):
+        field = db.SlugField()
+        assert field.slugify('à-€-ü') == 'a-eur-u'
+
 
 class DateFieldTest:
     def test_none_if_empty_and_not_required(self):
