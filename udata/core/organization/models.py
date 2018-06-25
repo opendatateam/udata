@@ -97,8 +97,8 @@ class OrganizationQuerySet(db.BaseQuerySet):
 class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     name = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='name', update=True)
+    slug = db.SlugField(max_length=255, required=True, populate_from='name',
+                        update=True, follow=True)
     description = db.StringField(required=True)
     url = db.StringField()
     image_url = db.StringField()

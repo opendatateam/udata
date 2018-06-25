@@ -11,8 +11,8 @@ __all__ = ('Topic', )
 
 class Topic(db.Document):
     name = db.StringField(required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='name', update=True)
+    slug = db.SlugField(max_length=255, required=True, populate_from='name',
+                        update=True, follow=True)
     description = db.StringField()
     tags = db.ListField(db.StringField())
     color = db.IntField()

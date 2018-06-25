@@ -16,8 +16,8 @@ IMAGE_SIZES = [400, 100, 50]
 
 class Post(db.Datetimed, db.Document):
     name = db.StringField(max_length=255, required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='name', update=True)
+    slug = db.SlugField(max_length=255, required=True, populate_from='name',
+                        update=True, follow=True)
     headline = db.StringField()
     content = db.StringField(required=True)
     image_url = db.StringField()
