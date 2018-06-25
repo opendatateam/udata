@@ -4,14 +4,21 @@ from __future__ import unicode_literals
 from bson import ObjectId
 from uuid import UUID
 
-from flask import request
+from flask import request, redirect, url_for
 from mongoengine.errors import InvalidQueryError
 from werkzeug.routing import BaseConverter, NotFound, PathConverter
 from werkzeug.urls import url_quote
 
 from udata import models
+from udata.models import db
 from udata.core.spatial.models import GeoZone
 from udata.i18n import ISO_639_1_CODES
+
+
+class LazyRedirect(object):
+    '''Store location for lazy redirections'''
+    def __init__(self, arg):
+        self.arg = arg
 
 
 class LanguagePrefixConverter(BaseConverter):
@@ -64,23 +71,47 @@ class ModelConverter(BaseConverter):
 
     model = None
 
+    @property
+    def has_slug(self):
+        return hasattr(self.model, 'slug') and isinstance(self.model.slug, db.SlugField)
+
+    @property
+    def has_redirected_slug(self):
+        return self.has_slug and self.model.slug.follow
+
+    def quote(self, value):
+        if self.has_slug:
+            return self.model.slug.slugify(value)
+        else:
+            return url_quote(value)
+
     def to_python(self, value):
         try:
-            obj = self.model.objects(slug=value).first()
-        except InvalidQueryError:  # If the model doesn't have a slug.
+            quoted = self.quote(value)
+            query = db.Q(slug=value) | db.Q(slug=quoted)
+            obj = self.model.objects(query).get()
+        except (InvalidQueryError, self.model.DoesNotExist):
+            # If the model doesn't have a slug or matching slug doesn't exist.
             obj = None
+        else:
+            if obj.slug != value:
+                return LazyRedirect(quoted)
         try:
             return obj or self.model.objects.get_or_404(id=value)
         except NotFound as e:
+            if self.has_redirected_slug:
+                latest = self.model.slug.latest(value)
+                if latest:
+                    return LazyRedirect(latest)
             return e
 
     def to_url(self, obj):
         if isinstance(obj, basestring):
-            return url_quote(obj)
+            return self.quote(obj)
         elif isinstance(obj, (ObjectId, UUID)):
             return str(obj)
         elif getattr(obj, 'slug', None):
-            return url_quote(obj.slug)
+            return self.quote(obj.slug)
         elif getattr(obj, 'id', None):
             return str(obj.id)
         else:
@@ -165,18 +196,26 @@ class TerritoryConverter(PathConverter):
             raise ValueError('Unable to serialize "%s" to url' % obj)
 
 
-def lazy_raise_404():
-    '''Raise 404 lazily to ensure request.endpoint is set'''
+def lazy_raise_or_redirect():
+    '''
+    Raise exception lazily to ensure request.endpoint is set
+    Also perform redirect if needed
+    '''
     if not request.view_args:
         return
-    for arg in request.view_args.values():
-        if isinstance(arg, NotFound):
-            request.routing_exception = arg
+    for name, value in request.view_args.items():
+        if isinstance(value, NotFound):
+            request.routing_exception = value
             break
+        elif isinstance(value, LazyRedirect):
+            new_args = request.view_args
+            new_args[name] = value.arg
+            new_url = url_for(request.endpoint, **new_args)
+            return redirect(new_url)
 
 
 def init_app(app):
-    app.before_request(lazy_raise_404)
+    app.before_request(lazy_raise_or_redirect)
     app.url_map.converters['lang'] = LanguagePrefixConverter
     app.url_map.converters['list'] = ListConverter
     app.url_map.converters['pathlist'] = PathListConverter

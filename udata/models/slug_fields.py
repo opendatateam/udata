@@ -6,6 +6,9 @@ import slugify
 
 from flask_mongoengine import Document
 from mongoengine.fields import StringField
+from mongoengine.signals import post_delete
+
+from .queryset import UDataQuerySet
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +29,9 @@ class SlugField(StringField):
         self.separator = separator
         self.follow = follow
         super(SlugField, self).__init__(**kwargs)
+        if follow:
+            # Can't use sender=self.owner_document which is not yet defined
+            post_delete.connect(self.cleanup_on_delete)
 
     def __get__(self, instance, owner):
         if instance is not None:
@@ -54,6 +60,26 @@ class SlugField(StringField):
                                separator=self.separator,
                                to_lower=self.lower_case)
 
+    def latest(self, value):
+        '''
+        Get the latest object for a given old slug
+        '''
+        namespace = self.owner_document.__name__
+        follow = SlugFollow.objects(namespace=namespace, old_slug=value).first()
+        if follow:
+            return self.owner_document.objects(slug=follow.new_slug).first()
+        return None
+
+    def cleanup_on_delete(self, sender, document):
+        '''
+        Clean up slug redirections on object deletion
+        '''
+        if not self.follow or sender is not self.owner_document:
+            return
+        slug = getattr(document, self.db_field)
+        namespace = self.owner_document.__name__
+        SlugFollow.objects(namespace=namespace, new_slug=slug).delete()
+
 
 class SlugFollow(Document):
     '''
@@ -64,14 +90,15 @@ class SlugFollow(Document):
         * old_slug - Before change slug.
         * new_slug - After change slug
     '''
-    namespace = StringField()
-    old_slug = StringField()
-    new_slug = StringField()  # In case slug was changed after a name change.
+    namespace = StringField(required=True)
+    old_slug = StringField(required=True)
+    new_slug = StringField(required=True)
 
     meta = {
-        "indexes": [
-            ("namespace", "old_slug"),
-        ]
+        'indexes': [
+            ('namespace', 'old_slug'),
+        ],
+        'queryset_class': UDataQuerySet,
     }
 
 
@@ -83,19 +110,26 @@ def populate_slug(instance, field):
 
     try:
         previous = instance.__class__.objects.get(id=instance.id)
-    except:
+    except Exception:
         previous = None
 
-    manual = (not previous and value or
-              field.db_field in instance._get_changed_fields())
+    # Field value has changed
+    changed = field.db_field in instance._get_changed_fields()
+    # Field initial value has been manually set
+    manual = not previous and value or changed
 
     if not manual and field.populate_from:
+        # value to slugify is extracted from populate_from parameter
         value = getattr(instance, field.populate_from)
         if previous and value == getattr(previous, field.populate_from):
             return value
 
-    if previous and (getattr(previous, field.db_field) == value or
-                     not field.update):
+    if previous and getattr(previous, field.db_field) == value:
+        # value is unchanged from DB
+        return value
+
+    if previous and not changed and not field.update:
+        # Field is not manually set and slug should not update on change
         return value
 
     slug = field.slugify(value)
@@ -106,7 +140,6 @@ def populate_slug(instance, field):
     if slug is None:
         return
 
-    # If previous and slug ==
     old_slug = getattr(previous, field.db_field, None)
 
     if slug == old_slug:
@@ -130,14 +163,23 @@ def populate_slug(instance, field):
             index += 1
 
     # Track old slugs for this class
-    if field.follow and slug != old_slug:
-        slug_follower, created = SlugFollow.get_or_create(
-            namespace=instance.__class__.__name__,
-            old_slug=old_slug
-        )
+    if field.follow and old_slug != slug:
+        ns = instance.__class__.__name__
+        # Destroy redirections from this new slug
+        SlugFollow.objects(namespace=ns, old_slug=slug).delete()
 
-        slug_follower.new_slug = slug
-        slug_follower.save()
+        if old_slug:
+            # Create a redirect for previous slug
+            slug_follower, created = SlugFollow.objects.get_or_create(
+                namespace=ns,
+                old_slug=old_slug,
+                auto_save=False,
+            )
+            slug_follower.new_slug = slug
+            slug_follower.save()
+
+            # Maintain previous redirects
+            SlugFollow.objects(namespace=ns, new_slug=old_slug).update(new_slug=slug)
 
     setattr(instance, field.db_field, slug)
     return slug

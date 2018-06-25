@@ -360,8 +360,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                   default=datetime.now, required=True)
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
-    slug = db.SlugField(max_length=255, required=True,
-                        populate_from='title', update=True)
+    slug = db.SlugField(max_length=255, required=True, populate_from='title',
+                        update=True, follow=True)
     description = db.StringField(required=True, default='')
     license = db.ReferenceField('License')
 
