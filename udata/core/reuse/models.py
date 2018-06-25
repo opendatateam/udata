@@ -40,8 +40,8 @@ class ReuseQuerySet(db.OwnedQuerySet):
 
 class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     title = db.StringField(required=True)
-    slug = db.SlugField(
-        max_length=255, required=True, populate_from='title', update=True)
+    slug = db.SlugField(max_length=255, required=True, populate_from='title',
+                        update=True, follow=True)
     description = db.StringField(required=True)
     type = db.StringField(required=True, choices=list(REUSE_TYPES))
     url = db.StringField(required=True)
