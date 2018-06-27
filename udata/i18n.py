@@ -68,8 +68,8 @@ class PluggableDomain(Domain):
                 translations.merge(flask_security_translations)
 
                 for pkg in entrypoints.get_roots(current_app):
-                    package = pkgutil.get_loader(pkg)
-                    path = join(package.filename, 'translations')
+                    loader = pkgutil.get_loader(pkg)
+                    path =   join(loader.path, 'translations')
                     domains = [f.replace(path, '').replace('.pot', '')[1:]
                                for f in iglob(join(path, '*.pot'))]
                     for domain in domains:
