@@ -17,9 +17,9 @@
                     :placeholder="_('Search')" v-model="search_query"
                 />
                 <div class="input-group-btn">
-                    <button type="submit" name="submit" class="btn btn-warning btn-flat">
+                    <div class="btn btn-warning btn-flat">
                         <span class="fa fa-search"></span>
-                    </button>
+                    </div>
                 </div>
             </div>
         </form>
