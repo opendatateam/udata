@@ -12,6 +12,7 @@
     - use `next()` instead of `.next()` to iterate
     - unhide some implicit casts (in particular search weight)
 - Slugs are now redirected on change when changed until old slug are free [#1771](https://github.com/opendatateam/udata/pull/1771)
+- Use metrics.views on resource card [#1778](https://github.com/opendatateam/udata/pull/1778)
 
 ## 1.4.1 (2018-06-15)
 
