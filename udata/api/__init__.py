@@ -1,5 +1,5 @@
 import logging
-import urllib
+import urllib.parse
 
 from functools import wraps
 
@@ -222,7 +222,7 @@ def collect_stats(response):
     if (not current_app.config['TESTING'] and
             request.endpoint not in blacklist):
         extras = {
-            'action_name': urllib.quote(action_name),
+            'action_name': urllib.parse.quote(action_name),
         }
         tracking.send_signal(on_api_call, request, current_user, **extras)
     return response
