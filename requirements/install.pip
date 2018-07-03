@@ -7,7 +7,7 @@ celerybeat-mongo==0.1.0
 chardet==3.0.4
 CommonMark==0.7.5
 elasticsearch==2.4.1
-elasticsearch-dsl==2.2.0
+elasticsearch-dsl==6.2.1
 factory-boy==2.11.1
 Faker==0.8.16
 Flask-BabelEx==0.9.3
