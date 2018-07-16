@@ -13,9 +13,9 @@
                 <input type="text" name="search" class="form-control"
                     :placeholder="_('Search')" v-model="search_query" />
                 <div class="input-group-btn">
-                    <button type="submit" name="submit" class="btn btn-warning btn-flat">
+                    <div class="btn btn-warning btn-flat">
                         <span class="fa fa-search"></span>
-                    </button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -33,6 +33,11 @@
     <p class="col-xs-12 lead text-center">
     {{ _('No organization found. You can go to the next step to create your own one.') }}
     </p>
+    <div class="col-xs-12 lead text-center">
+        <a v-link="{name: 'organization-new'}" class="btn btn-flat btn-primary">
+            {{ _('Find or create your organization') }}
+        </a>
+    </div>
 </div>
 </div>
 </template>

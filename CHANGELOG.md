@@ -12,6 +12,7 @@
     - use `next()` instead of `.next()` to iterate
     - unhide some implicit casts (in particular search weight)
 - Slugs are now redirected on change when changed until old slug are free [#1771](https://github.com/opendatateam/udata/pull/1771)
+- improve usability of new organization form [#1777](https://github.com/opendatateam/udata/pull/1777) 
 
 ## 1.4.1 (2018-06-15)
 
