@@ -1,2 +1,2 @@
 -r install.pip
-mkdocs==0.17.4
+mkdocs==0.17.5
