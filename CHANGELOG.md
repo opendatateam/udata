@@ -12,7 +12,11 @@
     - use `next()` instead of `.next()` to iterate
     - unhide some implicit casts (in particular search weight)
 - Slugs are now redirected on change when changed until old slug are free [#1771](https://github.com/opendatateam/udata/pull/1771)
-- improve usability of new organization form [#1777](https://github.com/opendatateam/udata/pull/1777) 
+- Improve usability of new organization form [#1777](https://github.com/opendatateam/udata/pull/1777)
+- Fix resources reorder (registered extras validation logic) [#1796](https://github.com/opendatateam/udata/pull/1796)
+- Fix dataset collapse on ie11 and card markup [#1792](https://github.com/opendatateam/udata/pull/1792)
+- Fix checksum display on resource modal [#1797](https://github.com/opendatateam/udata/pull/1797)
+- Use metrics.views on resource card [#1778](https://github.com/opendatateam/udata/pull/1778)
 
 ## 1.4.1 (2018-06-15)
 

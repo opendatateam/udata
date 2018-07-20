@@ -106,7 +106,7 @@
                         {% if nb_groups > 1 %}<h4 class="resource-type">{{ type_label }}</h4>{% endif %}
                         {% for resource in resources %}
                             {% if loop.index0 == max_resources %}
-                            <div v-if="isTypeListVisible('{{ type }}')" id="collapsed-resources-{{ type }}" class="collapse">
+                            <div id="collapsed-resources-{{ type }}" class="collapse">
                             {% endif %}
                             {% include theme('dataset/resource/card.html') %}
                         {% endfor %}
