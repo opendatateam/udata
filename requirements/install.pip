@@ -9,7 +9,7 @@ CommonMark==0.7.5
 elasticsearch==2.4.1
 elasticsearch-dsl==2.2.0
 factory-boy==2.11.1
-Faker==0.8.16
+Faker==0.8.17
 Flask-BabelEx==0.9.3
 Flask-Caching==1.4.0
 flask-fs==0.6.1
@@ -34,7 +34,7 @@ bcrypt==3.1.4
 pydenticon==0.3.1
 pyliblzma==0.5.3
 python-dateutil==2.7.3
-pytz==2018.4
+pytz==2018.5
 PyYAML==3.12
 rdflib==4.2.2
 rdflib-jsonld==0.4.0

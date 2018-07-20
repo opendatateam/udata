@@ -1,4 +1,4 @@
-invoke==1.0.0
+invoke==1.1.0
 -r install.pip
 -r test.pip
 -r report.pip
