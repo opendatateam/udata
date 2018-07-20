@@ -665,7 +665,7 @@ class PublishAsField(ModelFieldMixin, Field):
 
 
 def field_parse(cls, value, *args, **kwargs):
-    kwargs['_form'] = Form()
+    kwargs['_form'] = WTForm()
     kwargs['_name'] = 'extra'
     field = cls(*args, **kwargs)
     field.process_formdata([value])
