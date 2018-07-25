@@ -17,6 +17,7 @@
 - Fix dataset collapse on ie11 and card markup [#1792](https://github.com/opendatateam/udata/pull/1792)
 - Fix checksum display on resource modal [#1797](https://github.com/opendatateam/udata/pull/1797)
 - Use metrics.views on resource card [#1778](https://github.com/opendatateam/udata/pull/1778)
+- Upgrade i18next (security) [#1803](https://github.com/opendatateam/udata/pull/1803)
 
 ## 1.4.1 (2018-06-15)
 
