@@ -18,6 +18,7 @@
 - Use metrics.views on resource card [#1778](https://github.com/opendatateam/udata/pull/1778)
 - Fix dataset collapse on ie11 [#1802](https://github.com/opendatateam/udata/pull/1802)
 - Upgrade i18next (security) [#1803](https://github.com/opendatateam/udata/pull/1803)
+- Allows to serve assets on an external CDN domain using `CDN_DOMAIN` [#1804](https://github.com/opendatateam/udata/pull/1804)
 
 ## 1.4.1 (2018-06-15)
 

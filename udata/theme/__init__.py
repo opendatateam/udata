@@ -45,7 +45,17 @@ default_menu = nav.Bar('default_menu', [
 @contextfunction
 def theme_static_with_version(ctx, filename, external=False):
     '''Override the default theme static to add cache burst'''
-    url = global_theme_static(ctx, filename, external=external)
+    # Imported here to avoir circular dependencies
+    from udata.frontend.helpers import cdn_for
+    if current_app.theme_manager.static_folder:
+        url = cdn_for('_themes.static',
+                      filename=current.identifier + '/' + filename,
+                      _external=external)
+    else:
+        url = cdn_for('_themes.static',
+                      themeid=current.identifier,
+                      filename=filename,
+                      _external=external)
     if url.endswith('/'):  # this is a directory, no need for cache burst
         return url
     if current_app.config['DEBUG']:
