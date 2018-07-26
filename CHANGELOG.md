@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add a reference on the page about SPD [#318]https://github.com/etalab/udata-gouvfr/pull/318)
 
 ## 1.4.1 (2018-06-06)
 
