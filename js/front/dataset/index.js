@@ -45,6 +45,7 @@ new Vue({
             dataset: this.extractDataset(),
             userReuses: [],
             checkUrlEnabled: config.check_urls,
+            visibleTypeLists: [],
         };
     },
     ready() {
@@ -58,6 +59,15 @@ new Vue({
         log.debug('Dataset display page ready');
     },
     methods: {
+        /**
+         * Is a resource type list collapsed
+         * @type {String}
+         * @return {Boolean}
+         */
+        isTypeListVisible(type) {
+            return this.visibleTypeLists.indexOf(type) !== -1;
+        },
+
         /**
          * Extract the current dataset metadatas from JSON-LD script
          * @return {Object} The parsed dataset
@@ -131,6 +141,7 @@ new Vue({
             new Velocity(e.target, {height: 0, opacity: 0}, {complete(els) {
                 els[0].remove();
             }});
+            this.visibleTypeLists.push(type);
         },
 
         /**
