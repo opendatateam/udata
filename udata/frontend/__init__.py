@@ -100,6 +100,11 @@ def init_app(app, views=None):
     # Load front only views and helpers
     app.register_blueprint(front)
 
+    # Enable CDN if required
+    if app.config['CDN_DOMAIN'] is not None:
+        from flask_cdn import CDN
+        CDN(app)
+
     # Load debug toolbar if enabled
     if app.config.get('DEBUG_TOOLBAR'):
         from flask_debugtoolbar import DebugToolbarExtension

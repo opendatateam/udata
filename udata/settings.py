@@ -307,6 +307,12 @@ class Defaults(object):
     MAP_INITIAL_ZOOM = 4
     # Initial map territory level
     MAP_INITIAL_LEVEL = 0
+    # Flask-CDN options
+    # See: https://github.com/libwilliam/flask-cdn#flask-cdn-options
+    # If this value is defined, toggle static assets on external domain
+    CDN_DOMAIN = None
+    # Don't check timestamp on assets (and avoid error on missing assets)
+    CDN_TIMESTAMP = False
 
 
 class Testing(object):
