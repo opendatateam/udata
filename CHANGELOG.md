@@ -2,23 +2,35 @@
 
 ## Current (in progress)
 
+### New features
+
+- Slugs are now redirected on change when changed until old slug are free [#1771](https://github.com/opendatateam/udata/pull/1771)
+- Improve usability of new organization form [#1777](https://github.com/opendatateam/udata/pull/1777)
+- Allows to serve assets on an external CDN domain using `CDN_DOMAIN` [#1804](https://github.com/opendatateam/udata/pull/1804)
+
+### Breaking changes
+
+None
+
+### Bug fixes and minor changes
+
 - Sort dataset update frequencies by ascending frequency [#1758](https://github.com/opendatateam/udata/pull/1758)
 - Skip gov.uk references tests when site is unreachable [#1767](https://github.com/opendatateam/udata/pull/1767)
-- Tests are now run against `local.test` instead of `localhost` to avoid pytest warnings
+- Fix resources reorder (registered extras validation logic) [#1796](https://github.com/opendatateam/udata/pull/1796)
+- Fix checksum display on resource modal [#1797](https://github.com/opendatateam/udata/pull/1797)
+- Use metrics.views on resource card [#1778](https://github.com/opendatateam/udata/pull/1778)
+- Fix dataset collapse on ie11 [#1802](https://github.com/opendatateam/udata/pull/1802)
+- Upgrade i18next (security) [#1803](https://github.com/opendatateam/udata/pull/1803)
+
+### Internals
+
 - Backports some Python 3 forward compatible changes and fixes some bugs [#1769](https://github.com/opendatateam/udata/pull/1769):
     - avoid `filter` and `map` usage instead of list comprehension
     - explicit encoding handling
     - avoid comparison to `None`
     - use `next()` instead of `.next()` to iterate
     - unhide some implicit casts (in particular search weight)
-- Slugs are now redirected on change when changed until old slug are free [#1771](https://github.com/opendatateam/udata/pull/1771)
-- Improve usability of new organization form [#1777](https://github.com/opendatateam/udata/pull/1777)
-- Fix resources reorder (registered extras validation logic) [#1796](https://github.com/opendatateam/udata/pull/1796)
-- Fix checksum display on resource modal [#1797](https://github.com/opendatateam/udata/pull/1797)
-- Use metrics.views on resource card [#1778](https://github.com/opendatateam/udata/pull/1778)
-- Fix dataset collapse on ie11 [#1802](https://github.com/opendatateam/udata/pull/1802)
-- Upgrade i18next (security) [#1803](https://github.com/opendatateam/udata/pull/1803)
-- Allows to serve assets on an external CDN domain using `CDN_DOMAIN` [#1804](https://github.com/opendatateam/udata/pull/1804)
+- Tests are now run against `local.test` instead of `localhost` to avoid pytest warnings
 
 ## 1.4.1 (2018-06-15)
 
