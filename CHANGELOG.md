@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.4.2 (2018-07-30)
 
 - Add a reference on the page about SPD [#318](https://github.com/etalab/udata-gouvfr/pull/318)
