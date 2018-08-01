@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Harvest sources are now filterable through the harvest source create/edit admin form [#1812](https://github.com/opendatateam/udata/pull/1812)
 
 ## 1.5.0 (2018-07-30)
 

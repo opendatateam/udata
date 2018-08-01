@@ -33,7 +33,8 @@ const MASK = [
     'last_job{status,ended}',
     'organization',
     'backend',
-    'validation{state}'
+    'validation{state}',
+    'config',
 ];
 
 export default {
