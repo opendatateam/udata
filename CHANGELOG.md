@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Ensure OEmbed compatibility with external CDN [#1815](https://github.com/opendatateam/udata/pull/1815)
+- Fixes some static URL serialization [#1815](https://github.com/opendatateam/udata/pull/1815)
 
 ## 1.5.0 (2018-07-30)
 
