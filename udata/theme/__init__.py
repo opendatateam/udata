@@ -49,13 +49,11 @@ def theme_static_with_version(ctx, filename, external=False):
     from udata.frontend.helpers import cdn_for
     if current_app.theme_manager.static_folder:
         url = cdn_for('_themes.static',
-                      filename=current.identifier + '/' + filename,
-                      _external=external)
+                      filename=current.identifier + '/' + filename)
     else:
         url = cdn_for('_themes.static',
                       themeid=current.identifier,
-                      filename=filename,
-                      _external=external)
+                      filename=filename)
     if url.endswith('/'):  # this is a directory, no need for cache burst
         return url
     if current_app.config['DEBUG']:
