@@ -6,7 +6,8 @@
         :placeholder="placeholder"
         :required="required"
         :readonly="readonly"
-        :value="value"></input>
+        :value="value"
+        @input="onChange"></input>
 </div>
 </template>
 

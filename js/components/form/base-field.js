@@ -18,6 +18,11 @@ export const FieldComponentMixin = {
         required: Boolean,
         placeholder: String,
         readonly: Boolean
+    },
+    methods: {
+        onChange(evt) {
+            this.$dispatch('field:value-change', evt.target.value);
+        }
     }
 };
 
@@ -39,6 +44,11 @@ export const BaseField = {
         'markdown-editor': require('components/form/markdown-editor.vue'),
         'date-picker': require('components/form/date-picker.vue'),
         'checkbox': require('components/form/checkbox.vue')
+    },
+    events: {
+        'field:value-change': function(value) {
+            this.$dispatch('field:change', this, value);
+        }
     },
     props: {
         field: {
@@ -122,6 +132,11 @@ export const BaseField = {
                 };
             }
             return widget;
+        }
+    },
+    watch: {
+        value(value) {
+            this.$dispatch('field:change', this, value);
         }
     }
 };

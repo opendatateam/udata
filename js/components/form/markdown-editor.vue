@@ -45,7 +45,8 @@
     :name="field.id"
     :placeholder="placeholder"
     :required="required"
-    :readonly="readonly">{{value || ''}}</textarea>
+    :readonly="readonly"
+    @input="onChange">{{value || ''}}</textarea>
 </template>
 
 <script>
