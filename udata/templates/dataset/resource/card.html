@@ -27,7 +27,7 @@
                 </li>
                 <li v-tooltip title="{{ _('Download count') }}">
                     <span class="fa fa-cloud-download"></span>
-                    {{ resource.metrics.nb_hits or 0 }}
+                    {{ resource.metrics.views or 0 }}
                 </li>
                 {% if not resource.from_community %}
                 <li class="healthcheck-container">
@@ -67,8 +67,8 @@
                     href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
                     <span class="fa fa-pencil"></span>
                 </a>
+            {% endif %}
             </div>
-        {% endif %}
         </div>
     </footer>
 </article>

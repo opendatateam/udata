@@ -17,8 +17,8 @@
           <dd v-if="resource.mime">{{resource.mime}}</dd>
           <dt v-if="resource.filesize">{{ _('Size') }}</dt>
           <dd v-if="resource.filesize">{{ resource.filesize|size }}</dd>
-          <dt v-if="resource.checksum">{{ resource.checksumType || 'sha1'}}</dt>
-          <dd v-if="resource.checksum">{{ resource.checksum }}</dd>
+          <dt v-if="checksum">{{ checksum.type || 'sha1'}}</dt>
+          <dd v-if="checksum">{{ checksum.value }}</dd>
           <dt v-if="resource.created_at">{{ _('Created on') }}</dt>
           <dd v-if="resource.created_at"> {{ resource.created_at|dt }}</dd>
           <dt v-if="resource.modified">{{ _('Modified on') }}</dt>
@@ -70,6 +70,7 @@ export default {
     data() {
         return {
             resourceType: undefined,
+            checksum: undefined,
         }
     },
     created() {
@@ -78,6 +79,7 @@ export default {
             `datasets/${this.datasetId}/resources/${this.resource.id}/`;
         this.$api.get(url).then(resource => {
             Object.assign(this.resource, resource);
+            this.checksum = resource.checksum;
         });
         // ensure this will be filled both on open from dataset page and direct open (deeplink)
         if (resource_types.has_data) {

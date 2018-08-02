@@ -106,16 +106,14 @@
                         {% if nb_groups > 1 %}<h4 class="resource-type">{{ type_label }}</h4>{% endif %}
                         {% for resource in resources %}
                             {% if loop.index0 == max_resources %}
-                            <div v-if="isTypeListVisible('{{ type }}')" id="collapsed-resources-{{ type }}" class="collapse">
+                            <div v-if="isTypeListVisible('{{ type }}')" v-cloak transition="expand">
                             {% endif %}
                             {% include theme('dataset/resource/card.html') %}
                         {% endfor %}
                         {% if resources|length > max_resources %}
                             </div>
                             <p class="text-center expander">
-                                <button type="button" class="btn btn-default"
-                                    data-toggle="collapse" href="#collapsed-resources-{{ type }}"
-                                    @click.prevent="expandResources($event, '{{ type }}')">
+                                <button type="button" class="btn btn-default" @click.prevent="expandResources($event, '{{ type }}')">
                                     <span class="fa fa-list" ></span>
                                     {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
                                 </button>

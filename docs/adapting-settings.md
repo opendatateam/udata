@@ -446,6 +446,16 @@ This activates metrics, this is deactivated for tests
 
 uData use Flask-FS as storage abstraction.
 
+## Flask-CDN options
+
+See [Flask-CDN README](https://github.com/libwilliam/flask-cdn#flask-cdn-options) for detailed options.
+
+### CDN_DOMAIN
+
+**default**: `None`
+
+Set this to a domain name. If defined, udata will serve its static assets from this domain.
+
 ## Avatars/identicon configuration
 
 Theses settings allow you to customize avatar rendering.
