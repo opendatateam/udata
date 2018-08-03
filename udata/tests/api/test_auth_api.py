@@ -107,6 +107,23 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert response.json == {'success': True}
 
+    def test_bad_oauth_auth(self, api, oauth):
+        '''Should handle wrong OAuth header authentication'''
+        user = UserFactory()
+        OAuth2Token.objects.create(
+            client=oauth,
+            user=user,
+            access_token='access-token',
+            refresh_token='refresh-token',
+        )
+
+        response = api.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', 'not-my-token'])
+        })
+
+        assert401(response)
+        assert response.content_type == 'application/json'
+
     def test_no_apikey(self, api):
         '''Should raise a HTTP 401 if no API Key is provided'''
         response = api.post(url_for('api.fake'))
