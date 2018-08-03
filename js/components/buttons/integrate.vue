@@ -29,6 +29,7 @@ export default {
         objectType: {type: String, required: true},
         objectId: {type: String, required: true},
         widgetUrl: {type: String, required: true},
+        rootUrl: String,
         documentationUrl: String
     },
     data() {
@@ -41,8 +42,9 @@ export default {
     computed: {
         snippet() {
             const tag = 'script'; // Due to vue-loader failing on closing script tag, we interpolate it
+            const root = this.rootUrl && !this.widgetUrl.startsWith(this.rootUrl) ? ` data-udata="${this.rootUrl}"` : '';
             return `<div data-udata-${this.objectType}="${this.objectId}"></div>
-<${tag} src="${this.widgetUrl}" async defer></${tag}>`;
+<${tag}${root} src="${this.widgetUrl}" async defer></${tag}>`;
         }
     },
     methods: {
