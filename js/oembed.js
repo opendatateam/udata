@@ -21,7 +21,7 @@ import '../less/oembed.less';
 function getBaseUrl() {
     const script =  document.currentScript || document.querySelector('script[src$="oembed.js"]');
     const parser = document.createElement('a');
-    parser.href = script.src;
+    parser.href = script.dataset.udata || script.src;
     return `${parser.protocol}//${parser.host}`;
 }
 
