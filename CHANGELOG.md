@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.5.1 (2018-08-03)
 
 - Ensure OEmbed compatibility with external CDN [#1815](https://github.com/opendatateam/udata/pull/1815)
 - Fixes some static URL serialization [#1815](https://github.com/opendatateam/udata/pull/1815)
