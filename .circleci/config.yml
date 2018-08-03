@@ -135,6 +135,8 @@ jobs:
   github:
     docker:
       - image: udata/circleci
+    environment:
+       BASH_ENV: /root/.bashrc
     steps:
       - attach_workspace:
           at: .
