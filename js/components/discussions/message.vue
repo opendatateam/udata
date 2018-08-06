@@ -1,37 +1,61 @@
-<style scoped lang="less">
-.message {
+<style lang="less">
+/* Warning:
+    As markdown content is not rendered by Vue.js,
+    scoped style doesn't work for styling markdown content
+*/
+
+.discussion-message {
     display: flex;
     flex-direction: row;
-    
+
     padding-top: 1.25em;
 
-    & > div {
-        display: flex;
-        flex-grow: 1;
-        flex-flow: row wrap;
-        justify-content: space-between;
-        flex-basis: 100%;
-    }
-    
-    & > .avatar {
+    > .avatar {
         margin-right: 1em;
         flex-basis: auto;
     }
 
-    div.author {
-        font-weight: bold;
-        margin-bottom: 0.5em;
-    }
+    .message-content {
+        display: flex;
+        flex-direction: column;
+        min-width: 0; // Override Flex default to auto
 
-    div.posted_on {
-        text-align: right;
-    }
+        .message-header {
+            display: flex;
+            flex: 0 0 auto;
+            margin-bottom: 0.5em;
 
-    div.body {
-        overflow-wrap: break-word;
-        word-wrap: break-word;
-        word-break: break-all;
-        flex-basis: 100%;
+            .author {
+                flex: 1 0 auto;
+                font-weight: bold;
+            }
+
+            .posted_on {
+                flex: 0 0 auto;
+                text-align: right;
+
+                .fa {
+                    // Space before anchor
+                    margin-left: 5px;
+                }
+            }
+        }
+
+        .body {
+            flex: 1 0 auto;
+
+            a, code {
+                word-wrap: break-word;
+                word-break: break-all;
+            }
+
+            pre {
+                code {
+                    word-wrap: normal;
+                    word-break: normal;
+                }
+            }
+        }
     }
 }
 
@@ -44,23 +68,25 @@
 
 </style>
 <template>
-    <div class="message">
+    <div class="discussion-message">
         <div class="avatar">
             <a href="{{ message.posted_by.page }}"><avatar :user="message.posted_by"></avatar></a>
         </div>
-        <div>
-            <div class="author">
-                <a href="{{ message.posted_by.page }}">{{ message.posted_by.first_name }} {{ message.posted_by.last_name }}</a>
-            </div>
-           
-            <div class="posted_on">
-                {{ formatDate(message.posted_on) }} 
-                <a href="#{{ discussion }}-{{ index }}"><span class="fa fa-link"></span></a>
+        <div class="message-content">
+            <div class="message-header">
+                <div class="author">
+                    <a href="{{ message.posted_by.page }}">{{ message.posted_by.first_name }} {{ message.posted_by.last_name }}</a>
+                </div>
+
+                <div class="posted_on">
+                    {{ formatDate(message.posted_on) }}
+                    <a href="#{{ discussion }}-{{ index }}"><span class="fa fa-link"></span></a>
+                </div>
             </div>
 
             <div class="body">
                 {{{ message.content | markdown }}}
-            </div> 
+            </div>
        </div>
     </div>
 </template>
