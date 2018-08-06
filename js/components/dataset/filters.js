@@ -17,7 +17,7 @@ export default {
             const start_label = start.format('L');
             const end_label = end.format('L');
             return end_label
-                ? this._('{start} to {end}', {start:start_label, end:end_label})
+                ? this._('{start} to {end}', {start: start_label, end: end_label, interpolation: { escapeValue: false }})
                 : start_label;
         },
         frequency_label(dataset) {
