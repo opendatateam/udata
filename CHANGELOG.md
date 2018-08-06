@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix client-side temporal coverage rendering [#1821](https://github.com/opendatateam/udata/pull/1821)
 
 ## 1.5.1 (2018-08-03)
 
