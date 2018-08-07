@@ -4,6 +4,7 @@
 
 - Fix client-side temporal coverage rendering [#1821](https://github.com/opendatateam/udata/pull/1821)
 - Prevent word breaking when wrapping discussions messages [#1822](https://github.com/opendatateam/udata/pull/1822)
+- Properly render message content on issues and discussions mails
 
 ## 1.5.1 (2018-08-03)
 
