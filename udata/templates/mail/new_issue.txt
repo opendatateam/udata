@@ -8,7 +8,7 @@
 ) }}.
 
 
-{{ _('Details') }}: {{ issue.title }}
+{{ _('Title') }}: {{ issue.title }}
 
 {{ _('You can see the issue on this page:') }}
 {{ issue.subject.external_url }}

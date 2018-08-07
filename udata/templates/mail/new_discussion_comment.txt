@@ -3,12 +3,12 @@
 {% block body %}
 {{ _('%(user)s commented an discussion on your %(type)s %(subject)s',
     type=discussion.subject.verbose_name,
-    user=comment.posted_by.fullname,
+    user=message.posted_by.fullname,
     subject=discussion.subject|string
 ) }}.
 
 
-{{ _('Details') }}: {{ discussion.title }}
+{{ _('Title') }}: {{ discussion.title }}
 
 
 {{ _('You can see the discussion on this page:') }}
