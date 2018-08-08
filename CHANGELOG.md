@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.4.3 (2018-08-08)
 
 - Fix the navbar toggle button position 🎊 [#327](https://github.com/etalab/udata-gouvfr/pull/327)
