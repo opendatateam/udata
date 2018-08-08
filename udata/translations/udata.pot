@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 1.5.1.dev0\n"
+"Project-Id-Version: udata 1.6.0.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-08-01 17:58+0200\n"
-"PO-Revision-Date: 2018-08-01 17:58+0200\n"
+"POT-Creation-Date: 2018-08-08 11:21+0200\n"
+"PO-Revision-Date: 2018-08-08 11:21+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -49,15 +49,15 @@ msgid ""
 "of the error and we will fix it as soon as possible."
 msgstr ""
 
-#: udata/api/oauth2.py:55
+#: udata/api/oauth2.py:54
 msgid "Bearer Token"
 msgstr ""
 
-#: udata/api/oauth2.py:59
+#: udata/api/oauth2.py:58
 msgid "Default scope"
 msgstr ""
 
-#: udata/api/oauth2.py:60
+#: udata/api/oauth2.py:59
 msgid "System administrator rights"
 msgstr ""
 
@@ -127,9 +127,16 @@ msgstr ""
 #: udata/core/dataset/forms.py:54 udata/core/dataset/forms.py:108
 #: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
-#: udata/templates/dataset/list.html:40 udata/templates/reuse/list.html:36
-#: udata/templates/search.html:73 udata/templates/search.html:87
-#: udata/templates/topic/datasets.html:33 udata/templates/topic/reuses.html:32
+#: udata/templates/dataset/list.html:40
+#: udata/templates/mail/discussion_closed.html:26
+#: udata/templates/mail/issue_closed.html:26
+#: udata/templates/mail/new_discussion.html:25
+#: udata/templates/mail/new_discussion_comment.html:26
+#: udata/templates/mail/new_issue.html:25
+#: udata/templates/mail/new_issue_comment.html:26
+#: udata/templates/reuse/list.html:36 udata/templates/search.html:73
+#: udata/templates/search.html:87 udata/templates/topic/datasets.html:33
+#: udata/templates/topic/reuses.html:32
 msgid "Title"
 msgstr ""
 
@@ -496,10 +503,7 @@ msgstr ""
 #: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:22
 #: udata/core/issues/forms.py:16 udata/core/issues/forms.py:21
 #: udata/core/organization/forms.py:54 udata/core/organization/forms.py:58
-#: udata/harvest/forms.py:61 udata/templates/mail/discussion_closed.html:31
-#: udata/templates/mail/issue_closed.html:31
-#: udata/templates/mail/new_discussion_comment.html:31
-#: udata/templates/mail/new_issue_comment.html:31
+#: udata/harvest/forms.py:61
 msgid "Comment"
 msgstr ""
 
@@ -518,12 +522,12 @@ msgstr ""
 msgid "Your %(type)s have a new discussion"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:56
+#: udata/core/discussions/tasks.py:57
 #, python-format
 msgid "%(user)s commented your discussion"
 msgstr ""
 
-#: udata/core/discussions/tasks.py:72
+#: udata/core/discussions/tasks.py:73
 msgid "A discussion has been closed"
 msgstr ""
 
@@ -564,12 +568,12 @@ msgstr ""
 msgid "Your %(type)s have a new issue"
 msgstr ""
 
-#: udata/core/issues/tasks.py:39
+#: udata/core/issues/tasks.py:40
 #, python-format
 msgid "%(user)s commented your issue"
 msgstr ""
 
-#: udata/core/issues/tasks.py:54
+#: udata/core/issues/tasks.py:55
 msgid "An issue has been closed"
 msgstr ""
 
@@ -1131,21 +1135,21 @@ msgstr ""
 msgid "This field requires \"%(name)s\" to be set"
 msgstr ""
 
-#: udata/frontend/helpers.py:191
+#: udata/frontend/helpers.py:193
 msgid "Anonymous user"
 msgstr ""
 
-#: udata/frontend/helpers.py:295
+#: udata/frontend/helpers.py:297
 msgctxt "month-format"
 msgid "yyyy/MM"
 msgstr ""
 
-#: udata/frontend/helpers.py:299
+#: udata/frontend/helpers.py:301
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
 msgstr ""
 
-#: udata/frontend/helpers.py:322
+#: udata/frontend/helpers.py:324
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr ""
@@ -1777,12 +1781,6 @@ msgstr ""
 #: udata/templates/api/oauth_authorize.html:26
 #: udata/templates/dataset/display.html:308
 #: udata/templates/dataset/display.html:310
-#: udata/templates/mail/discussion_closed.html:26
-#: udata/templates/mail/issue_closed.html:26
-#: udata/templates/mail/new_discussion.html:25
-#: udata/templates/mail/new_discussion_comment.html:26
-#: udata/templates/mail/new_issue.html:25
-#: udata/templates/mail/new_issue_comment.html:26
 msgid "Details"
 msgstr ""
 
@@ -2197,9 +2195,18 @@ msgstr ""
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
 msgstr ""
 
+#: udata/templates/mail/discussion_closed.html:31
+#: udata/templates/mail/issue_closed.html:31
+#: udata/templates/mail/new_discussion.html:30
+#: udata/templates/mail/new_discussion_comment.html:31
+#: udata/templates/mail/new_issue.html:29
+#: udata/templates/mail/new_issue_comment.html:31
+msgid "Message"
+msgstr ""
+
 #: udata/templates/mail/discussion_closed.html:40
-#: udata/templates/mail/new_discussion.html:32
-#: udata/templates/mail/new_discussion_comment.html:40
+#: udata/templates/mail/new_discussion.html:38
+#: udata/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"
 msgstr ""
 
@@ -2228,8 +2235,8 @@ msgstr ""
 msgid "%(user)s closed an issue on your %(type)s %(subject)s"
 msgstr ""
 
-#: udata/templates/mail/issue_closed.html:40 udata/templates/mail/new_issue.html:32
-#: udata/templates/mail/new_issue_comment.html:40
+#: udata/templates/mail/issue_closed.html:40 udata/templates/mail/new_issue.html:36
+#: udata/templates/mail/new_issue_comment.html:39
 msgid "See the issue"
 msgstr ""
 
