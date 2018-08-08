@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 import pkg_resources
 import pkgutil
 
@@ -12,9 +13,10 @@ from jinja2 import contextfunction
 from werkzeug.local import LocalProxy
 
 from flask_themes2 import (
-    Themes, Theme, render_theme_template, get_theme, global_theme_static
+    Themes, Theme, render_theme_template, get_theme
 )
 
+from udata import assets
 from udata.app import nav
 from udata.i18n import lazy_gettext as _
 
@@ -45,15 +47,13 @@ default_menu = nav.Bar('default_menu', [
 @contextfunction
 def theme_static_with_version(ctx, filename, external=False):
     '''Override the default theme static to add cache burst'''
-    # Imported here to avoir circular dependencies
-    from udata.frontend.helpers import cdn_for
     if current_app.theme_manager.static_folder:
-        url = cdn_for('_themes.static',
-                      filename=current.identifier + '/' + filename)
+        url = assets.cdn_for('_themes.static',
+                             filename=current.identifier + '/' + filename)
     else:
-        url = cdn_for('_themes.static',
-                      themeid=current.identifier,
-                      filename=filename)
+        url = assets.cdn_for('_themes.static',
+                             themeid=current.identifier,
+                             filename=filename)
     if url.endswith('/'):  # this is a directory, no need for cache burst
         return url
     if current_app.config['DEBUG']:
@@ -67,6 +67,7 @@ class ConfigurableTheme(Theme):
     context_processors = None
     defaults = None
     admin_form = None
+    manifest = None
     _menu = None
     _configured = False
 
@@ -80,6 +81,11 @@ class ConfigurableTheme(Theme):
         if 'default' not in self.variants:
             self.variants.insert(0, 'default')
         self.context_processors = {}
+
+        # Check JSON manifest
+        manifest = os.path.join(path, 'manifest.json')
+        if os.path.exists(manifest):
+            self.manifest = manifest
 
     @property
     def site(self):
@@ -112,6 +118,7 @@ class ConfigurableTheme(Theme):
         if self._configured:
             return
         self.entrypoint.load()
+        assets.register_manifest('theme', self.manifest)
         if self.defaults and self.identifier not in self.site.themes:
             self.site.themes[self.identifier] = self.defaults
             try:

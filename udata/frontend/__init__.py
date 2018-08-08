@@ -8,7 +8,7 @@ from importlib import import_module
 
 from flask import abort, current_app
 
-from udata import entrypoints
+from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
 
 from .markdown import init_app as init_markdown
@@ -75,6 +75,8 @@ def init_app(app, views=None):
     init_markdown(app)
 
     from . import helpers, error_handlers  # noqa
+
+    assets.register_manifest('udata')
 
     for view in views:
         _load_views(app, 'udata.{}.views'.format(view))

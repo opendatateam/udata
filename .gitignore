@@ -39,6 +39,7 @@ js-built
 /site/
 /node_modules/
 /udata/static/
+/udata/manifest.json
 /jsdoc/
 *.rdb
 venv
