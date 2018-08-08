@@ -2,7 +2,21 @@
 
 ## Current (in progress)
 
+### New features
+
 - Harvest sources are now filterable through the harvest source create/edit admin form [#1812](https://github.com/opendatateam/udata/pull/1812)
+
+### Breaking changes
+
+None
+
+### Bugfixes
+
+None
+
+### Internal
+
+- Upgrade to Authlib 0.8 [#1760](https://github.com/opendatateam/udata/pull/1760)
 
 ## 1.5.2 (2018-08-08)
 
