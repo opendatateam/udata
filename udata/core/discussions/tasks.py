@@ -40,7 +40,8 @@ def notify_new_discussion(discussion):
         recipients = owner_recipients(discussion)
         subject = _('Your %(type)s have a new discussion',
                     type=discussion.subject.verbose_name)
-        mail.send(subject, recipients, 'new_discussion', discussion=discussion)
+        mail.send(subject, recipients, 'new_discussion',
+                  discussion=discussion, message=discussion.discussion[0])
     else:
         log.warning('Unrecognized discussion subject type %s',
                     type(discussion.subject))
@@ -49,14 +50,14 @@ def notify_new_discussion(discussion):
 @connect(on_new_discussion_comment)
 def notify_new_discussion_comment(discussion, **kwargs):
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
-        comment = kwargs['message']
+        message = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = [u for u in set(recipients) if u != comment.posted_by]
+        recipients = [u for u in set(recipients) if u != message.posted_by]
         subject = _('%(user)s commented your discussion',
-                    user=comment.posted_by.fullname)
+                    user=message.posted_by.fullname)
         mail.send(subject, recipients, 'new_discussion_comment',
-                  discussion=discussion, comment=comment)
+                  discussion=discussion, message=message)
     else:
         log.warning('Unrecognized discussion subject type %s',
                     type(discussion.subject))
@@ -65,13 +66,13 @@ def notify_new_discussion_comment(discussion, **kwargs):
 @connect(on_discussion_closed)
 def notify_discussion_closed(discussion, **kwargs):
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
-        comment = kwargs['message']
+        message = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
-        recipients = [u for u in set(recipients) if u != comment.posted_by]
+        recipients = [u for u in set(recipients) if u != message.posted_by]
         subject = _('A discussion has been closed')
         mail.send(subject, recipients, 'discussion_closed',
-                  discussion=discussion, comment=comment)
+                  discussion=discussion, message=message)
     else:
         log.warning('Unrecognized discussion subject type %s',
                     type(discussion.subject))
