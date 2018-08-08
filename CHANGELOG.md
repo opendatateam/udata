@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.5.2 (2018-08-08)
 
 - Fix client-side temporal coverage rendering [#1821](https://github.com/opendatateam/udata/pull/1821)
