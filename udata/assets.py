@@ -56,12 +56,17 @@ def from_manifest(app, filename, **kwargs):
     '''
     Get the path to a static file for a given app entry of a given type
     '''
-    if current_app.config.get('DEBUG', current_app.debug):
+    cfg = current_app.config
+    if cfg.get('DEBUG', current_app.debug):
         # Always read manifest in DEBUG
         manifest = load_manifest(app, _registered_manifests[app])
         return manifest[filename]
 
     path = _manifests[app][filename]
+
+    if cfg.get('CDN_DOMAIN') and not cfg.get('CDN_DEBUG'):
+        prefix = 'https://' if cfg.get('CDN_HTTPS') else '//'
+        return ''.join((prefix, cfg['CDN_DOMAIN'], path))
     return path
 
 
