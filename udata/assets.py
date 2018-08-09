@@ -26,6 +26,8 @@ def has_manifest(app, filename='manifest.json'):
 
 def register_manifest(app, filename='manifest.json'):
     '''Register an assets json manifest'''
+    if current_app.config.get('TESTING'):
+        return  # Do not spend time here when testing
     if not has_manifest(app, filename):
         msg = '{filename} not found for {app}'.format(**locals())
         raise ValueError(msg)
@@ -56,6 +58,8 @@ def from_manifest(app, filename, **kwargs):
     '''
     Get the path to a static file for a given app entry of a given type
     '''
+    if current_app.config.get('TESTING'):
+        return  # Do not spend time here when testing
     cfg = current_app.config
     if cfg.get('DEBUG', current_app.debug):
         # Always read manifest in DEBUG
