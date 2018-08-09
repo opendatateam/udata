@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Make use of assets manifest for long term caching [#328](https://github.com/etalab/udata-gouvfr/pull/328)
 
 ## 1.4.3 (2018-08-08)
 

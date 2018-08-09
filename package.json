@@ -23,7 +23,8 @@
     "less-loader": "^2.2.2",
     "style-loader": "^0.13.0",
     "webpack": "^1.12.11",
-    "webpack-fail-plugin": "^2.0.0"
+    "webpack-fail-plugin": "^2.0.0",
+    "webpack-manifest-plugin": "^1.3.2"
   },
   "dependencies": {
     "bootstrap": "^3.3.7"
