@@ -107,6 +107,7 @@ jobs:
           root: .
           paths:
             - udata/static
+            - udata/manifest.json
 
   dist:
     docker:
