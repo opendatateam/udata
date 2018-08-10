@@ -84,6 +84,9 @@ def init_app(app, views=None):
     # Load all plugins views and blueprints
     for module in entrypoints.get_enabled('udata.views', app).values():
         _load_views(app, module)
+    for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
+        if assets.has_manifest(dist):
+            assets.register_manifest(dist)
 
     # Optionnaly register debug views
     if app.config.get('DEBUG'):
