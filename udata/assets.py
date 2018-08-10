@@ -34,16 +34,17 @@ def register_manifest(app, filename='manifest.json'):
     manifest = _manifests.get(app, {})
     manifest.update(load_manifest(app, filename))
     _manifests[app] = manifest
-    _registered_manifests[app] = filename
 
 
 def load_manifest(app, filename='manifest.json'):
     '''Load an assets json manifest'''
     if os.path.isabs(filename):
-        with io.open(filename, mode='r', encoding='utf8') as stream:
-            data = json.load(stream)
+        path = filename
     else:
-        data = json.load(pkg_resources.resource_stream(app, filename))
+        path = pkg_resources.resource_filename(app, filename)
+    with io.open(path, mode='r', encoding='utf8') as stream:
+        data = json.load(stream)
+    _registered_manifests[app] = path
     return data
 
 
@@ -58,13 +59,10 @@ def from_manifest(app, filename, **kwargs):
     '''
     Get the path to a static file for a given app entry of a given type
     '''
+    cfg = current_app.config
+
     if current_app.config.get('TESTING'):
         return  # Do not spend time here when testing
-    cfg = current_app.config
-    if cfg.get('DEBUG', current_app.debug):
-        # Always read manifest in DEBUG
-        manifest = load_manifest(app, _registered_manifests[app])
-        return manifest[filename]
 
     path = _manifests[app][filename]
 
@@ -72,6 +70,10 @@ def from_manifest(app, filename, **kwargs):
         prefix = 'https://' if cfg.get('CDN_HTTPS') else '//'
         return ''.join((prefix, cfg['CDN_DOMAIN'], path))
     return path
+
+
+def manifests_paths():
+    return _registered_manifests.values()
 
 
 def cdn_for(endpoint, **kwargs):

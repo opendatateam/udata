@@ -64,7 +64,7 @@ def known_dists():
 def get_plugins_dists(app, name=None):
     '''Return a list of Distributions with enabled udata plugins'''
     if name:
-        plugins = set(e.name for e in get_all(name) if e.name in app.config['PLUGINS'])
+        plugins = set(e.name for e in iter_all(name) if e.name in app.config['PLUGINS'])
     else:
         plugins = set(app.config['PLUGINS'])
     return [

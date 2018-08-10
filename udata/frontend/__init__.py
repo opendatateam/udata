@@ -76,17 +76,19 @@ def init_app(app, views=None):
 
     from . import helpers, error_handlers  # noqa
 
-    assets.register_manifest('udata')
-
     for view in views:
         _load_views(app, 'udata.{}.views'.format(view))
 
     # Load all plugins views and blueprints
     for module in entrypoints.get_enabled('udata.views', app).values():
         _load_views(app, module)
-    for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
-        if assets.has_manifest(dist):
-            assets.register_manifest(dist)
+
+    # Load core manifest
+    with app.app_context():
+        assets.register_manifest('udata')
+        for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
+            if assets.has_manifest(dist.project_name):
+                assets.register_manifest(dist.project_name)
 
     # Optionnaly register debug views
     if app.config.get('DEBUG'):

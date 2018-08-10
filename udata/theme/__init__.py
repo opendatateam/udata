@@ -118,7 +118,6 @@ class ConfigurableTheme(Theme):
         if self._configured:
             return
         self.entrypoint.load()
-        assets.register_manifest('theme', self.manifest)
         if self.defaults and self.identifier not in self.site.themes:
             self.site.themes[self.identifier] = self.defaults
             try:
@@ -174,6 +173,11 @@ def init_app(app):
 
     # Override the default theme_static
     app.jinja_env.globals['theme_static'] = theme_static_with_version
+
+    # Load manifest if necessary
+    if theme.manifest:
+        with app.app_context():
+            assets.register_manifest('theme', theme.manifest)
 
     # Hook into flask security to user themed auth pages
     app.config.setdefault('SECURITY_RENDER', 'udata.theme:render')
