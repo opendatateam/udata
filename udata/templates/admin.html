@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ g.lang_code }}">
     <head>
+        {% block raw_head %}
         {% from theme('macros/metadata.html') import metadata with context %}
         {{ metadata({
             'title': _('Admin'),
@@ -9,13 +10,16 @@
             'robots': 'noindex',
         }) }}
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport' />
-        <link href="{{ static('common.css') }}" rel="stylesheet">
-        <link href="{{ static('admin.css') }}" rel="stylesheet">
-        <link href="{{ theme_static('admin.css') }}" rel="stylesheet">
+        <link href="{{ manifest('udata', 'common.css') }}" rel="stylesheet" />
+        <link href="{{ manifest('udata', 'admin.css') }}" rel="stylesheet" />
+        {% block theme_css %}{% endblock %}
+        {% block extra_head %}{% endblock %}
+        {% endblock raw_head %}
     </head>
     <body class="skin-blue fixed sidebar-mini">
         <div id="app"></div>
-        <script src="{{ static('common.js') }}"></script>
-        <script src="{{ static('admin.js') }}"></script>
+        <script src="{{ manifest('udata', 'common.js') }}"></script>
+        <script src="{{ manifest('udata', 'admin.js') }}"></script>
+        {% block theme_js %}{% endblock %}
     </body>
 </html>

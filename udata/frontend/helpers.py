@@ -13,10 +13,10 @@ from babel.numbers import format_number as format_number_babel
 from flask import g, url_for, request, current_app, json
 from jinja2 import Markup, contextfilter
 from werkzeug import url_decode, url_encode
-from flask_cdn import url_for as cdn_url_for
 
 from . import front
 
+from udata import assets
 from udata.models import db
 from udata.i18n import format_date, _, pgettext, get_current_locale
 from udata.theme import theme_static_with_version
@@ -36,22 +36,6 @@ def now():
     return datetime.now()
 
 
-def cdn_for(endpoint, **kwargs):
-    '''
-    Get a CDN URL for a static assets.
-
-    Do not use a replacement for all flask.url_for calls
-    as it is only meant for CDN assets URLS.
-    (There is some extra round trip which cost is justified
-    by the CDN assets prformance improvements)
-    '''
-    if current_app.config['CDN_DOMAIN']:
-        if not current_app.config.get('CDN_DEBUG'):
-            kwargs.pop('_external', None)  # Avoid the _external parameter in URL
-        return cdn_url_for(endpoint, **kwargs)
-    return url_for(endpoint, **kwargs)
-
-
 @front.app_template_global(name='static')
 def static_global(filename, _burst=True, **kwargs):
     if current_app.config['DEBUG'] or current_app.config['TESTING']:
@@ -60,7 +44,18 @@ def static_global(filename, _burst=True, **kwargs):
         burst = package_version('udata')
     if _burst:
         kwargs['_'] = burst
-    return cdn_for('static', filename=filename, **kwargs)
+    return assets.cdn_for('static', filename=filename, **kwargs)
+
+
+@front.app_template_global()
+def manifest(app, filename):
+    return assets.from_manifest(app, filename)
+
+
+@front.app_template_test()
+def in_manifest(filename, app='udata'):
+    '''A Jinja test to check an asset existance in manifests'''
+    return assets.exists_in_manifest(app, filename)
 
 
 @front.app_template_global(name='form_grid')
