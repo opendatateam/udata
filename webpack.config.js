@@ -1,13 +1,17 @@
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path');
+const webpack = require('webpack');
 
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var node_path = path.join(__dirname, 'node_modules');
-var static_path = path.join(__dirname, 'udata_gouvfr', 'theme', 'static');
-var source_path = path.join(__dirname, 'theme');
+const ManifestPlugin = require('webpack-manifest-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const node_path = path.join(__dirname, 'node_modules');
+const theme_path = path.join(__dirname, 'udata_gouvfr', 'theme');
+const static_path = path.join(theme_path, 'static');
+const source_path = path.join(__dirname, 'theme');
+const public_path = '/_themes/gouvfr/'
 
-var css_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap'),
-    less_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap!less?sourceMap=source-map-less-inline');
+const css_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap');
+const less_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap!less?sourceMap=source-map-less-inline');
+
 
 module.exports = {
     context: source_path,
@@ -18,8 +22,9 @@ module.exports = {
     },
     output: {
         path: static_path,
-        publicPath: "/_themes/gouvfr/",
-        filename: "[name].js"
+        publicPath: public_path,
+        filename: "[name].[hash].js",
+        chunkFilename: 'chunks/[id].[hash].js'
     },
     resolve: {
         root: source_path
@@ -45,7 +50,13 @@ module.exports = {
         plugins: ['transform-runtime']
     },
     plugins: [
-        new ExtractTextPlugin('[name].css'),
+        new ManifestPlugin({
+            fileName: path.join(theme_path, 'manifest.json'),
+            // Filter out chunks and source maps
+            filter: ({name, isInitial, isChunk}) => !name.endsWith('.map') && (isInitial || !isChunk),
+            publicPath: public_path,
+        }),
+        new ExtractTextPlugin('[name].[contenthash].css'),
         require('webpack-fail-plugin'),
     ]
 };
