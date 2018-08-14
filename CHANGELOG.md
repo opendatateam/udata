@@ -17,7 +17,7 @@ None
 
 ### Internal
 
-- Upgrade to Authlib 0.8 [#1760](https://github.com/opendatateam/udata/pull/1760)
+- Upgrade to Authlib 0.9 [#1760](https://github.com/opendatateam/udata/pull/1760) [#1827](https://github.com/opendatateam/udata/pull/1827)
 
 ## 1.5.2 (2018-08-08)
 
