@@ -334,10 +334,6 @@ def check_credentials():
 def init_app(app):
     oauth.init_app(app, query_client=query_client, save_token=save_token)
 
-    # Temp fix for https://github.com/lepture/authlib/issues/79
-    from authlib.specs.rfc6749.authenticate_client import ClientAuthentication
-    oauth.authenticate_client = ClientAuthentication(query_client)
-
     # support all grants
     oauth.register_grant(AuthorizationCodeGrant)
     oauth.register_grant(PasswordGrant)
