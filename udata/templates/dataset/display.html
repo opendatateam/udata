@@ -228,7 +228,7 @@
                                 <a href v-tooltip title="{{ _('Temporal coverage') }}">
                                     <span class="fa fa-fw fa-calendar"></span>
                                 </a>
-                                {{ dataset.temporal_coverage|daterange }}
+                                {{ dataset.temporal_coverage|daterange(details=True) }}
                             </li>
                             {% endif %}
 

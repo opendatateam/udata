@@ -296,12 +296,8 @@ def short_day(date):
     return format_date(date, pgettext('day-format', 'yyyy/MM/dd'))
 
 
-@front.app_template_global()
-@front.app_template_filter()
-def daterange(value):
+def daterange_with_details(value):
     '''Display a date range in the shorter possible maner.'''
-    if not isinstance(value, db.DateRange):
-        raise ValueError('daterange only accept db.DateRange as parameter')
     delta = value.end - value.start
     start, end = None, None
     if is_first_year_day(value.start) and is_last_year_day(value.end):
@@ -317,6 +313,27 @@ def daterange(value):
         if value.start != value.end:
             end = short_day(value.end)
     return _('%(start)s to %(end)s', start=start, end=end) if end else start
+
+
+@front.app_template_global()
+@front.app_template_filter()
+def daterange(value, details=False):
+    '''Display a date range in the shorter possible maner.'''
+    if not isinstance(value, db.DateRange):
+        raise ValueError('daterange only accept db.DateRange as parameter')
+
+    if details:
+        return daterange_with_details(value)
+
+    date_format = 'YYYY'
+
+    delta = value.end - value.start
+    start, end = None, None
+    start = format_date(value.start, date_format)
+    if delta.days > 365:
+        end = format_date(value.end, date_format)
+
+    return '{start!s}–{end!s}'.format(start=start, end=end) if end else start
 
 
 @front.app_template_filter()
