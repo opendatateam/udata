@@ -9,6 +9,7 @@
 - Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
 - Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
 - Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
+- Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
 
 ## 1.5.2 (2018-08-08)
 
