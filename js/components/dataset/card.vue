@@ -59,7 +59,7 @@ import placeholders from 'helpers/placeholders';
 import config from 'config';
 
 const MASK = [
-    'id', 'title', 'description', 'metrics', 'organization',
+    'id', 'title', 'acronym', 'description', 'metrics', 'organization',
     'spatial{zones,granularity}', 'frequency', 'temporal_coverage',
     'page', 'uri'
 ];
