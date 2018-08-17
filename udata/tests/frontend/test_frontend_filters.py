@@ -201,6 +201,32 @@ class FrontEndRootTest:
 
         assert render_template_string(tpl, dates=dr(*dates)) == expected
 
+    @pytest.mark.parametrize('dates,expected', (
+        (('2014-02-01', '2014-02-01'), '2014/02/01'),
+        (('2012-01-01', '2012-01-31'), '2012/01'),
+        (('2012-01-01', '2012-01-14'), '2012/01/01 to 2012/01/14'),
+        (('2012-01-01', '2012-03-31'), '2012/01 to 2012/03'),
+        (('2012-01-01', '2012-02-29'), '2012/01 to 2012/02'),
+        (('2012-01-01', '2012-12-31'), '2012'),
+        (('2012-01-01', '2014-12-31'), '2012 to 2014'),
+        (('2012-02-02', '2014-12-25'), '2012/02/02 to 2014/12/25'),
+        # Before 1900
+        (('1234-02-01', '1234-02-01'), '1234/02/01'),
+        (('1232-01-01', '1232-01-31'), '1232/01'),
+        (('1232-01-01', '1232-01-14'), '1232/01/01 to 1232/01/14'),
+        (('1232-01-01', '1232-03-31'), '1232/01 to 1232/03'),
+        (('1232-01-01', '1232-02-29'), '1232/01 to 1232/02'),
+        (('1232-01-01', '1232-12-31'), '1232'),
+        (('1232-01-01', '1234-12-31'), '1232 to 1234'),
+        (('1232-02-02', '1234-12-25'), '1232/02/02 to 1234/12/25'),
+    ))
+    def test_daterange_with_details(self, dates, expected):
+        '''Daterange filter should display range in an adaptive'''
+        g.lang_code = 'en'
+        tpl = '{{dates|daterange(details=True)}}'
+
+        assert render_template_string(tpl, dates=dr(*dates)) == expected
+
     def test_daterange_bad_type(self):
         '''Daterange filter should only accept db.DateRange as parameter'''
         with pytest.raises(ValueError):

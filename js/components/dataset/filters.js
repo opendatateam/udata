@@ -8,18 +8,22 @@ export default {
         /**
          * Display a date range in the shorter possible manner.
          */
-        daterange: function(range) {
+        daterange(range, details = false) {
             if (!range || !range.start) {
                 return;
             }
             const start = moment(range.start);
             const end = range.end ? moment(range.end) : undefined;
-            const start_label = start.format('YYYY');
-            const end_label = end.format('YYYY');
-
-            return end_label
-                ? `${start_label}-${end_label}`
-                : start_label;
+            const fmt = details ? 'L' : 'YYYY';
+            const start_label = start.format(fmt);
+            const end_label = end.format(fmt);
+            if (details) {
+                return end_label
+                    ? this._('{start} to {end}', {start: start_label, end: end_label, interpolation: { escapeValue: false }})
+                    : start_label;
+            } else {
+                return end_label && end_label !== start_label ? `${start_label}-${end_label}` : start_label;
+            }
         },
         frequency_label(dataset) {
             if (dataset && dataset.frequency) {
