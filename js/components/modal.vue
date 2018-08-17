@@ -11,8 +11,6 @@
                 </button>
                 <h4 class="modal-title" id="modal-title">{{{title}}}</h4>
             </div>
-            <!-- Notifications -->
-            <notification-zone class="modal-body"></notification-zone>
             <slot></slot>
         </div>
         </slot>
@@ -24,11 +22,8 @@
 import velocity from 'velocity-animate';
 import {getScrollBarWidth} from 'vue-strap/src/utils/utils.js';
 
-import NotificationZone from 'components/notification-zone.vue';
-
 export default {
     name: 'modal',
-    components: {NotificationZone},
     props: {
         title: {type: String, default: ''},
         small: {type: Boolean, default: false},
