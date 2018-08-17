@@ -13,7 +13,7 @@
 
 ### Bugfixes
 
-None
+- Ensure that admin notifications are displayed once and with a constant width. [#1831](https://github.com/opendatateam/udata/pull/1831)
 
 ### Internal
 
