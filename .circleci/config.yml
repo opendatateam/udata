@@ -20,22 +20,22 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v2-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v2-{{ arch }}-{{ .Branch }}
-          - py3-cache-v2-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py3-cache-v3-{{ arch }}-{{ checksum "python.deps" }}
+          - py3-cache-v3-{{ arch }}-{{ .Branch }}
+          - py3-cache-v3-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
-            virtualenv -ppython3.6 venv
+            python -m venv venv
             source venv/bin/activate
-            pip3 install -e . || pip3 install -e .
-            pip3 install -r requirements/circleci.pip
+            pip install -e . || pip install -e .
+            pip install -r requirements/circleci.pip
       - save_cache:
-          key: py3-cache-v2-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v3-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py3-cache-v2-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v3-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
@@ -57,11 +57,17 @@ jobs:
 
   assets:
     docker:
-      - image: udata/circleci:2-alpine
-    environment:
-       BASH_ENV: /root/.bashrc
+      - image: node:6-alpine
     steps:
       - checkout
+      - run:
+          name: Install some tools
+          command: |
+            apk add --update ca-certificates openssl jq fontconfig-dev
+            update-ca-certificates
+            wget -q -O- "https://github.com/dustinblackman/phantomized/releases/download/2.1.1a/dockerized-phantomjs.tar.gz" | tar xz -C /
+            wget https://raw.githubusercontent.com/opendatateam/udata-dockers/2-alpine/circleci/.bashrc
+            . .bashrc
       - run:
           name: Compute JS dependencies key
           command: cat .nvmrc package.json > js.deps
@@ -74,8 +80,8 @@ jobs:
             - js-cache-{{ arch }}-{{ .Branch }}
             - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
-          name: Install NodeJS and dependencies
-          command: nvm install && npm install
+          name: Install  dependencies
+          command: npm install
       - save_cache:
           key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:
@@ -88,7 +94,6 @@ jobs:
           name: Execute Karma tests
           command: |
             mkdir -p reports/karma
-            nvm use
             REPORT_DIR=reports/karma npm -s run test:unit -- --reporters mocha,junit
       - store_test_results:
           path: reports/karma
@@ -98,7 +103,6 @@ jobs:
       - run:
           name: Compile assets
           command: |
-            nvm use
             npm run assets:build
             npm run widgets:build
             npm run oembed:build
@@ -150,33 +154,20 @@ jobs:
           at: .
       - run:
           name: Install Twine
-          command: pip3 install twine
+          command: pip install twine
       - deploy:
           name: Publish on PyPI
           command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   github:
     docker:
-      - image: udata/circleci:2-alpine
+      - image: apihackers/ghr
     steps:
       - attach_workspace:
           at: .
       - run:
           name: Upload github release
-          command: |
-            path=$(set -- dist/*.whl; echo "$1")
-            filename=$(basename $path)
-            RELEASE_URL="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/releases/tags/$CIRCLE_TAG"
-            RELEASE_DATA=$(curl -fsSL $RELEASE_URL)
-            RELEASE_PAGE_URL=$(jq -r '.html_url' <<< $RELEASE_DATA)
-            UPLOAD_URL=$(jq -r '.upload_url' <<< $RELEASE_DATA)
-            UPLOAD_URL="$(sed 's/{.*}/?name=/' <<< $UPLOAD_URL)$filename"
-            curl --request POST \
-                --data-binary @$path \
-                --header "Authorization: token $GITHUB_OAUTH_TOKEN" \
-                --header "Content-Type: application/zip" \
-                $UPLOAD_URL
-            echo "Wheel upload to release $RELEASE_PAGE_URL"
+          command: -t ${GITHUB_OAUTH_TOKEN} ${CIRCLE_TAG} dist
 
 workflows:
   version: 2
@@ -191,7 +182,7 @@ workflows:
                 - /pull/[0-9]+/
                 - /pyup-update-.+/
                 - l10n_master
-                - py3
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - assets:
@@ -203,7 +194,7 @@ workflows:
                 - /pull/[0-9]+/
                 - /pyup-update-.+/
                 - l10n_master
-                - py3
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - dist:
@@ -218,7 +209,7 @@ workflows:
                 - /pull/[0-9]+/
                 - /pyup-update-.+/
                 - l10n_master
-                - py3
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - publish:
@@ -229,7 +220,7 @@ workflows:
               only:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
-                - py3
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
           context: org-global
