@@ -1,5 +1,5 @@
 mock==2.0.0
-pytest==3.7.1
+pytest==3.7.2
 pytest-flask==0.10.0
 pytest-sugar==0.9.1
 requests-mock==1.5.2
