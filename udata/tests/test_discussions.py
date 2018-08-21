@@ -324,7 +324,7 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(data['title'], 'test discussion')
         self.assertIsNotNone(data['created'])
         self.assertIsNotNone(data['closed'])
-        self.assertEqual(data['closed_by'], str(owner.id))
+        self.assertEqual(data['closed_by']['id'], str(owner.id))
         self.assertEqual(len(data['discussion']), 2)
         self.assertEqual(data['discussion'][1]['content'], 'close bla bla')
         self.assertEqual(
