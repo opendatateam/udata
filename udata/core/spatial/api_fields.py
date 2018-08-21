@@ -66,7 +66,7 @@ spatial_coverage_fields = api.model('SpatialCoverage', {
         description='A multipolygon for the whole coverage'),
     'zones': fields.List(
         fields.String, description='The covered zones identifiers'),
-    'granularity': fields.String(
+    'granularity': fields.String(default='other',
         description='The spatial/territorial granularity'),
 })
 
