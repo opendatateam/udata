@@ -75,7 +75,7 @@
         <div class="message-content">
             <div class="message-header">
                 <div class="author">
-                    <a href="{{ message.posted_by.page }}">{{ message.posted_by.first_name }} {{ message.posted_by.last_name }}</a>
+                    <a href="{{ message.posted_by.page }}">{{ message.posted_by | display }}</a>
                 </div>
 
                 <div class="posted_on">

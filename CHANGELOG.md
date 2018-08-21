@@ -15,6 +15,7 @@
 ### Breaking changes
 
 - Theme are now responsible for adding their CSS markup on template (no more assumptions on `theme.css` and `admin.css`). Most of the time, overriding `raw.html` and `admin.html` should be sufficient
+- The discussions API `posted_by` attribute is now an embedded user instead of an user ID to avoid extra API calls [#1839](https://github.com/opendatateam/udata/pull/1839)
 
 ### Bugfixes
 
