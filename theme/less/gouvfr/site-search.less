@@ -35,19 +35,24 @@
 
     .breadcrumb-bar,    // this class should be dropped once .search-bar gets exposed
     .search-bar {
-        .nav-tabs > li > a {                   // overrides common.css
-            background-color: @gray-lighter;
-            color: @navbar-default-color;
+        .nav-tabs {
+            margin-bottom: 0;
 
-            &:hover,
-            &:focus {
-                background-color: darken(@gray-lighter, 10%);
-                color: darken(@navbar-default-color, 10%);
+            > li > a {                   // overrides common.css
+                background-color: @gray-lighter;
+                color: @navbar-default-color;
+    
+                &:hover,
+                &:focus {
+                    background-color: darken(@gray-lighter, 10%);
+                    color: darken(@navbar-default-color, 10%);
+                }
+            }
+    
+            > li.active > a {
+                background-color: @bg-light;
             }
         }
 
-        .nav-tabs > li.active > a {
-            background-color: @bg-light;
-        }
     }
 }
