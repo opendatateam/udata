@@ -5,7 +5,7 @@ jobs:
   python:
     docker:
       - image: udata/circleci:2-alpine
-      - image: mongo:3.4
+      - image: circleci/mongo:3.4-ram
       - image: redis:alpine
       - image: udata/elasticsearch:2.4.5
     environment:
