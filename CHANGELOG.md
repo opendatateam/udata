@@ -7,6 +7,7 @@
 - The purge chunks tasks also remove the directory [#1845](https://github.com/opendatateam/udata/pull/1845)
 - Upgrade to latest Fine-Uploader version to benefit from bug fixes [#1849](https://github.com/opendatateam/udata/pull/1849)
 - Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
+- Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
 
 ## 1.5.2 (2018-08-08)
 

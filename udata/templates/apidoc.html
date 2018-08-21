@@ -7,8 +7,7 @@
 } %}
 
 {% set bundle = 'apidoc' %}
-{% set org_list = organizations | list %}
-{% set main_org = org_list | first %} 
+{% set main_org = organizations | first %}
 
 {% block extra_head %}
 <meta name="swagger-specs" content="{{ specs_url }}" />
@@ -81,7 +80,7 @@
     "data": [{...}, {...}],
     "page": 1,
     "page_size": 20,
-    "total": {{ org_list|count }},
+    "total": {{ organizations|count }},
     "next_page": "https://{{config.SERVER_NAME}}/api/endpoint/?page=2",
     "previous_page": null
 }</code></pre>
@@ -120,7 +119,7 @@ Access-Control-Allow-Credentials: true
             "name": "{{ main_org.name }}",
             "page": "https://{{config.SERVER_NAME}}/organizations/{{ main_org.slug }}/",
             "slug": "{{ main_org.slug }}",
-            "uri": "https://{{config.SERVER_NAME}}/api/1/organizations/{{ main_org.slug }}/",
+            "uri": "https://{{config.SERVER_NAME}}/api/1/organizations/{{ main_org.id }}/",
             "url": "{{ main_org.url }}"
         }
     ],
@@ -128,7 +127,7 @@ Access-Control-Allow-Credentials: true
     "page": 1,
     "page_size": 1,
     "previous_page": null,
-    "total": "{{ org_list|count }}"
+    "total": "{{ organizations|count }}"
 }
 </code></pre>
 
@@ -169,7 +168,7 @@ Access-Control-Allow-Credentials: true
                 <pre><code class="json">$ http $API'organizations/' | jq '.data[].name'</code></pre>
 
 <pre><code class="json">
-{% for org in org_list[0:20] %}"{{ org.name }}"
+{% for org in organizations[0:20] %}"{{ org.name }}"
 {% endfor %}
 </code></pre>
 
@@ -179,19 +178,19 @@ Access-Control-Allow-Credentials: true
                 <pre><code class="json">$ http $API'organizations/?page_size=5' | jq '.data[].uri'</code></pre>
 
 <pre><code class="json">
-{% for org in org_list[0:5] %}"https://{{config.SERVER_NAME}}/api/1/organizations/{{ org.slug }}/"
+{% for org in organizations[0:5] %}"https://{{config.SERVER_NAME}}/api/1/organizations/{{ org.id }}/"
 {% endfor %}
 </code></pre>
 
                 <p>{% trans %}Now we'll be able to retrieve a unique organization thanks to the returned URI:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http $API'organizations/{{main_org.slug}}/' | jq '.'</code></pre>
+                <pre><code class="json">$ http $API'organizations/{{main_org.id}}/' | jq '.'</code></pre>
 
                 <p>{% trans %}That's a lot of data to compute. Let's refine these data, if we want only metrics:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http $API'organizations/{{main_org.slug}}/' | jq '.metrics'</code></pre>
+                <pre><code class="json">$ http $API'organizations/{{main_org.id}}/' | jq '.metrics'</code></pre>
 
 <pre><code class="json">
 {
@@ -203,7 +202,7 @@ Access-Control-Allow-Credentials: true
                 <p>{% trans %}Or maybe just the name of the members of that organization:
                 {% endtrans %}</p>
 
-                <pre><code class="json">$ http $API'organizations/{{main_org.slug}}/' | jq '.members[].user.last_name'</code></pre>
+                <pre><code class="json">$ http $API'organizations/{{main_org.id}}/' | jq '.members[].user.last_name'</code></pre>
 
 <pre><code class="json">
 {% for member in main_org.members|list %}"{{member.user.last_name}}"
