@@ -1,3 +1,4 @@
+import config from 'config';
 import i18n from 'i18n';
 import log from 'logger';
 import qq from 'fine-uploader';
@@ -230,6 +231,12 @@ export default {
             }
             if (reason === 'XHR returned response code 0') {
                 reason = this._('Unknown error while communicating with the server');
+            }
+            if (xhr && config.sentry.dsn) {
+                const sentryId = xhr.getResponseHeader('X-Sentry-ID');
+                if (sentryId) {
+                    reason = [reason, this._('The error identifier is {id}', {id: sentryId})].join('\n');
+                }
             }
             this.$dispatch('notify', {
                 type: 'error',
