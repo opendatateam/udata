@@ -56,6 +56,7 @@ export default {
     data() {
         return {
             files: [],
+            errors: new Set(),  // Track files ID for which errors has already been advertised
             dropping: false,
             upload_endpoint: null,
             HAS_FILE_API,
@@ -116,9 +117,9 @@ export default {
                     filenameParam: 'filename',
                 },
                 chunking: {
-                    enabled:  this.$options.chunk,
+                    enabled: this.$options.chunk,
                     concurrent: {
-                        enabled:  this.$options.chunk,
+                        enabled: this.$options.chunk,
                     },
                     paramNames: {
                         chunkSize: 'chunksize',
@@ -140,8 +141,8 @@ export default {
                     onComplete: this.on_complete,
                     onError: this.on_error,
                 },
-                messages: messages,
-                validation: {allowedExtensions: allowedExtensions.items}
+                validation: {allowedExtensions: allowedExtensions.items},
+                messages,
             });
         },
 
@@ -217,6 +218,7 @@ export default {
          * See: http://docs.fineuploader.com/branch/master/api/events.html#error
          */
         on_error(id, name, reason, xhr) {
+            if (this.errors.has(id)) return;  // Already notified on first chunk error
             // If there is a JSON message display it instead of the non-explicit default one
             if (xhr) {
                 try {
@@ -233,6 +235,7 @@ export default {
                 details: reason,
             });
             this.$emit('uploader:error', id, name, reason);
+            this.errors.add(id);
         },
 
         clear() {
