@@ -228,6 +228,9 @@ export default {
                     log.error('Unable to parse error', xhr.responseText);
                 }
             }
+            if (reason === 'XHR returned response code 0') {
+                reason = this._('Unknown error while communicating with the server');
+            }
             this.$dispatch('notify', {
                 type: 'error',
                 icon: 'exclamation-triangle',
