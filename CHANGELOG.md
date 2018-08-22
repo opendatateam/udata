@@ -23,6 +23,7 @@
 - Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
 - Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
 - Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
+- Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
 
 ### Internal
 
