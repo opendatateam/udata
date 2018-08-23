@@ -12,6 +12,7 @@
 - Only display temporal coverage years on cards and search results [#1833](https://github.com/opendatateam/udata/pull/1833)
 - Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
 - Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
+- Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
 
 ### Breaking changes
 

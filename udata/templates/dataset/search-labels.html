@@ -22,6 +22,9 @@
         labelize=datasets.label_func('granularity')
     ) }}
     {{ s.filter_label('format', _('Format'), ficon('fa-file')) }}
+    {{ s.filter_label('resource_type', _('Resource type'), ficon('fa-file-o'),
+        labelize=datasets.label_func('resource_type')
+    ) }}
     {{ s.filter_label('reuses', _('Reuses'), ficon('fa-retweet'),
         labelize=datasets.label_func('reuses')
     ) }}
