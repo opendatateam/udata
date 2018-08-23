@@ -192,6 +192,16 @@
                         {% endwith %}
                     </div>
                 </div>
+                {% elif dataset.owner %}
+                <div class="panel panel-default text-center">
+                    <div class="panel-body">
+                        <h3 class="text-left">{{ _('Author') }}</h3>
+                        
+                        {% with user=dataset.owner %}
+                            {% include theme('user/sidebar-user.html') %}
+                        {% endwith %}
+                    </div>
+                </div>
                 {% endif %}
 
                 {# Information panel #}
