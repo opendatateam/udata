@@ -49,10 +49,12 @@ class ValidationError(ValueError):
 
 def error(url, reason=None):
     __tracebackhide__ = True
+    if not isinstance(url, unicode):
+        url = url.decode('utf8')
     msg = 'Invalid URL "{0}"'.format(url)
     if reason:
         msg = ': '.join((msg, reason))
-    raise ValidationError(msg)
+    raise ValidationError(msg.encode('utf8'))
 
 
 def config_for(value, key):
