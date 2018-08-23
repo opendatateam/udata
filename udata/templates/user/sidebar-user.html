@@ -1,13 +1,13 @@
 <a href="{{ url_for('users.show', user=user, _external=True) }}"
    title="{{ user.name }}">
-    <img src="{{ user.logo|placeholder('organization') }}"
+    <img src="{{ user.avatar | placeholder('user') }}"
         alt="{{ user.name }}" class="organization-logo producer img-responsive"/>
 </a>
 
-<h4>{{ user.first_name }} {{ user.last_name  }}</h4>
+<h4>{{ user.fullname }}</h4>
 
 <div class="caption text-left">
-{% if user.description %}
+{% if user.about %}
 <p>
     {{ user.about|mdstrip(180) }}
 </p>
