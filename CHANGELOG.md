@@ -5,6 +5,7 @@
 - Prevent UnicodeError on unicode URL validation error [#1844](https://github.com/opendatateam/udata/pull/1844)
 - Hide save button in "Add resource" modal until form is visible (and prevent error) [#1846](https://github.com/opendatateam/udata/pull/1846)
 - The purge chunks tasks also remove the directory [#1845](https://github.com/opendatateam/udata/pull/1845)
+- Upgrade to latest Fine-Uploader version to benefit from bug fixes [#1849](https://github.com/opendatateam/udata/pull/1849)
 
 ## 1.5.2 (2018-08-08)
 
