@@ -11,6 +11,7 @@
 
 - Only display temporal coverage years on cards and search results [#1833](https://github.com/opendatateam/udata/pull/1833)
 - Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
+- Add publisher's name on dataset template [#1847](https://github.com/opendatateam/udata/pull/1847)
 
 ### Breaking changes
 
