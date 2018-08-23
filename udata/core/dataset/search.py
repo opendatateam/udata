@@ -8,7 +8,7 @@ from elasticsearch_dsl import (
 from udata.i18n import lazy_gettext as _
 from udata.core.site.models import current_site
 from udata.models import (
-    Dataset, Organization, License, User, GeoZone
+    Dataset, Organization, License, User, GeoZone, RESOURCE_TYPES
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
@@ -56,6 +56,10 @@ def zone_labelizer(value):
 
 def dataset_badge_labelizer(kind):
     return Dataset.__badges__.get(kind, '')
+
+
+def resource_type_labelizer(value):
+    return RESOURCE_TYPES.get(value, value)
 
 
 @register
@@ -140,6 +144,8 @@ class DatasetSearch(ModelSearchAdapter):
         'granularity': TermsFacet(field='granularity',
                                   labelizer=granularity_labelizer),
         'format': TermsFacet(field='resources.format'),
+        'resource_type': TermsFacet(field='resources.type',
+                                    labelizer=resource_type_labelizer),
         'reuses': RangeFacet(field='metrics.reuses',
                              ranges=[('none', (None, 1)),
                                      ('few', (1, 5)),
@@ -205,6 +211,7 @@ class DatasetSearch(ModelSearchAdapter):
                     'title': r.title,
                     'description': r.description,
                     'format': r.format,
+                    'type': r.type,
                 }
                 for r in dataset.resources],
             'format_suggest': [r.format.lower()
