@@ -124,6 +124,7 @@ INVALID = [
     'http://##',
     'http://##/',
     'http://foo.bar?q=Spaces should be encoded',
+    'http://foo.bar?q=Spaces should be encoded with unicode é',
     '//',
     '//a',
     '///a',

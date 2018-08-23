@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Prevent UnicodeError on unicode URL validation error [#1844](https://github.com/opendatateam/udata/pull/1844)
 
 ## 1.5.2 (2018-08-08)
 
