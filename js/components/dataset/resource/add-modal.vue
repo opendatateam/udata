@@ -10,7 +10,7 @@
     <footer class="modal-footer text-center">
         <button type="button"
             class="btn btn-primary btn-flat pull-left"
-            v-show="$refs.form.resource.filetype"
+            v-show="$refs.form.hasData"
             @click="save">
             {{ _('Save') }}
         </button>
