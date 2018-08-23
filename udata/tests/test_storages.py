@@ -211,6 +211,7 @@ class ChunksRetentionTest:
         self.create_chunks(uuid)
         purge_chunks.apply()
         assert list(storages.chunks.list_files()) == []
+        assert not storages.chunks.exists(uuid)  # Directory should be removed too
 
     @pytest.mark.options(UPLOAD_MAX_RETENTION=60 * 60)  # 1 hour
     def test_chunks_kept_before_max_retention(self, client):
@@ -227,3 +228,4 @@ class ChunksRetentionTest:
         ])
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
+        assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too
