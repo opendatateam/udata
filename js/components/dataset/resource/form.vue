@@ -227,7 +227,7 @@ export default {
     },
     computed: {
         hasData() {
-            return this.hasChosenRemoteFile || this.resource.url;
+            return Boolean(this.resource.url || this.hasChosenRemoteFile);
         },
         showUploadZone() {
             if (this.files.length) return false;
