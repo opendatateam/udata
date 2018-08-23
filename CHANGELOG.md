@@ -12,6 +12,7 @@
 - Only display temporal coverage years on cards and search results [#1833](https://github.com/opendatateam/udata/pull/1833)
 - Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
 - Add publisher's name on dataset template [#1847](https://github.com/opendatateam/udata/pull/1847)
+- Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
 
 ### Breaking changes
 
@@ -24,6 +25,7 @@
 - Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
 - Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
 - Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
+- Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
 
 ### Internal
 
