@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from udata.api import api, fields, API
 from udata.auth import admin_permission
-
 
 from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.reuse.api_fields import reuse_ref_fields
@@ -48,6 +49,8 @@ post_fields = api.model('Post', {
         description='The post creation date', readonly=True),
     'last_modified': fields.ISODateTime(
         description='The post last modification date', readonly=True),
+    'published': fields.ISODateTime(
+        description='The post publication date', readonly=True),
 
     'uri': fields.UrlFor(
         'api.post', lambda o: {'post': o},
@@ -62,6 +65,7 @@ post_page_fields = api.model('PostPage', fields.pager(post_fields))
 parser = api.page_parser()
 
 parser.add_argument('sort', type=str, default='-created_at', location='args', help='The sorting attribute')
+
 
 @ns.route('/', endpoint='posts')
 class PostsAPI(API):
@@ -109,6 +113,25 @@ class PostAPI(API):
         '''Delete a given post'''
         post.delete()
         return '', 204
+
+
+@ns.route('/<post:post>/publish', endpoint='publish_post')
+class PublishPostAPI(API):
+    @api.secure(admin_permission)
+    @api.doc('publish_post')
+    @api.marshal_with(post_fields)
+    def post(self, post):
+        '''Publish an existing post'''
+        post.modify(published=datetime.now())
+        return post
+
+    @api.secure(admin_permission)
+    @api.doc('unpublish_post')
+    @api.marshal_with(post_fields)
+    def delete(self, post):
+        '''Publish an existing post'''
+        post.modify(published=None)
+        return post
 
 
 @ns.route('/<post:post>/image', endpoint='post_image')

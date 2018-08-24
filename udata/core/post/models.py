@@ -35,6 +35,7 @@ class Post(db.Datetimed, db.Document):
 
     owner = db.ReferenceField('User')
     private = db.BooleanField()
+    published = db.DateTimeField()
 
     meta = {
         'ordering': ['-created_at'],

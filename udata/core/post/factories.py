@@ -26,3 +26,6 @@ class PostFactory(ModelFactory):
     @factory.lazy_attribute
     def reuses(self):
         return ReuseFactory.create_batch(3)
+
+    class Params:
+        publish = factory.Trait(published=factory.Faker('past_datetime'))
