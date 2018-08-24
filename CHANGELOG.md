@@ -12,6 +12,7 @@
 - Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
 - Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
 - Ensure that admin notifications are displayed once and with a constant width. [#1831](https://github.com/opendatateam/udata/pull/1831)
+- Fix broken date range picker date parsing (ie. manual keyboard input) [#1863](https://github.com/opendatateam/udata/pull/1853)
 
 ## 1.5.2 (2018-08-08)
 
