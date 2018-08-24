@@ -52,16 +52,17 @@
 
                     <div class="row">
                         <p class="col-xs-12">
+                            {% if post.published %}
                             <small>
                                 {{ _('Published on %(date)s',
-                                    date=post.created_at|dateformat(format='long')
+                                    date=post.published|dateformat(format='long')
                                 ) }}
                             </small>
-                            {% if post.private %}
-                            <small class="private" title="{{ _('Private') }}"
-                                v.popover.literal="{{ _('This post is private and will not be visible by other users') }}"
+                            {% else %}
+                            <small class="private" title="{{ _('Draft') }}"
+                                v.popover.literal="{{ _('This post is a draft and will not be visible by other users') }}"
                                 popover-trigger="hover" popover-placement="top"
-                                >{{ _('Private') }}</small>
+                                >{{ _('Draft') }}</small>
                             {% endif %}
                             {% if post.deleted %}
                             <small class="deleted" title="{{ _('Deleted') }}"

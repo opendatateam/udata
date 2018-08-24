@@ -61,10 +61,10 @@ class PostBlueprintTest:
         next_date = faker.date_time_between(start_date='-1d', end_date='now')
         other_date = faker.date_time_between(start_date='-1y', end_date='-3d')
 
-        previous_post = PostFactory(created_at=previous_date)
-        post = PostFactory(created_at=date)
-        next_post = PostFactory(created_at=next_date)
-        PostFactory.create_batch(3, created_at=other_date)
+        previous_post = PostFactory(published=previous_date)
+        post = PostFactory(published=date)
+        next_post = PostFactory(published=next_date)
+        PostFactory.create_batch(3, published=other_date)
 
         response = client.get(url_for('posts.show', post=post))
 

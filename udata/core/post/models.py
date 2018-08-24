@@ -14,6 +14,11 @@ __all__ = ('Post', )
 IMAGE_SIZES = [400, 100, 50]
 
 
+class PostQuerySet(db.BaseQuerySet):
+    def published(self):
+        return self(published__ne=None).order_by('-published')
+
+
 class Post(db.Datetimed, db.Document):
     name = db.StringField(max_length=255, required=True)
     slug = db.SlugField(max_length=255, required=True, populate_from='name',
@@ -34,11 +39,15 @@ class Post(db.Datetimed, db.Document):
         db.ReferenceField('Reuse', reverse_delete_rule=db.PULL))
 
     owner = db.ReferenceField('User')
-    private = db.BooleanField()
     published = db.DateTimeField()
 
     meta = {
         'ordering': ['-created_at'],
+        'indexes': [
+            '-created_at',
+            '-published',
+        ],
+        'queryset_class': PostQuerySet,
     }
 
     verbose_name = _('post')

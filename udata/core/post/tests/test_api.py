@@ -66,8 +66,7 @@ class PostsAPITest:
 
     def test_post_api_publish(self, api):
         '''It should update a post from the API'''
-        post = PostFactory()
-        assert post.published is None
+        post = PostFactory(published=None)
         api.login(AdminFactory())
         response = api.post(url_for('api.publish_post', post=post))
         assert200(response)
@@ -78,8 +77,7 @@ class PostsAPITest:
 
     def test_post_api_unpublish(self, api):
         '''It should update a post from the API'''
-        post = PostFactory(publish=True)
-        assert post.published is not None
+        post = PostFactory()
         api.login(AdminFactory())
         response = api.delete(url_for('api.publish_post', post=post))
         assert200(response)

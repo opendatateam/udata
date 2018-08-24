@@ -43,8 +43,6 @@ post_fields = api.model('Post', {
     'owner': fields.Nested(
         user_ref_fields, description='The owner user',
         readonly=True, allow_null=True),
-    'private': fields.Boolean(description='Is the post visible'),
-
     'created_at': fields.ISODateTime(
         description='The post creation date', readonly=True),
     'last_modified': fields.ISODateTime(
