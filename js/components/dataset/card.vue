@@ -22,7 +22,8 @@
                 <span class="fa fa-files-o fa-fw"></span>
                 {{ dataset.resources.length  }}
             </li>
-            <li v-if="dataset.spatial && dataset.spatial.zones" v-tooltip :title="_('Territorial coverage')">
+            <li v-if="dataset.spatial && dataset.spatial.zones && dataset.spatial.zones.length > 0" v-tooltip
+                :title="_('Territorial coverage')">
                 <span class="fa fa-map-marker fa-fw"></span>
                 {{ dataset.spatial.zones[0].name }}
             </li>

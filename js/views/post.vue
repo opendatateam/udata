@@ -26,6 +26,11 @@ import ReuseCardList from 'components/reuse/card-list.vue';
 
 export default {
     name: 'PostView',
+    MASK: [
+        '*',
+        `datasets{${DatasetCardList.MASK.join(',')}}`,
+        `reuses{${ReuseCardList.MASK.join(',')}}`,
+    ],
     data() {
         return {
             post: new Post(),
@@ -85,7 +90,7 @@ export default {
     route: {
         data() {
             if (this.$route.params.oid !== this.post.id) {
-                this.post.fetch(this.$route.params.oid);
+                this.post.fetch(this.$route.params.oid, this.$options.MASK);
                 this.$scrollTo(this.$el);
             }
         }

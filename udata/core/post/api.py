@@ -6,8 +6,8 @@ from datetime import datetime
 from udata.api import api, fields, API
 from udata.auth import admin_permission
 
-from udata.core.dataset.api_fields import dataset_ref_fields
-from udata.core.reuse.api_fields import reuse_ref_fields
+from udata.core.dataset.api_fields import dataset_fields
+from udata.core.reuse.api_fields import reuse_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -36,9 +36,9 @@ post_fields = api.model('Post', {
     'tags': fields.List(
         fields.String, description='Some keywords to help in search'),
     'datasets': fields.List(
-        fields.Nested(dataset_ref_fields), description='The post datasets'),
+        fields.Nested(dataset_fields), description='The post datasets'),
     'reuses': fields.List(
-        fields.Nested(reuse_ref_fields), description='The post reuses'),
+        fields.Nested(reuse_fields), description='The post reuses'),
 
     'owner': fields.Nested(
         user_ref_fields, description='The owner user',
@@ -56,7 +56,7 @@ post_fields = api.model('Post', {
     'page': fields.UrlFor(
         'posts.show', lambda o: {'post': o},
         description='The post page URL', readonly=True),
-})
+}, mask='*,datasets{title,acronym,uri,page},reuses{title,image,image_thumbnail,uri,page}')
 
 post_page_fields = api.model('PostPage', fields.pager(post_fields))
 
