@@ -46,7 +46,7 @@
     <div class="container post-container">
         <div class="row">
 
-            <div class="col-sm-8 smaller">
+            <div class="{% if post.datasets or post.reuses %}col-sm-8 smaller{% else %}col-xs-12{% endif %}">
                 <div class="page-header">
                     <h2>{{ post.name }}</h2>
 
@@ -127,36 +127,34 @@
             </div>
             {# end left column #}
 
+            {% if post.datasets or post.reuses %}
             {# Right sidebar #}
             <aside class="col-sm-4">
 
                 {# Reuses list #}
                 {% if post.reuses %}
-                <h3>{{ _('Associated reuses') }}</h3>
-                <ul class="card-list">
+                <h3>{{ ngettext('Associated reuse', 'Associated reuses', post.reuses|length) }}</h3>
+                <div class="card-list">
                     {% for reuse in post.reuses %}
-                    <li class="col-xs-12">
-                        {% include theme('reuse/card.html') %}
-                    </li>
+                    {% include theme('reuse/card.html') %}
                     {% endfor %}
-                </ul>
+                </div>
                 {% endif %}
                 {# end reuses list #}
 
                 {# Datasets list #}
                 {% if post.datasets %}
-                <h3>{{ _('Associated datasets') }}</h3>
-                <ul class="card-list">
+                <h3>{{ ngettext('Associated dataset', 'Associated datasets', post.datasets|length) }}</h3>
+                <div class="card-list">
                     {% for dataset in post.datasets %}
-                    <li class="col-xs-12">
-                        {% include theme('dataset/card.html') %}
-                    </li>
+                    {% include theme('dataset/card.html') %}
                     {% endfor %}
-                </ul>
+                </div>
                 {% endif %}
                 {# end post list #}
 
             </aside>
+            {% endif %}
         </div>
 
     </div>
@@ -165,27 +163,29 @@
 {% if previous_post or next_post %}
 <section class="content nav-section">
     <div class="container">
-        <div class="col-sm-4">
-            {% if previous_post %}
-            <a href="{{ previous_post.display_url }}" title="{{ _('Previous post') }}" class="btn btn-primary">
-                <span class="fa fa-chevron-left"></span>
-                {{ _('Previous post') }}
-            </a>
-            {% endif %}
-        </div>
-        <div class="col-sm-4 text-center">
-            <a href="{{ url_for('posts.list') }}" class="btn btn-primary">
-                <span class="fa fa-fw fa-list"></span>
-                {{ _('All posts') }}
-            </a>
-        </div>
-        <div class="col-sm-4 text-right">
-            {% if next_post %}
-            <a href="{{ next_post.display_url }}" title="{{ _('Next post') }}" class="btn btn-primary">
-                {{ _('Next post') }}
-                <span class="fa fa-chevron-right"></span>
-            </a>
-            {% endif %}
+        <div class="row">
+            <div class="col-sm-4">
+                {% if previous_post %}
+                <a href="{{ previous_post.display_url }}" title="{{ _('Previous post') }}" class="btn btn-primary">
+                    <span class="fa fa-chevron-left"></span>
+                    {{ _('Previous post') }}
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-sm-4 text-center">
+                <a href="{{ url_for('posts.list') }}" class="btn btn-primary">
+                    <span class="fa fa-fw fa-list"></span>
+                    {{ _('All posts') }}
+                </a>
+            </div>
+            <div class="col-sm-4 text-right">
+                {% if next_post %}
+                <a href="{{ next_post.display_url }}" title="{{ _('Next post') }}" class="btn btn-primary">
+                    {{ _('Next post') }}
+                    <span class="fa fa-chevron-right"></span>
+                </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </section>
