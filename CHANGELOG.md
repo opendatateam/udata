@@ -14,6 +14,7 @@
 - Add publisher's name on dataset template [#1847](https://github.com/opendatateam/udata/pull/1847)
 - Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
 - Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
+- Switch the admin sidebar collapse icon from "hamburger"to left and right arrows [#1855](https://github.com/opendatateam/udata/pull/1855)
 
 ### Breaking changes
 
