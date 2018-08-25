@@ -20,6 +20,9 @@
     <image-button :src="post.image" :size="150"
         :endpoint="endpoint">
     </image-button>
+    <p v-if="published"><strong>
+        {{ _('Published on {date}', {date: published}) }}
+    </strong></p>
     <p v-if="post.headline" class="lead">{{post.headline}}</p>
     <div v-markdown="post.content"></div>
 </box>
@@ -30,6 +33,8 @@
 import API from 'api';
 import Box from 'components/containers/box.vue';
 import ImageButton from 'components/widgets/image-button.vue';
+import moment from 'moment';
+
 
 export default {
     name: 'post-content',
@@ -49,6 +54,10 @@ export default {
                 var operation = API.posts.operations.post_image;
                 return operation.urlify({post: this.post.id});
             }
+        },
+        published() {
+            if (!this.post.published) return;
+            return moment(this.post.published).format('LLL');
         }
     },
     events: {

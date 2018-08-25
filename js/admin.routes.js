@@ -198,6 +198,7 @@ router.map({
         }
     },
     '/post/new/': {
+        name: 'post-new',
         component(resolve) {
             require(['./views/post-wizard.vue'], resolve);
         }
