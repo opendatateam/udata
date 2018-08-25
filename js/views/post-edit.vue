@@ -2,6 +2,11 @@
 <div>
     <form-layout icon="newspaper-o" :title="title" :save="save" :cancel="cancel" footer="true" :model="post">
         <post-form v-ref:form :post="post"></post-form>
+        <button v-if="save" slot="right-actions"
+            class="btn btn-primary"
+            @click.prevent="save(true)">
+            {{ _('Save and continue') }}
+        </button>
     </form-layout>
 </div>
 </template>
@@ -28,12 +33,14 @@ export default {
         }
     },
     methods: {
-        save() {
+        save(continueEditing=false) {
             const form = this.$refs.form;
             if (form.validate()) {
                 this.post.update(form.serialize(), (response) => {
                     this.post.on_fetched(response);
-                    this.$go({name: 'post', params: {oid: this.post.id}});
+                    if (!continueEditing) {
+                        this.$go({name: 'post', params: {oid: this.post.id}});
+                    }
                 }, form.on_error);
             }
         },
