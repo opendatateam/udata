@@ -23,6 +23,4 @@ def purge_chunks(self):
         if datetime.now() - parse(metadata['lastchunk']) >= max_retention:
             uuid = metadata['uuid']
             log.info('Removing %s expired chunks', uuid)
-            to_remote = (f for f in chunks.list_files() if f.startswith(uuid))
-            for f in to_remote:
-                chunks.delete(f)
+            chunks.delete(uuid)

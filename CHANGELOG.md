@@ -10,7 +10,6 @@
 ### Minor changes
 
 - Only display temporal coverage years on cards and search results [#1833](https://github.com/opendatateam/udata/pull/1833)
-- Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
 - Add publisher's name on dataset template [#1847](https://github.com/opendatateam/udata/pull/1847)
 - Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
 - Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
@@ -23,15 +22,26 @@
 
 ### Bugfixes
 
-- Ensure that admin notifications are displayed once and with a constant width. [#1831](https://github.com/opendatateam/udata/pull/1831)
-- Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
-- Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
-- Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
-- Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
+- Not yet
 
 ### Internal
 
 - Upgrade to Authlib 0.9 [#1760](https://github.com/opendatateam/udata/pull/1760) [#1827](https://github.com/opendatateam/udata/pull/1827)
+
+## 1.5.3 (2018-08-27)
+
+- Prevent UnicodeError on unicode URL validation error [#1844](https://github.com/opendatateam/udata/pull/1844)
+- Hide save button in "Add resource" modal until form is visible (and prevent error) [#1846](https://github.com/opendatateam/udata/pull/1846)
+- The purge chunks tasks also remove the directory [#1845](https://github.com/opendatateam/udata/pull/1845)
+- Upgrade to latest Fine-Uploader version to benefit from bug fixes [#1849](https://github.com/opendatateam/udata/pull/1849)
+- Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
+- Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
+- Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
+- Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
+- Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
+- Ensure that admin notifications are displayed once and with a constant width. [#1831](https://github.com/opendatateam/udata/pull/1831)
+- Fix broken date range picker date parsing (ie. manual keyboard input) [#1863](https://github.com/opendatateam/udata/pull/1853)
+- Normalize uploaded filenames to avoid encoding issues, filesystem incompatibilities... [#1852](https://github.com/opendatateam/udata/pull/1852)
 
 ## 1.5.2 (2018-08-08)
 

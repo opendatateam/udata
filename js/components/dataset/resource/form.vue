@@ -99,7 +99,7 @@
 
 <template>
 <div>
-    <form-horizontal v-if="resource.url || hasChosenRemoteFile" class="resource-form file-resource-form"
+    <form-horizontal v-if="hasData" class="resource-form file-resource-form"
         :fields="fields" :model="resource" v-ref:form>
     </form-horizontal>
     <div v-show="files.length" v-for="file in files" class="info-box bg-aqua">
@@ -192,6 +192,7 @@ export default {
                 }, {
                     id: 'description',
                     label: this._('Description'),
+                    rows:3,
                 }, {
                     id: 'published',
                     label: this._('Publication date'),
@@ -226,6 +227,9 @@ export default {
         };
     },
     computed: {
+        hasData() {
+            return Boolean(this.resource.url || this.hasChosenRemoteFile);
+        },
         showUploadZone() {
             if (this.files.length) return false;
             if (this.hasChosenRemoteFile) return false;
