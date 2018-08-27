@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.5.3 (2018-08-27)
 
 - Prevent UnicodeError on unicode URL validation error [#1844](https://github.com/opendatateam/udata/pull/1844)
 - Hide save button in "Add resource" modal until form is visible (and prevent error) [#1846](https://github.com/opendatateam/udata/pull/1846)
