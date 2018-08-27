@@ -51,6 +51,7 @@
 <script>
 import Calendar from 'components/calendar.vue';
 import {FieldComponentMixin} from 'components/form/base-field';
+import moment from 'moment';
 import $ from 'jquery-validation';  // Ensure jquery & jquery.validate plugin are both loaded
 
 const DEFAULT_FORMAT = 'L';
