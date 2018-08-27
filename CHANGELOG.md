@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.4.4 (2018-08-27)
 
 - Fix the multisearch labels position [#330](https://github.com/etalab/udata-gouvfr/pull/330)
