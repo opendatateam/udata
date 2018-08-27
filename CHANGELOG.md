@@ -3,6 +3,9 @@
 ## Current (in progress)
 
 - Make use of assets manifest for long term caching [#328](https://github.com/etalab/udata-gouvfr/pull/328)
+
+## 1.4.4 (2018-08-27)
+
 - Fix the multisearch labels position [#330](https://github.com/etalab/udata-gouvfr/pull/330)
 
 ## 1.4.3 (2018-08-08)
