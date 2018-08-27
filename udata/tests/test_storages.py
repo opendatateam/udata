@@ -73,6 +73,19 @@ class StorageUtilsTest:
         assert utils.extension('test') is None
         assert utils.extension('prefix/test') is None
 
+    def test_normalize_no_changes(self):
+        assert utils.normalize('test.txt') == 'test.txt'
+
+    def test_normalize_spaces(self):
+        expected = 'test-with-spaces.txt'
+        assert utils.normalize('test with  spaces.txt') == expected
+
+    def test_normalize_to_lower(self):
+        assert utils.normalize('Test.TXT') == 'test.txt'
+
+    def test_normalize_special_chars(self):
+        assert utils.normalize('éàü@€.txt') == 'eau-eur.txt'
+
 
 @pytest.mark.usefixtures('app')
 class ConfigurableAllowedExtensionsTest:
@@ -98,7 +111,7 @@ class StorageUploadViewTest:
         client.login()
         response = client.post(
             url_for('storage.upload', name='resources'),
-            {'file': (StringIO(b'aaa'), 'test.txt')})
+            {'file': (StringIO(b'aaa'), 'Test with  spaces.TXT')})
 
         assert200(response)
         assert response.json['success']
@@ -107,7 +120,7 @@ class StorageUploadViewTest:
         assert 'sha1' in response.json
         assert 'filename' in response.json
         filename = response.json['filename']
-        assert filename.endswith('test.txt')
+        assert filename.endswith('test-with-spaces.txt')
         expected = storages.resources.url(filename, external=True)
         assert response.json['url'] == expected
         assert response.json['mime'] == 'text/plain'
@@ -122,7 +135,7 @@ class StorageUploadViewTest:
             response = client.post(url, {
                 'file': (StringIO(b'a'), 'blob'),
                 'uuid': uuid,
-                'filename': 'test.txt',
+                'filename': 'Test with  spaces.TXT',
                 'partindex': i,
                 'partbyteoffset': 0,
                 'totalfilesize': parts,
@@ -140,7 +153,7 @@ class StorageUploadViewTest:
 
         response = client.post(url, {
             'uuid': uuid,
-            'filename': 'test.txt',
+            'filename': 'Test with  spaces.TXT',
             'totalfilesize': parts,
             'totalparts': parts,
         })
@@ -149,10 +162,13 @@ class StorageUploadViewTest:
         assert 'size' in response.json
         assert response.json['size'] == parts
         assert 'sha1' in response.json
-        expected = storages.tmp.url(response.json['filename'], external=True)
-        assert response.json['url'] == expected
+        expected_filename = 'test-with-spaces.txt'
+        filename = response.json['filename']
+        assert filename.endswith(expected_filename)
+        expected_url = storages.tmp.url(filename, external=True)
+        assert response.json['url'] == expected_url
         assert response.json['mime'] == 'text/plain'
-        assert storages.tmp.read(response.json['filename']) == 'aaaa'
+        assert storages.tmp.read(filename) == 'aaaa'
         assert list(storages.chunks.list_files()) == []
 
     def test_chunked_upload_bad_chunk(self, client):
@@ -211,6 +227,7 @@ class ChunksRetentionTest:
         self.create_chunks(uuid)
         purge_chunks.apply()
         assert list(storages.chunks.list_files()) == []
+        assert not storages.chunks.exists(uuid)  # Directory should be removed too
 
     @pytest.mark.options(UPLOAD_MAX_RETENTION=60 * 60)  # 1 hour
     def test_chunks_kept_before_max_retention(self, client):
@@ -227,3 +244,4 @@ class ChunksRetentionTest:
         ])
         expected.add(chunk_filename(active_uuid, META))
         assert set(storages.chunks.list_files()) == expected
+        assert not storages.chunks.exists(expired_uuid)  # Directory should be removed too
