@@ -114,7 +114,8 @@ def combine_chunks(storage, args, prefix=None):
     Chunks are stored in the chunks storage.
     '''
     uuid = args['uuid']
-    target = args['filename']
+    # Normalize filename including extension
+    target = utils.normalize(args['filename'])
     if prefix:
         target = os.path.join(prefix, target)
     with storage.open(target, 'wb') as out:
@@ -139,7 +140,10 @@ def handle_upload(storage, prefix=None):
     elif not uploaded_file:
         raise UploadError('Missing file parameter')
     else:
-        filename = storage.save(uploaded_file, prefix=prefix)
+        # Normalize filename including extension
+        filename = utils.normalize(uploaded_file.filename)
+        filename = storage.save(uploaded_file, prefix=prefix,
+                                filename=filename)
 
     metadata = storage.metadata(filename)
     checksum = metadata.pop('checksum')
