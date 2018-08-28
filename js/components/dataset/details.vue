@@ -8,7 +8,7 @@
             <span class="fa fa-calendar fa-fw"></span>
             {{ _('Temporal coverage') }}:
         </strong>
-        {{ dataset.temporal_coverage | daterange }}
+        {{ dataset.temporal_coverage | daterange true }}
     </div>
     <div v-if="dataset.frequency" class="label-list">
         <strong>

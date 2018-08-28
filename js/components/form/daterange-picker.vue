@@ -3,6 +3,14 @@
     .dropdown-menu {
         min-width: auto;
     }
+
+    input.form-control {
+        border-right: none;
+
+        &:nth-of-type(2) {  // End date
+            border-left: none;
+        }
+    }
 }
 </style>
 
@@ -10,19 +18,24 @@
 <div class="input-group dropdown daterange-picker" :class="{ 'open': picking }"
     v-outside="onOutside">
     <span class="input-group-addon"><span class="fa fa-calendar"></span></span>
-    <input type="text" class="input-sm form-control"
+    <input type="text" class="form-control"
         v-el:start-input :placeholder="_('Start')"
         @focus="onFocus" @input="onChange | debounce 500"
         :required="required"
         :value="startValue|dt dateFormat ''"
         :readonly="readonly">
     <span class="input-group-addon">{{ _('to') }}</span>
-    <input type="text" class="input-sm form-control"
+    <input type="text" class="form-control daterange-picker-end"
         v-el:end-input :placeholder="_('End')"
         @focus="onFocus" @input="onChange | debounce 500"
         :required="required"
         :value="endValue|dt dateFormat ''"
         :readonly="readonly">
+    <span class="input-group-btn">
+        <button class="btn btn-danger" type="button" @click.prevent="clear">
+            <span class="fa fa-remove">
+        </button>
+    </span>
     <div class="dropdown-menu" :style="dropdownStyle">
         <calendar v-ref:calendar :selected="currentValue" :min="dateMin" :max="dateMax"></calendar>
     </div>
@@ -38,6 +51,7 @@
 <script>
 import Calendar from 'components/calendar.vue';
 import {FieldComponentMixin} from 'components/form/base-field';
+import moment from 'moment';
 import $ from 'jquery-validation';  // Ensure jquery & jquery.validate plugin are both loaded
 
 const DEFAULT_FORMAT = 'L';
@@ -126,6 +140,10 @@ export default {
         });
     },
     methods: {
+        clear() {
+            this.startValue = '';
+            this.endValue = '';
+        },
         onFocus(e) {
             if (!this.picking || e.target !== this.pickedField) {
                 this.$nextTick(this.$refs.calendar.focus);

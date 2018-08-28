@@ -2,7 +2,57 @@
 
 ## Current (in progress)
 
+### New features
+
 - Harvest sources are now filterable through the harvest source create/edit admin form [#1812](https://github.com/opendatateam/udata/pull/1812)
+- Static assets are now compatible with long-term caching (ie. their hash is present in the filename) [#1826](https://github.com/opendatateam/udata/pull/1826)
+
+### Minor changes
+
+- Only display temporal coverage years on cards and search results [#1833](https://github.com/opendatateam/udata/pull/1833)
+- Add publisher's name on dataset template [#1847](https://github.com/opendatateam/udata/pull/1847)
+- Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
+- Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
+- Switch the admin sidebar collapse icon from "hamburger"to left and right arrows [#1855](https://github.com/opendatateam/udata/pull/1855)
+
+### Breaking changes
+
+- Theme are now responsible for adding their CSS markup on template (no more assumptions on `theme.css` and `admin.css`). Most of the time, overriding `raw.html` and `admin.html` should be sufficient
+- The discussions API `posted_by` attribute is now an embedded user instead of an user ID to avoid extra API calls [#1839](https://github.com/opendatateam/udata/pull/1839)
+
+### Bugfixes
+
+- Not yet
+
+### Internal
+
+- Upgrade to Authlib 0.9 [#1760](https://github.com/opendatateam/udata/pull/1760) [#1827](https://github.com/opendatateam/udata/pull/1827)
+
+## 1.5.3 (2018-08-27)
+
+- Prevent UnicodeError on unicode URL validation error [#1844](https://github.com/opendatateam/udata/pull/1844)
+- Hide save button in "Add resource" modal until form is visible (and prevent error) [#1846](https://github.com/opendatateam/udata/pull/1846)
+- The purge chunks tasks also remove the directory [#1845](https://github.com/opendatateam/udata/pull/1845)
+- Upgrade to latest Fine-Uploader version to benefit from bug fixes [#1849](https://github.com/opendatateam/udata/pull/1849)
+- Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
+- Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
+- Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
+- Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
+- Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
+- Ensure that admin notifications are displayed once and with a constant width. [#1831](https://github.com/opendatateam/udata/pull/1831)
+- Fix broken date range picker date parsing (ie. manual keyboard input) [#1863](https://github.com/opendatateam/udata/pull/1853)
+- Normalize uploaded filenames to avoid encoding issues, filesystem incompatibilities... [#1852](https://github.com/opendatateam/udata/pull/1852)
+
+## 1.5.2 (2018-08-08)
+
+- Fix client-side temporal coverage rendering [#1821](https://github.com/opendatateam/udata/pull/1821)
+- Prevent word breaking when wrapping discussions messages [#1822](https://github.com/opendatateam/udata/pull/1822)
+- Properly render message content on issues and discussions mails [#1823](https://github.com/opendatateam/udata/pull/1823)
+
+## 1.5.1 (2018-08-03)
+
+- Ensure OEmbed compatibility with external CDN [#1815](https://github.com/opendatateam/udata/pull/1815)
+- Fixes some static URL serialization [#1815](https://github.com/opendatateam/udata/pull/1815)
 
 ## 1.5.0 (2018-07-30)
 

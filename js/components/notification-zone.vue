@@ -6,6 +6,7 @@
 
 <script>
 import Alert from 'components/alert.vue';
+
 export default {
     name: 'notification-zone',
     components: {Alert}
@@ -16,10 +17,10 @@ export default {
 .notification-zone {
     padding: 15px 15px 0;
     position: fixed;
-    right: 0;
+    right: 15px;
     bottom: 15px;
-    max-width: 350px;
-    z-index: 1001;
+    width: 350px;
+    z-index: 10000;
 
     .alert {
         &:last-child {

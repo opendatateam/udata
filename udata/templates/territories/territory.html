@@ -61,5 +61,8 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer onload="udataScript.loadDatasets()"></script>
+    <script src="{{ static('widgets.js', _burst=False) }}" id="udata"
+        async defer onload="udataScript.loadDatasets()"
+        {% if config.CDN_DOMAIN %}data-udata="{{ url_for('site.home_redirect', _external=True) }}"{% endif %}
+    ></script>
 {% endblock %}

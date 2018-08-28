@@ -22,9 +22,15 @@
 ) }}.</p>
 <br/>
 <p style="margin: 0;padding: 0;">
-    <b>{{ _('Details') }}:</b>
+    <b>{{ _('Title') }}:</b>
     {{ discussion.title }}
 </p>
+
+<p style="margin: 0;padding: 0;">
+    <b>{{ _('Message') }}:</b>
+    {{ message.content | markdown }}
+</p>
+
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr>
         <td align="center">

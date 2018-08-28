@@ -10,7 +10,7 @@
           <dt>{{ _('Latest URL') }}</dt>
           <dd><a :href="resource.latest" @click="onClick">{{resource.latest}}</a></dd>
           <dt v-if="resourceType">{{ _('Type') }}</dt>
-          <dd v-if="resourceType">{{ resourceType }}</dd>
+          <dd v-if="resourceType">{{ resourceType.label }}</dd>
           <dt v-if="resource.format">{{ _('Format') }}</dt>
           <dd v-if="resource.format">{{resource.format}}</dd>
           <dt v-if="resource.mime">{{ _('MimeType') }}</dt>
@@ -48,8 +48,6 @@
 import Availability from './resource/availability.vue';
 import Modal from 'components/modal.vue';
 import pubsub from 'pubsub';
-import Resource from 'models/resource';
-import resource_types from 'models/resource_types';
 
 export default {
     props: {
@@ -69,8 +67,14 @@ export default {
     components: {Modal, Availability},
     data() {
         return {
-            resourceType: undefined,
+            types: [],
             checksum: undefined,
+        }
+    },
+    computed: {
+        resourceType() {
+            if (!this.resource || !this.types) return;
+            return this.types.find(o => o.id == this.resource.type);
         }
     },
     created() {
@@ -81,14 +85,8 @@ export default {
             Object.assign(this.resource, resource);
             this.checksum = resource.checksum;
         });
-        // ensure this will be filled both on open from dataset page and direct open (deeplink)
-        if (resource_types.has_data) {
-            this.fillResourceType();
-        } else {
-            resource_types.$on('updated', (res) => {
-                this.fillResourceType();
-            });
-        }
+
+        this.$api.get('datasets/resource_types/').then(types => this.types = types);
     },
     methods: {
         onClick() {
@@ -100,12 +98,7 @@ export default {
             }
             pubsub.publish(eventName);
             this.$refs.modal.close();
-        },
-        fillResourceType() {
-            if (this.resource.type) {
-                this.resourceType = resource_types.by_id(this.resource.type).label;
-            }
-        },
+        }
     }
 };
 </script>

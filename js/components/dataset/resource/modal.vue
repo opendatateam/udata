@@ -16,7 +16,7 @@
 
 <template>
 <div>
-<modal :title="resource.title" class="resource-modal"
+<modal :title="resource.title" class="resource-modal" :large="edit"
     :class="{ 'modal-danger': confirm, 'modal-primary': !confirm }"
     v-ref:modal>
     <div class="modal-body">
