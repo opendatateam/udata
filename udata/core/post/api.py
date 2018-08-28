@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from udata.api import api, fields, API
 from udata.auth import admin_permission
 
-
-from udata.core.dataset.api_fields import dataset_ref_fields
-from udata.core.reuse.api_fields import reuse_ref_fields
+from udata.core.dataset.api_fields import dataset_fields
+from udata.core.reuse.api_fields import reuse_fields
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -35,19 +36,19 @@ post_fields = api.model('Post', {
     'tags': fields.List(
         fields.String, description='Some keywords to help in search'),
     'datasets': fields.List(
-        fields.Nested(dataset_ref_fields), description='The post datasets'),
+        fields.Nested(dataset_fields), description='The post datasets'),
     'reuses': fields.List(
-        fields.Nested(reuse_ref_fields), description='The post reuses'),
+        fields.Nested(reuse_fields), description='The post reuses'),
 
     'owner': fields.Nested(
         user_ref_fields, description='The owner user',
         readonly=True, allow_null=True),
-    'private': fields.Boolean(description='Is the post visible'),
-
     'created_at': fields.ISODateTime(
         description='The post creation date', readonly=True),
     'last_modified': fields.ISODateTime(
         description='The post last modification date', readonly=True),
+    'published': fields.ISODateTime(
+        description='The post publication date', readonly=True),
 
     'uri': fields.UrlFor(
         'api.post', lambda o: {'post': o},
@@ -55,13 +56,14 @@ post_fields = api.model('Post', {
     'page': fields.UrlFor(
         'posts.show', lambda o: {'post': o},
         description='The post page URL', readonly=True),
-})
+}, mask='*,datasets{title,acronym,uri,page},reuses{title,image,image_thumbnail,uri,page}')
 
 post_page_fields = api.model('PostPage', fields.pager(post_fields))
 
 parser = api.page_parser()
 
 parser.add_argument('sort', type=str, default='-created_at', location='args', help='The sorting attribute')
+
 
 @ns.route('/', endpoint='posts')
 class PostsAPI(API):
@@ -109,6 +111,25 @@ class PostAPI(API):
         '''Delete a given post'''
         post.delete()
         return '', 204
+
+
+@ns.route('/<post:post>/publish', endpoint='publish_post')
+class PublishPostAPI(API):
+    @api.secure(admin_permission)
+    @api.doc('publish_post')
+    @api.marshal_with(post_fields)
+    def post(self, post):
+        '''Publish an existing post'''
+        post.modify(published=datetime.now())
+        return post
+
+    @api.secure(admin_permission)
+    @api.doc('unpublish_post')
+    @api.marshal_with(post_fields)
+    def delete(self, post):
+        '''Publish an existing post'''
+        post.modify(published=None)
+        return post
 
 
 @ns.route('/<post:post>/image', endpoint='post_image')

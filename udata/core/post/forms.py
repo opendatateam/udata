@@ -27,5 +27,3 @@ class PostForm(ModelForm):
     credit_url = fields.URLField(_('Credit URL'))
 
     tags = fields.TagField(_('Tags'))
-
-    private = fields.BooleanField(_('Private'))

@@ -307,7 +307,7 @@ class TemplateRecorder:
         for template, context in self.templates:
             if name in context:
                 return context[name]
-        raise ContextVariableDoesNotExist
+        raise ContextVariableDoesNotExist()
 
 
 @pytest.fixture
