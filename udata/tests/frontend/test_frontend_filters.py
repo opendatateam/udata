@@ -272,4 +272,4 @@ class FrontEndRootTest:
         }
 
         response = client.get(url_for('test.i18n', key='value', param='other'))
-        assert response.data == ''
+        assert response.data == b''

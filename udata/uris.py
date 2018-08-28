@@ -46,7 +46,7 @@ class ValidationError(ValueError):
 
 def error(url, reason=None):
     __tracebackhide__ = True
-    if not isinstance(url, unicode):
+    if not isinstance(url, str):
         url = url.decode('utf8')
     msg = 'Invalid URL "{0}"'.format(url)
     if reason:
