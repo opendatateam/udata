@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-08-27 17:36+0200\n"
-"PO-Revision-Date: 2018-08-28 12:22\n"
+"PO-Revision-Date: 2018-08-28 12:30\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1913,7 +1913,7 @@ msgstr "Organisation"
 
 #: udata/templates/dataset/search-labels.html:25
 msgid "Resource type"
-msgstr ""
+msgstr "Type de ressource"
 
 #: udata/templates/dataset/search-panel.html:11
 msgid "Licenses"
@@ -2518,11 +2518,11 @@ msgstr "Publié le %(date)s"
 
 #: udata/templates/post/display.html:62 udata/templates/post/display.html:65
 msgid "Draft"
-msgstr ""
+msgstr "Brouillon"
 
 #: udata/templates/post/display.html:63
 msgid "This post is a draft and will not be visible by other users"
-msgstr ""
+msgstr "Cet article est un brouillon et ne sera pas visible par les autres utilisateurs"
 
 #: udata/templates/post/display.html:69
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
@@ -2531,14 +2531,14 @@ msgstr "Cet article a été supprimé. Cel sera permanent dans les prochaines 24
 #: udata/templates/post/display.html:136
 msgid "Associated reuse"
 msgid_plural "Associated reuses"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Réutilisation associée"
+msgstr[1] "Réutilisations associées"
 
 #: udata/templates/post/display.html:147
 msgid "Associated dataset"
 msgid_plural "Associated datasets"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Jeu de donnée associé"
+msgstr[1] "Jeux de données associés"
 
 #: udata/templates/post/display.html:169 udata/templates/post/display.html:171
 msgid "Previous post"
