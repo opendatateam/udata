@@ -7,9 +7,9 @@
         type=discussion.subject.verbose_name,
         user=(
             '<a href="'|safe
-            + url_for('users.show', user=comment.posted_by, _external=True)
+            + url_for('users.show', user=message.posted_by, _external=True)
             + '">'|safe
-            + comment.posted_by.fullname
+            + message.posted_by.fullname
             + '</a>'|safe
         ),
         subject=(
@@ -23,13 +23,13 @@
 }}.</p>
 <br/>
 <p style="margin: 0;padding: 0;">
-    <b>{{ _('Details') }}:</b>
+    <b>{{ _('Title') }}:</b>
     {{ discussion.title }}
 </p>
 
 <p style="margin: 0;padding: 0;">
-    <b>{{ _('Comment') }}:</b>
-    {{ comment.content }}
+    <b>{{ _('Message') }}:</b>
+    {{ message.content | markdown }}
 </p>
 
 

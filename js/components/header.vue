@@ -1,10 +1,16 @@
 <style lang="less">
-a.sidebar-toggle {
-    cursor: pointer;
+.main-header {
+    a.sidebar-toggle {
+        cursor: pointer;
+
+        &::before {
+            content: '';
+        }
+    }
 }
 </style>
 <template>
-<div>
+<div class="main-header">
     <a href="/" class="logo">
       <!-- Add the class icon to your logo image or logo icon to add the margining -->
       <!-- mini logo for sidebar mini 50x50 pixels -->
@@ -17,9 +23,7 @@ a.sidebar-toggle {
         <!-- Sidebar toggle button-->
         <a class="sidebar-toggle" role="button" @click="click($event)">
             <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+            <span :class="['fa', $root.toggled ? 'fa-angle-double-left' : 'fa-angle-double-right']"></span>
         </a>
       <div class="navbar-custom-menu">
           <ul class="nav navbar-nav">
@@ -43,7 +47,7 @@ module.exports = {
         'add-menu': require('components/add-menu.vue')
     },
     methods: {
-        click: function(e) {
+        click(e) {
             e.preventDefault();
             this.$dispatch('navigation:toggled');
         }

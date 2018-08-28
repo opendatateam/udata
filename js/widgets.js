@@ -44,7 +44,8 @@ const _MAX_SIZE = 50
  */
 function extractURLs (selector) {
   const parser = document.createElement('a')
-  const scriptURL = document.querySelector(selector).src
+  const script = document.querySelector(selector)
+  const scriptURL = script.dataset.udata || script.src
   parser.href = scriptURL
   const baseURL = `${parser.protocol}//${parser.host}`
   return [scriptURL, baseURL]

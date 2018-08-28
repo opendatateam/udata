@@ -206,6 +206,7 @@ export class List extends Base {
 
         this.items = this.$options.data || [];
         this.query = this.$options.query || {};
+        this.model = this.$options.model;
 
         this.sorted = null;
         this.reversed = false;
@@ -268,7 +269,7 @@ export class List extends Base {
     }
 
     on_fetched(data) {
-        this.items = data.obj;
+        this.items = this.model ? data.obj.map(o => new this.model({data: o})) : data.obj;
         this.populate();
         this.$emit('updated');
         this.loading = false;

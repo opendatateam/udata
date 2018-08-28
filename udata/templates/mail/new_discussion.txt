@@ -8,7 +8,7 @@
 ) }}.
 
 
-{{ _('Details') }}: {{ discussion.title }}
+{{ _('Title') }}: {{ discussion.title }}
 
 {{ _('You can see the discussion on this page:') }}
 {{ discussion.subject.external_url }}

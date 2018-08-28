@@ -3,8 +3,12 @@ import mimetypes
 import os
 import zlib
 
+from slugify import Slugify
 
 CHUNK_SIZE = 2 ** 16
+
+
+slugify = Slugify(separator='-', to_lower=True, safe_chars='.')
 
 
 def hash(file, hasher):
@@ -50,3 +54,7 @@ def extension(filename):
         extension = ext if not extension else ext + '.' + extension
 
     return extension
+
+
+def normalize(filename):
+    return slugify(filename)

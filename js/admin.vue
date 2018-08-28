@@ -2,7 +2,7 @@
 <div>
     <!-- Placeholder for non-routable modals -->
     <div v-el:modal></div>
-    <app-header class="main-header"></app-header>
+    <app-header></app-header>
     <sidebar></sidebar>
     <router-view></router-view>
 </div>
@@ -23,7 +23,7 @@ export default {
     mixins: [ModalMixin],
     data() {
         return {
-            toggled: false,
+            toggled: true,
             notifications: [],
             site, me, config,
         };
@@ -33,6 +33,7 @@ export default {
         'navigation:toggled': function() {
             document.body.classList.toggle('sidebar-collapse');
             document.body.classList.toggle('sidebar-open');
+            this.toggled = !this.toggled;
         },
         notify: function(notification) {
             this.notifications.push(notification);

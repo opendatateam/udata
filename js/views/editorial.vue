@@ -25,6 +25,8 @@
 <script>
 import Posts from 'models/posts';
 import Topics from 'models/topics';
+import Reuse from 'models/reuse';
+import Dataset from 'models/dataset';
 import {List} from 'models/base';
 import API from 'api';
 import Layout from 'components/layout.vue';
@@ -40,8 +42,10 @@ export default {
         return {
             posts: new Posts({query: {sort: '-created', page_size: 10}, mask: PostList.MASK}),
             topics: new Topics({query: {sort: '-created', page_size: 10}, mask: TopicList.MASK}),
-            home_datasets: new List({ns: 'site', fetch: 'get_home_datasets', mask: DatasetCardList.MASK}),
-            home_reuses: new List({ns: 'site', fetch: 'get_home_reuses', mask: ReuseCardList.MASK})
+            home_datasets: new List({ns: 'site', fetch: 'get_home_datasets',
+                                     mask: DatasetCardList.MASK, model: Dataset}),
+            home_reuses: new List({ns: 'site', fetch: 'get_home_reuses',
+                                   mask: ReuseCardList.MASK, model: Reuse})
         };
     },
     components: {
