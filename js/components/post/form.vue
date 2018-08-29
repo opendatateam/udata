@@ -1,6 +1,6 @@
 <template>
 <div>
-    <vertical-form v-ref:form :fields="fields" :model="post"></vertical-form> 
+    <vertical-form v-ref:form :fields="fields" :model="post"></vertical-form>
 </div>
 </template>
 
@@ -25,14 +25,12 @@ export default {
                     label: this._('Headline')
                 }, {
                     id: 'content',
-                    label: this._('Content')
+                    label: this._('Content'),
+                    rows: 12
                 }, {
                     id: 'tags',
                     label: this._('Tags'),
                     widget: 'tag-completer'
-                }, {
-                    id: 'private',
-                    label: this._('Draft')
                 }]
         };
     },

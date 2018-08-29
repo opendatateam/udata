@@ -1,13 +1,13 @@
 <template>
 <div>
-    <datatable :title="_('Posts') " icon="newspaper-o"
+    <datatable :title="_('Posts')" icon="newspaper-o"
         boxclass="posts-widget"
         :fields="fields"
         :p="posts"
         :empty="_('No post')">
         <footer slot="footer">
             <button type="button" class="btn btn-primary btn-flat btn-sm"
-                v-link.literal="/post/new/">
+                v-link="{name: 'post-new'}">
                 <span class="fa fa-fw fa-plus"></span>
                 <span v-i18n="New"></span>
             </button>
@@ -21,7 +21,7 @@ import Datatable from 'components/datatable/widget.vue';
 
 export default {
     name: 'posts-list',
-    MASK: ['id', 'name', 'created_at', 'last_modified', 'private'],
+    MASK: ['id', 'name', 'created_at', 'last_modified', 'published'],
     props: ['posts'],
     components: {Datatable},
     data() {
@@ -46,11 +46,11 @@ export default {
                 type: 'timeago',
                 width: 120
             }, {
-                label: this._('Access'),
-                key: 'private',
-                sort: 'private',
+                label: this._('Publication'),
+                key: 'published',
+                sort: 'published',
                 align: 'left',
-                type: 'visibility',
+                type: 'timeago',
                 width: 120
             }]
         };
