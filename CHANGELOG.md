@@ -23,7 +23,7 @@
 
 ### Bugfixes
 
-- Not yet
+- Hide the `resource.type` attribute from JSON-LD output until handled by a dedicated vocabulary/property [#1864](https://github.com/opendatateam/udata/pull/1864)
 
 ### Internal
 
