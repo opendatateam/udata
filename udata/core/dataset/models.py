@@ -313,7 +313,6 @@ class ResourceMixin(object):
             'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
-            'type': self.type,
         }
 
         if 'views' in self.metrics:
