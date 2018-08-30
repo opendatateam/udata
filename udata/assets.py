@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import io
 import json
 import os
@@ -20,7 +17,7 @@ def has_manifest(app, filename='manifest.json'):
     '''Verify the existance of a JSON assets manifest'''
     try:
         return pkg_resources.resource_exists(app, filename)
-    except ImportError:
+    except (ImportError, NotImplementedError):
         return os.path.isabs(filename) and os.path.exists(filename)
 
 

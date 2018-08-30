@@ -72,7 +72,8 @@ class ConfigurableTheme(Theme):
         self.entrypoint = entrypoint
         # Compute path without loading the module
         path = pkgutil.get_loader(entrypoint.module_name).path
-        super(ConfigurableTheme, self).__init__(os.path.dirname(path))
+        path = os.path.dirname(path)
+        super(ConfigurableTheme, self).__init__(path)
 
         self.variants = self.info.get('variants', [])
         if 'default' not in self.variants:
