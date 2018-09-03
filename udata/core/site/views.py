@@ -70,7 +70,7 @@ def map():
     return theme.render('site/map.html')
 
 
-@blueprint.route('/datasets.csv')
+@blueprint.route('/datasets.csv', cors=True)
 def datasets_csv():
     params = multi_to_dict(request.args)
     params['facets'] = False
@@ -79,7 +79,7 @@ def datasets_csv():
     return csv.stream(adapter(datasets), 'datasets')
 
 
-@blueprint.route('/resources.csv')
+@blueprint.route('/resources.csv', cors=True)
 def resources_csv():
     params = multi_to_dict(request.args)
     params['facets'] = False
@@ -87,7 +87,7 @@ def resources_csv():
     return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
 
 
-@blueprint.route('/organizations.csv')
+@blueprint.route('/organizations.csv', cors=True)
 def organizations_csv():
     params = multi_to_dict(request.args)
     params['facets'] = False
@@ -95,7 +95,7 @@ def organizations_csv():
     return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
 
 
-@blueprint.route('/reuses.csv')
+@blueprint.route('/reuses.csv', cors=True)
 def reuses_csv():
     params = multi_to_dict(request.args)
     params['facets'] = False
@@ -181,20 +181,20 @@ def terms():
     return theme.render('terms.html', terms=content)
 
 
-@blueprint.route('/context.jsonld', localize=False)
+@blueprint.route('/context.jsonld', localize=False, cors=True)
 def jsonld_context():
     '''Expose the JSON-LD context'''
     return json.dumps(CONTEXT), 200, {'Content-Type': 'application/ld+json'}
 
 
-@blueprint.route('/data.<format>', localize=False)
+@blueprint.route('/data.<format>', localize=False, cors=True)
 def dataportal(format):
     '''Root RDF endpoint with content negociation handling'''
     url = url_for('site.rdf_catalog_format', format=format)
     return redirect(url)
 
 
-@blueprint.route('/catalog', localize=False)
+@blueprint.route('/catalog', localize=False, cors=True)
 def rdf_catalog():
     '''Root RDF endpoint with content negociation handling'''
     format = RDF_EXTENSIONS[negociate_content()]
@@ -202,7 +202,7 @@ def rdf_catalog():
     return redirect(url)
 
 
-@blueprint.route('/catalog.<format>', localize=False)
+@blueprint.route('/catalog.<format>', localize=False, cors=True)
 def rdf_catalog_format(format):
     params = multi_to_dict(request.args)
     page = int(params.get('page', 1))
