@@ -374,6 +374,7 @@ class OrgDatasetsAPI(API):
     }
 
     def map_sort(self, sort):
+        """Map sort arg from search index attributes to DB attributes"""
         if not sort:
             return
         if sort[0] == '-':
