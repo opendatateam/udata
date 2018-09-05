@@ -365,6 +365,23 @@ dataset_parser.add_argument(
 
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
 class OrgDatasetsAPI(API):
+    sort_mapping = {
+        'created': 'created_at',
+        'views': 'metrics.views',
+        'updated': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+    }
+
+    def map_sort(self, sort):
+        if not sort:
+            return
+        if sort[0] == '-':
+            mapped = self.sort_mapping.get(sort[1:]) or sort[1:]
+            return '-{}'.format(mapped)
+        else:
+            return self.sort_mapping.get(sort) or sort
+
     @api.doc('list_organization_datasets')
     @api.expect(dataset_parser)
     @api.marshal_with(dataset_page_fields)
@@ -374,7 +391,7 @@ class OrgDatasetsAPI(API):
         qs = Dataset.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return (qs.order_by(args['sort'].replace('created', 'created_at'))
+        return (qs.order_by(self.map_sort(args['sort']))
                 .paginate(args['page'], args['page_size']))
 
 
