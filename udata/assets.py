@@ -55,9 +55,15 @@ def exists_in_manifest(app, filename):
     return app in _manifests and filename in _manifests[app]
 
 
-def from_manifest(app, filename, **kwargs):
+def from_manifest(app, filename, raw=False, **kwargs):
     '''
-    Get the path to a static file for a given app entry of a given type
+    Get the path to a static file for a given app entry of a given type.
+
+    :param str app: The application key to which is tied this manifest
+    :param str filename: the original filename (without hash)
+    :param bool raw: if True, doesn't add prefix to the manifest
+    :return: the resolved file path from manifest
+    :rtype: str
     '''
     cfg = current_app.config
 
@@ -66,8 +72,10 @@ def from_manifest(app, filename, **kwargs):
 
     path = _manifests[app][filename]
 
-    if cfg.get('CDN_DOMAIN') and not cfg.get('CDN_DEBUG'):
+    if not raw and cfg.get('CDN_DOMAIN') and not cfg.get('CDN_DEBUG'):
         prefix = 'https://' if cfg.get('CDN_HTTPS') else '//'
+        if not path.startswith('/'):
+            path = '/' + path
         return ''.join((prefix, cfg['CDN_DOMAIN'], path))
     return path
 
