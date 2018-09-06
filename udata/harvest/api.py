@@ -129,11 +129,20 @@ filter_fields = api.model('HarvestFilter', {
     'description': fields.String(description='The filter details'),
 })
 
+feature_fields = api.model('HarvestFeature', {
+    'label': fields.String(description='A localized human-readable and descriptive label'),
+    'key': fields.String(description='The feature key'),
+    'description': fields.String(description='Some details about the behavior'),
+    'default': fields.String(description='The feature default state (true is enabled)'),
+})
+
 backend_fields = api.model('HarvestBackend', {
     'id': fields.String(description='The backend identifier'),
     'label': fields.String(description='The backend display name'),
     'filters': fields.List(fields.Nested(filter_fields),
                            description='The backend supported filters'),
+    'features': fields.List(fields.Nested(feature_fields),
+                            description='The backend optionnal features'),
 })
 
 preview_dataset_fields = api.clone('DatasetPreview', dataset_fields, {
@@ -303,6 +312,7 @@ class ListBackendsAPI(API):
                 'id': b.name,
                 'label': b.display_name,
                 'filters': [f.as_dict() for f in b.filters],
+                'features': [f.as_dict() for f in b.features],
             } for b in actions.list_backends()
         ], key=lambda b: b['label'])
 
