@@ -61,7 +61,7 @@ class NotAValidPlugin(object):
 class ResourcePreviewTest:
     @pytest.fixture(autouse=True)
     def patch_entrypoint(self, request, mocker, app):
-        marker = request.node.get_marker('preview')
+        marker = request.node.get_closest_marker('preview')
         plugins = marker.args[0] if marker else []
         m = mocker.patch('udata.entrypoints.get_enabled')
         m.return_value.values.return_value = plugins  # Keep order
