@@ -22,6 +22,10 @@ class Unknown:
 
 
 class FakeBackend(BaseBackend):
+    filters = (
+        HarvestFilter('First filter', 'first', basestring),
+        HarvestFilter('Second filter', 'second', basestring),
+    )
     features = (
         HarvestFeature('feature', 'A test feature'),
         HarvestFeature('enabled', 'A test feature enabled by default', default=True),
@@ -101,6 +105,23 @@ class BaseBackendTest:
 
         with pytest.raises(HarvestException):
             backend.has_feature('unknown')
+
+    def test_get_filters_empty(self):
+        source = HarvestSourceFactory()
+        backend = FakeBackend(source)
+
+        assert backend.get_filters() == []
+
+    def test_get_filters(self):
+        source = HarvestSourceFactory(config={
+            'filters': [
+                {'key': 'second', 'value': ''},
+                {'key': 'first', 'value': ''},
+            ]
+        })
+        backend = FakeBackend(source)
+
+        assert [f['key'] for f in backend.get_filters()] == ['second', 'first']
 
 
 @pytest.mark.usefixtures('clean_db')

@@ -113,8 +113,11 @@ class BaseBackend(object):
         try:
             feature = next(f for f in self.features if f.key == key)
         except StopIteration:
-            raise HarvestException('Unkown feature {}'.format(key))
+            raise HarvestException('Unknown feature {}'.format(key))
         return self.config.get('features', {}).get(key, feature.default)
+
+    def get_filters(self):
+        return self.config.get('filters', [])
 
     def harvest(self):
         '''Start the harvesting process'''
