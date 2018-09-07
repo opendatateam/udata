@@ -109,6 +109,13 @@ class BaseBackend(object):
             'User-Agent': 'uData/0.1 {0.name}'.format(self),
         }
 
+    def has_feature(self, key):
+        try:
+            feature = next(f for f in self.features if f.key == key)
+        except StopIteration:
+            raise HarvestException('Unkown feature {}'.format(key))
+        return self.config.get('features', {}).get(key, feature.default)
+
     def harvest(self):
         '''Start the harvesting process'''
         if self.perform_initialization() is not None:
