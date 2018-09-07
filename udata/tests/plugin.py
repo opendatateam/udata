@@ -80,7 +80,7 @@ def _load_frontend(request, _configure_application):
         return
 
     app = request.getfixturevalue('app')
-    marker = request.node.get_marker('frontend')
+    marker = request.node.get_closest_marker('frontend')
     modules = set(marker.args[0] if marker and marker.args else [])
 
     if getattr(request.cls, 'modules', None):
@@ -115,7 +115,7 @@ def get_settings(request):
     '''
     Extract settings from the current test request
     '''
-    marker = request.node.get_marker('settings')
+    marker = request.node.get_closest_marker('settings')
     if marker:
         return marker.args[0]
     return getattr(request.cls, 'settings', settings.Testing)
