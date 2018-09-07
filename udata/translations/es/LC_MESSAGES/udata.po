@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-08-27 17:36+0200\n"
-"PO-Revision-Date: 2018-08-28 12:22\n"
+"POT-Creation-Date: 2018-09-07 11:01+0200\n"
+"PO-Revision-Date: 2018-09-07 09:31\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -139,7 +139,7 @@ msgstr "Título"
 #: udata/core/dataset/forms.py:55 udata/core/dataset/forms.py:112
 #: udata/core/jobs/forms.py:31 udata/core/organization/forms.py:27
 #: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:20
-#: udata/harvest/forms.py:47
+#: udata/harvest/forms.py:60
 msgid "Description"
 msgstr "Descripción"
 
@@ -164,7 +164,7 @@ msgid "Resource type (documentation, API...)"
 msgstr ""
 
 #: udata/core/dataset/forms.py:66 udata/core/reuse/forms.py:29
-#: udata/harvest/forms.py:49
+#: udata/harvest/forms.py:62
 msgid "URL"
 msgstr "URL"
 
@@ -201,7 +201,7 @@ msgid "Related dataset"
 msgstr "Conjunto de datos relacionado"
 
 #: udata/core/dataset/forms.py:96 udata/core/dataset/forms.py:137
-#: udata/core/reuse/forms.py:40 udata/harvest/forms.py:54
+#: udata/core/reuse/forms.py:40 udata/harvest/forms.py:67
 msgid "Publish as"
 msgstr "Publicar como"
 
@@ -439,7 +439,7 @@ msgstr "Archivo eliminado"
 msgid "Nameless resource"
 msgstr "Expedientes sin nombre"
 
-#: udata/core/dataset/models.py:357 udata/models/datetime_fields.py:58
+#: udata/core/dataset/models.py:356 udata/models/datetime_fields.py:58
 #: udata/templates/dataset/display.html:255 udata/templates/dataset/list.html:41
 #: udata/templates/organization/list.html:35 udata/templates/reuse/list.html:37
 #: udata/templates/search.html:74 udata/templates/search.html:88
@@ -447,7 +447,7 @@ msgstr "Expedientes sin nombre"
 msgid "Creation date"
 msgstr "Fecha de creación"
 
-#: udata/core/dataset/models.py:359 udata/models/datetime_fields.py:60
+#: udata/core/dataset/models.py:358 udata/models/datetime_fields.py:60
 #: udata/templates/dataset/list.html:42 udata/templates/organization/list.html:36
 #: udata/templates/reuse/list.html:38 udata/templates/search.html:75
 #: udata/templates/search.html:89 udata/templates/topic/datasets.html:35
@@ -455,15 +455,15 @@ msgstr "Fecha de creación"
 msgid "Last modification date"
 msgstr "Ultima fecha de creación "
 
-#: udata/core/dataset/models.py:373
+#: udata/core/dataset/models.py:372
 msgid "Future date of update"
 msgstr "La futura fecha de actualización"
 
-#: udata/core/dataset/models.py:388
+#: udata/core/dataset/models.py:387
 msgid "Pivotal data"
 msgstr "Datos centrales"
 
-#: udata/core/dataset/models.py:410 udata/templates/dataset/display.html:11
+#: udata/core/dataset/models.py:409 udata/templates/dataset/display.html:11
 msgid "dataset"
 msgstr "conjunto de datos"
 
@@ -498,7 +498,7 @@ msgstr "Ultimos conjuntos de datos "
 #: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:22
 #: udata/core/issues/forms.py:16 udata/core/issues/forms.py:21
 #: udata/core/organization/forms.py:54 udata/core/organization/forms.py:58
-#: udata/harvest/forms.py:61
+#: udata/harvest/forms.py:74
 msgid "Comment"
 msgstr "Comentar"
 
@@ -574,7 +574,7 @@ msgstr "Un problema ha sido cerrado"
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
-#: udata/harvest/forms.py:45 udata/templates/api/admin.html:10
+#: udata/harvest/forms.py:58 udata/templates/api/admin.html:10
 #: udata/templates/organization/list.html:34 udata/templates/search.html:101
 #: udata/templates/user/list.html:35
 msgid "Name"
@@ -1152,11 +1152,11 @@ msgstr "%(start)s hasta %(end)s\n"
 msgid "Source"
 msgstr ""
 
-#: udata/harvest/forms.py:48
+#: udata/harvest/forms.py:61
 msgid "Some optionnal details about this harvester"
 msgstr "Algunos detalles opcionales sobre el recopilador de datos"
 
-#: udata/harvest/forms.py:50
+#: udata/harvest/forms.py:63
 msgid "Backend"
 msgstr "En la parte posterior"
 
