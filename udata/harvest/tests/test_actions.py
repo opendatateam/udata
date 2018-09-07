@@ -143,7 +143,10 @@ class HarvestActionsTest:
 
     def test_create_source_with_config(self):
         source_url = faker.url()
-        config = {'filters': [{'key': 'test', 'value': 42}]}
+        config = {
+            'filters': [{'key': 'test', 'value': 42}],
+            'features': {'key': True},
+        }
 
         with assert_emit(signals.harvest_source_created):
             source = actions.create_source('Test source',
