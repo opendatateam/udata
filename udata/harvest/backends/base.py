@@ -52,6 +52,22 @@ class HarvestFilter(object):
         }
 
 
+class HarvestFeature(object):
+    def __init__(self, key, label, description=None, default=False):
+        self.key = key
+        self.label = label
+        self.description = description
+        self.default = default
+
+    def as_dict(self):
+        return {
+            'key': self.key,
+            'label': self.label,
+            'description': self.description,
+            'default': self.default,
+        }
+
+
 class BaseBackend(object):
     '''Base class for Harvester implementations'''
 
@@ -62,6 +78,10 @@ class BaseBackend(object):
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
     filters = tuple()
+
+    # Define some allowed filters on the backend
+    # This a Sequence[HarvestFeature]
+    features = tuple()
 
     def __init__(self, source, job=None, dryrun=False, max_items=None):
         self.source = source

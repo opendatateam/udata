@@ -1,11 +1,22 @@
 <template>
 <form class="config-form" role="form" v-el:form>
+    <!-- Features -->
+    <div v-if="hasFeatures" class="vertical-field form-group">
+        <span class="form-help"
+            v-popover="featuresDescription" popover-trigger="hover" popover-placement="left">
+        </span>
+        <label class="config-label">{{ _('Features') }}</label>
+        <feature-field v-ref:features
+            v-for="feature in backend.features" :key="feature.key"
+            :config="config" :feature="feature">
+        </feature-field>
+    </div>
     <!-- Filters -->
     <div v-if="hasFilters" class="vertical-field form-group">
         <span class="form-help"
-            v-popover="description" popover-trigger="hover" popover-placement="left">
+            v-popover="filtersDescription" popover-trigger="hover" popover-placement="left">
         </span>
-        <label class="filter-label">{{ _('Filters') }}</label>
+        <label class="config-label">{{ _('Filters') }}</label>
         <filter-field v-for="(idx,filter) in config.filters"
             :choices="backend.filters" :key="filter.key" :value="filter.value"
             :index="idx" :type="filter.type"
@@ -23,13 +34,15 @@
 </template>
 
 <script>
+import FeatureField from './feature-field.vue';
 import FilterField from './filter-field.vue';
 
 export default {
-    components: {FilterField},
+    components: {FeatureField, FilterField},
     data() {
         return {
-            description: this._('A set of filters to apply'),
+            featuresDescription: this._('A set of boolean parameters to toggle'),
+            filtersDescription: this._('A set of filters to apply'),
         };
     },
     events: {
@@ -45,6 +58,9 @@ export default {
         backend: Object,
     },
     computed: {
+        hasFeatures() {
+            return this.backend && this.backend.features.length;
+        },
         hasFilters() {
             return this.backend && this.backend.filters.length;
         }
@@ -58,6 +74,12 @@ export default {
         },
         serialize() {
             const config = {};
+            if (this.hasFeatures) {
+                config.features = this.$refs.features.reduce((obj, vm) => {
+                    obj[vm.key] = vm.value;
+                    return obj;
+                }, {});
+            }
             if (this.hasFilters) {
                 config.filters = this.$refs.filters.map(vm => ({
                     key: vm.key, value: vm.value, type: vm.type
@@ -71,7 +93,7 @@ export default {
 
 <style lang="less">
 .config-form {
-    .filter-label {
+    .config-label {
         display: block;
     }
 }

@@ -22,6 +22,7 @@ from babel.support import NullTranslations, Translations
 from flask_babelex import Babel, Domain, refresh
 from flask_babelex import format_date, format_datetime  # noqa
 from flask_babelex import get_locale as get_current_locale  # noqa
+from flask_restplus import cors
 
 from werkzeug.local import LocalProxy
 
@@ -236,6 +237,18 @@ class I18nBlueprintSetupState(BlueprintSetupState):
         defaults = self.url_defaults
         if 'defaults' in options:
             defaults = dict(defaults, **options.pop('defaults'))
+        # Handle an optionnal cors=True parameter
+        options.setdefault('cors', False)
+        if options.pop('cors', False):
+            methods = options.get('methods', ['GET'])
+            if 'HEAD' not in methods:
+                methods.append('HEAD')
+            if 'OPTIONS' not in methods:
+                methods.append('OPTIONS')
+            decorator = cors.crossdomain('*', headers='*', credentials=True)
+            view_func = decorator(view_func)
+            options['methods'] = methods
+
         if options.pop('localize', True):
             self.app.add_url_rule('/<lang:lang_code>' + rule,
                                   '%s.%s' % (self.blueprint.name, endpoint),
