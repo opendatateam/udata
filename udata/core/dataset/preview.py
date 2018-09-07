@@ -16,6 +16,10 @@ CACHE_DURATION = 60 * 60 * 24
 CACHE_KEY = 'udata.preview.enabled_plugins'
 
 
+class PreviewWarning(UserWarning):
+    pass
+
+
 class PreviewPlugin:
     '''
     An abstract preview plugin.
@@ -68,7 +72,8 @@ def get_enabled_plugins():
     for plugin in plugins:
         if plugin not in valid:
             clsname = plugin.__name__
-            warnings.warn('{0} is not a valid preview plugin'.format(clsname))
+            msg = '{0} is not a valid preview plugin'.format(clsname)
+            warnings.warn(msg, PreviewWarning)
     return [p() for p in sorted(valid, key=lambda p: 1 if p.fallback else 0)]
 
 
