@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from udata.core.dataset.preview import PreviewPlugin
+from udata.core.dataset.preview import PreviewPlugin, PreviewWarning
 from udata.core.dataset.factories import DatasetFactory
 
 pytestmark = [
@@ -118,11 +118,9 @@ class ResourcePreviewTest:
         assert resource.preview_url == FALLBACK_PREVIEW_URL
 
     @pytest.mark.preview([NotAValidPlugin])
-    def test_warn_but_ignore_invalid_plugins(self, recwarn):
-        dataset = DatasetFactory(visible=True)
-        resource = dataset.resources[0]
-        assert resource.preview_url is None
-
-        assert len(recwarn) == 1
-        msg = str(recwarn[0].message)
-        assert msg == 'NotAValidPlugin is not a valid preview plugin'
+    def test_warn_but_ignore_invalid_plugins(self):
+        expected_msg = 'NotAValidPlugin is not a valid preview plugin'
+        with pytest.warns(PreviewWarning, match=expected_msg):
+            dataset = DatasetFactory(visible=True)
+            resource = dataset.resources[0]
+            assert resource.preview_url is None
