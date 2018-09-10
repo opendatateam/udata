@@ -52,6 +52,22 @@ class HarvestFilter(object):
         }
 
 
+class HarvestFeature(object):
+    def __init__(self, key, label, description=None, default=False):
+        self.key = key
+        self.label = label
+        self.description = description
+        self.default = default
+
+    def as_dict(self):
+        return {
+            'key': self.key,
+            'label': self.label,
+            'description': self.description,
+            'default': self.default,
+        }
+
+
 class BaseBackend(object):
     '''Base class for Harvester implementations'''
 
@@ -62,6 +78,10 @@ class BaseBackend(object):
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
     filters = tuple()
+
+    # Define some allowed filters on the backend
+    # This a Sequence[HarvestFeature]
+    features = tuple()
 
     def __init__(self, source, job=None, dryrun=False, max_items=None):
         self.source = source
@@ -88,6 +108,16 @@ class BaseBackend(object):
             # TODO: extract site title and version
             'User-Agent': 'uData/0.1 {0.name}'.format(self),
         }
+
+    def has_feature(self, key):
+        try:
+            feature = next(f for f in self.features if f.key == key)
+        except StopIteration:
+            raise HarvestException('Unknown feature {}'.format(key))
+        return self.config.get('features', {}).get(key, feature.default)
+
+    def get_filters(self):
+        return self.config.get('filters', [])
 
     def harvest(self):
         '''Start the harvesting process'''
