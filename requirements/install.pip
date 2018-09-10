@@ -5,7 +5,7 @@ blinker==1.4
 celery==4.1.1
 celerybeat-mongo==0.1.0
 chardet==3.0.4
-CommonMark==0.7.5
+CommonMark==0.8.1
 elasticsearch==2.4.1
 elasticsearch-dsl==2.2.0
 factory-boy==2.11.1
