@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-09-11 11:57+0200\n"
-"PO-Revision-Date: 2018-09-11 10:31\n"
+"PO-Revision-Date: 2018-09-11 10:51\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1863,7 +1863,7 @@ msgstr "Ressources communautaires"
 
 #: udata/templates/dataset/display.html:398
 msgid "Add a community resource"
-msgstr ""
+msgstr "Ajouter une ressource communautaire"
 
 #: udata/templates/dataset/display.html:405
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
