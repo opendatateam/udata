@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 1.6.0.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-09-07 11:01+0200\n"
-"PO-Revision-Date: 2018-09-07 11:01+0200\n"
+"POT-Creation-Date: 2018-09-11 11:57+0200\n"
+"PO-Revision-Date: 2018-09-11 11:57+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.0\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: udata/settings.py:93
 msgid "Welcome"
@@ -1929,7 +1929,7 @@ msgid "Community resources"
 msgstr ""
 
 #: udata/templates/dataset/display.html:398
-msgid "New community resource"
+msgid "Add a community resource"
 msgstr ""
 
 #: udata/templates/dataset/display.html:405
