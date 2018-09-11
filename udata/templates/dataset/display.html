@@ -196,7 +196,7 @@
                 <div class="panel panel-default text-center">
                     <div class="panel-body">
                         <h3 class="text-left">{{ _('Author') }}</h3>
-                        
+
                         {% with user=dataset.owner %}
                             {% include theme('user/sidebar-user.html') %}
                         {% endwith %}
@@ -395,7 +395,7 @@
                     href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
                     <div class="card-logo"><span>+</span></div>
                     <div class="card-body">
-                        <h4>{{ _('New community resource') }}</h4>
+                        <h4>{{ _('Add a community resource') }}</h4>
                     </div>
                 </a>
                 </div>

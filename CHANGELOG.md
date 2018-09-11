@@ -16,6 +16,7 @@
 - Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
 - Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
 - Switch the admin sidebar collapse icon from "hamburger"to left and right arrows [#1855](https://github.com/opendatateam/udata/pull/1855)
+- Discussion add card style coherence [#1884](https://github.com/opendatateam/udata/pull/1884)
 
 ### Breaking changes
 
