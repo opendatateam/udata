@@ -47,8 +47,12 @@ DEFAULT_COUNT = 3
 class FactoryBackend(backends.BaseBackend):
     name = 'factory'
     filters = (
-        backends.HarvestFilter('Test', 'test', int),
+        backends.HarvestFilter('Test', 'test', int, 'An integer'),
         backends.HarvestFilter('Tag', 'tag', str),
+    )
+    features = (
+        backends.HarvestFeature('test', 'Test'),
+        backends.HarvestFeature('toggled', 'Toggled', 'A togglable', True),
     )
 
     def initialize(self):

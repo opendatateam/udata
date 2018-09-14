@@ -128,7 +128,11 @@ class HarvestAPITest(MockBackendsMixin):
                     {'key': 'test', 'value': 1},
                     {'key': 'test', 'value': 42},
                     {'key': 'tag', 'value': 'my-tag'},
-                ]
+                ],
+                'features': {
+                    'test': True,
+                    'toggled': True,
+                }
             }
         }
         response = api.post(url_for('api.harvest_sources'), data)
@@ -141,7 +145,11 @@ class HarvestAPITest(MockBackendsMixin):
                 {'key': 'test', 'value': 1},
                 {'key': 'test', 'value': 42},
                 {'key': 'tag', 'value': 'my-tag'},
-            ]
+            ],
+            'features': {
+                'test': True,
+                'toggled': True,
+            }
         }
 
     def test_create_source_with_unknown_filter(self, api):
@@ -189,6 +197,62 @@ class HarvestAPITest(MockBackendsMixin):
                 'filters': [
                     {'key': 'unknown', 'notvalue': 'any'},
                 ]
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert400(response)
+
+    def test_create_source_with_unknown_feature(self, api):
+        '''Can only use known features in config'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'features': {'unknown': True},
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert400(response)
+
+    def test_create_source_with_false_feature(self, api):
+        '''It should handled negative values'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'features': {
+                    'test': False,
+                    'toggled': False,
+                }
+            }
+        }
+        response = api.post(url_for('api.harvest_sources'), data)
+
+        assert201(response)
+
+        source = response.json
+        assert source['config'] == {'features': {
+            'test': False,
+            'toggled': False,
+        }}
+
+    def test_create_source_with_not_boolean_feature(self, api):
+        '''It should handled negative values'''
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory',
+            'config': {
+                'features': {
+                    'test': 'not a boolean',
+                }
             }
         }
         response = api.post(url_for('api.harvest_sources'), data)

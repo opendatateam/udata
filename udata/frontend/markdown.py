@@ -1,7 +1,7 @@
 from urllib.parse import urlparse
 
 import bleach
-import CommonMark
+import commonmark
 import html2text
 import re
 from flask import current_app, Markup, request
@@ -130,8 +130,8 @@ def parse_html(html):
 
 
 def init_app(app):
-    parser = CommonMark.Parser  # Not an instance because not thread-safe(?)
-    renderer = CommonMark.HtmlRenderer({'softbreak': '<br/>'})
+    parser = commonmark.Parser  # Not an instance because not thread-safe(?)
+    renderer = commonmark.HtmlRenderer({'softbreak': '<br/>'})
     app.extensions['markdown'] = UDataMarkdown(app, parser, renderer)
 
     app.add_template_filter(mdstrip)
