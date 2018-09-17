@@ -12,6 +12,7 @@ import requests
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata.models import Dataset
+from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException
 from ..models import HarvestItem, HarvestJob, HarvestError
@@ -143,7 +144,7 @@ class BaseBackend(object):
                 self.job.save()
         except Exception as e:
             self.job.status = 'failed'
-            error = HarvestError(message=str(e))
+            error = HarvestError(message=safe_unicode(e))
             self.job.errors.append(error)
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
@@ -199,12 +200,12 @@ class BaseBackend(object):
         except HarvestSkipException as e:
             log.info("Skipped item %s : %s" % (item.remote_id, str(e)))
             item.status = 'skipped'
-            item.errors.append(HarvestError(message=str(e)))
+            item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
             log.exception('Error while processing %s : %s',
                           item.remote_id,
-                          str(e))
-            error = HarvestError(message=str(e),
+                          safe_unicode(e))
+            error = HarvestError(message=safe_unicode(e),
                                  details=traceback.format_exc())
             item.errors.append(error)
             item.status = 'failed'
@@ -264,7 +265,7 @@ class BaseBackend(object):
                         except Exception:
                             value = None
 
-                    txt = str(error).replace('for dictionary value', '')
+                    txt = safe_unicode(error).replace('for dictionary value', '')
                     txt = txt.strip()
                     if isinstance(error, RequiredFieldInvalid):
                         msg = '[{0}] {1}'

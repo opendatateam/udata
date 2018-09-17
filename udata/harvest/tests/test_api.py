@@ -343,10 +343,21 @@ class HarvestAPITest(MockBackendsMixin):
         assert200(response)
 
     def test_source_preview(self, api):
+        api.login()
         source = HarvestSourceFactory(backend='factory')
 
         url = url_for('api.preview_harvest_source', ident=str(source.id))
         response = api.get(url)
+        assert200(response)
+
+    def test_source_from_config(self, api):
+        api.login()
+        data = {
+            'name': faker.word(),
+            'url': faker.url(),
+            'backend': 'factory'
+        }
+        response = api.post(url_for('api.preview_harvest_source_config'), data)
         assert200(response)
 
     def test_delete_source(self, api):

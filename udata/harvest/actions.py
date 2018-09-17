@@ -149,8 +149,38 @@ def launch(ident):
 
 
 def preview(ident):
-    '''Launch or resume an harvesting for a given source if none is running'''
+    '''Preview an harvesting for a given source'''
     source = get_source(ident)
+    cls = backends.get(current_app, source.backend)
+    max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
+    backend = cls(source, dryrun=True, max_items=max_items)
+    return backend.harvest()
+
+
+def preview_from_config(name, url, backend,
+                        description=None,
+                        frequency=DEFAULT_HARVEST_FREQUENCY,
+                        owner=None,
+                        organization=None,
+                        config=None,
+                        ):
+    '''Preview an harvesting from a source created with the given parameters'''
+    if owner and not isinstance(owner, User):
+        owner = User.get(owner)
+
+    if organization and not isinstance(organization, Organization):
+        organization = Organization.get(organization)
+
+    source = HarvestSource(
+        name=name,
+        url=url,
+        backend=backend,
+        description=description,
+        frequency=frequency or DEFAULT_HARVEST_FREQUENCY,
+        owner=owner,
+        organization=organization,
+        config=config,
+    )
     cls = backends.get(current_app, source.backend)
     max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
     backend = cls(source, dryrun=True, max_items=max_items)
