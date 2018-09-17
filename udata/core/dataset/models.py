@@ -405,6 +405,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     before_delete = signal('Dataset.before_delete')
     after_delete = signal('Dataset.after_delete')
     on_delete = signal('Dataset.on_delete')
+    on_resource_added = signal('Dataset.on_resource_added')
 
     verbose_name = _('dataset')
 
@@ -423,6 +424,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             cls.on_update.send(document)
         if document.deleted:
             cls.on_delete.send(document)
+        if kwargs.get('resource_added'):
+            cls.on_resource_added.send(document,
+                                       resource_id=kwargs['resource_added'])
 
     def clean(self):
         super(Dataset, self).clean()
@@ -607,7 +611,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             }
         })
         self.reload()
-        post_save.send(self.__class__, document=self)
+        post_save.send(self.__class__, document=self,
+                       resource_added=resource.id)
 
     def update_resource(self, resource):
         '''Perform an atomic update for an existing resource'''
