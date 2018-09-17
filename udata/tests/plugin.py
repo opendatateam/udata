@@ -212,16 +212,23 @@ class AutoIndex(object):
         return self
 
 
+def _clean_es():
+    if es.indices.exists(index=es.index_name):
+        es.indices.delete(index=es.index_name)
+
+
 @pytest.fixture
 def autoindex(app, clean_db):
     app.config['AUTO_INDEX'] = True
+    _clean_es()
     es.initialize()
     es.cluster.health(wait_for_status='yellow', request_timeout=10)
 
     yield AutoIndex()
 
-    if es.indices.exists(index=es.index_name):
-        es.indices.delete(index=es.index_name)
+    _clean_es()
+
+
 
 
 @pytest.fixture(name='cli')
