@@ -2,15 +2,8 @@
 <div>
 <form-layout icon="tasks" :title="title" :save="save" :cancel="cancel" footer="true" :model="source">
     <harvest-form v-ref:form :source="source"></harvest-form>
-    <!--div class="row" slot="extras">
-        <div class="col-xs-12">
-            <box :title="_('Filters')">
-                <mappings-form :source="source"></mappings-form>
-            </box>
-        </div>
-    </div-->
-    <div class="row" slot="extras">
-        <preview class="col-xs-12" :source="source"></preview>
+    <div v-if="previewSource" class="row" slot="extras">
+        <preview class="col-xs-12" :source="previewSource" from-config></preview>
     </div>
 </form-layout>
 </div>
@@ -42,6 +35,7 @@ export default {
     data() {
         return {
             source: new HarvestSource({mask: MASK}),
+            previewSource: undefined,
         };
     },
     components: {Box, FormLayout, HarvestForm, Preview},
@@ -56,7 +50,7 @@ export default {
     },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
                 this.source.update(form.serialize(), (response) => {
                     this.source.on_fetched(response);
@@ -72,6 +66,9 @@ export default {
         'harvest:job:item:selected': function(item) {
             this.$root.$modal(ItemModal, {item: item});
             return true;
+        },
+        'harvest:source:form:changed': function(data) {
+            this.previewSource = Object.assign(new HarvestSource(), data);
         }
     },
     route: {
