@@ -33,6 +33,7 @@
 ### Internal
 
 - Upgrade to Authlib 0.9 [#1760](https://github.com/opendatateam/udata/pull/1760) [#1827](https://github.com/opendatateam/udata/pull/1827)
+- Add a `Dataset.on_resource_added` signal
 
 ## 1.5.3 (2018-08-27)
 
