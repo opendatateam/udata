@@ -229,8 +229,6 @@ def autoindex(app, clean_db):
     _clean_es()
 
 
-
-
 @pytest.fixture(name='cli')
 def cli_fixture(app):
 

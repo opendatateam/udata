@@ -19,6 +19,7 @@ class Fake(db.Document):
     description = db.StringField()
     tags = db.ListField(db.StringField())
     other = db.ListField(db.StringField())
+    indexable = db.BooleanField(default=True)
 
     meta = {'allow_inheritance': True}
 
@@ -57,6 +58,17 @@ class FakeSearch(search.ModelSearchAdapter):
         'title': 'title.raw',
         'description': 'description.raw',
     }
+
+    @classmethod
+    def is_indexable(cls, document):
+        return document.indexable
+
+    @classmethod
+    def serialize(cls, fake):
+        return {
+            'title': fake.title,
+            'description': fake.description,
+        }
 
 
 #############################################################################

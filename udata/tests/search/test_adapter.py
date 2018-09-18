@@ -12,7 +12,7 @@ from udata.i18n import gettext as _
 from udata.tests.helpers import assert_json_equal
 from udata.utils import clean_string
 
-from . import Fake, FakeSearch
+from . import Fake, FakeSearch, FakeFactory
 
 #############################################################################
 #                  Custom search adapters and metrics                       #
@@ -157,6 +157,52 @@ class SearchAdaptorTest:
         assertHasArgument(parser, 'coverage', facet.validate_parameter)
         assertHasArgument(parser, 'page', int)
         assertHasArgument(parser, 'page_size', int)
+
+
+@pytest.mark.usefixtures('autoindex')
+class IndexingLifecycleTest:
+    def test_dont_index_on_creation_if_not_indexable(self):
+        '''Should not index an object if it is not indexable'''
+        fake = FakeFactory(indexable=False)
+        assert not FakeSearch.exists(fake.id)
+
+    def test_index_object_on_creation_if_indexable(self):
+        '''Should index an object if it is indexable'''
+        fake = FakeFactory(indexable=True)
+        assert FakeSearch.exists(fake.id)
+
+    def test_index_object_on_update_if_indexable(self):
+        '''Should index an object if it has become indexable'''
+        fake = FakeFactory(indexable=False)
+        assert not FakeSearch.exists(fake.id)
+        fake.indexable = False
+        fake.save()
+        assert not FakeSearch.exists(fake.id)
+
+    def test_reindex_object_on_update_if_indexable(self):
+        '''Should reindex an object if it is still indexable'''
+        fake = FakeFactory(indexable=True)
+        assert FakeSearch.exists(fake.id)
+        fake.title = 'New Title'
+        fake.save()
+        fake_in_es = FakeSearch.safe_get(fake.id)
+        assert fake_in_es is not None
+        assert fake_in_es.title == 'New Title'
+
+    def test_unindex_object_if_not_indexable(self):
+        '''Should unindex an object if it has become not indexable'''
+        fake = FakeFactory(indexable=True)
+        assert FakeSearch.exists(fake.id)
+        fake.indexable = False
+        fake.save()
+        assert not FakeSearch.exists(fake.id)
+
+    def test_unindex_object_on_deletion(self):
+        '''Should unindex an object on deletion'''
+        fake = FakeFactory(indexable=True)
+        assert FakeSearch.exists(fake.id)
+        fake.delete()
+        assert not FakeSearch.exists(fake.id)
 
 
 @pytest.mark.usefixtures('app')

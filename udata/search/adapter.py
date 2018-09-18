@@ -7,7 +7,7 @@ import logging
 from elasticsearch_dsl import DocType, Integer, Float, Object
 from flask_restplus.reqparse import RequestParser
 
-from udata.search import i18n_analyzer
+from udata.search import es, i18n_analyzer
 from udata.search.query import SearchQuery
 from udata.core.metrics import Metric
 
@@ -88,8 +88,14 @@ class ModelSearchAdapter(DocType):
         return TempSearch
 
     @classmethod
-    def exists(cls, id, **kwargs):
+    def safe_get(cls, id, **kwargs):
+        if 'using' not in kwargs:
+            kwargs['using'] = es.client
         return cls.get(id, ignore=404, **kwargs)
+
+    @classmethod
+    def exists(cls, id, **kwargs):
+        return bool(cls.safe_get(id, **kwargs))
 
     @classmethod
     def as_request_parser(cls, paginate=True):
