@@ -31,7 +31,7 @@
                 </li>
                 {% if not resource.from_community %}
                 <li class="healthcheck-container">
-                    <availability v-if="checkUrlEnabled"
+                    <availability v-if="isCheckEnabled('{{ resource.type }}')"
                                   :resource="getResourceById('{{ resource.id }}')"
                                   :checkurl="'{{ url_for('api.check_dataset_resource', dataset=dataset.id, rid=resource.id) }}'"
                                   :need-check="{{ resource.need_check()|tojson }}">
