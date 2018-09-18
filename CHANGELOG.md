@@ -29,6 +29,7 @@
 - RDFs, CSVs and resource redirect views are now handling CORS properly [#1866](https://github.com/opendatateam/udata/pull/1866)
 - Fix broken sorts on organization's datasets list in admin [#1873](https://github.com/opendatateam/udata/pull/1873)
 - Ensure harvest previewing is done against current form content [#1888](https://github.com/opendatateam/udata/pull/1888)
+- Ensure deleted objects are unindexed [#1891](https://github.com/opendatateam/udata/pull/1891)
 
 ### Internal
 
