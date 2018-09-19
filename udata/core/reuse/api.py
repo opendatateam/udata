@@ -71,7 +71,8 @@ class ReuseAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         '''Update a given reuse'''
-        if reuse.deleted:
+        request_deleted = request.json.get('deleted', True) 
+        if reuse.deleted and request_deleted is not None: 
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         form = api.validate(ReuseForm, reuse)
