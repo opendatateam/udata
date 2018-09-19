@@ -151,8 +151,7 @@ export default {
                     icon: 'trash',
                     method: this.confirm_delete
                 });
-            }
-            else{
+            } else {
                 actions.push({
                     label: this._('Restore'),
                     icon: 'undo',
