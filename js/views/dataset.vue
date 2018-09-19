@@ -143,11 +143,22 @@ export default {
                     label: this._('Transfer'),
                     icon: 'send',
                     method: this.transfer_request
-                }, {
+                }];
+
+            if(!this.dataset.deleted) {
+                actions.push({
                     label: this._('Delete'),
                     icon: 'trash',
                     method: this.confirm_delete
-                }];
+                });
+            }
+            else{
+                actions.push({
+                    label: this._('Restore'),
+                    icon: 'undo',
+                    method: this.confirm_restore
+                });
+            }
 
             if (this.$root.me.is_admin) {
                 actions.push({divider: true});
@@ -200,6 +211,12 @@ export default {
         confirm_delete() {
             var m = this.$root.$modal(
                 require('components/dataset/delete-modal.vue'),
+                {dataset: this.dataset}
+            );
+        },
+        confirm_restore() {
+            var m = this.$root.$modal(
+                require('components/dataset/restore-modal.vue'),
                 {dataset: this.dataset}
             );
         },
@@ -258,6 +275,8 @@ export default {
                     class: 'danger',
                     label: this._('Deleted')
                 }];
+            } else {
+                this.badges = [];
             }
         }
     }
