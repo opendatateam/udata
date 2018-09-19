@@ -1,11 +1,12 @@
 <template>
-<modal :title="_('Confirm deletion')"
-    class="modal-danger organization-delete-modal"
+<div>
+<modal :title="_('Confirm restore')"
+    class="modal-info organization-delete-modal"
     v-ref:modal>
 
     <div class="modal-body">
         <p class="lead text-center">
-            {{ _('You are about to delete this organization') }}
+            {{ _('You are about to restore this organization') }}
         </p>
         <p class="lead text-center">
             {{ _('Are you sure?') }}
@@ -23,6 +24,7 @@
         </button>
     </footer>
 </modal>
+</div>
 </template>
 
 <script>
@@ -32,12 +34,14 @@ import Modal from 'components/modal.vue';
 export default {
     components: {Modal},
     props: {
-        organization: Object
+        organization: Object,
     },
     methods: {
         confirm() {
-            API.organizations.delete_organization(
-                {org: this.organization.id},
+            var restore_organization = this.organization;
+            restore_organization.deleted = null;
+            API.organizations.update_organization(
+                {org: this.organization.id, payload: restore_organization},
                 (response) => {
                     this.organization.fetch();
                     this.$refs.modal.close();

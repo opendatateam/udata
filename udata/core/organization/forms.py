@@ -30,6 +30,7 @@ class OrganizationForm(ModelForm):
         _('Website'), description=_('The organization website URL'))
     logo = fields.ImageField(_('Logo'), sizes=LOGO_SIZES)
 
+    deleted = fields.DateTimeField()
     extras = fields.ExtrasField()
 
     def save(self, commit=True, **kwargs):

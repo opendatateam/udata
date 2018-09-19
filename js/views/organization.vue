@@ -135,11 +135,21 @@ export default {
                     label: this._('Edit'),
                     icon: 'edit',
                     method: this.edit
-                }, {
+                }];
+
+            if(!this.org.deleted) {
+                actions.push({
                     label: this._('Delete'),
                     icon: 'trash',
                     method: this.confirm_delete
-                }];
+                });
+            } else {
+                actions.push({
+                    label: this._('Restore'),
+                    icon: 'undo',
+                    method: this.confirm_restore
+                });
+            }
 
             if (this.$root.me.is_admin) {
                 actions.push({divider: true});
@@ -220,6 +230,12 @@ export default {
                 {organization: this.org}
             );
         },
+        confirm_restore() {
+            this.$root.$modal(
+                require('components/organization/restore-modal.vue'),
+                {organization: this.org}
+            );
+        },
         setBadges() {
             this.$root.$modal(
                 require('components/badges/modal.vue'),
@@ -258,6 +274,8 @@ export default {
                     class: 'danger',
                     label: this._('Deleted')
                 }];
+            } else {
+                this.badges = [];
             }
         }
     }
