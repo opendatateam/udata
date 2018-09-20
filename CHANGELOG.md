@@ -4,6 +4,7 @@
 
 - Make use of assets manifest for long term caching [#328](https://github.com/etalab/udata-gouvfr/pull/328)
 - Discussion add card style coherence [#339](https://github.com/etalab/udata-gouvfr/pull/339)
+- Remove a duplicate rule on `.dataset-container h3`
 
 ## 1.4.4 (2018-08-27)
 
