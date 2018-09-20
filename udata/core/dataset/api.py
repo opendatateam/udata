@@ -437,6 +437,9 @@ class CommunityResourceAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='dataset_followers')
+@ns.doc(get={'id': 'list_dataset_followers'},
+        post={'id': 'follow_dataset'},
+        delete={'id': 'unfollow_dataset'})
 class DatasetFollowersAPI(FollowAPI):
     model = Dataset
 

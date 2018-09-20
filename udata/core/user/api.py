@@ -288,6 +288,9 @@ class UserAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='user_followers')
+@ns.doc(get={'id': 'list_user_followers'},
+        post={'id': 'follow_user'},
+        delete={'id': 'unfollow_user'})
 class FollowUserAPI(FollowAPI):
     model = User
 

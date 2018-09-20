@@ -301,6 +301,9 @@ class MemberAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='organization_followers')
+@ns.doc(get={'id': 'list_organization_followers'},
+        post={'id': 'follow_organization'},
+        delete={'id': 'unfollow_organization'})
 class FollowOrgAPI(FollowAPI):
     model = Organization
 

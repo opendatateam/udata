@@ -164,6 +164,9 @@ class ReuseFeaturedAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='reuse_followers')
+@ns.doc(get={'id': 'list_reuse_followers'},
+        post={'id': 'follow_reuse'},
+        delete={'id': 'unfollow_reuse'})
 class FollowReuseAPI(FollowAPI):
     model = Reuse
 
