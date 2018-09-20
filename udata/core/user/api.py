@@ -77,10 +77,10 @@ class MeAPI(API):
 
 
 @me.route('/avatar', endpoint='my_avatar')
-@api.doc(parser=image_parser)
 class AvatarAPI(API):
     @api.secure
     @api.doc('my_avatar')
+    @api.expect(image_parser)
     @api.marshal_with(uploaded_image_fields)
     def post(self):
         '''Upload a new avatar'''

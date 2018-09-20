@@ -133,10 +133,10 @@ class PublishPostAPI(API):
 
 
 @ns.route('/<post:post>/image', endpoint='post_image')
-@api.doc(parser=image_parser)
 class PostImageAPI(API):
     @api.secure(admin_permission)
     @api.doc('post_image')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def post(self, post):
         '''Upload a new image'''
@@ -146,6 +146,7 @@ class PostImageAPI(API):
 
     @api.secure(admin_permission)
     @api.doc('resize_post_image')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def put(self, post):
         '''Set the image BBox'''
