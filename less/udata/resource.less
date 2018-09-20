@@ -13,8 +13,11 @@
         margin-top: 20px;
         margin-bottom: 10px;
         display: flex;
+        flex-flow: row wrap;
+
         h3 {
             margin-top: 0;
+            margin-bottom: 0;
             flex-grow: 1;
         }
     }
@@ -57,20 +60,18 @@
     footer {
         // to display resource-card-actions and card-footer side by side
         display: flex;
+        flex-flow: row wrap;
         width: 100%;
         margin-top: 10px;
-        .resource-card-actions {
-            // align right
-            margin-left: auto;
-            // avoid wrap
-            display: flex;
 
-            .btn:first-child {
-                margin-right: 0.5em;
-            }
+        .resource-card-actions {
+            display: flex;
+            flex-flow: row wrap;
+            margin-top: 5px;
         }
+
         .card-footer {
-            flex: 1 1 auto;
+            flex: 1 0 auto;
             // vertical align with action buttons
             align-self: center;
             margin-top: initial;
@@ -79,20 +80,3 @@
     }
 }
 
-@media screen and (max-width: 320px){
-    .resource-card {
-        footer {
-            flex-direction: column;
-
-            .card-footer {
-                flex: 1 0 100%;
-                align-self: normal;
-                padding-bottom: 0.5em;
-            }
-
-            .resource-card-actions {
-                margin-left: -5px;
-            }
-        }
-    }
-}

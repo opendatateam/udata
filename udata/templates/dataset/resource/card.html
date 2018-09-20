@@ -41,22 +41,21 @@
             </ul>
         </div>
         <div class="resource-card-actions btn-toolbar">
-            <div class="btn-group">
-                {% if config.PREVIEW_MODE and resource.preview_url %}
-                <a class="btn btn-sm btn-primary"
-                    {% if config.PREVIEW_MODE == 'iframe' %}
-                    @click.stop="showPreview('{{ resource.preview_url }}')"
-                    {% else %}
-                    @click.stop href="{{ resource.preview_url }}" target="_blank"
-                    {% endif %}
-                    >
-                    {{ _('Preview') }}
-                </a>
+            {% if config.PREVIEW_MODE and resource.preview_url %}
+            <a class="btn btn-sm btn-primary"
+                {% if config.PREVIEW_MODE == 'iframe' %}
+                @click.stop="showPreview('{{ resource.preview_url }}')"
+                {% else %}
+                @click.stop href="{{ resource.preview_url }}" target="_blank"
                 {% endif %}
-                <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary" download>{{ _('Download') }}</a>
-                <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Copy permalink to clipboard') }}" v-clipboard="{{ resource.latest }}">
-                    <span class="fa fa-clipboard"></span>
-                </a>
+                >
+                {{ _('Preview') }}
+            </a>
+            {% endif %}
+            <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary" download>{{ _('Download') }}</a>
+            <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Copy permalink to clipboard') }}" v-clipboard="{{ resource.latest }}">
+                <span class="fa fa-clipboard"></span>
+            </a>
             {% if can_edit_resource(resource if resource.from_community else dataset) %}
                 {% if resource.from_community %}
                     {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
@@ -68,7 +67,6 @@
                     <span class="fa fa-pencil"></span>
                 </a>
             {% endif %}
-            </div>
         </div>
     </footer>
 </article>
