@@ -62,13 +62,15 @@ post_page_fields = api.model('PostPage', fields.pager(post_fields))
 
 parser = api.page_parser()
 
-parser.add_argument('sort', type=str, default='-created_at', location='args', help='The sorting attribute')
+parser.add_argument('sort', type=str, default='-created_at', location='args',
+                    help='The sorting attribute')
 
 
 @ns.route('/', endpoint='posts')
 class PostsAPI(API):
 
-    @api.doc('list_posts', model=post_page_fields, parser=parser)
+    @api.doc('list_posts')
+    @api.expect(parser)
     @api.marshal_with(post_page_fields)
     def get(self):
         '''List all posts'''
@@ -76,10 +78,11 @@ class PostsAPI(API):
         return (Post.objects.order_by(args['sort'])
                             .paginate(args['page'], args['page_size']))
 
-    @api.doc('create_post', responses={400: 'Validation error'})
+    @api.doc('create_post')
     @api.secure(admin_permission)
     @api.expect(post_fields)
     @api.marshal_with(post_fields)
+    @api.response(400, 'Validation error')
     def post(self):
         '''Create a post'''
         form = api.validate(PostForm)
@@ -87,8 +90,8 @@ class PostsAPI(API):
 
 
 @ns.route('/<post:post>/', endpoint='post')
-@api.doc(responses={404: 'Object not found'})
-@api.doc(params={'post': 'The post ID or slug'})
+@api.response(404, 'Object not found')
+@api.param('post', 'The post ID or slug')
 class PostAPI(API):
     @api.doc('get_post')
     @api.marshal_with(post_fields)
@@ -96,17 +99,19 @@ class PostAPI(API):
         '''Get a given post'''
         return post
 
+    @api.doc('update_post')
     @api.secure(admin_permission)
     @api.expect(post_fields)
     @api.marshal_with(post_fields)
-    @api.doc('update_post', responses={400: 'Validation error'})
+    @api.response(400, 'Validation error')
     def put(self, post):
         '''Update a given post'''
         form = api.validate(PostForm, post)
         return form.save()
 
     @api.secure(admin_permission)
-    @api.doc('delete_post', model=None, responses={204: 'Object deleted'})
+    @api.doc('delete_post')
+    @api.response(204, 'Object deleted')
     def delete(self, post):
         '''Delete a given post'''
         post.delete()
