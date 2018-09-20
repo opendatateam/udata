@@ -90,7 +90,7 @@ class ZonesAPI(API):
 
 @ns.route('/zone/<path:id>/children', endpoint='zone_children')
 class ZoneChildrenAPI(API):
-    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.doc('spatial_zone_children', params={'id': 'A zone identifier'})
     @api.marshal_list_with(feature_collection_fields)
     def get(self, id):
         '''Fetch children of a zone.'''
@@ -105,7 +105,7 @@ class ZoneChildrenAPI(API):
 
 @ns.route('/zone/<path:id>/datasets', endpoint='zone_datasets')
 class ZoneDatasetsAPI(API):
-    @api.doc('spatial_zone', params={'id': 'A zone identifier'})
+    @api.doc('spatial_zone_datasets', params={'id': 'A zone identifier'})
     @api.expect(dataset_parser)
     @api.marshal_with(dataset_ref_fields)
     def get(self, id):
