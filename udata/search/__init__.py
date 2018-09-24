@@ -11,7 +11,7 @@ from elasticsearch_dsl import FacetedSearch
 from elasticsearch_dsl import MultiSearch, Search, Index as ESIndex
 from elasticsearch_dsl.serializer import AttrJSONSerializer
 from flask import current_app
-from mongoengine.signals import post_save
+from mongoengine.signals import post_save, post_delete
 from speaklater import is_lazy_string
 from werkzeug.local import LocalProxy
 
@@ -130,17 +130,30 @@ def reindex(obj):
         try:
             adapter = adapter_class.from_model(obj)
             adapter.save(using=es.client, index=es.index_name)
-        except:
-            log.exception('Unable to index %s "%s"',
-                          model.__name__, str(obj.id))
+        except Exception:
+            log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     elif adapter_class.exists(obj.id, using=es.client, index=es.index_name):
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
             adapter = adapter_class.from_model(obj)
             adapter.delete(using=es.client, index=es.index_name)
-        except:
-            log.exception('Unable to index %s "%s"',
-                          model.__name__, str(obj.id))
+        except Exception:
+            log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
+    else:
+        log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
+
+
+@task(route='high.search')
+def unindex(obj):
+    model = obj.__class__
+    adapter_class = adapter_catalog.get(model)
+    if adapter_class.exists(obj.id, using=es.client, index=es.index_name):
+        log.info('Unindexing %s (%s)', model.__name__, obj.id)
+        try:
+            adapter = adapter_class.from_model(obj)
+            adapter.delete(using=es.client, index=es.index_name)
+        except Exception:
+            log.exception('Unable to unindex %s "%s"', model.__name__, str(obj.id))
     else:
         log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
 
@@ -151,13 +164,20 @@ def reindex_model_on_save(sender, document, **kwargs):
         reindex.delay(document)
 
 
+def unindex_model_on_delete(sender, document, **kwargs):
+    '''Unindex Mongo document on post_delete'''
+    if current_app.config.get('AUTO_INDEX'):
+        unindex.delay(document)
+
+
 def register(adapter):
     '''Register a search adapter'''
     # register the class in the catalog
     if adapter.model and adapter.model not in adapter_catalog:
         adapter_catalog[adapter.model] = adapter
-        # Automatically reindex objects on save
+        # Automatically (re|un)index objects on save/delete
         post_save.connect(reindex_model_on_save, sender=adapter.model)
+        post_delete.connect(unindex_model_on_delete, sender=adapter.model)
     return adapter
 
 

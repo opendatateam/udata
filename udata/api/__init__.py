@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import itertools
 import logging
 import urllib
 
+from bson import ObjectId
 from functools import wraps
 
 from flask import (
@@ -19,6 +21,7 @@ from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.core.user.models import User
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.sitemap import sitemap
 from udata.utils import safe_unicode
@@ -272,8 +275,18 @@ def default_api():
 
 @apidoc.route('/apidoc/')
 def swaggerui():
+    page_size = 10
     params = {"datasets": "many"}
-    organizations = search.iter(Organization, **params)
+    organizations = search.iter(Organization)
+    organizations = list(itertools.islice(organizations, page_size))
+    if len(organizations) < page_size:
+        # Fill with dummy values
+        needs = page_size - len(organizations)
+        extra_orgs = OrganizationFactory.build_batch(needs)
+        for org in extra_orgs:
+            org.id = ObjectId()
+            Organization.slug.generate()
+        organizations.extend(extra_orgs)
     return theme.render('apidoc.html', specs_url=api.specs_url, organizations=organizations)
 
 

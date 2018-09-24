@@ -80,7 +80,7 @@ def _load_frontend(request, _configure_application):
         return
 
     app = request.getfixturevalue('app')
-    marker = request.node.get_marker('frontend')
+    marker = request.node.get_closest_marker('frontend')
     modules = set(marker.args[0] if marker and marker.args else [])
 
     if getattr(request.cls, 'modules', None):
@@ -115,7 +115,7 @@ def get_settings(request):
     '''
     Extract settings from the current test request
     '''
-    marker = request.node.get_marker('settings')
+    marker = request.node.get_closest_marker('settings')
     if marker:
         return marker.args[0]
     return getattr(request.cls, 'settings', settings.Testing)
@@ -212,16 +212,21 @@ class AutoIndex(object):
         return self
 
 
+def _clean_es():
+    if es.indices.exists(index=es.index_name):
+        es.indices.delete(index=es.index_name)
+
+
 @pytest.fixture
 def autoindex(app, clean_db):
     app.config['AUTO_INDEX'] = True
+    _clean_es()
     es.initialize()
     es.cluster.health(wait_for_status='yellow', request_timeout=10)
 
     yield AutoIndex()
 
-    if es.indices.exists(index=es.index_name):
-        es.indices.delete(index=es.index_name)
+    _clean_es()
 
 
 @pytest.fixture(name='cli')
@@ -307,7 +312,7 @@ class TemplateRecorder:
         for template, context in self.templates:
             if name in context:
                 return context[name]
-        raise ContextVariableDoesNotExist
+        raise ContextVariableDoesNotExist()
 
 
 @pytest.fixture

@@ -17,7 +17,7 @@ class PostFactory(ModelFactory):
     name = factory.Faker('sentence')
     headline = factory.Faker('sentence')
     content = factory.Faker('text')
-    private = False
+    published = factory.Faker('past_datetime')
 
     @factory.lazy_attribute
     def datasets(self):

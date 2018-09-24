@@ -5,12 +5,19 @@
 ### New features
 
 - Harvest sources are now filterable through the harvest source create/edit admin form [#1812](https://github.com/opendatateam/udata/pull/1812)
+- Harvest sources can now enable or disable some optionnal backend features [#1875](https://github.com/opendatateam/udata/pull/1875)
 - Static assets are now compatible with long-term caching (ie. their hash is present in the filename) [#1826](https://github.com/opendatateam/udata/pull/1826)
+- Post UIs have been reworked: publication date, publish/unpublish action, save and continue editing, dynamic sidebar, alignments fixes... [#1857](https://github.com/opendatateam/udata/pull/1857)
 
 ### Minor changes
 
 - Only display temporal coverage years on cards and search results [#1833](https://github.com/opendatateam/udata/pull/1833)
-- Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
+- Add publisher's name on dataset template [#1847](https://github.com/opendatateam/udata/pull/1847)
+- Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
+- Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
+- Switch the admin sidebar collapse icon from "hamburger"to left and right arrows [#1855](https://github.com/opendatateam/udata/pull/1855)
+- Discussion add card style coherence [#1884](https://github.com/opendatateam/udata/pull/1884)
+- `LINKCHECKING_UNCHECKED_TYPES` setting to prevent linkchecking on some ressource types [#1892](https://github.com/opendatateam/udata/pull/1892)
 
 ### Breaking changes
 
@@ -23,11 +30,33 @@
 - Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
 - Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
 - Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
+- Hide the `resource.type` attribute from JSON-LD output until handled by a dedicated vocabulary/property [#1865](https://github.com/opendatateam/udata/pull/1865)
+- RDFs, CSVs and resource redirect views are now handling CORS properly [#1866](https://github.com/opendatateam/udata/pull/1866)
+- Fix broken sorts on organization's datasets list in admin [#1873](https://github.com/opendatateam/udata/pull/1873)
+- Ensure harvest previewing is done against current form content [#1888](https://github.com/opendatateam/udata/pull/1888)
+- Ensure deleted objects are unindexed [#1891](https://github.com/opendatateam/udata/pull/1891)
+- Fix the dataset resources list layout wrapping [#1893](https://github.com/opendatateam/udata/pull/1893)
 - Fix wrong behavior for weblinks [#1894](https://github.com/opendatateam/udata/pull/1894) 
 
 ### Internal
 
 - Upgrade to Authlib 0.9 [#1760](https://github.com/opendatateam/udata/pull/1760) [#1827](https://github.com/opendatateam/udata/pull/1827)
+- Add a `Dataset.on_resource_added` signal
+
+## 1.5.3 (2018-08-27)
+
+- Prevent UnicodeError on unicode URL validation error [#1844](https://github.com/opendatateam/udata/pull/1844)
+- Hide save button in "Add resource" modal until form is visible (and prevent error) [#1846](https://github.com/opendatateam/udata/pull/1846)
+- The purge chunks tasks also remove the directory [#1845](https://github.com/opendatateam/udata/pull/1845)
+- Upgrade to latest Fine-Uploader version to benefit from bug fixes [#1849](https://github.com/opendatateam/udata/pull/1849)
+- Prevent front views from downloading `swagger.json` [#1838](https://github.com/opendatateam/udata/pull/1838)
+- Ensure API docs works without data [#1840](https://github.com/opendatateam/udata/pull/1840)
+- Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
+- Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
+- Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
+- Ensure that admin notifications are displayed once and with a constant width. [#1831](https://github.com/opendatateam/udata/pull/1831)
+- Fix broken date range picker date parsing (ie. manual keyboard input) [#1863](https://github.com/opendatateam/udata/pull/1853)
+- Normalize uploaded filenames to avoid encoding issues, filesystem incompatibilities... [#1852](https://github.com/opendatateam/udata/pull/1852)
 
 ## 1.5.2 (2018-08-08)
 

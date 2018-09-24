@@ -40,7 +40,7 @@
 </style>
 
 <template>
-<textarea class="form-control" :rows="rows || 6"
+<textarea class="form-control" :rows="field.rows || rows || 6"
     :id="field.id"
     :name="field.id"
     :placeholder="placeholder"

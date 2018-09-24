@@ -1,6 +1,8 @@
 <style scoped lang="less">
 .sort {
     margin-top: -32px;
+    margin-bottom: 1em;
+    text-align: right;
 }
 
 .loading {
@@ -8,18 +10,22 @@
     text-align: center;
 }
 
-.sort {
-    margin-bottom: 1em;
-    text-align: right;
-}
-
-.add {
-    h4 {
-        line-height: 30px;
-        margin-top: 9px;
-        margin-left: 60px;
-        font-size: 14px;
-        font-weight: bold;
+.discussion-card.add {
+    cursor: pointer;
+    .card-logo {
+        background-color: #eeeeee;
+        font-size: 2em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 60px;
+    }
+    .card-body {
+        min-height: auto;
+        justify-content: left;
+        h4 {
+            margin-bottom: 0;
+        }
     }
 }
 
@@ -64,7 +70,7 @@
             </ul>
         </div>
     </div>
-    
+
     <discussion-thread
         v-ref:threads
         v-for="discussion in discussions"
@@ -74,9 +80,11 @@
     </discussion-thread>
 
     <!-- New discussion -->
-    <a class="list-group-item add new-discussion" @click="displayForm" v-show="!formDisplayed">
-        <div class="format-label pull-left">+</div>
-        <h4 class="list-group-item-heading">{{ _('Start a new discussion') }}</h4>
+    <a class="card discussion-card add" @click="displayForm" v-show="!formDisplayed">
+        <div class="card-logo"><span>+</span></div>
+        <div class="card-body">
+            <h4>{{ _('Start a new discussion') }}</h4>
+        </div>
     </a>
 
     <div v-el:form id="discussion-create" v-show="formDisplayed" v-if="currentUser"
@@ -95,7 +103,7 @@
                 <h4 class="list-group-item-heading">
                     {{ _('Starting a new discussion thread') }}
                 </h4>
-                
+
                 <p class="list-group-item-text">
                     {{ _("You're about to start a new discussion thread. Make sure that a thread about the same topic doesn't exist yet just above.") }}
                 </p>
@@ -159,7 +167,7 @@ export default {
     },
     ready() {
         this.$api.get('discussions/', {for: this.subjectId}).then(response => {
-            
+
             this.loading = false;
             this.discussions = response.data;
 
@@ -244,7 +252,7 @@ export default {
 .discussion-threads {
     .list-group-form {
         height: inherit;
-        
+
         form {
             padding: 1em;
         }

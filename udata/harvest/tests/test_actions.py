@@ -143,7 +143,10 @@ class HarvestActionsTest:
 
     def test_create_source_with_config(self):
         source_url = faker.url()
-        config = {'filters': [{'key': 'test', 'value': 42}]}
+        config = {
+            'filters': [{'key': 'test', 'value': 42}],
+            'features': {'key': True},
+        }
 
         with assert_emit(signals.harvest_source_created):
             source = actions.create_source('Test source',
@@ -653,6 +656,38 @@ class HarvestPreviewTest(MockBackendsMixin):
 
         error = item_ko.errors[0]
         assert isinstance(error, HarvestError)
+
+        assert len(HarvestJob.objects) == 0
+        assert len(Dataset.objects) == 0
+
+    def test_preview_from_config(self):
+        org = OrganizationFactory()
+        source_url = faker.url()
+        count = 10
+        job = actions.preview_from_config('Test source',
+                                          source_url,
+                                          'factory',
+                                          organization=org,
+                                          config={'count': count})
+
+        assert job.status == 'done'
+        assert job.errors == []
+        assert job.started is not None
+        assert job.ended is not None
+        assert len(job.items) == count
+
+        for item in job.items:
+            assert item.status == 'done'
+            assert item.errors == []
+            assert item.started is not None
+            assert item.ended is not None
+            assert item.dataset is not None
+
+            dataset = item.dataset
+            assert dataset.organization == org
+            assert 'harvest:remote_id' in dataset.extras
+            assert 'harvest:last_update' in dataset.extras
+            assert 'harvest:source_id' in dataset.extras
 
         assert len(HarvestJob.objects) == 0
         assert len(Dataset.objects) == 0

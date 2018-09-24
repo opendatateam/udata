@@ -82,6 +82,11 @@ export default {
         },
         fill: Boolean
     },
+    events: {
+        'field:change': function(field, value) {
+            this.$dispatch('form:change', this, field, value);
+        }
+    },
     computed: {
         schema() {
             if (!this.fields || !(this.model || this.defs)) {

@@ -17,7 +17,7 @@
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Posted on') }}">
                     <span class="fa fa-calendar fa-fw"></span>
-                    {{ post.created_at|dateformat(format='long') }}
+                    {{ post.published|dateformat(format='long') }}
                 </a>
             </li>
         </ul>
