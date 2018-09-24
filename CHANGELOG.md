@@ -26,10 +26,6 @@
 
 ### Bugfixes
 
-- Ensure that admin notifications are displayed once and with a constant width. [#1831](https://github.com/opendatateam/udata/pull/1831)
-- Allows to clear the dataset form temporal coverage. [#1832](https://github.com/opendatateam/udata/pull/1832)
-- Fix missing dataset title on client-side card listing [#1834](https://github.com/opendatateam/udata/pull/1834)
-- Expose the default spatial granularity in API specs [#1841](https://github.com/opendatateam/udata/pull/1841)
 - Hide the `resource.type` attribute from JSON-LD output until handled by a dedicated vocabulary/property [#1865](https://github.com/opendatateam/udata/pull/1865)
 - RDFs, CSVs and resource redirect views are now handling CORS properly [#1866](https://github.com/opendatateam/udata/pull/1866)
 - Fix broken sorts on organization's datasets list in admin [#1873](https://github.com/opendatateam/udata/pull/1873)
