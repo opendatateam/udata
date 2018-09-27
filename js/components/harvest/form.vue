@@ -56,6 +56,11 @@ export default {
             if (field.field.id == 'backend') {
                 this.backendValue = value;
             }
+        },
+        'form:change': function(form) {
+            if (form.validate()) {
+                this.$dispatch('harvest:source:form:changed', this.serialize());
+            }
         }
     },
     computed: {
@@ -75,10 +80,10 @@ export default {
     },
     created() {
         // Prevent empty backends select box
-        backends.$on('updated', () => {this.backends = backends.items})
+        backends.$on('updated', () => {this.backends = backends.items});
     },
     methods: {
-        serialize: function() {
+        serialize() {
             const data =  Object.assign({},
                 this.$refs.postForm.serialize(),
                 this.$refs.form.serialize(),
@@ -86,7 +91,7 @@ export default {
             data.config = this.$refs.configForm.serialize();
             return data;
         },
-        validate: function() {
+        validate() {
             const isValid = this.$refs.form.validate();
 
             if (isValid & !this.hideNotifications) {

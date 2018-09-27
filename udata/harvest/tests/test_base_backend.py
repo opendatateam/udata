@@ -13,7 +13,7 @@ from udata.models import Dataset
 
 from .factories import HarvestSourceFactory
 
-from ..backends import BaseBackend, HarvestFilter
+from ..backends import BaseBackend, HarvestFilter, HarvestFeature
 from ..exceptions import HarvestException
 
 
@@ -22,6 +22,15 @@ class Unknown:
 
 
 class FakeBackend(BaseBackend):
+    filters = (
+        HarvestFilter('First filter', 'first', basestring),
+        HarvestFilter('Second filter', 'second', basestring),
+    )
+    features = (
+        HarvestFeature('feature', 'A test feature'),
+        HarvestFeature('enabled', 'A test feature enabled by default', default=True),
+    )
+
     def initialize(self):
         for i in range(self.source.config.get('nb_datasets', 3)):
             self.add_item('fake-{0}'.format(i))
@@ -70,6 +79,49 @@ class BaseBackendTest:
             assert dataset.extras['harvest:remote_id'].startswith('fake-')
             datetime.strptime(dataset.extras['harvest:last_update'],
                               '%Y-%m-%dT%H:%M:%S.%f')
+
+    def test_has_feature_defaults(self):
+        source = HarvestSourceFactory()
+        backend = FakeBackend(source)
+
+        assert not backend.has_feature('feature')
+        assert backend.has_feature('enabled')
+
+    def test_has_feature_defined(self):
+        source = HarvestSourceFactory(config={
+            'features': {
+                'feature': True,
+                'enabled': False,
+            }
+        })
+        backend = FakeBackend(source)
+
+        assert backend.has_feature('feature')
+        assert not backend.has_feature('enabled')
+
+    def test_has_feature_unkown(self):
+        source = HarvestSourceFactory()
+        backend = FakeBackend(source)
+
+        with pytest.raises(HarvestException):
+            backend.has_feature('unknown')
+
+    def test_get_filters_empty(self):
+        source = HarvestSourceFactory()
+        backend = FakeBackend(source)
+
+        assert backend.get_filters() == []
+
+    def test_get_filters(self):
+        source = HarvestSourceFactory(config={
+            'filters': [
+                {'key': 'second', 'value': ''},
+                {'key': 'first', 'value': ''},
+            ]
+        })
+        backend = FakeBackend(source)
+
+        assert [f['key'] for f in backend.get_filters()] == ['second', 'first']
 
 
 @pytest.mark.usefixtures('clean_db')

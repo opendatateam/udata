@@ -16,6 +16,8 @@
 - Improved upload error handling: deduplicate notifications, localized generic error message, sentry identifier... [#1842](https://github.com/opendatateam/udata/pull/1842)
 - Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
 - Switch the admin sidebar collapse icon from "hamburger"to left and right arrows [#1855](https://github.com/opendatateam/udata/pull/1855)
+- Discussion add card style coherence [#1884](https://github.com/opendatateam/udata/pull/1884)
+- `LINKCHECKING_UNCHECKED_TYPES` setting to prevent linkchecking on some ressource types [#1892](https://github.com/opendatateam/udata/pull/1892)
 
 ### Breaking changes
 
@@ -27,10 +29,15 @@
 - Hide the `resource.type` attribute from JSON-LD output until handled by a dedicated vocabulary/property [#1865](https://github.com/opendatateam/udata/pull/1865)
 - RDFs, CSVs and resource redirect views are now handling CORS properly [#1866](https://github.com/opendatateam/udata/pull/1866)
 - Fix broken sorts on organization's datasets list in admin [#1873](https://github.com/opendatateam/udata/pull/1873)
+- Ensure harvest previewing is done against current form content [#1888](https://github.com/opendatateam/udata/pull/1888)
+- Ensure deleted objects are unindexed [#1891](https://github.com/opendatateam/udata/pull/1891)
+- Fix the dataset resources list layout wrapping [#1893](https://github.com/opendatateam/udata/pull/1893)
+- Fix wrong behavior for weblinks [#1894](https://github.com/opendatateam/udata/pull/1894) 
 
 ### Internal
 
 - Upgrade to Authlib 0.9 [#1760](https://github.com/opendatateam/udata/pull/1760) [#1827](https://github.com/opendatateam/udata/pull/1827)
+- Add a `Dataset.on_resource_added` signal
 
 ## 1.5.3 (2018-08-27)
 

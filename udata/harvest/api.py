@@ -263,9 +263,24 @@ class ScheduleSourceAPI(API):
         return actions.unschedule(ident), 204
 
 
+@ns.route('/source/preview', endpoint='preview_harvest_source_config')
+class PreviewSourceConfigAPI(API):
+    @api.secure
+    @api.expect(source_fields)
+    @api.doc('preview_harvest_source_config')
+    @api.marshal_with(preview_job_fields)
+    def post(self):
+        '''Preview an harvesting from a source created with the given payload'''
+        form = api.validate(HarvestSourceForm)
+        if form.organization.data:
+            EditOrganizationPermission(form.organization.data).test()
+        return actions.preview_from_config(**form.data)
+
+
 @ns.route('/source/<string:ident>/preview', endpoint='preview_harvest_source')
 @api.doc(params={'ident': 'A source ID or slug'})
 class PreviewSourceAPI(API):
+    @api.secure
     @api.doc('preview_harvest_source')
     @api.marshal_with(preview_job_fields)
     def get(self, ident):
