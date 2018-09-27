@@ -32,7 +32,8 @@
 - Ensure harvest previewing is done against current form content [#1888](https://github.com/opendatateam/udata/pull/1888)
 - Ensure deleted objects are unindexed [#1891](https://github.com/opendatateam/udata/pull/1891)
 - Fix the dataset resources list layout wrapping [#1893](https://github.com/opendatateam/udata/pull/1893)
-- Fix wrong behavior for weblinks [#1894](https://github.com/opendatateam/udata/pull/1894) 
+- Fix wrong behavior for weblinks [#1894](https://github.com/opendatateam/udata/pull/1894)
+- Ensure `info config` command only displays configuration variables [#1897](https://github.com/opendatateam/udata/pull/1897)
 
 ### Internal
 

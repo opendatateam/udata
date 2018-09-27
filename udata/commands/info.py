@@ -38,6 +38,8 @@ def config():
 
     log.info(white('Current configuration'))
     for key in sorted(current_app.config):
+        if key.startswith('__') or not key.isupper():
+            continue
         echo('{0}: {1}'.format(white(key), current_app.config[key]))
 
 
