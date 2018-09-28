@@ -301,6 +301,9 @@ class MemberAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='organization_followers')
+@ns.doc(get={'id': 'list_organization_followers'},
+        post={'id': 'follow_organization'},
+        delete={'id': 'unfollow_organization'})
 class FollowOrgAPI(FollowAPI):
     model = Organization
 
@@ -335,10 +338,11 @@ class SuggestOrganizationsAPI(API):
 
 
 @ns.route('/<org:org>/logo', endpoint='organization_logo')
-@api.doc(parser=image_parser, **common_doc)
+@api.doc(**common_doc)
 class AvatarAPI(API):
     @api.secure
     @api.doc('organization_logo')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def post(self, org):
         '''Upload a new logo'''
@@ -349,6 +353,7 @@ class AvatarAPI(API):
 
     @api.secure
     @api.doc('resize_organization_logo')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def put(self, org):
         '''Set the logo BBox'''

@@ -3,16 +3,23 @@ from __future__ import unicode_literals
 
 import json
 
-from . import APITestCase
+from flask import url_for
+from flask_restplus import schemas
+
+from udata.tests.helpers import assert200
 
 
-class SwaggerBlueprintTest(APITestCase):
+class SwaggerBlueprintTest:
+    modules = []
 
-    def test_swagger_resource_type(self):
-
-        response = self.get('api/1/swagger.json')
-        self.assert200(response)
+    def test_swagger_resource_type(self, api):
+        response = api.get(url_for('api.specs'))
+        assert200(response)
         swagger = json.loads(response.data)
         expected = swagger['paths']['/datasets/{dataset}/resources/']
         expected = expected['put']['responses']['200']['schema']['type']
-        self.assertEquals(expected, 'array')
+        assert expected == 'array'
+
+    def test_swagger_specs_validate(self, api):
+        response = api.get(url_for('api.specs'))
+        schemas.validate(response.json)

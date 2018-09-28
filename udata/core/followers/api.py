@@ -42,7 +42,7 @@ class FollowAPI(API):
     '''
     model = None
 
-    @api.doc('list_followers', parser=parser)
+    @api.doc(parser=parser)
     @api.marshal_with(follow_page_fields)
     def get(self, id):
         '''List all followers for a given object'''
@@ -52,7 +52,7 @@ class FollowAPI(API):
         return qs.paginate(args['page'], args['page_size'])
 
     @api.secure
-    @api.doc('follow', description=NOTE)
+    @api.doc(description=NOTE)
     def post(self, id):
         '''Follow an object given its ID'''
         model = self.model.objects.only('id').get_or_404(id=id)
@@ -64,7 +64,7 @@ class FollowAPI(API):
         return {'followers': count}, 201 if created else 200
 
     @api.secure
-    @api.doc('unfollow', description=NOTE)
+    @api.doc(description=NOTE)
     def delete(self, id):
         '''Unfollow an object given its ID'''
         model = self.model.objects.only('id').get_or_404(id=id)

@@ -77,10 +77,10 @@ class MeAPI(API):
 
 
 @me.route('/avatar', endpoint='my_avatar')
-@api.doc(parser=image_parser)
 class AvatarAPI(API):
     @api.secure
     @api.doc('my_avatar')
+    @api.expect(image_parser)
     @api.marshal_with(uploaded_image_fields)
     def post(self):
         '''Upload a new avatar'''
@@ -288,6 +288,9 @@ class UserAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='user_followers')
+@ns.doc(get={'id': 'list_user_followers'},
+        post={'id': 'follow_user'},
+        delete={'id': 'unfollow_user'})
 class FollowUserAPI(FollowAPI):
     model = User
 

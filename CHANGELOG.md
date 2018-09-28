@@ -18,6 +18,7 @@
 - Switch the admin sidebar collapse icon from "hamburger"to left and right arrows [#1855](https://github.com/opendatateam/udata/pull/1855)
 - Discussion add card style coherence [#1884](https://github.com/opendatateam/udata/pull/1884)
 - `LINKCHECKING_UNCHECKED_TYPES` setting to prevent linkchecking on some ressource types [#1892](https://github.com/opendatateam/udata/pull/1892)
+- `swagger.json` API specifications now pass validation [#1898](https://github.com/opendatateam/udata/pull/1898)
 
 ### Breaking changes
 
