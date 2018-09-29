@@ -165,6 +165,9 @@ class ReuseFeaturedAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='reuse_followers')
+@ns.doc(get={'id': 'list_reuse_followers'},
+        post={'id': 'follow_reuse'},
+        delete={'id': 'unfollow_reuse'})
 class FollowReuseAPI(FollowAPI):
     model = Reuse
 
@@ -198,10 +201,11 @@ class SuggestReusesAPI(API):
 
 
 @ns.route('/<reuse:reuse>/image', endpoint='reuse_image')
-@api.doc(parser=image_parser, **common_doc)
+@api.doc(**common_doc)
 class ReuseImageAPI(API):
     @api.secure
     @api.doc('reuse_image')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def post(self, reuse):
         '''Upload a new reuse image'''

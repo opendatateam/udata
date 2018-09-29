@@ -129,11 +129,20 @@ filter_fields = api.model('HarvestFilter', {
     'description': fields.String(description='The filter details'),
 })
 
+feature_fields = api.model('HarvestFeature', {
+    'label': fields.String(description='A localized human-readable and descriptive label'),
+    'key': fields.String(description='The feature key'),
+    'description': fields.String(description='Some details about the behavior'),
+    'default': fields.String(description='The feature default state (true is enabled)'),
+})
+
 backend_fields = api.model('HarvestBackend', {
     'id': fields.String(description='The backend identifier'),
     'label': fields.String(description='The backend display name'),
     'filters': fields.List(fields.Nested(filter_fields),
                            description='The backend supported filters'),
+    'features': fields.List(fields.Nested(feature_fields),
+                            description='The backend optionnal features'),
 })
 
 preview_dataset_fields = api.clone('DatasetPreview', dataset_fields, {
@@ -254,9 +263,24 @@ class ScheduleSourceAPI(API):
         return actions.unschedule(ident), 204
 
 
+@ns.route('/source/preview', endpoint='preview_harvest_source_config')
+class PreviewSourceConfigAPI(API):
+    @api.secure
+    @api.expect(source_fields)
+    @api.doc('preview_harvest_source_config')
+    @api.marshal_with(preview_job_fields)
+    def post(self):
+        '''Preview an harvesting from a source created with the given payload'''
+        form = api.validate(HarvestSourceForm)
+        if form.organization.data:
+            EditOrganizationPermission(form.organization.data).test()
+        return actions.preview_from_config(**form.data)
+
+
 @ns.route('/source/<string:ident>/preview', endpoint='preview_harvest_source')
 @api.doc(params={'ident': 'A source ID or slug'})
 class PreviewSourceAPI(API):
+    @api.secure
     @api.doc('preview_harvest_source')
     @api.marshal_with(preview_job_fields)
     def get(self, ident):
@@ -303,6 +327,7 @@ class ListBackendsAPI(API):
                 'id': b.name,
                 'label': b.display_name,
                 'filters': [f.as_dict() for f in b.filters],
+                'features': [f.as_dict() for f in b.features],
             } for b in actions.list_backends()
         ], key=lambda b: b['label'])
 

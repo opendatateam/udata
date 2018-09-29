@@ -10,9 +10,9 @@
 }
 
 .add-comment {
-    
+
     padding: 10px 15px;
-    
+
     & > button.btn {
         margin: 0 auto;
         display: block;
@@ -23,7 +23,7 @@
 <div class="discussion-thread panel panel-default">
     <div class="panel-heading" @click="toggleDiscussions">
         <div>
-            <a href="#{{ discussionIdAttr }}" class="pull-right" v-on:click.stop><span class="fa fa-link"></span></a> 
+            <a href="#{{ discussionIdAttr }}" class="pull-right" v-on:click.stop><span class="fa fa-link"></span></a>
             <strong>{{ discussion.title }}</strong>
             <span class="label label-warning" v-if="discussion.closed"><i class="fa fa-minus-circle" aria-hidden="true"></i> {{ _('closed discussion') }}</span>
         </div>
@@ -56,10 +56,10 @@
         <span class="text-muted">{{ discussion.discussion.length }} {{ _('messages') }}</span>
     </div>
 
-    <div class="panel-footer" v-show="discussion.closed">
+    <div class="panel-footer" v-if="discussion.closed">
         <div class="text-muted">
             {{ _('Discussion has been closed') }}
-            {{ _('by') }} <a href="{{ closed_by_url}}">{{ closed_by_name }}</a>
+            {{ _('by') }} <a href="{{ discussion.closed_by.page }}">{{ discussion.closed_by | display }}</a>
             {{ _('on') }} {{ closedDate }}
         </div>
     </div>
@@ -84,8 +84,6 @@ export default {
             detailed: true,
             formDisplayed: false,
             currentUser: config.user,
-            closed_by_name: null,
-            closed_by_url: null
         }
     },
     events: {
@@ -104,18 +102,6 @@ export default {
         },
         closedDate() {
             return moment(this.discussion.closed).format('LL');
-        }
-    },
-    ready() {
-        if( this.discussion.closed_by ){
-            const user_id = this.discussion.closed_by;
-
-            this.detailed = false;
-
-            this.$api.get(`users/${user_id}`).then(response => {
-                this.closed_by_url = response.page;
-                this.closed_by_name = `${response.first_name} ${response.last_name}`;
-            });
         }
     },
     methods: {

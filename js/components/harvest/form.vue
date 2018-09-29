@@ -1,13 +1,20 @@
 <template>
-<vform v-ref:form :fields="fields" :model="source"></vform>
+<div>
+    <v-form v-ref:form :fields="fields" :model="source"></v-form>
+    <config-form v-ref:config-form :config="source.config || {}" :backend="backend"></config-form>
+    <v-form v-ref:post-form :fields="postFields" :model="source"></v-form>
+</div>
 </template>
 
 <script>
 import HarvestSource from 'models/harvest/source';
 import backends from 'models/harvest/backends';
+import VForm from 'components/form/vertical-form.vue';
+import ConfigForm from './config-form.vue';
 
 export default {
     name: 'HarvestSourceForm',
+    components: {VForm, ConfigForm},
     props: {
         source: {
             type: HarvestSource,
@@ -17,8 +24,10 @@ export default {
         },
         hideNotifications: false
     },
-    data: function() {
+    data() {
         return {
+            backends: backends.items,
+            backendValue: this.source.backend,
             fields: [{
                     id: 'name',
                     label: this._('Name')
@@ -33,23 +42,56 @@ export default {
                     id: 'backend',
                     label: this._('Backend'),
                     widget: 'select-input',
-                    values: backends.items.map(function(item) {
-                        return {value: item.id, text: item.label};
-                    })
-                }, {
-                    id: 'active',
-                    label: this._('Active')
-                }]
+                    values: this.backendValues
+                }],
+            postFields: [{
+                id: 'active',
+                label: this._('Active')
+            }],
+            filters: [],
         };
     },
-    components: {
-        vform: require('components/form/vertical-form.vue')
+    events: {
+        'field:change': function(field, value) {
+            if (field.field.id == 'backend') {
+                this.backendValue = value;
+            }
+        },
+        'form:change': function(form) {
+            if (form.validate()) {
+                this.$dispatch('harvest:source:form:changed', this.serialize());
+            }
+        }
+    },
+    computed: {
+        /**
+         * The currently selected backend
+         */
+        backend() {
+            if (!this.backendValue) return;
+            return this.backends.find(item => item.id == this.backendValue);
+        },
+        /**
+         * Values for the backend select box
+         */
+        backendValues() {
+            return this.backends.map(item => ({value: item.id, text: item.label}));
+        },
+    },
+    created() {
+        // Prevent empty backends select box
+        backends.$on('updated', () => {this.backends = backends.items});
     },
     methods: {
-        serialize: function() {
-            return this.$refs.form.serialize();
+        serialize() {
+            const data =  Object.assign({},
+                this.$refs.postForm.serialize(),
+                this.$refs.form.serialize(),
+            )
+            data.config = this.$refs.configForm.serialize();
+            return data;
         },
-        validate: function() {
+        validate() {
             const isValid = this.$refs.form.validate();
 
             if (isValid & !this.hideNotifications) {

@@ -8,7 +8,7 @@ from importlib import import_module
 
 from flask import abort, current_app
 
-from udata import entrypoints
+from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
 
 from .markdown import init_app as init_markdown
@@ -82,6 +82,13 @@ def init_app(app, views=None):
     # Load all plugins views and blueprints
     for module in entrypoints.get_enabled('udata.views', app).values():
         _load_views(app, module)
+
+    # Load core manifest
+    with app.app_context():
+        assets.register_manifest('udata')
+        for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
+            if assets.has_manifest(dist.project_name):
+                assets.register_manifest(dist.project_name)
 
     # Optionnaly register debug views
     if app.config.get('DEBUG'):

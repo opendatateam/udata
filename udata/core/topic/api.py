@@ -55,7 +55,8 @@ parser = api.page_parser()
 @ns.route('/', endpoint='topics')
 class TopicsAPI(API):
 
-    @api.doc('list_topics', model=topic_page_fields, parser=parser)
+    @api.doc('list_topics')
+    @api.expect(parser)
     @api.marshal_with(topic_page_fields)
     def get(self):
         '''List all topics'''
@@ -63,10 +64,11 @@ class TopicsAPI(API):
         return (Topic.objects.order_by('-created')
                              .paginate(args['page'], args['page_size']))
 
-    @api.doc('create_topic', responses={400: 'Validation error'})
+    @api.doc('create_topic')
     @api.secure(admin_permission)
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
+    @api.response(400, 'Validation error')
     def post(self):
         '''Create a topic'''
         form = api.validate(TopicForm)
@@ -74,8 +76,8 @@ class TopicsAPI(API):
 
 
 @ns.route('/<topic:topic>/', endpoint='topic')
-@api.doc(responses={404: 'Object not found'})
-@api.doc(params={'topic': 'The topic ID or slug'})
+@api.param('topic', 'The topic ID or slug')
+@api.response(404, 'Object not found')
 class TopicAPI(API):
     @api.doc('get_topic')
     @api.marshal_with(topic_fields)
@@ -83,17 +85,19 @@ class TopicAPI(API):
         '''Get a given topic'''
         return topic
 
+    @api.doc('update_topic')
     @api.secure(admin_permission)
     @api.expect(topic_fields)
     @api.marshal_with(topic_fields)
-    @api.doc('update_topic', responses={400: 'Validation error'})
+    @api.response(400, 'Validation error')
     def put(self, topic):
         '''Update a given topic'''
         form = api.validate(TopicForm, topic)
         return form.save()
 
+    @api.doc('delete_topic')
     @api.secure(admin_permission)
-    @api.doc('delete_topic', model=None, responses={204: 'Object deleted'})
+    @api.response(204, 'Object deleted')
     def delete(self, topic):
         '''Delete a given topic'''
         topic.delete()

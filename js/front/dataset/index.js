@@ -44,7 +44,6 @@ new Vue({
         return {
             dataset: this.extractDataset(),
             userReuses: [],
-            checkUrlEnabled: config.check_urls,
             visibleTypeLists: [],
         };
     },
@@ -227,6 +226,14 @@ new Vue({
          */
         getResourceById(resourceId) {
             return this.dataset.resources.find(r => r['@id'] === resourceId);
+        },
+
+        /**
+         * Is check enabled for a particular resourceType (and globally)
+         */
+        isCheckEnabled(resourceType) {
+            if (!config.check_urls) return false;
+            return config.unchecked_types.indexOf(resourceType) == -1;
         },
     }
 });

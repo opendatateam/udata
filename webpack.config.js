@@ -1,13 +1,15 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const node_path = path.join(__dirname, 'node_modules');
+const ManifestPlugin = require('webpack-manifest-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const css_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 
 const languages = ['en', 'es', 'fr', 'pt'];
+const public_path = '/static/';
 
 module.exports = {
     entry: {
@@ -28,9 +30,9 @@ module.exports = {
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),
-        publicPath: '/static/',
-        filename: '[name].js',
-        chunkFilename: 'chunks/[id].[hash].js'
+        publicPath: public_path,
+        filename: '[name].[hash].js',
+        chunkFilename: 'chunks/[id].[chunkhash].js'
     },
     resolve: {
         root: [
@@ -89,13 +91,18 @@ module.exports = {
             jQuery: 'jquery',  // Required by bootstrap.js
             'window.jQuery': 'jquery',  // Required by swagger.js jquery client
         }),
-        new ExtractTextPlugin('[name].css'),
+        new ManifestPlugin({
+            fileName: path.join(__dirname, 'udata', 'manifest.json'),
+            // Filter out chunks and source maps
+            filter: ({name, isInitial, isChunk}) => !name.endsWith('.map') && (isInitial || !isChunk),
+            publicPath: public_path,
+        }),
+        new ExtractTextPlugin('[name].[contenthash].css'),
         // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'common',
-            filename: 'common.js',
             minChunks: 10,  // (Modules must be shared between 10 entries)
         })
     ],

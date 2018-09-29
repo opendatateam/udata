@@ -302,6 +302,9 @@ class MemberAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='organization_followers')
+@ns.doc(get={'id': 'list_organization_followers'},
+        post={'id': 'follow_organization'},
+        delete={'id': 'unfollow_organization'})
 class FollowOrgAPI(FollowAPI):
     model = Organization
 
@@ -336,10 +339,11 @@ class SuggestOrganizationsAPI(API):
 
 
 @ns.route('/<org:org>/logo', endpoint='organization_logo')
-@api.doc(parser=image_parser, **common_doc)
+@api.doc(**common_doc)
 class AvatarAPI(API):
     @api.secure
     @api.doc('organization_logo')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def post(self, org):
         '''Upload a new logo'''
@@ -350,6 +354,7 @@ class AvatarAPI(API):
 
     @api.secure
     @api.doc('resize_organization_logo')
+    @api.expect(image_parser)  # Swagger 2.0 does not support formData at path level
     @api.marshal_with(uploaded_image_fields)
     def put(self, org):
         '''Set the logo BBox'''
@@ -366,6 +371,24 @@ dataset_parser.add_argument(
 
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
 class OrgDatasetsAPI(API):
+    sort_mapping = {
+        'created': 'created_at',
+        'views': 'metrics.views',
+        'updated': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+    }
+
+    def map_sort(self, sort):
+        """Map sort arg from search index attributes to DB attributes"""
+        if not sort:
+            return
+        if sort[0] == '-':
+            mapped = self.sort_mapping.get(sort[1:]) or sort[1:]
+            return '-{}'.format(mapped)
+        else:
+            return self.sort_mapping.get(sort) or sort
+
     @api.doc('list_organization_datasets')
     @api.expect(dataset_parser)
     @api.marshal_with(dataset_page_fields)
@@ -375,7 +398,7 @@ class OrgDatasetsAPI(API):
         qs = Dataset.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return (qs.order_by(args['sort'].replace('created', 'created_at'))
+        return (qs.order_by(self.map_sort(args['sort']))
                 .paginate(args['page'], args['page_size']))
 
 

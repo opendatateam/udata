@@ -38,9 +38,8 @@ discussion_fields = api.model('Discussion', {
         user_ref_fields, description='The discussion author'),
     'created': fields.ISODateTime(description='The discussion creation date'),
     'closed': fields.ISODateTime(description='The discussion closing date'),
-    'closed_by': fields.String(
-        attribute='closed_by.id',
-        description='The user who closed the discussion'),
+    'closed_by': fields.Nested(user_ref_fields, allow_null=True,
+                               description='The user who closed the discussion'),
     'discussion': fields.Nested(message_fields),
     'url': fields.UrlFor('api.discussion',
                          description='The discussion API URI'),

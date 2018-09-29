@@ -1,16 +1,29 @@
 import {Model} from 'models/base';
+import Dataset from 'models/dataset';
+import Reuse from 'models/reuse';
 import log from 'logger';
 
 
 export default class Post extends Model {
-    fetch(ident) {
+    fetch(ident, mask) {
         ident = ident || this.id || this.slug;
+        const options = {post: ident};
+        if (mask) {
+            options['X-Fields'] = mask;
+        }
         if (ident) {
-            this.$api('posts.get_post', {post: ident}, this.on_fetched);
+            this.$api('posts.get_post', options, this.on_fetched);
         } else {
             log.error('Unable to fetch Post: no identifier specified');
         }
         return this;
+    }
+
+    on_fetched(data) {
+        super.on_fetched(data);
+        // Cast lists to benefit from helpers
+        this.datasets = this.datasets.map(d => new Dataset({data: d}));
+        this.reuses = this.reuses.map(r => new Reuse({data: r}));
     }
 
     update(data, on_success, on_error) {

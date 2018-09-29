@@ -27,7 +27,8 @@ class DatasetModelTest:
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
-        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+        expected_signals = (post_save, Dataset.after_save, Dataset.on_update,
+                            Dataset.on_resource_added)
 
         with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory())

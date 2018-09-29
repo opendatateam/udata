@@ -12,6 +12,7 @@ import requests
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata.models import Dataset
+from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException
 from ..models import HarvestItem, HarvestJob, HarvestError
@@ -26,6 +27,7 @@ requests.packages.urllib3.disable_warnings()
 class HarvestFilter(object):
     TYPES = {
         str: 'string',
+        unicode: 'string',
         basestring: 'string',
         int: 'integer',
         bool: 'boolean',
@@ -51,6 +53,22 @@ class HarvestFilter(object):
         }
 
 
+class HarvestFeature(object):
+    def __init__(self, key, label, description=None, default=False):
+        self.key = key
+        self.label = label
+        self.description = description
+        self.default = default
+
+    def as_dict(self):
+        return {
+            'key': self.key,
+            'label': self.label,
+            'description': self.description,
+            'default': self.default,
+        }
+
+
 class BaseBackend(object):
     '''Base class for Harvester implementations'''
 
@@ -61,6 +79,10 @@ class BaseBackend(object):
     # Define some allowed filters on the backend
     # This a Sequence[HarvestFilter]
     filters = tuple()
+
+    # Define some allowed filters on the backend
+    # This a Sequence[HarvestFeature]
+    features = tuple()
 
     def __init__(self, source, job=None, dryrun=False, max_items=None):
         self.source = source
@@ -88,6 +110,16 @@ class BaseBackend(object):
             'User-Agent': 'uData/0.1 {0.name}'.format(self),
         }
 
+    def has_feature(self, key):
+        try:
+            feature = next(f for f in self.features if f.key == key)
+        except StopIteration:
+            raise HarvestException('Unknown feature {}'.format(key))
+        return self.config.get('features', {}).get(key, feature.default)
+
+    def get_filters(self):
+        return self.config.get('filters', [])
+
     def harvest(self):
         '''Start the harvesting process'''
         if self.perform_initialization() is not None:
@@ -112,7 +144,7 @@ class BaseBackend(object):
                 self.job.save()
         except Exception as e:
             self.job.status = 'failed'
-            error = HarvestError(message=str(e))
+            error = HarvestError(message=safe_unicode(e))
             self.job.errors.append(error)
             self.end()
             msg = 'Initialization failed for "{0.name}" ({0.backend})'
@@ -168,12 +200,12 @@ class BaseBackend(object):
         except HarvestSkipException as e:
             log.info("Skipped item %s : %s" % (item.remote_id, str(e)))
             item.status = 'skipped'
-            item.errors.append(HarvestError(message=str(e)))
+            item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
             log.exception('Error while processing %s : %s',
                           item.remote_id,
-                          str(e))
-            error = HarvestError(message=str(e),
+                          safe_unicode(e))
+            error = HarvestError(message=safe_unicode(e),
                                  details=traceback.format_exc())
             item.errors.append(error)
             item.status = 'failed'
@@ -233,7 +265,7 @@ class BaseBackend(object):
                         except Exception:
                             value = None
 
-                    txt = str(error).replace('for dictionary value', '')
+                    txt = safe_unicode(error).replace('for dictionary value', '')
                     txt = txt.strip()
                     if isinstance(error, RequiredFieldInvalid):
                         msg = '[{0}] {1}'

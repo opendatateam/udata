@@ -181,9 +181,11 @@ class Defaults(object):
     HANDLED_LEVELS = tuple()
 
     LINKCHECKING_ENABLED = True
+    # Resource types ignored by linkchecker
+    LINKCHECKING_UNCHECKED_TYPES = ('api', )
     LINKCHECKING_IGNORE_DOMAINS = []
     LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
-    LINKCHECKING_MAX_CACHE_DURATION = 1080 # in minutes (1 week)
+    LINKCHECKING_MAX_CACHE_DURATION = 1080  # in minutes (1 week)
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 

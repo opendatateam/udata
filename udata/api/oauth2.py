@@ -21,9 +21,8 @@ from bson import ObjectId
 from datetime import datetime, timedelta
 
 from authlib.common.security import generate_token
-from authlib.flask.oauth2 import (
-    AuthorizationServer, ResourceProtector, current_token
-)
+from authlib.flask.error import _HTTPException as AuthlibFlaskException
+from authlib.flask.oauth2 import AuthorizationServer, ResourceProtector
 from authlib.specs.rfc6749 import grants, ClientMixin
 from authlib.specs.rfc6750 import BearerTokenValidator
 from authlib.specs.rfc7009 import RevocationEndpoint
@@ -324,14 +323,11 @@ def save_token(token, request):
 
 
 def check_credentials():
-    @require_oauth(None)
-    def log_user_from_oauth_credentials():
-        login_user(current_token.user)
-
     try:
-        log_user_from_oauth_credentials()
+        with require_oauth.acquire() as token:
+            login_user(token.user)
         return True
-    except Unauthorized:
+    except (Unauthorized, AuthlibFlaskException):
         return False
 
 

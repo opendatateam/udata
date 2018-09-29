@@ -192,6 +192,16 @@
                         {% endwith %}
                     </div>
                 </div>
+                {% elif dataset.owner %}
+                <div class="panel panel-default text-center">
+                    <div class="panel-body">
+                        <h3 class="text-left">{{ _('Author') }}</h3>
+
+                        {% with user=dataset.owner %}
+                            {% include theme('user/sidebar-user.html') %}
+                        {% endwith %}
+                    </div>
+                </div>
                 {% endif %}
 
                 {# Information panel #}
@@ -228,7 +238,7 @@
                                 <a href v-tooltip title="{{ _('Temporal coverage') }}">
                                     <span class="fa fa-fw fa-calendar"></span>
                                 </a>
-                                {{ dataset.temporal_coverage|daterange }}
+                                {{ dataset.temporal_coverage|daterange(details=True) }}
                             </li>
                             {% endif %}
 
@@ -385,7 +395,7 @@
                     href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
                     <div class="card-logo"><span>+</span></div>
                     <div class="card-body">
-                        <h4>{{ _('New community resource') }}</h4>
+                        <h4>{{ _('Add a community resource') }}</h4>
                     </div>
                 </a>
                 </div>
