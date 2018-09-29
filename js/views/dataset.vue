@@ -208,13 +208,13 @@ export default {
             this.$go({name: 'dataset-edit', params: {oid: this.dataset.id}});
         },
         confirm_delete() {
-            var m = this.$root.$modal(
+            this.$root.$modal(
                 require('components/dataset/delete-modal.vue'),
                 {dataset: this.dataset}
             );
         },
         confirm_restore() {
-            var m = this.$root.$modal(
+            this.$root.$modal(
                 require('components/dataset/restore-modal.vue'),
                 {dataset: this.dataset}
             );

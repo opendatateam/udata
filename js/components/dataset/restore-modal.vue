@@ -38,11 +38,11 @@ export default {
     },
     methods: {
         confirm() {
-            var restore_dataset =  this.dataset;
+            const restore_dataset =  this.dataset;
             restore_dataset.deleted = null;
             API.datasets.update_dataset({dataset: this.dataset.id, payload: restore_dataset},
                 (response) => {
-                    this.dataset.fetch();
+                    this.dataset.on_fetched(response);
                     this.$refs.modal.close();
                 }
             );

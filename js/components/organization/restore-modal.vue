@@ -38,12 +38,12 @@ export default {
     },
     methods: {
         confirm() {
-            var restore_organization = this.organization;
+            const restore_organization = this.organization;
             restore_organization.deleted = null;
             API.organizations.update_organization(
                 {org: this.organization.id, payload: restore_organization},
                 (response) => {
-                    this.organization.fetch();
+                    this.organization.on_fetched(response);
                     this.$refs.modal.close();
                 }
             );

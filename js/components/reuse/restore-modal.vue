@@ -36,11 +36,11 @@ export default {
     },
     methods: {
         confirm() {
-            var restore_reuse = this.reuse;
+            const restore_reuse = this.reuse;
             restore_reuse.deleted = null;
             API.reuses.update_reuse({reuse: this.reuse.id, payload: restore_reuse},
                 (response) => {
-                    this.reuse.fetch();
+                    this.reuse.on_fetched(response);
                     this.$refs.modal.close();
                 }
             );
