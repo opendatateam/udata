@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.0 (2018-10-02)
 
 ### New features
 
