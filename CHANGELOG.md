@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.0 (2018-10-02)
 
 - Make use of assets manifest for long term caching [#328](https://github.com/etalab/udata-gouvfr/pull/328)
 - Discussion add card style coherence [#339](https://github.com/etalab/udata-gouvfr/pull/339)
