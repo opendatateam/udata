@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Allows arguments and keyword arguments in the task `@connect` decorator [#1908](https://github.com/opendatateam/udata/pull/1908)
+- Allow to restore assets after being deleted.( Datasets, Organizations and Reuses) [#1901](https://github.com/opendatateam/udata/pull/1901)
 
 ## 1.6.0 (2018-10-02)
 
@@ -12,7 +13,6 @@
 - Harvest sources can now enable or disable some optionnal backend features [#1875](https://github.com/opendatateam/udata/pull/1875)
 - Static assets are now compatible with long-term caching (ie. their hash is present in the filename) [#1826](https://github.com/opendatateam/udata/pull/1826)
 - Post UIs have been reworked: publication date, publish/unpublish action, save and continue editing, dynamic sidebar, alignments fixes... [#1857](https://github.com/opendatateam/udata/pull/1857)
-- Allow to restore assets after being deleted.( Datasets, Organizations and Reuses) [#1901](https://github.com/opendatateam/udata/pull/1901)
 
 ### Minor changes
 
