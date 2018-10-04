@@ -88,9 +88,9 @@ def get_logger(name):
     return logger
 
 
-def connect(signal):
+def connect(signal, *args, **kwargs):
     def wrapper(func):
-        t = task(func)
+        t = task(func, *args, **kwargs)
 
         def call_task(item, **kwargs):
             t.delay(item, **kwargs)
