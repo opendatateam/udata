@@ -121,6 +121,7 @@ class DatasetForm(ModelForm):
         preprocessors=[map_legacy_frequencies],
         description=_('The frequency at which data are updated.'))
     frequency_date = fields.DateTimeField(_('Expected frequency date'))
+    deleted = fields.DateTimeField()
     temporal_coverage = fields.DateRangeField(
         _('Temporal coverage'),
         description=_('The period covered by the data'))

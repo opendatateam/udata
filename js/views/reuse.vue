@@ -100,11 +100,21 @@ export default {
                     label: this._('Transfer'),
                     icon: 'send',
                     method: this.transfer_request
-                }, {
+                }];
+
+            if(!this.reuse.deleted) {
+                actions.push({
                     label: this._('Delete'),
                     icon: 'trash',
                     method: this.confirm_delete
-                }];
+                });
+            } else {
+                actions.push({
+                    label: this._('Restore'),
+                    icon: 'undo',
+                    method: this.confirm_restore
+                });
+            }
 
             if (this.$root.me.is_admin) {
                 actions.push({divider: true});
@@ -157,6 +167,12 @@ export default {
                 {reuse: this.reuse}
             );
         },
+        confirm_restore() {
+            this.$root.$modal(
+                require('components/reuse/restore-modal.vue'),
+                {reuse: this.reuse}
+            );
+        },
         transfer_request() {
             this.$root.$modal(
                 require('components/transfer/request-modal.vue'),
@@ -193,6 +209,8 @@ export default {
                     class: 'danger',
                     label: this._('Deleted')
                 }];
+            } else {
+                this.badges = [];
             }
         }
     }
