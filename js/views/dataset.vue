@@ -64,9 +64,9 @@
 import moment from 'moment';
 import API from 'api';
 import Vue from 'vue';
+import {ModelPage} from 'models/base';
 import Dataset from 'models/dataset';
 import Discussions from 'models/discussions';
-import Followers from 'models/followers';
 import Issues from 'models/issues';
 import Metrics from 'models/metrics';
 import Reuses from 'models/reuses';
@@ -111,7 +111,11 @@ export default {
                 end: moment().format('YYYY-MM-DD')
             }}),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
-            followers: new Followers({ns: 'datasets', query: {page_size: 10}}),
+            followers: new ModelPage({
+                query: {page_size: 10},
+                ns: 'datasets',
+                fetch: 'list_dataset_followers'
+            }),
             issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}, mask: CommunityList.MASK}),

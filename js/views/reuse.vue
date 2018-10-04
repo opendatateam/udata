@@ -34,9 +34,9 @@
 
 <script>
 import moment from 'moment';
+import {ModelPage} from 'models/base';
 import Reuse from 'models/reuse';
 import Dataset from 'models/dataset';
-import Followers from 'models/followers';
 import Metrics from 'models/metrics';
 import Vue from 'vue';
 import Issues from 'models/issues';
@@ -68,12 +68,16 @@ export default {
     },
     data() {
         return {
-            reuse: new Reuse({mask: MASK}), 
+            reuse: new Reuse({mask: MASK}),
             metrics: new Metrics({query: {
                 start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
                 end: moment().format('YYYY-MM-DD')
             }}),
-            followers: new Followers({ns: 'reuses', query: {page_size: 10}}),
+            followers: new ModelPage({
+                query: {page_size: 10},
+                ns: 'reuses',
+                fetch: 'list_reuse_followers'
+            }),
             issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
             badges: [],
