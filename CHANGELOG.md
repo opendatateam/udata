@@ -3,7 +3,8 @@
 ## Current (in progress)
 
 - Allows arguments and keyword arguments in the task `@connect` decorator [#1908](https://github.com/opendatateam/udata/pull/1908)
-- Allow to restore assets after being deleted.( Datasets, Organizations and Reuses) [#1901](https://github.com/opendatateam/udata/pull/1901)
+- Allows to restore assets after being deleted (Datasets, Organizations and Reuses) [#1901](https://github.com/opendatateam/udata/pull/1901)
+- Fixes form events not bubbling (and so fixes harvester config not displaying) [#1914](https://github.com/opendatateam/udata/pull/1914)
 
 ## 1.6.0 (2018-10-02)
 
