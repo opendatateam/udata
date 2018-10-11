@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2018-09-11 11:57+0200\n"
-"PO-Revision-Date: 2018-09-11 10:51\n"
+"POT-Creation-Date: 2018-10-04 12:24+0200\n"
+"PO-Revision-Date: 2018-10-11 13:38\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.5.0\n"
 "X-Generator: crowdin.com\n"
 "X-Crowdin-Project: udata\n"
 "X-Crowdin-Language: fr\n"
@@ -200,7 +200,7 @@ msgstr "La date de publication de la ressource"
 msgid "Related dataset"
 msgstr "Jeu de données concerné"
 
-#: udata/core/dataset/forms.py:96 udata/core/dataset/forms.py:137
+#: udata/core/dataset/forms.py:96 udata/core/dataset/forms.py:138
 #: udata/core/reuse/forms.py:40 udata/harvest/forms.py:67
 msgid "Publish as"
 msgstr "Publier en tant que"
@@ -234,7 +234,7 @@ msgstr "La fréquence à laquelle les données sont mises à jour."
 msgid "Expected frequency date"
 msgstr "Date de mise à jour prévue"
 
-#: udata/core/dataset/forms.py:125 udata/templates/dataset/card.html:40
+#: udata/core/dataset/forms.py:126 udata/templates/dataset/card.html:40
 #: udata/templates/dataset/display.html:238
 #: udata/templates/dataset/search-labels.html:15
 #: udata/templates/dataset/search-panel.html:13
@@ -243,11 +243,11 @@ msgstr "Date de mise à jour prévue"
 msgid "Temporal coverage"
 msgstr "Couverture temporelle"
 
-#: udata/core/dataset/forms.py:126
+#: udata/core/dataset/forms.py:127
 msgid "The period covered by the data"
 msgstr "La période couverte par les données"
 
-#: udata/core/dataset/forms.py:128 udata/core/spatial/forms.py:84
+#: udata/core/dataset/forms.py:129 udata/core/spatial/forms.py:84
 #: udata/templates/dataset/display.html:330
 #: udata/templates/dataset/search-labels.html:18
 #: udata/templates/dataset/search-panel.html:15
@@ -257,29 +257,29 @@ msgstr "La période couverte par les données"
 msgid "Spatial coverage"
 msgstr "Couverture spatiale"
 
-#: udata/core/dataset/forms.py:129
+#: udata/core/dataset/forms.py:130
 msgid "The geographical area covered by the data."
 msgstr "La zone géographique couverte par les données."
 
-#: udata/core/dataset/forms.py:130 udata/core/post/forms.py:29
+#: udata/core/dataset/forms.py:131 udata/core/post/forms.py:29
 #: udata/core/reuse/forms.py:32 udata/core/site/forms.py:16
 #: udata/core/topic/forms.py:25 udata/templates/dataset/search-panel.html:10
 #: udata/templates/reuse/search-panel.html:7
 msgid "Tags"
 msgstr "Mots-clés"
 
-#: udata/core/dataset/forms.py:130 udata/core/reuse/forms.py:32
+#: udata/core/dataset/forms.py:131 udata/core/reuse/forms.py:32
 msgid "Some taxonomy keywords"
 msgstr "Quelques mots-clés pour la taxonomie"
 
-#: udata/core/dataset/forms.py:132 udata/core/reuse/forms.py:35
+#: udata/core/dataset/forms.py:133 udata/core/reuse/forms.py:35
 #: udata/core/topic/forms.py:26 udata/templates/dataset/display.html:73
 #: udata/templates/dataset/display.html:74 udata/templates/reuse/display.html:60
 #: udata/templates/reuse/display.html:63
 msgid "Private"
 msgstr "Privé"
 
-#: udata/core/dataset/forms.py:133 udata/core/reuse/forms.py:36
+#: udata/core/dataset/forms.py:134 udata/core/reuse/forms.py:36
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
@@ -463,7 +463,7 @@ msgstr "Future date de mise à jour"
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:409 udata/templates/dataset/display.html:11
+#: udata/core/dataset/models.py:410 udata/templates/dataset/display.html:11
 msgid "dataset"
 msgstr "jeu de données"
 
@@ -471,19 +471,19 @@ msgstr "jeu de données"
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
-#: udata/core/dataset/search.py:155 udata/tests/test_search.py:97
+#: udata/core/dataset/search.py:155 udata/tests/search/test_adapter.py:22
 msgid "Never reused"
 msgstr "Jamais réutilisé"
 
-#: udata/core/dataset/search.py:156 udata/tests/test_search.py:98
+#: udata/core/dataset/search.py:156 udata/tests/search/test_adapter.py:23
 msgid "Little reused"
 msgstr "Peu réutilisé"
 
-#: udata/core/dataset/search.py:157 udata/tests/test_search.py:99
+#: udata/core/dataset/search.py:157 udata/tests/search/test_adapter.py:24
 msgid "Quite reused"
 msgstr "Assez réutilisé"
 
-#: udata/core/dataset/search.py:158 udata/tests/test_search.py:100
+#: udata/core/dataset/search.py:158 udata/tests/search/test_adapter.py:25
 msgid "Heavily reused"
 msgstr "Souvent réutilisé"
 
@@ -497,7 +497,7 @@ msgstr "Derniers jeux de données"
 
 #: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:22
 #: udata/core/issues/forms.py:16 udata/core/issues/forms.py:21
-#: udata/core/organization/forms.py:54 udata/core/organization/forms.py:58
+#: udata/core/organization/forms.py:55 udata/core/organization/forms.py:59
 #: udata/harvest/forms.py:74
 msgid "Comment"
 msgstr "Commentaire"
@@ -624,7 +624,7 @@ msgstr "L'URL du site web de votre organisation"
 msgid "Logo"
 msgstr "Logo"
 
-#: udata/core/organization/forms.py:65
+#: udata/core/organization/forms.py:66
 msgid "Role"
 msgstr "Rôle"
 
@@ -1199,13 +1199,13 @@ msgstr "Ignoré"
 msgid "OR"
 msgstr "OU"
 
-#: udata/search/fields.py:119 udata/tests/test_search.py:850
-#: udata/tests/test_search.py:853
+#: udata/search/fields.py:119 udata/tests/search/test_facets.py:101
+#: udata/tests/search/test_facets.py:104
 msgid "yes"
 msgstr "oui"
 
-#: udata/search/fields.py:119 udata/tests/test_search.py:851
-#: udata/tests/test_search.py:854
+#: udata/search/fields.py:119 udata/tests/search/test_facets.py:102
+#: udata/tests/search/test_facets.py:105
 msgid "no"
 msgstr "non"
 
@@ -1943,19 +1943,23 @@ msgstr "Information du fichier"
 msgid "Download count"
 msgstr "Nombre de téléchargements"
 
-#: udata/templates/dataset/resource/card.html:53
+#: udata/templates/dataset/resource/card.html:52
 msgid "Preview"
 msgstr "Prévisualiser"
 
 #: udata/templates/dataset/resource/card.html:56
+msgid "Visit"
+msgstr "Consulter"
+
+#: udata/templates/dataset/resource/card.html:58
 msgid "Download"
 msgstr "Télécharger"
 
-#: udata/templates/dataset/resource/card.html:57
+#: udata/templates/dataset/resource/card.html:60
 msgid "Copy permalink to clipboard"
 msgstr "Copier le lien dans le presse-papiers"
 
-#: udata/templates/dataset/resource/card.html:66
+#: udata/templates/dataset/resource/card.html:69
 msgid "Edit this resource"
 msgstr "Modifier cette ressource"
 
@@ -2441,7 +2445,7 @@ msgstr "Membre"
 #: udata/templates/organization/display_base.html:149
 #: udata/templates/organization/sidebar-producer.html:31
 msgid "I'll be informed about this organization news"
-msgstr "Je serais informé de l'activité de cette organisation"
+msgstr "Je serai informé de l'activité de cette organisation"
 
 #: udata/templates/organization/list.html:9
 #, python-format
@@ -2605,7 +2609,7 @@ msgstr "plus"
 
 #: udata/templates/reuse/display.html:172 udata/templates/user/sidebar-user.html:31
 msgid "I'll be informed about this user news"
-msgstr "Je serais informé de l'activité de cet utilisateur"
+msgstr "Je serai informé de l'activité de cet utilisateur"
 
 #: udata/templates/reuse/display.html:226
 msgid "No followers yet"
