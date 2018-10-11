@@ -56,11 +56,13 @@ export default {
             if (field.field.id == 'backend') {
                 this.backendValue = value;
             }
+            return true;  // Let the event continue its bubbling
         },
         'form:change': function(form) {
             if (form.validate()) {
                 this.$dispatch('harvest:source:form:changed', this.serialize());
             }
+            return true;  // Let the event continue its bubbling
         }
     },
     computed: {

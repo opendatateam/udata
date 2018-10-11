@@ -85,6 +85,7 @@ export default {
     events: {
         'field:change': function(field, value) {
             this.$dispatch('form:change', this, field, value);
+            return true;  // Let the event continue its bubbling
         }
     },
     computed: {
