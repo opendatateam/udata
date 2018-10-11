@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.1 (2018-10-11)
 
 - Allows arguments and keyword arguments in the task `@connect` decorator [#1908](https://github.com/opendatateam/udata/pull/1908)
