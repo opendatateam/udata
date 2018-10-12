@@ -1,5 +1,5 @@
 awesome-slugify==1.6.5
-authlib==0.9
+authlib==0.10
 bleach==2.1.4
 blinker==1.4
 celery==4.1.1
