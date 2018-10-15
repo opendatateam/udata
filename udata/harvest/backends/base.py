@@ -14,7 +14,7 @@ from voluptuous import MultipleInvalid, RequiredFieldInvalid
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
-from ..exceptions import HarvestException, HarvestSkipException
+from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import HarvestItem, HarvestJob, HarvestError
 from ..signals import before_harvest_job, after_harvest_job
 
@@ -142,6 +142,14 @@ class BaseBackend(object):
             self.job.status = 'initialized'
             if not self.dryrun:
                 self.job.save()
+        except HarvestValidationError as e:
+            log.info('Initialization failed for "%s" (%s)',
+                     safe_unicode(self.source.name), self.source.backend)
+            error = HarvestError(message=safe_unicode(e))
+            self.job.errors.append(error)
+            self.job.status = 'failed'
+            self.end()
+            return
         except Exception as e:
             self.job.status = 'failed'
             error = HarvestError(message=safe_unicode(e))
@@ -198,8 +206,12 @@ class BaseBackend(object):
             item.dataset = dataset
             item.status = 'done'
         except HarvestSkipException as e:
-            log.info("Skipped item %s : %s" % (item.remote_id, str(e)))
+            log.info('Skipped item %s : %s', item.remote_id, safe_unicode(e))
             item.status = 'skipped'
+            item.errors.append(HarvestError(message=safe_unicode(e)))
+        except HarvestValidationError as e:
+            log.info('Error validating item %s : %s', item.remote_id, safe_unicode(e))
+            item.status = 'failed'
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
             log.exception('Error while processing %s : %s',
@@ -280,4 +292,4 @@ class BaseBackend(object):
                     msg = str(error)
                 errors.append(msg)
             msg = '\n- '.join(['Validation error:'] + errors)
-            raise HarvestException(msg)
+            raise HarvestValidationError(msg)
