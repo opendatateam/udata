@@ -4,7 +4,7 @@
 
 - Display the owner/organization on harvester view [#1921](https://github.com/opendatateam/udata/pull/1921)
 - Improve harvest validation errors handling [#1920](https://github.com/opendatateam/udata/pull/1920)
-- make extra TOS text customizable [#1922](https://github.com/opendatateam/udata/pull/1922)
+- Make extra TOS text customizable [#1922](https://github.com/opendatateam/udata/pull/1922)
 
 ## 1.6.1 (2018-10-11)
 
