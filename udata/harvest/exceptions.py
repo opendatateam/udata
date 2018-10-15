@@ -10,3 +10,8 @@ class HarvestException(Exception):
 class HarvestSkipException(HarvestException):
     '''Raised when an item is skipped'''
     pass
+
+
+class HarvestValidationError(HarvestException):
+    '''Raised when an harvested item is invalid'''
+    pass
