@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata-gouvfr 1.3.0.dev0\n"
+"Project-Id-Version: udata-gouvfr 1.6.1.dev0\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2018-02-10 13:45+0100\n"
-"PO-Revision-Date: 2018-02-10 13:45+0100\n"
+"POT-Creation-Date: 2018-10-15 17:18+0200\n"
+"PO-Revision-Date: 2018-10-15 17:18+0200\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
 "Language: en\n"
 "Language-Team: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.0\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: udata_gouvfr/metrics.py:14
 msgid "Public services"
@@ -39,20 +39,24 @@ msgstr ""
 msgid "Dataconnexions 6 laureate"
 msgstr ""
 
-#: udata_gouvfr/models.py:33
+#: udata_gouvfr/models.py:34
 msgid "C³"
 msgstr ""
 
-#: udata_gouvfr/models.py:34
+#: udata_gouvfr/models.py:35
 msgid "Nec Mergitur"
 msgstr ""
 
-#: udata_gouvfr/models.py:36 udata_gouvfr/templates/spd.html:8
+#: udata_gouvfr/models.py:37 udata_gouvfr/templates/spd.html:8
 msgid "Reference Data"
 msgstr ""
 
-#: udata_gouvfr/models.py:37
+#: udata_gouvfr/models.py:38
 msgid "Transport"
+msgstr ""
+
+#: udata_gouvfr/models.py:39
+msgid "Base Adresse Locale"
 msgstr ""
 
 #: udata_gouvfr/templates/c3.html:138 udata_gouvfr/templates/nec_mergitur.html:80
