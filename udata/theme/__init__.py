@@ -49,11 +49,13 @@ def theme_static_with_version(ctx, filename, external=False):
     '''Override the default theme static to add cache burst'''
     if current_app.theme_manager.static_folder:
         url = assets.cdn_for('_themes.static',
-                             filename=current.identifier + '/' + filename)
+                             filename=current.identifier + '/' + filename,
+                             _external=external)
     else:
         url = assets.cdn_for('_themes.static',
                              themeid=current.identifier,
-                             filename=filename)
+                             filename=filename,
+                             _external=external)
     if url.endswith('/'):  # this is a directory, no need for cache burst
         return url
     if current_app.config['DEBUG']:

@@ -6,7 +6,7 @@ import json
 import os
 import pkg_resources
 
-from flask import current_app, url_for
+from flask import current_app, request, url_for
 from flask_cdn import url_for as cdn_url_for
 
 # Store manifests URLs with the following hierarchy
@@ -73,10 +73,15 @@ def from_manifest(app, filename, raw=False, **kwargs):
     path = _manifests[app][filename]
 
     if not raw and cfg.get('CDN_DOMAIN') and not cfg.get('CDN_DEBUG'):
-        prefix = 'https://' if cfg.get('CDN_HTTPS') else '//'
-        if not path.startswith('/'):
+        scheme = 'https' if cfg.get('CDN_HTTPS') else request.scheme
+        prefix = '{}://'.format(scheme)
+        if not path.startswith('/'):  # CDN_DOMAIN has no trailing slash
             path = '/' + path
         return ''.join((prefix, cfg['CDN_DOMAIN'], path))
+    elif not raw and kwargs.get('external', False):
+        if path.startswith('/'):  # request.host_url has a trailing slash
+            path = path[1:]
+        return ''.join((request.host_url, path))
     return path
 
 

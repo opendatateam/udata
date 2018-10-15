@@ -48,8 +48,8 @@ def static_global(filename, _burst=True, **kwargs):
 
 
 @front.app_template_global()
-def manifest(app, filename):
-    return assets.from_manifest(app, filename)
+def manifest(app, filename, **kwargs):
+    return assets.from_manifest(app, filename, **kwargs)
 
 
 @front.app_template_test()
