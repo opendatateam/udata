@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Display the owner/organization on harvester view [#1921](https://github.com/opendatateam/udata/pull/1921)
 
 ## 1.6.1 (2018-10-11)
 
