@@ -246,10 +246,18 @@ class BaseBackend(object):
         after_harvest_job.send(self)
 
     def get_dataset(self, remote_id):
-        '''Get or create a dataset given its remote ID (and its source)'''
+        '''Get or create a dataset given its remote ID (and its source)
+        We first try to match `source_id` to be source domain independent
+        '''
+        dataset = Dataset.objects(__raw__={
+            'extras.harvest:source_id': self.source.id,
+            'extras.harvest:remote_id': remote_id,
+        }).first()
+        if dataset:
+            return dataset
         dataset = Dataset.objects(__raw__={
             'extras.harvest:remote_id': remote_id,
-            'extras.harvest:domain': self.source.domain
+            'extras.harvest:domain': self.source.domain,
         }).first()
         return dataset or Dataset()
 
