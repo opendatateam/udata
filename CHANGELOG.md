@@ -7,6 +7,7 @@
 - Make extra TOS text customizable [#1922](https://github.com/opendatateam/udata/pull/1922)
 - Fixes an `UnicodeEncodeError` occuring when parsing RDF with unicode URLs [#1919](https://github.com/opendatateam/udata/pull/1919)
 - Fix some external assets handling cases [#1918](https://github.com/opendatateam/udata/pull/1918)
+- Harvest items can now match `source.id` before `source.domain` — no more duplicates when changing an harvester URL [#1923](https://github.com/opendatateam/udata/pull/1923)
 
 ## 1.6.1 (2018-10-11)
 
