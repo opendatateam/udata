@@ -1,6 +1,6 @@
 awesome-slugify==1.6.5
 authlib==0.9
-bleach==2.1.4
+bleach==3.0.2
 blinker==1.4
 celery==4.1.1
 celerybeat-mongo==0.1.0
