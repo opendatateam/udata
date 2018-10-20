@@ -87,6 +87,7 @@ $ udata init
 You can use whatever stack you want to run uData, nginx or Apache 2 as reverse proxy, supervisord + Gunicorn or uWSGI...
 
 All you need to remember is that uData requires at least 3 services to run:
+
 - a web frontend using the `udata.wsgi` WSGI entry point.
 - a worker service using [celery][]
 - a beat/cron service using [celery][] too
