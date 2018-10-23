@@ -142,7 +142,7 @@ export default {
                     onComplete: this.on_complete,
                     onError: this.on_error,
                 },
-                validation: {allowedExtensions: allowedExtensions.items},
+                validation: {allowedExtensions: this.$options.allowedExtensions || allowedExtensions.items},
                 messages,
             });
         },
