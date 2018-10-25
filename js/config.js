@@ -141,9 +141,8 @@ export const map = _jsonMeta('map-config');
 
 /**
  * Tags constraints
- * Should be kept synced with udata/tags.py in case of modification
  */
-export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
+export const tags = _jsonMeta('tags-config');
 
 /**
  * Max number of resources to display uncollapsed in dataset view

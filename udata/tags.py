@@ -3,6 +3,11 @@ from __future__ import unicode_literals
 
 from flask import current_app
 from slugify import slugify
+from werkzeug.local import LocalProxy
+
+
+MIN_TAG_LENGTH = LocalProxy(lambda: current_app.config['TAG_MIN_LENGTH'])
+MAX_TAG_LENGTH = LocalProxy(lambda: current_app.config['TAG_MAX_LENGTH'])
 
 
 def slug(value):
@@ -11,12 +16,10 @@ def slug(value):
 
 def normalize(value):
     value = slug(value)
-    min_length = current_app.config['TAG_MIN_LENGTH']
-    max_length = current_app.config['TAG_MAX_LENGTH']
-    if len(value) < min_length:
+    if len(value) < MIN_TAG_LENGTH:
         value = ''
-    elif len(value) > max_length:
-        value = value[:max_length]
+    elif len(value) > MAX_TAG_LENGTH:
+        value = value[:MAX_TAG_LENGTH]
     return value
 
 
