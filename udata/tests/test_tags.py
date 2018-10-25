@@ -2,16 +2,16 @@
 from __future__ import unicode_literals, absolute_import
 
 import logging
+import pytest
 import StringIO
 
 from flask import url_for
 
 from udata.frontend import csv
 
-from udata.tests import TestCase
-from udata.tests.frontend import FrontTestCase
-from udata.core.dataset.factories import VisibleDatasetFactory
-from udata.core.reuse.factories import VisibleReuseFactory
+from udata.tests.helpers import assert200
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
 from udata.tags import tags_list, normalize, slug, MAX_TAG_LENGTH
@@ -19,36 +19,37 @@ from udata.tags import tags_list, normalize, slug, MAX_TAG_LENGTH
 log = logging.getLogger(__name__)
 
 
-class TagsTests(FrontTestCase):
+@pytest.mark.frontend
+class TagsTests:
     modules = ['core.tags']
 
-    def test_csv(self):
+    def test_csv(self, client):
         Tag.objects.create(name='datasets-only', counts={'datasets': 15})
         Tag.objects.create(name='reuses-only', counts={'reuses': 10})
         Tag.objects.create(name='both', counts={'reuses': 10, 'datasets': 15})
 
-        response = self.get(url_for('tags.csv'))
-        self.assert200(response)
-        self.assertEqual(response.mimetype, 'text/csv')
-        self.assertEqual(response.charset, 'utf-8')
+        response = client.get(url_for('tags.csv'))
+        assert200(response)
+        assert response.mimetype == 'text/csv'
+        assert response.charset == 'utf-8'
 
         csvfile = StringIO.StringIO(response.data)
         reader = reader = csv.get_reader(csvfile)
         header = reader.next()
         rows = list(reader)
 
-        self.assertEqual(header, ['name', 'datasets', 'reuses', 'total'])
-        self.assertEqual(len(rows), 3)
-        self.assertEqual(rows[0], ['both', '15', '10', '25'])
-        self.assertEqual(rows[1], ['datasets-only', '15', '0', '15'])
-        self.assertEqual(rows[2], ['reuses-only', '0', '10', '10'])
+        assert header == ['name', 'datasets', 'reuses', 'total']
+        assert len(rows) is 3
+        assert rows[0] == ['both', '15', '10', '25']
+        assert rows[1] == ['datasets-only', '15', '0', '15']
+        assert rows[2] == ['reuses-only', '0', '10', '10']
 
     def test_count(self):
         for i in range(1, 4):
             # Tags should be normalized and deduplicated.
             tags = ['Tag "{0}"'.format(j) for j in range(i)] + ['tag-0']
-            VisibleDatasetFactory(tags=tags)
-            VisibleReuseFactory(tags=tags)
+            DatasetFactory(tags=tags, visible=True)
+            ReuseFactory(tags=tags, visible=True)
 
         count_tags.run()
 
@@ -58,61 +59,55 @@ class TagsTests(FrontTestCase):
             'tag-2': 1,
         }
 
-        self.assertEqual(len(Tag.objects), len(expected))
+        assert len(Tag.objects) == len(expected)
 
         for name, count in expected.items():
             tag = Tag.objects.get(name=name)
-            self.assertEqual(tag.total, 2 * count)
-            self.assertEqual(tag.counts['datasets'], count)
-            self.assertEqual(tag.counts['reuses'], count)
+            assert tag.total == 2 * count
+            assert tag.counts['datasets'] == count
+            assert tag.counts['reuses'] == count
 
 
-class TagsUtilsTest(TestCase):
+class TagsUtilsTest:
 
     def test_tags_list(self):
-        self.assertEquals([], tags_list(''))
-        self.assertEquals(['a'], tags_list('a'))
-        self.assertEquals(['a', 'b', 'c'],
-                          sorted(tags_list('a, b, c')))
-        self.assertEquals(['a-b', 'c-d', 'e'],
-                          sorted(tags_list('a b, c d, e')))
+        assert tags_list('') == []
+        assert tags_list('a') == ['a']
+        assert sorted(tags_list('a, b, c')) == ['a', 'b', 'c']
+        assert sorted(tags_list('a b, c d, e')) == ['a-b', 'c-d', 'e']
 
     def test_tags_list_strip(self):
-        self.assertEquals(['a', 'b', 'c'],
-                          sorted(tags_list('a, b ,  ,,, c')))
-        self.assertEquals(['a-b', 'c-d', 'e'],
-                          sorted(tags_list('  a b ,  c   d, e ')))
+        assert sorted(tags_list('a, b ,  ,,, c')) == ['a', 'b', 'c']
+        assert sorted(tags_list('  a b ,  c   d, e ')) == ['a-b', 'c-d', 'e']
 
     def test_tags_list_deduplication(self):
-        self.assertEquals(['a-b', 'c-d', 'e'],
-                          sorted(tags_list('a b, c d,  a  b , e')))
+        assert sorted(tags_list('a b, c d,  a  b , e')) == ['a-b', 'c-d', 'e']
 
     def test_slug_empty(self):
-        self.assertEquals('', slug(''))
+        assert slug('') == ''
 
     def test_slug_several_words(self):
-        self.assertEquals('la-claire-fontaine',
-                          slug('la claire fontaine'))
+        assert slug('la claire fontaine') == 'la-claire-fontaine'
 
     def test_slug_accents(self):
-        self.assertEquals('ecole-publique', slug('école publique'))
+        assert slug('école publique') == 'ecole-publique'
 
     def test_slug_case(self):
-        self.assertEquals('ecole-publique', slug('EcoLe publiquE'))
+        assert slug('EcoLe publiquE') == 'ecole-publique'
 
     def test_slug_consecutive_spaces(self):
-        self.assertEquals('ecole-publique', slug('ecole  publique'))
+        assert slug('ecole  publique') == 'ecole-publique'
 
     def test_slug_special_characters(self):
-        self.assertEquals('ecole-publique', slug('ecole-publique'))
-        self.assertEquals('ecole-publique', slug('ecole publique.'))
-        self.assertEquals('ecole-publique', slug('ecole publique-'))
-        self.assertEquals('ecole-publique', slug('ecole publique_'))
+        assert slug('ecole-publique') == 'ecole-publique'
+        assert slug('ecole publique.') == 'ecole-publique'
+        assert slug('ecole publique-') == 'ecole-publique'
+        assert slug('ecole publique_') == 'ecole-publique'
 
     def test_normalize(self):
-        self.assertEquals('', normalize(''))
-        self.assertEquals('', normalize('a'))
-        self.assertEquals('', normalize('aa'))
-        self.assertEquals('aaa', normalize('aaa'))
-        self.assertEquals('a' * MAX_TAG_LENGTH, normalize('a' * (MAX_TAG_LENGTH + 1)))
-        self.assertEquals('aaa-a', normalize('aAa a'))
+        assert normalize('') == ''
+        assert normalize('a') == ''
+        assert normalize('aa') == ''
+        assert normalize('aaa') == 'aaa'
+        assert normalize('a' * (MAX_TAG_LENGTH + 1)) == 'a' * MAX_TAG_LENGTH
+        assert normalize('aAa a') == 'aaa-a'
