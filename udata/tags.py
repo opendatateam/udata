@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from flask import current_app
 from slugify import slugify
-
-# Constraints
-# Should be kept synced with js/config.js in case of modification
-MIN_TAG_LENGTH = 3
-MAX_TAG_LENGTH = 96
 
 
 def slug(value):
@@ -15,10 +11,12 @@ def slug(value):
 
 def normalize(value):
     value = slug(value)
-    if len(value) < MIN_TAG_LENGTH:
+    min_length = current_app.config['TAG_MIN_LENGTH']
+    max_length = current_app.config['TAG_MAX_LENGTH']
+    if len(value) < min_length:
         value = ''
-    elif MAX_TAG_LENGTH < len(value):
-        value = value[:MAX_TAG_LENGTH]
+    elif len(value) > max_length:
+        value = value[:max_length]
     return value
 
 

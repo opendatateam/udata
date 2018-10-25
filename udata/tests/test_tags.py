@@ -14,9 +14,12 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.tags.models import Tag
 from udata.core.tags.tasks import count_tags
-from udata.tags import tags_list, normalize, slug, MAX_TAG_LENGTH
+from udata.tags import tags_list, normalize, slug
 
 log = logging.getLogger(__name__)
+
+
+MAX_TAG_LENGTH = 32
 
 
 @pytest.mark.frontend
@@ -104,7 +107,8 @@ class TagsUtilsTest:
         assert slug('ecole publique-') == 'ecole-publique'
         assert slug('ecole publique_') == 'ecole-publique'
 
-    def test_normalize(self):
+    @pytest.mark.options(TAG_MAX_LENGTH=MAX_TAG_LENGTH)
+    def test_normalize(self, app):
         assert normalize('') == ''
         assert normalize('a') == ''
         assert normalize('aa') == ''
