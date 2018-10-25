@@ -1,77 +1,78 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
+
 from flask import url_for
 
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.utils import faker
+from udata.tests.helpers import assert200
 
-from . import APITestCase
 
-
-class TagsAPITest(APITestCase):
-    def test_suggest_tags_api(self):
+@pytest.mark.frontend
+class TagsAPITest:
+    def test_suggest_tags_api(self, api, autoindex):
         '''It should suggest tags'''
-        with self.autoindex():
+        with autoindex:
             for i in range(3):
                 tags = [faker.word(), faker.word(), 'test',
                         'test-{0}'.format(i)]
-                ReuseFactory(tags=tags, datasets=[DatasetFactory()])
-                DatasetFactory(tags=tags, resources=[ResourceFactory()])
+                ReuseFactory(tags=tags, visible=True)
+                DatasetFactory(tags=tags, visible=True)
 
-        response = self.get(url_for('api.suggest_tags'),
+        response = api.get(url_for('api.suggest_tags'),
                             qs={'q': 'tes', 'size': '5'})
-        self.assert200(response)
+        assert200(response)
 
-        self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
-        self.assertEqual(response.json[0]['text'], 'test')
+        assert len(response.json) <= 5
+        assert len(response.json) > 1
+        assert response.json[0]['text'] == 'test'
 
         for suggestion in response.json:
-            self.assertIn('text', suggestion)
-            self.assertIn('score', suggestion)
-            self.assertTrue(suggestion['text'].startswith('test'))
-    
-    def test_suggest_tags_api_with_unicode(self):
+            assert 'text' in suggestion
+            assert 'score' in suggestion
+            assert suggestion['text'].startswith('test')
+
+    def test_suggest_tags_api_with_unicode(self, api, autoindex):
         '''It should suggest tags'''
-        with self.autoindex():
+        with autoindex:
             for i in range(3):
                 tags = [faker.word(), faker.word(), 'testé',
                         'testé-{0}'.format(i)]
                 ReuseFactory(tags=tags, visible=True)
                 DatasetFactory(tags=tags, visible=True)
 
-        response = self.get(url_for('api.suggest_tags'),
-                            qs={'q': 'testé', 'size': '5'})
-        self.assert200(response)
+        response = api.get(url_for('api.suggest_tags'),
+                           qs={'q': 'testé', 'size': '5'})
+        assert200(response)
 
-        self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
-        self.assertEqual(response.json[0]['text'], 'teste')
+        assert len(response.json) <= 5
+        assert len(response.json) > 1
+        assert response.json[0]['text'] == 'teste'
 
         for suggestion in response.json:
-            self.assertIn('text', suggestion)
-            self.assertIn('score', suggestion)
-            self.assertTrue(suggestion['text'].startswith('teste'))
+            assert 'text' in suggestion
+            assert 'score' in suggestion
+            assert suggestion['text'].startswith('teste')
 
-    def test_suggest_tags_api_no_match(self):
+    def test_suggest_tags_api_no_match(self, api, autoindex):
         '''It should not provide tag suggestion if no match'''
-        with self.autoindex():
+        with autoindex:
             for i in range(3):
                 tags = ['aaaa', 'aaaa-{0}'.format(i)]
-                ReuseFactory(tags=tags, datasets=[DatasetFactory()])
-                DatasetFactory(tags=tags, resources=[ResourceFactory()])
+                ReuseFactory(tags=tags, visible=True)
+                DatasetFactory(tags=tags, visible=True)
 
-        response = self.get(url_for('api.suggest_tags'),
-                            qs={'q': 'bbbb', 'size': '5'})
-        self.assert200(response)
-        self.assertEqual(len(response.json), 0)
+        response = api.get(url_for('api.suggest_tags'),
+                           qs={'q': 'bbbb', 'size': '5'})
+        assert200(response)
+        assert len(response.json) is 0
 
-    def test_suggest_tags_api_empty(self):
+    def test_suggest_tags_api_empty(self, api, autoindex):
         '''It should not provide tag suggestion if no data'''
-        self.init_search()
-        response = self.get(url_for('api.suggest_tags'),
-                            qs={'q': 'bbbb', 'size': '5'})
-        self.assert200(response)
-        self.assertEqual(len(response.json), 0)
+        response = api.get(url_for('api.suggest_tags'),
+                           qs={'q': 'bbbb', 'size': '5'})
+        assert200(response)
+        assert len(response.json) is 0

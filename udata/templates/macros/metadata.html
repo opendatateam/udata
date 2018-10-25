@@ -69,6 +69,10 @@
         'config': config.MAP_TILES_CONFIG,
     }
 }|to_json|urlencode }}" />
+<meta name="tags-config" content="{{ {
+    'MIN_LENGTH': config.TAG_MIN_LENGTH,
+    'MAX_LENGTH': config.TAG_MAX_LENGTH,
+}|tojson|urlencode }}" />
 
 {% if json_ld %}
 <script id="json_ld" type="application/ld+json">{{ json_ld|safe }}</script>
