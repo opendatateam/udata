@@ -232,6 +232,21 @@ class MembershipAPITest:
         assert request.handled_on is not None
         assert request.refusal_comment is None
 
+    def test_only_admin_can_accept_membership(self, api):
+        user = api.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment='test')
+        member = Member(user=user, role='editor')
+        organization = OrganizationFactory(
+            members=[member], requests=[membership_request])
+
+        api_url = url_for(
+            'api.accept_membership',
+            org=organization,
+            id=membership_request.id)
+        response = api.post(api_url)
+        assert403(response)
+
     def test_accept_membership_404(self, api):
         user = api.login()
         member = Member(user=user, role='admin')
@@ -277,6 +292,22 @@ class MembershipAPITest:
         assert request.handled_by == user
         assert request.handled_on is not None
 
+    def test_only_admin_can_refuse_membership(self, api):
+        user = api.login()
+        applicant = UserFactory()
+        membership_request = MembershipRequest(user=applicant, comment='test')
+        member = Member(user=user, role='editor')
+        organization = OrganizationFactory(
+            members=[member], requests=[membership_request])
+        data = {'comment': 'no'}
+
+        api_url = url_for(
+            'api.refuse_membership',
+            org=organization,
+            id=membership_request.id)
+        response = api.post(api_url, data)
+        assert403(response)
+
     def test_refuse_membership_404(self, api):
         user = api.login()
         member = Member(user=user, role='admin')
@@ -308,6 +339,21 @@ class MembershipAPITest:
         organization.reload()
         assert organization.is_member(added_user)
         assert organization.is_admin(added_user)
+
+    def test_only_admin_can_create_member(self, api):
+        user = api.login()
+        added_user = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='editor'),
+        ])
+
+        api_url = url_for('api.member', org=organization, user=added_user)
+        response = api.post(api_url, {'role': 'editor'})
+
+        assert403(response)
+
+        organization.reload()
+        assert not organization.is_member(added_user)
 
     def test_create_member_exists(self, api):
         user = api.login()
@@ -347,6 +393,23 @@ class MembershipAPITest:
         assert organization.is_member(updated_user)
         assert organization.is_admin(updated_user)
 
+    def test_only_admin_can_update_member(self, api):
+        user = api.login()
+        updated_user = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='editor'),
+            Member(user=updated_user, role='editor')
+        ])
+
+        api_url = url_for('api.member', org=organization, user=updated_user)
+        response = api.put(api_url, {'role': 'admin'})
+
+        assert403(response)
+
+        organization.reload()
+        assert organization.is_member(updated_user)
+        assert not organization.is_admin(updated_user)
+
     def test_delete_member(self, api):
         user = api.login()
         deleted_user = UserFactory()
@@ -361,6 +424,21 @@ class MembershipAPITest:
 
         organization.reload()
         assert not organization.is_member(deleted_user)
+
+    def test_only_admin_can_delete_member(self, api):
+        user = api.login()
+        deleted_user = UserFactory()
+        organization = OrganizationFactory(members=[
+            Member(user=user, role='editor'),
+            Member(user=deleted_user, role='editor')
+        ])
+
+        api_url = url_for('api.member', org=organization, user=deleted_user)
+        response = api.delete(api_url)
+        assert403(response)
+
+        organization.reload()
+        assert organization.is_member(deleted_user)
 
     def test_follow_org(self, api):
         '''It should follow an organization on POST'''
