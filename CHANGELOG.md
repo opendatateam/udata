@@ -10,6 +10,7 @@
 - Harvest items can now match `source.id` before `source.domain` — no more duplicates when changing an harvester URL [#1923](https://github.com/opendatateam/udata/pull/1923)
 - Ensure image picker/cropper only allows images [#1925](https://github.com/opendatateam/udata/pull/1925)
 - Make tags min and max length configurable and ensure admin takes its configuration from the backend [#1935](https://github.com/opendatateam/udata/pull/1935)
+- Prevent errors when there is no date available to focus on the calendar [#1937](https://github.com/opendatateam/udata/pull/1937)
 
 ## 1.6.1 (2018-10-11)
 
