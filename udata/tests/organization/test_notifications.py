@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import pytest
+
 from udata.models import MembershipRequest, Member
 
 from udata.core.user.factories import UserFactory
@@ -9,10 +11,11 @@ from udata.core.organization.notifications import (
     membership_request_notifications
 )
 
-from .. import TestCase, DBTestMixin
+from udata.tests.helpers import assert_equal_dates
 
 
-class OrganizationNotificationsTest(TestCase, DBTestMixin):
+@pytest.mark.usefixtures('clean_db')
+class OrganizationNotificationsTest:
     def test_pending_membership_requests(self):
         admin = UserFactory()
         editor = UserFactory()
@@ -24,15 +27,15 @@ class OrganizationNotificationsTest(TestCase, DBTestMixin):
         ]
         org = OrganizationFactory(members=members, requests=[request])
 
-        self.assertEqual(len(membership_request_notifications(applicant)), 0)
-        self.assertEqual(len(membership_request_notifications(editor)), 0)
+        assert len(membership_request_notifications(applicant)) is 0
+        assert len(membership_request_notifications(editor)) is 0
 
         notifications = membership_request_notifications(admin)
-        self.assertEqual(len(notifications), 1)
+        assert len(notifications) is 1
         dt, details = notifications[0]
-        self.assertEqualDates(dt, request.created)
-        self.assertEqual(details['id'], request.id)
-        self.assertEqual(details['organization'], org.id)
-        self.assertEqual(details['user']['id'], applicant.id)
-        self.assertEqual(details['user']['fullname'], applicant.fullname)
-        self.assertEqual(details['user']['avatar'], str(applicant.avatar))
+        assert_equal_dates(dt, request.created)
+        assert details['id'] == request.id
+        assert details['organization'] == org.id
+        assert details['user']['id'] == applicant.id
+        assert details['user']['fullname'] == applicant.fullname
+        assert details['user']['avatar'] == str(applicant.avatar)
