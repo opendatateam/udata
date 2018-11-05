@@ -164,6 +164,10 @@ class Defaults(object):
 
     MD_ALLOWED_STYLES = []
 
+    # Tags constraints
+    TAG_MIN_LENGTH = 3
+    TAG_MAX_LENGTH = 96
+
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
 

@@ -42,10 +42,19 @@ export function user_avatar(user, size) {
     return user.avatar_thumbnail || user.avatar || identicon(user.id, size);
 }
 
+/**
+ * Get a logo url for a given organization object.
+ */
+export function org_logo(org, size) {
+    if (!org) return;
+    return org.logo_thumbnail || org.logo || identicon(org.id, size);
+}
+
 
 export default {
     getFor,
     user_avatar,
+    org_logo,
     organization,
     reuse,
     territory,

@@ -9,6 +9,28 @@
         <header slot="header">
             {{{ source.description | markdown }}}
             <dl class="dl-horizontal">
+                <dt v-if="source.owner">{{ _('Owner') }}</dt>
+                <dd v-if="source.owner">
+                    <a v-link="{name:'user', params: {oid: source.owner.id}}"
+                        :title="source.owner | display">
+                        <img class="avatar"
+                            :src="source.owner | avatar_url AVATAR_SIZE"
+                            :alt="source.owner | display"
+                            :width="AVATAR_SIZE" :height="AVATAR_SIZE">
+                        {{ source.owner | display }}
+                    </a>
+                </dd>
+                <dt v-if="source.organization">{{ _('Organization') }}</dt>
+                <dd v-if="source.organization">
+                    <a v-link="{name:'organization', params: {oid: source.organization.id}}"
+                        :title="source.organization | display">
+                        <img class="avatar"
+                            :src="source.organization | logo_url AVATAR_SIZE"
+                            :alt="source.organization | display"
+                            :width="AVATAR_SIZE" :height="AVATAR_SIZE">
+                        {{ source.organization | display }}
+                    </a>
+                </dd>
                 <dt>{{ _('Backend') }}</dt>
                 <dd>{{ source.backend }}</dd>
                 <dt>{{ _('URL') }}</dt>
@@ -30,6 +52,7 @@ import Datatable from 'components/datatable/widget.vue';
 import HarvestJobs from 'models/harvest/jobs';
 
 const MASK = ['id', 'created', 'status'];
+const AVATAR_SIZE = 20
 
 export default {
     components: {Datatable},
@@ -39,6 +62,7 @@ export default {
     },
     data() {
         return {
+            AVATAR_SIZE,
             title: this._('Jobs'),
             jobs: new HarvestJobs({query: {page_size: 10}, mask: MASK}),
             fields: [{

@@ -41,7 +41,7 @@ export default {
                 fields.push({
                     key(item) {
                         if (item.organization) {
-                            return item.organization.logo_thumbnail || placeholders.organization;
+                            return placeholders.org_logo(item.organization, 30);
                         } else {
                             return placeholders.user_avatar(item.owner, 30);
                         }

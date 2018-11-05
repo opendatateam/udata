@@ -23,7 +23,7 @@ from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
     namespace_manager, url_from_rdf
 )
-from udata.utils import get_by
+from udata.utils import get_by, safe_unicode
 
 from .models import Dataset, Resource, Checksum, License
 
@@ -346,7 +346,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
 
     download_url = url_from_rdf(distrib, DCAT.downloadURL)
     access_url = url_from_rdf(distrib, DCAT.accessURL)
-    url = str(download_url or access_url)
+    url = safe_unicode(download_url or access_url)
 
     if dataset:
         resource = get_by(dataset.resources, 'url', url)

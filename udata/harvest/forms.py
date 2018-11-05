@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata.utils import safe_unicode
 from udata.forms import Form, fields, validators
 from udata.i18n import lazy_gettext as _
 
@@ -39,6 +40,10 @@ class HarvestConfigField(fields.DictField):
                     msg = 'Unknown filter key "{0}" for "{1}" backend'
                     msg = msg.format(f['key'], backend.name)
                     raise validators.ValidationError(msg)
+
+                if isinstance(f['value'], basestring):
+                    f['value'] = safe_unicode(f['value'])  # Fix encoding error
+
                 if not isinstance(f['value'], specs.type):
                     msg = '"{0}" filter should of type "{1}"'
                     msg = msg.format(specs.key, specs.type.__name__)

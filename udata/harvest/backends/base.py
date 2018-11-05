@@ -14,7 +14,7 @@ from voluptuous import MultipleInvalid, RequiredFieldInvalid
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
-from ..exceptions import HarvestException, HarvestSkipException
+from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import HarvestItem, HarvestJob, HarvestError
 from ..signals import before_harvest_job, after_harvest_job
 
@@ -142,6 +142,14 @@ class BaseBackend(object):
             self.job.status = 'initialized'
             if not self.dryrun:
                 self.job.save()
+        except HarvestValidationError as e:
+            log.info('Initialization failed for "%s" (%s)',
+                     safe_unicode(self.source.name), self.source.backend)
+            error = HarvestError(message=safe_unicode(e))
+            self.job.errors.append(error)
+            self.job.status = 'failed'
+            self.end()
+            return
         except Exception as e:
             self.job.status = 'failed'
             error = HarvestError(message=safe_unicode(e))
@@ -198,8 +206,12 @@ class BaseBackend(object):
             item.dataset = dataset
             item.status = 'done'
         except HarvestSkipException as e:
-            log.info("Skipped item %s : %s" % (item.remote_id, str(e)))
+            log.info('Skipped item %s : %s', item.remote_id, safe_unicode(e))
             item.status = 'skipped'
+            item.errors.append(HarvestError(message=safe_unicode(e)))
+        except HarvestValidationError as e:
+            log.info('Error validating item %s : %s', item.remote_id, safe_unicode(e))
+            item.status = 'failed'
             item.errors.append(HarvestError(message=safe_unicode(e)))
         except Exception as e:
             log.exception('Error while processing %s : %s',
@@ -234,10 +246,15 @@ class BaseBackend(object):
         after_harvest_job.send(self)
 
     def get_dataset(self, remote_id):
-        '''Get or create a dataset given its remote ID (and its source)'''
+        '''Get or create a dataset given its remote ID (and its source)
+        We first try to match `source_id` to be source domain independent
+        '''
         dataset = Dataset.objects(__raw__={
             'extras.harvest:remote_id': remote_id,
-            'extras.harvest:domain': self.source.domain
+            '$or': [
+                {'extras.harvest:domain': self.source.domain},
+                {'extras.harvest:source_id': str(self.source.id)},
+            ],
         }).first()
         return dataset or Dataset()
 
@@ -280,4 +297,4 @@ class BaseBackend(object):
                     msg = str(error)
                 errors.append(msg)
             msg = '\n- '.join(['Validation error:'] + errors)
-            raise HarvestException(msg)
+            raise HarvestValidationError(msg)
