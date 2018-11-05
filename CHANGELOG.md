@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.1 (2018-11-05)
 
 - Add a BAL badge [#347](https://github.com/etalab/udata-gouvfr/pull/347)
