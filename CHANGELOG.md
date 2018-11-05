@@ -12,6 +12,10 @@
 - Make tags min and max length configurable and ensure admin takes its configuration from the backend [#1935](https://github.com/opendatateam/udata/pull/1935)
 - Prevent errors when there is no date available to focus on the calendar [#1937](https://github.com/opendatateam/udata/pull/1937)
 
+### Internals
+
+- Update authlib to 0.10 [#1916](https://github.com/opendatateam/udata/pull/1916)
+
 ## 1.6.1 (2018-10-11)
 
 - Allows arguments and keyword arguments in the task `@connect` decorator [#1908](https://github.com/opendatateam/udata/pull/1908)
