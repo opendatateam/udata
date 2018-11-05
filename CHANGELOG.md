@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.2 (2018-11-05)
 
 - Display the owner/organization on harvester view [#1921](https://github.com/opendatateam/udata/pull/1921)
 - Improve harvest validation errors handling [#1920](https://github.com/opendatateam/udata/pull/1920)
