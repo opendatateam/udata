@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.2 (2018-11-05)
 
 - Display the owner/organization on harvester view [#1921](https://github.com/opendatateam/udata/pull/1921)
