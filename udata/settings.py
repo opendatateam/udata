@@ -161,6 +161,10 @@ class Defaults(object):
 
     MD_ALLOWED_STYLES = []
 
+    # Tags constraints
+    TAG_MIN_LENGTH = 3
+    TAG_MAX_LENGTH = 96
+
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
 
@@ -178,9 +182,11 @@ class Defaults(object):
     HANDLED_LEVELS = tuple()
 
     LINKCHECKING_ENABLED = True
+    # Resource types ignored by linkchecker
+    LINKCHECKING_UNCHECKED_TYPES = ('api', )
     LINKCHECKING_IGNORE_DOMAINS = []
     LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
-    LINKCHECKING_MAX_CACHE_DURATION = 1080 # in minutes (1 week)
+    LINKCHECKING_MAX_CACHE_DURATION = 1080  # in minutes (1 week)
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 

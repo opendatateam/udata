@@ -1,6 +1,6 @@
-import html5lib
 import pytest
 
+from bleach._vendor import html5lib
 from flask import render_template_string
 
 from udata.frontend.markdown import md, parse_html, EXCERPT_TOKEN

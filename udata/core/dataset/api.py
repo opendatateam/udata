@@ -127,7 +127,8 @@ class DatasetAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, dataset):
         '''Update a dataset given its identifier'''
-        if dataset.deleted:
+        request_deleted = request.json.get('deleted', True)
+        if dataset.deleted and request_deleted is not None:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
         dataset.last_modified = datetime.now()
@@ -161,7 +162,7 @@ class DatasetFeaturedAPI(API):
         return dataset
 
     @api.secure(admin_permission)
-    @api.doc('unfeature_reuse')
+    @api.doc('unfeature_dataset')
     @api.marshal_with(dataset_fields)
     def delete(self, dataset):
         '''Unmark the dataset as featured'''
@@ -246,10 +247,11 @@ class UploadMixin(object):
 
 
 @ns.route('/<dataset:dataset>/upload/', endpoint='upload_new_dataset_resource')
-@api.doc(parser=upload_parser, **common_doc)
+@api.doc(**common_doc)
 class UploadNewDatasetResource(UploadMixin, API):
     @api.secure
     @api.doc('upload_new_dataset_resource')
+    @api.expect(upload_parser)
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new dataset resource'''
@@ -264,10 +266,11 @@ class UploadNewDatasetResource(UploadMixin, API):
 
 @ns.route('/<dataset:dataset>/upload/community/',
           endpoint='upload_new_community_resource')
-@api.doc(parser=upload_parser, **common_doc)
+@api.doc(**common_doc)
 class UploadNewCommunityResources(UploadMixin, API):
     @api.secure
     @api.doc('upload_new_community_resource')
+    @api.expect(upload_parser)
     @api.marshal_with(upload_fields)
     def post(self, dataset):
         '''Upload a new community resource'''
@@ -436,6 +439,9 @@ class CommunityResourceAPI(API):
 
 
 @ns.route('/<id>/followers/', endpoint='dataset_followers')
+@ns.doc(get={'id': 'list_dataset_followers'},
+        post={'id': 'follow_dataset'},
+        delete={'id': 'unfollow_dataset'})
 class DatasetFollowersAPI(FollowAPI):
     model = Dataset
 

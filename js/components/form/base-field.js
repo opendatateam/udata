@@ -48,6 +48,7 @@ export const BaseField = {
     events: {
         'field:value-change': function(value) {
             this.$dispatch('field:change', this, value);
+            return true;  // Let the event continue its bubbling
         }
     },
     props: {

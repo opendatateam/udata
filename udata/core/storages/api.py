@@ -12,6 +12,8 @@ from . import utils, chunks
 
 META = 'meta.json'
 
+IMAGES_MIMETYPES = ('image/jpeg', 'image/png', 'image/webp')
+
 
 uploaded_image_fields = api.model('UploadedImage', {
     'success': fields.Boolean(
@@ -155,6 +157,8 @@ def parse_uploaded_image(field):
     args = image_parser.parse_args()
 
     image = args['file']
+    if image.mimetype not in IMAGES_MIMETYPES:
+        api.abort(400, 'Unsupported image format')
     bbox = args.get('bbox', None)
     if bbox:
         bbox = [int(float(c)) for c in bbox.split(',')]

@@ -2,6 +2,32 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 1.6.2 (2018-11-05)
+
+- Display the owner/organization on harvester view [#1921](https://github.com/opendatateam/udata/pull/1921)
+- Improve harvest validation errors handling [#1920](https://github.com/opendatateam/udata/pull/1920)
+- Make extra TOS text customizable [#1922](https://github.com/opendatateam/udata/pull/1922)
+- Fixes an `UnicodeEncodeError` occuring when parsing RDF with unicode URLs [#1919](https://github.com/opendatateam/udata/pull/1919)
+- Fix some external assets handling cases [#1918](https://github.com/opendatateam/udata/pull/1918)
+- Harvest items can now match `source.id` before `source.domain` — no more duplicates when changing an harvester URL [#1923](https://github.com/opendatateam/udata/pull/1923)
+- Ensure image picker/cropper only allows images [#1925](https://github.com/opendatateam/udata/pull/1925)
+- Make tags min and max length configurable and ensure admin takes its configuration from the backend [#1935](https://github.com/opendatateam/udata/pull/1935)
+- Prevent errors when there is no date available to focus on the calendar [#1937](https://github.com/opendatateam/udata/pull/1937)
+
+### Internals
+
+- Update authlib to 0.10 [#1916](https://github.com/opendatateam/udata/pull/1916)
+
+## 1.6.1 (2018-10-11)
+
+- Allows arguments and keyword arguments in the task `@connect` decorator [#1908](https://github.com/opendatateam/udata/pull/1908)
+- Allows to restore assets after being deleted (Datasets, Organizations and Reuses) [#1901](https://github.com/opendatateam/udata/pull/1901)
+- Fixes form events not bubbling (and so fixes harvester config not displaying) [#1914](https://github.com/opendatateam/udata/pull/1914)
+
+## 1.6.0 (2018-10-02)
+
 ### New features
 
 - Harvest sources are now filterable through the harvest source create/edit admin form [#1812](https://github.com/opendatateam/udata/pull/1812)
@@ -17,6 +43,8 @@
 - Allows to filter datasets on resource `type` (needs reindexing) [#1848](https://github.com/opendatateam/udata/pull/1848)
 - Switch the admin sidebar collapse icon from "hamburger"to left and right arrows [#1855](https://github.com/opendatateam/udata/pull/1855)
 - Discussion add card style coherence [#1884](https://github.com/opendatateam/udata/pull/1884)
+- `LINKCHECKING_UNCHECKED_TYPES` setting to prevent linkchecking on some ressource types [#1892](https://github.com/opendatateam/udata/pull/1892)
+- `swagger.json` API specifications now pass validation [#1898](https://github.com/opendatateam/udata/pull/1898)
 
 ### Breaking changes
 
@@ -28,10 +56,16 @@
 - Hide the `resource.type` attribute from JSON-LD output until handled by a dedicated vocabulary/property [#1865](https://github.com/opendatateam/udata/pull/1865)
 - RDFs, CSVs and resource redirect views are now handling CORS properly [#1866](https://github.com/opendatateam/udata/pull/1866)
 - Fix broken sorts on organization's datasets list in admin [#1873](https://github.com/opendatateam/udata/pull/1873)
+- Ensure harvest previewing is done against current form content [#1888](https://github.com/opendatateam/udata/pull/1888)
+- Ensure deleted objects are unindexed [#1891](https://github.com/opendatateam/udata/pull/1891)
+- Fix the dataset resources list layout wrapping [#1893](https://github.com/opendatateam/udata/pull/1893)
+- Fix wrong behavior for weblinks [#1894](https://github.com/opendatateam/udata/pull/1894)
+- Ensure `info config` command only displays configuration variables [#1897](https://github.com/opendatateam/udata/pull/1897)
 
 ### Internal
 
 - Upgrade to Authlib 0.9 [#1760](https://github.com/opendatateam/udata/pull/1760) [#1827](https://github.com/opendatateam/udata/pull/1827)
+- Add a `Dataset.on_resource_added` signal
 
 ## 1.5.3 (2018-08-27)
 

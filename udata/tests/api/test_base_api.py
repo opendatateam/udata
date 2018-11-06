@@ -5,7 +5,7 @@ from udata.forms import Form, fields
 
 from . import APITestCase
 
-ns = api.namespace('fake', 'A Fake namespace')
+ns = api.namespace('fake-ns', 'A Fake namespace')
 
 
 @ns.route('/options', endpoint='fake-options')

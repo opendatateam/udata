@@ -53,7 +53,6 @@
 import moment from 'moment';
 import Vue from 'vue';
 import URLs from 'urls';
-import Followers from 'models/followers';
 import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
@@ -98,7 +97,11 @@ export default {
                 mask: DiscussionList.MASK
             }),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}}),
-            followers: new Followers({ns: 'organizations', query: {page_size: 10}}),
+            followers: new ModelPage({
+                query: {page_size: 10},
+                ns: 'organizations',
+                fetch: 'list_organization_followers'
+            }),
             badges: [],
             charts: {
                 traffic: {
@@ -135,11 +138,21 @@ export default {
                     label: this._('Edit'),
                     icon: 'edit',
                     method: this.edit
-                }, {
+                }];
+
+            if(!this.org.deleted) {
+                actions.push({
                     label: this._('Delete'),
                     icon: 'trash',
                     method: this.confirm_delete
-                }];
+                });
+            } else {
+                actions.push({
+                    label: this._('Restore'),
+                    icon: 'undo',
+                    method: this.confirm_restore
+                });
+            }
 
             if (this.$root.me.is_admin) {
                 actions.push({divider: true});
@@ -220,6 +233,12 @@ export default {
                 {organization: this.org}
             );
         },
+        confirm_restore() {
+            this.$root.$modal(
+                require('components/organization/restore-modal.vue'),
+                {organization: this.org}
+            );
+        },
         setBadges() {
             this.$root.$modal(
                 require('components/badges/modal.vue'),
@@ -258,6 +277,8 @@ export default {
                     class: 'danger',
                     label: this._('Deleted')
                 }];
+            } else {
+                this.badges = [];
             }
         }
     }

@@ -1,4 +1,4 @@
 -r test.pip
 invoke==1.2.0
-readme-renderer==21.0
 wheel
+readme-renderer[md]==24.0

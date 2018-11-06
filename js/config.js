@@ -70,6 +70,11 @@ export const csrf_token = _meta('csrf-token');
 export const check_urls = _jsonMeta('check-urls');
 
 /**
+ * Is the check url feature disabled for some resource types ?
+ */
+export const unchecked_types = _jsonMeta('unchecked-types');
+
+/**
  * The API root/base URL
  */
 export const api_root = _meta('api-root');
@@ -136,9 +141,8 @@ export const map = _jsonMeta('map-config');
 
 /**
  * Tags constraints
- * Should be kept synced with udata/tags.py in case of modification
  */
-export const tags = {MIN_LENGTH: 3, MAX_LENGTH: 32};
+export const tags = _jsonMeta('tags-config');
 
 /**
  * Max number of resources to display uncollapsed in dataset view
@@ -165,6 +169,7 @@ export default {
     auth_url,
     sentry,
     check_urls,
+    unchecked_types,
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,

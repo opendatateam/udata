@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import pytest
 
 from datetime import datetime
+from urlparse import urlparse
 
 from voluptuous import Schema
 
@@ -122,6 +123,27 @@ class BaseBackendTest:
         backend = FakeBackend(source)
 
         assert [f['key'] for f in backend.get_filters()] == ['second', 'first']
+
+    def test_harvest_source_id(self):
+        nb_datasets = 3
+        source = HarvestSourceFactory(config={'nb_datasets': nb_datasets})
+        backend = FakeBackend(source)
+
+        job = backend.harvest()
+        assert len(job.items) == nb_datasets
+
+        source_url = faker.url()
+        source.url = source_url
+        source.save()
+
+        job = backend.harvest()
+        datasets = Dataset.objects()
+        # no new datasets have been created
+        assert len(datasets) == nb_datasets
+        for dataset in datasets:
+            assert dataset.extras['harvest:source_id'] == str(source.id)
+            parsed = urlparse(source_url).netloc.split(':')[0]
+            assert parsed == dataset.extras['harvest:domain']
 
 
 @pytest.mark.usefixtures('clean_db')
