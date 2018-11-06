@@ -115,7 +115,7 @@ class TermsFacetTest(FacetTestCase):
 
         assert len(result) == 10
         for row in result:
-            assert isinstance(row[0], basestring)
+            assert isinstance(row[0], str)
             assert isinstance(row[1], int)
             assert isinstance(row[2], bool)
 

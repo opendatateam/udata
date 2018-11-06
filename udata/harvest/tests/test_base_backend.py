@@ -1,7 +1,7 @@
 import pytest
 
 from datetime import datetime
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from voluptuous import Schema
 

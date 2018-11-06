@@ -105,7 +105,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + tag and other facets + sorts + pagination
         assert len(parser.args) == 7
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'tag', clean_string)
@@ -119,7 +119,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + boolean facet + sorts + pagination
         assert len(parser.args) == 6
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'boolean', inputs.boolean)
@@ -133,7 +133,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + range facet + sorts + pagination
         assert len(parser.args) == 6
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'range', facet.validate_parameter,
@@ -148,7 +148,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + range facet + sorts + pagination
         assert len(parser.args) == 6
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'coverage', facet.validate_parameter)

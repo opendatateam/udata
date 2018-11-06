@@ -38,7 +38,7 @@ class HarvestConfigField(fields.DictField):
                     msg = msg.format(f['key'], backend.name)
                     raise validators.ValidationError(msg)
 
-                if isinstance(f['value'], basestring):
+                if isinstance(f['value'], str):
                     f['value'] = safe_unicode(f['value'])  # Fix encoding error
 
                 if not isinstance(f['value'], specs.type):
