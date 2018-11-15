@@ -38,6 +38,13 @@ def get_enabled(name, app):
     return dict(_ep_to_kv(e) for e in iter_all(name) if e.name in plugins)
 
 
+def get_plugin_module(name, app, plugin):
+    '''
+    Get the module for a given plugin
+    '''
+    return next((m for p, m in get_enabled(name, app).items() if p == plugin), None)
+
+
 def _ep_to_kv(entrypoint):
     '''
     Transform an entrypoint into a key-value tuple where:

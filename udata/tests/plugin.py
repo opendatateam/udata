@@ -131,6 +131,13 @@ def drop_db(app):
 def clean_db(app):
     drop_db(app)
     yield
+
+
+@pytest.fixture(name='db')
+def raw_db(app, clean_db):
+    '''Access to raw PyMongo DB client'''
+    from mongoengine.connection import get_db
+    return get_db()
     drop_db(app)
 
 
