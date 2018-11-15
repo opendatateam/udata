@@ -41,7 +41,6 @@ class MigrationsMock:
         return module
 
     def _resource_path(self, name, path):
-        # root = self.core if name == 'udata' else (self.root / name)
         return self.root / name / path
 
     def mock_resource_listdir(self, name, dirname):

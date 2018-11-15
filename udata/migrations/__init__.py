@@ -52,12 +52,18 @@ class Migration:
     '''
     Wraps a single migration
     '''
-    def __init__(self, plugin, module, filename):
+    def __init__(self, plugin, filename, module=None):
         self.plugin = plugin
-        self.module_name = module
+        self.module_name = module or self.get_module_name(plugin)
         self.filename = filename
         self.script = None
         self.module = None
+
+    def get_module_name(self, plugin):
+        module = entrypoints.get_plugin_module('udata.models', current_app, plugin)
+        if module is None:
+            raise ValueError('Plugin {} not found'.format(plugin))
+        return module.__name__
     
     @property
     def db(self):
@@ -128,24 +134,28 @@ class MigrationManager:
         echo('')
         return success
 
-    def load_migration(self, plugin, filename):
-        '''Load a migration file if exists'''
-        module = entrypoints.get_plugin_module('udata.models', current_app, plugin)
-        if module is None:
-            return
-        migration = Migration(plugin, module.__name__, filename)
-        if not migration.exists():
-            return
-        print('Load', plugin, filename)
-        migration.load()
-        print('Loaded')
-        return migration
+    # def load_migration(self, plugin, filename):
+    #     '''Load a migration file if exists'''
+    #     module = entrypoints.get_plugin_module('udata.models', current_app, plugin)
+    #     if module is None:
+    #         return
+    #     migration = Migration(plugin, module.__name__, filename)
+    #     if not migration.exists():
+    #         return
+    #     print('Load', plugin, filename)
+    #     migration.load()
+    #     print('Loaded')
+    #     return migration
 
     def record_migration(self, plugin, filename, dryrun=False):
         '''Only record a migration without applying it'''
-        migration = self.load_migration(plugin, filename)
-        if not migration:
-            return 
+        try:
+            migration = Migration(plugin, filename)
+        except ValueError:
+            return
+        if not migration.exists():
+            return
+        migration.load()
         self.migrations.insert_one({
             'plugin': plugin,
             'filename': filename,
@@ -169,7 +179,7 @@ class MigrationManager:
             return
         for filename in resource_listdir(module_name, 'migrations'):
             if filename.endswith('.py') and not filename.startswith('__'):
-                migration = Migration(plugin, module_name, filename, module_name)
+                migration = Migration(plugin, filename, module_name)
                 yield (plugin, module_name, filename)
 
     def available_migrations(self):
