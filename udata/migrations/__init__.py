@@ -30,22 +30,27 @@ class MigrationLogger:
     Allows to live logging during migrations and later store logged output
     '''
     def __init__(self):
-        pass
+        self.logged = []
 
-    def debug(msg, *args, **kwargs):
-        pass
+    def log(self, level, msg, *args, **kwargs):
+        msg = msg.format(*args, **kwargs)
+        log[level](msg)
+        self.logged.append(level, msg)
 
-    def info(msg, *args, **kwargs):
-        pass
+    def debug(self, msg, *args, **kwargs):
+        self.log('debug', msg, *args, **kwargs)
 
-    def warning(msg, *args, **kwargs):
-        pass
+    def info(self, msg, *args, **kwargs):
+        self.log('debug', msg, *args, **kwargs)
 
-    def error(msg, *args, **kwargs):
-        pass
+    def warning(self, msg, *args, **kwargs):
+        self.log('debug', msg, *args, **kwargs)
 
-    def exception(msg, exc, *args, **kwargs):
-        pass
+    def error(self, msg, *args, **kwargs):
+        self.log('debug', msg, *args, **kwargs)
+
+    def exception(self, msg, *args, **kwargs):
+        self.log('exception', msg, *args, **kwargs)
 
 
 class Migration:
@@ -60,11 +65,13 @@ class Migration:
         self.module = None
 
     def get_module_name(self, plugin):
+        if plugin == 'udata':
+            return 'udata'
         module = entrypoints.get_plugin_module('udata.models', current_app, plugin)
         if module is None:
             raise ValueError('Plugin {} not found'.format(plugin))
         return module.__name__
-    
+
     @property
     def db(self):
         return get_db()
@@ -83,14 +90,27 @@ class Migration:
         self.module = importlib.util.module_from_spec(spec)
         exec(self.script, self.module.__dict__)
 
+    def execute(self):
+        if self.script is None:
+            self.load()
+
+        if not hasattr(self.module, 'migrate'):
+            raise SyntaxError('A migration should at least have a migrate(db, log) function')
+
+        logger = MigrationLogger()
+        self.module.migrate(self.db, logger)
+
     def exists(self):
         return os.path.exists(self.path)
 
+    def get_record(self):
+        return self.db.migrations.find_one({'plugin': self.plugin, 'filename': self.filename})
+
     def is_recorded(self):
-        return bool(self.db.migrations.find_one({'plugin': self.plugin, 'filename': self.filename}))
+        return bool(self.get_record())
 
     def status(self):
-        record = self.db.migrations.find_one({'plugin': self.plugin, 'filename': self.filename})
+        record = self.get_record()
         if not record:
             return
         return record['date']
@@ -110,7 +130,8 @@ class MigrationManager:
 
     def get_migration(self, plugin, filename):
         '''Get an existing migration record if exists'''
-        return self.migrations.find_one({'plugin': plugin, 'filename': filename})
+        return Migration(plugin, filename)
+        # return self.migrations.find_one({'plugin': plugin, 'filename': filename})
 
     def execute_migration(self, plugin, filename, dryrun=False):
         '''Execute and record a migration'''
