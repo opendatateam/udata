@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime
 from textwrap import dedent
 
-from udata.migrations import manager, Migration
+from udata import migrations
 from udata.tests.helpers import assert_equal_dates
 
 
@@ -69,7 +69,7 @@ class MigrationsMock:
 
 
 @pytest.fixture
-def mock(tmpdir, mocker):
+def mock(app, tmpdir, mocker):
     '''
     Mock migrations files
     '''
@@ -83,146 +83,133 @@ def mock(tmpdir, mocker):
     yield m
 
 
-class MigrationTest:
-    def test_is_recorded(self, db):
-        db.migrations.insert_one({
-            'plugin': 'test',
-            'filename': 'filename.py',
-            'date': datetime.now(),
-            'script': 'script',
-            'output': 'output',
-        })
+def test_list_available_migrations(mock):
+    mock.add_migration('udata', '01_core_migration.py')
+    mock.add_migration('test', '02_test_migration.py')
+    mock.add_migration('other', '03_other_migration.py')
+    # Should not list `__*.py` files
+    mock.add_migration('test', '__private.py')
+    # Should not list migrations for disabled plugin
+    mock.add_migration('disabled', 'should_not_be_there.py', enable=False)
+    # Should not fail on plugins without migrations dir
+    mock.ensure_plugin('nomigrations')
 
-        assert Migration('test', 'filename.py', 'test').is_recorded()
-        assert not Migration('test', 'other.py', 'test').is_recorded()
+    availables = migrations.list_availables()
 
-    def test_exists(self, mock):
-        mock.add_migration('test', 'filename.py')
-        assert Migration('test', 'filename.py').exists()
-        assert not Migration('test', 'other.py').exists()
-
-    def test_status(self, db):
-        db.migrations.insert_one({
-            'plugin': 'test',
-            'filename': 'filename.py',
-            'date': datetime.now(),
-            'script': 'script',
-            'output': 'output',
-        })
-
-        status = Migration('test', 'filename.py', 'test').status()
-        assert isinstance(status, datetime)
-        assert not Migration('test', 'other.py', 'test').status()
-
-    def test_get_record(self, db):
-        inserted = {
-            'plugin': 'test',
-            'filename': 'filename.py',
-            'date': datetime.now(),
-            'script': 'script',
-            'output': 'output',
-        }
-        db.migrations.insert_one(inserted)
-
-        record = Migration('test', 'filename.py', 'test').get_record()
-
-        assert record['plugin'] == inserted['plugin']
-        assert record['filename'] == inserted['filename']
-        assert record['script'] == inserted['script']
-        assert record['output'] == inserted['output']
-        assert_equal_dates(record['date'], inserted['date'])
+    assert len(availables) == 3
+    assert availables == [
+        ('udata', 'udata', '01_core_migration.py'),
+        ('test', 'test', '02_test_migration.py'),
+        ('other', 'other', '03_other_migration.py'),
+    ]
 
 
-@pytest.mark.usefixtures('app')
-class MigrationManagerTest:
-    def test_list_available_migrations(self, mock):
-        mock.add_migration('udata', '01_core_migration.py')
-        mock.add_migration('test', '02_test_migration.py')
-        mock.add_migration('other', '03_other_migration.py')
-        # Should not list `__*.py` files
-        mock.add_migration('test', '__private.py')
-        # Should not list migrations for disabled plugin
-        mock.add_migration('disabled', 'should_not_be_there.py', enable=False)
-        # Should not fail on plugins without migrations dir
-        mock.ensure_plugin('nomigrations')
+def test_get_record(db):
+    inserted = {
+        'plugin': 'test',
+        'filename': 'filename.py',
+        'date': datetime.now(),
+        # 'script': 'script',
+        # 'output': 'output',
+    }
+    db.migrations.insert_one(inserted)
 
-        migrations = manager.available_migrations()
+    record = migrations.get_record('test', 'filename.py')
 
-        assert len(migrations) == 3
-        assert migrations == [
-            ('udata', 'udata', '01_core_migration.py'),
-            ('test', 'test', '02_test_migration.py'),
-            ('other', 'other', '03_other_migration.py'),
-        ]
+    assert record['plugin'] == inserted['plugin']
+    assert record['filename'] == inserted['filename']
+    # assert record['script'] == inserted['script']
+    # assert record['output'] == inserted['output']
+    assert_equal_dates(record['date'], inserted['date'])
 
-    def test_get_migration(self, mock):
-        mock.ensure_plugin('test')
-        migration = manager.get_migration('test', 'filename.py')
-        assert isinstance(migration, Migration)
-        assert migration.plugin == 'test'
-        assert migration.module_name == 'test'
-        assert migration.filename == 'filename.py'
 
-        # assert migration['plugin'] == inserted['plugin']
-        # assert migration['filename'] == inserted['filename']
-        # assert migration['script'] == inserted['script']
-        # assert migration['output'] == inserted['output']
-        # assert_equal_dates(migration['date'], inserted['date'])
+def test_record_migration(mock, db):
+    mock.add_migration('test', 'filename.py', '# whatever')
 
-    def test_get_migration_not_found(self, clean_db):
-        assert manager.get_migration('test', 'filename.py') is None
+    assert migrations.record('test', 'filename.py')
 
-    def test_record_migration(self, mock, db):
-        mock.add_migration('test', 'filename.py', '# whatever')
+    migration = db.migrations.find_one()
+    assert migration['plugin'] == 'test'
+    assert migration['filename'] == 'filename.py'
+    # assert migration['script'] == '# whatever'
+    # assert migration['output'] == 'Recorded only'
 
-        assert manager.record_migration('test', 'filename.py')
 
-        migration = db.migrations.find_one()
-        assert migration['plugin'] == 'test'
-        assert migration['filename'] == 'filename.py'
-        assert migration['script'] == '# whatever'
-        assert migration['output'] == 'Recorded only'
+def test_record_missing_plugin(db):
+    assert not migrations.record('test', 'filename.py')
+    assert db.migrations.find_one() is None
 
-    def test_record_missing_migration(self, db):
-        assert not manager.record_migration('test', 'filename.py')
-        assert db.migrations.find_one() is None
 
-    def test_unrecord_migration(self, db):
-        inserted = {
-            'plugin': 'test',
-            'filename': 'filename.py',
-            'date': datetime.now(),
-            'script': 'script',
-            'output': 'output',
-        }
-        db.migrations.insert_one(inserted)
+def test_record_missing_migration(db, mock):
+    mock.ensure_plugin('test')
+    assert not migrations.record('test', 'filename.py')
+    assert db.migrations.find_one() is None
 
-        # Remove the migration record, return True
-        assert manager.unrecord_migration('test', 'filename.py')
-        assert db.migrations.find_one() is None
-        # Already removed, return False
-        assert not manager.unrecord_migration('test', 'filename.py')
 
-    def test_execute_migration(self, mock, db):
-        mock.add_migration('udata', 'migration.py', '''\
-        def migrate(db, log):
-            db.test.insert_one({'key': 'value'})
-            log.info('test')
-        ''')
+def test_unrecord_migration(db):
+    inserted = {
+        'plugin': 'test',
+        'filename': 'filename.py',
+        'date': datetime.now(),
+        # 'script': 'script',
+        # 'output': 'output',
+    }
+    db.migrations.insert_one(inserted)
 
-        migration = manager.get_migration('udata', 'migration.py')
-        migration.execute()
+    # Remove the migration record, return True
+    assert migrations.unrecord('test', 'filename.py')
+    assert db.migrations.find_one() is None
+    # Already removed, return False
+    assert not migrations.unrecord('test', 'filename.py')
 
-        db.migrations.count_documents({}) == 1
-        # record = 
 
-        assert isinstance(migration.status(), datetime.datetime)
+def test_execute_migration(mock, db):
+    mock.add_migration('udata', 'migration.py', '''\
+    import logging
 
-        # migrations = manager.available_migrations()
+    log = logging.getLogger(__name__)
 
-        # assert len(migrations) == 3
-        # assert migrations == [
-        #     ('udata', 'udata', '01_core_migration.py'),
-        #     ('test', 'test', '02_test_migration.py'),
-        #     ('other', 'other', '03_other_migration.py'),
-        # ]
+    def migrate(db):
+        db.test.insert_one({'key': 'value'})
+        log.info('test')
+    ''')
+
+    output = migrations.execute('udata', 'migration.py')
+
+    db.migrations.count_documents({}) == 1
+    inserted = db.test.find_one()
+    assert inserted is not None
+    assert inserted['key'] == 'value'
+    assert output == [
+        ('info', 'test')
+    ]
+
+
+def test_execute_migration_error(mock, db):
+    mock.add_migration('udata', 'migration.py', '''\
+    import logging
+
+    log = logging.getLogger(__name__)
+
+    def migrate(db):
+        db.test.insert_one({'key': 'value'})
+        log.info('test')
+        raise ValueError('error')
+    ''')
+
+    with pytest.raises(migrations.MigrationError) as excinfo:
+        migrations.execute('udata', 'migration.py')
+
+    exc = excinfo.value
+    assert isinstance(exc, migrations.MigrationError)
+    assert isinstance(exc.exc, ValueError)
+    assert exc.msg == "Error while executing migration"
+    assert exc.output == [
+        ('info', 'test')
+    ]
+
+    # Without rollback DB is left as it is
+    db.migrations.count_documents({}) == 1
+    inserted = db.test.find_one()
+    assert inserted is not None
+    assert inserted['key'] == 'value'
