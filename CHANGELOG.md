@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.2 (2018-11-17)
 
 - Konami code 🥚 [#362](https://github.com/etalab/udata-gouvfr/pull/362) NB: this is not a release worth installing except on [data.gouv.fr](https://data.gouv.fr).
