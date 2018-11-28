@@ -213,3 +213,90 @@ def test_execute_migration_error(mock, db):
     inserted = db.test.find_one()
     assert inserted is not None
     assert inserted['key'] == 'value'
+
+
+def test_execute_migration_error_with_rollback(mock, db):
+    mock.add_migration('udata', 'migration.py', '''\
+    def migrate(db):
+        db.test.insert_one({'key': 'value'})
+        raise ValueError('error')
+    
+    def rollback(db):
+        db.rollback_test.insert_one({'key': 'value'})
+    ''')
+
+    with pytest.raises(migrations.MigrationError) as excinfo:
+        migrations.execute('udata', 'migration.py')
+
+    exc = excinfo.value
+    assert isinstance(exc, migrations.MigrationError)
+    assert isinstance(exc.exc, ValueError)
+    assert exc.msg == "Error while executing migration"
+
+    # DB is rollbacked if possible
+    # Migrations should not be recorded
+    db.migrations.count_documents({}) == 0
+    # Migrate value is inserted
+    db.test.count_documents({}) == 1
+    # Rollback should not be recorded
+    db.rollback_test.count_documents({}) == 1
+
+
+def test_execute_migration_error_with_state_rollback(mock, db):
+    mock.add_migration('udata', 'migration.py', '''\
+    def migrate(db):
+        db.test.insert_one({'key': 'first'})
+        db._state['first'] = True
+        raise ValueError('error')
+        db.test.insert_two({'key': 'second'})
+        db._state['second'] = True
+    
+    def rollback(db):
+        if db._state.get('first', False):
+            db.rollback_test.insert_one({'key': 'first'})
+        if db._state.get('second', False):
+            db.rollback_test.insert_one({'key': 'second'})
+    ''')
+
+    with pytest.raises(migrations.MigrationError) as excinfo:
+        migrations.execute('udata', 'migration.py')
+
+    exc = excinfo.value
+    assert isinstance(exc, migrations.MigrationError)
+    assert isinstance(exc.exc, ValueError)
+    assert exc.msg == "Error while executing migration"
+
+    # Migrations should not be recorded
+    db.migrations.count_documents({}) == 0
+    # Only the first value is inserted
+    db.test.count_documents({}) == 1
+    # Only the first rollback operation is executed
+    db.rollback_test.count_documents({}) == 1
+
+
+def test_execute_migration_error_with_rollback_error(mock, db):
+    mock.add_migration('udata', 'migration.py', '''\
+    def migrate(db):
+        db.test.insert_one({'key': 'value'})
+        raise ValueError('error')
+    
+    def rollback(db):
+        db.rollback_test.insert_one({'key': 'value'})
+        raise ValueError('error')
+    ''')
+
+    with pytest.raises(migrations.MigrationError) as excinfo:
+        migrations.execute('udata', 'migration.py')
+
+    exc = excinfo.value
+    assert isinstance(exc, migrations.MigrationError)
+    assert isinstance(exc.exc, ValueError)
+    assert exc.msg == "Error while executing migration rollback"
+
+    # DB is rollbacked if possible
+    # Migrations should not be recorded
+    db.migrations.count_documents({}) == 0
+    # Migrate value is inserted
+    db.test.count_documents({}) == 1
+    # Rollback should not be recorded
+    db.rollback_test.count_documents({}) == 1

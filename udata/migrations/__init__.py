@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 class MigrationError(Exception):
     '''
-    Raise on migration execution error.
+    Raised on migration execution error.
 
     :param msg str: A human readable message (a reason)
     :param output str: An optionnal array of logging output
@@ -31,6 +31,23 @@ class MigrationError(Exception):
         self.msg = msg
         self.output = output
         self.exc = exc
+
+
+class RollbackError(MigrationError):
+    '''
+    Raised on rollback.
+    Hold the initial migration error and rollback exception (if any)
+    '''
+    def __init__(self, msg, output=None, exc=None, migrate_exc=None):
+        super().__init__(msg)
+        self.msg = msg
+        self.output = output
+        self.exc = exc
+        self.migrate_exc = migrate_exc
+
+
+class MigrationFormatter(logging.Formatter):
+    pass
 
 
 def get_record(plugin, filename):
@@ -96,19 +113,33 @@ def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
 
     q = queue.Queue(-1)  # no limit on size
     handler = QueueHandler(q)
+    handler.setFormatter(MigrationFormatter())
     logger = getattr(migration, 'log', logging.getLogger(migration.__name__))
-    logger.handlers = [handler]
+    logger.propagate = False
+    for h in logger.handlers:
+        logger.removeHandler(h)
+    logger.addHandler(handler)
 
     if not hasattr(migration, 'migrate'):
-        raise SyntaxError('A migration should at least have a migrate(db, log) function')
+        error = SyntaxError('A migration should at least have a migrate(db) function')
+        raise MigrationError('Error while executing migration', exc=error)
 
     if not recordonly and not dryrun:
+        db = get_db()
+        db._state = {}
         try:
-            migration.migrate(get_db())
+            migration.migrate(db)
         except Exception as e:
-            output = _extract_output(q)
-            raise MigrationError('Error while executing migration', output=output, exc=e)
-
+            fe = MigrationError('Error while executing migration',
+                                output=_extract_output(q), exc=e)
+            if hasattr(migration, 'rollback'):
+                try:
+                    migration.rollback(db)
+                except Exception as re:
+                    raise MigrationError('Error while executing migration rollback',
+                                         output=_extract_output(q), exc=re)
+            raise fe
+        
     if not dryrun:
         record(plugin, filename)
 
