@@ -2,14 +2,6 @@ import logging
 
 import click
 
-from os.path import join
-from pkg_resources import resource_isdir, resource_listdir, resource_string
-
-from flask import current_app
-
-from pymongo.errors import PyMongoError, OperationFailure
-from mongoengine.connection import get_db
-
 from udata.commands import cli, green, yellow, cyan, red, magenta, echo
 from udata import migrations
 

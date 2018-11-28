@@ -229,9 +229,13 @@ def test_execute_migration_error_with_rollback(mock, db):
         migrations.execute('udata', 'migration.py')
 
     exc = excinfo.value
-    assert isinstance(exc, migrations.MigrationError)
-    assert isinstance(exc.exc, ValueError)
-    assert exc.msg == "Error while executing migration"
+    assert isinstance(exc, migrations.RollbackError)
+    assert exc.exc is None
+    assert exc.msg == "Error while executing migration, rollback has been applyied"
+
+    assert isinstance(exc.migrate_exc, migrations.MigrationError)
+    assert isinstance(exc.migrate_exc.exc, ValueError)
+    assert exc.migrate_exc.msg == "Error while executing migration"
 
     # DB is rollbacked if possible
     # Migrations should not be recorded
@@ -262,9 +266,13 @@ def test_execute_migration_error_with_state_rollback(mock, db):
         migrations.execute('udata', 'migration.py')
 
     exc = excinfo.value
-    assert isinstance(exc, migrations.MigrationError)
-    assert isinstance(exc.exc, ValueError)
-    assert exc.msg == "Error while executing migration"
+    assert isinstance(exc, migrations.RollbackError)
+    assert exc.exc is None
+    assert exc.msg == "Error while executing migration, rollback has been applyied"
+
+    assert isinstance(exc.migrate_exc, migrations.MigrationError)
+    assert isinstance(exc.migrate_exc.exc, ValueError)
+    assert exc.migrate_exc.msg == "Error while executing migration"
 
     # Migrations should not be recorded
     db.migrations.count_documents({}) == 0
@@ -289,9 +297,13 @@ def test_execute_migration_error_with_rollback_error(mock, db):
         migrations.execute('udata', 'migration.py')
 
     exc = excinfo.value
-    assert isinstance(exc, migrations.MigrationError)
+    assert isinstance(exc, migrations.RollbackError)
     assert isinstance(exc.exc, ValueError)
     assert exc.msg == "Error while executing migration rollback"
+
+    assert isinstance(exc.migrate_exc, migrations.MigrationError)
+    assert isinstance(exc.migrate_exc.exc, ValueError)
+    assert exc.migrate_exc.msg == "Error while executing migration"
 
     # DB is rollbacked if possible
     # Migrations should not be recorded

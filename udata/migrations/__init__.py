@@ -135,9 +135,13 @@ def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
             if hasattr(migration, 'rollback'):
                 try:
                     migration.rollback(db)
+                    fe = RollbackError('Error while executing migration, rollback has been applyied',
+                                       output=_extract_output(q),
+                                       migrate_exc=fe)
                 except Exception as re:
-                    raise MigrationError('Error while executing migration rollback',
-                                         output=_extract_output(q), exc=re)
+                    fe = RollbackError('Error while executing migration rollback',
+                                       output=_extract_output(q), exc=re,
+                                       migrate_exc=fe)
             raise fe
         
     if not dryrun:
