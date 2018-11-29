@@ -108,9 +108,13 @@ def test_get_record(db):
     inserted = {
         'plugin': 'test',
         'filename': 'filename.py',
-        'date': datetime.now(),
-        # 'script': 'script',
-        # 'output': 'output',
+        'ops': [{
+            'date': datetime.now(),
+            'type': 'migrate',
+            'script': 'script',
+            'output': 'output',
+            'success': True,
+        }]
     }
     db.migrations.insert_one(inserted)
 
@@ -118,9 +122,13 @@ def test_get_record(db):
 
     assert record['plugin'] == inserted['plugin']
     assert record['filename'] == inserted['filename']
-    # assert record['script'] == inserted['script']
-    # assert record['output'] == inserted['output']
-    assert_equal_dates(record['date'], inserted['date'])
+
+    op = record['ops'][0]
+    assert op['script'] == inserted['ops'][0]['script']
+    assert op['output'] == inserted['ops'][0]['output']
+    assert op['type'] == inserted['ops'][0]['type']
+    assert op['success']
+    assert_equal_dates(op['date'], inserted['ops'][0]['date'])
 
 
 def test_record_migration(mock, db):
@@ -131,8 +139,12 @@ def test_record_migration(mock, db):
     migration = db.migrations.find_one()
     assert migration['plugin'] == 'test'
     assert migration['filename'] == 'filename.py'
-    # assert migration['script'] == '# whatever'
-    # assert migration['output'] == 'Recorded only'
+
+    op = migration['ops'][0]
+    assert op['script'] == '# whatever\n'
+    assert op['output'] == 'Recorded only'
+    assert op['type'] == 'migrate'
+    assert op['success']
 
 
 def test_record_missing_plugin(db):
@@ -150,9 +162,14 @@ def test_unrecord_migration(db):
     inserted = {
         'plugin': 'test',
         'filename': 'filename.py',
-        'date': datetime.now(),
-        # 'script': 'script',
-        # 'output': 'output',
+        'ops': [{
+            'date': datetime.now(),
+            'type': 'migrate',
+            'script': 'script',
+            'output': 'output',
+            'state': {},
+            'success': True,
+        }]
     }
     db.migrations.insert_one(inserted)
 
@@ -176,13 +193,27 @@ def test_execute_migration(mock, db):
 
     output = migrations.execute('udata', 'migration.py')
 
-    db.migrations.count_documents({}) == 1
     inserted = db.test.find_one()
     assert inserted is not None
     assert inserted['key'] == 'value'
     assert output == [
         ('info', 'test')
     ]
+    
+    assert db.migrations.count_documents({}) == 1
+    record = db.migrations.find_one()
+    assert record['plugin'] == 'udata'
+    assert record['filename'] == 'migration.py'
+    assert len(record['ops']) == 1
+
+    op = record['ops'][0]
+    assert op['type'] == 'migrate'
+    assert op['output'] == [
+        ['info', 'test'],  # Mongo store tuples as lists
+    ]
+    assert op['state'] == {}
+    assert isinstance(op['date'], datetime)
+    assert op['success']
 
 
 def test_execute_migration_error(mock, db):
@@ -209,10 +240,26 @@ def test_execute_migration_error(mock, db):
     ]
 
     # Without rollback DB is left as it is
-    db.migrations.count_documents({}) == 1
+    assert db.test.count_documents({}) == 1
     inserted = db.test.find_one()
     assert inserted is not None
     assert inserted['key'] == 'value'
+
+    # Failed migration is recorded
+    assert db.migrations.count_documents({}) == 1
+    record = db.migrations.find_one()
+    assert record['plugin'] == 'udata'
+    assert record['filename'] == 'migration.py'
+    assert len(record['ops']) == 1
+
+    op = record['ops'][0]
+    assert op['type'] == 'migrate'
+    assert op['output'] == [
+        ['info', 'test'],  # Mongo store tuples as lists
+    ]
+    assert op['state'] == {}
+    assert isinstance(op['date'], datetime)
+    assert not op['success']
 
 
 def test_execute_migration_error_with_rollback(mock, db):
@@ -237,13 +284,34 @@ def test_execute_migration_error_with_rollback(mock, db):
     assert isinstance(exc.migrate_exc.exc, ValueError)
     assert exc.migrate_exc.msg == "Error while executing migration"
 
-    # DB is rollbacked if possible
-    # Migrations should not be recorded
-    db.migrations.count_documents({}) == 0
     # Migrate value is inserted
-    db.test.count_documents({}) == 1
-    # Rollback should not be recorded
-    db.rollback_test.count_documents({}) == 1
+    assert db.test.count_documents({}) == 1
+    # Rollback should be executed
+    assert db.rollback_test.count_documents({}) == 1
+
+    # DB is rollbacked if possible
+    assert db.migrations.count_documents({}) == 1
+    record = db.migrations.find_one()
+    assert record['plugin'] == 'udata'
+    assert record['filename'] == 'migration.py'
+    # Both failed migration and rollback are recorded
+    assert len(record['ops']) == 2
+
+    # First the migration
+    op = record['ops'][0]
+    assert op['type'] == 'migrate'
+    assert op['output'] == []
+    assert op['state'] == {}
+    assert isinstance(op['date'], datetime)
+    assert not op['success']
+
+    # Then the rollback
+    op = record['ops'][1]
+    assert op['type'] == 'rollback'
+    assert op['output'] == []
+    assert op['state'] == {}
+    assert isinstance(op['date'], datetime)
+    assert op['success']
 
 
 def test_execute_migration_error_with_state_rollback(mock, db):
@@ -274,12 +342,34 @@ def test_execute_migration_error_with_state_rollback(mock, db):
     assert isinstance(exc.migrate_exc.exc, ValueError)
     assert exc.migrate_exc.msg == "Error while executing migration"
 
-    # Migrations should not be recorded
-    db.migrations.count_documents({}) == 0
     # Only the first value is inserted
-    db.test.count_documents({}) == 1
+    assert db.test.count_documents({}) == 1
     # Only the first rollback operation is executed
-    db.rollback_test.count_documents({}) == 1
+    assert db.rollback_test.count_documents({}) == 1
+
+    # DB is rollbacked if possible
+    assert db.migrations.count_documents({}) == 1
+    record = db.migrations.find_one()
+    assert record['plugin'] == 'udata'
+    assert record['filename'] == 'migration.py'
+    # Both failed migration and rollback are recorded
+    assert len(record['ops']) == 2
+
+    # First the migration
+    op = record['ops'][0]
+    assert op['type'] == 'migrate'
+    assert op['output'] == []
+    assert op['state'] == {'first': True}
+    assert isinstance(op['date'], datetime)
+    assert not op['success']
+
+    # Then the rollback
+    op = record['ops'][1]
+    assert op['type'] == 'rollback'
+    assert op['output'] == []
+    assert op['state'] == {'first': True}
+    assert isinstance(op['date'], datetime)
+    assert op['success']
 
 
 def test_execute_migration_error_with_rollback_error(mock, db):
@@ -305,10 +395,31 @@ def test_execute_migration_error_with_rollback_error(mock, db):
     assert isinstance(exc.migrate_exc.exc, ValueError)
     assert exc.migrate_exc.msg == "Error while executing migration"
 
-    # DB is rollbacked if possible
-    # Migrations should not be recorded
-    db.migrations.count_documents({}) == 0
     # Migrate value is inserted
-    db.test.count_documents({}) == 1
+    assert db.test.count_documents({}) == 1
     # Rollback should not be recorded
-    db.rollback_test.count_documents({}) == 1
+    assert db.rollback_test.count_documents({}) == 1
+
+    # DB is rollbacked if possible
+    assert db.migrations.count_documents({}) == 1
+    record = db.migrations.find_one()
+    assert record['plugin'] == 'udata'
+    assert record['filename'] == 'migration.py'
+    # Both failed migration and rollback are recorded
+    assert len(record['ops']) == 2
+
+    # First the migration
+    op = record['ops'][0]
+    assert op['type'] == 'migrate'
+    assert op['output'] == []
+    assert op['state'] == {}
+    assert isinstance(op['date'], datetime)
+    assert not op['success']
+
+    # Then the rollback
+    op = record['ops'][1]
+    assert op['type'] == 'rollback'
+    assert op['output'] == []
+    assert op['state'] == {}
+    assert isinstance(op['date'], datetime)
+    assert not op['success']

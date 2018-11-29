@@ -11,6 +11,7 @@ from datetime import datetime
 from logging.handlers import QueueHandler
 from flask import current_app
 from mongoengine.connection import get_db
+from pymongo import ReturnDocument
 from pkg_resources import resource_isdir, resource_listdir, resource_filename, resource_string
 
 from udata import entrypoints
@@ -50,14 +51,88 @@ class MigrationFormatter(logging.Formatter):
     pass
 
 
+class Record(dict):
+    '''
+    A simple wrapper to migrations document
+    '''
+    __getattr__ = dict.get
+
+    def exists(self):
+        return bool(self._id)
+
+    @property
+    def collection(self):
+        return get_db().migrations
+
+    @property
+    def status(self):
+        '''
+        Status is the status of the last operation.
+
+        Will be `None` is the record doesn't exists.
+        Possible values are:
+          - success
+          - rollback
+          - rollback-error
+          - recorded
+        '''
+        if not self.exists():
+            return
+        op = self.ops[-1]
+        if op['success']:
+            if op['type'] == 'migrate':
+                return 'success'
+            elif op['type'] == 'rollback':
+                return 'rollback'
+            elif op['type'] == 'record':
+                return 'recorded'
+            else:
+                return 'unknown'
+        else:
+            return 'rollback-error' if op['type'] == 'rollback' else 'error'
+
+    @property
+    def ok(self):
+        '''
+        Is true if the migration is considered as successfully applied
+        '''
+        if not self.exists():
+            return False
+        op = self.ops[-1]
+        return op['success'] and op['type'] in ('migrate', 'record')
+
+    def add(self, type, migration, output, state, success):
+        script = inspect.getsource(migration)
+        return Record(self.collection.find_one_and_update(
+            {'plugin': self.plugin, 'filename': self.filename},
+            {
+                '$push': {'ops': {
+                    'date': datetime.now(),
+                    'type': type,
+                    'script': script,
+                    'output': output,
+                    'state': state,
+                    'success': success,
+                }}
+            },
+            upsert=True,
+            return_document=ReturnDocument.AFTER,
+        ))
+
+    def delete(self):
+        return self.collection.delete_one({'_id': self._id})
+
+
 def get_record(plugin, filename):
     '''Get an existing migration record if exists'''
-    return get_db().migrations.find_one({'plugin': plugin, 'filename': filename})
+    data = get_db().migrations.find_one({'plugin': plugin, 'filename': filename})
+    return Record(data or {'plugin': plugin, 'filename': filename})
 
 
 def record(plugin, filename, module_name=None, dryrun=False):
     '''Only record a migration without applying it'''
-    if get_record(plugin, filename):
+    record = get_record(plugin, filename)
+    if record.ok:
         return False
     try:
         path = _migration_path(plugin, filename, module_name)
@@ -65,22 +140,17 @@ def record(plugin, filename, module_name=None, dryrun=False):
         return False
     if not os.path.exists(path):
         return False
-    get_db().migrations.insert_one({
-        'plugin': plugin,
-        'filename': filename,
-        'date': datetime.now(),
-        # 'script': migration.script,
-        # 'output': 'Recorded only'
-    })
+    migration = _load_migration(plugin, filename, module_name=module_name)
+    record.add('migrate', migration, 'Recorded only', {}, True)
     return True
 
 
 def unrecord(plugin, filename):
     '''Only record a migration without applying it'''
     record = get_record(plugin, filename)
-    if record is None:
+    if not record.exists():
         return False
-    get_db().migrations.delete_one({'_id': record['_id']})
+    record.delete()
     return True
 
 
@@ -110,6 +180,7 @@ def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
     If dryrun is True, the migration is neither executed nor recorded
     '''
     migration = _load_migration(plugin, filename, module_name)
+    record = get_record(plugin, filename)
 
     q = queue.Queue(-1)  # no limit on size
     handler = QueueHandler(q)
@@ -130,24 +201,30 @@ def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
         try:
             migration.migrate(db)
         except Exception as e:
+            out = _extract_output(q)
+            record.add('migrate', migration, out, db._state, False)
             fe = MigrationError('Error while executing migration',
-                                output=_extract_output(q), exc=e)
+                                output=out, exc=e)
             if hasattr(migration, 'rollback'):
                 try:
                     migration.rollback(db)
+                    out = _extract_output(q)
+                    record.add('rollback', migration, out, db._state, True)
                     fe = RollbackError('Error while executing migration, rollback has been applyied',
-                                       output=_extract_output(q),
+                                       output=out,
                                        migrate_exc=fe)
                 except Exception as re:
+                    out = _extract_output(q)
+                    record.add('rollback', migration, out, db._state, False)
                     fe = RollbackError('Error while executing migration rollback',
-                                       output=_extract_output(q), exc=re,
-                                       migrate_exc=fe)
+                                       output=out, exc=re, migrate_exc=fe)
             raise fe
         
+    out = _extract_output(q)
     if not dryrun:
-        record(plugin, filename)
+        record.add('migrate', migration, out, db._state, True)
 
-    return _extract_output(q)
+    return out
 
 
 def _iter(plugin, module):
@@ -195,6 +272,7 @@ def _load_migration(plugin, filename, module_name=None):
     spec = importlib.util.spec_from_loader(name, loader=None)
     module = importlib.util.module_from_spec(spec)
     exec(script, module.__dict__)
+    module.__file__ = resource_filename(module_name, filename)
     return module
 
 
