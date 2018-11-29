@@ -131,55 +131,6 @@ def test_get_record(db):
     assert_equal_dates(op['date'], inserted['ops'][0]['date'])
 
 
-def test_record_migration(mock, db):
-    mock.add_migration('test', 'filename.py', '# whatever')
-
-    assert migrations.record('test', 'filename.py')
-
-    migration = db.migrations.find_one()
-    assert migration['plugin'] == 'test'
-    assert migration['filename'] == 'filename.py'
-
-    op = migration['ops'][0]
-    assert op['script'] == '# whatever\n'
-    assert op['output'] == 'Recorded only'
-    assert op['type'] == 'migrate'
-    assert op['success']
-
-
-def test_record_missing_plugin(db):
-    assert not migrations.record('test', 'filename.py')
-    assert db.migrations.find_one() is None
-
-
-def test_record_missing_migration(db, mock):
-    mock.ensure_plugin('test')
-    assert not migrations.record('test', 'filename.py')
-    assert db.migrations.find_one() is None
-
-
-def test_unrecord_migration(db):
-    inserted = {
-        'plugin': 'test',
-        'filename': 'filename.py',
-        'ops': [{
-            'date': datetime.now(),
-            'type': 'migrate',
-            'script': 'script',
-            'output': 'output',
-            'state': {},
-            'success': True,
-        }]
-    }
-    db.migrations.insert_one(inserted)
-
-    # Remove the migration record, return True
-    assert migrations.unrecord('test', 'filename.py')
-    assert db.migrations.find_one() is None
-    # Already removed, return False
-    assert not migrations.unrecord('test', 'filename.py')
-
-
 def test_execute_migration(mock, db):
     mock.add_migration('udata', 'migration.py', '''\
     import logging
@@ -196,9 +147,7 @@ def test_execute_migration(mock, db):
     inserted = db.test.find_one()
     assert inserted is not None
     assert inserted['key'] == 'value'
-    assert output == [
-        ('info', 'test')
-    ]
+    assert output == [['info', 'test']]
     
     assert db.migrations.count_documents({}) == 1
     record = db.migrations.find_one()
@@ -208,12 +157,48 @@ def test_execute_migration(mock, db):
 
     op = record['ops'][0]
     assert op['type'] == 'migrate'
-    assert op['output'] == [
-        ['info', 'test'],  # Mongo store tuples as lists
-    ]
+    assert op['output'] == [['info', 'test']]
     assert op['state'] == {}
     assert isinstance(op['date'], datetime)
     assert op['success']
+
+
+def test_record_migration(mock, db):
+    mock.add_migration('test', 'filename.py', '''\
+    # whatever
+
+    def migrate():
+        pass
+    ''')
+
+    expected_output = [['info', 'Recorded only']]
+
+    output = migrations.execute('test', 'filename.py', recordonly=True)
+
+    assert output == expected_output
+
+    migration = db.migrations.find_one()
+    assert migration['plugin'] == 'test'
+    assert migration['filename'] == 'filename.py'
+
+    op = migration['ops'][0]
+    assert op['script'].startswith('# whatever\n')
+    assert op['output'] == expected_output
+    assert op['type'] == 'migrate'
+    assert op['success']
+
+
+def test_execute_missing_plugin(db):
+    with pytest.raises(migrations.MigrationError):
+        migrations.execute('test', 'filename.py')
+    assert db.migrations.find_one() is None
+
+
+def test_execute_missing_migration(db, mock):
+    mock.ensure_plugin('test')
+    with pytest.raises(migrations.MigrationError):
+        migrations.execute('test', 'filename.py')
+    assert db.migrations.find_one() is None
 
 
 def test_execute_migration_error(mock, db):
@@ -235,9 +220,7 @@ def test_execute_migration_error(mock, db):
     assert isinstance(exc, migrations.MigrationError)
     assert isinstance(exc.exc, ValueError)
     assert exc.msg == "Error while executing migration"
-    assert exc.output == [
-        ('info', 'test')
-    ]
+    assert exc.output == [['info', 'test']]
 
     # Without rollback DB is left as it is
     assert db.test.count_documents({}) == 1
@@ -254,9 +237,7 @@ def test_execute_migration_error(mock, db):
 
     op = record['ops'][0]
     assert op['type'] == 'migrate'
-    assert op['output'] == [
-        ['info', 'test'],  # Mongo store tuples as lists
-    ]
+    assert op['output'] == [['info', 'test']]
     assert op['state'] == {}
     assert isinstance(op['date'], datetime)
     assert not op['success']
@@ -423,3 +404,43 @@ def test_execute_migration_error_with_rollback_error(mock, db):
     assert op['state'] == {}
     assert isinstance(op['date'], datetime)
     assert not op['success']
+
+
+def test_execute_migration_dry_run(mock, db):
+    mock.add_migration('udata', 'migration.py', '''\
+    import logging
+
+    log = logging.getLogger(__name__)
+
+    def migrate(db):
+        db.test.insert_one({'key': 'value'})
+        log.info('test')
+    ''')
+
+    output = migrations.execute('udata', 'migration.py', dryrun=True)
+
+    assert output == []
+    assert db.test.find_one() is None
+    assert db.migrations.count_documents({}) == 0
+
+
+def test_unrecord_migration(db):
+    inserted = {
+        'plugin': 'test',
+        'filename': 'filename.py',
+        'ops': [{
+            'date': datetime.now(),
+            'type': 'migrate',
+            'script': 'script',
+            'output': 'output',
+            'state': {},
+            'success': True,
+        }]
+    }
+    db.migrations.insert_one(inserted)
+
+    # Remove the migration record, return True
+    assert migrations.unrecord('test', 'filename.py')
+    assert db.migrations.find_one() is None
+    # Already removed, return False
+    assert not migrations.unrecord('test', 'filename.py')

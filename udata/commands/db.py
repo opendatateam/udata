@@ -47,8 +47,8 @@ def status():
     '''Display the database migrations status'''
     for plugin, package, filename in migrations.list_availables():
         record = migrations.get_record(plugin, filename)
-        if record:
-            status = green(record['date'].strftime(DATE_FORMAT))
+        if record.ok:
+            status = green(record.last_date.strftime(DATE_FORMAT))
         else:
             status = yellow('Not applied')
         log_status(plugin, filename, status)
@@ -64,13 +64,15 @@ def migrate(record, dry_run=False):
     success = True
     for plugin, package, filename in migrations.list_availables():
         dbrecord = migrations.get_record(plugin, filename)
-        if dbrecord or not success:
+        if dbrecord.ok or not success:
             log_status(plugin, filename, cyan('Skipped'))
         else:
             status = magenta('Recorded') if record else yellow('Apply')
             log_status(plugin, filename, status)
             try:
-                output = migrations.execute(plugin, filename, package, recordonly=record, dryrun=dry_run)
+                output = migrations.execute(plugin, filename, package,
+                                            recordonly=record,
+                                            dryrun=dry_run)
             except migrations.MigrationError as me:
                 output = me.output
                 success = False

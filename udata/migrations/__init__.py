@@ -92,6 +92,13 @@ class Record(dict):
             return 'rollback-error' if op['type'] == 'rollback' else 'error'
 
     @property
+    def last_date(self):
+        if not self.exists():
+            return
+        op = self.ops[-1]
+        return op['date']
+
+    @property
     def ok(self):
         '''
         Is true if the migration is considered as successfully applied
@@ -127,22 +134,6 @@ def get_record(plugin, filename):
     '''Get an existing migration record if exists'''
     data = get_db().migrations.find_one({'plugin': plugin, 'filename': filename})
     return Record(data or {'plugin': plugin, 'filename': filename})
-
-
-def record(plugin, filename, module_name=None, dryrun=False):
-    '''Only record a migration without applying it'''
-    record = get_record(plugin, filename)
-    if record.ok:
-        return False
-    try:
-        path = _migration_path(plugin, filename, module_name)
-    except Exception:
-        return False
-    if not os.path.exists(path):
-        return False
-    migration = _load_migration(plugin, filename, module_name=module_name)
-    record.add('migrate', migration, 'Recorded only', {}, True)
-    return True
 
 
 def unrecord(plugin, filename):
@@ -195,11 +186,15 @@ def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
         error = SyntaxError('A migration should at least have a migrate(db) function')
         raise MigrationError('Error while executing migration', exc=error)
 
+    out = [['info', 'Recorded only']] if recordonly else []
+    state = {}
+
     if not recordonly and not dryrun:
         db = get_db()
-        db._state = {}
+        db._state = state
         try:
             migration.migrate(db)
+            out = _extract_output(q)
         except Exception as e:
             out = _extract_output(q)
             record.add('migrate', migration, out, db._state, False)
@@ -219,10 +214,9 @@ def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
                     fe = RollbackError('Error while executing migration rollback',
                                        output=out, exc=re, migrate_exc=fe)
             raise fe
-        
-    out = _extract_output(q)
+
     if not dryrun:
-        record.add('migrate', migration, out, db._state, True)
+        record.add('migrate', migration, out, state, True)
 
     return out
 
@@ -247,15 +241,8 @@ def _module_name(plugin):
         return 'udata'
     module = entrypoints.get_plugin_module('udata.models', current_app, plugin)
     if module is None:
-        raise ValueError('Plugin {} not found'.format(plugin))
+        raise MigrationError('Plugin {} not found'.format(plugin))
     return module.__name__
-
-
-def _migration_path(plugin, filename, module_name=None):
-    '''Get a migration file path'''
-    module_name = module_name or _module_name(plugin)
-    filename = os.path.join('migrations', filename)
-    return resource_filename(module_name, filename)
 
 
 def _load_migration(plugin, filename, module_name=None):
@@ -268,7 +255,11 @@ def _load_migration(plugin, filename, module_name=None):
     basename = os.path.splitext(os.path.basename(filename))[0]
     name = '.'.join((module_name, 'migrations', basename))
     filename = os.path.join('migrations', filename)
-    script = resource_string(module_name, filename)
+    try:
+        script = resource_string(module_name, filename)
+    except Exception:
+        msg = 'Unable to load file {} from module {}'.format(filename, module_name)
+        raise MigrationError(msg)
     spec = importlib.util.spec_from_loader(name, loader=None)
     module = importlib.util.module_from_spec(spec)
     exec(script, module.__dict__)
@@ -281,5 +272,6 @@ def _extract_output(q):
     out = []
     while not q.empty():
         record = q.get()
-        out.append((record.levelname.lower(), record.getMessage()))
+        # Use list instead of tuple to have the same data before and after mongo persist
+        out.append([record.levelname.lower(), record.getMessage()])
     return out
