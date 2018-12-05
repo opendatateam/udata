@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove BAN license [#364](https://github.com/etalab/udata-gouvfr/pull/364)
 
 ## 1.6.2 (2018-11-17)
 
