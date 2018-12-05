@@ -130,6 +130,33 @@ class Record(dict):
         return self.collection.delete_one({'_id': self._id})
 
 
+class Migration:
+    def __init__(self, plugin, filename):
+        self.plugin = plugin
+        self.filename = filename
+        self._record = None
+        self._module = None
+
+    @property
+    def record(self):
+        if self._record is None:
+            specs = {'plugin': self.plugin, 'filename': self.filename}
+            data = get_db().migrations.find_one(specs)
+            self._record = Record(data or specs)
+        return self._record
+
+    @property
+    def module(self):
+        if self._module is None:
+            self._module = load_migration(self.plugin, self.filename)
+        return self._module
+
+
+def get(plugin, filename):
+    '''Get a migration'''
+    return Migration(plugin, filename)
+
+
 def get_record(plugin, filename):
     '''Get an existing migration record if exists'''
     data = get_db().migrations.find_one({'plugin': plugin, 'filename': filename})
@@ -170,7 +197,7 @@ def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
     If recordonly is True, the migration is only recorded
     If dryrun is True, the migration is neither executed nor recorded
     '''
-    migration = _load_migration(plugin, filename, module_name)
+    migration = load_migration(plugin, filename, module_name)
     record = get_record(plugin, filename)
 
     q = queue.Queue(-1)  # no limit on size
@@ -245,7 +272,7 @@ def _module_name(plugin):
     return module.__name__
 
 
-def _load_migration(plugin, filename, module_name=None):
+def load_migration(plugin, filename, module_name=None):
     '''
     Load a migration from its python file
 

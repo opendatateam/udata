@@ -1,8 +1,9 @@
+import os
 import logging
 
 import click
 
-from udata.commands import cli, green, yellow, cyan, red, magenta, echo
+from udata.commands import cli, green, yellow, cyan, red, magenta, white, echo
 from udata import migrations
 
 # Date format used to for display
@@ -29,8 +30,18 @@ def normalize_migration(plugin_or_specs, filename):
 
 def log_status(plugin, filename, status):
     '''Properly display a migration status line'''
-    display = ':'.join((plugin, filename)) + ' '
+    name = os.path.splitext(filename)[0]
+    display = ':'.join((plugin, name)) + ' '
     log.info('%s [%s]', '{:.<70}'.format(display), status)
+
+
+def display_status(record):
+    if record.ok:
+        return green(record.last_date.strftime(DATE_FORMAT))
+    elif not record.exists():
+        return yellow('Not applied')
+    else:
+        return red(record.status)
 
 
 def format_output(output, success=True):
@@ -47,11 +58,7 @@ def status():
     '''Display the database migrations status'''
     for plugin, package, filename in migrations.list_availables():
         record = migrations.get_record(plugin, filename)
-        if record.ok:
-            status = green(record.last_date.strftime(DATE_FORMAT))
-        else:
-            status = yellow('Not applied')
-        log_status(plugin, filename, status)
+        log_status(plugin, filename, display_status(record))
 
 
 @grp.command()
@@ -100,3 +107,29 @@ def unrecord(plugin_or_specs, filename):
         log.info('Removed migration %s:%s', plugin, filename)
     else:
         log.error('Migration not found %s:%s', plugin, filename)
+
+
+@grp.command()
+@click.argument('plugin_or_specs')
+@click.argument('filename', default=None, required=False, metavar='[FILENAME]')
+def info(plugin_or_specs, filename):
+    '''
+    Display detailled info about a migration
+    '''
+    plugin, filename = normalize_migration(plugin_or_specs, filename)
+    migration = migrations.get(plugin, filename)
+    log_status(plugin, filename, display_status(migration.record))
+    try:
+        echo(migration.module.__doc__)
+    except migrations.MigrationError:
+        echo(yellow('Module not found'))
+
+    for op in migration.record['ops']:
+        display_op(op)
+
+
+def display_op(op):
+    timestamp = white(op['date'].strftime(DATE_FORMAT))
+    label = white(op['type'].title()) + ' '
+    echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
+    format_output(op['output'], op['success'])
