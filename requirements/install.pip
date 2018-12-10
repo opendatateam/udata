@@ -40,7 +40,7 @@ PyYAML==3.13
 rdflib==4.2.2
 rdflib-jsonld==0.4.0
 redis==2.10.6
-requests==2.20.0
+requests==2.21.0
 StringDist==1.0.9
 tlds
 unicodecsv==0.14.1
