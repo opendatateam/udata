@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-10-04 12:24+0200\n"
-"PO-Revision-Date: 2018-10-04 10:26\n"
+"PO-Revision-Date: 2018-12-19 15:41\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -372,7 +372,7 @@ msgstr "Bimensal"
 
 #: udata/core/dataset/models.py:49
 msgid "Quarterly"
-msgstr "Quadrimestral"
+msgstr "Trimestral"
 
 #: udata/core/dataset/models.py:50
 msgid "Three times a year"
