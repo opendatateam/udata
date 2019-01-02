@@ -63,7 +63,7 @@
     "less-loader": "^2.2.3",
     "mocha": "^3.2.0",
     "null-loader": "^0.1.1",
-    "phantomjs-prebuilt": "^2.1.7",
+    "phantomjs-prebuilt": "2.1.7",
     "script-loader": "^0.7.0",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
