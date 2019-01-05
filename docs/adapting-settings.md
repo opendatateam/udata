@@ -153,6 +153,28 @@ from udata.settings import Defaults
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 ```
 
+### EXPORT_CSV_MODELS
+
+**default**: `('dataset', 'resource', 'discussion', 'organization', 'reuse', 'tag')`
+
+List models that will be exported to CSV by the job `export-csv`.
+You can disable the feature by setting this to an empty list.
+
+### EXPORT_CSV_DATASET_INFO
+
+**default**:
+```
+{
+    'slug': 'export-csv',
+    'title': 'Export of portal data',
+    'description': 'This dataset holds the CSV exports of this portal\'s data.',
+    # this should point to an existing organization id
+    'organization': None,
+}
+```
+
+Values that will be used to find (`slug`) or create the dataset that holds the CSV exports created by `export-csv`.
+
 ## Map widget configuration
 
 ### MAP_TILES_URL
