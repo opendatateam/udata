@@ -30,7 +30,7 @@ lxml==4.2.5
 mongoengine==0.15.3
 msgpack-python==0.4.8
 netaddr==0.7.19
-pillow==5.3.0
+pillow==5.4.1
 bcrypt==3.1.4
 pydenticon==0.3.1
 pyliblzma==0.5.3
