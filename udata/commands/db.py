@@ -18,24 +18,14 @@ def grp():
     pass
 
 
-def normalize_migration(plugin_or_specs, filename):
-    if filename is None and ':' in plugin_or_specs:
-        plugin, filename = plugin_or_specs.split(':')
-    else:
-        plugin = plugin_or_specs
-    if not filename.endswith('.py'):
-        filename += '.py'
-    return plugin, filename
-
-
-def log_status(plugin, filename, status):
+def log_status(migration, status):
     '''Properly display a migration status line'''
-    name = os.path.splitext(filename)[0]
-    display = ':'.join((plugin, name)) + ' '
+    name = os.path.splitext(migration.filename)[0]
+    display = ':'.join((migration.plugin, name)) + ' '
     log.info('%s [%s]', '{:.<70}'.format(display), status)
 
 
-def display_status(record):
+def status_label(record):
     if record.ok:
         return green(record.last_date.strftime(DATE_FORMAT))
     elif not record.exists():
@@ -45,20 +35,19 @@ def display_status(record):
 
 
 def format_output(output, success=True):
-    echo('│')
+    echo('  │')
     for level, msg in output:
-        echo('│ {0}'.format(msg))
-    echo('│')
-    echo('└──[{0}]'.format(green('OK') if success else red('KO')))
+        echo('  │ {0}'.format(msg))
+    echo('  │')
+    echo('  └──[{0}]'.format(green('OK') if success else red('KO')))
     echo('')
 
 
 @grp.command()
 def status():
     '''Display the database migrations status'''
-    for plugin, package, filename in migrations.list_availables():
-        record = migrations.get_record(plugin, filename)
-        log_status(plugin, filename, display_status(record))
+    for migration in migrations.list_availables():
+        log_status(migration, status_label(migration.record))
 
 
 @grp.command()
@@ -69,21 +58,24 @@ def status():
 def migrate(record, dry_run=False):
     '''Perform database migrations'''
     success = True
-    for plugin, package, filename in migrations.list_availables():
-        dbrecord = migrations.get_record(plugin, filename)
-        if dbrecord.ok or not success:
-            log_status(plugin, filename, cyan('Skipped'))
+    for migration in migrations.list_availables():
+        if migration.record.ok or not success:
+            log_status(migration, cyan('Skipped'))
         else:
             status = magenta('Recorded') if record else yellow('Apply')
-            log_status(plugin, filename, status)
+            log_status(migration, status)
             try:
-                output = migrations.execute(plugin, filename, package,
-                                            recordonly=record,
-                                            dryrun=dry_run)
-            except migrations.MigrationError as me:
-                output = me.output
+                output = migration.execute(recordonly=record, dryrun=dry_run)
+            except migrations.RollbackError as re:
+                format_output(re.migrate_exc.output, False)
+                log_status(migration, red('Rollback'))
+                format_output(re.output, not re.exc)
                 success = False
-            format_output(output, success)
+            except migrations.MigrationError as me:
+                format_output(me.output, False)
+                success = False
+            else:
+                format_output(output, True)
     return success
 
 
@@ -101,12 +93,12 @@ def unrecord(plugin_or_specs, filename):
      - plugin:filename
      - plugin:fliename.js
     '''
-    plugin, filename = normalize_migration(plugin_or_specs, filename)
-    removed = migrations.unrecord(plugin, filename)
+    migration = migrations.get(plugin_or_specs, filename)
+    removed = migration.unrecord()
     if removed:
-        log.info('Removed migration %s:%s', plugin, filename)
+        log.info('Removed migration %s', migration.label)
     else:
-        log.error('Migration not found %s:%s', plugin, filename)
+        log.error('Migration not found %s', migration.label)
 
 
 @grp.command()
@@ -116,15 +108,14 @@ def info(plugin_or_specs, filename):
     '''
     Display detailled info about a migration
     '''
-    plugin, filename = normalize_migration(plugin_or_specs, filename)
-    migration = migrations.get(plugin, filename)
-    log_status(plugin, filename, display_status(migration.record))
+    migration = migrations.get(plugin_or_specs, filename)
+    log_status(migration, status_label(migration.record))
     try:
         echo(migration.module.__doc__)
     except migrations.MigrationError:
         echo(yellow('Module not found'))
 
-    for op in migration.record['ops']:
+    for op in migration.record.get('ops', []):
         display_op(op)
 
 

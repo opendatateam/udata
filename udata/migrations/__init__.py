@@ -57,8 +57,17 @@ class Record(dict):
     '''
     __getattr__ = dict.get
 
+    def load(self):
+        specs = {'plugin': self['plugin'], 'filename': self['filename']}
+        self.clear()
+        data = get_db().migrations.find_one(specs)
+        self.update(data or specs)
+
     def exists(self):
         return bool(self._id)
+
+    def __bool__(self):
+        return self.exists()
 
     @property
     def collection(self):
@@ -131,11 +140,31 @@ class Record(dict):
 
 
 class Migration:
-    def __init__(self, plugin, filename):
+    def __init__(self, plugin_or_specs, filename, module_name=None):
+        if filename is None and ':' in plugin_or_specs:
+            plugin, filename = plugin_or_specs.split(':')
+        else:
+            plugin = plugin_or_specs
+        if not filename.endswith('.py'):
+            filename += '.py'
+
         self.plugin = plugin
         self.filename = filename
+        self.module_name = module_name
         self._record = None
         self._module = None
+
+    @property
+    def collection(self):
+        return get_db().migrations
+
+    @property
+    def db_query(self):
+        return {'plugin': self.plugin, 'filename': self.filename}
+
+    @property
+    def label(self):
+        return ':'.join((self.plugin, self.filename))
 
     @property
     def record(self):
@@ -148,28 +177,97 @@ class Migration:
     @property
     def module(self):
         if self._module is None:
-            self._module = load_migration(self.plugin, self.filename)
+            self._module = load_migration(self.plugin, self.filename, module_name=self.module_name)
         return self._module
+
+    def __eq__(self, value):
+        return (
+            isinstance(value, Migration)
+            and getattr(value, 'plugin') == self.plugin
+            and getattr(value, 'filename') == self.filename
+        )
+
+    def execute(self, recordonly=False, dryrun=False):
+        '''
+        Execute a migration
+
+        If recordonly is True, the migration is only recorded
+        If dryrun is True, the migration is neither executed nor recorded
+        '''
+        q = queue.Queue(-1)  # no limit on size
+        handler = QueueHandler(q)
+        handler.setFormatter(MigrationFormatter())
+        logger = getattr(self.module, 'log', logging.getLogger(self.module.__name__))
+        logger.propagate = False
+        for h in logger.handlers:
+            logger.removeHandler(h)
+        logger.addHandler(handler)
+
+        if not hasattr(self.module, 'migrate'):
+            error = SyntaxError('A migration should at least have a migrate(db) function')
+            raise MigrationError('Error while executing migration', exc=error)
+
+        out = [['info', 'Recorded only']] if recordonly else []
+        state = {}
+
+        if not recordonly and not dryrun:
+            db = get_db()
+            db._state = state
+            try:
+                self.module.migrate(db)
+                out = _extract_output(q)
+            except Exception as e:
+                out = _extract_output(q)
+                self.add_record('migrate', out, db._state, False)
+                fe = MigrationError('Error while executing migration',
+                                    output=out, exc=e)
+                if hasattr(self.module, 'rollback'):
+                    try:
+                        self.module.rollback(db)
+                        out = _extract_output(q)
+                        self.add_record('rollback', out, db._state, True)
+                        msg = 'Error while executing migration, rollback has been applyied'
+                        fe = RollbackError(msg, output=out, migrate_exc=fe)
+                    except Exception as re:
+                        out = _extract_output(q)
+                        self.add_record('rollback', out, db._state, False)
+                        msg = 'Error while executing migration rollback'
+                        fe = RollbackError(msg, output=out, exc=re, migrate_exc=fe)
+                raise fe
+
+        if not dryrun:
+            self.add_record('migrate', out, state, True)
+
+        return out
+
+    def unrecord(self):
+        '''Only record a migration without applying it'''
+        if not self.record.exists():
+            return False
+        return bool(self.collection.delete_one(self.db_query).deleted_count)
+
+    def add_record(self, type, output, state, success):
+        script = inspect.getsource(self.module)
+        return Record(self.collection.find_one_and_update(
+            self.db_query,
+            {
+                '$push': {'ops': {
+                    'date': datetime.now(),
+                    'type': type,
+                    'script': script,
+                    'output': output,
+                    'state': state,
+                    'success': success,
+                }}
+            },
+            upsert=True,
+            return_document=ReturnDocument.AFTER,
+        ))
 
 
 def get(plugin, filename):
     '''Get a migration'''
     return Migration(plugin, filename)
-
-
-def get_record(plugin, filename):
-    '''Get an existing migration record if exists'''
-    data = get_db().migrations.find_one({'plugin': plugin, 'filename': filename})
-    return Record(data or {'plugin': plugin, 'filename': filename})
-
-
-def unrecord(plugin, filename):
-    '''Only record a migration without applying it'''
-    record = get_record(plugin, filename)
-    if not record.exists():
-        return False
-    record.delete()
-    return True
 
 
 def list_availables():
@@ -187,65 +285,7 @@ def list_availables():
     plugins = entrypoints.get_enabled('udata.models', current_app)
     for plugin, module in plugins.items():
         migrations.extend(_iter(plugin, module))
-    return sorted(migrations, key=lambda r: r[2])
-
-
-def execute(plugin, filename, module_name=None, recordonly=False, dryrun=False):
-    '''
-    Execute a migration given a plugin (and optionnaly its resolved module name) and a filename
-
-    If recordonly is True, the migration is only recorded
-    If dryrun is True, the migration is neither executed nor recorded
-    '''
-    migration = load_migration(plugin, filename, module_name)
-    record = get_record(plugin, filename)
-
-    q = queue.Queue(-1)  # no limit on size
-    handler = QueueHandler(q)
-    handler.setFormatter(MigrationFormatter())
-    logger = getattr(migration, 'log', logging.getLogger(migration.__name__))
-    logger.propagate = False
-    for h in logger.handlers:
-        logger.removeHandler(h)
-    logger.addHandler(handler)
-
-    if not hasattr(migration, 'migrate'):
-        error = SyntaxError('A migration should at least have a migrate(db) function')
-        raise MigrationError('Error while executing migration', exc=error)
-
-    out = [['info', 'Recorded only']] if recordonly else []
-    state = {}
-
-    if not recordonly and not dryrun:
-        db = get_db()
-        db._state = state
-        try:
-            migration.migrate(db)
-            out = _extract_output(q)
-        except Exception as e:
-            out = _extract_output(q)
-            record.add('migrate', migration, out, db._state, False)
-            fe = MigrationError('Error while executing migration',
-                                output=out, exc=e)
-            if hasattr(migration, 'rollback'):
-                try:
-                    migration.rollback(db)
-                    out = _extract_output(q)
-                    record.add('rollback', migration, out, db._state, True)
-                    fe = RollbackError('Error while executing migration, rollback has been applyied',
-                                       output=out,
-                                       migrate_exc=fe)
-                except Exception as re:
-                    out = _extract_output(q)
-                    record.add('rollback', migration, out, db._state, False)
-                    fe = RollbackError('Error while executing migration rollback',
-                                       output=out, exc=re, migrate_exc=fe)
-            raise fe
-
-    if not dryrun:
-        record.add('migrate', migration, out, state, True)
-
-    return out
+    return sorted(migrations, key=lambda m: m.filename)
 
 
 def _iter(plugin, module):
@@ -259,7 +299,7 @@ def _iter(plugin, module):
         return
     for filename in resource_listdir(module_name, 'migrations'):
         if filename.endswith('.py') and not filename.startswith('__'):
-            yield (plugin, module_name, filename)
+            yield Migration(plugin, filename, module_name)
 
 
 def _module_name(plugin):
