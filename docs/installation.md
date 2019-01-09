@@ -408,7 +408,7 @@ PLUGINS = (
 )
 
 # Optionnaly activate an installed theme
-THEME = 'my-theme'
+# THEME = 'my-theme'
 
 # Define where resources are stored and exposed
 FS_ROOT = '/srv/udata/fs'
