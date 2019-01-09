@@ -108,7 +108,7 @@ def test_list_available_migrations(mock):
     # Should not fail on plugins without migrations dir
     mock.ensure_plugin('nomigrations')
 
-    availables = migrations.list_availables()
+    availables = migrations.list_available()
 
     assert len(availables) == 3
     assert availables == [migrations.Migration(p, f) for p, f in (
@@ -298,7 +298,7 @@ def test_execute_migration_error_with_rollback(mock, db):
     exc = excinfo.value
     assert isinstance(exc, migrations.RollbackError)
     assert exc.exc is None
-    assert exc.msg == "Error while executing migration, rollback has been applyied"
+    assert exc.msg == "Error while executing migration, rollback has been applied"
 
     assert isinstance(exc.migrate_exc, migrations.MigrationError)
     assert isinstance(exc.migrate_exc.exc, ValueError)
@@ -356,7 +356,7 @@ def test_execute_migration_error_with_state_rollback(mock, db):
     exc = excinfo.value
     assert isinstance(exc, migrations.RollbackError)
     assert exc.exc is None
-    assert exc.msg == "Error while executing migration, rollback has been applyied"
+    assert exc.msg == "Error while executing migration, rollback has been applied"
 
     assert isinstance(exc.migrate_exc, migrations.MigrationError)
     assert isinstance(exc.migrate_exc.exc, ValueError)

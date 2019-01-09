@@ -46,7 +46,7 @@ def format_output(output, success=True):
 @grp.command()
 def status():
     '''Display the database migrations status'''
-    for migration in migrations.list_availables():
+    for migration in migrations.list_available():
         log_status(migration, status_label(migration.record))
 
 
@@ -58,7 +58,7 @@ def status():
 def migrate(record, dry_run=False):
     '''Perform database migrations'''
     success = True
-    for migration in migrations.list_availables():
+    for migration in migrations.list_available():
         if migration.record.ok or not success:
             log_status(migration, cyan('Skipped'))
         else:
@@ -106,7 +106,7 @@ def unrecord(plugin_or_specs, filename):
 @click.argument('filename', default=None, required=False, metavar='[FILENAME]')
 def info(plugin_or_specs, filename):
     '''
-    Display detailled info about a migration
+    Display detailed info about a migration
     '''
     migration = migrations.get(plugin_or_specs, filename)
     log_status(migration, status_label(migration.record))

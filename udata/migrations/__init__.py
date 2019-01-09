@@ -78,7 +78,7 @@ class Record(dict):
         '''
         Status is the status of the last operation.
 
-        Will be `None` is the record doesn't exists.
+        Will be `None` if the record doesn't exists.
         Possible values are:
           - success
           - rollback
@@ -226,7 +226,7 @@ class Migration:
                         self.module.rollback(db)
                         out = _extract_output(q)
                         self.add_record('rollback', out, db._state, True)
-                        msg = 'Error while executing migration, rollback has been applyied'
+                        msg = 'Error while executing migration, rollback has been applied'
                         fe = RollbackError(msg, output=out, migrate_exc=fe)
                     except Exception as re:
                         out = _extract_output(q)
@@ -241,7 +241,7 @@ class Migration:
         return out
 
     def unrecord(self):
-        '''Only record a migration without applying it'''
+        '''Delete a migration record'''
         if not self.record.exists():
             return False
         return bool(self.collection.delete_one(self.db_query).deleted_count)
@@ -270,11 +270,11 @@ def get(plugin, filename):
     return Migration(plugin, filename)
 
 
-def list_availables():
+def list_available():
     '''
     List available migrations for udata and enabled plugins
 
-    Each row is tuple with following signature:
+    Each row is a tuple with following signature:
 
         (plugin, package, filename)
     '''
@@ -290,7 +290,7 @@ def list_availables():
 
 def _iter(plugin, module):
     '''
-    Iter over migrations for a given plugin module
+    Iterate over migrations for a given plugin module
 
     Yield tuples in the form (plugin_name, module_name, filename)
     '''
@@ -303,7 +303,7 @@ def _iter(plugin, module):
 
 
 def _module_name(plugin):
-    '''Get the module namefor a given plugin'''
+    '''Get the module name for a given plugin'''
     if plugin == 'udata':
         return 'udata'
     module = entrypoints.get_plugin_module('udata.models', current_app, plugin)
