@@ -9,7 +9,7 @@ CommonMark==0.8.1
 elasticsearch==2.4.1
 elasticsearch-dsl==2.2.0
 factory-boy==2.11.1
-Faker==0.9.2
+Faker==1.0.1
 Flask-BabelEx==0.9.3
 Flask-Caching==1.4.0
 Flask-CDN==1.5.3
@@ -30,8 +30,8 @@ lxml==4.3.0
 mongoengine==0.15.3
 msgpack-python==0.4.8
 netaddr==0.7.19
+bcrypt==3.1.5
 pillow==5.4.1
-bcrypt==3.1.4
 pydenticon==0.3.1
 pyliblzma==0.5.3
 python-dateutil==2.7.5
@@ -40,7 +40,7 @@ PyYAML==3.13
 rdflib==4.2.2
 rdflib-jsonld==0.4.0
 redis==2.10.6
-requests==2.20.0
+requests==2.21.0
 StringDist==1.0.9
 tlds
 unicodecsv==0.14.1
