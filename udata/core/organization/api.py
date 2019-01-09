@@ -97,8 +97,8 @@ class OrganizationAPI(API):
 
         :raises PermissionDenied:
         '''
-        request_deleted = request.json.get('deleted', True) 
-        if org.deleted and request_deleted is not None: 
+        request_deleted = request.json.get('deleted', True)
+        if org.deleted and request_deleted is not None:
             api.abort(410, 'Organization has been deleted')
         EditOrganizationPermission(org).test()
         form = api.validate(OrganizationForm, org)
@@ -210,6 +210,9 @@ class MembershipAcceptAPI(MembershipAPI):
         '''Accept user membership to a given organization.'''
         EditOrganizationPermission(org).test()
         membership_request = self.get_or_404(org, id)
+
+        if org.is_member(membership_request.user):
+            return org.member(membership_request.user), 409
 
         membership_request.status = 'accepted'
         membership_request.handled_by = current_user._get_current_object()

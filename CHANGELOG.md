@@ -2,9 +2,8 @@
 
 ## Current (in progress)
 
-### Bugfixes
-
 - Pin phantomjs to version `2.1.7` [#1975](https://github.com/opendatateam/udata/pull/1975)
+- Protect membership accept route against flood [#1984](https://github.com/opendatateam/udata/pull/1984)
 
 ## 1.6.2 (2018-11-05)
 

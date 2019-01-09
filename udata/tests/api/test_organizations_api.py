@@ -232,6 +232,14 @@ class MembershipAPITest:
         assert request.handled_on is not None
         assert request.refusal_comment is None
 
+        # test accepting twice will raise 409
+        api_url = url_for(
+            'api.accept_membership',
+            org=organization,
+            id=membership_request.id)
+        response = api.post(api_url)
+        assert_status(response, 409)
+
     def test_only_admin_can_accept_membership(self, api):
         user = api.login()
         applicant = UserFactory()
