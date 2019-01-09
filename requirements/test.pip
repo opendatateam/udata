@@ -1,7 +1,7 @@
 feedparser==5.2.1
 httpretty==0.9.6
 mock==2.0.0
-pytest==3.10.0
+pytest==4.1.0
 pytest-env==0.6.2
 pytest-flask==0.14.0
 pytest-mock==1.10.0
