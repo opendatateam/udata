@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2018-10-04 12:24+0200\n"
-"PO-Revision-Date: 2018-12-19 15:41\n"
+"PO-Revision-Date: 2019-01-15 11:12\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -63,7 +63,7 @@ msgstr "Nome"
 
 #: udata/auth/forms.py:12
 msgid "First name is required"
-msgstr "O nome próprio é obrigatório"
+msgstr "O primeiro nome é obrigatório"
 
 #: udata/auth/forms.py:14 udata/core/user/forms.py:18
 #: udata/templates/user/list.html:31
@@ -72,7 +72,7 @@ msgstr "Apelido"
 
 #: udata/auth/forms.py:14
 msgid "Last name is required"
-msgstr "O apelido é obrigatório"
+msgstr "O último nome é obrigatório"
 
 #: udata/commands/init.py:31
 msgid "Do you want to create a superadmin user?"
@@ -404,7 +404,7 @@ msgstr "Irregular"
 
 #: udata/core/dataset/models.py:79
 msgid "Main file"
-msgstr "Arquivo principal"
+msgstr "Ficheiro principal"
 
 #: udata/core/dataset/models.py:80
 msgid "Documentation"
@@ -1790,7 +1790,7 @@ msgstr "Eliminado"
 
 #: udata/templates/dataset/display.html:97
 msgid "See also: community resources"
-msgstr "Veja também: recursos da comunidade"
+msgstr "Ver também: recursos da comunidade"
 
 #: udata/templates/dataset/display.html:118
 #, python-format
@@ -1860,7 +1860,7 @@ msgstr "Recursos da comunidade"
 
 #: udata/templates/dataset/display.html:398
 msgid "Add a community resource"
-msgstr ""
+msgstr "Adicionar recurso da comunidade"
 
 #: udata/templates/dataset/display.html:405
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
@@ -1909,7 +1909,7 @@ msgstr "Organização"
 
 #: udata/templates/dataset/search-labels.html:25
 msgid "Resource type"
-msgstr ""
+msgstr "Tipo de recurso"
 
 #: udata/templates/dataset/search-panel.html:11
 msgid "Licenses"
@@ -1945,7 +1945,7 @@ msgstr "Pré-visualizar"
 
 #: udata/templates/dataset/resource/card.html:56
 msgid "Visit"
-msgstr ""
+msgstr "Visita"
 
 #: udata/templates/dataset/resource/card.html:58
 msgid "Download"
@@ -2134,7 +2134,7 @@ msgstr "%(user)s encerrou uma discussão sobre %(type)s %(subject)s"
 #: udata/templates/mail/new_issue.html:29
 #: udata/templates/mail/new_issue_comment.html:31
 msgid "Message"
-msgstr ""
+msgstr "Mensagem"
 
 #: udata/templates/mail/discussion_closed.html:40
 #: udata/templates/mail/new_discussion.html:38
@@ -2518,11 +2518,11 @@ msgstr "Publicado em %(date)s"
 
 #: udata/templates/post/display.html:62 udata/templates/post/display.html:65
 msgid "Draft"
-msgstr ""
+msgstr "Rascunho"
 
 #: udata/templates/post/display.html:63
 msgid "This post is a draft and will not be visible by other users"
-msgstr ""
+msgstr "Este artigo é um rascunho e não será visível por outros utilizadores"
 
 #: udata/templates/post/display.html:69
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
@@ -2531,14 +2531,14 @@ msgstr "Este artigo foi apagado. A alteração será definitiva dentro de 24 hor
 #: udata/templates/post/display.html:136
 msgid "Associated reuse"
 msgid_plural "Associated reuses"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Reutilizações associadas"
+msgstr[1] "Reutilizações associadas"
 
 #: udata/templates/post/display.html:147
 msgid "Associated dataset"
 msgid_plural "Associated datasets"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Conjuntos de dados associados"
+msgstr[1] "Conjuntos de dados associados"
 
 #: udata/templates/post/display.html:169 udata/templates/post/display.html:171
 msgid "Previous post"
