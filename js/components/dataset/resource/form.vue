@@ -231,9 +231,10 @@ export default {
             return Boolean(this.resource.url || this.hasChosenRemoteFile);
         },
         showUploadZone() {
+            // Upload in progress
             if (this.files.length) return false;
-            if (this.hasChosenRemoteFile) return false;
-            if (this.resource.url && !this.hasUploadedFile) return false;
+            // Upload done
+            if (this.hasData || this.hasUploadedFile) return false;
             return true;
         },
         hasUploadedFile() {
