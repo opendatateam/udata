@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Remove extra attributes on user deletion [#1961](https://github.com/opendatateam/udata/pull/1961)
 - Pin phantomjs to version `2.1.7` [#1975](https://github.com/opendatateam/udata/pull/1975)
 - Protect membership accept route against flood [#1984](https://github.com/opendatateam/udata/pull/1984)
 - Ensure compatibility with IE11 and Firefox ESR [#1990](https://github.com/opendatateam/udata/pull/1990)
