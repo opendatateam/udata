@@ -61,7 +61,7 @@ module.exports = function(config) {
                 }
             },
             babel: {
-                presets: ['es2015'],
+                presets: ['env'],
                 comments: false,
                 plugins: [
                     ['transform-builtin-extend', {globals: ['Error']}],
