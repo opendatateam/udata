@@ -1,6 +1,6 @@
 import API from 'api';
 import {_} from 'i18n';
-import {setattr, isObject, isString} from 'utils';
+import {setattr, isObject, isString, findComponent} from 'utils';
 import log from 'logger';
 import moment from 'moment';
 import $ from 'jquery-validation';  // Ensure jquery & jquery.validate plugin are both loaded
@@ -69,7 +69,6 @@ const TEXT_INPUTS = [
  * Form tags that should be considered as text
  */
 const TEXT_TAGS = ['select', 'textarea'];
-
 
 export default {
     name: 'base-form',
@@ -170,9 +169,7 @@ export default {
                     label.remove();
                 }
             },
-            errorPlacement(error, element) {
-                $(element).closest('.form-group,.field-wrapper').append(error);
-            }
+            showErrors: this.showErrors,
         });
         this.$broadcast('form:ready');
     },
@@ -280,6 +277,29 @@ export default {
         error_element(id, message) {
             $(`#form-${id}-error`).remove();
             return `<p class="form-error" id="form-${id}-error">${message}</p>`;
+        },
+        /**
+         * Inject jQuery.Validation errors into their fields
+         *
+         * See: https://jqueryvalidation.org/category/plugin/#showerrors
+         */
+        showErrors(errorMap, errorList) {
+            errorList.forEach(error => {
+                const $field = this.findField(error.element);
+                $field.errors.push(error.message);
+            });
+        },
+        /**
+         * Find the form field containing a given DOM field
+         *
+         * @param {Element} el The DOM element to match
+         */
+        findField(el) {
+            let $component = findComponent(this, el);
+            while (!$component.isField) {
+                $component = $component.$parent;
+            }
+            return $component;
         }
     }
 };

@@ -73,6 +73,24 @@ export function escapeRegex(str) {
     return str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
 }
 
+/**
+ * Find the component containning a given element (if any)
+ *
+ * @param {VueComponent} $root The root component to search into
+ * @param {Element} el The DOM element to match
+ */
+export function findComponent($root, el) {
+    if ($root.$el === el) return $root;
+    if (!$root.$el.contains(el)) return;  // Don't loop if not necessary
+
+    let $match = $root;
+    $root.$children.find($child => {
+        $match = findComponent($child, el);
+        return $match;
+    });
+    return $match;
+}
+
 
 export default {
     isFunction,
@@ -82,4 +100,5 @@ export default {
     setattr,
     parseQS,
     escapeRegex,
+    findComponent,
 };
