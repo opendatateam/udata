@@ -39,6 +39,7 @@ export const BaseField = {
     components: {
         // Only register the common components
         'text-input': require('components/form/text-input.vue'),
+        'number-input': require('components/form/number-input.vue'),
         'hidden-input': require('components/form/hidden-input.vue'),
         'select-input': require('components/form/select-input.vue'),
         'markdown-editor': require('components/form/markdown-editor.vue'),
@@ -117,6 +118,8 @@ export const BaseField = {
                 widget = this.field.widget;
             } else if (this.property.type === 'boolean') {
                 widget = 'checkbox';
+            } else if (this.property.type === 'integer') {
+                widget = 'number-input';
             } else if (this.property.type === 'string') {
                 if (this.property.format === 'markdown') {
                     widget = 'markdown-editor';

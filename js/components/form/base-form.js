@@ -55,6 +55,7 @@ const TEXT_INPUTS = [
     'email',
     'hidden',
     'month',
+    'number',
     'range',
     'search',
     'tel',
