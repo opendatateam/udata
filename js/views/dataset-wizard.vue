@@ -63,6 +63,7 @@ export default {
                 component: ResourceForm,
                 init: (component) => {
                     component.dataset = this.dataset;
+                    component.isUpload = true;
                 },
                 next: (component) => {
                     if (component.validate()) {

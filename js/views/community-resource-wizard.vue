@@ -32,6 +32,7 @@ export default {
                     this.dataset.fetch(this.dataset_id);
                     component.dataset = this.dataset;
                     component.resource = this.communityResource;
+                    component.isUpload = true;
                 },
                 next: (component) => {
                     if (component.validate()) {

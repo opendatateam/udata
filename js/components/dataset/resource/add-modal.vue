@@ -4,7 +4,7 @@
     :title="_('Add a resource')" :large="editing">
 
     <div class="modal-body">
-        <resource-form v-ref:form :dataset="dataset"></resource-form>
+        <resource-form v-ref:form :dataset="dataset" is-upload></resource-form>
     </div>
 
     <footer class="modal-footer text-center">
@@ -27,9 +27,11 @@
 import Dataset from 'models/dataset';
 import Modal from 'components/modal.vue';
 import ResourceForm from 'components/dataset/resource/form.vue';
+import WatchRefs from 'mixins/watch-refs';
 
 export default {
     name: 'add-resource-modal',
+    mixins: [WatchRefs],
     props: {
         dataset: {
             type: Dataset,
@@ -38,24 +40,24 @@ export default {
     },
     components: {Modal, ResourceForm},
     data() {
-        return {ready: false};
-    },
-    computed: {
-        editing() {
-            return this.ready && this.$refs && this.$refs.form && this.$refs.form.hasData;
-        }
-    },
-    ready() {
-        this.ready = true; // Artificially force editing update because $refs is not reactive
+        return {editing: false};
     },
     methods: {
+        upload() {
+            this.$refs.form.isUpload = true;
+        },
         save() {
             if (this.$refs.form.validate()) {
                 this.dataset.save_resource(this.$refs.form.serialize());
                 this.$refs.modal.close();
                 return true;
             }
-        }
-    }
+        },
+    },
+    watchRefs: {
+        'form.hasData': function(hasData) {
+            this.editing = hasData;
+        },
+    },
 };
 </script>

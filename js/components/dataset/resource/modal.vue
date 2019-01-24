@@ -59,7 +59,7 @@
             </dl>
         </div>
 
-        <resource-form v-if="edit" v-ref:form :dataset="dataset" :resource="resource" :hide-notifications="false"></resource-form>
+        <resource-form v-show="edit" v-ref:form :dataset="dataset" :resource="resource" :hide-notifications="false"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -72,19 +72,16 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" v-show="!edit && !confirm"
+        <!-- Main close button (visible on read-only display) -->
+        <button type="button" v-show="!edit && !confirm && !isUpload"
                 class="btn btn-primary btn-sm btn-flat pull-left"
                 @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
-        <button type="button" v-show="confirm"
+        <!-- Same cancel button for every action-->
+        <button type="button" v-show="edit || confirm || isUpload"
                 class="btn btn-warning btn-sm btn-flat pull-left"
-                @click="confirm = false">
-            {{ _('Cancel') }}
-        </button>
-        <button type="button" v-show="edit"
-                class="btn btn-primary btn-sm btn-flat pull-left"
-                @click="edit = false">
+                @click="cancel">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="!edit && !confirm && can_edit"
@@ -102,7 +99,12 @@
                 @click="delete_confirmed">
             {{ _('Confirm') }}
         </button>
-        <button type="button" v-show="edit"
+        <button type="button" v-show="edit && hasUploadedFile && !isUpload"
+            class="btn btn-outline btn-flat"
+            @click="upload">
+            {{ _('Replace the file') }}
+        </button>
+        <button type="button" v-show="edit && !isUpload"
                 class="btn btn-outline btn-flat"
                 @click="save">
             {{ _('Save') }}
@@ -124,17 +126,21 @@ import OrgCard from 'components/organization/card.vue'
 import UserCard from 'components/user/card.vue'
 import DatasetFilters from 'components/dataset/filters';
 
+import WatchRefs from 'mixins/watch-refs';
+
 export default {
     name: 'resource-modal',
     components: {Modal, ResourceForm, OrgCard, UserCard},
-    mixins: [DatasetFilters],
+    mixins: [DatasetFilters, WatchRefs],
     data() {
         return {
             edit: false,
             confirm: false,
             dataset: this.$parent.$parent.dataset,
             resource: new Resource(),
-            next_route: null
+            next_route: null,
+            isUpload: false,
+            hasUploadedFile: false,
         };
     },
     computed: {
@@ -147,7 +153,7 @@ export default {
         },
         is_community() {
             return this.resource instanceof CommunityResource
-        }
+        },
     },
     events: {
         'modal:closed': function() {
@@ -176,6 +182,18 @@ export default {
         }
     },
     methods: {
+        cancel() {
+            if (this.confirm) {
+                this.confirm = false;
+            } else if (this.edit && !this.isUpload) {
+                this.edit = false;
+            } else if (this.isUpload) {
+                this.$refs.form.isUpload = false;
+            }
+        },
+        upload() {
+            this.$refs.form.isUpload = true;
+        },
         save() {
             if (this.$refs.form.validate()) {
                 if (this.is_community) {
@@ -199,7 +217,7 @@ export default {
                 this.dataset.delete_resource(this.resource.id);
                 this.$refs.modal.close();
             }
-        }
+        },
     },
     watch: {
         'dataset.resources': function(resources) {
@@ -212,6 +230,14 @@ export default {
                 });
             }
         }
-    }
+    },
+    watchRefs: {
+        'form.isUpload': function(isUpload) {
+            this.isUpload = isUpload;
+        },
+        'form.hasUploadedFile': function(hasUploadedFile) {
+            this.hasUploadedFile = hasUploadedFile;
+        }
+    },
 };
 </script>
