@@ -115,3 +115,97 @@ export default {
     }
 };
 </script>
+
+<style lang="less">
+@import '~less/admin/variables';
+@import '~bootstrap/less/mixins';
+@import '~selectize/src/less/selectize.bootstrap3.less';
+
+@selectize-color-item: @label-primary-bg;
+@selectize-color-item-text: @label-color;
+@selectize-color-item-active-text: @label-link-hover-color;
+@selectize-padding-item-x: 5px;
+@selectize-padding-item-y: 2px;
+
+.selectize-control {
+    .selectize-input {
+        border-radius: 0;
+
+        // Tags
+        .multi& > div {
+            -webkit-border-radius: 0;
+               -moz-border-radius: 0;
+                    border-radius: 0;
+        }
+
+        .card {
+            margin: 0;
+        }
+
+        &.focus {
+            border-color: #3c8dbc;
+            -webkit-box-shadow: none;
+                    box-shadow: none;
+        }
+
+        .form-group.has-error & {
+            border-color: @red;
+        }
+
+        .form-group.has-success & {
+            border-color: @green;
+        }
+    }
+
+    .selectize-dropdown .selectize-option {
+        .logo {
+            width: 25px;
+            height: 25px;
+            border: 1px solid @gray-lighter;
+            margin-right: 5px;
+            img {
+                width: 100%;
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
+
+    }
+
+    .selectize-dropdown-content > .create {
+        padding: @selectize-padding-dropdown-item-y * 2 @selectize-padding-dropdown-item-x;
+    }
+
+    &.plugin-remove_button .card-input {
+        position: relative;
+        .card {
+            margin-right: 10px;
+        }
+
+        a.remove {
+            position: absolute;
+            top: 0;
+            right: 4px;
+        }
+    }
+
+    .card-input {
+        display: block;
+    }
+
+    .locked, .locked.input-active {
+        cursor: not-allowed !important;
+        background-color: #DCDCDC !important;
+        opacity: 1;
+    }
+
+    a.remove {
+        color: white;
+        margin-left: 4px;
+
+        &:hover {
+            color: red;
+        }
+    }
+}
+</style>
