@@ -70,7 +70,7 @@
         margin-bottom: 0;
     }
 
-    .drop-active > & {
+    .drop-active  & {
         border: 4px dashed @green;
     }
 
