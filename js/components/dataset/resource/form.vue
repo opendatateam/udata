@@ -202,43 +202,45 @@ export default {
                     label: this._('Publication date'),
                     widget: 'date-picker'
                 }],
-            file_fields: [{
-                    id: 'url',
-                    label: this._('URL'),
-                    readonly: false,
-                    widget: 'url-field',
-                }, {
-                    id: 'filesize',
-                    label: this._('Size'),
-                    readonly: false
-                }, {
-                    id: 'format',
-                    label: this._('Format'),
-                    widget: 'format-completer',
-                    readonly: false
-                }, {
-                    id: 'mime',
-                    label: this._('Mime Type'),
-                    readonly: false
-                }, {
-                    id: 'checksum',
-                    label: this._('Checksum'),
-                    widget: 'checksum',
-                    readonly: false
-                }],
-            uploadMultiple: false,
             progress: 0,
         };
     },
     computed: {
-        hasData() {
-            return Boolean(this.resource.url || this.hasChosenRemoteFile);
-        },
         canDrop() {
             return this.isUpload && !this.files.length;
         },
+        hasData() {
+            return Boolean(this.resource.url || this.hasChosenRemoteFile);
+        },
         hasUploadedFile() {
             return this.resource.filetype == 'file';
+        },
+        file_fields() {
+            const readonly = this.resource.filetype === 'file';
+            return [{
+                id: 'url',
+                label: this._('URL'),
+                widget: 'url-field',
+                readonly,
+            }, {
+                id: 'filesize',
+                label: this._('Size'),
+                readonly,
+            }, {
+                id: 'format',
+                label: this._('Format'),
+                widget: 'format-completer',
+                readonly,
+            }, {
+                id: 'mime',
+                label: this._('Mime Type'),
+                readonly,
+            }, {
+                id: 'checksum',
+                label: this._('Checksum'),
+                widget: 'checksum',
+                readonly,
+            }]
         },
         fields() {
             return this.generic_fields.concat(this.file_fields);
@@ -291,10 +293,6 @@ export default {
         },
         postUpload() {
             this.resource.filetype = 'file';
-            this.file_fields = this.file_fields.map(ff => {
-                ff.readonly = true;
-                return ff;
-            });
             this.isUpload = false;
         },
         serialize() {
