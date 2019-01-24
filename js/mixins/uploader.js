@@ -63,9 +63,14 @@ export default {
             HAS_FILE_API,
         };
     },
+    computed: {
+        canDrop() {
+            return true;
+        },
+    },
     ready() {
         this.$dnd = new qq.DragAndDrop({
-            dropZoneElements: [this.$el],
+            dropZoneElements: this.canDrop ? [this.$el] : [],
             classes: {
                 dropActive: this.$options.dropActive || 'drop-active'
             },
@@ -77,6 +82,13 @@ export default {
     },
 
     watch: {
+        canDrop(canDrop) {
+            if (canDrop) {
+                this.$dnd.setupExtraDropzone(this.$el);
+            } else {
+                this.$dnd.dispose();
+            }
+        },
         upload_endpoint() {
             this._build_uploader();
         }
@@ -210,7 +222,9 @@ export default {
          * See: http://docs.fineuploader.com/branch/master/features/drag-and-drop.html#processingDroppedFilesComplete
          */
         on_dropped_files_complete(files) {
-            this.$uploader.addFiles(files); // this submits the dropped files to Fine Uploader
+            if (this.canDrop) {
+                this.$uploader.addFiles(files); // this submits the dropped files to Fine Uploader
+            }
         },
 
         /**

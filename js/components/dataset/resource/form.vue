@@ -70,7 +70,7 @@
         margin-bottom: 0;
     }
 
-    .drop-active > & {
+    .drop-active  & {
         border: 4px dashed @green;
     }
 
@@ -99,10 +99,10 @@
 
 <template>
 <div>
-    <form-horizontal v-if="hasData" class="resource-form file-resource-form"
+    <form-horizontal v-if="hasData && !isUpload" class="resource-form file-resource-form"
         :fields="fields" :model="resource" v-ref:form>
     </form-horizontal>
-    <div v-show="files.length" v-for="file in files" class="info-box bg-aqua">
+    <div v-for="file in files" track-by="id" class="info-box bg-aqua">
         <span class="info-box-icon">
             <span class="fa fa-cloud-upload"></span>
         </span>
@@ -117,7 +117,7 @@
             </span>
         </div>
     </div>
-    <div class="resource-choose-upload" v-if="showUploadZone">
+    <div class="resource-choose-upload" v-if="isUpload && !files.length">
         <div class="resource-upload-dropzone">
             <div class="row">
                 <div class="text-center col-xs-12">
@@ -137,7 +137,7 @@
             </div>
         </div>
         <div v-if="!hasUploadedFile">
-            <a href="" @click.prevent.stop="hasChosenRemoteFile = true">
+            <a href @click.prevent.stop="manual">
                 {{ _("You can also link to an existing remote file or URL by clicking here.") }}
             </a>
         </div>
@@ -174,6 +174,10 @@ export default {
             )}
         },
         hideNotifications: false,
+        isUpload: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
@@ -198,46 +202,45 @@ export default {
                     label: this._('Publication date'),
                     widget: 'date-picker'
                 }],
-            file_fields: [{
-                    id: 'url',
-                    label: this._('URL'),
-                    readonly: false,
-                    widget: 'url-field',
-                }, {
-                    id: 'filesize',
-                    label: this._('Size'),
-                    readonly: false
-                }, {
-                    id: 'format',
-                    label: this._('Format'),
-                    widget: 'format-completer',
-                    readonly: false
-                }, {
-                    id: 'mime',
-                    label: this._('Mime Type'),
-                    readonly: false
-                }, {
-                    id: 'checksum',
-                    label: this._('Checksum'),
-                    widget: 'checksum',
-                    readonly: false
-                }],
-            uploadMultiple: false,
             progress: 0,
         };
     },
     computed: {
+        canDrop() {
+            return this.isUpload && !this.files.length;
+        },
         hasData() {
             return Boolean(this.resource.url || this.hasChosenRemoteFile);
         },
-        showUploadZone() {
-            if (this.files.length) return false;
-            if (this.hasChosenRemoteFile) return false;
-            if (this.resource.url && !this.hasUploadedFile) return false;
-            return true;
-        },
         hasUploadedFile() {
             return this.resource.filetype == 'file';
+        },
+        file_fields() {
+            const readonly = this.resource.filetype === 'file';
+            return [{
+                id: 'url',
+                label: this._('URL'),
+                widget: 'url-field',
+                readonly,
+            }, {
+                id: 'filesize',
+                label: this._('Size'),
+                readonly,
+            }, {
+                id: 'format',
+                label: this._('Format'),
+                widget: 'format-completer',
+                readonly,
+            }, {
+                id: 'mime',
+                label: this._('Mime Type'),
+                readonly,
+            }, {
+                id: 'checksum',
+                label: this._('Checksum'),
+                widget: 'checksum',
+                readonly,
+            }]
         },
         fields() {
             return this.generic_fields.concat(this.file_fields);
@@ -284,12 +287,13 @@ export default {
         },
     },
     methods: {
+        manual() {
+            this.hasChosenRemoteFile = true;
+            this.isUpload = false;
+        },
         postUpload() {
             this.resource.filetype = 'file';
-            this.file_fields = this.file_fields.map(ff => {
-                ff.readonly = true;
-                return ff;
-            });
+            this.isUpload = false;
         },
         serialize() {
             // Required because of readonly fields and filetype.
