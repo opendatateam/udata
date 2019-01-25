@@ -6,6 +6,7 @@
     :required="required"
     :value="value | lst2str"
     :readonly="readonly || false"
+    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
     />
 </template>
 

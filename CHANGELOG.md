@@ -10,6 +10,7 @@
 - Centralize `selectize` handling and style in `base-completer` and apply some fixes [1992](https://github.com/opendatateam/udata/pull/1992)
 - Added the missing `number` input field widget [#1993](https://github.com/opendatateam/udata/pull/1993)
 - Fix the organization private datasets and reuses counters [#1994](https://github.com/opendatateam/udata/pull/1994)
+- Disable autocorrect, spellcheck... on search and completion fields [#1995](https://github.com/opendatateam/udata/pull/1995)
 
 ## 1.6.2 (2018-11-05)
 
