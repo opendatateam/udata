@@ -7,6 +7,7 @@
 - Protect membership accept route against flood [#1984](https://github.com/opendatateam/udata/pull/1984)
 - Ensure compatibility with IE11 and Firefox ESR [#1990](https://github.com/opendatateam/udata/pull/1990)
 - Lots of fixes on the resource form. Be explicit about uploading a new file [#1991](https://github.com/opendatateam/udata/pull/1991)
+- Centralize `selectize` handling and style in `base-completer` and apply some fixes [1992](https://github.com/opendatateam/udata/pull/1992)
 
 ## 1.6.2 (2018-11-05)
 
