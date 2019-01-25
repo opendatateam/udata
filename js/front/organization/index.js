@@ -30,6 +30,8 @@ new Vue({
             followersVisible: false,
             // Current tab index
             currentTab: 0,
+            // URL hash value
+            hash: undefined,
         };
     },
     methods: {
@@ -49,13 +51,12 @@ new Vue({
 
         // Restore tab from hash
         if (location.hash !== '') {
-            this.$refs.tabs.$children.some((tab, index) => {
-                if (`#${tab.id}` === location.hash) {
-                    this.currentTab = index;
-                    return true;
-                }
-            });
+            this.hash = location.hash;
         }
+        // Keep tab in sync with URL hash
+        window.addEventListener('hashchange', () => {
+            this.hash = location.hash;
+        });
     },
     watch: {
         /**
@@ -64,6 +65,14 @@ new Vue({
         */
         currentTab(index) {
             location.hash = this.$refs.tabs.$children[index].id;
+        },
+        hash(hash) {
+            this.$refs.tabs.$children.some((tab, index) => {
+                if (`#${tab.id}` === hash) {
+                    this.currentTab = index;
+                    return true;
+                }
+            });
         }
     }
 });

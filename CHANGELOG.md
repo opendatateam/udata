@@ -12,6 +12,7 @@
 - Fix the organization private datasets and reuses counters [#1994](https://github.com/opendatateam/udata/pull/1994)
 - Disable autocorrect, spellcheck... on search and completion fields [#1995](https://github.com/opendatateam/udata/pull/1995)
 - Fix harvest preview in edit form not taking configuration (features and filters) [#1996](https://github.com/opendatateam/udata/pull/1996)
+- Ensure organization page react to URL hash changes (including those from right sidebar) [#1997](https://github.com/opendatateam/udata/pull/1997)
 
 ## 1.6.2 (2018-11-05)
 
