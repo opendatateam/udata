@@ -48,6 +48,13 @@ export default {
             }
         }
     },
+    ready() {
+        this.source.$on('updated', () => {
+            this.$nextTick(() => {
+                this.previewSource = Object.assign(new HarvestSource(), this.$refs.form.serialize());
+            });
+        });
+    },
     methods: {
         save() {
             const form = this.$refs.form;
