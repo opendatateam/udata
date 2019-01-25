@@ -47,11 +47,11 @@
 {# Datasets and reuses tabs #}
 {% set dataset_tabs = (
     ('datasets', ngettext('%(num)d dataset', '%(num)d datasets', datasets.total or 0), datasets, {'organization': org.id|string}),
-    ('private-datasets', ngettext('%(num)d private dataset', '%(num)d private datasets', private_datasets.total or 0), private_datasets, {}),
+    ('private-datasets', ngettext('%(num)d private dataset', '%(num)d private datasets', private_datasets|length), private_datasets, {}),
 ) %}
 {% set reuse_tabs = (
     ('reuses', ngettext('%(num)d reuse', '%(num)d reuses', reuses.total or 0), reuses, {'organization': org.id|string}),
-    ('private-reuses', ngettext('%(num)d private reuse', '%(num)d private reuses', private_reuses.total or 0), private_reuses, {}),
+    ('private-reuses', ngettext('%(num)d private reuse', '%(num)d private reuses', private_reuses|length), private_reuses, {}),
 ) %}
 {% set user_tabs = (
     ('members', _('Members'), org.members, {}),
