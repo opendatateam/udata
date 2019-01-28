@@ -43,6 +43,9 @@ export default {
                 label: this._('New dataset'),
                 subtitle: this._('Describe your dataset'),
                 component: DatasetForm,
+                init: (component) => {
+                    this.dataset.$once('updated', this.$refs.wizard.go_next);
+                },
                 next: (component) => {
                     if (component.validate()) {
                         const data = component.serialize();
@@ -51,9 +54,6 @@ export default {
                         }
                         Object.assign(this.dataset, data);
                         this.dataset.save(component.on_error);
-                        this.dataset.$once('updated', () => {
-                            this.$refs.wizard.go_next();
-                        });
                         return false;
                     }
                 }
@@ -64,14 +64,12 @@ export default {
                 init: (component) => {
                     component.dataset = this.dataset;
                     component.isUpload = true;
+                    this.dataset.$once('updated', this.$refs.wizard.go_next);
                 },
                 next: (component) => {
                     if (component.validate()) {
                         const resource = component.serialize();
-                        this.dataset.save_resource(resource);
-                        this.dataset.$once('updated', () => {
-                            this.$refs.wizard.go_next();
-                        });
+                        this.dataset.save_resource(resource, component.on_error);
                         return false;
                     }
                 }

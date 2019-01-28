@@ -23,23 +23,20 @@ export default class CommunityResource extends Model {
     /**
      * Create or update the given community resource
      */
-    save() {
+    save(on_error) {
         if (this.id) {
-            this.update(this);
+            this.update(this, on_success, on_error);
         } else {
             this.$api('datasets.create_community_resource', {
                 payload: this
-            },
-            this.on_fetched);
+            }, this.on_fetched, on_error);
         }
     }
 
-    update(data) {
+    update(data, on_error) {
         this.$api('datasets.update_community_resource', {
             community: this.id,
             payload: data
-        }, () => {
-            this.fetch(this.id);
-        });
+        }, this.on_fetched, on_error);
     }
 };

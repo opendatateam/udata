@@ -29,40 +29,39 @@ export default class Dataset extends Model {
      */
     save(on_error) {
         if (this.id) {
-            return this.update(this, this.on_fetched, on_error);
+            return this.update(this, on_error);
         }
         this.loading = true;
         this.$api('datasets.create_dataset', {payload: this}, this.on_fetched, on_error);
     }
 
-    update(data, on_success, on_error) {
+    update(data, on_error) {
         this.loading = true;
         this.$api('datasets.update_dataset', {
             dataset: this.id,
             payload: data
-        }, on_success, on_error);
+        }, this.on_fetched, on_error);
     }
 
-    delete_resource(id) {
+    delete_resource(id, on_success, on_error) {
         this.$api('datasets.delete_resource', {
             dataset: this.id,
             rid: id
         }, () => {
             this.fetch(this.id);
-        });
+            on_success(this);
+        }, on_error);
     }
 
-    save_resource(resource) {
-        var endpoint = resource.id ? 'datasets.update_resource' : 'datasets.create_resource',
-            payload = resource.hasOwnProperty('$data') ? resource.$data : resource;
+    save_resource(resource, on_error) {
+        const endpoint = resource.id ? 'datasets.update_resource' : 'datasets.create_resource';
+        const payload = resource.hasOwnProperty('$data') ? resource.$data : resource;
 
         this.$api(endpoint, {
             dataset: this.id,
             rid: resource.id,
             payload: payload
-        }, () => {
-            this.fetch(this.id);
-        });
+        }, () => this.fetch(this.id), on_error);
     }
 
     reorder(new_order) {

@@ -42,17 +42,29 @@ export default {
     data() {
         return {editing: false};
     },
+    ready() {
+        // Avoid multiple handlers in case of error
+        this.dataset.$once('updated', this.on_success);
+    },
     methods: {
         upload() {
             this.$refs.form.isUpload = true;
         },
         save() {
-            if (this.$refs.form.validate()) {
-                this.dataset.save_resource(this.$refs.form.serialize());
-                this.$refs.modal.close();
+            const $form = this.$refs.form
+            if ($form.validate()) {
+                this.dataset.save_resource($form.serialize(), $form.on_error);
                 return true;
             }
         },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('Your resource has been added.')
+            });
+            this.$refs.modal.close();
+        }
     },
     watchRefs: {
         'form.hasData': function(hasData) {
