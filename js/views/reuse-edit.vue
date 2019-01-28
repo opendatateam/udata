@@ -12,12 +12,12 @@ import Reuse from 'models/reuse';
 import FormLayout from 'components/form-layout.vue';
 
 export default {
-    data: function() {
+    components: {FormLayout, ReuseForm},
+    data() {
         return {
             reuse: new Reuse(),
         };
     },
-    components: {FormLayout, ReuseForm},
     computed: {
         title() {
             if (this.reuse.id) {
@@ -29,13 +29,18 @@ export default {
     },
     methods: {
         save() {
-            let form = this.$refs.form;
+            const form = this.$refs.form;
             if (form.validate()) {
-                this.reuse.update(form.serialize(), (response) => {
-                    this.reuse.on_fetched(response);
-                    this.$go({name: 'reuse', params: {oid: this.reuse.id}});
-                }, form.on_error);
+                this.reuse.update(form.serialize(), form.on_error);
             }
+        },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('Your reuse has been updated.')
+            });
+            this.$go({name: 'reuse', params: {oid: this.reuse.id}});
         },
         cancel() {
             this.$go({name: 'reuse', params: {oid: this.reuse.id}});
@@ -44,8 +49,17 @@ export default {
     route: {
         data() {
             if (this.$route.params.oid !== this.reuse.id) {
-                this.reuse.fetch(this.$route.params.oid);
                 this.$scrollTo(this.$el);
+                this.reuse.fetch(this.$route.params.oid);
+                this.reuse.$once('updated', () => {
+                    this.updHandler = this.reuse.$once('updated', this.on_success);
+                });
+            }
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
             }
         }
     }
