@@ -74,21 +74,23 @@ export function escapeRegex(str) {
 }
 
 /**
- * Find the component containning a given element (if any)
+ * Find the component containing a given element (if any)
  *
  * @param {VueComponent} $root The root component to search into
  * @param {Element} el The DOM element to match
  */
 export function findComponent($root, el) {
-    if ($root.$el === el) return $root;
+    if ($root.$el === el) return $root;  // Exact match
     if (!$root.$el.contains(el)) return;  // Don't loop if not necessary
 
     let $match = $root;
-    $root.$children.find($child => {
+    $root.$children.find($child => {  // `find()` stops on first result
         $match = findComponent($child, el);
         return $match;
     });
-    return $match;
+    // If there is no match in children,
+    // `el` is contained in the current component
+    return $match || $root;
 }
 
 
