@@ -141,6 +141,7 @@ export default {
             next_route: null,
             isUpload: false,
             hasUploadedFile: false,
+            successMsg: undefined,
         };
     },
     computed: {
@@ -211,6 +212,7 @@ export default {
         save() {
             const $form = this.$refs.form;
             if ($form.validate()) {
+                this.successMsg = this._('Your resource has been updated.')
                 if (this.is_community) {
                     Object.assign(this.resource, $form.serialize());
                     this.resource.save($form.on_error);
@@ -224,20 +226,16 @@ export default {
             this.$dispatch('notify', {
                 autoclose: true,
                 title: this._('Changes saved'),
-                details: this._('Your resource has been updated.')
+                details: this.successMsg
             });
             this.$refs.modal.close();
         },
         delete_confirmed() {
+            this.successMsg = this._('Your resource has been deleted.')
             if (this.is_community) {
-                API.datasets.delete_community_resource({community: this.resource.id},
-                    (response) => {
-                        this.$refs.modal.close();
-                    }
-                );
+                this.resource.delete();
             } else {
                 this.dataset.delete_resource(this.resource.id);
-                this.$refs.modal.close();
             }
         },
         resource_from_dataset() {

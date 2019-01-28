@@ -43,14 +43,11 @@ export default class Dataset extends Model {
         }, this.on_fetched, on_error);
     }
 
-    delete_resource(id, on_success, on_error) {
+    delete_resource(id, on_error) {
         this.$api('datasets.delete_resource', {
             dataset: this.id,
             rid: id
-        }, () => {
-            this.fetch(this.id);
-            on_success(this);
-        }, on_error);
+        }, () => this.fetch(), on_error);
     }
 
     save_resource(resource, on_error) {

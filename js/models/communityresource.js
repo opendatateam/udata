@@ -25,7 +25,7 @@ export default class CommunityResource extends Model {
      */
     save(on_error) {
         if (this.id) {
-            this.update(this, on_success, on_error);
+            this.update(this, on_error);
         } else {
             this.$api('datasets.create_community_resource', {
                 payload: this
@@ -39,4 +39,10 @@ export default class CommunityResource extends Model {
             payload: data
         }, this.on_fetched, on_error);
     }
-};
+
+    delete(on_error) {
+        this.$api('datasets.delete_community_resource', {
+            community: this.id
+        }, () => this.$emit('updated'), on_error);
+    }
+}
