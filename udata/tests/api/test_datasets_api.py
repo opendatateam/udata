@@ -1144,6 +1144,20 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.first().description,
                          'new description')
 
+    def test_community_resource_api_update_w_previous_owner(self):
+        '''Should update a community resource and keep the original author'''
+        owner = UserFactory()
+        community_resource = CommunityResourceFactory(owner=owner)
+        self.login(AdminFactory())
+        data = community_resource.to_dict()
+        data['description'] = 'new description'
+        response = self.put(url_for('api.community_resource',
+                                    community=community_resource),
+                            data)
+        self.assert200(response)
+        self.assertEqual(CommunityResource.objects.first().owner,
+                         owner)
+
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''
         dataset = VisibleDatasetFactory()

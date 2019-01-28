@@ -423,7 +423,7 @@ class CommunityResourceAPI(API):
         ResourceEditPermission(community).test()
         form = api.validate(CommunityResourceForm, community)
         form.populate_obj(community)
-        if not community.organization:
+        if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
         community.modified = datetime.now()
         community.save()
