@@ -173,7 +173,6 @@ export default {
                 }
             )}
         },
-        hideNotifications: false,
         isUpload: {
             type: Boolean,
             default: false,
@@ -300,16 +299,10 @@ export default {
             return Object.assign({}, this.resource, this.$refs.form.serialize());
         },
         validate() {
-            const isValid = this.$refs.form.validate();
-
-            if (isValid & !this.hideNotifications) {
-                this.$dispatch('notify', {
-                    autoclose: true,
-                    title: this._('Changes saved'),
-                    details: this._('Your resource has been updated.')
-                });
-            }
-            return isValid;
+            return this.$refs.form.validate();
+        },
+        on_error(response) {
+            return this.$refs.form.on_error(response);
         },
     }
 };

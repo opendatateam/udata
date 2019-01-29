@@ -18,23 +18,23 @@ export default class Organization extends Model {
         return this;
     }
 
-    update(data, on_success, on_error) {
+    update(data, on_error) {
         this.$api('organizations.update_organization', {
             org: this.id,
             payload: JSON.stringify(data)
-        }, on_success, on_error);
+        }, this.on_fetched, on_error);
     }
 
-    save() {
+    save(on_error) {
         if (this.id) {
-            this.update(this, this.on_fetched);
+            this.update(this, on_error);
         } else {
-            this.create();
+            this.create(on_error);
         }
     }
 
-    create() {
-        this.$api('organizations.create_organization', {payload: this}, this.on_fetched);
+    create(on_error) {
+        this.$api('organizations.create_organization', {payload: this}, this.on_fetched, on_error);
     }
 
     role_for(obj) {

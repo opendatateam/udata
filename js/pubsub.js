@@ -30,7 +30,7 @@ export class PubSub {
         }
 
         // Add the listener to queue
-        var index = this.topics[topic].push(listener) -1;
+        const index = this.topics[topic].push(listener) - 1;
 
         // Provide handle back for removal of topic
         return {
@@ -62,11 +62,11 @@ export class PubSub {
      * @param  {Function} listener The callback executed on topic publication
      */
     once(topic, listener) {
-        let subscription;
-        subscription = this.subscribe(topic, () => {
+        const subscription = this.subscribe(topic, () => {
             subscription.remove();
             listener.apply(this, arguments);
         });
+        return subscription;
     }
 
     /**
@@ -93,8 +93,8 @@ export class PubSub {
             delete this.topics[topic];
         }
     }
-};
+}
 
-export var pubsub = new PubSub();
+export const pubsub = new PubSub();
 
 export default pubsub;

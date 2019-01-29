@@ -34,16 +34,18 @@ export default {
                 label: this._('New harvester'),
                 subtitle: this._('Configure your harvester'),
                 component: HarvesterForm,
+                init: (component) => {
+                    this.source.$once('updated', () => {
+                        this.$refs.wizard.go_next();
+                    });
+                },
                 next: (component) => {
                     if (component.$refs.form.validate()) {
                         Object.assign(this.source, component.serialize());
                         if (this.publish_as) {
                             this.source.organization = this.publish_as;
                         }
-                        this.source.save();
-                        this.source.$once('updated', () => {
-                            this.$refs.wizard.go_next();
-                        });
+                        this.source.save(component.on_error);
                         return false;
                     }
                 }

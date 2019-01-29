@@ -1,6 +1,6 @@
 import API from 'api';
 import {_} from 'i18n';
-import {setattr, isObject, isString} from 'utils';
+import {setattr, isObject, isString, findComponent} from 'utils';
 import log from 'logger';
 import moment from 'moment';
 import $ from 'jquery-validation';  // Ensure jquery & jquery.validate plugin are both loaded
@@ -69,7 +69,6 @@ const TEXT_INPUTS = [
  * Form tags that should be considered as text
  */
 const TEXT_TAGS = ['select', 'textarea'];
-
 
 export default {
     name: 'base-form',
@@ -158,21 +157,11 @@ export default {
         $(this.$form).validate({
             ignore: '',
             errorClass: 'help-block',
-            highlight(element) {
-                $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-            },
-            unhighlight(element) {
-                $(element).closest('.form-group').removeClass('has-error');
-            },
-            success(label) {
-                label.closest('.form-group').addClass('has-success');
-                if (!label.text()) {
-                    label.remove();
-                }
-            },
-            errorPlacement(error, element) {
-                $(element).closest('.form-group,.field-wrapper').append(error);
-            }
+            highlight: this.highlight,
+            unhighlight: this.unhighlight,
+            success: this.success,
+            showErrors: this.showErrors,
+            errorPlacement() {},
         });
         this.$broadcast('form:ready');
     },
@@ -236,50 +225,92 @@ export default {
             return out;
         },
         on_error(response) {
+            const messages = [];
+
             // Errors occuring before submission are simple strings
             if (isString(response)) {
-                log.error(response);
+                log.error(response);  // Technical and non translatable, logged for better handling later
+                // TODO: Optionnal Sentry handling
                 return;
             }
+
             // Display the error identifier if present
             if (response.headers && 'X-Sentry-ID' in response.headers) {
-                this.$dispatch('notify', {
-                    type: 'error',
-                    icon: 'exclamation-triangle',
-                    title: this._('An error occured'),
-                    details: this._('The error identifier is {id}', {id: response.headers['X-Sentry-ID']}),
-                });
+                messages.push(
+                    this._('The error identifier is {id}', {id: response.headers['X-Sentry-ID']})
+                );
             }
+
             if ('data' in response) {
                 let data = {};
                 try {
                     data = JSON.parse(response.data);
                 } catch (e) {
                     log.warn('Parsing error:', e);
-                    return;
+                    // TODO: Optionnal Sentry handling
                 }
+
                 if ('errors' in data) {
                     this.fill_errors(data.errors);
-                } else {
-                    $(this.$form).append(this.error_element('', data.message));
+                    return;  // Form errors does not need to be notified
+                } else if ('message' in data) {
+                    messages.push(data.message);
                 }
             }
-        },
-        fill_errors(errors) {
-            [...this.$form.querySelectorAll('input,textarea,select')].forEach((element) => {
-                if (element.name in errors) {
-                    const name = element.name;
-                    const error = errors[name][0];
-                    $(element).closest('.form-group,.field-wrapper')
-                              .removeClass('has-success')
-                              .addClass('has-error')
-                              .append(this.error_element(name, error));
-                }
+
+            if (!messages.length) {
+                messages.push(this._('An unkown error occured'));
+            }
+
+            this.$dispatch('notify', {
+                type: 'error',
+                icon: 'exclamation-triangle',
+                title: this._('An error occured'),
+                details: messages.join('\n'),
             });
         },
-        error_element(id, message) {
-            $(`#form-${id}-error`).remove();
-            return `<p class="form-error" id="form-${id}-error">${message}</p>`;
+        fill_errors(errors) {
+            Object.entries(errors).forEach(([field, errs]) => {
+                const el = this.$form.querySelector(`[name="${field}"]`);
+                const $field = this.findField(el);
+                $field.errors = errs;
+                $field.success = false;
+            });
+        },
+        highlight(element) {
+            this.findField(element).success = false;
+        },
+        unhighlight(element) {
+            this.findField(element).errors = [];
+        },
+        /**
+         * Inject jQuery.Validation errors into their fields
+         *
+         * See: https://jqueryvalidation.org/category/plugin/#showerrors
+         */
+        showErrors(errorMap, errorList) {
+            errorList.forEach(error => {
+                this.findField(error.element).errors = [error.message];
+            });
+            $(this.$form).data('validator').defaultShowErrors();
+        },
+        /**
+         * Mark a field as `success`
+         */
+        success(label, el) {
+            this.findField(el).success = true;
+        },
+        /**
+         * Find the form field containing a given DOM field
+         *
+         * @param {Element} el The DOM element to match
+         */
+        findField(el) {
+            let $component = findComponent(this, el);
+            while (!$component.isField) {
+                $component = $component.$parent;
+            }
+            return $component;
         }
     }
 };

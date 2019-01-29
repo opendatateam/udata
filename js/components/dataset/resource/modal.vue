@@ -59,7 +59,7 @@
             </dl>
         </div>
 
-        <resource-form v-show="edit" v-ref:form :dataset="dataset" :resource="resource" :hide-notifications="false"></resource-form>
+        <resource-form v-show="edit" v-ref:form :dataset="dataset" :resource="resource"></resource-form>
 
         <div v-show="confirm">
             <p class="lead text-center">
@@ -136,11 +136,12 @@ export default {
         return {
             edit: false,
             confirm: false,
-            dataset: this.$parent.$parent.dataset,
-            resource: new Resource(),
+            dataset: this.$parent.$parent.dataset,  // Because this is a nested view
+            resource: undefined,
             next_route: null,
             isUpload: false,
             hasUploadedFile: false,
+            successMsg: undefined,
         };
     },
     computed: {
@@ -166,8 +167,8 @@ export default {
         data() {
             if (this.$route.matched.length > 1) {
                 // This is a nested view
-                let idx = this.$route.matched.length - 2,
-                    parent = this.$route.matched[idx];
+                const idx = this.$route.matched.length - 2;
+                const parent = this.$route.matched[idx];
                 this.next_route = {
                     name: parent.handler.name,
                     params: parent.params
@@ -176,8 +177,22 @@ export default {
             if (this.$route.name.includes('community')) {
                 this.resource = new CommunityResource();
                 this.resource.fetch(this.$route.params.rid);
+                this.resource.$once('updated', () => {
+                    // Next updated will be on success
+                    this.updHandler = this.resource.$once('updated', this.on_success);
+                });
+            } else if (this.dataset.loading) {
+                // Dataset from parent view is still loading
+                this.updHandler = this.dataset.$once('updated', this.resource_from_dataset);
             } else {
-                this.resource.fetch(this.$route.params.oid, this.$route.params.rid);
+                // Dataset from parent view is already fetched
+                this.resource_from_dataset();
+            }
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
             }
         }
     },
@@ -195,39 +210,40 @@ export default {
             this.$refs.form.isUpload = true;
         },
         save() {
-            if (this.$refs.form.validate()) {
+            const $form = this.$refs.form;
+            if ($form.validate()) {
+                this.successMsg = this._('Your resource has been updated.')
                 if (this.is_community) {
-                    Object.assign(this.resource, this.$refs.form.serialize());
-                    this.resource.save();
+                    Object.assign(this.resource, $form.serialize());
+                    this.resource.save($form.on_error);
                 } else {
-                    this.dataset.save_resource(this.$refs.form.serialize());
+                    this.dataset.save_resource($form.serialize(), $form.on_error);
                 }
-                this.$refs.modal.close();
                 return true;
             }
         },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this.successMsg
+            });
+            this.$refs.modal.close();
+        },
         delete_confirmed() {
+            this.successMsg = this._('Your resource has been deleted.')
             if (this.is_community) {
-                API.datasets.delete_community_resource({community: this.resource.id},
-                    (response) => {
-                        this.$refs.modal.close();
-                    }
-                );
+                this.resource.delete();
             } else {
                 this.dataset.delete_resource(this.resource.id);
-                this.$refs.modal.close();
             }
         },
-    },
-    watch: {
-        'dataset.resources': function(resources) {
-            if (!this.is_community) {
-                resources.some((resource) => {
-                    if (resource.id === this.$route.params.rid) {
-                        this.resource = new Resource({data: resource});
-                        return true;
-                    }
-                });
+        resource_from_dataset() {
+            const rid = this.$route.params.rid;
+            const data = this.dataset.resources.find(resource => resource.id === rid);
+            if (data) {
+                this.resource = new Resource({data});
+                this.updHandler = this.dataset.$once('updated', this.on_success)
             }
         }
     },

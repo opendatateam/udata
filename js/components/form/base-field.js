@@ -33,7 +33,9 @@ export const BaseField = {
     name: 'base-field',
     data() {
         return {
-            errors: []
+            errors: [],
+            success: undefined,
+            isField: true,
         };
     },
     components: {

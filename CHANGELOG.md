@@ -14,6 +14,7 @@
 - Fix harvest preview in edit form not taking configuration (features and filters) [#1996](https://github.com/opendatateam/udata/pull/1996)
 - Ensure organization page react to URL hash changes (including those from right sidebar) [#1997](https://github.com/opendatateam/udata/pull/1997)
 - Updating community resource as admin keeps original owner [#1999](https://github.com/opendatateam/udata/pull/1999)
+- Major form fixes [#2000](https://github.com/opendatateam/udata/pull/2000)
 
 ## 1.6.2 (2018-11-05)
 
