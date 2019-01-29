@@ -2,7 +2,19 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove extra attributes on user deletion [#1961](https://github.com/opendatateam/udata/pull/1961)
+- Pin phantomjs to version `2.1.7` [#1975](https://github.com/opendatateam/udata/pull/1975)
+- Protect membership accept route against flood [#1984](https://github.com/opendatateam/udata/pull/1984)
+- Ensure compatibility with IE11 and Firefox ESR [#1990](https://github.com/opendatateam/udata/pull/1990)
+- Lots of fixes on the resource form. Be explicit about uploading a new file [#1991](https://github.com/opendatateam/udata/pull/1991)
+- Centralize `selectize` handling and style in `base-completer` and apply some fixes [1992](https://github.com/opendatateam/udata/pull/1992)
+- Added the missing `number` input field widget [#1993](https://github.com/opendatateam/udata/pull/1993)
+- Fix the organization private datasets and reuses counters [#1994](https://github.com/opendatateam/udata/pull/1994)
+- Disable autocorrect, spellcheck... on search and completion fields [#1995](https://github.com/opendatateam/udata/pull/1995)
+- Fix harvest preview in edit form not taking configuration (features and filters) [#1996](https://github.com/opendatateam/udata/pull/1996)
+- Ensure organization page react to URL hash changes (including those from right sidebar) [#1997](https://github.com/opendatateam/udata/pull/1997)
+- Updating community resource as admin keeps original owner [#1999](https://github.com/opendatateam/udata/pull/1999)
+- Major form fixes [#2000](https://github.com/opendatateam/udata/pull/2000)
 
 ## 1.6.2 (2018-11-05)
 

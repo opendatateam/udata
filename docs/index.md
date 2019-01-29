@@ -18,7 +18,7 @@ Take a look at our advanced documentation on [adapting settings](adapting-settin
 
 ## I want to use it for my country
 
-The project is currently [in production for France][data-gouv-fr] and [in development for Luxembourg][data-gouv-lu-repository]. We can help you to set up your infrastructure, you can contact the team via [a Github issue][github-new-issue] or [through Gitter to chat directly][gitter].
+The project is currently in production [in France][data-gouv-fr] and [in Luxembourg][data-gouv-lu-repository]. We can help you to set up your infrastructure, you can contact the team via [a Github issue][github-new-issue] or [through Gitter to chat directly][gitter].
 
 Take a look at the [governance](governance.md) section to know how we deal with feature voting from all the community.
 
@@ -32,7 +32,7 @@ For a bug, please [report it directly as a Github issue][github-new-issue] follo
 For a contribution as an enthusiastic citizen, check out our [contributing guide](contributing-guide.md). It's good to have you on board!
 
 [data-gouv-fr]: https://www.data.gouv.fr/
-[data-gouv-lu-repository]: https://github.com/opendatalu/udata-gouvlu
+[data-gouv-lu-repository]: https://github.com/opendatalu/gouvlu
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
 [docker images]: https://github.com/opendatateam/docker-udata
 [gitter]: https://gitter.im/opendatateam/udata

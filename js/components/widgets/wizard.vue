@@ -46,7 +46,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <box boxclass="box-solid" :footer="true">
-                    <component :is="component" v-ref:content :hide-notifications="false"></component>
+                    <component :is="component" v-ref:content></component>
                     <footer slot="footer">
                         <div class="col-xs-12">
                             <button v-if="previous_step"

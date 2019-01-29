@@ -7,7 +7,7 @@ import Reuse from 'models/reuse';
 import API from 'api';
 
 export default {
-    data: function() {
+    data() {
         return {
             reuse: new Reuse(),
             steps: [{
@@ -24,6 +24,9 @@ export default {
                 label: this._('New reuse'),
                 subtitle: this._('Describe your reuse'),
                 component: require('components/reuse/form.vue'),
+                init: (component) => {
+                    this.reuse.$once('updated', this.$refs.wizard.go_next);
+                },
                 next: (component) => {
                     if (component.validate()) {
                         let data = component.serialize();
@@ -32,9 +35,6 @@ export default {
                         }
                         Object.assign(this.reuse, data);
                         this.reuse.save(component.on_error);
-                        this.reuse.$once('updated', () => {
-                            this.$refs.wizard.go_next();
-                        });
                         return false;
                     }
                 }
@@ -42,12 +42,12 @@ export default {
                 label: this._('Datasets'),
                 subtitle: this._('Add some related datasets'),
                 component: require('components/dataset/cards-form.vue'),
+                init: (component) => {
+                    this.reuse.$once('updated', this.$refs.wizard.go_next);
+                },
                 next: (component) => {
                     this.reuse.datasets = component.datasets;
                     this.reuse.save();
-                    this.reuse.$once('updated', () => {
-                        this.$refs.wizard.go_next();
-                    });
                     return false;
                 }
             }, {

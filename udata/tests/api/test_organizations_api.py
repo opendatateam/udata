@@ -232,6 +232,14 @@ class MembershipAPITest:
         assert request.handled_on is not None
         assert request.refusal_comment is None
 
+        # test accepting twice will raise 409
+        api_url = url_for(
+            'api.accept_membership',
+            org=organization,
+            id=membership_request.id)
+        response = api.post(api_url)
+        assert_status(response, 409)
+
     def test_only_admin_can_accept_membership(self, api):
         user = api.login()
         applicant = UserFactory()
@@ -832,9 +840,7 @@ class OrganizationBadgeAPITest:
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
         kinds_keys = Organization.__badges__.keys()
-        self.organization.badges.append(
-            self.factory(kind=kinds_keys[0]))
-        self.organization.save()
+        self.organization.add_badge(kinds_keys[0])
         data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]
         url = url_for('api.organization_badges', org=self.organization)
@@ -845,7 +851,7 @@ class OrganizationBadgeAPITest:
 
     def test_delete(self, api):
         badge = self.factory()
-        self.organization.badges.append(badge)
+        self.organization.add_badge(badge.kind)
         self.organization.save()
         url = url_for('api.organization_badge',
                       org=self.organization,

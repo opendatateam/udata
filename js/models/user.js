@@ -29,11 +29,11 @@ export default class User extends Model {
         return this;
     }
 
-    update(data, on_success, on_error) {
+    update(data, on_error) {
         this.$api('users.update_user', {
             user: this.id,
             payload: JSON.stringify(data)
-        }, on_success, on_error);
+        }, this.on_fetched, on_error);
     }
 
     /**

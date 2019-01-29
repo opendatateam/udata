@@ -47,13 +47,6 @@ class BadgesList(db.EmbeddedDocumentListField):
             )
         return super(BadgesList, self).validate(value)
 
-    def __set__(self, instance, value):
-        super(BadgesList, self).__set__(instance, value)
-        # Fix until fix is released.
-        # See: https://github.com/MongoEngine/mongoengine/pull/1131
-        for value in instance._data[self.name]:
-            value._instance = weakref.proxy(instance)
-
 
 class BadgeMixin(object):
     badges = BadgesList()

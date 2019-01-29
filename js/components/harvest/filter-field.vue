@@ -1,13 +1,13 @@
 <template>
 <div class="input-group filter-group">
-    <select class="form-control filter-group__type" v-model="type">
+    <select class="form-control filter-group__type" v-model="type" @change="onChange">
         <option v-for="t in TYPES" :value="t.value" :key="t.value">{{ t.label }}</option>
     </select>
-    <select class="form-control filter-group__key" v-model="key">
+    <select class="form-control filter-group__key" v-model="key" @change="onChange">
         <option v-for="c in choices" :value="c.key" :key="c.key">{{ c.label }}</option>
     </select>
     <input type="text" class="form-control filter-group__value" v-model="value"
-        :placeholder="placeholder"></input>
+        :placeholder="placeholder" @change="onChange"></input>
     <span class="input-group-btn">
         <button class="btn btn-danger" type="button" @click.prevent="onDelete">
             <span class="fa fa-remove">
@@ -52,6 +52,9 @@ export default {
         }
     },
     methods: {
+        onChange(evt) {
+            this.$dispatch('field:value-change', evt.target.value);
+        },
         onDelete() {
             this.$dispatch('filter:delete', this.index);
         }

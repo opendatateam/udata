@@ -15,7 +15,8 @@
         <div class="input-group-btn">
             <button class="btn" type="submit"><i class="fa fa-search"></i></button>
         </div>
-        <input name="q" type="search" class="form-control" autocomplete="off"
+        <input name="q" type="search" class="form-control"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             :placeholder="placeholder || _('Search')"
             v-model="query" debounce="200"
             @keydown="show = true"

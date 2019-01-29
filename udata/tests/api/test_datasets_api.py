@@ -551,8 +551,7 @@ class DatasetBadgeAPITest(APITestCase):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
         kinds_keys = Dataset.__badges__.keys()
-        self.dataset.badges.append(self.factory(kind=kinds_keys[0]))
-        self.dataset.save()
+        self.dataset.add_badge(kinds_keys[0])
         data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]
         with self.api_user():
@@ -564,8 +563,7 @@ class DatasetBadgeAPITest(APITestCase):
 
     def test_delete(self):
         badge = self.factory()
-        self.dataset.badges.append(badge)
-        self.dataset.save()
+        self.dataset.add_badge(badge.kind)
         with self.api_user():
             response = self.delete(
                 url_for('api.dataset_badge', dataset=self.dataset,
@@ -1145,6 +1143,20 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(CommunityResource.objects.count(), 1)
         self.assertEqual(CommunityResource.objects.first().description,
                          'new description')
+
+    def test_community_resource_api_update_w_previous_owner(self):
+        '''Should update a community resource and keep the original author'''
+        owner = UserFactory()
+        community_resource = CommunityResourceFactory(owner=owner)
+        self.login(AdminFactory())
+        data = community_resource.to_dict()
+        data['description'] = 'new description'
+        response = self.put(url_for('api.community_resource',
+                                    community=community_resource),
+                            data)
+        self.assert200(response)
+        self.assertEqual(CommunityResource.objects.first().owner,
+                         owner)
 
     def test_community_resource_api_update_with_file(self):
         '''It should update a community resource file from the API'''

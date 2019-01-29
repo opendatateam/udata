@@ -23,17 +23,17 @@ export default class Reuse extends Model {
      */
     save(on_error) {
         if (this.id) {
-            return this.update(this, this.on_fetched, on_error);
+            return this.update(this, on_error);
         }
         this.$api('reuses.create_reuse', {payload: this}, this.on_fetched, on_error);
     }
 
-    update(data, on_success, on_error) {
+    update(data, on_error) {
         this.$api('reuses.update_reuse', {
             reuse: this.id,
             payload: data
-        }, on_success, on_error);
+        }, this.on_fetched, on_error);
     }
-};
+}
 
 Reuse.__badges_type__ = 'reuse';
