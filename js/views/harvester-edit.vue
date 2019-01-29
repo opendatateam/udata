@@ -59,11 +59,16 @@ export default {
         save() {
             const form = this.$refs.form;
             if (form.validate()) {
-                this.source.update(form.serialize(), (response) => {
-                    this.source.on_fetched(response);
-                    this.$go({name: 'harvester', params: {oid: this.source.id}});
-                }, form.on_error);
+                this.source.update(form.serialize(), form.on_error);
             }
+        },
+        on_success() {
+            this.$dispatch('notify', {
+                autoclose: true,
+                title: this._('Changes saved'),
+                details: this._('The harvester has been updated.')
+            });
+            this.$go({name: 'harvester', params: {oid: this.source.id}});
         },
         cancel() {
             this.$go({name: 'harvester', params: {oid: this.source.id}});
@@ -80,8 +85,17 @@ export default {
     },
     route: {
         data() {
-            this.source.fetch(this.$route.params.oid);
             this.$scrollTo(this.$el);
+            this.source.fetch(this.$route.params.oid);
+            this.source.$once('updated', () => {
+                this.updHandler = this.source.$once('updated', this.on_success);
+            });
+        },
+        deactivate() {
+            if (this.updHandler) {
+                this.updHandler.remove();
+                this.updHandler = undefined;
+            }
         }
     }
 };

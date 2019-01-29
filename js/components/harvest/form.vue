@@ -21,8 +21,7 @@ export default {
             default() {
                 return new HarvestSource();
             }
-        },
-        hideNotifications: false
+        }
     },
     data() {
         return {
@@ -94,16 +93,7 @@ export default {
             return data;
         },
         validate() {
-            const isValid = this.$refs.form.validate();
-
-            if (isValid & !this.hideNotifications) {
-                this.$dispatch('notify', {
-                    autoclose: true,
-                    title: this._('Changes saved'),
-                    details: this._('The harvester has been updated.')
-                });
-            }
-            return isValid;
+            return this.$refs.form.validate();
         }
     }
 };
