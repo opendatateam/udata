@@ -39,7 +39,7 @@ pytz==2018.9
 PyYAML==3.13
 rdflib==4.2.2
 rdflib-jsonld==0.4.0
-redis==3.0.1
+redis==3.1.0
 requests==2.21.0
 StringDist==1.0.9
 tlds
