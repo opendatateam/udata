@@ -29,14 +29,16 @@ export default {
                 label: this._('Description'),
                 subtitle: this._('Describe your organization'),
                 component: OrganizationForm,
+                init: (component) => {
+                    this.organization.$once('updated', () => {
+                        this.$refs.wizard.go_next();
+                    });
+                },
                 next: (component) => {
                     if (component.validate()) {
                         const data = component.serialize();
                         Object.assign(this.organization, data);
-                        this.organization.save();
-                        this.organization.$once('updated', () => {
-                            this.$refs.wizard.go_next();
-                        });
+                        this.organization.save(component.on_error);
                         return false;
                     }
                 }

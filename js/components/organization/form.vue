@@ -1,11 +1,13 @@
 <template>
-<vform v-ref:form :fields="fields" :model="organization"></vform>
+<v-form v-ref:form :fields="fields" :model="organization"></v-form>
 </template>
 
 <script>
 import Organization from 'models/organization';
+import VForm from 'components/form/vertical-form.vue';
 
 export default {
+    components: {VForm},
     props: {
         organization: {
             type: Object,
@@ -13,9 +15,8 @@ export default {
                 return new Organization();
             }
         },
-        hideNotifications: false
     },
-    data: function() {
+    data() {
         return {
             fields: [{
                     id: 'name',
@@ -33,26 +34,14 @@ export default {
                 }]
         };
     },
-    components: {
-        vform: require('components/form/vertical-form.vue')
-    },
     methods: {
-        serialize: function() {
+        serialize() {
             return this.$refs.form.serialize();
         },
-        validate: function() {
-            const isValid = this.$refs.form.validate();
-
-            if (isValid & !this.hideNotifications) {
-                this.$dispatch('notify', {
-                    autoclose: true,
-                    title: this._('Changes saved'),
-                    details: this._('Your organization has been updated.')
-                });
-            }
-            return isValid;
+        validate() {
+            return this.$refs.form.validate();
         },
-        on_error: function(response) {
+        on_error(response) {
             return this.$refs.form.on_error(response);
         },
     }
