@@ -112,7 +112,8 @@ export const BaseField = {
             return this.field.placeholder || this.field.label || '';
         },
         readonly() {
-            return this.field.readonly || false;
+            // $parent is form
+            return this.$parent.readonly || this.field.readonly || false;
         },
         widget() {
             let widget;
