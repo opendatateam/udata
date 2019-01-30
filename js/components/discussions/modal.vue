@@ -145,7 +145,8 @@ export default {
             API.discussions.delete_discussion({id: this.discussion.id},
                 (response) => {
                     this.$refs.modal.close();
-                }
+                },
+                this.$root.handleApiError
             );
         },
         close_discussion() {
@@ -162,7 +163,7 @@ export default {
                 }}, (response) => {
                     this.discussion = response.obj;
                     this.comment = null;
-                });
+                }, this.$root.handleApiError);
             }
         }
     }

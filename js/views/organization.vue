@@ -134,24 +134,28 @@ export default {
     },
     computed: {
         actions() {
-            const actions = [{
+            const actions = []
+
+            if (this.org.is_admin(this.$root.me)) {
+                actions.push({
                     label: this._('Edit'),
                     icon: 'edit',
                     method: this.edit
-                }];
+                });
 
-            if(!this.org.deleted) {
-                actions.push({
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete
-                });
-            } else {
-                actions.push({
-                    label: this._('Restore'),
-                    icon: 'undo',
-                    method: this.confirm_restore
-                });
+                if(!this.org.deleted) {
+                    actions.push({
+                        label: this._('Delete'),
+                        icon: 'trash',
+                        method: this.confirm_delete
+                    });
+                } else {
+                    actions.push({
+                        label: this._('Restore'),
+                        icon: 'undo',
+                        method: this.confirm_restore
+                    });
+                }
             }
 
             if (this.$root.me.is_admin) {

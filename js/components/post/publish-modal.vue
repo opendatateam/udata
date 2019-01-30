@@ -46,7 +46,7 @@ export default {
                 });
                 this.$refs.modal.close();
                 this.$go({name: 'post', params: {oid: this.post.id}});
-            });
+            }, this.$root.handleApiError);
         }
     }
 };

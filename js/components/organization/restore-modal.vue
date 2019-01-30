@@ -45,7 +45,8 @@ export default {
                 (response) => {
                     this.organization.on_fetched(response);
                     this.$refs.modal.close();
-                }
+                },
+                this.$root.handleApiError
             );
         }
     }

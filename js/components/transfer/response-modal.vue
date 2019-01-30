@@ -105,7 +105,7 @@ export default {
                 });
                 this.$refs.modal.close();
                 this.$emit('transfer:responded', response.obj);
-            });
+            }, this.$root.handleApiError);
         }
     },
     ready() {

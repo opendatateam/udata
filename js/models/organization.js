@@ -53,21 +53,21 @@ export default class Organization extends Model {
         return member !== null && member.role === 'admin';
     }
 
-    accept_membership(request, callback) {
+    accept_membership(request, callback, on_error) {
         this.$api('organizations.accept_membership', {
             org: this.id,
             id: request.id
         }, function(response) {
             callback(response.obj);
-        });
+        }, on_error);
     }
 
-    refuse_membership(request, comment, callback) {
+    refuse_membership(request, comment, callback, on_error) {
         this.$api('organizations.refuse_membership', {
             org: this.id,
             id: request.id,
             payload: {comment: comment}
-        }, callback);
+        }, callback, on_error);
     }
 };
 

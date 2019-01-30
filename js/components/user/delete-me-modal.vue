@@ -51,7 +51,8 @@ export default {
                                       {status: response.status}),
                         details: JSON.parse(response.data).message,
                     });
-                }
+                },
+                this.$root.handleApiError
             );
         }
     }

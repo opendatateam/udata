@@ -46,7 +46,8 @@ export default {
                     });
                     this.$refs.modal.close();
                     this.$go({name: 'editorial'});
-                }
+                },
+                this.$root.handleApiError
             );
         }
     }

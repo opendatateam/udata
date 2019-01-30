@@ -42,7 +42,8 @@ export default {
                 (response) => {
                     this.dataset.fetch();
                     this.$refs.modal.close();
-                }
+                },
+                this.$root.handleApiError
             );
         }
     }
