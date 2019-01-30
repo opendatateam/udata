@@ -104,7 +104,7 @@ export default {
                     });
                     this.$dispatch('notify', {title: msg, autoclose: true});
                     this.goBack();
-                });
+                }, this.$root.handleApiError);
             }
         },
         unschedule() {
@@ -114,7 +114,7 @@ export default {
                 });
                 this.$dispatch('notify', {title: msg, autoclose: true});
                 this.goBack();
-            });
+            }, this.$root.handleApiError);
         },
         cancel() {
             if (this.unscheduling) {

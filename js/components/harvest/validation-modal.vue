@@ -72,7 +72,8 @@ export default {
                 (response) => {
                     this.source.on_fetched(response);
                     this.$refs.modal.close();
-                }
+                },
+                this.$root.handleApiError
             );
         }
     }

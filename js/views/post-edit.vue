@@ -67,7 +67,7 @@ export default {
                         title: this._('Post published'),
                     });
                     this.$go({name: 'post', params: {oid: this.post.id}});
-                });
+                }, this.$root.handleApiError);
             });
         },
         cancel() {

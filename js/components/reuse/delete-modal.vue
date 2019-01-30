@@ -40,7 +40,8 @@ export default {
                 (response) => {
                     this.reuse.fetch();
                     this.$refs.modal.close();
-                }
+                },
+                this.$root.handleApiError
             );
         }
     }

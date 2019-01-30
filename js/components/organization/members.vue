@@ -93,7 +93,7 @@
                 :src="request.user | avatar_url 40"/>
             <div class="direct-chat-text">
                 {{ request.comment }}
-                <div class="btn-group btn-group-xs pull-right">
+                <div v-if="org.is_admin($root.me)" class="btn-group btn-group-xs pull-right">
                     <button type="button" class="btn btn-success"
                         @click="accept_request(request)">
                         <span class="fa fa-fw fa-check"></span>
@@ -121,7 +121,7 @@
              {{ _('No membership requests') }}
         </div>
     </div><!-- /.box-body -->
-    <div class="box-footer" v-if="!validating"
+    <div class="box-footer" v-if="!validating && org.is_admin($root.me)"
         :class="{ 'text-center': !adding, 'search': adding }">
         <a v-if="!adding" class="text-uppercase footer-btn pointer"
             @click="adding = true">{{ _('Add') }}</a>
@@ -187,7 +187,7 @@ export default {
             this.org.accept_membership(request, (member) => {
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
-            })
+            }, this.$root.handleApiError)
         },
         refuse_request(request) {
             Vue.set(request, 'refused', true);
@@ -197,11 +197,10 @@ export default {
             // let comment = this.$els.textarea[index].value;
             const comment = this.$el.querySelectorAll('textarea')[index].value;
             this.org.refuse_membership(request, comment, (response) => {
-                log.debug('refused', response);
                 Vue.set(request, 'refused', false);
                 this.requests.fetch();
                 this.validating = Boolean(this.requests.length);
-            });
+            }, this.$root.handleApiError);
         },
         toggle_validation() {
             this.validating = !this.validating;

@@ -55,12 +55,46 @@ export default {
         });
     },
     methods: {
-        handleApiError(error) {
-            const notif = {type: 'danger', icon: 'exclamation-circle'};
-            if (error.status === 403) {
+        handleApiError(response) {
+            const notif = {type: 'error', icon: 'exclamation-circle'};
+            if (response.status === 403) {
                 notif.title = this._('Operation not permitted');
                 notif.details = this._('You are not allowed to perform this operation');
                 notif.icon = 'ban'
+            } else {
+                notif.title = this._('An error occured');
+                const messages = [];
+
+                if ('data' in response) {
+                    let data = {};
+                    try {
+                        data = JSON.parse(response.data);
+                    } catch (e) {
+                        log.warn('Parsing error:', e);
+                        // TODO: Optionnal Sentry handling
+                    }
+
+                    if ('errors' in data) {
+                        messages.push(this._('Invalid API request:'));
+                        Object.entries(data.errors).forEach(([field, errs]) => {
+                            messages.push(`<strong>${field}</strong>: ${errs.join(', ')}`);
+                        });
+                    } else if ('message' in data) {
+                        messages.push(data.message);
+                    }
+                }
+
+                if (!messages.length) {
+                    messages.push(this._('An unkown error occured'));
+                }
+
+                if (response.headers && 'X-Sentry-ID' in response.headers) {
+                    messages.push(
+                        this._('The error identifier is {id}', {id: response.headers['X-Sentry-ID']})
+                    );
+                }
+
+                notif.details = messages.join('\n');
             }
             this.notifications.push(notif);
         }

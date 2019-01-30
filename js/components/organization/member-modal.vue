@@ -77,7 +77,7 @@ export default {
     },
     computed: {
         can_edit() {
-            return this.$root.me.is_admin || this.org.is_admin(this.$root.me);
+            return this.org.is_admin(this.$root.me);
         },
         member_exists() {
             return this.org.is_member(this.user);
@@ -90,7 +90,8 @@ export default {
         delete() {
             API.organizations.delete_organization_member(
                 {org: this.org.id, user: this.user.id},
-                this.on_deleted.bind(this)
+                this.on_deleted.bind(this),
+                this.$root.handleApiError
             );
         },
         on_deleted(response) {
@@ -109,9 +110,9 @@ export default {
                 payload: this.$refs.form.serialize()
             };
             if (this.member_exists) {
-                API.organizations.update_organization_member(data, this.on_updated.bind(this));
+                API.organizations.update_organization_member(data, this.on_updated.bind(this), this.$root.handleApiError);
             } else {
-                API.organizations.create_organization_member(data, this.on_created.bind(this));
+                API.organizations.create_organization_member(data, this.on_created.bind(this), this.$root.handleApiError);
             }
         },
         on_created(response) {
