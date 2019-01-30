@@ -26,6 +26,14 @@ license_fields = api.model('License', {
     'maintainer': fields.String(description='The license official maintainer'),
     'url': fields.String(description='The license official URL'),
     'flags': fields.List(fields.String, description='Some arbitry flags'),
+    'alternate_urls': fields.List(
+        fields.String,
+        description='Same alternative known URLs (improve rematch)'
+    ),
+    'alternate_titles': fields.List(
+        fields.String,
+        description='Same alternative known titles (improve rematch)'
+    ),
 })
 
 frequency_fields = api.model('Frequency', {
