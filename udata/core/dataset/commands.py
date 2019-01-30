@@ -52,6 +52,8 @@ def licenses(source=DEFAULT_LICENSE_FILE):
             maintainer=json_license['maintainer'] or None,
             flags=flags,
             active=json_license.get('active', False),
+            alternate_urls=json_license.get('alternate_urls', []),
+            alternate_titles=json_license.get('alternate_titles', []),
         )
         log.info('Added license "%s"', license.title)
     try:
