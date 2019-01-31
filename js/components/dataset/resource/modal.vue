@@ -80,12 +80,13 @@
         </button>
         <!-- Same cancel button for every action-->
         <button type="button" v-show="edit || confirm || isUpload"
-                class="btn btn-warning btn-sm btn-flat pull-left"
+                class="btn btn-sm btn-flat pull-left"
+                :class="{'btn-danger': confirm, 'btn-primary': !confirm}"
                 @click="cancel">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="!edit && !confirm && can_edit"
-                class="btn btn-danger btn-xs btn-flat"
+                class="btn btn-danger btn-sm btn-flat"
                 @click="confirm = true">
             {{ _('Delete') }}
         </button>
@@ -95,7 +96,7 @@
             {{ _('Edit') }}
         </button>
         <button type="button" v-show="confirm"
-                class="btn btn-danger btn-outline btn-flat"
+                class="btn btn-warning btn-flat"
                 @click="delete_confirmed">
             {{ _('Confirm') }}
         </button>

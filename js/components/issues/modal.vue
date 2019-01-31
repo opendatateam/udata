@@ -7,13 +7,30 @@
     .direct-chat-messages {
         height: auto;
     }
+
+    .direct-chat-timestamp {
+        color: #eee;
+    }
+
+    .direct-chat-text {
+        background: #fff;
+        border: 1px solid #fff;
+
+        &:before, &:after {
+            border-right-color: #fff;
+        }
+    }
+
+    .card-container {
+        margin-bottom: 1em;
+    }
 }
 </style>
 
 <template>
-<modal v-ref:modal :title="_('Issue')" class="issue-modal" large>
+<modal v-ref:modal :title="_('Issue')" class="modal-info issue-modal" large>
     <div class="modal-body">
-        <div class="row">
+        <div class="row card-container">
             <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
                 v-if="issue.subject | is 'dataset'"
                 :datasetid="issue.subject.id"></dataset-card>
@@ -44,17 +61,17 @@
                 </textarea>
             </div>
         </form>
-        <button type="button" class="btn btn-success btn-flat pull-left"
+        <button type="button" class="btn btn-sm btn-info btn-flat pull-left"
+            @click="$refs.modal.close">
+            {{ _('Close') }}
+        </button>
+        <button type="button" class="btn btn-outline btn-flat"
             @click="comment_issue" v-if="can_comment">
             {{ _('Comment the issue') }}
         </button>
-        <button type="button" class="btn btn-warning btn-flat pull-left"
+        <button type="button" class="btn btn-outline btn-flat"
             @click="close_issue" v-if="can_close">
             {{ _('Comment and close issue') }}
-        </button>
-        <button type="button" class="btn btn-danger btn-flat"
-            @click="$refs.modal.close">
-            {{ _('Close') }}
         </button>
     </footer>
 </modal>
