@@ -17,6 +17,7 @@
 - Major form fixes [#2000](https://github.com/opendatateam/udata/pull/2000)
 - Improved admin errors handling: visual feedback on all errors, `Sentry-ID` header if present, hide organization unauthorized actions [#2005](https://github.com/opendatateam/udata/pull/2005)
 - Expose and import licenses `alternate_urls` and `alternate_titles` fields [#2006](https://github.com/opendatateam/udata/pull/2006)
+- Be consistent on search results wording and picto (Stars vs Followers)
 
 ## 1.6.2 (2018-11-05)
 

@@ -15,7 +15,7 @@
 
 {% block breadcrumb %}
     <li class="active">
-    
+
         {{ _('Datasets') }}
 
         {% if datasets.total > 0 %}
@@ -24,7 +24,7 @@
                 end=datasets.page_end,
                 total=datasets.total) }}</small>
 		{% endif %}
-        
+
         {% include "dataset/search-labels.html" %}
     </li>
 {% endblock %}
@@ -41,7 +41,7 @@
     created=(_('Creation date'), 'desc'),
     last_modified=(_('Last modification date'), 'desc'),
     reuses=(_('Reuses'), 'desc'),
-    followers=(_('Stars'), 'desc')
+    followers=(_('Followers'), 'desc')
 ) }}
 </div>
 {% endblock %}
@@ -49,7 +49,7 @@
 {% block main_content %}
 <div class="row">
 
-    {% if datasets %} 
+    {% if datasets %}
         <div class="col-md-8 col-lg-9 smaller">
 
             <ul class="search-results">
@@ -67,7 +67,7 @@
     <aside class="col-md-4 col-lg-3">
     {% include theme('dataset/search-panel.html') %}
     </aside>
-    {% else %} 
+    {% else %}
         <p class="text-center">
             <strong>
                 {{ _('No results found, try to be less specific.') }}
