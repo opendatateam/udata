@@ -42,20 +42,11 @@
                 </a>
             </li>
             {% endif %}
-            {% if organization.metrics.stars %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of stars') }}">
-                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                    {{ ngettext('%(num)d star', '%(num)d stars', organization.metrics.stars or 0) }}
-                </a>
-            </li>
-            {% endif %}
             {% if organization.metrics.followers %}
             <li>
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
                     title="{{ _('Number of followers') }}">
-                    <span class="{{ ficon('fa-eye') }} fa-fw"></span>
+                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
                     {{ ngettext('%(num)d follower', '%(num)d followers', organization.metrics.followers or 0) }}
                 </a>
             </li>

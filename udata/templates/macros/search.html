@@ -26,7 +26,7 @@
                 ---
             </a>
         </li>
-        {% for field, (label, order) in kwargs.items() %}
+        {% for field, (label, order) in kwargs|dictsort(by='value') %}
             {% set sort = field if order == 'asc' else '-'+field %}
             <li>
                 <a href="{{ to_url(url=url, replace=True, sort=sort) }}">
