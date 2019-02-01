@@ -20,6 +20,7 @@
 - Be consistent on search results wording and icons (Stars vs Followers) [#2013](https://github.com/opendatateam/udata/pull/2013)
 - Switch from a "full facet reset" to a "by term reset" approach in search facets [#2014](https://github.com/opendatateam/udata/pull/2014)
 - Ensures all modals have the same buttons styles and orders, same color code... [#2012](https://github.com/opendatateam/udata/pull/2012)
+- Ensure URLs from assets stored on `CDN_DOMAINS` are considered as valid and that associated error message is properly translated [#2017](https://github.com/opendatateam/udata/pull/2017)
 
 ## 1.6.2 (2018-11-05)
 
