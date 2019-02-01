@@ -61,7 +61,7 @@
                 </textarea>
             </div>
         </form>
-        <button type="button" class="btn btn-sm btn-info btn-flat pull-left"
+        <button type="button" class="btn btn-info btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Close') }}
         </button>

@@ -15,11 +15,11 @@
             </p>
         </div>
         <footer class="modal-footer text-center">
-            <button type="button" class="btn btn-sm btn-flat pull-left" :class="cancelClass" @click="cancel">
+            <button type="button" class="btn btn-flat pull-left" :class="cancelClass" @click="cancel">
                 {{ _('Cancel') }}
             </button>
             <button type="button"  v-if="!unscheduling && source.schedule"
-                class="btn btn-sm btn-danger btn-flat" @click="unscheduling = true">
+                class="btn btn-danger btn-flat" @click="unscheduling = true">
                 {{ _('Unschedule') }}
             </button>
             <button type="button" v-if="!unscheduling" class="btn btn-outline btn-flat" @click="schedule">

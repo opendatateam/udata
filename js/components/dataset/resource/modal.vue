@@ -74,19 +74,19 @@
     <footer class="modal-footer text-center">
         <!-- Main close button (visible on read-only display) -->
         <button type="button" v-show="!edit && !confirm && !isUpload"
-                class="btn btn-primary btn-sm btn-flat pull-left"
+                class="btn btn-primary btn-flat pull-left"
                 @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
         <!-- Same cancel button for every action-->
         <button type="button" v-show="edit || confirm || isUpload"
-                class="btn btn-sm btn-flat pull-left"
+                class="btn btn-flat pull-left"
                 :class="{'btn-danger': confirm, 'btn-primary': !confirm}"
                 @click="cancel">
             {{ _('Cancel') }}
         </button>
         <button type="button" v-show="!edit && !confirm && can_edit"
-                class="btn btn-danger btn-sm btn-flat"
+                class="btn btn-danger btn-flat"
                 @click="confirm = true">
             {{ _('Delete') }}
         </button>

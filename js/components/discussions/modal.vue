@@ -70,11 +70,11 @@
                 </textarea>
             </div>
         </form>
-        <button type="button" class="btn btn-sm btn-info btn-flat pull-left"
+        <button type="button" class="btn btn-info btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
-        <button type="button" class="btn btn-sm btn-danger btn-flat"
+        <button type="button" class="btn btn-danger btn-flat"
             v-if="$root.me.is_admin" @click="confirm_delete">
             {{ _('Delete') }}
         </button>

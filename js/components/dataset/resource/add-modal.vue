@@ -8,7 +8,7 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-sm btn-primary btn-flat pull-left"
+        <button type="button" class="btn btn-primary btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>

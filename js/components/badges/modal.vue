@@ -26,7 +26,7 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button v-if="confirm" type="button" class="btn btn-sm btn-info btn-flat pull-left"
+        <button v-if="confirm" type="button" class="btn btn-info btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Cancel') }}
         </button>
