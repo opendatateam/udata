@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.3 (2019-02-01)
 
 - Remove extra attributes on user deletion [#1961](https://github.com/opendatateam/udata/pull/1961)
