@@ -1,3 +1,4 @@
+commit_message": '[ci skip]'
 files:
   - source: /udata/translations/*.pot
     translation: /udata/translations/%two_letters_code%/LC_MESSAGES/udata.po
