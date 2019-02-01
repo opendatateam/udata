@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-02-01 15:24+0100\n"
-"PO-Revision-Date: 2019-02-01 14:43\n"
+"PO-Revision-Date: 2019-02-01 14:52\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -122,7 +122,7 @@ msgstr "a supprimé un jeu de données"
 
 #: udata/core/dataset/forms.py:50
 msgid "Domain \"{domain}\" not allowed for filetype \"{filetype}\""
-msgstr ""
+msgstr "Domain \"{domain}\" non autorisé pour le type \"{filetype}\""
 
 #: udata/core/dataset/forms.py:57 udata/core/dataset/forms.py:111
 #: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
