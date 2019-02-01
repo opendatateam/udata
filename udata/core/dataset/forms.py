@@ -35,29 +35,27 @@ def normalize_format(data):
 
 def enforce_filetype_file(form, field):
     '''Only allowed domains in resource.url when filetype is file'''
-    if field.data != RESOURCE_FILETYPE_FILE:
+    if form._fields.get('filetype').data != RESOURCE_FILETYPE_FILE:
         return
-    url = form._fields.get('url').data
-    domain = urlparse(url).netloc
-    allowed_domains = current_app.config.get(
-        'RESOURCES_FILE_ALLOWED_DOMAINS', [])
+    domain = urlparse(field.data).netloc
+    allowed_domains = current_app.config['RESOURCES_FILE_ALLOWED_DOMAINS']
     allowed_domains += [current_app.config.get('SERVER_NAME')]
     if current_app.config.get('CDN_DOMAIN'):
         allowed_domains.append(current_app.config['CDN_DOMAIN'])
     if '*' in allowed_domains:
         return
     if domain and domain not in allowed_domains:
-        message = _('Domain "{domain}" not allowed for filetype "{filetype}"').format(
+        message = _('Domain "{domain}" not allowed for filetype "{filetype}"')
+        raise validators.ValidationError(message.format(
             domain=domain, filetype=RESOURCE_FILETYPE_FILE
-        )
-        raise validators.ValidationError(message)
+        ))
 
 
 class BaseResourceForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.required()])
     description = fields.MarkdownField(_('Description'))
     filetype = fields.RadioField(
-        _('File type'), [validators.required(), enforce_filetype_file],
+        _('File type'), [validators.required()],
         choices=RESOURCE_FILETYPES.items(), default='file',
         description=_('Whether the resource is an uploaded file, '
                       'a remote file or an API'))
@@ -66,7 +64,8 @@ class BaseResourceForm(ModelForm):
         choices=RESOURCE_TYPES.items(), default='other',
         description=_('Resource type (documentation, API...)'))
     url = fields.UploadableURLField(
-        _('URL'), [validators.required()], storage=resources)
+        _('URL'), [validators.required(), enforce_filetype_file],
+        storage=resources)
     format = fields.StringField(
         _('Format'),
         filters=[normalize_format],
