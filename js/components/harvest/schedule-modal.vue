@@ -15,18 +15,18 @@
             </p>
         </div>
         <footer class="modal-footer text-center">
-            <button type="button" v-if="!unscheduling" class="btn btn-outline btn-flat pull-left" @click="schedule">
-                {{ _('Schedule') }}
-            </button>
-            <button type="button" v-if="unscheduling" class="btn btn-warning btn-flat pull-left" @click="unschedule">
-                {{ _('Confirm') }}
+            <button type="button" class="btn btn-flat pull-left" :class="cancelClass" @click="cancel">
+                {{ _('Cancel') }}
             </button>
             <button type="button"  v-if="!unscheduling && source.schedule"
-                class="btn btn-warning btn-flat pull-left" @click="unscheduling = true">
+                class="btn btn-danger btn-flat" @click="unscheduling = true">
                 {{ _('Unschedule') }}
             </button>
-            <button type="button" class="btn btn-sm btn-flat" :class="cancelClass" @click="cancel">
-                {{ _('Cancel') }}
+            <button type="button" v-if="!unscheduling" class="btn btn-outline btn-flat" @click="schedule">
+                {{ _('Schedule') }}
+            </button>
+            <button type="button" v-if="unscheduling" class="btn btn-warning btn-flat" @click="unschedule">
+                {{ _('Confirm') }}
             </button>
         </footer>
     </modal>
@@ -53,7 +53,7 @@ export default {
             return [this.unscheduling ? 'modal-danger' : 'modal-primary'];
         },
         cancelClass() {
-            return [this.unscheduling ? 'btn-warning' : 'btn-primary'];
+            return [this.unscheduling ? 'btn-danger' : 'btn-primary'];
         }
     },
     data() {

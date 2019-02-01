@@ -8,6 +8,19 @@
         height: auto;
     }
 
+    .direct-chat-timestamp {
+        color: #eee;
+    }
+
+    .direct-chat-text {
+        background: #fff;
+        border: 1px solid #fff;
+
+        &:before, &:after {
+            border-right-color: #fff;
+        }
+    }
+
     .card-container {
         margin-bottom: 1em;
     }
@@ -15,8 +28,8 @@
 </style>
 
 <template>
-<modal v-ref:modal :title="title" class="discussion-modal" large
-    :class="{'modal-danger': deleting}">
+<modal v-ref:modal :title="title" class="discussion-modal" :large="!deleting"
+    :class="{'modal-danger': deleting, 'modal-info': !deleting}">
     <div class="modal-body" v-show="!deleting">
         <div class="row card-container">
             <dataset-card class="col-xs-12 col-md-offset-3 col-md-6"
@@ -57,31 +70,31 @@
                 </textarea>
             </div>
         </form>
-        <button type="button" class="btn btn-danger btn-flat pull-left"
-            v-if="$root.me.is_admin" @click="confirm_delete">
-            {{ _('Delete') }}
-        </button>
-        <button type="button" class="btn btn-success btn-flat pull-left"
-            @click="comment_discussion" v-if="!discussion.closed">
-            {{ _('Comment the discussion') }}
-        </button>
-        <button type="button" class="btn btn-warning btn-flat pull-left"
-            @click="close_discussion" v-if="!discussion.closed">
-            {{ _('Comment and close discussion') }}
-        </button>
-        <button type="button" class="btn btn-primary btn-flat"
+        <button type="button" class="btn btn-info btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
+        <button type="button" class="btn btn-danger btn-flat"
+            v-if="$root.me.is_admin" @click="confirm_delete">
+            {{ _('Delete') }}
+        </button>
+        <button type="button" class="btn btn-outline btn-flat"
+            @click="comment_discussion" v-if="!discussion.closed">
+            {{ _('Comment the discussion') }}
+        </button>
+        <button type="button" class="btn btn-outline btn-flat"
+            @click="close_discussion" v-if="!discussion.closed">
+            {{ _('Comment and close discussion') }}
+        </button>
     </footer>
     <footer class="modal-footer text-center" v-show="deleting">
-        <button type="button" class="btn btn-warning btn-flat pull-left"
-            @click="delete">
-            {{ _('Confirm') }}
-        </button>
-        <button type="button" class="btn btn-danger btn-flat"
+        <button type="button" class="btn btn-danger btn-flat pull-left"
             @click="cancel_delete">
             {{ _('Cancel') }}
+        </button>
+        <button type="button" class="btn btn-warning btn-flat"
+            @click="delete">
+            {{ _('Confirm') }}
         </button>
     </footer>
 </modal>

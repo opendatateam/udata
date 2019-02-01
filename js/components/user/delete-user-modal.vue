@@ -17,13 +17,13 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button type="button" class="btn btn-warning btn-flat pull-left"
-            @click="confirm">
-            {{ _('Confirm') }}
-        </button>
-        <button type="button" class="btn btn-danger btn-flat"
+        <button type="button" class="btn btn-danger btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Cancel') }}
+        </button>
+        <button type="button" class="btn btn-warning btn-flat"
+            @click="confirm">
+            {{ _('Confirm') }}
         </button>
     </footer>
 </modal>

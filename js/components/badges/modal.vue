@@ -12,7 +12,7 @@
         <div class="text-center row">
             <div class="badges col-xs-6 col-xs-offset-3">
                 <button class="btn btn-primary btn-flat btn-block"
-                    v-for="(key, label) in badges"
+                    v-for="(key, label) in badges" track-by="$index"
                     @click="toggle(key)"
                     :class="{ 'active': selected.indexOf(key) >= 0 }">
                     <span class="fa pull-left" :class="{
@@ -26,14 +26,14 @@
     </div>
 
     <footer class="modal-footer text-center">
-        <button :disabled="!hasModifications" type="button"
-            class="btn btn-success btn-flat pull-left"
-            @click="confirm">
-            {{ _('Confirm') }}
-        </button>
-        <button v-if="confirm" type="button" class="btn btn-danger btn-flat"
+        <button v-if="confirm" type="button" class="btn btn-info btn-flat pull-left"
             @click="$refs.modal.close">
             {{ _('Cancel') }}
+        </button>
+        <button :disabled="!hasModifications" type="button"
+            class="btn btn-outline btn-flat"
+            @click="confirm">
+            {{ _('Confirm') }}
         </button>
     </footer>
 </modal>
@@ -117,3 +117,13 @@ export default {
     }
 };
 </script>
+
+<style lang="less">
+.badges-modal {
+    .badges {
+        .fa {
+            line-height: inherit;
+        }
+    }
+}
+</style>
