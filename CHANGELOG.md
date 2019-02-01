@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.3 (2019-02-01)
 
 - Remove extra attributes on user deletion [#1961](https://github.com/opendatateam/udata/pull/1961)
 - Pin phantomjs to version `2.1.7` [#1975](https://github.com/opendatateam/udata/pull/1975)
