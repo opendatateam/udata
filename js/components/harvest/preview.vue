@@ -50,12 +50,14 @@ export default {
             if (this.fromConfig) {
                 API.harvest.preview_harvest_source_config(
                     {payload: this.source},
-                    this.onPreviewFetch
+                    this.onPreviewFetch,
+                    this.$root.handleApiError
                 );
             } else {
                 API.harvest.preview_harvest_source(
                     {ident: this.source.id},
-                    this.onPreviewFetch
+                    this.onPreviewFetch,
+                    this.$root.handleApiError
                 );
             }
         },

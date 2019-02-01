@@ -13,6 +13,28 @@
 
 - The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
 
+## 1.6.3 (2019-02-01)
+
+- Remove extra attributes on user deletion [#1961](https://github.com/opendatateam/udata/pull/1961)
+- Pin phantomjs to version `2.1.7` [#1975](https://github.com/opendatateam/udata/pull/1975)
+- Protect membership accept route against flood [#1984](https://github.com/opendatateam/udata/pull/1984)
+- Ensure compatibility with IE11 and Firefox ESR [#1990](https://github.com/opendatateam/udata/pull/1990)
+- Lots of fixes on the resource form. Be explicit about uploading a new file [#1991](https://github.com/opendatateam/udata/pull/1991)
+- Centralize `selectize` handling and style in `base-completer` and apply some fixes [1992](https://github.com/opendatateam/udata/pull/1992)
+- Added the missing `number` input field widget [#1993](https://github.com/opendatateam/udata/pull/1993)
+- Fix the organization private datasets and reuses counters [#1994](https://github.com/opendatateam/udata/pull/1994)
+- Disable autocorrect, spellcheck... on search and completion fields [#1995](https://github.com/opendatateam/udata/pull/1995)
+- Fix harvest preview in edit form not taking configuration (features and filters) [#1996](https://github.com/opendatateam/udata/pull/1996)
+- Ensure organization page react to URL hash changes (including those from right sidebar) [#1997](https://github.com/opendatateam/udata/pull/1997)
+- Updating community resource as admin keeps original owner [#1999](https://github.com/opendatateam/udata/pull/1999)
+- Major form fixes [#2000](https://github.com/opendatateam/udata/pull/2000)
+- Improved admin errors handling: visual feedback on all errors, `Sentry-ID` header if present, hide organization unauthorized actions [#2005](https://github.com/opendatateam/udata/pull/2005)
+- Expose and import licenses `alternate_urls` and `alternate_titles` fields [#2006](https://github.com/opendatateam/udata/pull/2006)
+- Be consistent on search results wording and icons (Stars vs Followers) [#2013](https://github.com/opendatateam/udata/pull/2013)
+- Switch from a "full facet reset" to a "by term reset" approach in search facets [#2014](https://github.com/opendatateam/udata/pull/2014)
+- Ensures all modals have the same buttons styles and orders, same color code... [#2012](https://github.com/opendatateam/udata/pull/2012)
+- Ensure URLs from assets stored on `CDN_DOMAINS` are considered as valid and that associated error message is properly translated [#2017](https://github.com/opendatateam/udata/pull/2017)
+
 ## 1.6.2 (2018-11-05)
 
 - Display the owner/organization on harvester view [#1921](https://github.com/opendatateam/udata/pull/1921)

@@ -37,12 +37,12 @@ export default {
         generate() {
             API.me.generate_apikey({}, (response) => {
                 this.user.apikey = response.obj.apikey;
-            });
+            }, this.$root.handleApiError);
         },
         clear() {
             API.me.clear_apikey({}, (response) => {
                 this.user.apikey = null;
-            });
+            }, this.$root.handleApiError);
         }
     }
 };

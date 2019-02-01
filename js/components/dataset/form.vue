@@ -18,7 +18,6 @@ export default {
             type: Object,
             default: () => new Dataset(),
         },
-        hideNotifications: false
     },
     data() {
         return {
@@ -80,8 +79,7 @@ export default {
             return this.$refs.form.serialize();
         },
         validate() {
-            const isValid = this.$refs.form.validate();
-            return isValid;
+            return this.$refs.form.validate();
         },
         on_error(response) {
             return this.$refs.form.on_error(response);

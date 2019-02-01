@@ -3,6 +3,7 @@
     <label :for="id">
         <input v-el:checkbox type="checkbox"
             :id="id" :name="key" :checked="checked"
+            @input="onChange"
         />
         {{ feature.label }}
     </label>
@@ -31,8 +32,16 @@ export default {
         key() {
             return this.feature.key;
         },
-        value() {
-            return this.$els.checkbox.checked;
+        value: {
+            cache: false,
+            get() {
+                return this.$els.checkbox.checked;
+            }
+        }
+    },
+    methods: {
+        onChange(evt) {
+            this.$dispatch('field:value-change', evt.target.checked);
         }
     }
 }

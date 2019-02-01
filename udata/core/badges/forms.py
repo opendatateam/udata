@@ -11,7 +11,7 @@ def badge_form(model):
         model_class = Badge
 
         kind = fields.RadioField(
-            _('Kind'), [validators.required()],
+            _('Kind'), [validators.DataRequired()],
             choices=list(model.__badges__.items()),
             description=_('Kind of badge (certified, etc)'))
 

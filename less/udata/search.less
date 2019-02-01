@@ -168,11 +168,15 @@ ul.search-results {
                 padding-right: @padding + 37px;
                 position: relative;
 
-                .badge {
+                .badge, .fa-times {
                     position: absolute;
                     top: 50%;
                     right: @padding;
                     transform: translateY(-50%);
+                }
+
+                .fa-times:hover {
+                    color: red;
                 }
             }
 

@@ -45,7 +45,7 @@ def basic_header(client):
 
 @pytest.fixture
 def oauth(app, request):
-    marker = request.node.get_marker('oauth')
+    marker = request.node.get_closest_marker('oauth')
     kwargs = marker.kwargs if marker else {}
     return OAuth2Client.objects.create(
         name='test-client',

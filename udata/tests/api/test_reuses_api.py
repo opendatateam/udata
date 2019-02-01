@@ -357,9 +357,7 @@ class ReuseBadgeAPITest(APITestCase):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
         kinds_keys = list(Reuse.__badges__)
-        self.reuse.badges.append(
-            self.factory(kind=kinds_keys[0]))
-        self.reuse.save()
+        self.reuse.add_badge(kinds_keys[0])
         data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]
         with self.api_user():
@@ -371,8 +369,7 @@ class ReuseBadgeAPITest(APITestCase):
 
     def test_delete(self):
         badge = self.factory()
-        self.reuse.badges.append(badge)
-        self.reuse.save()
+        self.reuse.add_badge(badge.kind)
         with self.api_user():
             response = self.delete(
                 url_for('api.reuse_badge', reuse=self.reuse,

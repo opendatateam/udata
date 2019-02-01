@@ -3,13 +3,18 @@
     .form-control {
         color: #555;
     }
+
+    label.help-block {
+        margin-bottom: 0;
+    }
 }
 </style>
 
 <template>
     <div class="horizontal-field" :class="{
         'form-group': !is_hidden,
-        'has-error': errors.length
+        'has-error': errors.length,
+        'has-success': success,
         }">
         <label v-if="!is_hidden" :for="field.id"
             :class="{ 'required': required && !is_bool }"
@@ -28,7 +33,7 @@
                 :readonly="readonly">
             </component>
             <label :for="field.id" class="help-block"
-                v-for="error in errors">{{error}}</label>
+                v-for="error in errors" track-by="$index">{{error}}</label>
         </div>
     </div>
 </template>

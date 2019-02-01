@@ -38,6 +38,7 @@ import FeatureField from './feature-field.vue';
 import FilterField from './filter-field.vue';
 
 export default {
+    name: 'config-form',
     components: {FeatureField, FilterField},
     data() {
         return {
@@ -48,6 +49,17 @@ export default {
     events: {
         'filter:delete': function(index) {
             this.config.filters.splice(index, 1);
+            this.$nextTick(() => {
+                this.$dispatch('form:change', this)
+            })
+        },
+        'field:change': function(field, value) {
+            this.$dispatch('form:change', this, field, value);
+            return true;  // Let the event continue its bubbling
+        },
+        // Custom fields are not wrapped into a FormField
+        'field:value-change': function(value) {
+            this.$dispatch('form:change', this);
         }
     },
     props: {
@@ -71,6 +83,7 @@ export default {
                 this.$set('config.filters', []);
             }
             this.config.filters.push({key: undefined, value: undefined});
+            this.$dispatch('form:change', this)
         },
         serialize() {
             const config = {};
@@ -86,6 +99,9 @@ export default {
                 }));
             }
             return config;
+        },
+        validate() {
+            return true;  // Always valid
         }
     }
 }

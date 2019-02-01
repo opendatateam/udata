@@ -50,7 +50,8 @@ export default {
             this.$set('preview_job', job);
             API.harvest.preview_harvest_source(
                 {ident: this.source.id},
-                job.on_fetched.bind(job)
+                job.on_fetched.bind(job),
+                this.$root.handleApiError
             );
         }
     }

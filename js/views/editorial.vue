@@ -59,13 +59,15 @@ export default {
         'dataset-card-list:submit': function(order) {
             API.site.set_home_datasets(
                 {payload: order},
-                this.home_datasets.on_fetched.bind(this.home_datasets)
+                this.home_datasets.on_fetched.bind(this.home_datasets),
+                this.$root.handleApiError
             );
         },
         'reuse-card-list:submit': function(order) {
             API.site.set_home_reuses(
                 {payload: order},
-                this.home_reuses.on_fetched.bind(this.home_reuses)
+                this.home_reuses.on_fetched.bind(this.home_reuses),
+                this.$root.handleApiError
             );
         }
     },
