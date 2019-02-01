@@ -87,12 +87,6 @@
         <span class="{{icon or 'fa fa-filter'}} fa-fw"></span>
         {{ label or name }}
         <span id="chevrons-{{result.class_name}}-{{name}}" class="fa fa-chevron-down pull-right"></span>
-        {% if in_url(name) %}
-        <a id="facet-{{result.class_name}}-{{name}}-remove" class="btn-remove pull-right"
-            href="{{ url_del(None, name, 'page') }}" title="{{ _('Clear filter') }}">
-            <span class="fa fa-remove"></span>
-        </a>
-        {% endif %}
     </h3>
 </div>
 <div id="facet-{{result.class_name}}-{{name}}" class="{{ classes }} collapse in">
@@ -100,17 +94,28 @@
 </div>
 {% endmacro %}
 
+{% macro term_item(result, facet, url, term, count, selected) %}
+{% if selected %}
+<a href="{{ url|url_del('page', **{facet: term}) }}"
+    class="list-group-item active">
+    <span class="fa fa-times pull-right"></span>
+    {{ result.query.facets[facet].labelize(term) }}
+</a>
+{% else %}
+<a href="{{ result.query.to_url(url, **{facet: term}) }}"
+    class="list-group-item">
+    <span class="badge">{{ count }}</span>
+    {{ result.query.facets[facet].labelize(term) }}
+</a>
+{% endif %}
+{% endmacro %}
 
 {% macro terms_facet(result, name, label, icon, url=None) %}
 {% set terms = result.facets[name] %}
 {% if terms|length > 1 %}
     {% call facet_panel(result, name, label, icon, url) %}
     {% for term, count, selected in terms[:nb_displayed_aggregations] %}
-        <a href="{{ result.query.to_url(url, **{name: term}) }}"
-            class="list-group-item">
-            <span class="badge">{{ count }}</span>
-            {{ result.query.facets[name].labelize(term) }}
-        </a>
+        {{ term_item(result, name, url, term, count, selected) }}
     {% endfor %}
     {% if terms|length > nb_displayed_aggregations %}
         <button class="list-group-item more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
@@ -118,15 +123,27 @@
         </button>
         <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
         {% for term, count, selected in terms[nb_displayed_aggregations:] %}
-            <a href="{{ result.query.to_url(url, **{name: term}) }}"
-                class="list-group-item">
-                <span class="badge">{{ count }}</span>
-                {{ result.query.facets[name].labelize(term) }}
-            </a>
+            {{ term_item(result, name, url, term, count, selected) }}
         {% endfor %}
         </div>
     {% endif %}
     {% endcall %}
+{% endif %}
+{% endmacro %}
+
+{% macro model_term_item(result, facet, url, obj, count, selected) %}
+{% if selected %}
+<a href="{{ url|url_del('page', **{facet: obj.id|string}) }}"
+    class="list-group-item active">
+    <span class="fa fa-times pull-right"></span>
+    {{ result.query.facets[facet].labelize(obj) }}
+</a>
+{% else %}
+<a href="{{ result.query.to_url(url, **{facet:  obj.id|string}) }}"
+    class="list-group-item">
+    <span class="badge">{{ count }}</span>
+    {{ result.query.facets[facet].labelize(obj) }}
+</a>
 {% endif %}
 {% endmacro %}
 
@@ -136,11 +153,7 @@
 {% if objects|length > 1 %}
     {% call facet_panel(result, name, label, icon, url) %}
     {% for obj, count, selected in objects[:nb_displayed_aggregations] %}
-        <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
-            class="list-group-item">
-            <span class="badge">{{ count }}</span>
-            {{ result.query.facets[name].labelize(obj) }}
-        </a>
+        {{ model_term_item(result, name, url, obj, count, selected) }}
     {% endfor %}
     {% if objects|length > nb_displayed_aggregations %}
         <button class="list-group-item more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
@@ -148,11 +161,7 @@
         </button>
         <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
         {% for obj, count, selected in objects[nb_displayed_aggregations:] %}
-            <a href="{{ result.query.to_url(url, **{name: obj.id|string}) }}"
-                class="list-group-item">
-                <span class="badge">{{ count }}</span>
-                {{ result.query.facets[name].labelize(obj) }}
-            </a>
+            {{ model_term_item(result, name, url, obj, count, selected) }}
         {% endfor %}
         </div>
     {% endif %}

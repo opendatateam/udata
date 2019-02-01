@@ -18,6 +18,7 @@
 - Improved admin errors handling: visual feedback on all errors, `Sentry-ID` header if present, hide organization unauthorized actions [#2005](https://github.com/opendatateam/udata/pull/2005)
 - Expose and import licenses `alternate_urls` and `alternate_titles` fields [#2006](https://github.com/opendatateam/udata/pull/2006)
 - Be consistent on search results wording and icons (Stars vs Followers) [#2013](https://github.com/opendatateam/udata/pull/2013)
+- Switch from a "full facet reset" to a "by term reset" approach in search facets [#2014](https://github.com/opendatateam/udata/pull/2014)
 
 ## 1.6.2 (2018-11-05)
 
