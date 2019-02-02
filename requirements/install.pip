@@ -39,7 +39,7 @@ pytz==2018.9
 PyYAML==3.13
 rdflib==4.2.2
 rdflib-jsonld==0.4.0
-redis==3.1.0
+redis==2.10.6 # this can be safely upgraded back to 3.1.0 as soon as celery 4.2.2 is released
 requests==2.21.0
 StringDist==1.0.9
 tlds
