@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix workers: pin redis version for Celery compatibility [#2019](https://github.com/opendatateam/udata/pull/2019)
 
 ## 1.6.3 (2019-02-01)
 
