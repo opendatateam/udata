@@ -1152,7 +1152,7 @@ msgid "Source"
 msgstr ""
 
 #: udata/harvest/forms.py:18
-msgid "Some optionnal details about this harvester"
+msgid "Some optional details about this harvester"
 msgstr ""
 
 #: udata/harvest/forms.py:20
