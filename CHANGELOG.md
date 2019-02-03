@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Use the "udata" (vs UData or uData) naming convention
+- Fix a few typos in documentation and UI/translation strings
 
 ## 1.6.4 (2019-02-02)
 
