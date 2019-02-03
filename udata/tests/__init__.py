@@ -90,7 +90,7 @@ class DBTestMixin(object):
 
 
 class SearchTestMixin(DBTestMixin):
-    '''A mixin allowing to optionnaly enable indexation and cleanup after'''
+    '''A mixin allowing to optionally enable indexation and cleanup after'''
     _used_search = False
 
     def init_search(self):

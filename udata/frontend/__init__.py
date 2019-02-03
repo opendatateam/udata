@@ -90,7 +90,7 @@ def init_app(app, views=None):
             if assets.has_manifest(dist.project_name):
                 assets.register_manifest(dist.project_name)
 
-    # Optionnaly register debug views
+    # Optionally register debug views
     if app.config.get('DEBUG'):
         @front.route('/403/')
         def test_403():
