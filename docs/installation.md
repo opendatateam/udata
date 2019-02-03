@@ -54,7 +54,7 @@ $ pip install udata-piwik
 
 !!! note
     We install Cython before all other dependencies because
-    some have an optionnal compilation support for Cython
+    some have an optional compilation support for Cython
     resulting in better performances (mostly XML harvesting).
 
 
@@ -402,12 +402,12 @@ LANGUAGES = {
 # Here is you default language
 DEFAULT_LANGUAGE = 'fr'
 
-# Optionnaly activate some installed plugins
+# Optionally activate some installed plugins
 PLUGINS = (
     'piwik',
 )
 
-# Optionnaly activate an installed theme
+# Optionally activate an installed theme
 # THEME = 'my-theme'
 
 # Define where resources are stored and exposed

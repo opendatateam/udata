@@ -9,7 +9,7 @@ If you need to use an alternative Mongo or Elasticsearch instance during tests,
 you can provides the alternate urls in you `udata.cfg`
 with `MONGODB_HOST_TEST` and `ELASTICSEARCH_URL_TEST`.
 
-**ex**: To make use of the tmpfs based middleware provided by docker-compose, use:
+**E.g.**: To make use of the tmpfs based middleware provided by docker-compose, use:
 
 ```python
 MONGODB_HOST_TEST = 'mongodb://localhost:27018/udata'

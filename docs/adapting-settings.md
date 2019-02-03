@@ -145,7 +145,7 @@ List of allowed URL schemes.
 **default**: All IANA registered TLDs
 
 List of allowed TLDs.
-When using udata on an intranet, you might want to add your own custom TLDs:
+When using uData on an intranet, you might want to add your own custom TLDs:
 
 ```python
 from udata.settings import Defaults
@@ -307,7 +307,7 @@ ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
 
 **default**: same as `ELASTICSEARCH_URL`
 
-An optionnal alternative elasticsearch server url that may be used for testing.
+An optional alternative elasticsearch server url that may be used for testing.
 
 ### ELASTICSEARCH_INDEX_BASENAME
 
@@ -334,7 +334,7 @@ The above example will produce:
 
 **default**: `'mongodb://localhost:27017/udata'`
 
-The mongodb database used by udata.
+The mongodb database used by uData.
 During tests, the test database will use the same name suffixed by `-test`
 
 See [the official Flask-MongoEngine documentation][flask-mongoengine-doc]
@@ -350,7 +350,7 @@ MONGODB_HOST = 'mongodb://<user>:<password>@<host>:<port>/<database>'
 
 **default**: same as `MONGODB_HOST` with a `-test` suffix on the collection
 
-An optionnal alternative mongo database used for testing.
+An optional alternative mongo database used for testing.
 
 ## Celery options
 
@@ -380,9 +380,9 @@ CELERY_BROKER_URL = 'redis://u:<password>@<host>:<port>'
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
 
-**Note** Celery parameters changed in UData 1.2 because Celery has been upgraded to 4.1.0.
+**Note** Celery parameters changed in uData 1.2 because Celery has been upgraded to 4.1.0.
 (You can get the change map [here][celery-conf-map]).
-UData expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
+uData expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
 and they will be automatically transformed for Celery 4.x:
 Example:
  - Celery 3.x expected `BROKER_URL` and Celery 4.x expects `broker_url` so you need to change `BROKER_URL` to `CELERY_BROKER_URL` in your settings
@@ -479,7 +479,7 @@ uData provides 3 backends:
 
 Number of blocks (the matrix size) used by the internal provider.
 
-*Ex*: `7` will render avatars on a 7x7 matrix
+*E.g.*: `7` will render avatars on a 7x7 matrix
 
 ### AVATAR_INTERNAL_FOREGROUND
 
