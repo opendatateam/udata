@@ -206,7 +206,7 @@ export default {
                 setattr(out, item.name, item.value);
             });
 
-            // Filter out empty optionnal objects
+            // Filter out empty optional objects
             // TODO: handle recursion
             for (const prop in out) {
                 if (isObject(out[prop]) && this.schema.required.indexOf(prop) < 0) {
@@ -230,7 +230,7 @@ export default {
             // Errors occuring before submission are simple strings
             if (isString(response)) {
                 log.error(response);  // Technical and non translatable, logged for better handling later
-                // TODO: Optionnal Sentry handling
+                // TODO: Optional Sentry handling
                 return;
             }
 
@@ -247,7 +247,7 @@ export default {
                     data = JSON.parse(response.data);
                 } catch (e) {
                     log.warn('Parsing error:', e);
-                    // TODO: Optionnal Sentry handling
+                    // TODO: Optional Sentry handling
                 }
 
                 if ('errors' in data) {

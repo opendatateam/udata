@@ -30,7 +30,7 @@ error_fields = api.model('HarvestError', {
                                      required=True),
     'message': fields.String(description='The error short message',
                              required=True),
-    'details': fields.String(description='Optionnal details (ie. stacktrace)'),
+    'details': fields.String(description='Optional details (ie. stacktrace)'),
 })
 
 item_fields = api.model('HarvestItem', {
@@ -142,7 +142,7 @@ backend_fields = api.model('HarvestBackend', {
     'filters': fields.List(fields.Nested(filter_fields),
                            description='The backend supported filters'),
     'features': fields.List(fields.Nested(feature_fields),
-                            description='The backend optionnal features'),
+                            description='The backend optional features'),
 })
 
 preview_dataset_fields = api.clone('DatasetPreview', dataset_fields, {

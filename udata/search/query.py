@@ -117,9 +117,9 @@ class SearchQuery(FacetedSearch):
 
         It handles the following features:
          - negation support
-         - optionnal fuzziness
-         - optionnal analyzer
-         - optionnal match_type
+         - optional fuzziness
+         - optional analyzer
+         - optional match_type
         '''
         if not query:
             return search
@@ -154,13 +154,13 @@ class SearchQuery(FacetedSearch):
         params = {'query': ' '.join(terms)}
         if len(terms) > 1:
             params['operator'] = 'and'
-        # Optionnal search type
+        # Optional search type
         if self.match_type:
             params['type'] = self.match_type
-        # Optionnal analyzer
+        # Optional analyzer
         if self.analyzer:
             params['analyzer'] = self.analyzer
-        # Optionnal fuzzines
+        # Optional fuzzines
         if self.fuzzy:
             params['fuzziness'] = 'AUTO'
             params['prefix_length'] = 2  # Make it configurable ?

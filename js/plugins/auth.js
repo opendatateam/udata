@@ -10,7 +10,7 @@ const DEFAULT_NEED_ROLE = i18n._('Role "{role}" is required', {role: 'ROLE'});
 export class AuthenticationRequired extends CustomError {}
 
 /**
- * Build the authentication URL given the current page and an optionnal message.
+ * Build the authentication URL given the current page and an optional message.
  */
 export function get_auth_url(message) {
     const params = {next: window.location.href};

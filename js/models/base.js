@@ -386,7 +386,7 @@ export class ModelPage extends Model {
 
     /**
      * Fetch page from server.
-     * @param  {Object} options An optionnal query object
+     * @param  {Object} options An optional query object
      * @return {Object} Return itself allowing to chain methods.
      */
     fetch(options) {
@@ -407,7 +407,7 @@ export class ModelPage extends Model {
 
     /**
      * Fetch the next page.
-     * @param {Object} options An optionnal query object for fetch.
+     * @param {Object} options An optional query object for fetch.
      * @return {Object} Return itself allowing to chain methods.
      */
     nextPage(options) {

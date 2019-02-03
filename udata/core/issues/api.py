@@ -91,7 +91,7 @@ class IssueAPI(API):
     @api.response(403, 'Not allowed to close this issue')
     @api.marshal_with(issue_fields)
     def post(self, id):
-        '''Add comment and optionnaly close an issue given its ID'''
+        '''Add comment and optionally close an issue given its ID'''
         issue = Issue.objects.get_or_404(id=id)
         form = api.validate(IssueCommentForm)
         message = Message(

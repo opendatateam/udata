@@ -74,7 +74,7 @@ resource_fields = api.model('Resource', {
         description='The resource last modification date'),
     'metrics': fields.Raw(description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
-    'preview_url': fields.String(description='An optionnal preview URL to be '
+    'preview_url': fields.String(description='An optional preview URL to be '
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
                                  readonly=True),
@@ -97,7 +97,7 @@ temporal_coverage_fields = api.model('TemporalCoverage', {
 
 dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
     'title': fields.String(description='The dataset title', readonly=True),
-    'acronym': fields.String(description='An optionnal dataset acronym',
+    'acronym': fields.String(description='An optional dataset acronym',
                              readonly=True),
     'uri': fields.UrlFor(
         'api.dataset', lambda d: {'dataset': d},
@@ -133,7 +133,7 @@ DEFAULT_MASK = ','.join((
 dataset_fields = api.model('Dataset', {
     'id': fields.String(description='The dataset identifier', readonly=True),
     'title': fields.String(description='The dataset title', required=True),
-    'acronym': fields.String(description='An optionnal dataset acronym'),
+    'acronym': fields.String(description='An optional dataset acronym'),
     'slug': fields.String(
         description='The dataset permalink string', required=True),
     'description': fields.Markdown(
@@ -196,7 +196,7 @@ dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
 dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'id': fields.String(description='The dataset identifier'),
     'title': fields.String(description='The dataset title'),
-    'acronym': fields.String(description='An optionnal dataset acronym'),
+    'acronym': fields.String(description='An optional dataset acronym'),
     'slug': fields.String(
         description='The dataset permalink string'),
     'image_url': fields.String(

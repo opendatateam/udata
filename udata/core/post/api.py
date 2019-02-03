@@ -29,9 +29,9 @@ post_fields = api.model('Post', {
 
     'image': fields.ImageField(description='The post image', readonly=True),
     'credit_to': fields.String(
-        description='An optionnal credit line (associated to the image)'),
+        description='An optional credit line (associated to the image)'),
     'credit_url': fields.String(
-        description='An optionnal link associated to the credits'),
+        description='An optional link associated to the credits'),
 
     'tags': fields.List(
         fields.String, description='Some keywords to help in search'),
