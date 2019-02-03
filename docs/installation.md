@@ -23,7 +23,7 @@ total 4
 drwxr-xr-x 9 udata udata 4096 Jun 23 05:50 udata
 ```
 
-You can now log into this account to install uData:
+You can now log into this account to install udata:
 
 ```shell
 $ su - udata
@@ -84,9 +84,9 @@ $ udata init
 
 ## Sample nginx & uWSGI configuration
 
-You can use whatever stack you want to run uData, nginx or Apache 2 as reverse proxy, supervisord + Gunicorn or uWSGI...
+You can use whatever stack you want to run udata, nginx or Apache 2 as reverse proxy, supervisord + Gunicorn or uWSGI...
 
-All you need to remember is that uData requires at least 3 services to run:
+All you need to remember is that udata requires at least 3 services to run:
 
 - a web frontend using the `udata.wsgi` WSGI entry point.
 - a worker service using [celery][]
@@ -357,7 +357,7 @@ Then create a symlink to activate it:
 $ ln -s /etc/nginx/sites-{available,enabled}/data.example.com
 ```
 
-Before restarting all services to start uData, we need to adjust its configuration
+Before restarting all services to start udata, we need to adjust its configuration
 and collect static assets to make them available for nginx.
 
 ```shell
@@ -421,7 +421,7 @@ You can now process static assets in the directory declared in the nginx configu
 $ udata collect -ni $HOME/public
 ```
 
-Alright, everything is ready to run uData so logout from the `udata` account and restart nginx and uWSGI:
+Alright, everything is ready to run udata so logout from the `udata` account and restart nginx and uWSGI:
 
 ```shell
 $ service uwsgi restart

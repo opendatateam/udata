@@ -93,7 +93,7 @@ $ inv widgets-build
 
 ## Running the project for the first time
 
-You need to initialize some data before being able to use uData:
+You need to initialize some data before being able to use udata:
 
 ```shell
 # Initialize database, indexes...
@@ -106,7 +106,7 @@ $ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
 $ inv i18nc
 ```
 
-You should be to start using and contributing to uData.
+You should be to start using and contributing to udata.
 
 ## Running the project
 
@@ -128,7 +128,7 @@ you can open your browser to <http://localhost:7000>.
 Everything should be up and running!
 
 !!! note "Tell us what you think"
-    You are always welcome to tell us about your experience _installing uData_.
+    You are always welcome to tell us about your experience _installing udata_.
     Get in touch with us via our [Gitter chatroom][Gitter] or by raising a [new issue][] on [GitHub][].
 
 ## Common tasks

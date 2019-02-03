@@ -2,7 +2,7 @@
 
 **Hello fellow developer/hacker/citizen/peer!**
 
-The uData project welcomes, and depends, on contributions from developers and users in the open source community. Contributions can be made in a number of ways, a few examples are:
+The udata project welcomes, and depends, on contributions from developers and users in the open source community. Contributions can be made in a number of ways, a few examples are:
 
 * Code patches via pull requests
 * Documentation improvements

@@ -8,7 +8,7 @@ export UDATA_SETTINGS=/path/to/my/udata.cfg
 
 The configuration file is simply a Python file declaring variables.
 
-uData uses a few Flask extensions and therefore provides all available options for these extensions.
+udata uses a few Flask extensions and therefore provides all available options for these extensions.
 Most of the time, it tries to provide sane defaults.
 
 ## Flask and global behavior options
@@ -53,7 +53,7 @@ If this is an URL, the content is downloaded on the first terms page display and
 
 **default**: `[]`
 
-A list of enabled uData plugins.
+A list of enabled udata plugins.
 
 ### THEME
 
@@ -145,7 +145,7 @@ List of allowed URL schemes.
 **default**: All IANA registered TLDs
 
 List of allowed TLDs.
-When using uData on an intranet, you might want to add your own custom TLDs:
+When using udata on an intranet, you might want to add your own custom TLDs:
 
 ```python
 from udata.settings import Defaults
@@ -334,7 +334,7 @@ The above example will produce:
 
 **default**: `'mongodb://localhost:27017/udata'`
 
-The mongodb database used by uData.
+The mongodb database used by udata.
 During tests, the test database will use the same name suffixed by `-test`
 
 See [the official Flask-MongoEngine documentation][flask-mongoengine-doc]
@@ -354,7 +354,7 @@ An optional alternative mongo database used for testing.
 
 ## Celery options
 
-By default, uData is configured to use Redis as Celery backend and a customized MongoDB scheduler.
+By default, udata is configured to use Redis as Celery backend and a customized MongoDB scheduler.
 
 The defaults are:
 
@@ -380,9 +380,9 @@ CELERY_BROKER_URL = 'redis://u:<password>@<host>:<port>'
 
 You can see the full list of Celery options in the [Celery official documentation][celery-doc].
 
-**Note** Celery parameters changed in uData 1.2 because Celery has been upgraded to 4.1.0.
+**Note** Celery parameters changed in udata 1.2 because Celery has been upgraded to 4.1.0.
 (You can get the change map [here][celery-conf-map]).
-uData expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
+udata expect Celery parameters to be upper case and prefixed by `CELERY_` in your `udata.cfg`
 and they will be automatically transformed for Celery 4.x:
 Example:
  - Celery 3.x expected `BROKER_URL` and Celery 4.x expects `broker_url` so you need to change `BROKER_URL` to `CELERY_BROKER_URL` in your settings
@@ -401,7 +401,7 @@ The default identity used for outgoing mails.
 
 ## Flask-OAuthlib options
 
-uData is Oauthlib to provide OAuth2 on the API.
+udata is Oauthlib to provide OAuth2 on the API.
 The full option list is available in
 [the official Flask-OAuthlib documentation][flask-oauthlib-doc]
 
@@ -419,7 +419,7 @@ The OAuth2 error page. Do not modify unless you know what you are doing.
 
 ## Flask-Cache options
 
-uData uses Flask-Cache to handle cache and use Redis by default.
+udata uses Flask-Cache to handle cache and use Redis by default.
 You can see the full options list in
 [the official Flask-Cache documentation][flask-cache-doc]
 
@@ -444,7 +444,7 @@ This activates metrics, this is deactivated for tests
 
 ## Flask-FS options
 
-uData use Flask-FS as storage abstraction.
+udata use Flask-FS as storage abstraction.
 
 ## Flask-CDN options
 
@@ -467,11 +467,11 @@ If defined to anything else than a falsy value, theses settings take precedence 
 
 Avatar provider used to render user avatars.
 
-uData provides 3 backends:
+udata provides 3 backends:
 
-- `internal`: uData renders avatars itself using [pydenticon](http://pydenticon.readthedocs.io)
-- `adorable`: uData uses [Adorable Avatars](http://avatars.adorable.io/) to render avatars
-- `robohash`: uData uses [Robohash](https://robohash.org/) to render avatars
+- `internal`: udata renders avatars itself using [pydenticon](http://pydenticon.readthedocs.io)
+- `adorable`: udata uses [Adorable Avatars](http://avatars.adorable.io/) to render avatars
+- `robohash`: udata uses [Robohash](https://robohash.org/) to render avatars
 
 ### AVATAR_INTERNAL_SIZE
 
