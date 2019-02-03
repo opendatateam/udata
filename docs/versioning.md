@@ -2,11 +2,11 @@
 
 ## Versioning process
 
-uData follows [Python PEP 440 on versioning][pep440] to version its published releases.
+udata follows [Python PEP 440 on versioning][pep440] to version its published releases.
 
 ### Branches management
 
-There is a main branch on the [uData git repository][github], `master`,
+There is a main branch on the [udata git repository][github], `master`,
 and some maintenance branches `vX.Y`
 
 The `master` is the stable development branch on which:
@@ -33,11 +33,11 @@ The contents of each version (expected or real) is tracked trough [issues][], [p
 
 ## Releasing
 
-uData uses [Bump'R][bumpr] as its release process.
+udata uses [Bump'R][bumpr] as its release process.
 
 To create a release, you need to:
 
-- have administrator permission on the uData repository (to allow direct push)
+- have administrator permission on the udata repository (to allow direct push)
 - have a working development environment up to date with the `master` branch
 - have `bumpr` installed
 

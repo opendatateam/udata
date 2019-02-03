@@ -1,6 +1,6 @@
 # Launching tasks
 
-uData provides a command line interface for most of the administrative tasks.
+udata provides a command line interface for most of the administrative tasks.
 
 You can get the documentation related to all tasks with:
 

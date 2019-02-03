@@ -111,7 +111,7 @@ $ npm -s run test:unit -- --browsers 'IE11 - Win7'
 ```
 
 !!! note
-    uData tests ensure the compatibility with IE version(s) [officially supported by Microsoft][ie-support].
+    udata tests ensure the compatibility with IE version(s) [officially supported by Microsoft][ie-support].
     Right now, it’s IE11.
 
 You maybe need to manually close the first time popup on first run.
