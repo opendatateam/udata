@@ -72,7 +72,7 @@ We need to branch the master each time a minor version development cycle starts:
 - create a branch for the current minor version. **E.g.**: if the current master version is `1.1.8.dev`, create a `v1.1` branch with `git checkout -b v1.1`
 - publish the branch to the official repository: `git push -u origin vX.Y`
 - get the `master` branch back: `git checkout master`
-- increment the version in `udata/__init__.py`: **ex** `1.1.8.dev` become `1.2.0.dev`
+- increment the version in `udata/__init__.py`: **E.g.** `1.1.8.dev` become `1.2.0.dev`
 
 ### Fixing an old version
 
