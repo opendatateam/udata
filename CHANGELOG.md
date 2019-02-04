@@ -767,7 +767,7 @@ None
 - Raise a `400 Bad Request` when a bad `class` attribute is provided to the API
   (for entry point not using forms). [#772](https://github.com/opendatateam/udata/issues/772)
 - Fix datasets with spatial coverage not being indexed [#778](https://github.com/opendatateam/udata/issues/778)
-- Ensure theme assets cache is versionned (and flushed when necessary)
+- Ensure theme assets cache is versioned (and flushed when necessary)
   [#781](https://github.com/opendatateam/udata/pull/781)
 - Raise maximum tag length to 96 in order to at least support
   [official INSPIRE tags](http://inspire.ec.europa.eu/theme)
@@ -820,7 +820,7 @@ The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/ma
 ### Deprecation
 
 Theses are deprecated and support will be removed in some feature release.
-See [Deprecation Policy](https://udata.readthedocs.io/en/stable/versionning/#deprecation-policy).
+See [Deprecation Policy](https://udata.readthedocs.io/en/stable/versioning/#deprecation-policy).
 
 * Theses frequencies are deprecated for their Dublin Core counter part:
     * `fortnighly` ⇨ `biweekly`
