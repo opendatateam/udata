@@ -2,8 +2,7 @@
 
 ## Current (in progress)
 
-- Use the "udata" (vs UData or uData) naming convention
-- Fix a few typos in documentation and UI/translation strings
+- Use "udata" and fix a few other typos in documentation and UI/translation strings [#2023](https://github.com/opendatateam/udata/pull/2023)
 
 ## 1.6.4 (2019-02-02)
 
