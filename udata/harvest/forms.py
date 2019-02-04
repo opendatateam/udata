@@ -63,7 +63,7 @@ class HarvestSourceForm(Form):
     name = fields.StringField(_('Name'), [validators.required()])
     description = fields.MarkdownField(
         _('Description'),
-        description=_('Some optionnal details about this harvester'))
+        description=_('Some optional details about this harvester'))
     url = fields.URLField(_('URL'), [validators.required()])
     backend = fields.SelectField(_('Backend'), choices=lambda: [
         (b.name, b.display_name) for b in list_backends()

@@ -27,7 +27,7 @@ pages:
     - Contributing:
         - Guide: contributing-guide.md
         - Governance: governance.md
-        - Versionning: versionning.md
+        - Versioning: versioning.md
     - Changelog: changelog.md
 
 markdown_extensions:

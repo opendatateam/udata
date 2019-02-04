@@ -334,7 +334,7 @@
                     "type": "string"
                 },
                 "details": {
-                    "description": "Optionnal details (ie. stacktrace)",
+                    "description": "Optional details (ie. stacktrace)",
                     "type": "string"
                 },
                 "message": {
@@ -2160,7 +2160,7 @@
                         }
                     }
                 },
-                "summary": "Add comment and optionnaly close an issue given its ID",
+                "summary": "Add comment and optionally close an issue given its ID",
                 "tags": [
                     "issues"
                 ]

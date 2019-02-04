@@ -1,6 +1,6 @@
-# Extending uData
+# Extending udata
 
-uData is customizable in many ways, just choose yours.
+udata is customizable in many ways, just choose yours.
 
 ## Configuration
 

@@ -55,8 +55,8 @@ $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
 
-Some dependencies have an optionnal compilation support for Cython
-resulting in more performances (mostly XML harvesting).
+Some dependencies have an optional compilation support for Cython
+resulting in better performances (mostly XML harvesting).
 To enable it, you need to install Cython before all other dependencies:
 
 ```shell
@@ -93,20 +93,20 @@ $ inv widgets-build
 
 ## Running the project for the first time
 
-You need to initialize some data before being able to use uData:
+You need to initialize some data before being able to use udata:
 
 ```shell
 # Initialize database, indexes...
 $ udata init
 
-# Optionnaly fetch and load some licenses from another udata instance
+# Optionally fetch and load some licenses from another udata instance
 $ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
 
 # Compile translations
 $ inv i18nc
 ```
 
-You should be to start using and contributing to uData.
+You should be to start using and contributing to udata.
 
 ## Running the project
 
@@ -128,7 +128,7 @@ you can open your browser to <http://localhost:7000>.
 Everything should be up and running!
 
 !!! note "Tell us what you think"
-    You are always welcome to tell us about your experience _installing uData_.
+    You are always welcome to tell us about your experience _installing udata_.
     Get in touch with us via our [Gitter chatroom][Gitter] or by raising a [new issue][] on [GitHub][].
 
 ## Common tasks

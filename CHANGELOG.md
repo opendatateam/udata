@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Use "udata" and fix a few other typos in documentation and UI/translation strings [#2023](https://github.com/opendatateam/udata/pull/2023)
 
 ## 1.6.4 (2019-02-02)
 
@@ -57,7 +57,7 @@
 ### New features
 
 - Harvest sources are now filterable through the harvest source create/edit admin form [#1812](https://github.com/opendatateam/udata/pull/1812)
-- Harvest sources can now enable or disable some optionnal backend features [#1875](https://github.com/opendatateam/udata/pull/1875)
+- Harvest sources can now enable or disable some optional backend features [#1875](https://github.com/opendatateam/udata/pull/1875)
 - Static assets are now compatible with long-term caching (ie. their hash is present in the filename) [#1826](https://github.com/opendatateam/udata/pull/1826)
 - Post UIs have been reworked: publication date, publish/unpublish action, save and continue editing, dynamic sidebar, alignments fixes... [#1857](https://github.com/opendatateam/udata/pull/1857)
 
@@ -420,7 +420,7 @@ None
 - Added a `udata info` command for diagnostic purpose [#1179](https://github.com/opendatateam/udata/pull/1179)
 - Switch from static theme avatars/placeholders to [identicons](https://en.wikipedia.org/wiki/Identicon) for readability (mostly on discussions) [#1193](https://github.com/opendatateam/udata/pull/1193)
 - Move croquemort features to a generic link checker architecture [#1110](https://github.com/opendatateam/udata/pull/1110)
-- CKAN and OpenDataSoft backends are now optionnal separate udata extensions [#1213](https://github.com/opendatateam/udata/pull/1213)
+- CKAN and OpenDataSoft backends are now optional separate udata extensions [#1213](https://github.com/opendatateam/udata/pull/1213)
 - Better search autocomplete [#1222](https://github.com/opendatateam/udata/pull/1222)
 - Big post improvements (discussions support, navigation, fixes...) [#1224](https://github.com/opendatateam/udata/pull/1224)
 
@@ -767,7 +767,7 @@ None
 - Raise a `400 Bad Request` when a bad `class` attribute is provided to the API
   (for entry point not using forms). [#772](https://github.com/opendatateam/udata/issues/772)
 - Fix datasets with spatial coverage not being indexed [#778](https://github.com/opendatateam/udata/issues/778)
-- Ensure theme assets cache is versionned (and flushed when necessary)
+- Ensure theme assets cache is versioned (and flushed when necessary)
   [#781](https://github.com/opendatateam/udata/pull/781)
 - Raise maximum tag length to 96 in order to at least support
   [official INSPIRE tags](http://inspire.ec.europa.eu/theme)
@@ -820,7 +820,7 @@ The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/ma
 ### Deprecation
 
 Theses are deprecated and support will be removed in some feature release.
-See [Deprecation Policy](https://udata.readthedocs.io/en/stable/versionning/#deprecation-policy).
+See [Deprecation Policy](https://udata.readthedocs.io/en/stable/versioning/#deprecation-policy).
 
 * Theses frequencies are deprecated for their Dublin Core counter part:
     * `fortnighly` ⇨ `biweekly`

@@ -237,7 +237,7 @@ class I18nBlueprintSetupState(BlueprintSetupState):
         defaults = self.url_defaults
         if 'defaults' in options:
             defaults = dict(defaults, **options.pop('defaults'))
-        # Handle an optionnal cors=True parameter
+        # Handle an optional cors=True parameter
         options.setdefault('cors', False)
         if options.pop('cors', False):
             methods = options.get('methods', ['GET'])

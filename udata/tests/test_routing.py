@@ -332,7 +332,7 @@ class TerritoryConverterTest:
         response = client.get(url.format(**zone._data))
         assert200(response)
 
-    def test_resolve_zone_without_optionnal_slug(self, client):
+    def test_resolve_zone_without_optional_slug(self, client):
         zone = GeoZoneFactory(validity=None)
         url = '/territory/{level}/{code}@latest/'
         response = client.get(url.format(**zone._data))

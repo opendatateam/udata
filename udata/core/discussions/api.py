@@ -102,7 +102,7 @@ class DiscussionAPI(API):
     @api.response(403, 'Not allowed to close this discussion')
     @api.marshal_with(discussion_fields)
     def post(self, id):
-        '''Add comment and optionnaly close a discussion given its ID'''
+        '''Add comment and optionally close a discussion given its ID'''
         discussion = Discussion.objects.get_or_404(id=id)
         form = api.validate(DiscussionCommentForm)
         message = Message(

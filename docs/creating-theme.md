@@ -64,8 +64,8 @@ In the package directory (`my_theme` in this example), you need to have two file
 There can also be three directories:
 
 - `static` containing static assets (images, styles, extra scripts...)
-- `templates` containing the overriden templates (optionnal).
-- `translations` containing the overriden translated strings (optionnal).
+- `templates` containing the overriden templates (optional).
+- `translations` containing the overriden translated strings (optional).
 
 !!! note
     This is a proposal layout for a standalone theme.
@@ -162,7 +162,7 @@ for template inheritance and use the proper context variables.
 
 ## Assets manifest
 
-Theme can optionnaly provide an asset manifest for long-term caching.
+Theme can optionally provide an asset manifest for long-term caching.
 The manifest is simply a JSON file mapping human-readable names (ie. `theme.css`) to their real path (ie. `/_theme/my-theme/theme.83c45954dd3da90126b5f13d10b547b5.css`).
 
 The theme assets manifest need to be named `manifest.json` at the theme root directory (sibling `info.json`).
@@ -252,7 +252,7 @@ def home_context(context):
 
 ## Translations
 
-You can also (and optionnaly) add or override some translations in you theme.
+You can also (and optionally) add or override some translations in you theme.
 
 If the `translations` directory is present and contains some gettext-based translations(`po/mo` files),
 they will be loaded after all others and so they will override existing ones.

@@ -60,7 +60,7 @@ def success(msg):
 
 
 def error(msg, details=None):
-    '''Display an error message with optionnal details'''
+    '''Display an error message with optional details'''
     msg = '{0} {1}'.format(red(KO), white(safe_unicode(msg)))
     msg = safe_unicode(msg)
     if details:

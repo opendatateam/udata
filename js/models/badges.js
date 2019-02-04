@@ -70,7 +70,7 @@ export class Badges {
      * Add a given badge kind to a given object
      * @param {Object}   obj      A badgeable object instance
      * @param {String}   kind     A badge kind code
-     * @param {Function} callback An optionnal callback function(badge)
+     * @param {Function} callback An optional callback function(badge)
      */
     add(obj, kind, callback) {
         const data = {payload: {kind: kind}};
@@ -93,7 +93,7 @@ export class Badges {
      * Remove a given badge kind to a given object
      * @param {Object}   obj      A badgeable object instance
      * @param {String}   kind     A badge kind code
-     * @param {Function} callback An optionnal callback
+     * @param {Function} callback An optional callback
      */
     remove(obj, kind, callback) {
         const data = {badge_kind: kind};
