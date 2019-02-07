@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2019-02-01 15:24+0100\n"
-"PO-Revision-Date: 2019-02-01 14:43\n"
+"POT-Creation-Date: 2019-02-07 11:26+0100\n"
+"PO-Revision-Date: 2019-02-07 10:31\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
+"Generated-By: Babel 2.5.3\n"
 "X-Generator: crowdin.com\n"
 "X-Crowdin-Project: udata\n"
 "X-Crowdin-Language: es-ES\n"
@@ -120,11 +120,11 @@ msgstr "ha actualizado un conjunto de datos"
 msgid "deleted a dataset"
 msgstr "ha eliminado un conjunto de datos"
 
-#: udata/core/dataset/forms.py:50
+#: udata/core/dataset/forms.py:48
 msgid "Domain \"{domain}\" not allowed for filetype \"{filetype}\""
 msgstr ""
 
-#: udata/core/dataset/forms.py:57 udata/core/dataset/forms.py:111
+#: udata/core/dataset/forms.py:55 udata/core/dataset/forms.py:110
 #: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
 #: udata/templates/dataset/list.html:40
@@ -140,22 +140,22 @@ msgstr ""
 msgid "Title"
 msgstr "Título"
 
-#: udata/core/dataset/forms.py:58 udata/core/dataset/forms.py:115
+#: udata/core/dataset/forms.py:56 udata/core/dataset/forms.py:114
 #: udata/core/jobs/forms.py:31 udata/core/organization/forms.py:27
 #: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:20
 #: udata/harvest/forms.py:65
 msgid "Description"
 msgstr "Descripción"
 
-#: udata/core/dataset/forms.py:60
+#: udata/core/dataset/forms.py:58
 msgid "File type"
 msgstr ""
 
-#: udata/core/dataset/forms.py:62
+#: udata/core/dataset/forms.py:60
 msgid "Whether the resource is an uploaded file, a remote file or an API"
 msgstr "Bien sea el recurso un archivo cargado, un archivo remoto o una API"
 
-#: udata/core/dataset/forms.py:65 udata/core/reuse/forms.py:27
+#: udata/core/dataset/forms.py:63 udata/core/reuse/forms.py:27
 #: udata/templates/reuse/card.html:27 udata/templates/reuse/display.html:189
 #: udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:6
@@ -163,53 +163,53 @@ msgstr "Bien sea el recurso un archivo cargado, un archivo remoto o una API"
 msgid "Type"
 msgstr "Tipo"
 
-#: udata/core/dataset/forms.py:67
+#: udata/core/dataset/forms.py:65
 msgid "Resource type (documentation, API...)"
 msgstr ""
 
-#: udata/core/dataset/forms.py:69 udata/core/reuse/forms.py:29
+#: udata/core/dataset/forms.py:67 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:67
 msgid "URL"
 msgstr "URL"
 
-#: udata/core/dataset/forms.py:71 udata/templates/dataset/search-labels.html:24
+#: udata/core/dataset/forms.py:70 udata/templates/dataset/search-labels.html:24
 msgid "Format"
 msgstr "Formato"
 
-#: udata/core/dataset/forms.py:76
+#: udata/core/dataset/forms.py:75
 msgid "Mime type"
 msgstr "Tipo mime"
 
-#: udata/core/dataset/forms.py:77
+#: udata/core/dataset/forms.py:76
 msgid "The mime type associated to the extension. (ex: text/plain)"
 msgstr "El tipo mime asociado a la extensión. (ej: texto / completo)"
 
-#: udata/core/dataset/forms.py:80
+#: udata/core/dataset/forms.py:79
 msgid "Size"
 msgstr "Tamaño"
 
-#: udata/core/dataset/forms.py:81
+#: udata/core/dataset/forms.py:80
 msgid "The file size in bytes"
 msgstr "Tamño del archivo en bytes"
 
-#: udata/core/dataset/forms.py:83
+#: udata/core/dataset/forms.py:82
 msgid "Publication date"
 msgstr "Fecha de publicación"
 
-#: udata/core/dataset/forms.py:84
+#: udata/core/dataset/forms.py:83
 msgid "The publication date of the resource"
 msgstr "La fecha de publicación del recurso"
 
-#: udata/core/dataset/forms.py:97
+#: udata/core/dataset/forms.py:96
 msgid "Related dataset"
 msgstr "Conjunto de datos relacionado"
 
-#: udata/core/dataset/forms.py:99 udata/core/dataset/forms.py:141
+#: udata/core/dataset/forms.py:98 udata/core/dataset/forms.py:140
 #: udata/core/reuse/forms.py:40 udata/harvest/forms.py:72
 msgid "Publish as"
 msgstr "Publicar como"
 
-#: udata/core/dataset/forms.py:112 udata/core/organization/forms.py:25
+#: udata/core/dataset/forms.py:111 udata/core/organization/forms.py:25
 msgid "Acronym"
 msgstr "Acrónimo"
 
@@ -217,28 +217,28 @@ msgstr "Acrónimo"
 msgid "An optional acronym"
 msgstr ""
 
-#: udata/core/dataset/forms.py:116
+#: udata/core/dataset/forms.py:115
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "Los detalles sobre el conjunto de datos (proceso de colección, específicos...)."
 
-#: udata/core/dataset/forms.py:119 udata/templates/dataset/display.html:228
+#: udata/core/dataset/forms.py:118 udata/templates/dataset/display.html:228
 #: udata/templates/dataset/search-labels.html:9
 msgid "License"
 msgstr "Licencia"
 
-#: udata/core/dataset/forms.py:121
+#: udata/core/dataset/forms.py:120
 msgid "Update frequency"
 msgstr "Actualizar la frecuencia"
 
-#: udata/core/dataset/forms.py:125
+#: udata/core/dataset/forms.py:124
 msgid "The frequency at which data are updated."
 msgstr "La frecuencia con la que se actualizan los datos."
 
-#: udata/core/dataset/forms.py:126
+#: udata/core/dataset/forms.py:125
 msgid "Expected frequency date"
 msgstr "Fecha de frecuencia esperada"
 
-#: udata/core/dataset/forms.py:129 udata/templates/dataset/card.html:40
+#: udata/core/dataset/forms.py:128 udata/templates/dataset/card.html:40
 #: udata/templates/dataset/display.html:238
 #: udata/templates/dataset/search-labels.html:15
 #: udata/templates/dataset/search-panel.html:13
@@ -247,11 +247,11 @@ msgstr "Fecha de frecuencia esperada"
 msgid "Temporal coverage"
 msgstr "Cobertura temporal"
 
-#: udata/core/dataset/forms.py:130
+#: udata/core/dataset/forms.py:129
 msgid "The period covered by the data"
 msgstr "El período cubierto por los datos. "
 
-#: udata/core/dataset/forms.py:132 udata/core/spatial/forms.py:84
+#: udata/core/dataset/forms.py:131 udata/core/spatial/forms.py:84
 #: udata/templates/dataset/display.html:330
 #: udata/templates/dataset/search-labels.html:18
 #: udata/templates/dataset/search-panel.html:15
@@ -261,29 +261,29 @@ msgstr "El período cubierto por los datos. "
 msgid "Spatial coverage"
 msgstr "Cobertura espacial"
 
-#: udata/core/dataset/forms.py:133
+#: udata/core/dataset/forms.py:132
 msgid "The geographical area covered by the data."
 msgstr "El área geográfica cubierta por los datos. "
 
-#: udata/core/dataset/forms.py:134 udata/core/post/forms.py:29
+#: udata/core/dataset/forms.py:133 udata/core/post/forms.py:29
 #: udata/core/reuse/forms.py:32 udata/core/site/forms.py:16
 #: udata/core/topic/forms.py:25 udata/templates/dataset/search-panel.html:10
 #: udata/templates/reuse/search-panel.html:7
 msgid "Tags"
 msgstr "Etiquetas"
 
-#: udata/core/dataset/forms.py:134 udata/core/reuse/forms.py:32
+#: udata/core/dataset/forms.py:133 udata/core/reuse/forms.py:32
 msgid "Some taxonomy keywords"
 msgstr "Algunas palabras clave de taxonomía"
 
-#: udata/core/dataset/forms.py:136 udata/core/reuse/forms.py:35
+#: udata/core/dataset/forms.py:135 udata/core/reuse/forms.py:35
 #: udata/core/topic/forms.py:26 udata/templates/dataset/display.html:73
 #: udata/templates/dataset/display.html:74 udata/templates/reuse/display.html:60
 #: udata/templates/reuse/display.html:63
 msgid "Private"
 msgstr "Privado"
 
-#: udata/core/dataset/forms.py:137 udata/core/reuse/forms.py:36
+#: udata/core/dataset/forms.py:136 udata/core/reuse/forms.py:36
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restringa la visibilidad del conjunto de datos solo para usted o su organización."
 
