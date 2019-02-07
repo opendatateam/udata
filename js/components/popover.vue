@@ -15,7 +15,7 @@ export default {
     name: 'popover',
     mixins: [TooltipMixin],
     props: {
-        // An optionnal title
+        // An optional title
         title: [String, Element, HTMLElement],
         // The popover content
         content: [String, Element, HTMLElement],

@@ -177,7 +177,7 @@ class RandomBackend(BaseBackend):
         '''Generate a list of fake identifiers to harvest'''
         # In a real implementation, you should iter over
         # a remote endpoint to list identifiers to harvest
-        # and optionnaly store extra data
+        # and optionally store extra data
         for _ in range(faker.pyint()):
             self.add_item(faker.uuid4())  # Accept kwargs to store data
 

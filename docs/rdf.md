@@ -1,6 +1,6 @@
 # RDF
 
-uData as built-in [RDF][] support allowing to both expose and harvest RDF metadata.
+udata as built-in [RDF][] support allowing to both expose and harvest RDF metadata.
 It uses the [Data Catalog Vocabulary][dcat] (or [DCAT][]) as base vocabulary.
 
 ## Endpoints

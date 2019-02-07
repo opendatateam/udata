@@ -214,7 +214,7 @@ msgid "Acronym"
 msgstr "اختصار"
 
 #: udata/core/dataset/forms.py:113
-msgid "An optionnal acronym"
+msgid "An optional acronym"
 msgstr ""
 
 #: udata/core/dataset/forms.py:116
@@ -1155,7 +1155,7 @@ msgid "Source"
 msgstr "مصدر"
 
 #: udata/harvest/forms.py:66
-msgid "Some optionnal details about this harvester"
+msgid "Some optional details about this harvester"
 msgstr "بعض التفاصيل الاختيارية حول هذا الحصاد"
 
 #: udata/harvest/forms.py:68

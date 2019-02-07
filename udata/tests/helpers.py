@@ -107,7 +107,7 @@ def assert_redirects(response, location, message=None):
     given location.
     :param response: Flask response
     :param location: relative URL path to SERVER_NAME or an absolute URL
-    :param message: an optionnal failure message
+    :param message: an optional failure message
     """
     __tracebackhide__ = True
     parts = urlparse(location)

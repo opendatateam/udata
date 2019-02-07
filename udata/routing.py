@@ -161,7 +161,7 @@ class TerritoryConverter(PathConverter):
         if '/' not in value:
             return
 
-        level, code = value.split('/')[:2]  # Ignore optionnal slug
+        level, code = value.split('/')[:2]  # Ignore optional slug
 
         geoid = GeoZone.SEPARATOR.join([level, code])
         zone = GeoZone.objects.resolve(geoid)

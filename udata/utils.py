@@ -259,7 +259,7 @@ def faker_provider(provider):
 @faker_provider
 class UDataProvider(BaseProvider):
     '''
-    A Faker provider for UData missing requirements.
+    A Faker provider for udata missing requirements.
 
     Might be conributed to upstream Faker project
     '''
