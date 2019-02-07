@@ -213,7 +213,7 @@ msgstr "Publicar como"
 msgid "Acronym"
 msgstr "Acrónimo"
 
-#: udata/core/dataset/forms.py:112
+#: udata/core/dataset/forms.py:113
 msgid "An optional acronym"
 msgstr ""
 
@@ -1157,7 +1157,7 @@ msgstr ""
 
 #: udata/harvest/forms.py:66
 msgid "Some optional details about this harvester"
-msgstr ""
+msgstr "Algunos detalles opcionales sobre el recopilador de datos"
 
 #: udata/harvest/forms.py:68
 msgid "Backend"

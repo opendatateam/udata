@@ -84,7 +84,7 @@ class UDataApi(Api):
 
     def secure(self, func):
         '''Enforce authentication on a given method/verb
-        and optionnaly check a given permission
+        and optionally check a given permission
         '''
         if isinstance(func, basestring):
             return self._apply_permission(Permission(RoleNeed(func)))

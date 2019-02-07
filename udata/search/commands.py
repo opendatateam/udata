@@ -156,14 +156,14 @@ def handle_error(index_name, keep=False):
 
 @grp.command()
 @click.argument('models', nargs=-1, metavar='[<model> ...]')
-@click.option('-n', '--name', default=None, help='Optionnal index name')
+@click.option('-n', '--name', default=None, help='Optional index name')
 @click.option('-f', '--force', is_flag=True, help='Do not prompt on deletion')
 @click.option('-k', '--keep', is_flag=True, help='Do not delete indexes')
 def index(models=None, name=None, force=False, keep=False):
     '''
     Initialize or rebuild the search index
 
-    Models to reindex can optionnaly be specified as arguments.
+    Models to reindex can optionally be specified as arguments.
     If not, all models are reindexed.
     '''
     index_name = name or default_index_name()

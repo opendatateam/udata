@@ -122,7 +122,7 @@ def render_territory(territory):
     for ancestor_object in territory.ancestors_objects:
         territories.append(ancestor_object)
 
-    # Retrieve all datasets then split between those optionaly owned
+    # Retrieve all datasets then split between those optionally owned
     # by an org for that zone and others. We need to know if the current
     # user has datasets for that zone in order to display a custom
     # message to ease the conversion.

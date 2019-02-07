@@ -213,7 +213,7 @@ msgstr "Publier en tant que"
 msgid "Acronym"
 msgstr "Sigle"
 
-#: udata/core/dataset/forms.py:112
+#: udata/core/dataset/forms.py:113
 msgid "An optional acronym"
 msgstr "Un acronyme facultatif"
 

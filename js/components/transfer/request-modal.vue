@@ -7,7 +7,7 @@
 
             <div class="col-xs-6 pointer" @click="type = 'user'">
                 <span class="fa fa-3x fa-user"></span>
-                <p>{{ _('An user') }}</p>
+                <p>{{ _('A user') }}</p>
             </div>
 
             <div class="col-xs-6 pointer" @click="type = 'organization'">

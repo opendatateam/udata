@@ -2,7 +2,7 @@
 
 ## Python requirements
 
-uData requires [Python][] 2.7 (installed by default on OSX and many Linux distributions),
+udata requires [Python][] 2.7 (installed by default on OSX and many Linux distributions),
 its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:

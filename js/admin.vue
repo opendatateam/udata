@@ -71,7 +71,7 @@ export default {
                         data = JSON.parse(response.data);
                     } catch (e) {
                         log.warn('Parsing error:', e);
-                        // TODO: Optionnal Sentry handling
+                        // TODO: Optional Sentry handling
                     }
 
                     if ('errors' in data) {
