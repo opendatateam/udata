@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-02-07 11:26+0100\n"
-"PO-Revision-Date: 2019-02-07 10:31\n"
+"PO-Revision-Date: 2019-02-07 15:00\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -215,7 +215,7 @@ msgstr "Sigle"
 
 #: udata/core/dataset/forms.py:112
 msgid "An optional acronym"
-msgstr ""
+msgstr "Un acronyme facultatif"
 
 #: udata/core/dataset/forms.py:115
 msgid "The details about the dataset (collection process, specifics...)."
@@ -1156,7 +1156,7 @@ msgstr "Source"
 
 #: udata/harvest/forms.py:66
 msgid "Some optional details about this harvester"
-msgstr ""
+msgstr "Des détails optionnels sur votre moissonneur"
 
 #: udata/harvest/forms.py:68
 msgid "Backend"
