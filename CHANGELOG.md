@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Push discussion under reuses and community resources [378](https://github.com/etalab/udata-gouvfr/pull/378)
 
 ## 1.6.2 (2018-11-17)
 
