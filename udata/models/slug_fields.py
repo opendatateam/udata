@@ -28,6 +28,7 @@ class SlugField(StringField):
         self.lower_case = lower_case
         self.separator = separator
         self.follow = follow
+        self.instance = None
         super(SlugField, self).__init__(**kwargs)
         if follow:
             # Can't use sender=self.owner_document which is not yet defined
@@ -42,6 +43,12 @@ class SlugField(StringField):
         if instance is not None:
             self.instance = instance
         return super(SlugField, self).__set__(instance, value)
+
+    def __deepcopy__(self, memo):
+        # Fixes no_dereference by avoiding deep copying instance attribute
+        copied = self.__class__()
+        copied.__dict__.update(self.__dict__)
+        return copied
 
     def validate(self, value):
         populate_slug(self.instance, self)

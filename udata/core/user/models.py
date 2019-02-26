@@ -215,6 +215,7 @@ class User(WithMetrics, UserMixin, db.Document):
     def mark_as_deleted(self):
         copied_user = copy(self)
         self.email = '{}@deleted'.format(self.id)
+        self.slug = 'deleted'
         self.password = None
         self.active = False
         self.first_name = 'DELETED'
