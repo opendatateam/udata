@@ -96,7 +96,7 @@
     "diff": "^2.2.3",
     "fine-uploader": "5.16.2",
     "font-awesome": "^4.7.0",
-    "highlight.js": "^9.9.0",
+    "highlight.js": "9.14.2",
     "i18next": "11.5.0",
     "icheck": "^1.0.2",
     "jquery": "~3.0.0",
