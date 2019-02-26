@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-02-07 11:26+0100\n"
-"PO-Revision-Date: 2019-02-07 10:31\n"
+"PO-Revision-Date: 2019-02-25 14:22\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -122,7 +122,7 @@ msgstr "apagou um dataset"
 
 #: udata/core/dataset/forms.py:48
 msgid "Domain \"{domain}\" not allowed for filetype \"{filetype}\""
-msgstr ""
+msgstr "Domínio \"{domain}\" não permitido para o tipo de arquivo \"{filetype}\""
 
 #: udata/core/dataset/forms.py:55 udata/core/dataset/forms.py:110
 #: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
@@ -213,9 +213,9 @@ msgstr "Publicar como"
 msgid "Acronym"
 msgstr "Sigla"
 
-#: udata/core/dataset/forms.py:113
+#: udata/core/dataset/forms.py:112
 msgid "An optional acronym"
-msgstr "Acrónimo opcional"
+msgstr "Um acrónimo opcional"
 
 #: udata/core/dataset/forms.py:115
 msgid "The details about the dataset (collection process, specifics...)."
@@ -1156,8 +1156,7 @@ msgstr "Fonte"
 
 #: udata/harvest/forms.py:66
 msgid "Some optional details about this harvester"
-msgstr "Alguns detalhes opcionais sobre este harvester"
-
+msgstr "Alguns detalhes opcionais sobre esta colheita"
 
 #: udata/harvest/forms.py:68
 msgid "Backend"

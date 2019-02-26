@@ -281,6 +281,7 @@ class UserAPITest(APITestCase):
         other_user = UserFactory()
         response = self.delete(url_for('api.user', user=other_user))
         self.assert204(response)
+        other_user.reload()
         response = self.delete(url_for('api.user', user=other_user))
         self.assert410(response)
         response = self.delete(url_for('api.user', user=user))

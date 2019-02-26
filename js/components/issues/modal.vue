@@ -55,7 +55,7 @@
     <footer class="modal-footer text-center">
         <form v-if="can_comment" v-el:form>
             <div class="form-group">
-                <textarea class="form-control" rows="3"
+                <textarea class="form-control" rows="3" :class="{'has-success': formValid}"
                     :placeholder="_('Type your comment')"
                     v-model="comment" required>
                 </textarea>
@@ -65,11 +65,11 @@
             @click="$refs.modal.close">
             {{ _('Close') }}
         </button>
-        <button type="button" class="btn btn-outline btn-flat"
+        <button type="button" class="btn btn-outline btn-flat" :disabled="!formValid"
             @click="comment_issue" v-if="can_comment">
             {{ _('Comment the issue') }}
         </button>
-        <button type="button" class="btn btn-outline btn-flat"
+        <button type="button" class="btn btn-outline btn-flat" :disabled="!formValid"
             @click="close_issue" v-if="can_close">
             {{ _('Comment and close issue') }}
         </button>
@@ -80,14 +80,12 @@
 <script>
 import API from 'api';
 import Vue from 'vue';
-import BaseForm from 'components/form/base-form';
 import Modal from 'components/modal.vue';
 import DatasetCard from 'components/dataset/card.vue';
 import ReuseCard from 'components/reuse/card.vue';
 
 export default {
     name: 'issue-modal',
-    mixins: [BaseForm],
     components: {Modal, DatasetCard, ReuseCard},
     data() {
         return {
@@ -102,6 +100,9 @@ export default {
         },
         can_close() {
             return this.issue.subject && !this.issue.closed && this.$root.me.can_edit(this.issue.subject);
+        },
+        formValid() {
+            return this.comment && this.comment.length > 0;
         }
     },
     events: {
@@ -134,7 +135,7 @@ export default {
             this.send_comment(this.comment);
         },
         send_comment: function(comment, close) {
-            if (this.validate()) {
+            if (this.formValid) {
                 API.issues.comment_issue({id: this.issue.id, payload: {
                     comment: comment,
                     close: close || false
