@@ -8,6 +8,7 @@
 - Fix broken form validation on admin discussions and issues [#2045](https://github.com/opendatateam/udata/pull/2045)
 - Fix full reindexation by avoiding `SlugField.instance` deepcopy in `no_dereference()` querysets [#2048](https://github.com/opendatateam/udata/pull/2048)
 - Ensure deleted user slug is pseudonymized [#2049](https://github.com/opendatateam/udata/pull/2049)
+- Prevent the "Add resource" modal from closing when using the frontend "Add resource" button
 
 ## 1.6.4 (2019-02-02)
 
