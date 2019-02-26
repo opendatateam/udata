@@ -2,7 +2,12 @@
 
 ## Current (in progress)
 
+- Replace "An user" by "A user" [#2033](https://github.com/opendatateam/udata/pull/2033)
 - Use "udata" and fix a few other typos in documentation and UI/translation strings [#2023](https://github.com/opendatateam/udata/pull/2023)
+- Add a surrounding block declaration around community section [2039](https://github.com/opendatateam/udata/pull/2039)
+- Fix broken form validation on admin discussions and issues [#2045](https://github.com/opendatateam/udata/pull/2045)
+- Fix full reindexation by avoiding `SlugField.instance` deepcopy in `no_dereference()` querysets [#2048](https://github.com/opendatateam/udata/pull/2048)
+- Ensure deleted user slug is pseudonymized [#2049](https://github.com/opendatateam/udata/pull/2049)
 
 ## 1.6.4 (2019-02-02)
 

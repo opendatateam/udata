@@ -26,7 +26,7 @@ Flask-Themes2==0.1.4
 Flask-WTF==0.14.2
 Flask==1.0.2
 html2text==2018.1.9
-lxml==4.3.0
+lxml==4.3.1
 mongoengine==0.16.3
 msgpack-python==0.4.8
 netaddr==0.7.19
@@ -48,7 +48,7 @@ ujson==1.35
 voluptuous==0.10.5
 wtforms-json==0.3.3
 wtforms==2.2.1
-xmltodict==0.11.0
+xmltodict==0.12.0
 geojson==2.4.1
 pymongo==3.7.2
 Jinja2==2.10
