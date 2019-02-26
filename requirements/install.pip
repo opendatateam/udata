@@ -26,7 +26,7 @@ Flask-Themes2==0.1.4
 Flask-WTF==0.14.2
 Flask==1.0.2
 html2text==2018.1.9
-lxml==4.3.0
+lxml==4.3.1
 mongoengine==0.16.3
 msgpack-python==0.4.8
 netaddr==0.7.19
