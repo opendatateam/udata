@@ -20,7 +20,7 @@ Take a look at our advanced documentation on [adapting settings](adapting-settin
 
 The project is currently in production [in France][data-gouv-fr] and [in Luxembourg][data-gouv-lu-repository]. We can help you to set up your infrastructure, you can contact the team via [a Github issue][github-new-issue] or [through Gitter to chat directly][gitter].
 
-Take a look at the [governance](governance.md) section to know how we deal with feature voting from all the community.
+Take a look at the [governance](governance.md) section to know how we deal with contributions from the community.
 
 To perform a full installation for production purpose, follow the [System dependencies](system-dependencies.md)
 and [installation](installation.md) sections.
@@ -30,6 +30,8 @@ and [installation](installation.md) sections.
 For a bug, please [report it directly as a Github issue][github-new-issue] following the proposed template. We’ll answer you as soon as possible.
 
 For a contribution as an enthusiastic citizen, check out our [contributing guide](contributing-guide.md). It's good to have you on board!
+
+For any question, feel free to send an email to [udata@opendata.team](mailto:udata@opendata.team).
 
 [data-gouv-fr]: https://www.data.gouv.fr/
 [data-gouv-lu-repository]: https://github.com/opendatalu/gouvlu
