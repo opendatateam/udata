@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.5 (2019-02-27)
 
 - Replace "An user" by "A user" [#2033](https://github.com/opendatateam/udata/pull/2033)
 - Use "udata" and fix a few other typos in documentation and UI/translation strings [#2023](https://github.com/opendatateam/udata/pull/2023)
