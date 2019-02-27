@@ -40,11 +40,17 @@ export default {
     },
     components: {Modal, ResourceForm},
     data() {
-        return {editing: false};
+        return {editing: false, submitted: false};
     },
     ready() {
         // Avoid multiple handlers in case of error
-        this.dataset.$once('updated', this.on_success);
+        this.updHandler = this.dataset.$on('updated', this.on_success);
+    },
+    beforeDestroy() {
+        if (this.updHandler) {
+            this.updHandler.remove();
+            this.updHandler = undefined;
+        }
     },
     methods: {
         upload() {
@@ -53,17 +59,20 @@ export default {
         save() {
             const $form = this.$refs.form
             if ($form.validate()) {
+                this.submitted = true;
                 this.dataset.save_resource($form.serialize(), $form.on_error);
                 return true;
             }
         },
         on_success() {
-            this.$dispatch('notify', {
-                autoclose: true,
-                title: this._('Changes saved'),
-                details: this._('Your resource has been added.')
-            });
-            this.$refs.modal.close();
+            if (this.submitted) {
+                this.$dispatch('notify', {
+                    autoclose: true,
+                    title: this._('Changes saved'),
+                    details: this._('Your resource has been added.')
+                });
+                this.$refs.modal.close();
+            }
         }
     },
     watchRefs: {
