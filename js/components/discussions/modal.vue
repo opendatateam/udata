@@ -63,7 +63,7 @@
     </div>
     <footer class="modal-footer text-center" v-show="!deleting">
         <form v-if="!discussion.closed" v-el:form>
-            <div class="form-group">
+            <div class="form-group" :class="{'has-success': formValid}">
                 <textarea class="form-control" rows="3"
                     :placeholder="_('Type your comment')"
                     v-model="comment" required>
@@ -79,10 +79,12 @@
             {{ _('Delete') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat"
+            :disabled="!formValid"
             @click="comment_discussion" v-if="!discussion.closed">
             {{ _('Comment the discussion') }}
         </button>
         <button type="button" class="btn btn-outline btn-flat"
+            :disabled="!formValid"
             @click="close_discussion" v-if="!discussion.closed">
             {{ _('Comment and close discussion') }}
         </button>
@@ -103,18 +105,19 @@
 <script>
 import API  from 'api';
 import Vue from 'vue';
-import BaseForm from 'components/form/base-form';
 import Modal from 'components/modal.vue';
 import DatasetCard from 'components/dataset/card.vue';
 import ReuseCard from 'components/reuse/card.vue';
 
 export default {
     name: 'discussion-modal',
-    mixins: [BaseForm],
     components: {Modal, DatasetCard, ReuseCard},
     computed: {
         title() {
             return this.deleting ? this._('Confirm deletion') : this._('Discussion');
+        },
+        formValid() {
+            return this.comment && this.comment.length > 0;
         }
     },
     data() {
@@ -122,7 +125,7 @@ export default {
             discussion: {},
             next_route: null,
             comment: null,
-            deleting: false
+            deleting: false,
         };
     },
     events: {
@@ -169,7 +172,7 @@ export default {
             this.send_comment(this.comment);
         },
         send_comment(comment, close) {
-            if (this.validate()) {
+            if (this.formValid) {
                 API.discussions.comment_discussion({id: this.discussion.id, payload: {
                     comment: comment,
                     close: close || false
