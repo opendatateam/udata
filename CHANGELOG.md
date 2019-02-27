@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.5 (2019-02-27)
 
 - Replace "An user" by "A user" [#2033](https://github.com/opendatateam/udata/pull/2033)
