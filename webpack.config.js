@@ -8,7 +8,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const css_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap');
 const less_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 
-const languages = ['en', 'es', 'fr', 'pt'];
+const languages = ['en', 'es', 'fr', 'pt', 'sr'];
 const public_path = '/static/';
 
 module.exports = {
