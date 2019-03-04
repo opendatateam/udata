@@ -21,7 +21,8 @@ parser.add_argument(
 
 @ns.route('/suggest/', endpoint='suggest_tags')
 class SuggestTagsAPI(API):
-    @api.doc(id='suggest_tags', parser=parser)
+    @api.doc('suggest_tags')
+    @api.expect(parser)
     def get(self):
         '''Suggest tags'''
         args = parser.parse_args()

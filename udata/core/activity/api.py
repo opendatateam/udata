@@ -52,7 +52,8 @@ activity_parser.add_argument(
 
 @api.route('/activity', endpoint='activity')
 class SiteActivityAPI(API):
-    @api.doc('activity', parser=activity_parser)
+    @api.doc('activity')
+    @api.expect(activity_parser)
     @api.marshal_list_with(activity_page_fields)
     def get(self):
         '''Fetch site activity, optionally filtered by user of org.'''

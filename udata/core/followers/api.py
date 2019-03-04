@@ -42,7 +42,7 @@ class FollowAPI(API):
     '''
     model = None
 
-    @api.doc(parser=parser)
+    @api.expect(parser)
     @api.marshal_with(follow_page_fields)
     def get(self, id):
         '''List all followers for a given object'''

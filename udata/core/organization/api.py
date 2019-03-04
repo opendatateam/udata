@@ -55,7 +55,8 @@ common_doc = {
 @ns.route('/', endpoint='organizations')
 class OrganizationListAPI(API):
     '''Organizations collection endpoint'''
-    @api.doc('list_organizations', parser=search_parser)
+    @api.doc('list_organizations')
+    @api.expect(search_parser)
     @api.marshal_with(org_page_fields)
     def get(self):
         '''List or search all organizations'''
@@ -158,9 +159,10 @@ requests_parser.add_argument(
           doc=common_doc)
 class MembershipRequestAPI(API):
     @api.secure
+    @api.doc('list_membership_requests')
+    @api.expect(requests_parser)
+    @api.response(403, 'Not Authorized')
     @api.marshal_list_with(request_fields)
-    @api.doc('list_membership_requests', parser=requests_parser)
-    @api.doc(responses={403: 'Not Authorized'})
     def get(self, org):
         '''List membership requests for a given organization'''
         OrganizationPrivatePermission(org).test()
@@ -227,18 +229,12 @@ class MembershipAcceptAPI(MembershipAPI):
         return member
 
 
-refuse_parser = api.parser()
-refuse_parser.add_argument(
-    'comment', type=str, help='The refusal reason', location='json'
-)
-
-
 @ns.route('/<org:org>/membership/<uuid:id>/refuse/',
           endpoint='refuse_membership')
 class MembershipRefuseAPI(MembershipAPI):
     @api.secure
     @api.expect(refuse_membership_fields)
-    @api.doc('refuse_membership', parser=refuse_parser, **common_doc)
+    @api.doc('refuse_membership', **common_doc)
     def post(self, org, id):
         '''Refuse user membership to a given organization.'''
         EditOrganizationPermission(org).test()
@@ -323,8 +319,9 @@ suggest_parser.add_argument(
 
 @ns.route('/suggest/', endpoint='suggest_organizations')
 class SuggestOrganizationsAPI(API):
+    @api.doc('suggest_organizations')
+    @api.expect(suggest_parser)
     @api.marshal_list_with(org_suggestion_fields)
-    @api.doc('suggest_organizations', parser=suggest_parser)
     def get(self):
         '''Suggest organizations'''
         args = suggest_parser.parse_args()

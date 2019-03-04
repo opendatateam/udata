@@ -91,7 +91,8 @@ common_doc = {
 @ns.route('/', endpoint='datasets')
 class DatasetListAPI(API):
     '''Datasets collection endpoint'''
-    @api.doc('list_datasets', parser=search_parser)
+    @api.doc('list_datasets')
+    @api.expect(search_parser)
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
@@ -203,7 +204,8 @@ class DatasetBadgeAPI(API):
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @api.secure
-    @api.doc('create_resource', body=resource_fields, **common_doc)
+    @api.doc('create_resource', **common_doc)
+    @api.expect(resource_fields)
     @api.marshal_with(resource_fields)
     def post(self, dataset):
         '''Create a new resource for a given dataset'''
@@ -292,7 +294,7 @@ class ResourceMixin(object):
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/upload/',
           endpoint='upload_dataset_resource', doc=common_doc)
-@api.doc(params={'rid': 'The resource unique identifier'})
+@api.param('rid', 'The resource unique identifier')
 class UploadDatasetResource(ResourceMixin, UploadMixin, API):
     @api.secure
     @api.doc('upload_dataset_resource')
@@ -312,7 +314,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
 
 @ns.route('/community_resources/<crid:community>/upload/',
           endpoint='upload_community_resource', doc=common_doc)
-@api.doc(params={'community': 'The community resource unique identifier'})
+@api.param('community', 'The community resource unique identifier')
 class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     @api.secure
     @api.doc('upload_community_resource')
@@ -328,7 +330,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/', endpoint='resource',
           doc=common_doc)
-@api.doc(params={'rid': 'The resource unique identifier'})
+@api.param('rid', 'The resource unique identifier')
 class ResourceAPI(ResourceMixin, API):
     @api.doc('get_resource')
     @api.marshal_with(resource_fields)
@@ -340,7 +342,8 @@ class ResourceAPI(ResourceMixin, API):
         return resource
 
     @api.secure
-    @api.doc('update_resource', body=resource_fields)
+    @api.doc('update_resource')
+    @api.expect(resource_fields)
     @api.marshal_with(resource_fields)
     def put(self, dataset, rid):
         '''Update a given resource on a given dataset'''
@@ -368,8 +371,8 @@ class ResourceAPI(ResourceMixin, API):
 @ns.route('/community_resources/', endpoint='community_resources')
 class CommunityResourcesAPI(API):
     @api.doc('list_community_resources')
+    @api.expect(community_parser)
     @api.marshal_with(community_resource_page_fields)
-    @api.doc(parser=community_parser)
     def get(self):
         '''List all community resources'''
         args = community_parser.parse_args()
@@ -406,7 +409,7 @@ class CommunityResourcesAPI(API):
 
 @ns.route('/community_resources/<crid:community>/',
           endpoint='community_resource', doc=common_doc)
-@api.doc(params={'community': 'The community resource unique identifier'})
+@api.param('community', 'The community resource unique identifier')
 class CommunityResourceAPI(API):
     @api.doc('retrieve_community_resource')
     @api.marshal_with(community_resource_fields)
@@ -415,8 +418,8 @@ class CommunityResourceAPI(API):
         return community
 
     @api.secure
-    @api.doc('update_community_resource',
-             body=community_resource_fields)
+    @api.doc('update_community_resource')
+    @api.expect(community_resource_fields)
     @api.marshal_with(community_resource_fields)
     def put(self, community):
         '''Update a given community resource'''
@@ -458,8 +461,9 @@ suggest_parser.add_argument(
 
 @ns.route('/suggest/', endpoint='suggest_datasets')
 class SuggestDatasetsAPI(API):
+    @api.doc('suggest_datasets')
+    @api.expect(suggest_parser)
     @api.marshal_list_with(dataset_suggestion_fields)
-    @api.doc('suggest_datasets', parser=suggest_parser)
     def get(self):
         '''Suggest datasets'''
         args = suggest_parser.parse_args()
@@ -479,7 +483,8 @@ class SuggestDatasetsAPI(API):
 
 @ns.route('/suggest/formats/', endpoint='suggest_formats')
 class SuggestFormatsAPI(API):
-    @api.doc('suggest_formats', parser=suggest_parser)
+    @api.doc('suggest_formats')
+    @api.expect(suggest_parser)
     def get(self):
         '''Suggest file formats'''
         args = suggest_parser.parse_args()
@@ -517,7 +522,7 @@ class AllowedExtensionsAPI(API):
 
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/check/',
           endpoint='check_dataset_resource', doc=common_doc)
-@api.doc(params={'rid': 'The resource unique identifier'})
+@api.param('rid', 'The resource unique identifier')
 class CheckDatasetResource(API, ResourceMixin):
 
     @api.doc('check_dataset_resource')

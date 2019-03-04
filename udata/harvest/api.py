@@ -172,7 +172,8 @@ source_parser.add_argument('owner', type=str, location='args',
 
 @ns.route('/sources/', endpoint='harvest_sources')
 class SourcesAPI(API):
-    @api.doc('list_harvest_sources', parser=source_parser)
+    @api.doc('list_harvest_sources')
+    @api.expect(source_parser)
     @api.marshal_list_with(source_page_fields)
     def get(self):
         '''List all harvest sources'''
@@ -181,8 +182,8 @@ class SourcesAPI(API):
                                         page=args['page'],
                                         page_size=args['page_size'])
 
-    @api.doc('create_harvest_source')
     @api.secure
+    @api.doc('create_harvest_source')
     @api.expect(source_fields)
     @api.marshal_with(source_fields)
     def post(self):
@@ -195,7 +196,7 @@ class SourcesAPI(API):
 
 
 @ns.route('/source/<string:ident>', endpoint='harvest_source')
-@api.doc(params={'ident': 'A source ID or slug'})
+@api.param('ident', 'A source ID or slug')
 class SourceAPI(API):
     @api.doc('get_harvest_source')
     @api.marshal_with(source_fields)
@@ -223,7 +224,7 @@ class SourceAPI(API):
 
 @ns.route('/source/<string:ident>/validate',
           endpoint='validate_harvest_source')
-@api.doc(params={'ident': 'A source ID or slug'})
+@api.param('ident', 'A source ID or slug')
 class ValidateSourceAPI(API):
     @api.doc('validate_harvest_source')
     @api.secure(admin_permission)
@@ -240,7 +241,7 @@ class ValidateSourceAPI(API):
 
 @ns.route('/source/<string:ident>/schedule',
           endpoint='schedule_harvest_source')
-@api.doc(params={'ident': 'A source ID or slug'})
+@api.param('ident', 'A source ID or slug')
 class ScheduleSourceAPI(API):
     @api.doc('schedule_harvest_source')
     @api.secure(admin_permission)
@@ -278,7 +279,7 @@ class PreviewSourceConfigAPI(API):
 
 
 @ns.route('/source/<string:ident>/preview', endpoint='preview_harvest_source')
-@api.doc(params={'ident': 'A source ID or slug'})
+@api.param('ident', 'A source ID or slug')
 class PreviewSourceAPI(API):
     @api.secure
     @api.doc('preview_harvest_source')
@@ -297,7 +298,8 @@ parser.add_argument('page_size', type=int, default=20, location='args',
 
 @ns.route('/source/<string:ident>/jobs/', endpoint='harvest_jobs')
 class JobsAPI(API):
-    @api.doc('list_harvest_jobs', parser=parser)
+    @api.doc('list_harvest_jobs')
+    @api.expect(parser)
     @api.marshal_with(job_page_fields)
     def get(self, ident):
         '''List all jobs for a given source'''
@@ -309,7 +311,8 @@ class JobsAPI(API):
 
 @ns.route('/job/<string:ident>/', endpoint='harvest_job')
 class JobAPI(API):
-    @api.doc('get_harvest_job', parser=parser)
+    @api.doc('get_harvest_job')
+    @api.expect(parser)
     @api.marshal_with(job_fields)
     def get(self, ident):
         '''List all jobs for a given source'''
