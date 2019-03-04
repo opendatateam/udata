@@ -36,7 +36,8 @@ class OEmbedAPI(API):
         'reuses.show': 'reuse',
     }
 
-    @api.doc('oembed', parser=oembed_parser)
+    @api.doc('oembed')
+    @api.expect(oembed_parser)
     def get(self):
         """
         An OEmbed compliant API endpoint
@@ -92,7 +93,8 @@ class OEmbedAPI(API):
 @api.route('/oembeds/', endpoint='oembeds')
 class OEmbedsAPI(API):
 
-    @api.doc('oembeds', parser=oembeds_parser)
+    @api.doc('oembeds')
+    @api.expect(oembeds_parser)
     def get(self):
         """ The returned payload is a list of OEmbed formatted responses.
 
