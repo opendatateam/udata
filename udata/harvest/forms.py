@@ -60,11 +60,11 @@ class HarvestConfigField(fields.DictField):
 
 
 class HarvestSourceForm(Form):
-    name = fields.StringField(_('Name'), [validators.required()])
+    name = fields.StringField(_('Name'), [validators.DataRequired()])
     description = fields.MarkdownField(
         _('Description'),
         description=_('Some optional details about this harvester'))
-    url = fields.URLField(_('URL'), [validators.required()])
+    url = fields.URLField(_('URL'), [validators.DataRequired()])
     backend = fields.SelectField(_('Backend'), choices=lambda: [
         (b.name, b.display_name) for b in list_backends()
     ])

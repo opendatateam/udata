@@ -27,7 +27,7 @@ class IntervalForm(ModelForm):
 class PeriodicTaskForm(ModelForm):
     model_class = PeriodicTask
 
-    name = fields.StringField(_('Name'), [validators.required()])
+    name = fields.StringField(_('Name'), [validators.DataRequired()])
     description = fields.StringField(_('Description'))
     task = fields.StringField(_('Tasks'))
     enabled = fields.BooleanField(_('Enabled'))

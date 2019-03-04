@@ -52,19 +52,19 @@ def enforce_filetype_file(form, field):
 
 
 class BaseResourceForm(ModelForm):
-    title = fields.StringField(_('Title'), [validators.required()])
+    title = fields.StringField(_('Title'), [validators.DataRequired()])
     description = fields.MarkdownField(_('Description'))
     filetype = fields.RadioField(
-        _('File type'), [validators.required()],
+        _('File type'), [validators.DataRequired()],
         choices=RESOURCE_FILETYPES.items(), default='file',
         description=_('Whether the resource is an uploaded file, '
                       'a remote file or an API'))
     type = fields.RadioField(
-        _('Type'), [validators.required()],
+        _('Type'), [validators.DataRequired()],
         choices=RESOURCE_TYPES.items(), default='other',
         description=_('Resource type (documentation, API...)'))
     url = fields.UploadableURLField(
-        _('URL'), [validators.required(), enforce_filetype_file],
+        _('URL'), [validators.DataRequired(), enforce_filetype_file],
         storage=resources)
     format = fields.StringField(
         _('Format'),
@@ -107,11 +107,11 @@ def map_legacy_frequencies(form, field):
 class DatasetForm(ModelForm):
     model_class = Dataset
 
-    title = fields.StringField(_('Title'), [validators.required()])
+    title = fields.StringField(_('Title'), [validators.DataRequired()])
     acronym = fields.StringField(_('Acronym'),
                                  description=_('An optional acronym'))
     description = fields.MarkdownField(
-        _('Description'), [validators.required()],
+        _('Description'), [validators.DataRequired()],
         description=_('The details about the dataset '
                       '(collection process, specifics...).'))
     license = fields.ModelSelectField(

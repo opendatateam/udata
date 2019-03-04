@@ -14,8 +14,8 @@ __all__ = ('UserProfileForm', 'UserProfileAdminForm')
 class UserProfileForm(ModelForm):
     model_class = User
 
-    first_name = fields.StringField(_('First name'), [validators.required()])
-    last_name = fields.StringField(_('Last name'), [validators.required()])
+    first_name = fields.StringField(_('First name'), [validators.DataRequired()])
+    last_name = fields.StringField(_('Last name'), [validators.DataRequired()])
     avatar = fields.ImageField(_('Avatar'), sizes=AVATAR_SIZES)
     website = fields.URLField(_('Website'))
     about = fields.MarkdownField(_('About'))

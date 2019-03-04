@@ -27,12 +27,12 @@ class Fake(db.Document):
 
 class SubNestedForm(ModelForm):
     model_class = SubNested
-    name = fields.StringField(validators=[fields.validators.required()])
+    name = fields.StringField(validators=[fields.validators.DataRequired()])
 
 
 class NestedForm(ModelForm):
     model_class = Nested
-    name = fields.StringField(validators=[fields.validators.required()])
+    name = fields.StringField(validators=[fields.validators.DataRequired()])
 
 
 class NestedFormWithId(NestedForm):
