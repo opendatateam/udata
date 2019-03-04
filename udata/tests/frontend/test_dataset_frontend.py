@@ -100,39 +100,39 @@ class DatasetBlueprintTest(FrontTestCase):
         response = self.get(url)
         self.assert200(response)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld['@context'], 'http://schema.org')
-        self.assertEquals(json_ld['@type'], 'Dataset')
-        self.assertEquals(json_ld['@id'], str(dataset.id))
-        self.assertEquals(json_ld['description'], 'a&amp;éèëù$£')
-        self.assertEquals(json_ld['alternateName'], dataset.slug)
-        self.assertEquals(json_ld['dateCreated'][:16],
+        self.assertEqual(json_ld['@context'], 'http://schema.org')
+        self.assertEqual(json_ld['@type'], 'Dataset')
+        self.assertEqual(json_ld['@id'], str(dataset.id))
+        self.assertEqual(json_ld['description'], 'a&amp;éèëù$£')
+        self.assertEqual(json_ld['alternateName'], dataset.slug)
+        self.assertEqual(json_ld['dateCreated'][:16],
                           dataset.created_at.isoformat()[:16])
-        self.assertEquals(json_ld['dateModified'][:16],
+        self.assertEqual(json_ld['dateModified'][:16],
                           dataset.last_modified.isoformat()[:16])
-        self.assertEquals(json_ld['url'], 'http://local.test{}'.format(url))
-        self.assertEquals(json_ld['name'], dataset.title)
-        self.assertEquals(json_ld['keywords'], 'bar,foo')
-        self.assertEquals(len(json_ld['distribution']), 1)
+        self.assertEqual(json_ld['url'], 'http://local.test{}'.format(url))
+        self.assertEqual(json_ld['name'], dataset.title)
+        self.assertEqual(json_ld['keywords'], 'bar,foo')
+        self.assertEqual(len(json_ld['distribution']), 1)
 
         json_ld_resource = json_ld['distribution'][0]
-        self.assertEquals(json_ld_resource['@type'], 'DataDownload')
-        self.assertEquals(json_ld_resource['@id'], str(resource.id))
-        self.assertEquals(json_ld_resource['url'], resource.latest)
-        self.assertEquals(json_ld_resource['name'], resource.title)
-        self.assertEquals(json_ld_resource['contentUrl'], resource.url)
-        self.assertEquals(json_ld_resource['dateCreated'][:16],
+        self.assertEqual(json_ld_resource['@type'], 'DataDownload')
+        self.assertEqual(json_ld_resource['@id'], str(resource.id))
+        self.assertEqual(json_ld_resource['url'], resource.latest)
+        self.assertEqual(json_ld_resource['name'], resource.title)
+        self.assertEqual(json_ld_resource['contentUrl'], resource.url)
+        self.assertEqual(json_ld_resource['dateCreated'][:16],
                           resource.created_at.isoformat()[:16])
-        self.assertEquals(json_ld_resource['dateModified'][:16],
+        self.assertEqual(json_ld_resource['dateModified'][:16],
                           resource.modified.isoformat()[:16])
-        self.assertEquals(json_ld_resource['datePublished'][:16],
+        self.assertEqual(json_ld_resource['datePublished'][:16],
                           resource.published.isoformat()[:16])
-        self.assertEquals(json_ld_resource['encodingFormat'], 'png')
-        self.assertEquals(json_ld_resource['contentSize'],
+        self.assertEqual(json_ld_resource['encodingFormat'], 'png')
+        self.assertEqual(json_ld_resource['contentSize'],
                           resource.filesize)
-        self.assertEquals(json_ld_resource['fileFormat'], resource.mime)
-        self.assertEquals(json_ld_resource['description'],
+        self.assertEqual(json_ld_resource['fileFormat'], resource.mime)
+        self.assertEqual(json_ld_resource['description'],
                           'Title 1 Title 2')
-        self.assertEquals(json_ld_resource['interactionStatistic'],
+        self.assertEqual(json_ld_resource['interactionStatistic'],
                           {
                               '@type': 'InteractionCounter',
                               'interactionType': {
@@ -141,28 +141,28 @@ class DatasetBlueprintTest(FrontTestCase):
                               'userInteractionCount': 10,
                           })
 
-        self.assertEquals(len(json_ld['contributedDistribution']), 1)
+        self.assertEqual(len(json_ld['contributedDistribution']), 1)
         json_ld_resource = json_ld['contributedDistribution'][0]
-        self.assertEquals(json_ld_resource['@type'], 'DataDownload')
-        self.assertEquals(json_ld_resource['@id'], str(community_resource.id))
-        self.assertEquals(json_ld_resource['url'], community_resource.latest)
-        self.assertEquals(json_ld_resource['name'], community_resource.title)
-        self.assertEquals(json_ld_resource['contentUrl'],
+        self.assertEqual(json_ld_resource['@type'], 'DataDownload')
+        self.assertEqual(json_ld_resource['@id'], str(community_resource.id))
+        self.assertEqual(json_ld_resource['url'], community_resource.latest)
+        self.assertEqual(json_ld_resource['name'], community_resource.title)
+        self.assertEqual(json_ld_resource['contentUrl'],
                           community_resource.url)
-        self.assertEquals(json_ld_resource['dateCreated'][:16],
+        self.assertEqual(json_ld_resource['dateCreated'][:16],
                           community_resource.created_at.isoformat()[:16])
-        self.assertEquals(json_ld_resource['dateModified'][:16],
+        self.assertEqual(json_ld_resource['dateModified'][:16],
                           community_resource.modified.isoformat()[:16])
-        self.assertEquals(json_ld_resource['datePublished'][:16],
+        self.assertEqual(json_ld_resource['datePublished'][:16],
                           community_resource.published.isoformat()[:16])
-        self.assertEquals(json_ld_resource['encodingFormat'],
+        self.assertEqual(json_ld_resource['encodingFormat'],
                           community_resource.format)
-        self.assertEquals(json_ld_resource['contentSize'],
+        self.assertEqual(json_ld_resource['contentSize'],
                           community_resource.filesize)
-        self.assertEquals(json_ld_resource['fileFormat'],
+        self.assertEqual(json_ld_resource['fileFormat'],
                           community_resource.mime)
-        self.assertEquals(json_ld_resource['description'], 'Title 1 Title 2')
-        self.assertEquals(json_ld_resource['interactionStatistic'], {
+        self.assertEqual(json_ld_resource['description'], 'Title 1 Title 2')
+        self.assertEqual(json_ld_resource['interactionStatistic'], {
             '@type': 'InteractionCounter',
             'interactionType': {
                 '@type': 'DownloadAction',
@@ -170,14 +170,14 @@ class DatasetBlueprintTest(FrontTestCase):
             'userInteractionCount': 42,
         })
 
-        self.assertEquals(json_ld['extras'],
+        self.assertEqual(json_ld['extras'],
                           [{
                               '@type': 'http://schema.org/PropertyValue',
                               'name': 'foo',
                               'value': 'bar',
                           }])
-        self.assertEquals(json_ld['license'], 'http://www.datagouv.fr/licence')
-        self.assertEquals(json_ld['author']['@type'], 'Person')
+        self.assertEqual(json_ld['license'], 'http://www.datagouv.fr/licence')
+        self.assertEqual(json_ld['author']['@type'], 'Person')
 
     def test_json_ld_sanitize(self):
         '''Json-ld should be sanitized'''
@@ -185,7 +185,7 @@ class DatasetBlueprintTest(FrontTestCase):
         url = url_for('datasets.show', dataset=dataset)
         response = self.get(url)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld['description'],
+        self.assertEqual(json_ld['description'],
                           'an &lt;script&gt;evil()&lt;/script&gt;')
 
     def test_raise_404_if_private(self):

@@ -60,7 +60,7 @@ class LinkcheckerTest(TestCase):
     def test_check_resource_no_linkchecker(self, mock_fn):
         mock_fn.return_value = None
         res = check_resource(self.resource)
-        self.assertEquals(res, ({'error': 'No linkchecker configured.'}, 503))
+        self.assertEqual(res, ({'error': 'No linkchecker configured.'}, 503))
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
     def test_check_resource_linkchecker_ok(self, mock_fn):
@@ -73,9 +73,9 @@ class LinkcheckerTest(TestCase):
         mock_fn.return_value = DummyLinkchecker
 
         res = check_resource(self.resource)
-        self.assertEquals(res, check_res)
+        self.assertEqual(res, check_res)
         check_res.update({'check:count-availability': 1})
-        self.assertEquals(self.resource.extras, check_res)
+        self.assertEqual(self.resource.extras, check_res)
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
     def test_check_resource_filter_result(self, mock_fn):
@@ -87,7 +87,7 @@ class LinkcheckerTest(TestCase):
         mock_fn.return_value = DummyLinkchecker
 
         res = check_resource(self.resource)
-        self.assertEquals(res, check_res)
+        self.assertEqual(res, check_res)
         self.assertNotIn('dummy', self.resource.extras)
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
@@ -97,7 +97,7 @@ class LinkcheckerTest(TestCase):
                 return {'check:available': True}
         mock_fn.return_value = DummyLinkchecker
         res = check_resource(self.resource)
-        self.assertEquals(res,
+        self.assertEqual(res,
                           ({'error': 'No status in response from linkchecker'},
                            503))
 
@@ -108,7 +108,7 @@ class LinkcheckerTest(TestCase):
                 return {'check:error': 'ERROR'}
         mock_fn.return_value = DummyLinkchecker
         res = check_resource(self.resource)
-        self.assertEquals(res, ({'error': 'ERROR'}, 500))
+        self.assertEqual(res, ({'error': 'ERROR'}, 500))
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
     def test_check_resource_linkchecker_in_resource(self, mock_fn):
@@ -116,22 +116,22 @@ class LinkcheckerTest(TestCase):
         self.resource.save()
         check_resource(self.resource)
         args, kwargs = mock_fn.call_args
-        self.assertEquals(args, ('another_linkchecker', ))
+        self.assertEqual(args, ('another_linkchecker', ))
 
     def test_check_resource_linkchecker_no_check(self):
         self.resource.extras['check:checker'] = 'no_check'
         self.resource.save()
         res = check_resource(self.resource)
-        self.assertEquals(res.get('check:status'), 204)
-        self.assertEquals(res.get('check:available'), True)
+        self.assertEqual(res.get('check:status'), 204)
+        self.assertEqual(res.get('check:available'), True)
 
     def test_check_resource_ignored_domain(self):
         self.resource.extras = {}
         self.resource.url = 'http://example-ignore.com/url'
         self.resource.save()
         res = check_resource(self.resource)
-        self.assertEquals(res.get('check:status'), 204)
-        self.assertEquals(res.get('check:available'), True)
+        self.assertEqual(res.get('check:status'), 204)
+        self.assertEqual(res.get('check:available'), True)
 
     def test_is_need_check(self):
         self.resource.extras = {'check:available': True,
@@ -220,10 +220,10 @@ class LinkcheckerTest(TestCase):
         mock_fn.return_value = DummyLinkchecker
 
         check_resource(self.resource)
-        self.assertEquals(self.resource.extras['check:count-availability'], 1)
+        self.assertEqual(self.resource.extras['check:count-availability'], 1)
 
         check_resource(self.resource)
-        self.assertEquals(self.resource.extras['check:count-availability'], 2)
+        self.assertEqual(self.resource.extras['check:count-availability'], 2)
 
     @mock.patch('udata.linkchecker.checker.get_linkchecker')
     def test_count_availability_reset(self, mock_fn):
@@ -239,7 +239,7 @@ class LinkcheckerTest(TestCase):
         mock_fn.return_value = DummyLinkchecker
 
         check_resource(self.resource)
-        self.assertEquals(self.resource.extras['check:count-availability'], 1)
+        self.assertEqual(self.resource.extras['check:count-availability'], 1)
 
     def test_count_availability_threshold(self):
         self.resource.extras = {
