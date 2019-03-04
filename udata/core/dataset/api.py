@@ -227,7 +227,7 @@ class ResourcesAPI(API):
         ResourceEditPermission(dataset).test()
         data = {'resources': request.json}
         form = ResourcesListForm.from_json(data, obj=dataset, instance=dataset,
-                                           csrf_enabled=False)
+                                           meta={'csrf': False})
         if not form.validate():
             api.abort(400, errors=form.errors['resources'])
 

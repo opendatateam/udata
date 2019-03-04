@@ -142,7 +142,7 @@ class UDataApi(Api):
             errors = {'Content-Type': 'expecting application/json'}
             self.abort(400, errors=errors)
         form = form_cls.from_json(request.json, obj=obj, instance=obj,
-                                  csrf_enabled=False)
+                                  meta={'csrf': False})
         if not form.validate():
             self.abort(400, errors=form.errors)
         return form
