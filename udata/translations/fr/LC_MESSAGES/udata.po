@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-02-07 11:26+0100\n"
-"PO-Revision-Date: 2019-02-07 15:00\n"
+"PO-Revision-Date: 2019-03-06 11:36\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -213,7 +213,7 @@ msgstr "Publier en tant que"
 msgid "Acronym"
 msgstr "Sigle"
 
-#: udata/core/dataset/forms.py:113
+#: udata/core/dataset/forms.py:112
 msgid "An optional acronym"
 msgstr "Un acronyme facultatif"
 
