@@ -194,18 +194,6 @@ class Defaults(object):
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 
-    # PIWIK_ID = # Demo = 11, Prod = 1
-    # PIWIK_URL = 'stats.data.gouv.fr'
-    # PIWIK_AUTH = '<32-chars-auth-token-from-piwik>'
-    # # All keys are required.
-    # PIWIK_GOALS = {
-    #     'NEW_DATASET': # Demo = 1, Prod = 7
-    #     'NEW_REUSE': # Demo = 2, Prod = 6
-    #     'NEW_FOLLOW': # Demo = 3, Prod = 3
-    #     'SHARE': , # Demo = 4, Prod = ?
-    #     'RESOURCE_DOWNLOAD': , # Demo = 5, Prod = ?
-    #     'RESOURCE_REDIRECT': , # Demo = 6, Prod = ?
-    # }
     # TRACKING_BLACKLIST = ['api.notifications', 'api.check_dataset_resource']  # Default: []
 
     DELETE_ME = True
