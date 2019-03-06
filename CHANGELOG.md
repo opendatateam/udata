@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.3 (2019-03-06)
 
 - Remove "compte des collectivités" from territories [#376](https://github.com/etalab/udata-gouvfr/pull/376)
 - Push discussion under reuses and community resources [378](https://github.com/etalab/udata-gouvfr/pull/378)
