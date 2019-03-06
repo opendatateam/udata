@@ -378,7 +378,7 @@ class TerritoriesTest:
         data = response.data.decode('utf-8')
         assert arles.name in data
         base_datasets = templates.get_context_variable('base_datasets')
-        assert len(base_datasets) == 9
+        assert len(base_datasets) == 8
         expected = '<div data-udata-territory-id="{dataset.slug}"'
         for dataset in base_datasets:
             assert expected.format(dataset=dataset) in data
@@ -393,7 +393,7 @@ class TerritoriesTest:
         data = response.data.decode('utf-8')
         assert bdr.name in data
         base_datasets = templates.get_context_variable('base_datasets')
-        assert len(base_datasets) == 7
+        assert len(base_datasets) == 6
         expected = '<div data-udata-territory-id="{dataset.slug}"'
         for dataset in base_datasets:
             assert expected.format(dataset=dataset) in data
@@ -407,7 +407,7 @@ class TerritoriesTest:
         data = response.data.decode('utf-8')
         assert paca.name in data
         base_datasets = templates.get_context_variable('base_datasets')
-        assert len(base_datasets) == 7
+        assert len(base_datasets) == 6
         expected = '<div data-udata-territory-id="{dataset.slug}"'
         for dataset in base_datasets:
             assert expected.format(dataset=dataset) in data
@@ -447,16 +447,15 @@ class OEmbedsTerritoryAPITest:
             assert md(territory.description, source_tooltip=True) in html
             assert 'Download from local.test' in html
             assert 'Add to your own website' in html
-            if territory_dataset_class not in (town_datasets['comptes_com'],):
-                if territory_dataset_class == town_datasets['ban_odbl_com']:
-                    license = odbl_license
-                else:
-                    license = licence_ouverte
-                assert 'License: {title}'.format(title=license.title) in html
-                assert '© {license_id}'.format(license_id=license.id) in html
-                assert (
-                    '<a data-tooltip="Source" href="http://local.test/datasets'
-                    in html)
+            if territory_dataset_class == town_datasets['ban_odbl_com']:
+                license = odbl_license
+            else:
+                license = licence_ouverte
+            assert 'License: {title}'.format(title=license.title) in html
+            assert '© {license_id}'.format(license_id=license.id) in html
+            assert (
+                '<a data-tooltip="Source" href="http://local.test/datasets'
+                in html)
 
     def test_oembed_county_territory_api_get(self, api):
         '''It should fetch a county territory in the oembed format.'''
@@ -487,8 +486,7 @@ class OEmbedsTerritoryAPITest:
             assert 'Download from local.test' in html
             assert 'Add to your own website' in html
             if dataset_class not in (
-                    TERRITORY_DATASETS['departement']['comptes_dep'],
-                    TERRITORY_DATASETS['departement']['zonages_dep']):
+                    TERRITORY_DATASETS['departement']['zonages_dep'], ):
                 assert 'License: {0}'.format(licence_ouverte.title) in html
                 assert '© {0}'.format(licence_ouverte.id) in html
                 assert (
@@ -524,8 +522,7 @@ class OEmbedsTerritoryAPITest:
             assert 'Download from local.test' in html
             assert 'Add to your own website' in html
             if territory_dataset_class not in (
-                    TERRITORY_DATASETS['region']['comptes_reg'],
-                    TERRITORY_DATASETS['region']['zonages_reg']):
+                    TERRITORY_DATASETS['region']['zonages_reg'], ):
                 assert 'License: {0}'.format(licence_ouverte.title) in html
                 assert '© {0}'.format(licence_ouverte.id) in html
                 assert (
@@ -549,7 +546,7 @@ class SpatialTerritoriesApiTest:
         response = client.get(url_for('api.zone_datasets', id=paca.id),
                               qs={'dynamic': 1})
         assert200(response)
-        assert len(response.json) == 10
+        assert len(response.json) == 9
 
     def test_datasets_with_dynamic_region_and_size(self, autoindex, client):
         paca, bdr, arles = create_geozones_fixtures()
@@ -563,7 +560,7 @@ class SpatialTerritoriesApiTest:
         response = client.get(url_for('api.zone_datasets', id=paca.id),
                               qs={'dynamic': 1, 'size': 2})
         assert200(response)
-        assert len(response.json) == 9
+        assert len(response.json) == 8
 
     def test_datasets_without_dynamic_region(self, autoindex, client):
         paca, bdr, arles = create_geozones_fixtures()
@@ -590,7 +587,7 @@ class SpatialTerritoriesApiTest:
         response = client.get(url_for('api.zone_datasets', id=bdr.id),
                               qs={'dynamic': 1})
         assert200(response)
-        assert len(response.json) == 10
+        assert len(response.json) == 9
 
     def test_datasets_with_dynamic_town(self, autoindex, client):
         paca, bdr, arles = create_geozones_fixtures()
@@ -604,7 +601,7 @@ class SpatialTerritoriesApiTest:
         response = client.get(url_for('api.zone_datasets', id=arles.id),
                               qs={'dynamic': 1})
         assert200(response)
-        assert len(response.json) == 12
+        assert len(response.json) == 11
 
     def test_zone_children(self, client):
         paca, bdr, arles = create_geozones_fixtures()
