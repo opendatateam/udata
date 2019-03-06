@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Automatically loads default settings from plugins (if `plugin.settings` module exists) [#2058](https://github.com/opendatateam/udata/pull/2058)
 
 ## 1.6.5 (2019-02-27)
 
