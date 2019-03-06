@@ -1,70 +1,63 @@
-# Serbian translations for udata.
-# Copyright (C) 2019 ORGANIZATION
-# This file is distributed under the same license as the udata project.
-# Data.gov.rs <admindata@data.gov.rs>, 2019.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 1.6.6.dev0\n"
-"Report-Msgid-Bugs-To: admindata@data.gov.rs\n"
-"POT-Creation-Date: 2019-03-01 23:12+0100\n"
-"PO-Revision-Date: 2019-03-02 12:15+0100\n"
-"Last-Translator: data.gov.rs <admindata@data.gov.rs>\n"
+"Project-Id-Version: udata\n"
+"Report-Msgid-Bugs-To: i18n@opendata.team\n"
+"POT-Creation-Date: 2019-02-07 11:26+0100\n"
+"PO-Revision-Date: 2019-03-06 11:31\n"
+"Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: sr\n"
-"Language-Team: sr <admindata@data.gov.rs>\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Language-Team: Serbian (Cyrillic)\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.6.0\n"
-"X-Generator: Poedit 2.0.6\n"
+"Generated-By: Babel 2.5.3\n"
+"X-Generator: crowdin.com\n"
+"X-Crowdin-Project: udata\n"
+"X-Crowdin-Language: sr\n"
+"X-Crowdin-File: /master/udata/translations/udata.pot\n"
 
-#: udata/settings.py:94
+#: udata/settings.py:93
 msgid "Welcome"
 msgstr "Добро дошли"
 
-#: udata/settings.py:95
+#: udata/settings.py:94
 msgid "Please confirm your email"
 msgstr "Молимо, потврдите Ваш е-mail "
 
-#: udata/settings.py:96
+#: udata/settings.py:95
 msgid "Login instructions"
 msgstr "Инструкције за приступ"
 
-#: udata/settings.py:97
+#: udata/settings.py:96
 msgid "Your password has been reset"
 msgstr "Ваша лозинка је ресетована"
 
-#: udata/settings.py:98
+#: udata/settings.py:97
 msgid "Your password has been changed"
 msgstr "Ваша лозинка је промењена"
 
-#: udata/settings.py:100
+#: udata/settings.py:99
 msgid "Password reset instructions"
 msgstr "Инструкције за ресетовање лозинке"
 
 #: udata/api/errors.py:4
-msgid ""
-"Validation error: your data cannot be updated for now, we have been notified "
-"of the error and we will fix it as soon as possible."
-msgstr ""
-"Грешка у валидацији: податке тренутно није могуће ажурирати. Обавештени смо "
-"о грешци и отклонићемо је чим то буде могуће."
+msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
+msgstr "Грешка у валидацији: податке тренутно није могуће ажурирати. Обавештени смо о грешци и отклонићемо је чим то буде могуће."
 
-#: udata/api/oauth2.py:48
+#: udata/api/oauth2.py:54
 msgid "Bearer Token"
 msgstr "Токен носиоца"
 
-#: udata/api/oauth2.py:52
+#: udata/api/oauth2.py:58
 msgid "Default scope"
 msgstr "Подразумевани опсег"
 
-#: udata/api/oauth2.py:53
+#: udata/api/oauth2.py:59
 msgid "System administrator rights"
 msgstr "Права администратора система"
 
-#: udata/core/user/forms.py:17
+#: udata/auth/forms.py:12 udata/core/user/forms.py:17
 msgid "First name"
 msgstr "Име"
 
@@ -72,7 +65,8 @@ msgstr "Име"
 msgid "First name is required"
 msgstr "Име је обавезно"
 
-#: udata/core/user/forms.py:18 udata/templates/user/list.html:26
+#: udata/auth/forms.py:14 udata/core/user/forms.py:18
+#: udata/templates/user/list.html:31
 msgid "Last name"
 msgstr "Презиме"
 
@@ -130,21 +124,26 @@ msgstr "скуп података је избрисан"
 msgid "Domain \"{domain}\" not allowed for filetype \"{filetype}\""
 msgstr "Домен \"{domain}\" не дозвољава типове података \"{filetype}\""
 
-#: udata/core/dataset/forms.py:26 udata/core/dataset/forms.py:67
-#: udata/core/discussions/forms.py:11 udata/core/issues/forms.py:11
+#: udata/core/dataset/forms.py:55 udata/core/dataset/forms.py:110
+#: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:15
 #: udata/core/reuse/forms.py:22 udata/core/site/forms.py:15
-#: udata/templates/dataset/list.html:30
-#: udata/templates/discussion/threads.html:42
-#: udata/templates/organization/list.html:29 udata/templates/reuse/list.html:31
-#: udata/templates/search.html:90 udata/templates/search.html:104
-#: udata/templates/topic/datasets.html:26 udata/templates/topic/reuses.html:25
+#: udata/templates/dataset/list.html:40
+#: udata/templates/mail/discussion_closed.html:26
+#: udata/templates/mail/issue_closed.html:26
+#: udata/templates/mail/new_discussion.html:25
+#: udata/templates/mail/new_discussion_comment.html:26
+#: udata/templates/mail/new_issue.html:25
+#: udata/templates/mail/new_issue_comment.html:26
+#: udata/templates/reuse/list.html:36 udata/templates/search.html:73
+#: udata/templates/search.html:87 udata/templates/topic/datasets.html:33
+#: udata/templates/topic/reuses.html:32
 msgid "Title"
 msgstr "Наслов"
 
-#: udata/core/dataset/forms.py:27 udata/core/dataset/forms.py:69
+#: udata/core/dataset/forms.py:56 udata/core/dataset/forms.py:114
 #: udata/core/jobs/forms.py:31 udata/core/organization/forms.py:27
 #: udata/core/reuse/forms.py:24 udata/core/topic/forms.py:20
-#: udata/harvest/forms.py:20
+#: udata/harvest/forms.py:65
 msgid "Description"
 msgstr "Опис"
 
@@ -152,12 +151,12 @@ msgstr "Опис"
 msgid "File type"
 msgstr "Тип податка"
 
-#: udata/core/dataset/forms.py:31
+#: udata/core/dataset/forms.py:60
 msgid "Whether the resource is an uploaded file, a remote file or an API"
 msgstr "Да ли је ресурс отпремљена датотека, удаљена датотека или API"
 
-#: udata/core/dataset/forms.py:29 udata/core/reuse/forms.py:27
-#: udata/templates/reuse/card.html:35 udata/templates/reuse/display.html:221
+#: udata/core/dataset/forms.py:63 udata/core/reuse/forms.py:27
+#: udata/templates/reuse/card.html:27 udata/templates/reuse/display.html:189
 #: udata/templates/reuse/search-labels.html:6
 #: udata/templates/reuse/search-panel.html:6
 #: udata/templates/reuse/search-result.html:18
@@ -168,49 +167,49 @@ msgstr "Тип"
 msgid "Resource type (documentation, API...)"
 msgstr "Тип ресурса (документација, API...)"
 
-#: udata/core/dataset/forms.py:34 udata/core/reuse/forms.py:29
-#: udata/harvest/forms.py:22
+#: udata/core/dataset/forms.py:67 udata/core/reuse/forms.py:29
+#: udata/harvest/forms.py:67
 msgid "URL"
-msgstr "URL"
+msgstr ""
 
-#: udata/core/dataset/forms.py:36 udata/templates/dataset/search-labels.html:22
+#: udata/core/dataset/forms.py:70 udata/templates/dataset/search-labels.html:24
 msgid "Format"
 msgstr "Формат"
 
-#: udata/core/dataset/forms.py:39
+#: udata/core/dataset/forms.py:75
 msgid "Mime type"
 msgstr "MIME тип"
 
-#: udata/core/dataset/forms.py:40
+#: udata/core/dataset/forms.py:76
 msgid "The mime type associated to the extension. (ex: text/plain)"
 msgstr "MIME тип повезан са екстензијом (нпр: text/plain)"
 
-#: udata/core/dataset/forms.py:43
+#: udata/core/dataset/forms.py:79
 msgid "Size"
 msgstr "Величина"
 
-#: udata/core/dataset/forms.py:44
+#: udata/core/dataset/forms.py:80
 msgid "The file size in bytes"
 msgstr "Величина датотеке у бајтовима"
 
-#: udata/core/dataset/forms.py:46
+#: udata/core/dataset/forms.py:82
 msgid "Publication date"
 msgstr "Датум објављивања"
 
-#: udata/core/dataset/forms.py:47
+#: udata/core/dataset/forms.py:83
 msgid "The publication date of the resource"
 msgstr "Датум објављивања ресурса"
 
-#: udata/core/dataset/forms.py:59
+#: udata/core/dataset/forms.py:96
 msgid "Related dataset"
 msgstr "Повезани скуп података"
 
-#: udata/core/dataset/forms.py:61 udata/core/dataset/forms.py:93
-#: udata/core/reuse/forms.py:40 udata/harvest/forms.py:25
+#: udata/core/dataset/forms.py:98 udata/core/dataset/forms.py:140
+#: udata/core/reuse/forms.py:40 udata/harvest/forms.py:72
 msgid "Publish as"
 msgstr "Објављено као"
 
-#: udata/core/organization/forms.py:25
+#: udata/core/dataset/forms.py:111 udata/core/organization/forms.py:25
 msgid "Acronym"
 msgstr "Акроним"
 
@@ -218,110 +217,104 @@ msgstr "Акроним"
 msgid "An optional acronym"
 msgstr "Опциони акроним"
 
-#: udata/core/dataset/forms.py:70
+#: udata/core/dataset/forms.py:115
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "Детаљи о скупу података (процес прикупљања, спецификација…)."
 
-#: udata/core/dataset/forms.py:73 udata/templates/dataset/display.html:237
-#: udata/templates/dataset/search-labels.html:7
+#: udata/core/dataset/forms.py:118 udata/templates/dataset/display.html:228
+#: udata/templates/dataset/search-labels.html:9
 msgid "License"
 msgstr "Лиценца"
 
-#: udata/core/dataset/forms.py:75
+#: udata/core/dataset/forms.py:120
 msgid "Update frequency"
 msgstr "Фреквенција ажурирања"
 
-#: udata/core/dataset/forms.py:78
+#: udata/core/dataset/forms.py:124
 msgid "The frequency at which data are updated."
 msgstr "Фреквенција којом се подаци ажурирају."
 
-#: udata/core/dataset/forms.py:79
+#: udata/core/dataset/forms.py:125
 msgid "Expected frequency date"
 msgstr "Датум очекиване фреквенције"
 
-#: udata/core/dataset/forms.py:81 udata/templates/dataset/card.html:70
-#: udata/templates/dataset/display.html:250
-#: udata/templates/dataset/search-labels.html:13
-#: udata/templates/dataset/search-panel.html:12
-#: udata/templates/dataset/search-result.html:32
-#: udata/templates/embed-dataset.html:206
+#: udata/core/dataset/forms.py:128 udata/templates/dataset/card.html:40
+#: udata/templates/dataset/display.html:238
+#: udata/templates/dataset/search-labels.html:15
+#: udata/templates/dataset/search-panel.html:13
+#: udata/templates/dataset/search-result.html:31
+#: udata/templates/embed-dataset.html:209
 msgid "Temporal coverage"
 msgstr "Временска покривеност"
 
-#: udata/core/dataset/forms.py:82
+#: udata/core/dataset/forms.py:129
 msgid "The period covered by the data"
 msgstr "Период покривен подацима"
 
-#: udata/core/dataset/forms.py:84 udata/core/spatial/forms.py:60
-#: udata/templates/dataset/display.html:352
-#: udata/templates/dataset/search-labels.html:16
-#: udata/templates/dataset/search-panel.html:13
+#: udata/core/dataset/forms.py:131 udata/core/spatial/forms.py:84
+#: udata/templates/dataset/display.html:330
+#: udata/templates/dataset/search-labels.html:18
+#: udata/templates/dataset/search-panel.html:15
 #: udata/templates/dataset/search-result.html:55
+#: udata/templates/dataset/search-result.html:65
+#: udata/templates/dataset/search-result.html:76
 msgid "Spatial coverage"
 msgstr "Просторна покривеност"
 
-#: udata/core/dataset/forms.py:85
+#: udata/core/dataset/forms.py:132
 msgid "The geographical area covered by the data."
 msgstr "Географска област покривена подацима."
 
-#: udata/core/dataset/forms.py:86 udata/core/post/forms.py:29
+#: udata/core/dataset/forms.py:133 udata/core/post/forms.py:29
 #: udata/core/reuse/forms.py:32 udata/core/site/forms.py:16
 #: udata/core/topic/forms.py:25 udata/templates/dataset/search-panel.html:10
 #: udata/templates/reuse/search-panel.html:7
 msgid "Tags"
 msgstr "Ознаке"
 
-#: udata/core/dataset/forms.py:86 udata/core/reuse/forms.py:32
+#: udata/core/dataset/forms.py:133 udata/core/reuse/forms.py:32
 msgid "Some taxonomy keywords"
 msgstr "Неке кључне речи у таксономији"
 
-#: udata/core/dataset/forms.py:88 udata/core/post/forms.py:31
-#: udata/core/reuse/forms.py:35 udata/core/topic/forms.py:26
-#: udata/templates/dataset/display.html:98
-#: udata/templates/dataset/display.html:100
-#: udata/templates/post/display.html:64 udata/templates/post/display.html:66
-#: udata/templates/reuse/display.html:91 udata/templates/reuse/display.html:93
+#: udata/core/dataset/forms.py:135 udata/core/reuse/forms.py:35
+#: udata/core/topic/forms.py:26 udata/templates/dataset/display.html:73
+#: udata/templates/dataset/display.html:74 udata/templates/reuse/display.html:60
+#: udata/templates/reuse/display.html:63
 msgid "Private"
 msgstr "Приватно"
 
-#: udata/core/dataset/forms.py:89 udata/core/reuse/forms.py:36
+#: udata/core/dataset/forms.py:136 udata/core/reuse/forms.py:36
 msgid "Restrict the dataset visibility to you or your organization only."
-msgstr ""
-"Ограничите видљивост скупа података само на себе или своју организацију."
+msgstr "Ограничите видљивост скупа података само на себе или своју организацију."
 
-#: udata/core/dataset/metrics.py:24 udata/core/organization/metrics.py:35
-#: udata/core/organization/views.py:132 udata/core/organization/views.py:135
-#: udata/core/site/metrics.py:52 udata/core/site/views.py:134
-#: udata/core/user/metrics.py:42 udata/templates/dataset/card.html:40
-#: udata/templates/dataset/display.html:410
-#: udata/templates/dataset/list.html:33
-#: udata/templates/dataset/search-labels.html:23
-#: udata/templates/dataset/search-panel.html:16
-#: udata/templates/organization/display.html:58
-#: udata/templates/organization/list.html:33
+#: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:34
+#: udata/core/site/metrics.py:53 udata/core/site/views.py:134
+#: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:28
+#: udata/templates/dataset/display.html:410 udata/templates/dataset/list.html:43
+#: udata/templates/dataset/search-labels.html:28
+#: udata/templates/organization/list.html:38
 #: udata/templates/organization/search-labels.html:9
 #: udata/templates/organization/search-panel.html:6
-#: udata/templates/reuse/display.html:24 udata/templates/reuse/edit_base.html:4
-#: udata/templates/reuse/list.html:13 udata/templates/reuse/list.html:29
-#: udata/templates/search.html:36 udata/templates/search.html:93
-#: udata/templates/search.html:102 udata/templates/search.html:120
-#: udata/templates/search.html:131 udata/templates/topic/browse.html:15
-#: udata/templates/topic/datasets.html:29 udata/templates/topic/reuses.html:14
-#: udata/templates/user/following.html:16 udata/templates/user/list.html:28
-#: udata/templates/user/reuses.html:8 udata/templates/user/search-labels.html:9
-#: udata/templates/user/search-panel.html:8 udata/theme.py:39
+#: udata/templates/reuse/display.html:27 udata/templates/reuse/list.html:8
+#: udata/templates/reuse/list.html:18 udata/templates/reuse/list.html:34
+#: udata/templates/search.html:76 udata/templates/search.html:85
+#: udata/templates/search.html:103 udata/templates/site/dashboard.html:22
+#: udata/templates/topic/browse.html:15 udata/templates/topic/datasets.html:36
+#: udata/templates/topic/reuses.html:21 udata/templates/user/following.html:16
+#: udata/templates/user/list.html:33 udata/templates/user/reuses.html:8
+#: udata/theme/__init__.py:42
 msgid "Reuses"
 msgstr "Примери употребе"
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:32
 msgid "Unknown"
 msgstr "Непознато"
 
-#: udata/core/dataset/models.py:32
+#: udata/core/dataset/models.py:33
 msgid "Punctual"
 msgstr "Тачно"
 
-#: udata/core/dataset/models.py:33
+#: udata/core/dataset/models.py:34
 msgid "Real time"
 msgstr "У реалном времену"
 
@@ -341,7 +334,7 @@ msgstr "Три пута дневно"
 msgid "Semidaily"
 msgstr "Два пута дневно"
 
-#: udata/core/dataset/models.py:34 udata/harvest/models.py:18
+#: udata/core/dataset/models.py:39 udata/harvest/models.py:25
 msgid "Daily"
 msgstr "Дневно"
 
@@ -357,7 +350,7 @@ msgstr "Три пута недељно"
 msgid "Semiweekly"
 msgstr "Два пута недељно"
 
-#: udata/core/dataset/models.py:35 udata/harvest/models.py:17
+#: udata/core/dataset/models.py:43 udata/harvest/models.py:24
 msgid "Weekly"
 msgstr "Седмично"
 
@@ -373,15 +366,15 @@ msgstr "Три пута месечно"
 msgid "Semimonthly"
 msgstr "Два пута месечно"
 
-#: udata/core/dataset/models.py:37 udata/harvest/models.py:16
+#: udata/core/dataset/models.py:47 udata/harvest/models.py:23
 msgid "Monthly"
 msgstr "Месечно"
 
-#: udata/core/dataset/models.py:38
+#: udata/core/dataset/models.py:48
 msgid "Bimonthly"
 msgstr "Свака два месеца"
 
-#: udata/core/dataset/models.py:39
+#: udata/core/dataset/models.py:49
 msgid "Quarterly"
 msgstr "Квартално"
 
@@ -389,23 +382,23 @@ msgstr "Квартално"
 msgid "Three times a year"
 msgstr "Три пута годишње"
 
-#: udata/core/dataset/models.py:40
+#: udata/core/dataset/models.py:51
 msgid "Biannual"
 msgstr "Двапут годишње"
 
-#: udata/core/dataset/models.py:41
+#: udata/core/dataset/models.py:52
 msgid "Annual"
 msgstr "Годишње"
 
-#: udata/core/dataset/models.py:42
+#: udata/core/dataset/models.py:53
 msgid "Biennial"
 msgstr "Сваке друге године"
 
-#: udata/core/dataset/models.py:43
+#: udata/core/dataset/models.py:54
 msgid "Triennial"
 msgstr "Сваке три године"
 
-#: udata/core/dataset/models.py:44
+#: udata/core/dataset/models.py:55
 msgid "Quinquennial"
 msgstr "Сваких пет година"
 
@@ -425,56 +418,56 @@ msgstr "Документација"
 msgid "Update"
 msgstr "Ажурирање"
 
-#: udata/core/dataset/models.py:62 udata/core/reuse/models.py:21
+#: udata/core/dataset/models.py:82 udata/core/reuse/models.py:19
 msgid "API"
-msgstr "API"
+msgstr ""
 
 #: udata/core/dataset/models.py:83
 msgid "Code repository"
 msgstr "Складиште кода"
 
-#: udata/core/spatial/models.py:22
+#: udata/core/dataset/models.py:84 udata/core/spatial/models.py:26
 msgid "Other"
 msgstr "Друго"
 
-#: udata/core/dataset/models.py:60
+#: udata/core/dataset/models.py:89
 msgid "Uploaded file"
 msgstr "Отпремљена датотека"
 
-#: udata/core/dataset/models.py:61
+#: udata/core/dataset/models.py:90
 msgid "Remote file"
 msgstr "Удаљена датотека"
 
-#: udata/templates/dataset/resource/list-item.html:13
+#: udata/core/dataset/models.py:309 udata/core/dataset/rdf.py:333
+#: udata/templates/dataset/resource/card.html:14
 msgid "Nameless resource"
 msgstr "Ресурс без имена"
 
-#: udata/core/dataset/models.py:160 udata/models/datetime_fields.py:58
-#: udata/templates/dataset/display.html:269
-#: udata/templates/dataset/list.html:31
-#: udata/templates/organization/list.html:30 udata/templates/reuse/list.html:32
-#: udata/templates/search.html:91 udata/templates/search.html:105
-#: udata/templates/topic/datasets.html:27 udata/templates/topic/reuses.html:26
+#: udata/core/dataset/models.py:356 udata/models/datetime_fields.py:58
+#: udata/templates/dataset/display.html:255 udata/templates/dataset/list.html:41
+#: udata/templates/organization/list.html:35 udata/templates/reuse/list.html:37
+#: udata/templates/search.html:74 udata/templates/search.html:88
+#: udata/templates/topic/datasets.html:34 udata/templates/topic/reuses.html:33
 msgid "Creation date"
 msgstr "Датум креирања"
 
-#: udata/core/dataset/models.py:162 udata/models/datetime_fields.py:60
-#: udata/templates/dataset/list.html:32
-#: udata/templates/organization/list.html:31 udata/templates/reuse/list.html:33
-#: udata/templates/search.html:92 udata/templates/search.html:106
-#: udata/templates/topic/datasets.html:28 udata/templates/topic/reuses.html:27
+#: udata/core/dataset/models.py:358 udata/models/datetime_fields.py:60
+#: udata/templates/dataset/list.html:42 udata/templates/organization/list.html:36
+#: udata/templates/reuse/list.html:38 udata/templates/search.html:75
+#: udata/templates/search.html:89 udata/templates/topic/datasets.html:35
+#: udata/templates/topic/reuses.html:34
 msgid "Last modification date"
 msgstr "Датум последње измене"
 
-#: udata/core/dataset/models.py:178
+#: udata/core/dataset/models.py:372
 msgid "Future date of update"
 msgstr "Будући датум ажурирања"
 
-#: udata/core/dataset/models.py:195
+#: udata/core/dataset/models.py:387
 msgid "Pivotal data"
 msgstr "Кључни подаци"
 
-#: udata/core/dataset/models.py:219 udata/templates/dataset/display.html:11
+#: udata/core/dataset/models.py:410 udata/templates/dataset/display.html:11
 msgid "dataset"
 msgstr "скуп података"
 
@@ -498,68 +491,59 @@ msgstr "Често коришћено"
 msgid "Heavily reused"
 msgstr "Популарно"
 
-#: udata/core/dataset/tasks.py:95
+#: udata/core/dataset/tasks.py:69
 msgid "You need to update some frequency-based datasets"
-msgstr ""
-"Потребно је да ажурирате неке скупове података засноване на фреквенцији"
+msgstr "Потребно је да ажурирате неке скупове података засноване на фреквенцији"
 
-#: udata/core/dataset/views.py:20 udata/templates/home.html:108
+#: udata/core/dataset/views.py:30 udata/templates/home.html:122
 msgid "Last datasets"
 msgstr "Најновији скупови података"
 
-#: udata/core/discussions/forms.py:12 udata/core/discussions/forms.py:17
-#: udata/core/issues/forms.py:12 udata/core/issues/forms.py:17
-#: udata/core/organization/forms.py:52 udata/core/organization/forms.py:56
-#: udata/harvest/forms.py:30 udata/templates/discussion/item.html:60
-#: udata/templates/discussion/threads.html:44
-#: udata/templates/mail/discussion_closed.html:31
-#: udata/templates/mail/issue_closed.html:31
-#: udata/templates/mail/new_discussion_comment.html:31
-#: udata/templates/mail/new_issue_comment.html:31
+#: udata/core/discussions/forms.py:16 udata/core/discussions/forms.py:22
+#: udata/core/issues/forms.py:16 udata/core/issues/forms.py:21
+#: udata/core/organization/forms.py:55 udata/core/organization/forms.py:59
+#: udata/harvest/forms.py:79
 msgid "Comment"
 msgstr "Коментар"
 
-#: udata/core/discussions/forms.py:13 udata/core/issues/forms.py:13
+#: udata/core/discussions/forms.py:17 udata/core/issues/forms.py:17
 msgid "Subject"
 msgstr "Тема"
 
 #: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
-#: udata/templates/dataset/display.html:381
-#: udata/templates/reuse/display.html:300
+#: udata/templates/dataset/display.html:374 udata/templates/post/display.html:199
+#: udata/templates/reuse/display.html:276 udata/templates/site/dashboard.html:25
 msgid "Discussions"
 msgstr "Дискусије"
 
-#: udata/core/discussions/tasks.py:39
+#: udata/core/discussions/tasks.py:41
 #, python-format
 msgid "Your %(type)s have a new discussion"
 msgstr "Ваши %(type)s имају нову дискусију"
 
-#: udata/core/discussions/tasks.py:54
+#: udata/core/discussions/tasks.py:57
 #, python-format
 msgid "%(user)s commented your discussion"
 msgstr "Корисник %(user)s је коментарисао вашу дискусију"
 
-#: udata/core/discussions/tasks.py:70
+#: udata/core/discussions/tasks.py:73
 msgid "A discussion has been closed"
 msgstr "Дискусија је затворена"
 
-#: udata/core/followers/metrics.py:29 udata/core/organization/views.py:161
-#: udata/core/site/metrics.py:101 udata/templates/dataset/followers.html:6
-#: udata/templates/dataset/search-labels.html:26
-#: udata/templates/dataset/search-panel.html:17
-#: udata/templates/dataset/search-result.html:85
-#: udata/templates/organization/display.html:63
+#: udata/core/followers/metrics.py:29 udata/core/site/metrics.py:104
+#: udata/templates/dataset/followers.html:6 udata/templates/dataset/list.html:44
+#: udata/templates/dataset/search-labels.html:31
+#: udata/templates/dataset/search-panel.html:19
+#: udata/templates/organization/display.html:58
 #: udata/templates/organization/followers.html:7
-#: udata/templates/organization/list.html:34
+#: udata/templates/organization/list.html:39
 #: udata/templates/organization/search-labels.html:12
 #: udata/templates/organization/search-panel.html:8
-#: udata/templates/reuse/display.html:244 udata/templates/reuse/list.html:35
-#: udata/templates/reuse/search-labels.html:13
-#: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:121
-#: udata/templates/search.html:132 udata/templates/topic/reuses.html:29
-#: udata/templates/user/followers.html:7 udata/templates/user/list.html:29
-#: udata/templates/user/search-labels.html:12
-#: udata/templates/user/search-panel.html:9
+#: udata/templates/reuse/display.html:222 udata/templates/reuse/list.html:40
+#: udata/templates/reuse/search-labels.html:15
+#: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:104
+#: udata/templates/topic/reuses.html:36 udata/templates/user/followers.html:7
+#: udata/templates/user/list.html:34
 msgid "Followers"
 msgstr "Пратиоци"
 
@@ -573,8 +557,7 @@ msgstr "Корисник %(user)s вас прати"
 msgid "%(user)s followed your organization"
 msgstr "Корисник %(user)s прати вашу организацију"
 
-#: udata/core/issues/metrics.py:13 udata/core/reuse/views.py:56
-#: udata/templates/macros/issues.html:6
+#: udata/core/issues/metrics.py:13 udata/core/reuse/views.py:57
 msgid "Issues"
 msgstr "Проблеми"
 
@@ -583,19 +566,20 @@ msgstr "Проблеми"
 msgid "Your %(type)s have a new issue"
 msgstr "%(type)s има нови проблем"
 
-#: udata/core/issues/tasks.py:39
+#: udata/core/issues/tasks.py:40
 #, python-format
 msgid "%(user)s commented your issue"
 msgstr "Корисник %(user)s је коментарисао ваш проблем"
 
-#: udata/core/issues/tasks.py:54
+#: udata/core/issues/tasks.py:55
 msgid "An issue has been closed"
 msgstr "Проблем је затворен"
 
 #: udata/core/jobs/forms.py:30 udata/core/organization/forms.py:23
 #: udata/core/post/forms.py:18 udata/core/topic/forms.py:18
-#: udata/harvest/forms.py:18 udata/templates/api/admin.html:10
-#: udata/templates/search.html:118 udata/templates/user/list.html:30
+#: udata/harvest/forms.py:63 udata/templates/api/admin.html:10
+#: udata/templates/organization/list.html:34 udata/templates/search.html:101
+#: udata/templates/user/list.html:35
 msgid "Name"
 msgstr "Име"
 
@@ -607,11 +591,11 @@ msgstr "Задаци"
 msgid "Enabled"
 msgstr "Омогућено"
 
-#: udata/core/jobs/models.py:19
+#: udata/core/jobs/models.py:21
 msgid "every {0.period_singular}"
 msgstr "сваки {0.period_singular}"
 
-#: udata/core/jobs/models.py:20
+#: udata/core/jobs/models.py:22
 msgid "every {0.every} {0.period}"
 msgstr "сваки {0.every} {0.period}"
 
@@ -643,73 +627,67 @@ msgstr "URL веб-сајта организације"
 msgid "Logo"
 msgstr "Логотип"
 
-#: udata/core/organization/forms.py:63
+#: udata/core/organization/forms.py:66
 msgid "Role"
 msgstr "Улога"
 
-#: udata/core/organization/metrics.py:19 udata/core/organization/views.py:110
-#: udata/core/organization/views.py:113 udata/core/reuse/metrics.py:24
+#: udata/core/organization/metrics.py:17 udata/core/reuse/metrics.py:24
 #: udata/core/site/metrics.py:42 udata/core/site/views.py:128
-#: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:25
-#: udata/templates/dataset/edit_base.html:4
-#: udata/templates/dataset/followers.html:4
-#: udata/templates/dataset/list.html:13 udata/templates/dataset/list.html:27
-#: udata/templates/dataset/resource/display.html:4
-#: udata/templates/organization/display.html:54
-#: udata/templates/organization/list.html:32
+#: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:27
+#: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:8
+#: udata/templates/dataset/list.html:19 udata/templates/dataset/list.html:37
+#: udata/templates/organization/list.html:37
 #: udata/templates/organization/search-labels.html:6
 #: udata/templates/organization/search-panel.html:4
-#: udata/templates/reuse/list.html:34
-#: udata/templates/reuse/search-labels.html:10
-#: udata/templates/reuse/search-panel.html:8 udata/templates/search.html:28
-#: udata/templates/search.html:87 udata/templates/search.html:119
-#: udata/templates/search.html:130 udata/templates/topic/browse.html:9
-#: udata/templates/topic/datasets.html:14 udata/templates/topic/reuses.html:28
-#: udata/templates/user/datasets.html:8 udata/templates/user/following.html:15
-#: udata/templates/user/list.html:27 udata/templates/user/search-labels.html:6
-#: udata/templates/user/search-panel.html:7 udata/theme.py:38
+#: udata/templates/reuse/list.html:39 udata/templates/reuse/search-labels.html:12
+#: udata/templates/reuse/search-panel.html:8 udata/templates/search.html:70
+#: udata/templates/search.html:102 udata/templates/site/dashboard.html:20
+#: udata/templates/topic/browse.html:9 udata/templates/topic/datasets.html:21
+#: udata/templates/topic/reuses.html:35 udata/templates/user/datasets.html:8
+#: udata/templates/user/following.html:15 udata/templates/user/list.html:32
+#: udata/theme/__init__.py:41
 msgid "Datasets"
 msgstr "Скупови података"
 
-#: udata/core/organization/metrics.py:46 udata/core/organization/views.py:156
+#: udata/core/organization/metrics.py:50
 msgid "Permitted reuses"
 msgstr "Дозвољени примери употребе"
 
-#: udata/core/organization/metrics.py:57
-#: udata/templates/organization/display.html:62
+#: udata/core/organization/metrics.py:61
+#: udata/templates/organization/display.html:57
 msgid "Members"
 msgstr "Чланови"
 
-#: udata/templates/organization/display_base.html:132
+#: udata/core/organization/models.py:25
+#: udata/templates/organization/display_base.html:127
 msgid "Administrator"
 msgstr "Администратор"
 
-#: udata/core/organization/models.py:24
-#: udata/templates/organization/display_base.html:139
+#: udata/core/organization/models.py:26
+#: udata/templates/organization/display_base.html:134
 msgid "Editor"
 msgstr "Уредник"
 
-#: udata/core/organization/models.py:29 udata/features/transfer/models.py:17
-#: udata/harvest/models.py:22 udata/harvest/models.py:32
-#: udata/harvest/models.py:69
+#: udata/core/organization/models.py:32 udata/features/transfer/models.py:17
+#: udata/harvest/models.py:29 udata/harvest/models.py:39 udata/harvest/models.py:76
 msgid "Pending"
 msgstr "На чекању"
 
-#: udata/core/organization/models.py:30 udata/features/transfer/models.py:18
-#: udata/harvest/models.py:70
+#: udata/core/organization/models.py:33 udata/features/transfer/models.py:18
+#: udata/harvest/models.py:77
 msgid "Accepted"
 msgstr "Прихваћено"
 
-#: udata/core/organization/models.py:31 udata/features/transfer/models.py:19
-#: udata/harvest/models.py:71
+#: udata/core/organization/models.py:34 udata/features/transfer/models.py:19
+#: udata/harvest/models.py:78
 msgid "Refused"
 msgstr "Одбијено"
 
-#: udata/core/organization/models.py:144
+#: udata/core/organization/models.py:128
 msgid "Public Service"
 msgstr "Јавни сервис"
 
-#: udata/core/organization/models.py:145
+#: udata/core/organization/models.py:129
 msgid "Certified"
 msgstr "Сертификовано"
 
@@ -755,16 +733,16 @@ msgstr "Мало пратилаца"
 msgid "Many followers"
 msgstr "Много пратилаца"
 
-#: udata/core/organization/tasks.py:31
+#: udata/core/organization/tasks.py:37
 msgid "New membership request"
 msgstr "Нови захтев за чланство"
 
-#: udata/core/organization/tasks.py:38 udata/core/organization/tasks.py:48
+#: udata/core/organization/tasks.py:44 udata/core/organization/tasks.py:54
 #, python-format
 msgid "You are now a member of the organization \"%(org)s\""
 msgstr "Сада сте члан организације \"%(org)s\""
 
-#: udata/core/organization/tasks.py:42
+#: udata/core/organization/tasks.py:48
 msgid "Membership refused"
 msgstr "Чланство је одбијено"
 
@@ -777,12 +755,10 @@ msgid "Content"
 msgstr "Садржај"
 
 #: udata/core/post/forms.py:22 udata/core/topic/forms.py:22
-#: udata/templates/post/display.html:148
 msgid "Associated datasets"
 msgstr "Повезани скупови података"
 
 #: udata/core/post/forms.py:23 udata/core/topic/forms.py:23
-#: udata/templates/post/display.html:135
 msgid "Associated reuses"
 msgstr "Повезани примери употребе"
 
@@ -819,44 +795,43 @@ msgid "This URL is already registered"
 msgstr "Овај URL је већ регистрован"
 
 #: udata/core/reuse/forms.py:25
-msgid ""
-"The details about the reuse (build process, specifics, self-critics...)."
-msgstr ""
-"Детаљи о примеру употребе (процес креирања, спецификације, самокритика…)."
+msgid "The details about the reuse (build process, specifics, self-critics...)."
+msgstr "Детаљи о примеру употребе (процес креирања, спецификације, самокритика…)."
 
-#: udata/core/reuse/forms.py:33 udata/templates/reuse/display.html:266
+#: udata/core/reuse/forms.py:33 udata/templates/home.html:92
+#: udata/templates/reuse/display.html:243
 msgid "Used datasets"
 msgstr "Коришћени скупови података"
 
-#: udata/core/reuse/models.py:22
+#: udata/core/reuse/models.py:20
 msgid "Application"
 msgstr "Апликација"
 
-#: udata/core/reuse/models.py:23
+#: udata/core/reuse/models.py:21
 msgid "Idea"
 msgstr "Идеја"
 
-#: udata/core/reuse/models.py:24
+#: udata/core/reuse/models.py:22
 msgid "News Article"
 msgstr "Чланак вести"
 
-#: udata/core/reuse/models.py:25
+#: udata/core/reuse/models.py:23
 msgid "Paper"
 msgstr "Рад"
 
-#: udata/core/reuse/models.py:26
+#: udata/core/reuse/models.py:24
 msgid "Post"
 msgstr "Објава"
 
-#: udata/core/reuse/models.py:27
+#: udata/core/reuse/models.py:25
 msgid "Visualization"
 msgstr "Визуелизација"
 
-#: udata/core/reuse/models.py:28
+#: udata/core/reuse/models.py:26
 msgid "Connected device"
 msgstr "Повезани уређај"
 
-#: udata/core/reuse/models.py:96 udata/templates/reuse/display.html:10
+#: udata/core/reuse/models.py:88 udata/templates/reuse/display.html:11
 msgid "reuse"
 msgstr "пример употребе"
 
@@ -864,11 +839,11 @@ msgstr "пример употребе"
 msgid "New reuse"
 msgstr "Нови пример употребе"
 
-#: udata/core/reuse/views.py:21
+#: udata/core/reuse/views.py:22 udata/templates/home.html:140
 msgid "Last reuses"
 msgstr "Најновији примери употребе"
 
-#: udata/core/reuse/views.py:57
+#: udata/core/reuse/views.py:58
 msgid "Transfer"
 msgstr "Пренос"
 
@@ -884,58 +859,57 @@ msgstr "Величина фида"
 msgid "Number of elements in feeds"
 msgstr "Број елемената у фидовима"
 
-#: udata/core/site/metrics.py:62 udata/core/site/views.py:140
-#: udata/templates/dataset/display.html:119
-#: udata/templates/dataset/list.html:28 udata/templates/search.html:88
+#: udata/core/site/metrics.py:63 udata/core/site/views.py:140
+#: udata/templates/dataset/display.html:94 udata/templates/dataset/list.html:38
+#: udata/templates/search.html:71 udata/templates/site/dashboard.html:21
 msgid "Resources"
 msgstr "Ресурси"
 
-#: udata/core/site/metrics.py:81 udata/core/site/views.py:155
-#: udata/templates/search.html:52 udata/templates/user/base.html:15
-#: udata/templates/user/edit_base.html:9 udata/templates/user/following.html:18
-#: udata/templates/user/list.html:13
+#: udata/core/site/metrics.py:84 udata/core/site/views.py:155
+#: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
+#: udata/templates/user/following.html:18 udata/templates/user/list.html:8
+#: udata/templates/user/list.html:18
 msgid "Users"
 msgstr "Корисници"
 
-#: udata/core/site/metrics.py:91 udata/core/site/views.py:149
-#: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:31
-#: udata/templates/organization/display_base.html:7
-#: udata/templates/organization/edit_base.html:8
+#: udata/core/site/metrics.py:94 udata/core/site/views.py:149
+#: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:47
+#: udata/templates/organization/display_base.html:8
 #: udata/templates/organization/followers.html:5
-#: udata/templates/organization/list.html:13
-#: udata/templates/organization/list.html:27
-#: udata/templates/reuse/search-panel.html:4 udata/templates/search.html:44
-#: udata/templates/search.html:116 udata/templates/user/base.html:95
-#: udata/templates/user/following.html:17
-#: udata/templates/user/search-panel.html:5 udata/theme.py:37
+#: udata/templates/organization/list.html:8
+#: udata/templates/organization/list.html:18
+#: udata/templates/organization/list.html:32
+#: udata/templates/reuse/search-panel.html:4 udata/templates/search.html:99
+#: udata/templates/site/dashboard.html:24 udata/templates/user/base.html:92
+#: udata/templates/user/following.html:17 udata/theme/__init__.py:40
 msgid "Organizations"
 msgstr "Организације"
 
-#: udata/core/site/metrics.py:111
+#: udata/core/site/metrics.py:114
 msgid "Maximum dataset followers"
 msgstr "Максимални број пратилаца скупа података"
 
-#: udata/core/site/metrics.py:124
+#: udata/core/site/metrics.py:127
 msgid "Maximum dataset reuses"
 msgstr "Максимални број примера употребе скупа података"
 
-#: udata/core/site/metrics.py:137
+#: udata/core/site/metrics.py:140
 msgid "Maximum datasets in reuses"
 msgstr "Максимални број скупова података у примерима употребе"
 
-#: udata/core/site/metrics.py:150
+#: udata/core/site/metrics.py:153
 msgid "Maximum reuse followers"
 msgstr "Максимални број пратилаца примера употребе"
 
-#: udata/core/site/metrics.py:163
+#: udata/core/site/metrics.py:166
 msgid "Maximum organization followers"
 msgstr "Максимални број пратилаца организације"
 
-#: udata/core/site/metrics.py:177
+#: udata/core/site/metrics.py:180
 msgid "Maximum organization reuses"
 msgstr "Максимални број примера употребе организације"
 
-#: udata/core/site/metrics.py:193
+#: udata/core/site/metrics.py:194
 msgid "Maximum organization datasets"
 msgstr "Максимални број скупова података организације"
 
@@ -943,7 +917,7 @@ msgstr "Максимални број скупова података орган
 msgid "Data"
 msgstr "Подаци"
 
-#: udata/core/organization/views.py:153 udata/core/site/views.py:146
+#: udata/core/site/views.py:146
 msgid "Community"
 msgstr "Заједница"
 
@@ -951,25 +925,25 @@ msgstr "Заједница"
 msgid "Unknown geoid(s): {identifiers}"
 msgstr "Непознати geoid(s): {identifiers}"
 
-#: udata/core/spatial/forms.py:47
+#: udata/core/spatial/forms.py:70
 msgid "Not a valid GeoJSON"
 msgstr "GeoJSON није важећи"
 
-#: udata/core/spatial/forms.py:61
+#: udata/core/spatial/forms.py:85
 msgid "A list of covered territories"
 msgstr "Листа обухваћених територија"
 
-#: udata/core/spatial/forms.py:63 udata/templates/dataset/search-labels.html:19
+#: udata/core/spatial/forms.py:87 udata/templates/dataset/search-labels.html:21
 msgid "Spatial granularity"
 msgstr "Просторна грануларност"
 
-#: udata/core/spatial/forms.py:64
+#: udata/core/spatial/forms.py:88
 msgid "The size of the data increment"
 msgstr "Величина инкремента података"
 
-#: udata/core/spatial/models.py:21
+#: udata/core/spatial/models.py:25
 msgid "POI"
-msgstr "POI"
+msgstr ""
 
 #: udata/core/spatial/translations.py:8
 msgid "French region"
@@ -1035,9 +1009,7 @@ msgstr ""
 msgid "French arrondissement"
 msgstr ""
 
-#: udata/core/topic/forms.py:27 udata/templates/dataset/display.html:44
-#: udata/templates/dataset/display.html:174
-#: udata/templates/reuse/display.html:42 udata/templates/reuse/display.html:146
+#: udata/core/topic/forms.py:27
 msgid "Featured"
 msgstr "Истакнуто"
 
@@ -1077,11 +1049,11 @@ msgstr "Основни подаци"
 msgid "Roles"
 msgstr "Улоге"
 
-#: udata/core/user/metrics.py:56 udata/templates/user/following.html:7
+#: udata/core/user/metrics.py:72 udata/templates/user/following.html:7
 msgid "Following"
 msgstr "Праћење"
 
-#: udata/core/user/models.py:242 udata/tests/api/test_me_api.py:374
+#: udata/core/user/models.py:241 udata/tests/api/test_me_api.py:374
 msgid "Account deletion"
 msgstr "Брисање налога"
 
@@ -1105,7 +1077,7 @@ msgstr "Пробна порука"
 msgid "The role {role} does not exist"
 msgstr "Улога {role} не постоји"
 
-#: udata/forms/fields.py:94
+#: udata/forms/fields.py:119
 msgid "Not a valid UUID"
 msgstr "UUID није важећи"
 
@@ -1113,13 +1085,12 @@ msgstr "UUID није важећи"
 msgid "Invalid URL"
 msgstr "Неправилан URL"
 
-#: udata/forms/fields.py:314
+#: udata/forms/fields.py:339
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
-msgstr ""
-"Ознака \"%(tag)s\" мора да буде дужине између %(min)d и %(max)d знакова."
+msgstr "Ознака \"%(tag)s\" мора да буде дужине између %(min)d и %(max)d знакова."
 
-#: udata/forms/fields.py:354
+#: udata/forms/fields.py:379 udata/forms/fields.py:403
 msgid "{0} does not exists"
 msgstr "{0} не постоји"
 
@@ -1131,27 +1102,27 @@ msgstr ""
 msgid "{0} is not a valid identifier"
 msgstr "{0} невалидан индентификатор"
 
-#: udata/forms/fields.py:380
+#: udata/forms/fields.py:432
 msgid "Model for {0} not found"
 msgstr "Модел за {0} није пронађен"
 
-#: udata/forms/fields.py:405
+#: udata/forms/fields.py:467
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Непознати идентификатори: {identifiers}"
 
-#: udata/forms/fields.py:548
+#: udata/forms/fields.py:602
 msgid "Unable to parse date range"
 msgstr "Није могуће рашчланити опсег датума"
 
-#: udata/forms/fields.py:575 udata/forms/fields.py:598
+#: udata/forms/fields.py:629 udata/forms/fields.py:652
 msgid "You must be authenticated"
 msgstr "Морате потврдити свој идентитет"
 
-#: udata/forms/fields.py:578
+#: udata/forms/fields.py:632
 msgid "You can only set yourself as owner"
 msgstr "Само себе можете да означите као власника"
 
-#: udata/forms/fields.py:601
+#: udata/forms/fields.py:655
 msgid "Permission denied for this organization"
 msgstr "Дозвола ја ову организацију је одбијена"
 
@@ -1160,26 +1131,26 @@ msgstr "Дозвола ја ову организацију је одбијен�
 msgid "This field requires \"%(name)s\" to be set"
 msgstr "Ово поље захтева да се подесе \"%(name)s\""
 
-#: udata/frontend/helpers.py:163
+#: udata/frontend/helpers.py:188
 msgid "Anonymous user"
 msgstr "Анонимни корисник"
 
-#: udata/frontend/helpers.py:276
+#: udata/frontend/helpers.py:292
 msgctxt "month-format"
 msgid "yyyy/MM"
 msgstr "гггг/ММ"
 
-#: udata/frontend/helpers.py:280
+#: udata/frontend/helpers.py:296
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
 msgstr "гггг/ММ/дд"
 
-#: udata/frontend/helpers.py:303
+#: udata/frontend/helpers.py:315
 #, python-format
 msgid "%(start)s to %(end)s"
 msgstr "од %(start)s до %(end)s"
 
-#: udata/frontend/markdown.py:31
+#: udata/frontend/markdown.py:36
 msgid "Source"
 msgstr "Извор"
 
@@ -1187,43 +1158,43 @@ msgstr "Извор"
 msgid "Some optional details about this harvester"
 msgstr "Опцони детаљи сакупљача"
 
-#: udata/harvest/forms.py:23
+#: udata/harvest/forms.py:68
 msgid "Backend"
 msgstr "Позадинска компонента"
 
-#: udata/harvest/models.py:15
+#: udata/harvest/models.py:22
 msgid "Manual"
 msgstr "Ручно"
 
-#: udata/harvest/models.py:23
+#: udata/harvest/models.py:30
 msgid "Initializing"
 msgstr "Иницијализација"
 
-#: udata/harvest/models.py:24
+#: udata/harvest/models.py:31
 msgid "Initialized"
 msgstr "Покренуто"
 
-#: udata/harvest/models.py:25
+#: udata/harvest/models.py:32
 msgid "Processing"
 msgstr "Обрада"
 
-#: udata/harvest/models.py:26 udata/harvest/models.py:34
+#: udata/harvest/models.py:33 udata/harvest/models.py:41
 msgid "Done"
 msgstr "Готово"
 
-#: udata/harvest/models.py:27
+#: udata/harvest/models.py:34
 msgid "Done with errors"
 msgstr "Готово са грешкама"
 
-#: udata/harvest/models.py:28 udata/harvest/models.py:35
+#: udata/harvest/models.py:35 udata/harvest/models.py:42
 msgid "Failed"
 msgstr "Није успело"
 
-#: udata/harvest/models.py:33
+#: udata/harvest/models.py:40
 msgid "Started"
 msgstr "Започето"
 
-#: udata/harvest/models.py:36
+#: udata/harvest/models.py:43
 msgid "Skipped"
 msgstr "Прескочено"
 
@@ -1231,23 +1202,21 @@ msgstr "Прескочено"
 msgid "OR"
 msgstr "I"
 
-#: udata/search/fields.py:112 udata/tests/test_search.py:721
-#: udata/tests/test_search.py:726
+#: udata/search/fields.py:119 udata/tests/search/test_facets.py:101
+#: udata/tests/search/test_facets.py:104
 msgid "yes"
 msgstr "да"
 
-#: udata/search/fields.py:112 udata/tests/test_search.py:723
-#: udata/tests/test_search.py:728
+#: udata/search/fields.py:119 udata/tests/search/test_facets.py:102
+#: udata/tests/search/test_facets.py:105
 msgid "no"
 msgstr "не"
 
 #: udata/search/fields.py:291
-msgid ""
-"A date range expressed as start-end where both dates are in iso format (ie. "
-"YYYY-MM-DD-YYYY-MM-DD)"
+msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
 msgstr ""
 
-#: udata/templates/admin.html:6
+#: udata/templates/admin.html:7
 msgid "Admin"
 msgstr "Администратор"
 
@@ -1260,416 +1229,286 @@ msgstr "API документација"
 msgid "%(site)s dynamic API documentation"
 msgstr "%(site)s динамичка API документација"
 
-#: udata/templates/apidoc.html:31
+#: udata/templates/apidoc.html:25
 msgid "This page describe this website's free and open RESTful API's behavior"
-msgstr ""
-"На овој страници налази се опис рада бесплатног и отвореног RESTful API-ја "
-"овог веб-сајта"
+msgstr "На овој страници налази се опис рада бесплатног и отвореног RESTful API-ја овог веб-сајта"
 
-#: udata/templates/apidoc.html:37
+#: udata/templates/apidoc.html:31
 msgid "Authentication"
 msgstr "Потврда идентитета"
 
-#: udata/templates/apidoc.html:42
+#: udata/templates/apidoc.html:36
 msgid "In order to be able to execute write operations,"
 msgstr "Да бисте могли да извршите операције писања,"
 
-#: udata/templates/apidoc.html:44
+#: udata/templates/apidoc.html:38
 #, python-format
 msgid "you first need to obtain an %(apikey)s in your profile settings."
 msgstr "прво морате да добијете %(apikey)s у поставкама профила."
 
-#: udata/templates/apidoc.html:48
+#: udata/templates/apidoc.html:42
 msgid "API Key"
 msgstr "API кључ"
 
-#: udata/templates/apidoc.html:51
-msgid ""
-"you first need to authenticate and obtain an API Key in your profile "
-"settings."
-msgstr ""
-"прво морате да потврдите идентитет и добијете API кључ у поставкама профила."
+#: udata/templates/apidoc.html:45
+msgid "you first need to authenticate and obtain an API Key in your profile settings."
+msgstr "прво морате да потврдите идентитет и добијете API кључ у поставкама профила."
+
+#: udata/templates/apidoc.html:48
+msgid "This key should be provided on each call in the <code>X-API-KEY</code> HTTP header."
+msgstr "Тај кључ треба да буде обезбеђен за сваки позив у <code>X-API-KEY</code> HTTP заглављу."
 
 #: udata/templates/apidoc.html:54
-msgid ""
-"This key should be provided on each call in the <code>X-API-KEY</code> HTTP "
-"header."
-msgstr ""
-"Тај кључ треба да буде обезбеђен за сваки позив у <code>X-API-KEY</code> "
-"HTTP заглављу."
-
-#: udata/templates/apidoc.html:60
 msgid "Authorizations"
 msgstr "Ауторизације"
 
-#: udata/templates/apidoc.html:64
+#: udata/templates/apidoc.html:58
 msgid "API calls are subject to the same permissions than the web interface."
 msgstr "За API позиве потребне су исте дозволе као за веб-интерфејс."
 
-#: udata/templates/apidoc.html:65
-msgid ""
-"By example, you need to be part of the organization to modify one of its "
-"datasets."
-msgstr ""
-"На пример, морате бити члан неке организације да бисте променили неки од "
-"скупова података те организације."
+#: udata/templates/apidoc.html:59
+msgid "By example, you need to be part of the organization to modify one of its datasets."
+msgstr "На пример, морате бити члан неке организације да бисте променили неки од скупова података те организације."
 
-#: udata/templates/apidoc.html:71
+#: udata/templates/apidoc.html:65
 msgid "Pagination"
 msgstr "Нумерисање страница"
 
-#: udata/templates/apidoc.html:75
-msgid ""
-"Some method are paginated and always follow the same pattern.\n"
+#: udata/templates/apidoc.html:69
+msgid "Some method are paginated and always follow the same pattern.\n"
 "                The object list is wrapped in a <code>Page</code> object.\n"
 "                "
-msgstr ""
-"Неке методе имају нумерацију страница и увек прате исти образац.\n"
+msgstr "Неке методе имају нумерацију страница и увек прате исти образац.\n"
 "                Листа објеката је увијена у објекат <code>Page</code>.\n"
 "                "
 
-#: udata/templates/apidoc.html:79
-msgid ""
-"You don't have to compute yourself the previous and next pages\n"
+#: udata/templates/apidoc.html:73
+msgid "You don't have to compute yourself the previous and next pages\n"
 "                because the URLs are available in the response under the\n"
-"                <code>previous_page</code> and <code>next_page</code> "
-"attributes.\n"
-"                They will be set to <code>null</code> if there is no "
-"previous and/or next page."
-msgstr ""
-"Не морате сами да израчунавате претходне и наредне странице\n"
+"                <code>previous_page</code> and <code>next_page</code> attributes.\n"
+"                They will be set to <code>null</code> if there is no previous and/or next page."
+msgstr "Не морате сами да израчунавате претходне и наредне странице\n"
 "                јер су URL-ови доступни као одговор у оквиру атрибута\n"
 "                <code>previous_page</code> и <code>next_page</code>.\n"
-"                Биће постављени на вредност <code>null</code> ако не постоји "
-"претходна и/или наредна страница."
+"                Биће постављени на вредност <code>null</code> ако не постоји претходна и/или наредна страница."
 
-#: udata/templates/apidoc.html:84
+#: udata/templates/apidoc.html:78
 msgid "Example"
 msgstr "Пример"
 
-#: udata/templates/apidoc.html:97
+#: udata/templates/apidoc.html:91
 msgid "Examples"
 msgstr "Примери"
 
-#: udata/templates/apidoc.html:101
-msgid ""
-"All examples use the <a href=\"http://httpie.org\">httpie</a> and <a href="
-"\"http://stedolan.github.io/jq/\">jq</a> utilities for readability purpose. "
-"You don't need to use these tools in your code though, they're just helpers "
-"to better understand the API.\n"
+#: udata/templates/apidoc.html:95
+msgid "All examples use the <a href=\"http://httpie.org\">httpie</a> and <a href=\"http://stedolan.github.io/jq/\">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.\n"
 "                "
-msgstr ""
-"Сви примери користе <a href=\"http://httpie.org\">httpie</a> and <a href="
-"\"http://stedolan.github.io/jq/\">jq</a> услужне програме због читљивости. "
-"Међутим, те алатке не морате да користите у свом коду; оне вам само помажу "
-"да боље разумете API.\n"
+msgstr "Сви примери користе <a href=\"http://httpie.org\">httpie</a> and <a href=\"http://stedolan.github.io/jq/\">jq</a> услужне програме због читљивости. Међутим, те алатке не морате да користите у свом коду; оне вам само помажу да боље разумете API.\n"
 "                "
 
-#: udata/templates/apidoc.html:104
+#: udata/templates/apidoc.html:98
 msgid "Verifying that httpie is working"
 msgstr "Провера да ли httpie функционише"
 
-#: udata/templates/apidoc.html:106
-msgid ""
-"Once httpie is installed, you can verify that it works as expected by typing "
-"that command in your shell:\n"
+#: udata/templates/apidoc.html:100
+msgid "Once httpie is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
-msgstr ""
-"Кад се httpie инсталира, можете проверити да ли функционише тако што ћете "
-"откуцати команду у терминалу:\n"
+msgstr "Кад се httpie инсталира, можете проверити да ли функционише тако што ћете откуцати команду у терминалу:\n"
 "                "
 
-#: udata/templates/apidoc.html:111 udata/templates/apidoc.html:150
-msgid ""
-"It should return something in this vein:\n"
+#: udata/templates/apidoc.html:105 udata/templates/apidoc.html:144
+msgid "It should return something in this vein:\n"
 "                "
-msgstr ""
-"Резултат би требало да буде нешто слично овоме:\n"
+msgstr "Резултат би требало да буде нешто слично овоме:\n"
 "                "
 
-#: udata/templates/apidoc.html:140
-msgid ""
-"This is very verbose and we don't need all that information yet. That's why "
-"we use jq.\n"
+#: udata/templates/apidoc.html:134
+msgid "This is very verbose and we don't need all that information yet. That's why we use jq.\n"
 "                "
-msgstr ""
-"Ово је веома детаљно и још увек нам није неопходно да имамо све те "
-"информације. Зато користимо јq.\n"
+msgstr "Ово је веома детаљно и још увек нам није неопходно да имамо све те информације. Зато користимо јq.\n"
 "                "
 
-#: udata/templates/apidoc.html:143
+#: udata/templates/apidoc.html:137
 msgid "Verifying that jq is working"
 msgstr "Потврда да јq функционише"
 
-#: udata/templates/apidoc.html:145
-msgid ""
-"Once jq is installed, you can verify that it works as expected by typing "
-"that command in your shell:\n"
+#: udata/templates/apidoc.html:139
+msgid "Once jq is installed, you can verify that it works as expected by typing that command in your shell:\n"
 "                "
-msgstr ""
-"Кад се jq инсталира, можете проверити да ли функционише тако што ћете "
-"откуцати команду у терминалу:\n"
+msgstr "Кад се jq инсталира, можете проверити да ли функционише тако што ћете откуцати команду у терминалу:\n"
 "\t\t"
 
-#: udata/templates/apidoc.html:155
-msgid ""
-"That's definitely better! Now that we're sure that it works as expected, "
-"let's shorten a bit the command line:\n"
+#: udata/templates/apidoc.html:149
+msgid "That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:\n"
 "                "
-msgstr ""
-"То је већ боље! Сада кад смо сигурни да функционише као што је очекивано, "
-"хајде да мало скратимо командну линију:\n"
+msgstr "То је већ боље! Сада кад смо сигурни да функционише као што је очекивано, хајде да мало скратимо командну линију:\n"
 "                "
 
-#: udata/templates/apidoc.html:160
-msgid ""
-"The previous command is now equivalent to the more readable (don't forget "
-"the quotes):\n"
+#: udata/templates/apidoc.html:154
+msgid "The previous command is now equivalent to the more readable (don't forget the quotes):\n"
 "                "
-msgstr ""
-"Претходна команда је сада еквивалентна следећој читљивијој команди (не "
-"заборавите наводнике):\n"
+msgstr "Претходна команда је сада еквивалентна следећој читљивијој команди (не заборавите наводнике):\n"
 "                "
 
-#: udata/templates/apidoc.html:165
-msgid ""
-"That's a good start, now let's dig into the API itself. We don't know it yet "
-"but we already fetched our first organization.\n"
+#: udata/templates/apidoc.html:159
+msgid "That's a good start, now let's dig into the API itself. We don't know it yet but we already fetched our first organization.\n"
 "                "
-msgstr ""
-"То је добар почетак, а сада хајде да истражимо сâм API. Иако то још увек не "
-"знамо, већ смо преузели нашу прву организацију.\n"
+msgstr "То је добар почетак, а сада хајде да истражимо сâм API. Иако то још увек не знамо, већ смо преузели нашу прву организацију.\n"
 "                "
 
-#: udata/templates/apidoc.html:169
+#: udata/templates/apidoc.html:163
 msgid "Browsing and retrieving data"
 msgstr "Преглед и преузимање података"
 
-#: udata/templates/apidoc.html:171
-msgid ""
-"You can retrieve a list of organization (filtered or not) or a unique "
-"organization. When you reach an endpoint, the default page size is 20. Let's "
-"fetch the first 20 organization from the API:\n"
+#: udata/templates/apidoc.html:165
+msgid "You can retrieve a list of organization (filtered or not) or a unique organization. When you reach an endpoint, the default page size is 20. Let's fetch the first 20 organization from the API:\n"
 "                "
-msgstr ""
-"Можете преузети листу организација (филтрирану или нефилтрирану) или једну "
-"организацију. Кад стигнете до крајње тачке, подразумевана величина странице "
-"износи 20. Хајде да преузмемо првих 20 организација из API-ја:\n"
+msgstr "Можете преузети листу организација (филтрирану или нефилтрирану) или једну организацију. Кад стигнете до крајње тачке, подразумевана величина странице износи 20. Хајде да преузмемо првих 20 организација из API-ја:\n"
 "                "
 
-#: udata/templates/apidoc.html:199
-msgid ""
-"That list is great to have but what if we want to walk through returned "
-"organizations? Let's fetch the first 5 organizations URIs:\n"
+#: udata/templates/apidoc.html:175
+msgid "That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:\n"
 "                "
-msgstr ""
-"Ова листа је сјајна, али шта ако желимо да прођемо кроз листу враћених "
-"организација? Хајде да преузмемо URI-је првих 5 организација:\n"
+msgstr "Ова листа је сјајна, али шта ако желимо да прођемо кроз листу враћених организација? Хајде да преузмемо URI-је првих 5 организација:\n"
+"                "
+
+#: udata/templates/apidoc.html:185
+msgid "Now we'll be able to retrieve a unique organization thanks to the returned URI:\n"
+"                "
+msgstr "Сада можемо да преузмемо јединствену организацију захваљујући враћеном URI-ју:\n"
+"                "
+
+#: udata/templates/apidoc.html:190
+msgid "That's a lot of data to compute. Let's refine these data, if we want only metrics:\n"
+"                "
+msgstr "То је много података за израчунавање. Хајде да прерадимо те податке ако желимо искључиво метрику:\n"
+"                "
+
+#: udata/templates/apidoc.html:202
+msgid "Or maybe just the name of the members of that organization:\n"
+"                "
+msgstr "Или можда само имена чланова организације:\n"
 "                "
 
 #: udata/templates/apidoc.html:212
-msgid ""
-"Now we'll be able to retrieve a unique organization thanks to the returned "
-"URI:\n"
+msgid "It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href=\"http://stedolan.github.io/jq/tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/\">manual</a> if you want to browse the API through the command-line in depth.\n"
 "                "
-msgstr ""
-"Сада можемо да преузмемо јединствену организацију захваљујући враћеном URI-"
-"ју:\n"
+msgstr "На вама је да преузмете податке који су од значаја за ваш пројекат. Не оклевајте да прођете кроз <a href=\"http://stedolan.github.io/jq/tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/\">приручник</a> ако желите да детаљно прегледате API преко командне линије.\n"
 "                "
 
-#: udata/templates/apidoc.html:217
-msgid ""
-"That's a lot of data to compute. Let's refine these data, if we want only "
-"metrics:\n"
-"                "
-msgstr ""
-"То је много података за израчунавање. Хајде да прерадимо те податке ако "
-"желимо искључиво метрику:\n"
-"                "
-
-#: udata/templates/apidoc.html:239
-msgid ""
-"Or maybe just the name of the members of that organization:\n"
-"                "
-msgstr ""
-"Или можда само имена чланова организације:\n"
-"                "
-
-#: udata/templates/apidoc.html:263
-msgid ""
-"It's really up-to-you to retrieve the data that matters to your project. Do "
-"not hesitate to go through the <a href=\"http://stedolan.github.io/jq/"
-"tutorial/\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/"
-"manual/\">manual</a> if you want to browse the API through the command-line "
-"in depth.\n"
-"                "
-msgstr ""
-"На вама је да преузмете податке који су од значаја за ваш пројекат. Не "
-"оклевајте да прођете кроз <a href=\"http://stedolan.github.io/jq/tutorial/"
-"\">jq's tutorial</a> and <a href=\"http://stedolan.github.io/jq/manual/"
-"\">приручник</a> ако желите да детаљно прегледате API преко командне "
-"линије.\n"
-"                "
-
-#: udata/templates/apidoc.html:267
+#: udata/templates/apidoc.html:216
 msgid "Modifying and deleting data"
 msgstr "Измене и брисање података"
 
-#: udata/templates/apidoc.html:269
-msgid ""
-"Warning, you're entering a danger zone. Data modifications or deletions with "
-"the API are definitive and we don't provide any sandbox to test those prior "
-"executing (for now). Be aware of these responsibilities prior to use your "
-"great powers.\n"
+#: udata/templates/apidoc.html:218
+msgid "Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.\n"
 "                "
-msgstr ""
-"Упозорење, ово може да буде опасно! Измене или брисања података помоћу API-"
-"ја не могу се опозвати и ми не пружамо никакав sandbox у којем бисте могли "
-"то да тестирате пре извршења (за сада). Пре употребе својих привилегија, "
-"будите свесни своје одговорности.\n"
+msgstr "Упозорење, ово може да буде опасно! Измене или брисања података помоћу API-ја не могу се опозвати и ми не пружамо никакав sandbox у којем бисте могли то да тестирате пре извршења (за сада). Пре употребе својих привилегија, будите свесни своје одговорности.\n"
 "                "
 
-#: udata/templates/apidoc.html:272
-msgid ""
-"If you try to modify a resource without an authentication token, a 401 will "
-"be returned:\n"
+#: udata/templates/apidoc.html:221
+msgid "If you try to modify a resource without an authentication token, a 401 will be returned:\n"
 "                "
-msgstr ""
-"Уколико покушате да измените ресурс без токена за потврду идентитета, биће "
-"враћен кôд 401:\n"
+msgstr "Уколико покушате да измените ресурс без токена за потврду идентитета, биће враћен кôд 401:\n"
 "                "
 
-#: udata/templates/apidoc.html:287
-msgid ""
-"You need to specify your API Key (see above) and use the <code>X-API-KEY</"
-"code> HTTP header. If you try to modify a resource that you're not in "
-"control of, a 400 will be returned instead:\n"
+#: udata/templates/apidoc.html:236
+msgid "You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:\n"
 "                "
-msgstr ""
-"Морате да наведете API кључ (погледајте изнад) и да користите <code>X-API-"
-"KEY</code> HTTP заглавље. Ако покушајте да измените ресурс који не "
-"контролишете, биће враћен кôд 400:\n"
+msgstr "Морате да наведете API кључ (погледајте изнад) и да користите <code>X-API-KEY</code> HTTP заглавље. Ако покушајте да измените ресурс који не контролишете, биће враћен кôд 400:\n"
 "                "
 
-#: udata/templates/apidoc.html:302
-msgid ""
-"This is the message you will end up with if you specified the wrong API Key. "
-"There is another potential error message that you can encounter:\n"
+#: udata/templates/apidoc.html:251
+msgid "This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:\n"
 "                "
-msgstr ""
-"Ово је порука коју ћете добити уколико сте навели погрешан API кључ. Постоји "
-"још једна потенцијална порука о грешци на коју можете да наиђете:\n"
+msgstr "Ово је порука коју ћете добити уколико сте навели погрешан API кључ. Постоји још једна потенцијална порука о грешци на коју можете да наиђете:\n"
 "                "
 
-#: udata/templates/apidoc.html:315
-msgid ""
-"It occurs if you try to access a resource that you cannot edit with your "
-"credentials. If your Key is valid you should have something like this:\n"
+#: udata/templates/apidoc.html:264
+msgid "It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:\n"
 "                "
-msgstr ""
-"Појављује се уколико покушате да приступите ресурсу који не можете да мењате "
-"са својим акредитивима. Уколико је ваш кључ валидан, требало би да добијете "
-"нешто налик следећем:\n"
+msgstr "Појављује се уколико покушате да приступите ресурсу који не можете да мењате са својим акредитивима. Уколико је ваш кључ валидан, требало би да добијете нешто налик следећем:\n"
 "                "
 
-#: udata/templates/apidoc.html:328
-msgid ""
-"But it didn't change anything! This is perfectly normal, we forgot to "
-"specify the right data to send to the server.\n"
+#: udata/templates/apidoc.html:277
+msgid "But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.\n"
 "                "
-msgstr ""
-"Међутим, ништа се није променило! То је сасвим у реду, јер смо заборавили да "
-"наведемо праве податке који ће бити послати на сервер.\n"
+msgstr "Међутим, ништа се није променило! То је сасвим у реду, јер смо заборавили да наведемо праве податке који ће бити послати на сервер.\n"
 "                "
 
-#: udata/templates/apidoc.html:340
-msgid ""
-"The resource has been modified with your new values. Finally, you can delete "
-"a resource with the appropriated HTTP verb (beware, no rollback is possible "
-"using the API at the moment):\n"
+#: udata/templates/apidoc.html:289
+msgid "The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):\n"
 "                "
-msgstr ""
-"Ресурс је модификован са жељеним вредностима. Коначно, можете обрисати "
-"ресурс употребом одговарајућег HTTP глагола (пазите, тренутно није могуће "
-"опозвати операцију брисања кроз API):\n"
+msgstr "Ресурс је модификован са жељеним вредностима. Коначно, можете обрисати ресурс употребом одговарајућег HTTP глагола (пазите, тренутно није могуће опозвати операцију брисања кроз API):\n"
 "                "
 
-#: udata/templates/apidoc.html:352
-msgid ""
-"Once you did it, you can verify that it's effective issuing a GET against "
-"the previous URI:\n"
+#: udata/templates/apidoc.html:301
+msgid "Once you did it, you can verify that it's effective issuing a GET against the previous URI:\n"
 "                "
-msgstr ""
-"Кад то обавите, можете проверити да ли је промена ступила на снагу користећи "
-"GET у односу на претходни URI:\n"
+msgstr "Кад то обавите, можете проверити да ли је промена ступила на снагу користећи GET у односу на претходни URI:\n"
 "                "
 
-#: udata/templates/apidoc.html:369
-msgid ""
-"Please consult the reference documentation below for further interactions "
-"with the API or ask us for questions related to it!\n"
+#: udata/templates/apidoc.html:318
+msgid "Please consult the reference documentation below for further interactions with the API or ask us for questions related to it!\n"
 "                "
-msgstr ""
-"Консултујте референтну документацију у наставку да бисте пронашли више "
-"детаља о употреби API-ја или поставили питања у вези с њим!\n"
+msgstr "Консултујте референтну документацију у наставку да бисте пронашли више детаља о употреби API-ја или поставили питања у вези с њим!\n"
 "                "
 
-#: udata/templates/apidoc.html:376
+#: udata/templates/apidoc.html:325
 msgid "Reference"
 msgstr "Референца"
 
-#: udata/templates/topic/display.html:17
+#: udata/templates/carousel.html:4
 msgid "Best reuse cases"
 msgstr "Најбољи примери употребе"
 
-#: udata/templates/embed-dataset.html:168
+#: udata/templates/embed-dataset.html:169
 msgid "Download from "
 msgstr "Преузми са "
 
-#: udata/templates/dataset/display.html:204
-#: udata/templates/embed-dataset.html:176
-#: udata/templates/reuse/display.html:164
+#: udata/templates/dataset/display.html:189 udata/templates/embed-dataset.html:177
+#: udata/templates/reuse/display.html:137
 msgid "Producer"
 msgstr "Произвођач"
 
-#: udata/templates/embed-dataset.html:182
+#: udata/templates/embed-dataset.html:183
 msgid "Uploader"
 msgstr "Отпремалац"
 
-#: udata/templates/embed-dataset.html:202
+#: udata/templates/embed-dataset.html:205
 msgid "Add to your own website"
 msgstr "Додајте на свој веб-сајт"
 
-#: udata/templates/embed-dataset.html:203
+#: udata/templates/embed-dataset.html:206
 msgid "Close"
 msgstr "Затвори"
 
-#: udata/templates/embed-dataset.html:203
+#: udata/templates/embed-dataset.html:206
 msgid "Embed"
 msgstr "Угради"
 
-#: udata/templates/embed-dataset.html:210
-#: udata/templates/macros/search.html:233
+#: udata/templates/embed-dataset.html:213
 msgid "to"
 msgstr "за"
 
-#: udata/templates/embed-dataset.html:218
+#: udata/templates/embed-dataset.html:221
 msgid "Granularity"
 msgstr "Грануларност"
 
-#: udata/templates/embed-dataset.html:222
+#: udata/templates/embed-dataset.html:225
 msgid "Territory"
 msgstr "Територија"
 
-#: udata/templates/dataset/card.html:94
-#: udata/templates/dataset/display.html:260
-#: udata/templates/dataset/search-result.html:43
-#: udata/templates/embed-dataset.html:229
+#: udata/templates/dataset/display.html:247
+#: udata/templates/dataset/search-result.html:42
+#: udata/templates/embed-dataset.html:232
 msgid "Frequency"
 msgstr "Фреквенција"
 
-#: udata/templates/embed-dataset.html:234
-#: udata/templates/territories/territory.html:30
+#: udata/templates/embed-dataset.html:237
+#: udata/templates/territories/commune.html:23
+#: udata/templates/territories/departement.html:22
+#: udata/templates/territories/region.html:21
 msgid "License:"
 msgstr "Лиценца:"
 
@@ -1677,26 +1516,26 @@ msgstr "Лиценца:"
 msgid "Contribute"
 msgstr "Допринеси"
 
-#: udata/templates/header.html:25
+#: udata/templates/header.html:41
 msgid "Profile"
 msgstr "Профил"
 
-#: udata/templates/header.html:28
+#: udata/templates/header.html:44
 msgid "Change password"
 msgstr "Промените лозинку"
 
-#: udata/templates/header.html:44
+#: udata/templates/header.html:60
 msgid "Settings"
 msgstr "Поставке"
 
-#: udata/templates/header.html:53 udata/templates/header.html:55
-#: udata/templates/territories/territory.html:83
+#: udata/templates/header.html:68 udata/templates/header.html:71
+#: udata/templates/territories/territory.html:35
 msgid "Sign In / Register"
 msgstr "Пријава/регистрација"
 
 #: udata/templates/api/oauth_error.html:13 udata/templates/errors/base.html:18
 #: udata/templates/home.html:4 udata/templates/macros/breadcrumb.html:16
-#: udata/templates/macros/metadata.html:2 udata/theme.py:36
+#: udata/templates/macros/metadata.html:2
 msgid "Home"
 msgstr "Почетак"
 
@@ -1709,9 +1548,13 @@ msgstr "%(site)s – почетна страница"
 msgid "home"
 msgstr "почетак"
 
-#: udata/templates/topic/display.html:81
+#: udata/templates/home.html:53 udata/templates/topic/display.html:47
 msgid "Featured datasets"
 msgstr "Одабрани скупови података"
+
+#: udata/templates/home.html:78
+msgid "Reuse"
+msgstr "Пример употребе"
 
 #: udata/templates/metrics.html:4 udata/templates/metrics.html:10
 msgid "Metrics"
@@ -1721,8 +1564,7 @@ msgstr "Метрика"
 msgid "Site metrics"
 msgstr "Метрика сајта"
 
-#: udata/templates/metrics.html:6 udata/templates/organization/dashboard.html:7
-#: udata/templates/site/dashboard.html:6
+#: udata/templates/metrics.html:6 udata/templates/site/dashboard.html:6
 msgid "metrics"
 msgstr "метрике"
 
@@ -1756,15 +1598,15 @@ msgstr "Креирај или нађи своју организацију"
 msgid "You can create a new organization or find yours."
 msgstr "Креирај или нађи своју организацију"
 
-#: udata/templates/raw.html:14
+#: udata/templates/raw.html:20
 msgid "Recent datasets"
 msgstr "Недавни скупови података"
 
-#: udata/templates/raw.html:18
+#: udata/templates/raw.html:24
 msgid "Recent reuses"
 msgstr "Недавни примери употребе"
 
-#: udata/templates/header.html:98 udata/templates/post/subnav.html:18
+#: udata/templates/macros/search.html:224 udata/templates/post/subnav.html:13
 #: udata/templates/search.html:8
 msgid "Search"
 msgstr "Претрага"
@@ -1774,12 +1616,19 @@ msgstr "Претрага"
 msgid "%(site)s search"
 msgstr "%(site)s: претрага"
 
-#: udata/templates/search.html:10
+#: udata/templates/dataset/list.html:10 udata/templates/organization/list.html:10
+#: udata/templates/reuse/list.html:10 udata/templates/search.html:10
+#: udata/templates/topic/datasets.html:9 udata/templates/topic/reuses.html:9
+#: udata/templates/user/list.html:10
 msgid "search"
 msgstr "претрага"
 
-#: udata/templates/organization/display_base.html:55
-#: udata/templates/user/base.html:82
+#: udata/templates/organization/card.html:21
+#: udata/templates/organization/display.html:49
+#: udata/templates/organization/display_base.html:58
+#: udata/templates/organization/search-result.html:23
+#: udata/templates/reuse/search-result.html:27 udata/templates/search.html:27
+#: udata/templates/user/base.html:79
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
@@ -1787,8 +1636,11 @@ msgstr[0] "%(num)d скуп података"
 msgstr[1] "Скупова података: %(num)d"
 msgstr[2] "Скупова података: %(num)d"
 
-#: udata/templates/organization/display_base.html:84
-#: udata/templates/user/base.html:88
+#: udata/templates/organization/card.html:27
+#: udata/templates/organization/display.html:53
+#: udata/templates/organization/display_base.html:87
+#: udata/templates/organization/search-result.html:32
+#: udata/templates/search.html:34 udata/templates/user/base.html:85
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
@@ -1805,32 +1657,31 @@ msgstr[1] "%(num)d организације"
 msgstr[2] "%(num)d организација"
 
 #: udata/templates/search.html:49
-#, fuzzy, python-format
+#, python-format
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
-msgstr[0] "Територија: %(name)s"
-msgstr[1] "%(num)d територије"
-msgstr[2] "%(num)d територија"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #: udata/templates/dataset/search-labels.html:6
-#: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:75
+#: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
 msgid "Tag"
 msgstr "Ознака"
 
-#: udata/templates/dataset/search-labels.html:10
-#: udata/templates/organization/search-labels.html:3
-#: udata/templates/search.html:76
+#: udata/templates/dataset/search-labels.html:12
+#: udata/templates/organization/search-labels.html:3 udata/templates/search.html:59
 msgid "Badge"
 msgstr "Беџ"
 
-#: udata/templates/dataset/card.html:48 udata/templates/dataset/list.html:34
-#: udata/templates/organization/card.html:47 udata/templates/reuse/card.html:52
-#: udata/templates/search.html:94 udata/templates/search.html:108
-#: udata/templates/topic/datasets.html:30 udata/templates/user/card.html:39
+#: udata/templates/dataset/card.html:32 udata/templates/organization/card.html:30
+#: udata/templates/reuse/card.html:36 udata/templates/search.html:77
+#: udata/templates/search.html:91 udata/templates/topic/datasets.html:37
+#: udata/templates/user/card.html:28
 msgid "Stars"
 msgstr "Звездице"
 
-#: udata/templates/search.html:107
+#: udata/templates/search.html:90
 msgid "Datasets used"
 msgstr "Коришћени скупови података"
 
@@ -1838,25 +1689,23 @@ msgstr "Коришћени скупови података"
 msgid "No results found, try to be less specific."
 msgstr "Нема резултата претраге, покушајте мање одређену претрагу"
 
-#: udata/templates/search.html:161 udata/templates/search.html:186
-#: udata/templates/search.html:213 udata/templates/search.html:240
-#: udata/templates/topic/browse.html:34 udata/templates/topic/browse.html:54
+#: udata/templates/search.html:133 udata/templates/search.html:158
+#: udata/templates/search.html:185 udata/templates/topic/browse.html:34
+#: udata/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
 msgstr "Погледајте резултате (%(total)s)"
 
-#: udata/templates/search.html:197 udata/templates/search.html:224
-#: udata/templates/search.html:251 udata/templates/topic/browse.html:39
-#: udata/templates/topic/browse.html:59
+#: udata/templates/search.html:169 udata/templates/search.html:196
+#: udata/templates/topic/browse.html:39 udata/templates/topic/browse.html:59
 msgid "No results found"
 msgstr "Нема резултата"
 
-#: udata/templates/discover.html:4 udata/templates/discover.html:5
 #: udata/templates/terms.html:4 udata/templates/terms.html:5
 msgid "Terms"
 msgstr "Услови"
 
-#: udata/templates/discover.html:7 udata/templates/terms.html:7
+#: udata/templates/terms.html:7
 msgid "terms"
 msgstr "услови"
 
@@ -1864,15 +1713,11 @@ msgstr "услови"
 msgid "Maintainer"
 msgstr "Одржава"
 
-#: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:34
-#: udata/templates/dataset/display.html:164
-#: udata/templates/dataset/display.html:447
-#: udata/templates/dataset/resource/display.html:12
-#: udata/templates/dataset/resource/list-item.html:51
-#: udata/templates/organization/display.html:31
+#: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:146
+#: udata/templates/organization/display.html:28
 #: udata/templates/organization/followers.html:15
-#: udata/templates/post/display.html:119 udata/templates/reuse/display.html:33
-#: udata/templates/reuse/display.html:136 udata/templates/user/base.html:24
+#: udata/templates/post/display.html:119 udata/templates/reuse/display.html:115
+#: udata/templates/user/base.html:23
 msgid "Edit"
 msgstr "Измени"
 
@@ -1898,15 +1743,8 @@ msgid "%(app)s want to access your %(site)s account."
 msgstr "%(app)s жели да приступи налогу вашег сајта %(site)s."
 
 #: udata/templates/api/oauth_authorize.html:26
-#: udata/templates/dataset/display.html:340
-#: udata/templates/dataset/display.html:342
-#: udata/templates/mail/badge_added.html:25
-#: udata/templates/mail/discussion_closed.html:26
-#: udata/templates/mail/issue_closed.html:26
-#: udata/templates/mail/new_discussion.html:25
-#: udata/templates/mail/new_discussion_comment.html:26
-#: udata/templates/mail/new_issue.html:25
-#: udata/templates/mail/new_issue_comment.html:26
+#: udata/templates/dataset/display.html:318
+#: udata/templates/dataset/display.html:320
 msgid "Details"
 msgstr "Детаљи"
 
@@ -1916,8 +1754,7 @@ msgstr "Приступите свом профилу"
 
 #: udata/templates/api/oauth_authorize.html:37
 msgid "Read your profile, the orgnization you belong to, your publications"
-msgstr ""
-"Прочитајте детаље профила, организацију којој припадате и своје публикације"
+msgstr "Прочитајте детаље профила, организацију којој припадате и своје публикације"
 
 #: udata/templates/api/oauth_authorize.html:45
 msgid "Publish data"
@@ -1925,14 +1762,13 @@ msgstr "Објављивање података"
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr ""
-"Објавите скупове података, примере употребе, пратите или опозовите праћење"
+msgstr "Објавите скупове података, примере употребе, пратите или опозовите праћење"
 
-#: udata/templates/api/oauth_authorize.html:60
+#: udata/templates/api/oauth_authorize.html:56
 msgid "Accept"
 msgstr "Прихвати"
 
-#: udata/templates/api/oauth_authorize.html:62
+#: udata/templates/api/oauth_authorize.html:58
 msgid "Refuse"
 msgstr "Одбиј"
 
@@ -1940,7 +1776,7 @@ msgstr "Одбиј"
 msgid "OAuth Authentication Error"
 msgstr "Грешка у OAuth потврди идентитета"
 
-#: udata/templates/dataset/display.html:477
+#: udata/templates/dataset/add-reuse-card.html:6
 msgid "Add a reuse"
 msgstr "Додајте пример употребе"
 
@@ -1948,56 +1784,45 @@ msgstr "Додајте пример употребе"
 msgid "Number of resources"
 msgstr "Број ресурса"
 
-#: udata/templates/dataset/card.html:30
-#: udata/templates/dataset/display.html:305
+#: udata/templates/dataset/card.html:48 udata/templates/dataset/display.html:287
 msgid "Territorial coverage"
 msgstr "Територијална покривеност"
 
-#: udata/templates/dataset/card.html:82
-#: udata/templates/dataset/display.html:296
-#: udata/templates/dataset/search-result.html:66
+#: udata/templates/dataset/card.html:56 udata/templates/dataset/display.html:279
+#: udata/templates/dataset/search-result.html:89
 msgid "Territorial coverage granularity"
 msgstr "Грануларност територијалне покривености"
 
-#: udata/templates/dataset/display.html:73
+#: udata/templates/dataset/display.html:49
 msgid "This dataset comes from a certified public service"
 msgstr "Овај скуп података добија се од сертификованог јавног сервиса"
 
-#: udata/templates/dataset/display.html:78
+#: udata/templates/dataset/display.html:54
 #, python-format
-msgid ""
-"This dataset has been published on %(date)s and updated on %(update)s on the "
-"initiative and under the responsibility of <a href=\"%(url)s\" title="
-"\"%(author)s\">%(author)s</a>"
-msgstr ""
-"Овај скуп података је објављен %(date)s и ажуриран %(update)s на иницијативу "
-"и под одговорношћу <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+msgid "This dataset has been published on %(date)s and updated on %(update)s on the initiative and under the responsibility of <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
+msgstr "Овај скуп података је објављен %(date)s и ажуриран %(update)s на иницијативу и под одговорношћу <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 
-#: udata/templates/dataset/display.html:90
+#: udata/templates/dataset/display.html:65
 msgid "See all datasets with that badge."
 msgstr "Погледајте све скупове података са тим беџем."
 
-#: udata/templates/dataset/display.html:99
+#: udata/templates/dataset/display.html:72
 msgid "This dataset is private and will not be visible by other users"
 msgstr "Овај скуп података је приватан и неће бити видљив другим корисницима"
 
-#: udata/templates/dataset/display.html:105
-msgid ""
-"This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
-"Овај скуп података је избрисан. Подаци ће бити трајно обрисани у наредна 24 "
-"сата"
+#: udata/templates/dataset/display.html:78
+msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
+msgstr "Овај скуп података је избрисан. Подаци ће бити трајно обрисани у наредна 24 сата"
 
-#: udata/templates/dataset/display.html:104
-#: udata/templates/dataset/display.html:106
-#: udata/templates/organization/display.html:41
-#: udata/templates/organization/display.html:43
-#: udata/templates/post/display.html:70 udata/templates/post/display.html:72
-#: udata/templates/reuse/display.html:97 udata/templates/reuse/display.html:99
+#: udata/templates/dataset/display.html:79 udata/templates/dataset/display.html:80
+#: udata/templates/organization/display.html:37
+#: udata/templates/organization/display.html:39
+#: udata/templates/post/display.html:68 udata/templates/post/display.html:71
+#: udata/templates/reuse/display.html:67 udata/templates/reuse/display.html:70
 msgid "Deleted"
 msgstr "Избрисано"
 
-#: govrs/theme/templates/dataset/display.html:82
+#: udata/templates/dataset/display.html:97
 msgid "See also: community resources"
 msgstr "Vidi joш: ресурси заједнице"
 
@@ -2006,47 +1831,48 @@ msgstr "Vidi joш: ресурси заједнице"
 msgid "See the %(nb)d resources of type %(type)s"
 msgstr "Види %(nb)d ресурсе типа %(type)s"
 
-#: udata/templates/dataset/display.html:129
+#: udata/templates/dataset/display.html:123
 msgid "No resources"
 msgstr "Нема ресурса"
 
-#: udata/templates/dataset/display.html:149
+#: udata/templates/dataset/display.html:131
 msgid "Add a resource"
 msgstr "Додајте ресурс"
 
-#: govrs/theme/templates/dataset/display.html:69
+#: udata/templates/dataset/display.html:158
+#: udata/templates/organization/sidebar-producer.html:23
+#: udata/templates/reuse/display.html:108 udata/templates/user/sidebar-user.html:23
 msgid "Contact the producer"
 msgstr "Контакт"
 
-#: udata/templates/reuse/display.html:173
+#: udata/templates/dataset/display.html:198 udata/templates/reuse/display.html:146
 msgid "Author"
 msgstr "Аутор"
 
-#: udata/templates/dataset/display.html:215
-#: udata/templates/reuse/display.html:215
+#: udata/templates/dataset/display.html:210 udata/templates/reuse/display.html:182
 msgid "Informations"
 msgstr "Информације"
 
-#: udata/core/badges/metrics.py:12 udata/templates/dataset/display.html:223
+#: udata/templates/dataset/display.html:217
 #: udata/templates/dataset/search-panel.html:8
 #: udata/templates/organization/search-panel.html:5
 #: udata/templates/reuse/search-panel.html:5
 msgid "Badges"
 msgstr "Беџеви"
 
-#: udata/templates/dataset/display.html:277
+#: udata/templates/dataset/display.html:262
 msgid "Modification date"
 msgstr "Датум измене"
 
-#: udata/templates/dataset/display.html:285
+#: udata/templates/dataset/display.html:269
 msgid "Latest resource update"
 msgstr "Последње ажурирање ресурса"
 
-#: udata/templates/dataset/display.html:325
+#: udata/templates/dataset/display.html:309 udata/templates/reuse/display.html:210
 msgid "Suggest a tag with a new discussion thread"
 msgstr "Предложите ознаку са новом нити дискусије"
 
-#: udata/templates/dataset/display.html:327
+#: udata/templates/dataset/display.html:311 udata/templates/reuse/display.html:212
 msgid "Suggest a tag"
 msgstr "Предложите ознаку"
 
@@ -2054,17 +1880,15 @@ msgstr "Предложите ознаку"
 msgid "Territories"
 msgstr "Територије"
 
-#: udata/templates/dataset/display.html:373
-#: udata/templates/reuse/display.html:292
+#: udata/templates/dataset/display.html:366 udata/templates/reuse/display.html:269
 msgid "Community contributions"
 msgstr "Доприноси заједнице"
 
-#: udata/templates/dataset/display.html:383
-msgid ""
-"Discussion between the organization and the community about this dataset."
+#: udata/templates/dataset/display.html:383 udata/templates/reuse/display.html:284
+msgid "Discussion between the organization and the community about this dataset."
 msgstr "Дискусија између организације и заједнице о овом скупу података."
 
-#: udata/templates/dataset/display.html:388
+#: udata/templates/dataset/display.html:387
 msgid "Community resources"
 msgstr "Ресурси заједнице"
 
@@ -2072,32 +1896,25 @@ msgstr "Ресурси заједнице"
 msgid "Add a community resource"
 msgstr "Додај ресурсе заједнице"
 
-#: udata/templates/dataset/display.html:406
-msgid ""
-"You have built a more comprehensive database than those presented here? This "
-"is the time to share it!"
-msgstr ""
-"Направили сте сложенију базу података од оне која је овде представљена? Сада "
-"је време да је поделите с другима!"
+#: udata/templates/dataset/display.html:405
+msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
+msgstr "Направили сте сложенију базу података од оне која је овде представљена? Сада је време да је поделите с другима!"
 
-#: udata/templates/dataset/display.html:485
-msgid ""
-"You reused these data and published an article, a computer graphics, or an "
-"application?\n"
+#: udata/templates/dataset/display.html:428
+msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
-"                Reference your work in just a few clicks and increase your "
-"visibility."
-msgstr ""
-"Да ли сте искористили те податке и објавили чланак, рачунарску графику или "
-"апликацију?\n"
+"                Reference your work in just a few clicks and increase your visibility."
+msgstr "Да ли сте искористили те податке и објавили чланак, рачунарску графику или апликацију?\n"
 "                Време је да се то зна!\n"
-"                Упутите на свој рад помоћу само неколико кликова и повећајте "
-"му видљивост!"
+"                Упутите на свој рад помоћу само неколико кликова и повећајте му видљивост!"
 
 #: udata/templates/dataset/followers.html:13
-#: udata/templates/organization/display_base.html:73
+#: udata/templates/organization/display.html:158
+#: udata/templates/organization/display_base.html:76
 #: udata/templates/organization/followers.html:26
-#: udata/templates/user/base.html:70 udata/templates/user/followers.html:14
+#: udata/templates/organization/search-result.html:50
+#: udata/templates/reuse/search-result.html:34 udata/templates/user/base.html:67
+#: udata/templates/user/followers.html:15
 #, python-format
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
@@ -2105,26 +1922,25 @@ msgstr[0] "%(num)d пратилац"
 msgstr[1] "Пратилаца: %(num)d"
 msgstr[2] "Пратилаца: %(num)d"
 
-#: govrs/theme/templates/dataset/list.html:7
+#: udata/templates/dataset/list.html:9
 #, python-format
 msgid "%(site)s dataset search"
 msgstr "%(site)s скуп података претрага"
 
-#: govrs/theme/templates/dataset/list.html:8
+#: udata/templates/dataset/list.html:10 udata/templates/topic/datasets.html:9
 msgid "datasets"
 msgstr "сетови података"
 
-#: udata/templates/dataset/list.html:14
-#: udata/templates/organization/list.html:14 udata/templates/reuse/list.html:14
-#: udata/templates/topic/datasets.html:15 udata/templates/topic/reuses.html:15
-#: udata/templates/user/list.html:14
+#: udata/templates/dataset/list.html:22 udata/templates/organization/list.html:19
+#: udata/templates/post/list.html:16 udata/templates/reuse/list.html:19
+#: udata/templates/topic/datasets.html:22 udata/templates/topic/reuses.html:22
+#: udata/templates/user/list.html:19
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
 msgstr "од %(start)s до %(end)s за %(total)s"
 
 #: udata/templates/dataset/search-labels.html:3
 #: udata/templates/reuse/search-labels.html:3
-#: udata/templates/user/search-labels.html:3
 msgid "Organization"
 msgstr "Организација"
 
@@ -2136,11 +1952,11 @@ msgstr "Тип ресурса"
 msgid "Licenses"
 msgstr "Лиценце"
 
-#: udata/templates/dataset/search-panel.html:14
+#: udata/templates/dataset/search-panel.html:16
 msgid "Territorial granularity"
 msgstr "Територијална грануларност"
 
-#: udata/templates/dataset/search-panel.html:15
+#: udata/templates/dataset/search-panel.html:17
 msgid "Formats"
 msgstr "Формати"
 
@@ -2148,12 +1964,13 @@ msgstr "Формати"
 msgid "Known reuses"
 msgstr "Познати случајеви употребе"
 
-#: udata/templates/dataset/search-result.html:76
+#: udata/templates/dataset/search-result.html:98
 msgid "Reuse number"
 msgstr "Број примера употребе"
 
-#: udata/templates/organization/search-result.html:57
-#: udata/templates/user/search-result.html:37
+#: udata/templates/dataset/search-result.html:106
+#: udata/templates/organization/search-result.html:48
+#: udata/templates/reuse/search-result.html:32
 msgid "Number of followers"
 msgstr "Број пратилаца"
 
@@ -2189,7 +2006,7 @@ msgstr "Измени овај ресурс"
 msgid "Bad request"
 msgstr "Лош захтев"
 
-#: udata/templates/errors/500.html:8
+#: udata/templates/errors/400.html:8 udata/templates/errors/500.html:8
 msgid "The error identifier is {id}"
 msgstr "Идентификатор грешке је {id}"
 
@@ -2218,13 +2035,8 @@ msgid "Internal server error"
 msgstr "Интерна грешка сервера"
 
 #: udata/templates/errors/500.html:6
-msgid ""
-"The server encountered an internal error and was unable to complete your "
-"request. Either the server is overloaded or there is an error in the "
-"application."
-msgstr ""
-"Услед интерне грешке сервер није могао да доврши ваш захтев. Могуће је да је "
-"сервер преоптерећен или је дошло до грешке у апликацији."
+msgid "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application."
+msgstr "Услед интерне грешке сервер није могао да доврши ваш захтев. Могуће је да је сервер преоптерећен или је дошло до грешке у апликацији."
 
 #: udata/templates/errors/base.html:11
 #, python-format
@@ -2236,22 +2048,22 @@ msgstr "Грешка: %(code)s"
 msgid "Following since %(date)s"
 msgstr "Праћење од %(date)s"
 
-#: udata/templates/macros/certified.html:6
+#: udata/templates/macros/certified.html:4
+#: udata/templates/organization/display_base.html:30
 #, python-format
 msgid "The identity of this public service is certified by %(certifier)s"
-msgstr ""
-"Идентитет овог јавног сервиса сертификовала је организација %(certifier)s"
+msgstr "Идентитет овог јавног сервиса сертификовала је организација %(certifier)s"
 
 #: udata/templates/macros/certified.html:5
-#: udata/templates/organization/display_base.html:27
+#: udata/templates/organization/display_base.html:31
 msgid "Certified public service"
 msgstr "Сертификовани јавни сервис"
 
-#: udata/templates/macros/forms.html:193
+#: udata/templates/macros/forms.html:106
 msgid "required fields"
 msgstr "обавезна поља"
 
-#: udata/templates/macros/integrate.html:2
+#: udata/templates/macros/integrate.html:4
 msgid "Integrate"
 msgstr "Интеграција"
 
@@ -2259,19 +2071,19 @@ msgstr "Интеграција"
 msgid "Share, improve and reuse public data"
 msgstr "Дељење, унапређивање и примери употребе јавних података"
 
-#: udata/templates/macros/paginator.html:8
+#: udata/templates/macros/paginator.html:9
 msgid "First page"
 msgstr "Прва страница"
 
-#: udata/templates/macros/paginator.html:13
+#: udata/templates/macros/paginator.html:15
 msgid "Previous page"
 msgstr "Претходна страница"
 
-#: udata/templates/macros/paginator.html:23
+#: udata/templates/macros/paginator.html:26
 msgid "Next page"
 msgstr "Следећа страница"
 
-#: udata/templates/macros/paginator.html:28
+#: udata/templates/macros/paginator.html:32
 msgid "Last page"
 msgstr "Последња страница"
 
@@ -2291,17 +2103,16 @@ msgstr "Опадајућим редоследом"
 msgid "Export"
 msgstr "Извоз"
 
-#: udata/templates/macros/search.html:131
-#: udata/templates/macros/search.html:160
+#: udata/templates/macros/search.html:122 udata/templates/macros/search.html:160
 msgid "More results…"
 msgstr "Више резултата..."
 
-#: udata/templates/macros/search.html:264
+#: udata/templates/macros/search.html:201
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
 msgstr "Резултати од %(start)s до %(end)s од укупно пронађених: %(total)s"
 
-#: udata/templates/macros/search.html:279
+#: udata/templates/macros/search.html:216
 msgid "No result found"
 msgstr "Нема резултата"
 
@@ -2326,16 +2137,15 @@ msgstr "Ваш налог је обрисан"
 msgid "%(user)s has certified your organization \"%(name)s\""
 msgstr "%(user)s је сертификовао вашу организацију \"%(name)s\""
 
-#: udata/templates/mail/badge_added.html:32
+#: udata/templates/mail/badge_added_certified.html:27
+#: udata/templates/mail/badge_added_public_service.html:27
 msgid "See the badge"
 msgstr "Погледајте беџ"
 
 #: udata/templates/mail/badge_added_public_service.html:6
 #, python-format
-msgid ""
-"%(user)s has identified your organization \"%(name)s\" as public service"
-msgstr ""
-"%(user)s је индентификовао вашу организацију \"%(name)s\" као јавни сервис"
+msgid "%(user)s has identified your organization \"%(name)s\" as public service"
+msgstr "%(user)s је индентификовао вашу организацију \"%(name)s\" као јавни сервис"
 
 #: udata/templates/mail/base.html:14
 #, python-format
@@ -2366,33 +2176,24 @@ msgid "Message"
 msgstr "Порука"
 
 #: udata/templates/mail/discussion_closed.html:40
-#: udata/templates/mail/new_discussion.html:32
-#: udata/templates/mail/new_discussion_comment.html:40
+#: udata/templates/mail/new_discussion.html:38
+#: udata/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"
 msgstr "Погледајте дискусију"
 
 #: udata/templates/mail/frequency_reminder.html:6
-msgid ""
-"Some of your datasets need to be updated according to the frequency you set:"
-msgstr ""
-"Неке од ваших скупова података треба ажурирати у складу са фреквенцијом коју "
-"сте подесили:"
+msgid "Some of your datasets need to be updated according to the frequency you set:"
+msgstr "Неке од ваших скупова података треба ажурирати у складу са фреквенцијом коју сте подесили:"
 
 #: udata/templates/mail/frequency_reminder.html:12
 #, python-format
 msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
-msgstr ""
-"Скуп података \"%(dataset_title)s\" последњи пут је ажуриран "
-"%(published_date)s."
+msgstr "Скуп података \"%(dataset_title)s\" последњи пут је ажуриран %(published_date)s."
 
 #: udata/templates/mail/frequency_reminder.html:17
 #, python-format
-msgid ""
-"Given the set frequency (%(dataset_frequency)s) update was due "
-"%(due_update_days)s days ago."
-msgstr ""
-"Узимајући у обзир подешену фреквенцију (%(dataset_frequency)s), ажурирање је "
-"требало обавити пре %(due_update_days)s дан(а)."
+msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
+msgstr "Узимајући у обзир подешену фреквенцију (%(dataset_frequency)s), ажурирање је требало обавити пре %(due_update_days)s дан(а)."
 
 #: udata/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
@@ -2403,9 +2204,8 @@ msgstr "Ажурирање скупа података и повезаних р�
 msgid "%(user)s closed an issue on your %(type)s %(subject)s"
 msgstr "Корисник %(user)s је затворио проблем на тему %(type)s %(subject)s"
 
-#: udata/templates/mail/issue_closed.html:40
-#: udata/templates/mail/new_issue.html:32
-#: udata/templates/mail/new_issue_comment.html:40
+#: udata/templates/mail/issue_closed.html:40 udata/templates/mail/new_issue.html:36
+#: udata/templates/mail/new_issue_comment.html:39
 msgid "See the issue"
 msgstr "Погледајте проблем"
 
@@ -2420,12 +2220,8 @@ msgstr "Разлог одбијања"
 
 #: udata/templates/mail/membership_request.html:8
 #, python-format
-msgid ""
-"As an administrator of \"%(org)s\" you are being informed than a new "
-"membership request from %(user)s is pending for validation"
-msgstr ""
-"Као администратор \"%(org)s\", обавештени сте да нови захтев за чланством "
-"корисника %(user)s чека на потврду"
+msgid "As an administrator of \"%(org)s\" you are being informed than a new membership request from %(user)s is pending for validation"
+msgstr "Као администратор \"%(org)s\", обавештени сте да нови захтев за чланством корисника %(user)s чека на потврду"
 
 #: udata/templates/mail/membership_request.html:40
 msgid "See the request"
@@ -2434,14 +2230,12 @@ msgstr "Погледајте захтев"
 #: udata/templates/mail/new_discussion.html:6
 #, python-format
 msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
-msgstr ""
-"Корисник %(user)s је проследио нову дискусију на тему %(type)s %(subject)s"
+msgstr "Корисник %(user)s је проследио нову дискусију на тему %(type)s %(subject)s"
 
 #: udata/templates/mail/new_discussion_comment.html:6
 #, python-format
 msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
-msgstr ""
-"Корисник %(user)s је коментарисао дискусију на тему %(type)s %(subject)s"
+msgstr "Корисник %(user)s је коментарисао дискусију на тему %(type)s %(subject)s"
 
 #: udata/templates/mail/new_follower.html:33
 #: udata/templates/mail/new_follower_org.html:40
@@ -2456,8 +2250,7 @@ msgstr "Корисник %(user)s прати вашу организацију %
 #: udata/templates/mail/new_issue.html:6
 #, python-format
 msgid "%(user)s submitted a new issue on your %(type)s %(subject)s"
-msgstr ""
-"Корисник %(user)s је поставио нови проблем на тему %(type)s %(subject)s"
+msgstr "Корисник %(user)s је поставио нови проблем на тему %(type)s %(subject)s"
 
 #: udata/templates/mail/new_issue_comment.html:6
 #, python-format
@@ -2478,8 +2271,7 @@ msgstr "Погледајте страницу организације"
 msgid "A new reuse of your dataset %(dataset)s has been published"
 msgstr "Објављен је нови пример употребе скупа података %(dataset)s"
 
-#: udata/templates/mail/new_reuse.html:31
-#: udata/templates/reuse/display.html:116
+#: udata/templates/mail/new_reuse.html:31 udata/templates/reuse/display.html:86
 msgid "See the reuse"
 msgstr "Погледајте пример употребе"
 
@@ -2525,16 +2317,11 @@ msgstr "Улогуј се"
 
 #: udata/templates/mail/security/reset_instructions.html:7
 #, python-format
-msgid ""
-"Someone has requested a password reset for your %(site)s account. If you "
-"didn't, please ignore this email."
-msgstr ""
-"Неко је затражио ресетовање лозинке за ваш налог на сајту %(site)s. Ако то "
-"нисте ви, занемарите ову поруку"
+msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
+msgstr "Неко је затражио ресетовање лозинке за ваш налог на сајту %(site)s. Ако то нисте ви, занемарите ову поруку"
 
 #: udata/templates/mail/security/reset_instructions.html:10
-msgid ""
-"To reset your password, please confirm your request through the link below:"
+msgid "To reset your password, please confirm your request through the link below:"
 msgstr "Да бисте ресетовали лозинку, потврдите захтев помоћу следеће везе:"
 
 #: udata/templates/mail/security/reset_instructions.html:18
@@ -2552,41 +2339,32 @@ msgid "Welcome to %(site)s!"
 msgstr "Добро дошли на %(site)s!"
 
 #: udata/templates/mail/security/welcome.html:10
-msgid ""
-"To activate your account, please confirm your email address through the link "
-"below:"
-msgstr ""
-"Да бисте активирали свој налог, потврдите своју е-адресу помоћу следеће везе:"
+msgid "To activate your account, please confirm your email address through the link below:"
+msgstr "Да бисте активирали свој налог, потврдите своју е-адресу помоћу следеће везе:"
 
 #: udata/templates/mail/security/welcome.html:18
 msgid "Confirm now"
 msgstr "Потврди"
 
-#: udata/templates/organization/card.html:23
+#: udata/templates/organization/card.html:19
 #: udata/templates/organization/search-result.html:21
-#: udata/templates/user/card.html:22 udata/templates/user/search-result.html:19
+#: udata/templates/user/card.html:17
 msgid "Number of datasets"
 msgstr "Број скупова података"
 
-#: udata/templates/organization/card.html:32 udata/templates/user/card.html:31
-#: udata/templates/user/search-result.html:28
+#: udata/templates/organization/card.html:25 udata/templates/user/card.html:23
 msgid "Number of reuses"
 msgstr "Број примера употребе"
 
-#: udata/templates/organization/display.html:7
+#: udata/templates/organization/display.html:8
 msgid "organization"
 msgstr "организација"
 
-#: udata/templates/organization/display.html:42
-msgid ""
-"This organization has been deleted. This will be permanent in the next 24 "
-"hours"
-msgstr ""
-"Ова организација је избрисана. Организација ће бити трајно избрисана у "
-"наредна 24 сата"
+#: udata/templates/organization/display.html:38
+msgid "This organization has been deleted. This will be permanent in the next 24 hours"
+msgstr "Ова организација је избрисана. Организација ће бити трајно избрисана у наредна 24 сата"
 
 #: udata/templates/organization/display.html:50
-#: govrs/theme/templates/organization/display.html:171
 #, python-format
 msgid "%(num)d private dataset"
 msgid_plural "%(num)d private datasets"
@@ -2595,7 +2373,6 @@ msgstr[1] "%(num)d приватна скупа података"
 msgstr[2] "%(num)d приватних скупова података"
 
 #: udata/templates/organization/display.html:54
-#: govrs/theme/templates/organization/display.html:175
 #, python-format
 msgid "%(num)d private reuse"
 msgid_plural "%(num)d private reuses"
@@ -2603,37 +2380,38 @@ msgstr[0] "%(num)d приватни случај употребе"
 msgstr[1] "%(num)d приватна случаја употребе"
 msgstr[2] "%(num)d приватних случајева употребе"
 
-#: govrs/theme/templates/organization/display.html:196
+#: udata/templates/organization/display.html:81
 #, python-format
 msgid "See the %(nb)d datasets"
 msgstr "Види  %(nb)d скупова података"
 
-#: udata/templates/organization/display.html:108
+#: udata/templates/organization/display.html:88
 msgid "Download as CSV"
 msgstr "Преузмите као CSV"
 
-#: udata/templates/organization/display.html:113
+#: udata/templates/organization/display.html:93
 msgid "Datasets list"
 msgstr "Листа скупова података"
 
-#: udata/templates/organization/display.html:118
+#: udata/templates/organization/display.html:98
 msgid "Resources list"
 msgstr "Листа ресурса"
 
-#: udata/templates/organization/display.html:123
+#: udata/templates/organization/display.html:103
 msgid "Issues list"
 msgstr "Листа проблема"
 
-#: udata/templates/organization/display.html:128
+#: udata/templates/organization/display.html:108
 msgid "Discussions list"
 msgstr "Листа дискусија"
 
-#: govrs/theme/templates/organization/display.html:221
+#: udata/templates/organization/display.html:137
 #, python-format
 msgid "See the %(nb)d reuses"
 msgstr "Види %(nb)d примета употребе"
 
-#: udata/templates/organization/display_base.html:64
+#: udata/templates/organization/display.html:146
+#: udata/templates/organization/display_base.html:67
 #, python-format
 msgid "%(num)d member"
 msgid_plural "%(num)d members"
@@ -2641,28 +2419,29 @@ msgstr[0] "%(num)d члан"
 msgstr[1] "Чланова: %(num)d"
 msgstr[2] "Чланова: %(num)d"
 
-#: udata/templates/organization/display.html:191
+#: udata/templates/organization/display.html:171
 msgid "Display all followers"
 msgstr "Прикажите све пратиоце"
 
-#: udata/templates/organization/dashboard.html:42
-#: udata/templates/site/dashboard.html:39
+#: udata/templates/organization/display.html:191
+#: udata/templates/site/dashboard.html:51
 msgid "Community activity"
 msgstr "Активност заједнице"
 
-#: udata/templates/organization/display_base.html:43
+#: udata/templates/organization/display_base.html:46
 msgid "See all organizations with that badge."
 msgstr "Погледајте све организације са тим беџем."
 
-#: udata/templates/organization/display_base.html:83
+#: udata/templates/organization/display_base.html:86
 msgid "Use of data by that organization for the community"
 msgstr "Употреба података те организације за заједницу"
 
-#: udata/templates/organization/display_base.html:94
+#: udata/templates/organization/display_base.html:96
 msgid "Use of data from that organization by the community"
 msgstr "Употреба података те организације од стране заједнице"
 
-#: udata/templates/organization/display_base.html:95
+#: udata/templates/organization/display_base.html:97
+#: udata/templates/organization/search-result.html:41
 #, python-format
 msgid "%(num)d reappropriation"
 msgid_plural "%(num)d reappropriations"
@@ -2670,49 +2449,49 @@ msgstr[0] "%(num)d реапропријација"
 msgstr[1] "Реапропријација: %(num)d"
 msgstr[2] "Реапропријација: %(num)d"
 
-#: udata/templates/organization/display_base.html:115
+#: udata/templates/organization/display_base.html:109
 msgid "I belong to this organization"
 msgstr "Ја припадам овој организацији"
 
-#: udata/templates/organization/display_base.html:117
+#: udata/templates/organization/display_base.html:112
 msgid "Join"
 msgstr "Придружи се"
 
-#: udata/templates/organization/display_base.html:120
+#: udata/templates/organization/display_base.html:116
 msgid "Waiting for approval"
 msgstr "Чекање на одобрење"
 
-#: udata/templates/organization/display_base.html:125
+#: udata/templates/organization/display_base.html:120
 msgid "Pending request"
 msgstr "Захтев на чекању"
 
-#: udata/templates/organization/display_base.html:129
+#: udata/templates/organization/display_base.html:125
 msgid "You are an administrator of this organization"
 msgstr "Ви сте администратор ове организације"
 
-#: udata/templates/organization/display_base.html:136
+#: udata/templates/organization/display_base.html:132
 msgid "You are editor in this organization"
 msgstr "Ви сте уредник ове организације"
 
-#: udata/templates/organization/display_base.html:143
+#: udata/templates/organization/display_base.html:139
 msgid "You are a member of this organization"
 msgstr "Ви сте члан ове организације"
 
-#: udata/templates/organization/display_base.html:146
+#: udata/templates/organization/display_base.html:141
 msgid "Member"
 msgstr "Члан"
 
-#: udata/templates/organization/display_base.html:160
-#: udata/templates/organization/sidebar-producer.html:28
+#: udata/templates/organization/display_base.html:149
+#: udata/templates/organization/sidebar-producer.html:31
 msgid "I'll be informed about this organization news"
 msgstr "Добијаћу обавештења о вестима ове организације"
 
-#: govrs/theme/templates/organization/list.html:7
+#: udata/templates/organization/list.html:9
 #, python-format
 msgid "%(site)s organization search"
 msgstr "%(site)s претрага организације"
 
-#: govrs/theme/templates/organization/list.html:8
+#: udata/templates/organization/list.html:10
 msgid "organizations"
 msgstr "организације"
 
@@ -2728,12 +2507,11 @@ msgstr "Број примера употребе од стране органи�
 msgid "Number of reappropriations by the community"
 msgstr "Број реапропријација од стране заједнице"
 
-#: udata/templates/organization/search-result.html:65
+#: udata/templates/organization/search-result.html:56
 msgid "Number of members"
 msgstr "Број чланова"
 
 #: udata/templates/organization/search-result.html:58
-#: govrs/theme/templates/organization/search-result.html:28
 #, python-format
 msgid "%(num)d members"
 msgid_plural "%(num)d members"
@@ -2742,8 +2520,7 @@ msgstr[1] "%(num)d члана"
 msgstr[2] "%(num)d чланова"
 
 #: udata/templates/organization/sidebar-producer.html:20
-#: udata/templates/reuse/display.html:167
-#: udata/templates/user/sidebar-user.html:20
+#: udata/templates/reuse/display.html:167 udata/templates/user/sidebar-user.html:20
 msgid "View Profile"
 msgstr "Види профил"
 
@@ -2753,15 +2530,15 @@ msgstr "Види профил"
 msgid "Contact"
 msgstr "Контакт"
 
-#: udata/templates/post/display.html:20
+#: udata/templates/post/display.html:18
 msgid "News"
 msgstr "Вести"
 
-#: udata/templates/post/display.html:34 udata/templates/post/display.html:88
+#: udata/templates/post/display.html:32 udata/templates/post/display.html:87
 msgid "Photo credit"
 msgstr "Акредитација фотографије"
 
-#: udata/templates/post/display.html:58
+#: udata/templates/post/display.html:57 udata/templates/reuse/card.html:41
 #, python-format
 msgid "Published on %(date)s"
 msgstr "Објављено: %(date)s"
@@ -2774,10 +2551,9 @@ msgstr "Спреми"
 msgid "This post is a draft and will not be visible by other users"
 msgstr "Ова објава је спремљена и неће бити видљива другим корисницима"
 
-#: udata/templates/post/display.html:71
+#: udata/templates/post/display.html:69
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
-"Ова објава је избрисана. Објава ће бити трајно избрисана у наредна 24 сата"
+msgstr "Ова објава је избрисана. Објава ће бити трајно избрисана у наредна 24 сата"
 
 #: udata/templates/post/display.html:136
 msgid "Associated reuse"
@@ -2809,7 +2585,7 @@ msgstr "Следећа објава"
 msgid "Comments about this post."
 msgstr "Коментари објаве"
 
-#: govrs/theme/__init__.py:21
+#: udata/templates/post/list.html:5 udata/templates/post/list.html:15
 msgid "Posts"
 msgstr "Блог"
 
@@ -2822,14 +2598,15 @@ msgstr "%(site)s објаве"
 msgid "posts"
 msgstr "објаве"
 
+#: udata/templates/post/search-result.html:18
 msgid "Posted on"
 msgstr "Објављено"
 
-#: udata/templates/post/subnav.html:46
+#: udata/templates/post/subnav.html:39
 msgid "Read more"
 msgstr "Прочитајте више"
 
-#: udata/templates/reuse/card.html:43
+#: udata/templates/reuse/card.html:31
 msgid "Number of datasets used"
 msgstr "Број коришћених скупова података"
 
@@ -2838,32 +2615,28 @@ msgstr "Број коришћених скупова података"
 msgid "Created by %(user)s"
 msgstr "Креирао %(user)s"
 
-#: udata/templates/reuse/display.html:81
+#: udata/templates/reuse/display.html:51
 #, python-format
 msgid "Published on %(date)s by %(user)s"
 msgstr "Објављено дана %(date)s од стране корисника: %(user)s"
 
-#: udata/templates/reuse/display.html:92
+#: udata/templates/reuse/display.html:61
 msgid "This reuse is private and will not be visible by other users"
 msgstr "Овај пример употребе је приватан и неће бити видљив другим корисницима"
 
-#: udata/templates/reuse/display.html:98
-msgid ""
-"This reuse has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
-"Овај пример употребе је избрисан. Пример употребе ће бити трајно избрисан у "
-"наредна 24 сата"
+#: udata/templates/reuse/display.html:68
+msgid "This reuse has been deleted. This will be permanent in the next 24 hours"
+msgstr "Овај пример употребе је избрисан. Пример употребе ће бити трајно избрисан у наредна 24 сата"
 
-#: udata/templates/organization/sidebar-producer.html:12
-#: udata/templates/reuse/display.html:186
+#: udata/templates/reuse/display.html:164
 msgid "more"
 msgstr "још"
 
-#: udata/templates/reuse/display.html:202
+#: udata/templates/reuse/display.html:172 udata/templates/user/sidebar-user.html:31
 msgid "I'll be informed about this user news"
 msgstr "Добијаћу обавештења о вестима овог корисника"
 
-#: udata/templates/reuse/display.html:249
+#: udata/templates/reuse/display.html:226
 msgid "No followers yet"
 msgstr "Још нема пратилаца"
 
@@ -2893,12 +2666,8 @@ msgid "Reset Password"
 msgstr "Ресетовање лозинке"
 
 #: udata/templates/security/forgot_password.html:13
-msgid ""
-"Forgotten your password? Enter your email address below, and we'll email "
-"instructions for setting a new one."
-msgstr ""
-"Заборавили сте лозинку? Унесите е-адресу у наставку, а ми ћемо вам послати "
-"упутства за постављање нове."
+msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgstr "Заборавили сте лозинку? Унесите е-адресу у наставку, а ми ћемо вам послати упутства за постављање нове."
 
 #: udata/templates/security/login_user.html:14
 msgid "Sign In"
@@ -2916,24 +2685,24 @@ msgstr "Заборавили сте лозинку?"
 msgid "Recover your password"
 msgstr "Опоравите лозинку"
 
-#: govrs/theme/templates/security/login_user.html:77
+#: udata/templates/security/login_user.html:28
 msgid "Confirmation instructions not received?"
 msgstr "Потврда да инструкције нису примљене?"
 
-#: govrs/theme/templates/security/login_user.html:79
+#: udata/templates/security/login_user.html:30
 msgid "Send the instructions again"
 msgstr "Пошаљи инструкције поново"
 
-#: udata/templates/security/login_user.html:33
-#: udata/templates/security/register_user.html:32
+#: udata/templates/security/login_user.html:39
+#: udata/templates/security/register_user.html:33
 msgid "Sign up"
 msgstr "Региструјте се"
 
-#: udata/templates/security/login_user.html:36
+#: udata/templates/security/login_user.html:42
 msgid "Register"
 msgstr "Регистрација"
 
-#: udata/templates/security/login_user.html:40
+#: udata/templates/security/login_user.html:46
 msgid "Create an account"
 msgstr "Направите налог"
 
@@ -2943,24 +2712,16 @@ msgstr "Региструјте се"
 
 #: udata/templates/security/register_user.html:21
 #, python-format
-msgid ""
-"I have read and accept <a href=\"%(url)s\"> the terms and conditions of the "
-"service.</a>"
+msgid "I have read and accept <a href=\"%(url)s\"> the terms and conditions of the service.</a>"
 msgstr "Прочитао сам и прихватио <a href=\"%(url)s\">све услове коришћења.</a>"
 
 #: udata/templates/security/register_user.html:25
-msgid ""
-"In particular, I understand that this site\n"
-"                    values the production and enrichment of datasets over "
-"definitive or partisan interpretations.\n"
-"                    The members of the community are in charge of looking "
-"after the quality of the content it produces."
-msgstr ""
-"Пре свега, разумем да овај сајт\n"
-"                    више цени продукцију и обогаћивање скупова података него "
-"пристрасне интерпретације.\n"
-"                    Припадници ове заједнице су одговорни за квалитет "
-"садржаја."
+msgid "In particular, I understand that this site\n"
+"                    values the production and enrichment of datasets over definitive or partisan interpretations.\n"
+"                    The members of the community are in charge of looking after the quality of the content it produces."
+msgstr "Пре свега, разумем да овај сајт\n"
+"                    више цени продукцију и обогаћивање скупова података него пристрасне интерпретације.\n"
+"                    Припадници ове заједнице су одговорни за квалитет садржаја."
 
 #: udata/templates/security/send_confirmation.html:12
 msgid "Resend confirmation instructions"
@@ -2970,49 +2731,38 @@ msgstr "Поново пошаљи информације потврде"
 msgid "Submit"
 msgstr "Сачувај"
 
-#: udata/templates/organization/dashboard.html:4
-#: udata/templates/organization/dashboard.html:23
-#: udata/templates/organization/display_base.html:103
-#: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:22
-#: udata/theme.py:41
+#: udata/templates/site/dashboard.html:4 udata/templates/site/dashboard.html:14
 msgid "Dashboard"
 msgstr "Контролна табла"
 
-#: udata/templates/organization/dashboard.html:5
 #: udata/templates/site/dashboard.html:5
 msgid "Site metrics and activity"
 msgstr "Метрика и активност сајта"
 
-#: udata/templates/organization/dashboard.html:7
 #: udata/templates/site/dashboard.html:6
 msgid "activity"
 msgstr "активност"
 
-#: udata/templates/site/map.html:4 udata/templates/site/map.html:16
+#: udata/templates/site/map.html:5 udata/templates/site/map.html:13
 msgid "Coverage map"
 msgstr "Мапа покривености"
 
-#: udata/templates/site/map.html:5
+#: udata/templates/site/map.html:6
 msgid "Display datasets on a map"
 msgstr "Прикажи скупове података на мапи"
 
-#: udata/templates/site/map.html:6
+#: udata/templates/site/map.html:7
 msgid "coverage"
 msgstr "покривеност"
 
-#: udata/templates/site/map.html:6
+#: udata/templates/site/map.html:7
 msgid "map"
 msgstr "мапа"
 
 #: udata/templates/territories/commune.html:5
-#: udata/templates/territories/territory.html:6
 #, python-format
-msgid ""
-"Datasets related to the town of %(name)s with INSEE code %(code)s and postal "
-"code %(postal)s"
-msgstr ""
-"Скупови података повезани са градом %(name)s, INSEE кодом %(code)s и "
-"поштанским бројем %(postal)s"
+msgid "Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s"
+msgstr "Скупови података повезани са градом %(name)s, INSEE кодом %(code)s и поштанским бројем %(postal)s"
 
 #: udata/templates/territories/commune.html:12
 #: udata/templates/territories/departement.html:12
@@ -3025,33 +2775,44 @@ msgstr "Регион:"
 msgid "County:"
 msgstr "Држава:"
 
-#: udata/templates/search.html:62
+#: udata/templates/territories/commune.html:14
 msgid "Town:"
 msgstr "Град:"
 
-#: udata/templates/territories/territory.html:29
+#: udata/templates/territories/commune.html:22
+#: udata/templates/territories/departement.html:21
+#: udata/templates/territories/region.html:20
 msgid "Source:"
 msgstr "Извор:"
 
-#: udata/templates/territories/territory.html:36
+#: udata/templates/territories/commune.html:29
+#: udata/templates/territories/departement.html:28
+#: udata/templates/territories/region.html:27
 msgid "Submit your logo through:"
 msgstr "Проследите логотип путем:"
 
-#: udata/templates/territories/territory.html:37
+#: udata/templates/territories/commune.html:30
+#: udata/templates/territories/departement.html:29
+#: udata/templates/territories/region.html:28
 msgid "we only expose logos under an open license"
 msgstr "логотипе приказујемо искључиво под отвореном лиценцом"
 
+#: udata/templates/territories/commune.html:40
+#: udata/templates/territories/departement.html:39
+#: udata/templates/territories/region.html:38
 #: udata/templates/territories/search-result.html:13
-#: udata/templates/territories/territory.html:44
 msgid "INSEE code:"
 msgstr "INSEE кôд:"
 
+#: udata/templates/territories/commune.html:46
+#: udata/templates/territories/region.html:44
 #: udata/templates/territories/search-result.html:15
-#: udata/templates/territories/territory.html:50
 msgid "Postal code:"
 msgstr "Поштански број:"
 
-#: udata/templates/territories/territory.html:57
+#: udata/templates/territories/commune.html:53
+#: udata/templates/territories/departement.html:45
+#: udata/templates/territories/region.html:51
 msgid "Population:"
 msgstr "Популација:"
 
@@ -3064,8 +2825,7 @@ msgstr "Скупови података вазани за државу %(name)s 
 msgid "Main towns:"
 msgstr "Главни градови:"
 
-#: udata/templates/territories/home.html:4
-#: udata/templates/territories/home.html:5
+#: udata/templates/territories/home.html:4 udata/templates/territories/home.html:5
 msgid "French regions"
 msgstr "Француски региони"
 
@@ -3090,11 +2850,11 @@ msgstr "Претходни:"
 msgid "Counties:"
 msgstr "Државе:"
 
-#: udata/templates/territories/search-result.html:24
+#: udata/templates/territories/search-result.html:22
 msgid "Administrative level"
 msgstr "Административни ниво"
 
-#: udata/templates/territories/search-result.html:32
+#: udata/templates/territories/search-result.html:30
 msgid "Population"
 msgstr "Популација"
 
@@ -3108,18 +2868,14 @@ msgstr "od"
 
 #: udata/templates/territories/territory.html:32
 #, python-format
-msgid ""
-"If you want your datasets to appear in that list, the geographical zone "
-"associated must be the exact same one of that territory (%(code)s)."
-msgstr ""
-"Ако желите да се ваши скупови података нађу на тој листи, повезана "
-"географска зона мора бити иста као зона те територије (%(code)s)."
+msgid "If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s)."
+msgstr "Ако желите да се ваши скупови података нађу на тој листи, повезана географска зона мора бити иста као зона те територије (%(code)s)."
 
-#: udata/templates/territories/territory.html:82
+#: udata/templates/territories/territory.html:34
 msgid "You want to add your own datasets to that list?"
 msgstr "Желите ли да додате своје скупове података на ту листу?"
 
-#: udata/templates/territories/territory.html:85
+#: udata/templates/territories/territory.html:37
 msgid "Log in"
 msgstr "Пријавите се"
 
@@ -3137,7 +2893,8 @@ msgstr "%(topic)s скупова података"
 msgid "%(site)s %(topic)s related datasets"
 msgstr "%(site)s %(topic)s повезаних скупова података"
 
-#: udata/templates/topic/display_base.html:7
+#: udata/templates/topic/datasets.html:9 udata/templates/topic/display_base.html:7
+#: udata/templates/topic/reuses.html:9
 msgid "topic"
 msgstr "тема"
 
@@ -3149,15 +2906,15 @@ msgstr "Теме"
 msgid "Latest reuses"
 msgstr "Најновији случајеви употребе"
 
-#: udata/templates/topic/display.html:82
+#: udata/templates/topic/display.html:48
 msgid "Latest datasets"
 msgstr "Најновији скупови података"
 
-#: udata/templates/topic/display.html:118
+#: udata/templates/topic/display.html:84
 msgid "See more"
 msgstr "Погледајте још"
 
-#: udata/templates/topic/display_base.html:25
+#: udata/templates/topic/display_base.html:23
 msgid "Related tags"
 msgstr "Повезане ознаке"
 
@@ -3171,24 +2928,24 @@ msgstr "%(topic)s случајева употребе"
 msgid "%(site)s %(topic)s related reuses"
 msgstr "%(site)s %(topic)s повезаних случајева употребе"
 
-#: udata/templates/user/activity.html:5 udata/templates/user/base.html:65
+#: udata/templates/user/activity.html:5 udata/templates/user/base.html:62
 msgid "Activity"
 msgstr "Активност"
 
-#: govrs/theme/templates/user/base.html:4
+#: udata/templates/user/base.html:8
 #, python-format
 msgid "%(site)s %(username)s profile"
 msgstr "%(site)s %(username)s профил"
 
-#: govrs/theme/templates/user/base.html:4
+#: udata/templates/user/base.html:9
 msgid "user"
 msgstr "коросник"
 
-#: govrs/theme/templates/user/base.html:4
+#: udata/templates/user/base.html:9
 msgid "profile"
 msgstr "профил"
 
-#: udata/templates/user/base.html:76
+#: udata/templates/user/base.html:73
 #, python-format
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"
@@ -3257,520 +3014,7 @@ msgstr "корисници"
 msgid "%(user)s has not yet published any reuse"
 msgstr "%(user)s није објавио ни један случај употребе"
 
-#: govrs/theme/__init__.py:17
-msgid "Discover OpenData"
-msgstr "Отворени подаци"
-
-#: govrs/theme/templates/anketa.html:4 govrs/theme/templates/discover.html:4
-msgid "Discover"
-msgstr "Истражи"
-
-#: govrs/theme/templates/anketa.html:6 govrs/theme/templates/discover.html:6
-msgid "discover"
-msgstr "истражи"
-
-#: govrs/theme/templates/header.html:73
-msgid "Logout"
-msgstr "Крај рада"
-
-#: govrs/theme/templates/dataset/card.html:14
-#: govrs/theme/templates/dataset/display_card.html:11
-#: govrs/theme/templates/reuse/card.html:16
-#: govrs/theme/templates/reuse/display_card.html:11
-msgid "View"
-msgstr "Погледај"
-
-#: govrs/theme/templates/dataset/display.html:118
-msgid "Latest URL"
-msgstr "Последњи URL"
-
-#: govrs/theme/templates/dataset/display.html:139
-msgid "MimeType"
-msgstr "MimeType"
-
-#: govrs/theme/templates/dataset/display.html:157
-msgid "Created on"
-msgstr "Креирано"
-
-#: govrs/theme/templates/dataset/display.html:163
-msgid "Modified on"
-msgstr "Модификовано"
-
-#: govrs/theme/templates/dataset/display.html:169
-msgid "Published on"
-msgstr "Објављено"
-
-#: govrs/theme/templates/security/register_user.html:26
-#, python-format
-msgid ""
-"I have read and accept\n"
-"                                    <a href=\"%(url)s\"> the terms and "
-"conditions of the service.</a>"
-msgstr ""
-"Прочитао сам и прихватио\n"
-"                                    <a href=\"%(url)s\"> све услове корићења."
-"</a>"
-
-#: govrs/theme/templates/security/register_user.html:28
-msgid ""
-"In particular, I understand that this site values the production and "
-"enrichment of datasets over definitive\n"
-"                                or partisan interpretations. The members of "
-"the community are in charge of looking after the quality of the\n"
-"                                content it produces."
-msgstr ""
-"Пре свега, разумем да овај сајт\n"
-"                    више цени продукцију и обогаћивање скупова података него "
-"пристрасне интерпретације.\n"
-"                    Припадници ове заједнице су одговорни за квалитет "
-"садржаја."
-
-#: udata/api/oauth2.py:30
-msgid "Public"
-msgstr "Јавно"
-
-#: udata/api/oauth2.py:31
-msgid "Confidential"
-msgstr "Поверљиво"
-
-#: udata/api/oauth2.py:35
-msgid "Web Application"
-msgstr "Веб-апликација"
-
-#: udata/api/oauth2.py:36
-msgid "User Agent"
-msgstr "Кориснички агент"
-
-#: udata/api/oauth2.py:37
-msgid "Native"
-msgstr "Основно"
-
-#: udata/api/oauth2.py:41
-msgid "Authorization Code"
-msgstr "Кôд за ауторизацију"
-
-#: udata/api/oauth2.py:42
-msgid "Implicit"
-msgstr "Имплицитно"
-
-#: udata/api/oauth2.py:43
-msgid "Resource Owner Password Credentials"
-msgstr "Акредитиви власника ресурса"
-
-#: udata/api/oauth2.py:44
-msgid "Client Credentials"
-msgstr "Акредитиви клијента"
-
-#: udata/core/badges/tasks.py:38
-#, python-format
-msgid "Your %(type)s gain a new badge"
-msgstr "Ваш %(type)s добио је нови беџ"
-
-#: udata/core/dataset/models.py:36
-msgid "Fortnighly"
-msgstr "Сваке две седмице"
-
-#: udata/core/organization/models.py:23
-msgid "Administrateur"
-msgstr "Администратор"
-
-#: udata/core/organization/views.py:120 udata/core/organization/views.py:142
-msgid "Views"
-msgstr "Прикази"
-
-#: udata/core/spatial/api.py:71
-msgid "payloadname"
-msgstr "име корисних података"
-
-#: udata/core/spatial/models.py:150
-msgid "other"
-msgstr "друго"
-
-#: udata/forms/fields.py:320
-#, python-format
-msgid "Tag \"%(tag)s\" must be alphanumeric characters or symbols: -_."
-msgstr ""
-"Ознака \"%(tag)s\" мора да буде сачињена од алфанумеричких знакова или "
-"симбола: -_."
-
-#: udata/forms/widgets.py:142 udata/templates/macros/forms.html:207
-msgid "Choose a picture"
-msgstr "Одаберите слику"
-
-#: udata/harvest/forms.py:21
-msgid "Some optionnal details about this harvester"
-msgstr "Неки опциони детаљи о овом преузимачу"
-
-#: udata/templates/search.html:67
-msgid "Towns"
-msgstr "Градови"
-
-#: udata/templates/search.html:128
-msgid "Last Name"
-msgstr "Презиме"
-
-#: udata/templates/search.html:129
-msgid "First Name"
-msgstr "Име"
-
-#: udata/templates/search.html:144
-msgid "No results found, try to be less specific (or fix your typos?)"
-msgstr ""
-"Нема резултата; покушајте да будете мање одређени (или отклоните грешке у "
-"куцању?)"
-
-#: udata/templates/dataset/display.html:139
-#, python-format
-msgid "See the %(nb)d resources"
-msgstr "Погледајте %(nb)d ресурсе"
-
-#: udata/templates/dataset/display.html:384
-msgid ""
-"If you want to report an anomaly, please use the dedicated button just under "
-"the resources."
-msgstr ""
-"Уколико желите да пријавите неправилност, молимо вас да користите дугме које "
-"се налази одмах испод ресурса."
-
-#: udata/templates/dataset/display.html:400
-msgid "New community resource"
-msgstr "Нови ресурс заједнице"
-
-#: udata/templates/dataset/display.html:443
-msgid "Open in a new window"
-msgstr "Отворите у новом прозору"
-
-#: udata/templates/dataset/display.html:458
-#: udata/templates/dataset/display.html:462
-msgid "Unmark as featured"
-msgstr "Склоните ознаку „истакнуто“"
-
-#: udata/templates/dataset/display.html:460
-#: udata/templates/dataset/display.html:463
-msgid "Mark as featured"
-msgstr "Означите као „истакнуто“"
-
-#: udata/templates/dataset/edit_base.html:6
-#: udata/templates/organization/edit_base.html:10
-#: udata/templates/reuse/edit_base.html:6
-#: udata/templates/user/edit_base.html:11
-msgid "Edition"
-msgstr "Издање"
-
-#: udata/templates/dataset/resource/list-item.html:36
-#, python-format
-msgid "Last modified on %(date)s"
-msgstr "Последња измена: %(date)s"
-
-#: udata/templates/discussion/item.html:12
-msgid "Discussion started on"
-msgstr "Дискусија је почела"
-
-#: udata/templates/discussion/item.html:12
-msgid "with"
-msgstr "са"
-
-#: udata/templates/discussion/item.html:13
-#, python-format
-msgid "%(nb)s message"
-msgid_plural "%(nb)s messages"
-msgstr[0] "%(nb)s порука"
-msgstr[1] "Порука: %(nb)s"
-msgstr[2] "Порука: %(nb)s"
-
-#: udata/templates/discussion/item.html:38
-msgid "Add a comment"
-msgstr "Додајте коментар"
-
-#: udata/templates/discussion/item.html:52
-msgid "Commenting on this thread"
-msgstr "Коментарисање ове нити"
-
-#: udata/templates/discussion/item.html:55
-msgid "You're about to answer to this particular thread about:"
-msgstr "Намеравате да одговорите на ову одређену нит на следећу тему:"
-
-#: udata/templates/discussion/item.html:64
-msgid "Submit your comment"
-msgstr "Пошаљите коментар"
-
-#: udata/templates/discussion/threads.html:20
-msgid "Start a new discussion"
-msgstr "Започните нову дискусију"
-
-#: udata/templates/discussion/threads.html:32
-msgid "Starting a new discussion thread"
-msgstr "Започињање нове нити дискусије"
-
-#: udata/templates/discussion/threads.html:35
-msgid ""
-"You're about to start a new discussion thread. Make sure that a thread about "
-"the same topic doesn't exist yet just above."
-msgstr ""
-"Намеравате да започнете нову нит дискусије. Уверите се да претходно није већ "
-"направљена нит на исту тему."
-
-#: udata/templates/discussion/threads.html:48
-msgid "Start a discussion"
-msgstr "Започните дискусију"
-
-#: udata/templates/macros/follow.html:11
-#: udata/templates/organization/display_base.html:162
-#: udata/templates/organization/sidebar-producer.html:30
-#: udata/templates/reuse/display.html:204
-msgid "Follow"
-msgstr "Прати"
-
-#: udata/templates/macros/forms.html:170 udata/templates/macros/forms.html:269
-msgid "Add"
-msgstr "Додај"
-
-#: udata/templates/macros/forms.html:174 udata/templates/macros/forms.html:251
-msgid "Remove"
-msgstr "Уклони"
-
-#: udata/templates/macros/forms.html:218
-msgid "Delete resource"
-msgstr "Избриши ресурс"
-
-#: udata/templates/macros/forms.html:219
-msgid "You can remove this uploaded file"
-msgstr "Ову отпремљену датотеку можете да уклоните"
-
-#: udata/templates/macros/forms.html:231 udata/templates/macros/forms.html:240
-msgid "Key"
-msgstr "Кључ"
-
-#: udata/templates/macros/forms.html:232 udata/templates/macros/forms.html:245
-msgid "Value"
-msgstr "Вредност"
-
-#: udata/templates/macros/forms.html:262
-msgid "New key"
-msgstr "Нови кључ"
-
-#: udata/templates/macros/forms.html:265
-msgid "New value"
-msgstr "Нова вредност"
-
-#: udata/templates/macros/issues.html:15 udata/templates/macros/issues.html:28
-msgid "No Issues"
-msgstr "Нема проблема"
-
-#: udata/templates/macros/issues.html:43
-msgid "Subject thumbnail"
-msgstr "Сличица субјекта"
-
-#: udata/templates/macros/issues.html:48
-msgid "On"
-msgstr "На"
-
-#: udata/templates/macros/issues.html:49
-msgid "about"
-msgstr "основни подаци"
-
-#: udata/templates/macros/search.html:93
-msgid "Clear filter"
-msgstr "Обриши филтер"
-
-#: udata/templates/macros/search.html:181
-msgid "Yes"
-msgstr "Да"
-
-#: udata/templates/macros/search.html:186
-msgid "No"
-msgstr "Не"
-
-#: udata/templates/macros/search.html:253
-msgid "Apply"
-msgstr "Примени"
-
-#: udata/templates/macros/share.html:2
-msgid "Share"
-msgstr "Подели"
-
-#: udata/templates/mail/badge_added.html:6
-#, python-format
-msgid "%(user)s added a new badge on your %(type)s %(subject)s"
-msgstr "Корисник %(user)s је додао нови беџ за %(type)s %(subject)s"
-
-#: udata/templates/organization/card.html:25
-#: udata/templates/organization/search-result.html:23
-#: udata/templates/reuse/search-result.html:27
-#: udata/templates/user/card.html:24 udata/templates/user/search-result.html:21
-#, python-format
-msgid "%(num)s dataset"
-msgid_plural "%(num)s datasets"
-msgstr[0] "%(num)s скуп података"
-msgstr[1] "Скупова података: %(num)s"
-msgstr[2] "Скупова података: %(num)s"
-
-#: udata/templates/organization/card.html:34
-#: udata/templates/organization/search-result.html:32
-#: udata/templates/user/card.html:33 udata/templates/user/search-result.html:30
-#, python-format
-msgid "%(num)s reuse"
-msgid_plural "%(num)s reuses"
-msgstr[0] "%(num)s пример употребе"
-msgstr[1] "Примера употребе: %(num)s"
-msgstr[2] "Примера употребе: %(num)s"
-
-#: udata/templates/organization/display.html:55
-msgid "Private datasets"
-msgstr "Приватни скупови података"
-
-#: udata/templates/organization/display.html:59
-msgid "Private reuses"
-msgstr "Приватни примери употребе"
-
-#: udata/templates/organization/display.html:101
-#, python-format
-msgid "See the %(nb)s datasets"
-msgstr "Погледајте скупове података (%(nb)s)"
-
-#: udata/templates/organization/display.html:157
-#, python-format
-msgid "See the %(nb)s reuses"
-msgstr "Погледајте примере употребе (%(nb)s)"
-
-#: udata/templates/organization/display_base.html:28
-msgid "This organization and its datasets are certified by"
-msgstr "Ову организацију и њене скупове података сертификује"
-
-#: udata/templates/organization/display_base.html:156
-#: udata/templates/organization/display_base.html:158
-#: udata/templates/organization/sidebar-producer.html:22
-#: udata/templates/organization/sidebar-producer.html:24
-#: udata/templates/organization/sidebar-producer.html:26
-#: udata/templates/reuse/display.html:196
-#: udata/templates/reuse/display.html:198
-#: udata/templates/reuse/display.html:200
-msgid "Unfollow"
-msgstr "Престани да пратиш"
-
-#: udata/templates/organization/search-result.html:41
-#, python-format
-msgid "%(num)s reappropriation"
-msgid_plural "%(num)s reappropriations"
-msgstr[0] "%(num)s реапропријација"
-msgstr[1] "Реапропријација: %(num)s"
-msgstr[2] "Реапропријација: %(num)s"
-
-#: udata/templates/organization/search-result.html:48
-#: udata/templates/reuse/search-result.html:32
-msgid "Number of stars"
-msgstr "Број звездица"
-
-#: udata/templates/organization/search-result.html:50
-#: udata/templates/reuse/search-result.html:34
-#, python-format
-msgid "%(num)s star"
-msgid_plural "%(num)s stars"
-msgstr[0] "%(num)s звездица"
-msgstr[1] "Звездица: %(num)s"
-msgstr[2] "Звездица: %(num)s"
-
-#: udata/templates/organization/search-result.html:59
-#: udata/templates/user/search-result.html:39
-#, python-format
-msgid "%(num)s follower"
-msgid_plural "%(num)s followers"
-msgstr[0] "%(num)s пратилац"
-msgstr[1] "Пратилаца: %(num)s"
-msgstr[2] "Пратилаца: %(num)s"
-
-#: udata/templates/organization/search-result.html:67
-#, python-format
-msgid "%(num)s members"
-msgid_plural "%(num)s members"
-msgstr[0] "Чланова: %(num)s"
-msgstr[1] "Чланова: %(num)s"
-msgstr[2] "Чланова: %(num)s"
-
-#: udata/templates/post/display.html:65
-msgid "This post is private and will not be visible by other users"
-msgstr "Ова објава је приватна и неће бити видљива другим корисницима"
-
-#: udata/templates/reuse/display.html:302
-msgid "Discussion between the reusers and the community about this reuse."
-msgstr ""
-"Дискусија између оних који користе податке и заједнице о овом примеру "
-"употребе."
-
-#: udata/templates/reuse/display.html:303
-msgid ""
-"If you want to report an anomaly, please use the dedicated button just under "
-"the reuse."
-msgstr ""
-"Уколико желите да пријавите неправилност, молимо вас да користите дугме које "
-"се налази одмах испод примера употребе."
-
-#: udata/templates/security/register_user.html:22
-msgid "I have read and accept the terms and conditions of the service."
-msgstr "Прочитао/ла сам и прихватам услове и одредбе коришћења ове услуге."
-
-#: udata/templates/site/config.html:8
-msgid "Site configuration"
-msgstr "Конфигурација сајта"
-
-#: udata/templates/site/config.html:14 udata/templates/site/theme.html:15
-#: udata/templates/user/edit.html:12 udata/templates/user/edit_settings.html:12
-msgid "Save"
-msgstr "Сачувај"
-
-#: udata/templates/site/theme.html:9
-msgid "Theme configuration"
-msgstr "Конфигурација теме"
-
-#: udata/templates/site/theme.html:20
-msgid "Current theme has no configuration"
-msgstr "Тренутна тема нема конфигурацију"
-
-#: udata/templates/territories/search-result.html:26
-msgid "Town"
-msgstr "Град"
-
-#: udata/templates/territories/territory.html:75
-msgid "Some of your datasets have an exact match!"
-msgstr "За неке од ваших скупова података постоји тачно подударање!"
-
-#: udata/templates/territories/territory.html:77
-msgid "Claim that town"
-msgstr "Потврдите тај град"
-
-#: udata/templates/territories/territory.html:77
-msgid "and your datasets will appear first."
-msgstr "и ваши скупови података појавиће се први."
-
-#: udata/templates/territories/territory.html:79
-#, python-format
-msgid ""
-"If you want your datasets to appear in that list, the geographical zone "
-"associated must be the exact same one of that town (%(code)s)."
-msgstr ""
-"Ако желите да се ваши скупови података нађу на тој листи, повезана "
-"географска зона мора бити иста као зона тог града (%(code)s)."
-
-#: udata/templates/territories/territory.html:86
-msgid "and create resources for that town."
-msgstr "и направите ресурсе за тај град."
-
-#: udata/templates/user/edit.html:13 udata/templates/user/edit_settings.html:13
-msgid "Cancel"
-msgstr "Откажи"
-
-#: udata/templates/user/edit_notifications.html:10
-msgid "Test your email"
-msgstr "Тестирајте е-пошту"
-
-msgid "Reuse"
-msgstr "Пример употребе"
-
+#: udata/theme/__init__.py:43
 msgid "Map"
 msgstr "Мапа"
 
-msgid "I belong to that city and I want to publish more datasets."
-msgstr "Ја припадам том граду и желим да објавим још скупова података."
-
-msgid "Claim and enrich"
-msgstr "Потврдите и обогатите"
