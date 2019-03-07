@@ -5,6 +5,7 @@ import bson
 import datetime
 import logging
 import os
+import pkgutil
 import types
 
 from os.path import abspath, join, dirname, isfile, exists
@@ -156,6 +157,7 @@ def create_app(config='udata.settings.Defaults', override=None,
     '''Factory for a minimal application'''
     app = UDataApp(APP_NAME)
     app.config.from_object(config)
+
     settings = os.environ.get('UDATA_SETTINGS', join(os.getcwd(), 'udata.cfg'))
     if exists(settings):
         app.settings_file = settings  # Keep track of loaded settings for diagnostic
@@ -163,6 +165,16 @@ def create_app(config='udata.settings.Defaults', override=None,
 
     if override:
         app.config.from_object(override)
+
+    # Loads defaults from plugins
+    for pkg in entrypoints.get_roots(app):
+        if pkg == 'udata':
+            continue  # Defaults are already loaded
+        module = '{}.settings'.format(pkg)
+        if pkgutil.find_loader(module):
+            settings = pkgutil.get_loader(module)
+            for key, default in settings.__dict__.items():
+                app.config.setdefault(key, default)
 
     app.json_encoder = UDataJsonEncoder
 
