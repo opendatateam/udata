@@ -43,7 +43,7 @@ def iter_adapters():
 
 def iter_qs(qs, adapter):
     '''Safely iterate over a DB QuerySet yielding ES documents'''
-    for obj in qs.no_dereference().timeout(False):
+    for obj in qs.no_cache().no_dereference().timeout(False):
         if adapter.is_indexable(obj):
             try:
                 doc = adapter.from_model(obj).to_dict(include_meta=True)
