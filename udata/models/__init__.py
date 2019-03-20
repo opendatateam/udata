@@ -75,7 +75,7 @@ class UDataMongoEngine(MongoEngine):
         try:
             return get_document(classname)
         except self.NotRegistered:
-            message = '{0} does not exists'.format(classname)
+            message = 'Model "{0}" does not exists'.format(classname)
             raise ValueError(message)
 
 
