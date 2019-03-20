@@ -730,7 +730,7 @@ class ExtrasField(Field):
     def validate(self, form, extra_validators=tuple()):
         if self.process_errors:
             self.errors = list(self.process_errors)
-        elif self.field_errors:
+        elif getattr(self, 'field_errors', None):
             self.errors = self.field_errors
         elif self.data:
             try:
