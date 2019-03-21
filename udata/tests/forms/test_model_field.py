@@ -70,7 +70,7 @@ class Generic:
 
         assert 'target' in form.errors
         assert len(form.errors['target']) == 1
-        assert form.errors['target'][0] == 'Model "Unknown" does not exists'
+        assert form.errors['target'][0] == 'Model "Unknown" does not exist'
 
 
 class Explicit:

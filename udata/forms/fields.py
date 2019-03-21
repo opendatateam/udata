@@ -382,63 +382,61 @@ class ModelFieldMixin(object):
 
 class ModelField(Field):
     def process(self, formdata, data=unset_value):
-        if not formdata:
-            return
-        # Process prefixed values as in FormField
-        newdata = {}
-        prefix = self.short_name + '-'
-        for key in formdata.keys():
-            if key.startswith(prefix):
-                value = formdata.pop(key)
-                newdata[key.replace(prefix, '')] = value
-        if newdata:
-            formdata.add(self.short_name, newdata)
+        if formdata:
+            # Process prefixed values as in FormField
+            newdata = {}
+            prefix = self.short_name + '-'
+            for key in formdata.keys():
+                if key.startswith(prefix):
+                    value = formdata.pop(key)
+                    newdata[key.replace(prefix, '')] = value
+            if newdata:
+                formdata.add(self.short_name, newdata)
         super(ModelField, self).process(formdata, data)
 
     def process_formdata(self, valuelist):
-        if valuelist and len(valuelist) == 1 and valuelist[0]:
-            specs = valuelist[0]
-            model_field = getattr(self._form.model_class, self.name)
-            if isinstance(specs, basestring):
-                specs = {'id': specs}
-            elif not specs.get('id', None):
-                raise validators.ValidationError('Missing "id" field')
+        if not valuelist or len(valuelist) != 1 or not valuelist[0]:
+            return
+        specs = valuelist[0]
+        model_field = getattr(self._form.model_class, self.name)
+        if isinstance(specs, basestring):
+            specs = {'id': specs}
+        elif not specs.get('id', None):
+            raise validators.ValidationError('Missing "id" field')
 
-            if isinstance(model_field, db.ReferenceField):
-                expected_model = str(model_field.document_type.__name__)
-                if 'class' not in specs:
-                    specs['class'] = expected_model
-                elif specs['class'] != expected_model:
-                    msg = 'Expect a "{0}" class but "{1}" was found'.format(
-                        expected_model, specs['class']
-                    )
-                    raise validators.ValidationError(msg)
-            elif isinstance(model_field, db.GenericReferenceField):
-                if 'class' not in specs:
-                    msg = _('Expect both class and identifier')
-                    raise validators.ValidationError(msg)
-
-            # No try/except required
-            # In case of error, ValueError is raised
-            # and is properly handled as form validation error
-            model = db.resolve_model(specs['class'])
-            oid = clean_oid(specs, model)
-
-            try:
-                self.data = model.objects.only('id').get(id=oid)
-            except db.DoesNotExist:
-                label = '{0}({1})'.format(model.__name__, oid)
-                msg = _('{0} does not exists').format(label)
+        if isinstance(model_field, db.ReferenceField):
+            expected_model = str(model_field.document_type.__name__)
+            if 'class' not in specs:
+                specs['class'] = expected_model
+            elif specs['class'] != expected_model:
+                msg = 'Expect a "{0}" class but "{1}" was found'.format(
+                    expected_model, specs['class']
+                )
                 raise validators.ValidationError(msg)
+        elif isinstance(model_field, db.GenericReferenceField):
+            if 'class' not in specs:
+                msg = _('Expect both class and identifier')
+                raise validators.ValidationError(msg)
+
+        # No try/except required
+        # In case of error, ValueError is raised
+        # and is properly handled as form validation error
+        model = db.resolve_model(specs['class'])
+        oid = clean_oid(specs, model)
+
+        try:
+            self.data = model.objects.only('id').get(id=oid)
+        except db.DoesNotExist:
+            label = '{0}({1})'.format(model.__name__, oid)
+            msg = _('{0} does not exists').format(label)
+            raise validators.ValidationError(msg)
 
     def pre_validate(self, form):
         # If any error happen during process, we raise StopValidation here
         # to prevent "DataRequired" validator from clearing errors
         if self.errors:
             raise validators.StopValidation()
-
-    def populate_obj(self, obj, name):
-        setattr(obj, name, getattr(self, 'data', None))
+        super(ModelField, self).pre_validate(form)
 
 
 class ModelChoiceField(StringField):
