@@ -6,7 +6,7 @@ import slugify
 
 from flask_mongoengine import Document
 from mongoengine.fields import StringField
-from mongoengine.signals import post_delete
+from mongoengine.signals import pre_save, post_delete
 
 from .queryset import UDataQuerySet
 
@@ -18,6 +18,7 @@ class SlugField(StringField):
     A field that that produces a slug from the inputs and auto-
     increments the slug if the value already exists.
     '''
+    # Do not remove, this is required to trigger field population
     _auto_gen = True
 
     def __init__(self, populate_from=None, update=False, lower_case=True,
@@ -30,19 +31,16 @@ class SlugField(StringField):
         self.follow = follow
         self.instance = None
         super(SlugField, self).__init__(**kwargs)
-        if follow:
-            # Can't use sender=self.owner_document which is not yet defined
-            post_delete.connect(self.cleanup_on_delete)
 
     def __get__(self, instance, owner):
-        if instance is not None:
-            self.instance = instance
+        # mongoengine calls this after document initialization
+        # We register signals handlers here to have a owner reference
+        if not hasattr(self, 'owner'):
+            self.owner = owner
+            pre_save.connect(self.populate_on_pre_save, sender=owner)
+            if self.follow:
+                post_delete.connect(self.cleanup_on_delete, sender=owner)
         return super(SlugField, self).__get__(instance, owner)
-
-    def __set__(self, instance, value):
-        if instance is not None:
-            self.instance = instance
-        return super(SlugField, self).__set__(instance, value)
 
     def __deepcopy__(self, memo):
         # Fixes no_dereference by avoiding deep copying instance attribute
@@ -50,11 +48,9 @@ class SlugField(StringField):
         copied.__dict__.update(self.__dict__)
         return copied
 
-    def validate(self, value):
-        populate_slug(self.instance, self)
-
+    # Do not remove, this is required when field population is triggered
     def generate(self):
-        return populate_slug(self.instance, self)
+        pass
 
     def slugify(self, value):
         '''
@@ -77,7 +73,7 @@ class SlugField(StringField):
             return self.owner_document.objects(slug=follow.new_slug).first()
         return None
 
-    def cleanup_on_delete(self, sender, document):
+    def cleanup_on_delete(self, sender, document, **kwargs):
         '''
         Clean up slug redirections on object deletion
         '''
@@ -86,6 +82,11 @@ class SlugField(StringField):
         slug = getattr(document, self.db_field)
         namespace = self.owner_document.__name__
         SlugFollow.objects(namespace=namespace, new_slug=slug).delete()
+
+    def populate_on_pre_save(self, sender, document, **kwargs):
+        field = document._fields.get(self.name)
+        if field:
+            populate_slug(document, field)
 
 
 class SlugFollow(Document):

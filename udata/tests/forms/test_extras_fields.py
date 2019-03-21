@@ -82,6 +82,18 @@ class ExtrasFieldTest:
         assert 'extras' in form.errors
         assert len(form.errors['extras']) == 1
 
+    def test_with_null_data(self):
+        Fake, FakeForm = self.factory()
+
+        fake = Fake()
+        form = FakeForm(MultiDict({'extras': None}))
+
+        form.validate()
+        assert form.errors == {}
+
+        form.populate_obj(fake)
+        assert fake.extras == {}
+
     def test_with_valid_registered_data(self):
         Fake, FakeForm = self.factory()
 
