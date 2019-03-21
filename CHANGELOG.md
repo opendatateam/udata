@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Updates topic entry page [#382](https://github.com/etalab/udata-gouvfr/pull/382)
 
 ## 1.6.3 (2019-03-06)
 
