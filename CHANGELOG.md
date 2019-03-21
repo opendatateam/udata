@@ -8,6 +8,7 @@
 - Prevent ExtrasField failure on null value [#2074](https://github.com/opendatateam/udata/pull/2074)
 - Improve ModelField errors handling [#2075](https://github.com/opendatateam/udata/pull/2075)
 - Pin werkzeug dependency to `0.14.1` until incompatibilities are fixed [#2081](https://github.com/opendatateam/udata/pull/2081)
+- Prevent client-side error while handling unparseable API response [#2076](https://github.com/opendatateam/udata/pull/2076)
 
 ## 1.6.5 (2019-02-27)
 
