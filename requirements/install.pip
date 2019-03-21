@@ -9,7 +9,7 @@ CommonMark==0.8.1
 elasticsearch==2.4.1
 elasticsearch-dsl==2.2.0
 factory-boy==2.11.1
-Faker==1.0.2
+Faker==1.0.4
 Flask-BabelEx==0.9.3
 Flask-Caching==1.4.0
 Flask-CDN==1.5.3
@@ -36,7 +36,7 @@ pydenticon==0.3.1
 pyliblzma==0.5.3
 python-dateutil==2.8.0
 pytz==2018.9
-PyYAML==3.13
+PyYAML==5.1
 rdflib==4.2.2
 rdflib-jsonld==0.4.0
 redis==2.10.6 # this can be safely upgraded back to 3.1.0 as soon as celery 4.2.2 is released
