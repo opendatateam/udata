@@ -70,7 +70,7 @@ export default {
                     try {
                         data = JSON.parse(response.data);
                     } catch (e) {
-                        log.warn('Parsing error:', e);
+                        console.warn('Parsing error:', e);
                         // TODO: Optional Sentry handling
                     }
 
