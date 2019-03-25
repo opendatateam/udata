@@ -1,4 +1,5 @@
 {% extends theme("layouts/1-column.html") %}
+{% set bundle = 'territory' %}
 
 {% set meta = {
     'title': _('French regions'),
@@ -22,12 +23,10 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{{ static('vue-common.js') }}"></script>
-    <script src="{{ static('territory.js') }}"></script>
     <script>
         var defaultCenter = [47, 2];
         var defaultZoom = 6;
-        var tilelayer = L.tileLayer(uData.config.tiles_url, uData.config.tiles_config);
+        var tilelayer = L.tileLayer(uData.config.map.tiles.url, uData.config.map.tiles.config);
         var map = L.map('map-nav', {
             center: defaultCenter,
             zoom: defaultZoom,
