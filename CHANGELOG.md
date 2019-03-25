@@ -4,8 +4,10 @@
 
 - Automatically loads default settings from plugins (if `plugin.settings` module exists) [#2058](https://github.com/opendatateam/udata/pull/2058)
 - Fixes some memory leaks on reindexing [#2070](https://github.com/opendatateam/udata/pull/2070)
+- Fixes minor UI bug [#2072](https://github.com/opendatateam/udata/pull/2072)
 - Prevent ExtrasField failure on null value [#2074](https://github.com/opendatateam/udata/pull/2074)
 - Improve ModelField errors handling [#2075](https://github.com/opendatateam/udata/pull/2075)
+- Pin werkzeug dependency to `0.14.1` until incompatibilities are fixed [#2081](https://github.com/opendatateam/udata/pull/2081)
 
 ## 1.6.5 (2019-02-27)
 
