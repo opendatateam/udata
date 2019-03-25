@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-02-07 11:26+0100\n"
-"PO-Revision-Date: 2019-03-06 11:31\n"
+"PO-Revision-Date: 2019-03-07 13:06\n"
 "Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -170,7 +170,7 @@ msgstr "Тип ресурса (документација, API...)"
 #: udata/core/dataset/forms.py:67 udata/core/reuse/forms.py:29
 #: udata/harvest/forms.py:67
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: udata/core/dataset/forms.py:70 udata/templates/dataset/search-labels.html:24
 msgid "Format"
@@ -420,7 +420,7 @@ msgstr "Ажурирање"
 
 #: udata/core/dataset/models.py:82 udata/core/reuse/models.py:19
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: udata/core/dataset/models.py:83
 msgid "Code repository"
@@ -943,7 +943,7 @@ msgstr "Величина инкремента података"
 
 #: udata/core/spatial/models.py:25
 msgid "POI"
-msgstr ""
+msgstr "POI"
 
 #: udata/core/spatial/translations.py:8
 msgid "French region"
@@ -1003,11 +1003,11 @@ msgstr "Француске прекоморске територије"
 
 #: udata/core/spatial/translations.py:22
 msgid "French overseas collectivities"
-msgstr ""
+msgstr "Француске прекоморске територије"
 
 #: udata/core/spatial/translations.py:23
 msgid "French arrondissement"
-msgstr ""
+msgstr "Француски арондисман"
 
 #: udata/core/topic/forms.py:27
 msgid "Featured"
@@ -1096,7 +1096,7 @@ msgstr "{0} не постоји"
 
 #: udata/forms/fields.py:392
 msgid "Expect both class and identifier"
-msgstr ""
+msgstr "Очекуј класу и идентификатор"
 
 #: udata/forms/fields.py:406
 msgid "{0} is not a valid identifier"
@@ -1214,7 +1214,7 @@ msgstr "не"
 
 #: udata/search/fields.py:291
 msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
-msgstr ""
+msgstr "Опсег датума у облику почетак-крај, са оба датума у ISO формату (тј. YYYY-ММ-DD-YYYY-ММ-DD)"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
@@ -1660,9 +1660,9 @@ msgstr[2] "%(num)d организација"
 #, python-format
 msgid "Territory: %(name)s"
 msgid_plural "%(num)d territories"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Територија: %(name)s"
+msgstr[1] "%(num)d територија"
+msgstr[2] "%(num)d територије"
 
 #: udata/templates/dataset/search-labels.html:6
 #: udata/templates/reuse/search-labels.html:9 udata/templates/search.html:56
