@@ -103,7 +103,7 @@ def enable_refresh(index_name):
     es.indices.put_settings(index=index_name, body={
         'index': {'refresh_interval': refresh_interval}
     })
-    es.indices.forcemerge(index=index_name)
+    es.indices.forcemerge(index=index_name, request_timeout=30)
 
 
 def set_alias(index_name, delete=True):
