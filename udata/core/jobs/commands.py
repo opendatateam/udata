@@ -80,7 +80,7 @@ def schedule(cron, name, params):
     Jobs args and kwargs are given as parameters without dashes.
 
     Ex:
-        udata job schedule my-job "* * 0 * *" arg1 arg2 key1=value key2=value
+        udata job schedule "* * 0 * *" my-job arg1 arg2 key1=value key2=value
     '''
     if name not in celery.tasks:
         exit_with_error('Job %s not found', name)
