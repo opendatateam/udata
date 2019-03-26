@@ -117,7 +117,7 @@
             </span>
         </div>
     </div>
-    <div class="resource-choose-upload" v-if="isUpload && !files.length">
+    <div class="resource-choose-upload" v-show="isUpload && !files.length">
         <div class="resource-upload-dropzone">
             <div class="row">
                 <div class="text-center col-xs-12">

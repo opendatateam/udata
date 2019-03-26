@@ -12,6 +12,7 @@
 - Pin werkzeug dependency to `0.14.1` until incompatibilities are fixed [#2081](https://github.com/opendatateam/udata/pull/2081)
 - Prevent client-side error while handling unparseable API response [#2076](https://github.com/opendatateam/udata/pull/2076)
 - Fix the `udata job schedule` erroneous help message [#2083](https://github.com/opendatateam/udata/pull/2083)
+- Fix upload button on replace resource file [#2085](https://github.com/opendatateam/udata/pull/2085)
 
 ## 1.6.5 (2019-02-27)
 
