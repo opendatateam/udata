@@ -397,8 +397,13 @@ class DiscussionsTest(APITestCase):
 
         # delete again to test list overflow
         response = self.delete(url_for('api.discussion_comment',
-                               id=discussion.id, cidx=1))
+                               id=discussion.id, cidx=3))
         self.assertStatus(response, 404)
+
+        # delete again to test last comment deletion
+        response = self.delete(url_for('api.discussion_comment',
+                               id=discussion.id, cidx=0))
+        self.assertStatus(response, 400)
 
     def test_delete_discussion_permissions(self):
         self.app.config['USE_METRICS'] = True
