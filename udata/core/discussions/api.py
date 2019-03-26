@@ -130,7 +130,7 @@ class DiscussionAPI(API):
         discussion = Discussion.objects.get_or_404(id=id)
         discussion.delete()
         on_discussion_deleted.send(discussion)
-        return '', 204
+        return 204
 
 
 @ns.route('/', endpoint='discussions')

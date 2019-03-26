@@ -147,7 +147,7 @@ class DatasetAPI(API):
         dataset.deleted = datetime.now()
         dataset.last_modified = datetime.now()
         dataset.save()
-        return '', 204
+        return 204
 
 
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
@@ -362,7 +362,7 @@ class ResourceAPI(ResourceMixin, API):
         dataset.resources.remove(resource)
         dataset.last_modified = datetime.now()
         dataset.save()
-        return '', 204
+        return 204
 
 
 @ns.route('/community_resources/', endpoint='community_resources')
@@ -436,7 +436,7 @@ class CommunityResourceAPI(API):
         '''Delete a given community resource'''
         ResourceEditPermission(community).test()
         community.delete()
-        return '', 204
+        return 204
 
 
 @ns.route('/<id>/followers/', endpoint='dataset_followers')

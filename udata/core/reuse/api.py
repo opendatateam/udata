@@ -88,7 +88,7 @@ class ReuseAPI(API):
         ReuseEditPermission(reuse).test()
         reuse.deleted = datetime.now()
         reuse.save()
-        return '', 204
+        return 204
 
 
 @ns.route('/<reuse:reuse>/datasets/', endpoint='reuse_add_dataset')

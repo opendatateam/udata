@@ -101,4 +101,4 @@ class TopicAPI(API):
     def delete(self, topic):
         '''Delete a given topic'''
         topic.delete()
-        return '', 204
+        return 204

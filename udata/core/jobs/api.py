@@ -133,7 +133,7 @@ class JobAPI(API):
         '''Delete a single scheduled job'''
         task = self.get_or_404(id)
         task.delete()
-        return '', 204
+        return 204
 
 
 @ns.route('/tasks/<string:id>', endpoint='task')

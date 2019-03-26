@@ -42,4 +42,4 @@ def remove(obj, kind):
     if not obj.get_badge(kind):
         api.abort(404, 'Badge does not exists')
     obj.remove_badge(kind)
-    return '', 204
+    return 204

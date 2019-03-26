@@ -73,7 +73,7 @@ class MeAPI(API):
         user = current_user._get_current_object()
         user.mark_as_deleted()
         logout_user()
-        return '', 204
+        return 204
 
 
 @me.route('/avatar', endpoint='my_avatar')
@@ -216,7 +216,7 @@ class ApiKeyAPI(API):
         '''Clear/destroy an apikey'''
         current_user.apikey = None
         current_user.save()
-        return '', 204
+        return 204
 
 
 @ns.route('/', endpoint='users')
@@ -284,7 +284,7 @@ class UserAPI(API):
             api.abort(403, 'You cannot delete yourself with this API. ' +
                       'Use the "me" API instead.')
         user.mark_as_deleted()
-        return '', 204
+        return 204
 
 
 @ns.route('/<id>/followers/', endpoint='user_followers')

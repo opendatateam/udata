@@ -115,7 +115,7 @@ class PostAPI(API):
     def delete(self, post):
         '''Delete a given post'''
         post.delete()
-        return '', 204
+        return 204
 
 
 @ns.route('/<post:post>/publish', endpoint='publish_post')

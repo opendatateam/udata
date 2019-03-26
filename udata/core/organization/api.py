@@ -114,7 +114,7 @@ class OrganizationAPI(API):
         EditOrganizationPermission(org).test()
         org.deleted = datetime.now()
         org.save()
-        return '', 204
+        return 204
 
 
 @ns.route('/badges/', endpoint='available_organization_badges')
@@ -299,7 +299,7 @@ class MemberAPI(API):
         member = org.member(user)
         if member:
             Organization.objects(id=org.id).update_one(pull__members=member)
-            return '', 204
+            return 204
         else:
             api.abort(404)
 
