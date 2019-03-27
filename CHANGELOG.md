@@ -8,6 +8,7 @@
   - Use python based migrations instead of relying on mongo internal and deprecated `js_exec`
   - Handle rollback (optionnal)
   - Detailled history
+- Admins can delete a single comment in a discussion thread [#2087](https://github.com/opendatateam/udata/pull/2087)
 
 ### Breaking changes
 
