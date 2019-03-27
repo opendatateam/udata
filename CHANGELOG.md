@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.6 (2019-03-27)
 
 - Automatically loads default settings from plugins (if `plugin.settings` module exists) [#2058](https://github.com/opendatateam/udata/pull/2058)
 - Fixes some memory leaks on reindexing [#2070](https://github.com/opendatateam/udata/pull/2070)
