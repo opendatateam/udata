@@ -84,9 +84,13 @@ class BaseBackend(object):
     # This a Sequence[HarvestFeature]
     features = tuple()
 
-    def __init__(self, source, job=None, dryrun=False, max_items=None):
-        self.source = source
-        self.job = job
+    def __init__(self, source_or_job, dryrun=False, max_items=None):
+        if isinstance(source_or_job, HarvestJob):
+            self.source = source_or_job.source
+            self.job = source_or_job
+        else:
+            self.source = source_or_job
+            self.job = None
         self.dryrun = dryrun
         self.max_items = max_items
 
