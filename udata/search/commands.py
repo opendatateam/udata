@@ -40,7 +40,7 @@ def iter_adapters():
 
 def iter_qs(qs, adapter):
     '''Safely iterate over a DB QuerySet yielding ES documents'''
-    for obj in qs.no_dereference().timeout(False):
+    for obj in qs.no_cache().no_dereference().timeout(False):
         if adapter.is_indexable(obj):
             try:
                 doc = adapter.from_model(obj).to_dict(include_meta=True)
@@ -100,7 +100,7 @@ def enable_refresh(index_name):
     es.indices.put_settings(index=index_name, body={
         'index': {'refresh_interval': refresh_interval}
     })
-    es.indices.forcemerge(index=index_name)
+    es.indices.forcemerge(index=index_name, request_timeout=30)
 
 
 def set_alias(index_name, delete=True):

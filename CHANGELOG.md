@@ -13,6 +13,22 @@
 
 - The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
 
+## 1.6.6 (2019-03-27)
+
+- Automatically loads default settings from plugins (if `plugin.settings` module exists) [#2058](https://github.com/opendatateam/udata/pull/2058)
+- Fixes some memory leaks on reindexing [#2070](https://github.com/opendatateam/udata/pull/2070)
+- Fixes minor UI bug [#2072](https://github.com/opendatateam/udata/pull/2072)
+- Prevent ExtrasField failure on null value [#2074](https://github.com/opendatateam/udata/pull/2074)
+- Improve ModelField errors handling [#2075](https://github.com/opendatateam/udata/pull/2075)
+- Fix territories home map [#2077](https://github.com/opendatateam/udata/pull/2077)
+- Prevent timeout on `udata index` in some cases [#2079](https://github.com/opendatateam/udata/pull/2079)
+- Pin werkzeug dependency to `0.14.1` until incompatibilities are fixed [#2081](https://github.com/opendatateam/udata/pull/2081)
+- Prevent client-side error while handling unparseable API response [#2076](https://github.com/opendatateam/udata/pull/2076)
+- Fix the `udata job schedule` erroneous help message [#2083](https://github.com/opendatateam/udata/pull/2083)
+- Fix upload button on replace resource file [#2085](https://github.com/opendatateam/udata/pull/2085)
+- Ensure harvest items statuses are updated on the right job [#2089](https://github.com/opendatateam/udata/pull/2089)
+- Added Serbian translations [#2055](https://github.com/opendatateam/udata/pull/2055)
+
 ## 1.6.5 (2019-02-27)
 
 - Replace "An user" by "A user" [#2033](https://github.com/opendatateam/udata/pull/2033)

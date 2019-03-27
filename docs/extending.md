@@ -98,6 +98,10 @@ and can perform any manual initialization.
 
 Use this entrypoint if you want to perform something not handled by previous entrypoints.
 
+### Default settings
+
+Any registered plugin may also expose some default settings in a `settings` module (ie. `my_plugin.settings`). They will be automatically discovered and registered.
+
 ### Translations
 
 Any registered plugin may also expose translations in its root module `translations` directory.
