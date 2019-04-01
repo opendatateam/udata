@@ -219,7 +219,7 @@ class Optionnal:
 class CommonMixin:
     @property
     def form(self):
-        validators = [fields.validators.required()] if self.required else []
+        validators = [fields.validators.DataRequired()] if self.required else []
 
         class Form(ModelForm):
             model_class = self.model

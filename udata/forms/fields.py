@@ -384,7 +384,7 @@ class ModelField(Field):
             # Process prefixed values as in FormField
             newdata = {}
             prefix = self.short_name + '-'
-            for key in formdata.keys():
+            for key in list(formdata.keys()):
                 if key.startswith(prefix):
                     value = formdata.pop(key)
                     newdata[key.replace(prefix, '')] = value
