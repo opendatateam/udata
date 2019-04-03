@@ -244,6 +244,47 @@ class RdfToDatasetTest:
         assert dataset.id == original.id
         assert dataset.title == new_title
 
+    def test_minimal_from_multiple(self):
+        node = BNode()
+        g = Graph()
+
+        title = faker.sentence()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(title)))
+
+        for i in range(3):
+            other = BNode()
+            g.add((other, RDF.type, DCAT.Dataset))
+            g.add((other, DCT.title, Literal(faker.sentence())))
+
+        dataset = dataset_from_rdf(g, node=node)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert dataset.title == title
+
+    def test_update_from_multiple(self):
+        original = DatasetFactory()
+
+        node = URIRef('https://test.org/dataset')
+        g = Graph()
+
+        new_title = faker.sentence()
+        g.add((node, RDF.type, DCAT.Dataset))
+        g.add((node, DCT.title, Literal(new_title)))
+
+        for i in range(3):
+            other = BNode()
+            g.add((other, RDF.type, DCAT.Dataset))
+            g.add((other, DCT.title, Literal(faker.sentence())))
+
+        dataset = dataset_from_rdf(g, dataset=original, node=node)
+        dataset.validate()
+
+        assert isinstance(dataset, Dataset)
+        assert dataset.id == original.id
+        assert dataset.title == new_title
+
     def test_all_fields(self):
         uri = 'https://test.org/dataset'
         node = URIRef(uri)

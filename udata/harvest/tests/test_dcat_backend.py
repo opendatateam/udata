@@ -94,6 +94,23 @@ class DcatBackendTest:
         assert dataset.tags == ['tag-1', 'tag-2']
         assert len(dataset.resources) == 1
 
+    def test_flat_with_blank_nodes(self, rmock):
+        filename = 'bnodes.jsonld'
+        url = mock_dcat(rmock, filename)
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
+
+        assert len(datasets) == 3
+        assert len(datasets['1'].resources) == 2
+        assert len(datasets['2'].resources) == 2
+        assert len(datasets['3'].resources) == 1
+
     def test_simple_nested_attributes(self, rmock):
         filename = 'nested.jsonld'
         url = mock_dcat(rmock, filename)
