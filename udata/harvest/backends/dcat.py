@@ -67,18 +67,19 @@ class DcatBackend(BaseBackend):
 
     def parse_graph(self, url, fmt):
         graph = Graph(namespace_manager=namespace_manager)
-        graph.parse(data=requests.get(url).text, format=fmt)
+        while url:
+            graph.parse(data=requests.get(url).text, format=fmt)
+
+            url = None
+            for cls, prop in KNOWN_PAGINATION:
+                if (None, RDF.type, cls) in graph:
+                    pagination = graph.value(predicate=RDF.type, object=cls)
+                    pagination = graph.resource(pagination)
+                    url = url_from_rdf(pagination, prop)
+                    break
+
         for id, data in self.dcat_datasets(graph):
             self.add_item(id, graph=data)
-
-        for cls, prop in KNOWN_PAGINATION:
-            if (None, RDF.type, cls) in graph:
-                pagination = graph.value(predicate=RDF.type, object=cls)
-                pagination = graph.resource(pagination)
-                next_url = url_from_rdf(pagination, prop)
-                if next_url:
-                    self.parse_graph(next_url, fmt)
-                break
 
     def dcat_datasets(self, graph):
         '''
