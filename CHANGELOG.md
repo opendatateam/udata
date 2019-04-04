@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Refactor DCAT harvesting to store only one graph (and prevent MongoDB document size overflow) [#2096](https://github.com/opendatateam/udata/pull/2096)
 
 ## 1.6.6 (2019-03-27)
 
