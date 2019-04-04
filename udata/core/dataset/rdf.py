@@ -384,13 +384,15 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     return resource
 
 
-def dataset_from_rdf(graph, dataset=None):
+def dataset_from_rdf(graph, dataset=None, node=None):
     '''
     Create or update a dataset from a RDF/DCAT graph
     '''
     dataset = dataset or Dataset()
 
-    node = graph.value(predicate=RDF.type, object=DCAT.Dataset)
+    if node is None:  # Assume first match is the only match
+        node = graph.value(predicate=RDF.type, object=DCAT.Dataset)
+
     d = graph.resource(node)
 
     dataset.title = rdf_value(d, DCT.title)
