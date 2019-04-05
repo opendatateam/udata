@@ -17,11 +17,23 @@ from udata.i18n import lazy_gettext as _
 log = logging.getLogger(__name__)
 
 RE_POST_IMG = re.compile(
-    r'<img .+? src="(?P<src>https?://.+?)" .+?/>',
+    r'''
+    <img .*? (?:(?:
+        src="(?P<src>https?://.+?)"
+        |
+        srcset="(?P<srcset>.+?)"
+        |
+        sizes="(?P<sizes>.+?)"
+    )\s*)+ .*?/>
+    ''',
     re.I|re.X|re.S
 )
 
 RE_STRIP_TAGS = re.compile(r'</?(img|br|p|div|ul|li|ol)[^<>]*?>', re.I|re.M)
+
+# Add some html5 allowed attributes
+EXTRA_ATTRIBUTES = ('srcset', 'sizes')
+feedparser._HTMLSanitizer.acceptable_attributes.update(set(EXTRA_ATTRIBUTES))
 
 # Wordpress ATOM timeout
 WP_TIMEOUT = 5
@@ -73,6 +85,8 @@ def get_blog_post(lang):
 
     feed = None
 
+    print('attrs', feedparser._HTMLSanitizer.acceptable_attributes)
+
     for code in lang, current_app.config['DEFAULT_LANGUAGE']:
         feed_url = wp_atom_url.format(lang=code)
         try:
@@ -84,7 +98,6 @@ def get_blog_post(lang):
             log.error('Error while fetching %s', feed_url, exc_info=True)
             continue
         feed = feedparser.parse(response.content)
-        print('response', feed.version)
         from lxml import etree
         root = etree.fromstring(response.content)
         print(etree.tostring(root, pretty_print=True))
@@ -109,6 +122,10 @@ def get_blog_post(lang):
     match = RE_POST_IMG.search(content)
     if match:
         blogpost['image_url'] = match.group('src').replace('&amp;', '&')
+        if match.group('srcset'):
+            blogpost['srcset'] = match.group('srcset').replace('&amp;', '&')
+        if match.group('sizes'):
+            blogpost['sizes'] = match.group('sizes')
 
     blogpost['summary'] = RE_STRIP_TAGS.sub('', summary).strip()
     return blogpost

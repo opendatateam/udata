@@ -202,11 +202,6 @@ class GetBlogPostMixin:
 
         return fixture
 
-
-    '''
-    <![CDATA[<p><img class="alignnone size-full wp-image-9750" src="https://www.etalab.gouv.fr/wp-content/uploads/2019/03/2019-03-01-cover-article-opendataday.png" alt="image de couverture pour l’article sur la journée mondiale des données ouvertes" width="1200" height="800" srcset="https://www.etalab.gouv.fr/wp-content/uploads/2019/03/2019-03-01-cover-article-opendataday.png 1200w, https://www.etalab.gouv.fr/wp-content/uploads/2019/03/2019-03-01-cover-article-opendataday-300x200.png 300w, https://www.etalab.gouv.fr/wp-content/uploads/2019/03/2019-03-01-cover-article-opendataday-768x512.png 768w, https://www.etalab.gouv.fr/wp-content/uploads/2019/03/2019-03-01-cover-article-opendataday-1024x683.png 1024w" sizes="(max-width: 1200px) 100vw, 1200px" /></p>
-    '''
-
     def test_basic_blogpost(self, blogpost):
         title = faker.sentence()
         post_url = faker.uri()
@@ -225,6 +220,8 @@ class GetBlogPostMixin:
         assert post['summary'] == content
         assert_equal_dates(post['date'], publish_date)
         assert 'image_url' not in post
+        assert 'srcset' not in post
+        assert 'sizes' not in post
 
     def test_blogpost_with_summary(self, blogpost):
         title = faker.sentence()
@@ -246,6 +243,9 @@ class GetBlogPostMixin:
         assert post['summary'] == summary
         assert_equal_dates(post['date'], publish_date)
         assert 'image_url' not in post
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+        
 
     def test_blogpost_with_first_image_as_thumbnail(self, blogpost):
         title = faker.sentence()
@@ -265,6 +265,8 @@ class GetBlogPostMixin:
         assert post['summary'] == summary
         assert_equal_dates(post['date'], publish_date)
         assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
 
     def test_blogpost_with_first_image_as_thumbnail_and_summary(self, blogpost):
         title = faker.sentence()
@@ -285,24 +287,42 @@ class GetBlogPostMixin:
         assert post['summary'] == summary
         assert_equal_dates(post['date'], publish_date)
         assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
 
-    # def test_render_home_with_blog_and_thumbnail_as_enclosure(self, rmock, client):
-    #     '''It should render the home page with the latest blog article'''
-    #     post_url = faker.uri()
-    #     feed = AtomFeed('Some blog', feed_url=WP_ATOM_URL)
-    #     feed.add('Some post',
-    #              '<div>Some content</div>',
-    #              content_type='html',
-    #              author=faker.name(),
-    #              url=post_url,
-    #              updated=faker.date_time(),
-    #              published=faker.date_time())
-    #     rmock.get(WP_ATOM_URL, text=feed.to_string(),
-    #               headers={'Content-Type': 'application/atom+xml'})
-    #     response = client.get(url_for('site.home'))
-    #     assert200(response)
-    #     assert 'Some post' in response.data.decode('utf8')
-    #     assert post_url in response.data.decode('utf8')
+    @pytest.mark.parametrize('tpl', [
+        # Try different aatributes order
+        '<p><img class="whatever" src="{0}" srcset="{1}" sizes="{2}"/> Whatever whatever</p>',
+        '<p><img class="whatever" sizes="{2}" src="{0}" srcset="{1}"/> Whatever whatever</p>',
+        '<p><img class="whatever" srcset="{1}" sizes="{2}" src="{0}"/> Whatever whatever</p>'
+    ])
+    def test_blogpost_with_first_image_as_thumbnail_as_src_set(self, blogpost, tpl):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        summary = faker.sentence()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        srcset = ', '.join(
+            ' '.join((faker.image_url(width=w), '{0}w'.format(w)))
+            for w in ('1200', '1024', '300')
+        )
+        sizes = "(max-width: 1200px) 100vw, 1200px"
+        content = tpl.format(image_url, srcset, sizes)
+        
+        feed = self.feed('Some blog', title, content, post_url,
+                         published=publish_date,
+                         summary=summary)
+        
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == summary
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert post['srcset'] == srcset
+        assert post['sizes'] == sizes
 
     # def test_render_home_with_blog_and_thumbnail_as_srcset(self, rmock, client):
     #     '''It should render the home page with the latest blog article'''
@@ -321,6 +341,25 @@ class GetBlogPostMixin:
     #     assert200(response)
     #     assert 'Some post' in response.data.decode('utf8')
     #     assert post_url in response.data.decode('utf8')
+
+    # def test_render_home_with_blog_and_thumbnail_as_enclosure(self, rmock, client):
+    #     '''It should render the home page with the latest blog article'''
+    #     post_url = faker.uri()
+    #     feed = AtomFeed('Some blog', feed_url=WP_ATOM_URL)
+    #     feed.add('Some post',
+    #              '<div>Some content</div>',
+    #              content_type='html',
+    #              author=faker.name(),
+    #              url=post_url,
+    #              updated=faker.date_time(),
+    #              published=faker.date_time())
+    #     rmock.get(WP_ATOM_URL, text=feed.to_string(),
+    #               headers={'Content-Type': 'application/atom+xml'})
+    #     response = client.get(url_for('site.home'))
+    #     assert200(response)
+    #     assert 'Some post' in response.data.decode('utf8')
+    #     assert post_url in response.data.decode('utf8')
+    
 
     def test_render_home_if_blog_timeout(self, blogpost):
         '''It should not fail when blog time out'''
