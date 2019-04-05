@@ -38,6 +38,9 @@ feedparser._HTMLSanitizer.acceptable_attributes.update(set(EXTRA_ATTRIBUTES))
 # Wordpress ATOM timeout
 WP_TIMEOUT = 5
 
+# Feed allowed enclosure type as thumbnails
+FEED_THUMBNAIL_MIMES = ('image/jpeg', 'image/png', 'image/webp')
+
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Discover OpenData'), None, url='https://doc.data.gouv.fr'),
@@ -85,8 +88,6 @@ def get_blog_post(lang):
 
     feed = None
 
-    print('attrs', feedparser._HTMLSanitizer.acceptable_attributes)
-
     for code in lang, current_app.config['DEFAULT_LANGUAGE']:
         feed_url = wp_atom_url.format(lang=code)
         try:
@@ -119,15 +120,22 @@ def get_blog_post(lang):
     description = post.get('description', None)
     content = post.get('content', [{}])[0].get('value') or description
     summary = post.get('summary', content)
-    match = RE_POST_IMG.search(content)
-    if match:
-        blogpost['image_url'] = match.group('src').replace('&amp;', '&')
-        if match.group('srcset'):
-            blogpost['srcset'] = match.group('srcset').replace('&amp;', '&')
-        if match.group('sizes'):
-            blogpost['sizes'] = match.group('sizes')
-
     blogpost['summary'] = RE_STRIP_TAGS.sub('', summary).strip()
+    
+    for enclosure in post.get('enclosures', []):
+        if enclosure.get('type') in FEED_THUMBNAIL_MIMES:
+            blogpost['image_url'] = enclosure['href']
+            break
+
+    if not 'image_url' in blogpost:
+        match = RE_POST_IMG.search(content)
+        if match:
+            blogpost['image_url'] = match.group('src').replace('&amp;', '&')
+            if match.group('srcset'):
+                blogpost['srcset'] = match.group('srcset').replace('&amp;', '&')
+            if match.group('sizes'):
+                blogpost['sizes'] = match.group('sizes')
+
     return blogpost
 
 

@@ -324,42 +324,29 @@ class GetBlogPostMixin:
         assert post['srcset'] == srcset
         assert post['sizes'] == sizes
 
-    # def test_render_home_with_blog_and_thumbnail_as_srcset(self, rmock, client):
-    #     '''It should render the home page with the latest blog article'''
-    #     post_url = faker.uri()
-    #     feed = AtomFeed('Some blog', feed_url=WP_ATOM_URL)
-    #     feed.add('Some post',
-    #              '<div>Some content</div>',
-    #              content_type='html',
-    #              author=faker.name(),
-    #              url=post_url,
-    #              updated=faker.date_time(),
-    #              published=faker.date_time())
-    #     rmock.get(WP_ATOM_URL, text=feed.to_string(),
-    #               headers={'Content-Type': 'application/atom+xml'})
-    #     response = client.get(url_for('site.home'))
-    #     assert200(response)
-    #     assert 'Some post' in response.data.decode('utf8')
-    #     assert post_url in response.data.decode('utf8')
+    @pytest.mark.parametrize('mime', ['image/jpeg', 'image/png', 'image/webp'])
+    def test_blogpost_with_thumbnail_as_enclosure(self, blogpost, mime):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        content = faker.sentence()
+        html_content = '<div>{0}</div>'.format(content)
+        feed = self.feed('Some blog', title, html_content, post_url,
+                         published=publish_date,
+                         enclosure={'type': mime, 'url': image_url},
+                         )
 
-    # def test_render_home_with_blog_and_thumbnail_as_enclosure(self, rmock, client):
-    #     '''It should render the home page with the latest blog article'''
-    #     post_url = faker.uri()
-    #     feed = AtomFeed('Some blog', feed_url=WP_ATOM_URL)
-    #     feed.add('Some post',
-    #              '<div>Some content</div>',
-    #              content_type='html',
-    #              author=faker.name(),
-    #              url=post_url,
-    #              updated=faker.date_time(),
-    #              published=faker.date_time())
-    #     rmock.get(WP_ATOM_URL, text=feed.to_string(),
-    #               headers={'Content-Type': 'application/atom+xml'})
-    #     response = client.get(url_for('site.home'))
-    #     assert200(response)
-    #     assert 'Some post' in response.data.decode('utf8')
-    #     assert post_url in response.data.decode('utf8')
-    
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == content
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
 
     def test_render_home_if_blog_timeout(self, blogpost):
         '''It should not fail when blog time out'''
@@ -375,7 +362,7 @@ class GetBlogPostMixin:
 class GetBlogPostAtomTest(GetBlogPostMixin):
     mime = 'application/atom+xml'
 
-    def feed(self, feed_title, title, content, url, published=None, summary=None):
+    def feed(self, feed_title, title, content, url, published=None, summary=None, enclosure=None):
         feed = AtomFeed(feed_title, feed_url=WP_FEED_URL)
         tz = pytz.timezone(faker.timezone())
         published = published or faker.date_time(tzinfo=tz)
@@ -388,13 +375,20 @@ class GetBlogPostAtomTest(GetBlogPostMixin):
         }
         if summary:
             kwargs['summary'] = summary
+        if enclosure:
+            kwargs['links'] = [{
+                'type': enclosure['type'],
+                'href': enclosure['url'],
+                'rel': 'enclosure',
+                'length': faker.pyint(),
+            }]
         feed.add(title, content, **kwargs)
         return feed.to_string()
 
 class GetBlogPostRssTest(GetBlogPostMixin):
     mime = 'application/rss+xml'
 
-    def feed(self, feed_title, title, content, url, published=None, summary=None):
+    def feed(self, feed_title, title, content, url, published=None, summary=None, enclosure=None):
         feed = FeedGenerator()
         feed.title(feed_title)
         feed.description(faker.sentence())
@@ -407,6 +401,10 @@ class GetBlogPostRssTest(GetBlogPostMixin):
         entry.content(content, type="cdata")
         if summary:
             entry.description(summary)
+        if enclosure:
+            entry.enclosure(url=enclosure['url'],
+                            type=enclosure['type'],
+                            length=str(faker.pyint()))
         tz = pytz.timezone(faker.timezone())
         published = published or faker.date_time(tzinfo=tz)
         entry.published(published)
