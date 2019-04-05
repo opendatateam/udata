@@ -82,6 +82,15 @@ nav.Bar(
 
 @cache.memoize(50)
 def get_blog_post(lang):
+    '''
+    Extract the latest post summary from an RSS or an Atom feed.
+
+    Image is searched and extracted from (in order of priority):
+      - mediarss `media:thumbnail` attribute
+      - enclosures of image type (first match)
+      - first image found in content
+    Image size is ot taken in account but could in future improvements.
+    '''
     wp_atom_url = current_app.config.get('WP_ATOM_URL')
     if not wp_atom_url:
         return
@@ -99,9 +108,6 @@ def get_blog_post(lang):
             log.error('Error while fetching %s', feed_url, exc_info=True)
             continue
         feed = feedparser.parse(response.content)
-        from lxml import etree
-        root = etree.fromstring(response.content)
-        print(etree.tostring(root, pretty_print=True))
 
         if len(feed.entries) > 0:
             break
@@ -110,7 +116,6 @@ def get_blog_post(lang):
         return
 
     post = feed.entries[0]
-    from pprint import pprint; pprint(post)
 
     blogpost = {
         'title': post.title,
@@ -121,13 +126,18 @@ def get_blog_post(lang):
     content = post.get('content', [{}])[0].get('value') or description
     summary = post.get('summary', content)
     blogpost['summary'] = RE_STRIP_TAGS.sub('', summary).strip()
-    
-    for enclosure in post.get('enclosures', []):
-        if enclosure.get('type') in FEED_THUMBNAIL_MIMES:
-            blogpost['image_url'] = enclosure['href']
-            break
 
-    if not 'image_url' in blogpost:
+    for thumbnail in post.get('media_thumbnail', []):
+        blogpost['image_url'] = thumbnail['url']
+        break
+
+    if 'image_url' not in blogpost:
+        for enclosure in post.get('enclosures', []):
+            if enclosure.get('type') in FEED_THUMBNAIL_MIMES:
+                blogpost['image_url'] = enclosure['href']
+                break
+
+    if 'image_url' not in blogpost:
         match = RE_POST_IMG.search(content)
         if match:
             blogpost['image_url'] = match.group('src').replace('&amp;', '&')

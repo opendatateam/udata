@@ -210,8 +210,7 @@ class GetBlogPostMixin:
         content = faker.sentence()
         html_content = '<div>{0}</div>'.format(content)
         feed = self.feed('Some blog', title, html_content, post_url,
-                         published=publish_date,
-                         )
+                         published=publish_date)
 
         post = blogpost(feed)
 
@@ -233,8 +232,7 @@ class GetBlogPostMixin:
         publish_date = faker.date_time(tzinfo=tz)
         feed = self.feed('Some blog', title, html_content, post_url,
                          published=publish_date,
-                         summary=summary
-                         )
+                         summary=summary)
 
         post = blogpost(feed)
         
@@ -335,8 +333,29 @@ class GetBlogPostMixin:
         html_content = '<div>{0}</div>'.format(content)
         feed = self.feed('Some blog', title, html_content, post_url,
                          published=publish_date,
-                         enclosure={'type': mime, 'url': image_url},
-                         )
+                         enclosure={'type': mime, 'url': image_url})
+
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == content
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+
+    def test_blogpost_with_thumbnail_as_media_thumbnail(self, blogpost):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        content = faker.sentence()
+        html_content = '<div>{0}</div>'.format(content)
+        feed = self.feed('Some blog', title, html_content, post_url,
+                         published=publish_date,
+                         media_thumbnail=image_url)
 
         post = blogpost(feed)
 
@@ -362,7 +381,8 @@ class GetBlogPostMixin:
 class GetBlogPostAtomTest(GetBlogPostMixin):
     mime = 'application/atom+xml'
 
-    def feed(self, feed_title, title, content, url, published=None, summary=None, enclosure=None):
+    def feed(self, feed_title, title, content, url, published=None, summary=None,
+             enclosure=None, media_thumbnail=None):
         feed = AtomFeed(feed_title, feed_url=WP_FEED_URL)
         tz = pytz.timezone(faker.timezone())
         published = published or faker.date_time(tzinfo=tz)
@@ -383,12 +403,18 @@ class GetBlogPostAtomTest(GetBlogPostMixin):
                 'length': faker.pyint(),
             }]
         feed.add(title, content, **kwargs)
-        return feed.to_string()
+        out = feed.to_string()
+        if media_thumbnail:
+            el = '<media:thumbnail url="{0}" />'.format(media_thumbnail)
+            out = out.replace('<feed', '<feed xmlns:media="http://search.yahoo.com/mrss/"')
+            out = out.replace('</entry>', '{0}</entry>'.format(el))
+        return out
 
 class GetBlogPostRssTest(GetBlogPostMixin):
     mime = 'application/rss+xml'
 
-    def feed(self, feed_title, title, content, url, published=None, summary=None, enclosure=None):
+    def feed(self, feed_title, title, content, url, published=None, summary=None,
+             enclosure=None, media_thumbnail=None):
         feed = FeedGenerator()
         feed.title(feed_title)
         feed.description(faker.sentence())
@@ -405,6 +431,9 @@ class GetBlogPostRssTest(GetBlogPostMixin):
             entry.enclosure(url=enclosure['url'],
                             type=enclosure['type'],
                             length=str(faker.pyint()))
+        if media_thumbnail:
+            feed.load_extension('media')
+            entry.media.thumbnail({'url': media_thumbnail})
         tz = pytz.timezone(faker.timezone())
         published = published or faker.date_time(tzinfo=tz)
         entry.published(published)
