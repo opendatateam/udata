@@ -17,7 +17,11 @@ from udata.i18n import lazy_gettext as _
 log = logging.getLogger(__name__)
 
 RE_POST_IMG = re.compile(
-    r'\<img .* src="https?:(?P<src>.+\.(?:png|jpg))" .* />(?P<content>.+)')
+    r'<img .+? src="(?P<src>https?://.+?)" .+?/>',
+    re.I|re.X|re.S
+)
+
+RE_STRIP_TAGS = re.compile(r'</?(img|br|p|div|ul|li|ol)[^<>]*?>', re.I|re.M)
 
 # Wordpress ATOM timeout
 WP_TIMEOUT = 5
@@ -80,6 +84,11 @@ def get_blog_post(lang):
             log.error('Error while fetching %s', feed_url, exc_info=True)
             continue
         feed = feedparser.parse(response.content)
+        print('response', feed.version)
+        from lxml import etree
+        root = etree.fromstring(response.content)
+        print(etree.tostring(root, pretty_print=True))
+
         if len(feed.entries) > 0:
             break
 
@@ -87,17 +96,21 @@ def get_blog_post(lang):
         return
 
     post = feed.entries[0]
+    from pprint import pprint; pprint(post)
+
     blogpost = {
         'title': post.title,
         'link': post.link,
         'date': parse(post.published)
     }
-    match = RE_POST_IMG.match(post.content[0].value)
+    description = post.get('description', None)
+    content = post.get('content', [{}])[0].get('value') or description
+    summary = post.get('summary', content)
+    match = RE_POST_IMG.search(content)
     if match:
-        blogpost.update(image_url=match.group('src'),
-                        summary=match.group('content'))
-    else:
-        blogpost['summary'] = post.summary
+        blogpost['image_url'] = match.group('src').replace('&amp;', '&')
+
+    blogpost['summary'] = RE_STRIP_TAGS.sub('', summary).strip()
     return blogpost
 
 
