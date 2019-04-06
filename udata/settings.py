@@ -194,7 +194,13 @@ class Defaults(object):
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 
-    # TRACKING_BLACKLIST = ['api.notifications', 'api.check_dataset_resource']  # Default: []
+    # Ignore some endpoint from API tracking
+    # By default ignore the 3 most called APIs
+    TRACKING_BLACKLIST = [
+        'api.notifications',
+        'api.check_dataset_resource',
+        'api.avatars',
+    ]
 
     DELETE_ME = True
 
