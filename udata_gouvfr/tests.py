@@ -235,7 +235,7 @@ class GetBlogPostMixin:
                          summary=summary)
 
         post = blogpost(feed)
-        
+
         assert post['title'] == title
         assert post['link'] == post_url
         assert post['summary'] == summary
@@ -243,7 +243,6 @@ class GetBlogPostMixin:
         assert 'image_url' not in post
         assert 'srcset' not in post
         assert 'sizes' not in post
-        
 
     def test_blogpost_with_first_image_as_thumbnail(self, blogpost):
         title = faker.sentence()
@@ -255,7 +254,7 @@ class GetBlogPostMixin:
         content = '<p><img class="whatever" src="{0}" /> {1}</p>'.format(image_url, summary)
         feed = self.feed('Some blog', title, content, post_url,
                          published=publish_date)
-        
+
         post = blogpost(feed)
 
         assert post['title'] == title
@@ -277,7 +276,7 @@ class GetBlogPostMixin:
         feed = self.feed('Some blog', title, content, post_url,
                          published=publish_date,
                          summary=summary)
-        
+
         post = blogpost(feed)
 
         assert post['title'] == title
@@ -307,11 +306,11 @@ class GetBlogPostMixin:
         )
         sizes = "(max-width: 1200px) 100vw, 1200px"
         content = tpl.format(image_url, srcset, sizes)
-        
+
         feed = self.feed('Some blog', title, content, post_url,
                          published=publish_date,
                          summary=summary)
-        
+
         post = blogpost(feed)
 
         assert post['title'] == title
@@ -409,6 +408,7 @@ class GetBlogPostAtomTest(GetBlogPostMixin):
             out = out.replace('<feed', '<feed xmlns:media="http://search.yahoo.com/mrss/"')
             out = out.replace('</entry>', '{0}</entry>'.format(el))
         return out
+
 
 class GetBlogPostRssTest(GetBlogPostMixin):
     mime = 'application/rss+xml'

@@ -26,10 +26,10 @@ RE_POST_IMG = re.compile(
         sizes="(?P<sizes>.+?)"
     )\s*)+ .*?/>
     ''',
-    re.I|re.X|re.S
+    re.I | re.X | re.S
 )
 
-RE_STRIP_TAGS = re.compile(r'</?(img|br|p|div|ul|li|ol)[^<>]*?>', re.I|re.M)
+RE_STRIP_TAGS = re.compile(r'</?(img|br|p|div|ul|li|ol)[^<>]*?>', re.I | re.M)
 
 # Add some html5 allowed attributes
 EXTRA_ATTRIBUTES = ('srcset', 'sizes')
