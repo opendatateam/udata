@@ -9,7 +9,7 @@ from . import backends
 ns = api.namespace('avatars', 'Avatars')
 
 
-@ns.route('/<identifier>/<int:size>', endpoint='avatar')
+@ns.route('/<identifier>/<int:size>', endpoint='avatars')
 class IdenticonAPI(API):
     @api.doc('avatars')
     def get(self, identifier, size):
