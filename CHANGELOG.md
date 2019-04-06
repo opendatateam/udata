@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Refactor DCAT harvesting to store only one graph (and prevent MongoDB document size overflow) [#2096](https://github.com/opendatateam/udata/pull/2096)
+- Expose sane defaults for `TRACKING_BLACKLIST` [#2098](https://github.com/opendatateam/udata/pull/2098)
 
 ## 1.6.6 (2019-03-27)
 
