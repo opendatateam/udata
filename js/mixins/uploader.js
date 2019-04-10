@@ -152,7 +152,7 @@ export default {
                     onSubmitted: this.on_submit,
                     onProgress: this.on_progress,
                     onComplete: this.on_complete,
-                    onError: this.on_error,
+                    onError: this.on_upload_error,
                 },
                 validation: {allowedExtensions: this.$options.allowedExtensions || allowedExtensions.items},
                 messages,
@@ -232,7 +232,7 @@ export default {
          *
          * See: http://docs.fineuploader.com/branch/master/api/events.html#error
          */
-        on_error(id, name, reason, xhr) {
+        on_upload_error(id, name, reason, xhr) {
             if (this.errors.has(id)) return;  // Already notified on first chunk error
             // If there is a JSON message display it instead of the non-explicit default one
             if (xhr) {
