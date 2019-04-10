@@ -1,6 +1,6 @@
+import os
 import collections
 from datetime import datetime, timedelta
-from sets import Set
 from tempfile import NamedTemporaryFile
 
 from celery.utils.log import get_task_logger
@@ -147,16 +147,17 @@ def export_csv_for_model(model, dataset):
 
     log.info('Exporting CSV for %s...' % model)
 
-    csvfile = NamedTemporaryFile(delete=False)
+    csvfile = NamedTemporaryFile(mode='w', delete=False)
     try:
         # write adapter results into a tmp file
         writer = csv.get_writer(csvfile)
         writer.writerow(adapter.header())
         for row in adapter.rows():
             writer.writerow(row)
-        csvfile.seek(0)
-        # make a resource from this tmp file
-        created, resource = store_resource(csvfile, model, dataset)
+        csvfile.close()
+        with open(csvfile.name, 'rb') as rcsvfile:
+            # make a resource from this tmp file
+            created, resource = store_resource(rcsvfile, model, dataset)
         # add it to the dataset
         if created:
             dataset.add_resource(resource)
