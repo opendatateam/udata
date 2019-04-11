@@ -32,10 +32,12 @@ def start():
 
 
 def status_print_task(count, biggest_task_name, munin=False):
-    if not munin:
-        print('* %s : %s' % (count[0].ljust(biggest_task_name), count[1]))
-    else:
+    if munin:
+        # Munin expect all values, including zeros
         print('%s.value %s' % (format_field_for_munin(count[0]), count[1]))
+    elif count[1] > 0:
+        # We only display tasks with items in queue for readability
+        print('* %s : %s' % (count[0].ljust(biggest_task_name), count[1]))
 
 
 def status_print_config(queue):
@@ -56,7 +58,7 @@ def status_print_queue(queue, munin=False):
     queue_length = r.llen(queue)
     if not munin:
         print('Queue "%s": %s task(s)' % (queue, queue_length))
-    counter = Counter()
+    counter = Counter({n: 0 for n, q in get_tasks().items() if q == queue})
     biggest_task_name = 0
     for task in r.lrange(queue, 0, -1):
         task = json.loads(task)
