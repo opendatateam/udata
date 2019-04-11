@@ -9,10 +9,8 @@ from urlparse import urlparse
 import click
 import redis
 
-from celery.task.control import inspect
 from flask import current_app
 
-from udata.app import cache
 from udata.commands import cli, exit_with_error
 from udata.tasks import celery, router
 
@@ -23,11 +21,6 @@ log = logging.getLogger(__name__)
 def grp():
     '''Worker related operations'''
     pass
-
-
-TASKS_LIST_CACHE_KEY = 'worker-status-tasks'
-# we're using an aggressive cache in order not to hit Celery every 5 min
-TASKS_LIST_CACHE_DURATION = 60 * 60 * 24  # in seconds
 
 
 @grp.command()
@@ -48,14 +41,7 @@ def status_print_task(count, biggest_task_name, munin=False):
 def status_print_config(queue):
     if not queue:
         exit_with_error('--munin-config called without a --queue parameter')
-    tasks = cache.get(TASKS_LIST_CACHE_KEY) or []
-    if not tasks:
-        registered = inspect().registered_tasks()
-        if registered:
-            for w, tasks_list in registered.iteritems():
-                tasks += [t for t in tasks_list if t not in tasks]
-            cache.set(TASKS_LIST_CACHE_KEY, tasks,
-                      timeout=TASKS_LIST_CACHE_DURATION)
+    tasks = [n for n, q in get_tasks().items() if q == queue]
     print('graph_title Waiting tasks for queue %s' % queue)
     print('graph_vlabel Nb of tasks')
     print('graph_category celery')
