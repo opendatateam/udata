@@ -14,7 +14,7 @@ from flask import current_app
 
 from udata.app import cache
 from udata.commands import cli, exit_with_error
-from udata.tasks import celery
+from udata.tasks import celery, router
 
 log = logging.getLogger(__name__)
 
@@ -100,6 +100,32 @@ def get_redis_connection():
     db = parsed_url.path[1:] if parsed_url.path else 0
     return redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
                              db=db)
+
+
+def get_task_queue(name, cls):
+    return (router(name, [], {}, None, task=cls) or {}).get('queue', 'default')
+
+
+def get_tasks():
+    '''Get a list of known tasks with their routing queue'''
+    return {
+        name: get_task_queue(name, cls)
+        for name, cls in celery.tasks.items()
+        # Exclude celery internal tasks
+        if not name.startswith('celery.')
+        # Exclude udata test tasks
+        and not name.startswith('test-')
+    }
+
+
+@grp.command()
+def tasks():
+    '''Display registered tasks with their queue'''
+    tasks = get_tasks()
+    longest = max(tasks.keys(), key=len)
+    size = len(longest)
+    for name, queue in sorted(tasks.items()):
+        print('* {0}: {1}'.format(name.ljust(size), queue))
 
 
 @grp.command()
