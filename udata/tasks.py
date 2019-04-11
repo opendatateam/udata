@@ -100,7 +100,7 @@ def connect(signal, *args, **kwargs):
     return wrapper
 
 
-@job('log-test')
+@job('test-log')
 def log_test(self):
     self.log.debug('This is a DEBUG message')
     self.log.info('This is an INFO message')
@@ -121,7 +121,7 @@ def queue_test(self, raises=False):
         raise Exception('Test task processing')
 
 
-@job('error-test')
+@job('test-error')
 def error_test(self):
     self.log.info('There should be an error soon')
     raise Exception('There is an error')
