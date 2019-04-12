@@ -9,12 +9,10 @@ from urlparse import urlparse
 import click
 import redis
 
-from celery.task.control import inspect
 from flask import current_app
 
-from udata.app import cache
 from udata.commands import cli, exit_with_error
-from udata.tasks import celery
+from udata.tasks import celery, router
 
 log = logging.getLogger(__name__)
 
@@ -23,11 +21,6 @@ log = logging.getLogger(__name__)
 def grp():
     '''Worker related operations'''
     pass
-
-
-TASKS_LIST_CACHE_KEY = 'worker-status-tasks'
-# we're using an aggressive cache in order not to hit Celery every 5 min
-TASKS_LIST_CACHE_DURATION = 60 * 60 * 24  # in seconds
 
 
 @grp.command()
@@ -39,23 +32,18 @@ def start():
 
 
 def status_print_task(count, biggest_task_name, munin=False):
-    if not munin:
-        print('* %s : %s' % (count[0].ljust(biggest_task_name), count[1]))
-    else:
+    if munin:
+        # Munin expect all values, including zeros
         print('%s.value %s' % (format_field_for_munin(count[0]), count[1]))
+    elif count[1] > 0:
+        # We only display tasks with items in queue for readability
+        print('* %s : %s' % (count[0].ljust(biggest_task_name), count[1]))
 
 
 def status_print_config(queue):
     if not queue:
         exit_with_error('--munin-config called without a --queue parameter')
-    tasks = cache.get(TASKS_LIST_CACHE_KEY) or []
-    if not tasks:
-        registered = inspect().registered_tasks()
-        if registered:
-            for w, tasks_list in registered.iteritems():
-                tasks += [t for t in tasks_list if t not in tasks]
-            cache.set(TASKS_LIST_CACHE_KEY, tasks,
-                      timeout=TASKS_LIST_CACHE_DURATION)
+    tasks = [n for n, q in get_tasks().items() if q == queue]
     print('graph_title Waiting tasks for queue %s' % queue)
     print('graph_vlabel Nb of tasks')
     print('graph_category celery')
@@ -70,7 +58,7 @@ def status_print_queue(queue, munin=False):
     queue_length = r.llen(queue)
     if not munin:
         print('Queue "%s": %s task(s)' % (queue, queue_length))
-    counter = Counter()
+    counter = Counter({n: 0 for n, q in get_tasks().items() if q == queue})
     biggest_task_name = 0
     for task in r.lrange(queue, 0, -1):
         task = json.loads(task)
@@ -100,6 +88,32 @@ def get_redis_connection():
     db = parsed_url.path[1:] if parsed_url.path else 0
     return redis.StrictRedis(host=parsed_url.hostname, port=parsed_url.port,
                              db=db)
+
+
+def get_task_queue(name, cls):
+    return (router(name, [], {}, None, task=cls) or {}).get('queue', 'default')
+
+
+def get_tasks():
+    '''Get a list of known tasks with their routing queue'''
+    return {
+        name: get_task_queue(name, cls)
+        for name, cls in celery.tasks.items()
+        # Exclude celery internal tasks
+        if not name.startswith('celery.')
+        # Exclude udata test tasks
+        and not name.startswith('test-')
+    }
+
+
+@grp.command()
+def tasks():
+    '''Display registered tasks with their queue'''
+    tasks = get_tasks()
+    longest = max(tasks.keys(), key=len)
+    size = len(longest)
+    for name, queue in sorted(tasks.items()):
+        print('* {0}: {1}'.format(name.ljust(size), queue))
 
 
 @grp.command()
