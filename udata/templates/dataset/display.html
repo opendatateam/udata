@@ -187,8 +187,8 @@
                     </div>
                 </div></div>
                 {# end button bar #}
-                {% if hook_dataset_recommendations and dataset.extras.recommendations %}
-                    {{ hook_dataset_recommendations(dataset.extras.recommendations)|safe }}
+                {% if dataset.extras.recommendations %}
+                {{ hook('dataset_recommendations', dataset.extras.recommendations) }}
                 {% endif %}
             </div>
             {# end left column #}

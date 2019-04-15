@@ -59,11 +59,6 @@ def render_snippets(funcs):
 
 
 @front.app_context_processor
-def inject_template_hooks():
-    return {'hook_%s' % k: v for (k, v) in _template_hooks.items()}
-
-
-@front.app_context_processor
 def inject_hooks():
     return {
         'header_snippets': lambda: render_snippets(_header_snippets),
