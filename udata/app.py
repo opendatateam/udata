@@ -2,7 +2,7 @@ import bson
 import datetime
 import logging
 import os
-import pkgutil
+import importlib
 import types
 
 from os.path import abspath, join, dirname, isfile, exists
@@ -168,10 +168,14 @@ def create_app(config='udata.settings.Defaults', override=None,
         if pkg == 'udata':
             continue  # Defaults are already loaded
         module = '{}.settings'.format(pkg)
-        if pkgutil.find_loader(module):
-            settings = pkgutil.get_loader(module)
-            for key, default in settings.__dict__.items():
-                app.config.setdefault(key, default)
+        try:
+            settings = importlib.import_module(module)
+        except ImportError:
+            continue
+        for key, default in settings.__dict__.items():
+            if key.startswith('__'):
+                continue
+            app.config.setdefault(key, default)
 
     app.json_encoder = UDataJsonEncoder
 
