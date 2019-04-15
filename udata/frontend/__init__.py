@@ -4,6 +4,7 @@ import logging
 from importlib import import_module
 
 from flask import abort, current_app
+from jinja2 import Markup
 
 from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
@@ -17,8 +18,14 @@ log = logging.getLogger(__name__)
 
 front = I18nBlueprint('front', __name__)
 
+_header_snippets = []
 _footer_snippets = []
 _template_hooks = {}
+
+
+def header_snippet(func):
+    _header_snippets.append(func)
+    return func
 
 
 def footer_snippet(func):
@@ -31,14 +38,39 @@ def template_hook(func):
     return func
 
 
+def has_template_hook(name):
+    return name in _template_hooks
+
+
+def render_template_hook(name, *args, **kwargs):
+    if not has_template_hook(name):
+        return ''
+    content = _template_hooks[name](*args, **kwargs)
+    return Markup(content or '')
+
+
+def render_snippets(funcs):
+    snippets = ''
+    for snippet in funcs:
+        out = snippet()
+        if out:
+            snippets += out
+    return Markup(snippets)
+
+
 @front.app_context_processor
 def inject_template_hooks():
     return {'hook_%s' % k: v for (k, v) in _template_hooks.items()}
 
 
 @front.app_context_processor
-def inject_footer_snippets():
-    return {'footer_snippets': _footer_snippets}
+def inject_hooks():
+    return {
+        'header_snippets': lambda: render_snippets(_header_snippets),
+        'footer_snippets': lambda: render_snippets(_footer_snippets),
+        'hook': render_template_hook,
+        'has_hook': has_template_hook,
+    }
 
 
 @front.app_context_processor
