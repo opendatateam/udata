@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Home blog post extraction improvements. Supports both Atom and RSS 2.0, more image tag formats, `media:thumbnail` and enclosures. [#385](https://github.com/etalab/udata-gouvfr/pull/385)
 
 ## 1.6.4 (2019-03-27)
 

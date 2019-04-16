@@ -163,10 +163,13 @@
             </div>
 
             <div class="row gray">
-                <div class="col-xs-12 col-sm-4 photo">
+                {% set has_thumbnail = blogpost.image_url is defined %}
+                {% if has_thumbnail %}
+                <div class="col-xs-12 col-sm-4 photo blog-thumbnail">
                     <img src="{{ blogpost.image_url|safe }}" alt="{{ blogpost.title|safe }}">
                 </div>
-                <div class="col-xs-12 col-sm-8 body">
+                {% endif  %}
+                <div class="col-xs-12 {% if has_thumbnail %}col-sm-8 {% endif %}body">
                     <span class="post-date">{{blogpost.date|dateformat('long')|title}}</span>
                     <h4>
                         <a href="{{ blogpost.link }}"

@@ -4,9 +4,11 @@ import cgi
 import json
 
 import pytest
+import pytz
 import requests
 
 from flask import url_for
+from feedgen.feed import FeedGenerator
 from werkzeug.contrib.atom import AtomFeed
 
 from udata.core.dataset.factories import (
@@ -22,7 +24,7 @@ from udata.tests.features.territories.test_territories_process import (
     create_geozones_fixtures
 )
 from udata.utils import faker
-from udata.tests.helpers import assert200, assert404, assert_redirects
+from udata.tests.helpers import assert200, assert404, assert_redirects, assert_equal_dates
 
 from .models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
@@ -121,44 +123,323 @@ class GouvFrThemeTest:
         assert200(response)
 
 
-WP_ATOM_URL = 'http://somewhere.test/feed.atom'
+WP_FEED_URL = 'http://somewhere.test/feed'
 
 
-@pytest.mark.options(WP_ATOM_URL=WP_ATOM_URL)
+@pytest.mark.options(WP_ATOM_URL=WP_FEED_URL)
 class GouvFrHomeBlogTest:
     '''Ensure home page render with blog'''
     settings = GouvFrSettings
     modules = []
 
-    def test_render_home_with_blog(self, rmock, client):
+    @pytest.fixture
+    def home(self, mocker, client):
+        from . import theme
+
+        def home_client(blogpost):
+            mocker.patch.object(theme, 'get_blog_post', return_value=blogpost)
+            return client.get(url_for('site.home'))
+
+        return home_client
+
+    def test_render_home_with_blog_without_thumbnail(self, home):
         '''It should render the home page with the latest blog article'''
+        post = {
+            'title': faker.name(),
+            'link': faker.uri(),
+            'summary': faker.sentence(),
+            'date': faker.date_time(),
+        }
+        response = home(post)
+        assert200(response)
+        page = response.data.decode('utf8')
+        assert post['title'] in page
+        assert post['link'] in page
+        assert post['summary'] in page
+        assert 'blog-thumbnail' not in page
+
+    def test_render_home_with_blog_with_thumbnail(self, home):
+        '''It should render the home page with the latest blog article and its thumbnail'''
+        post = {
+            'title': faker.name(),
+            'link': faker.uri(),
+            'summary': faker.sentence(),
+            'date': faker.date_time(),
+            'image_url': faker.image_url(),
+        }
+        response = home(post)
+        assert200(response)
+        page = response.data.decode('utf8')
+        assert post['title'] in page
+        assert post['link'] in page
+        assert post['summary'] in page
+        assert post['image_url'] in page
+        assert 'blog-thumbnail' in page
+
+    def test_render_home_without_blogpost(self, home):
+        '''It should render the home page when blog post is missing'''
+        response = home(None)
+        assert200(response)
+        assert 'blog-container' not in response.data.decode('utf8')
+
+
+@pytest.mark.options(WP_ATOM_URL=WP_FEED_URL)
+class GetBlogPostMixin:
+    '''Ensure home page render with blog'''
+    settings = GouvFrSettings
+    mime = None
+
+    @pytest.fixture
+    def blogpost(self, app, rmock):
+        from .theme import get_blog_post
+
+        def fixture(feed):
+            if isinstance(feed, Exception):
+                rmock.get(WP_FEED_URL, exc=feed)
+            else:
+                rmock.get(WP_FEED_URL, text=feed, headers={'Content-Type': self.mime})
+            return get_blog_post('en')
+
+        return fixture
+
+    def test_basic_blogpost(self, blogpost):
+        title = faker.sentence()
         post_url = faker.uri()
-        feed = AtomFeed('Some blog', feed_url=WP_ATOM_URL)
-        feed.add('Some post',
-                 '<div>Some content</div>',
-                 content_type='html',
-                 author=faker.name(),
-                 url=post_url,
-                 updated=faker.date_time(),
-                 published=faker.date_time())
-        rmock.get(WP_ATOM_URL, text=feed.to_string(),
-                  headers={'Content-Type': 'application/atom+xml'})
-        response = client.get(url_for('site.home'))
-        assert200(response)
-        assert 'Some post' in response.data.decode('utf8')
-        assert post_url in response.data.decode('utf8')
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        content = faker.sentence()
+        html_content = '<div>{0}</div>'.format(content)
+        feed = self.feed('Some blog', title, html_content, post_url,
+                         published=publish_date)
 
-    def test_render_home_if_blog_timeout(self, rmock, client):
-        '''It should render the home page when blog time out'''
-        rmock.get(WP_ATOM_URL, exc=requests.Timeout('Blog timed out'))
-        response = client.get(url_for('site.home'))
-        assert200(response)
+        post = blogpost(feed)
 
-    def test_render_home_if_blog_error(self, rmock, client):
-        '''It should render the home page when blog is not available'''
-        rmock.get(WP_ATOM_URL, exc=requests.ConnectionError('Error'))
-        response = client.get(url_for('site.home'))
-        assert200(response)
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == content
+        assert_equal_dates(post['date'], publish_date)
+        assert 'image_url' not in post
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+
+    def test_blogpost_with_summary(self, blogpost):
+        title = faker.sentence()
+        post_url = faker.uri()
+        summary = faker.sentence()
+        content = faker.sentence()
+        html_content = '<div>{0}</div>'.format(content)
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        feed = self.feed('Some blog', title, html_content, post_url,
+                         published=publish_date,
+                         summary=summary)
+
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == summary
+        assert_equal_dates(post['date'], publish_date)
+        assert 'image_url' not in post
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+
+    def test_blogpost_with_first_image_as_thumbnail(self, blogpost):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        summary = faker.sentence()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        content = '<p><img class="whatever" src="{0}" /> {1}</p>'.format(image_url, summary)
+        feed = self.feed('Some blog', title, content, post_url,
+                         published=publish_date)
+
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == summary
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+
+    def test_blogpost_with_first_image_as_thumbnail_and_summary(self, blogpost):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        summary = faker.sentence()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        content = '<p><img class="whatever" src="{0}" /> Whatever whatever</p>'.format(image_url)
+        feed = self.feed('Some blog', title, content, post_url,
+                         published=publish_date,
+                         summary=summary)
+
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == summary
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+
+    @pytest.mark.parametrize('tpl', [
+        # Try different aatributes order
+        '<p><img class="whatever" src="{0}" srcset="{1}" sizes="{2}"/> Whatever whatever</p>',
+        '<p><img class="whatever" sizes="{2}" src="{0}" srcset="{1}"/> Whatever whatever</p>',
+        '<p><img class="whatever" srcset="{1}" sizes="{2}" src="{0}"/> Whatever whatever</p>'
+    ])
+    def test_blogpost_with_first_image_as_thumbnail_as_src_set(self, blogpost, tpl):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        summary = faker.sentence()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        srcset = ', '.join(
+            ' '.join((faker.image_url(width=w), '{0}w'.format(w)))
+            for w in ('1200', '1024', '300')
+        )
+        sizes = "(max-width: 1200px) 100vw, 1200px"
+        content = tpl.format(image_url, srcset, sizes)
+
+        feed = self.feed('Some blog', title, content, post_url,
+                         published=publish_date,
+                         summary=summary)
+
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == summary
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert post['srcset'] == srcset
+        assert post['sizes'] == sizes
+
+    @pytest.mark.parametrize('mime', ['image/jpeg', 'image/png', 'image/webp'])
+    def test_blogpost_with_thumbnail_as_enclosure(self, blogpost, mime):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        content = faker.sentence()
+        html_content = '<div>{0}</div>'.format(content)
+        feed = self.feed('Some blog', title, html_content, post_url,
+                         published=publish_date,
+                         enclosure={'type': mime, 'url': image_url})
+
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == content
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+
+    def test_blogpost_with_thumbnail_as_media_thumbnail(self, blogpost):
+        title = faker.sentence()
+        post_url = faker.uri()
+        image_url = faker.image_url()
+        tz = pytz.timezone(faker.timezone())
+        publish_date = faker.date_time(tzinfo=tz)
+        content = faker.sentence()
+        html_content = '<div>{0}</div>'.format(content)
+        feed = self.feed('Some blog', title, html_content, post_url,
+                         published=publish_date,
+                         media_thumbnail=image_url)
+
+        post = blogpost(feed)
+
+        assert post['title'] == title
+        assert post['link'] == post_url
+        assert post['summary'] == content
+        assert_equal_dates(post['date'], publish_date)
+        assert post['image_url'] == image_url
+        assert 'srcset' not in post
+        assert 'sizes' not in post
+
+    def test_render_home_if_blog_timeout(self, blogpost):
+        '''It should not fail when blog time out'''
+        exc = requests.Timeout('Blog timed out')
+        assert blogpost(exc) is None
+
+    def test_render_home_if_blog_error(self, blogpost):
+        '''It should not fail when blog is not available'''
+        exc = requests.ConnectionError('Error')
+        assert blogpost(exc) is None
+
+
+class GetBlogPostAtomTest(GetBlogPostMixin):
+    mime = 'application/atom+xml'
+
+    def feed(self, feed_title, title, content, url, published=None, summary=None,
+             enclosure=None, media_thumbnail=None):
+        feed = AtomFeed(feed_title, feed_url=WP_FEED_URL)
+        tz = pytz.timezone(faker.timezone())
+        published = published or faker.date_time(tzinfo=tz)
+        kwargs = {
+            'content_type': 'html',
+            'author': faker.name(),
+            'url': url,
+            'updated': faker.date_time_between(start_date=published, tzinfo=tz),
+            'published': published
+        }
+        if summary:
+            kwargs['summary'] = summary
+        if enclosure:
+            kwargs['links'] = [{
+                'type': enclosure['type'],
+                'href': enclosure['url'],
+                'rel': 'enclosure',
+                'length': faker.pyint(),
+            }]
+        feed.add(title, content, **kwargs)
+        out = feed.to_string()
+        if media_thumbnail:
+            el = '<media:thumbnail url="{0}" />'.format(media_thumbnail)
+            out = out.replace('<feed', '<feed xmlns:media="http://search.yahoo.com/mrss/"')
+            out = out.replace('</entry>', '{0}</entry>'.format(el))
+        return out
+
+
+class GetBlogPostRssTest(GetBlogPostMixin):
+    mime = 'application/rss+xml'
+
+    def feed(self, feed_title, title, content, url, published=None, summary=None,
+             enclosure=None, media_thumbnail=None):
+        feed = FeedGenerator()
+        feed.title(feed_title)
+        feed.description(faker.sentence())
+        feed.link({'href': WP_FEED_URL})
+
+        entry = feed.add_entry()
+        entry.title(title)
+        entry.link({'href': url})
+        entry.author(name=faker.name())
+        entry.content(content, type="cdata")
+        if summary:
+            entry.description(summary)
+        if enclosure:
+            entry.enclosure(url=enclosure['url'],
+                            type=enclosure['type'],
+                            length=str(faker.pyint()))
+        if media_thumbnail:
+            feed.load_extension('media')
+            entry.media.thumbnail({'url': media_thumbnail})
+        tz = pytz.timezone(faker.timezone())
+        published = published or faker.date_time(tzinfo=tz)
+        entry.published(published)
+        entry.updated(faker.date_time_between(start_date=published, tzinfo=tz))
+
+        return feed.rss_str().decode('utf8')
 
 
 DISCOURSE_URL = 'http://somewhere.test/discourse'
@@ -365,6 +646,7 @@ class TerritoriesSettings(GouvFrSettings):
     HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 
 
+@pytest.mark.usefixtures('clean_db')
 class TerritoriesTest:
     settings = TerritoriesSettings
     modules = []
@@ -413,6 +695,7 @@ class TerritoriesTest:
             assert expected.format(dataset=dataset) in data
 
 
+@pytest.mark.usefixtures('clean_db')
 class OEmbedsTerritoryAPITest:
     settings = TerritoriesSettings
     modules = []
@@ -530,6 +813,7 @@ class OEmbedsTerritoryAPITest:
                     in html)
 
 
+@pytest.mark.usefixtures('clean_db')
 class SpatialTerritoriesApiTest:
     settings = TerritoriesSettings
     modules = []
@@ -641,6 +925,7 @@ class SitemapTest:
             assert '<loc>{url}</loc>'.format(url=url) in response.data
 
 
+@pytest.mark.usefixtures('clean_db')
 class SitemapTerritoriesTest:
     settings = TerritoriesSettings
     modules = []
