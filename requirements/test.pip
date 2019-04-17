@@ -4,6 +4,6 @@ mock==2.0.0
 pytest==4.4.0
 pytest-env==0.6.2
 pytest-flask==0.14.0
-pytest-mock==1.10.3
+pytest-mock==1.10.4
 pytest-sugar==0.9.2
 requests-mock==1.5.2
