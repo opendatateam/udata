@@ -18,11 +18,10 @@ __all__ = (
 class SiteMetric(Metric):
     model = Site
 
-    def __init__(self, value=None):
+    def __init__(self):
         if current_site is None:
             raise ValueError('Need to be inside app context')
-        super(SiteMetric, self).__init__(current_site._get_current_object(),
-                                         value)
+        super(SiteMetric, self).__init__(current_site._get_current_object())
 
     @classmethod
     def update(cls):

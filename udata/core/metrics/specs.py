@@ -19,7 +19,6 @@ __all__ = ('Metric', 'MetricMetaClass')
 class MetricMetaClass(type):
     '''Ensure any child class dispatch the signals'''
     def __new__(cls, name, bases, attrs):
-
         # Ensure any child class dispatch the signals
         new_class = super(MetricMetaClass, cls).__new__(
             cls, name, bases, attrs)
@@ -41,9 +40,9 @@ class Metric(object):
 
     __metaclass__ = MetricMetaClass
 
-    def __init__(self, target, data=None):
+    def __init__(self, target):
+        '''Apply these metrics on a given target object instance'''
         self.target = target
-        self.data = data
 
     @property
     def objects(self):

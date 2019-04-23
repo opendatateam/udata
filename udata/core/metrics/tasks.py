@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 @metric_need_update.connect
 def update_on_demand(metric):
+    print('update on demand', metric, metric.target)
     update_metric.delay(metric)
 
 
