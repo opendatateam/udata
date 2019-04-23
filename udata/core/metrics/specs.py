@@ -3,27 +3,17 @@ from __future__ import unicode_literals
 
 import logging
 
-from blinker import Signal
 from datetime import date, datetime
 from flask import current_app
 
 from udata.models import db
 
 from . import registry
-from .tasks import update_metric, archive_metric  # noqa
+from .signals import metric_need_update, metric_updated
 
 log = logging.getLogger(__name__)
 
 __all__ = ('Metric', 'MetricMetaClass')
-
-
-def update_on_demand(metric):
-    update_metric.delay(metric)
-
-
-def archive_on_updated(metric):
-    if metric.archived:
-        archive_metric.delay(metric)
 
 
 class MetricMetaClass(type):
@@ -34,10 +24,8 @@ class MetricMetaClass(type):
         new_class = super(MetricMetaClass, cls).__new__(
             cls, name, bases, attrs)
         if new_class.model and new_class.name:
-            new_class.need_update = Signal()
-            new_class.need_update.connect(update_on_demand)
-            new_class.updated = Signal()
-            new_class.updated.connect(archive_on_updated)
+            new_class.need_update = metric_need_update
+            new_class.updated = metric_updated
             registry.register(new_class)
         return new_class
 
