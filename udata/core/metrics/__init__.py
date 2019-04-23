@@ -7,16 +7,15 @@ from blinker import Signal
 from datetime import date, datetime
 from flask import current_app
 
-log = logging.getLogger(__name__)
-
-__all__ = ('Metric', 'MetricMetaClass')
-
-metric_catalog = {}
-
 from udata import entrypoints
 from udata.models import db  # noqa: need metrics refactoring
 
+from . import registry
 from .tasks import update_metric, archive_metric  # noqa
+
+log = logging.getLogger(__name__)
+
+__all__ = ('Metric', 'MetricMetaClass')
 
 
 def update_on_demand(metric):
@@ -40,10 +39,7 @@ class MetricMetaClass(type):
             new_class.need_update.connect(update_on_demand)
             new_class.updated = Signal()
             new_class.updated.connect(archive_on_updated)
-            # register the class in the catalog
-            if new_class.model not in metric_catalog:
-                metric_catalog[new_class.model] = {}
-            metric_catalog[new_class.model][new_class.name] = new_class
+            registry.register(new_class)
         return new_class
 
 
@@ -125,7 +121,7 @@ class Metric(object):
 
     @classmethod
     def get_for(cls, model):
-        return metric_catalog.get(model, {})
+        return registry.get_for(model)
 
     @classmethod
     def connect(cls, *signals):

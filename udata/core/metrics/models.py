@@ -4,7 +4,8 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 
 from udata.models import db
-from . import metric_catalog
+
+from . import registry
 
 
 __all__ = ('Metrics', 'WithMetrics')
@@ -45,9 +46,9 @@ class WithMetrics(object):
         '''Fill metrics with defaults on create'''
         if not self.metrics:
             self.metrics = dict(
-                (name, spec.default)
-                for name, spec in (metric_catalog.get(self.__class__, {})
-                                                 .items()))
+                (name, spec.default) for name, spec
+                in registry.get_for(self.__class__).items()
+            )
         return super(WithMetrics, self).clean()
 
 
