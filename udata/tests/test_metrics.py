@@ -2,16 +2,18 @@
 from __future__ import unicode_literals
 
 import mock
+import pytest
 
 from datetime import date, timedelta
 
-from udata.models import db, Metrics, WithMetrics
 from udata.core.metrics import Metric
-from udata.tests import TestCase, DBTestMixin
+from udata.models import db, Metrics, WithMetrics
+from udata.tests.helpers import assert_emit, assert_not_emit
+
+pytestmark = pytest.mark.usefixtures('clean_db')
 
 
 class FakeModel(WithMetrics, db.Document):
-
     def __unicode__(self):
         return ''
 
@@ -24,15 +26,15 @@ class FakeMetric(Metric):
         return 42
 
 
-class MetricsModelTest(DBTestMixin, TestCase):
+class MetricsModelTest:
     def test_mixin(self):
         obj = FakeModel()
-        self.assertIsInstance(obj.metrics, dict)
+        assert isinstance(obj.metrics, dict)
 
         obj.save()
 
-        self.assertIn('fake', obj.metrics)
-        self.assertEqual(obj.metrics['fake'], 0)
+        assert 'fake' in obj.metrics
+        assert obj.metrics['fake'] == 0
 
     def build_metrics(self, obj, days=3):
         today = date.today()
@@ -53,8 +55,8 @@ class MetricsModelTest(DBTestMixin, TestCase):
         self.build_metrics(obj)
 
         metrics = Metrics.objects.last_for(obj)
-        self.assertIsInstance(metrics, Metrics)
-        self.assertEqual(metrics.date, date.today().isoformat())
+        assert isinstance(metrics, Metrics)
+        assert metrics.date == date.today().isoformat()
 
     def test_get_for(self):
         obj = FakeModel.objects.create()
@@ -62,8 +64,8 @@ class MetricsModelTest(DBTestMixin, TestCase):
 
         metrics = Metrics.objects.get_for(obj)
 
-        self.assertEqual(len(metrics), 1)
-        self.assertEqual(metrics[0].date, date.today().isoformat())
+        assert len(metrics) == 1
+        assert metrics[0].date == date.today().isoformat()
 
     def test_get_for_n_days(self):
         obj = FakeModel.objects.create()
@@ -71,12 +73,12 @@ class MetricsModelTest(DBTestMixin, TestCase):
 
         metrics = Metrics.objects.get_for(obj, days=3)
 
-        self.assertEqual(len(metrics), 3)
+        assert len(metrics) == 3
 
         today = date.today().isoformat()
         first_day = (date.today() - timedelta(2)).isoformat()
-        self.assertEqual(metrics[0].date, today)
-        self.assertEqual(metrics[2].date, first_day)
+        assert metrics[0].date == today
+        assert metrics[2].date == first_day
 
     def test_update_daily_create(self):
         obj = FakeModel.objects.create()
@@ -84,7 +86,7 @@ class MetricsModelTest(DBTestMixin, TestCase):
         Metrics.objects.update_daily(obj, key='value')
 
         metrics = Metrics.objects.get(object_id=obj.id)
-        self.assertEqual(metrics.values, {'key': 'value'})
+        assert metrics.values == {'key': 'value'}
 
     def test_update_daily_update(self):
         obj = FakeModel.objects.create()
@@ -98,7 +100,7 @@ class MetricsModelTest(DBTestMixin, TestCase):
         Metrics.objects.update_daily(obj, key='new-value')
 
         metrics = Metrics.objects.get(object_id=obj.id)
-        self.assertEqual(metrics.values, {'key': 'new-value'})
+        assert metrics.values == {'key': 'new-value'}
 
     def test_update_daily_add(self):
         obj = FakeModel.objects.create()
@@ -112,58 +114,37 @@ class MetricsModelTest(DBTestMixin, TestCase):
         Metrics.objects.update_daily(obj, other='new-value')
 
         metrics = Metrics.objects.get(object_id=obj.id)
-        self.assertEqual(metrics.values, {
+        assert metrics.values == {
             'key': 'value',
             'other': 'new-value',
-        })
+        }
 
 
-class MetricTest(DBTestMixin, TestCase):
-    def setUp(self):
-        self.app.config['USE_METRICS'] = True
-        self.obj = FakeModel.objects.create()
-        self.updated_emitted = False
-        self.need_update_emitted = False
-
-    def on_need_update(self, metric):
-        self.assertIsInstance(metric, FakeMetric)
-        self.assertEqual(metric.target, self.obj)
-        self.need_update_emitted = True
-
-    def on_updated(self, metric):
-        self.assertIsInstance(metric, FakeMetric)
-        self.assertEqual(metric.target, self.obj)
-        self.assertIsNotNone(metric.value)
-        self.updated_emitted = True
-
+@pytest.mark.options(USE_METRICS=True)
+class MetricTest:
     def test_need_update(self):
         '''It should update the metric on "need_update" signal'''
-        metric = FakeMetric(self.obj)
+        obj = FakeModel.objects.create()
+        metric = FakeMetric(obj)
 
-        with FakeMetric.need_update.connected_to(self.on_need_update):
-            with FakeMetric.updated.connected_to(self.on_updated):
-                metric.trigger_update()
+        with assert_emit(FakeMetric.need_update, FakeMetric.updated):
+            metric.trigger_update()
 
-        self.assertTrue(self.need_update_emitted)
-        self.assertTrue(self.updated_emitted)
-
-        self.obj.reload()
-        self.assertEqual(self.obj.metrics['fake'], 42)
+        obj.reload()
+        assert obj.metrics['fake'] == 42
 
     def test_updated(self):
         '''It should store the updated metric on "updated" signal'''
-        metric = FakeMetric(self.obj)
+        obj = FakeModel.objects.create()
+        metric = FakeMetric(obj)
         metric.value = 'some-value'
 
-        with FakeMetric.need_update.connected_to(self.on_need_update):
-            with FakeMetric.updated.connected_to(self.on_updated):
+        with assert_emit(FakeMetric.updated):
+            with assert_not_emit(FakeMetric.need_update):
                 metric.notify_update()
 
-        self.assertFalse(self.need_update_emitted)
-        self.assertTrue(self.updated_emitted)
-
-        metrics = Metrics.objects.last_for(self.obj)
-        self.assertEqual(metrics.values['fake'], 'some-value')
+        metrics = Metrics.objects.last_for(obj)
+        assert metrics.values['fake'] == 'some-value'
 
     @mock.patch('udata.core.metrics.tasks.archive_metric.delay')
     def test_not_archived(self, task):
@@ -176,14 +157,15 @@ class MetricTest(DBTestMixin, TestCase):
             def get_value(self):
                 return 1024
 
-        metric = NotArchivedMetric(self.obj)
+        obj = FakeModel.objects.create()
+        metric = NotArchivedMetric(obj)
 
         metric.notify_update()
 
-        self.assertFalse(task.called)
+        assert not task.called
 
     def test_get_for(self):
         '''All metrics should be registered'''
-        self.assertEqual(Metric.get_for(FakeModel), {
-            'fake': FakeMetric,
-        })
+        metrics = Metric.get_for(FakeModel)
+        assert 'fake' in metrics
+        assert metrics['fake'] is FakeMetric

@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import pytest
 
-from udata.models import db, Metrics, WithMetrics, Site
 from udata.core.site.metrics import SiteMetric
-from udata.tests import TestCase, DBTestMixin
+from udata.models import db, Metrics, WithMetrics, Site
+from udata.tests.helpers import assert_emit
+
+FAKE_VALUE = 42
 
 
 class FakeModel(WithMetrics, db.Document):
-
     def __unicode__(self):
         return ''
-
-
-FAKE_VALUE = 42
 
 
 class FakeSiteMetric(SiteMetric):
@@ -23,34 +22,17 @@ class FakeSiteMetric(SiteMetric):
         return FAKE_VALUE
 
 
-class SiteMetricTest(DBTestMixin, TestCase):
-    def setUp(self):
-        self.app.config['USE_METRICS'] = True
-        self.updated_emitted = False
-        self.need_update_emitted = False
-
-    def on_need_update(self, metric):
-        self.assertIsInstance(metric, FakeSiteMetric)
-        self.need_update_emitted = True
-
-    def on_updated(self, metric):
-        self.assertIsInstance(metric, FakeSiteMetric)
-        self.assertIsNotNone(metric.value)
-        self.updated_emitted = True
-
-    def test_update(self):
+@pytest.mark.usefixtures('clean_db')
+@pytest.mark.options(USE_METRICS=True)
+class SiteMetricTest:
+    def test_update(self, app):
         '''It should store the updated metric on "updated" signal'''
 
-        with FakeSiteMetric.need_update.connected_to(self.on_need_update):
-            with FakeSiteMetric.updated.connected_to(self.on_updated):
-                FakeSiteMetric.update()
-                # metric.notify_update()
+        with assert_emit(FakeSiteMetric.need_update, FakeSiteMetric.updated):
+            FakeSiteMetric.update()
 
-        self.assertTrue(self.need_update_emitted)
-        self.assertTrue(self.updated_emitted)
+        metrics = Metrics.objects.last_for(app.config['SITE_ID'])
+        assert metrics.values['fake'] == FAKE_VALUE
 
-        metrics = Metrics.objects.last_for(self.app.config['SITE_ID'])
-        self.assertEqual(metrics.values['fake'], FAKE_VALUE)
-
-        site = Site.objects.get(id=self.app.config['SITE_ID'])
-        self.assertEqual(site.metrics['fake'], FAKE_VALUE)
+        site = Site.objects.get(id=app.config['SITE_ID'])
+        assert site.metrics['fake'] == FAKE_VALUE
