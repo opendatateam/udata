@@ -15,15 +15,20 @@ class MetricsQuerySet(db.BaseQuerySet):
     def _today(self):
         return date.today()
 
-    def get_for(self, obj, days=1):
+    def _for(self, obj):
+        '''Build a queryset for a given target object'''
         object_id = obj.id if hasattr(obj, 'id') else obj
-        days = max(days or 1, 1)
-        first_day = (date.today() - timedelta(days)).isoformat()
-        qs = self(object_id=object_id, level='daily', date__gt=first_day)
+        qs = self(object_id=object_id, level='daily')
         return qs.order_by('-date')
 
+    def get_for(self, obj, days=1):
+        qs = self._for(obj)
+        days = max(days or 1, 1)
+        first_day = (date.today() - timedelta(days)).isoformat()
+        return qs(date__gt=first_day)
+
     def last_for(self, obj):
-        return self.get_for(obj=obj).first()
+        return self._for(obj=obj).first()
 
     def update_daily(self, obj, date=None, **kwargs):
         oid = obj.id if hasattr(obj, 'id') else obj

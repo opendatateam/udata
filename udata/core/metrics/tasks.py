@@ -42,7 +42,7 @@ def archive_metric(metric):
 def bump_metrics(self):
     today = date.today().isoformat()
     yesterday = (date.today() - timedelta(1)).isoformat()
-    self.log.info('Bumping metrics from to %s to %s', yesterday, today)
+    log.info('Bumping metrics from to %s to %s', yesterday, today)
     script = '''
     function() {
         var processed = 0;

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import mock
 import pytest
 
 from datetime import date, timedelta
 
 from udata.core.metrics import Metric
+from udata.core.metrics.tasks import bump_metrics
 from udata.models import db, Metrics, WithMetrics
 from udata.tests.helpers import assert_emit, assert_not_emit
 
@@ -26,6 +26,21 @@ class FakeMetric(Metric):
         return 42
 
 
+def build_metrics(obj, days=3, today=None):
+    today = today or date.today()
+    for i in range(days):
+        day = (today - timedelta(i)).isoformat()
+        Metrics.objects.create(
+            object_id=obj.id,
+            date=day,
+            level='daily',
+            values={
+                'metric-1': i,
+                'metric-2': float(i),
+            }
+        )
+
+
 class MetricsModelTest:
     def test_mixin(self):
         obj = FakeModel()
@@ -36,23 +51,9 @@ class MetricsModelTest:
         assert 'fake' in obj.metrics
         assert obj.metrics['fake'] == 0
 
-    def build_metrics(self, obj, days=3):
-        today = date.today()
-        for i in range(days):
-            day = (today - timedelta(i)).isoformat()
-            Metrics.objects.create(
-                object_id=obj.id,
-                date=day,
-                level='daily',
-                values={
-                    'metric-1': i,
-                    'metric-2': float(i),
-                }
-            )
-
     def test_last_for(self):
         obj = FakeModel.objects.create()
-        self.build_metrics(obj)
+        build_metrics(obj)
 
         metrics = Metrics.objects.last_for(obj)
         assert isinstance(metrics, Metrics)
@@ -60,7 +61,7 @@ class MetricsModelTest:
 
     def test_get_for(self):
         obj = FakeModel.objects.create()
-        self.build_metrics(obj)
+        build_metrics(obj)
 
         metrics = Metrics.objects.get_for(obj)
 
@@ -69,7 +70,7 @@ class MetricsModelTest:
 
     def test_get_for_n_days(self):
         obj = FakeModel.objects.create()
-        self.build_metrics(obj, 4)
+        build_metrics(obj, 4)
 
         metrics = Metrics.objects.get_for(obj, days=3)
 
@@ -146,9 +147,10 @@ class MetricTest:
         metrics = Metrics.objects.last_for(obj)
         assert metrics.values['fake'] == 'some-value'
 
-    @mock.patch('udata.core.metrics.tasks.archive_metric.delay')
-    def test_not_archived(self, task):
+    def test_not_archived(self, mocker):
         '''It should not store the updated metric when archived=False'''
+        task = mocker.patch('udata.core.metrics.tasks.archive_metric.delay')
+
         class NotArchivedMetric(Metric):
             model = FakeModel
             name = 'not-archived'
@@ -169,3 +171,29 @@ class MetricTest:
         metrics = Metric.get_for(FakeModel)
         assert 'fake' in metrics
         assert metrics['fake'] is FakeMetric
+
+
+@pytest.mark.options(USE_METRICS=True)
+class BumpMetricsTest:
+
+    @pytest.fixture
+    def today(self, mocker):
+        today = date(2019, 4, 20)
+        cls = mocker.patch('udata.core.metrics.tasks.date')
+        cls.today.return_value = today
+        yield today
+
+    def test_no_metrics(self):
+        bump_metrics()
+
+        assert Metrics.objects.count() == 0
+
+    def test_bump_all(self, today):
+        obj = FakeModel.objects.create()
+        days = 3
+        build_metrics(obj, days=days, today=(today - timedelta(1)))
+
+        bump_metrics()
+
+        assert len(Metrics.objects.get_for(obj, days=100)) == days + 1
+        assert Metrics.objects.last_for(obj).date == today.isoformat()
