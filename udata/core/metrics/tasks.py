@@ -43,20 +43,19 @@ def bump_metrics(self):
     today = date.today().isoformat()
     yesterday = (date.today() - timedelta(1)).isoformat()
     log.info('Bumping metrics from to %s to %s', yesterday, today)
-    script = '''
-    function() {
-        var processed = 0;
-        db[collection].find(query).forEach(function(doc) {
-            delete doc._id;
-            doc.date = options.today;
-            db[collection].save(doc);
-            processed += 1;
-        });
-        return processed;
-    }
-    '''
-    processed = Metrics.objects(date=yesterday).exec_js(script, today=today)
-    log.info('Processed %s document(s)', processed)
+    to_bump = Metrics.objects(date=yesterday)
+
+    if to_bump.count() == 0:
+        log.info('No metric to bump')
+        return
+
+    new_metrics = to_bump.aggregate(
+        {'$project': {'_id': False}},
+        {'$addFields': {'date': today}}
+    )
+    # Use underlying PyMongo insert for bulk insertion from generator
+    ids = Metrics.objects._collection.insert(new_metrics)
+    log.info('Processed %s document(s)', len(ids))
 
 
 @task
