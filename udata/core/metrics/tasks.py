@@ -50,8 +50,13 @@ def bump_metrics(self):
         return
 
     new_metrics = to_bump.aggregate(
-        {'$project': {'_id': False}},
-        {'$addFields': {'date': today}}
+        {'$project': {
+            '_id': False,
+            'object_id': True,
+            'date': {'$literal': today},
+            'level': True,
+            'values': True,
+        }}
     )
     # Use underlying PyMongo insert for bulk insertion from generator
     ids = Metrics.objects._collection.insert(new_metrics)
