@@ -6,6 +6,7 @@
 - Expose sane defaults for `TRACKING_BLACKLIST` [#2098](https://github.com/opendatateam/udata/pull/2098)
 - Bubble up uploader errors [#2102](https://github.com/opendatateam/udata/pull/2102)
 - Ensure `udata worker status --munin` always outputs zero values so munin won't see it has a "no data" response [#2103](https://github.com/opendatateam/udata/pull/2103)
+- Metrics tuning: breaks circular dependencies, drop exec_js/eval usage, proper logging...
 
 ## 1.6.6 (2019-03-27)
 
