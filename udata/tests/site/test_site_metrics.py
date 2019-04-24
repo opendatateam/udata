@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import pytest
 
+from udata.core.dataset.factories import DatasetFactory
 from udata.core.site.metrics import SiteMetric
 from udata.models import db, Metrics, WithMetrics, Site
 from udata.tests.helpers import assert_emit
@@ -36,3 +37,9 @@ class SiteMetricTest:
 
         site = Site.objects.get(id=app.config['SITE_ID'])
         assert site.metrics['fake'] == FAKE_VALUE
+
+    def test_resources_metric(self, app):
+        DatasetFactory.create_batch(3, nb_resources=3)
+
+        site = Site.objects.get(id=app.config['SITE_ID'])
+        assert site.metrics['resources'] == 9
