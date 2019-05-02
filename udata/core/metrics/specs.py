@@ -17,9 +17,9 @@ __all__ = ('Metric', 'MetricMetaClass')
 
 
 class MetricMetaClass(type):
-    '''Ensure any child class dispatch the signals'''
+    '''Ensure any child class dispatches the signals'''
     def __new__(cls, name, bases, attrs):
-        # Ensure any child class dispatch the signals
+        # Ensure any child class dispatches the signals
         new_class = super(MetricMetaClass, cls).__new__(
             cls, name, bases, attrs)
         if new_class.model and new_class.name:
@@ -65,7 +65,7 @@ class Metric(object):
 
     def get_value(self):
         '''
-        This method encapsulate the metric computing logic
+        This method encapsulates the metric computing logic
 
         Implement this method when you inherit this class.
         '''
@@ -73,7 +73,7 @@ class Metric(object):
 
     def aggregate(self, start, end):
         '''
-        This method encpsualte the metric aggregation logic.
+        This method encapsulates the metric aggregation logic.
         Override this method when you inherit this class.
         By default, it takes the last value.
         '''
