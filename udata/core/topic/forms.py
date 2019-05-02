@@ -15,13 +15,13 @@ class TopicForm(ModelForm):
 
     owner = fields.CurrentUserField()
 
-    name = fields.StringField(_('Name'), [validators.required()])
+    name = fields.StringField(_('Name'), [validators.DataRequired()])
     description = fields.MarkdownField(
-        _('Description'), [validators.required()])
+        _('Description'), [validators.DataRequired()])
 
     datasets = fields.DatasetListField(_('Associated datasets'))
     reuses = fields.ReuseListField(_('Associated reuses'))
 
-    tags = fields.TagField(_('Tags'), [validators.required()])
+    tags = fields.TagField(_('Tags'), [validators.DataRequired()])
     private = fields.BooleanField(_('Private'))
     featured = fields.BooleanField(_('Featured'))

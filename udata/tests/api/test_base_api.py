@@ -46,7 +46,7 @@ class JSONFormRequestTest(APITestCase):
             'Content-Type': 'multipart/form-data'
         })
         self.assert400(response)
-        self.assertEquals(
+        self.assertEqual(
             response.json,
             {'errors': {'Content-Type': 'expecting application/json'}}
         )

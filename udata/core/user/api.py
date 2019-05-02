@@ -122,7 +122,8 @@ class MyMetricsAPI(API):
 @me.route('/org_datasets/', endpoint='my_org_datasets')
 class MyOrgDatasetsAPI(API):
     @api.secure
-    @api.doc('my_org_datasets', parser=filter_parser)
+    @api.doc('my_org_datasets')
+    @api.expect(filter_parser)
     @api.marshal_list_with(dataset_fields)
     def get(self):
         '''List all datasets related to me and my organizations.'''
@@ -137,7 +138,8 @@ class MyOrgDatasetsAPI(API):
 @me.route('/org_community_resources/', endpoint='my_org_community_resources')
 class MyOrgCommunityResourcesAPI(API):
     @api.secure
-    @api.doc('my_org_community_resources', parser=filter_parser)
+    @api.doc('my_org_community_resources')
+    @api.expect(filter_parser)
     @api.marshal_list_with(community_resource_fields)
     def get(self):
         '''List all community resources related to me and my organizations.'''
@@ -154,7 +156,8 @@ class MyOrgCommunityResourcesAPI(API):
 @me.route('/org_reuses/', endpoint='my_org_reuses')
 class MyOrgReusesAPI(API):
     @api.secure
-    @api.doc('my_org_reuses', parser=filter_parser)
+    @api.doc('my_org_reuses')
+    @api.expect(filter_parser)
     @api.marshal_list_with(reuse_fields)
     def get(self):
         '''List all reuses related to me and my organizations.'''
@@ -169,7 +172,8 @@ class MyOrgReusesAPI(API):
 @me.route('/org_issues/', endpoint='my_org_issues')
 class MyOrgIssuesAPI(API):
     @api.secure
-    @api.doc('my_org_issues', parser=filter_parser)
+    @api.doc('my_org_issues')
+    @api.expect(filter_parser)
     @api.marshal_list_with(issue_fields)
     def get(self):
         '''List all issues related to my organizations.'''
@@ -184,7 +188,8 @@ class MyOrgIssuesAPI(API):
 @me.route('/org_discussions/', endpoint='my_org_discussions')
 class MyOrgDiscussionsAPI(API):
     @api.secure
-    @api.doc('my_org_discussions', parser=filter_parser)
+    @api.doc('my_org_discussions')
+    @api.expect(filter_parser)
     @api.marshal_list_with(discussion_fields)
     def get(self):
         '''List all discussions related to my organizations.'''
@@ -315,8 +320,9 @@ suggest_parser.add_argument(
 
 @ns.route('/suggest/', endpoint='suggest_users')
 class SuggestUsersAPI(API):
+    @api.doc('suggest_users')
+    @api.expect(suggest_parser)
     @api.marshal_list_with(user_suggestion_fields)
-    @api.doc('suggest_users', parser=suggest_parser)
     def get(self):
         '''Suggest users'''
         args = suggest_parser.parse_args()
@@ -335,8 +341,8 @@ class SuggestUsersAPI(API):
 
 @ns.route('/roles/', endpoint='user_roles')
 class UserRolesAPI(API):
-    @api.marshal_list_with(user_role_fields)
     @api.doc('user_roles')
+    @api.marshal_list_with(user_role_fields)
     def get(self):
         '''List all possible user roles'''
         return [{'name': role.name} for role in Role.objects()]

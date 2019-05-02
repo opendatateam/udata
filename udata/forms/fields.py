@@ -171,7 +171,8 @@ class FormWrapper(object):
         self.cls = cls
 
     def __call__(self, *args, **kwargs):
-        kwargs['csrf_enabled'] = False
+        meta = kwargs['meta'] = kwargs.get('meta', {})
+        meta['csrf'] = False
         return self.cls(*args, **kwargs)
 
     def __getattr__(self, name):
