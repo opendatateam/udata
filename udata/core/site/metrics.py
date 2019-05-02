@@ -18,11 +18,10 @@ __all__ = (
 class SiteMetric(Metric):
     model = Site
 
-    def __init__(self, value=None):
+    def __init__(self):
         if current_site is None:
             raise ValueError('Need to be inside app context')
-        super(SiteMetric, self).__init__(current_site._get_current_object(),
-                                         value)
+        super(SiteMetric, self).__init__(current_site._get_current_object())
 
     @classmethod
     def update(cls):
@@ -55,6 +54,7 @@ class ReusesMetric(SiteMetric):
     def get_value(self):
         return Reuse.objects.visible().count()
 
+
 ReusesMetric.connect(Reuse.on_create, Reuse.on_update)
 
 
@@ -63,17 +63,12 @@ class ResourcesMetric(SiteMetric):
     display_name = _('Resources')
 
     def get_value(self):
-        return int(Dataset.objects.visible().exec_js('''
-        function() {
-            var total = 0
-            db[collection].find(query).forEach(function(doc) {
-                if (doc.resources && doc.resources.length) {
-                    total += doc.resources.length;
-                }
-            });
-            return total;
-        }
-        '''))
+        return next(Dataset.objects.visible().aggregate(
+            {'$project': {'resources': 1}},
+            {'$unwind': '$resources' },
+            {'$group': {'_id': 'result', 'count': {'$sum': 1}}}
+        ), {}).get('count', 0)
+
 
 ResourcesMetric.connect(Dataset.on_create, Dataset.on_update,
                         Resource.on_added, Resource.on_deleted)
@@ -86,6 +81,7 @@ class UsersMetric(SiteMetric):
     def get_value(self):
         return User.objects.count()
 
+
 UsersMetric.connect(User.on_update, User.on_create)
 
 
@@ -96,6 +92,7 @@ class OrganizationsMetric(SiteMetric):
     def get_value(self):
         return Organization.objects.visible().count()
 
+
 OrganizationsMetric.connect(Organization.on_update)
 
 
@@ -105,6 +102,7 @@ class SiteFollowersMetric(SiteMetric):
 
     def get_value(self):
         return Follow.objects(until=None).count()
+
 
 SiteFollowersMetric.connect(on_follow, on_unfollow)
 
@@ -119,6 +117,7 @@ class MaxDatasetFollowersMetric(SiteMetric):
                           .order_by('-metrics.followers').first())
         return dataset.metrics['followers'] if dataset else 0
 
+
 MaxDatasetFollowersMetric.connect(Dataset.on_create, Dataset.on_update)
 
 
@@ -131,6 +130,7 @@ class MaxDatasetReusesMetric(SiteMetric):
         dataset = (Dataset.objects(metrics__reuses__gt=0).visible()
                    .order_by('-metrics.reuses').first())
         return dataset.metrics['reuses'] if dataset else 0
+
 
 MaxDatasetReusesMetric.connect(Dataset.on_create, Dataset.on_update)
 
@@ -145,6 +145,7 @@ class MaxReuseDatasetsMetric(SiteMetric):
                  .order_by('-metrics.datasets').first())
         return reuse.metrics['datasets'] if reuse else 0
 
+
 MaxReuseDatasetsMetric.connect(Reuse.on_create, Reuse.on_update)
 
 
@@ -158,6 +159,7 @@ class MaxReuseFollowersMetric(SiteMetric):
                  .order_by('-metrics.followers').first())
         return reuse.metrics['followers'] if reuse else 0
 
+
 MaxReuseFollowersMetric.connect(on_follow, on_unfollow)
 
 
@@ -170,6 +172,7 @@ class MaxOrgFollowersMetric(SiteMetric):
         org = (Organization.objects(metrics__followers__gt=0).visible()
                .order_by('-metrics.followers').first())
         return org.metrics['followers'] if org else 0
+
 
 MaxOrgFollowersMetric.connect(Organization.on_create, Organization.on_update,
                               on_follow, on_unfollow)
@@ -198,6 +201,7 @@ class MaxOrgDatasetsMetric(SiteMetric):
         org = (Organization.objects(metrics__datasets__gt=0).visible()
                .order_by('-metrics.datasets').first())
         return org.metrics['datasets'] if org else 0
+
 
 MaxOrgDatasetsMetric.connect(Organization.on_create, Organization.on_update,
                              Reuse.on_create, Reuse.on_update)

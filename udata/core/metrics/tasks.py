@@ -1,22 +1,38 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
 from datetime import date, timedelta
 
-from celery.utils.log import get_task_logger
+from udata.tasks import task, job
 
-from udata.tasks import celery, job
+from .models import Metrics
+from .signals import metric_need_update, metric_updated
+from .specs import Metric
 
-log = get_task_logger(__name__)
+log = logging.getLogger(__name__)
 
 
-@celery.task
+@metric_need_update.connect
+def update_on_demand(metric):
+    print('update on demand', metric, metric.target)
+    update_metric.delay(metric)
+
+
+@metric_updated.connect
+def archive_on_updated(metric):
+    if metric.archived:
+        archive_metric.delay(metric)
+
+
+@task
 def update_metric(metric):
     log.debug('Update metric %s for %s', metric.name, metric.target)
     metric.compute()
 
 
-@celery.task
+@task
 def archive_metric(metric):
     log.debug('Store metric %s for %s', metric.name, metric.target)
     metric.store()
@@ -24,37 +40,38 @@ def archive_metric(metric):
 
 @job('bump-metrics')
 def bump_metrics(self):
-    from .models import Metrics
     today = date.today().isoformat()
     yesterday = (date.today() - timedelta(1)).isoformat()
-    self.log.info('Bumping metrics from to %s to %s', yesterday, today)
-    script = '''
-    function() {
-        var processed = 0;
-        db[collection].find(query).forEach(function(doc) {
-            delete doc._id;
-            doc.date = options.today;
-            db[collection].save(doc);
-            processed += 1;
-        });
-        return processed;
-    }
-    '''
-    processed = Metrics.objects(date=yesterday).exec_js(script, today=today)
-    log.info('Processed %s document(s)', processed)
+    log.info('Bumping metrics from to %s to %s', yesterday, today)
+    to_bump = Metrics.objects(date=yesterday)
+
+    if to_bump.count() == 0:
+        log.info('No metric to bump')
+        return
+
+    new_metrics = to_bump.aggregate(
+        {'$project': {
+            '_id': False,
+            'object_id': True,
+            'date': {'$literal': today},
+            'level': True,
+            'values': True,
+        }}
+    )
+    # Use underlying PyMongo insert for bulk insertion from generator
+    ids = Metrics.objects._collection.insert(new_metrics)
+    log.info('Processed %s document(s)', len(ids))
 
 
-@celery.task
+@task
 def update_metrics_for(obj):
-    from udata.core.metrics import Metric
     metrics = Metric.get_for(obj.__class__)
     for metric in metrics.values():
         metric(obj).compute()
 
 
-@celery.task
+@task
 def update_site_metrics():
-    from udata.core.metrics import Metric
     from udata.models import Site
     metrics = Metric.get_for(Site)
     for metric in metrics.values():

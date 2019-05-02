@@ -8,7 +8,7 @@ import click
 from udata.commands import cli, success, echo, white
 from udata.models import User, Dataset, Reuse, Organization
 
-from . import metric_catalog
+from . import registry
 from .tasks import update_metrics_for, update_site_metrics
 
 log = logging.getLogger(__name__)
@@ -18,12 +18,6 @@ log = logging.getLogger(__name__)
 def grp():
     '''Metrics related operations'''
     pass
-
-
-def iter_catalog(*models):
-    for model, metrics in metric_catalog.items():
-        if not models or model.__name__.lower() in models:
-            yield (model, metrics)
 
 
 @grp.command()
@@ -69,7 +63,7 @@ def update(site=False, organizations=False, users=False, datasets=False,
 @grp.command()
 def list():
     '''List all known metrics'''
-    for cls, metrics in metric_catalog.items():
+    for cls, metrics in registry.items():
         echo(white(cls.__name__))
 
         for metric in metrics.keys():
