@@ -181,7 +181,7 @@ export default {
             }, {
                 value: this.org.metrics.reuses || 0,
                 label: this.org.metrics.reuses ? this._('Reuses') : this._('Reuse'),
-                icon: 'retweet',
+                icon: 'recycle',
                 color: 'green',
                 target: '#reuses-widget'
             }, {
