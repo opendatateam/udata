@@ -23,7 +23,7 @@
             {% endif %}
             {% if organization.metrics.reuses %}
             <li v-tooltip title="{{ _('Number of reuses') }}">
-                <span class="{{ ficon('fa-retweet') }} fa-fw"></span>
+                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
                 {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
             </li>
             {% endif %}

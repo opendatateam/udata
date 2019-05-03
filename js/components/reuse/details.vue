@@ -20,7 +20,7 @@
 
 <template>
 <div>
-<box :title="_('Details')" icon="retweet" boxclass="box-solid reuse-details-widget">
+<box :title="_('Details')" icon="recycle" boxclass="box-solid reuse-details-widget">
     <h3>{{reuse.title}}</h3>
     <div class="details-body">
         <image-button :src="reuse.image_thumbnail" :size="100" class="thumbnail-button"

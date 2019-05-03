@@ -91,7 +91,7 @@ export default {
             }, {
                 value: orgReusesCount,
                 label: this._('Reuses'),
-                icon: 'retweet',
+                icon: 'recycle',
                 color: 'teal',
             }];
         }

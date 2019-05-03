@@ -3,7 +3,7 @@
 <div class="panel panel-default advanced-search-panel">
     {{ s.range_facet(organizations, 'datasets', _('Datasets'), ficon('fa-cubes'), url=url) }}
     {{ s.terms_facet(organizations, 'badge', _('Badges'), ficon('fa-bookmark'), url=url) }}
-    {{ s.range_facet(organizations, 'reuses', _('Reuses'), ficon('fa-retweet'), url=url) }}
+    {{ s.range_facet(organizations, 'reuses', _('Reuses'), ficon('fa-recycle'), url=url) }}
     {{ s.range_facet(organizations, 'permitted_reuses', _('Reappropriations'), ficon('fa-lightbulb-o'), url=url) }}
     {{ s.range_facet(organizations, 'followers', _('Followers'), ficon('fa-eye'), url=url) }}
 </div>

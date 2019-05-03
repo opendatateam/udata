@@ -1,6 +1,6 @@
 <template>
 <div>
-    <form-layout icon="retweet" :title="title" :save="save" :cancel="cancel" footer="true" :model="reuse">
+    <form-layout icon="recycle" :title="title" :save="save" :cancel="cancel" footer="true" :model="reuse">
       <reuse-form v-ref:form :reuse="reuse"></reuse-form>
     </form-layout>
 </div>

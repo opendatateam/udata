@@ -1,6 +1,6 @@
 <template>
 <div>
-    <datatable :title="title" icon="retweet"
+    <datatable :title="title" icon="recycle"
         boxclass="reuses-widget"
         :fields="fields" :p="reuses"
         :downloads="downloads"

@@ -180,7 +180,7 @@ export default {
             return [{
                 value: this.dataset.metrics.reuses || 0,
                 label: this.dataset.metrics.reuses ? this._('Reuses') : this._('Reuse'),
-                icon: 'retweet',
+                icon: 'recycle',
                 color: 'green',
                 target: '#reuses'
             }, {
