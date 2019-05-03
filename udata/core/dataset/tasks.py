@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import os
+
 from compiler.ast import flatten
 from datetime import datetime, timedelta
 from sets import Set
