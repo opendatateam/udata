@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from udata.core.discussions.models import Discussion
 from udata.frontend import csv
 
-from .models import Dataset
+from .models import Dataset, Resource
 
 
 def serialize_spatial_zones(dataset):
@@ -42,6 +43,7 @@ def dataset_field(name, getter=None):
     return ('dataset.{0}'.format(name), getter or name)
 
 
+@csv.adapter(Resource)
 class ResourcesCsvAdapter(csv.NestedAdapter):
     fields = (
         dataset_field('id'),
@@ -75,6 +77,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
     attribute = 'resources'
 
 
+@csv.adapter(Discussion)
 class IssuesOrDiscussionCsvAdapter(csv.Adapter):
     fields = (
         'id',

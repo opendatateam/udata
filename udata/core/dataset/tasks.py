@@ -1,20 +1,26 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import os
+
 from compiler.ast import flatten
 from datetime import datetime, timedelta
 from sets import Set
+from tempfile import NamedTemporaryFile
 
 from celery.utils.log import get_task_logger
 from flask import current_app
 
 from udata import mail
+from udata import models as udata_models
+from udata.core import storages
+from udata.frontend import csv
 from udata.i18n import lazy_gettext as _
-from udata.models import (
-    Organization, Activity, Metrics, Topic, Issue, Discussion, Follow
-)
+from udata.models import (Follow, Issue, Discussion, Activity, Metrics, Topic,
+                          Organization)
 from udata.tasks import job
 
-from .models import Dataset, UPDATE_FREQUENCIES
+from .models import Dataset, Resource, UPDATE_FREQUENCIES, Checksum
 
 log = get_task_logger(__name__)
 
@@ -76,3 +82,107 @@ def send_frequency_reminder(self):
         nb_emails=len(reminded_people),
         nb_emails_twice=len(reminded_people) - len(Set(reminded_people))))
     print('Done')
+
+
+def get_queryset(model_cls):
+    # special case for resources
+    if model_cls.__name__ == 'Resource':
+        model_cls = getattr(udata_models, 'Dataset')
+    params = {}
+    attrs = ('private', 'deleted')
+    for attr in attrs:
+        if getattr(model_cls, attr, None):
+            params[attr] = False
+    return model_cls.objects.filter(**params)
+
+
+def get_or_create_resource(r_info, model, dataset):
+    resource = None
+    for r in dataset.resources:
+        if r.extras.get('csv-export:model', '') == model:
+            resource = r
+            break
+    if resource:
+        for k, v in r_info.items():
+            setattr(resource, k, v)
+        resource.save()
+        return False, resource
+    else:
+        r_info['extras'] = {'csv-export:model': model}
+        return True, Resource(**r_info)
+
+
+def store_resource(csvfile, model, dataset):
+    timestr = datetime.now().strftime('%Y%m%d-%H%M%S')
+    filename = 'export-%s-%s.csv' % (model, timestr)
+    prefix = '/'.join((dataset.slug, timestr))
+    storage = storages.resources
+    stored_filename = storage.save(csvfile, prefix=prefix, filename=filename)
+    r_info = storage.metadata(stored_filename)
+    checksum = r_info.pop('checksum')
+    algo, checksum = checksum.split(':', 1)
+    r_info[algo] = checksum
+    r_info['format'] = storages.utils.extension(stored_filename)
+    r_info['checksum'] = Checksum(type='sha1', value=r_info.pop('sha1'))
+    r_info['filesize'] = r_info.pop('size')
+    del r_info['filename']
+    r_info['title'] = filename
+    return get_or_create_resource(r_info, model, dataset)
+
+
+def export_csv_for_model(model, dataset):
+    model_cls = getattr(udata_models, model.capitalize(), None)
+    if not model_cls:
+        log.error('Unknow model %s' % model)
+        return
+    queryset = get_queryset(model_cls)
+    adapter = csv.get_adapter(model_cls)
+    if not adapter:
+        log.error('No adapter found for %s' % model)
+        return
+    adapter = adapter(queryset)
+
+    log.info('Exporting CSV for %s...' % model)
+
+    csvfile = NamedTemporaryFile(delete=False)
+    try:
+        # write adapter results into a tmp file
+        writer = csv.get_writer(csvfile)
+        writer.writerow(adapter.header())
+        for row in adapter.rows():
+            writer.writerow(row)
+        csvfile.seek(0)
+        # make a resource from this tmp file
+        created, resource = store_resource(csvfile, model, dataset)
+        # add it to the dataset
+        if created:
+            dataset.add_resource(resource)
+        dataset.last_modified = datetime.now()
+        dataset.save()
+    finally:
+        os.unlink(csvfile.name)
+
+
+@job('export-csv')
+def export_csv(self):
+    '''
+    Generates a CSV export of all model objects as a resource of a dataset
+    '''
+    ALLOWED_MODELS = current_app.config.get('EXPORT_CSV_MODELS', [])
+    DATASET_DEFAULTS = current_app.config.get('EXPORT_CSV_DATASET_INFO')
+
+    if ALLOWED_MODELS:
+        slug = DATASET_DEFAULTS.pop('slug')
+        organization = DATASET_DEFAULTS.get('organization')
+        if organization:
+            try:
+                DATASET_DEFAULTS['organization'] = Organization.objects.get(id=organization)
+            except Organization.DoesNotExist:
+                log.error('Organization with id %s not found.' % organization)
+        dataset, _ = Dataset.objects.get_or_create(
+            slug=slug,
+            defaults=DATASET_DEFAULTS,
+        )
+
+    for model in ALLOWED_MODELS:
+        export_csv_for_model(model, dataset)
