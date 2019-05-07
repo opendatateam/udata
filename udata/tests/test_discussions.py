@@ -378,6 +378,43 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(dataset.metrics['discussions'], 0)
         self.assertEqual(Discussion.objects(subject=dataset).count(), 0)
 
+    def test_delete_discussion_comment(self):
+        owner = self.login(AdminFactory())
+        user = UserFactory()
+        dataset = Dataset.objects.create(title='Test dataset', owner=owner)
+        message = Message(content='bla bla', posted_by=user)
+        message2 = Message(content='bla bla bla', posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset,
+            user=user,
+            title='test discussion',
+            discussion=[message, message2]
+        )
+        self.assertEqual(len(discussion.discussion), 2)
+
+        # test first comment deletion
+        response = self.delete(url_for('api.discussion_comment',
+                               id=discussion.id, cidx=0))
+        self.assertStatus(response, 400)
+
+        # test effective deletion
+        response = self.delete(url_for('api.discussion_comment',
+                               id=discussion.id, cidx=1))
+        self.assertStatus(response, 204)
+        discussion.reload()
+        self.assertEqual(len(discussion.discussion), 1)
+        self.assertEqual(discussion.discussion[0].content, 'bla bla')
+
+        # delete again to test list overflow
+        response = self.delete(url_for('api.discussion_comment',
+                               id=discussion.id, cidx=3))
+        self.assertStatus(response, 404)
+
+        # delete again to test last comment deletion
+        response = self.delete(url_for('api.discussion_comment',
+                               id=discussion.id, cidx=0))
+        self.assertStatus(response, 400)
+
     def test_delete_discussion_permissions(self):
         self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
@@ -398,6 +435,21 @@ class DiscussionsTest(APITestCase):
         dataset.reload()
         # Metrics unchanged after attempt to delete the discussion.
         self.assertEqual(dataset.metrics['discussions'], 1)
+
+    def test_delete_discussion_comment_permissions(self):
+        dataset = Dataset.objects.create(title='Test dataset')
+        user = UserFactory()
+        message = Message(content='bla bla', posted_by=user)
+        discussion = Discussion.objects.create(
+            subject=dataset,
+            user=user,
+            title='test discussion',
+            discussion=[message]
+        )
+        self.login()
+        response = self.delete(url_for('api.discussion_comment',
+                               id=discussion.id, cidx=0))
+        self.assert403(response)
 
 
 class DiscussionCsvTest(FrontTestCase):
