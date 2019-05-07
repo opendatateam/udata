@@ -51,7 +51,7 @@
                 v-for="(idx, message) in discussion.discussion">
                 <div class="direct-chat-info clearfix">
                     <span class="direct-chat-name pull-left">{{message.posted_by | display}}</span>
-                    <a v-if="$root.me.is_admin && canDeleteComment"  @click.prevent="confirm_delete_comment(idx)" href="" class="direct-chat-name direct-chat-delete">{{ _('Delete comment') }}</a>
+                    <a v-if="$root.me.is_admin && idx !== 0"  @click.prevent="confirm_delete_comment(idx)" href class="direct-chat-name direct-chat-delete">{{ _('Delete comment') }}</a>
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>
                 </div>
                 <img class="direct-chat-img"  :alt="_('User Image')"
@@ -125,9 +125,6 @@ export default {
         },
         formValid() {
             return this.comment && this.comment.length > 0;
-        },
-        canDeleteComment() {
-            return !!this.discussion.discussion && this.discussion.discussion.length > 1;
         }
     },
     data() {

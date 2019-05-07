@@ -146,8 +146,8 @@ class DiscussionCommentAPI(API):
         discussion = Discussion.objects.get_or_404(id=id)
         if len(discussion.discussion) <= cidx:
             api.abort(404, 'Comment does not exist')
-        elif len(discussion.discussion) == 1:
-            api.abort(400, 'You cannot delete the last comment of a discussion')
+        elif cidx == 0:
+            api.abort(400, 'You cannot delete the first comment of a discussion')
         discussion.discussion.pop(cidx)
         discussion.save()
         return '', 204

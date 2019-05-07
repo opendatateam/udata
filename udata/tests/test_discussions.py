@@ -391,6 +391,13 @@ class DiscussionsTest(APITestCase):
             discussion=[message, message2]
         )
         self.assertEqual(len(discussion.discussion), 2)
+
+        # test first comment deletion
+        response = self.delete(url_for('api.discussion_comment',
+                               id=discussion.id, cidx=0))
+        self.assertStatus(response, 400)
+
+        # test effective deletion
         response = self.delete(url_for('api.discussion_comment',
                                id=discussion.id, cidx=1))
         self.assertStatus(response, 204)
