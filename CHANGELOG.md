@@ -10,6 +10,7 @@
 - Change reuse icon from "retweet" to "recycle" [#2122](https://github.com/opendatateam/udata/pull/2122)
 - Admins can delete a single comment in a discussion thread [#2087](https://github.com/opendatateam/udata/pull/2087)
 - Add cache directives to dataset display blocks [#2129](https://github.com/opendatateam/udata/pull/2129)
+- Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload)
 
 ## 1.6.6 (2019-03-27)
 
