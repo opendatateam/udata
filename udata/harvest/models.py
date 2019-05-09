@@ -123,14 +123,16 @@ class HarvestSource(db.Owned, db.Document):
     def get(cls, ident):
         return cls.objects(slug=ident).first() or cls.objects.get(pk=ident)
 
-    def get_last_job(self):
+    def get_last_job(self, reduced=False):
         qs = HarvestJob.objects(source=self)
-        qs = qs.exclude('source', 'items', 'errors', 'data')
-        return qs.no_dereference().order_by('-created').first()
+        if reduced:
+            qs = qs.exclude('source', 'items', 'errors', 'data')
+            qs = qs.no_dereference()
+        return qs.order_by('-created').first()
 
     @cached_property
     def last_job(self):
-        return self.get_last_job()
+        return self.get_last_job(reduced=True)
 
     @property
     def schedule(self):
