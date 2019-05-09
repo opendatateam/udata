@@ -22,12 +22,14 @@
 <link rel="alternate" type="application/json+oembed"
     href="{{ url_for('api.oembed', url=dataset.external_url) }}"
     title="{{ dataset.title | urlencode }}" />
+{% endcache %}
 {% endblock %}
 
 {% block breadcrumb %}
 {% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
     <li class="active">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
+{% endcache %}
 {% endblock %}
 
 {% block content %}
@@ -438,4 +440,5 @@
     </div>
 </section>
 {% endblock %}
+{% endcache %}
 {% endblock %}
