@@ -9,6 +9,7 @@
 - Metrics tuning: breaks circular dependencies, drop exec_js/eval usage, proper logging... [#2113](https://github.com/opendatateam/udata/pull/2113)
 - Change reuse icon from "retweet" to "recycle" [#2122](https://github.com/opendatateam/udata/pull/2122)
 - Admins can delete a single comment in a discussion thread [#2087](https://github.com/opendatateam/udata/pull/2087)
+- Add cache directives to dataset display blocks [#2129](https://github.com/opendatateam/udata/pull/2129)
 
 ## 1.6.6 (2019-03-27)
 

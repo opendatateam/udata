@@ -17,18 +17,23 @@
 {% set body_class = 'dataset-display' %}
 
 {% block extra_head %}
+{% cache cache_duration, 'dataset-extra-head', dataset.id|string, g.lang_code %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
 <link rel="alternate" type="application/json+oembed"
     href="{{ url_for('api.oembed', url=dataset.external_url) }}"
     title="{{ dataset.title | urlencode }}" />
+{% endcache %}
 {% endblock %}
 
 {% block breadcrumb %}
+{% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
     <li class="active">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
+{% endcache %}
 {% endblock %}
 
 {% block content %}
+{% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
@@ -435,4 +440,5 @@
     </div>
 </section>
 {% endblock %}
+{% endcache %}
 {% endblock %}
