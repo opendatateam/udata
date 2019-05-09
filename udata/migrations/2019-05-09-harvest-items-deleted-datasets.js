@@ -11,7 +11,7 @@ const pipeline = [
     {$unwind: '$datasetId'}, // One row by ID
     {$lookup: {from: 'dataset', localField: 'datasetId', foreignField: '_id', as: 'dataset'}}, // Join
     {$match: {'dataset': [] }} // Only keep IDs without match
-]
+];
 
 const index = {'items.dataset': 1};
 
