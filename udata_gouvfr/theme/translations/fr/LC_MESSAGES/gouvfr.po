@@ -18,8 +18,8 @@ msgstr ""
 "X-Crowdin-File: /master/udata_gouvfr/theme/translations/gouvfr.pot\n"
 
 #: __init__.py:27
-msgid "Discover OpenData"
-msgstr "Découvrez l’OpenData"
+msgid "Documentation"
+msgstr "Documentation"
 
 #: __init__.py:28
 msgid "Data"
@@ -246,4 +246,3 @@ msgstr "L'identité de ce service public est certifiée par Etalab"
 #: templates/organization/sidebar-producer.html:4
 msgid "Certified public service"
 msgstr "Service public certifié"
-

@@ -43,14 +43,11 @@ FEED_THUMBNAIL_MIMES = ('image/jpeg', 'image/png', 'image/webp')
 
 
 gouvfr_menu = nav.Bar('gouvfr_menu', [
-    nav.Item(_('Discover OpenData'), None, url='https://doc.data.gouv.fr'),
-    nav.Item(_('Data'), 'datasets.list', items=[
-        nav.Item(_('Datasets'), 'datasets.list'),
-        nav.Item(_('Reuses'), 'reuses.list'),
-        nav.Item(_('Organizations'), 'organizations.list'),
-    ]),
+    nav.Item(_('Data'), 'datasets.list'),
+    nav.Item(_('Reuses'), 'reuses.list'),
+    nav.Item(_('Organizations'), 'organizations.list'),
     nav.Item(_('Dashboard'), 'site.dashboard'),
-    # nav.Item(_('Territories'), 'territories.home'),
+    nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr'),
 ])
 
 theme.menu(gouvfr_menu)
