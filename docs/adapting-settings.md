@@ -113,6 +113,18 @@ Define the resources preview mode. Can be one of:
 
 If you want to disable preview, set `PREVIEW_MODE` to `None`
 
+### SEARCH_AUTOCOMPLETE_ENABLED
+
+**default**: `True`
+
+Enables the search autocomplete on frontend if set to `True`, disables otherwise.
+
+### SEARCH_AUTOCOMPLETE_DEBOUNCE
+
+**default**: `200`
+
+The search autocomplete debounce delay on frontend, in milliseconds.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE

@@ -328,6 +328,9 @@ class Defaults(object):
         'organization': None,
     }
 
+    SEARCH_AUTOCOMPLETE_ENABLED = True
+    SEARCH_AUTOCOMPLETE_DEBOUNCE = 200  # in ms
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

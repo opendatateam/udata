@@ -18,7 +18,7 @@
         <input name="q" type="search" class="form-control"
             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             :placeholder="placeholder || _('Search')"
-            v-model="query" debounce="200"
+            v-model="query" :debounce="config.search_autocomplete_debounce"
             @keydown="show = true"
             @keydown.up.prevent="up"
             @keydown.down.prevent="down"
@@ -48,6 +48,7 @@
 import { Cache } from 'cache';
 import { escapeRegex } from 'utils';
 import placeholders from 'helpers/placeholders';
+import config from 'config';
 
 function group(id, name, template) {
     return {id, name,
@@ -85,6 +86,7 @@ export default {
             ],
             minLength: 2,
             placeholders: placeholders,
+            config: config
         }
     },
     computed: {
@@ -163,6 +165,7 @@ export default {
     },
     watch: {
         query(value) {
+            if (!config.is_search_autocomplete_enabled) return;
             const query = value.trim()
             if (!query || query.length < this.minLength) {
                 this.reset()
