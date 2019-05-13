@@ -99,6 +99,7 @@ class GeoZone(db.Document):
     population = db.IntField()
     area = db.FloatField()
     wikipedia = db.StringField()
+    wikidata = db.StringField()
     dbpedia = db.StringField()
     flag = db.ImageField(fs=logos)
     blazon = db.ImageField(fs=logos)
