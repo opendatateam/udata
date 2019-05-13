@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Extend debounce delay on autocomplete [#2137](https://github.com/opendatateam/udata/pull/2137)
 
 ## 1.6.7 (2019-05-10)
 
