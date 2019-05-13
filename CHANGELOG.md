@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.8 (2019-05-13)
 
 - Configurable search autocomplete [#2138](https://github.com/opendatateam/udata/pull/2138)
 
