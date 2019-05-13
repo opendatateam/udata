@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Configurable search autocomplete [#2138](https://github.com/opendatateam/udata/pull/2138)
 
 ## 1.6.7 (2019-05-10)
 
