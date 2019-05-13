@@ -101,7 +101,8 @@ class SpatialApiTest(APITestCase):
         with self.autoindex():
             for i in range(4):
                 GeoZoneFactory(name='test-{0}'.format(i)
-                               if i % 2 else faker.word())
+                               if i % 2 else faker.word(),
+                               is_current=True)
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
@@ -123,7 +124,8 @@ class SpatialApiTest(APITestCase):
         with self.autoindex():
             for i in range(4):
                 GeoZoneFactory(code='test-{0}'.format(i)
-                               if i % 2 else faker.word())
+                               if i % 2 else faker.word(),
+                               is_current=True)
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
@@ -147,7 +149,8 @@ class SpatialApiTest(APITestCase):
                 GeoZoneFactory(
                     name='in' if i % 2 else 'not-in',
                     keys={str(i): 'test-{0}'.format(i)
-                                  if i % 2 else faker.word()}
+                                  if i % 2 else faker.word()},
+                    is_current=True
                 )
 
         response = self.get(url_for('api.suggest_zones'),
@@ -172,7 +175,8 @@ class SpatialApiTest(APITestCase):
                 GeoZoneFactory(
                     name='in' if i % 2 else 'not-in',
                     keys={str(i): ['test-{0}'.format(i)
-                                   if i % 2 else faker.word()]}
+                                   if i % 2 else faker.word()]},
+                    is_current=True
                 )
 
         response = self.get(url_for('api.suggest_zones'),
@@ -194,8 +198,9 @@ class SpatialApiTest(APITestCase):
         '''It should not provide zones suggestions if no match'''
         with self.autoindex():
             for i in range(3):
-                GeoZoneFactory(
-                    name=5 * '{0}'.format(i), code=3 * '{0}'.format(i))
+                GeoZoneFactory(name=5 * '{0}'.format(i),
+                               code=3 * '{0}'.format(i),
+                               is_current=True)
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
@@ -207,7 +212,8 @@ class SpatialApiTest(APITestCase):
         with self.autoindex():
             for i in range(4):
                 GeoZoneFactory(name='testé-{0}'.format(i)
-                               if i % 2 else faker.word())
+                               if i % 2 else faker.word(),
+                               is_current=True)
 
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'testé', 'size': '5'})
@@ -231,6 +237,28 @@ class SpatialApiTest(APITestCase):
             url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
+
+    def test_only_suggest_current_zones(self):
+        '''It should only suggest current zones'''
+        with self.autoindex():
+            for i in range(4):
+                GeoZoneFactory(name='test-{0}-{1}'.format(i, 'current' if i % 2 else 'legacy'),
+                               is_current=i % 2)
+
+        response = self.get(
+            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 2)
+
+        for suggestion in response.json:
+            self.assertIn('id', suggestion)
+            self.assertIn('name', suggestion)
+            self.assertIn('code', suggestion)
+            self.assertIn('level', suggestion)
+            self.assertIn('keys', suggestion)
+            self.assertIsInstance(suggestion['keys'], dict)
+            self.assertTrue(suggestion['name'].endswith('-current'))
 
     def test_spatial_levels(self):
         levels = [GeoLevelFactory() for _ in range(3)]
