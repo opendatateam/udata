@@ -18,7 +18,7 @@
         <input name="q" type="search" class="form-control"
             autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
             :placeholder="placeholder || _('Search')"
-            v-model="query" debounce="200"
+            v-model="query" debounce="600"
             @keydown="show = true"
             @keydown.up.prevent="up"
             @keydown.down.prevent="down"
