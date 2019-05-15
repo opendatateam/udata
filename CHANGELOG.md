@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- remove clutter from search bar [#400](https://github.com/etalab/udata-gouvfr/pull/400)
 
 ## 1.6.5 (2019-05-10)
 
