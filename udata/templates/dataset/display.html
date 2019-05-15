@@ -33,7 +33,7 @@
 {% endblock %}
 
 {% block content %}
-{% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code %}
+{% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
