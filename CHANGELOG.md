@@ -6,6 +6,7 @@
 - Change display of cards of reuses on topic pages [#2148](https://github.com/opendatateam/udata/pull/2148)
 - Display remote source of harvested dataset [#2150](https://github.com/opendatateam/udata/pull/2150)
 - Prefill community resource type on upload form [#2151](https://github.com/opendatateam/udata/pull/2151)
+- Fix user profile UI [#2152](https://github.com/opendatateam/udata/pull/2152)
 - Remove concept of permitted reuse [#2153](https://github.com/opendatateam/udata/pull/2153)
 
 ## 1.6.8 (2019-05-13)
