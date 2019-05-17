@@ -245,6 +245,14 @@
                             </li>
                             {% endif%}
 
+                            {# Source CKAN #}
+                            {% if dataset.extras['remote_url'] %}
+                            <li>
+                                <a href v-tooltip title="{{ _('Remote source') }}"><span class="fa fa-fw fa-external-link "></span></a>
+                                <a href="{{ dataset.extras['remote_url'] }}">{{ _('Remote source') }}</a>
+                            </li>
+                            {% endif%}
+
                             {# Temporal coverage #}
                             {% if dataset.temporal_coverage %}
                             <li>
