@@ -33,15 +33,6 @@
                 </a>
             </li>
             {% endif %}
-            {% if organization.metrics.permitted_reuses %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of reappropriations by the community') }}">
-                    <span class="{{ ficon('fa-lightbulb-o') }} fa-fw"></span>
-                    {{ ngettext('%(num)d reappropriation', '%(num)d reappropriations', organization.metrics.permitted_reuses or 0) }}
-                </a>
-            </li>
-            {% endif %}
             {% if organization.metrics.followers %}
             <li>
                 <a class="btn btn-xs" v-tooltip tooltip-placement="top"
