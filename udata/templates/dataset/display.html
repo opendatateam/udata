@@ -238,13 +238,7 @@
                             {% endif %}
 
                             {# Harvesting source #}
-                            {# ODS #}
-                            {% if dataset.extras['ods:url'] %}
-                                {% set source = dataset.extras['ods:url']  %}
-                            {# CKAN #}
-                            {% elif dataset.extras['remote_url'] %}
-                                {% set source = dataset.extras['remote_url']  %}
-                            {% endif %}
+                            {% set source = dataset.extras['ods:url'] or  dataset.extras['remote_url'] %}
 
                             {% if source %}
                             <li>
