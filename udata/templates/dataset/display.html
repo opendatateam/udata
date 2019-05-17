@@ -238,18 +238,19 @@
                             {% endif %}
 
                             {# Source #}
+
                             {# ODS #}
                             {% if dataset.extras['ods:url'] %}
-                            <li>
-                                <a href v-tooltip title="{{ _('Remote source') }}"><span class="fa fa-fw fa-external-link "></span></a>
-                                <a href="{{ dataset.extras['ods:url'] }}">{{ _('Remote source') }}</a>
-                            </li>
-
+                                {% set source = dataset.extras['ods:url']  %}
                             {# CKAN #}
                             {% elif dataset.extras['remote_url'] %}
+                                {% set source = dataset.extras['remote_url']  %}
+                            {% endif %}
+
+                            {% if source %}
                             <li>
                                 <a href v-tooltip title="{{ _('Remote source') }}"><span class="fa fa-fw fa-external-link "></span></a>
-                                <a href="{{ dataset.extras['remote_url'] }}">{{ _('Remote source') }}</a>
+                                <a href="{{ source }}">{{ _('Remote source') }}</a>
                             </li>
                             {% endif%}
 
