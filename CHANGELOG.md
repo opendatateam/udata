@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - remove clutter from search bar [#400](https://github.com/etalab/udata-gouvfr/pull/400)
+- Add the homologation of INPI licenses [#402](https://github.com/etalab/udata-gouvfr/pull/402)
 
 ## 1.6.5 (2019-05-10)
 
