@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2019-02-07 11:26+0100\n"
-"PO-Revision-Date: 2019-03-06 11:36\n"
-"Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
+"POT-Creation-Date: 2019-05-20 09:07+0200\n"
+"PO-Revision-Date: 2019-05-20 07:33\n"
+"Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: fr\n"
 "Language-Team: French\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
@@ -17,27 +17,27 @@ msgstr ""
 "X-Crowdin-Language: fr\n"
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 
-#: udata/settings.py:93
+#: udata/settings.py:94
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:94
+#: udata/settings.py:95
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:95
+#: udata/settings.py:96
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/settings.py:96
+#: udata/settings.py:97
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/settings.py:97
+#: udata/settings.py:98
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:99
+#: udata/settings.py:100
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
@@ -221,7 +221,7 @@ msgstr "Un acronyme facultatif"
 msgid "The details about the dataset (collection process, specifics...)."
 msgstr "Les détails sur le jeu de données (processus de collecte, spécificités...)."
 
-#: udata/core/dataset/forms.py:118 udata/templates/dataset/display.html:228
+#: udata/core/dataset/forms.py:118 udata/templates/dataset/display.html:233
 #: udata/templates/dataset/search-labels.html:9
 msgid "License"
 msgstr "Licence"
@@ -239,7 +239,7 @@ msgid "Expected frequency date"
 msgstr "Date de mise à jour prévue"
 
 #: udata/core/dataset/forms.py:128 udata/templates/dataset/card.html:40
-#: udata/templates/dataset/display.html:238
+#: udata/templates/dataset/display.html:253
 #: udata/templates/dataset/search-labels.html:15
 #: udata/templates/dataset/search-panel.html:13
 #: udata/templates/dataset/search-result.html:31
@@ -252,7 +252,7 @@ msgid "The period covered by the data"
 msgstr "La période couverte par les données"
 
 #: udata/core/dataset/forms.py:131 udata/core/spatial/forms.py:84
-#: udata/templates/dataset/display.html:330
+#: udata/templates/dataset/display.html:345
 #: udata/templates/dataset/search-labels.html:18
 #: udata/templates/dataset/search-panel.html:15
 #: udata/templates/dataset/search-result.html:55
@@ -277,8 +277,8 @@ msgid "Some taxonomy keywords"
 msgstr "Quelques mots-clés pour la taxonomie"
 
 #: udata/core/dataset/forms.py:135 udata/core/reuse/forms.py:35
-#: udata/core/topic/forms.py:26 udata/templates/dataset/display.html:73
-#: udata/templates/dataset/display.html:74 udata/templates/reuse/display.html:60
+#: udata/core/topic/forms.py:26 udata/templates/dataset/display.html:78
+#: udata/templates/dataset/display.html:79 udata/templates/reuse/display.html:60
 #: udata/templates/reuse/display.html:63
 msgid "Private"
 msgstr "Privé"
@@ -288,9 +288,9 @@ msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
 #: udata/core/dataset/metrics.py:23 udata/core/organization/metrics.py:34
-#: udata/core/site/metrics.py:53 udata/core/site/views.py:134
+#: udata/core/site/metrics.py:52 udata/core/site/views.py:134
 #: udata/core/user/metrics.py:43 udata/templates/dataset/card.html:28
-#: udata/templates/dataset/display.html:410 udata/templates/dataset/list.html:43
+#: udata/templates/dataset/display.html:425 udata/templates/dataset/list.html:43
 #: udata/templates/dataset/search-labels.html:28
 #: udata/templates/organization/list.html:38
 #: udata/templates/organization/search-labels.html:9
@@ -444,7 +444,7 @@ msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
 #: udata/core/dataset/models.py:356 udata/models/datetime_fields.py:58
-#: udata/templates/dataset/display.html:255 udata/templates/dataset/list.html:41
+#: udata/templates/dataset/display.html:270 udata/templates/dataset/list.html:41
 #: udata/templates/organization/list.html:35 udata/templates/reuse/list.html:37
 #: udata/templates/search.html:74 udata/templates/search.html:88
 #: udata/templates/topic/datasets.html:34 udata/templates/topic/reuses.html:33
@@ -491,7 +491,7 @@ msgstr "Assez réutilisé"
 msgid "Heavily reused"
 msgstr "Souvent réutilisé"
 
-#: udata/core/dataset/tasks.py:69
+#: udata/core/dataset/tasks.py:75
 msgid "You need to update some frequency-based datasets"
 msgstr "Vous devez publier certains jeux de données avec une fréquence de mise à jour"
 
@@ -511,7 +511,7 @@ msgid "Subject"
 msgstr "Sujet"
 
 #: udata/core/discussions/metrics.py:16 udata/core/discussions/metrics.py:24
-#: udata/templates/dataset/display.html:374 udata/templates/post/display.html:199
+#: udata/templates/dataset/display.html:389 udata/templates/post/display.html:199
 #: udata/templates/reuse/display.html:276 udata/templates/site/dashboard.html:25
 msgid "Discussions"
 msgstr "Discussions"
@@ -530,7 +530,7 @@ msgstr "%(user)s a commenté votre discussion"
 msgid "A discussion has been closed"
 msgstr "Une discussion a été clôturée"
 
-#: udata/core/followers/metrics.py:29 udata/core/site/metrics.py:104
+#: udata/core/followers/metrics.py:29 udata/core/site/metrics.py:101
 #: udata/templates/dataset/followers.html:6 udata/templates/dataset/list.html:44
 #: udata/templates/dataset/search-labels.html:31
 #: udata/templates/dataset/search-panel.html:19
@@ -538,7 +538,7 @@ msgstr "Une discussion a été clôturée"
 #: udata/templates/organization/followers.html:7
 #: udata/templates/organization/list.html:39
 #: udata/templates/organization/search-labels.html:12
-#: udata/templates/organization/search-panel.html:8
+#: udata/templates/organization/search-panel.html:7
 #: udata/templates/reuse/display.html:222 udata/templates/reuse/list.html:40
 #: udata/templates/reuse/search-labels.html:15
 #: udata/templates/reuse/search-panel.html:9 udata/templates/search.html:104
@@ -632,8 +632,8 @@ msgid "Role"
 msgstr "Rôle"
 
 #: udata/core/organization/metrics.py:17 udata/core/reuse/metrics.py:24
-#: udata/core/site/metrics.py:42 udata/core/site/views.py:128
-#: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:27
+#: udata/core/site/metrics.py:41 udata/core/site/views.py:128
+#: udata/core/user/metrics.py:28 udata/templates/dataset/display.html:30
 #: udata/templates/dataset/followers.html:4 udata/templates/dataset/list.html:8
 #: udata/templates/dataset/list.html:19 udata/templates/dataset/list.html:37
 #: udata/templates/organization/list.html:37
@@ -650,21 +650,17 @@ msgid "Datasets"
 msgstr "Jeux de données"
 
 #: udata/core/organization/metrics.py:50
-msgid "Permitted reuses"
-msgstr "Réutilisations permises"
-
-#: udata/core/organization/metrics.py:61
 #: udata/templates/organization/display.html:57
 msgid "Members"
 msgstr "Membres"
 
 #: udata/core/organization/models.py:25
-#: udata/templates/organization/display_base.html:127
+#: udata/templates/organization/display_base.html:117
 msgid "Administrator"
 msgstr "Administrateur"
 
 #: udata/core/organization/models.py:26
-#: udata/templates/organization/display_base.html:134
+#: udata/templates/organization/display_base.html:124
 msgid "Editor"
 msgstr "Éditeur"
 
@@ -860,19 +856,19 @@ msgid "Number of elements in feeds"
 msgstr "Nombre d’éléments dans les flux"
 
 #: udata/core/site/metrics.py:63 udata/core/site/views.py:140
-#: udata/templates/dataset/display.html:94 udata/templates/dataset/list.html:38
+#: udata/templates/dataset/display.html:99 udata/templates/dataset/list.html:38
 #: udata/templates/search.html:71 udata/templates/site/dashboard.html:21
 msgid "Resources"
 msgstr "Ressources"
 
-#: udata/core/site/metrics.py:84 udata/core/site/views.py:155
+#: udata/core/site/metrics.py:79 udata/core/site/views.py:155
 #: udata/templates/site/dashboard.html:23 udata/templates/user/base.html:14
 #: udata/templates/user/following.html:18 udata/templates/user/list.html:8
 #: udata/templates/user/list.html:18
 msgid "Users"
 msgstr "Utilisateurs"
 
-#: udata/core/site/metrics.py:94 udata/core/site/views.py:149
+#: udata/core/site/metrics.py:90 udata/core/site/views.py:149
 #: udata/templates/dataset/search-panel.html:5 udata/templates/header.html:47
 #: udata/templates/organization/display_base.html:8
 #: udata/templates/organization/followers.html:5
@@ -885,11 +881,11 @@ msgstr "Utilisateurs"
 msgid "Organizations"
 msgstr "Organisations"
 
-#: udata/core/site/metrics.py:114
+#: udata/core/site/metrics.py:112
 msgid "Maximum dataset followers"
 msgstr "Maximum d'abonnés à un jeu de données"
 
-#: udata/core/site/metrics.py:127
+#: udata/core/site/metrics.py:126
 msgid "Maximum dataset reuses"
 msgstr "Maximum d'abonnés à une réutilisation"
 
@@ -897,19 +893,19 @@ msgstr "Maximum d'abonnés à une réutilisation"
 msgid "Maximum datasets in reuses"
 msgstr "Maximum de  jeux de données pour une réutilisation"
 
-#: udata/core/site/metrics.py:153
+#: udata/core/site/metrics.py:154
 msgid "Maximum reuse followers"
 msgstr "Maximum d'abonnés à une réutilisation"
 
-#: udata/core/site/metrics.py:166
+#: udata/core/site/metrics.py:168
 msgid "Maximum organization followers"
 msgstr "Maximum d'abonnés à une organisation"
 
-#: udata/core/site/metrics.py:180
+#: udata/core/site/metrics.py:183
 msgid "Maximum organization reuses"
 msgstr "Maximum de réutilisations pour une organisation"
 
-#: udata/core/site/metrics.py:194
+#: udata/core/site/metrics.py:197
 msgid "Maximum organization datasets"
 msgstr "Maximum de jeux de données pour une organisation"
 
@@ -1053,7 +1049,7 @@ msgstr "Rôles"
 msgid "Following"
 msgstr "Abonné à"
 
-#: udata/core/user/models.py:241 udata/tests/api/test_me_api.py:374
+#: udata/core/user/models.py:242 udata/tests/api/test_me_api.py:374
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -1085,44 +1081,40 @@ msgstr "N'est pas un UUID"
 msgid "Invalid URL"
 msgstr "URL invalide"
 
-#: udata/forms/fields.py:339
+#: udata/forms/fields.py:340
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
 msgstr "Le mot-clé \"%(tag)s\" doit avoir entre %(min)d et %(max)d caractères."
 
-#: udata/forms/fields.py:379 udata/forms/fields.py:403
+#: udata/forms/fields.py:380 udata/forms/fields.py:432
 msgid "{0} does not exists"
 msgstr "{0} n'existe pas"
 
-#: udata/forms/fields.py:392
+#: udata/forms/fields.py:419
 msgid "Expect both class and identifier"
 msgstr "Attends à la fois une classe et un identifiant"
 
-#: udata/forms/fields.py:406
-msgid "{0} is not a valid identifier"
-msgstr "{0} n'est pas un identifiant valide"
-
-#: udata/forms/fields.py:432
+#: udata/forms/fields.py:465
 msgid "Model for {0} not found"
 msgstr "Modèle pour {0} non trouvé"
 
-#: udata/forms/fields.py:467
+#: udata/forms/fields.py:500
 msgid "Unknown identifiers: {identifiers}"
 msgstr "Identifiants inconnus : {identifiers}"
 
-#: udata/forms/fields.py:602
+#: udata/forms/fields.py:635
 msgid "Unable to parse date range"
 msgstr "Incapable de comprendre la date"
 
-#: udata/forms/fields.py:629 udata/forms/fields.py:652
+#: udata/forms/fields.py:662 udata/forms/fields.py:685
 msgid "You must be authenticated"
 msgstr "Vous devez être authentifié"
 
-#: udata/forms/fields.py:632
+#: udata/forms/fields.py:665
 msgid "You can only set yourself as owner"
 msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 
-#: udata/forms/fields.py:655
+#: udata/forms/fields.py:688
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
@@ -1442,7 +1434,7 @@ msgstr "Meilleures réutilisations"
 msgid "Download from "
 msgstr "Télécharger depuis"
 
-#: udata/templates/dataset/display.html:189 udata/templates/embed-dataset.html:177
+#: udata/templates/dataset/display.html:194 udata/templates/embed-dataset.html:177
 #: udata/templates/reuse/display.html:137
 msgid "Producer"
 msgstr "Producteur"
@@ -1475,7 +1467,7 @@ msgstr "Granularité"
 msgid "Territory"
 msgstr "Territoire"
 
-#: udata/templates/dataset/display.html:247
+#: udata/templates/dataset/display.html:262
 #: udata/templates/dataset/search-result.html:42
 #: udata/templates/embed-dataset.html:232
 msgid "Frequency"
@@ -1685,7 +1677,7 @@ msgstr "conditions générales d'utilisations"
 msgid "Maintainer"
 msgstr "Mainteneur"
 
-#: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:146
+#: udata/templates/api/admin.html:31 udata/templates/dataset/display.html:151
 #: udata/templates/organization/display.html:28
 #: udata/templates/organization/followers.html:15
 #: udata/templates/post/display.html:119 udata/templates/reuse/display.html:115
@@ -1715,8 +1707,8 @@ msgid "%(app)s want to access your %(site)s account."
 msgstr "%(app)s voudrait accéder à votre compte %(site)s."
 
 #: udata/templates/api/oauth_authorize.html:26
-#: udata/templates/dataset/display.html:318
-#: udata/templates/dataset/display.html:320
+#: udata/templates/dataset/display.html:333
+#: udata/templates/dataset/display.html:335
 msgid "Details"
 msgstr "Détails"
 
@@ -1756,37 +1748,37 @@ msgstr "Ajouter une réutilisation"
 msgid "Number of resources"
 msgstr "Nombre de ressources"
 
-#: udata/templates/dataset/card.html:48 udata/templates/dataset/display.html:287
+#: udata/templates/dataset/card.html:48 udata/templates/dataset/display.html:302
 msgid "Territorial coverage"
 msgstr "Couverture territoriale"
 
-#: udata/templates/dataset/card.html:56 udata/templates/dataset/display.html:279
+#: udata/templates/dataset/card.html:56 udata/templates/dataset/display.html:294
 #: udata/templates/dataset/search-result.html:89
 msgid "Territorial coverage granularity"
 msgstr "Granularité de la couverture territoriale"
 
-#: udata/templates/dataset/display.html:49
+#: udata/templates/dataset/display.html:54
 msgid "This dataset comes from a certified public service"
 msgstr "Ce jeu de données provient d'un service public certifié"
 
-#: udata/templates/dataset/display.html:54
+#: udata/templates/dataset/display.html:59
 #, python-format
 msgid "This dataset has been published on %(date)s and updated on %(update)s on the initiative and under the responsibility of <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 msgstr "Ce jeu de données a été publié le %(date)s et mis à jour le %(update)s à l'initiative et sous la responsabilité de <a href=\"%(url)s\" title=\"%(author)s\">%(author)s</a>"
 
-#: udata/templates/dataset/display.html:65
+#: udata/templates/dataset/display.html:70
 msgid "See all datasets with that badge."
 msgstr "Voir tous les jeux de données avec ce badge."
 
-#: udata/templates/dataset/display.html:72
+#: udata/templates/dataset/display.html:77
 msgid "This dataset is private and will not be visible by other users"
 msgstr "Ce jeu de données est privé et ne sera pas visible des autres utilisateurs"
 
-#: udata/templates/dataset/display.html:78
+#: udata/templates/dataset/display.html:83
 msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
 msgstr "Ce jeu de données a été supprimé. Cela deviendra permanent dans les prochaines 24 heures."
 
-#: udata/templates/dataset/display.html:79 udata/templates/dataset/display.html:80
+#: udata/templates/dataset/display.html:84 udata/templates/dataset/display.html:85
 #: udata/templates/organization/display.html:37
 #: udata/templates/organization/display.html:39
 #: udata/templates/post/display.html:68 udata/templates/post/display.html:71
@@ -1794,85 +1786,90 @@ msgstr "Ce jeu de données a été supprimé. Cela deviendra permanent dans les 
 msgid "Deleted"
 msgstr "Supprimé"
 
-#: udata/templates/dataset/display.html:97
+#: udata/templates/dataset/display.html:102
 msgid "See also: community resources"
 msgstr "Voir aussi : ressources communautaires"
 
-#: udata/templates/dataset/display.html:118
+#: udata/templates/dataset/display.html:123
 #, python-format
 msgid "See the %(nb)d resources of type %(type)s"
 msgstr "Voir les %(nb)d ressources de type %(type)s"
 
-#: udata/templates/dataset/display.html:123
+#: udata/templates/dataset/display.html:128
 msgid "No resources"
 msgstr "Aucune ressource"
 
-#: udata/templates/dataset/display.html:131
+#: udata/templates/dataset/display.html:136
 msgid "Add a resource"
 msgstr "Ajouter une ressource"
 
-#: udata/templates/dataset/display.html:158
+#: udata/templates/dataset/display.html:163
 #: udata/templates/organization/sidebar-producer.html:23
 #: udata/templates/reuse/display.html:108 udata/templates/user/sidebar-user.html:23
 msgid "Contact the producer"
 msgstr "Contacter le producteur"
 
-#: udata/templates/dataset/display.html:198 udata/templates/reuse/display.html:146
+#: udata/templates/dataset/display.html:203 udata/templates/reuse/display.html:146
 msgid "Author"
 msgstr "Auteur"
 
-#: udata/templates/dataset/display.html:210 udata/templates/reuse/display.html:182
+#: udata/templates/dataset/display.html:215 udata/templates/reuse/display.html:182
 msgid "Informations"
 msgstr "Informations"
 
-#: udata/templates/dataset/display.html:217
+#: udata/templates/dataset/display.html:222
 #: udata/templates/dataset/search-panel.html:8
 #: udata/templates/organization/search-panel.html:5
 #: udata/templates/reuse/search-panel.html:5
 msgid "Badges"
 msgstr "Badges"
 
-#: udata/templates/dataset/display.html:262
+#: udata/templates/dataset/display.html:245
+#: udata/templates/dataset/display.html:246
+msgid "Remote source"
+msgstr "Source originale"
+
+#: udata/templates/dataset/display.html:277
 msgid "Modification date"
 msgstr "Date de modification"
 
-#: udata/templates/dataset/display.html:269
+#: udata/templates/dataset/display.html:284
 msgid "Latest resource update"
 msgstr "Dernière mise à jour de ressource"
 
-#: udata/templates/dataset/display.html:309 udata/templates/reuse/display.html:210
+#: udata/templates/dataset/display.html:324 udata/templates/reuse/display.html:210
 msgid "Suggest a tag with a new discussion thread"
 msgstr "Suggérer un mot-clé avec un nouveau fil de discussion"
 
-#: udata/templates/dataset/display.html:311 udata/templates/reuse/display.html:212
+#: udata/templates/dataset/display.html:326 udata/templates/reuse/display.html:212
 msgid "Suggest a tag"
 msgstr "Suggérer un mot-clé"
 
-#: udata/templates/dataset/display.html:348
+#: udata/templates/dataset/display.html:363
 msgid "Territories"
 msgstr "Territoires"
 
-#: udata/templates/dataset/display.html:366 udata/templates/reuse/display.html:269
+#: udata/templates/dataset/display.html:382 udata/templates/reuse/display.html:269
 msgid "Community contributions"
 msgstr "Contributions communautaires"
 
-#: udata/templates/dataset/display.html:383 udata/templates/reuse/display.html:284
+#: udata/templates/dataset/display.html:398 udata/templates/reuse/display.html:284
 msgid "Discussion between the organization and the community about this dataset."
 msgstr "Discussion entre l'organisation et la communauté à propos de ce jeu de données."
 
-#: udata/templates/dataset/display.html:387
+#: udata/templates/dataset/display.html:402
 msgid "Community resources"
 msgstr "Ressources communautaires"
 
-#: udata/templates/dataset/display.html:398
+#: udata/templates/dataset/display.html:413
 msgid "Add a community resource"
 msgstr "Ajouter une ressource communautaire"
 
-#: udata/templates/dataset/display.html:405
+#: udata/templates/dataset/display.html:420
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
 msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
 
-#: udata/templates/dataset/display.html:428
+#: udata/templates/dataset/display.html:443
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
@@ -1884,9 +1881,9 @@ msgstr "Vous avez réutilisé ces données et publié un article, une infographi
 #: udata/templates/organization/display.html:158
 #: udata/templates/organization/display_base.html:76
 #: udata/templates/organization/followers.html:26
-#: udata/templates/organization/search-result.html:50
+#: udata/templates/organization/search-result.html:41
 #: udata/templates/reuse/search-result.html:34 udata/templates/user/base.html:67
-#: udata/templates/user/followers.html:15
+#: udata/templates/user/followers.html:12
 #, python-format
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
@@ -1940,7 +1937,7 @@ msgid "Reuse number"
 msgstr "Nombre de réutilisations"
 
 #: udata/templates/dataset/search-result.html:106
-#: udata/templates/organization/search-result.html:48
+#: udata/templates/organization/search-result.html:39
 #: udata/templates/reuse/search-result.html:32
 msgid "Number of followers"
 msgstr "Nombre d'abonnés"
@@ -2404,51 +2401,39 @@ msgstr "Voir toutes les organisations avec ce badge."
 msgid "Use of data by that organization for the community"
 msgstr "Usage des données de cette organisation pour la communauté"
 
-#: udata/templates/organization/display_base.html:96
-msgid "Use of data from that organization by the community"
-msgstr "Usage des données de cette organisation par la communauté."
-
-#: udata/templates/organization/display_base.html:97
-#: udata/templates/organization/search-result.html:41
-#, python-format
-msgid "%(num)d reappropriation"
-msgid_plural "%(num)d reappropriations"
-msgstr[0] "%(num)d réappropriation"
-msgstr[1] "%(num)d réappropriations"
-
-#: udata/templates/organization/display_base.html:109
+#: udata/templates/organization/display_base.html:99
 msgid "I belong to this organization"
 msgstr "J'appartiens à cette organisation"
 
-#: udata/templates/organization/display_base.html:112
+#: udata/templates/organization/display_base.html:102
 msgid "Join"
 msgstr "Rejoindre"
 
-#: udata/templates/organization/display_base.html:116
+#: udata/templates/organization/display_base.html:106
 msgid "Waiting for approval"
 msgstr "En attente d'approbation"
 
-#: udata/templates/organization/display_base.html:120
+#: udata/templates/organization/display_base.html:110
 msgid "Pending request"
 msgstr "Demande en attente"
 
-#: udata/templates/organization/display_base.html:125
+#: udata/templates/organization/display_base.html:115
 msgid "You are an administrator of this organization"
 msgstr "Vous êtes administrateur de cette organisation"
 
-#: udata/templates/organization/display_base.html:132
+#: udata/templates/organization/display_base.html:122
 msgid "You are editor in this organization"
 msgstr "Vous êtes éditeur dans cette organisation"
 
-#: udata/templates/organization/display_base.html:139
+#: udata/templates/organization/display_base.html:129
 msgid "You are a member of this organization"
 msgstr "Vous êtes membre de cette organisation"
 
-#: udata/templates/organization/display_base.html:141
+#: udata/templates/organization/display_base.html:131
 msgid "Member"
 msgstr "Membre"
 
-#: udata/templates/organization/display_base.html:149
+#: udata/templates/organization/display_base.html:139
 #: udata/templates/organization/sidebar-producer.html:31
 msgid "I'll be informed about this organization news"
 msgstr "Je serai informé de l'activité de cette organisation"
@@ -2462,23 +2447,15 @@ msgstr "Recherche d'organisation sur %(site)s"
 msgid "organizations"
 msgstr "organisations"
 
-#: udata/templates/organization/search-panel.html:7
-msgid "Reappropriations"
-msgstr "Réappropriations"
-
 #: udata/templates/organization/search-result.html:30
 msgid "Number of reuses by the organization"
 msgstr "Nombre de réutilisations par cette organisation"
 
-#: udata/templates/organization/search-result.html:39
-msgid "Number of reappropriations by the community"
-msgstr "Nombre de réappropriations par la communauté"
-
-#: udata/templates/organization/search-result.html:56
+#: udata/templates/organization/search-result.html:47
 msgid "Number of members"
 msgstr "Nombre de membres"
 
-#: udata/templates/organization/search-result.html:58
+#: udata/templates/organization/search-result.html:49
 #, python-format
 msgid "%(num)d members"
 msgid_plural "%(num)d members"
@@ -2789,15 +2766,15 @@ msgstr "Jeux de données relatifs à la commune %(name)s avec le code INSEE %(co
 msgid "Main towns:"
 msgstr "Principales communes :"
 
-#: udata/templates/territories/home.html:4 udata/templates/territories/home.html:5
+#: udata/templates/territories/home.html:5 udata/templates/territories/home.html:6
 msgid "French regions"
 msgstr "Régions françaises"
 
-#: udata/templates/territories/home.html:13
+#: udata/templates/territories/home.html:14
 msgid "Click to navigate to the given region:"
 msgstr "Cliquer pour naviguer vers la région :"
 
-#: udata/templates/territories/home.html:15
+#: udata/templates/territories/home.html:16
 msgid "Or sorted alphabetically:"
 msgstr "Ou par ordre alphabétique :"
 
@@ -2921,40 +2898,40 @@ msgstr[1] "%(num)d suivis"
 msgid "%(user)s has not yet published any dataset"
 msgstr "%(user)s n'a pas encore publié de jeu de données"
 
-#: udata/templates/user/followers.html:34
+#: udata/templates/user/followers.html:31
 #, python-format
 msgid "%(user)s has no follower"
 msgstr "%(user)s n'a pas d'abonnés"
 
-#: udata/templates/user/following.html:43
+#: udata/templates/user/following.html:41
 #, python-format
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
 msgstr[0] "Suit %(num)d jeu de données"
 msgstr[1] "Suit %(num)d jeux de données"
 
-#: udata/templates/user/following.html:63
+#: udata/templates/user/following.html:61
 #, python-format
 msgid "Follow %(num)d reuse"
 msgid_plural "Follow %(num)d reuses"
 msgstr[0] "Suit %(num)d réutilisation"
 msgstr[1] "Suit %(num)d réutilisations"
 
-#: udata/templates/user/following.html:83
+#: udata/templates/user/following.html:81
 #, python-format
 msgid "Follow %(num)d organization"
 msgid_plural "Follow %(num)d organizations"
 msgstr[0] "Suit %(num)d organisation"
 msgstr[1] "Suit %(num)d organisations"
 
-#: udata/templates/user/following.html:103
+#: udata/templates/user/following.html:101
 #, python-format
 msgid "Follow %(num)d user"
 msgid_plural "Follow %(num)d users"
 msgstr[0] "Suit %(num)d utilisateur"
 msgstr[1] "Suit %(num)d utilisateurs"
 
-#: udata/templates/user/following.html:129
+#: udata/templates/user/following.html:127
 #, python-format
 msgid "%(user)s is not following anyone"
 msgstr "%(user)s ne suit personne"
