@@ -89,16 +89,6 @@
                                 </strong>
                             </p>
                             {% endif %}
-                            {% if org.metrics.permitted_reuses %}
-                            <p class="text-center">
-                                <strong>
-                                <a href="#" v-tooltip tooltip-placement="left"
-                                    title="{{ _('Use of data from that organization by the community') }}">
-                                    {{ ngettext('%(num)d reappropriation', '%(num)d reappropriations', org.metrics.permitted_reuses or 0) }}
-                                </a>
-                                </strong>
-                            </p>
-                            {% endif %}
                         </div>
                         {% set member = org.member(current_user) %}
                         {% if not member %}

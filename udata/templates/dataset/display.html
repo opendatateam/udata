@@ -237,6 +237,16 @@
                             </li>
                             {% endif %}
 
+                            {# Harvesting source #}
+                            {% set source = dataset.extras['ods:url'] or dataset.extras['remote_url'] %}
+
+                            {% if source %}
+                            <li>
+                                <a href v-tooltip title="{{ _('Remote source') }}"><span class="fa fa-fw fa-external-link "></span></a>
+                                <a href="{{ source }}">{{ _('Remote source') }}</a>
+                            </li>
+                            {% endif%}
+
                             {# Temporal coverage #}
                             {% if dataset.temporal_coverage %}
                             <li>
