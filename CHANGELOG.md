@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.6 (2019-05-20)
 
 - remove clutter from search bar [#400](https://github.com/etalab/udata-gouvfr/pull/400)
