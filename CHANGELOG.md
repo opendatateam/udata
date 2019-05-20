@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.9 (2019-05-20)
 
 - Add user slug to dataset cache key [#2146](https://github.com/opendatateam/udata/pull/2146)
 - Change display of cards of reuses on topic pages [#2148](https://github.com/opendatateam/udata/pull/2148)
