@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.9 (2019-05-20)
 
 - Add user slug to dataset cache key [#2146](https://github.com/opendatateam/udata/pull/2146)
