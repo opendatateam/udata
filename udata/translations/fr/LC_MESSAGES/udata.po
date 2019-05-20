@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-05-20 09:07+0200\n"
-"PO-Revision-Date: 2019-05-20 07:11\n"
+"PO-Revision-Date: 2019-05-20 07:21\n"
 "Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1827,7 +1827,7 @@ msgstr "Badges"
 #: udata/templates/dataset/display.html:245
 #: udata/templates/dataset/display.html:246
 msgid "Remote source"
-msgstr ""
+msgstr "Source distante"
 
 #: udata/templates/dataset/display.html:277
 msgid "Modification date"
