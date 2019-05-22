@@ -36,7 +36,7 @@
                                 alt="{{ org.title }}" class="scalable" />
                         </div>
                         <br/>
-                        <div class="tab-links">
+                        <div class="badges tab-links">
                             {# Badges #}
                             {% if org.badges %}
                             <p class="text-center">
@@ -46,7 +46,7 @@
                                             title="{{ _('See all organizations with that badge.') }}">
                                             <span class="fa fa-bookmark"></span>
                                             {{ org.badge_label(badge) }}</a>
-                                    </small><br/>
+                                    </small>
                                 {% endfor %}
                             </p>
                             {% endif %}
