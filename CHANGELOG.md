@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- set org logo to max width [#403](https://github.com/etalab/udata-gouvfr/pull/403)
 
 ## 1.6.6 (2019-05-20)
 
