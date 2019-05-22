@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove `<br>` in badge display [#2156](https://github.com/opendatateam/udata/pull/2156)
 
 ## 1.6.9 (2019-05-20)
 
