@@ -9,6 +9,12 @@
                 width="70" height="70">
         </div>
         {{ badge_if_certified(dataset.organization) }}
+        {% elif dataset.owner %}
+        <div class="result-logo pull-left">
+            <img alt="{{ dataset.owner.fullname }}"
+                src="{{ dataset.owner.avatar(70)|placeholder('user') }}"
+                width="70" height="70">
+        </div>
         {% else %}
         <div class="result-logo pull-left">
             <img src="{{ ''|placeholder('organization') }}" alt="">
