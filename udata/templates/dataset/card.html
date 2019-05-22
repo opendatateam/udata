@@ -8,9 +8,13 @@
                 width="70" height="70">
         </div>
         {{ badge_if_certified(dataset.organization) }}
+    {% elif dataset.owner %}
+    <div class="card-logo">
+        <img src="{{ dataset.owner.avatar(70, external=True) | placeholder('organization', external=True) }}" alt="">
+    </div>
     {% else %}
     <div class="card-logo">
-        <img src="{{ ''|placeholder('organization', external=True) }}" alt="">
+        <img src="{{ '' | placeholder('organization', external=True) }}" alt="">
     </div>
     {% endif %}
     <div class="card-body">
