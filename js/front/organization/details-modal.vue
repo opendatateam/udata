@@ -4,7 +4,7 @@
     <div class="modal-body">
         <dl class="dl-horizontal dl-wide">
           <dt>{{ _('ID') }}</dt>
-          <dd>{{organization['@id']}}</dd>
+          <dd><a href="/organization/{{organization['@id']}}">{{organization['@id']}}</a></dd>
           <dt v-if="organization.dateCreated">{{ _('Created on') }}</dt>
           <dd v-if="organization.dateCreated"> {{ organization.dateCreated|dt }}</dd>
           <dt v-if="organization.dateModified">{{ _('Modified on') }}</dt>
