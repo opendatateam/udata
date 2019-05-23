@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2018-10-15 17:18+0200\n"
-"PO-Revision-Date: 2018-10-15 15:33\n"
-"Last-Translator: noirbizarre <noirbizarre@gmail.com>\n"
+"POT-Creation-Date: 2019-05-23 12:50+0200\n"
+"PO-Revision-Date: 2019-05-23 10:52\n"
+"Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -17,52 +17,49 @@ msgstr ""
 "X-Crowdin-Language: es-ES\n"
 "X-Crowdin-File: /master/udata_gouvfr/theme/translations/gouvfr.pot\n"
 
-#: __init__.py:27
-msgid "Discover OpenData"
-msgstr "Descubrir los Datos Abiertos"
-
-#: __init__.py:28
+#: __init__.py:47
 msgid "Data"
 msgstr "Datos"
 
-#: __init__.py:29 templates/footer.html:68 templates/footer.html:70
-msgid "Datasets"
-msgstr "Conjunto de datos"
-
-#: __init__.py:30 templates/footer.html:73 templates/footer.html:75
+#: __init__.py:48 templates/dataset/display.html:41 templates/footer.html:70
+#: templates/footer.html:72
 msgid "Reuses"
 msgstr "Reutilizaciones"
 
-#: __init__.py:31 templates/header.html:78
+#: __init__.py:49 templates/header.html:78
 msgid "Organizations"
 msgstr "Organizaciones"
 
-#: __init__.py:33
+#: __init__.py:50
 msgid "Dashboard"
 msgstr "Tablero de mando"
 
-#: __init__.py:40
+#: __init__.py:51 __init__.py:57
 msgid "Documentation"
 msgstr ""
 
-#: __init__.py:41
+#: __init__.py:58
 msgid "Reference Data"
 msgstr ""
 
-#: __init__.py:42
+#: __init__.py:59
 msgid "Licences"
 msgstr ""
 
-#: __init__.py:43
+#: __init__.py:60
 msgid "API"
 msgstr ""
 
-#: __init__.py:44
+#: __init__.py:61
 msgid "Terms of use"
 msgstr "Términos de uso"
 
-#: __init__.py:45
+#: __init__.py:62
 msgid "Tracking and privacy"
+msgstr ""
+
+#: __init__.py:73
+msgid "Data catalog"
 msgstr ""
 
 #: templates/carousel.html:6 templates/home.html:27
@@ -73,7 +70,7 @@ msgstr "Los mejores casos de reutilización "
 msgid "The Open Data"
 msgstr "Los datos abiertos"
 
-#: templates/footer.html:26 templates/subnav-small.html:26
+#: templates/footer.html:26
 msgid "Topics"
 msgstr "Temas"
 
@@ -85,27 +82,31 @@ msgstr "Vínculo"
 msgid "Contact Us"
 msgstr ""
 
-#: templates/footer.html:64
+#: templates/footer.html:61
 msgid "Feeds"
 msgstr "Alimentaciones"
 
-#: templates/footer.html:82
+#: templates/footer.html:65 templates/footer.html:67
+msgid "Datasets"
+msgstr "Conjunto de datos"
+
+#: templates/footer.html:79
 msgid "Go to Etalab’s blog"
 msgstr ""
 
-#: templates/footer.html:85
+#: templates/footer.html:82
 msgid "Open-source engine"
 msgstr ""
 
-#: templates/footer.html:86 templates/footer.html:89
+#: templates/footer.html:83 templates/footer.html:86
 msgid "Deployed version"
 msgstr ""
 
-#: templates/footer.html:88
+#: templates/footer.html:85
 msgid "Data.gouv.fr extension"
 msgstr ""
 
-#: templates/footer.html:92
+#: templates/footer.html:89
 msgid "Back to top"
 msgstr "Volver arriba"
 
@@ -185,7 +186,7 @@ msgstr "Ver más"
 msgid "The blog"
 msgstr "El blog"
 
-#: templates/home.html:180
+#: templates/home.html:183
 msgid "more"
 msgstr "más"
 
@@ -194,8 +195,6 @@ msgid "Share, improve and reuse public data"
 msgstr "Comparta, mejore y reutilice datos públicos"
 
 #: templates/subnav-large.html:36 templates/subnav-large.html:40
-#: templates/subnav-small.html:44 templates/subnav-small.html:47
-#: templates/topic/subnav.html:37 templates/topic/subnav.html:40
 msgid "Contribute!"
 msgstr "Contribuya!"
 
@@ -215,6 +214,36 @@ msgstr "Buscar"
 #, python-format
 msgid "Explore with %(certifier)s"
 msgstr "Explore con %(certifier)s"
+
+#: templates/dataset/display.html:11
+msgid "Community contributions"
+msgstr ""
+
+#: templates/dataset/display.html:18
+msgid "Community resources"
+msgstr ""
+
+#: templates/dataset/display.html:29
+msgid "Add a community resource"
+msgstr ""
+
+#: templates/dataset/display.html:36
+msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
+msgstr ""
+
+#: templates/dataset/display.html:59
+msgid "You reused these data and published an article, a computer graphics, or an application?\n"
+"                It's time to let you know!\n"
+"                Reference your work in just a few clicks and increase your visibility."
+msgstr ""
+
+#: templates/dataset/display.html:66
+msgid "Discussions"
+msgstr ""
+
+#: templates/dataset/display.html:75
+msgid "Discussion between the organization and the community about this dataset."
+msgstr ""
 
 #: templates/mail/base.html:45
 msgid "on your browser."
