@@ -221,6 +221,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         result = {
             '@context': 'http://schema.org',
             '@type': type_,
+            '@id': str(self.id),
             'alternateName': self.slug,
             'url': url_for('organizations.show', org=self, _external=True),
             'name': self.name,
