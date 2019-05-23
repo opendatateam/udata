@@ -92,7 +92,7 @@ def datasets_csv():
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'dataset' in exported_models:
-        return get_export_url('dataset')
+        return redirect(get_export_url('dataset'))
     params['facets'] = False
     datasets = search.iter(Dataset, **params)
     adapter = csv.get_adapter(Dataset)
@@ -105,7 +105,7 @@ def resources_csv():
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'resource' in exported_models:
-        return get_export_url('resource')
+        return redirect(get_export_url('resource'))
     params['facets'] = False
     datasets = search.iter(Dataset, **params)
     return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
@@ -117,7 +117,7 @@ def organizations_csv():
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'organization' in exported_models:
-        return get_export_url('organization')
+        return redirect(get_export_url('organization'))
     params['facets'] = False
     organizations = search.iter(Organization, **params)
     return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
@@ -129,7 +129,7 @@ def reuses_csv():
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'reuse' in exported_models:
-        return get_export_url('reuse')
+        return redirect(get_export_url('reuse'))
     params['facets'] = False
     reuses = search.iter(Reuse, **params)
     return csv.stream(ReuseCsvAdapter(reuses), 'reuses')
