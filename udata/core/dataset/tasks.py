@@ -169,7 +169,7 @@ def export_csv(self):
     Generates a CSV export of all model objects as a resource of a dataset
     '''
     ALLOWED_MODELS = current_app.config.get('EXPORT_CSV_MODELS', [])
-    DATASET_DEFAULTS = current_app.config.get('EXPORT_CSV_DATASET_INFO')
+    DATASET_DEFAULTS = current_app.config.get('EXPORT_CSV_DATASET_INFO').copy()
 
     if ALLOWED_MODELS:
         slug = DATASET_DEFAULTS.pop('slug')

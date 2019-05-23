@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import StringIO
 
+import pytest
 from datetime import datetime
 
 from flask import url_for
@@ -10,6 +11,7 @@ from flask import url_for
 from udata.frontend import csv
 from udata.models import Badge, Site, PUBLIC_SERVICE
 
+from udata.core.dataset import tasks as dataset_tasks
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.models import current_site
@@ -63,6 +65,7 @@ class SiteViewsTest(FrontTestCase):
         self.assert200(response)
 
     def test_datasets_csv(self):
+        self.app.config['EXPORT_CSV_MODELS'] = []
         with self.autoindex():
             datasets = [DatasetFactory(resources=[ResourceFactory()])
                         for _ in range(5)]
@@ -93,6 +96,20 @@ class SiteViewsTest(FrontTestCase):
         for dataset in datasets:
             self.assertIn(str(dataset.id), ids)
         self.assertNotIn(str(hidden_dataset.id), ids)
+
+    @pytest.mark.usefixtures('instance_path')
+    def test_datasets_csv_w_export_csv_feature(self):
+        # no export generated, 404
+        response = self.get(url_for('site.datasets_csv'))
+        self.assert404(response)
+
+        # generate the export
+        o = OrganizationFactory()
+        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        dataset_tasks.export_csv()
+        response = self.get(url_for('site.datasets_csv'))
+        self.assertStatus(response, 302)
+        self.assertIn('export-dataset-', response.location)
 
     def test_datasets_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
@@ -138,6 +155,7 @@ class SiteViewsTest(FrontTestCase):
         self.assertNotIn(str(hidden_dataset.id), ids)
 
     def test_resources_csv(self):
+        self.app.config['EXPORT_CSV_MODELS'] = []
         with self.autoindex():
             datasets = [
                 DatasetFactory(resources=[ResourceFactory(),
@@ -175,6 +193,20 @@ class SiteViewsTest(FrontTestCase):
         for dataset in datasets:
             for resource in dataset.resources:
                 self.assertIn((str(dataset.id), str(resource.id)), ids)
+
+    @pytest.mark.usefixtures('instance_path')
+    def test_resources_csv_w_export_csv_feature(self):
+        # no export generated, 404
+        response = self.get(url_for('site.resources_csv'))
+        self.assert404(response)
+
+        # generate the export
+        o = OrganizationFactory()
+        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        dataset_tasks.export_csv()
+        response = self.get(url_for('site.resources_csv'))
+        self.assertStatus(response, 302)
+        self.assertIn('export-resource-', response.location)
 
     def test_resources_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
@@ -221,6 +253,7 @@ class SiteViewsTest(FrontTestCase):
                 self.assertIn((str(dataset.id), str(resource.id)), ids)
 
     def test_organizations_csv(self):
+        self.app.config['EXPORT_CSV_MODELS'] = []
         with self.autoindex():
             orgs = [OrganizationFactory() for _ in range(5)]
             hidden_org = OrganizationFactory(deleted=datetime.now())
@@ -249,6 +282,20 @@ class SiteViewsTest(FrontTestCase):
         for org in orgs:
             self.assertIn(str(org.id), ids)
         self.assertNotIn(str(hidden_org.id), ids)
+
+    @pytest.mark.usefixtures('instance_path')
+    def test_organizations_csv_w_export_csv_feature(self):
+        # no export generated, 404
+        response = self.get(url_for('site.organizations_csv'))
+        self.assert404(response)
+
+        # generate the export
+        o = OrganizationFactory()
+        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        dataset_tasks.export_csv()
+        response = self.get(url_for('site.organizations_csv'))
+        self.assertStatus(response, 302)
+        self.assertIn('export-organization-', response.location)
 
     def test_organizations_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
@@ -296,6 +343,7 @@ class SiteViewsTest(FrontTestCase):
         self.assertNotIn(str(hidden_org.id), ids)
 
     def test_reuses_csv(self):
+        self.app.config['EXPORT_CSV_MODELS'] = []
         with self.autoindex():
             reuses = [ReuseFactory(datasets=[DatasetFactory()])
                       for _ in range(5)]
@@ -326,6 +374,20 @@ class SiteViewsTest(FrontTestCase):
         for reuse in reuses:
             self.assertIn(str(reuse.id), ids)
         self.assertNotIn(str(hidden_reuse.id), ids)
+
+    @pytest.mark.usefixtures('instance_path')
+    def test_reuses_csv_w_export_csv_feature(self):
+        # no export generated, 404
+        response = self.get(url_for('site.reuses_csv'))
+        self.assert404(response)
+
+        # generate the export
+        o = OrganizationFactory()
+        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        dataset_tasks.export_csv()
+        response = self.get(url_for('site.reuses_csv'))
+        self.assertStatus(response, 302)
+        self.assertIn('export-reuse-', response.location)
 
     def test_reuses_csv_with_filters(self):
         '''Should handle filtering but ignore paging or facets'''
