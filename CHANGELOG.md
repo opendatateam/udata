@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.10 (2019-05-23)
 
 - Remove `<br>` in badge display [#2156](https://github.com/opendatateam/udata/pull/2156)
