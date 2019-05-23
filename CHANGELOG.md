@@ -4,6 +4,7 @@
 
 - Remove `<br>` in badge display [#2156](https://github.com/opendatateam/udata/pull/2156)
 - Display user avatar and fix its sizing [#2157](https://github.com/opendatateam/udata/pull/2157)
+- Redirect unfiltered csv exports to dataset of datasets [#2158](https://github.com/opendatateam/udata/pull/2158)
 
 ## 1.6.9 (2019-05-20)
 

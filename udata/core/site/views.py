@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import logging
 import requests
 
-from flask import request, json, redirect, url_for, current_app
+from flask import request, json, redirect, url_for, current_app, abort
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search, theme
@@ -73,9 +73,26 @@ def map():
     return theme.render('site/map.html')
 
 
+def get_export_url(model):
+    slug = current_app.config['EXPORT_CSV_DATASET_INFO']['slug']
+    dataset = Dataset.objects.get_or_404(slug=slug)
+    resource = None
+    for r in dataset.resources:
+        if r.extras.get('csv-export:model', '') == model:
+            resource = r
+            break
+    if not resource:
+        abort(404)
+    return resource.url
+
+
 @blueprint.route('/datasets.csv', cors=True)
 def datasets_csv():
     params = multi_to_dict(request.args)
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
+    exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
+    if not params and 'dataset' in exported_models:
+        return redirect(get_export_url('dataset'))
     params['facets'] = False
     datasets = search.iter(Dataset, **params)
     adapter = csv.get_adapter(Dataset)
@@ -85,6 +102,10 @@ def datasets_csv():
 @blueprint.route('/resources.csv', cors=True)
 def resources_csv():
     params = multi_to_dict(request.args)
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
+    exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
+    if not params and 'resource' in exported_models:
+        return redirect(get_export_url('resource'))
     params['facets'] = False
     datasets = search.iter(Dataset, **params)
     return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
@@ -93,6 +114,10 @@ def resources_csv():
 @blueprint.route('/organizations.csv', cors=True)
 def organizations_csv():
     params = multi_to_dict(request.args)
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
+    exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
+    if not params and 'organization' in exported_models:
+        return redirect(get_export_url('organization'))
     params['facets'] = False
     organizations = search.iter(Organization, **params)
     return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
@@ -101,6 +126,10 @@ def organizations_csv():
 @blueprint.route('/reuses.csv', cors=True)
 def reuses_csv():
     params = multi_to_dict(request.args)
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
+    exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
+    if not params and 'reuse' in exported_models:
+        return redirect(get_export_url('reuse'))
     params['facets'] = False
     reuses = search.iter(Reuse, **params)
     return csv.stream(ReuseCsvAdapter(reuses), 'reuses')
