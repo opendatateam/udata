@@ -225,6 +225,8 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             'alternateName': self.slug,
             'url': url_for('organizations.show', org=self, _external=True),
             'name': self.name,
+            'dateCreated': self.created_at.isoformat(),
+            'dateModified': self.last_modified.isoformat()
         }
 
         if self.description:
