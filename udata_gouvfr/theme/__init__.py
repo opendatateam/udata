@@ -8,10 +8,11 @@ import feedparser
 import requests
 
 from dateutil.parser import parse
-from flask import g, current_app
+from flask import g, current_app, url_for
 
 from udata import theme
 from udata.app import cache, nav
+from udata.models import Dataset
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
@@ -52,14 +53,26 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 
 theme.menu(gouvfr_menu)
 
-nav.Bar('gouvfr_footer', [
+footer_links = [
     nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr'),
     nav.Item(_('Reference Data'), 'gouvfr.spd'),
     nav.Item(_('Licences'), 'gouvfr.licences'),
     nav.Item(_('API'), 'apidoc.swaggerui'),
     nav.Item(_('Terms of use'), 'site.terms'),
     nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
-])
+]
+if current_app.config.get('EXPORT_CSV_MODELS'):
+    try:
+        export_dataset = Dataset.objects.get(
+            slug=current_app.config['EXPORT_CSV_DATASET_INFO']['slug'])
+    except Dataset.DoesNotExist:
+        pass
+    else:
+        export_url = url_for('datasets.show', dataset=export_dataset,
+                             _external=True)
+        footer_links.append(nav.Item(_('Data catalog'), None, url=export_url))
+
+nav.Bar('gouvfr_footer', footer_links)
 
 NETWORK_LINKS = [
     ('Gouvernement.fr', 'http://www.gouvernement.fr'),

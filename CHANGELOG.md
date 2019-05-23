@@ -2,11 +2,12 @@
 
 ## Current (in progress)
 
-- set org logo to max width [#403](https://github.com/etalab/udata-gouvfr/pull/403)
+- Set org logo to max width [#403](https://github.com/etalab/udata-gouvfr/pull/403)
+- Add data catalog link to footer [#404](https://github.com/etalab/udata-gouvfr/pull/404)
 
 ## 1.6.6 (2019-05-20)
 
-- remove clutter from search bar [#400](https://github.com/etalab/udata-gouvfr/pull/400)
+- Remove clutter from search bar [#400](https://github.com/etalab/udata-gouvfr/pull/400)
 - Add the homologation of INPI licenses [#402](https://github.com/etalab/udata-gouvfr/pull/402)
 
 ## 1.6.5 (2019-05-10)
