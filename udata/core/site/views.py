@@ -89,7 +89,7 @@ def get_export_url(model):
 @blueprint.route('/datasets.csv', cors=True)
 def datasets_csv():
     params = multi_to_dict(request.args)
-    # redirect to EXPORT_CSV dataset if feature is enabled and no filter set
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'dataset' in exported_models:
         return get_export_url('dataset')
@@ -102,7 +102,7 @@ def datasets_csv():
 @blueprint.route('/resources.csv', cors=True)
 def resources_csv():
     params = multi_to_dict(request.args)
-    # redirect to EXPORT_CSV dataset if feature is enabled and no filter set
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'resource' in exported_models:
         return get_export_url('resource')
@@ -114,7 +114,7 @@ def resources_csv():
 @blueprint.route('/organizations.csv', cors=True)
 def organizations_csv():
     params = multi_to_dict(request.args)
-    # redirect to EXPORT_CSV dataset if feature is enabled and no filter set
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'organization' in exported_models:
         return get_export_url('organization')
@@ -126,7 +126,7 @@ def organizations_csv():
 @blueprint.route('/reuses.csv', cors=True)
 def reuses_csv():
     params = multi_to_dict(request.args)
-    # redirect to EXPORT_CSV dataset if feature is enabled and no filter set
+    # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
     exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
     if not params and 'reuse' in exported_models:
         return get_export_url('reuse')
