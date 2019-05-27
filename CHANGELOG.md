@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Center incomplete rows of cards [#2162](https://github.com/opendatateam/udata/pull/2162)
+- Allow .dxf upload [#2163](https://github.com/opendatateam/udata/pull/2163)
 
 ## 1.6.10 (2019-05-23)
 
