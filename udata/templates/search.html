@@ -14,9 +14,9 @@
 
 {% set bundle = 'search' %}
 
-{% set datasets_search_url = url_for('datasets.list', **request.args) %}
-{% set reuses_search_url = url_for('reuses.list', **request.args) %}
-{% set organizations_search_url = url_for('organizations.list', **request.args) %}
+{% set datasets_search_url = url_for('datasets.list') %}
+{% set reuses_search_url = url_for('reuses.list') %}
+{% set organizations_search_url = url_for('organizations.list') %}
 {% set breadcrum_class='search-bar'%}
 
 {% block breadcrumb_bar %}
@@ -128,12 +128,15 @@
                     {% endfor %}
                 </ul>
 
-                {{ paginator(datasets, url=datasets_search_url) }}
+                {{ paginator(
+                    datasets,
+                    url=url_for('datasets.list', **request.args)
+                ) }}
             </div>
 
             <aside class="col-md-4 col-lg-3">
                 {% set search_url = datasets_search_url %}
-                {% include theme('dataset/search-panel.html') %}
+                {% include theme('dataset/search-panel.html') with context %}
             </aside>
         {% endif %}
     </div>
@@ -147,7 +150,10 @@
                     {% endfor %}
                 </ul>
 
-                {{ paginator(reuses, url=reuses_search_url) }}
+                {{ paginator(
+                    reuses,
+                    url=url_for('reuses.list', **request.args)
+                ) }}
             </div>
 
             <aside class="col-md-4 col-lg-3">
@@ -168,12 +174,14 @@
                     {% endfor %}
                 </ul>
 
-                {{ paginator(organizations, url=organizations_search_url) }}
+                {{ paginator(
+                    organizations, url=url_for('organizations.list', **request.args)
+                ) }}
             </div>
 
             <aside class="col-md-4 col-lg-3">
                 {% set search_url =organizations_search_url %}
-                {% include theme('organization/search-panel.html') %}
+                {% include theme('organization/search-panel.html') with context %}
             </aside>
         {% else %}
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
