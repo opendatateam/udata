@@ -6,6 +6,7 @@
 - Allow .dxf upload [#2164](https://github.com/opendatateam/udata/pull/2164)
 - Always use remote_url as harvesting source [#2165](https://github.com/opendatateam/udata/pull/2165)
 - Update jquery to ~3.4.1 [#2161](https://github.com/opendatateam/udata/pull/2161)
+- Fix various issues with search result page [#2166](https://github.com/opendatateam/udata/pull/2166)
 
 ## 1.6.10 (2019-05-23)
 
