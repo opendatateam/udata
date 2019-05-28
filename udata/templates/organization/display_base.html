@@ -139,6 +139,13 @@
                             tooltip="{{ _('I\'ll be informed about this organization news') }}"
                             >
                         </follow-button>
+
+                        <button type="button" @click="showDetails"
+                            class="btn btn-primary btn-extras btn-block btn-sm btn-left"
+                            title="{{ _('Details') }}">
+                            <span class="fa fa-info-circle"></span>
+                            {{ _('Details') }}
+                        </button>
                     </div>
                 </div>
             </aside>
