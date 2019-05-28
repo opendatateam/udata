@@ -1,4 +1,5 @@
 {% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
 {% import theme('macros/search.html') as s %}
 
 {% set body_class = 'multisearch' %}
@@ -126,19 +127,16 @@
                     {% include theme('dataset/search-result.html') %}
                     {% endfor %}
                 </ul>
-                {% if datasets.has_next %}
-                <p class="text-center">
-                    <a class="btn btn-grey btn-sm" href="{{ url_for('datasets.list', **request.args) }}">
-                        <span class="fa fa-fw fa-list"></span>
-                        {{ _('See the %(total)s results', total=datasets.total) }}
-                    </a>
-                </p>
-                {% endif %}
+
+                {{ paginator(
+                    datasets,
+                    url=url_for('datasets.list', **request.args)
+                ) }}
             </div>
 
             <aside class="col-md-4 col-lg-3">
                 {% set search_url = datasets_search_url %}
-                {% include theme('dataset/search-panel.html') %}
+                {% include theme('dataset/search-panel.html') with context %}
             </aside>
         {% endif %}
     </div>
@@ -151,19 +149,16 @@
                     {% include theme('reuse/search-result.html') %}
                     {% endfor %}
                 </ul>
-                {% if reuses.has_next %}
-                <p class="text-center">
-                    <a class="btn btn-grey btn-sm" href="{{ url_for('reuses.list', **request.args) }}">
-                        <span class="fa fa-fw fa-list"></span>
-                        {{ _('See the %(total)s results', total=reuses.total) }}
-                    </a>
-                </p>
-                {% endif %}
+
+                {{ paginator(
+                    reuses,
+                    url=url_for('reuses.list', **request.args)
+                ) }}
             </div>
 
             <aside class="col-md-4 col-lg-3">
                 {% set search_url = reuses_search_url %}
-                {% include theme('reuse/search-panel.html') %}
+                {% include theme('reuse/search-panel.html') with context %}
             </aside>
         {% else %}
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
@@ -178,19 +173,15 @@
                     {% include theme('organization/search-result.html') %}
                     {% endfor %}
                 </ul>
-                {% if organizations.has_next %}
-                <p class="text-center">
-                    <a class="btn btn-grey btn-sm" href="{{ url_for('organizations.list', **request.args) }}">
-                        <span class="fa fa-fw fa-list"></span>
-                        {{ _('See the %(total)s results', total=organizations.total) }}
-                    </a>
-                </p>
-                {% endif %}
+
+                {{ paginator(
+                    organizations, url=url_for('organizations.list', **request.args)
+                ) }}
             </div>
 
             <aside class="col-md-4 col-lg-3">
                 {% set search_url =organizations_search_url %}
-                {% include theme('organization/search-panel.html') %}
+                {% include theme('organization/search-panel.html') with context %}
             </aside>
         {% else %}
         <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
