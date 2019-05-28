@@ -146,7 +146,7 @@
             <div class="col-md-8 col-lg-9 smaller">
                 <ul class="search-results">
                     {% for reuse in reuses %}
-                    {% include theme('reuse/search-result.html') %}
+                    {% include theme('reuse/search-result.html') with context %}
                     {% endfor %}
                 </ul>
 
