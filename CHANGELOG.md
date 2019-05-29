@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.8 (2019-05-29)
 
 - Minor edits on SPD [#406](https://github.com/etalab/udata-gouvfr/pull/406)
 - Change certification visual location in cards [#407](https://github.com/etalab/udata-gouvfr/pull/407)
