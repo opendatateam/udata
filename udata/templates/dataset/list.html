@@ -2,6 +2,8 @@
 {% from theme('macros/paginator.html') import paginator with context %}
 {% import theme('macros/search.html') as s %}
 
+{% set toolbar_class='search-toolbar' %}
+
 {% set meta = {
     'title': _('Datasets'),
     'description': _("%(site)s dataset search", site=config['SITE_TITLE']),
@@ -27,9 +29,7 @@
     </li>
 {% endblock %}
 
-{% block toolbar_container %}
-<div class="btn-toolbar search-toolbar" role="toolbar">
-
+{% block toolbar %}
 {{ s.breadcrum_toolbar(datasets, url=url,
     exports=(
         (_('Datasets'), 'site.datasets_csv', 'csv'),
@@ -41,7 +41,6 @@
     reuses=(_('Reuses'), 'desc'),
     followers=(_('Followers'), 'desc')
 ) }}
-</div>
 {% endblock %}
 
 {% block main_content %}

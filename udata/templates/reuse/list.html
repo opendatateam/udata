@@ -2,6 +2,8 @@
 {% from theme('macros/paginator.html') import paginator with context %}
 {% import theme('macros/search.html') as s %}
 
+{% set toolbar_class='search-toolbar' %}
+
 {% set meta = {
     'title': _('Reuses'),
     'description': _("%(site)s reuse search", site=config['SITE_TITLE']),
@@ -25,8 +27,7 @@
 
 
 {# // 'site.reuses_csv', url=url, #}
-{% block toolbar_container %}
-<div class="btn-toolbar search-toolbar" role="toolbar">
+{% block toolbar %}
 {{ s.breadcrum_toolbar(reuses, url=url,
     exports=(
         (_('Reuses'), 'site.reuses_csv', 'csv'),
@@ -37,7 +38,6 @@
     datasets=(_('Datasets'), 'desc'),
     followers=(_('Followers'), 'desc')
 ) }}
-</div>
 {% endblock %}
 
 {% block main_content %}
