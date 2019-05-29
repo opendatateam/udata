@@ -36,7 +36,12 @@
 {% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
-<section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
+
+{% if dataset.archived %}
+<div class="alert alert-warning" role="alert">{{ _('This dataset has been archived.') }}</div>
+{% endif %}
+
+<section class="content {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
     <div class="container dataset-container">
         <div class="row">
 
@@ -93,10 +98,6 @@
                         </p>
                     </div>
                 </div>
-
-                {% if dataset.archived %}
-                <div class="alert alert-warning" role="alert">{{ _('This dataset has been archived.') }}</div>
-                {% endif %}
 
                 <div class="row">
                     <div class="col-xs-12">
