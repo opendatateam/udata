@@ -5,7 +5,6 @@ import click
 import json
 import logging
 import requests
-import unicodecsv as csv
 
 from bson import ObjectId
 
