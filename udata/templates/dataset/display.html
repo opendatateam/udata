@@ -14,7 +14,7 @@
 
 {% set bundle = 'dataset' %}
 
-{% set body_class = 'dataset-display' if not dataset.archived else 'dataset-display dataset-archived' %}
+{% set body_class = 'dataset-display' %}
 
 {% block extra_head %}
 {% cache cache_duration, 'dataset-extra-head', dataset.id|string, g.lang_code %}
