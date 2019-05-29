@@ -29,7 +29,7 @@
                 <h3>{{ _('Latest reuses') }}</h3>
 
                 <ul class="card-list card-list--columned">
-                    {% for reuse in topic.reuses %}
+                    {% for reuse in recent_reuses %}
                     {% set features = ['preview'] %}
                     <li class="col-xs-12 col-sm-4">
                         {% include theme('reuse/card.html') %}
