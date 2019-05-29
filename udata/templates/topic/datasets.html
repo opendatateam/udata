@@ -26,8 +26,7 @@
     </li>
 {% endblock %}
 
-{% block toolbar_container %}
-<div class="btn-toolbar search-toolbar" role="toolbar">
+{% block toolbar %}
 {{ s.breadcrum_toolbar(datasets, url=url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
@@ -35,7 +34,6 @@
     reuses=(_('Reuses'), 'desc'),
     followers=(_('Stars'), 'desc')
 ) }}
-</div>
 {% endblock %}
 
 {% block main_content %}
