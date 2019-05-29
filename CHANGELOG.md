@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.8 (2019-05-29)
 
 - Minor edits on SPD [#406](https://github.com/etalab/udata-gouvfr/pull/406)
