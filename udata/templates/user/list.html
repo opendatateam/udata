@@ -2,8 +2,6 @@
 {% from theme('macros/paginator.html') import paginator with context %}
 {% import theme('macros/search.html') as s %}
 
-{% set toolbar_class='search-toolbar' %}
-
 {% set meta = {
     'title': _('Users'),
     'description': _("%(site)s user search", site=config['SITE_TITLE']),
