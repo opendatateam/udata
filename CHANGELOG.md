@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.11 (2019-05-29)
 
 - Center incomplete rows of cards [#2162](https://github.com/opendatateam/udata/pull/2162)
 - Allow .dxf upload [#2164](https://github.com/opendatateam/udata/pull/2164)
