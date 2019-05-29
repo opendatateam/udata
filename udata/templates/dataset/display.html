@@ -84,9 +84,19 @@
                                 popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
                                 >{{ _('Deleted') }}</small>
                             {% endif %}
+                            {% if dataset.archived %}
+                            <small class="archived"
+                                v-popover.literal="{{ _('This dataset has been archived.') }}"
+                                popover-title="{{ _('Archived') }}" popover-trigger="hover" popover-placement="top"
+                                >{{ _('Archived') }}</small>
+                            {% endif %}
                         </p>
                     </div>
                 </div>
+
+                {% if dataset.archived %}
+                <div class="alert alert-warning" role="alert">{{ _('This dataset has been archived.') }}</div>
+                {% endif %}
 
                 <div class="row">
                     <div class="col-xs-12">
