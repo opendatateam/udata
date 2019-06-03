@@ -125,6 +125,12 @@ Enables the search autocomplete on frontend if set to `True`, disables otherwise
 
 The search autocomplete debounce delay on frontend, in milliseconds.
 
+### ARCHIVE_COMMENT_USER_ID
+
+**default**: `None`
+
+The id of an existing user which will post a comment when a dataset is archived.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE

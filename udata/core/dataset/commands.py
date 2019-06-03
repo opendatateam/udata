@@ -84,19 +84,21 @@ def grp():
 
 @grp.command()
 @click.argument('dataset_id')
-def archive_one(dataset_id):
+@click.option('-c', '--comment', is_flag=True, help='Post a comment when archiving')
+def archive_one(dataset_id, comment):
     """Archive one dataset"""
     try:
         dataset = Dataset.objects.get(id=dataset_id)
     except Dataset.DoesNotExist:
         exit_with_error('Cannot find a dataset with id %s' % dataset_id)
     else:
-        actions.archive(dataset)
+        actions.archive(dataset, comment)
 
 
 @grp.command()
 @click.argument('filepath')
-def archive(filepath):
+@click.option('-c', '--comment', is_flag=True, help='Post a comment when archiving')
+def archive(filepath, comment):
     """Archive multiple datasets from a list in a file (one id per line)"""
     count = 0
     errors = 0
@@ -113,6 +115,6 @@ def archive(filepath):
                 errors += 1
                 continue
             else:
-                actions.archive(dataset)
+                actions.archive(dataset, comment)
                 count += 1
     log.info('Archived %s datasets, %s failed', count, errors)
