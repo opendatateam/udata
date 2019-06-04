@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Archive dataset feature [#2172](https://github.com/opendatateam/udata/pull/2172)
 
 ## 1.6.11 (2019-05-29)
 
