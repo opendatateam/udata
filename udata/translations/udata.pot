@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 1.6.12.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2019-06-04 15:19+0200\n"
-"PO-Revision-Date: 2019-06-04 15:19+0200\n"
+"POT-Creation-Date: 2019-06-04 15:44+0200\n"
+"PO-Revision-Date: 2019-06-04 15:44+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -1801,6 +1801,17 @@ msgstr ""
 
 #: udata/templates/api/oauth_error.html:8
 msgid "OAuth Authentication Error"
+msgstr ""
+
+#: udata/templates/comments/dataset_archived.txt:1
+msgid ""
+"This dataset has been archived by our administration team.\n"
+"\n"
+"An archived dataset is considered out of date by a combination of factors.\n"
+"It does not appear in the search results and has a special layout warning the"
+" site's users.\n"
+"\n"
+"If you think this is a mistake, you can contact the site administrator."
 msgstr ""
 
 #: udata/templates/dataset/add-reuse-card.html:6
