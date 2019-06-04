@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-06-04 15:19+0200\n"
-"PO-Revision-Date: 2019-06-04 13:22\n"
+"PO-Revision-Date: 2019-06-04 13:33\n"
 "Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -43,7 +43,7 @@ msgstr "Instructions de réinitialisation du mot de passe"
 
 #: udata/settings.py:339
 msgid "This dataset has been archived"
-msgstr ""
+msgstr "Ce jeu de données a été archivé"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
@@ -1758,7 +1758,7 @@ msgstr "Granularité de la couverture territoriale"
 
 #: udata/templates/dataset/display.html:42 udata/templates/dataset/display.html:96
 msgid "This dataset has been archived."
-msgstr ""
+msgstr "Ce jeu de données a été archivé."
 
 #: udata/templates/dataset/display.html:61
 msgid "This dataset comes from a certified public service"
@@ -1791,7 +1791,7 @@ msgstr "Supprimé"
 
 #: udata/templates/dataset/display.html:97 udata/templates/dataset/display.html:98
 msgid "Archived"
-msgstr ""
+msgstr "Archivé"
 
 #: udata/templates/dataset/display.html:115
 msgid "See also: community resources"
