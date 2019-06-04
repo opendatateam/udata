@@ -19,6 +19,7 @@ Flask-Caching==1.4.0
 Flask-CDN==1.5.3
 flask-fs==0.6.1
 Flask-Gravatar==0.5.0
+Flask-Limiter==1.0.1
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
 flask-mongoengine==0.9.5

@@ -8,6 +8,7 @@ from flask_restplus.inputs import boolean
 
 from udata.auth import admin_permission
 from udata.api import api, API, fields
+from udata.limiter import limiter, comment_limit
 from udata.core.user.api_fields import user_ref_fields
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
@@ -89,6 +90,8 @@ class DiscussionAPI(API):
     '''
     Base class for a discussion thread.
     '''
+    decorators = [limiter.limit(comment_limit, methods=['post'])]
+
     @api.doc('get_discussion')
     @api.marshal_with(discussion_fields)
     def get(self, id):
@@ -158,6 +161,8 @@ class DiscussionsAPI(API):
     '''
     Base class for a list of discussions.
     '''
+    decorators = [limiter.limit(comment_limit, methods=['post'])]
+
     @api.doc('list_discussions')
     @api.expect(parser)
     @api.marshal_with(discussion_page_fields)

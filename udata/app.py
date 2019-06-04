@@ -14,8 +14,8 @@ from flask import (
     Flask, abort, g, send_from_directory, json, Blueprint as BaseBlueprint,
     make_response
 )
-from flask_caching import Cache
 
+from flask_caching import Cache
 from flask_wtf.csrf import CSRFProtect
 from flask_navigation import Navigation
 from speaklater import is_lazy_string
@@ -204,7 +204,7 @@ def standalone(app):
 def register_extensions(app):
     from udata import (
         models, routing, tasks, mail, i18n, auth, theme, search, sitemap,
-        sentry
+        sentry, limiter
     )
     i18n.init_app(app)
     models.init_app(app)
@@ -218,6 +218,7 @@ def register_extensions(app):
     mail.init_app(app)
     search.init_app(app)
     sitemap.init_app(app)
+    limiter.init_app(app)
     sentry.init_app(app)
     from . import patch_flask_security  # noqa
     return app

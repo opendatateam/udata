@@ -338,6 +338,12 @@ class Defaults(object):
     ARCHIVE_COMMENT_USER_ID = None
     ARCHIVE_COMMENT_TITLE = _('This dataset has been archived')
 
+    # Rate limiting parameters
+    ####################
+    RATELIMIT_ENABLED = False
+    RATELIMIT_STORAGE_URL = 'redis://localhost:6379/14'
+    RATELIMIT_COMMENT = '5/minute'
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
