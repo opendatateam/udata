@@ -38,7 +38,9 @@
 <div v-el:modal></div>
 
 {% if dataset.archived %}
-<div class="alert alert-warning" role="alert">{{ _('This dataset has been archived.') }}</div>
+<div class="container-fluid alert alert-warning">
+    <div class="container" role="alert">{{ _('This dataset has been archived.') }}</div>
+</div>
 {% endif %}
 
 <section class="content {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
