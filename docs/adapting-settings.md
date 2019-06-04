@@ -131,6 +131,12 @@ The search autocomplete debounce delay on frontend, in milliseconds.
 
 The id of an existing user which will post a comment when a dataset is archived.
 
+### ARCHIVE_COMMENT_TITLE
+
+**default**: `_('This dataset has been archived')`
+
+The title of the comment optionaly posted when a dataset is archived.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
