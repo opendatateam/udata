@@ -125,6 +125,19 @@ Enables the search autocomplete on frontend if set to `True`, disables otherwise
 
 The search autocomplete debounce delay on frontend, in milliseconds.
 
+### ARCHIVE_COMMENT_USER_ID
+
+**default**: `None`
+
+The id of an existing user which will post a comment when a dataset is archived.
+
+### ARCHIVE_COMMENT_TITLE
+
+**default**: `_('This dataset has been archived')`
+
+The title of the comment optionaly posted when a dataset is archived.
+NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
