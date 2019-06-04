@@ -342,7 +342,7 @@ class Defaults(object):
     ####################
     RATELIMIT_ENABLED = False
     RATELIMIT_STORAGE_URL = 'redis://localhost:6379/14'
-    RATELIMIT_COMMENT = '5/minute'
+    RATELIMIT_DISCUSSIONS = '5/minute'
 
 
 class Testing(object):

@@ -138,6 +138,30 @@ The id of an existing user which will post a comment when a dataset is archived.
 The title of the comment optionaly posted when a dataset is archived.
 NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
 
+## Rate limiting
+
+See [Flask-Limiter documentation](https://flask-limiter.readthedocs.io/en/stable/index.html) for more options.
+
+`flask_limiter.util.get_remote_address` is used as a _key_func_.
+
+## RATELIMIT_ENABLED
+
+**default**: `False`
+
+Enables the rate limiting feature. Every other related option is ignored if `False`.
+
+## RATELIMIT_STORAGE_URL
+
+**default**: `'redis://localhost:6379/14'`
+
+Storage URL for the rate limiting counter.
+
+## RATELIMIT_DISCUSSIONS
+
+**default**:  `'5/minute'`
+
+Rate limiting rule for posting discussions and comments.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
