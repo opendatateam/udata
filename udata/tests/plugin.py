@@ -61,6 +61,7 @@ class TestClient(FlaskClient):
 @pytest.fixture
 def app(request):
     test_settings = get_settings(request)
+    test_settings.RATELIMIT_ENABLED = True
     app = create_app(settings.Defaults, override=test_settings)
     app.test_client_class = TestClient
     return app
