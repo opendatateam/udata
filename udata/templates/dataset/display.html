@@ -36,7 +36,14 @@
 {% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
-<section class="content {% if not dataset.organization.public_service %}non{% endif %}certified">
+
+{% if dataset.archived %}
+<div class="container-fluid alert alert-warning">
+    <div class="container" role="alert">{{ _('This dataset has been archived.') }}</div>
+</div>
+{% endif %}
+
+<section class="content {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
     <div class="container dataset-container">
         <div class="row">
 
@@ -83,6 +90,12 @@
                                 v-popover.literal="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
                                 popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
                                 >{{ _('Deleted') }}</small>
+                            {% endif %}
+                            {% if dataset.archived %}
+                            <small class="archived"
+                                v-popover.literal="{{ _('This dataset has been archived.') }}"
+                                popover-title="{{ _('Archived') }}" popover-trigger="hover" popover-placement="top"
+                                >{{ _('Archived') }}</small>
                             {% endif %}
                         </p>
                     </div>
