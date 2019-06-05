@@ -328,8 +328,15 @@ class Defaults(object):
         'organization': None,
     }
 
+    # Autocomplete parameters
+    #########################
     SEARCH_AUTOCOMPLETE_ENABLED = True
     SEARCH_AUTOCOMPLETE_DEBOUNCE = 200  # in ms
+
+    # Archive parameters
+    ####################
+    ARCHIVE_COMMENT_USER_ID = None
+    ARCHIVE_COMMENT_TITLE = _('This dataset has been archived')
 
 
 class Testing(object):

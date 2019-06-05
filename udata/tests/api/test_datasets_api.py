@@ -1061,6 +1061,28 @@ class DatasetReferencesAPITest(APITestCase):
         self.assertEqual(response.json, extensions)
 
 
+class DatasetArchivedAPITest(APITestCase):
+    modules = ['core.dataset']
+
+    def test_dataset_api_search_archived(self):
+        '''It should search datasets from the API, excluding archived ones'''
+        with self.autoindex():
+            VisibleDatasetFactory(archived=None)
+            dataset = VisibleDatasetFactory(archived=datetime.now())
+
+        response = self.get(url_for('api.datasets', q=''))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertNotIn(str(dataset.id),
+                         [r['id'] for r in response.json['data']])
+
+    def test_dataset_api_get_archived(self):
+        '''It should fetch an archived dataset from the API and return 200'''
+        dataset = VisibleDatasetFactory(archived=datetime.now())
+        response = self.get(url_for('api.dataset', dataset=dataset))
+        self.assert200(response)
+
+
 class CommunityResourceAPITest(APITestCase):
     modules = ['core.dataset', 'core.user', 'core.organization']
 

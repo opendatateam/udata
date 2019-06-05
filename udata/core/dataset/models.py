@@ -191,12 +191,14 @@ class License(db.Document):
 
 class DatasetQuerySet(db.OwnedQuerySet):
     def visible(self):
-        return self(private__ne=True, resources__0__exists=True, deleted=None)
+        return self(private__ne=True, resources__0__exists=True,
+                    deleted=None, archived=None)
 
     def hidden(self):
         return self(db.Q(private=True) |
                     db.Q(resources__0__exists=False) |
-                    db.Q(deleted__ne=None))
+                    db.Q(deleted__ne=None) |
+                    db.Q(archived__ne=None))
 
 
 class Checksum(db.EmbeddedDocument):
@@ -379,6 +381,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     featured = db.BooleanField(required=True, default=False)
 
     deleted = db.DateTimeField()
+    archived = db.DateTimeField()
 
     def __unicode__(self):
         return self.title or ''
@@ -405,6 +408,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     before_delete = signal('Dataset.before_delete')
     after_delete = signal('Dataset.after_delete')
     on_delete = signal('Dataset.on_delete')
+    on_archive = signal('Dataset.on_archive')
     on_resource_added = signal('Dataset.on_resource_added')
 
     verbose_name = _('dataset')
@@ -424,6 +428,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             cls.on_update.send(document)
         if document.deleted:
             cls.on_delete.send(document)
+        if document.archived:
+            cls.on_archive.send(document)
         if kwargs.get('resource_added'):
             cls.on_resource_added.send(document,
                                        resource_id=kwargs['resource_added'])
@@ -444,7 +450,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def is_hidden(self):
-        return len(self.resources) == 0 or self.private or self.deleted
+        return (len(self.resources) == 0 or self.private or self.deleted
+                or self.archived)
 
     @property
     def full_title(self):
