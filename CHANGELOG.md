@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Switch removal of related tags in a topic page to a proper `related` jinja tag [#408](https://github.com/etalab/udata-gouvfr/pull/408)
+- Add the homologation of IGN licenses [#412](https://github.com/etalab/udata-gouvfr/  pull/412)
 
 ## 1.6.8 (2019-05-29)
 
