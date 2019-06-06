@@ -35,7 +35,7 @@ html2text==2018.1.9
 itsdangerous==1.1.0
 Jinja2==2.10.1
 jsonschema==3.0.1
-kombu==4.6.0
+kombu[redis]==4.2.1
 lxml==4.3.3
 mongoengine==0.16.3
 msgpack-python==0.4.8
@@ -52,9 +52,11 @@ rdflib==4.2.2
 redis==2.10.6 # this can be safely upgraded back to 3.1.0 as soon as celery 4.2.2 is released
 requests==2.21.0
 simplejson==3.16.0
+six==1.12.0
 StringDist==1.0.9
 tlds
 ujson==1.35
+urllib3==1.24.3
 unicodecsv==0.14.1
 voluptuous==0.10.5
 werkzeug==0.14.1
