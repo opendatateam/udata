@@ -54,6 +54,14 @@
         }
     }
 }
+
+.list-group-form {
+    height: inherit;
+
+    form {
+        padding: 1em;
+    }
+}
 </style>
 <template>
 <div class="discussion-threads">
@@ -62,7 +70,7 @@
         <span class="sr-only">{{ _('Loading') }}...</span>
     </div>
 
-    <div class="sort" v-show="discussions.data.length > 1">
+    <div class="sort" v-show="discussions.data && discussions.data.length > 1">
         <div class="btn-group">
             <button class="btn btn-default btn-sm dropdown-toogle" type="button"
                 data-toggle="dropdown"
@@ -252,18 +260,13 @@ export default {
                 this.threadFor(id).start();
             }
         }
-    }
-}
-</script>
-
-<style lang="less">
-.discussion-threads {
-    .list-group-form {
-        height: inherit;
-
-        form {
-            padding: 1em;
+    },
+    watch: {
+        deeplink: function() {
+            if (this.discussions.data && document.location.hash) {
+                this.jumpToHash(document.location.hash);
+            };
         }
     }
 }
-</style>
+</script>

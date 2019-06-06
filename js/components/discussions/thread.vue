@@ -20,7 +20,7 @@
 }
 </style>
 <template>
-<div class="discussion-thread panel panel-default">
+<div class="discussion-thread panel panel-default" id={}>
     <div class="panel-heading" @click="toggleDiscussions">
         <div>
             <a href="#{{ discussionIdAttr }}" class="pull-right" v-on:click.stop><span class="fa fa-link"></span></a>
