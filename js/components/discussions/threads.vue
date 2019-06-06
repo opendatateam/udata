@@ -131,7 +131,6 @@
 
 <script>
 import config from 'config';
-import {PageList} from 'models/base';
 import Avatar from 'components/avatar.vue';
 import Discussions from 'models/discussions';
 import DiscussionThread from 'components/discussions/thread.vue';
