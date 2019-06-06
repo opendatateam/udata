@@ -40,7 +40,9 @@ jobs:
           - venv
       - run:
           name: Check dependencies
-          command: pip check
+          command: |
+            source venv/bin/activate
+            pip check
       - run:
           name: Run tests
           command: |
