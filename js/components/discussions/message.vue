@@ -19,6 +19,7 @@
         display: flex;
         flex-direction: column;
         min-width: 0; // Override Flex default to auto
+        flex-grow: 1;
 
         .message-header {
             display: flex;
