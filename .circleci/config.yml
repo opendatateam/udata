@@ -39,6 +39,9 @@ jobs:
           paths:
           - venv
       - run:
+          name: Check dependencies
+          command: pip check
+      - run:
           name: Run tests
           command: |
             mkdir -p reports/python
