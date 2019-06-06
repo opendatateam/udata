@@ -10,6 +10,11 @@
     text-align: center;
 }
 
+.pagination {
+    display:flex;
+    justify-content: center;
+}
+
 .discussion-card.add {
     cursor: pointer;
     .card-logo {
@@ -52,12 +57,12 @@
 </style>
 <template>
 <div class="discussion-threads">
-    <div class="loading" v-if="loading">
+    <div class="loading" v-if="discussions.loading">
         <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
         <span class="sr-only">{{ _('Loading') }}...</span>
     </div>
 
-    <div class="sort" v-show="discussions.length > 1">
+    <div class="sort" v-show="discussions.data.length > 1">
         <div class="btn-group">
             <button class="btn btn-default btn-sm dropdown-toogle" type="button"
                 data-toggle="dropdown"
@@ -73,11 +78,13 @@
 
     <discussion-thread
         v-ref:threads
-        v-for="discussion in discussions"
+        v-for="discussion in discussions.data"
         :discussion="discussion"
         id="discussion-{{ discussion.id }}"
         track-by="id">
     </discussion-thread>
+
+    <pagination-widget :p="discussions" class="pagination"></pagination-widget>
 
     <!-- New discussion -->
     <a class="card discussion-card add" @click="displayForm" v-show="!formDisplayed">
@@ -116,27 +123,39 @@
 
 <script>
 import config from 'config';
+import {PageList} from 'models/base';
 import Avatar from 'components/avatar.vue';
+import Discussions from 'models/discussions';
 import DiscussionThread from 'components/discussions/thread.vue';
 import ThreadFormCreate from 'components/discussions/thread-create.vue';
+import PaginationWidget from 'components/pagination.vue';
+
 import log from 'logger';
 
 const DISCUSSION_REGEX = /^#discussion-([0-9a-f]{24})$/;
 const COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-(\d+)$/;
 const NEW_COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-new-comment$/;
 
+const MASK = ['id', 'title', 'created', 'closed', 'class', 'subject', 'discussion'];
 
 export default {
-    components: {Avatar, DiscussionThread, ThreadFormCreate},
+    components: {Avatar, DiscussionThread, ThreadFormCreate, PaginationWidget},
     data() {
         return {
-            discussions: [],
+            discussions: new Discussions({
+                query: {
+                    sort: '-created',
+                    page_size: 10
+                },
+                mask: MASK
+            }),
             loading: true,
             formDisplayed: false,
             currentUser: config.user,
         }
     },
     props: {
+//        discussions: null,
         subjectId: String,
         subjectClass: String
     },
@@ -166,17 +185,7 @@ export default {
         }
     },
     ready() {
-        this.$api.get('discussions/', {for: this.subjectId}).then(response => {
-
-            this.loading = false;
-            this.discussions = response.data;
-
-            if (document.location.hash) {
-                this.$nextTick(() => { // Wait for data to be binded
-                    this.jumpToHash(document.location.hash);
-                });
-            }
-        }).catch(log.error.bind(log));
+        this.discussions.fetch({for: this.subjectId});
     },
     methods: {
         /**
@@ -219,11 +228,10 @@ export default {
          * Sort threads by creation date or by last response date
          */
         sortBy(key) {
-
             if (key === 'created') {
-                this.discussions.sort( (a,b) => new Date(b['created']) - new Date(a['created']) );
+                this.discussions.data.sort( (a,b) => new Date(b['created']) - new Date(a['created']) );
             } else if (key === 'response') {
-                this.discussions.sort( (a,b) => new Date(b.discussion.slice(-1)[0]['posted_on']) -  new Date(a.discussion.slice(-1)[0]['posted_on']) );
+                this.discussions.data.sort( (a,b) => new Date(b.discussion.slice(-1)[0]['posted_on']) -  new Date(a.discussion.slice(-1)[0]['posted_on']) );
             }
         },
 
