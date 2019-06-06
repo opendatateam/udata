@@ -26,10 +26,10 @@
             {# Last reuses #}
             <div class="col-xs-12">
 
-                <h3>{{ _('Latest reuses') }}</h3>
+                <h3><a href="{{ url_for('topics.reuses', topic=topic) }}">{{ _('Latest reuses') }}</a></h3>
 
                 <ul class="card-list card-list--columned">
-                    {% for reuse in topic.reuses %}
+                    {% for reuse in recent_reuses %}
                     {% set features = ['preview'] %}
                     <li class="col-xs-12 col-sm-4">
                         {% include theme('reuse/card.html') %}
