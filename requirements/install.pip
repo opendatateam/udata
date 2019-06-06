@@ -52,7 +52,7 @@ rdflib==4.2.2
 redis==2.10.6 # this can be safely upgraded back to 3.1.0 as soon as celery 4.2.2 is released
 requests==2.21.0
 simplejson==3.16.0
-six==1.10.0
+six==1.12.0
 StringDist==1.0.9
 tlds
 ujson==1.35
