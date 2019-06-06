@@ -143,7 +143,7 @@ const DISCUSSION_REGEX = /^#discussion-([0-9a-f]{24})$/;
 const COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-(\d+)$/;
 const NEW_COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-new-comment$/;
 
-const MASK = ['id', 'title', 'created', 'closed', 'class', 'subject', 'discussion'];
+const MASK = ['id', 'title', 'created', 'closed', 'class', 'subject', 'discussion', 'closed_by'];
 
 export default {
     components: {Avatar, DiscussionThread, ThreadFormCreate, PaginationWidget},
