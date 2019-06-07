@@ -46,7 +46,7 @@ pyliblzma==0.5.3
 pymongo==3.7.2
 python-dateutil==2.8.0
 pytz==2019.1
-PyYAML==5.1
+PyYAML==5.1.1
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
 redis==2.10.6 # this can be safely upgraded back to 3.1.0 as soon as celery 4.2.2 is released
