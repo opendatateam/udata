@@ -32,87 +32,43 @@
 
             {# Temporal coverage #}
             {% if dataset.temporal_coverage %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Temporal coverage') }}">
-                    <span class="fa fa-calendar fa-fw"></span>
-                    {{ dataset.temporal_coverage|daterange }}
-                </a>
+            <li title="{{ _('Temporal coverage') }}">
+                <span class="fa fa-calendar fa-fw"></span>
+                {{ dataset.temporal_coverage|daterange }}
             </li>
             {% endif %}
 
             {# Periodicity #}
             {% if dataset.frequency %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Frequency') }}">
-                    <span class="fa fa-clock-o fa-fw"></span>
-                    {{ dataset.frequency_label }}
-                </a>
+            <li title="{{ _('Frequency') }}">
+                <span class="fa fa-clock-o fa-fw"></span>
+                {{ dataset.frequency_label }}
             </li>
             {% endif %}
 
             {# Spatial coverage #}
             {% if dataset.spatial.zones %}
-                {# Avoid listing too many territories otherwise it breaks design. #}
-                {% if dataset.spatial.zones|length > 3 %}
-                    <li>
-                        <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                            title="{{ _('Spatial coverage') }}">
-                            <span class="fa fa-map-marker fa-fw"></span>
-                            {{ dataset.spatial.top_label }}
-                        </a>
-                    </li>
-                {% else %}
-                    {% for territory in dataset.spatial.zones %}
-                        <li>
-                        {% if territory.handled_zone %}
-                            <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                                href="{{ territory.url }}" title="{{ _('Spatial coverage') }}">
-                                {% set logo=territory.logo_url(external=True) %}
-                                {% if logo %}
-                                    <img src="{{ logo }}" alt="{{ territory.name }}" class="float-left" width="11px" />
-                                {% else %}
-                                    <span class="fa fa-map-marker fa-fw"></span>
-                                {% endif %}
-                                {{ territory.name }}
-                            </a>
-                        {% else %}
-                            <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                                title="{{ _('Spatial coverage') }}">
-                                <span class="fa fa-map-marker fa-fw"></span>
-                                {{ dataset.spatial.top_label }}
-                            </a>
-                        {% endif %}
-                        </li>
-                    {% endfor %}
-                {% endif %}
+            <li title="{{ _('Spatial coverage') }}">
+                    <span class="fa fa-map-marker fa-fw"></span>
+                    {{ dataset.spatial.top_label }}
+            </li>
             {% endif %}
 
             {% if dataset.spatial.granularity %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Territorial coverage granularity') }}">
-                    <span class="fa fa-bullseye fa-fw"></span>
-                    {{ dataset.spatial.granularity_label }}
-                </a>
+            <li title="{{ _('Territorial coverage granularity') }}">
+                <span class="fa fa-bullseye fa-fw"></span>
+                {{ dataset.spatial.granularity_label }}
             </li>
             {% endif %}
 
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Reuse number') }}">
-                    <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
-                    {{ dataset.metrics.reuses or 0 }}
-                </a>
+            <li title="{{ _('Reuse number') }}">
+                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
+                {{ dataset.metrics.reuses or 0 }}
             </li>
 
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of followers') }}">
-                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                    {{ dataset.metrics.followers or 0 }}
-                </a>
+            <li title="{{ _('Number of followers') }}">
+                <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                {{ dataset.metrics.followers or 0 }}
             </li>
 
         </ul>
