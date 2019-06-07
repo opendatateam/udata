@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.9 (2019-06-07)
 
 - Switch removal of related tags in a topic page to a proper `related` jinja tag [#408](https://github.com/etalab/udata-gouvfr/pull/408)
