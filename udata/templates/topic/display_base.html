@@ -12,6 +12,7 @@
 {% set body_class = 'topic-display' %}
 
 {% block content %}
+{% cache cache_duration, 'topic-content', topic.id|string, g.lang_code %}
 {{ breadcrumb(self) }}
 {% block main_content %}{% endblock %}
 {% block related %}
@@ -44,4 +45,5 @@
     </div>
 </section>
 {% endblock %}
+{% endcache %}
 {% endblock %}
