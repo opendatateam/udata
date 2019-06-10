@@ -104,8 +104,8 @@ class SiteViewsTest(FrontTestCase):
         self.assert404(response)
 
         # generate the export
-        o = OrganizationFactory()
-        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        d = DatasetFactory()
+        self.app.config['EXPORT_CSV_DATASET_ID'] = d.id
         dataset_tasks.export_csv()
         response = self.get(url_for('site.datasets_csv'))
         self.assertStatus(response, 302)
@@ -201,8 +201,8 @@ class SiteViewsTest(FrontTestCase):
         self.assert404(response)
 
         # generate the export
-        o = OrganizationFactory()
-        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        d = DatasetFactory()
+        self.app.config['EXPORT_CSV_DATASET_ID'] = d.id
         dataset_tasks.export_csv()
         response = self.get(url_for('site.resources_csv'))
         self.assertStatus(response, 302)
@@ -290,8 +290,8 @@ class SiteViewsTest(FrontTestCase):
         self.assert404(response)
 
         # generate the export
-        o = OrganizationFactory()
-        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        d = DatasetFactory()
+        self.app.config['EXPORT_CSV_DATASET_ID'] = d.id
         dataset_tasks.export_csv()
         response = self.get(url_for('site.organizations_csv'))
         self.assertStatus(response, 302)
@@ -382,8 +382,8 @@ class SiteViewsTest(FrontTestCase):
         self.assert404(response)
 
         # generate the export
-        o = OrganizationFactory()
-        self.app.config['EXPORT_CSV_DATASET_INFO']['organization'] = o.id
+        d = DatasetFactory()
+        self.app.config['EXPORT_CSV_DATASET_ID'] = d.id
         dataset_tasks.export_csv()
         response = self.get(url_for('site.reuses_csv'))
         self.assertStatus(response, 302)
