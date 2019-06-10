@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+{% cache cache_duration, 'organization-content', org.id|string, g.lang_code, current_user.slug or 'anonymous' %}
 <div v-el:modal></div>
 <section class="default">
     <div class="container organization-container"
@@ -157,4 +158,5 @@
 </section>
 
 {% block after_content %}{% endblock %}
+{% endcache %}
 {% endblock %}
