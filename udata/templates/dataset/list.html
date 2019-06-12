@@ -29,9 +29,7 @@
     </li>
 {% endblock %}
 
-{% block toolbar_container %}
-<div class="btn-toolbar search-toolbar" role="toolbar">
-
+{% block toolbar %}
 {{ s.breadcrum_toolbar(datasets, url=url,
     exports=(
         (_('Datasets'), 'site.datasets_csv', 'csv'),
@@ -43,7 +41,6 @@
     reuses=(_('Reuses'), 'desc'),
     followers=(_('Followers'), 'desc')
 ) }}
-</div>
 {% endblock %}
 
 {% block main_content %}
