@@ -61,10 +61,10 @@ footer_links = [
     nav.Item(_('Terms of use'), 'site.terms'),
     nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
 ]
-if current_app.config.get('EXPORT_CSV_MODELS'):
+export_dataset_id = current_app.config.get('EXPORT_CSV_DATASET_ID')
+if export_dataset_id:
     try:
-        export_dataset = Dataset.objects.get(
-            slug=current_app.config['EXPORT_CSV_DATASET_INFO']['slug'])
+        export_dataset = Dataset.objects.get(id=export_dataset_id)
     except Dataset.DoesNotExist:
         pass
     else:
