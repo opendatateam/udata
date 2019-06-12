@@ -440,12 +440,12 @@
                 <div class="card-list card-list--columned">
                     {% for reuse in reuses %}
                     {% set features = ['preview'] %}
-                    <div class="col-sm-6">
+                    <div class="col-md-4 col-sm-6 col-xs-12">
                         {% include theme('reuse/card.html') %}
                     </div>
                     {% endfor %}
 
-                    <div class="col-sm-6">
+                    <div class="col-md-4 col-sm-6 col-xs-12">
                          {% include theme('dataset/add-reuse-card.html') %}
 					</div>
 
