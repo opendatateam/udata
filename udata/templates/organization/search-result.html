@@ -16,38 +16,26 @@
         </div>
         <ul class="list-inline result-infos">
             {% if organization.metrics.datasets %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of datasets') }}">
-                    <span class="fa fa-cubes fa-fw"></span>
-                    {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
-                </a>
+            <li title="{{ _('Number of datasets') }}">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
             </li>
             {% endif %}
             {% if organization.metrics.reuses %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of reuses by the organization') }}">
-                    <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
-                    {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
-                </a>
+            <li title="{{ _('Number of reuses by the organization') }}">
+                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
+                {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
             </li>
             {% endif %}
             {% if organization.metrics.followers %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of followers') }}">
-                    <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                    {{ ngettext('%(num)d follower', '%(num)d followers', organization.metrics.followers or 0) }}
-                </a>
+            <li title="{{ _('Number of followers') }}">
+                <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                {{ ngettext('%(num)d follower', '%(num)d followers', organization.metrics.followers or 0) }}
             </li>
             {% endif %}
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of members') }}">
-                    <span class="fa fa-users fa-fw"></span>
-                    {{ ngettext('%(num)d members', '%(num)d members', organization.members|length) }}
-                </a>
+            <li title="{{ _('Number of members') }}">
+                <span class="fa fa-users fa-fw"></span>
+                {{ ngettext('%(num)d members', '%(num)d members', organization.members|length) }}
             </li>
         </ul>
     </a>
