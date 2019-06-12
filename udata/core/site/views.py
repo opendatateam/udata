@@ -74,8 +74,8 @@ def map():
 
 
 def get_export_url(model):
-    slug = current_app.config['EXPORT_CSV_DATASET_INFO']['slug']
-    dataset = Dataset.objects.get_or_404(slug=slug)
+    did = current_app.config['EXPORT_CSV_DATASET_ID']
+    dataset = Dataset.objects.get_or_404(id=did)
     resource = None
     for r in dataset.resources:
         if r.extras.get('csv-export:model', '') == model:
