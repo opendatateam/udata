@@ -317,16 +317,9 @@ class Defaults(object):
 
     # Export CSVs of model objects as resources of a dataset
     ########################################################
-    # which models should be exported
     EXPORT_CSV_MODELS = ('dataset', 'resource', 'discussion', 'organization',
                          'reuse', 'tag')
-    EXPORT_CSV_DATASET_INFO = {
-        'slug': 'export-csv',
-        'title': 'Export of portal data',
-        'description': 'This dataset holds the CSV exports of this portal\'s data.',
-        # this should point to an existing organization id
-        'organization': None,
-    }
+    EXPORT_CSV_DATASET_ID = None
 
     # Autocomplete parameters
     #########################
