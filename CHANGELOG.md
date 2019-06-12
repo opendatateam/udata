@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add cache for topic display page [#414](https://github.com/etalab/udata-gouvfr/pull/414)
 
 ## 1.6.9 (2019-06-07)
 
