@@ -5,6 +5,7 @@
 - Archive dataset feature [#2172](https://github.com/opendatateam/udata/pull/2172)
 - Better dependencies management [#2182](https://github.com/opendatateam/udata/pull/2182) and [#2172/install.pip](https://github.com/opendatateam/udata/pull/2172/files#diff-d7b45472f3465d62f857d14cf59ea8a2)
 - Add cache for organization and topic display pages [#2194](https://github.com/opendatateam/udata/pull/2194)
+- Add meta og:type: make twitter cards work [#2196](https://github.com/opendatateam/udata/pull/2196)
 
 ## 1.6.11 (2019-05-29)
 
