@@ -8,6 +8,7 @@
 - Reduce following to staring [#2192](https://github.com/opendatateam/udata/pull/2192/files)
 - Simplify display of spatial coverage in search results [#2192](https://github.com/opendatateam/udata/pull/2192/files)
 - Add cache for organization and topic display pages [#2194](https://github.com/opendatateam/udata/pull/2194)
+- Fix UI responsiveness [#2199](https://github.com/opendatateam/udata/pull/2199)
 
 ## 1.6.11 (2019-05-29)
 
