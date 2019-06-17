@@ -47,7 +47,19 @@ def activity_feed():
     activities = (Activity.objects.order_by('-created_at')
                                   .limit(current_site.feed_size))
     for activity in activities:
-        feed.add('Activity', 'Description')
+        owner = activity.actor or activity.organization
+        feed.add(
+            id='%s#activity=%s' % (
+                url_for('site.dashboard', _external=True), activity.id),
+            title='%s by %s on %s' % (
+                activity.key, owner, activity.related_to),
+            url=activity.related_to.url_for(_external=True),
+            author={
+                'name': owner,
+                'uri': owner.url_for(_external=True)
+            },
+            updated=activity.created_at
+        )
     return feed.get_response()
 
 
