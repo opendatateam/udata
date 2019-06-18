@@ -11,6 +11,7 @@
 - Dataset of datasets: id as ref instead of slug [#2195](https://github.com/opendatateam/udata/pull/2195) :warning: this introduces some settings changes, cf [documentation for EXPORT_CSV](https://github.com/opendatateam/udata/blob/master/docs/adapting-settings.md).
 - Add meta og:type: make twitter cards work [#2196](https://github.com/opendatateam/udata/pull/2196)
 - Fix UI responsiveness [#2199](https://github.com/opendatateam/udata/pull/2199)
+- Remove diff from js dependencies to fix CVE [#2204](https://github.com/opendatateam/udata/pull/2204)
 
 ## 1.6.11 (2019-05-29)
 
