@@ -43,7 +43,8 @@ def inject_site():
 @blueprint.route('/activity.atom')
 def activity_feed():
     feed = AtomFeed(
-        'Site activity', feed_url=request.url, url=request.url_root)
+        current_app.config.get('SITE_TITLE'), feed_url=request.url,
+        url=request.url_root)
     activities = (Activity.objects.order_by('-created_at')
                                   .limit(current_site.feed_size))
     for activity in activities.select_related():
