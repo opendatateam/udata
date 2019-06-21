@@ -16,6 +16,7 @@
 - Remove diff from js dependencies to fix CVE [#2204](https://github.com/opendatateam/udata/pull/2204)
 - Replace default sort label for better readability [#2206](https://github.com/opendatateam/udata/pull/2206)
 - Add a condition to up-to-dateness of a dataset [#2208](https://github.com/opendatateam/udata/pull/2208)
+- Prevent deleted harvester from runnning until purged
 
 ## 1.6.11 (2019-05-29)
 
