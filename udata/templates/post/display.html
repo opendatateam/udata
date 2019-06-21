@@ -1,5 +1,4 @@
 {% extends theme('base.html') %}
-{% from theme('macros/share.html') import share_btn with context %}
 
 {% set meta = {
     'title': post.name,
@@ -109,9 +108,6 @@
                 {# button bar #}
                 <div class="row main-toolbar"><div class="col-xs-12">
                     <div class="btn-toolbar pull-right">
-                        <div class="btn-group btn-group-sm">
-                            {{ share_btn(post.name) }}
-                        </div>
                         {% if sysadmin %}
                         <div class="btn-group btn-group-sm">
                             <a href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}" class="btn btn-success">

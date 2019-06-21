@@ -1,6 +1,5 @@
 {% extends theme('base.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
-{% from theme('macros/share.html') import share_btn with context %}
 {% from theme('macros/integrate.html') import integrate_btn with context %}
 {% from theme('macros/issues.html') import issues_btn with context %}
 
@@ -178,9 +177,6 @@
                         </div>
                         <div class="btn-group btn-group-sm">
                             {{ follow_btn(dataset) }}
-                        </div>
-                        <div class="btn-group btn-group-sm">
-                            {{ share_btn(dataset.title) }}
                         </div>
                         <div class="btn-group btn-group-sm">
                             {{ integrate_btn(dataset) }}

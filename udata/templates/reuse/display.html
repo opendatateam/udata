@@ -2,7 +2,6 @@
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/issues.html') import issues_btn with context %}
 {% from theme('macros/integrate.html') import integrate_btn with context %}
-{% from theme('macros/share.html') import share_btn with context %}
 
 {% set meta = {
     'title': reuse.title,
@@ -96,7 +95,6 @@
                     <div class="btn-toolbar pull-right">
                         <div class="btn-group btn-group-sm">
                             {{ follow_btn(reuse, ['fa-star-o', 'fa-star'])}}
-                            {{ share_btn(reuse.title) }}
                             {{ issues_btn(reuse) }}
                         </div>
                         <div class="btn-group btn-group-sm">
