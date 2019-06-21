@@ -28,6 +28,9 @@ from udata.core.storages import logos, tmp
 log = logging.getLogger(__name__)
 
 
+DEFAULT_GEOZONES_FILE = 'https://github.com/etalab/geozones/releases/download/2019.0/geozones-countries-2019-0-msgpack.tar.xz'
+
+
 def level_ref(level):
     return DBRef(GeoLevel._get_collection_name(), level)
 
@@ -39,9 +42,9 @@ def grp():
 
 
 @grp.command()
-@click.argument('filename', metavar='<filename>')
+@click.argument('filename', metavar='<filename>', default=DEFAULT_GEOZONES_FILE)
 @click.option('-d', '--drop', is_flag=True, help='Drop existing data')
-def load(filename, drop=False):
+def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     '''
     Load a geozones archive from <filename>
 
