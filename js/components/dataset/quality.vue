@@ -37,7 +37,7 @@
     </qa-section>
 
     <qa-section :title="_('Up-to-date')"
-        :condition="quality.update_in <= 0"
+        :condition="(quality.frequency && quality.update_in <= 0) || !quality.frequency"
         :ok="_('That is great!')"
         :ko="_('Need an update since {days} days.', {days: quality.update_in || '0'})">
         <p>{{ _('Proposing up-to-date and incremental data makes it possible for reusers to establish datavisualisations on the long term.') }}</p>
