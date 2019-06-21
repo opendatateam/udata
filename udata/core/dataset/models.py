@@ -361,6 +361,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                   default=datetime.now, required=True)
     title = db.StringField(required=True)
     acronym = db.StringField(max_length=128)
+    # /!\ do not set directly the slug when creating or updating a dataset
+    # this will break the search indexation
     slug = db.SlugField(max_length=255, required=True, populate_from='title',
                         update=True, follow=True)
     description = db.StringField(required=True, default='')

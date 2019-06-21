@@ -3,8 +3,10 @@
 {% set description = meta.description or _('Share, improve and reuse public data') %}
 {% set image = meta.image or theme_static('img/logo-600x600.png', external=True) %}
 {% set keywords = meta.keywords or [] %}
+{% set meta_type = meta.type or 'website' %}
 <meta charset="utf-8" />
 <title>{{ title }} - {{ current_site.title }}</title>
+<meta property="og:type" content="{{ meta_type }}" />
 <meta property="og:title" content="{{ title }} - {{ current_site.title }}" />
 <link rel="author" href="{{ config.SITE_AUTHOR_URL }}" />
 <meta name="description" content="{{ description }}" />

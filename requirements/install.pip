@@ -1,7 +1,7 @@
 authlib==0.10
 awesome-slugify==1.6.5
 Babel==2.6.0
-bcrypt==3.1.6
+bcrypt==3.1.7
 bleach==3.1.0
 blinker==1.4
 celery==4.1.1
@@ -36,7 +36,7 @@ itsdangerous==1.1.0
 Jinja2==2.10.1
 jsonschema==3.0.1
 kombu[redis]==4.2.1
-lxml==4.3.3
+lxml==4.3.4
 mongoengine==0.16.3
 msgpack-python==0.4.8
 netaddr==0.7.19
