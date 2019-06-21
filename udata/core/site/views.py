@@ -43,11 +43,25 @@ def inject_site():
 @blueprint.route('/activity.atom')
 def activity_feed():
     feed = AtomFeed(
-        'Site activity', feed_url=request.url, url=request.url_root)
+        current_app.config.get('SITE_TITLE'), feed_url=request.url,
+        url=request.url_root)
     activities = (Activity.objects.order_by('-created_at')
                                   .limit(current_site.feed_size))
-    for activity in activities:
-        feed.add('Activity', 'Description')
+    for activity in activities.select_related():
+        owner = activity.actor or activity.organization
+        related = activity.related_to
+        feed.add(
+            id='%s#activity=%s' % (
+                url_for('site.dashboard', _external=True), activity.id),
+            title='%s by %s on %s' % (
+                activity.key, owner, related),
+            url=related.url_for(_external=True),
+            author={
+                'name': owner,
+                'uri': owner.url_for(_external=True)
+            },
+            updated=activity.created_at
+        )
     return feed.get_response()
 
 
@@ -74,8 +88,8 @@ def map():
 
 
 def get_export_url(model):
-    slug = current_app.config['EXPORT_CSV_DATASET_INFO']['slug']
-    dataset = Dataset.objects.get_or_404(slug=slug)
+    did = current_app.config['EXPORT_CSV_DATASET_ID']
+    dataset = Dataset.objects.get_or_404(id=did)
     resource = None
     for r in dataset.resources:
         if r.extras.get('csv-export:model', '') == model:
