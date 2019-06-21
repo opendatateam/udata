@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-06-21 14:29+0200\n"
-"PO-Revision-Date: 2019-06-21 12:36\n"
+"PO-Revision-Date: 2019-06-21 12:45\n"
 "Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -2076,7 +2076,7 @@ msgstr "Trier par"
 
 #: udata/templates/macros/search.html:21
 msgid "Relevance"
-msgstr ""
+msgstr "Pertinence"
 
 #: udata/templates/macros/search.html:43
 msgid "Ascending"
