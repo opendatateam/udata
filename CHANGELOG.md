@@ -12,6 +12,8 @@
 - Add meta og:type: make twitter cards work [#2196](https://github.com/opendatateam/udata/pull/2196)
 - Fix UI responsiveness [#2199](https://github.com/opendatateam/udata/pull/2199)
 - Quick fix for activity.atom [#2203](https://github.com/opendatateam/udata/pull/2203)
+- Replace default sort label for better readability [#2206](https://github.com/opendatateam/udata/pull/2206)
+
 
 ## 1.6.11 (2019-05-29)
 
