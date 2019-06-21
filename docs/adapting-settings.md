@@ -125,6 +125,19 @@ Enables the search autocomplete on frontend if set to `True`, disables otherwise
 
 The search autocomplete debounce delay on frontend, in milliseconds.
 
+### ARCHIVE_COMMENT_USER_ID
+
+**default**: `None`
+
+The id of an existing user which will post a comment when a dataset is archived.
+
+### ARCHIVE_COMMENT_TITLE
+
+**default**: `_('This dataset has been archived')`
+
+The title of the comment optionaly posted when a dataset is archived.
+NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
@@ -172,20 +185,11 @@ URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 List models that will be exported to CSV by the job `export-csv`.
 You can disable the feature by setting this to an empty list.
 
-### EXPORT_CSV_DATASET_INFO
+### EXPORT_CSV_DATASET_ID
 
-**default**:
-```
-{
-    'slug': 'export-csv',
-    'title': 'Export of portal data',
-    'description': 'This dataset holds the CSV exports of this portal\'s data.',
-    # this should point to an existing organization id
-    'organization': None,
-}
-```
+**default**: `None`
 
-Values that will be used to find (`slug`) or create the dataset that holds the CSV exports created by `export-csv`.
+The id of a dataset that should be created before running the `export-csv` job and will hold the CSV exports.
 
 ## Map widget configuration
 

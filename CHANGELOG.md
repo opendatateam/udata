@@ -2,7 +2,44 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Archive dataset feature [#2172](https://github.com/opendatateam/udata/pull/2172)
+- Refactor breadcrum includes [#2173](https://github.com/opendatateam/udata/pull/2173)
+- Better dependencies management [#2182](https://github.com/opendatateam/udata/pull/2182) and [#2172/install.pip](https://github.com/opendatateam/udata/pull/2172/files#diff-d7b45472f3465d62f857d14cf59ea8a2)
+- Reduce following to staring [#2192](https://github.com/opendatateam/udata/pull/2192/files)
+- Simplify display of spatial coverage in search results [#2192](https://github.com/opendatateam/udata/pull/2192/files)
+- Add cache for organization and topic display pages [#2194](https://github.com/opendatateam/udata/pull/2194)
+- Dataset of datasets: id as ref instead of slug [#2195](https://github.com/opendatateam/udata/pull/2195) :warning: this introduces some settings changes, cf [documentation for EXPORT_CSV](https://github.com/opendatateam/udata/blob/master/docs/adapting-settings.md).
+- Add meta og:type: make twitter cards work [#2196](https://github.com/opendatateam/udata/pull/2196)
+- Fix UI responsiveness [#2199](https://github.com/opendatateam/udata/pull/2199)
+- Remove social media sharing feature [#2200](https://github.com/opendatateam/udata/pull/2200)
+- Quick fix for activity.atom [#2203](https://github.com/opendatateam/udata/pull/2203)
+- Remove diff from js dependencies to fix CVE [#2204](https://github.com/opendatateam/udata/pull/2204)
+- Replace default sort label for better readability [#2206](https://github.com/opendatateam/udata/pull/2206)
+
+## 1.6.11 (2019-05-29)
+
+- Center incomplete rows of cards [#2162](https://github.com/opendatateam/udata/pull/2162)
+- Allow .dxf upload [#2164](https://github.com/opendatateam/udata/pull/2164)
+- Always use remote_url as harvesting source [#2165](https://github.com/opendatateam/udata/pull/2165)
+- Update jquery to ~3.4.1 [#2161](https://github.com/opendatateam/udata/pull/2161)
+- Fix various issues with search result page [#2166](https://github.com/opendatateam/udata/pull/2166)
+- Restore notbroken facet includes [#2169](https://github.com/opendatateam/udata/pull/2169)
+
+## 1.6.10 (2019-05-23)
+
+- Remove `<br>` in badge display [#2156](https://github.com/opendatateam/udata/pull/2156)
+- Display user avatar and fix its sizing [#2157](https://github.com/opendatateam/udata/pull/2157)
+- Redirect unfiltered csv exports to dataset of datasets [#2158](https://github.com/opendatateam/udata/pull/2158)
+- Show organization id in a modal and add hyperlinks to ids in detail modal [#2159](https://github.com/opendatateam/udata/pull/2159)
+
+## 1.6.9 (2019-05-20)
+
+- Add user slug to dataset cache key [#2146](https://github.com/opendatateam/udata/pull/2146)
+- Change display of cards of reuses on topic pages [#2148](https://github.com/opendatateam/udata/pull/2148)
+- Display remote source of harvested dataset [#2150](https://github.com/opendatateam/udata/pull/2150)
+- Prefill community resource type on upload form [#2151](https://github.com/opendatateam/udata/pull/2151)
+- Fix user profile UI [#2152](https://github.com/opendatateam/udata/pull/2152)
+- Remove concept of permitted reuse [#2153](https://github.com/opendatateam/udata/pull/2153)
 
 ## 1.6.8 (2019-05-13)
 

@@ -4,7 +4,7 @@ import pytest
 
 from udata.models import Dataset, Topic
 from udata.core.dataset import tasks
-from udata.core.organization.factories import OrganizationFactory
+from udata.core.dataset.factories import DatasetFactory
 # csv.adapter for Tag won't be registered if this is not imported :thinking:
 from udata.core.tags import csv as _  # noqa
 
@@ -27,14 +27,11 @@ def test_purge_datasets():
 
 @pytest.mark.usefixtures('instance_path')
 def test_export_csv(app):
-    organization = OrganizationFactory()
-    app.config['EXPORT_CSV_DATASET_INFO']['organization'] = organization.id
-    slug = app.config['EXPORT_CSV_DATASET_INFO']['slug']
+    dataset = DatasetFactory()
+    app.config['EXPORT_CSV_DATASET_ID'] = dataset.id
     models = app.config['EXPORT_CSV_MODELS']
     tasks.export_csv()
-    dataset = Dataset.objects.get(slug=slug)
-    assert dataset is not None
-    assert dataset.organization == organization
+    dataset = Dataset.objects.get(id=dataset.id)
     assert len(dataset.resources) == len(models)
     extras = [r.extras.get('csv-export:model') for r in dataset.resources]
     for model in models:
