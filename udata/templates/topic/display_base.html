@@ -12,8 +12,9 @@
 {% set body_class = 'topic-display' %}
 
 {% block content %}
+
 {% cache cache_duration, 'topic-content', topic.id|string, g.lang_code %}
-{{ breadcrumb(self) }}
+{{ breadcrumb(self, toolbar_class='search-toolbar') }}
 {% block main_content %}{% endblock %}
 {% block related %}
 <section class="content topic-section related-tags-section">

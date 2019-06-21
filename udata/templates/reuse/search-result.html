@@ -13,26 +13,17 @@
             </div>
         </div>
         <ul class="list-inline result-infos">
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Type') }}">
-                    <span class="fa fa-file fa-fw"></span>
-                    {{ reuse.type_label }}
-                </a>
+            <li title="{{ _('Type') }}">
+                <span class="fa fa-file fa-fw"></span>
+                {{ reuse.type_label }}
             </li>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of dataset') }}">
-                    <span class="fa fa-cubes fa-fw"></span>
-                    {{ ngettext('%(num)d dataset', '%(num)d datasets', reuse.datasets|length) }}
-                </a>
+            <li title="{{ _('Number of dataset') }}">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ ngettext('%(num)d dataset', '%(num)d datasets', reuse.datasets|length) }}
             </li>
-            <li>
-                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                    title="{{ _('Number of followers') }}">
-                    <span class="fa fa-star fa-fw"></span>
-                    {{ ngettext('%(num)d follower', '%(num)d followers', reuse.metrics.followers or 0) }}
-                </a>
+            <li title="{{ _('Number of followers') }}">
+                <span class="fa fa-star fa-fw"></span>
+                {{ ngettext('%(num)d follower', '%(num)d followers', reuse.metrics.followers or 0) }}
             </li>
         </ul>
     </a>
