@@ -10,7 +10,6 @@
     'robots': 'noindex',
 } %}
 
-{% set toolbar_class='search-toolbar' %}
 {% block breadcrumb %}
     <li>
         <a href="{{ url_for('topics.display', topic=topic) }}">
@@ -27,8 +26,7 @@
     </li>
 {% endblock %}
 
-{% block toolbar_container %}
-<div class="btn-toolbar search-toolbar" role="toolbar">
+{% block toolbar %}
 {{ s.breadcrum_toolbar(datasets, url=url,
     title=(_('Title'), 'asc'),
     created=(_('Creation date'), 'desc'),
@@ -36,7 +34,6 @@
     reuses=(_('Reuses'), 'desc'),
     followers=(_('Stars'), 'desc')
 ) }}
-</div>
 {% endblock %}
 
 {% block main_content %}

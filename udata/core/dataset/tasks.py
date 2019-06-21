@@ -169,20 +169,17 @@ def export_csv(self):
     Generates a CSV export of all model objects as a resource of a dataset
     '''
     ALLOWED_MODELS = current_app.config.get('EXPORT_CSV_MODELS', [])
-    DATASET_DEFAULTS = current_app.config.get('EXPORT_CSV_DATASET_INFO').copy()
+    DATASET_ID = current_app.config.get('EXPORT_CSV_DATASET_ID')
 
-    if ALLOWED_MODELS:
-        slug = DATASET_DEFAULTS.pop('slug')
-        organization = DATASET_DEFAULTS.get('organization')
-        if organization:
-            try:
-                DATASET_DEFAULTS['organization'] = Organization.objects.get(id=organization)
-            except Organization.DoesNotExist:
-                log.error('Organization with id %s not found.' % organization)
-        dataset, _ = Dataset.objects.get_or_create(
-            slug=slug,
-            defaults=DATASET_DEFAULTS,
-        )
+    if not DATASET_ID:
+        log.error('EXPORT_CSV_DATASET_ID setting value not set')
+        return
+
+    try:
+        dataset = Dataset.objects.get(id=DATASET_ID)
+    except Dataset.DoesNotExist:
+        log.error('EXPORT_CSV_DATASET_ID points to a non existent dataset')
+        return
 
     for model in ALLOWED_MODELS:
         export_csv_for_model(model, dataset)
