@@ -17,6 +17,7 @@
 - Replace default sort label for better readability [#2206](https://github.com/opendatateam/udata/pull/2206)
 - Add a condition to up-to-dateness of a dataset [#2208](https://github.com/opendatateam/udata/pull/2208)
 - Prevent deleted harvesters from running until purged. Harvest jobs history is deleted too on purge. [#2209](https://github.com/opendatateam/udata/pull/2209)
+- Better quality.frequency management [#2211](https://github.com/opendatateam/udata/pull/2211)
 
 ## 1.6.11 (2019-05-29)
 
