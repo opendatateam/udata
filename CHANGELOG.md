@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.12 (2019-06-26)
 
 - Archive dataset feature [#2172](https://github.com/opendatateam/udata/pull/2172)
 - Refactor breadcrum includes [#2173](https://github.com/opendatateam/udata/pull/2173)
