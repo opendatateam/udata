@@ -5,6 +5,7 @@ import logging
 import requests
 
 from flask import request, json, redirect, url_for, current_app, abort
+from mongoengine.errors import DoesNotExist
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search, theme
@@ -48,17 +49,29 @@ def activity_feed():
     activities = (Activity.objects.order_by('-created_at')
                                   .limit(current_site.feed_size))
     for activity in activities.select_related():
-        owner = activity.actor or activity.organization
-        related = activity.related_to
+        try:
+            owner = activity.actor or activity.organization
+        except DoesNotExist:
+            owner = 'deleted'
+            owner_url = None
+        else:
+            owner_url = owner.url_for(_external=True)
+        try:
+            related = activity.related_to
+        except DoesNotExist:
+            related = 'deleted'
+            related_url = None
+        else:
+            related_url = related.url_for(_external=True)
         feed.add(
             id='%s#activity=%s' % (
                 url_for('site.dashboard', _external=True), activity.id),
             title='%s by %s on %s' % (
                 activity.key, owner, related),
-            url=related.url_for(_external=True),
+            url=related_url,
             author={
                 'name': owner,
-                'uri': owner.url_for(_external=True)
+                'uri': owner_url,
             },
             updated=activity.created_at
         )
