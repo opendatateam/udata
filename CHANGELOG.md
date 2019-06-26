@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.12 (2019-06-26)
 
 - Archive dataset feature [#2172](https://github.com/opendatateam/udata/pull/2172)
