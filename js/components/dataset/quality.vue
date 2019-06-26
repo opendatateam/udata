@@ -37,7 +37,7 @@
     </qa-section>
 
     <qa-section :title="_('Up-to-date')"
-        :condition="(quality.update_in && quality.update_in <= 0) || !quality.update_in"
+        :condition="(quality.update_in && quality.update_in <= 0) || (!quality.update_in && quality.frequency)"
         :ok="_('That is great!')"
         :ko="_('Need an update since {days} days.', {days: quality.update_in || '0'})"
         :info="_('You currently have no frequency set for that dataset, is that pertinent?')"

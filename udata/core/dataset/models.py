@@ -547,7 +547,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if not self.id:
             # Quality is only relevant on saved Datasets
             return result
-        result['frequency'] = self.frequency
+        result['frequency'] = self.frequency if self.frequency != 'unknown' else None
         if self.next_update:
             result['update_in'] = -(self.next_update - datetime.now()).days
         if self.tags:
