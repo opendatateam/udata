@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.10 (2019-06-26)
 
 - Data catalog: id as ref instead of slug [#415](https://github.com/etalab/udata-gouvfr/pull/415)
