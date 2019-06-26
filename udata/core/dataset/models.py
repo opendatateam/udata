@@ -547,8 +547,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if not self.id:
             # Quality is only relevant on saved Datasets
             return result
+        result['frequency'] = self.frequency
         if self.next_update:
-            result['frequency'] = self.frequency
             result['update_in'] = -(self.next_update - datetime.now()).days
         if self.tags:
             result['tags_count'] = len(self.tags)
@@ -573,7 +573,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         """Compute the score related to the quality of that dataset."""
         score = 0
         UNIT = 2
-        if 'frequency' in quality:
+        if 'update_in' in quality:
             # TODO: should be related to frequency.
             if quality['update_in'] < 0:
                 score += UNIT
