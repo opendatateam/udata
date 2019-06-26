@@ -5,6 +5,7 @@ import logging
 import requests
 
 from flask import request, json, redirect, url_for, current_app, abort
+from mongoengine.errors import DoesNotExist
 from werkzeug.contrib.atom import AtomFeed
 
 from udata import search, theme
@@ -17,7 +18,6 @@ from udata.core.organization.models import Organization
 from udata.core.post.models import Post
 from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.core.reuse.models import Reuse
-from udata.core.user.models import User
 from udata.frontend import csv
 from udata.frontend.views import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
@@ -51,15 +51,14 @@ def activity_feed():
     for activity in activities.select_related():
         try:
             owner = activity.actor or activity.organization
-        except (User.DoesNotExist, Organization.DoesNotExist):
+        except DoesNotExist:
             owner = 'deleted'
             owner_url = None
         else:
             owner_url = owner.url_for(_external=True)
         try:
             related = activity.related_to
-        except (Dataset.DoesNotExist, Reuse.DoesNotExist,
-                Organization.DoesNotExist):
+        except DoesNotExist:
             related = 'deleted'
             related_url = None
         else:
