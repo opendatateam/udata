@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.10 (2019-06-26)
 
 - Data catalog: id as ref instead of slug [#415](https://github.com/etalab/udata-gouvfr/pull/415)
 - Add cache for topic display page [#414](https://github.com/etalab/udata-gouvfr/pull/414)
