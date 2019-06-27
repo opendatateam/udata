@@ -11,6 +11,8 @@
 - Fix queryless (no `q` text parameter) search results scoring (or lack of scoring) [#2231](https://github.com/opendatateam/udata/pull/2231)
 - Miscellaneous fixes on completers [#2215](https://github.com/opendatateam/udata/pull/2215)
 - Ensure `filetype='remote'` is set when using the manual ressource form [#2236](https://github.com/opendatateam/udata/pull/2236)
+- Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload) [#2131](https://github.com/opendatateam/udata/pull/2131)
+- Ensure HarvestItems are cleaned up on dataset deletion [#2131](https://github.com/opendatateam/udata/pull/2131)
 
 ## 1.6.12 (2019-06-26)
 
