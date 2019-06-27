@@ -11,9 +11,9 @@
 - Fix queryless (no `q` text parameter) search results scoring (or lack of scoring) [#2231](https://github.com/opendatateam/udata/pull/2231)
 - Miscellaneous fixes on completers [#2215](https://github.com/opendatateam/udata/pull/2215)
 - Ensure `filetype='remote'` is set when using the manual ressource form [#2236](https://github.com/opendatateam/udata/pull/2236)
-- Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload) [#2131](https://github.com/opendatateam/udata/pull/2131)
-- Ensure HarvestItems are cleaned up on dataset deletion [#2131](https://github.com/opendatateam/udata/pull/2131)
-- Added `config.HARVEST_JOBS_RETENTION_DAYS` and `harvest-purge-jobs` job to apply it
+- Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload) [#2214](https://github.com/opendatateam/udata/pull/2214)
+- Ensure HarvestItems are cleaned up on dataset deletion [#2214](https://github.com/opendatateam/udata/pull/2214)
+- Added `config.HARVEST_JOBS_RETENTION_DAYS` and a `harvest-purge-jobs` job to apply it [#2214](https://github.com/opendatateam/udata/pull/2214) (migration). **Warning, the migration will enforce `config.HARVEST_JOBS_RETENTION_DAYS` and can take some time on a big `HarvestJob` collection**
 
 ## 1.6.12 (2019-06-26)
 
