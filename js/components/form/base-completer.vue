@@ -114,6 +114,12 @@ export default {
                 callback();
             });
         },
+        clear() {
+            if (this.selectize) {
+                this.selectize.clear(true);
+                this.selectize.setTextboxValue('');
+            }
+        },
         destroy() {
             if (this.selectize) {
                 this.selectize.destroy();

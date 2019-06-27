@@ -132,7 +132,7 @@
             <user-completer v-ref:completer></user-completer>
             <span class="input-group-btn">
                 <button class="btn btn-warning" type="button"
-                    @click="adding = false;">
+                    @click="close_completer">
                     <span class="fa fa-close"></span>
                 </button>
             </span>
@@ -180,6 +180,10 @@ export default {
         }
     },
     methods: {
+        close_completer() {
+            this.adding = false;
+            this.$refs.completer.clear(); // Prevent state from persisting
+        },
         member_click(member) {
             this.$root.$modal(MemberModal, {member: member, org: this.org});
         },
