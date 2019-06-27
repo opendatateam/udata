@@ -16,7 +16,7 @@
         }
     }
 
-    .selectize-control {
+    .form-control.selectize-control {
         height: @field-height;
     }
 
