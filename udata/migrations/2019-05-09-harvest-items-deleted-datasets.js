@@ -3,6 +3,12 @@
  */
 
 var updated = 0;
+var nbDays = config.HARVEST_JOBS_RETENTION_DAYS;
+var minDate = new Date(ISODate().getTime() - 1000 * 60 * 60 * 24 * nbDays);
+
+// Delete jobs older then minDate
+var result = db.harvest_job.deleteMany({'created': {'$lt': minDate}});
+print(`Deleted ${result.deletedCount} HarvestJobs according to retention policy (${config.HARVEST_JOBS_RETENTION_DAYS} days)`);
 
 // Match all HarvestJob.items.dataset not found in dataset collection
 const pipeline = [
