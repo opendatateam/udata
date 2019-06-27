@@ -9,6 +9,7 @@
 - Handle UTF-8 filenames in `spatial load_logos` command [#2223](https://github.com/opendatateam/udata/pull/2223)
 - Display the datasets, reuses and harvesters deleted state on listing when possible [#2228](https://github.com/opendatateam/udata/pull/2228)
 - Fix queryless (no `q` text parameter) search results scoring (or lack of scoring) [#2231](https://github.com/opendatateam/udata/pull/2231)
+- Miscellaneous fixes on completers [#2215](https://github.com/opendatateam/udata/pull/2215)
 
 ## 1.6.12 (2019-06-26)
 
