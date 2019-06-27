@@ -178,6 +178,9 @@ class Defaults(object):
     # Harvesters are scheduled at midnight by default
     HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
 
+    # The number of days of harvest jobs to keep (ie. number of days of history kept)
+    HARVEST_JOBS_RETENTION_DAYS = 365
+
     # Lists levels that shouldn't be indexed
     SPATIAL_SEARCH_EXCLUDE_LEVELS = tuple()
 
