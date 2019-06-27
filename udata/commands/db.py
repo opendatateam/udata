@@ -27,7 +27,7 @@ def grp():
 
 # A migration script wrapper recording the stdout lines
 SCRIPT_WRAPPER = '''
-function(plugin, filename, script) {{
+function(plugin, filename, script, config) {{
     var stdout = [];
     function print() {{
         var args = Array.prototype.slice.call(arguments);
@@ -50,7 +50,7 @@ function(plugin, filename, script) {{
 
 # Only record a migration script
 RECORD_WRAPPER = '''
-function(plugin, filename, script) {
+function(plugin, filename, script, config) {
     db.migrations.insert({
         plugin: plugin,
         filename: filename,
@@ -96,7 +96,7 @@ def execute_migration(plugin, filename, script, dryrun=False):
     success = True
     if not dryrun:
         try:
-            lines = db.eval(js, plugin, filename, script)
+            lines = db.eval(js, plugin, filename, script, current_app.config)
         except OperationFailure as e:
             log.error(e.details['errmsg'].replace('\n', '\\n'))
             success = False
@@ -115,7 +115,7 @@ def execute_migration(plugin, filename, script, dryrun=False):
 def record_migration(plugin, filename, script, **kwargs):
     '''Only record a migration without applying it'''
     db = get_db()
-    db.eval(RECORD_WRAPPER, plugin, filename, script)
+    db.eval(RECORD_WRAPPER, plugin, filename, script, current_app.config)
     return True
 
 
