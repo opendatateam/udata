@@ -13,6 +13,7 @@
 - Ensure `filetype='remote'` is set when using the manual ressource form [#2236](https://github.com/opendatateam/udata/pull/2236)
 - Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload) [#2131](https://github.com/opendatateam/udata/pull/2131)
 - Ensure HarvestItems are cleaned up on dataset deletion [#2131](https://github.com/opendatateam/udata/pull/2131)
+- Added `config.HARVEST_JOBS_RETENTION_DAYS` and `harvest-purge-jobs` job to apply it
 
 ## 1.6.12 (2019-06-26)
 

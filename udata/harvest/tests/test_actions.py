@@ -5,7 +5,7 @@ import csv
 import logging
 import pytest
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 from mock import patch
@@ -380,6 +380,22 @@ class HarvestActionsTest:
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
+
+    @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
+    def test_purge_jobs(self):
+        now = datetime.now()
+        retention = now - timedelta(days=2)
+        too_old = retention - timedelta(days=1)
+        to_delete = HarvestJobFactory.create_batch(3, created=too_old)
+        to_keep = [
+            HarvestJobFactory(created=now),
+            HarvestJobFactory(created=retention + timedelta(minutes=1)),
+        ]
+
+        result = actions.purge_jobs()
+
+        assert result == len(to_delete)
+        assert len(HarvestJob.objects) == len(to_keep)
 
     def test_attach(self):
         datasets = DatasetFactory.create_batch(3)

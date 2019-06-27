@@ -5,7 +5,7 @@ import logging
 import unicodecsv as csv
 
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from bson import ObjectId
 from flask import current_app
@@ -135,6 +135,13 @@ def delete_source(ident):
 def purge_sources():
     '''Permanently remove sources flagged as deleted'''
     return HarvestSource.objects(deleted__exists=True).delete()
+
+
+def purge_jobs():
+    '''Delete jobs older than retention policy'''
+    retention = current_app.config['HARVEST_JOBS_RETENTION_DAYS']
+    expiration = datetime.now() - timedelta(days=retention)
+    return HarvestJob.objects(created__lt=expiration).delete()
 
 
 def run(ident):
