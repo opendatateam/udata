@@ -159,10 +159,12 @@ export default {
     }
 
     .selectize-dropdown .selectize-option {
+        padding-left: 5px;
         .logo {
             width: 25px;
             height: 25px;
             border: 1px solid @gray-lighter;
+            margin-left: -5px;
             margin-right: 5px;
             img {
                 width: 100%;
