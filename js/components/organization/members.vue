@@ -129,7 +129,7 @@
             <span class="input-group-addon">
                 <span class="fa fa-user"></span>
             </span>
-            <user-completer v-ref:completer></user-completer>
+            <user-completer v-ref:completer :placeholder="_('Search an user')"></user-completer>
             <span class="input-group-btn">
                 <button class="btn btn-warning" type="button"
                     @click="close_completer">
