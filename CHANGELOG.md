@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- New social logo (`og:image`) [#419](https://github.com/etalab/udata-gouvfr/pull/419)
 
 ## 1.6.10 (2019-06-26)
 
