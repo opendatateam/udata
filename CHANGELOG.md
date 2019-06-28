@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Rename og:image target :warning: this will break your custom theme, please rename your logo image file to `logo-social.png` instead of `logo-600x600.png` [#2217](https://github.com/opendatateam/udata/pull/2217)
 
 ## 1.6.12 (2019-06-26)
 
