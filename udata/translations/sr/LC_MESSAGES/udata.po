@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-06-21 14:29+0200\n"
-"PO-Revision-Date: 2019-07-01 07:37\n"
+"PO-Revision-Date: 2019-07-01 07:41\n"
 "Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -1827,7 +1827,7 @@ msgstr "Избрисано"
 
 #: udata/templates/dataset/display.html:96 udata/templates/dataset/display.html:97
 msgid "Archived"
-msgstr "Архивирано"
+msgstr "Архивиран"
 
 #: udata/templates/dataset/display.html:114
 msgid "See also: community resources"
