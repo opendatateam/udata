@@ -28,6 +28,7 @@ def parse(text):
     else:
         spatial = text
         validity = 'latest'
+    spatial = spatial.lower().replace('/', ':')  # Backward compatibility
     if ':' not in spatial:
         raise GeoIDError('Bad GeoID format: {0}'.format(text))
     # country-subset is a special case:

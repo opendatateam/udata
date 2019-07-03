@@ -4,6 +4,9 @@
 
 - Rename og:image target :warning: this will break your custom theme, please rename your logo image file to `logo-social.png` instead of `logo-600x600.png` [#2217](https://github.com/opendatateam/udata/pull/2217)
 - Don't automatically overwrite `last_update` field if manually set [#2020](https://github.com/opendatateam/udata/pull/2220)
+- Spatial completion: only index last version of each zone and prevent completion cluttering [#2140](https://github.com/opendatateam/udata/pull/2140)
+- Init: prompt to loads countries [#2140](https://github.com/opendatateam/udata/pull/2140)
+- Handle UTF-8 filenames in `spatial load_logos` command [#2223](https://github.com/opendatateam/udata/pull/2223)
 
 ## 1.6.12 (2019-06-26)
 
@@ -65,6 +68,7 @@
 - Admins can delete a single comment in a discussion thread [#2087](https://github.com/opendatateam/udata/pull/2087)
 - Add cache directives to dataset display blocks [#2129](https://github.com/opendatateam/udata/pull/2129)
 - Export multiple models objects to CSV (dataset of datasets) [#2124](https://github.com/opendatateam/udata/pull/2124)
+
 
 ## 1.6.6 (2019-03-27)
 

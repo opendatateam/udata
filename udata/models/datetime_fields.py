@@ -25,7 +25,7 @@ class DateField(BaseField):
             return value
         try:
             value = parse(value, yearfirst=True).date()
-        except:
+        except Exception:
             pass
         return value
 
@@ -47,8 +47,8 @@ class DateField(BaseField):
 
 
 class DateRange(EmbeddedDocument):
-    start = DateField(required=True)
-    end = DateField(required=True)
+    start = DateField()
+    end = DateField()
 
     def to_dict(self):
         return {'start': self.start, 'end': self.end}

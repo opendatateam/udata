@@ -54,7 +54,7 @@ class ModelSearchAdapter(DocType):
     def completer_tokenize(cls, value, min_length=3):
         '''Quick and dirty tokenizer for completion suggester'''
         tokens = list(itertools.chain(*[
-            [m for m in n.split("'") if len(m) > min_length]
+            [m for m in n.split("'") if len(m) >= min_length]
             for n in value.split(' ')
         ]))
         return list(set([value] + tokens + [' '.join(tokens)]))
