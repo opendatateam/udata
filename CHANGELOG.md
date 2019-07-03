@@ -4,6 +4,7 @@
 
 - Rename og:image target :warning: this will break your custom theme, please rename your logo image file to `logo-social.png` instead of `logo-600x600.png` [#2217](https://github.com/opendatateam/udata/pull/2217)
 - Don't automatically overwrite `last_update` field if manually set [#2020](https://github.com/opendatateam/udata/pull/2220)
+- Handle UTF-8 filenames in `spatial load_logos` command [#2223](https://github.com/opendatateam/udata/pull/2223)
 
 ## 1.6.12 (2019-06-26)
 
