@@ -16,7 +16,7 @@ import {STATUS_CLASSES, STATUS_I18N} from 'models/harvest/job';
 import Datatable from 'components/datatable/widget.vue';
 import placeholders from 'helpers/placeholders';
 
-const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization{name,logo_thumbnail}', 'backend', 'validation{state}'];
+const MASK = ['id', 'name', 'owner', 'last_job{status,ended}', 'organization{name,logo_thumbnail}', 'backend', 'validation{state}', 'deleted'];
 
 export default {
     MASK,
@@ -30,7 +30,7 @@ export default {
     data() {
         return {
             title: this._('Harvesters'),
-            sources: new HarvestSources({mask: MASK}),
+            sources: new HarvestSources({mask: MASK, query: {deleted: true}}),
         };
     },
     computed: {
@@ -103,6 +103,10 @@ export default {
                     else if (status == 'refused') return this._('Refused');
                     return STATUS_I18N[status];
                 }
+            }, {
+                label: '',
+                align: 'center',
+                type: 'visibility',
             }, {
                 label: this._('Last run'),
                 key: 'last_job.ended',

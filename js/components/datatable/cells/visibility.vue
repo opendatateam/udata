@@ -8,7 +8,7 @@ import {_} from 'i18n';
 const VISIBILITIES = {
     deleted: {
         label: _('Deleted'),
-        type: 'error'
+        type: 'danger'
     },
     private: {
         label: _('Private'),
