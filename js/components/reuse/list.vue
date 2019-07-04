@@ -27,7 +27,7 @@ export default {
                 label: this._('Title'),
                 key: 'title',
                 sort: 'title',
-                type: 'text'
+                type: 'deletable-text'
             },{
                 label: this._('Creation'),
                 key: 'created_at',
