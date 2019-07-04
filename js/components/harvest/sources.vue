@@ -54,7 +54,7 @@ export default {
                 label: this._('Name'),
                 key: 'name',
                 align: 'left',
-                type: 'text'
+                type: 'deletable-text'
             });
             // Only display owner if not filtered
             if (!(this.owner instanceof Model)) {
@@ -103,10 +103,6 @@ export default {
                     else if (status == 'refused') return this._('Refused');
                     return STATUS_I18N[status];
                 }
-            }, {
-                label: '',
-                align: 'center',
-                type: 'visibility',
             }, {
                 label: this._('Last run'),
                 key: 'last_job.ended',
