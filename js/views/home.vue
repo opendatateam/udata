@@ -48,7 +48,7 @@ export default {
             reuses: new PageList({
                 ns: 'me',
                 fetch: 'my_org_reuses',
-                mask: ReuseList.MASK
+                mask: ReuseList.MASK.concat(['deleted'])
             }),
             issues: new PageList({
                 ns: 'me',
