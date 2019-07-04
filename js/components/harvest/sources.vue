@@ -81,7 +81,9 @@ export default {
             }, {
                 label: this._('Status'),
                 key(item) {
-                    if (item.validation.state == 'pending') {
+                    if (item.deleted) {
+                        return 'deleted';
+                    } else if (item.validation.state == 'pending') {
                         return 'validation';
                     } else if (item.validation.state == 'refused') {
                         return 'refused';
