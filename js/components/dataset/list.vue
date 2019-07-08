@@ -26,7 +26,7 @@ export default {
                 },
                 sort: 'title',
                 align: 'left',
-                type: 'text'
+                type: 'deletable-text'
             }, {
                 label: this._('Creation'),
                 key: 'created_at',

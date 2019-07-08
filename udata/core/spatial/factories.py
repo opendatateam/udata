@@ -114,6 +114,11 @@ class GeoZoneFactory(ModelFactory):
     geom = factory.Faker('multipolygon')
     validity = factory.SubFactory(DateRangeFactory)
 
+    class Params:
+        is_current = factory.Trait(
+            validity=factory.SubFactory(DateRangeFactory, end=None)
+        )
+
 
 class SpatialCoverageFactory(ModelFactory):
     class Meta:

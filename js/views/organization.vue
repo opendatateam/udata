@@ -77,14 +77,14 @@ export default {
                 ns: 'organizations',
                 fetch: 'list_organization_reuses',
                 search: 'title',
-                mask: ReuseList.MASK
+                mask: ReuseList.MASK.concat(['deleted'])
             }),
             datasets: new ModelPage({
                 query: {page_size: 10, sort: '-created'},
                 ns: 'organizations',
                 fetch: 'list_organization_datasets',
                 search: 'title',
-                mask: DatasetList.MASK
+                mask: DatasetList.MASK.concat(['deleted'])
             }),
             issues: new PageList({
                 ns: 'organizations',

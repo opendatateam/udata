@@ -59,12 +59,12 @@ export default  {
             reuses: new PageList({
                 ns: 'me',
                 fetch: 'my_reuses',
-                mask: ReuseList.MASK
+                mask: ReuseList.MASK.concat(['deleted'])
             }),
             datasets: new PageList({
                 ns: 'me',
                 fetch: 'my_datasets',
-                mask: DatasetList.MASK
+                mask: DatasetList.MASK.concat(['deleted'])
             }),
             y: [{
                 id: 'datasets',

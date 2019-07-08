@@ -12,7 +12,7 @@ from mongoengine.fields import BaseField
 from udata.settings import Defaults
 from udata.models import db, Dataset, validate_config, build_test_config
 from udata.errors import ConfigError
-from udata.tests.helpers import assert_json_equal
+from udata.tests.helpers import assert_json_equal, assert_equal_dates
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db')
@@ -301,9 +301,40 @@ class DatetimedTest:
             created_at=earlier, last_modified=earlier)
 
         datetimed.save()
+        datetimed.reload()
 
-        assert datetimed.created_at == earlier
-        assert now <= datetimed.last_modified <= datetime.now()
+        assert_equal_dates(datetimed.created_at, earlier)
+        assert_equal_dates(datetimed.last_modified, now)
+
+    def test_save_last_modified_instance_manually_set(self):
+        now = datetime.now()
+        manual = now - timedelta(days=1)
+        earlier = now - timedelta(days=2)
+        datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
+
+        datetimed.last_modified = manual
+        datetimed.save()
+        datetimed.reload()
+
+        assert_equal_dates(datetimed.created_at, earlier)
+        assert_equal_dates(datetimed.last_modified, manual)
+
+    def test_save_last_modified_instance_manually_set_same_value(self):
+        now = datetime.now()
+        manual = now - timedelta(days=1)
+        earlier = now - timedelta(days=2)
+        datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
+
+        datetimed.last_modified = manual
+        datetimed.save()
+        datetimed.reload()
+
+        datetimed.last_modified = manual
+        datetimed.save()
+        datetimed.reload()
+
+        assert_equal_dates(datetimed.created_at, earlier)
+        assert_equal_dates(datetimed.last_modified, manual)
 
 
 class ExtrasFieldTest:

@@ -8,6 +8,7 @@
 
 
 {% block main_content %}
+{% cache cache_duration, 'topic-content', topic.id|string, g.lang_code %}
 <section class="default">
     <div class="container">
 
@@ -93,4 +94,5 @@
       </div>
 </section>
 {# End datasets section #}
+{% endcache %}
 {% endblock %}

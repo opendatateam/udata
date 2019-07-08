@@ -13,7 +13,6 @@
 
 {% block content %}
 
-{% cache cache_duration, 'topic-content', topic.id|string, g.lang_code %}
 {{ breadcrumb(self, toolbar_class='search-toolbar') }}
 {% block main_content %}{% endblock %}
 {% block related %}
@@ -46,5 +45,4 @@
     </div>
 </section>
 {% endblock %}
-{% endcache %}
 {% endblock %}
