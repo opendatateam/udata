@@ -59,7 +59,7 @@ ujson==1.35
 urllib3==1.24.3
 unicodecsv==0.14.1
 voluptuous==0.10.5
-werkzeug==0.14.1
+werkzeug==0.15.4
 wtforms-json==0.3.3
 wtforms==2.2.1
 xmltodict==0.12.0
