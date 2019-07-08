@@ -25,20 +25,6 @@ PONDERATION_STEP = 10000
 MAX_POPULATION = 1E8
 
 
-def labels_for_zone(zone):
-    '''
-    Extract all known zone labels
-    - main code
-    - keys (postal...)
-    - name translation in every supported languages
-    '''
-    labels = set([zone.name, zone.code] + zone.keys_values)
-    for lang in current_app.config['LANGUAGES'].keys():
-        with language(lang):
-            labels.add(_(zone.name))
-    return list(labels)
-
-
 @register
 class GeoZoneSearch(ModelSearchAdapter):
     model = GeoZone
@@ -73,14 +59,34 @@ class GeoZoneSearch(ModelSearchAdapter):
 
     @classmethod
     def is_indexable(cls, zone):
-        excluded = current_app.config['SPATIAL_SEARCH_EXCLUDE_LEVELS']
-        return zone.level not in excluded
+        return (
+            # Only index non-excluded levels
+            zone.level not in current_app.config['SPATIAL_SEARCH_EXCLUDE_LEVELS']
+            # Only index latest zone
+            and zone.is_current
+        )
+
+    @classmethod
+    def labels_for_zone(cls, zone):
+        '''
+        Extract all known zone labels
+        - main code
+        - keys (postal...)
+        - name translation in every supported languages
+        '''
+        labels = set(cls.completer_tokenize(zone.name))
+        labels.add(zone.code)
+        labels |= set(zone.keys_values)
+        for lang in current_app.config['LANGUAGES'].keys():
+            with language(lang):
+                labels |= set(cls.completer_tokenize(_(zone.name)))
+        return list(labels)
 
     @classmethod
     def serialize(cls, zone):
         return {
             'zone_suggest': {
-                'input': labels_for_zone(zone),
+                'input': cls.labels_for_zone(zone),
                 'output': zone.id,
                 'payload': {
                     'name': zone.name,

@@ -168,6 +168,8 @@ preview_job_fields = api.clone('HarvestJobPreview', job_fields, {
 source_parser = api.page_parser()
 source_parser.add_argument('owner', type=str, location='args',
                            help='The organization or user ID to filter on')
+source_parser.add_argument('deleted', type=bool, location='args', default=False,
+                           help='Include sources flaggued as deleted')
 
 
 @ns.route('/sources/', endpoint='harvest_sources')
@@ -180,7 +182,8 @@ class SourcesAPI(API):
         args = source_parser.parse_args()
         return actions.paginate_sources(args.get('owner'),
                                         page=args['page'],
-                                        page_size=args['page_size'])
+                                        page_size=args['page_size'],
+                                        deleted=args['deleted'])
 
     @api.secure
     @api.doc('create_harvest_source')
