@@ -224,7 +224,7 @@ class Defaults(object):
         # Meteorology
         'grib2',
         # Misc
-        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
+        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
         # RDF
         'rdf', 'ttl', 'n3',
     ]
@@ -317,19 +317,19 @@ class Defaults(object):
 
     # Export CSVs of model objects as resources of a dataset
     ########################################################
-    # which models should be exported
     EXPORT_CSV_MODELS = ('dataset', 'resource', 'discussion', 'organization',
                          'reuse', 'tag')
-    EXPORT_CSV_DATASET_INFO = {
-        'slug': 'export-csv',
-        'title': 'Export of portal data',
-        'description': 'This dataset holds the CSV exports of this portal\'s data.',
-        # this should point to an existing organization id
-        'organization': None,
-    }
+    EXPORT_CSV_DATASET_ID = None
 
+    # Autocomplete parameters
+    #########################
     SEARCH_AUTOCOMPLETE_ENABLED = True
     SEARCH_AUTOCOMPLETE_DEBOUNCE = 200  # in ms
+
+    # Archive parameters
+    ####################
+    ARCHIVE_COMMENT_USER_ID = None
+    ARCHIVE_COMMENT_TITLE = _('This dataset has been archived')
 
 
 class Testing(object):

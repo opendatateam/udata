@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+{% cache cache_duration, 'organization-content', org.id|string, g.lang_code, current_user.slug or 'anonymous' %}
 <div v-el:modal></div>
 <section class="default">
     <div class="container organization-container"
@@ -36,7 +37,7 @@
                                 alt="{{ org.title }}" class="scalable" />
                         </div>
                         <br/>
-                        <div class="tab-links">
+                        <div class="badges tab-links">
                             {# Badges #}
                             {% if org.badges %}
                             <p class="text-center">
@@ -46,7 +47,7 @@
                                             title="{{ _('See all organizations with that badge.') }}">
                                             <span class="fa fa-bookmark"></span>
                                             {{ org.badge_label(badge) }}</a>
-                                    </small><br/>
+                                    </small>
                                 {% endfor %}
                             </p>
                             {% endif %}
@@ -139,6 +140,13 @@
                             tooltip="{{ _('I\'ll be informed about this organization news') }}"
                             >
                         </follow-button>
+
+                        <button type="button" @click="showDetails"
+                            class="btn btn-primary btn-extras btn-block btn-sm btn-left"
+                            title="{{ _('Details') }}">
+                            <span class="fa fa-info-circle"></span>
+                            {{ _('Details') }}
+                        </button>
                     </div>
                 </div>
             </aside>
@@ -150,4 +158,5 @@
 </section>
 
 {% block after_content %}{% endblock %}
+{% endcache %}
 {% endblock %}

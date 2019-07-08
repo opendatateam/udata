@@ -159,7 +159,7 @@ class HarvestJob(db.Document):
                             default=DEFAULT_HARVEST_JOB_STATUS, required=True)
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
     items = db.ListField(db.EmbeddedDocumentField(HarvestItem))
-    source = db.ReferenceField(HarvestSource, reverse_delete_rule=db.NULLIFY)
+    source = db.ReferenceField(HarvestSource, reverse_delete_rule=db.CASCADE)
     data = db.DictField()
 
     meta = {
