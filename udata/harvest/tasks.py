@@ -82,3 +82,10 @@ def purge_harvest_sources(self):
     log.info('Purging HarvestSources flagged as deleted')
     from .actions import purge_sources
     purge_sources()
+
+
+@job('purge-harvest-jobs', route='low.harvest')
+def purge_harvest_jobs(self):
+    log.info('Purging HarvestJobs older than retention policy')
+    from .actions import purge_jobs
+    purge_jobs()
