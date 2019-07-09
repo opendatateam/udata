@@ -97,6 +97,9 @@ class DatasetSearch(ModelSearchAdapter):
     dataset_suggest = Completion(analyzer=simple,
                                  search_analyzer=simple,
                                  payloads=True)
+    mime_suggest = Completion(analyzer=simple,
+                              search_analyzer=simple,
+                              payloads=False)
     created = Date(format='date_hour_minute_second')
     last_modified = Date(format='date_hour_minute_second')
     metrics = metrics_mapping_for(Dataset)
@@ -217,6 +220,7 @@ class DatasetSearch(ModelSearchAdapter):
             'format_suggest': [r.format.lower()
                                for r in dataset.resources
                                if r.format],
+            'mime_suggest': [],  # Need a custom loop below
             'frequency': dataset.frequency,
             'organization': str(organization.id) if organization else None,
             'owner': str(owner.id) if owner else None,
@@ -279,5 +283,13 @@ class DatasetSearch(ModelSearchAdapter):
 
         if dataset.acronym:
             document['dataset_suggest']['input'].append(dataset.acronym)
+
+        # mime Completion
+        mimes = {r.mime.lower() for r in dataset.resources if r.mime}
+        for mime in mimes:
+            document['mime_suggest'].append({
+                'input': mime.replace('+', '/').split('/') + [mime],
+                'output': mime,
+            })
 
         return document
