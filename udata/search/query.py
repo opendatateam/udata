@@ -89,10 +89,9 @@ class SearchQuery(FacetedSearch):
         '''
         if not self._filters:
             return search
-        filters = Q('match_all')
         for f in self._filters.values():
-            filters &= f
-        return search.filter(filters)
+            search = search.query(f)  # this will make a Bool(must=filter)
+        return search
 
     def search(self):
         """
