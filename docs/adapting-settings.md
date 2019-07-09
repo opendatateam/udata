@@ -138,6 +138,12 @@ The id of an existing user which will post a comment when a dataset is archived.
 The title of the comment optionaly posted when a dataset is archived.
 NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
 
+### PROXYFIX_KWARGS
+
+**default**: `{'x_for': 1, 'x_proto': 1, 'x_host': 1}`
+
+Keyword arguments passed to the `ProxyFix` constructor, cf https://werkzeug.palletsprojects.com/en/0.15.x/middleware/proxy_fix/#werkzeug.middleware.proxy_fix.ProxyFix for configuration options.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE

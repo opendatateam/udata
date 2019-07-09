@@ -331,6 +331,12 @@ class Defaults(object):
     ARCHIVE_COMMENT_USER_ID = None
     ARCHIVE_COMMENT_TITLE = _('This dataset has been archived')
 
+    # ProxyFix parameters
+    ####################
+    PROXYFIX_KWARGS = {
+        'x_for': 1, 'x_proto': 1, 'x_host': 1
+    }
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

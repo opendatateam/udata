@@ -180,7 +180,8 @@ def create_app(config='udata.settings.Defaults', override=None,
 
     app.debug = app.config['DEBUG'] and not app.config['TESTING']
 
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+    proxy_kwargs = app.config.get('PROXYFIX_KWARGS', {})
+    app.wsgi_app = ProxyFix(app.wsgi_app, **proxy_kwargs)
 
     init_logging(app)
     register_extensions(app)
