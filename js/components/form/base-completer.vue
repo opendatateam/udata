@@ -37,7 +37,7 @@ Selectize.define('preserve-on-blur', function (options) {
             // Do the default actions
             original.apply(this, [e]);
 
-            // Set the value back                    
+            // Set the value back
             this.setTextboxValue(inputValue);
         };
     })();
@@ -76,6 +76,7 @@ export default {
                     persist: false,
                     closeAfterSelect: true,
                     load: this.load_suggestions.bind(this),
+                    plugins: [],
                     onItemAdd: (value, $item) => {
                         this.$dispatch('completer:item-add', value, $item);
                         if (this.$options.selectize.onItemAdd) {
