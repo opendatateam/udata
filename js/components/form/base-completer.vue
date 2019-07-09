@@ -19,7 +19,30 @@ import CustomError from 'error';
 import utils from 'utils';
 import {FieldComponentMixin} from 'components/form/base-field';
 
-import 'selectize';
+import Selectize from 'selectize';
+
+/**
+ * A Selectize plugin to avoid field clearing on blur
+ * Based on: https://github.com/selectize/selectize.js/issues/999#issuecomment-380382572
+ */
+Selectize.define('preserve-on-blur', function (options) {
+    this.onBlur = ((e) => {
+        var original = this.onBlur;
+
+        return function (e) {
+            // Capture the current input value
+            var $input = this.$control_input;
+            var inputValue = $input.val();
+
+            // Do the default actions
+            original.apply(this, [e]);
+
+            // Set the value back                    
+            this.setTextboxValue(inputValue);
+        };
+    })();
+});
+
 
 class CompleterError extends CustomError {};
 
@@ -47,7 +70,7 @@ export default {
         selectize_options() {
             var opts = this.$options.selectize;
 
-            return $.extend({},
+            opts = $.extend({},
                 utils.isFunction(opts) ? opts.apply(this, []) : opts,
                 {
                     persist: false,
@@ -61,6 +84,8 @@ export default {
                     }
                 }
             );
+            opts.plugins.push('preserve-on-blur');
+            return opts;
         }
     },
     events: {
@@ -88,6 +113,12 @@ export default {
                 log.error('Unable to fetch completion', message);
                 callback();
             });
+        },
+        clear() {
+            if (this.selectize) {
+                this.selectize.clear(true);
+                this.selectize.setTextboxValue('');
+            }
         },
         destroy() {
             if (this.selectize) {
@@ -159,10 +190,12 @@ export default {
     }
 
     .selectize-dropdown .selectize-option {
+        padding-left: 5px;
         .logo {
             width: 25px;
             height: 25px;
             border: 1px solid @gray-lighter;
+            margin-left: -5px;
             margin-right: 5px;
             img {
                 width: 100%;
