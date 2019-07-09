@@ -10,6 +10,7 @@
 - Display the datasets, reuses and harvesters deleted state on listing when possible [#2228](https://github.com/opendatateam/udata/pull/2228)
 - Fix queryless (no `q` text parameter) search results scoring (or lack of scoring) [#2231](https://github.com/opendatateam/udata/pull/2231)
 - Miscellaneous fixes on completers [#2215](https://github.com/opendatateam/udata/pull/2215)
+- Ensure `filetype='remote'` is set when using the manual ressource form [#2236](https://github.com/opendatateam/udata/pull/2236)
 
 ## 1.6.12 (2019-06-26)
 
