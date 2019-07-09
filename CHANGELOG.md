@@ -8,6 +8,7 @@
 - Init: prompt to loads countries [#2140](https://github.com/opendatateam/udata/pull/2140)
 - Handle UTF-8 filenames in `spatial load_logos` command [#2223](https://github.com/opendatateam/udata/pull/2223)
 - Display the datasets, reuses and harvesters deleted state on listing when possible [#2228](https://github.com/opendatateam/udata/pull/2228)
+- Pin werkzeug to 0.15.2 [#2232](https://github.com/opendatateam/udata/pull/2232)
 
 ## 1.6.12 (2019-06-26)
 
