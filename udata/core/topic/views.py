@@ -25,7 +25,7 @@ class TopicSearchMixin(object):
     def search(self):
         '''Override search to match on topic tags'''
         s = super(TopicSearchMixin, self).search()
-        s = s.filter('bool', should=[
+        s = s.query('bool', should=[
             Q('term', tags=tag) for tag in self.topic.tags
         ])
         return s
