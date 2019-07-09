@@ -14,6 +14,7 @@
 - Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload) [#2214](https://github.com/opendatateam/udata/pull/2214)
 - Ensure HarvestItems are cleaned up on dataset deletion [#2214](https://github.com/opendatateam/udata/pull/2214)
 - Added `config.HARVEST_JOBS_RETENTION_DAYS` and a `harvest-purge-jobs` job to apply it [#2214](https://github.com/opendatateam/udata/pull/2214) (migration). **Warning, the migration will enforce `config.HARVEST_JOBS_RETENTION_DAYS` and can take some time on a big `HarvestJob` collection**
+- Drop `no_dereference` on indexing to avoid the "`dictionary changed size during iteration`" error until another solution is found. **Warning: this might result in more resources consumption while indexing** [#2237](https://github.com/opendatateam/udata/pull/2237)
 
 ## 1.6.12 (2019-06-26)
 
