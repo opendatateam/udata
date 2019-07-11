@@ -18,6 +18,15 @@ class GeoIDTest:
         assert code == 'code'
         assert validity == '1984-06-07'
 
+    def test_parse_legacy_geoid(self):
+        geoid = 'level/code@1984-06-07'
+
+        level, code, validity = geoids.parse(geoid)
+
+        assert level == 'level'
+        assert code == 'code'
+        assert validity == '1984-06-07'
+
     def test_parse_implicit_latest(self):
         geoid = 'level:code'
 

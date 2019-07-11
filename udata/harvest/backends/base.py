@@ -205,7 +205,6 @@ class BaseBackend(object):
             if self.dryrun:
                 dataset.validate()
             else:
-                dataset.last_modified = datetime.now()
                 dataset.save()
             item.dataset = dataset
             item.status = 'done'

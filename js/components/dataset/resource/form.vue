@@ -288,6 +288,7 @@ export default {
     methods: {
         manual() {
             this.hasChosenRemoteFile = true;
+            this.resource.filetype = 'remote';
             this.isUpload = false;
         },
         postUpload() {

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-06-21 14:29+0200\n"
-"PO-Revision-Date: 2019-06-21 12:37\n"
+"PO-Revision-Date: 2019-07-01 07:56\n"
 "Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -43,7 +43,7 @@ msgstr "Инструкције за ресетовање лозинке"
 
 #: udata/settings.py:332
 msgid "This dataset has been archived"
-msgstr ""
+msgstr "Овај скуп података је архивиран"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
@@ -1770,7 +1770,10 @@ msgid "This dataset has been archived by our administration team.\n\n"
 "An archived dataset is considered out of date by a combination of factors.\n"
 "It does not appear in the search results and has a special layout warning the site's users.\n\n"
 "If you think this is a mistake, you can contact the site administrator."
-msgstr ""
+msgstr "Овај скуп података су архивирали наши администратори.\n\n"
+"Аривирани скуп података се сматрао застарелим из више разлога.\n"
+"Не појављује се у резултатима претраге и има упозорење упућено корисницима сајта.\n\n"
+"Ако сматрате да је ово грешка контактирајте администратора портала."
 
 #: udata/templates/dataset/add-reuse-card.html:6
 msgid "Add a reuse"
@@ -1791,7 +1794,7 @@ msgstr "Грануларност територијалне покривенос
 
 #: udata/templates/dataset/display.html:41 udata/templates/dataset/display.html:95
 msgid "This dataset has been archived."
-msgstr ""
+msgstr "Овај скуп података је архивиран."
 
 #: udata/templates/dataset/display.html:60
 msgid "This dataset comes from a certified public service"
@@ -1824,7 +1827,7 @@ msgstr "Избрисано"
 
 #: udata/templates/dataset/display.html:96 udata/templates/dataset/display.html:97
 msgid "Archived"
-msgstr ""
+msgstr "Архивиран"
 
 #: udata/templates/dataset/display.html:114
 msgid "See also: community resources"
@@ -1867,7 +1870,7 @@ msgstr "Беџеви"
 #: udata/templates/dataset/display.html:253
 #: udata/templates/dataset/display.html:254
 msgid "Remote source"
-msgstr ""
+msgstr "Спољашња URL адреса извора"
 
 #: udata/templates/dataset/display.html:285
 msgid "Modification date"
@@ -2102,7 +2105,7 @@ msgstr "Сортирање"
 
 #: udata/templates/macros/search.html:21
 msgid "Relevance"
-msgstr ""
+msgstr "Релевантност"
 
 #: udata/templates/macros/search.html:43
 msgid "Ascending"

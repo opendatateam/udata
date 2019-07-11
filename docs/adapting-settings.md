@@ -285,6 +285,12 @@ The number of items to fetch while previewing an harvest source
 
 A cron expression used as default harvester schedule when validating harvesters.
 
+### HARVEST_JOBS_RETENTION_DAYS
+
+**default**: `365`
+
+The number of days of harvest jobs to keep (ie. number of days of history kept)
+
 ## Link checker configuration
 
 ### LINKCHECKING_ENABLED

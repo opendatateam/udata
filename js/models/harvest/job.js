@@ -10,7 +10,8 @@ export const STATUS_CLASSES = {
     'processing': 'info',
     'done': 'success',
     'done-errors': 'warning',
-    'failed': 'danger'
+    'failed': 'danger',
+    'deleted': 'danger',
 };
 
 export const STATUS_I18N = {
@@ -20,8 +21,9 @@ export const STATUS_I18N = {
     'processing': _('Processing'),
     'done': _('Done'),
     'done-errors': _('Done with errors'),
-    'failed': _('Failed')
-}
+    'failed': _('Failed'),
+    'deleted': _('Deleted'),
+};
 
 export class HarvestJob extends Model {
     fetch() {
@@ -33,6 +35,6 @@ export class HarvestJob extends Model {
         }
         return this;
     }
-};
+}
 
 export default HarvestJob;

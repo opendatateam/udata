@@ -2,6 +2,23 @@
 
 ## Current (in progress)
 
+- Rename og:image target :warning: this will break your custom theme, please rename your logo image file to `logo-social.png` instead of `logo-600x600.png` [#2217](https://github.com/opendatateam/udata/pull/2217)
+- Don't automatically overwrite `last_update` field if manually set [#2020](https://github.com/opendatateam/udata/pull/2220)
+- Spatial completion: only index last version of each zone and prevent completion cluttering [#2140](https://github.com/opendatateam/udata/pull/2140)
+- Init: prompt to loads countries [#2140](https://github.com/opendatateam/udata/pull/2140)
+- Handle UTF-8 filenames in `spatial load_logos` command [#2223](https://github.com/opendatateam/udata/pull/2223)
+- Display the datasets, reuses and harvesters deleted state on listing when possible [#2228](https://github.com/opendatateam/udata/pull/2228)
+- Fix queryless (no `q` text parameter) search results scoring (or lack of scoring) [#2231](https://github.com/opendatateam/udata/pull/2231)
+- Miscellaneous fixes on completers [#2215](https://github.com/opendatateam/udata/pull/2215)
+- Ensure `filetype='remote'` is set when using the manual ressource form [#2236](https://github.com/opendatateam/udata/pull/2236)
+- Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload) [#2214](https://github.com/opendatateam/udata/pull/2214)
+- Ensure HarvestItems are cleaned up on dataset deletion [#2214](https://github.com/opendatateam/udata/pull/2214)
+- Added `config.HARVEST_JOBS_RETENTION_DAYS` and a `harvest-purge-jobs` job to apply it [#2214](https://github.com/opendatateam/udata/pull/2214) (migration). **Warning, the migration will enforce `config.HARVEST_JOBS_RETENTION_DAYS` and can take some time on a big `HarvestJob` collection**
+- Drop `no_dereference` on indexing to avoid the "`dictionary changed size during iteration`" error until another solution is found. **Warning: this might result in more resources consumption while indexing** [#2237](https://github.com/opendatateam/udata/pull/2237)
+- Fix various issues around discussions UI [#2190](https://github.com/opendatateam/udata/pull/2190)
+
+## 1.6.12 (2019-06-26)
+
 - Archive dataset feature [#2172](https://github.com/opendatateam/udata/pull/2172)
 - Refactor breadcrum includes [#2173](https://github.com/opendatateam/udata/pull/2173)
 - Better dependencies management [#2182](https://github.com/opendatateam/udata/pull/2182) and [#2172/install.pip](https://github.com/opendatateam/udata/pull/2172/files#diff-d7b45472f3465d62f857d14cf59ea8a2)
@@ -18,7 +35,7 @@
 - Add a condition to up-to-dateness of a dataset [#2208](https://github.com/opendatateam/udata/pull/2208)
 - Prevent deleted harvesters from running until purged. Harvest jobs history is deleted too on purge. [#2209](https://github.com/opendatateam/udata/pull/2209)
 - Better quality.frequency management [#2211](https://github.com/opendatateam/udata/pull/2211)
-- Fix various issues around discussions UI [#2190](https://github.com/opendatateam/udata/pull/2190)
+- Fix caching of topic pages [#2213](https://github.com/opendatateam/udata/pull/2213)
 
 ## 1.6.11 (2019-05-29)
 
@@ -60,6 +77,7 @@
 - Admins can delete a single comment in a discussion thread [#2087](https://github.com/opendatateam/udata/pull/2087)
 - Add cache directives to dataset display blocks [#2129](https://github.com/opendatateam/udata/pull/2129)
 - Export multiple models objects to CSV (dataset of datasets) [#2124](https://github.com/opendatateam/udata/pull/2124)
+
 
 ## 1.6.6 (2019-03-27)
 

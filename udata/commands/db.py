@@ -8,7 +8,7 @@ import click
 from os.path import join
 from pkg_resources import resource_isdir, resource_listdir, resource_string
 
-from flask import current_app
+from flask import current_app, json
 
 from pymongo.errors import PyMongoError, OperationFailure
 from mongoengine.connection import get_db
@@ -27,7 +27,7 @@ def grp():
 
 # A migration script wrapper recording the stdout lines
 SCRIPT_WRAPPER = '''
-function(plugin, filename, script) {{
+function(plugin, filename, script, config) {{
     var stdout = [];
     function print() {{
         var args = Array.prototype.slice.call(arguments);
@@ -50,7 +50,7 @@ function(plugin, filename, script) {{
 
 # Only record a migration script
 RECORD_WRAPPER = '''
-function(plugin, filename, script) {
+function(plugin, filename, script, config) {
     db.migrations.insert({
         plugin: plugin,
         filename: filename,
@@ -70,6 +70,11 @@ function(oid) {{
 
 # Date format used to for display
 DATE_FORMAT = '%Y-%m-%d %H:%M'
+
+
+def get_config():
+    default = lambda o: '<non-serializable: {0}({1})>'.format(type(o), o)
+    return json.loads(json.dumps(current_app.config, default=default))
 
 
 def normalize_migration(plugin_or_specs, filename):
@@ -96,7 +101,7 @@ def execute_migration(plugin, filename, script, dryrun=False):
     success = True
     if not dryrun:
         try:
-            lines = db.eval(js, plugin, filename, script)
+            lines = db.eval(js, plugin, filename, script, get_config())
         except OperationFailure as e:
             log.error(e.details['errmsg'].replace('\n', '\\n'))
             success = False
@@ -115,7 +120,7 @@ def execute_migration(plugin, filename, script, dryrun=False):
 def record_migration(plugin, filename, script, **kwargs):
     '''Only record a migration without applying it'''
     db = get_db()
-    db.eval(RECORD_WRAPPER, plugin, filename, script)
+    db.eval(RECORD_WRAPPER, plugin, filename, script, get_config())
     return True
 
 
