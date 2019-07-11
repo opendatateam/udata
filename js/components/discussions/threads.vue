@@ -4,6 +4,7 @@
     flex-direction: row;
 
     .pagination {
+        margin-top: 0;
         flex-grow: 1;
     }
 }
