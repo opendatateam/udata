@@ -1,18 +1,16 @@
 <style scoped lang="less">
-.sort {
-    margin-top: -32px;
-    margin-bottom: 1em;
-    text-align: right;
+.control {
+    display:flex;
+    flex-direction: row;
+
+    .pagination {
+        flex-grow: 1;
+    }
 }
 
 .loading {
     margin: 2em;
     text-align: center;
-}
-
-.pagination {
-    display:flex;
-    justify-content: center;
 }
 
 .discussion-card.add {
@@ -65,34 +63,40 @@
 </style>
 <template>
 <div class="discussion-threads">
-    <div class="loading" v-if="discussions.loading">
+
+    <div class="control">
+        <pagination-widget
+            :p="p"
+            class="pagination">
+        </pagination-widget>
+
+        <div class="sort" v-show="discussions.length > 1">
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm dropdown-toogle" type="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    {{ _('sort by') }} <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li><a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a></li>
+                    <li><a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" v-if="loading">
         <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
         <span class="sr-only">{{ _('Loading') }}...</span>
     </div>
 
-    <div class="sort" v-show="discussions.data && discussions.data.length > 1">
-        <div class="btn-group">
-            <button class="btn btn-default btn-sm dropdown-toogle" type="button"
-                data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                {{ _('sort by') }} <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-right">
-                <li><a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a></li>
-                <li><a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a></li>
-            </ul>
-        </div>
-    </div>
-
     <discussion-thread
         v-ref:threads
-        v-for="discussion in discussions.data"
+        v-for="discussion in discussions"
         :discussion="discussion"
         id="discussion-{{ discussion.id }}"
         track-by="id">
     </discussion-thread>
-
-    <pagination-widget :p="discussions" class="pagination"></pagination-widget>
 
     <!-- New discussion -->
     <a class="card discussion-card add" @click="displayForm" v-show="!formDisplayed">
@@ -132,7 +136,6 @@
 <script>
 import config from 'config';
 import Avatar from 'components/avatar.vue';
-import Discussions from 'models/discussions';
 import DiscussionThread from 'components/discussions/thread.vue';
 import ThreadFormCreate from 'components/discussions/thread-create.vue';
 import PaginationWidget from 'components/pagination.vue';
@@ -149,16 +152,12 @@ export default {
     components: {Avatar, DiscussionThread, ThreadFormCreate, PaginationWidget},
     data() {
         return {
-            discussions: new Discussions({
-                query: {
-                    sort: '-created',
-                    page_size: 10
-                },
-                mask: MASK
-            }),
+            discussions: [],
+            p: {},
             loading: true,
             formDisplayed: false,
             currentUser: config.user,
+            page_size: 10
         }
     },
     props: {
@@ -192,7 +191,7 @@ export default {
         }
     },
     ready() {
-        this.discussions.fetch({for: this.subjectId});
+        this.go_to_page(1);
     },
     methods: {
         /**
@@ -258,6 +257,49 @@ export default {
                 const [, id] = hash.match(NEW_COMMENT_REGEX);
                 this.threadFor(id).start();
             }
+        },
+
+        go_to_page(page){
+            this.loading = true;
+
+            this.$api.get('discussions/', {for: this.subjectId, page: page}).then(response => {
+                this.loading = false;
+
+                this.discussions = response.data;
+
+                console.log(response)
+
+                const pages = Math.ceil(response.total / response.page_size)
+
+                let previous = ()=>{
+                    if (response.page > 1){
+                        this.go_to_page(response.page - 1);
+                    }
+                }
+
+                let next = ()=> {
+                    if (response.page < response.pages) {
+                        this.go_to_page(response.page + 1);
+                    }
+                }
+
+                const pagination = {
+                    page: response.page,
+                    page_size: response.page_size,
+                    pages: pages,
+                    go_to_page: this.go_to_page,
+                    previousPage: previous,
+                    nextPage: next
+                }
+
+                this.p = Object.assign({}, this.p, pagination)
+
+                if (document.location.hash) {
+                    this.$nextTick(() => { // Wait for data to be binded
+                        this.jumpToHash(document.location.hash);
+                    });
+                }
+            }).catch(log.error.bind(log));
         }
     },
     watch: {
