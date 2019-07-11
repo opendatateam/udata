@@ -300,13 +300,6 @@ export default {
                 }
             }).catch(log.error.bind(log));
         }
-    },
-    watch: {
-        deeplink: function() {
-            if (this.discussions.data && document.location.hash) {
-                this.jumpToHash(document.location.hash);
-            };
-        }
     }
 }
 </script>
