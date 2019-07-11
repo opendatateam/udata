@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.13 (2019-07-11)
 
 - Rename og:image target :warning: this will break your custom theme, please rename your logo image file to `logo-social.png` instead of `logo-600x600.png` [#2217](https://github.com/opendatateam/udata/pull/2217)
 - Don't automatically overwrite `last_update` field if manually set [#2020](https://github.com/opendatateam/udata/pull/2220)
