@@ -157,8 +157,7 @@ export default {
             p: {},
             loading: true,
             formDisplayed: false,
-            currentUser: config.user,
-            page_size: 10
+            currentUser: config.user
         }
     },
     props: {
