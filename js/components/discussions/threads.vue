@@ -266,17 +266,15 @@ export default {
 
                 this.discussions = response.data;
 
-                console.log(response)
-
                 const pages = Math.ceil(response.total / response.page_size)
 
-                let previous = ()=>{
+                let previous_page = ()=>{
                     if (response.page > 1){
                         this.go_to_page(response.page - 1);
                     }
                 }
 
-                let next = ()=> {
+                let next_page = ()=> {
                     if (response.page < response.pages) {
                         this.go_to_page(response.page + 1);
                     }
@@ -287,8 +285,8 @@ export default {
                     page_size: response.page_size,
                     pages: pages,
                     go_to_page: this.go_to_page,
-                    previousPage: previous,
-                    nextPage: next
+                    previousPage: previous_page,
+                    nextPage: next_page
                 }
 
                 this.p = Object.assign({}, this.p, pagination)
