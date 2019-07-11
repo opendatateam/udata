@@ -234,9 +234,9 @@ export default {
          */
         sortBy(key) {
             if (key === 'created') {
-                this.discussions.data.sort( (a,b) => new Date(b['created']) - new Date(a['created']) );
+                this.discussions.sort( (a,b) => new Date(b['created']) - new Date(a['created']) );
             } else if (key === 'response') {
-                this.discussions.data.sort( (a,b) => new Date(b.discussion.slice(-1)[0]['posted_on']) -  new Date(a.discussion.slice(-1)[0]['posted_on']) );
+                this.discussions.sort( (a,b) => new Date(b.discussion.slice(-1)[0]['posted_on']) -  new Date(a.discussion.slice(-1)[0]['posted_on']) );
             }
         },
 
