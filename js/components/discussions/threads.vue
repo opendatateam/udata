@@ -161,7 +161,6 @@ export default {
         }
     },
     props: {
-//        discussions: null,
         subjectId: String,
         subjectClass: String
     },
