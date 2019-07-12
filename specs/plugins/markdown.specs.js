@@ -96,6 +96,11 @@ describe('Markdown backend compliance', function() {
         expect(markdown(source)).to.have.html('<p><a href="http://example.net/">http://example.net/</a></p>');
     });
 
+    it('should handles autolink', function() {
+        const source = '<http://example.net/>';
+        expect(markdown(source)).to.have.html('<p><a href="http://example.net/">http://example.net/</a></p>');
+    });
+
     it('should not transform emails to anchors', function() {
         const source = 'coucou@cmoi.fr';
         expect(markdown(source)).to.have.html('<p>coucou@cmoi.fr</p>');
@@ -113,7 +118,7 @@ describe('Markdown backend compliance', function() {
 
     it('should handle soft breaks as <br/>', function() {
         const source = 'line 1\nline 2';
-        expect(markdown(source)).to.have.html('<p>line 1<br>line 2</p>');
+        expect(markdown(source)).to.have.html('<p>line 1<br>\nline 2</p>');
     });
 
     it('should properly render markdown tags not in allowed tags', function() {
@@ -121,12 +126,63 @@ describe('Markdown backend compliance', function() {
         expect(markdown(source)).to.have.html('<h3>titre</h3>');
     });
 
-    it('should not render github tables', function() {
+    it('should render GFM tables (extension)', function() {
         const source = [
             '| first | second |',
             '|-------|--------|',
             '| value | value  |',
         ].join('\n');
-        expect(markdown(source)).to.have.html(`<p>${source.replace(/\n/g, '<br>')}</p>`);
+        const expected = [
+            '<table>',
+            '<thead>',
+            '<tr>',
+            '<th>first</th>',
+            '<th>second</th>',
+            '</tr>',
+            '</thead>',
+            '<tbody>',
+            '<tr>',
+            '<td>value</td>',
+            '<td>value</td>',
+            '</tr>',
+            '</tbody>',
+            '</table>'
+        ].join('\n');
+        expect(markdown(source)).to.have.html(expected);
+    });
+
+    it('should render GFM strikethrough (extension)', function() {
+        const source = '~~Hi~~ Hello, world!';
+        const expected = '<p><del>Hi</del> Hello, world!</p>';
+        expect(markdown(source)).to.have.html(expected);
+    });
+
+    it('should handle GFM tagfilter extension', function() {
+        // Test extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-
+        const source = [
+            '<strong> <title> <style> <em>',
+            '<blockquote>',
+            '  <xmp> is disallowed.  <XMP> is also disallowed.',
+            '</blockquote>',
+        ].join('\n')
+        const expected = [
+            '<p><strong> &lt;title> &lt;style> <em></p>',
+            '<blockquote>',
+            '  &lt;xmp> is disallowed.  &lt;XMP> is also disallowed.',
+            '</blockquote>',
+        ].join('\n')
+        expect(markdown(source)).to.have.html(expected)
+    });
+
+    it('should not filter legit markup', function() {
+        const source = [
+            '> This is a blockquote',
+            '> with <script>evil()</script> inside',
+        ].join('\n');
+        const expected = [
+            '<blockquote>This is a blockquote<br>',
+            'with &lt;script>evil()&lt;/script> inside</blockquote>',
+        ].join('\n');
+        expect(markdown(source)).to.have.html(expected);
     });
 });

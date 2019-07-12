@@ -8,7 +8,6 @@ celery==4.3.0
 celerybeat-mongo==0.1.0
 chardet==3.0.4
 click==6.7
-CommonMark==0.8.1
 cryptography==2.7
 elasticsearch-dsl==2.2.0
 elasticsearch==2.4.1
@@ -36,6 +35,7 @@ itsdangerous==1.1.0
 Jinja2==2.10.1
 jsonschema==3.0.2
 lxml==4.4.1
+mistune==0.8.4
 mongoengine==0.18.2
 msgpack==0.5.6
 netaddr==0.7.19

@@ -149,27 +149,59 @@ class Defaults(object):
         'blockquote',
         'code',
         'dd',
+        'del',
         'dl',
         'dt',
         'em',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'hr',
         'i',
+        'img',
         'li',
         'ol',
+        'p',
         'pre',
         'small',
+        'span',
         'strong',
         'ul',
         'sup',
         'sub',
+        'table',
+        'td',
+        'th',
+        'tr',
+        'tbody',
+        'thead',
+        'tfooter',
+        # 'title',
     ]
 
     MD_ALLOWED_ATTRIBUTES = {
-        'a': ['href', 'title'],
+        'a': ['href', 'title', 'rel', 'data-tooltip'],
         'abbr': ['title'],
         'acronym': ['title'],
     }
 
     MD_ALLOWED_STYLES = []
+
+    # Extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-
+    MD_FILTERED_TAGS = [
+        'title',
+        'textarea',
+        'style',
+        'xmp',
+        'iframe',
+        'noembed',
+        'noframes',
+        'script',
+        'plaintext',
+    ]
 
     # Tags constraints
     TAG_MIN_LENGTH = 3

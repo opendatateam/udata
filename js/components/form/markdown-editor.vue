@@ -1,5 +1,7 @@
 <!-- Markdown editor widget -->
 <style lang="less">
+@import '~less/udata/markdown';
+
 @padding: 6px 12px;
 
 .md-editor {
@@ -35,6 +37,9 @@
     .md-preview {
         color: black;
         padding: @padding;
+        max-width: 100%;
+
+        .markdown();
     }
 }
 </style>
