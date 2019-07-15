@@ -113,6 +113,31 @@ Define the resources preview mode. Can be one of:
 
 If you want to disable preview, set `PREVIEW_MODE` to `None`
 
+### SEARCH_AUTOCOMPLETE_ENABLED
+
+**default**: `True`
+
+Enables the search autocomplete on frontend if set to `True`, disables otherwise.
+
+### SEARCH_AUTOCOMPLETE_DEBOUNCE
+
+**default**: `200`
+
+The search autocomplete debounce delay on frontend, in milliseconds.
+
+### ARCHIVE_COMMENT_USER_ID
+
+**default**: `None`
+
+The id of an existing user which will post a comment when a dataset is archived.
+
+### ARCHIVE_COMMENT_TITLE
+
+**default**: `_('This dataset has been archived')`
+
+The title of the comment optionaly posted when a dataset is archived.
+NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
@@ -152,6 +177,19 @@ from udata.settings import Defaults
 
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 ```
+
+### EXPORT_CSV_MODELS
+
+**default**: `('dataset', 'resource', 'discussion', 'organization', 'reuse', 'tag')`
+
+List models that will be exported to CSV by the job `export-csv`.
+You can disable the feature by setting this to an empty list.
+
+### EXPORT_CSV_DATASET_ID
+
+**default**: `None`
+
+The id of a dataset that should be created before running the `export-csv` job and will hold the CSV exports.
 
 ## Map widget configuration
 
@@ -246,6 +284,12 @@ The number of items to fetch while previewing an harvest source
 **default**: `0 0 * * *`
 
 A cron expression used as default harvester schedule when validating harvesters.
+
+### HARVEST_JOBS_RETENTION_DAYS
+
+**default**: `365`
+
+The number of days of harvest jobs to keep (ie. number of days of history kept)
 
 ## Link checker configuration
 

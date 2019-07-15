@@ -48,7 +48,7 @@ export default {
             reuses: new PageList({
                 ns: 'me',
                 fetch: 'my_org_reuses',
-                mask: ReuseList.MASK
+                mask: ReuseList.MASK.concat(['deleted'])
             }),
             issues: new PageList({
                 ns: 'me',
@@ -91,7 +91,7 @@ export default {
             }, {
                 value: orgReusesCount,
                 label: this._('Reuses'),
-                icon: 'retweet',
+                icon: 'recycle',
                 color: 'teal',
             }];
         }

@@ -28,7 +28,7 @@
                 {{ dataset.spatial.zones[0].name }}
             </li>
             <li v-if="dataset.metrics" v-tooltip :title="_('Reuses')">
-                <span class="fa fa-retweet fa-fw"></span>
+                <span class="fa fa-recycle fa-fw"></span>
                 {{ dataset.metrics.reuses || 0 }}
             </li>
             <li v-if="dataset.metrics" v-tooltip :title="_('Stars')">

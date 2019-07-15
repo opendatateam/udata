@@ -138,7 +138,7 @@ export default {
             edit: false,
             confirm: false,
             dataset: this.$parent.$parent.dataset,  // Because this is a nested view
-            resource: undefined,
+            resource: {},
             next_route: null,
             isUpload: false,
             hasUploadedFile: false,

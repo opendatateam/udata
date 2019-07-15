@@ -19,17 +19,15 @@
 ) %}
 
 <div class="row">
-    <div class="col-xs-12">
-        <ul class="nav nav-pills" data-tabs="tabs">
-            {% for tab_id, label, content in tabs %}
-            {% if content %}
-            <li {% if not actived %}class="active"{% set actived = True %}{% endif %}>
-                <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
-            </li>
-            {% endif %}
-            {% endfor %}
-        </ul>
-    </div>
+    <ul class="nav nav-pills" data-tabs="tabs">
+        {% for tab_id, label, content in tabs %}
+        {% if content %}
+        <li {% if loop.first %}class="active"{% endif %}>
+            <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
 </div>
 
 {% set activated = False %}

@@ -92,7 +92,7 @@ export default {
             render: {
                 option: (data, escape) => {
                     const opt = [
-                            '<div class="selectize-zone">',
+                            '<div class="selectize-option selectize-zone">',
                             '<span class="title">',
                             '<span class="name">',
                             escape(data.name),

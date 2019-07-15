@@ -204,7 +204,7 @@ $ udata worker status --munin -q default
 $ udata worker status --munin-config -q default
 ```
 
-[munin-plugin]: https://github.com/etalab/munin-plugins/tree/master/udata-worker-status
+[munin-plugin]: https://github.com/etalab/munin-plugins/tree/master/udata
 
 
 ## Cache

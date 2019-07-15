@@ -16,6 +16,8 @@ def harvest(self, ident):
     log.info('Launching harvest job for source "%s"', ident)
 
     source = HarvestSource.get(ident)
+    if source.deleted:
+        return  # Ignore deleted sources
     Backend = backends.get(current_app, source.backend)
     backend = Backend(source)
     items = backend.perform_initialization()
@@ -72,8 +74,15 @@ def harvest_finalize(results, source_id):
     harvest_job_finalize(results, job.id)
 
 
-@task(route='low.harvest')
-def purge_harvest_sources():
+@job('purge-harvesters', route='low.harvest')
+def purge_harvest_sources(self):
     log.info('Purging HarvestSources flagged as deleted')
     from .actions import purge_sources
     purge_sources()
+
+
+@job('purge-harvest-jobs', route='low.harvest')
+def purge_harvest_jobs(self):
+    log.info('Purging HarvestJobs older than retention policy')
+    from .actions import purge_jobs
+    purge_jobs()

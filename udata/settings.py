@@ -175,6 +175,9 @@ class Defaults(object):
     # Harvesters are scheduled at midnight by default
     HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
 
+    # The number of days of harvest jobs to keep (ie. number of days of history kept)
+    HARVEST_JOBS_RETENTION_DAYS = 365
+
     # Lists levels that shouldn't be indexed
     SPATIAL_SEARCH_EXCLUDE_LEVELS = tuple()
 
@@ -191,7 +194,13 @@ class Defaults(object):
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_DEFAULT_LINKCHECKER = 'no_check'
 
-    # TRACKING_BLACKLIST = ['api.notifications', 'api.check_dataset_resource']  # Default: []
+    # Ignore some endpoint from API tracking
+    # By default ignore the 3 most called APIs
+    TRACKING_BLACKLIST = [
+        'api.notifications',
+        'api.check_dataset_resource',
+        'api.avatar',
+    ]
 
     DELETE_ME = True
 
@@ -215,7 +224,7 @@ class Defaults(object):
         # Meteorology
         'grib2',
         # Misc
-        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
+        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
         # RDF
         'rdf', 'ttl', 'n3',
     ]
@@ -305,6 +314,22 @@ class Defaults(object):
     CDN_DOMAIN = None
     # Don't check timestamp on assets (and avoid error on missing assets)
     CDN_TIMESTAMP = False
+
+    # Export CSVs of model objects as resources of a dataset
+    ########################################################
+    EXPORT_CSV_MODELS = ('dataset', 'resource', 'discussion', 'organization',
+                         'reuse', 'tag')
+    EXPORT_CSV_DATASET_ID = None
+
+    # Autocomplete parameters
+    #########################
+    SEARCH_AUTOCOMPLETE_ENABLED = True
+    SEARCH_AUTOCOMPLETE_DEBOUNCE = 200  # in ms
+
+    # Archive parameters
+    ####################
+    ARCHIVE_COMMENT_USER_ID = None
+    ARCHIVE_COMMENT_TITLE = _('This dataset has been archived')
 
 
 class Testing(object):

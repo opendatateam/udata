@@ -22,7 +22,7 @@ class TopicSearchMixin(object):
     def search(self):
         '''Override search to match on topic tags'''
         s = super(TopicSearchMixin, self).search()
-        s = s.filter('bool', should=[
+        s = s.query('bool', should=[
             Q('term', tags=tag) for tag in self.topic.tags
         ])
         return s
@@ -41,6 +41,7 @@ def topic_search_for(topic, adapter, **kwargs):
 @blueprint.route('/<topic:topic>/')
 def display(topic):
     specs = {
+        'recent_reuses': topic_search_for(topic, ReuseSearch, sort='-created', page_size=3),
         'recent_datasets': topic_search_for(topic, DatasetSearch, sort='-created', page_size=9),
         'featured_reuses': topic_search_for(topic, ReuseSearch, featured=True, page_size=6),
     }

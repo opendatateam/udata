@@ -1,0 +1,227 @@
+[
+  {
+    "@id": "http://data.test.org",
+    "@type": ["http://www.w3.org/ns/dcat#Catalog"],
+    "http://purl.org/dc/terms/language": [{"@value": "en"}],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-15T09:19:51.723691"
+      }
+    ],
+    "http://purl.org/dc/terms/title": [{"@value": "Sample DCAT Catalog"}],
+    "http://www.w3.org/ns/dcat#dataset": [
+      {"@id": "_:dataset-1"},
+      {"@id": "_:dataset-2"},
+      {"@id": "_:dataset-3"}
+    ],
+    "http://xmlns.com/foaf/0.1/homepage": [{"@value": "http://data.test.org"}]
+  },
+  {
+    "@id": "_:org-1",
+    "@type": ["http://xmlns.com/foaf/0.1/Organization"],
+    "http://xmlns.com/foaf/0.1/name": [{"@value": "An Organization"}]
+  },
+  {
+    "@id": "_:contact-1",
+    "@type": ["http://www.w3.org/2006/vcard/ns#Organization"],
+    "http://www.w3.org/2006/vcard/ns#fn": [{"@value": "Organization contact"}],
+    "http://www.w3.org/2006/vcard/ns#hasEmail": [{"@value": "hello@its.me"}]
+  },
+  {
+    "@id": "_:dataset-1",
+    "@type": ["http://www.w3.org/ns/dcat#Dataset"],
+    "http://purl.org/dc/terms/description": [{"@value": "Dataset 1 description"}],
+    "http://purl.org/dc/terms/identifier": [{"@value": "1"}],
+    "http://purl.org/dc/terms/issued": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T18:59:02.737480"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T19:01:24.184120"
+      }
+    ],
+    "http://purl.org/dc/terms/spatial": [
+      {
+        "@id": "http://wuEurope.com"
+      }
+    ],
+    "http://purl.org/dc/terms/temporal": [{"@id": "_:temporal-1"}],
+    "http://www.w3.org/ns/dcat#landingPage": [{"@value": "_:dataset-1"}],
+    "http://purl.org/dc/terms/publisher": [{"@id": "_:org-1"}],
+    "http://purl.org/dc/terms/title": [{"@value": "Dataset 1"}],
+    "http://www.w3.org/2002/07/owl#versionInfo": [{"@value": "1.0"}],
+    "http://www.w3.org/ns/dcat#contactPoint": [{"@id": "_:contact-1"}],
+    "http://www.w3.org/ns/dcat#distribution": [
+      {"@id": "_:dataset-1-resource-1"},
+      {"@id": "_:dataset-1-resource-2"}
+    ],
+    "http://www.w3.org/ns/dcat#keyword": [
+      {"@value": "Tag 1"},
+      {"@value": "Tag 2"},
+      {"@value": "Tag 3"},
+      {"@value": "Tag 4"}
+    ],
+    "http://www.w3.org/ns/dcat#theme": [
+      {"@value": "Theme 1"},
+      {"@value": "Theme 2"}
+    ]
+  },
+  {
+    "@id": "_:dataset-2",
+    "@type": ["http://www.w3.org/ns/dcat#Dataset"],
+    "http://purl.org/dc/terms/description": [{"@value": "Dataset 2 description"}],
+    "http://purl.org/dc/terms/identifier": [{"@value": "2"}],
+    "http://purl.org/dc/terms/issued": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T18:59:02.737480"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T19:01:24.184120"
+      }
+    ],
+    "http://purl.org/dc/terms/spatial": [
+      {
+        "@id": "http://wuEurope.com"
+      }
+    ],
+    "http://purl.org/dc/terms/temporal": [{"@id": "_:temporal-2"}],
+    "http://www.w3.org/ns/dcat#landingPage": [{"@value": "_:dataset-2"}],
+    "http://purl.org/dc/terms/publisher": [{"@id": "_:org-1"}],
+    "http://purl.org/dc/terms/title": [{"@value": "Dataset 2"}],
+    "http://www.w3.org/2002/07/owl#versionInfo": [{"@value": "1.0"}],
+    "http://www.w3.org/ns/dcat#contactPoint": [{"@id": "_:contact-1"}],
+    "http://www.w3.org/ns/dcat#distribution": [
+      {"@id": "_:dataset-2-resource-1"},
+      {"@id": "_:dataset-2-resource-2"}
+    ],
+    "http://www.w3.org/ns/dcat#keyword": [
+      {"@value": "Tag 1"},
+      {"@value": "Tag 2"},
+      {"@value": "Tag 3"}
+    ]
+  },
+  {
+    "@id": "_:dataset-3",
+    "@type": ["http://www.w3.org/ns/dcat#Dataset"],
+    "http://purl.org/dc/terms/description": [{"@value": "Dataset 3 description"}],
+    "http://purl.org/dc/terms/identifier": [{"@value": "3"}],
+    "http://purl.org/dc/terms/issued": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T18:59:02.737480"
+      }
+    ],
+    "http://purl.org/dc/terms/modified": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-14T19:01:24.184120"
+      }
+    ],
+    "http://purl.org/dc/terms/spatial": [
+      {
+        "@id": "http://wuEurope.com"
+      }
+    ],
+    "http://purl.org/dc/terms/publisher": [{"@id": "_:org-1"}],
+    "http://purl.org/dc/terms/title": [{"@value": "Dataset 3"}],
+    "http://www.w3.org/2002/07/owl#versionInfo": [{"@value": "1.0"}],
+    "http://www.w3.org/ns/dcat#distribution": [
+      {"@id": "_:dataset-3-resource-1"}
+    ],
+    "http://www.w3.org/ns/dcat#keyword": [
+      {"@value": "Tag 1"},
+      {"@value": "Tag 2"}
+    ]
+  },
+  {
+    "@id": "_:dataset-1-resource-1",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 1-1"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/1/resources/1/file.json"}
+    ]
+  },
+  {
+    "@id": "_:dataset-1-resource-2",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 1-2"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/1/resources/2/file.json"}
+    ]
+  },
+  {
+    "@id": "_:dataset-2-resource-1",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 2-1"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/2/resources/1/file.json"}
+    ]
+  },
+  {
+    "@id": "_:dataset-2-resource-2",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 2-2"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/2/resources/2/file.json"}
+    ]
+  },
+  {
+    "@id": "_:dataset-3-resource-1",
+    "@type": ["http://www.w3.org/ns/dcat#Distribution"],
+    "http://purl.org/dc/terms/title": [{"@value": "Resource 3-1"}],
+    "http://purl.org/dc/terms/description": [{"@value": "A JSON resource"}],
+    "http://purl.org/dc/terms/format": [{"@value": "JSON"}],
+    "http://www.w3.org/ns/dcat#accessURL": [
+      {"@value": "http://data.test.org/datasets/3/resources/1/file.json"}
+    ]
+  },
+  {
+    "@id": "_:temporal-1",
+    "@type": ["http://purl.org/dc/terms/PeriodOfTime"],
+    "http://schema.org/startDate": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-05T00:00:00"
+      }
+    ]
+  },
+  {
+    "@id": "_:temporal-2",
+    "@type": ["http://purl.org/dc/terms/PeriodOfTime"],
+    "http://schema.org/startDate": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-01-01T00:00:00"
+      }
+    ],
+    "http://schema.org/endDate": [
+      {
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+        "@value": "2016-12-05T00:00:00"
+      }
+    ]
+  },
+  {
+    "@id": "http://wuEurope.com",
+    "@type": [
+      "http://purl.org/dc/terms/Location"
+    ]
+  }
+]

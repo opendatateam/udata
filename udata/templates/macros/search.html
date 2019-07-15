@@ -18,7 +18,7 @@
 <div class="btn-group">
     <button type="button" class="btn btn-sorter btn-xs dropdown-toggle" data-toggle="dropdown">
         <span class="fa fa-fw fa-chevron-down hidden-sm"></span>
-        {{ label|truncate(12, True) or '---' }}
+        {{ label|truncate(12, True) or _('Relevance') }}
     </button>
     <ul class="dropdown-menu">
         <li>

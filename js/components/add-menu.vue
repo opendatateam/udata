@@ -32,7 +32,7 @@ export default {
                     color: 'info'
                 }, {
                     label: this._('A reuse'),
-                    icon: 'fa-retweet',
+                    icon: 'fa-recycle',
                     route: '/reuse/new/',
                     color: 'success'
                 }, {

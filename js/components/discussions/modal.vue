@@ -8,6 +8,12 @@
         height: auto;
     }
 
+    .direct-chat-delete {
+        padding-left: 10px;
+        text-decoration: underline;
+        color: white;
+    }
+
     .direct-chat-timestamp {
         color: #eee;
     }
@@ -42,9 +48,10 @@
         <h3>{{ discussion.title }}</h3>
         <div class="direct-chat-messages">
             <div class="direct-chat-msg"
-                v-for="message in discussion.discussion">
+                v-for="(idx, message) in discussion.discussion">
                 <div class="direct-chat-info clearfix">
                     <span class="direct-chat-name pull-left">{{message.posted_by | display}}</span>
+                    <a v-if="$root.me.is_admin && idx !== 0"  @click.prevent="confirm_delete_comment(idx)" href class="direct-chat-name direct-chat-delete">{{ _('Delete comment') }}</a>
                     <span class="direct-chat-timestamp pull-right">{{message.posted_on | dt}}</span>
                 </div>
                 <img class="direct-chat-img"  :alt="_('User Image')"
@@ -156,6 +163,16 @@ export default {
         },
         cancel_delete() {
             this.deleting = false;
+        },
+        confirm_delete_comment(cidx) {
+            if(confirm(this._('Are you sure you want to delete this comment?'))) {
+                API.discussions.delete_discussion_comment({id: this.discussion.id, cidx: cidx},
+                    (response) => {
+                        this.discussion.discussion.splice(cidx, 1);
+                    },
+                    this.$root.handleApiError
+                );
+            }
         },
         delete() {
             API.discussions.delete_discussion({id: this.discussion.id},

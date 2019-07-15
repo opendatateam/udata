@@ -133,7 +133,7 @@ export default {
             return [{
                 value: this.reuse.metrics.datasets || 0,
                 label: this.reuse.metrics.datasets ? this._('Datasets') : this._('Dataset'),
-                icon: 'retweet',
+                icon: 'recycle',
                 color: 'green',
                 target: '#datasets-list'
             }, {

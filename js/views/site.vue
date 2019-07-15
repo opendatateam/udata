@@ -107,7 +107,7 @@ export default {
             }, {
                 value: this.$root.site.metrics.reuses || 0,
                 label: this._('Reuses'),
-                icon: 'retweet',
+                icon: 'recycle',
                 color: 'green',
                 target: '#reuses'
             }, {

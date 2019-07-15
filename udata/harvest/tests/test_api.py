@@ -1,4 +1,7 @@
 import logging
+import pytest
+
+from datetime import datetime
 
 from flask import url_for
 
@@ -22,6 +25,7 @@ from .factories import HarvestSourceFactory, MockBackendsMixin
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.usefixtures('clean_db')
 class HarvestAPITest(MockBackendsMixin):
     modules = ['core.organization', 'core.user', 'core.dataset']
 
@@ -40,6 +44,22 @@ class HarvestAPITest(MockBackendsMixin):
         sources = HarvestSourceFactory.create_batch(3)
 
         response = api.get(url_for('api.harvest_sources'))
+        assert200(response)
+        assert len(response.json['data']) == len(sources)
+
+    def test_list_sources_exclude_deleted(self, api):
+        sources = HarvestSourceFactory.create_batch(3)
+        HarvestSourceFactory.create_batch(2, deleted=datetime.now())
+
+        response = api.get(url_for('api.harvest_sources'))
+        assert200(response)
+        assert len(response.json['data']) == len(sources)
+
+    def test_list_sources_include_deleted(self, api):
+        sources = HarvestSourceFactory.create_batch(3)
+        sources.extend(HarvestSourceFactory.create_batch(2, deleted=datetime.now()))
+
+        response = api.get(url_for('api.harvest_sources', deleted=True))
         assert200(response)
         assert len(response.json['data']) == len(sources)
 
