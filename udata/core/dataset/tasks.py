@@ -124,7 +124,8 @@ def store_resource(csvfile, model, dataset):
     filename = 'export-%s-%s.csv' % (model, timestr)
     prefix = '/'.join((dataset.slug, timestr))
     storage = storages.resources
-    stored_filename = storage.save(csvfile, prefix=prefix, filename=filename)
+    with open(csvfile.name) as infile:
+        stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
     checksum = r_info.pop('checksum')
     algo, checksum = checksum.split(':', 1)
@@ -151,14 +152,13 @@ def export_csv_for_model(model, dataset):
 
     log.info('Exporting CSV for %s...' % model)
 
-    csvfile = NamedTemporaryFile(delete=False)
+    csvfile = NamedTemporaryFile(mode='w', encoding='utf8', delete=False)
     try:
         # write adapter results into a tmp file
         writer = csv.get_writer(csvfile)
         writer.writerow(adapter.header())
         for row in adapter.rows():
             writer.writerow(row)
-        csvfile.seek(0)
         # make a resource from this tmp file
         created, resource = store_resource(csvfile, model, dataset)
         # add it to the dataset
