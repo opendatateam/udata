@@ -36,7 +36,7 @@ def bucket_agg_factory(buckets):
 
 @pytest.mark.usefixtures('autoindex')
 class FacetTestCase:
-    @pytest.mark.fixture(autouse=True)
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.setUp()
 
