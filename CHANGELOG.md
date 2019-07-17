@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Cleanup `permitted_reuses` data (migration) [#2244](https://github.com/opendatateam/udata/pull/2244)
 
 ## 1.6.13 (2019-07-11)
 
