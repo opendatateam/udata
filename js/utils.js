@@ -9,7 +9,7 @@ export function isFunction(obj) {
  * Check if an object is an Object
  */
 export function isObject(obj) {
-    return obj === Object(obj);
+    return obj === Object(obj) && !Array.isArray(obj);
 }
 
 /**

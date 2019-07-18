@@ -25,6 +25,7 @@ describe('Utils', function() {
             expect(u.isObject(true)).to.be.false;
             expect(u.isObject(null)).to.be.false;
             expect(u.isObject(undefined)).to.be.false;
+            expect(u.isObject([42])).to.be.false;
         });
     });
 
