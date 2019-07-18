@@ -22,6 +22,7 @@ export default class User extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('users.get_user', {user: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch User: no identifier specified');

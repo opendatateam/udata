@@ -6,6 +6,7 @@ export default class Topic extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('topics.get_topic', {topic: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch Topic: no identifier specified');

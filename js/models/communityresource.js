@@ -11,6 +11,7 @@ export default class CommunityResource extends Model {
     fetch(ident) {
         ident = ident || this.id;
         if (ident) {
+            this.loading = true;
             this.$api('datasets.retrieve_community_resource', {
                 community: ident
             }, this.on_fetched);

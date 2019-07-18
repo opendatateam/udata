@@ -4,6 +4,7 @@ import config from 'config';
 
 class Me extends User {
     fetch() {
+        this.loading = true;
         this.$api('me.get_me', {}, this.on_user_fetched);
         return this;
     }

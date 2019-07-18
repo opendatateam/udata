@@ -12,6 +12,7 @@ export default class Post extends Model {
             options['X-Fields'] = mask;
         }
         if (ident) {
+            this.loading = true;
             this.$api('posts.get_post', options, this.on_fetched);
         } else {
             log.error('Unable to fetch Post: no identifier specified');

@@ -11,6 +11,7 @@ export default class Organization extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('organizations.get_organization', {org: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch Organization: no identifier specified');

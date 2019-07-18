@@ -11,6 +11,7 @@ export default class Reuse extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('reuses.get_reuse', {reuse: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch Reuse: no identifier specified');
