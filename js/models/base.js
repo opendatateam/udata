@@ -125,6 +125,19 @@ export class Base {
             operation(data, opts, on_success.bind(this), on_error.bind(this));
         });
     }
+
+    /**
+     * Wrap an eventual error handler with basic model error handling
+     * @param {Function} handler An optionnal func(response) error handler
+     */
+    on_error(handler) {
+        return (response) => {
+            if (handler) {
+                handler(response);
+            }
+            this.loading = false;
+        };
+    }
 }
 
 /**
