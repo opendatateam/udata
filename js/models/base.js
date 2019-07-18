@@ -1,10 +1,14 @@
-import API from 'api';
-import validator from 'models/validator';
-import {pubsub, PubSub} from 'pubsub';
 import Sifter from 'sifter';
 import Vue from 'vue';
 
+import API from 'api';
+import i18n from 'i18n';
+import config from 'config';
 import mask from './mask';
+import Raven from 'raven';
+import validator from 'models/validator';
+import {isString} from 'utils';
+import {pubsub, PubSub} from 'pubsub';
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -19,7 +23,7 @@ const requestInterceptor = {
         }
         return obj;
     }
-}
+};
 
 /**
  * Common class behaviors.
@@ -127,13 +131,41 @@ export class Base {
     }
 
     /**
-     * Wrap an eventual error handler with basic model error handling
+     * Wrap an optional error handler with basic model error handling
      * @param {Function} handler An optionnal func(response) error handler
      */
     on_error(handler) {
         return (response) => {
             if (handler) {
                 handler(response);
+            } else {  // Notify the error by default
+                const messages = [i18n._('An error occured')];
+                const isServerSentry = response.headers && 'X-Sentry-ID' in response.headers;
+                if (isServerSentry) {
+                    // Server-side error, already submitted to Sentry
+                    // Display the error identifier if present
+                    messages.push(
+                        i18n._('The error identifier is {id}', {id: response.headers['X-Sentry-ID']})
+                    );
+                } else {
+                    if (isString(response)) {
+                        messages.push(response);
+                    } else if (response.message) {
+                        messages.push(response.message);
+                    } else if (response.error && isString(response.error)) {
+                        messages.push(response.error);
+                    }
+                }
+                const msg = messages.join('\n');
+                if (!isServerSentry && config.sentry) {
+                    // Submit to Sentry
+                    // The global Raven/Sentry listener will display the error
+                    Raven.captureMessage(msg, {extra: {response}});
+                } else {
+                    // Fallback on console error logging
+                    // TODO: implement a pubsub feedback for views being able to notify the error
+                    console.error(msg);
+                }
             }
             this.loading = false;
         };
