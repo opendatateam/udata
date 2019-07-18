@@ -125,4 +125,26 @@ describe('Utils', function() {
             expect(u.escapeRegex('noop')).to.eql('noop');
         });
     });
+
+    describe('flattenObject', function() {
+        it('should flatten nested object keys', function() {
+            const obj = {
+                a: 1, b: {c: true, d: {e: 'foo'}}, f: false,
+                g: ['red', 'green', 'blue'], h: [{i: 2, j: 3}]
+            };
+            expect(u.flattenObject(obj)).to.eql({
+                'a': 1,
+                'b.c': true,
+                'b.d.e': 'foo',
+                'f': false,
+                'g': ['red', 'green', 'blue'],
+                'h': [{i: 2, j: 3}],
+            });
+        });
+
+        it('should not change flat objects', function() {
+            const obj = {a: 0, b: 1, c: 2};
+            expect(u.flattenObject(obj)).to.eql(obj);
+        });
+    });
 });
