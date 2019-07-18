@@ -9,7 +9,8 @@ class Me extends User {
     }
 
     update(data, on_error) {
-        this.$api('me.update_me', {payload: JSON.stringify(data)}, this.on_fetched, on_error);
+        this.loading = true;
+        this.$api('me.update_me', {payload: JSON.stringify(data)}, this.on_fetched, this.on_error(on_error));
     }
 
     on_user_fetched(response) {

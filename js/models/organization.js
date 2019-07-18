@@ -19,10 +19,11 @@ export default class Organization extends Model {
     }
 
     update(data, on_error) {
+        this.loading = true;
         this.$api('organizations.update_organization', {
             org: this.id,
             payload: JSON.stringify(data)
-        }, this.on_fetched, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 
     save(on_error) {
@@ -34,7 +35,8 @@ export default class Organization extends Model {
     }
 
     create(on_error) {
-        this.$api('organizations.create_organization', {payload: this}, this.on_fetched, on_error);
+        this.loading = true;
+        this.$api('organizations.create_organization', {payload: this}, this.on_fetched, this.on_error(on_error));
     }
 
     role_for(obj) {

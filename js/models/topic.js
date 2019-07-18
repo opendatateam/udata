@@ -13,25 +13,27 @@ export default class Topic extends Model {
         return this;
     }
 
-    save() {
+    save(on_error) {
+        this.loading = true;
         if (this.id) {
             this.$api('topics.update_topic', {
                 topic: this.id,
                 payload: this
             },
-            this.on_fetched);
+            this.on_fetched, this.on_error(on_error));
         } else {
             this.$api('topics.create_topic', {
                 payload: this
             },
-            this.on_fetched);
+            this.on_fetched, this.on_error(on_error));
         }
     }
 
     update(data, on_success, on_error) {
+        this.loading = true;
         this.$api('topics.update_topic', {
             topic: this.id,
             payload: data
-        }, on_success, on_error);
+        }, on_success, this.on_error(on_error));
     }
-};
+}

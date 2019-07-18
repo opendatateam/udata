@@ -30,10 +30,11 @@ export default class User extends Model {
     }
 
     update(data, on_error) {
+        this.loading = true;
         this.$api('users.update_user', {
             user: this.id,
             payload: JSON.stringify(data)
-        }, this.on_fetched, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 
     /**
