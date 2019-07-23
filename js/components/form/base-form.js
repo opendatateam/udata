@@ -1,6 +1,6 @@
 import API from 'api';
 import {_} from 'i18n';
-import {setattr, isObject, isString, findComponent} from 'utils';
+import {setattr, isObject, isString, findComponent, flattenObject} from 'utils';
 import log from 'logger';
 import moment from 'moment';
 import $ from 'jquery-validation';  // Ensure jquery & jquery.validate plugin are both loaded
@@ -270,7 +270,7 @@ export default {
             });
         },
         fill_errors(errors) {
-            Object.entries(errors).forEach(([field, errs]) => {
+            Object.entries(flattenObject(errors)).forEach(([field, errs]) => {
                 const el = this.$form.querySelector(`[name="${field}"]`);
                 const $field = this.findField(el);
                 $field.errors = errs;
