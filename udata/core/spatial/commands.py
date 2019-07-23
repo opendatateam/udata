@@ -9,6 +9,7 @@ import tarfile
 import shutil
 
 from collections import Counter
+from datetime import datetime
 from textwrap import dedent
 from urllib import urlretrieve
 
@@ -18,6 +19,7 @@ import slugify
 
 from bson import DBRef
 from mongoengine import errors
+from mongoengine.context_managers import switch_collection
 
 from udata.commands import cli
 from udata.core.dataset.models import Dataset
@@ -41,51 +43,21 @@ def grp():
     pass
 
 
-@grp.command()
-@click.argument('filename', metavar='<filename>', default=DEFAULT_GEOZONES_FILE)
-@click.option('-d', '--drop', is_flag=True, help='Drop existing data')
-def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
-    '''
-    Load a geozones archive from <filename>
-
-    <filename> can be either a local path or a remote URL.
-    '''
-    if filename.startswith('http'):
-        log.info('Downloading GeoZones bundle: %s', filename)
-        filename, _ = urlretrieve(filename, tmp.path('geozones.tar.xz'))
-
-    log.info('Extracting GeoZones bundle')
-    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
-        with tarfile.open(fileobj=xz) as f:
-            f.extractall(tmp.root)
-
-    log.info('Loading GeoZones levels')
-
-    if drop:
-        log.info('Dropping existing levels')
-        GeoLevel.drop_collection()
-
-    log.info('Loading levels.msgpack')
-    levels_filepath = tmp.path('levels.msgpack')
-    with open(levels_filepath) as fp:
+def load_levels(col, path):
+    with open(path) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
         for i, level in enumerate(unpacker, start=1):
-            GeoLevel.objects(id=level['id']).modify(
+            col.objects(id=level['id']).modify(
                 upsert=True,
                 set__name=level['label'],
                 set__parents=[level_ref(p) for p in level['parents']],
                 set__admin_level=level.get('admin_level')
             )
-    os.remove(levels_filepath)
-    log.info('Loaded {total} levels'.format(total=i))
+    return i
 
-    if drop:
-        log.info('Dropping existing spatial zones')
-        GeoZone.drop_collection()
 
-    log.info('Loading zones.msgpack')
-    zones_filepath = tmp.path('zones.msgpack')
-    with open(zones_filepath) as fp:
+def load_zones(col, path):
+    with open(path) as fp:
         unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
         unpacker.next()  # Skip headers.
         for i, geozone in enumerate(unpacker):
@@ -112,15 +84,62 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
                     geozone['geom']['geometries']):
                 params['geom'] = geozone['geom']
             try:
-                GeoZone.objects(id=geozone['_id']).modify(upsert=True, **{
+                col.objects(id=geozone['_id']).modify(upsert=True, **{
                     'set__{0}'.format(k): v for k, v in params.items()
                 })
             except errors.ValidationError as e:
                 log.warning('Validation error (%s) for %s with %s',
                             e, geozone['_id'], params)
                 continue
+    return i
+
+
+@grp.command()
+@click.argument('filename', metavar='<filename>', default=DEFAULT_GEOZONES_FILE)
+@click.option('-d', '--drop', is_flag=True, help='Drop existing data')
+def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
+    '''
+    Load a geozones archive from <filename>
+
+    <filename> can be either a local path or a remote URL.
+    '''
+    ts = datetime.now().isoformat().replace('-', '').replace(':', '').split('.')[0]
+    if filename.startswith('http'):
+        log.info('Downloading GeoZones bundle: %s', filename)
+        filename, _ = urlretrieve(filename, tmp.path('geozones.tar.xz'))
+
+    log.info('Extracting GeoZones bundle')
+    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
+        with tarfile.open(fileobj=xz) as f:
+            f.extractall(tmp.root)
+
+    log.info('Loading GeoZones levels')
+
+    log.info('Loading levels.msgpack')
+    levels_filepath = tmp.path('levels.msgpack')
+    if drop:
+        name = '_'.join((GeoLevel._get_collection_name(), ts))
+        target = GeoLevel._get_collection_name()
+        with switch_collection(GeoLevel, name):
+            total = load_levels(GeoLevel, levels_filepath)
+            GeoLevel.objects._collection.rename(target, dropTarget=True)
+    else:
+        total = load_levels(GeoLevel, levels_filepath)
+    os.remove(levels_filepath)
+    log.info('Loaded {total} levels'.format(total=total))
+
+    log.info('Loading zones.msgpack')
+    zones_filepath = tmp.path('zones.msgpack')
+    if drop:
+        name = '_'.join((GeoZone._get_collection_name(), ts))
+        target = GeoZone._get_collection_name()
+        with switch_collection(GeoZone, name):
+            total = load_zones(GeoZone, zones_filepath)
+            GeoZone.objects._collection.rename(target, dropTarget=True)
+    else:
+        total = load_zones(GeoZone, zones_filepath)
     os.remove(zones_filepath)
-    log.info('Loaded {total} zones'.format(total=i))
+    log.info('Loaded {total} zones'.format(total=total))
 
     shutil.rmtree(tmp.path('translations'))  # Not in use for now.
 
