@@ -242,7 +242,7 @@ class DatasetSearch(ModelSearchAdapter):
                 dataset.temporal_coverage.end):
             start = dataset.temporal_coverage.start.toordinal()
             end = dataset.temporal_coverage.end.toordinal()
-            temporal_weight = min((end - start) / 365, MAX_TEMPORAL_WEIGHT)
+            temporal_weight = min(abs(end - start) / 365, MAX_TEMPORAL_WEIGHT)
             document.update({
                 'temporal_coverage': {'start': start, 'end': end},
                 'temporal_weight': temporal_weight,

@@ -44,6 +44,14 @@ class DateTester(db.Document):
     a_date = db.DateField()
 
 
+class DateRangeTester(db.Document):
+    temporal = db.EmbeddedDocumentField(db.DateRange)
+
+
+class RequiredDateRangeTester(db.Document):
+    temporal = db.EmbeddedDocumentField(db.DateRange, required=True)
+
+
 class DateTesterWithDefault(db.Document):
     a_date = db.DateField(default=date.today)
 
@@ -241,6 +249,88 @@ class DateFieldTest:
         obj = DateTester(a_date='invalid')
         with pytest.raises(ValidationError):
             obj.save()
+
+
+class DateRangeFieldTest:
+    def test_none_if_empty_and_not_required(self):
+        obj = DateRangeTester()
+        assert obj.temporal is None
+        obj.save()
+        obj.reload()
+        assert obj.temporal is None
+
+    def test_both_valid(self):
+        start = date(1984, 6, 6)
+        end = date(1984, 6, 7)
+        obj = DateRangeTester(temporal={'start': start, 'end': end})
+        assert obj.temporal.start == start
+        assert obj.temporal.end == end
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end == end
+
+    def test_both_valid_but_reversed(self):
+        start = date(1984, 6, 6)
+        end = date(1984, 6, 7)
+        obj = DateRangeTester(temporal={'start': end, 'end': start})
+        assert obj.temporal.start == end
+        assert obj.temporal.end == start
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end == end
+
+    def test_only_start(self):
+        start = date(1984, 6, 6)
+        obj = DateRangeTester(temporal={'start': start})
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+
+    def test_only_end(self):
+        end = date(1984, 6, 7)
+        obj = DateRangeTester(temporal={'end': end})
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
+
+    def test_not_valid(self):
+        obj = DateRangeTester(temporal={'start': 'wrong'})
+        with pytest.raises(ValidationError):
+            obj.save()
+
+    def test_empty_but_required(self):
+        obj = RequiredDateRangeTester()
+        assert obj.temporal is None
+        with pytest.raises(ValidationError):
+            obj.save()
+
+    def test_only_start_when_required(self):
+        start = date(1984, 6, 6)
+        obj = RequiredDateRangeTester(temporal={'start': start})
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+
+    def test_only_end_when_required(self):
+        end = date(1984, 6, 7)
+        obj = RequiredDateRangeTester(temporal={'end': end})
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
 
 
 class URLFieldTest:
