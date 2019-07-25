@@ -14,6 +14,7 @@ from udata.search import (
     RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
 )
 from udata.search.analysis import simple
+from udata.utils import to_iso_datetime
 
 from . import metrics  # noqa: Metrics are require for reuse search
 
@@ -152,8 +153,8 @@ class ReuseSearch(ModelSearchAdapter):
             'tags': reuse.tags,
             'tag_suggest': reuse.tags,
             'badges': [badge.kind for badge in reuse.badges],
-            'created': reuse.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
-            'last_modified': reuse.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
+            'created': to_iso_datetime(reuse.created_at),
+            'last_modified': to_iso_datetime(reuse.last_modified),
             'dataset': [{
                 'id': str(d.id),
                 'title': d.title
