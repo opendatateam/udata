@@ -22,6 +22,7 @@ export default class User extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('users.get_user', {user: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch User: no identifier specified');
@@ -30,10 +31,11 @@ export default class User extends Model {
     }
 
     update(data, on_error) {
+        this.loading = true;
         this.$api('users.update_user', {
             user: this.id,
             payload: JSON.stringify(data)
-        }, this.on_fetched, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 
     /**

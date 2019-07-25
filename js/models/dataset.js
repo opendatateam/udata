@@ -32,7 +32,7 @@ export default class Dataset extends Model {
             return this.update(this, on_error);
         }
         this.loading = true;
-        this.$api('datasets.create_dataset', {payload: this}, this.on_fetched, on_error);
+        this.$api('datasets.create_dataset', {payload: this}, this.on_fetched, this.on_error(on_error));
     }
 
     update(data, on_error) {
@@ -40,14 +40,15 @@ export default class Dataset extends Model {
         this.$api('datasets.update_dataset', {
             dataset: this.id,
             payload: data
-        }, this.on_fetched, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 
     delete_resource(id, on_error) {
+        this.loading = true;
         this.$api('datasets.delete_resource', {
             dataset: this.id,
             rid: id
-        }, () => this.fetch(), on_error);
+        }, () => this.fetch(), this.on_error(on_error));
     }
 
     save_resource(resource, on_error) {
