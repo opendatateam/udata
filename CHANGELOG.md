@@ -7,6 +7,7 @@
 - JS models load/save/update consistency (`loading` always `true` on query, always handle error, no more silent errors) [#2247](https://github.com/opendatateam/udata/pull/2247)
 - Ensures that date ranges are always positive (ie. `start` < `end`) [#2253](https://github.com/opendatateam/udata/pull/2253)
 - Enable completion on the "`MIME type`" resource form field (needs reindexing) [#2238](https://github.com/opendatateam/udata/pull/2238)
+- Ensure oembed rendering errors are not hidden by default error handlers and have cors headers [#2254](https://github.com/opendatateam/udata/pull/2254)
 
 ## 1.6.13 (2019-07-11)
 
