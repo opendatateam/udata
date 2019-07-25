@@ -233,6 +233,7 @@ export default {
             }, {
                 id: 'mime',
                 label: this._('Mime Type'),
+                widget: 'mime-completer',
                 readonly,
             }, {
                 id: 'checksum',

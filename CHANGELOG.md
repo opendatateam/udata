@@ -6,6 +6,7 @@
 - Proper form errors handling on nested fields [#2246](https://github.com/opendatateam/udata/pull/2246)
 - JS models load/save/update consistency (`loading` always `true` on query, always handle error, no more silent errors) [#2247](https://github.com/opendatateam/udata/pull/2247)
 - Ensures that date ranges are always positive (ie. `start` < `end`) [#2253](https://github.com/opendatateam/udata/pull/2253)
+- Enable completion on the "`MIME type`" resource form field (needs reindexing) [#2238](https://github.com/opendatateam/udata/pull/2238)
 
 ## 1.6.13 (2019-07-11)
 
@@ -23,6 +24,7 @@
 - Added `config.HARVEST_JOBS_RETENTION_DAYS` and a `harvest-purge-jobs` job to apply it [#2214](https://github.com/opendatateam/udata/pull/2214) (migration). **Warning, the migration will enforce `config.HARVEST_JOBS_RETENTION_DAYS` and can take some time on a big `HarvestJob` collection**
 - Drop `no_dereference` on indexing to avoid the "`dictionary changed size during iteration`" error until another solution is found. **Warning: this might result in more resources consumption while indexing** [#2237](https://github.com/opendatateam/udata/pull/2237)
 - Fix various issues around discussions UI [#2190](https://github.com/opendatateam/udata/pull/2190)
+
 
 ## 1.6.12 (2019-06-26)
 
