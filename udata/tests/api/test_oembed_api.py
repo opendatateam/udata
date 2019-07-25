@@ -18,7 +18,7 @@ from udata.features.territories.models import (
 from udata.frontend.markdown import mdstrip
 from udata.settings import Testing
 from udata.utils import faker
-from udata.tests.helpers import assert200, assert400, assert404, assert_status
+from udata.tests.helpers import assert200, assert400, assert404, assert_status, assert_cors
 
 
 class OEmbedAPITest:
@@ -31,6 +31,7 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url=dataset.external_url)
         response = api.get(url)
         assert200(response)
+        assert_cors(response)
         assert 'html' in response.json
         assert 'width' in response.json
         assert 'maxwidth' in response.json
@@ -49,6 +50,7 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url=dataset.external_url)
         response = api.get(url)
         assert200(response)
+        assert_cors(response)
 
         card = theme.render('dataset/card.html', dataset=dataset)
         assert card in response.json['html']
@@ -62,6 +64,7 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url=redirect_url)
         response = api.get(url)
         assert200(response)
+        assert_cors(response)
         assert 'html' in response.json
         assert 'width' in response.json
         assert 'maxwidth' in response.json
@@ -79,6 +82,7 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url=dataset_url)
         response = api.get(url)
         assert404(response)
+        assert_cors(response)
 
     def test_oembed_for_reuse(self, api):
         '''It should fetch a reuse in the oembed format.'''
@@ -87,6 +91,7 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url=reuse.external_url)
         response = api.get(url)
         assert200(response)
+        assert_cors(response)
         assert 'html' in response.json
         assert 'width' in response.json
         assert 'maxwidth' in response.json
@@ -114,6 +119,7 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url='http://local.test/somewhere')
         response = api.get(url)
         assert404(response)
+        assert_cors(response)
 
     def test_oembed_with_port_in_https_url(self, api):
         '''It should works on HTTPS URLs with explicit port.'''
@@ -130,6 +136,7 @@ class OEmbedAPITest:
         url = url_for('api.oembed', url=dataset.external_url, format='xml')
         response = api.get(url)
         assert_status(response, 501)
+        assert_cors(response)
         assert response.json['message'] == 'Only JSON format is supported'
 
 
