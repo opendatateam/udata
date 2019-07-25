@@ -5,23 +5,23 @@ from elasticsearch_dsl import (
     Boolean, Completion, Date, Long, Object, String, Nested
 )
 
-from udata.i18n import lazy_gettext as _
 from udata.core.site.models import current_site
+from udata.core.spatial.models import (
+    admin_levels, spatial_granularities, ADMIN_LEVEL_MAX
+)
+from udata.i18n import lazy_gettext as _
 from udata.models import (
     Dataset, Organization, License, User, GeoZone, RESOURCE_TYPES
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
 )
+from udata.search.analysis import simple
 from udata.search.fields import (
     TermsFacet, ModelTermsFacet, RangeFacet, TemporalCoverageFacet,
     BoolBooster, GaussDecay, BoolFacet, ValueFactor
 )
-from udata.search.analysis import simple
-
-from udata.core.spatial.models import (
-    admin_levels, spatial_granularities, ADMIN_LEVEL_MAX
-)
+from udata.utils import to_iso_datetime
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
@@ -234,9 +234,8 @@ class DatasetSearch(ModelSearchAdapter):
                     'image_url': image_url,
                 },
             },
-            'created': dataset.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
-            'last_modified': dataset.last_modified.strftime(
-                '%Y-%m-%dT%H:%M:%S'),
+            'created': to_iso_datetime(dataset.created_at),
+            'last_modified': to_iso_datetime(dataset.last_modified),
             'metrics': dataset.metrics,
             'featured': dataset.featured,
             'from_certified': certified,

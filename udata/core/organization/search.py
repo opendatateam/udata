@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 
 from elasticsearch_dsl import Completion, Date, String
 
-from udata.i18n import lazy_gettext as _
 from udata import search
-from udata.search.fields import TermsFacet, RangeFacet
-from udata.models import Organization
 from udata.core.site.models import current_site
+from udata.i18n import lazy_gettext as _
+from udata.models import Organization
 from udata.search.analysis import simple
+from udata.search.fields import TermsFacet, RangeFacet
+from udata.utils import to_iso_datetime
 
 from . import metrics  # noqa: Metrics are need for the mapping
 
@@ -120,7 +121,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'url': organization.url,
             'metrics': organization.metrics,
             'badges': [badge.kind for badge in organization.badges],
-            'created': organization.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            'created': to_iso_datetime(organization.created_at),
             'org_suggest': {
                 'input': completions,
                 'output': str(organization.id),
