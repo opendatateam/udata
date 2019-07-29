@@ -9,6 +9,7 @@
 - Enable completion on the "`MIME type`" resource form field (needs reindexing) [#2238](https://github.com/opendatateam/udata/pull/2238)
 - Ensure oembed rendering errors are not hidden by default error handlers and have cors headers [#2254](https://github.com/opendatateam/udata/pull/2254)
 - Handle dates before 1900 during indexing [#2256](https://github.com/opendatateam/udata/pull/2256)
+- `spatial load` command is more resilient: make use of a temporary collection when `--drop` option is provided (avoid downtime during the load), in case of exception or keybord interrupt, temporary files and collections are cleaned up [#2261](https://github.com/opendatateam/udata/pull/2261)
 
 ## 1.6.13 (2019-07-11)
 
