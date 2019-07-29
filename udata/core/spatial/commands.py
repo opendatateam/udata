@@ -7,8 +7,11 @@ import logging
 import lzma
 import tarfile
 import shutil
+import signal
+import sys
 
 from collections import Counter
+from contextlib import contextmanager
 from datetime import datetime
 from textwrap import dedent
 from urllib import urlretrieve
@@ -95,6 +98,39 @@ def load_zones(col, path):
     return i
 
 
+def cleanup(prefix):
+    log.info('Removing temporary files')
+    tmp.delete(prefix)
+    if tmp.exists(GEOZONE_FILENAME):  # Has been downloaded
+        tmp.delete(GEOZONE_FILENAME)
+
+
+@contextmanager
+def handle_error(prefix, to_delete=None):
+    '''
+    Handle errors while loading.
+    In case of error, properly log it, remove the temporary files and collections and exit.
+    If `to_delete` is given a collection, it will be deleted deleted.
+    '''
+    # Handle keyboard interrupt
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
+    try:
+        yield
+    except KeyboardInterrupt:
+        print('')  # Proper warning message under the "^C" display
+        log.warning('Interrupted by signal')
+    except Exception as e:
+        log.error(e)
+    else:
+        return  # Nothing to do in case of success
+    cleanup(prefix)
+    if to_delete:
+        log.info('Removing temporary collection %s', to_delete._get_collection_name())
+        to_delete.drop_collection()
+    sys.exit(-1)
+
+
 @grp.command()
 @click.argument('filename', metavar='<filename>', default=DEFAULT_GEOZONES_FILE)
 @click.option('-d', '--drop', is_flag=True, help='Drop existing data')
@@ -111,9 +147,10 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
         filename, _ = urlretrieve(filename, tmp.path(GEOZONE_FILENAME))
 
     log.info('Extracting GeoZones bundle')
-    with contextlib.closing(lzma.LZMAFile(filename)) as xz:
-        with tarfile.open(fileobj=xz) as f:
-            f.extractall(tmp.path(prefix))
+    with handle_error(prefix):
+        with contextlib.closing(lzma.LZMAFile(filename)) as xz:
+            with tarfile.open(fileobj=xz) as f:
+                f.extractall(tmp.path(prefix))
 
     log.info('Loading GeoZones levels')
 
@@ -123,10 +160,12 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
         name = '_'.join((GeoLevel._get_collection_name(), ts))
         target = GeoLevel._get_collection_name()
         with switch_collection(GeoLevel, name):
-            total = load_levels(GeoLevel, levels_filepath)
-            GeoLevel.objects._collection.rename(target, dropTarget=True)
+            with handle_error(prefix, GeoLevel):
+                total = load_levels(GeoLevel, levels_filepath)
+                GeoLevel.objects._collection.rename(target, dropTarget=True)
     else:
-        total = load_levels(GeoLevel, levels_filepath)
+        with handle_error(prefix):
+            total = load_levels(GeoLevel, levels_filepath)
     log.info('Loaded {total} levels'.format(total=total))
 
     log.info('Loading zones.msgpack')
@@ -135,15 +174,15 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
         name = '_'.join((GeoZone._get_collection_name(), ts))
         target = GeoZone._get_collection_name()
         with switch_collection(GeoZone, name):
-            total = load_zones(GeoZone, zones_filepath)
-            GeoZone.objects._collection.rename(target, dropTarget=True)
+            with handle_error(prefix, GeoZone):
+                total = load_zones(GeoZone, zones_filepath)
+                GeoZone.objects._collection.rename(target, dropTarget=True)
     else:
-        total = load_zones(GeoZone, zones_filepath)
+        with handle_error(prefix):
+            total = load_zones(GeoZone, zones_filepath)
     log.info('Loaded {total} zones'.format(total=total))
 
-    tmp.delete(prefix)
-    if tmp.exists(GEOZONE_FILENAME):  # Has been downloaded
-        tmp.delete(GEOZONE_FILENAME)
+    cleanup(prefix)
 
 
 def safe_tarinfo(tarinfo):
