@@ -31,6 +31,7 @@ log = logging.getLogger(__name__)
 
 
 DEFAULT_GEOZONES_FILE = 'https://github.com/etalab/geozones/releases/download/2019.0/geozones-countries-2019-0-msgpack.tar.xz'
+GEOZONE_FILENAME = 'geozones.tar.xz'
 
 
 def level_ref(level):
@@ -104,19 +105,20 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     <filename> can be either a local path or a remote URL.
     '''
     ts = datetime.now().isoformat().replace('-', '').replace(':', '').split('.')[0]
+    prefix = 'geozones-{0}'.format(ts)
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
-        filename, _ = urlretrieve(filename, tmp.path('geozones.tar.xz'))
+        filename, _ = urlretrieve(filename, tmp.path(GEOZONE_FILENAME))
 
     log.info('Extracting GeoZones bundle')
     with contextlib.closing(lzma.LZMAFile(filename)) as xz:
         with tarfile.open(fileobj=xz) as f:
-            f.extractall(tmp.root)
+            f.extractall(tmp.path(prefix))
 
     log.info('Loading GeoZones levels')
 
     log.info('Loading levels.msgpack')
-    levels_filepath = tmp.path('levels.msgpack')
+    levels_filepath = tmp.path(prefix + '/levels.msgpack')
     if drop and GeoLevel.objects.count():
         name = '_'.join((GeoLevel._get_collection_name(), ts))
         target = GeoLevel._get_collection_name()
@@ -125,11 +127,10 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
             GeoLevel.objects._collection.rename(target, dropTarget=True)
     else:
         total = load_levels(GeoLevel, levels_filepath)
-    os.remove(levels_filepath)
     log.info('Loaded {total} levels'.format(total=total))
 
     log.info('Loading zones.msgpack')
-    zones_filepath = tmp.path('zones.msgpack')
+    zones_filepath = tmp.path(prefix + '/zones.msgpack')
     if drop and GeoZone.objects.count():
         name = '_'.join((GeoZone._get_collection_name(), ts))
         target = GeoZone._get_collection_name()
@@ -138,10 +139,11 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
             GeoZone.objects._collection.rename(target, dropTarget=True)
     else:
         total = load_zones(GeoZone, zones_filepath)
-    os.remove(zones_filepath)
     log.info('Loaded {total} zones'.format(total=total))
 
-    shutil.rmtree(tmp.path('translations'))  # Not in use for now.
+    tmp.delete(prefix)
+    if tmp.exists(GEOZONE_FILENAME):  # Has been downloaded
+        tmp.delete(GEOZONE_FILENAME)
 
 
 def safe_tarinfo(tarinfo):
