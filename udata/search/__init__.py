@@ -127,18 +127,21 @@ i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 def reindex(obj):
     model = obj.__class__
     adapter_class = adapter_catalog.get(model)
+    timeout = current_app.config['ELASTICSEARCH_INDEX_TIMEOUT']
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
         try:
             adapter = adapter_class.from_model(obj)
-            adapter.save(using=es.client, index=es.index_name)
+            adapter.save(using=es.client, index=es.index_name,
+                         request_timeout=timeout)
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     elif adapter_class.exists(obj.id, using=es.client, index=es.index_name):
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
             adapter = adapter_class.from_model(obj)
-            adapter.delete(using=es.client, index=es.index_name)
+            adapter.delete(using=es.client, index=es.index_name,
+                           request_timeout=timeout)
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
@@ -153,7 +156,11 @@ def unindex(obj):
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
             adapter = adapter_class.from_model(obj)
-            adapter.delete(using=es.client, index=es.index_name)
+            adapter.delete(
+                using=es.client,
+                index=es.index_name,
+                request_timeout=current_app.config['ELASTICSEARCH_INDEX_TIMEOUT'],
+            )
         except Exception:
             log.exception('Unable to unindex %s "%s"', model.__name__, str(obj.id))
     else:
