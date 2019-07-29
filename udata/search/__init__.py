@@ -51,14 +51,16 @@ class ElasticSearch(object):
             self.init_app(app)
 
     def init_app(self, app):
-        # using the app factory pattern _app_ctx_stack.top is None so what
-        # do we register on? app.extensions looks a little hackish (I don't
-        # know flask well enough to be sure), but that's how it's done in
-        # flask-pymongo so let's use it for now.
+        # Use ELASTICSEARCH_URL_TEST if defined during tests
         if app.config['TESTING'] and 'ELASTICSEARCH_URL_TEST' in app.config:
-                app.config['ELASTICSEARCH_URL'] = app.config['ELASTICSEARCH_URL_TEST']
+            app.config['ELASTICSEARCH_URL'] = app.config['ELASTICSEARCH_URL_TEST']
+
+        # Initialize the elasticsearch client for the current app
         app.extensions['elasticsearch'] = Elasticsearch(
-            [app.config['ELASTICSEARCH_URL']], serializer=EsJSONSerializer())
+            [app.config['ELASTICSEARCH_URL']],
+            serializer=EsJSONSerializer(),
+            timeout=app.config['ELASTICSEARCH_TIMEOUT'],
+        )
 
     def __getattr__(self, item):
         if 'elasticsearch' not in current_app.extensions.keys():
