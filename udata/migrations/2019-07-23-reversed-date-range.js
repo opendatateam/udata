@@ -8,19 +8,18 @@ var updated = 0;
 const pipeline = [
     {$project: {
         cmp: {$cmp: ['$temporal_coverage.start', '$temporal_coverage.end']},
-        obj: '$$ROOT'
+        dataset: '$$ROOT'
     }},
-    {$match: {cmp: {$gt: 0}}},
-    {$replaceRoot: {newRoot: '$obj'}}
+    {$match: {cmp: {$gt: 0}}}
 ];
 
 
-db.dataset.aggregate(pipeline).forEach(dataset => {
+db.dataset.aggregate(pipeline).forEach(row => {
     db.dataset.update(
-        {_id: dataset._id},
+        {_id: row.dataset._id},
         {'$set': {
-            'temporal_coverage.start': dataset.temporal_coverage.end,
-            'temporal_coverage.end': dataset.temporal_coverage.start,
+            'temporal_coverage.start': row.dataset.temporal_coverage.end,
+            'temporal_coverage.end': row.dataset.temporal_coverage.start,
         }}
     );
     updated++;
