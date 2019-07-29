@@ -35,6 +35,10 @@ class Defaults(object):
     ELASTICSEARCH_URL = 'localhost:9200'
     ELASTICSEARCH_INDEX_BASENAME = 'udata'
     ELASTICSEARCH_REFRESH_INTERVAL = '1s'
+    # ES Query/default timeout.
+    ELASTICSEARCH_TIMEOUT = 10  # Same default as elasticsearch library
+    # ES index timeout (should be longer)
+    ELASTICSEARCH_INDEX_TIMEOUT = 20
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
