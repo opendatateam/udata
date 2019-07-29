@@ -117,7 +117,7 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
 
     log.info('Loading levels.msgpack')
     levels_filepath = tmp.path('levels.msgpack')
-    if drop:
+    if drop and GeoLevel.objects.count():
         name = '_'.join((GeoLevel._get_collection_name(), ts))
         target = GeoLevel._get_collection_name()
         with switch_collection(GeoLevel, name):
@@ -130,7 +130,7 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
 
     log.info('Loading zones.msgpack')
     zones_filepath = tmp.path('zones.msgpack')
-    if drop:
+    if drop and GeoZone.objects.count():
         name = '_'.join((GeoZone._get_collection_name(), ts))
         target = GeoZone._get_collection_name()
         with switch_collection(GeoZone, name):
