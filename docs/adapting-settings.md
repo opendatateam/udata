@@ -371,6 +371,19 @@ The above example will produce:
 - a `myindex` alias on `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
 - a temporary `myindex-test` index during each test requiring it
 
+### ELASTICSEARCH_TIMEOUT
+
+**default**: `10`
+
+The timeout (in seconds) used by search queries and as default for any operation except indexing.
+
+
+### ELASTICSEARCH_INDEX_TIMEOUT
+
+**default**: `20`
+
+The timeout (in seconds) used by indexing/write operations (should be longer than the default timeout as indexing can be quite resources intensive and response time can be longer).
+
 
 ## Mongoengine/Flask-Mongoengine options
 

@@ -61,10 +61,10 @@ def iter_for_index(docs, index_name):
         yield doc
 
 
-def index_model(index_name, adapter):
+def index_model(index_name, adapter, timeout=None):
     ''' Indel all objects given a model'''
     model = adapter.model
-    log.info('Indexing {0} objects'.format(model.__name__))
+    log.info('Indexing %s objects', model.__name__)
     qs = model.objects
     if hasattr(model.objects, 'visible'):
         qs = qs.visible()
@@ -74,13 +74,14 @@ def index_model(index_name, adapter):
     docs = iter_qs(qs, adapter)
     docs = iter_for_index(docs, index_name)
 
-    for ok, info in streaming_bulk(es.client, docs, raise_on_error=False):
+    for ok, info in streaming_bulk(es.client, docs, raise_on_error=False,
+                                   request_timeout=timeout):
         if not ok:
             log.error('Unable to index %s "%s": %s', model.__name__,
                       info['index']['_id'], info['index']['error'])
 
 
-def disable_refresh(index_name):
+def disable_refresh(index_name, timeout=None):
     '''
     Disable refresh to optimize indexing
 
@@ -90,45 +91,50 @@ def disable_refresh(index_name):
         'index': {
             'refresh_interval': '-1'
         }
-    })
+    }, request_timeout=timeout)
 
 
-def enable_refresh(index_name):
+def enable_refresh(index_name, timeout=None):
     '''
     Enable refresh and force merge. To be used after indexing.
 
     See: https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html#bulk
     '''  # noqa
+    timeout = timeout or current_app.config['ELASTICSEARCH_INDEX_TIMEOUT']
     refresh_interval = current_app.config['ELASTICSEARCH_REFRESH_INTERVAL']
     es.indices.put_settings(index=index_name, body={
         'index': {'refresh_interval': refresh_interval}
-    })
-    es.indices.forcemerge(index=index_name, request_timeout=30)
+    }, request_timeout=timeout)
+    # Double the timeout as this can take some time
+    es.indices.forcemerge(index=index_name, request_timeout=timeout * 2)
 
 
-def set_alias(index_name, delete=True):
+def set_alias(index_name, delete=True, timeout=None):
     '''
     Properly end an indexation by creating an alias.
     Previous alias is deleted if needed.
     '''
-    log.info('Creating alias "{0}" on index "{1}"'.format(
-        es.index_name, index_name))
+    timeout = timeout or current_app.config['ELASTICSEARCH_INDEX_TIMEOUT']
+    log.info('Creating alias "%s" on index "%s"', es.index_name, index_name)
     if es.indices.exists_alias(name=es.index_name):
         alias = es.indices.get_alias(name=es.index_name)
         previous_indices = alias.keys()
         if index_name not in previous_indices:
-            es.indices.put_alias(index=index_name, name=es.index_name)
+            es.indices.put_alias(index=index_name, name=es.index_name,
+                                 request_timeout=timeout)
         for index in previous_indices:
             if index != index_name:
-                es.indices.delete_alias(index=index, name=es.index_name)
+                es.indices.delete_alias(index=index, name=es.index_name,
+                                        request_timeout=timeout)
                 if delete:
-                    es.indices.delete(index=index)
+                    es.indices.delete(index=index, request_timeout=timeout)
     else:
-        es.indices.put_alias(index=index_name, name=es.index_name)
+        es.indices.put_alias(index=index_name, name=es.index_name,
+                                               request_timeout=timeout)
 
 
 @contextmanager
-def handle_error(index_name, keep=False):
+def handle_error(index_name, keep=False, timeout=None):
     '''
     Handle errors while indexing.
     In case of error, properly log it, remove the index and exit.
@@ -150,7 +156,7 @@ def handle_error(index_name, keep=False):
     if has_error:
         if not keep:
             log.info('Removing index %s', index_name)
-            es.indices.delete(index=index_name)
+            es.indices.delete(index=index_name, request_timeout=timeout)
         sys.exit(-1)
 
 
@@ -159,7 +165,9 @@ def handle_error(index_name, keep=False):
 @click.option('-n', '--name', default=None, help='Optional index name')
 @click.option('-f', '--force', is_flag=True, help='Do not prompt on deletion')
 @click.option('-k', '--keep', is_flag=True, help='Do not delete indexes')
-def index(models=None, name=None, force=False, keep=False):
+
+@click.option('-t', '--timeout', type=float, help='Elasticsearch write timeout in seconds')
+def index(models=None, name=None, force=False, keep=False, timeout=None):
     '''
     Initialize or rebuild the search index
 
@@ -167,6 +175,7 @@ def index(models=None, name=None, force=False, keep=False):
     If not, all models are reindexed.
     '''
     index_name = name or default_index_name()
+    timeout = timeout or current_app.config['ELASTICSEARCH_INDEX_TIMEOUT']
 
     doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
     models = [model.lower().rstrip('s') for model in (models or [])]
@@ -174,25 +183,23 @@ def index(models=None, name=None, force=False, keep=False):
         if model not in doc_types_names:
             log.error('Unknown model %s', model)
             sys.exit(-1)
-
-    log.info('Initiliazing index "{0}"'.format(index_name))
+    log.info('Initiliazing index "%s"', index_name)
     if es.indices.exists(index_name):
         if IS_TTY and not force:
             msg = 'Index {0} will be deleted, are you sure?'
             click.confirm(msg.format(index_name), abort=True)
-        es.indices.delete(index_name)
+        es.indices.delete(index_name, request_timeout=timeout)
 
     es.initialize(index_name)
 
-    with handle_error(index_name, keep):
+    with handle_error(index_name, keep, timeout):
 
-        disable_refresh(index_name)
+        disable_refresh(index_name, timeout)
         for adapter in iter_adapters():
             if not models or adapter.doc_type().lower() in models:
-                index_model(index_name, adapter)
+                index_model(index_name, adapter, timeout)
             else:
-                log.info('Copying {0} objects to the new index'.format(
-                         adapter.model.__name__))
+                log.info('Copying %s objects to the new index', adapter.model.__name__)
                 # Need upgrade to Elasticsearch-py 5.0.0 to write:
                 # es.reindex({
                 #     'source': {'index': es.index_name, 'type': adapter.doc_type()},
@@ -204,11 +211,11 @@ def index(models=None, name=None, force=False, keep=False):
                 # triggers a server-side documents copy.
                 # Instead we use this helper for meant for backward compatibility
                 # but with poor performance as copy is client-side (scan+bulk)
-                es_reindex(es.client, es.index_name, index_name, scan_kwargs={
-                    'doc_type': adapter.doc_type()
-                })
+                es_reindex(es.client, es.index_name, index_name,
+                           scan_kwargs={'doc_type': adapter.doc_type()},
+                           bulk_kwargs={'request_timeout': timeout})
 
-        enable_refresh(index_name)
+        enable_refresh(index_name, timeout)
     # At this step, we don't want error handler to delete the index
     # in case of error
-    set_alias(index_name, delete=not keep)
+    set_alias(index_name, delete=not keep, timeout=timeout)
