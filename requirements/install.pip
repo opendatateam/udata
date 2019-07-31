@@ -45,7 +45,7 @@ pydenticon==0.3.1
 pyliblzma==0.5.3
 pymongo==3.7.2
 python-dateutil==2.8.0
-pytz==2019.1
+pytz==2019.2
 PyYAML==5.1.1
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
