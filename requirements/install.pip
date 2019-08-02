@@ -34,7 +34,7 @@ geojson==2.4.1
 html2text==2018.1.9
 itsdangerous==1.1.0
 Jinja2==2.10.1
-jsonschema==3.0.1
+jsonschema==3.0.2
 kombu[redis]==4.2.1
 lxml==4.3.4
 mongoengine==0.16.3
