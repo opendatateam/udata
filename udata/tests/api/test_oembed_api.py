@@ -22,7 +22,7 @@ from udata.tests.helpers import assert200, assert400, assert404, assert_status, 
 
 
 class OEmbedAPITest:
-    modules = ['core.dataset', 'core.reuse']
+    modules = ['core.dataset', 'core.organization', 'core.reuse']
 
     def test_oembed_for_dataset(self, api):
         '''It should fetch a dataset in the oembed format.'''
@@ -100,6 +100,24 @@ class OEmbedAPITest:
         assert response.json['type'] == 'rich'
         assert response.json['version'] == '1.0'
         card = theme.render('reuse/card.html', reuse=reuse)
+        assert card in response.json['html']
+
+    def test_oembed_for_org(self, api):
+        '''It should fetch an organization in the oembed format.'''
+        org = OrganizationFactory()
+
+        url = url_for('api.oembed', url=org.external_url)
+        response = api.get(url)
+        assert200(response)
+        assert_cors(response)
+        assert 'html' in response.json
+        assert 'width' in response.json
+        assert 'maxwidth' in response.json
+        assert 'height' in response.json
+        assert 'maxheight' in response.json
+        assert response.json['type'] == 'rich'
+        assert response.json['version'] == '1.0'
+        card = theme.render('organization/card.html', organization=org)
         assert card in response.json['html']
 
     def test_oembed_without_url(self, api):
