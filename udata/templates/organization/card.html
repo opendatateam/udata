@@ -1,10 +1,10 @@
 {% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
 <a class="card organization-card" title="{{organization.name}}"
-     href="{{ url_for('organizations.show', org=organization) }}">
+     href="{{ url_for('organizations.show', org=organization, _external=True) }}">
     <div class="card-logo">
         <img alt=""
-            src="{{ organization.logo(60)|placeholder('organization') }}"
+            src="{{ organization.logo(60, external=True)|placeholder('organization', external=True) }}"
             width="60" height="60">
     </div>
     {{ badge_if_certified(organization) }}

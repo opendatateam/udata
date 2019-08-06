@@ -36,8 +36,10 @@ oembeds_parser.add_argument(
 @api.route('/oembed', endpoint='oembed')
 class OEmbedAPI(API):
     ROUTES = {
-        'datasets.show': 'dataset',
-        'reuses.show': 'reuse',
+        # endpoint: (param name, template prefix)
+        'datasets.show': ('dataset', 'dataset'),
+        'organizations.show': ('org', 'organization'),
+        'reuses.show': ('reuse', 'reuse'),
     }
 
     @api.doc('oembed')
@@ -69,7 +71,7 @@ class OEmbedAPI(API):
         if endpoint not in self.ROUTES:
             return {'message': 'The URL "{0}" does not support oembed'.format(url)}, 404
 
-        param = self.ROUTES[endpoint]
+        param, prefix = self.ROUTES[endpoint]
         item = view_args[param]
         if isinstance(item, Exception):
             if isinstance(item, HTTPException):
@@ -83,7 +85,7 @@ class OEmbedAPI(API):
             'width': width,
             'height': height,
             'item': item,
-            'type': param
+            'type': prefix
         }
         params[param] = item
         html = theme.render('oembed.html', **params)
