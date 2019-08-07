@@ -294,6 +294,11 @@ class TemporalCoverageFacet(Facet, DSLFacet):
         }
 
 
+def _v(value):
+    '''Call value if necessary'''
+    return value() if callable(value) else value
+
+
 class BoolBooster(object):
     def __init__(self, field, factor):
         self.field = field
@@ -302,7 +307,7 @@ class BoolBooster(object):
     def to_query(self):
         return {
             'filter': {'term': {self.field: True}},
-            'boost_factor': self.factor,
+            'boost_factor': _v(self.factor),
         }
 
 
@@ -325,11 +330,6 @@ class ValueFactor(object):
 
     def to_query(self):
         return {'field_value_factor': self.params}
-
-
-def _v(value):
-    '''Call value if necessary'''
-    return value() if callable(value) else value
 
 
 class DecayFunction(object):

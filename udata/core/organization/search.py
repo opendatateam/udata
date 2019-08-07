@@ -14,6 +14,7 @@ from udata.utils import to_iso_datetime
 from . import metrics  # noqa: Metrics are need for the mapping
 
 __all__ = ('OrganizationSearch', )
+lazy = search.lazy_config('organization')
 
 
 def max_reuses():
@@ -99,9 +100,9 @@ class OrganizationSearch(search.ModelSearchAdapter):
                                 }),
     }
     boosters = [
-        search.GaussDecay('metrics.followers', max_followers, decay=0.8),
-        search.GaussDecay('metrics.reuses', max_reuses, decay=0.9),
-        search.GaussDecay('metrics.datasets', max_datasets, decay=0.9),
+        search.GaussDecay('metrics.followers', max_followers, decay=lazy('followers_decay')),
+        search.GaussDecay('metrics.reuses', max_reuses, decay=lazy('reuses_decay')),
+        search.GaussDecay('metrics.datasets', max_datasets, decay=lazy('datasets_decay')),
     ]
 
     @classmethod

@@ -5,6 +5,7 @@ import itertools
 import logging
 
 from elasticsearch_dsl import DocType, Integer, Float, Object
+from elasticsearch_dsl.document import DocTypeMeta
 from flask_restplus.reqparse import RequestParser
 from flask import current_app
 
@@ -15,8 +16,41 @@ from udata.core.metrics import Metric
 log = logging.getLogger(__name__)
 
 
+def config_getter(domain):
+    prefix = '_'.join(('SEARCH', domain.upper()))
+
+    def get_config(key, default=None):
+        key = '_'.join((prefix, key.upper()))
+        return current_app.config.get(key, default)
+    return get_config
+
+
+def lazy_config(domain):
+    getter = config_getter(domain)
+
+    def lazy_get_config(key, default=None):
+        def lazy():
+            return getter(key, default)
+        return lazy
+    return lazy_get_config
+
+
+class AdapterMetaclass(DocTypeMeta):
+    def __new__(cls, name, bases, attrs):
+        new = super(AdapterMetaclass, cls).__new__(cls, name, bases, attrs)
+        if new.model:
+            getter = config_getter(new.model.__name__.upper())
+
+            @classmethod
+            def from_config(cls, key, value=None):
+                return getter(key, value)
+            new.from_config = from_config
+        return new
+
+
 class ModelSearchAdapter(DocType):
     """This class allow to describe and customize the search behavior."""
+    __metaclass__ = AdapterMetaclass
     analyzer = i18n_analyzer
     boosters = None
     facets = None
@@ -26,11 +60,6 @@ class ModelSearchAdapter(DocType):
     model = None
     exclude_fields = None  # Exclude fields from being fetched on indexation
     sorts = None
-
-    @classmethod
-    def from_config(cls, key, default=None):
-        key = '_'.join(('SEARCH', cls.model.__name__.upper(), key.upper()))
-        return current_app.config.get(key, default)
 
     @classmethod
     def doc_type(cls):

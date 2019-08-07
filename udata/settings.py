@@ -330,16 +330,40 @@ class Defaults(object):
 
     # Search parameters
     ###################
-    # After this number of years, scoring is kept constant instead of increasing.
-    SEARCH_DATASET_MAX_TEMPORAL_WEIGHT = 5
-    # How much weight featured items get
-    SEARCH_DATASET_FEATURED_WEIGHT = 3
     # Overrides dataset search fields and their ponderation
     SEARCH_DATASET_FIELDS = None
+    # After this number of years, scoring is kept constant instead of increasing.
+    # Index time parameter:
+    #   reindeixing dataset is required for this parameter to be effective
+    SEARCH_DATASET_MAX_TEMPORAL_WEIGHT = 5
+    # How much weight featured items get in completion
+    # Index time parameter:
+    #   reindeixing dataset is required for this parameter to be effective
+    SEARCH_DATASET_FEATURED_WEIGHT = 3
+    # Boost given to the featured datasets
+    SEARCH_DATASET_FEATURED_BOOST = 1.5
+    # Boost given to the datasets from certified organization
+    SEARCH_DATASET_CERTIFIED_BOOST = 1.2
+    # Decay factor for reuses count on datasets
+    SEARCH_DATASET_REUSES_DECAY = 0.1
+    # Decay factor for followers count on datasets
+    SEARCH_DATASET_FOLLOWERS_DECAY = 0.1
     # Overrides reuse search fields and their ponderation
     SEARCH_REUSE_FIELDS = None
+    # Boost given to the featured reuses
+    SEARCH_REUSE_FEATURED_BOOST = 1.1
+    # Decay factor for reused datasets count on reuses
+    SEARCH_REUSE_DATASETS_DECAY = 0.8
+    # Decay factor for followers count on reuses
+    SEARCH_REUSE_FOLLOWERS_DECAY = 0.8
     # Overrides organization search fields and their ponderation
     SEARCH_ORGANIZATION_FIELDS = None
+    # Decay factor for datasets count on organizations
+    SEARCH_ORGANIZATION_DATASETS_DECAY = 0.9
+    # Decay factor for reuses count on organizations
+    SEARCH_ORGANIZATION_REUSES_DECAY = 0.9
+    # Decay factor for followers count on organizations
+    SEARCH_ORGANIZATION_FOLLOWERS_DECAY = 0.8
     # Overrides geozone search fields and their ponderation
     SEARCH_GEOZONE_FIELDS = None
     # Overrides user search fields and their ponderation

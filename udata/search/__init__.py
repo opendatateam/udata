@@ -190,7 +190,7 @@ def register(adapter):
     return adapter
 
 
-from .adapter import ModelSearchAdapter, metrics_mapping_for  # noqa
+from .adapter import ModelSearchAdapter, metrics_mapping_for, lazy_config  # noqa
 from .query import SearchQuery  # noqa
 from .result import SearchResult  # noqa
 from .fields import *  # noqa

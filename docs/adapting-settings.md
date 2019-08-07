@@ -193,18 +193,6 @@ Enables the search autocomplete on frontend if set to `True`, disables otherwise
 
 The search autocomplete debounce delay on frontend, in milliseconds.
 
-### SEARCH_DATASET_MAX_TEMPORAL_WEIGHT
-
-**default**: `5`
-
-After this number of years, scoring is kept constant instead of increasing.
-
-### SEARCH_DATASET_FEATURED_WEIGHT
-
-**default**: `3`
-
-How much weight featured items get
-
 ### SEARCH_DATASET_FIELDS
 
 **default**:
@@ -220,6 +208,45 @@ How much weight featured items get
 ```
 Overrides dataset search fields and their ponderation
 
+### SEARCH_DATASET_MAX_TEMPORAL_WEIGHT
+
+**default**: `5`
+
+After this number of years, scoring is kept constant instead of increasing.
+
+**Warning** Index time parameter: reindeixing dataset is required for this parameter to be effective
+
+### SEARCH_DATASET_FEATURED_WEIGHT
+
+**default**: `3`
+
+How much weight featured items get
+
+**Warning** Index time parameter: reindeixing dataset is required for this parameter to be effective
+
+### SEARCH_DATASET_FEATURED_BOOST
+
+**default**: `1.5`
+
+Boost given to the featured datasets
+
+### SEARCH_DATASET_CERTIFIED_BOOST
+
+**default**: `1.2`
+
+Boost given to the datasets from certified organization
+
+### SEARCH_DATASET_REUSES_DECAY
+
+**default**: `0.1`
+
+Decay factor for reuses count on datasets
+
+### SEARCH_DATASET_FOLLOWERS_DECAY
+
+**default**: `0.1`
+
+Decay factor for followers count on datasets
 
 ### SEARCH_REUSE_FIELDS
 
@@ -234,6 +261,24 @@ Overrides dataset search fields and their ponderation
 
 Overrides reuse search fields and their ponderation
 
+### SEARCH_REUSE_FEATURED_BOOST
+
+**default**: `1.1`
+
+Boost given to the featured reuses
+
+### SEARCH_REUSE_DATASETS_DECAY
+
+**default**: `0.8`
+
+Decay factor for reused datasets count on reuses
+
+### SEARCH_REUSE_FOLLOWERS_DECAY
+
+**default**: `0.8`
+
+Decay factor for followers count on reuses
+
 ### SEARCH_ORGANIZATION_FIELDS
 
 **default**:
@@ -246,6 +291,24 @@ Overrides reuse search fields and their ponderation
 ```
 
 Overrides organization search fields and their ponderation
+
+### SEARCH_ORGANIZATION_DATASETS_DECAY
+
+**default**: `0.9`
+
+Decay factor for datasets count on organizations
+
+### SEARCH_ORGANIZATION_REUSES_DECAY
+
+**default**: `0.9`
+
+Decay factor for reuses count on organizations
+
+### SEARCH_ORGANIZATION_FOLLOWERS_DECAY
+
+**default**: `0.8`
+
+Decay factor for followers count on organizations
 
 ### SEARCH_GEOZONE_FIELDS
 

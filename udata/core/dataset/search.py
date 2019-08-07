@@ -15,6 +15,7 @@ from udata.models import (
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
+    lazy_config
 )
 from udata.search.analysis import simple
 from udata.search.fields import (
@@ -29,11 +30,9 @@ from . import metrics  # noqa
 __all__ = ('DatasetSearch', )
 
 
-# After this number of years, scoring is kept constant instead of increasing.
-MAX_TEMPORAL_WEIGHT = 5
 DEFAULT_SPATIAL_WEIGHT = 1
 DEFAULT_TEMPORAL_WEIGHT = 1
-FEATURED_WEIGHT = 3
+lazy = lazy_config('dataset')
 
 
 def max_reuses():
@@ -164,13 +163,13 @@ class DatasetSearch(ModelSearchAdapter):
         'featured': BoolFacet(field='featured'),
     }
     boosters = [
-        BoolBooster('featured', 1.5),
-        BoolBooster('from_certified', 1.2),
+        BoolBooster('featured', lazy('featured_boost')),
+        BoolBooster('from_certified', lazy('certified_boost')),
         ValueFactor('spatial_weight', missing=1),
         ValueFactor('temporal_weight', missing=1),
-        GaussDecay('metrics.reuses', max_reuses, decay=0.1),
-        GaussDecay(
-            'metrics.followers', max_followers, max_followers, decay=0.1),
+        GaussDecay('metrics.reuses', max_reuses, decay=lazy('reuses_decay')),
+        GaussDecay('metrics.followers', max_followers, max_followers,
+                   decay=lazy('followers_decay')),
     ]
 
     @classmethod
