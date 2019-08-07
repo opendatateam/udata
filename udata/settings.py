@@ -328,6 +328,23 @@ class Defaults(object):
                          'reuse', 'tag')
     EXPORT_CSV_DATASET_ID = None
 
+    # Search parameters
+    ###################
+    # After this number of years, scoring is kept constant instead of increasing.
+    SEARCH_DATASET_MAX_TEMPORAL_WEIGHT = 5
+    # How much weight featured items get
+    SEARCH_DATASET_FEATURED_WEIGHT = 3
+    # Overrides dataset search fields and their ponderation
+    SEARCH_DATASET_FIELDS = None
+    # Overrides reuse search fields and their ponderation
+    SEARCH_REUSE_FIELDS = None
+    # Overrides organization search fields and their ponderation
+    SEARCH_ORGANIZATION_FIELDS = None
+    # Overrides geozone search fields and their ponderation
+    SEARCH_GEOZONE_FIELDS = None
+    # Overrides user search fields and their ponderation
+    SEARCH_USER_FIELDS = None
+
     # Autocomplete parameters
     #########################
     SEARCH_AUTOCOMPLETE_ENABLED = True

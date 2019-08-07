@@ -113,18 +113,6 @@ Define the resources preview mode. Can be one of:
 
 If you want to disable preview, set `PREVIEW_MODE` to `None`
 
-### SEARCH_AUTOCOMPLETE_ENABLED
-
-**default**: `True`
-
-Enables the search autocomplete on frontend if set to `True`, disables otherwise.
-
-### SEARCH_AUTOCOMPLETE_DEBOUNCE
-
-**default**: `200`
-
-The search autocomplete debounce delay on frontend, in milliseconds.
-
 ### ARCHIVE_COMMENT_USER_ID
 
 **default**: `None`
@@ -190,6 +178,94 @@ You can disable the feature by setting this to an empty list.
 **default**: `None`
 
 The id of a dataset that should be created before running the `export-csv` job and will hold the CSV exports.
+
+## Search configuration
+
+### SEARCH_AUTOCOMPLETE_ENABLED
+
+**default**: `True`
+
+Enables the search autocomplete on frontend if set to `True`, disables otherwise.
+
+### SEARCH_AUTOCOMPLETE_DEBOUNCE
+
+**default**: `200`
+
+The search autocomplete debounce delay on frontend, in milliseconds.
+
+### SEARCH_DATASET_MAX_TEMPORAL_WEIGHT
+
+**default**: `5`
+
+After this number of years, scoring is kept constant instead of increasing.
+
+### SEARCH_DATASET_FEATURED_WEIGHT
+
+**default**: `3`
+
+How much weight featured items get
+
+### SEARCH_DATASET_FIELDS
+
+**default**:
+```python
+(
+    'geozones.keys^9',
+    'geozones.name^9',
+    'acronym^7',
+    'title^6',
+    'tags.i18n^3',
+    'description',
+)
+```
+Overrides dataset search fields and their ponderation
+
+
+### SEARCH_REUSE_FIELDS
+
+**default**:
+```python
+(
+    'title^4',
+    'description^2',
+    'datasets.title',
+)
+```
+
+Overrides reuse search fields and their ponderation
+
+### SEARCH_ORGANIZATION_FIELDS
+
+**default**:
+```python
+(
+    'name^6',
+    'acronym^6',
+    'description',
+)
+```
+
+Overrides organization search fields and their ponderation
+
+### SEARCH_GEOZONE_FIELDS
+
+**default**: `None`
+
+Overrides geozone search fields and their ponderation
+
+### SEARCH_USER_FIELDS
+
+**default**:
+
+```python
+(
+    'last_name^6',
+    'first_name^5',
+    'about'
+)
+```
+
+Overrides user search fields and their ponderation
 
 ## Map widget configuration
 

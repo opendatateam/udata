@@ -6,6 +6,7 @@ import logging
 
 from elasticsearch_dsl import DocType, Integer, Float, Object
 from flask_restplus.reqparse import RequestParser
+from flask import current_app
 
 from udata.search import es, i18n_analyzer
 from udata.search.query import SearchQuery
@@ -25,6 +26,11 @@ class ModelSearchAdapter(DocType):
     model = None
     exclude_fields = None  # Exclude fields from being fetched on indexation
     sorts = None
+
+    @classmethod
+    def from_config(cls, key, default=None):
+        key = '_'.join(('SEARCH', cls.model.__name__.upper(), key.upper()))
+        return current_app.config.get(key, default)
 
     @classmethod
     def doc_type(cls):
@@ -80,7 +86,7 @@ class ModelSearchAdapter(DocType):
             boosters = cls.boosters
             doc_types = cls
             facets = f
-            fields = cls.fields
+            fields = cls.from_config('FIELDS') or cls.fields
             fuzzy = cls.fuzzy
             match_type = cls.match_type
             model = cls.model
