@@ -54,7 +54,6 @@ class ModelSearchAdapter(DocType):
     analyzer = i18n_analyzer
     boosters = None
     facets = None
-    fields = None
     fuzzy = False
     match_type = 'cross_fields'
     model = None
@@ -115,7 +114,7 @@ class ModelSearchAdapter(DocType):
             boosters = cls.boosters
             doc_types = cls
             facets = f
-            fields = cls.from_config('FIELDS') or cls.fields
+            fields = cls.from_config('FIELDS')
             fuzzy = cls.fuzzy
             match_type = cls.match_type
             model = cls.model

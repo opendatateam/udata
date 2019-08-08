@@ -77,11 +77,6 @@ class ReuseSearch(ModelSearchAdapter):
                                payloads=True)
     extras = Object()
 
-    fields = (
-        'title^4',
-        'description^2',
-        'datasets.title',
-    )
     facets = {
         'tag': TermsFacet(field='tags'),
         'organization': ModelTermsFacet(field='organization',

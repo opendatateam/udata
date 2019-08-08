@@ -54,11 +54,6 @@ class OrganizationSearch(search.ModelSearchAdapter):
                              search_analyzer=simple,
                              payloads=True)
 
-    fields = (
-        'name^6',
-        'acronym^6',
-        'description',
-    )
     sorts = {
         'name': 'name.raw',
         'reuses': 'metrics.reuses',

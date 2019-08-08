@@ -331,7 +331,14 @@ class Defaults(object):
     # Search parameters
     ###################
     # Overrides dataset search fields and their ponderation
-    SEARCH_DATASET_FIELDS = None
+    SEARCH_DATASET_FIELDS = (
+        'geozones.keys^9',
+        'geozones.name^9',
+        'acronym^7',
+        'title^6',
+        'tags.i18n^3',
+        'description',
+    )
     # After this number of years, scoring is kept constant instead of increasing.
     # Index time parameter:
     #   reindeixing dataset is required for this parameter to be effective
@@ -349,7 +356,11 @@ class Defaults(object):
     # Decay factor for followers count on datasets
     SEARCH_DATASET_FOLLOWERS_DECAY = 0.1
     # Overrides reuse search fields and their ponderation
-    SEARCH_REUSE_FIELDS = None
+    SEARCH_REUSE_FIELDS = (
+        'title^4',
+        'description^2',
+        'datasets.title',
+    )
     # Boost given to the featured reuses
     SEARCH_REUSE_FEATURED_BOOST = 1.1
     # Decay factor for reused datasets count on reuses
@@ -357,7 +368,11 @@ class Defaults(object):
     # Decay factor for followers count on reuses
     SEARCH_REUSE_FOLLOWERS_DECAY = 0.8
     # Overrides organization search fields and their ponderation
-    SEARCH_ORGANIZATION_FIELDS = None
+    SEARCH_ORGANIZATION_FIELDS = (
+        'name^6',
+        'acronym^6',
+        'description',
+    )
     # Decay factor for datasets count on organizations
     SEARCH_ORGANIZATION_DATASETS_DECAY = 0.9
     # Decay factor for reuses count on organizations
@@ -365,9 +380,13 @@ class Defaults(object):
     # Decay factor for followers count on organizations
     SEARCH_ORGANIZATION_FOLLOWERS_DECAY = 0.8
     # Overrides geozone search fields and their ponderation
-    SEARCH_GEOZONE_FIELDS = None
+    SEARCH_GEOZONE_FIELDS = tuple()
     # Overrides user search fields and their ponderation
-    SEARCH_USER_FIELDS = None
+    SEARCH_USER_FIELDS = (
+        'last_name^6',
+        'first_name^5',
+        'about'
+    )
 
     # Autocomplete parameters
     #########################

@@ -117,14 +117,6 @@ class DatasetSearch(ModelSearchAdapter):
     spatial_weight = Long()
     from_certified = Boolean()
 
-    fields = (
-        'geozones.keys^9',
-        'geozones.name^9',
-        'acronym^7',
-        'title^6',
-        'tags.i18n^3',
-        'description',
-    )
     sorts = {
         'title': 'title.raw',
         'created': 'created',
