@@ -37,11 +37,6 @@ class UserSearch(ModelSearchAdapter):
                               search_analyzer=simple,
                               payloads=True)
 
-    fields = (
-        'last_name^6',
-        'first_name^5',
-        'about'
-    )
     sorts = {
         'last_name': 'last_name',
         'first_name': 'first_name',

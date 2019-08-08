@@ -5,7 +5,9 @@ import itertools
 import logging
 
 from elasticsearch_dsl import DocType, Integer, Float, Object
+from elasticsearch_dsl.document import DocTypeMeta
 from flask_restplus.reqparse import RequestParser
+from flask import current_app
 
 from udata.search import es, i18n_analyzer
 from udata.search.query import SearchQuery
@@ -14,12 +16,44 @@ from udata.core.metrics import Metric
 log = logging.getLogger(__name__)
 
 
+def config_getter(domain):
+    prefix = '_'.join(('SEARCH', domain.upper()))
+
+    def get_config(key, default=None):
+        key = '_'.join((prefix, key.upper()))
+        return current_app.config.get(key, default)
+    return get_config
+
+
+def lazy_config(domain):
+    getter = config_getter(domain)
+
+    def lazy_get_config(key, default=None):
+        def lazy():
+            return getter(key, default)
+        return lazy
+    return lazy_get_config
+
+
+class AdapterMetaclass(DocTypeMeta):
+    def __new__(cls, name, bases, attrs):
+        new = super(AdapterMetaclass, cls).__new__(cls, name, bases, attrs)
+        if new.model:
+            getter = config_getter(new.model.__name__.upper())
+
+            @classmethod
+            def from_config(cls, key, value=None):
+                return getter(key, value)
+            new.from_config = from_config
+        return new
+
+
 class ModelSearchAdapter(DocType):
     """This class allow to describe and customize the search behavior."""
+    __metaclass__ = AdapterMetaclass
     analyzer = i18n_analyzer
     boosters = None
     facets = None
-    fields = None
     fuzzy = False
     match_type = 'cross_fields'
     model = None
@@ -80,7 +114,7 @@ class ModelSearchAdapter(DocType):
             boosters = cls.boosters
             doc_types = cls
             facets = f
-            fields = cls.fields
+            fields = cls.from_config('FIELDS')
             fuzzy = cls.fuzzy
             match_type = cls.match_type
             model = cls.model

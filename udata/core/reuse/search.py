@@ -10,7 +10,7 @@ from udata.models import (
 )
 from udata.search import (
     BoolBooster, GaussDecay, ModelSearchAdapter,
-    i18n_analyzer, metrics_mapping_for, register,
+    i18n_analyzer, metrics_mapping_for, register, lazy_config,
     RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
 )
 from udata.search.analysis import simple
@@ -20,6 +20,7 @@ from . import metrics  # noqa: Metrics are require for reuse search
 
 
 __all__ = ('ReuseSearch', )
+lazy = lazy_config('reuse')
 
 
 def max_datasets():
@@ -76,11 +77,6 @@ class ReuseSearch(ModelSearchAdapter):
                                payloads=True)
     extras = Object()
 
-    fields = (
-        'title^4',
-        'description^2',
-        'datasets.title',
-    )
     facets = {
         'tag': TermsFacet(field='tags'),
         'organization': ModelTermsFacet(field='organization',
@@ -118,9 +114,9 @@ class ReuseSearch(ModelSearchAdapter):
         'views': 'metrics.views',
     }
     boosters = [
-        BoolBooster('featured', 1.1),
-        GaussDecay('metrics.datasets', max_datasets, decay=0.8),
-        GaussDecay('metrics.followers', max_followers, decay=0.8),
+        BoolBooster('featured', lazy('featured_boost')),
+        GaussDecay('metrics.datasets', max_datasets, decay=lazy('datasets_decay')),
+        GaussDecay('metrics.followers', max_followers, decay=lazy('followers_decay')),
     ]
 
     @classmethod

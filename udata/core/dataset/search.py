@@ -15,6 +15,7 @@ from udata.models import (
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
+    lazy_config
 )
 from udata.search.analysis import simple
 from udata.search.fields import (
@@ -29,11 +30,9 @@ from . import metrics  # noqa
 __all__ = ('DatasetSearch', )
 
 
-# After this number of years, scoring is kept constant instead of increasing.
-MAX_TEMPORAL_WEIGHT = 5
 DEFAULT_SPATIAL_WEIGHT = 1
 DEFAULT_TEMPORAL_WEIGHT = 1
-FEATURED_WEIGHT = 3
+lazy = lazy_config('dataset')
 
 
 def max_reuses():
@@ -118,14 +117,6 @@ class DatasetSearch(ModelSearchAdapter):
     spatial_weight = Long()
     from_certified = Boolean()
 
-    fields = (
-        'geozones.keys^9',
-        'geozones.name^9',
-        'acronym^7',
-        'title^6',
-        'tags.i18n^3',
-        'description',
-    )
     sorts = {
         'title': 'title.raw',
         'created': 'created',
@@ -164,13 +155,13 @@ class DatasetSearch(ModelSearchAdapter):
         'featured': BoolFacet(field='featured'),
     }
     boosters = [
-        BoolBooster('featured', 1.5),
-        BoolBooster('from_certified', 1.2),
+        BoolBooster('featured', lazy('featured_boost')),
+        BoolBooster('from_certified', lazy('certified_boost')),
         ValueFactor('spatial_weight', missing=1),
         ValueFactor('temporal_weight', missing=1),
-        GaussDecay('metrics.reuses', max_reuses, decay=0.1),
-        GaussDecay(
-            'metrics.followers', max_followers, max_followers, decay=0.1),
+        GaussDecay('metrics.reuses', max_reuses, decay=lazy('reuses_decay')),
+        GaussDecay('metrics.followers', max_followers, max_followers,
+                   decay=lazy('followers_decay')),
     ]
 
     @classmethod
@@ -182,7 +173,7 @@ class DatasetSearch(ModelSearchAdapter):
     @classmethod
     def get_suggest_weight(cls, temporal_weight, spatial_weight, featured):
         '''Compute the suggest part of the indexation payload'''
-        featured_weight = 1 if not featured else FEATURED_WEIGHT
+        featured_weight = 1 if not featured else cls.from_config('FEATURED_WEIGHT')
         return int(temporal_weight * spatial_weight * featured_weight * 10)
 
     @classmethod
@@ -245,7 +236,7 @@ class DatasetSearch(ModelSearchAdapter):
                 dataset.temporal_coverage.end):
             start = dataset.temporal_coverage.start.toordinal()
             end = dataset.temporal_coverage.end.toordinal()
-            temporal_weight = min(abs(end - start) / 365, MAX_TEMPORAL_WEIGHT)
+            temporal_weight = min(abs(end - start) / 365, cls.from_config('MAX_TEMPORAL_WEIGHT'))
             document.update({
                 'temporal_coverage': {'start': start, 'end': end},
                 'temporal_weight': temporal_weight,
