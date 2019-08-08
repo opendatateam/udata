@@ -423,6 +423,11 @@ class Testing(object):
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
+    # FakeSearch fields have to be declared here
+    SEARCH_FAKE_FIELDS = (
+        'title^2',
+        'description',
+    )
 
 
 class Debug(Defaults):
