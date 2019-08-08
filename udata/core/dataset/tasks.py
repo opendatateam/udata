@@ -96,7 +96,8 @@ def get_queryset(model_cls):
     for attr in attrs:
         if getattr(model_cls, attr, None):
             params[attr] = False
-    return model_cls.objects.filter(**params)
+    # no_cache to avoid eating up too much RAM
+    return model_cls.objects.filter(**params).no_cache()
 
 
 def get_or_create_resource(r_info, model, dataset):
