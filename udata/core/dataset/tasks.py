@@ -157,6 +157,7 @@ def export_csv_for_model(model, dataset):
         csvfile.seek(0)
         # make a resource from this tmp file
         created, resource = store_resource(csvfile, model, dataset)
+        csvfile.close()
         # add it to the dataset
         if created:
             dataset.add_resource(resource)

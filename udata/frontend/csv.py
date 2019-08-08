@@ -83,7 +83,8 @@ class Adapter(object):
 
     def rows(self):
         '''Iterate over queryset objects'''
-        return (self.to_row(o) for o in self.queryset)
+        # no_cache to avoid eating up too much RAM with large querysets
+        return (self.to_row(o) for o in self.queryset.no_cache())
 
     def to_row(self, obj):
         '''Convert an object into a flat csv row'''
