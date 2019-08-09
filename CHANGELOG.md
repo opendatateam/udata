@@ -14,6 +14,7 @@
 - OEmbed support for organizations [#2273](https://github.com/opendatateam/udata/pull/2273)
 - Extract search parameters as settings allowing fine tuning search without repackaging udata (see [the **Search configuration** documentation](https://udata.readthedocs.io/en/stable/adapting-settings/#search-configuration)) [#2275](https://github.com/opendatateam/udata/pull/2275)
 - Prevent `DoesNotExist` error in activity API: silence the error for the consumer but log it (ie. visible in Sentry) [#2268](https://github.com/opendatateam/udata/pull/2268)
+- Optimize CSV export generation memory wise [#2277](https://github.com/opendatateam/udata/pull/2277)
 
 ## 1.6.13 (2019-07-11)
 
