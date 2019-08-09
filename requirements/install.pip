@@ -30,7 +30,7 @@ Flask-Themes2==0.1.4
 Flask-WTF==0.14.2
 Flask==1.0.3
 future==0.17.1
-geojson==2.4.1
+geojson==2.5.0
 html2text==2018.1.9
 itsdangerous==1.1.0
 Jinja2==2.10.1
