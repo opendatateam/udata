@@ -53,6 +53,10 @@ class DateRange(EmbeddedDocument):
     def to_dict(self):
         return {'start': self.start, 'end': self.end}
 
+    def clean(self):
+        if self.start and self.end and self.start > self.end:
+            self.start, self.end = self.end, self.start
+
 
 class Datetimed(object):
     created_at = DateTimeField(verbose_name=_('Creation date'),

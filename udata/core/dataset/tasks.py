@@ -96,7 +96,8 @@ def get_queryset(model_cls):
     for attr in attrs:
         if getattr(model_cls, attr, None):
             params[attr] = False
-    return model_cls.objects.filter(**params)
+    # no_cache to avoid eating up too much RAM
+    return model_cls.objects.filter(**params).no_cache()
 
 
 def get_or_create_resource(r_info, model, dataset):
@@ -163,16 +164,21 @@ def export_csv_for_model(model, dataset):
         dataset.last_modified = datetime.now()
         dataset.save()
     finally:
+        csvfile.close()
         os.unlink(csvfile.name)
 
 
 @job('export-csv')
-def export_csv(self):
+def export_csv(self, model=None):
     '''
     Generates a CSV export of all model objects as a resource of a dataset
     '''
     ALLOWED_MODELS = current_app.config.get('EXPORT_CSV_MODELS', [])
     DATASET_ID = current_app.config.get('EXPORT_CSV_DATASET_ID')
+
+    if model and model not in ALLOWED_MODELS:
+        log.error('Unknown or unallowed model: %s' % model)
+        return
 
     if not DATASET_ID:
         log.error('EXPORT_CSV_DATASET_ID setting value not set')
@@ -184,5 +190,6 @@ def export_csv(self):
         log.error('EXPORT_CSV_DATASET_ID points to a non existent dataset')
         return
 
-    for model in ALLOWED_MODELS:
+    models = (model, ) if model else ALLOWED_MODELS
+    for model in models:
         export_csv_for_model(model, dataset)

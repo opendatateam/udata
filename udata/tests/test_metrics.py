@@ -179,8 +179,10 @@ class BumpMetricsTest:
     @pytest.fixture
     def today(self, mocker):
         today = date(2019, 4, 20)
-        cls = mocker.patch('udata.core.metrics.tasks.date')
-        cls.today.return_value = today
+        tasks_date = mocker.patch('udata.core.metrics.tasks.date')
+        tasks_date.today.return_value = today
+        models_date = mocker.patch('udata.core.metrics.models.date')
+        models_date.today.return_value = today
         yield today
 
     def test_no_metrics(self):
@@ -195,5 +197,5 @@ class BumpMetricsTest:
 
         bump_metrics()
 
-        assert len(Metrics.objects.get_for(obj, days=100)) == days + 1
+        assert len(Metrics.objects.get_for(obj, days=days + 1)) == days + 1
         assert Metrics.objects.last_for(obj).date == today.isoformat()

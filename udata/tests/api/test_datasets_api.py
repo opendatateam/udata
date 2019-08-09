@@ -945,6 +945,64 @@ class DatasetResourceAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
+    def test_suggest_mime_api(self):
+        '''It should suggest mime types'''
+        with self.autoindex():
+            DatasetFactory(resources=[
+                ResourceFactory(mime=f) for f in (
+                    faker.mime_type(category=None),
+                    faker.mime_type(category=None),
+                    'application/test',
+                    'application/test-1'
+                )
+            ])
+
+        response = self.get(url_for('api.suggest_mime'),
+                            qs={'q': 'test', 'size': '5'})
+        self.assert200(response)
+
+        self.assertLessEqual(len(response.json), 5)
+        self.assertGreater(len(response.json), 1)
+        # Shortest match first.
+        self.assertEqual(response.json[0]['text'], 'application/test')
+
+        for suggestion in response.json:
+            self.assertIn('text', suggestion)
+            self.assertIn('score', suggestion)
+            self.assertTrue(suggestion['text'].startswith('application/test'))
+
+    def test_suggest_mime_api_plus(self):
+        '''It should suggest mime types'''
+        with self.autoindex():
+            DatasetFactory(resources=[ResourceFactory(mime='application/test+suffix')])
+
+        response = self.get(url_for('api.suggest_mime'),
+                            qs={'q': 'suff', 'size': '5'})
+        self.assert200(response)
+
+        self.assertEqual(len(response.json), 1)
+        self.assertEqual(response.json[0]['text'], 'application/test+suffix')
+
+    def test_suggest_mime_api_no_match(self):
+        '''It should not provide format suggestion if no match'''
+        with self.autoindex():
+            DatasetFactory(resources=[
+                ResourceFactory(mime=faker.word()) for _ in range(3)
+            ])
+
+        response = self.get(url_for('api.suggest_mime'),
+                            qs={'q': 'test', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
+    def test_suggest_mime_api_empty(self):
+        '''It should not provide mime suggestion if no data'''
+        self.init_search()
+        response = self.get(url_for('api.suggest_mime'),
+                            qs={'q': 'test', 'size': '5'})
+        self.assert200(response)
+        self.assertEqual(len(response.json), 0)
+
     def test_suggest_datasets_api(self):
         '''It should suggest datasets'''
         with self.autoindex():

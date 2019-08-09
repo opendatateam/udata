@@ -70,13 +70,12 @@ export default {
         selectize_options() {
             var opts = this.$options.selectize;
 
-            opts = $.extend({},
+            opts = $.extend({plugins: ['preserve-on-blur']},
                 utils.isFunction(opts) ? opts.apply(this, []) : opts,
                 {
                     persist: false,
                     closeAfterSelect: true,
                     load: this.load_suggestions.bind(this),
-                    plugins: [],
                     onItemAdd: (value, $item) => {
                         this.$dispatch('completer:item-add', value, $item);
                         if (this.$options.selectize.onItemAdd) {
@@ -85,7 +84,9 @@ export default {
                     }
                 }
             );
-            opts.plugins.push('preserve-on-blur');
+            if (opts.plugins.indexOf('preserve-on-blur') < 0) {
+                opts.plugins.push('preserve-on-blur');
+            }
             return opts;
         }
     },

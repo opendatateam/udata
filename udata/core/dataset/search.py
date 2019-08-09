@@ -5,23 +5,24 @@ from elasticsearch_dsl import (
     Boolean, Completion, Date, Long, Object, String, Nested
 )
 
-from udata.i18n import lazy_gettext as _
 from udata.core.site.models import current_site
+from udata.core.spatial.models import (
+    admin_levels, spatial_granularities, ADMIN_LEVEL_MAX
+)
+from udata.i18n import lazy_gettext as _
 from udata.models import (
     Dataset, Organization, License, User, GeoZone, RESOURCE_TYPES
 )
 from udata.search import (
     ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
+    lazy_config
 )
+from udata.search.analysis import simple
 from udata.search.fields import (
     TermsFacet, ModelTermsFacet, RangeFacet, TemporalCoverageFacet,
     BoolBooster, GaussDecay, BoolFacet, ValueFactor
 )
-from udata.search.analysis import simple
-
-from udata.core.spatial.models import (
-    admin_levels, spatial_granularities, ADMIN_LEVEL_MAX
-)
+from udata.utils import to_iso_datetime
 
 # Metrics are require for dataset search
 from . import metrics  # noqa
@@ -29,11 +30,9 @@ from . import metrics  # noqa
 __all__ = ('DatasetSearch', )
 
 
-# After this number of years, scoring is kept constant instead of increasing.
-MAX_TEMPORAL_WEIGHT = 5
 DEFAULT_SPATIAL_WEIGHT = 1
 DEFAULT_TEMPORAL_WEIGHT = 1
-FEATURED_WEIGHT = 3
+lazy = lazy_config('dataset')
 
 
 def max_reuses():
@@ -97,6 +96,9 @@ class DatasetSearch(ModelSearchAdapter):
     dataset_suggest = Completion(analyzer=simple,
                                  search_analyzer=simple,
                                  payloads=True)
+    mime_suggest = Completion(analyzer=simple,
+                              search_analyzer=simple,
+                              payloads=False)
     created = Date(format='date_hour_minute_second')
     last_modified = Date(format='date_hour_minute_second')
     metrics = metrics_mapping_for(Dataset)
@@ -115,14 +117,6 @@ class DatasetSearch(ModelSearchAdapter):
     spatial_weight = Long()
     from_certified = Boolean()
 
-    fields = (
-        'geozones.keys^9',
-        'geozones.name^9',
-        'acronym^7',
-        'title^6',
-        'tags.i18n^3',
-        'description',
-    )
     sorts = {
         'title': 'title.raw',
         'created': 'created',
@@ -161,13 +155,13 @@ class DatasetSearch(ModelSearchAdapter):
         'featured': BoolFacet(field='featured'),
     }
     boosters = [
-        BoolBooster('featured', 1.5),
-        BoolBooster('from_certified', 1.2),
+        BoolBooster('featured', lazy('featured_boost')),
+        BoolBooster('from_certified', lazy('certified_boost')),
         ValueFactor('spatial_weight', missing=1),
         ValueFactor('temporal_weight', missing=1),
-        GaussDecay('metrics.reuses', max_reuses, decay=0.1),
-        GaussDecay(
-            'metrics.followers', max_followers, max_followers, decay=0.1),
+        GaussDecay('metrics.reuses', max_reuses, decay=lazy('reuses_decay')),
+        GaussDecay('metrics.followers', max_followers, max_followers,
+                   decay=lazy('followers_decay')),
     ]
 
     @classmethod
@@ -179,7 +173,7 @@ class DatasetSearch(ModelSearchAdapter):
     @classmethod
     def get_suggest_weight(cls, temporal_weight, spatial_weight, featured):
         '''Compute the suggest part of the indexation payload'''
-        featured_weight = 1 if not featured else FEATURED_WEIGHT
+        featured_weight = 1 if not featured else cls.from_config('FEATURED_WEIGHT')
         return int(temporal_weight * spatial_weight * featured_weight * 10)
 
     @classmethod
@@ -217,6 +211,7 @@ class DatasetSearch(ModelSearchAdapter):
             'format_suggest': [r.format.lower()
                                for r in dataset.resources
                                if r.format],
+            'mime_suggest': [],  # Need a custom loop below
             'frequency': dataset.frequency,
             'organization': str(organization.id) if organization else None,
             'owner': str(owner.id) if owner else None,
@@ -230,9 +225,8 @@ class DatasetSearch(ModelSearchAdapter):
                     'image_url': image_url,
                 },
             },
-            'created': dataset.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
-            'last_modified': dataset.last_modified.strftime(
-                '%Y-%m-%dT%H:%M:%S'),
+            'created': to_iso_datetime(dataset.created_at),
+            'last_modified': to_iso_datetime(dataset.last_modified),
             'metrics': dataset.metrics,
             'featured': dataset.featured,
             'from_certified': certified,
@@ -242,7 +236,7 @@ class DatasetSearch(ModelSearchAdapter):
                 dataset.temporal_coverage.end):
             start = dataset.temporal_coverage.start.toordinal()
             end = dataset.temporal_coverage.end.toordinal()
-            temporal_weight = min((end - start) / 365, MAX_TEMPORAL_WEIGHT)
+            temporal_weight = min(abs(end - start) / 365, cls.from_config('MAX_TEMPORAL_WEIGHT'))
             document.update({
                 'temporal_coverage': {'start': start, 'end': end},
                 'temporal_weight': temporal_weight,
@@ -279,5 +273,13 @@ class DatasetSearch(ModelSearchAdapter):
 
         if dataset.acronym:
             document['dataset_suggest']['input'].append(dataset.acronym)
+
+        # mime Completion
+        mimes = {r.mime.lower() for r in dataset.resources if r.mime}
+        for mime in mimes:
+            document['mime_suggest'].append({
+                'input': mime.replace('+', '/').split('/') + [mime],
+                'output': mime,
+            })
 
         return document

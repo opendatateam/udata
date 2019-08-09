@@ -11,6 +11,7 @@ export default class Reuse extends Model {
     fetch(ident) {
         ident = ident || this.id || this.slug;
         if (ident) {
+            this.loading = true;
             this.$api('reuses.get_reuse', {reuse: ident}, this.on_fetched);
         } else {
             log.error('Unable to fetch Reuse: no identifier specified');
@@ -25,14 +26,16 @@ export default class Reuse extends Model {
         if (this.id) {
             return this.update(this, on_error);
         }
-        this.$api('reuses.create_reuse', {payload: this}, this.on_fetched, on_error);
+        this.loading = true;
+        this.$api('reuses.create_reuse', {payload: this}, this.on_fetched, this.on_error(on_error));
     }
 
     update(data, on_error) {
+        this.loading = true;
         this.$api('reuses.update_reuse', {
             reuse: this.id,
             payload: data
-        }, this.on_fetched, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 }
 

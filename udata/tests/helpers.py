@@ -216,3 +216,11 @@ def assert_urls_equal(url1, url2):
     q2 = parse_qs(p2.query)
     assert q1 == q2, 'Query does not match'
     assert p1.fragment == p2.fragment, 'Fragment does not match'
+
+
+def assert_cors(response):
+    '''CORS headers presence assertion'''
+    __tracebackhide__ = True
+    assert 'Access-Control-Allow-Origin' in response.headers
+    assert 'Access-Control-Allow-Methods' in response.headers
+    assert 'Access-Control-Max-Age' in response.headers

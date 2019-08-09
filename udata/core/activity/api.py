@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import logging
+
+from mongoengine.errors import DoesNotExist
+
 from udata.api import api, API, fields
 from udata.models import db, Activity
 
 from udata.core.user.api_fields import user_ref_fields
 from udata.core.organization.api_fields import org_ref_fields
 
+log = logging.getLogger(__name__)
 
 activity_fields = api.model('Activity', {
     'actor': fields.Nested(
@@ -67,5 +72,21 @@ class SiteActivityAPI(API):
         if args['user']:
             qs = qs(actor=args['user'])
 
-        return (qs.order_by('-created_at')
-                  .paginate(args['page'], args['page_size']))
+        qs = qs.order_by('-created_at')
+        qs = qs.paginate(args['page'], args['page_size'])
+
+        # Filter out DBRefs
+        # Always return a result even not complete
+        # But log the error (ie. visible in sentry, silent for user)
+        # Can happen when someone manually delete an object in DB (ie. without proper purge)
+        safe_items = []
+        for item in qs.queryset.items:
+            try:
+                item.related_to
+            except DoesNotExist as e:
+                log.error(e, exc_info=True)
+            else:
+                safe_items.append(item)
+        qs.queryset.items = safe_items
+
+        return qs

@@ -492,6 +492,17 @@ class SuggestFormatsAPI(API):
         return sorted(result, key=lambda o: len(o['text']))
 
 
+@ns.route('/suggest/mime/', endpoint='suggest_mime')
+class SuggestFormatsAPI(API):
+    @api.doc('suggest_mime')
+    @api.expect(suggest_parser)
+    def get(self):
+        '''Suggest mime types'''
+        args = suggest_parser.parse_args()
+        result = search.suggest(args['q'], 'mime_suggest', args['size'])
+        return sorted(result, key=lambda o: len(o['text']))
+
+
 @ns.route('/licenses/', endpoint='licenses')
 class LicensesAPI(API):
     @api.doc('list_licenses')
