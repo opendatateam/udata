@@ -43,10 +43,6 @@ class FakeSearch(search.ModelSearchAdapter):
         doc_type = 'Fake'
 
     model = Fake
-    fields = [
-        'title^2',
-        'description',
-    ]
     facets = {
         'tag': search.TermsFacet(field='tags'),
         'other': search.TermsFacet(field='other'),

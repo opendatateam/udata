@@ -9,7 +9,7 @@ export function isFunction(obj) {
  * Check if an object is an Object
  */
 export function isObject(obj) {
-    return obj === Object(obj);
+    return obj === Object(obj) && !Array.isArray(obj);
 }
 
 /**
@@ -93,6 +93,24 @@ export function findComponent($root, el) {
     return $match || $root;
 }
 
+/**
+ * Flatten a nested objects tree into a flat single object
+ * with dotted keys instead of nested object attributes.
+ *
+ * @param {Object} obj The source nested object to flatten
+ * @param {String} prefix Track the key preffix in recursions
+ * @return {Object} A flat object with dotted keys insted of nested ottributes
+ */
+export function flattenObject(obj, prefix='') {
+    const pre = prefix.length ? prefix + '.' : '';
+    return Object.entries(obj).reduce((out, [key, prop]) => {
+        key = pre + key;
+        if (isObject(prop)) Object.assign(out, flattenObject(prop, key));
+        else out[key] = prop;
+        return out;
+    }, {});
+}
+
 
 export default {
     isFunction,
@@ -103,4 +121,5 @@ export default {
     parseQS,
     escapeRegex,
     findComponent,
+    flattenObject,
 };

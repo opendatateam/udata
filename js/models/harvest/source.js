@@ -38,7 +38,7 @@ export class HarvestSource extends Model {
             return this.update(this, on_error);
         }
         this.loading = true;
-        this.$api('harvest.create_harvest_source', {payload: this}, this.on_fetched);
+        this.$api('harvest.create_harvest_source', {payload: this}, this.on_fetched, this.on_error(on_error));
     }
 
     update(data, on_error) {
@@ -46,7 +46,7 @@ export class HarvestSource extends Model {
         this.$api('harvest.update_harvest_source', {
             ident: this.id,
             payload: data
-        }, this.on_fetched, on_error);
+        }, this.on_fetched, this.on_error(on_error));
     }
 }
 

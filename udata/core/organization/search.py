@@ -1,15 +1,17 @@
 from elasticsearch_dsl import Completion, Date, String
 
-from udata.i18n import lazy_gettext as _
 from udata import search
-from udata.search.fields import TermsFacet, RangeFacet
-from udata.models import Organization
 from udata.core.site.models import current_site
+from udata.i18n import lazy_gettext as _
+from udata.models import Organization
 from udata.search.analysis import simple
+from udata.search.fields import TermsFacet, RangeFacet
+from udata.utils import to_iso_datetime
 
 from . import metrics  # noqa: Metrics are need for the mapping
 
 __all__ = ('OrganizationSearch', )
+lazy = search.lazy_config('organization')
 
 
 def max_reuses():
@@ -49,11 +51,6 @@ class OrganizationSearch(search.ModelSearchAdapter):
                              search_analyzer=simple,
                              payloads=True)
 
-    fields = (
-        'name^6',
-        'acronym^6',
-        'description',
-    )
     sorts = {
         'name': 'name.raw',
         'reuses': 'metrics.reuses',
@@ -95,9 +92,9 @@ class OrganizationSearch(search.ModelSearchAdapter):
                                 }),
     }
     boosters = [
-        search.GaussDecay('metrics.followers', max_followers, decay=0.8),
-        search.GaussDecay('metrics.reuses', max_reuses, decay=0.9),
-        search.GaussDecay('metrics.datasets', max_datasets, decay=0.9),
+        search.GaussDecay('metrics.followers', max_followers, decay=lazy('followers_decay')),
+        search.GaussDecay('metrics.reuses', max_reuses, decay=lazy('reuses_decay')),
+        search.GaussDecay('metrics.datasets', max_datasets, decay=lazy('datasets_decay')),
     ]
 
     @classmethod
@@ -117,7 +114,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'url': organization.url,
             'metrics': organization.metrics,
             'badges': [badge.kind for badge in organization.badges],
-            'created': organization.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            'created': to_iso_datetime(organization.created_at),
             'org_suggest': {
                 'input': completions,
                 'output': str(organization.id),
