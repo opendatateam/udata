@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.14 (2019-08-14)
 
 - Cleanup `permitted_reuses` data (migration) [#2244](https://github.com/opendatateam/udata/pull/2244)
 - Proper form errors handling on nested fields [#2246](https://github.com/opendatateam/udata/pull/2246)
