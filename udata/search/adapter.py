@@ -45,9 +45,8 @@ class AdapterMetaclass(DocTypeMeta):
         return new
 
 
-class ModelSearchAdapter(DocType):
+class ModelSearchAdapter(DocType, metaclass=AdapterMetaclass):
     """This class allow to describe and customize the search behavior."""
-    __metaclass__ = AdapterMetaclass
     analyzer = i18n_analyzer
     boosters = None
     facets = None
