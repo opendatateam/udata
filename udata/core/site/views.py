@@ -53,7 +53,7 @@ def activity_feed():
 
     for activity in activities.select_related():
         # filter by activity.key
-        # /!\ this won't completely honor `feed_size` (only as a max value)
+        # /!\ this won't completely honour `feed_size` (only as a max value)
         if activity_keys and activity.key not in activity_keys:
             continue
         try:
