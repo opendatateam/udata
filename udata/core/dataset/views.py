@@ -42,8 +42,6 @@ def recent_feed():
         elif dataset.owner:
             author = {
                 'name': dataset.owner.fullname,
-                'uri': url_for('users.show',
-                               user=dataset.owner.id, _external=True),
             }
         feed.add(dataset.title,
                  render_template('dataset/feed_item.html', dataset=dataset),

@@ -298,8 +298,6 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEqual(len(entry.authors), 1)
         author = entry.authors[0]
         self.assertEqual(author.name, owner.fullname)
-        self.assertEqual(author.href,
-                         self.full_url('users.show', user=owner.id))
 
     def test_recent_feed_org(self):
         owner = UserFactory()

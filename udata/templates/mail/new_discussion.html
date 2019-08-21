@@ -5,13 +5,7 @@
 <p style="margin: 0;padding: 0;">{{
     _('%(user)s submitted a new discussion on your %(type)s %(subject)s',
     type=discussion.subject.verbose_name,
-    user=(
-        '<a href="'|safe
-        + url_for('users.show', user=discussion.user, _external=True)
-        + '">'|safe
-        + discussion.user.fullname
-        + '</a>'|safe
-    ),
+    user=discussion.user.fullname,
     subject=(
         '<a href="'|safe
         + discussion.external_url

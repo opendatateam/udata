@@ -44,7 +44,7 @@
                                 {% set author_url = url_for('organizations.show', org=reuse.organization) %}
                             {% elif reuse.owner %}
                                 {% set author_name = reuse.owner.fullname %}
-                                {% set author_url = url_for('users.show', user=reuse.owner) %}
+                                {% set author_url = '#' %}
                             {% endif %}
                             <small>
                                 {{ _('Published on %(date)s by %(user)s',
@@ -142,11 +142,10 @@
                 <div class="panel panel-transparent text-center">
                     <div class="panel-body">
                         <h3 class="text-left">{{ _('Author') }}</h3>
-                        <a href="{{ url_for('users.show', user=reuse.owner) }}"
-                            title="{{ reuse.owner.fullname }}">
+                        <div>
                             <img src="{{ reuse.owner|avatar_url(200) }}"
                                 alt="{{ reuse.owner.fullname }}" class="scalable" />
-                        </a>
+                        </div>
                         <h4 class="text-center">{{ reuse.owner.fullname }}</h4>
                         <div class="caption text-left">
                             {% if reuse.owner.about %}
@@ -156,13 +155,6 @@
                             {% else %}
                             <br/>
                             {% endif %}
-
-                            <a href="{{ url_for('users.show', user=reuse.owner) }}"
-                                title="{{ _('more') }}"
-                                class="btn btn-block btn-sm btn-left btn-warning">
-                                <span class="fa fa-user"></span>
-                                {{ _('View Profile') }}
-                            </a>
                             <follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
                                 {% if is_following(reuse.owner) %}following{% endif %}
                                 url="{{ url_for('api.user_followers', id=reuse.owner.id|string) }}"

@@ -171,8 +171,6 @@ def owner_avatar_url(ctx, obj, size=32, external=False):
 def owner_url(obj, external=False):
     if hasattr(obj, 'organization') and obj.organization:
         return url_for('organizations.show', org=obj.organization, _external=external)
-    elif hasattr(obj, 'owner') and obj.owner:
-        return url_for('users.show', user=obj.owner, _external=external)
     return ''
 
 
@@ -180,14 +178,12 @@ def owner_url(obj, external=False):
 @contextfilter
 def avatar(ctx, user, size, classes='', external=False):
     markup = ''.join((
-        '<a class="avatar {classes}" href="{url}" title="{title}">',
+        '<div class="avatar {classes}" title="{title}">',
         '<img src="{avatar_url}" class="avatar" alt="{title}" ',
         'width="{size}" height="{size}"/>',
-        '</a>'
+        '</div>'
     )).format(
         title=getattr(user, 'fullname', _('Anonymous user')),
-        url=(url_for('users.show', user=user, _external=external)
-             if user and getattr(user, 'id', None) else '#'),
         size=size,
         avatar_url=avatar_url(ctx, user, size, external=external),
         classes=classes

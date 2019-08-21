@@ -33,8 +33,6 @@ def recent_feed():
         elif reuse.owner:
             author = {
                 'name': reuse.owner.fullname,
-                'uri': url_for('users.show',
-                               user=reuse.owner.id, _external=True),
             }
         feed.add(reuse.title,
                  render_template('reuse/feed_item.html', reuse=reuse),

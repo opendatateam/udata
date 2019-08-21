@@ -1,6 +1,5 @@
 {% cache cache_duration, 'user-card', user.id|string, g.lang_code %}
-{% set user_url = url_for('users.show', user=user) %}
-<a class="card user-card" href="{{ user_url }}" title="{{user.fullname}}">
+<div class="card user-card" title="{{user.fullname}}">
     <div class="card-logo">
         <img src="{{ user|avatar_url(60) }}" alt=""
             width="60" height="60">
@@ -31,5 +30,5 @@
             </li>
         </ul>
     </footer>
-</a>
+</div>
 {% endcache %}

@@ -10,7 +10,7 @@
                     <h5>
                         <span v-if="activity.aggregatedFollowing">
                             <span v-for="(index, actor) in activity.aggregaterActors">
-                                <a :href="actor.url">{{actor | displayName}}</a><span v-if="index < activity.aggregaterActors.length - 2">,</span>
+                                {{actor | displayName}}<span v-if="index < activity.aggregaterActors.length - 2">,</span>
                                 <span v-if="index === activity.aggregaterActors.length - 2">{{ _('and') }}</span>
                             </span>
                             {{ activity.aggregatedLabel }}
@@ -77,8 +77,6 @@ export default {
                 // Add URLs to the organization or actor.
                 if (activity.organization) {
                     activity.organization.url = URLs.build('organizations.show', {org: activity.organization});
-                } else {
-                    activity.actor.url = URLs.build('users.show', {user: activity.actor});
                 }
                 activity.aggregatedFollowing = false;
                 activity.aggregaterActors = [];

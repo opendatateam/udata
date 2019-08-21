@@ -1,8 +1,7 @@
-<a href="{{ url_for('users.show', user=user, _external=True) }}"
-   title="{{ user.name }}">
+<div title="{{ user.name }}">
     <img src="{{ user.avatar | placeholder('user') }}"
         alt="{{ user.name }}" class="organization-logo producer img-responsive"/>
-</a>
+</div>
 
 <h4>{{ user.fullname }}</h4>
 
@@ -14,11 +13,6 @@
 {% else %}
 <br/>
 {% endif %}
-<a href="{{ url_for('users.show', user=user) }}"
-    class="btn btn-sm btn-block btn-left btn-warning">
-    <span class="fa fa-users"></span>
-    {{ _('View Profile') }}
-</a>
 <button type="button" class="btn btn-sm btn-block btn-left btn-warning" @click="$refs.discussions.start('')"
     v-tooltip="'{{ _('Contact the producer') }}'" tooltip-placement="left">
     <span class="fa fa-envelope-o"></span>

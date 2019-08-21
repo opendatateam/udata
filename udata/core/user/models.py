@@ -110,9 +110,6 @@ class User(WithMetrics, UserMixin, db.Document):
     def sysadmin(self):
         return self.has_role('admin')
 
-    def url_for(self, *args, **kwargs):
-        return url_for('users.show', user=self, *args, **kwargs)
-
     display_url = property(url_for)
 
     @property
