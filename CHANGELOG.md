@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Style links in admin modals [#2292](https://github.com/opendatateam/udata/pull/2292)
 
 ## 1.6.14 (2019-08-14)
 
