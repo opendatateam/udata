@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add activity.key filter to activity.atom feed [#2293](https://github.com/opendatateam/udata/pull/2293)
 
 ## 1.6.14 (2019-08-14)
 
