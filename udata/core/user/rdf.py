@@ -15,7 +15,7 @@ def user_to_rdf(user, graph=None):
     Map a Resource domain model to a DCAT/RDF graph
     '''
     graph = graph or Graph(namespace_manager=namespace_manager)
-    id = BNode()
+    id = Literal(user.id) if user.id else BNode()
     o = graph.resource(id)
     o.set(RDF.type, FOAF.Person)
     o.set(FOAF.name, Literal(user.fullname))

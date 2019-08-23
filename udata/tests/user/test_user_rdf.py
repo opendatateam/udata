@@ -37,7 +37,8 @@ class UserToRdfTest(DBTestMixin, TestCase):
 
         self.assertEqual(u.value(RDF.type).identifier, FOAF.Person)
 
-        self.assertIsInstance(u.identifier, BNode)
+        self.assertIsInstance(u.identifier, Literal)
+        self.assertEqual(u.identifier.toPython(), user.id)
         self.assertEqual(u.value(FOAF.name), Literal(user.fullname))
         self.assertEqual(u.value(RDFS.label), Literal(user.fullname))
         self.assertEqual(u.value(FOAF.homepage).identifier,
