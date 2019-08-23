@@ -182,7 +182,7 @@ class DatasetToRdfTest:
         assert len(list(users)) == 1
 
         publisher = d.value(DCT.publisher)
-        assert publisher.value(RDF.type).identifier == FOAF.Person
+        assert publisher.value == user.id
 
     def test_temporal_coverage(self):
         start = faker.past_date(start_date='-30d')
