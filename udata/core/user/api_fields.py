@@ -15,9 +15,6 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
         description='The user larst name', readonly=True),
     'slug': fields.String(
         description='The user permalink string', required=True),
-    'page': fields.UrlFor(
-        'users.show', lambda u: {'user': u},
-        description='The user profile page URL', readonly=True),
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),
@@ -55,9 +52,6 @@ user_fields = api.model('User', {
     'since': fields.ISODateTime(
         attribute='created_at',
         description='The registeration date', required=True),
-    'page': fields.UrlFor(
-        'users.show', lambda u: {'user': u},
-        description='The user profile page URL', readonly=True),
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),

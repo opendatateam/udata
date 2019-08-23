@@ -63,7 +63,7 @@ def _load_views(app, module):
         app.register_blueprint(blueprint)
 
 
-VIEWS = ['core.storages', 'core.user', 'core.site', 'core.dataset',
+VIEWS = ['core.storages', 'core.site', 'core.dataset',
          'core.reuse', 'core.organization', 'core.followers',
          'core.topic', 'core.post', 'core.tags', 'admin', 'search',
          'features.territories']

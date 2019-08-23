@@ -4,13 +4,7 @@
 {% block body %}
 <p style="margin: 0;padding: 0;">{{
     _('%(user)s has certified your organization "%(name)s"',
-    user=(
-        '<a href="'|safe
-        + url_for('users.show', user=badge.created_by, _external=True)
-        + '">'|safe
-        + badge.created_by.fullname
-        + '</a>'|safe
-    ),
+    user=badge.created_by.fullname,
     name=(
         '<a href="'|safe
         + organization.external_url

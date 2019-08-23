@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add activity.key filter to activity.atom feed [#2293](https://github.com/opendatateam/udata/pull/2293)
+- **[breaking]** Remove user profile page(s) [#2295](https://github.com/opendatateam/udata/pull/2295)
 
 ## 1.6.14 (2019-08-14)
 

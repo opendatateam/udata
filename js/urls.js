@@ -7,8 +7,7 @@ define(['jquery'], function($) {
     var URLS = {
         'organization.datasets_csv': '/organizations/{org}/datasets.csv',
         'organization.datasets_resources_csv': '/organizations/{org}/datasets-resources.csv',
-        'organizations.show': '/organizations/{org}/',
-        'users.show': '/users/{user}/'
+        'organizations.show': '/organizations/{org}/'
     };
 
     function UrlBuildError(msg) {

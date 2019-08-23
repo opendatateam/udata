@@ -69,6 +69,7 @@ class CatalogTest:
         orgs = list(graph.subjects(RDF.type, FOAF.Organization))
         assert len(orgs) == 1 + 1  # There is the site publisher
         users = list(graph.subjects(RDF.type, FOAF.Person))
+        print(users)
         assert len(users) == 1
         org_names = list(graph.objects(orgs[0], FOAF.name))
         assert len(org_names) == 1

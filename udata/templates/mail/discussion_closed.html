@@ -5,13 +5,7 @@
 <p style="margin: 0;padding: 0;">{{
     _('%(user)s closed an discussion on your %(type)s %(subject)s',
         type=discussion.subject.verbose_name,
-        user=(
-            '<a href="'|safe
-            + url_for('users.show', user=message.posted_by, _external=True)
-            + '">'|safe
-            + message.posted_by.fullname
-            + '</a>'|safe
-        ),
+        user=message.posted_by.fullname,
         subject=(
             '<a href="'|safe
             + discussion.external_url
