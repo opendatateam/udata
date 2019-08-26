@@ -137,10 +137,10 @@ class Defaults(object):
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth.oauth_error'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_TOKEN_EXPIRES_IN = {
-        'authorization_code': 10 * 24 * HOUR,
+        'authorization_code': 30 * 24 * HOUR,
         'implicit': 10 * 24 * HOUR,
-        'password': 10 * 24 * HOUR,
-        'client_credentials': 10 * 24 * HOUR
+        'password': 30 * 24 * HOUR,
+        'client_credentials': 30 * 24 * HOUR
     }
 
     MD_ALLOWED_TAGS = [
