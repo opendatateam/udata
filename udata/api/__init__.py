@@ -49,6 +49,7 @@ PREFLIGHT_HEADERS = (
     'Accept',
     'Accept-Charset',
     'Accept-Language',
+    'Authorization',
     'Cache-Control',
     'Content-Encoding',
     'Content-Length',
