@@ -12,7 +12,7 @@ from mongoengine.signals import post_save, post_delete
 from speaklater import is_lazy_string
 from werkzeug.local import LocalProxy
 
-from udata.tasks import task
+from udata.tasks import task, task_obj_compat, as_task_param
 
 
 from . import analysis
@@ -121,8 +121,8 @@ i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
 
 @task(route='high.search')
-def reindex(obj):
-    model = obj.__class__
+def reindex(obj, id=None):
+    model, obj = task_obj_compat(obj, id)
     adapter_class = adapter_catalog.get(model)
     timeout = current_app.config['ELASTICSEARCH_INDEX_TIMEOUT']
     if adapter_class.is_indexable(obj):
@@ -146,7 +146,8 @@ def reindex(obj):
 
 
 @task(route='high.search')
-def unindex(obj):
+def unindex(obj, id=None):
+    model, obj = task_obj_compat(obj, id)
     model = obj.__class__
     adapter_class = adapter_catalog.get(model)
     if adapter_class.exists(obj.id, using=es.client, index=es.index_name):
@@ -167,13 +168,13 @@ def unindex(obj):
 def reindex_model_on_save(sender, document, **kwargs):
     '''(Re/Un)Index Mongo document on post_save'''
     if current_app.config.get('AUTO_INDEX'):
-        reindex.delay(document)
+        reindex.delay(*as_task_param(document))
 
 
 def unindex_model_on_delete(sender, document, **kwargs):
     '''Unindex Mongo document on post_delete'''
     if current_app.config.get('AUTO_INDEX'):
-        unindex.delay(document)
+        unindex.delay(*as_task_param(document))
 
 
 def register(adapter):
