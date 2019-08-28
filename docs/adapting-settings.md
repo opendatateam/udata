@@ -595,15 +595,23 @@ You can see the full configuration option list in
 
 The default identity used for outgoing mails.
 
-## Flask-OAuthlib options
+## Authlib options
 
-udata is Oauthlib to provide OAuth2 on the API.
+udata uses Authlib to provide OAuth2 on the API.
 The full option list is available in
-[the official Flask-OAuthlib documentation][flask-oauthlib-doc]
+[the official Authlib documentation][authlib-doc]
 
-### OAUTH2_PROVIDER_TOKEN_EXPIRES_IN
+### OAUTH2_TOKEN_EXPIRES_IN
 
-**default**: `30 * 24 * 60 * 60` (30 days)
+**default**:
+```python
+    {
+        'authorization_code': 10 * 24 * HOUR,
+        'implicit': 10 * 24 * HOUR,
+        'password': 10 * 24 * HOUR,
+        'client_credentials': 10 * 24 * HOUR
+    }
+```
 
 The OAuth2 token duration.
 
@@ -806,4 +814,4 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
-[flask-oauthlib-doc]: https://flask-oauthlib.readthedocs.org/en/latest/oauth2.html#configuration
+[authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server

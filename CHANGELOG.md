@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add activity.key filter to activity.atom feed [#2293](https://github.com/opendatateam/udata/pull/2293)
+- Allow `Authorization` as CORS header and OAuth minor fixes [#2298](https://github.com/opendatateam/udata/pull/2298)
 
 ## 1.6.14 (2019-08-14)
 
