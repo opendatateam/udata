@@ -29,7 +29,8 @@ def purge_reuses(self):
 
 
 @task
-def notify_new_reuse(reuse):
+def notify_new_reuse(reuse_id):
+    reuse = Reuse.objects.get(pk=reuse_id)
     for dataset in reuse.datasets:
         if dataset.organization:
             recipients = [m.user for m in dataset.organization.members]
