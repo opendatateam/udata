@@ -43,12 +43,19 @@ def inject_site():
 
 @blueprint.route('/activity.atom')
 def activity_feed():
+    activity_keys = request.args.getlist('key')
+
     feed = AtomFeed(
         current_app.config.get('SITE_TITLE'), feed_url=request.url,
         url=request.url_root)
     activities = (Activity.objects.order_by('-created_at')
                                   .limit(current_site.feed_size))
+
     for activity in activities.select_related():
+        # filter by activity.key
+        # /!\ this won't completely honour `feed_size` (only as a max value)
+        if activity_keys and activity.key not in activity_keys:
+            continue
         try:
             owner = activity.actor or activity.organization
         except DoesNotExist:
