@@ -189,7 +189,7 @@ class MembershipRequestAPI(API):
         form.populate_obj(membership_request)
         org.save()
 
-        notify_membership_request.delay(org, membership_request)
+        notify_membership_request.delay(str(org.id), str(membership_request.id))
 
         return membership_request, code
 
@@ -224,7 +224,7 @@ class MembershipAcceptAPI(MembershipAPI):
         org.members.append(member)
         org.save()
 
-        notify_membership_response.delay(org, membership_request)
+        notify_membership_response.delay(str(org.id), str(membership_request.id))
 
         return member
 
@@ -247,7 +247,7 @@ class MembershipRefuseAPI(MembershipAPI):
 
         org.save()
 
-        notify_membership_response.delay(org, membership_request)
+        notify_membership_response.delay(str(org.id), str(membership_request.id))
 
         return {}, 200
 
