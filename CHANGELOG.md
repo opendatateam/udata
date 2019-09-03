@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Nouvelle section contact dans le pied de page [#428](https://github.com/etalab/udata-gouvfr/pull/428)
+- Suppression du konami code [#429](https://github.com/etalab/udata-gouvfr/pull/429)
 
 ## 1.6.11 (2019-07-11)
 

@@ -19,7 +19,6 @@ module.exports = {
         theme: "theme",
         admin: "admin",
         oembed: 'oembed',
-        henri: 'js/henri.js',
     },
     output: {
         path: static_path,
