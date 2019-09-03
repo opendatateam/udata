@@ -194,7 +194,7 @@ Access-Control-Allow-Credentials: true
 
 <pre><code class="json">
 {
- {% for metric, value in main_org.metrics.iteritems() %}"{{ metric }}": {{ value }},
+ {% for metric, value in main_org.metrics.items() %}"{{ metric }}": {{ value }},
  {% endfor %}
 }
 </code></pre>
