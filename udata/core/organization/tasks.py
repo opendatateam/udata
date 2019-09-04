@@ -9,7 +9,9 @@ from udata.models import Follow, Activity, Metrics, Dataset
 from udata.search import reindex
 from udata.tasks import job, task, get_logger
 
-from .models import Organization, Member, MembershipRequest
+from udata.core.badges.tasks import notify_new_badge
+
+from .models import Organization, Member, MembershipRequest, CERTIFIED, PUBLIC_SERVICE
 
 log = get_logger(__name__)
 
@@ -117,3 +119,43 @@ def notify_new_member(org_id, email):
 
     subject = _('You are now a member of the organization "%(org)s"', org=org)
     mail.send(subject, member.user, 'new_member', org=org)
+
+
+@notify_new_badge(Organization, CERTIFIED)
+def notify_badge_certified(org_id):
+    '''
+    Send an email when a `CERTIFIED` badge is added to an `Organization`
+    '''
+    org = Organization.objects.get(pk=org_id)
+    recipients = [member.user for member in org.members]
+    subject = _(
+        'Your organization "%(name)s" has been certified',
+        name=org.name
+    )
+    mail.send(
+        subject,
+        recipients,
+        'badge_added_certified',
+        organization=org,
+        badge=org.get_badge(CERTIFIED)
+    )
+
+
+@notify_new_badge(Organization, PUBLIC_SERVICE)
+def notify_badge_public_service(org_id):
+    '''
+    Send an email when a `PUBLIC_SERVICE` badge is added to an `Organization`
+    '''
+    org = Organization.objects.get(pk=org_id)
+    recipients = [member.user for member in org.members]
+    subject = _(
+        'Your organization "%(name)s" has been identified as public service',
+        name=org.name
+    )
+    mail.send(
+        subject,
+        recipients,
+        'badge_added_public_service',
+        organization=org,
+        badge=org.get_badge(PUBLIC_SERVICE)
+    )
