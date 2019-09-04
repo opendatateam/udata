@@ -1,10 +1,13 @@
+import warnings
+
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.models import Reuse
 from udata.core.post.models import Post
-from udata.tasks import task, get_logger
+from udata.tasks import connect, get_logger
 
+from .models import Discussion
 from .signals import (
     on_new_discussion, on_new_discussion_comment, on_discussion_closed
 )
@@ -12,16 +15,16 @@ from .signals import (
 log = get_logger(__name__)
 
 
-def connect(signal):
-    def wrapper(func):
-        t = task(func)
-
-        def call_task(discussion, **kwargs):
-            t.delay(discussion, **kwargs)
-
-        signal.connect(call_task, weak=False)
-        return t
-    return wrapper
+def _compat_get_discussion(discussion_id):
+    if isinstance(discussion_id, Discussion):  # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Using documents as task parameter is deprecated and '
+            'will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        return discussion_id
+    else:
+        return Discussion.objects.get(pk=discussion_id)
 
 
 def owner_recipients(discussion):
@@ -31,8 +34,9 @@ def owner_recipients(discussion):
         return [discussion.subject.owner]
 
 
-@connect(on_new_discussion)
-def notify_new_discussion(discussion):
+@connect(on_new_discussion, by_id=True)
+def notify_new_discussion(discussion_id):
+    discussion = _compat_get_discussion(discussion_id)
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         recipients = owner_recipients(discussion)
         subject = _('Your %(type)s have a new discussion',
@@ -44,10 +48,10 @@ def notify_new_discussion(discussion):
                     type(discussion.subject))
 
 
-@connect(on_new_discussion_comment)
-def notify_new_discussion_comment(discussion, **kwargs):
+@connect(on_new_discussion_comment, by_id=True)
+def notify_new_discussion_comment(discussion_id, message=None):
+    discussion = _compat_get_discussion(discussion_id)
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
-        message = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
         recipients = [u for u in set(recipients) if u != message.posted_by]
@@ -60,10 +64,10 @@ def notify_new_discussion_comment(discussion, **kwargs):
                     type(discussion.subject))
 
 
-@connect(on_discussion_closed)
-def notify_discussion_closed(discussion, **kwargs):
+@connect(on_discussion_closed, by_id=True)
+def notify_discussion_closed(discussion_id, message=None):
+    discussion = _compat_get_discussion(discussion_id)
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
-        message = kwargs['message']
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
         recipients = [u for u in set(recipients) if u != message.posted_by]
