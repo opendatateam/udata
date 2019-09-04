@@ -1,6 +1,7 @@
 import bson
 import datetime
 import logging
+import warnings
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
@@ -12,7 +13,8 @@ from mongoengine.signals import post_save, post_delete
 from speaklater import is_lazy_string
 from werkzeug.local import LocalProxy
 
-from udata.tasks import task, task_obj_compat, as_task_param
+from udata.models import db
+from udata.tasks import task, as_task_param
 
 
 from . import analysis
@@ -117,12 +119,21 @@ def get_i18n_analyzer():
     except AttributeError:
         return getattr(analysis, 'standard')
 
+
 i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
 
 @task(route='high.search')
 def reindex(obj, id=None):
-    model, obj = task_obj_compat(obj, id)
+    if id is not None:
+        model = db.resolve_model(obj)
+        obj = model.objects.get(pk=id)
+    else:  # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Document as task parameter is deprecated and will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        model = obj.__class__
     adapter_class = adapter_catalog.get(model)
     timeout = current_app.config['ELASTICSEARCH_INDEX_TIMEOUT']
     if adapter_class.is_indexable(obj):
@@ -147,22 +158,29 @@ def reindex(obj, id=None):
 
 @task(route='high.search')
 def unindex(obj, id=None):
-    model, obj = task_obj_compat(obj, id)
-    model = obj.__class__
+    if id is not None:
+        model = db.resolve_model(obj)
+    else:  # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Document as task parameter is deprecated and will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        model = obj.__class__
+        id = obj.pk if isinstance(obj.pk, basestring) else str(obj.pk)
     adapter_class = adapter_catalog.get(model)
-    if adapter_class.exists(obj.id, using=es.client, index=es.index_name):
-        log.info('Unindexing %s (%s)', model.__name__, obj.id)
+    if adapter_class.exists(id, using=es.client, index=es.index_name):
+        log.info('Unindexing %s (%s)', model.__name__, id)
         try:
-            adapter = adapter_class.from_model(obj)
+            adapter = adapter_class(meta={'id': id})
             adapter.delete(
                 using=es.client,
                 index=es.index_name,
                 request_timeout=current_app.config['ELASTICSEARCH_INDEX_TIMEOUT'],
             )
         except Exception:
-            log.exception('Unable to unindex %s "%s"', model.__name__, str(obj.id))
+            log.exception('Unable to unindex %s "%s"', model.__name__, id)
     else:
-        log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
+        log.info('Nothing to do for %s (%s)', model.__name__, id)
 
 
 def reindex_model_on_save(sender, document, **kwargs):
