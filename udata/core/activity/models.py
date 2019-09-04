@@ -6,6 +6,8 @@ from mongoengine.signals import post_save
 from udata.models import db
 from udata.auth import current_user
 
+from .signals import new_activity
+
 
 __all__ = ('Activity', )
 
@@ -64,8 +66,7 @@ class Activity(db.Document, metaclass=EmitNewActivityMetaClass):
 
     @classmethod
     def emit(cls, related_to, organization=None, **kwargs):
-        return cls.objects.create(
-            actor=current_user._get_current_object(),
-            related_to=related_to,
-            organization=organization
-        )
+        new_activity.send(cls,
+                          related_to=related_to,
+                          actor=current_user._get_current_object(),
+                          organization=organization)
