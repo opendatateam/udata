@@ -5,7 +5,6 @@ from flask_security import current_user
 
 from udata.i18n import lazy_gettext as _
 from udata.models import db, Organization, Activity
-from udata.core.activity.tasks import write_activity
 
 
 __all__ = (
@@ -35,16 +34,10 @@ class UserUpdatedOrganization(OrgRelatedActivity, Activity):
 @Organization.on_create.connect
 def on_user_created_organization(organization):
     if current_user and current_user.is_authenticated:
-        user = current_user._get_current_object()
-        write_activity.delay(
-            UserCreatedOrganization, user, organization,
-            organization=organization)
+        UserCreatedOrganization.emit(organization, organization)
 
 
 @Organization.on_update.connect
 def on_user_updated_organization(organization):
     if current_user and current_user.is_authenticated:
-        user = current_user._get_current_object()
-        write_activity.delay(
-            UserUpdatedOrganization, user, organization,
-            organization=organization)
+        UserUpdatedOrganization.emit(organization, organization)
