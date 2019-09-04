@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import logging
-import warnings
 
 from urlparse import urlparse
 
@@ -11,7 +10,6 @@ from celery.utils.log import get_task_logger
 from celerybeatmongo.schedulers import MongoScheduler
 
 from udata import entrypoints
-from udata.models import db
 
 log = logging.getLogger(__name__)
 
@@ -87,21 +85,7 @@ def job(name, **kwargs):
 
 def as_task_param(obj):
     '''Pass a document as task parameter'''
-    return obj.__class__.__name__, str(obj.pk)
-
-
-def task_obj_compat(obj, id=None):
-    '''Handle compatibility and deprecation warning on tasks object parameters'''
-    if id is not None:
-        model = db.resolve_model(obj)
-        obj = model.objects.get(pk=id)
-    else:
-        warnings.warn(
-            'Document as task parameter is deprecated and will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        model = obj.__class__
-    return model, obj
+    return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, basestring) else str(obj.pk))
 
 
 def get_logger(name):
@@ -111,6 +95,7 @@ def get_logger(name):
 
 def connect(signal, *args, **kwargs):
     by_id = kwargs.pop('by_id', False)
+
     def wrapper(func):
         t = task(func, *args, **kwargs)
 
