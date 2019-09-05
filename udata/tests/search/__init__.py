@@ -14,7 +14,7 @@ from udata.utils import faker
 #                           Fake object for testing                         #
 #############################################################################
 
-class Fake(db.Document):
+class FakeSearchable(db.Document):
     title = db.StringField()
     description = db.StringField()
     tags = db.ListField(db.StringField())
@@ -37,15 +37,15 @@ class FakeFactory(MongoEngineFactory):
     title = factory.Faker('sentence')
 
     class Meta:
-        model = Fake
+        model = FakeSearchable
 
 
 @search.register
 class FakeSearch(search.ModelSearchAdapter):
     class Meta:
-        doc_type = 'Fake'
+        doc_type = 'FakeSearchable'
 
-    model = Fake
+    model = FakeSearchable
     facets = {
         'tag': search.TermsFacet(field='tags'),
         'other': search.TermsFacet(field='other'),
@@ -74,7 +74,7 @@ class FakeSearch(search.ModelSearchAdapter):
 def hit_factory():
     return {
         "_score": float(faker.random_number(2)),
-        "_type": "fake",
+        "_type": "fakesearchable",
         "_id": faker.md5(),
         "_source": {
             "title": faker.sentence(),

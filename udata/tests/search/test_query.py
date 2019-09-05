@@ -9,7 +9,7 @@ from udata import search
 from udata.tests.helpers import assert_json_equal
 from udata.utils import multi_to_dict
 
-from . import Fake, FakeFactory, FakeSearch
+from . import FakeSearchable, FakeFactory, FakeSearch
 
 
 class FuzzySearch(FakeSearch):
@@ -44,7 +44,7 @@ class SearchQueryTest:
 
     def test_execute_search_result_with_model(self):
         '''Should return a SearchResult with the right model'''
-        result = search.query(Fake)
+        result = search.query(FakeSearchable)
         assert isinstance(result, search.SearchResult)
         assert result.query.adapter == FakeSearch
 
@@ -61,7 +61,7 @@ class SearchQueryTest:
         objects = result.objects
         assert len(objects) == 3
         for o in objects:
-            assert isinstance(o, Fake)
+            assert isinstance(o, FakeSearchable)
 
     def test_only_id(self):
         '''Should only fetch id field'''

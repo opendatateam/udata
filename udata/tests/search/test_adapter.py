@@ -12,7 +12,7 @@ from udata.i18n import gettext as _
 from udata.tests.helpers import assert_json_equal
 from udata.utils import clean_string
 
-from . import Fake, FakeSearch, FakeFactory
+from . import FakeSearchable, FakeSearch, FakeFactory
 
 #############################################################################
 #                  Custom search adapters and metrics                       #
@@ -56,12 +56,12 @@ class FakeSearchWithCoverage(FakeSearch):
 # Register some metrics for testing
 
 class FakeMetricInt(Metric):
-    model = Fake
+    model = FakeSearchable
     name = 'fake-metric-int'
 
 
 class FakeMetricFloat(Metric):
-    model = Fake
+    model = FakeSearchable
     name = 'fake-metric-float'
     value_type = float
 
@@ -208,7 +208,7 @@ class IndexingLifecycleTest:
 @pytest.mark.usefixtures('app')
 class MetricsMappingTest:
     def test_map_metrics(self):
-        mapping = search.metrics_mapping_for(Fake)
+        mapping = search.metrics_mapping_for(FakeSearchable)
         assert_json_equal(mapping, {
             'type': 'object',
             'properties': {
