@@ -1,5 +1,3 @@
-import warnings
-
 from celery import chord
 from flask import current_app
 
@@ -47,31 +45,12 @@ def harvest_job_item(job_id, item_id):
 
 
 @task(ignore_result=False, route='low.harvest')
-def harvest_item(source_id, item_id):
-    log.info('Harvesting item %s for source "%s"', item_id, source_id)
-    msg = 'harvest_item is deprecated and only here for backward comaptibility'
-    warnings.warn(msg, DeprecationWarning)
-    job = HarvestSource.get(source_id).get_last_job()
-    return harvest_job_item(job.id, item_id)
-
-
-@task(ignore_result=False, route='low.harvest')
 def harvest_job_finalize(results, job_id):
     log.info('Finalize harvesting for job "%s"', job_id)
     job = HarvestJob.objects.get(pk=job_id)
     Backend = backends.get(current_app, job.source.backend)
     backend = Backend(job)
     backend.finalize()
-
-
-@task(ignore_result=False, route='low.harvest')
-def harvest_finalize(results, source_id):
-    log.info('Finalize harvesting for source "%s"', source_id)
-    msg = 'harvest_item is deprecated and only here for backward comaptibility'
-    warnings.warn(msg, DeprecationWarning)
-    source = HarvestSource.get(source_id)
-    job = source.get_last_job()
-    harvest_job_finalize(results, job.id)
 
 
 @job('purge-harvesters', route='low.harvest')

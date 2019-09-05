@@ -1,4 +1,3 @@
-import warnings
 import logging
 
 from udata.models import db, User, Organization
@@ -35,14 +34,3 @@ def emit_activity(classname, actor_id, related_to_cls, related_to_id,
         organization = None
     cls.objects.create(actor=actor, related_to=related_to,
                        organization=organization)
-
-
-@task
-def write_activity(cls, actor, related_to, organization=None, **kwargs):
-    warnings.warn(
-        'write_activity task is deprecated and '
-        'will be removed in udata 2.0',
-        DeprecationWarning
-    )
-    cls.objects.create(actor=actor, related_to=related_to,
-                       organization=organization, kwargs=kwargs)
