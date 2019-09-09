@@ -5,8 +5,8 @@
         <post-content :post="post" class="col-xs-12"></post-content>
     </div>
     <div class="row">
-        <dataset-card-list :datasets="post.datasets" class="col-xs-12 col-md-6"></dataset-card-list>
-        <reuse-card-list :reuses="post.reuses" class="col-xs-12 col-md-6"></reuse-card-list>
+        <dataset-card-list editable :datasets="post.datasets" class="col-xs-12 col-md-6"></dataset-card-list>
+        <reuse-card-list editable :reuses="post.reuses" class="col-xs-12 col-md-6"></reuse-card-list>
     </div>
 </layout>
 </div>
