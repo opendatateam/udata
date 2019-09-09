@@ -11,6 +11,7 @@
     <div class="row">
         <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
         <dataset-card-list id="datasets-list" :datasets="reuse.datasets"
+            :editable="can_edit"
             class="col-xs-12 col-md-6">
         </dataset-card-list>
     </div>
@@ -93,7 +94,7 @@ export default {
     computed: {
         actions() {
             const actions = [];
-            if (this.$root.me.can_edit(this.reuse)) {
+            if (this.can_edit) {
                 actions.push({
                     label: this._('Edit'),
                     icon: 'edit',
@@ -151,6 +152,9 @@ export default {
                 color: 'purple',
                 target: '#traffic'
             }];
+        },
+        can_edit() {
+            return this.$root.me.can_edit(this.reuse)
         }
     },
     events: {
