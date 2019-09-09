@@ -371,7 +371,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     tags = db.TagListField()
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
-    private = db.BooleanField()
+    private = db.BooleanField(default=False)
     frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
