@@ -92,7 +92,9 @@ export default {
     },
     computed: {
         actions() {
-            const actions = [{
+            const actions = [];
+            if (this.$root.me.can_edit(this.reuse)) {
+                actions.push({
                     label: this._('Edit'),
                     icon: 'edit',
                     method: this.edit
@@ -100,20 +102,20 @@ export default {
                     label: this._('Transfer'),
                     icon: 'send',
                     method: this.transfer_request
-                }];
-
-            if(!this.reuse.deleted) {
-                actions.push({
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete
                 });
-            } else {
-                actions.push({
-                    label: this._('Restore'),
-                    icon: 'undo',
-                    method: this.confirm_restore
-                });
+                if(!this.reuse.deleted) {
+                    actions.push({
+                        label: this._('Delete'),
+                        icon: 'trash',
+                        method: this.confirm_delete
+                    });
+                } else {
+                    actions.push({
+                        label: this._('Restore'),
+                        icon: 'undo',
+                        method: this.confirm_restore
+                    });
+                }
             }
 
             if (this.$root.me.is_admin) {
