@@ -140,7 +140,7 @@ export default {
     computed: {
         actions() {
             const actions = [];
-            if (this.can_edit()) {
+            if (this.can_edit) {
                 actions.push({
                     label: this._('Edit'),
                     icon: 'edit',
