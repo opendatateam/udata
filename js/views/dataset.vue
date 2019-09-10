@@ -209,7 +209,7 @@ export default {
             return (this.dataset.spatial && this.dataset.spatial.granularity || this.territories_labels) !== undefined;
         },
         can_edit() {
-            return this.$root.me.can_edit(this.reuse)
+            return this.$root.me.can_edit(this.dataset);
         }
     },
     methods: {
