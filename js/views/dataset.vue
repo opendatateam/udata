@@ -139,7 +139,9 @@ export default {
     },
     computed: {
         actions() {
-            const actions = [{
+            const actions = [];
+            if (this.can_edit()) {
+                actions.push({
                     label: this._('Edit'),
                     icon: 'edit',
                     method: this.edit
@@ -147,20 +149,20 @@ export default {
                     label: this._('Transfer'),
                     icon: 'send',
                     method: this.transfer_request
-                }];
-
-            if(!this.dataset.deleted) {
-                actions.push({
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete
                 });
-            } else {
-                actions.push({
-                    label: this._('Restore'),
-                    icon: 'undo',
-                    method: this.confirm_restore
-                });
+                if(!this.dataset.deleted) {
+                    actions.push({
+                        label: this._('Delete'),
+                        icon: 'trash',
+                        method: this.confirm_delete
+                    });
+                } else {
+                    actions.push({
+                        label: this._('Restore'),
+                        icon: 'undo',
+                        method: this.confirm_restore
+                    });
+                }
             }
 
             if (this.$root.me.is_admin) {
@@ -205,6 +207,9 @@ export default {
         },
         map_footer() {
             return (this.dataset.spatial && this.dataset.spatial.granularity || this.territories_labels) !== undefined;
+        },
+        can_edit() {
+            return this.$root.me.can_edit(this.reuse)
         }
     },
     methods: {

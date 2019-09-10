@@ -24,7 +24,7 @@
     <h3>{{reuse.title}}</h3>
     <div class="details-body">
         <image-button :src="reuse.image_thumbnail" :size="100" class="thumbnail-button"
-            :endpoint="endpoint">
+            :endpoint="endpoint" :editable="$root.me.can_edit(reuse)">
         </image-button>
         <div v-markdown="reuse.description"></div>
         <div v-if="reuse.tags" class="label-list">

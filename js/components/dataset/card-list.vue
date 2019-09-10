@@ -80,7 +80,7 @@
                 <dataset-card :dataset="dataset"></dataset-card>
             </div>
         </div>
-        <footer slot="footer">
+        <footer v-if="editable" slot="footer">
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
                 @click="edit">
                 {{ _('Edit') }}
@@ -124,6 +124,7 @@ export default {
             default() {return this._('Datasets')}
         },
         datasets: Array,
+        editable: Boolean,
         loading: Boolean
     },
     data() {

@@ -11,6 +11,7 @@
     <div class="row">
         <reuse-details :reuse="reuse" class="col-xs-12 col-md-6"></reuse-details>
         <dataset-card-list id="datasets-list" :datasets="reuse.datasets"
+            :editable="can_edit"
             class="col-xs-12 col-md-6">
         </dataset-card-list>
     </div>
@@ -92,7 +93,9 @@ export default {
     },
     computed: {
         actions() {
-            const actions = [{
+            const actions = [];
+            if (this.can_edit) {
+                actions.push({
                     label: this._('Edit'),
                     icon: 'edit',
                     method: this.edit
@@ -100,20 +103,20 @@ export default {
                     label: this._('Transfer'),
                     icon: 'send',
                     method: this.transfer_request
-                }];
-
-            if(!this.reuse.deleted) {
-                actions.push({
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete
                 });
-            } else {
-                actions.push({
-                    label: this._('Restore'),
-                    icon: 'undo',
-                    method: this.confirm_restore
-                });
+                if(!this.reuse.deleted) {
+                    actions.push({
+                        label: this._('Delete'),
+                        icon: 'trash',
+                        method: this.confirm_delete
+                    });
+                } else {
+                    actions.push({
+                        label: this._('Restore'),
+                        icon: 'undo',
+                        method: this.confirm_restore
+                    });
+                }
             }
 
             if (this.$root.me.is_admin) {
@@ -149,6 +152,9 @@ export default {
                 color: 'purple',
                 target: '#traffic'
             }];
+        },
+        can_edit() {
+            return this.$root.me.can_edit(this.reuse)
         }
     },
     events: {
