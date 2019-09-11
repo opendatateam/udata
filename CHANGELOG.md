@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.15 (2019-09-11)
 
 - Style links in admin modals [#2292](https://github.com/opendatateam/udata/pull/2292)
