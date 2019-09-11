@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.12 (2019-09-11)
 
 - Nouvelle section contact dans le pied de page [#428](https://github.com/etalab/udata-gouvfr/pull/428)
 - Suppression du konami code [#429](https://github.com/etalab/udata-gouvfr/pull/429)
