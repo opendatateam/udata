@@ -376,6 +376,16 @@
                 </div>
                 {% endif %}
 
+                {# Plugins panel #}
+                {% for hname, hook in conditionnal_hooks.items() %}
+                {% if hname.startswith('dataset_sidebar') and hook.condition(dataset) %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {{ hook.func(dataset)|safe }}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
             </aside>
         </div>
     </div>
