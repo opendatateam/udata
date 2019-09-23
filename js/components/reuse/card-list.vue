@@ -80,7 +80,7 @@
                 <reuse-card :reuse="reuse"></reuse-card>
             </div>
         </div>
-        <footer slot="footer">
+        <footer v-if="editable" slot="footer">
             <a v-show="!editing" class="text-uppercase footer-btn pointer"
                 @click="edit">
                 {{ _('Edit') }}
@@ -124,6 +124,7 @@ export default {
             default() {return this._('Reuses')}
         },
         reuses: Array,
+        editable: Boolean,
         loading: Boolean
     },
     data() {

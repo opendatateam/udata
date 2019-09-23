@@ -13,6 +13,14 @@
 
 - The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
 
+## 1.6.15 (2019-09-11)
+
+- Style links in admin modals [#2292](https://github.com/opendatateam/udata/pull/2292)
+- Add activity.key filter to activity.atom feed [#2293](https://github.com/opendatateam/udata/pull/2293)
+- Allow `Authorization` as CORS header and OAuth minor fixes [#2298](https://github.com/opendatateam/udata/pull/2298)
+- Set dataset.private to False by default (and fix stock) [#2307](https://github.com/opendatateam/udata/pull/2307)
+- Fixes some inconsistencies between admin display (buttons, actions...) and real permissions [#2308](https://github.com/opendatateam/udata/pull/2308)
+
 ## 1.6.14 (2019-08-14)
 
 - Cleanup `permitted_reuses` data (migration) [#2244](https://github.com/opendatateam/udata/pull/2244)

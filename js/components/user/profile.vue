@@ -24,7 +24,7 @@
     <h3>{{user.fullname}}</h3>
         <div class="profile-body">
             <image-button :src="user | avatar_url 100" :size="100" class="avatar-button"
-                :endpoint="endpoint">
+                :endpoint="endpoint" :editable="can_edit">
             </image-button>
         <div v-markdown="user.about"></div>
     </div>
@@ -49,12 +49,15 @@ export default {
         endpoint() {
             var operation = API.me.operations.my_avatar;
             return operation.urlify({});
+        },
+        can_edit() {
+            return this.$root.me.is_admin || this.user.id == this.$root.me;
         }
     },
     components: {Box, ImageButton},
     events: {
         'image:saved': function() {
-            this.$root.me.fetch();
+            this.user.fetch();
         }
     },
 };

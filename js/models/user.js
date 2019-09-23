@@ -53,7 +53,9 @@ export default class User extends Model {
      * @return {Boolean}       True if can edit.
      */
     can_edit(object) {
-        if (this.is_admin) {
+        if (object === undefined) {
+            return false;
+        } else if (this.is_admin) {
             return true;
         } else if (object.owner) {
             return object.owner.id === this.id;
