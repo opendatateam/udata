@@ -20,23 +20,22 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v5-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v5-{{ arch }}-{{ .Branch }}
-          - py3-cache-v5-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py3-cache-v6-{{ arch }}-{{ checksum "python.deps" }}
+          - py3-cache-v6-{{ arch }}-{{ .Branch }}
+          - py3-cache-v6-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
-            python -m venv venv --without-pip
+            virtualenv venv
             source venv/bin/activate
-            pip install -U pip setuptools
             pip install -e . || pip install -e .
             pip install -r requirements/circleci.pip
       - save_cache:
-          key: py3-cache-v5-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v6-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py3-cache-v5-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v6-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
