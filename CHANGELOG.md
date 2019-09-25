@@ -4,6 +4,7 @@
 
 - Prevent Google ranking spam attacks on reuse pages (`rel=nofollow` on reuse link) [#2320](https://github.com/opendatateam/udata/pull/2320)
 - Display admin resources list actions only if user has permissions to edit [#2326](https://github.com/opendatateam/udata/pull/2326)
+- Fix non-admin user not being able to change their profile picture [#2327](https://github.com/opendatateam/udata/pull/2327)
 
 ## 1.6.15 (2019-09-11)
 
