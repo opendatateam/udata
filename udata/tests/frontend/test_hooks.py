@@ -22,6 +22,16 @@ def second(ctx):
     return 'second'
 
 
+@template_hook('conditionnal', when=lambda ctx: True)
+def true(ctx):
+    return 'true'
+
+
+@template_hook('conditionnal', when=lambda ctx: False)
+def false(ctx):
+    return 'false'
+
+
 @bp.route('/empty/render')
 def render_empty():
     return render_template_string('{{ hook("siemptyngle") }}')
@@ -50,6 +60,16 @@ def render_multiple():
 @bp.route('/multiple/iter')
 def iter_multiple():
     return render_template_string('{% for w in hook("multiple") %}<{{ w }}>{% endfor %}')
+
+
+@bp.route('/conditionnal/render')
+def render_conditionnal():
+    return render_template_string('{{ hook("conditionnal") }}')
+
+
+@bp.route('/conditionnal/iter')
+def iter_conditionnal():
+    return render_template_string('{% for w in hook("conditionnal") %}<{{ w }}>{% endfor %}')
 
 
 @pytest.fixture
@@ -84,8 +104,18 @@ class HooksTest:
         response = client.get(url_for('hooks_tests.render_multiple'))
         assert200(response)
         assert b'firstsecond' == response.data
-    
+
     def test_iter_multiple_template_hooks(self, client):
         response = client.get(url_for('hooks_tests.iter_multiple'))
         assert200(response)
         assert b'<first><second>' == response.data
+
+    def test_conditionnal_template_hooks(self, client):
+        response = client.get(url_for('hooks_tests.render_conditionnal'))
+        assert200(response)
+        assert b'true' == response.data
+
+    def test_iter_conditionnal_template_hooks(self, client):
+        response = client.get(url_for('hooks_tests.iter_conditionnal'))
+        assert200(response)
+        assert b'<true>' == response.data
