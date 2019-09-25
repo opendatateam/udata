@@ -62,14 +62,14 @@ class HookRenderer:
         self.kwargs = kwargs
 
     def __html__(self):
-        return ''.join(f(self.ctx, *self.args, *self.kwargs)
+        return ''.join(f(self.ctx, *self.args, **self.kwargs)
                        for f, w in self.funcs
                        if w is None or w(self.ctx))
 
     def __iter__(self):
         for func, when in self.funcs:
             if when is None or when(self.ctx):
-                yield func(self.ctx, *self.args, *self.kwargs)
+                yield func(self.ctx, *self.args, **self.kwargs)
 
 
 @contextfunction

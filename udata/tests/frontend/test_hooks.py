@@ -12,6 +12,16 @@ def single(ctx):
     return 'single'
 
 
+@template_hook
+def hello(ctx, name):
+    return 'Hello {}'.format(name)
+
+
+@template_hook
+def kwargs(ctx, **kwargs):
+    return ', '.join(sorted('{0}={1}'.format(k, v) for k, v in kwargs.items()))
+
+
 @template_hook('multiple')
 def first(ctx):
     return 'first'
@@ -34,12 +44,22 @@ def false(ctx):
 
 @bp.route('/empty/render')
 def render_empty():
-    return render_template_string('{{ hook("siemptyngle") }}')
+    return render_template_string('{{ hook("empty") }}')
 
 
 @bp.route('/empty/iter')
 def iter_empty():
     return render_template_string('{% for w in hook("empty") %}<{{ w }}>{% endfor %}')
+
+
+@bp.route('/hello')
+def render_hello():
+    return render_template_string('{{ hook("hello", "world") }}')
+
+
+@bp.route('/kwargs')
+def render_kwargs():
+    return render_template_string('{{ hook("kwargs", key="value", other=42) }}')
 
 
 @bp.route('/single/render')
@@ -119,3 +139,13 @@ class HooksTest:
         response = client.get(url_for('hooks_tests.iter_conditionnal'))
         assert200(response)
         assert b'<true>' == response.data
+
+    def test_arguments(self, client):
+        response = client.get(url_for('hooks_tests.render_hello'))
+        assert200(response)
+        assert b'Hello world' == response.data
+
+    def test_kwargs(self, client):
+        response = client.get(url_for('hooks_tests.render_kwargs'))
+        assert200(response)
+        assert b'key=value, other=42' == response.data
