@@ -33,21 +33,47 @@ def footer_snippet(func):
     return func
 
 
-def template_hook(func):
-    _template_hooks[func.__name__] = func
+def _wrapper(func, name=None):
+    name = name or func.__name__
+    if name not in _template_hooks:
+        _template_hooks[name] = []
+    _template_hooks[name].append(func)
     return func
+
+
+def template_hook(func_or_name):
+    if callable(func_or_name):
+        return _wrapper(func_or_name)
+    elif isinstance(func_or_name, str):
+        def wrapper(func):
+            return _wrapper(func, func_or_name)
+        return wrapper
 
 
 def has_template_hook(name):
     return name in _template_hooks
 
 
+class HookRenderer:
+    def __init__(self, funcs, ctx, *args, **kwargs):
+        self.funcs = funcs
+        self.ctx = ctx
+        self.args = args
+        self.kwargs = kwargs
+
+    def __html__(self):
+        return ''.join(f(self.ctx, *self.args, *self.kwargs) for f in self.funcs)
+
+    def __iter__(self):
+        for func in self.funcs:
+            yield func(self.ctx, *self.args, *self.kwargs)
+
+
 @contextfunction
 def render_template_hook(ctx, name, *args, **kwargs):
     if not has_template_hook(name):
         return ''
-    content = _template_hooks[name](ctx, *args, **kwargs)
-    return Markup(content or '')
+    return HookRenderer(_template_hooks[name], ctx, *args, **kwargs)
 
 
 def snippets_renderer(funcs):
