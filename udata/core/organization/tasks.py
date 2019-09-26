@@ -32,8 +32,8 @@ def purge_organizations(self):
         # Remove
         organization.delete()
         # Reindex the datasets that were linked to the organization
-        for dataset in Dataset.objects(id__in=d_ids):
-            reindex(dataset)
+        for id in d_ids:
+            reindex(Dataset.__name__, str(id))
 
 
 @task(route='high.mail')
