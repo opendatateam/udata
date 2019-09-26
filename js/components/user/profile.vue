@@ -51,7 +51,7 @@ export default {
             return operation.urlify({});
         },
         can_edit() {
-            return this.$root.me.is_admin || this.user.id == this.$root.me;
+            return this.$root.me.is_admin || this.user.id == this.$root.me.id;
         }
     },
     components: {Box, ImageButton},
