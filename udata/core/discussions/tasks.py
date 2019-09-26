@@ -10,7 +10,7 @@ from udata.core.reuse.models import Reuse
 from udata.core.post.models import Post
 from udata.tasks import connect, get_logger
 
-from .models import Discussion
+from .models import Discussion, Message
 from .signals import (
     on_new_discussion, on_new_discussion_comment, on_discussion_closed
 )
@@ -28,6 +28,18 @@ def _compat_get_discussion(discussion_id):
         return discussion_id
     else:
         return Discussion.objects.get(pk=discussion_id)
+
+
+def _compat_get_message(discussion, message_idx):
+    if isinstance(message_idx, Message):  # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Using documents as task parameter is deprecated and '
+            'will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        return message_idx
+    else:
+        return discussion.discussion[message_idx]
 
 
 def owner_recipients(discussion):
@@ -54,12 +66,14 @@ def notify_new_discussion(discussion_id):
 @connect(on_new_discussion_comment, by_id=True)
 def notify_new_discussion_comment(discussion_id, message=None):
     discussion = _compat_get_discussion(discussion_id)
+    message = _compat_get_message(discussion, message)
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
         recipients = [u for u in set(recipients) if u != message.posted_by]
         subject = _('%(user)s commented your discussion',
                     user=message.posted_by.fullname)
+
         mail.send(subject, recipients, 'new_discussion_comment',
                   discussion=discussion, message=message)
     else:
@@ -70,6 +84,7 @@ def notify_new_discussion_comment(discussion_id, message=None):
 @connect(on_discussion_closed, by_id=True)
 def notify_discussion_closed(discussion_id, message=None):
     discussion = _compat_get_discussion(discussion_id)
+    message = _compat_get_message(discussion, message)
     if isinstance(discussion.subject, (Dataset, Reuse, Post)):
         recipients = owner_recipients(discussion) + [
             m.posted_by for m in discussion.discussion]
