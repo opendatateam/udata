@@ -40,7 +40,7 @@
         boxclass="box-solid resources-widget"
         bodyclass="table-responsive no-padding"
         footerclass="text-center"
-        :footer="true" :empty="_('No resources')">
+        :footer="$root.me.can_edit(dataset)" :empty="_('No resources')">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -99,7 +99,7 @@
         <div class="overlay dropzone" v-if="dropping">
             <span class="fa fa-download fa-2x"></span>
         </div>
-        <footer slot="footer">
+        <footer slot="footer" v-if="$root.me.can_edit(dataset)">
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering"
