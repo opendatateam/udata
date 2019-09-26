@@ -583,7 +583,7 @@ class IssuesMailsTest(FrontTestCase):
         )
 
         with capture_mails() as mails:
-            notify_new_issue(issue)
+            notify_new_issue(issue.id)
 
         # Should have sent one mail to the owner
         self.assertEqual(len(mails), 1)
@@ -604,7 +604,7 @@ class IssuesMailsTest(FrontTestCase):
 
         # issue = IssueFactory()
         with capture_mails() as mails:
-            notify_new_issue_comment(issue, message=new_message)
+            notify_new_issue_comment(issue.id, message=len(issue.discussion) - 1)
 
         # Should have sent one mail to the owner and the other participants
         # and no mail to the commenter
@@ -630,7 +630,7 @@ class IssuesMailsTest(FrontTestCase):
 
         # issue = IssueFactory()
         with capture_mails() as mails:
-            notify_issue_closed(issue, message=closing_message)
+            notify_issue_closed(issue.id, message=len(issue.discussion) - 1)
 
         # Should have sent one mail to each participant
         # and no mail to the closer

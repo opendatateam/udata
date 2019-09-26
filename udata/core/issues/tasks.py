@@ -8,7 +8,7 @@ from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse
 from udata.tasks import connect, get_logger
 
-from .models import Issue
+from .models import Issue, Message
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
 log = get_logger(__name__)
@@ -33,6 +33,18 @@ def _compat_get_issue(issue_id):
         return Issue.objects.get(pk=issue_id)
 
 
+def _compat_get_message(issue, message_idx):
+    if isinstance(message_idx, Message):  # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Using documents as task parameter is deprecated and '
+            'will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        return message_idx
+    else:
+        return issue.discussion[message_idx]
+
+
 @connect(on_new_issue, by_id=True)
 def notify_new_issue(issue_id):
     issue = _compat_get_issue(issue_id)
@@ -49,6 +61,7 @@ def notify_new_issue(issue_id):
 @connect(on_new_issue_comment, by_id=True)
 def notify_new_issue_comment(issue_id, message=None):
     issue = _compat_get_issue(issue_id)
+    message = _compat_get_message(issue, message)
     if isinstance(issue.subject, (Dataset, Reuse)):
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
@@ -64,6 +77,7 @@ def notify_new_issue_comment(issue_id, message=None):
 @connect(on_issue_closed, by_id=True)
 def notify_issue_closed(issue_id, message=None):
     issue = _compat_get_issue(issue_id)
+    message = _compat_get_message(issue, message)
     if isinstance(issue.subject, (Dataset, Reuse)):
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
