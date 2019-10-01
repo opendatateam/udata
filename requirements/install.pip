@@ -40,7 +40,7 @@ lxml==4.3.4
 mongoengine==0.16.3
 msgpack-python==0.4.8
 netaddr==0.7.19
-pillow==6.0.0
+pillow==6.2.0
 pydenticon==0.3.1
 pyliblzma==0.5.3
 pymongo==3.7.2
