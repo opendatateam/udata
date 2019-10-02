@@ -350,6 +350,11 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     def dataset(self):
         return self._instance
 
+    def save(self, *args, **kwargs):
+        if not self.dataset:
+            raise RuntimeError('Impossible to save un orphan resource')
+        self.dataset.save(*args, **kwargs)
+
 
 class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     created_at = DateTimeField(verbose_name=_('Creation date'),
