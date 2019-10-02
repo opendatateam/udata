@@ -131,8 +131,6 @@ jobs:
           name: Build a distributable package
           command: |
             source venv/bin/activate
-            # Check long description renders properly
-            python setup.py check -m -s
             # Build a wheel release
             if [[ $CIRCLE_TAG ]]; then
                 # This is a tagged release
@@ -157,9 +155,6 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run:
-          name: Install Twine
-          command: pip install twine
       - deploy:
           name: Publish on PyPI
           command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl

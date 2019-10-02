@@ -13,7 +13,7 @@ from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
 from invoke import run, task
 
-from tasks_helpers import ROOT, info, header, lrun, green
+from tasks_helpers import ROOT, info, header, lrun, green, success
 
 I18N_DOMAIN = 'udata'
 
@@ -243,19 +243,21 @@ def oembed_watch(ctx):
 @task(clean, i18nc, assets_build, widgets_build, oembed_build, default=True)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
-    perform_dist(buildno)
+    perform_dist(ctx, buildno)
 
 
 @task(i18nc)
 def pydist(ctx, buildno=None):
     '''Perform python packaging (without compiling assets)'''
-    perform_dist(buildno)
+    perform_dist(ctx, buildno)
 
 
-def perform_dist(buildno=None):
+def perform_dist(ctx, buildno=None):
     header('Building a distribuable package')
     cmd = ['python setup.py']
     if buildno:
         cmd.append('egg_info -b {0}'.format(buildno))
     cmd.append('bdist_wheel')
     lrun(' '.join(cmd), pty=True)
+    ctx.run('twine check dist/*')
+    success('Distribution is available in dist directory')
