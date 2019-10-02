@@ -8,6 +8,7 @@
   - Use python based migrations instead of relying on mongo internal and deprecated `js_exec`
   - Handle rollback (optionnal)
   - Detailled history
+- Template hooks generalization: allows to dynamically extend template with widgets and snippets from extensions. See [the dedicated documentation section](https://udata.readthedocs.io/en/stable/extending/#hooks) [#2323](https://github.com/opendatateam/udata/pull/2323)
 
 ### Breaking changes
 
