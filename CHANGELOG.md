@@ -13,6 +13,7 @@
 ### Breaking changes
 
 - The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
+- The targeted mongo version is now Mongo 3.6. Backward support is not guaranteed
 
 ## 1.6.15 (2019-09-11)
 
