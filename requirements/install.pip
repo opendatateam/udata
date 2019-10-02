@@ -30,12 +30,12 @@ Flask-Themes2==0.1.4
 Flask-WTF==0.14.2
 Flask==1.0.3
 future==0.17.1
-geojson==2.4.1
+geojson==2.5.0
 html2text==2018.1.9
 itsdangerous==1.1.0
 Jinja2==2.10.1
-jsonschema==3.0.1
-lxml==4.3.4
+jsonschema==3.0.2
+lxml==4.4.1
 mongoengine==0.16.3
 msgpack==0.5.6
 netaddr==0.7.19
@@ -43,8 +43,8 @@ pillow==6.2.0
 pydenticon==0.3.1
 pymongo==3.7.2
 python-dateutil==2.8.0
-pytz==2019.1
-PyYAML==5.1.1
+pytz==2019.2
+PyYAML==5.1.2
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
 redis==3.2.1
