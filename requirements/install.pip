@@ -36,12 +36,12 @@ itsdangerous==1.1.0
 Jinja2==2.10.1
 jsonschema==3.0.2
 lxml==4.4.1
-mongoengine==0.16.3
+mongoengine==0.18.2
 msgpack==0.5.6
 netaddr==0.7.19
 pillow==6.2.0
 pydenticon==0.3.1
-pymongo==3.7.2
+pymongo==3.9.0
 python-dateutil==2.8.0
 pytz==2019.2
 PyYAML==5.1.2
