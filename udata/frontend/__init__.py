@@ -18,19 +18,7 @@ log = logging.getLogger(__name__)
 
 front = I18nBlueprint('front', __name__)
 
-_header_snippets = []
-_footer_snippets = []
 _template_hooks = {}
-
-
-def header_snippet(func):
-    _header_snippets.append(func)
-    return func
-
-
-def footer_snippet(func):
-    _footer_snippets.append(func)
-    return func
 
 
 def _wrapper(func, name=None, when=None):
@@ -62,14 +50,16 @@ class HookRenderer:
         self.kwargs = kwargs
 
     def __html__(self):
-        return ''.join(f(self.ctx, *self.args, **self.kwargs)
-                       for f, w in self.funcs
-                       if w is None or w(self.ctx))
+        return Markup(''.join(
+            f(self.ctx, *self.args, **self.kwargs)
+            for f, w in self.funcs
+            if w is None or w(self.ctx)
+        ))
 
     def __iter__(self):
         for func, when in self.funcs:
             if when is None or when(self.ctx):
-                yield func(self.ctx, *self.args, **self.kwargs)
+                yield Markup(func(self.ctx, *self.args, **self.kwargs))
 
 
 @contextfunction
@@ -79,23 +69,9 @@ def render_template_hook(ctx, name, *args, **kwargs):
     return HookRenderer(_template_hooks[name], ctx, *args, **kwargs)
 
 
-def snippets_renderer(funcs):
-    @contextfunction
-    def render(ctx):
-        snippets = ''
-        for snippet in funcs:
-            out = snippet(ctx)
-            if out:
-                snippets += out
-        return Markup(snippets)
-    return render
-
-
 @front.app_context_processor
 def inject_hooks():
     return {
-        'header_snippets': snippets_renderer(_header_snippets),
-        'footer_snippets': snippets_renderer(_footer_snippets),
         'hook': render_template_hook,
         'has_hook': has_template_hook,
     }

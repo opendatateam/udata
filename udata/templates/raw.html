@@ -25,7 +25,7 @@
 
     {% block extra_head %}{% endblock %}
 
-    {{ header_snippets() }}
+    {{ hook('header.snippets') }}
 
     {% endblock raw_head %}
 
@@ -40,7 +40,7 @@
     {% endif %}
     {% block extra_js %}{% endblock %}
 
-    {{ footer_snippets() }}
+    {{ hook('footer.snippets') }}
 
   </body>
 </html>
