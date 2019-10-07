@@ -352,7 +352,7 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 
     def save(self, *args, **kwargs):
         if not self.dataset:
-            raise RuntimeError('Impossible to save un orphan resource')
+            raise RuntimeError('Impossible to save an orphan resource')
         self.dataset.save(*args, **kwargs)
 
 
