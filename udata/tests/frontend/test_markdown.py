@@ -251,6 +251,16 @@ class MdStripTest:
 
         assert result.strip() == 'Here…'
 
+    def test_mdstrip_returns_unsafe_string(self, app):
+        '''mdstrip should returns html compliants strings'''
+        text = '&é<script>'
+        with app.test_request_context('/'):
+            unsafe = render_template_string('{{ text|mdstrip }}', text=text)
+            safe = render_template_string('{{ text|mdstrip|safe }}', text=text)
+
+        assert unsafe.strip() == '&amp;é&lt;script&gt;'
+        assert safe.strip() == '&é<script>'
+
     def test_mdstrip_custom_end(self, app):
         '''mdstrip should allow a custom ending string'''
         text = '1234567890'

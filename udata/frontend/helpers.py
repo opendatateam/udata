@@ -1,4 +1,5 @@
 import calendar
+import html
 import logging
 import pkg_resources
 
@@ -401,3 +402,15 @@ def filesize(value):
             return "%3.1f%s%s" % (value, unit, suffix)
         value /= 1024.0
     return "%.1f%s%s" % (value, 'Y', suffix)
+
+
+@front.app_template_filter()
+def embedded_json_ld(jsonld):
+    '''
+    Sanitize JSON-LD for <script> tag inclusion.
+
+    JSON-LD accepts any string but there is a special case
+    for script tag inclusion.
+    See: https://w3c.github.io/json-ld-syntax/#restrictions-for-contents-of-json-ld-script-elements
+    '''
+    return Markup(html.escape(jsonld, quote=False))
