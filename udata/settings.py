@@ -35,6 +35,10 @@ class Defaults(object):
     ELASTICSEARCH_URL = 'localhost:9200'
     ELASTICSEARCH_INDEX_BASENAME = 'udata'
     ELASTICSEARCH_REFRESH_INTERVAL = '1s'
+    # ES Query/default timeout.
+    ELASTICSEARCH_TIMEOUT = 10  # Same default as elasticsearch library
+    # ES index timeout (should be longer)
+    ELASTICSEARCH_INDEX_TIMEOUT = 20
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
@@ -132,7 +136,12 @@ class Defaults(object):
     # OAuth 2 settings
     OAUTH2_PROVIDER_ERROR_ENDPOINT = 'oauth.oauth_error'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
-    OAUTH2_PROVIDER_TOKEN_EXPIRES_IN = 30 * 24 * HOUR  # 30 days
+    OAUTH2_TOKEN_EXPIRES_IN = {
+        'authorization_code': 30 * 24 * HOUR,
+        'implicit': 10 * 24 * HOUR,
+        'password': 30 * 24 * HOUR,
+        'client_credentials': 30 * 24 * HOUR
+    }
 
     MD_ALLOWED_TAGS = [
         'a',
@@ -177,6 +186,9 @@ class Defaults(object):
     HARVEST_PREVIEW_MAX_ITEMS = 20
     # Harvesters are scheduled at midnight by default
     HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
+
+    # The number of days of harvest jobs to keep (ie. number of days of history kept)
+    HARVEST_JOBS_RETENTION_DAYS = 365
 
     # Lists levels that shouldn't be indexed
     SPATIAL_SEARCH_EXCLUDE_LEVELS = tuple()
@@ -224,7 +236,7 @@ class Defaults(object):
         # Meteorology
         'grib2',
         # Misc
-        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl',
+        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
         # RDF
         'rdf', 'ttl', 'n3',
     ]
@@ -315,6 +327,82 @@ class Defaults(object):
     # Don't check timestamp on assets (and avoid error on missing assets)
     CDN_TIMESTAMP = False
 
+    # Export CSVs of model objects as resources of a dataset
+    ########################################################
+    EXPORT_CSV_MODELS = ('dataset', 'resource', 'discussion', 'organization',
+                         'reuse', 'tag')
+    EXPORT_CSV_DATASET_ID = None
+
+    # Search parameters
+    ###################
+    # Overrides dataset search fields and their ponderation
+    SEARCH_DATASET_FIELDS = (
+        'geozones.keys^9',
+        'geozones.name^9',
+        'acronym^7',
+        'title^6',
+        'tags.i18n^3',
+        'description',
+    )
+    # After this number of years, scoring is kept constant instead of increasing.
+    # Index time parameter:
+    #   reindeixing dataset is required for this parameter to be effective
+    SEARCH_DATASET_MAX_TEMPORAL_WEIGHT = 5
+    # How much weight featured items get in completion
+    # Index time parameter:
+    #   reindeixing dataset is required for this parameter to be effective
+    SEARCH_DATASET_FEATURED_WEIGHT = 3
+    # Boost given to the featured datasets
+    SEARCH_DATASET_FEATURED_BOOST = 1.5
+    # Boost given to the datasets from certified organization
+    SEARCH_DATASET_CERTIFIED_BOOST = 1.2
+    # Decay factor for reuses count on datasets
+    SEARCH_DATASET_REUSES_DECAY = 0.1
+    # Decay factor for followers count on datasets
+    SEARCH_DATASET_FOLLOWERS_DECAY = 0.1
+    # Overrides reuse search fields and their ponderation
+    SEARCH_REUSE_FIELDS = (
+        'title^4',
+        'description^2',
+        'datasets.title',
+    )
+    # Boost given to the featured reuses
+    SEARCH_REUSE_FEATURED_BOOST = 1.1
+    # Decay factor for reused datasets count on reuses
+    SEARCH_REUSE_DATASETS_DECAY = 0.8
+    # Decay factor for followers count on reuses
+    SEARCH_REUSE_FOLLOWERS_DECAY = 0.8
+    # Overrides organization search fields and their ponderation
+    SEARCH_ORGANIZATION_FIELDS = (
+        'name^6',
+        'acronym^6',
+        'description',
+    )
+    # Decay factor for datasets count on organizations
+    SEARCH_ORGANIZATION_DATASETS_DECAY = 0.9
+    # Decay factor for reuses count on organizations
+    SEARCH_ORGANIZATION_REUSES_DECAY = 0.9
+    # Decay factor for followers count on organizations
+    SEARCH_ORGANIZATION_FOLLOWERS_DECAY = 0.8
+    # Overrides geozone search fields and their ponderation
+    SEARCH_GEOZONE_FIELDS = tuple()
+    # Overrides user search fields and their ponderation
+    SEARCH_USER_FIELDS = (
+        'last_name^6',
+        'first_name^5',
+        'about'
+    )
+
+    # Autocomplete parameters
+    #########################
+    SEARCH_AUTOCOMPLETE_ENABLED = True
+    SEARCH_AUTOCOMPLETE_DEBOUNCE = 200  # in ms
+
+    # Archive parameters
+    ####################
+    ARCHIVE_COMMENT_USER_ID = None
+    ARCHIVE_COMMENT_TITLE = _('This dataset has been archived')
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
@@ -340,6 +428,11 @@ class Testing(object):
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
+    # FakeSearch fields have to be declared here
+    SEARCH_FAKE_FIELDS = (
+        'title^2',
+        'description',
+    )
 
 
 class Debug(Defaults):

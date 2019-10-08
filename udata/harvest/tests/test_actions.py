@@ -5,7 +5,7 @@ import csv
 import logging
 import pytest
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
 from mock import patch
@@ -53,7 +53,7 @@ class HarvestActionsTest:
         for source in sources:
             assert source in result
 
-    def test_list_sources_deleted(self):
+    def test_list_sources_exclude_deleted(self):
         assert actions.list_sources() == []
 
         now = datetime.now()
@@ -68,6 +68,19 @@ class HarvestActionsTest:
 
         for source in deleted_sources:
             assert source not in result
+
+    def test_list_sources_include_deleted(self):
+        assert actions.list_sources() == []
+
+        now = datetime.now()
+        sources = HarvestSourceFactory.create_batch(3)
+        sources.extend(HarvestSourceFactory.create_batch(2, deleted=now))
+
+        result = actions.list_sources(deleted=True)
+        assert len(result) == len(sources)
+
+        for source in sources:
+            assert source in result
 
     def test_list_sources_for_owner(self):
         owner = UserFactory()
@@ -113,6 +126,35 @@ class HarvestActionsTest:
         assert len(result.objects) == 2
 
         result = actions.paginate_sources(page=2, page_size=2)
+        assert isinstance(result, Paginable)
+        assert result.page == 2
+        assert result.page_size == 2
+        assert result.total == 3
+        assert len(result.objects) == 1
+
+    def test_paginate_sources_exclude_deleted(self):
+        HarvestSourceFactory.create_batch(2)
+        HarvestSourceFactory(deleted=datetime.now())
+
+        result = actions.paginate_sources(page_size=2)
+        assert isinstance(result, Paginable)
+        assert result.page == 1
+        assert result.page_size == 2
+        assert result.total == 2
+        assert len(result.objects) == 2
+
+    def test_paginate_sources_include_deleted(self):
+        HarvestSourceFactory.create_batch(2)
+        HarvestSourceFactory(deleted=datetime.now())
+
+        result = actions.paginate_sources(page_size=2, deleted=True)
+        assert isinstance(result, Paginable)
+        assert result.page == 1
+        assert result.page_size == 2
+        assert result.total == 3
+        assert len(result.objects) == 2
+
+        result = actions.paginate_sources(page=2, page_size=2, deleted=True)
         assert isinstance(result, Paginable)
         assert result.page == 2
         assert result.page_size == 2
@@ -338,6 +380,22 @@ class HarvestActionsTest:
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
+
+    @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
+    def test_purge_jobs(self):
+        now = datetime.now()
+        retention = now - timedelta(days=2)
+        too_old = retention - timedelta(days=1)
+        to_delete = HarvestJobFactory.create_batch(3, created=too_old)
+        to_keep = [
+            HarvestJobFactory(created=now),
+            HarvestJobFactory(created=retention + timedelta(minutes=1)),
+        ]
+
+        result = actions.purge_jobs()
+
+        assert result == len(to_delete)
+        assert len(HarvestJob.objects) == len(to_keep)
 
     def test_attach(self):
         datasets = DatasetFactory.create_batch(3)

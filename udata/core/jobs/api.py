@@ -99,7 +99,7 @@ class JobsAPI(API):
 
 
 @ns.route('/jobs/<string:id>', endpoint='job')
-@api.doc(params={'id': 'A job ID'})
+@api.param('id', 'A job ID')
 class JobAPI(API):
     def get_or_404(self, id):
         task = PeriodicTask.objects(id=id).first()
@@ -128,7 +128,7 @@ class JobAPI(API):
         return form.save()
 
     @api.secure(admin_permission)
-    @api.doc(responses={204: 'Successfuly deleted'})
+    @api.response(204, 'Successfuly deleted')
     def delete(self, id):
         '''Delete a single scheduled job'''
         task = self.get_or_404(id)

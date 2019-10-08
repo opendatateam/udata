@@ -4,7 +4,7 @@
     <div class="modal-body">
         <dl class="dl-horizontal dl-wide">
           <dt>{{ _('ID') }}</dt>
-          <dd>{{dataset['@id']}}</dd>
+          <dd><a href="/datasets/{{dataset['@id']}}">{{dataset['@id']}}</a></dd>
           <dt v-if="dataset.dateCreated">{{ _('Created on') }}</dt>
           <dd v-if="dataset.dateCreated"> {{ dataset.dateCreated|dt }}</dd>
           <dt v-if="dataset.dateModified">{{ _('Modified on') }}</dt>

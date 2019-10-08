@@ -26,7 +26,7 @@
     </h3>
     <div class="profile-body">
         <image-button :src="logoSrc" :size="100" class="logo-button"
-            :endpoint="endpoint">
+            :endpoint="endpoint" :editable="org.is_admin($root.me)">
         </image-button>
         <div v-markdown="org.description"></div>
         <div v-if="org.badges | length" class="label-list">

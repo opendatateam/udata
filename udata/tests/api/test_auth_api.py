@@ -21,7 +21,7 @@ ns = api.namespace('fake', 'A Fake namespace')
 
 
 class FakeForm(Form):
-    required = fields.StringField(validators=[validators.required()])
+    required = fields.StringField(validators=[validators.DataRequired()])
     choices = fields.SelectField(choices=(('first', ''), ('second', '')))
     email = fields.StringField(validators=[validators.Email()])
 
@@ -90,7 +90,7 @@ class APIAuthTest:
         assert response.json == {'success': True}
 
     def test_oauth_auth(self, api, oauth):
-        '''Should handle  OAuth header authentication'''
+        '''Should handle OAuth header authentication'''
         user = UserFactory()
         token = OAuth2Token.objects.create(
             client=oauth,

@@ -113,6 +113,19 @@ Define the resources preview mode. Can be one of:
 
 If you want to disable preview, set `PREVIEW_MODE` to `None`
 
+### ARCHIVE_COMMENT_USER_ID
+
+**default**: `None`
+
+The id of an existing user which will post a comment when a dataset is archived.
+
+### ARCHIVE_COMMENT_TITLE
+
+**default**: `_('This dataset has been archived')`
+
+The title of the comment optionaly posted when a dataset is archived.
+NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE
@@ -152,6 +165,170 @@ from udata.settings import Defaults
 
 URLS_ALLOWED_TLDS = Defaults.URLS_ALLOWED_TLDS + set(['custom', 'company'])
 ```
+
+### EXPORT_CSV_MODELS
+
+**default**: `('dataset', 'resource', 'discussion', 'organization', 'reuse', 'tag')`
+
+List models that will be exported to CSV by the job `export-csv`.
+You can disable the feature by setting this to an empty list.
+
+### EXPORT_CSV_DATASET_ID
+
+**default**: `None`
+
+The id of a dataset that should be created before running the `export-csv` job and will hold the CSV exports.
+
+## Search configuration
+
+### SEARCH_AUTOCOMPLETE_ENABLED
+
+**default**: `True`
+
+Enables the search autocomplete on frontend if set to `True`, disables otherwise.
+
+### SEARCH_AUTOCOMPLETE_DEBOUNCE
+
+**default**: `200`
+
+The search autocomplete debounce delay on frontend, in milliseconds.
+
+### SEARCH_DATASET_FIELDS
+
+**default**:
+```python
+(
+    'geozones.keys^9',
+    'geozones.name^9',
+    'acronym^7',
+    'title^6',
+    'tags.i18n^3',
+    'description',
+)
+```
+Overrides dataset search fields and their ponderation.
+
+### SEARCH_DATASET_MAX_TEMPORAL_WEIGHT
+
+**default**: `5`
+
+After this number of years, scoring is kept constant instead of increasing.
+
+**Warning** Index time parameter: reindexing dataset is required for this parameter to be effective.
+
+### SEARCH_DATASET_FEATURED_WEIGHT
+
+**default**: `3`
+
+How much weight featured items get
+
+**Warning** Index time parameter: reindexing dataset is required for this parameter to be effective.
+
+### SEARCH_DATASET_FEATURED_BOOST
+
+**default**: `1.5`
+
+Boost given to the featured datasets.
+
+### SEARCH_DATASET_CERTIFIED_BOOST
+
+**default**: `1.2`
+
+Boost given to the datasets from certified organization.
+
+### SEARCH_DATASET_REUSES_DECAY
+
+**default**: `0.1`
+
+[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for reuses count on datasets.
+
+### SEARCH_DATASET_FOLLOWERS_DECAY
+
+**default**: `0.1`
+
+[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for followers count on datasets.
+
+### SEARCH_REUSE_FIELDS
+
+**default**:
+```python
+(
+    'title^4',
+    'description^2',
+    'datasets.title',
+)
+```
+
+Overrides reuse search fields and their ponderation.
+
+### SEARCH_REUSE_FEATURED_BOOST
+
+**default**: `1.1`
+
+Boost given to the featured reuses.
+
+### SEARCH_REUSE_DATASETS_DECAY
+
+**default**: `0.8`
+
+[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for reused datasets count on reuses.
+
+### SEARCH_REUSE_FOLLOWERS_DECAY
+
+**default**: `0.8`
+
+[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for followers count on reuses.
+
+### SEARCH_ORGANIZATION_FIELDS
+
+**default**:
+```python
+(
+    'name^6',
+    'acronym^6',
+    'description',
+)
+```
+
+Overrides organization search fields and their ponderation.
+
+### SEARCH_ORGANIZATION_DATASETS_DECAY
+
+**default**: `0.9`
+
+[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for datasets count on organizations.
+
+### SEARCH_ORGANIZATION_REUSES_DECAY
+
+**default**: `0.9`
+
+[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for reuses count on organizations.
+
+### SEARCH_ORGANIZATION_FOLLOWERS_DECAY
+
+**default**: `0.8`
+
+[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for followers count on organizations.
+
+### SEARCH_GEOZONE_FIELDS
+
+**default**: `None`
+
+Overrides geozone search fields and their ponderation.
+
+### SEARCH_USER_FIELDS
+
+**default**:
+
+```python
+(
+    'last_name^6',
+    'first_name^5',
+    'about'
+)
+```
+
+Overrides user search fields and their ponderation.
 
 ## Map widget configuration
 
@@ -247,6 +424,12 @@ The number of items to fetch while previewing an harvest source
 
 A cron expression used as default harvester schedule when validating harvesters.
 
+### HARVEST_JOBS_RETENTION_DAYS
+
+**default**: `365`
+
+The number of days of harvest jobs to keep (ie. number of days of history kept)
+
 ## Link checker configuration
 
 ### LINKCHECKING_ENABLED
@@ -327,6 +510,19 @@ The above example will produce:
 - a `myindex` alias on `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
 - a temporary `myindex-test` index during each test requiring it
 
+### ELASTICSEARCH_TIMEOUT
+
+**default**: `10`
+
+The timeout (in seconds) used by search queries and as default for any operation except indexing.
+
+
+### ELASTICSEARCH_INDEX_TIMEOUT
+
+**default**: `20`
+
+The timeout (in seconds) used by indexing/write operations (should be longer than the default timeout as indexing can be quite resources intensive and response time can be longer).
+
 
 ## Mongoengine/Flask-Mongoengine options
 
@@ -399,15 +595,23 @@ You can see the full configuration option list in
 
 The default identity used for outgoing mails.
 
-## Flask-OAuthlib options
+## Authlib options
 
-udata is Oauthlib to provide OAuth2 on the API.
+udata uses Authlib to provide OAuth2 on the API.
 The full option list is available in
-[the official Flask-OAuthlib documentation][flask-oauthlib-doc]
+[the official Authlib documentation][authlib-doc]
 
-### OAUTH2_PROVIDER_TOKEN_EXPIRES_IN
+### OAUTH2_TOKEN_EXPIRES_IN
 
-**default**: `30 * 24 * 60 * 60` (30 days)
+**default**:
+```python
+    {
+        'authorization_code': 10 * 24 * HOUR,
+        'implicit': 10 * 24 * HOUR,
+        'password': 10 * 24 * HOUR,
+        'client_credentials': 10 * 24 * HOUR
+    }
+```
 
 The OAuth2 token duration.
 
@@ -610,4 +814,4 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [flask-cache-doc]: https://pythonhosted.org/Flask-Cache/
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
-[flask-oauthlib-doc]: https://flask-oauthlib.readthedocs.org/en/latest/oauth2.html#configuration
+[authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server

@@ -233,6 +233,7 @@ export default {
             }, {
                 id: 'mime',
                 label: this._('Mime Type'),
+                widget: 'mime-completer',
                 readonly,
             }, {
                 id: 'checksum',
@@ -288,6 +289,7 @@ export default {
     methods: {
         manual() {
             this.hasChosenRemoteFile = true;
+            this.resource.filetype = 'remote';
             this.isUpload = false;
         },
         postUpload() {

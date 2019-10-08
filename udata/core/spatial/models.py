@@ -41,12 +41,13 @@ class GeoLevel(db.Document):
 
 
 class GeoZoneQuerySet(db.BaseQuerySet):
-    def valid_at(self, valid_date):
+    def valid_at(self, at):
         '''Limit current QuerySet to zone valid at a given date'''
-        is_valid = db.Q(validity__end__gt=valid_date,
-                        validity__start__lte=valid_date)
-        no_validity = db.Q(validity=None)
-        return self(is_valid | no_validity)
+        only_start = db.Q(validity__start__lte=at, validity__end=None)
+        only_end = db.Q(validity__start=None, validity__end__gt=at)
+        both = db.Q(validity__end__gt=at, validity__start__lte=at)
+        no_validity = db.Q(validity=None) | db.Q(validity__start=None, validity__end=None)
+        return self(no_validity | both | only_start | only_end)
 
     def latest(self):
         '''
@@ -98,6 +99,7 @@ class GeoZone(db.Document):
     population = db.IntField()
     area = db.FloatField()
     wikipedia = db.StringField()
+    wikidata = db.StringField()
     dbpedia = db.StringField()
     flag = db.ImageField(fs=logos)
     blazon = db.ImageField(fs=logos)
@@ -248,9 +250,18 @@ class GeoZone(db.Document):
         return self.level in current_app.config.get('HANDLED_LEVELS')
 
     def valid_at(self, valid_date):
-        if not self.validity:
+        if not self.validity or not (self.validity.start or self.validity.end):
             return True
-        return self.validity.start <= valid_date <= self.validity.end
+        if self.validity.start and self.validity.end:
+            return self.validity.start <= valid_date < self.validity.end
+        elif self.validity.start:
+            return self.validity.start <= valid_date
+        else:
+            return self.validity.end > valid_date
+
+    @property
+    def is_current(self):
+        return self.valid_at(date.today())
 
     def toGeoJSON(self):
         return {

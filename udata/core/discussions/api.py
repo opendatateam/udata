@@ -133,12 +133,33 @@ class DiscussionAPI(API):
         return '', 204
 
 
+@ns.route('/<id>/comments/<int:cidx>', endpoint='discussion_comment')
+class DiscussionCommentAPI(API):
+    '''
+    Base class for a comment in a discussion thread.
+    '''
+    @api.secure(admin_permission)
+    @api.doc('delete_discussion_comment')
+    @api.response(403, 'Not allowed to delete this comment')
+    def delete(self, id, cidx):
+        '''Delete a comment given its index'''
+        discussion = Discussion.objects.get_or_404(id=id)
+        if len(discussion.discussion) <= cidx:
+            api.abort(404, 'Comment does not exist')
+        elif cidx == 0:
+            api.abort(400, 'You cannot delete the first comment of a discussion')
+        discussion.discussion.pop(cidx)
+        discussion.save()
+        return '', 204
+
+
 @ns.route('/', endpoint='discussions')
 class DiscussionsAPI(API):
     '''
     Base class for a list of discussions.
     '''
-    @api.doc('list_discussions', parser=parser)
+    @api.doc('list_discussions')
+    @api.expect(parser)
     @api.marshal_with(discussion_page_fields)
     def get(self):
         '''List all Discussions'''

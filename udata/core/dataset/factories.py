@@ -18,6 +18,7 @@ class DatasetFactory(ModelFactory):
     title = factory.Faker('sentence')
     description = factory.Faker('text')
     frequency = 'unknown'
+    resources = factory.LazyAttribute(lambda o: ResourceFactory.build_batch(o.nb_resources))
 
     class Params:
         geo = factory.Trait(
@@ -29,6 +30,7 @@ class DatasetFactory(ModelFactory):
         org = factory.Trait(
             organization=factory.SubFactory(OrganizationFactory),
         )
+        nb_resources = 0
 
 
 class VisibleDatasetFactory(DatasetFactory):

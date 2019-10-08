@@ -155,6 +155,17 @@ export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resource
 export const markdown = _jsonMeta('markdown-config');
 
 
+/**
+ * Whether the search autocomplete is enabled or not
+ */
+export const is_search_autocomplete_enabled = _jsonMeta('search-autocomplete-enabled');
+
+/**
+ * The search autocomplete  debounce delay
+ */
+export const search_autocomplete_debounce = _jsonMeta('search-autocomplete-debounce');
+
+
 export default {
     user,
     debug,
@@ -176,5 +187,7 @@ export default {
     map,
     tags,
     dataset_max_resources_uncollapsed,
+    is_search_autocomplete_enabled,
+    search_autocomplete_debounce,
     markdown,
 };

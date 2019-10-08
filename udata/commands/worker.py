@@ -48,7 +48,7 @@ def status_print_config(queue):
     print('graph_vlabel Nb of tasks')
     print('graph_category celery')
     for task in tasks:
-        print('%s.label %s' % (format_field_for_munin(task), task))
+        print('%s.label %s' % (format_field_for_munin(task), short_name(task)))
 
 
 def status_print_queue(queue, munin=False):
@@ -92,6 +92,12 @@ def get_redis_connection():
 
 def get_task_queue(name, cls):
     return (router(name, [], {}, None, task=cls) or {}).get('queue', 'default')
+
+
+def short_name(name):
+    if '.' not in name:
+        return name
+    return name.rsplit('.', 1)[1]
 
 
 def get_tasks():

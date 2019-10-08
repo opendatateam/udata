@@ -185,13 +185,13 @@ class UserAPITest(APITestCase):
         response = self.get(url_for('api.users'))
         self.assert200(response)
         [json] = response.json['data']
-        self.assertEquals(json['id'], str(user.id))
-        self.assertEquals(json['slug'], user.slug)
-        self.assertEquals(json['first_name'], user.first_name)
-        self.assertEquals(json['last_name'], user.last_name)
-        self.assertEquals(json['website'], user.website)
-        self.assertEquals(json['about'], user.about)
-        self.assertEquals(json['metrics'], user.metrics)
+        self.assertEqual(json['id'], str(user.id))
+        self.assertEqual(json['slug'], user.slug)
+        self.assertEqual(json['first_name'], user.first_name)
+        self.assertEqual(json['last_name'], user.last_name)
+        self.assertEqual(json['website'], user.website)
+        self.assertEqual(json['about'], user.about)
+        self.assertEqual(json['metrics'], user.metrics)
 
     def test_get_user(self):
         '''It should get a user'''

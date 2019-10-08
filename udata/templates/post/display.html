@@ -1,5 +1,4 @@
 {% extends theme('base.html') %}
-{% from theme('macros/share.html') import share_btn with context %}
 
 {% set meta = {
     'title': post.name,
@@ -109,9 +108,6 @@
                 {# button bar #}
                 <div class="row main-toolbar"><div class="col-xs-12">
                     <div class="btn-toolbar pull-right">
-                        <div class="btn-group btn-group-sm">
-                            {{ share_btn(post.name) }}
-                        </div>
                         {% if sysadmin %}
                         <div class="btn-group btn-group-sm">
                             <a href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}" class="btn btn-success">
@@ -164,24 +160,24 @@
 <section class="content nav-section">
     <div class="container">
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-xs-2 col-sm-4">
                 {% if previous_post %}
                 <a href="{{ previous_post.display_url }}" title="{{ _('Previous post') }}" class="btn btn-primary">
                     <span class="fa fa-chevron-left"></span>
-                    {{ _('Previous post') }}
+                    <span class="hidden-xs">{{ _('Previous post') }}</span>
                 </a>
                 {% endif %}
             </div>
-            <div class="col-sm-4 text-center">
+            <div class="col-xs-8 col-sm-4 text-center">
                 <a href="{{ url_for('posts.list') }}" class="btn btn-primary">
                     <span class="fa fa-fw fa-list"></span>
                     {{ _('All posts') }}
                 </a>
             </div>
-            <div class="col-sm-4 text-right">
+            <div class="col-xs-2 col-sm-4 text-right">
                 {% if next_post %}
                 <a href="{{ next_post.display_url }}" title="{{ _('Next post') }}" class="btn btn-primary">
-                    {{ _('Next post') }}
+                    <span class="hidden-xs">{{ _('Next post') }}</span>
                     <span class="fa fa-chevron-right"></span>
                 </a>
                 {% endif %}

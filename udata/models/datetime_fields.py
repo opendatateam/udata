@@ -25,7 +25,7 @@ class DateField(BaseField):
             return value
         try:
             value = parse(value, yearfirst=True).date()
-        except:
+        except Exception:
             pass
         return value
 
@@ -47,11 +47,15 @@ class DateField(BaseField):
 
 
 class DateRange(EmbeddedDocument):
-    start = DateField(required=True)
-    end = DateField(required=True)
+    start = DateField()
+    end = DateField()
 
     def to_dict(self):
         return {'start': self.start, 'end': self.end}
+
+    def clean(self):
+        if self.start and self.end and self.start > self.end:
+            self.start, self.end = self.end, self.start
 
 
 class Datetimed(object):
@@ -63,5 +67,6 @@ class Datetimed(object):
 
 @pre_save.connect
 def set_modified_datetime(sender, document, **kwargs):
-    if isinstance(document, Datetimed):
+    changed = document._get_changed_fields()
+    if isinstance(document, Datetimed) and 'last_modified' not in changed:
         document.last_modified = datetime.now()

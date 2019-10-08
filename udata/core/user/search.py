@@ -10,6 +10,7 @@ from udata.search import i18n_analyzer, metrics_mapping_for, register
 from udata.search.fields import ModelTermsFacet, RangeFacet
 from udata.search.fields import GaussDecay
 from udata.search.analysis import simple
+from udata.utils import to_iso_datetime
 
 # Metrics are required for user search
 from . import metrics  # noqa
@@ -36,11 +37,6 @@ class UserSearch(ModelSearchAdapter):
                               search_analyzer=simple,
                               payloads=True)
 
-    fields = (
-        'last_name^6',
-        'first_name^5',
-        'about'
-    )
     sorts = {
         'last_name': 'last_name',
         'first_name': 'first_name',
@@ -86,7 +82,7 @@ class UserSearch(ModelSearchAdapter):
             'about': user.about,
             'organizations': [str(o.id) for o in user.organizations],
             'metrics': user.metrics,
-            'created': user.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
+            'created': to_iso_datetime(user.created_at),
             'user_suggest': {
                 'input': cls.completer_tokenize(user.fullname) + [user.id],
                 'output': str(user.id),

@@ -1,8 +1,12 @@
 <style scoped lang="less">
-.sort {
-    margin-top: -32px;
-    margin-bottom: 1em;
-    text-align: right;
+.control {
+    display:flex;
+    flex-direction: row;
+
+    .pagination {
+        margin-top: 0;
+        flex-grow: 1;
+    }
 }
 
 .loading {
@@ -49,26 +53,42 @@
         }
     }
 }
+
+.list-group-form {
+    height: inherit;
+
+    form {
+        padding: 1em;
+    }
+}
 </style>
 <template>
 <div class="discussion-threads">
+
+    <div class="control">
+        <pagination-widget
+            :p="p"
+            class="pagination">
+        </pagination-widget>
+
+        <div class="sort" v-show="discussions.length > 1">
+            <div class="btn-group">
+                <button class="btn btn-default btn-sm dropdown-toogle" type="button"
+                    data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    {{ _('sort by') }} <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li><a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a></li>
+                    <li><a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="loading" v-if="loading">
         <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i>
         <span class="sr-only">{{ _('Loading') }}...</span>
-    </div>
-
-    <div class="sort" v-show="discussions.length > 1">
-        <div class="btn-group">
-            <button class="btn btn-default btn-sm dropdown-toogle" type="button"
-                data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                {{ _('sort by') }} <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-right">
-                <li><a class="by_created" @click="sortBy('created')">{{ _('topic creation') }}</a></li>
-                <li><a class="last_response" @click="sortBy('response')">{{ _('last response')  }}</a></li>
-            </ul>
-        </div>
     </div>
 
     <discussion-thread
@@ -119,21 +139,25 @@ import config from 'config';
 import Avatar from 'components/avatar.vue';
 import DiscussionThread from 'components/discussions/thread.vue';
 import ThreadFormCreate from 'components/discussions/thread-create.vue';
+import PaginationWidget from 'components/pagination.vue';
+
 import log from 'logger';
 
 const DISCUSSION_REGEX = /^#discussion-([0-9a-f]{24})$/;
 const COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-(\d+)$/;
 const NEW_COMMENT_REGEX = /^#discussion-([0-9a-f]{24})-new-comment$/;
 
+const MASK = ['id', 'title', 'created', 'closed', 'class', 'subject', 'discussion', 'closed_by'];
 
 export default {
-    components: {Avatar, DiscussionThread, ThreadFormCreate},
+    components: {Avatar, DiscussionThread, ThreadFormCreate, PaginationWidget},
     data() {
         return {
             discussions: [],
+            p: {},
             loading: true,
             formDisplayed: false,
-            currentUser: config.user,
+            currentUser: config.user
         }
     },
     props: {
@@ -166,17 +190,7 @@ export default {
         }
     },
     ready() {
-        this.$api.get('discussions/', {for: this.subjectId}).then(response => {
-
-            this.loading = false;
-            this.discussions = response.data;
-
-            if (document.location.hash) {
-                this.$nextTick(() => { // Wait for data to be binded
-                    this.jumpToHash(document.location.hash);
-                });
-            }
-        }).catch(log.error.bind(log));
+        this.go_to_page(1);
     },
     methods: {
         /**
@@ -219,7 +233,6 @@ export default {
          * Sort threads by creation date or by last response date
          */
         sortBy(key) {
-
             if (key === 'created') {
                 this.discussions.sort( (a,b) => new Date(b['created']) - new Date(a['created']) );
             } else if (key === 'response') {
@@ -243,19 +256,48 @@ export default {
                 const [, id] = hash.match(NEW_COMMENT_REGEX);
                 this.threadFor(id).start();
             }
+        },
+
+        go_to_page(page){
+            this.loading = true;
+
+            this.$api.get('discussions/', {for: this.subjectId, page: page}).then(response => {
+                this.loading = false;
+
+                this.discussions = response.data;
+
+                const pages = Math.ceil(response.total / response.page_size)
+
+                let previous_page = ()=>{
+                    if (response.page > 1){
+                        this.go_to_page(response.page - 1);
+                    }
+                }
+
+                let next_page = ()=> {
+                    if (response.page < response.pages) {
+                        this.go_to_page(response.page + 1);
+                    }
+                }
+
+                const pagination = {
+                    page: response.page,
+                    page_size: response.page_size,
+                    pages: pages,
+                    go_to_page: this.go_to_page,
+                    previousPage: previous_page,
+                    nextPage: next_page
+                }
+
+                this.p = Object.assign({}, this.p, pagination)
+
+                if (document.location.hash) {
+                    this.$nextTick(() => { // Wait for data to be binded
+                        this.jumpToHash(document.location.hash);
+                    });
+                }
+            }).catch(log.error.bind(log));
         }
     }
 }
 </script>
-
-<style lang="less">
-.discussion-threads {
-    .list-group-form {
-        height: inherit;
-
-        form {
-            padding: 1em;
-        }
-    }
-}
-</style>

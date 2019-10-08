@@ -24,12 +24,12 @@ class UserBlueprintTest(FrontTestCase):
         response = self.get(url_for('users.show', user=user))
         self.assert200(response)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld['@context'], 'http://schema.org')
-        self.assertEquals(json_ld['@type'], 'Person')
-        self.assertEquals(json_ld['name'], user.fullname)
-        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
-        self.assertEquals(json_ld['url'], 'http://www.datagouv.fr/user')
-        self.assertEquals(json_ld['image'], 'http://www.datagouv.fr/avatar')
+        self.assertEqual(json_ld['@context'], 'http://schema.org')
+        self.assertEqual(json_ld['@type'], 'Person')
+        self.assertEqual(json_ld['name'], user.fullname)
+        self.assertEqual(json_ld['description'], 'Title 1 Title 2')
+        self.assertEqual(json_ld['url'], 'http://www.datagouv.fr/user')
+        self.assertEqual(json_ld['image'], 'http://www.datagouv.fr/avatar')
 
     def test_cannot_render_profile_of_an_inactive_user(self):
         '''It should raise a 410 when the user is inactive'''

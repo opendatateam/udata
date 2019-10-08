@@ -33,27 +33,20 @@ import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
 import Metrics from 'models/metrics';
 import CommunityResources from 'models/communityresources';
-import Layout from 'components/layout.vue';
-import DatasetList from 'components/dataset/list.vue';
-import ReuseList from 'components/reuse/list.vue';
+
+import Chart from 'components/charts/widget.vue';
 import CommunityList from 'components/dataset/communityresource/list.vue';
+import DatasetList from 'components/dataset/list.vue';
+import Harvesters from 'components/harvest/sources.vue';
+import Layout from 'components/layout.vue';
+import Profile from 'components/user/profile.vue';
+import ReuseList from 'components/reuse/list.vue';
+
 
 export default {
     name: 'user-view',
-    data: function() {
+    data() {
         return {
-            actions: [
-                {
-                    label: this._('Edit'),
-                    icon: 'edit',
-                    method: this.edit
-                },
-                {
-                    label: this._('Delete'),
-                    icon: 'trash',
-                    method: this.confirm_delete,
-                }
-            ],
             user: new User(),
             metrics: new Metrics({
                 query: {
@@ -74,13 +67,33 @@ export default {
         };
     },
     components: {
-        profile: require('components/user/profile.vue'),
-        chart: require('components/charts/widget.vue'),
-        harvesters: require('components/harvest/sources.vue'),
+        Chart,
         CommunityList,
         DatasetList,
+        Harvesters,
+        Layout,
+        Profile,
         ReuseList,
-        Layout
+    },
+    computed: {
+        actions() {
+            const actions = [];
+            if (this.can_edit) {
+                actions.push({
+                    label: this._('Edit'),
+                    icon: 'edit',
+                    method: this.edit
+                }, {
+                    label: this._('Delete'),
+                    icon: 'trash',
+                    method: this.confirm_delete,
+                });
+            }
+            return actions;
+        },
+        can_edit() {
+            return this.$root.me.is_admin || this.user.id == this.$root.me;
+        },
     },
     watch: {
         'user.id': function(id) {

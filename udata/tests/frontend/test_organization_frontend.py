@@ -49,12 +49,12 @@ class OrganizationBlueprintTest(FrontTestCase):
         self.assertNotIn(b'<meta name="robots" content="noindex, nofollow">',
                          response.data)
         json_ld = self.get_json_ld(response)
-        self.assertEquals(json_ld['@context'], 'http://schema.org')
-        self.assertEquals(json_ld['@type'], 'Organization')
-        self.assertEquals(json_ld['alternateName'], organization.slug)
-        self.assertEquals(json_ld['url'], 'http://local.test{}'.format(url))
-        self.assertEquals(json_ld['name'], organization.name)
-        self.assertEquals(json_ld['description'], 'Title 1 Title 2')
+        self.assertEqual(json_ld['@context'], 'http://schema.org')
+        self.assertEqual(json_ld['@type'], 'Organization')
+        self.assertEqual(json_ld['alternateName'], organization.slug)
+        self.assertEqual(json_ld['url'], 'http://local.test{}'.format(url))
+        self.assertEqual(json_ld['name'], organization.name)
+        self.assertEqual(json_ld['description'], 'Title 1 Title 2')
 
     def test_render_display_if_deleted(self):
         '''It should not render the organization page if deleted'''

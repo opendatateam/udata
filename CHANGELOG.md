@@ -2,10 +2,113 @@
 
 ## Current (in progress)
 
+- Prevent Google ranking spam attacks on reuse pages (`rel=nofollow` on reuse link) [#2320](https://github.com/opendatateam/udata/pull/2320)
+- Display admin resources list actions only if user has permissions to edit [#2326](https://github.com/opendatateam/udata/pull/2326)
+- Fix non-admin user not being able to change their profile picture [#2327](https://github.com/opendatateam/udata/pull/2327)
+
+## 1.6.15 (2019-09-11)
+
+- Style links in admin modals [#2292](https://github.com/opendatateam/udata/pull/2292)
+- Add activity.key filter to activity.atom feed [#2293](https://github.com/opendatateam/udata/pull/2293)
+- Allow `Authorization` as CORS header and OAuth minor fixes [#2298](https://github.com/opendatateam/udata/pull/2298)
+- Set dataset.private to False by default (and fix stock) [#2307](https://github.com/opendatateam/udata/pull/2307)
+- Fixes some inconsistencies between admin display (buttons, actions...) and real permissions [#2308](https://github.com/opendatateam/udata/pull/2308)
+
+## 1.6.14 (2019-08-14)
+
+- Cleanup `permitted_reuses` data (migration) [#2244](https://github.com/opendatateam/udata/pull/2244)
+- Proper form errors handling on nested fields [#2246](https://github.com/opendatateam/udata/pull/2246)
+- JS models load/save/update consistency (`loading` always `true` on query, always handle error, no more silent errors) [#2247](https://github.com/opendatateam/udata/pull/2247)
+- Ensures that date ranges are always positive (ie. `start` < `end`) [#2253](https://github.com/opendatateam/udata/pull/2253)
+- Enable completion on the "`MIME type`" resource form field (needs reindexing) [#2238](https://github.com/opendatateam/udata/pull/2238)
+- Ensure oembed rendering errors are not hidden by default error handlers and have cors headers [#2254](https://github.com/opendatateam/udata/pull/2254)
+- Handle dates before 1900 during indexing [#2256](https://github.com/opendatateam/udata/pull/2256)
+- `spatial load` command is more resilient: make use of a temporary collection when `--drop` option is provided (avoid downtime during the load), in case of exception or keybord interrupt, temporary files and collections are cleaned up [#2261](https://github.com/opendatateam/udata/pull/2261)
+- Configurable Elasticsearch timeouts. Introduce `ELASTICSEARCH_TIMEOUT` as default/read timeout and `ELASTICSEARCH_INDEX_TIMEOUT` as indexing/write timeout [#2265](https://github.com/opendatateam/udata/pull/2265)
+- OEmbed support for organizations [#2273](https://github.com/opendatateam/udata/pull/2273)
+- Extract search parameters as settings allowing fine tuning search without repackaging udata (see [the **Search configuration** documentation](https://udata.readthedocs.io/en/stable/adapting-settings/#search-configuration)) [#2275](https://github.com/opendatateam/udata/pull/2275)
+- Prevent `DoesNotExist` error in activity API: silence the error for the consumer but log it (ie. visible in Sentry) [#2268](https://github.com/opendatateam/udata/pull/2268)
+- Optimize CSV export generation memory wise [#2277](https://github.com/opendatateam/udata/pull/2277)
+
+## 1.6.13 (2019-07-11)
+
+- Rename og:image target :warning: this will break your custom theme, please rename your logo image file to `logo-social.png` instead of `logo-600x600.png` [#2217](https://github.com/opendatateam/udata/pull/2217)
+- Don't automatically overwrite `last_update` field if manually set [#2020](https://github.com/opendatateam/udata/pull/2220)
+- Spatial completion: only index last version of each zone and prevent completion cluttering [#2140](https://github.com/opendatateam/udata/pull/2140)
+- Init: prompt to loads countries [#2140](https://github.com/opendatateam/udata/pull/2140)
+- Handle UTF-8 filenames in `spatial load_logos` command [#2223](https://github.com/opendatateam/udata/pull/2223)
+- Display the datasets, reuses and harvesters deleted state on listing when possible [#2228](https://github.com/opendatateam/udata/pull/2228)
+- Fix queryless (no `q` text parameter) search results scoring (or lack of scoring) [#2231](https://github.com/opendatateam/udata/pull/2231)
+- Miscellaneous fixes on completers [#2215](https://github.com/opendatateam/udata/pull/2215)
+- Ensure `filetype='remote'` is set when using the manual ressource form [#2236](https://github.com/opendatateam/udata/pull/2236)
+- Improve harvest sources listing (limit `last_job` fetched and serialized fields, reduce payload) [#2214](https://github.com/opendatateam/udata/pull/2214)
+- Ensure HarvestItems are cleaned up on dataset deletion [#2214](https://github.com/opendatateam/udata/pull/2214)
+- Added `config.HARVEST_JOBS_RETENTION_DAYS` and a `harvest-purge-jobs` job to apply it [#2214](https://github.com/opendatateam/udata/pull/2214) (migration). **Warning, the migration will enforce `config.HARVEST_JOBS_RETENTION_DAYS` and can take some time on a big `HarvestJob` collection**
+- Drop `no_dereference` on indexing to avoid the "`dictionary changed size during iteration`" error until another solution is found. **Warning: this might result in more resources consumption while indexing** [#2237](https://github.com/opendatateam/udata/pull/2237)
+- Fix various issues around discussions UI [#2190](https://github.com/opendatateam/udata/pull/2190)
+
+
+## 1.6.12 (2019-06-26)
+
+- Archive dataset feature [#2172](https://github.com/opendatateam/udata/pull/2172)
+- Refactor breadcrum includes [#2173](https://github.com/opendatateam/udata/pull/2173)
+- Better dependencies management [#2182](https://github.com/opendatateam/udata/pull/2182) and [#2172/install.pip](https://github.com/opendatateam/udata/pull/2172/files#diff-d7b45472f3465d62f857d14cf59ea8a2)
+- Reduce following to staring [#2192](https://github.com/opendatateam/udata/pull/2192/files)
+- Simplify display of spatial coverage in search results [#2192](https://github.com/opendatateam/udata/pull/2192/files)
+- Add cache for organization and topic display pages [#2194](https://github.com/opendatateam/udata/pull/2194)
+- Dataset of datasets: id as ref instead of slug [#2195](https://github.com/opendatateam/udata/pull/2195) :warning: this introduces some settings changes, cf [documentation for EXPORT_CSV](https://github.com/opendatateam/udata/blob/master/docs/adapting-settings.md).
+- Add meta og:type: make twitter cards work [#2196](https://github.com/opendatateam/udata/pull/2196)
+- Fix UI responsiveness [#2199](https://github.com/opendatateam/udata/pull/2199)
+- Remove social media sharing feature [#2200](https://github.com/opendatateam/udata/pull/2200)
+- Quick fix for activity.atom [#2203](https://github.com/opendatateam/udata/pull/2203)
+- Remove diff from js dependencies to fix CVE [#2204](https://github.com/opendatateam/udata/pull/2204)
+- Replace default sort label for better readability [#2206](https://github.com/opendatateam/udata/pull/2206)
+- Add a condition to up-to-dateness of a dataset [#2208](https://github.com/opendatateam/udata/pull/2208)
+- Prevent deleted harvesters from running until purged. Harvest jobs history is deleted too on purge. [#2209](https://github.com/opendatateam/udata/pull/2209)
+- Better quality.frequency management [#2211](https://github.com/opendatateam/udata/pull/2211)
+- Fix caching of topic pages [#2213](https://github.com/opendatateam/udata/pull/2213)
+
+## 1.6.11 (2019-05-29)
+
+- Center incomplete rows of cards [#2162](https://github.com/opendatateam/udata/pull/2162)
+- Allow .dxf upload [#2164](https://github.com/opendatateam/udata/pull/2164)
+- Always use remote_url as harvesting source [#2165](https://github.com/opendatateam/udata/pull/2165)
+- Update jquery to ~3.4.1 [#2161](https://github.com/opendatateam/udata/pull/2161)
+- Fix various issues with search result page [#2166](https://github.com/opendatateam/udata/pull/2166)
+- Restore notbroken facet includes [#2169](https://github.com/opendatateam/udata/pull/2169)
+
+## 1.6.10 (2019-05-23)
+
+- Remove `<br>` in badge display [#2156](https://github.com/opendatateam/udata/pull/2156)
+- Display user avatar and fix its sizing [#2157](https://github.com/opendatateam/udata/pull/2157)
+- Redirect unfiltered csv exports to dataset of datasets [#2158](https://github.com/opendatateam/udata/pull/2158)
+- Show organization id in a modal and add hyperlinks to ids in detail modal [#2159](https://github.com/opendatateam/udata/pull/2159)
+
+## 1.6.9 (2019-05-20)
+
+- Add user slug to dataset cache key [#2146](https://github.com/opendatateam/udata/pull/2146)
+- Change display of cards of reuses on topic pages [#2148](https://github.com/opendatateam/udata/pull/2148)
+- Display remote source of harvested dataset [#2150](https://github.com/opendatateam/udata/pull/2150)
+- Prefill community resource type on upload form [#2151](https://github.com/opendatateam/udata/pull/2151)
+- Fix user profile UI [#2152](https://github.com/opendatateam/udata/pull/2152)
+- Remove concept of permitted reuse [#2153](https://github.com/opendatateam/udata/pull/2153)
+
+## 1.6.8 (2019-05-13)
+
+- Configurable search autocomplete [#2138](https://github.com/opendatateam/udata/pull/2138)
+
+## 1.6.7 (2019-05-10)
+
 - Refactor DCAT harvesting to store only one graph (and prevent MongoDB document size overflow) [#2096](https://github.com/opendatateam/udata/pull/2096)
 - Expose sane defaults for `TRACKING_BLACKLIST` [#2098](https://github.com/opendatateam/udata/pull/2098)
 - Bubble up uploader errors [#2102](https://github.com/opendatateam/udata/pull/2102)
 - Ensure `udata worker status --munin` always outputs zero values so munin won't see it has a "no data" response [#2103](https://github.com/opendatateam/udata/pull/2103)
+- Metrics tuning: breaks circular dependencies, drop exec_js/eval usage, proper logging... [#2113](https://github.com/opendatateam/udata/pull/2113)
+- Change reuse icon from "retweet" to "recycle" [#2122](https://github.com/opendatateam/udata/pull/2122)
+- Admins can delete a single comment in a discussion thread [#2087](https://github.com/opendatateam/udata/pull/2087)
+- Add cache directives to dataset display blocks [#2129](https://github.com/opendatateam/udata/pull/2129)
+- Export multiple models objects to CSV (dataset of datasets) [#2124](https://github.com/opendatateam/udata/pull/2124)
+
 
 ## 1.6.6 (2019-03-27)
 

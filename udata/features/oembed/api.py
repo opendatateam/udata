@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from flask import current_app
 from flask_restplus import inputs
+from werkzeug.exceptions import HTTPException
 
 from udata import theme
 from udata.api import api, API
@@ -35,11 +36,14 @@ oembeds_parser.add_argument(
 @api.route('/oembed', endpoint='oembed')
 class OEmbedAPI(API):
     ROUTES = {
-        'datasets.show': 'dataset',
-        'reuses.show': 'reuse',
+        # endpoint: (param name, template prefix)
+        'datasets.show': ('dataset', 'dataset'),
+        'organizations.show': ('org', 'organization'),
+        'reuses.show': ('reuse', 'reuse'),
     }
 
-    @api.doc('oembed', parser=oembed_parser)
+    @api.doc('oembed')
+    @api.expect(oembed_parser)
     def get(self):
         """
         An OEmbed compliant API endpoint
@@ -50,7 +54,7 @@ class OEmbedAPI(API):
         """
         args = oembed_parser.parse_args()
         if args['format'] != 'json':
-            api.abort(501, 'Only JSON format is supported')
+            return {'message': 'Only JSON format is supported'}, 501
 
         url = args['url']
 
@@ -60,16 +64,20 @@ class OEmbedAPI(API):
 
         with current_app.test_request_context(url) as ctx:
             if not ctx.request.endpoint:
-                api.abort(404, 'Unknown URL')
+                return {'message': 'Unknown URL "{0}"'.format(url)}, 404
             endpoint = ctx.request.endpoint.replace('_redirect', '')
             view_args = ctx.request.view_args
 
         if endpoint not in self.ROUTES:
-            api.abort(404, 'Unknown URL')
+            return {'message': 'The URL "{0}" does not support oembed'.format(url)}, 404
 
-        param = self.ROUTES[endpoint]
+        param, prefix = self.ROUTES[endpoint]
         item = view_args[param]
         if isinstance(item, Exception):
+            if isinstance(item, HTTPException):
+                return {
+                    'message': 'An error occured on URL "{0}": {1}'.format(url, str(item))
+                }, item.code
             raise item
         width = maxwidth = 1000
         height = maxheight = 200
@@ -77,7 +85,7 @@ class OEmbedAPI(API):
             'width': width,
             'height': height,
             'item': item,
-            'type': param
+            'type': prefix
         }
         params[param] = item
         html = theme.render('oembed.html', **params)
@@ -95,7 +103,8 @@ class OEmbedAPI(API):
 @api.route('/oembeds/', endpoint='oembeds')
 class OEmbedsAPI(API):
 
-    @api.doc('oembeds', parser=oembeds_parser)
+    @api.doc('oembeds')
+    @api.expect(oembeds_parser)
     def get(self):
         """ The returned payload is a list of OEmbed formatted responses.
 

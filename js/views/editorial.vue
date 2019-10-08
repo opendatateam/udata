@@ -1,12 +1,12 @@
 <template>
 <layout :title="_('Editorial')">
     <div class="row">
-        <dataset-card-list class="col-xs-12 col-md-6"
+        <dataset-card-list class="col-xs-12 col-md-6" editable
             :title="_('Featured datasets')"
             :datasets="home_datasets.items"
             :loading="home_datasets.loading">
         </dataset-card-list>
-        <reuse-card-list class="col-xs-12 col-md-6"
+        <reuse-card-list class="col-xs-12 col-md-6" editable
             :title="_('Featured reuses')"
             :reuses="home_reuses.items"
             :loading="home_reuses.loading">

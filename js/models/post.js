@@ -12,6 +12,7 @@ export default class Post extends Model {
             options['X-Fields'] = mask;
         }
         if (ident) {
+            this.loading = true;
             this.$api('posts.get_post', options, this.on_fetched);
         } else {
             log.error('Unable to fetch Post: no identifier specified');
@@ -27,20 +28,22 @@ export default class Post extends Model {
     }
 
     update(data, on_success, on_error) {
+        this.loading = true;
         this.$api('posts.update_post', {
             post: this.id,
             payload: data
-        }, on_success, on_error);
+        }, on_success, this.on_error(on_error));
     }
 
-    save() {
+    save(on_error) {
         const data = {payload: this};
         let endpoint = 'posts.create_post';
+        this.loading = true;
 
         if (this.id) {
             endpoint = 'posts.update_post';
             data.post = this.id;
         }
-        this.$api(endpoint, data, this.on_fetched);
+        this.$api(endpoint, data, this.on_fetched, this.on_error(on_error));
     }
 };

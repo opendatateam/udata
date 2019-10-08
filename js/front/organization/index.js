@@ -12,6 +12,7 @@ import Vue from 'vue';
 // import Tabset from 'vue-strap/src/Tabset.vue';
 
 import FollowButton from 'components/buttons/follow.vue';
+import DetailsModal from './details-modal.vue';
 import ActivityTimeline from 'components/activities/timeline.vue';
 import DashboardGraphs from 'components/dashboard/graphs.vue';
 import Tab from 'components/tab';
@@ -27,6 +28,7 @@ new Vue({
     components: {FollowButton, Tab, Tabset, ActivityTimeline, DashboardGraphs, SmallBox},
     data() {
         return {
+            organization: this.extractOrganization(),
             followersVisible: false,
             // Current tab index
             currentTab: 0,
@@ -44,7 +46,25 @@ new Vue({
         },
         showFollowers() {
             this.followersVisible = true;
+        },
+        /**
+         * Extract the current organization metadatas from JSON-LD script
+         * @return {Object} The parsed organization
+         */
+        extractOrganization() {
+            const selector = '#json_ld';
+            const organization = JSON.parse(document.querySelector(selector).text);
+
+            return organization;
+        },
+
+        /**
+         * Display the details modal
+         */
+        showDetails() {
+            this.$modal(DetailsModal, {organization: this.organization});
         }
+
     },
     ready() {
         log.debug('Organization display page');
@@ -74,5 +94,5 @@ new Vue({
                 }
             });
         }
-    }
+    },
 });

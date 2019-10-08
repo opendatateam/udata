@@ -12,7 +12,7 @@ from mongoengine.fields import BaseField
 from udata.settings import Defaults
 from udata.models import db, Dataset, validate_config, build_test_config
 from udata.errors import ConfigError
-from udata.tests.helpers import assert_json_equal
+from udata.tests.helpers import assert_json_equal, assert_equal_dates
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db')
@@ -42,6 +42,14 @@ class SlugUpdateTester(db.Document):
 
 class DateTester(db.Document):
     a_date = db.DateField()
+
+
+class DateRangeTester(db.Document):
+    temporal = db.EmbeddedDocumentField(db.DateRange)
+
+
+class RequiredDateRangeTester(db.Document):
+    temporal = db.EmbeddedDocumentField(db.DateRange, required=True)
 
 
 class DateTesterWithDefault(db.Document):
@@ -243,6 +251,88 @@ class DateFieldTest:
             obj.save()
 
 
+class DateRangeFieldTest:
+    def test_none_if_empty_and_not_required(self):
+        obj = DateRangeTester()
+        assert obj.temporal is None
+        obj.save()
+        obj.reload()
+        assert obj.temporal is None
+
+    def test_both_valid(self):
+        start = date(1984, 6, 6)
+        end = date(1984, 6, 7)
+        obj = DateRangeTester(temporal={'start': start, 'end': end})
+        assert obj.temporal.start == start
+        assert obj.temporal.end == end
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end == end
+
+    def test_both_valid_but_reversed(self):
+        start = date(1984, 6, 6)
+        end = date(1984, 6, 7)
+        obj = DateRangeTester(temporal={'start': end, 'end': start})
+        assert obj.temporal.start == end
+        assert obj.temporal.end == start
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end == end
+
+    def test_only_start(self):
+        start = date(1984, 6, 6)
+        obj = DateRangeTester(temporal={'start': start})
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+
+    def test_only_end(self):
+        end = date(1984, 6, 7)
+        obj = DateRangeTester(temporal={'end': end})
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
+
+    def test_not_valid(self):
+        obj = DateRangeTester(temporal={'start': 'wrong'})
+        with pytest.raises(ValidationError):
+            obj.save()
+
+    def test_empty_but_required(self):
+        obj = RequiredDateRangeTester()
+        assert obj.temporal is None
+        with pytest.raises(ValidationError):
+            obj.save()
+
+    def test_only_start_when_required(self):
+        start = date(1984, 6, 6)
+        obj = RequiredDateRangeTester(temporal={'start': start})
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start == start
+        assert obj.temporal.end is None
+
+    def test_only_end_when_required(self):
+        end = date(1984, 6, 7)
+        obj = RequiredDateRangeTester(temporal={'end': end})
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
+        obj.save()
+        obj.reload()
+        assert obj.temporal.start is None
+        assert obj.temporal.end == end
+
+
 class URLFieldTest:
     def test_none_if_empty_and_not_required(self):
         obj = URLTester()
@@ -301,9 +391,40 @@ class DatetimedTest:
             created_at=earlier, last_modified=earlier)
 
         datetimed.save()
+        datetimed.reload()
 
-        assert datetimed.created_at == earlier
-        assert now <= datetimed.last_modified <= datetime.now()
+        assert_equal_dates(datetimed.created_at, earlier)
+        assert_equal_dates(datetimed.last_modified, now)
+
+    def test_save_last_modified_instance_manually_set(self):
+        now = datetime.now()
+        manual = now - timedelta(days=1)
+        earlier = now - timedelta(days=2)
+        datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
+
+        datetimed.last_modified = manual
+        datetimed.save()
+        datetimed.reload()
+
+        assert_equal_dates(datetimed.created_at, earlier)
+        assert_equal_dates(datetimed.last_modified, manual)
+
+    def test_save_last_modified_instance_manually_set_same_value(self):
+        now = datetime.now()
+        manual = now - timedelta(days=1)
+        earlier = now - timedelta(days=2)
+        datetimed = DatetimedTester.objects.create(created_at=earlier, last_modified=earlier)
+
+        datetimed.last_modified = manual
+        datetimed.save()
+        datetimed.reload()
+
+        datetimed.last_modified = manual
+        datetimed.save()
+        datetimed.reload()
+
+        assert_equal_dates(datetimed.created_at, earlier)
+        assert_equal_dates(datetimed.last_modified, manual)
 
 
 class ExtrasFieldTest:

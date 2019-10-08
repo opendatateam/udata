@@ -5,7 +5,7 @@ import logging
 import unicodecsv as csv
 
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from bson import ObjectId
 from flask import current_app
@@ -30,21 +30,23 @@ def list_backends():
     return backends.get_all(current_app).values()
 
 
-def _sources_queryset(owner=None):
-    sources = HarvestSource.objects.visible()
+def _sources_queryset(owner=None, deleted=False):
+    sources = HarvestSource.objects
+    if not deleted:
+        sources = sources.visible()
     if owner:
         sources = sources.owned_by(owner)
     return sources
 
 
-def list_sources(owner=None):
+def list_sources(owner=None, deleted=False):
     '''List all harvest sources'''
-    return list(_sources_queryset(owner=owner))
+    return list(_sources_queryset(owner=owner, deleted=deleted))
 
 
-def paginate_sources(owner=None, page=1, page_size=DEFAULT_PAGE_SIZE):
+def paginate_sources(owner=None, page=1, page_size=DEFAULT_PAGE_SIZE, deleted=False):
     '''Paginate harvest sources'''
-    sources = _sources_queryset(owner=owner)
+    sources = _sources_queryset(owner=owner, deleted=deleted)
     page = max(page or 1, 1)
     return sources.paginate(page, page_size)
 
@@ -133,6 +135,13 @@ def delete_source(ident):
 def purge_sources():
     '''Permanently remove sources flagged as deleted'''
     return HarvestSource.objects(deleted__exists=True).delete()
+
+
+def purge_jobs():
+    '''Delete jobs older than retention policy'''
+    retention = current_app.config['HARVEST_JOBS_RETENTION_DAYS']
+    expiration = datetime.now() - timedelta(days=retention)
+    return HarvestJob.objects(created__lt=expiration).delete()
 
 
 def run(ident):

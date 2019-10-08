@@ -10,15 +10,17 @@ from udata.models import (
 )
 from udata.search import (
     BoolBooster, GaussDecay, ModelSearchAdapter,
-    i18n_analyzer, metrics_mapping_for, register,
+    i18n_analyzer, metrics_mapping_for, register, lazy_config,
     RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
 )
 from udata.search.analysis import simple
+from udata.utils import to_iso_datetime
 
 from . import metrics  # noqa: Metrics are require for reuse search
 
 
 __all__ = ('ReuseSearch', )
+lazy = lazy_config('reuse')
 
 
 def max_datasets():
@@ -75,11 +77,6 @@ class ReuseSearch(ModelSearchAdapter):
                                payloads=True)
     extras = Object()
 
-    fields = (
-        'title^4',
-        'description^2',
-        'datasets.title',
-    )
     facets = {
         'tag': TermsFacet(field='tags'),
         'organization': ModelTermsFacet(field='organization',
@@ -117,9 +114,9 @@ class ReuseSearch(ModelSearchAdapter):
         'views': 'metrics.views',
     }
     boosters = [
-        BoolBooster('featured', 1.1),
-        GaussDecay('metrics.datasets', max_datasets, decay=0.8),
-        GaussDecay('metrics.followers', max_followers, decay=0.8),
+        BoolBooster('featured', lazy('featured_boost')),
+        GaussDecay('metrics.datasets', max_datasets, decay=lazy('datasets_decay')),
+        GaussDecay('metrics.followers', max_followers, decay=lazy('followers_decay')),
     ]
 
     @classmethod
@@ -152,8 +149,8 @@ class ReuseSearch(ModelSearchAdapter):
             'tags': reuse.tags,
             'tag_suggest': reuse.tags,
             'badges': [badge.kind for badge in reuse.badges],
-            'created': reuse.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
-            'last_modified': reuse.last_modified.strftime('%Y-%m-%dT%H:%M:%S'),
+            'created': to_iso_datetime(reuse.created_at),
+            'last_modified': to_iso_datetime(reuse.last_modified),
             'dataset': [{
                 'id': str(d.id),
                 'title': d.title

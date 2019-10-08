@@ -19,14 +19,14 @@ def check_url_does_not_exists(form, field):
 class ReuseForm(ModelForm):
     model_class = Reuse
 
-    title = fields.StringField(_('Title'), [validators.required()])
+    title = fields.StringField(_('Title'), [validators.DataRequired()])
     description = fields.MarkdownField(
-        _('Description'), [validators.required()],
+        _('Description'), [validators.DataRequired()],
         description=_('The details about the reuse (build process, specifics, '
                       'self-critics...).'))
     type = fields.SelectField(_('Type'), choices=REUSE_TYPES.items())
     url = fields.URLField(
-        _('URL'), [validators.required(), check_url_does_not_exists])
+        _('URL'), [validators.DataRequired(), check_url_does_not_exists])
     image = fields.ImageField(
         _('Image'), sizes=IMAGE_SIZES, placeholder='reuse')
     tags = fields.TagField(_('Tags'), description=_('Some taxonomy keywords'))

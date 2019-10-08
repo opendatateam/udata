@@ -6,9 +6,12 @@ import json
 import logging
 import requests
 
-from udata.commands import cli, success
-from udata.models import License, DEFAULT_LICENSE
+from bson import ObjectId
+
+from udata.commands import cli, success, exit_with_error
+from udata.models import License, DEFAULT_LICENSE, Dataset
 from .tasks import send_frequency_reminder
+from . import actions
 
 log = logging.getLogger(__name__)
 
@@ -71,3 +74,47 @@ def frequency_reminder():
     to remind them they have outdated datasets on the website.
     """
     send_frequency_reminder()
+
+
+@cli.group('dataset')
+def grp():
+    '''Dataset related operations'''
+    pass
+
+
+@grp.command()
+@click.argument('dataset_id')
+@click.option('-c', '--comment', is_flag=True, help='Post a comment when archiving')
+def archive_one(dataset_id, comment):
+    """Archive one dataset"""
+    try:
+        dataset = Dataset.objects.get(id=dataset_id)
+    except Dataset.DoesNotExist:
+        exit_with_error('Cannot find a dataset with id %s' % dataset_id)
+    else:
+        actions.archive(dataset, comment)
+
+
+@grp.command()
+@click.argument('filepath')
+@click.option('-c', '--comment', is_flag=True, help='Post a comment when archiving')
+def archive(filepath, comment):
+    """Archive multiple datasets from a list in a file (one id per line)"""
+    count = 0
+    errors = 0
+    log.info('Archiving datasets...')
+    with open(filepath) as inputfile:
+        for line in inputfile.readlines():
+            line = line.rstrip()
+            if not line:
+                continue
+            try:
+                dataset = Dataset.objects.get(id=ObjectId(line))
+            except Exception as e:  # noqa  (Never stop on failure)
+                log.error('Unable to archive dataset %s: %s', line, e)
+                errors += 1
+                continue
+            else:
+                actions.archive(dataset, comment)
+                count += 1
+    log.info('Archived %s datasets, %s failed', count, errors)

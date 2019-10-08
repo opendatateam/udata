@@ -59,7 +59,9 @@
     <div class="panel-footer" v-if="discussion.closed">
         <div class="text-muted">
             {{ _('Discussion has been closed') }}
-            {{ _('by') }} <a href="{{ discussion.closed_by.page }}">{{ discussion.closed_by | display }}</a>
+            <span v-if="discussion.closed_by">
+                {{ _('by') }} <a href="{{ discussion.closed_by.page }}">{{ discussion.closed_by | display }}</a>
+            </span>
             {{ _('on') }} {{ closedDate }}
         </div>
     </div>
