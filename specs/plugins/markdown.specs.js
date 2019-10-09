@@ -113,7 +113,7 @@ describe('Markdown backend compliance', function() {
 
     it('should sanitize evil code', function() {
         const source = 'an <script>evil()</script>';
-        expect(markdown(source)).to.have.text('an &lt;script&gt;evil()&lt;/script&gt;');
+        expect(markdown(source)).to.have.html('<p>an &lt;script&gt;evil()&lt;/script&gt;</p>');
     });
 
     it('should handle soft breaks as <br/>', function() {
@@ -152,23 +152,23 @@ describe('Markdown backend compliance', function() {
     });
 
     it('should render GFM strikethrough (extension)', function() {
-        const source = '~~Hi~~ Hello, world!';
-        const expected = '<p><del>Hi</del> Hello, world!</p>';
+        const source = 'Yay ~~Hi~~ Hello, world!';
+        const expected = '<p>Yay <del>Hi</del> Hello, world!</p>';
         expect(markdown(source)).to.have.html(expected);
     });
 
     it('should handle GFM tagfilter extension', function() {
         // Test extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-
         const source = [
-            '<strong> <title> <style> <em>',
+            '<strong> <title>My Title</title></strong>',
             '<blockquote>',
-            '  <xmp> is disallowed.  <XMP> is also disallowed.',
+            '  <xmp> is disallowed.</xmp>  <XMP> is also disallowed.</XMP>',
             '</blockquote>',
         ].join('\n')
         const expected = [
-            '<p><strong> &lt;title> &lt;style> <em></p>',
+            '<p><strong> &lt;title&gt;My Title&lt;/title&gt;</strong></p>',
             '<blockquote>',
-            '  &lt;xmp> is disallowed.  &lt;XMP> is also disallowed.',
+            '  &lt;xmp&gt; is disallowed.&lt;/xmp&gt;  &lt;XMP&gt; is also disallowed.&lt;/XMP&gt;',
             '</blockquote>',
         ].join('\n')
         expect(markdown(source)).to.have.html(expected)
@@ -180,8 +180,10 @@ describe('Markdown backend compliance', function() {
             '> with <script>evil()</script> inside',
         ].join('\n');
         const expected = [
-            '<blockquote>This is a blockquote<br>',
-            'with &lt;script>evil()&lt;/script> inside</blockquote>',
+            '<blockquote>',
+            '<p>This is a blockquote<br>',
+            'with &lt;script&gt;evil()&lt;/script&gt; inside</p>',
+            '</blockquote>',
         ].join('\n');
         expect(markdown(source)).to.have.html(expected);
     });
