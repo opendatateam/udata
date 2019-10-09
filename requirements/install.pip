@@ -4,7 +4,7 @@ Babel==2.6.0
 bcrypt==3.1.7
 bleach==3.1.0
 blinker==1.4
-celery==4.1.1
+celery==4.3.0
 celerybeat-mongo==0.1.0
 chardet==3.0.4
 click==6.7
@@ -15,7 +15,7 @@ elasticsearch==2.4.1
 factory-boy==2.11.1
 Faker==1.0.5
 Flask-BabelEx==0.9.3
-Flask-Caching==1.4.0
+Flask-Caching==1.7.0
 Flask-CDN==1.5.3
 flask-fs==0.6.1
 Flask-Gravatar==0.5.0
@@ -35,7 +35,7 @@ html2text==2018.1.9
 itsdangerous==1.1.0
 Jinja2==2.10.1
 jsonschema==3.0.1
-kombu[redis]==4.2.1
+kombu[redis]==4.4.0
 lxml==4.3.4
 mongoengine==0.16.3
 msgpack-python==0.4.8
@@ -48,8 +48,8 @@ python-dateutil==2.8.0
 pytz==2019.1
 PyYAML==5.1.1
 rdflib-jsonld==0.4.0
+redis==3.2.1
 rdflib==4.2.2
-redis==2.10.6 # this can be safely upgraded back to 3.1.0 as soon as celery 4.2.2 is released
 requests==2.21.0
 simplejson==3.16.0
 six==1.12.0
