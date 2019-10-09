@@ -79,51 +79,51 @@ describe('Markdown plugin', function() {
 });
 
 describe('Markdown backend compliance', function() {
-    const commonmark = require('helpers/commonmark').default;
+    const markdown = require('helpers/markdown').default;
 
     /**
     * An expect wrapper rendering the markdown
     * and then allowing to perform chai-dom expectation on it
     */
-    function markdown(source) {
+    function md(source) {
         const div = document.createElement('div');
-        div.innerHTML = commonmark(source);
+        div.innerHTML = markdown(source);
         return div;
     }
 
     it('should transform urls to anchors', function() {
         const source = 'http://example.net/';
-        expect(markdown(source)).to.have.html('<p><a href="http://example.net/">http://example.net/</a></p>');
+        expect(md(source)).to.have.html('<p><a href="http://example.net/">http://example.net/</a></p>');
     });
 
     it('should handles autolink', function() {
         const source = '<http://example.net/>';
-        expect(markdown(source)).to.have.html('<p><a href="http://example.net/">http://example.net/</a></p>');
+        expect(md(source)).to.have.html('<p><a href="http://example.net/">http://example.net/</a></p>');
     });
 
     it('should not transform emails to anchors', function() {
         const source = 'coucou@cmoi.fr';
-        expect(markdown(source)).to.have.html('<p>coucou@cmoi.fr</p>');
+        expect(md(source)).to.have.html('<p>coucou@cmoi.fr</p>');
     });
 
     it('should not transform links within pre', function() {
         const source = '<pre>http://example.net/</pre>';
-        expect(markdown(source)).to.have.html('<pre>http://example.net/</pre>');
+        expect(md(source)).to.have.html('<pre>http://example.net/</pre>');
     });
 
     it('should sanitize evil code', function() {
         const source = 'an <script>evil()</script>';
-        expect(markdown(source)).to.have.html('<p>an &lt;script&gt;evil()&lt;/script&gt;</p>');
+        expect(md(source)).to.have.html('<p>an &lt;script&gt;evil()&lt;/script&gt;</p>');
     });
 
     it('should handle soft breaks as <br/>', function() {
         const source = 'line 1\nline 2';
-        expect(markdown(source)).to.have.html('<p>line 1<br>\nline 2</p>');
+        expect(md(source)).to.have.html('<p>line 1<br>\nline 2</p>');
     });
 
     it('should properly render markdown tags not in allowed tags', function() {
         const source = '### titre';
-        expect(markdown(source)).to.have.html('<h3>titre</h3>');
+        expect(md(source)).to.have.html('<h3>titre</h3>');
     });
 
     it('should render GFM tables (extension)', function() {
@@ -148,13 +148,13 @@ describe('Markdown backend compliance', function() {
             '</tbody>',
             '</table>'
         ].join('\n');
-        expect(markdown(source)).to.have.html(expected);
+        expect(md(source)).to.have.html(expected);
     });
 
     it('should render GFM strikethrough (extension)', function() {
         const source = 'Yay ~~Hi~~ Hello, world!';
         const expected = '<p>Yay <del>Hi</del> Hello, world!</p>';
-        expect(markdown(source)).to.have.html(expected);
+        expect(md(source)).to.have.html(expected);
     });
 
     it('should handle GFM tagfilter extension', function() {
@@ -171,7 +171,7 @@ describe('Markdown backend compliance', function() {
             '  &lt;xmp&gt; is disallowed.&lt;/xmp&gt;  &lt;XMP&gt; is also disallowed.&lt;/XMP&gt;',
             '</blockquote>',
         ].join('\n')
-        expect(markdown(source)).to.have.html(expected)
+        expect(md(source)).to.have.html(expected)
     });
 
     it('should not filter legit markup', function() {
@@ -185,6 +185,6 @@ describe('Markdown backend compliance', function() {
             'with &lt;script&gt;evil()&lt;/script&gt; inside</p>',
             '</blockquote>',
         ].join('\n');
-        expect(markdown(source)).to.have.html(expected);
+        expect(md(source)).to.have.html(expected);
     });
 });

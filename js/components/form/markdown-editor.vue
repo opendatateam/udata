@@ -59,7 +59,7 @@ import $ from 'jquery';
 import config from 'config';
 import {_} from 'i18n';
 import {FieldComponentMixin} from 'components/form/base-field';
-import commonmark from 'helpers/commonmark';
+import markdown from 'helpers/markdown';
 
 const EXCERPT_TOKEN = '<!--- excerpt -->';
 
@@ -95,7 +95,7 @@ export default {
             savable: false,
             resize: 'both',
             iconlibrary: 'fa',
-            onPreview: (e) => commonmark(e.getContent()),
+            onPreview: (e) => markdown(e.getContent()),
             additionalButtons: [
                 [{
                     name: 'extras',

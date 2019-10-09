@@ -8,7 +8,7 @@ import 'less/apidoc.less';
 import Vue from 'vue';
 
 import $ from 'expose?$!expose?jQuery!jquery';
-import commonmark from 'helpers/commonmark';
+import markdown from 'helpers/markdown';
 import hljs from 'hljs';
 import log from 'logger';
 
@@ -27,7 +27,7 @@ import 'script!swaggerui/swagger-ui.min';
 SwaggerUi = window.SwaggerUi;
 
 // Marked compatibility for SwaggerUI
-window.marked = commonmark;
+window.marked = markdown;
 marked.setOptions = function() {};
 
 // Fix legacy import from Swagger UI
