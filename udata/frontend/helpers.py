@@ -15,6 +15,7 @@ from werkzeug import url_decode, url_encode
 from . import front
 
 from udata import assets
+from udata.app import UDataJsonEncoder
 from udata.models import db
 from udata.i18n import format_date, _, pgettext, get_current_locale
 from udata.theme import theme_static_with_version
@@ -404,6 +405,17 @@ def filesize(value):
     return "%.1f%s%s" % (value, 'Y', suffix)
 
 
+def json_ld_script_preprocessor(o):
+    if isinstance(o, dict):
+        return {k: json_ld_script_preprocessor(v) for k, v in o.items()}
+    elif isinstance(o,  (list, tuple)):
+        return [json_ld_script_preprocessor(v) for v in o]
+    elif isinstance(o, str):
+        return html.escape(o).replace('&#x27;', '&apos;')
+    else:
+        return o
+
+
 @front.app_template_filter()
 def embedded_json_ld(jsonld):
     '''
@@ -413,4 +425,4 @@ def embedded_json_ld(jsonld):
     for script tag inclusion.
     See: https://w3c.github.io/json-ld-syntax/#restrictions-for-contents-of-json-ld-script-elements
     '''
-    return Markup(html.escape(jsonld, quote=False))
+    return Markup(json.dumps(json_ld_script_preprocessor(jsonld), ensure_ascii=False))
