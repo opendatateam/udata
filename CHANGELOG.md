@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.16 (2019-10-22)
 
 - Prevent Google ranking spam attacks on reuse pages (`rel=nofollow` on reuse link) [#2320](https://github.com/opendatateam/udata/pull/2320)
