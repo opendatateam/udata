@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.16 (2019-10-22)
 
 - Prevent Google ranking spam attacks on reuse pages (`rel=nofollow` on reuse link) [#2320](https://github.com/opendatateam/udata/pull/2320)
 - Display admin resources list actions only if user has permissions to edit [#2326](https://github.com/opendatateam/udata/pull/2326)
