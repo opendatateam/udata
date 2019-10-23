@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove embedded API doc [#2343](https://github.com/opendatateam/udata/pull/2343) :warning: Breaking change, please customize `API_DOC_EXTERNAL_LINK` for your needs.
 
 ## 1.6.16 (2019-10-22)
 
