@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from urlextract import URLExtract
 
 from wtforms import validators
 from wtforms.validators import *  # noqa
 from wtforms.validators import ValidationError, StopValidation  # noqa
 
+extractor = URLExtract()
+
 
 def _(s):
     return s
+
+
+class NoURLs(object):
+    '''
+    Check no url is present on this field
+    '''
+    def __init__(self, message=''):
+        self.message = message
+
+    def __call__(self, form, field):
+        if extractor.find_urls(field.data):
+            raise validators.ValidationError(self.message)
 
 
 class RequiredIf(validators.DataRequired):
