@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Disallow URLs in first and last names [#2345](https://github.com/opendatateam/udata/pull/2345)
 
 ## 1.6.16 (2019-10-22)
 
