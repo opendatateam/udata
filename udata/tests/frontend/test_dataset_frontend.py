@@ -124,6 +124,8 @@ class DatasetBlueprintTest(FrontTestCase):
                           resource.created_at.isoformat()[:16])
         self.assertEqual(json_ld_resource['dateModified'][:16],
                           resource.modified.isoformat()[:16])
+        self.assertEqual(json_ld_resource['datePublished'][:16],
+                          resource.published.isoformat()[:16])
         self.assertEqual(json_ld_resource['encodingFormat'], 'png')
         self.assertEqual(json_ld_resource['contentSize'],
                           resource.filesize)
