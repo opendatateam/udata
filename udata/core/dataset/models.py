@@ -228,7 +228,6 @@ class ResourceMixin(object):
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
-    published = db.DateTimeField(default=datetime.now, required=True)
     deleted = db.DateTimeField()
 
     def clean(self):
@@ -312,7 +311,6 @@ class ResourceMixin(object):
             'contentUrl': self.url,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.modified.isoformat(),
-            'datePublished': self.published.isoformat(),
             'extras': [get_json_ld_extra(*item)
                        for item in self.extras.items()],
         }
@@ -492,10 +490,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def last_update(self):
-        if self.resources:
-            return max(resource.published for resource in self.resources)
-        else:
-            return self.last_modified
+        return self.last_modified
 
     @property
     def next_update(self):

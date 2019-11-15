@@ -113,7 +113,6 @@ Fields are extracted according these rules:
 | title         | dct:title                          | If missing, guessed from URL or format |
 | description   | dct:description                    | Detect and parse HTML                  |
 | url           | dcat:downloadURL or dcat:accessURL |                                        |
-| published     | dct:issued                         |                                        |
 | last_modified | dct:modified                       |                                        |
 | format        | dct:format                         |                                        |
 | mime          | dcat:mediaType                     |                                        |

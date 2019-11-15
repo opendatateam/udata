@@ -98,7 +98,6 @@ new Vue({
                 filesize: resourceJsonLd.contentSize,
                 created_at: resourceJsonLd.dateCreated,
                 modified: resourceJsonLd.dateModified,
-                published: resourceJsonLd.datePublished,
                 description: resourceJsonLd.description,
                 type: resourceJsonLd.type,
             };
