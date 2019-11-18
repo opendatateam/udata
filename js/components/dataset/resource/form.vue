@@ -200,7 +200,7 @@ export default {
                     id: 'published',
                     label: this._('Publication date'),
                     widget: 'date-picker'
-            }],
+                }],
             progress: 0,
         };
     },

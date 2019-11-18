@@ -97,8 +97,8 @@ new Vue({
                 mime: resourceJsonLd.fileFormat,
                 filesize: resourceJsonLd.contentSize,
                 created_at: resourceJsonLd.dateCreated,
-                published: resourceJsonLd.datePublished,
                 modified: resourceJsonLd.dateModified,
+                published: resourceJsonLd.datePublished,
                 description: resourceJsonLd.description,
                 type: resourceJsonLd.type,
             };
