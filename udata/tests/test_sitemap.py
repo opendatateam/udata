@@ -83,14 +83,6 @@ class SitemapTest:
         assert url is not None
         sitemap.assert_url(url, 0.6, 'weekly')
 
-    def test_apidoc_within_sitemap(self, sitemap):
-        '''It should return the API Doc page from the sitemap.'''
-        sitemap.fetch()
-
-        url = sitemap.get_by_url('apidoc.swaggerui_redirect')
-        assert url is not None
-        sitemap.assert_url(url, 0.9, 'weekly')
-
     def test_terms_within_sitemap(self, sitemap):
         '''It should return the terms page from the sitemap.'''
         sitemap.fetch()
