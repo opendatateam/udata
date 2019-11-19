@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 1.6.17.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2019-10-23 16:03+0200\n"
-"PO-Revision-Date: 2019-10-23 16:03+0200\n"
+"POT-Creation-Date: 2019-10-28 12:50+0100\n"
+"PO-Revision-Date: 2019-10-28 12:50+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -73,12 +73,17 @@ msgstr ""
 msgid "First name is required"
 msgstr ""
 
-#: udata/auth/forms.py:14 udata/core/user/forms.py:18
+#: udata/auth/forms.py:13 udata/auth/forms.py:16 udata/core/user/forms.py:18
+#: udata/core/user/forms.py:20
+msgid "URLs not allowed in this field"
+msgstr ""
+
+#: udata/auth/forms.py:15 udata/core/user/forms.py:19
 #: udata/templates/user/list.html:30
 msgid "Last name"
 msgstr ""
 
-#: udata/auth/forms.py:14
+#: udata/auth/forms.py:15
 msgid "Last name is required"
 msgstr ""
 
@@ -625,7 +630,7 @@ msgstr ""
 msgid "The details about your organization"
 msgstr ""
 
-#: udata/core/organization/forms.py:30 udata/core/user/forms.py:20
+#: udata/core/organization/forms.py:30 udata/core/user/forms.py:22
 msgid "Website"
 msgstr ""
 
@@ -1043,15 +1048,15 @@ msgstr ""
 msgid "followed a reuse"
 msgstr ""
 
-#: udata/core/user/forms.py:19
+#: udata/core/user/forms.py:21
 msgid "Avatar"
 msgstr ""
 
-#: udata/core/user/forms.py:21
+#: udata/core/user/forms.py:23
 msgid "About"
 msgstr ""
 
-#: udata/core/user/forms.py:25
+#: udata/core/user/forms.py:27
 msgid "Roles"
 msgstr ""
 
@@ -1128,7 +1133,7 @@ msgstr ""
 msgid "Permission denied for this organization"
 msgstr ""
 
-#: udata/forms/validators.py:48
+#: udata/forms/validators.py:63
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
 msgstr ""
