@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Removed published date from community ressources [#2350](https://github.com/opendatateam/udata/pull/2350)
 
 ## 1.6.17 (2019-10-28)
 
