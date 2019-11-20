@@ -144,7 +144,7 @@
                         <h3 class="text-left">{{ _('Author') }}</h3>
                         <a href="{{ url_for('users.show', user=reuse.owner) }}"
                             title="{{ reuse.owner.fullname }}">
-                            <img src="{{ reuse.owner|avatar_url(200) }}"
+                            <img src="{{ reuse.owner|avatar_url(500) }}"
                                 alt="{{ reuse.owner.fullname }}" class="scalable" />
                         </a>
                         <h4 class="text-center">{{ reuse.owner.fullname }}</h4>
