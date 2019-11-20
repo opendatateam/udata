@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Remove embedded API doc [#2343](https://github.com/opendatateam/udata/pull/2343) :warning: Breaking change, please customize `API_DOC_EXTERNAL_LINK` for your needs.
 - Removed published date from community ressources [#2350](https://github.com/opendatateam/udata/pull/2350)
 - Added new size for avatars in user's model (`udata images render` must be run in order to update the size of existing images) [#2353](https://github.com/opendatateam/udata/pull/2353)
 
