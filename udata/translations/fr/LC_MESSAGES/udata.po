@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-10-28 12:50+0100\n"
-"PO-Revision-Date: 2019-11-19 17:18\n"
+"PO-Revision-Date: 2019-11-20 11:21\n"
 "Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1230,11 +1230,11 @@ msgstr "Documentation de l'API"
 #: udata/templates/apidoc.html:5
 #, python-format
 msgid "%(site)s API documentation"
-msgstr ""
+msgstr "Documentation de l'API de %(site)s"
 
 #: udata/templates/apidoc.html:17
 msgid "The API documentation is available at"
-msgstr ""
+msgstr "La documentation de l'API est disponible ici"
 
 #: udata/templates/carousel.html:4
 msgid "Best reuse cases"
