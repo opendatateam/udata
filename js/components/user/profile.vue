@@ -51,7 +51,7 @@ export default {
                 var operation = API.me.operations.my_avatar;
                 return operation.urlify({});
             } else {
-                var operation = API.users.operations.given_user_avatar;
+                var operation = API.users.operations.user_avatar;
                 return operation.urlify({user: this.user.id});
             }
         },

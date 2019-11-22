@@ -251,10 +251,10 @@ class UserListAPI(API):
         return user, 201
 
 
-@ns.route('/<user:user>/avatar', endpoint='given_user_avatar')
+@ns.route('/<user:user>/avatar', endpoint='user_avatar')
 class UserAvatarAPI(API):
-    @api.secure
-    @api.doc('given_user_avatar')
+    @api.secure(admin_permission)
+    @api.doc('user_avatar')
     @api.expect(image_parser)
     @api.marshal_with(uploaded_image_fields)
     def post(self, user):
