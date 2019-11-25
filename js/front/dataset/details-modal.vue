@@ -9,8 +9,6 @@
           <dd v-if="dataset.dateCreated"> {{ dataset.dateCreated|dt }}</dd>
           <dt v-if="dataset.dateModified">{{ _('Modified on') }}</dt>
           <dd v-if="dataset.dateModified"> {{ dataset.dateModified|dt }}</dd>
-          <dt v-if="dataset.datePublished">{{ _('Published on') }}</dt>
-          <dd v-if="dataset.datePublished"> {{ dataset.datePublished|dt }}</dd>
         </dl>
 
         <div v-if="dataset.keywords && dataset.keywords.length">
