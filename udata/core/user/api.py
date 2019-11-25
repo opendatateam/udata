@@ -251,6 +251,19 @@ class UserListAPI(API):
         return user, 201
 
 
+@ns.route('/<user:user>/avatar', endpoint='user_avatar')
+class UserAvatarAPI(API):
+    @api.secure(admin_permission)
+    @api.doc('user_avatar')
+    @api.expect(image_parser)
+    @api.marshal_with(uploaded_image_fields)
+    def post(self, user):
+        '''Upload a new avatar for a given user'''
+        parse_uploaded_image(user.avatar)
+        user.save()
+        return {'image': user.avatar}
+
+
 @ns.route('/<user:user>/', endpoint='user')
 @api.response(404, 'User not found')
 @api.response(410, 'User is not active or has been deleted')

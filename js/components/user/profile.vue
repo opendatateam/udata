@@ -47,8 +47,13 @@ export default {
     },
     computed: {
         endpoint() {
-            var operation = API.me.operations.my_avatar;
-            return operation.urlify({});
+            if (this.user.id === this.$root.me.id) {
+                var operation = API.me.operations.my_avatar;
+                return operation.urlify({});
+            } else {
+                var operation = API.users.operations.user_avatar;
+                return operation.urlify({user: this.user.id});
+            }
         },
         can_edit() {
             return this.$root.me.is_admin || this.user.id == this.$root.me.id;
