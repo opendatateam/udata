@@ -144,19 +144,16 @@
 
 <script>
 import Vue from 'vue';
-import log from 'logger';
 
-import User from 'models/user';
 import Requests from 'models/requests';
 
 import BoxContainer from 'components/containers/box.vue';
 import MemberModal from 'components/organization/member-modal.vue';
-import PaginationWidget from 'components/pagination.vue';
 import UserCompleter from 'components/form/user-completer.vue';
 
 export default {
     name: 'members-widget',
-    components: {BoxContainer, PaginationWidget, UserCompleter},
+    components: {BoxContainer, UserCompleter},
     props: {
         org: Object
     },

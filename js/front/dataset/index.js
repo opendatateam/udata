@@ -26,12 +26,6 @@ import IssuesButton from 'components/buttons/issues.vue';
 import DiscussionThreads from 'components/discussions/threads.vue';
 
 
-function parseUrl(url) {
-    const a = document.createElement('a');
-    a.href = url;
-    return a;
-}
-
 const RESOURCE_REGEX = /^#resource(-community)?-([0-9a-f-]{36})$/;
 
 new Vue({
