@@ -6,6 +6,7 @@
 - Removed published date from community ressources [#2350](https://github.com/opendatateam/udata/pull/2350)
 - Added new size for avatars in user's model (`udata images render` must be run in order to update the size of existing images) [#2353](https://github.com/opendatateam/udata/pull/2353)
 - Fixed user's avatar change [#2351](https://github.com/opendatateam/udata/issues/2351)
+- Removed dead code [#2189](https://github.com/opendatateam/udata/issues/2189) [#2188](https://github.com/opendatateam/udata/issues/2188) [#2344](https://github.com/opendatateam/udata/issues/2344) [#2226](https://github.com/opendatateam/udata/issues/2226)
 
 ## 1.6.17 (2019-10-28)
 
