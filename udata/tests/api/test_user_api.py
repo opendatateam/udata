@@ -212,6 +212,13 @@ class UserAPITest(APITestCase):
         response = self.get(url_for('api.user', user=user))
         self.assert410(response)
 
+    def test_change_avatar_user_with_a_non_admin(self):
+        '''It should raise a 403'''
+        user = UserFactory(active=True)
+        self.login()
+        response = self.post(url_for('api.user_avatar', user=user))
+        self.assert403(response)
+
     def test_get_inactive_user_with_an_admin(self):
         '''It should get a user'''
         user = UserFactory(active=False)
