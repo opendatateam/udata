@@ -83,6 +83,11 @@ class ModelConverterMixin:
             assert isinstance(model, self.model)
             return 'ok'
 
+        @app.route('/wrong_model/<tester:model>')
+        def wrong_model_tester(model):
+            assert isinstance(model, self.model)
+            return str(model.id)
+
     def test_serialize_model_id_to_url(self):
         tester = self.model.objects.create()
         url = url_for('model_tester', model=tester)
@@ -162,6 +167,18 @@ class AsSlugMixin(ModelConverterMixin):
         url = url_for('model_tester', model=slug)
         self.model.objects.create(slug=slug)
         assert_redirects(client.get('/model/slüg'), url)
+
+
+class SlugAndIdTest(AsSlugMixin):
+    model = SlugTester
+    converter = SlugTesterConverter
+
+    def test_url_hijack(self, client):
+        tester = self.model.objects.create(slug='test_slug')
+        tester2 = self.model.objects.create(slug=str(tester.id))
+        model_url = url_for('wrong_model_tester', model=tester2)
+        model_id = client.get(model_url)
+        assert model_id.get_data() != str(tester2.id)
 
 
 class SlugAsSlugFieldTest(AsSlugMixin):

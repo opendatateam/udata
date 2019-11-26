@@ -87,23 +87,25 @@ class ModelConverter(BaseConverter):
 
     def to_python(self, value):
         try:
-            quoted = self.quote(value)
-            query = db.Q(slug=value) | db.Q(slug=quoted)
-            obj = self.model.objects(query).get()
+            obj = self.model.objects.get_or_404(id=value)
+        except NotFound:
+            obj = None
+        try:
+            if obj:
+                return obj
+            else:
+                quoted = self.quote(value)
+                query = db.Q(slug=value) | db.Q(slug=quoted)
+                obj = self.model.objects(query).get()
         except (InvalidQueryError, self.model.DoesNotExist):
             # If the model doesn't have a slug or matching slug doesn't exist.
-            obj = None
-        else:
-            if obj.slug != value:
-                return LazyRedirect(quoted)
-        try:
-            return obj or self.model.objects.get_or_404(id=value)
-        except NotFound as e:
             if self.has_redirected_slug:
                 latest = self.model.slug.latest(value)
                 if latest:
                     return LazyRedirect(latest)
-            return e
+        else:
+            if obj.slug != value:
+                return LazyRedirect(quoted)
 
     def to_url(self, obj):
         if isinstance(obj, basestring):
