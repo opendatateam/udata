@@ -57,7 +57,7 @@ footer_links = [
     nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr'),
     nav.Item(_('Reference Data'), 'gouvfr.spd'),
     nav.Item(_('Licences'), 'gouvfr.licences'),
-    nav.Item(_('API'), 'apidoc.swaggerui'),
+    nav.Item(_('API'), None, url=current_app.config.get('API_DOC_EXTERNAL_LINK', '#')),
     nav.Item(_('Terms of use'), 'site.terms'),
     nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
 ]
