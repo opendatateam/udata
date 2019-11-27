@@ -15,7 +15,7 @@ from faker.config import PROVIDERS
 from faker.providers import BaseProvider
 from faker.providers.lorem.la import Provider as LoremProvider
 from math import ceil
-from uuid import uuid4
+from uuid import uuid4, UUID
 from xml.sax.saxutils import escape
 
 
@@ -240,6 +240,18 @@ def unique_string(length=UUID_LENGTH):
     # We need a string at least as long as length
     string = str(uuid4()) * int(math.ceil(length / float(UUID_LENGTH)))
     return string[:length] if length else string
+
+
+def is_uuid(uuid_string, version=4):
+    try:
+        # If uuid_string is a valid hex code but not a valid uuid,
+        # UUID() will still make a valide uuid out of it.
+        # to prevent this, we check the genuine version (without dashes)
+        # with the generated hex code. They should be similar.
+        uid = UUID(uuid_string, version=version)
+        return uid.hex == uuid_string.replace('-', '')
+    except ValueError:
+        return False
 
 
 # This is the default providers list

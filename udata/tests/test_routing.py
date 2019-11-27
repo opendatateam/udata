@@ -81,11 +81,6 @@ class ModelConverterMixin:
         @app.route('/model/<tester:model>')
         def model_tester(model):
             assert isinstance(model, self.model)
-            return 'ok'
-
-        @app.route('/wrong_model/<tester:model>')
-        def wrong_model_tester(model):
-            assert isinstance(model, self.model)
             return str(model.id)
 
     def test_serialize_model_id_to_url(self):
@@ -176,7 +171,7 @@ class SlugAndIdTest(AsSlugMixin):
     def test_url_hijack(self, client):
         tester = self.model.objects.create(slug='test_slug')
         tester2 = self.model.objects.create(slug=str(tester.id))
-        model_url = url_for('wrong_model_tester', model=tester2)
+        model_url = url_for('model_tester', model=tester2)
         model_id = client.get(model_url)
         assert model_id.get_data() != str(tester2.id)
 
