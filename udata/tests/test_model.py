@@ -119,6 +119,13 @@ class SlugFieldTest:
         obj.save()
         assert obj.slug == 'a-title'
 
+    def test_populate_uuid(self):
+        '''SlugField should detect valid uuid'''
+        uuid = uuid4()
+        obj = SlugTester(title=str(uuid))
+        obj.save()
+        assert obj.slug == "{}{}".format(str(uuid), "-uuid")
+
     def test_populate_next(self):
         '''SlugField should not keep other fields value'''
         obj = SlugTester.objects.create(title="A Title")
