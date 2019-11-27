@@ -64,8 +64,8 @@ class ModelConverter(BaseConverter):
 
     When serializing to python, ir try in the following order:
 
-    * fetch by slug
     * fetch by id
+    * fetch by slug
     * raise 404
     '''
 

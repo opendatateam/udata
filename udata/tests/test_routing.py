@@ -169,6 +169,9 @@ class SlugAndIdTest(AsSlugMixin):
     converter = SlugTesterConverter
 
     def test_url_hijack(self, client):
+        """Tests for url hijack. If a object is created with"""
+        """an existing object's id as it's slug,"""
+        """the endpoint should return the first one"""
         tester = self.model.objects.create(slug='test_slug')
         tester2 = self.model.objects.create(slug=str(tester.id))
         model_url = url_for('model_tester', model=tester2)
