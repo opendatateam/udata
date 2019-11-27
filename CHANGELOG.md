@@ -8,6 +8,7 @@
 - Fixed user's avatar change [#2351](https://github.com/opendatateam/udata/issues/2351)
 - Removed dead code [#2355](https://github.com/opendatateam/udata/pull/2355)
 - Resolved conflict between id and slug [#2356](https://github.com/opendatateam/udata/pull/2356)
+- Fix next link in posts pagination [#2358](https://github.com/opendatateam/udata/pull/2358)
 
 ## 1.6.17 (2019-10-28)
 
