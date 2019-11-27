@@ -44,8 +44,8 @@ class PostListView(ListView):
 @blueprint.route('/<post:post>/')
 def show(post):
     others = Post.objects(id__ne=post.id).published()
-    older = others(published__lt=post.published)
-    newer = others(published__gt=post.published)
+    older = others(published__lt=post.published).order_by('-published')
+    newer = others(published__gt=post.published).order_by('published')
     return theme.render('post/display.html',
                         post=post,
                         previous_post=older.first(),
