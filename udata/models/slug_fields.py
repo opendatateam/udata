@@ -9,6 +9,7 @@ from mongoengine.fields import StringField
 from mongoengine.signals import pre_save, post_delete
 
 from .queryset import UDataQuerySet
+from udata.utils import is_uuid
 
 log = logging.getLogger(__name__)
 
@@ -169,6 +170,9 @@ def populate_slug(instance, field):
         while exists(slug):
             slug = '{0}-{1}'.format(base_slug, index)
             index += 1
+
+        if is_uuid(slug):
+            slug = '{0}-uuid'.format(slug)
 
     # Track old slugs for this class
     if field.follow and old_slug != slug:
