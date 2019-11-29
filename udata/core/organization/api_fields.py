@@ -111,3 +111,9 @@ refuse_membership_fields = api.model('RefuseMembership', {
     'comment': fields.String(
         description='The refusal comment.'),
 })
+
+
+org_role_fields = api.model('OrganizationRole', {
+    'id': fields.String(description='The role identifier'),
+    'label': fields.String(description='The role label')
+})

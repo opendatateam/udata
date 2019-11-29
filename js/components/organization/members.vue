@@ -75,7 +75,7 @@
                 <img class="img-circle" :alt="_('User Image')"
                     :src="member.user | avatar_url 60"/>
                 <strong>{{member.user | display}}</strong>
-                <small class="text-muted">{{member.role}}</small>
+                <small class="text-muted">{{ _(member.role) }}</small>
             </a>
         </div>
         <div v-if="!(org && org.members)" class="col-xs-12 text-center lead">
