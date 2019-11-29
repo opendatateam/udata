@@ -447,4 +447,4 @@ class OrgRolesAPI(API):
     @api.marshal_list_with(org_role_fields)
     def get(self):
         '''List all possible organization roles'''
-        return [{'id': key, 'label': ORG_ROLES[key]} for key in ORG_ROLES]
+        return [{'id': key, 'label': value} for (key, value) in ORG_ROLES.items()]

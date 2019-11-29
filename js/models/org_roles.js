@@ -8,5 +8,5 @@ class OrganizationRoles extends List {
     }
 };
 
-const organization_roles = new OrganizationRoles().fetch();
-export default organization_roles;
+const organizationRoles = new OrganizationRoles().fetch();
+export default organizationRoles;

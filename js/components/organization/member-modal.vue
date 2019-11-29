@@ -51,7 +51,7 @@
 import API from 'api';
 import User from 'models/user';
 import Organization from 'models/organization';
-import OrganizationRoles from '../../models/org_roles';
+import organizationRoles from 'models/org_roles';
 import UserModal from 'components/user/modal.vue';
 import RoleForm from 'components/form/horizontal-form.vue';
 
@@ -72,7 +72,7 @@ export default {
                 id: 'role',
                 label: this._('Role'),
                 widget: 'select-input',
-                values: OrganizationRoles,
+                values: organizationRoles,
                 map(item) {
                     return {value: item.id, text: item.label};
                 }
