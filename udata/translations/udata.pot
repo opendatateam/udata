@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 1.6.17.dev0\n"
+"Project-Id-Version: udata 1.6.18.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2019-10-28 12:50+0100\n"
-"PO-Revision-Date: 2019-10-28 12:50+0100\n"
+"POT-Creation-Date: 2019-11-29 16:45+0100\n"
+"PO-Revision-Date: 2019-11-29 16:45+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -1133,7 +1133,7 @@ msgstr ""
 msgid "Permission denied for this organization"
 msgstr ""
 
-#: udata/forms/validators.py:63
+#: udata/forms/validators.py:62
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
 msgstr ""
