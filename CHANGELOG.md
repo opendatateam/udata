@@ -9,7 +9,7 @@
 - Removed dead code [#2355](https://github.com/opendatateam/udata/pull/2355)
 - Resolved conflict between id and slug [#2356](https://github.com/opendatateam/udata/pull/2356)
 - Fix next link in posts pagination [#2358](https://github.com/opendatateam/udata/pull/2358)
-
+- Fix organization's members roles translation [#2359](https://github.com/opendatateam/udata/pull/2359)
 ## 1.6.17 (2019-10-28)
 
 - Disallow URLs in first and last names [#2345](https://github.com/opendatateam/udata/pull/2345)
