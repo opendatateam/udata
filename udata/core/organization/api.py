@@ -15,7 +15,7 @@ from udata.utils import multi_to_dict
 from .forms import (
     OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
 )
-from .models import Organization, MembershipRequest, Member
+from .models import Organization, MembershipRequest, Member, ORG_ROLES
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
@@ -25,6 +25,7 @@ from .api_fields import (
     org_fields,
     org_page_fields,
     org_suggestion_fields,
+    org_role_fields,
     request_fields,
     member_fields,
     refuse_membership_fields,
@@ -438,3 +439,12 @@ class OrgDiscussionsAPI(API):
         subjects = list(reuses) + list(datasets)
         qs = Discussion.objects(subject__in=subjects).order_by('-created')
         return list(qs)
+
+
+@ns.route('/roles/', endpoint='org_roles')
+class OrgRolesAPI(API):
+    @api.doc('org_roles')
+    @api.marshal_list_with(org_role_fields)
+    def get(self):
+        '''List all possible organization roles'''
+        return [{'id': key, 'label': value} for (key, value) in ORG_ROLES.items()]

@@ -16,7 +16,7 @@
 <div>
 <user-modal :user="user" v-ref:modal>
     <role-form class="member-form" v-ref:form
-        :fields="fields" :model="member" :defs="defs"
+        :fields="fields" :model="member"
         :readonly="!can_edit" :fill="true">
     </role-form>
     <br v-if="can_edit" />
@@ -51,6 +51,7 @@
 import API from 'api';
 import User from 'models/user';
 import Organization from 'models/organization';
+import organizationRoles from 'models/org_roles';
 import UserModal from 'components/user/modal.vue';
 import RoleForm from 'components/form/horizontal-form.vue';
 
@@ -70,9 +71,12 @@ export default {
             fields: [{
                 id: 'role',
                 label: this._('Role'),
-                widget: 'select-input'
-            }],
-            defs: API.definitions.Member
+                widget: 'select-input',
+                values: organizationRoles,
+                map(item) {
+                    return {value: item.id, text: item.label};
+                }
+            }]
         };
     },
     computed: {

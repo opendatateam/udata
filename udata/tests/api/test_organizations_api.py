@@ -45,6 +45,11 @@ class OrganizationAPITest:
         assert200(response)
         len(response.json['data']) == len(organizations)
 
+    def test_organization_role_api_get(self, api):
+        '''It should fetch an organization's roles list from the API'''
+        response = api.get(url_for('api.org_roles'))
+        assert200(response)
+
     def test_organization_api_get(self, api):
         '''It should fetch an organization from the API'''
         organization = OrganizationFactory()
