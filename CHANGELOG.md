@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.6.13 (2019-12-13)
 
 - Ajout de l'identifiant SPDX pour la licence Ouverte 2.0 [#437](https://github.com/etalab/udata-gouvfr/pull/437)
 - Lien vers la doc d'API externe dans le footer [#438](https://github.com/etalab/udata-gouvfr/pull/438)
