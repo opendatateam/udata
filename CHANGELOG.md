@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- `rel=nofollow` on remote source links [#2364](https://github.com/opendatateam/udata/pull/2364)
 
 ## 1.6.18 (2019-12-13)
 
