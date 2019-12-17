@@ -250,7 +250,7 @@
                             {% set source = dataset.extras['remote_url'] %}
                             {% if source %}
                             <li>
-                                <a href v-tooltip title="{{ _('Remote source') }}"><span class="fa fa-fw fa-external-link "></span></a>
+                                <a rel="nofollow" href v-tooltip title="{{ _('Remote source') }}"><span class="fa fa-fw fa-external-link "></span></a>
                                 <a href="{{ source }}">{{ _('Remote source') }}</a>
                             </li>
                             {% endif%}
