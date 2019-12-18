@@ -16,7 +16,7 @@
 <div>
 <user-modal :user="user" v-ref:modal>
     <role-form class="member-form" v-ref:form
-        :fields="fields" :model="member"
+        :fields="fields" :model="member" :defs="defs"
         :readonly="!can_edit" :fill="true">
     </role-form>
     <br v-if="can_edit" />
@@ -76,7 +76,8 @@ export default {
                 map(item) {
                     return {value: item.id, text: item.label};
                 }
-            }]
+            }],
+            defs: API.definitions.Member
         };
     },
     computed: {
