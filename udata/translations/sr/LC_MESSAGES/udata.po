@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-11-29 16:45+0100\n"
-"PO-Revision-Date: 2019-12-19 10:53\n"
+"PO-Revision-Date: 2019-12-19 11:03\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -1229,11 +1229,11 @@ msgstr "API документација"
 #: udata/templates/apidoc.html:5
 #, python-format
 msgid "%(site)s API documentation"
-msgstr ""
+msgstr "%(site)s API документација"
 
 #: udata/templates/apidoc.html:17
 msgid "The API documentation is available at"
-msgstr ""
+msgstr "API документација доступна на"
 
 #: udata/templates/carousel.html:4
 msgid "Best reuse cases"
