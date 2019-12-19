@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-11-29 16:45+0100\n"
-"PO-Revision-Date: 2019-12-19 10:21\n"
+"PO-Revision-Date: 2019-12-19 10:52\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -71,7 +71,7 @@ msgstr "Име је обавезно"
 #: udata/auth/forms.py:13 udata/auth/forms.py:16 udata/core/user/forms.py:18
 #: udata/core/user/forms.py:20
 msgid "URLs not allowed in this field"
-msgstr ""
+msgstr "URL путање нису дозвољене у овом пољу"
 
 #: udata/auth/forms.py:15 udata/core/user/forms.py:19
 #: udata/templates/user/list.html:30
@@ -1610,7 +1610,7 @@ msgstr "Избрисано"
 
 #: udata/templates/dataset/display.html:96 udata/templates/dataset/display.html:97
 msgid "Archived"
-msgstr "Архивиран"
+msgstr "Архивирано"
 
 #: udata/templates/dataset/display.html:114
 msgid "See also: community resources"
