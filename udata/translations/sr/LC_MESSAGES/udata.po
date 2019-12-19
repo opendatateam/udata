@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-11-29 16:45+0100\n"
-"PO-Revision-Date: 2019-12-19 10:01\n"
+"PO-Revision-Date: 2019-12-19 10:21\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -2434,7 +2434,7 @@ msgstr "Број скупа података"
 #: udata/templates/security/change_password.html:12
 #: udata/templates/security/change_password.html:19
 msgid "Change Password"
-msgstr "Промена лозинке"
+msgstr "Промени лозинку"
 
 #: udata/templates/security/forgot_password.html:12
 #: udata/templates/security/forgot_password.html:18
@@ -2461,11 +2461,11 @@ msgstr "Заборавили сте лозинку?"
 
 #: udata/templates/security/login_user.html:24
 msgid "Recover your password"
-msgstr "Опоравите лозинку"
+msgstr "Ресетујте лозинку"
 
 #: udata/templates/security/login_user.html:28
 msgid "Confirmation instructions not received?"
-msgstr "Потврда да инструкције нису примљене?"
+msgstr "Нисте примили мејл са инструкцијама?"
 
 #: udata/templates/security/login_user.html:30
 msgid "Send the instructions again"
@@ -2497,13 +2497,13 @@ msgstr "Прочитао сам и прихватио <a href=\"%(url)s\">све
 msgid "In particular, I understand that this site\n"
 "                    values the production and enrichment of datasets over definitive or partisan interpretations.\n"
 "                    The members of the community are in charge of looking after the quality of the content it produces."
-msgstr "Пре свега, разумем да овај сајт\n"
-"                    више цени продукцију и обогаћивање скупова података него пристрасне интерпретације.\n"
-"                    Припадници ове заједнице су одговорни за квалитет садржаја."
+msgstr "Пре свега, разумем да овај Портал\n"
+"                    више цени креирање и обогаћивање скупова података него пристрасне интерпретације.\n"
+"                    Чланови ове заједнице су одговорни за квалитет објављеног садржаја."
 
 #: udata/templates/security/send_confirmation.html:12
 msgid "Resend confirmation instructions"
-msgstr "Поново пошаљи информације потврде"
+msgstr "Поново пошаљи инструкције"
 
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
@@ -2687,7 +2687,7 @@ msgstr "Теме"
 
 #: udata/templates/topic/display.html:30
 msgid "Latest reuses"
-msgstr "Најновији случајеви употребе"
+msgstr "Најновији примери употребе"
 
 #: udata/templates/topic/display.html:49
 msgid "Latest datasets"
