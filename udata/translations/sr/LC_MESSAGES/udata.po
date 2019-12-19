@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2019-11-29 16:45+0100\n"
-"PO-Revision-Date: 2019-12-19 10:52\n"
+"PO-Revision-Date: 2019-12-19 10:53\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -92,7 +92,7 @@ msgstr "Да ли желите да увезете лицанце за пода�
 
 #: udata/commands/init.py:41
 msgid "Do you want to import some spatial zones (countries)?"
-msgstr ""
+msgstr "Да ли желите да увезете \"spatial\" зоне (државе)?"
 
 #: udata/commands/init.py:45
 msgid "Do you want to create some sample data?"
