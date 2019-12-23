@@ -6,7 +6,6 @@ import pytest
 
 from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
-from mock import patch
 
 from udata.factories import ModelFactory
 from udata.core.dataset.factories import DatasetFactory

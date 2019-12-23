@@ -178,6 +178,41 @@ class BaseBackendTest:
         harvest_last_update = parse(dataset.extras['harvest:last_update'])
         assert_equal_dates(harvest_last_update, datetime.now())
 
+    def test_autoarchive(self):
+        nb_datasets = 3
+        source = HarvestSourceFactory(config={'nb_datasets': nb_datasets})
+        backend = FakeBackend(source)
+
+        # create a dangling dataset to be archived
+        dataset = DatasetFactory(extras={
+            'harvest:domain': source.domain,
+            'harvest:source_id': str(source.id),
+            'harvest:remote_id': 'not-on-remote'
+        })
+
+        job = backend.harvest()
+
+        assert len(job.items) == nb_datasets
+        assert Dataset.objects.count() == nb_datasets + 1
+
+        dataset.reload()
+        assert dataset.archived is not None
+        assert 'harvest:archived' in dataset.extras
+        assert 'harvest:archived_at' in dataset.extras
+
+        # test unarchive: archive manually then relaunch harvest
+        q = {'extras__harvest:remote_id': 'fake-1'}
+        dataset = Dataset.objects.get(**q)
+        dataset.archived = datetime.now()
+        dataset.extras['harvest:archived'] = 'not-on-remote'
+        dataset.extras['harvest:archived_at'] = datetime.now()
+        dataset.save()
+        backend.harvest()
+        dataset.reload()
+        assert dataset.archived is None
+        assert 'harvest:archived' not in dataset.extras
+        assert 'harvest:archived_at' not in dataset.extras
+
 
 @pytest.mark.usefixtures('clean_db')
 class BaseBackendValidateTest:
