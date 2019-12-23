@@ -239,6 +239,18 @@ export default {
                 require('components/badges/modal.vue'),
                 {subject: this.dataset}
             );
+        },
+        addOrRemoveBadge(id, value, _class, label) {
+            const existing = this.badges.find(b => b.id === id);
+            if (value && !existing) {
+                this.badges.push({
+                    id,
+                    class: _class,
+                    label
+                });
+            } else if (existing) {
+                this.badges.splice(this.badges.indexOf(existing), 1);
+            }
         }
     },
     route: {
@@ -278,14 +290,10 @@ export default {
             }
         },
         'dataset.deleted': function(deleted) {
-            if (deleted) {
-                this.badges = [{
-                    class: 'danger',
-                    label: this._('Deleted')
-                }];
-            } else {
-                this.badges = [];
-            }
+            this.addOrRemoveBadge('deleted', deleted, 'danger', this._('Deleted'));
+        },
+        'dataset.archived': function(archived) {
+            this.addOrRemoveBadge('archived', archived, 'warning', this._('Archived'));
         }
     }
 };

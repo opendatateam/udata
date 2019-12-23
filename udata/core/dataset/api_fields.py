@@ -143,6 +143,7 @@ dataset_fields = api.model('Dataset', {
     'last_modified': fields.ISODateTime(
         description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
+    'archived': fields.ISODateTime(description='The archival date if archived'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(
         description='Is the dataset private to the owner or the organization'),
