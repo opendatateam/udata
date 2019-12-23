@@ -192,8 +192,12 @@ class BaseBackendTest:
 
         job = backend.harvest()
 
-        assert len(job.items) == nb_datasets
+        assert len(job.items) == nb_datasets + 1
         assert Dataset.objects.count() == nb_datasets + 1
+
+        archived_items = [i for i in job.items if i.status == 'archived']
+        assert len(archived_items) == 1
+        assert archived_items[0].dataset == dataset
 
         dataset.reload()
         assert dataset.archived is not None

@@ -246,6 +246,7 @@ class BaseBackend(object):
             'extras__harvest:remote_id__nin': remote_ids
         }
         local_items_not_on_remote = Dataset.objects.filter(**q)
+
         for dataset in local_items_not_on_remote:
             if not dataset.extras.get('harvest:archived_at'):
                 log.debug('Archiving dataset %s: %s', dataset.id, safe_unicode(dataset.title))
@@ -258,12 +259,22 @@ class BaseBackend(object):
                 else:
                     dataset.save()
 
+            # add a HarvestItem to the job list (useful for report)
+            # even when archiving has already been done (useful for debug)
+            item = self.add_item(dataset.extras['harvest:remote_id'])
+            item.dataset = dataset
+            item.status = 'archived'
+
+            if not self.dryrun:
+                self.job.save()
+
     def process(self, item):
         raise NotImplementedError
 
     def add_item(self, identifier, *args, **kwargs):
         item = HarvestItem(remote_id=str(identifier), args=args, kwargs=kwargs)
         self.job.items.append(item)
+        return item
 
     def finalize(self):
         self.job.status = 'done'
