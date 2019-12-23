@@ -28,6 +28,8 @@ const MASK = [
     'backend',
     'validation{state}',
     'config',
+    'active',
+    'autoarchive',
 ];
 
 export default {
