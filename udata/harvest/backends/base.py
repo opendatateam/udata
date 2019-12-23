@@ -128,6 +128,8 @@ class BaseBackend(object):
         '''Start the harvesting process'''
         if self.perform_initialization() is not None:
             self.process_items()
+            if self.source.autoarchive:
+                self.autoarchive()
             self.finalize()
         return self.job
 
@@ -193,6 +195,12 @@ class BaseBackend(object):
             dataset.extras['harvest:domain'] = self.source.domain
             dataset.extras['harvest:last_update'] = datetime.now().isoformat()
 
+            # unset archived status if needed
+            if dataset.extras.get('harvest:archived_at'):
+                dataset.extras.pop('harvest:archived_at')
+                dataset.extras.pop('harvest:archived')
+                dataset.archived = None
+
             # TODO permissions checking
             if not dataset.organization and not dataset.owner:
                 if self.source.organization:
@@ -228,6 +236,27 @@ class BaseBackend(object):
         item.ended = datetime.now()
         if not self.dryrun:
             self.job.save()
+
+    def autoarchive(self):
+        '''Archive items that exist on the local instance but not on remote platform'''
+        log.debug('Running autoarchive')
+        remote_ids = [i.remote_id for i in self.job.items]
+        q = {
+            'extras__harvest:source_id': str(self.source.id),
+            'extras__harvest:remote_id__nin': remote_ids
+        }
+        local_items_not_on_remote = Dataset.objects.filter(**q)
+        for dataset in local_items_not_on_remote:
+            if not dataset.extras.get('harvest:archived_at'):
+                log.debug('Archiving dataset %s: %s', dataset.id, safe_unicode(dataset.title))
+                archival_date = datetime.now()
+                dataset.archived = archival_date
+                dataset.extras['harvest:archived'] = 'not-on-remote'
+                dataset.extras['harvest:archived_at'] = archival_date
+                if self.dryrun:
+                    dataset.validate()
+                else:
+                    dataset.save()
 
     def process(self, item):
         raise NotImplementedError

@@ -109,6 +109,7 @@ class HarvestSource(db.Owned, db.Document):
                                default=DEFAULT_HARVEST_FREQUENCY,
                                required=True)
     active = db.BooleanField(default=True)
+    autoarchive = db.BooleanField(default=True)
     validation = db.EmbeddedDocumentField(HarvestSourceValidation,
                                           default=HarvestSourceValidation)
 
