@@ -15,7 +15,7 @@ import Datatable from 'components/datatable/widget.vue';
 export default {
     name: 'dataset-list',
     components: {Datatable},
-    MASK: ['id', 'title', 'acronym', 'created_at', 'last_update', 'last_modified', 'metrics', 'private', 'quality'],
+    MASK: ['id', 'title', 'acronym', 'created_at', 'last_update', 'last_modified', 'metrics', 'private', 'quality', 'archived'],
     data() {
         return {
             fields: [{
