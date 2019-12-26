@@ -4,6 +4,7 @@
 
 - `rel=nofollow` on remote source links [#2364](https://github.com/opendatateam/udata/pull/2364)
 - fix admin messages and fix user roles selector default value [#2365](https://github.com/opendatateam/udata/pull/2365)
+- Fix new harvester's form tooltip showup [#2371](https://github.com/opendatateam/udata/pull/2371)
 
 ## 1.6.18 (2019-12-13)
 
