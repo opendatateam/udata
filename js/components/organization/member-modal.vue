@@ -103,8 +103,7 @@ export default {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member deleted'),
-                details: this._('{user} is not a member of this organization anymore')
-                    .replace('{user}', this.user.fullname)
+                details: this._('{user} is not a member of this organization anymore', {user: this.user.fullname})
             });
             this.$refs.modal.close();
         },
@@ -124,9 +123,7 @@ export default {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member added'),
-                details: this._('{user} is now {role} of this organization')
-                    .replace('{user}', this.user.fullname)
-                    .replace('{role}', response.obj.role)
+                details: this._('{user} is now {role} of this organization', {user: this.user.fullname, role: this._(response.obj.role)})
             });
             this.$refs.modal.close();
         },
@@ -134,9 +131,7 @@ export default {
             this.org.fetch();
             this.$dispatch('notify', {
                 title: this._('Member role updated'),
-                details: this._('{user} is now {role} of this organization')
-                    .replace('{user}', this.user.fullname)
-                    .replace('{role}', response.obj.role)
+                details: this._('{user} is now {role} of this organization', {user: this.user.fullname, role: this._(response.obj.role)})
             });
             this.$refs.modal.close();
         }
