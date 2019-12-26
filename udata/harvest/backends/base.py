@@ -240,7 +240,7 @@ class BaseBackend(object):
     def autoarchive(self):
         '''Archive items that exist on the local instance but not on remote platform'''
         log.debug('Running autoarchive')
-        remote_ids = [i.remote_id for i in self.job.items]
+        remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
         q = {
             'extras__harvest:source_id': str(self.source.id),
             'extras__harvest:remote_id__nin': remote_ids
