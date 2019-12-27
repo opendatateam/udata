@@ -1,8 +1,8 @@
 <template>
 <form role="form" class="clearfix animated" @submit.prevent="submit">
     <div class="form-group">
-        <label :for="id">{{ _('Comment') }}</label>
-        <textarea v-el:textarea :id="id" v-model="comment" class="form-control" rows="3" required></textarea>
+        <label for="new-comment-{{this.id}}">{{ _('Comment') }}</label>
+        <textarea v-el:textarea id="new-comment-{{this.id}}" v-model="comment" class="form-control" rows="3" required></textarea>
     </div>
     <button type="submit" :disabled="this.sending || !this.comment" class="btn btn-primary btn-block pull-right submit-new-message">
         {{ _('Submit your comment') }}
@@ -23,11 +23,8 @@ export default {
           // duplicate POSTing.
           sending: false,
           comment: '',
-          id: null
+          id: this.discussionId
       }
-  },
-    ready: function() {
-      this.id = this._uid;
   },
     methods: {
       /**
