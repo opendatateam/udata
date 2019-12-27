@@ -11,51 +11,51 @@
 </template>
 
 <script>
-    import log from 'logger';
+import log from 'logger';
 
-    export default {
-        props: {
-            discussionId: String
-        },
-        data() {
-            return {
-                // Flags to `true` when the form is in sending process. This prevents
-                // duplicate POSTing.
-                sending: false,
-                comment: '',
-                id: null
-            }
-        },
-        ready: function() {
-            this.id = this._uid;
-        },
-        methods: {
-            /**
-             * Prefill the form and focus the comment area
-             */
-            prefill(comment) {
-                comment = comment || '';
-                this.comment = comment;
-                this.$els.textarea.setSelectionRange(comment.length, comment.length);
-                this.$els.textarea.focus();
-            },
-            submit() {
-                this.sending = true;
-                this.$api
-                    .post(`discussions/${this.discussionId}/`, {comment: this.comment})
-                    .then(response => {
-                        this.$dispatch('discussion:updated', response);
-                        this.comment = '';
-                        this.sending = false;
-                        document.location.href = `#discussion-${this.discussionId}-${response.discussion.length - 1}`;
-                    })
-                    .catch(err => {
-                        const msg = this._('An error occured while submitting your comment');
-                        this.$dispatch('notify.error', msg);
-                        log.error(err);
-                        this.sending = false;
-                    });
-            }
-        }
-    }
+export default {
+  props: {
+      discussionId: String
+  },
+  data() {
+      return {
+          // Flags to `true` when the form is in sending process. This prevents
+          // duplicate POSTing.
+          sending: false,
+          comment: '',
+          id: null
+      }
+  },
+    ready: function() {
+      this.id = this._uid;
+  },
+    methods: {
+      /**
+       * Prefill the form and focus the comment area
+       */
+      prefill(comment) {
+          comment = comment || '';
+          this.comment = comment;
+          this.$els.textarea.setSelectionRange(comment.length, comment.length);
+          this.$els.textarea.focus();
+      },
+      submit() {
+          this.sending = true;
+          this.$api
+          .post(`discussions/${this.discussionId}/`, {comment: this.comment})
+          .then(response => {
+              this.$dispatch('discussion:updated', response);
+              this.comment = '';
+              this.sending = false;
+              document.location.href = `#discussion-${this.discussionId}-${response.discussion.length - 1}`;
+          })
+          .catch(err => {
+              const msg = this._('An error occured while submitting your comment');
+              this.$dispatch('notify.error', msg);
+              log.error(err);
+              this.sending = false;
+          });
+      }
+  }
+}
 </script>
