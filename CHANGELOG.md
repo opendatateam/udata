@@ -7,6 +7,7 @@
 - Fix new harvester's form tooltip showup [#2371](https://github.com/opendatateam/udata/pull/2371)
 - Fix responsive design of search results [#2372](https://github.com/opendatateam/udata/pull/2372)
 - Fix non-unique ids in datasets' comments [#2374](https://github.com/opendatateam/udata/pull/2374)
+- Add the dataset acronym to the indexed fields [#2376](https://github.com/opendatateam/udata/pull/2376)
 
 ## 1.6.18 (2019-12-13)
 
