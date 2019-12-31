@@ -73,6 +73,7 @@ class DatasetSearch(ModelSearchAdapter):
     title = String(analyzer=i18n_analyzer, fields={
         'raw': String(index='not_analyzed')
     })
+    acronym = String(index='not_analyzed')
     description = String(analyzer=i18n_analyzer)
     license = String(index='not_analyzed')
     frequency = String(index='not_analyzed')
