@@ -273,6 +273,7 @@ class DatasetSearch(ModelSearchAdapter):
             temporal_weight, spatial_weight, dataset.featured)
 
         if dataset.acronym:
+            dataset['acronym'] = dataset.acronym
             document['dataset_suggest']['input'].append(dataset.acronym)
 
         # mime Completion
