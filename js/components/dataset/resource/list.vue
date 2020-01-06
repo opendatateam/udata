@@ -40,7 +40,7 @@
         boxclass="box-solid resources-widget"
         bodyclass="table-responsive no-padding"
         footerclass="text-center"
-        :footer="true" :empty="_('No resources')">
+        :footer="$root.me.can_edit(dataset)" :empty="_('No resources')">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -99,7 +99,7 @@
         <div class="overlay dropzone" v-if="dropping">
             <span class="fa fa-download fa-2x"></span>
         </div>
-        <footer slot="footer">
+        <footer slot="footer" v-if="$root.me.can_edit(dataset)">
             <button type="button"
                 class="btn btn-primary btn-sm btn-flat pointer"
                 v-show="!reordering"
@@ -136,16 +136,14 @@ import Vue from 'vue';
 import API from 'api';
 import Sorter from 'mixins/sorter';
 import Uploader from 'mixins/uploader';
-import Resource from 'models/resource';
 import Box from 'components/containers/box.vue';
-import PaginationWidget from 'components/pagination.vue';
 import ResourceAvailability from './availability.vue';
 import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'resources-list',
     mixins: [Uploader, Sorter, DatasetFilters],
-    components: {Box, PaginationWidget, ResourceAvailability},
+    components: {Box, ResourceAvailability},
     props: {
         dataset: {
             type: Object,

@@ -35,6 +35,7 @@ html2text==2019.9.26
 itsdangerous==1.1.0
 Jinja2==2.10.1
 jsonschema==3.0.2
+kombu[redis]==4.4.0
 lxml==4.4.1
 mongoengine==0.18.2
 msgpack==0.5.6
@@ -46,6 +47,7 @@ python-dateutil==2.8.0
 pytz==2019.2
 PyYAML==5.1.2
 rdflib-jsonld==0.4.0
+redis==3.2.1
 rdflib==4.2.2
 redis==3.2.1
 requests==2.22.0

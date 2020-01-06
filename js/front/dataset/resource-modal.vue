@@ -23,8 +23,8 @@
           <dd v-if="resource.created_at"> {{ resource.created_at|dt }}</dd>
           <dt v-if="resource.modified">{{ _('Modified on') }}</dt>
           <dd v-if="resource.modified"> {{ resource.modified|dt }}</dd>
-          <dt v-if="resource.published">{{ _('Published on') }}</dt>
-          <dd v-if="resource.published"> {{ resource.published|dt }}</dd>
+            <dt v-if="resource.published && !this.isCommunity">{{ _('Published on') }}</dt>
+          <dd v-if="resource.published && !this.isCommunity"> {{ resource.published|dt }}</dd>
           <dt v-if="resource.metrics && resource.metrics.views">{{ _('Downloads') }}</dt>
           <dd v-if="resource.metrics && resource.metrics.views"> {{ resource.metrics.views }}</dd>
           <dt v-if="resource.extras && resource.extras['check:date']">{{ _('Last checked on') }}</dt>

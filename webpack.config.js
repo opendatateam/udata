@@ -21,7 +21,6 @@ module.exports = {
         home: './js/front/home.js',
         search: './js/front/search.js',
         dashboard: './js/front/dashboard.js',
-        apidoc: './js/front/apidoc',
         organization: './js/front/organization',
         covermap: './js/front/covermap',
         topic: './js/front/topic',
@@ -41,7 +40,6 @@ module.exports = {
         ],
         alias: {
             'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
-            'swaggerui': 'swagger-ui/dist',
         }
     },
     devtool: 'eval-source-map',

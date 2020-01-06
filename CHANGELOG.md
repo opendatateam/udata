@@ -15,6 +15,35 @@
 - The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
 - The targeted mongo version is now Mongo 3.6. Backward support is not guaranteed
 
+## 1.6.19 (2020-01-06)
+
+- `rel=nofollow` on remote source links [#2364](https://github.com/opendatateam/udata/pull/2364)
+- Fix admin messages and fix user roles selector default value [#2365](https://github.com/opendatateam/udata/pull/2365)
+- Fix new harvester's form tooltip showup [#2371](https://github.com/opendatateam/udata/pull/2371)
+- Fix responsive design of search results [#2372](https://github.com/opendatateam/udata/pull/2372)
+- Fix non-unique ids in datasets' comments [#2374](https://github.com/opendatateam/udata/pull/2374)
+
+## 1.6.18 (2019-12-13)
+
+- Remove embedded API doc [#2343](https://github.com/opendatateam/udata/pull/2343) :warning: Breaking change, please customize `API_DOC_EXTERNAL_LINK` for your needs.
+- Removed published date from community ressources [#2350](https://github.com/opendatateam/udata/pull/2350)
+- Added new size for avatars in user's model (`udata images render` must be run in order to update the size of existing images) [#2353](https://github.com/opendatateam/udata/pull/2353)
+- Fixed user's avatar change [#2351](https://github.com/opendatateam/udata/issues/2351)
+- Removed dead code [#2355](https://github.com/opendatateam/udata/pull/2355)
+- Resolved conflict between id and slug [#2356](https://github.com/opendatateam/udata/pull/2356)
+- Fix next link in posts pagination [#2358](https://github.com/opendatateam/udata/pull/2358)
+- Fix organization's members roles translation [#2359](https://github.com/opendatateam/udata/pull/2359)
+## 1.6.17 (2019-10-28)
+
+- Disallow URLs in first and last names [#2345](https://github.com/opendatateam/udata/pull/2345)
+
+## 1.6.16 (2019-10-22)
+
+- Prevent Google ranking spam attacks on reuse pages (`rel=nofollow` on reuse link) [#2320](https://github.com/opendatateam/udata/pull/2320)
+- Display admin resources list actions only if user has permissions to edit [#2326](https://github.com/opendatateam/udata/pull/2326)
+- Fix non-admin user not being able to change their profile picture [#2327](https://github.com/opendatateam/udata/pull/2327)
+>>>>>>> master
+
 ## 1.6.15 (2019-09-11)
 
 - Style links in admin modals [#2292](https://github.com/opendatateam/udata/pull/2292)

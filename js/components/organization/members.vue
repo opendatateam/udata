@@ -75,7 +75,7 @@
                 <img class="img-circle" :alt="_('User Image')"
                     :src="member.user | avatar_url 60"/>
                 <strong>{{member.user | display}}</strong>
-                <small class="text-muted">{{member.role}}</small>
+                <small class="text-muted">{{ _(member.role) }}</small>
             </a>
         </div>
         <div v-if="!(org && org.members)" class="col-xs-12 text-center lead">
@@ -144,19 +144,16 @@
 
 <script>
 import Vue from 'vue';
-import log from 'logger';
 
-import User from 'models/user';
 import Requests from 'models/requests';
 
 import BoxContainer from 'components/containers/box.vue';
 import MemberModal from 'components/organization/member-modal.vue';
-import PaginationWidget from 'components/pagination.vue';
 import UserCompleter from 'components/form/user-completer.vue';
 
 export default {
     name: 'members-widget',
-    components: {BoxContainer, PaginationWidget, UserCompleter},
+    components: {BoxContainer, UserCompleter},
     props: {
         org: Object
     },
