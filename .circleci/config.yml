@@ -157,7 +157,9 @@ jobs:
           at: .
       - deploy:
           name: Publish on PyPI
-          command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+          command: |
+            pip install twine
+            twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   github:
     docker:
