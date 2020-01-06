@@ -38,7 +38,7 @@ jsonschema==3.0.2
 kombu[redis]==4.4.0
 lxml==4.4.1
 mongoengine==0.18.2
-msgpack==0.5.6
+msgpack==0.6.2
 netaddr==0.7.19
 pillow==6.2.0
 pydenticon==0.3.1
