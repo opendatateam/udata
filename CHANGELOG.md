@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.19 (2020-01-06)
 
 - `rel=nofollow` on remote source links [#2364](https://github.com/opendatateam/udata/pull/2364)
