@@ -137,7 +137,7 @@ def clean_db(app):
 def raw_db(app, clean_db):
     '''Access to raw PyMongo DB client'''
     from mongoengine.connection import get_db
-    return get_db()
+    yield get_db()
     drop_db(app)
 
 
