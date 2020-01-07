@@ -6,5 +6,6 @@
   "pip_requirements": {
     "fileMatch": ["requirements/test.pip"]
   },
-  "enabledManagers": ["pip_requirements"]
+  "enabledManagers": ["pip_requirements"],
+  "automerge": true
 }
