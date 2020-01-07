@@ -9,6 +9,7 @@
   - Handle rollback (optionnal)
   - Detailled history
 - Template hooks generalization: allows to dynamically extend template with widgets and snippets from extensions. See [the dedicated documentation section](https://udata.readthedocs.io/en/stable/extending/#hooks) [#2323](https://github.com/opendatateam/udata/pull/2323)
+- Markdown now supports [Github Flavored Markdown (GFM) specs](https://github.github.com/gfm/) (ie. the already supported [CommonMark specs](https://spec.commonmark.org) plus tables, strikethrough, autolinks support and predefined disallowed raw HTML) [#2341](https://github.com/opendatateam/udata/pull/2341)
 
 ### Breaking changes
 
