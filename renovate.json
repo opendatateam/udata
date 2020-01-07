@@ -2,7 +2,7 @@
   "extends": [
     "config:base"
   ],
-  "baseBranches": ["py3"],
+  "baseBranches": ["dev"],
   "pip_requirements": {
     "fileMatch": ["requirements/install.pip", "requirements/test.pip"]
   },
