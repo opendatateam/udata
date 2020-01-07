@@ -7,5 +7,6 @@
     "fileMatch": ["requirements/test.pip"]
   },
   "enabledManagers": ["pip_requirements"],
-  "automerge": true
+  "automerge": true,
+  "prHourlyLimit": 0
 }
