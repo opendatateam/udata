@@ -1,6 +1,5 @@
-import config from 'config';
 import $ from 'jquery';
-import commonmark from 'helpers/commonmark';
+import markdown from 'helpers/markdown';
 import txt from 'helpers/text';
 
 
@@ -13,7 +12,7 @@ export function install(Vue, options) {
         },
         update: function(value) {
             this.el.classList.add('markdown');
-            this.el.innerHTML = value ? commonmark(value, config.markdown) : '';
+            this.el.innerHTML = value ? markdown(value) : '';
         },
         unbind: function() {
             $(this.el).removeClass('markdown');
@@ -27,10 +26,10 @@ export function install(Vue, options) {
         if (max_length) {
             const div = document.createElement('div');
             div.classList.add('markdown');
-            div.innerHTML = commonmark(text, config.markdown);
+            div.innerHTML = markdown(text);
             return txt.truncate(div.textContent || div.innerText || '', max_length);
         } else {
-            return commonmark(text, config.markdown);
+            return markdown(text);
         }
     });
 }
