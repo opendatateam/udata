@@ -2,6 +2,19 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 1.6.19 (2020-01-06)
+
+- `rel=nofollow` on remote source links [#2364](https://github.com/opendatateam/udata/pull/2364)
+- Fix admin messages and fix user roles selector default value [#2365](https://github.com/opendatateam/udata/pull/2365)
+- Fix new harvester's form tooltip showup [#2371](https://github.com/opendatateam/udata/pull/2371)
+- Fix responsive design of search results [#2372](https://github.com/opendatateam/udata/pull/2372)
+- Fix non-unique ids in datasets' comments [#2374](https://github.com/opendatateam/udata/pull/2374)
+- Case insensitive license matching [#2378](https://github.com/opendatateam/udata/pull/2378)
+
+## 1.6.18 (2019-12-13)
+
 - Remove embedded API doc [#2343](https://github.com/opendatateam/udata/pull/2343) :warning: Breaking change, please customize `API_DOC_EXTERNAL_LINK` for your needs.
 - Removed published date from community ressources [#2350](https://github.com/opendatateam/udata/pull/2350)
 - Added new size for avatars in user's model (`udata images render` must be run in order to update the size of existing images) [#2353](https://github.com/opendatateam/udata/pull/2353)
