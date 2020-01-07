@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2019-10-28 12:50+0100\n"
-"PO-Revision-Date: 2019-11-19 17:18\n"
-"Last-Translator: Axel Haustant (noirbizarre)\n"
+"POT-Creation-Date: 2019-11-29 16:45+0100\n"
+"PO-Revision-Date: 2019-12-19 11:03\n"
+"Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
@@ -12,7 +12,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
-"X-Generator: crowdin.com\n"
 "X-Crowdin-Project: udata\n"
 "X-Crowdin-Language: sr\n"
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
@@ -72,7 +71,7 @@ msgstr "Име је обавезно"
 #: udata/auth/forms.py:13 udata/auth/forms.py:16 udata/core/user/forms.py:18
 #: udata/core/user/forms.py:20
 msgid "URLs not allowed in this field"
-msgstr ""
+msgstr "URL путање нису дозвољене у овом пољу"
 
 #: udata/auth/forms.py:15 udata/core/user/forms.py:19
 #: udata/templates/user/list.html:30
@@ -93,7 +92,7 @@ msgstr "Да ли желите да увезете лицанце за пода�
 
 #: udata/commands/init.py:41
 msgid "Do you want to import some spatial zones (countries)?"
-msgstr ""
+msgstr "Да ли желите да увезете \"spatial\" зоне (државе)?"
 
 #: udata/commands/init.py:45
 msgid "Do you want to create some sample data?"
@@ -848,7 +847,7 @@ msgstr "Нови пример употребе"
 
 #: udata/core/reuse/views.py:22 udata/templates/home.html:140
 msgid "Last reuses"
-msgstr "Најновији примери употребе"
+msgstr "Последњи примери употребе"
 
 #: udata/core/reuse/views.py:58
 msgid "Transfer"
@@ -1129,7 +1128,7 @@ msgstr "Само себе можете да означите као власни
 msgid "Permission denied for this organization"
 msgstr "Дозвола ја ову организацију је одбијена"
 
-#: udata/forms/validators.py:63
+#: udata/forms/validators.py:62
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
 msgstr "Ово поље захтева да се подесе \"%(name)s\""
@@ -1141,12 +1140,12 @@ msgstr "Анонимни корисник"
 #: udata/frontend/helpers.py:292
 msgctxt "month-format"
 msgid "yyyy/MM"
-msgstr "гггг/ММ"
+msgstr "MM/yyyy"
 
 #: udata/frontend/helpers.py:296
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
-msgstr "гггг/ММ/дд"
+msgstr "dd/MM/yyyy"
 
 #: udata/frontend/helpers.py:315
 #, python-format
@@ -1159,7 +1158,7 @@ msgstr "Извор"
 
 #: udata/harvest/forms.py:66
 msgid "Some optional details about this harvester"
-msgstr "Опцони детаљи сакупљача"
+msgstr "Детаљи харвестера"
 
 #: udata/harvest/forms.py:68
 msgid "Backend"
@@ -1230,11 +1229,11 @@ msgstr "API документација"
 #: udata/templates/apidoc.html:5
 #, python-format
 msgid "%(site)s API documentation"
-msgstr ""
+msgstr "%(site)s API документација"
 
 #: udata/templates/apidoc.html:17
 msgid "The API documentation is available at"
-msgstr ""
+msgstr "API документација доступна на"
 
 #: udata/templates/carousel.html:4
 msgid "Best reuse cases"
@@ -1247,7 +1246,7 @@ msgstr "Преузми са "
 #: udata/templates/dataset/display.html:203 udata/templates/embed-dataset.html:177
 #: udata/templates/reuse/display.html:135
 msgid "Producer"
-msgstr "Произвођач"
+msgstr "Организација"
 
 #: udata/templates/embed-dataset.html:183
 msgid "Uploader"
@@ -1304,7 +1303,7 @@ msgstr "Промените лозинку"
 
 #: udata/templates/header.html:60
 msgid "Settings"
-msgstr "Поставке"
+msgstr "Администрирај"
 
 #: udata/templates/header.html:68 udata/templates/header.html:71
 #: udata/templates/territories/territory.html:35
@@ -1328,7 +1327,7 @@ msgstr "почетак"
 
 #: udata/templates/home.html:53 udata/templates/topic/display.html:48
 msgid "Featured datasets"
-msgstr "Одабрани скупови података"
+msgstr "Истакнути скупови података"
 
 #: udata/templates/home.html:78
 msgid "Reuse"
@@ -1611,7 +1610,7 @@ msgstr "Избрисано"
 
 #: udata/templates/dataset/display.html:96 udata/templates/dataset/display.html:97
 msgid "Archived"
-msgstr "Архивиран"
+msgstr "Архивирано"
 
 #: udata/templates/dataset/display.html:114
 msgid "See also: community resources"
@@ -1901,7 +1900,7 @@ msgstr "Опадајућим редоследом"
 
 #: udata/templates/macros/search.html:53
 msgid "Export"
-msgstr "Извоз"
+msgstr "Преузми"
 
 #: udata/templates/macros/search.html:122 udata/templates/macros/search.html:160
 msgid "More results…"
@@ -1959,7 +1958,7 @@ msgstr "Видимо се ускоро на порталу"
 #: udata/templates/mail/base.html:19
 #, python-format
 msgid "The %(site)s team"
-msgstr "%(site)s тим"
+msgstr "%(site)s - администратор"
 
 #: udata/templates/mail/discussion_closed.html:6
 #, python-format
@@ -2238,7 +2237,7 @@ msgstr "Употреба података те организације за з�
 
 #: udata/templates/organization/display_base.html:100
 msgid "I belong to this organization"
-msgstr "Ја припадам овој организацији"
+msgstr "Припадам овој организацији"
 
 #: udata/templates/organization/display_base.html:103
 msgid "Join"
@@ -2435,7 +2434,7 @@ msgstr "Број скупа података"
 #: udata/templates/security/change_password.html:12
 #: udata/templates/security/change_password.html:19
 msgid "Change Password"
-msgstr "Промена лозинке"
+msgstr "Промени лозинку"
 
 #: udata/templates/security/forgot_password.html:12
 #: udata/templates/security/forgot_password.html:18
@@ -2462,11 +2461,11 @@ msgstr "Заборавили сте лозинку?"
 
 #: udata/templates/security/login_user.html:24
 msgid "Recover your password"
-msgstr "Опоравите лозинку"
+msgstr "Ресетујте лозинку"
 
 #: udata/templates/security/login_user.html:28
 msgid "Confirmation instructions not received?"
-msgstr "Потврда да инструкције нису примљене?"
+msgstr "Нисте примили мејл са инструкцијама?"
 
 #: udata/templates/security/login_user.html:30
 msgid "Send the instructions again"
@@ -2498,13 +2497,13 @@ msgstr "Прочитао сам и прихватио <a href=\"%(url)s\">све
 msgid "In particular, I understand that this site\n"
 "                    values the production and enrichment of datasets over definitive or partisan interpretations.\n"
 "                    The members of the community are in charge of looking after the quality of the content it produces."
-msgstr "Пре свега, разумем да овај сајт\n"
-"                    више цени продукцију и обогаћивање скупова података него пристрасне интерпретације.\n"
-"                    Припадници ове заједнице су одговорни за квалитет садржаја."
+msgstr "Пре свега, разумем да овај Портал\n"
+"                    више цени креирање и обогаћивање скупова података него пристрасне интерпретације.\n"
+"                    Чланови ове заједнице су одговорни за квалитет објављеног садржаја."
 
 #: udata/templates/security/send_confirmation.html:12
 msgid "Resend confirmation instructions"
-msgstr "Поново пошаљи информације потврде"
+msgstr "Поново пошаљи инструкције"
 
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
@@ -2688,7 +2687,7 @@ msgstr "Теме"
 
 #: udata/templates/topic/display.html:30
 msgid "Latest reuses"
-msgstr "Најновији случајеви употребе"
+msgstr "Најновији примери употребе"
 
 #: udata/templates/topic/display.html:49
 msgid "Latest datasets"

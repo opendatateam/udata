@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2019-10-28 12:50+0100\n"
-"PO-Revision-Date: 2019-11-20 11:21\n"
+"POT-Creation-Date: 2019-11-29 16:45+0100\n"
+"PO-Revision-Date: 2019-12-02 09:51\n"
 "Last-Translator: Axel Haustant (noirbizarre)\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1129,7 +1129,7 @@ msgstr "Vous ne pouvez définir que vous-même en tant que propriétaire"
 msgid "Permission denied for this organization"
 msgstr "Permission refusée pour cette organisation"
 
-#: udata/forms/validators.py:63
+#: udata/forms/validators.py:62
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
 msgstr "Ce champ requiert la définition de \"%(name)s\""
