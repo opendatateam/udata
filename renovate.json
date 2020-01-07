@@ -4,8 +4,9 @@
   ],
   "baseBranches": ["py3"],
   "pip_requirements": {
-    "fileMatch": ["requirements/test.pip"]
+    "fileMatch": ["requirements/install.pip", "requirements/test.pip"]
   },
   "enabledManagers": ["pip_requirements"],
-  "automerge": true
+  "automerge": true,
+  "prHourlyLimit": 0
 }
