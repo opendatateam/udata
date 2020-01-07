@@ -195,6 +195,7 @@ workflows:
                 - /[0-9]+(\.[0-9]+)+/
                 - /pull/[0-9]+/
                 - /pyup-update-.+/
+                - /renovate\/.+/
                 - l10n_master
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
@@ -206,6 +207,7 @@ workflows:
                 - /[0-9]+(\.[0-9]+)+/
                 - /pull/[0-9]+/
                 - /pyup-update-.+/
+                - /renovate\/.+/
                 - l10n_master
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
@@ -220,6 +222,7 @@ workflows:
                 - /[0-9]+(\.[0-9]+)+/
                 - /pull/[0-9]+/
                 - /pyup-update-.+/
+                - /renovate\/.+/
                 - l10n_master
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
