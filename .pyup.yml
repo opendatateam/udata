@@ -1,5 +1,5 @@
 ---
 branch: py3
 pin: False
-update: all
+update: False
 label_prs: update
