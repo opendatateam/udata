@@ -8,5 +8,5 @@
   },
   "enabledManagers": ["pip_requirements"],
   "automerge": true,
-  "prHourlyLimit": 0
+  "prHourlyLimit": 5
 }
