@@ -31,7 +31,7 @@ Flask==1.0.4
 geojson==2.5.0
 html2text==2019.9.26
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.10.3
 jsonschema==3.0.2
 kombu[redis]==4.4.0
 lxml==4.4.1
