@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import itertools
 import logging
 import urllib
 
-from bson import ObjectId
 from functools import wraps
 
 from flask import (
@@ -14,16 +12,13 @@ from flask import (
 from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource, cors
 
-from udata import search, theme, tracking
+from udata import tracking, theme
 from udata.app import csrf
 from udata.i18n import I18nBlueprint, get_locale
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
 from udata.core.user.models import User
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Organization
-from udata.sitemap import sitemap
 from udata.utils import safe_unicode
 
 from . import fields, oauth2
@@ -34,7 +29,6 @@ log = logging.getLogger(__name__)
 
 apiv1 = Blueprint('api', __name__, url_prefix='/api/1')
 apidoc = I18nBlueprint('apidoc', __name__)
-
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
@@ -149,7 +143,7 @@ class UDataApi(Api):
         return form
 
     def render_ui(self):
-        return redirect(url_for('apii18n.apidoc'))
+        return redirect(current_app.config.get('API_DOC_EXTERNAL_LINK'))
 
     def unauthorized(self, response):
         '''Override to change the WWW-Authenticate challenge'''
@@ -271,41 +265,12 @@ def handle_unauthorized_file_type(error):
 @apidoc.route('/api/1/')
 @api.documentation
 def default_api():
-    return redirect(url_for('apidoc.swaggerui'))
+    return redirect(url_for('apidoc.apidoc_index'))
 
 
 @apidoc.route('/apidoc/')
-def swaggerui():
-    page_size = 10
-    params = {"datasets": "many"}
-    organizations = search.iter(Organization)
-    organizations = list(itertools.islice(organizations, page_size))
-    if len(organizations) < page_size:
-        # Fill with dummy values
-        needs = page_size - len(organizations)
-        extra_orgs = OrganizationFactory.build_batch(needs)
-        for org in extra_orgs:
-            org.id = ObjectId()
-            Organization.slug.generate()
-        organizations.extend(extra_orgs)
-    return theme.render('apidoc.html', specs_url=api.specs_url, organizations=organizations)
-
-
-@sitemap.register_generator
-def api_sitemap_urls():
-    yield 'apidoc.swaggerui_redirect', {}, None, 'weekly', 0.9
-
-
-@apidoc.route('/apidoc/images/<path:path>')
-def images(path):
-    return redirect(url_for('static',
-                    filename='bower/swagger-ui/dist/images/' + path))
-
-
-@apidoc.route('/static/images/throbber.gif')
-def fix_apidoc_throbber():
-    return redirect(url_for('static',
-                    filename='bower/swagger-ui/dist/images/throbber.gif'))
+def apidoc_index():
+    return theme.render('apidoc.html')
 
 
 class API(Resource):  # Avoid name collision as resource is a core model

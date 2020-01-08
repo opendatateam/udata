@@ -23,7 +23,7 @@ from udata.core.storages import avatars, default_image_basename
 
 __all__ = ('User', 'Role', 'datastore')
 
-AVATAR_SIZES = [100, 32, 25]
+AVATAR_SIZES = [500, 200, 100, 32, 25]
 
 
 # TODO: use simple text for role

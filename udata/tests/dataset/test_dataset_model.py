@@ -301,6 +301,12 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_imatch_by_id(self):
+        license = LicenseFactory(id='CAPS-ID')
+        found = License.guess(license.id)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_exact_match_by_id_with_spaces(self):
         license = LicenseFactory()
         found = License.guess(' {0} '.format(license.id))
@@ -313,8 +319,22 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_imatch_by_url(self):
+        url = '%s/CAPS.php' % faker.uri()
+        license = LicenseFactory(url=url)
+        found = License.guess(license.url)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_exact_match_by_alternate_url(self):
         alternate_url = faker.uri()
+        license = LicenseFactory(alternate_urls=[alternate_url])
+        found = License.guess(alternate_url)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_imatch_by_alternate_url(self):
+        alternate_url = '%s/CAPS.php' % faker.uri()
         license = LicenseFactory(alternate_urls=[alternate_url])
         found = License.guess(alternate_url)
         assert isinstance(found, License)

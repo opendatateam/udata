@@ -403,6 +403,8 @@ class Defaults(object):
     ARCHIVE_COMMENT_USER_ID = None
     ARCHIVE_COMMENT_TITLE = _('This dataset has been archived')
 
+    API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

@@ -159,8 +159,8 @@ class License(db.Document):
         text = text.strip().lower()  # Stored identifiers are lower case
         slug = cls.slug.slugify(text)  # Use slug as it normalize string
         license = qs(
-            db.Q(id=text) | db.Q(slug=slug) | db.Q(url=text)
-            | db.Q(alternate_urls=text)
+            db.Q(id__iexact=text) | db.Q(slug=slug) | db.Q(url__iexact=text)
+            | db.Q(alternate_urls__iexact=text)
         ).first()
         if license is None:
             # Try to single match with a low Damerau-Levenshtein distance
