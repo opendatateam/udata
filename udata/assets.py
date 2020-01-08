@@ -25,7 +25,8 @@ def register_manifest(app, filename='manifest.json'):
     '''Register an assets json manifest'''
     if current_app.config.get('TESTING'):
         return  # Do not spend time here when testing
-    if not has_manifest(app, filename):
+    # only try to use the package parsing method if it's not a full path
+    if not os.path.isabs(filename) and not has_manifest(app, filename):
         msg = '{filename} not found for {app}'.format(**locals())
         raise ValueError(msg)
     manifest = _manifests.get(app, {})
