@@ -34,13 +34,12 @@ $ pwd
 ## Python and virtual environment
 
 It is recommended to work within a virtualenv to ensure proper dependencies isolation.
-If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
 
 We create a virtualenv in the `udata` home directory so it is activated each time
 you log into its account:
 
 ```shell
-$ virtualenv -ppython3.6 $HOME
+$ python3 -mvenv $HOME
 $ . bin/activate
 $ pip install Cython  # Enable optimizations on some packages
 $ pip install --upgrade setuptools  # Make sure setuptools is up to date
