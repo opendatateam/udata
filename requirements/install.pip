@@ -55,7 +55,7 @@ tlds
 ujson==1.35
 urlextract==0.14.0
 unicodecsv==0.14.1
-voluptuous==0.10.5
+voluptuous==0.11.7
 werkzeug==0.14.1
 wtforms-json==0.3.3
 wtforms==2.2.1
