@@ -11,7 +11,7 @@ class DatasetCommandTest:
     def test_dataset_archive_one(self, cli):
         dataset = VisibleDatasetFactory()
 
-        cli('dataset', 'archive_one', str(dataset.id))
+        cli('dataset', 'archive-one', str(dataset.id))
 
         dataset.reload()
         assert dataset.archived is not None
