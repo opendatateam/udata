@@ -45,8 +45,8 @@ def grp():
 
 
 def load_levels(col, path):
-    with open(path) as fp:
-        unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
+    with open(path, 'rb') as fp:
+        unpacker = msgpack.Unpacker(fp, raw=False)
         for i, level in enumerate(unpacker, start=1):
             col.objects(id=level['id']).modify(
                 upsert=True,
@@ -58,9 +58,9 @@ def load_levels(col, path):
 
 
 def load_zones(col, path):
-    with open(path) as fp:
-        unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
-        unpacker.next()  # Skip headers.
+    with open(path, 'rb') as fp:
+        unpacker = msgpack.Unpacker(fp, raw=False)
+        next(unpacker)  # Skip headers.
         for i, geozone in enumerate(unpacker):
             params = {
                 'slug': slugify.slugify(geozone['name'], separator='-'),
