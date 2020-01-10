@@ -182,12 +182,6 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     cleanup(prefix)
 
 
-def safe_tarinfo(tarinfo):
-    '''make a tarinfo utf8-compatible'''
-    tarinfo.name = tarinfo.name.decode('utf8')
-    return tarinfo
-
-
 @grp.command()
 @click.argument('filename', metavar='<filename>')
 def load_logos(filename):
@@ -203,8 +197,7 @@ def load_logos(filename):
     log.info('Extracting GeoLogos bundle')
     with contextlib.closing(lzma.LZMAFile(filename)) as xz:
         with tarfile.open(fileobj=xz, encoding='utf8') as tar:
-            decoded = (safe_tarinfo(t) for t in tar.getmembers())
-            tar.extractall(tmp.root, members=decoded)
+            tar.extractall(tmp.root, members=tar.getmembers())
 
     log.info('Moving to the final location and cleaning up')
     if os.path.exists(logos.root):
