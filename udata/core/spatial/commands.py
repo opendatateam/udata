@@ -59,7 +59,7 @@ def load_levels(col, path):
 
 def load_zones(col, path):
     with open(path, 'rb') as fp:
-        unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
+        unpacker = msgpack.Unpacker(fp, raw=False)
         next(unpacker)  # Skip headers.
         for i, geozone in enumerate(unpacker):
             params = {
