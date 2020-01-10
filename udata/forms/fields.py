@@ -41,7 +41,7 @@ class FieldHelper(object):
         return False
 
     def __call__(self, **kwargs):
-        placeholder = kwargs.pop('placeholder', _(self.label.text))
+        placeholder = kwargs.pop('placeholder', self.label.text)
         if placeholder:
             kwargs['placeholder'] = placeholder
         required = kwargs.pop('required', self.flags.required)
