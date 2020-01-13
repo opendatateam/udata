@@ -291,7 +291,7 @@ class TerritoryConverterTest:
         @app.route('/territory/<territory:territory>')
         def territory_tester(territory):
             assert isinstance(territory, GeoZone)
-            return 'ok'
+            return territory.id
 
     def test_serialize_zone_with_validity(self):
         zone = GeoZoneFactory()
@@ -362,3 +362,17 @@ class TerritoryConverterTest:
     def test_model_not_found(self, client):
         assert404(client.get('/territory/l/c@latest'))
 
+    def test_resolve_latest_without_validity_end(self, client):
+        '''
+        Two zones for the same code, one w/ validity.end and the other w/o:
+        we should get the one w/o validity.end (i.e. still valid)
+        '''
+        zone1 = GeoZoneFactory(level='fr:level')
+        zone2 = GeoZoneFactory(level='fr:level', code=zone1.code, slug=zone1.slug)
+        zone2.validity.end = None
+        zone2.save()
+        url = '/territory/level/{code}@latest/{slug}'.format(code=zone1.code, slug=zone1.slug)
+        response = client.get(url)
+        assert200(response)
+        assert response.data.decode() == zone2.id
+        assert response.data.decode() != zone1.id
