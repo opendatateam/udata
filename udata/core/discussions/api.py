@@ -110,6 +110,7 @@ class DiscussionAPI(API):
             posted_by=current_user.id
         )
         discussion.discussion.append(message)
+        message_idx = len(discussion.discussion) - 1
         close = form.close.data
         if close:
             CloseDiscussionPermission(discussion).test()
@@ -117,9 +118,9 @@ class DiscussionAPI(API):
             discussion.closed = datetime.now()
         discussion.save()
         if close:
-            on_discussion_closed.send(discussion, message=message)
+            on_discussion_closed.send(discussion, message=message_idx)
         else:
-            on_new_discussion_comment.send(discussion, message=message)
+            on_new_discussion_comment.send(discussion, message=message_idx)
         return discussion
 
     @api.secure(admin_permission)

@@ -13,10 +13,10 @@ from udata.i18n import gettext as _, format_date
 from udata.models import db
 from udata.utils import faker
 
-from . import response_factory, Fake, FakeFactory
+from . import response_factory, FakeSearchable, FakeFactory
 
 
-class FakeWithStringId(Fake):
+class FakeWithStringId(FakeSearchable):
     id = db.StringField(primary_key=True)
 
 
@@ -172,7 +172,7 @@ class TermsFacetTest(FacetTestCase):
 @pytest.mark.usefixtures('clean_db')
 class ModelTermsFacetTest(FacetTestCase):
     def setUp(self):
-        self.facet = search.ModelTermsFacet(field='fakes', model=Fake)
+        self.facet = search.ModelTermsFacet(field='fakes', model=FakeSearchable)
 
     def test_labelize_id(self):
         fake = FakeFactory()
@@ -189,7 +189,7 @@ class ModelTermsFacetTest(FacetTestCase):
     def test_labelize_object_with_or(self):
         fake_1 = FakeFactory()
         fake_2 = FakeFactory()
-        org_facet = search.ModelTermsFacet(field='id', model=Fake)
+        org_facet = search.ModelTermsFacet(field='id', model=FakeSearchable)
         assert (
             org_facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id))
             ==
@@ -198,11 +198,11 @@ class ModelTermsFacetTest(FacetTestCase):
 
     def test_labelize_object_with_or_and_html(self):
         def labelizer(value):
-            return Fake.objects(id=value).first()
+            return FakeSearchable.objects(id=value).first()
 
         fake_1 = FakeFactory()
         fake_2 = FakeFactory()
-        facet = search.ModelTermsFacet(field='id', model=Fake,
+        facet = search.ModelTermsFacet(field='id', model=FakeSearchable,
                                        labelizer=labelizer)
         assert (
             facet.labelize('{0}|{1}'.format(fake_1.id, fake_2.id))
@@ -221,7 +221,7 @@ class ModelTermsFacetTest(FacetTestCase):
 
         assert len(result) == 10
         for fake, row in zip(fakes, result):
-            assert isinstance(row[0], Fake)
+            assert isinstance(row[0], FakeSearchable)
             assert isinstance(row[1], int)
             assert isinstance(row[2], bool)
             assert fake.id == row[0].id

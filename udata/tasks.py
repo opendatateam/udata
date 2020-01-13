@@ -83,17 +83,24 @@ def job(name, **kwargs):
                 bind=True, **kwargs)
 
 
+def as_task_param(obj):
+    '''Pass a document as task parameter'''
+    return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, basestring) else str(obj.pk))
+
+
 def get_logger(name):
     logger = get_task_logger(name)
     return logger
 
 
 def connect(signal, *args, **kwargs):
+    by_id = kwargs.pop('by_id', False)
+
     def wrapper(func):
         t = task(func, *args, **kwargs)
 
         def call_task(item, **kwargs):
-            t.delay(item, **kwargs)
+            t.delay(str(item.pk) if by_id else item, **kwargs)
 
         signal.connect(call_task, weak=False)
         return t

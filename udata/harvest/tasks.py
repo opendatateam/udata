@@ -45,8 +45,8 @@ def harvest_job_item(job_id, item_id):
 
     item = filter(lambda i: i.remote_id == item_id, job.items)[0]
 
-    result = backend.process_item(item)
-    return (item_id, result)
+    backend.process_item(item)
+    return item_id
 
 
 @task(ignore_result=False, route='low.harvest')

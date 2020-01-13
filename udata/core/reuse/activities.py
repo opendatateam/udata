@@ -5,7 +5,6 @@ from flask_security import current_user
 
 from udata.i18n import lazy_gettext as _
 from udata.models import db, Reuse, Activity
-from udata.core.activity.tasks import write_activity
 
 
 __all__ = (
@@ -42,22 +41,16 @@ class UserDeletedReuse(ReuseRelatedActivity, Activity):
 @Reuse.on_create.connect
 def on_user_created_reuse(reuse):
     if not reuse.private and current_user and current_user.is_authenticated:
-        user = current_user._get_current_object()
-        organization = reuse.organization
-        write_activity.delay(UserCreatedReuse, user, reuse, organization)
+        UserCreatedReuse.emit(reuse, reuse.organization)
 
 
 @Reuse.on_update.connect
 def on_user_updated_reuse(reuse):
     if not reuse.private and current_user and current_user.is_authenticated:
-        user = current_user._get_current_object()
-        organization = reuse.organization
-        write_activity.delay(UserUpdatedReuse, user, reuse, organization)
+        UserUpdatedReuse.emit(reuse, reuse.organization)
 
 
 @Reuse.on_delete.connect
 def on_user_deleted_reuse(reuse):
     if not reuse.private and current_user and current_user.is_authenticated:
-        user = current_user._get_current_object()
-        organization = reuse.organization
-        write_activity.delay(UserDeletedReuse, user, reuse, organization)
+        UserDeletedReuse.emit(reuse, reuse.organization)

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import warnings
+
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.models import Activity, Metrics, Issue, Discussion, Follow
@@ -29,7 +31,17 @@ def purge_reuses(self):
 
 
 @task
-def notify_new_reuse(reuse):
+def notify_new_reuse(reuse_id):
+    if isinstance(reuse_id, Reuse):
+        # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Reuse as task parameter is deprecated and '
+            'will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        reuse = reuse_id
+    else:
+        reuse = Reuse.objects.get(pk=reuse_id)
     for dataset in reuse.datasets:
         if dataset.organization:
             recipients = [m.user for m in dataset.organization.members]

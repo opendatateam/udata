@@ -7,15 +7,11 @@ from datetime import date, timedelta
 
 from udata.core.metrics import Metric
 from udata.core.metrics.tasks import bump_metrics
-from udata.models import db, Metrics, WithMetrics
+from udata.models import Metrics
 from udata.tests.helpers import assert_emit, assert_not_emit
+from udata.tests.models import FakeModel
 
 pytestmark = pytest.mark.usefixtures('clean_db')
-
-
-class FakeModel(WithMetrics, db.Document):
-    def __unicode__(self):
-        return ''
 
 
 class FakeMetric(Metric):

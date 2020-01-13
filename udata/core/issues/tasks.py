@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, absolute_import
 
+import warnings
+
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse
 from udata.tasks import connect, get_logger
 
+from .models import Issue, Message
 from .signals import on_new_issue, on_new_issue_comment, on_issue_closed
 
 log = get_logger(__name__)
@@ -18,8 +21,33 @@ def owner_recipients(issue):
         return [issue.subject.owner]
 
 
-@connect(on_new_issue)
-def notify_new_issue(issue):
+def _compat_get_issue(issue_id):
+    if isinstance(issue_id, Issue):  # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Using documents as task parameter is deprecated and '
+            'will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        return issue_id
+    else:
+        return Issue.objects.get(pk=issue_id)
+
+
+def _compat_get_message(issue, message_idx):
+    if isinstance(message_idx, Message):  # TODO: Remove this branch in udata 2.0
+        warnings.warn(
+            'Using documents as task parameter is deprecated and '
+            'will be removed in udata 2.0',
+            DeprecationWarning
+        )
+        return message_idx
+    else:
+        return issue.discussion[message_idx]
+
+
+@connect(on_new_issue, by_id=True)
+def notify_new_issue(issue_id):
+    issue = _compat_get_issue(issue_id)
     if isinstance(issue.subject, (Dataset, Reuse)):
         recipients = owner_recipients(issue)
         subject = _('Your %(type)s have a new issue',
@@ -30,10 +58,11 @@ def notify_new_issue(issue):
         log.warning('Unrecognized issue subject type %s', type(issue.subject))
 
 
-@connect(on_new_issue_comment)
-def notify_new_issue_comment(issue, **kwargs):
+@connect(on_new_issue_comment, by_id=True)
+def notify_new_issue_comment(issue_id, message=None):
+    issue = _compat_get_issue(issue_id)
+    message = _compat_get_message(issue, message)
     if isinstance(issue.subject, (Dataset, Reuse)):
-        message = kwargs['message']
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
         recipients = [u for u in set(recipients) if u != message.posted_by]
@@ -45,10 +74,11 @@ def notify_new_issue_comment(issue, **kwargs):
         log.warning('Unrecognized issue subject type %s', type(issue.subject))
 
 
-@connect(on_issue_closed)
-def notify_issue_closed(issue, **kwargs):
+@connect(on_issue_closed, by_id=True)
+def notify_issue_closed(issue_id, message=None):
+    issue = _compat_get_issue(issue_id)
+    message = _compat_get_message(issue, message)
     if isinstance(issue.subject, (Dataset, Reuse)):
-        message = kwargs['message']
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
         recipients = [u for u in set(recipients) if u != message.posted_by]
