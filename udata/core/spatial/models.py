@@ -56,7 +56,12 @@ class GeoZoneQuerySet(db.BaseQuerySet):
         Ensuring the QuerySet unicity for (level, code)
         is you responsibility.
         '''
-        return self.order_by('-validity__end').first()
+        # first try to find a zone without `validity__end`
+        latest = self.filter(validity__end=None).first()
+        # only then try to find the zone with the latest `validity__end`
+        if not latest:
+            latest = self.order_by('-validity__end').first()
+        return latest
 
     def resolve(self, geoid, id_only=False):
         '''
