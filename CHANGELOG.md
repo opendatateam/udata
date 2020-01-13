@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - New Crowdin translations [#2360](https://github.com/opendatateam/udata/pull/2360)
+- Fix territory routing for @latest [#2447](https://github.com/opendatateam/udata/pull/2447)
 
 ## 1.6.19 (2020-01-06)
 
