@@ -93,7 +93,7 @@ class UDataApi(Api):
 
     def _apply_secure(self, func, permission=None):
         '''Enforce authentication on a given method/verb'''
-        self._handle_api_doc(func, {'security': 'apikey'})
+        self._build_doc(func, {'security': 'apikey'})
 
         @wraps(func)
         def wrapper(*args, **kwargs):
