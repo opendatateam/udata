@@ -63,7 +63,7 @@ setup(
     author_email='opendatateam@data.gouv.fr',
     packages=find_packages(),
     include_package_data=True,
-    python_requires='>=3.5',
+    python_requires='>=3.7',
     install_requires=install_requires,
     setup_requires=['setuptools>=38.6.0'],
     tests_require=tests_require,

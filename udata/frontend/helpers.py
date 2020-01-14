@@ -324,13 +324,13 @@ def daterange(value, details=False):
     if details:
         return daterange_with_details(value)
 
-    date_format = 'YYYY'
+    date_format = '%Y'
 
     delta = value.end - value.start
     start, end = None, None
-    start = format_date(value.start, date_format)
+    start = value.start.strftime(date_format)
     if delta.days > 365:
-        end = format_date(value.end, date_format)
+        end = value.end.strftime(date_format)
 
     return '{start!s}–{end!s}'.format(start=start, end=end) if end else start
 
