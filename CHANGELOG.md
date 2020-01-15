@@ -2,6 +2,8 @@
 
 ## Current (in progress)
 
+- Fix FTP links in markdown [#2448](https://github.com/opendatateam/udata/pull/2448)
+
 ### New features
 
 - New migration system [#1956](https://github.com/opendatateam/udata/pull/1956):
