@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from urlparse import urlparse
 
 from dateutil.parser import parse
