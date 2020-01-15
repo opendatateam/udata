@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import pytest
 
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from urlparse import urlparse
 
 from dateutil.parser import parse
@@ -178,31 +178,51 @@ class BaseBackendTest:
         harvest_last_update = parse(dataset.extras['harvest:last_update'])
         assert_equal_dates(harvest_last_update, datetime.now())
 
-    def test_autoarchive(self):
+    def test_autoarchive(self, app):
         nb_datasets = 3
         source = HarvestSourceFactory(config={'nb_datasets': nb_datasets})
         backend = FakeBackend(source)
 
         # create a dangling dataset to be archived
-        dataset = DatasetFactory(extras={
+        limit = app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
+        last_update = datetime.now() - timedelta(days=limit + 1)
+        dataset_arch = DatasetFactory(extras={
             'harvest:domain': source.domain,
             'harvest:source_id': str(source.id),
-            'harvest:remote_id': 'not-on-remote'
+            'harvest:remote_id': 'not-on-remote',
+            'harvest:last_update': last_update.isoformat(),
+        })
+
+        # create a dangling dataset that _won't_ be archived because of grace period
+        limit = app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
+        last_update = datetime.now() - timedelta(days=limit - 11)
+        dataset_no_arch = DatasetFactory(extras={
+            'harvest:domain': source.domain,
+            'harvest:source_id': str(source.id),
+            'harvest:remote_id': 'not-on-remote-two',
+            'harvest:last_update': last_update.isoformat(),
         })
 
         job = backend.harvest()
 
+        # all datasets except arch : 3 mocks + 1 manual (no_arch)
         assert len(job.items) == nb_datasets + 1
-        assert Dataset.objects.count() == nb_datasets + 1
+        # all datasets : 3 mocks + 2 manuals (arch and no_arch)
+        assert Dataset.objects.count() == nb_datasets + 2
 
         archived_items = [i for i in job.items if i.status == 'archived']
         assert len(archived_items) == 1
-        assert archived_items[0].dataset == dataset
+        assert archived_items[0].dataset == dataset_arch
 
-        dataset.reload()
-        assert dataset.archived is not None
-        assert 'harvest:archived' in dataset.extras
-        assert 'harvest:archived_at' in dataset.extras
+        dataset_arch.reload()
+        assert dataset_arch.archived is not None
+        assert 'harvest:archived' in dataset_arch.extras
+        assert 'harvest:archived_at' in dataset_arch.extras
+
+        dataset_no_arch.reload()
+        assert dataset_no_arch.archived is None
+        assert 'harvest:archived' not in dataset_no_arch.extras
+        assert 'harvest:archived_at' not in dataset_no_arch.extras
 
         # test unarchive: archive manually then relaunch harvest
         q = {'extras__harvest:remote_id': 'fake-1'}

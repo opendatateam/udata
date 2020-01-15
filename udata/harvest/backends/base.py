@@ -4,11 +4,12 @@ from __future__ import unicode_literals, print_function
 import logging
 import traceback
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from uuid import UUID
 
 import requests
 
+from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata.models import Dataset
@@ -238,18 +239,25 @@ class BaseBackend(object):
             self.job.save()
 
     def autoarchive(self):
-        '''Archive items that exist on the local instance but not on remote platform'''
+        '''
+        Archive items that exist on the local instance but not on remote platform
+        after a grace period of HARVEST_AUTOARCHIVE_GRACE_DAYS days.
+        '''
         log.debug('Running autoarchive')
+        limit_days = current_app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
+        limit_date = date.today() - timedelta(days=limit_days)
         remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
         q = {
             'extras__harvest:source_id': str(self.source.id),
-            'extras__harvest:remote_id__nin': remote_ids
+            'extras__harvest:remote_id__nin': remote_ids,
+            'extras__harvest:last_update__lt': limit_date.isoformat()
         }
+        print(q)
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
             if not dataset.extras.get('harvest:archived_at'):
-                log.debug('Archiving dataset %s: %s', dataset.id, safe_unicode(dataset.title))
+                log.debug('Archiving dataset %s', dataset.id)
                 archival_date = datetime.now()
                 dataset.archived = archival_date
                 dataset.extras['harvest:archived'] = 'not-on-remote'
