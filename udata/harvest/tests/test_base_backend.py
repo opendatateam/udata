@@ -195,7 +195,7 @@ class BaseBackendTest:
 
         # create a dangling dataset that _won't_ be archived because of grace period
         limit = app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
-        last_update = datetime.now() - timedelta(days=limit - 11)
+        last_update = datetime.now() - timedelta(days=limit - 1)
         dataset_no_arch = DatasetFactory(extras={
             'harvest:domain': source.domain,
             'harvest:source_id': str(source.id),
