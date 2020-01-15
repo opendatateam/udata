@@ -13,6 +13,7 @@ from jinja2.filters import do_truncate, do_striptags
 
 from udata.i18n import _
 
+
 md = LocalProxy(lambda: current_app.extensions['markdown'])
 
 EXCERPT_TOKEN = '<!--- --- -->'
@@ -24,8 +25,11 @@ RE_AUTOLINK = re.compile(
 
 def avoid_mailto_callback(attrs, new=False):
     """Remove completely the link containing a `mailto`."""
-    if attrs[(None, 'href')].startswith('mailto:'):
-        return None
+    try:
+        if attrs[(None, 'href')].startswith('mailto:'):
+            return None
+    except KeyError as e:
+        raise Exception("Markdown link serialization failed. Link's protocol might not be allowed in app's config") from e
     return attrs
 
 
@@ -93,6 +97,7 @@ class UDataMarkdown(object):
             tags=current_app.config['MD_ALLOWED_TAGS'],
             attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
             styles=current_app.config['MD_ALLOWED_STYLES'],
+            protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
             strip_comments=False,
             filters=[partial(LinkifyFilter, skip_tags=['pre'], parse_email=True,
                              callbacks=callbacks)]

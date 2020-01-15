@@ -203,6 +203,8 @@ class Defaults(object):
         'plaintext',
     ]
 
+    MD_ALLOWED_PROTOCOLS = ['http', 'https', 'ftp', 'ftps']
+
     # Tags constraints
     TAG_MIN_LENGTH = 3
     TAG_MAX_LENGTH = 96
