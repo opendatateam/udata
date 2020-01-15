@@ -252,7 +252,6 @@ class BaseBackend(object):
             'extras__harvest:remote_id__nin': remote_ids,
             'extras__harvest:last_update__lt': limit_date.isoformat()
         }
-        print(q)
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
