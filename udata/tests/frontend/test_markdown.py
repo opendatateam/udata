@@ -108,6 +108,14 @@ class MarkdownTest:
         assert el.getAttribute('data-tooltip') == ''
         assert el.firstChild.data == 'foo'
 
+    def test_markdown_linkify_ftp(self, md2dom):
+        '''Markdown filter should transform ftp urls'''
+        text = '[foo](ftp://random.net)'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('href') == 'ftp://random.net'
+        assert el.firstChild.data == 'foo'
+
     def test_markdown_linkify_relative_with_tooltip(self, app):
         '''Markdown filter should transform + add tooltip'''
         text = '[foo](/)'
