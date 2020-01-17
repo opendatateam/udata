@@ -41,6 +41,7 @@ HARVEST_ITEM_STATUS = OrderedDict((
     ('done', _('Done')),
     ('failed', _('Failed')),
     ('skipped', _('Skipped')),
+    ('archived', _('Archived'))
 ))
 
 DEFAULT_HARVEST_FREQUENCY = 'manual'
@@ -109,6 +110,7 @@ class HarvestSource(db.Owned, db.Document):
                                default=DEFAULT_HARVEST_FREQUENCY,
                                required=True)
     active = db.BooleanField(default=True)
+    autoarchive = db.BooleanField(default=True)
     validation = db.EmbeddedDocumentField(HarvestSourceValidation,
                                           default=HarvestSourceValidation)
 

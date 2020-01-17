@@ -190,6 +190,9 @@ class Defaults(object):
     # The number of days of harvest jobs to keep (ie. number of days of history kept)
     HARVEST_JOBS_RETENTION_DAYS = 365
 
+    # The number of days since last harvesting date when a missing dataset is archived
+    HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
+
     # Lists levels that shouldn't be indexed
     SPATIAL_SEARCH_EXCLUDE_LEVELS = tuple()
 

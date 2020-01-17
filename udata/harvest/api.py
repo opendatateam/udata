@@ -104,6 +104,9 @@ source_fields = api.model('HarvestSource', {
                                      required=True),
     'active': fields.Boolean(description='Is this source active',
                              required=True, default=False),
+    'autoarchive': fields.Boolean(
+        description='If enabled, datasets not present on the remote source will be automatically archived',  # noqa
+        required=True, default=True),
     'validation': fields.Nested(validation_fields, readonly=True,
                                 description='Has the source been validated'),
     'last_job': fields.Nested(job_fields,
@@ -190,7 +193,7 @@ class SourcesAPI(API):
     @api.expect(source_fields)
     @api.marshal_with(source_fields)
     def post(self):
-        '''Create a new harvests source'''
+        '''Create a new harvest source'''
         form = api.validate(HarvestSourceForm)
         if form.organization.data:
             EditOrganizationPermission(form.organization.data).test()
@@ -212,7 +215,7 @@ class SourceAPI(API):
     @api.expect(source_fields)
     @api.marshal_with(source_fields)
     def put(self, ident):
-        '''Create a new harvests source'''
+        '''Update a harvest source'''
         source = actions.get_source(ident)
         form = api.validate(HarvestSourceForm, source)
         source = actions.update_source(ident, form.data)

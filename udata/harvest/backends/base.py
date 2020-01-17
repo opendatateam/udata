@@ -4,11 +4,12 @@ from __future__ import unicode_literals, print_function
 import logging
 import traceback
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from uuid import UUID
 
 import requests
 
+from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
 from udata.models import Dataset
@@ -128,6 +129,8 @@ class BaseBackend(object):
         '''Start the harvesting process'''
         if self.perform_initialization() is not None:
             self.process_items()
+            if self.source.autoarchive:
+                self.autoarchive()
             self.finalize()
         return self.job
 
@@ -193,6 +196,12 @@ class BaseBackend(object):
             dataset.extras['harvest:domain'] = self.source.domain
             dataset.extras['harvest:last_update'] = datetime.now().isoformat()
 
+            # unset archived status if needed
+            if dataset.extras.get('harvest:archived_at'):
+                dataset.extras.pop('harvest:archived_at')
+                dataset.extras.pop('harvest:archived')
+                dataset.archived = None
+
             # TODO permissions checking
             if not dataset.organization and not dataset.owner:
                 if self.source.organization:
@@ -229,12 +238,50 @@ class BaseBackend(object):
         if not self.dryrun:
             self.job.save()
 
+    def autoarchive(self):
+        '''
+        Archive items that exist on the local instance but not on remote platform
+        after a grace period of HARVEST_AUTOARCHIVE_GRACE_DAYS days.
+        '''
+        log.debug('Running autoarchive')
+        limit_days = current_app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
+        limit_date = date.today() - timedelta(days=limit_days)
+        remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
+        q = {
+            'extras__harvest:source_id': str(self.source.id),
+            'extras__harvest:remote_id__nin': remote_ids,
+            'extras__harvest:last_update__lt': limit_date.isoformat()
+        }
+        local_items_not_on_remote = Dataset.objects.filter(**q)
+
+        for dataset in local_items_not_on_remote:
+            if not dataset.extras.get('harvest:archived_at'):
+                log.debug('Archiving dataset %s', dataset.id)
+                archival_date = datetime.now()
+                dataset.archived = archival_date
+                dataset.extras['harvest:archived'] = 'not-on-remote'
+                dataset.extras['harvest:archived_at'] = archival_date
+                if self.dryrun:
+                    dataset.validate()
+                else:
+                    dataset.save()
+
+            # add a HarvestItem to the job list (useful for report)
+            # even when archiving has already been done (useful for debug)
+            item = self.add_item(dataset.extras['harvest:remote_id'])
+            item.dataset = dataset
+            item.status = 'archived'
+
+            if not self.dryrun:
+                self.job.save()
+
     def process(self, item):
         raise NotImplementedError
 
     def add_item(self, identifier, *args, **kwargs):
         item = HarvestItem(remote_id=str(identifier), args=args, kwargs=kwargs)
         self.job.items.append(item)
+        return item
 
     def finalize(self):
         self.job.status = 'done'

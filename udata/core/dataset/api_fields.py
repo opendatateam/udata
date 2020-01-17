@@ -127,7 +127,7 @@ DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update'
+    'uri', 'page', 'last_update', 'archived'
 ))
 
 dataset_fields = api.model('Dataset', {
@@ -143,6 +143,7 @@ dataset_fields = api.model('Dataset', {
     'last_modified': fields.ISODateTime(
         description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
+    'archived': fields.ISODateTime(description='The archival date if archived'),
     'featured': fields.Boolean(description='Is the dataset featured'),
     'private': fields.Boolean(
         description='Is the dataset private to the owner or the organization'),
