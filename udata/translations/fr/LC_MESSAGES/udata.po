@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2020-01-15 11:11+0100\n"
-"PO-Revision-Date: 2020-01-17 09:13\n"
+"PO-Revision-Date: 2020-01-17 09:29\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -1578,7 +1578,7 @@ msgstr "Granularité de la couverture territoriale"
 
 #: udata/templates/dataset/display.html:43
 msgid "This dataset has been archived automatically because it has been deleted from the remote platform."
-msgstr ""
+msgstr "Ce jeu de données a été archivé automatiquement parce qu'il n'est plus disponible sur le portail source."
 
 #: udata/templates/dataset/display.html:45 udata/templates/dataset/display.html:101
 msgid "This dataset has been archived."
