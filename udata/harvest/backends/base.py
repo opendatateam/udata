@@ -129,8 +129,6 @@ class BaseBackend(object):
         '''Start the harvesting process'''
         if self.perform_initialization() is not None:
             self.process_items()
-            if self.source.autoarchive:
-                self.autoarchive()
             self.finalize()
         return self.job
 
@@ -284,6 +282,8 @@ class BaseBackend(object):
         return item
 
     def finalize(self):
+        if self.source.autoarchive:
+            self.autoarchive()
         self.job.status = 'done'
         if any(i.status == 'failed' for i in self.job.items):
             self.job.status += '-errors'
