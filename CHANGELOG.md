@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.6.20 (2020-01-21)
 
 - New Crowdin translations [#2360](https://github.com/opendatateam/udata/pull/2360)
