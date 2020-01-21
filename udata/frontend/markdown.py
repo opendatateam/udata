@@ -24,12 +24,16 @@ RE_AUTOLINK = re.compile(
 
 
 def avoid_mailto_callback(attrs, new=False):
-    """Remove completely the link containing a `mailto`."""
+    """
+    Remove completely the link containing a `mailto` to avoid spam.
+    If case of a bad markdown formating for links, the href will not be found in attr and a KeyError will be raised.
+    We chose to catch the exception and just display the text of the link alone.
+    """
     try:
         if attrs[(None, 'href')].startswith('mailto:'):
             return None
-    except KeyError as e:
-        raise Exception("Markdown link serialization failed. Link's protocol might not be allowed in app's config") from e
+    except KeyError:
+        pass
     return attrs
 
 
