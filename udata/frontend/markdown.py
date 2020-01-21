@@ -26,7 +26,7 @@ RE_AUTOLINK = re.compile(
 def avoid_mailto_callback(attrs, new=False):
     """
     Remove completely the link containing a `mailto` to avoid spam.
-    If case of a bad markdown formating for links, the href will not be found in attr and a KeyError will be raised.
+    In case of a bad markdown formatting for links, the href will not be found in attr and a KeyError will be raised.
     We chose to catch the exception and just display the text of the link alone.
     """
     try:
