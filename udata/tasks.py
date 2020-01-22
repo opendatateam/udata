@@ -82,7 +82,7 @@ def job(name, **kwargs):
 
 def as_task_param(obj):
     '''Pass a document as task parameter'''
-    return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, basestring) else str(obj.pk))
+    return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, str) else str(obj.pk))
 
 
 def get_logger(name):

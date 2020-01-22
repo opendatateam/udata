@@ -166,7 +166,7 @@ def unindex(obj, id=None):
             DeprecationWarning
         )
         model = obj.__class__
-        id = obj.pk if isinstance(obj.pk, basestring) else str(obj.pk)
+        id = obj.pk if isinstance(obj.pk, str) else str(obj.pk)
     adapter_class = adapter_catalog.get(model)
     if adapter_class.exists(id, using=es.client, index=es.index_name):
         log.info('Unindexing %s (%s)', model.__name__, id)
