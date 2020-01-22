@@ -46,13 +46,16 @@ export default {
             postFields: [{
                 id: 'active',
                 label: this._('Active')
+            }, {
+                id: 'autoarchive',
+                label: this._('Automatic archiving')
             }],
             filters: [],
         };
     },
     events: {
         'field:change': function(field, value) {
-            if (field.field.id == 'backend') {
+            if (field.field.id === 'backend') {
                 this.backendValue = value;
             }
             return true;  // Let the event continue its bubbling
@@ -70,7 +73,7 @@ export default {
          */
         backend() {
             if (!this.backendValue) return;
-            return this.backends.find(item => item.id == this.backendValue);
+            return this.backends.find(item => item.id === this.backendValue);
         },
         /**
          * Values for the backend select box
@@ -81,14 +84,14 @@ export default {
     },
     created() {
         // Prevent empty backends select box
-        backends.$on('updated', () => {this.backends = backends.items});
+        backends.$on('updated', () => {this.backends = backends.items;});
     },
     methods: {
         serialize() {
             const data =  Object.assign({},
                 this.$refs.postForm.serialize(),
                 this.$refs.form.serialize(),
-            )
+            );
             data.config = this.$refs.configForm.serialize();
             return data;
         },

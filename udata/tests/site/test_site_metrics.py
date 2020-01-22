@@ -2,15 +2,10 @@ import pytest
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.site.metrics import SiteMetric
-from udata.models import db, Metrics, WithMetrics, Site
+from udata.models import Metrics, Site
 from udata.tests.helpers import assert_emit
 
 FAKE_VALUE = 42
-
-
-class FakeModel(WithMetrics, db.Document):
-    def __str__(self):
-        return ''
 
 
 class FakeSiteMetric(SiteMetric):

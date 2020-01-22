@@ -67,6 +67,8 @@ class HarvestSourceForm(Form):
     ])
     owner = fields.CurrentUserField()
     organization = fields.PublishAsField(_('Publish as'))
+    active = fields.BooleanField()
+    autoarchive = fields.BooleanField()
 
     config = HarvestConfigField()
 

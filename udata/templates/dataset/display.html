@@ -38,7 +38,13 @@
 
 {% if dataset.archived %}
 <div class="container-fluid alert alert-warning">
-    <div class="container" role="alert">{{ _('This dataset has been archived.') }}</div>
+    <div class="container" role="alert">
+        {% if dataset.extras.get('harvest:archived') == 'not-on-remote' %}
+        {{ _('This dataset has been archived automatically because it has been deleted from the remote platform.') }}
+        {% else %}
+        {{ _('This dataset has been archived.') }}
+        {% endif %}
+    </div>
 </div>
 {% endif %}
 

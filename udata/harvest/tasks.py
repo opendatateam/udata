@@ -42,8 +42,8 @@ def harvest_job_item(job_id, item_id):
 
     item = next(i for i in job.items if i.remote_id == item_id)
 
-    result = backend.process_item(item)
-    return (item_id, result)
+    backend.process_item(item)
+    return item_id
 
 
 @task(ignore_result=False, route='low.harvest')
