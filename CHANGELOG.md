@@ -10,6 +10,7 @@
 - Fix territory routing for @latest [#2447](https://github.com/opendatateam/udata/pull/2447)
 - Refactor Celery: py2/py3 compatibility, use ids as payload [#2305](https://github.com/opendatateam/udata/pull/2305)
 - Automatically archive dangling harvested datasets :warning: this is enabled by default [#2368](https://github.com/opendatateam/udata/pull/2368)
+- Refactor celery tasks to avoid models/documents in the transport layer [#2305](https://github.com/opendatateam/udata/pull/2305)
 
 ## 1.6.19 (2020-01-06)
 
@@ -39,7 +40,6 @@
 - Prevent Google ranking spam attacks on reuse pages (`rel=nofollow` on reuse link) [#2320](https://github.com/opendatateam/udata/pull/2320)
 - Display admin resources list actions only if user has permissions to edit [#2326](https://github.com/opendatateam/udata/pull/2326)
 - Fix non-admin user not being able to change their profile picture [#2327](https://github.com/opendatateam/udata/pull/2327)
-- Refactor celery tasks to avoid models/documents in the transport layer [#2305](https://github.com/opendatateam/udata/pull/2305)
 
 ## 1.6.15 (2019-09-11)
 
