@@ -35,6 +35,10 @@
                     :title="_('Number of skipped items')"
                     >{{job.items | count 'skipped'}}</span>
                 /
+                <span class="text-warning" v-tooltip tooltip-placement="top"
+                    :title="_('Number of archived items')"
+                    >{{job.items | count 'archived'}}</span>
+                /
                 <span class="text-danger" v-tooltip tooltip-placement="top"
                     :title="_('Number of failed items')"
                     >{{job.items | count 'failed'}}</span>

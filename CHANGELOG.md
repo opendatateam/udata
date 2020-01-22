@@ -16,6 +16,14 @@
 - The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
 - The targeted mongo version is now Mongo 3.6. Backward support is not guaranteed
 
+## 1.6.20 (2020-01-21)
+
+- New Crowdin translations [#2360](https://github.com/opendatateam/udata/pull/2360)
+- Fix territory routing for @latest [#2447](https://github.com/opendatateam/udata/pull/2447)
+- Refactor Celery: py2/py3 compatibility, use ids as payload [#2305](https://github.com/opendatateam/udata/pull/2305)
+- Automatically archive dangling harvested datasets :warning: this is enabled by default [#2368](https://github.com/opendatateam/udata/pull/2368)
+- Refactor celery tasks to avoid models/documents in the transport layer [#2305](https://github.com/opendatateam/udata/pull/2305)
+
 ## 1.6.19 (2020-01-06)
 
 - `rel=nofollow` on remote source links [#2364](https://github.com/opendatateam/udata/pull/2364)
@@ -44,7 +52,6 @@
 - Prevent Google ranking spam attacks on reuse pages (`rel=nofollow` on reuse link) [#2320](https://github.com/opendatateam/udata/pull/2320)
 - Display admin resources list actions only if user has permissions to edit [#2326](https://github.com/opendatateam/udata/pull/2326)
 - Fix non-admin user not being able to change their profile picture [#2327](https://github.com/opendatateam/udata/pull/2327)
->>>>>>> master
 
 ## 1.6.15 (2019-09-11)
 
@@ -53,6 +60,7 @@
 - Allow `Authorization` as CORS header and OAuth minor fixes [#2298](https://github.com/opendatateam/udata/pull/2298)
 - Set dataset.private to False by default (and fix stock) [#2307](https://github.com/opendatateam/udata/pull/2307)
 - Fixes some inconsistencies between admin display (buttons, actions...) and real permissions [#2308](https://github.com/opendatateam/udata/pull/2308)
+
 
 ## 1.6.14 (2019-08-14)
 
