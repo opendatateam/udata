@@ -23,6 +23,23 @@ RE_AUTOLINK = re.compile(
     re.IGNORECASE)
 
 
+<<<<<<< HEAD
+=======
+def avoid_mailto_callback(attrs, new=False):
+    """
+    Remove completely the link containing a `mailto` to avoid spam.
+    In case of a bad markdown formatting for links, the href will not be found in attr and a KeyError will be raised.
+    We chose to catch the exception and just display the text of the link alone.
+    """
+    try:
+        if attrs[(None, 'href')].startswith('mailto:'):
+            return None
+    except KeyError:
+        pass
+    return attrs
+
+
+>>>>>>> 56c19205827c5facfaa0f9751178ea4e980f8a73
 def source_tooltip_callback(attrs, new=False):
     """
     Add a `data-tooltip` attribute with `Source` content for embeds.
