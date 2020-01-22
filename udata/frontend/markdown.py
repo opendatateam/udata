@@ -23,20 +23,6 @@ RE_AUTOLINK = re.compile(
     re.IGNORECASE)
 
 
-def avoid_mailto_callback(attrs, new=False):
-    """
-    Remove completely the link containing a `mailto` to avoid spam.
-    If case of a bad markdown formating for links, the href will not be found in attr and a KeyError will be raised.
-    We chose to catch the exception and just display the text of the link alone.
-    """
-    try:
-        if attrs[(None, 'href')].startswith('mailto:'):
-            return None
-    except KeyError:
-        pass
-    return attrs
-
-
 def source_tooltip_callback(attrs, new=False):
     """
     Add a `data-tooltip` attribute with `Source` content for embeds.
@@ -52,6 +38,9 @@ def nofollow_callback(attrs, new=False):
     otherwise add `nofollow`.
     That callback is not splitted in order to parse the URL only once.
     """
+
+    if (None, u"href") not in attrs:
+        return attrs
     parsed_url = urlparse(attrs[(None, 'href')])
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
         attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
@@ -93,7 +82,7 @@ class UDataMarkdown(object):
         html = self.markdown(stream)
 
         # Deal with callbacks
-        callbacks = [avoid_mailto_callback, nofollow_callback]
+        callbacks = [nofollow_callback]
         if source_tooltip:
             callbacks.append(source_tooltip_callback)
         
@@ -103,7 +92,7 @@ class UDataMarkdown(object):
             styles=current_app.config['MD_ALLOWED_STYLES'],
             protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
             strip_comments=False,
-            filters=[partial(LinkifyFilter, skip_tags=['pre'], parse_email=True,
+            filters=[partial(LinkifyFilter, skip_tags=['pre'], parse_email=False,
                              callbacks=callbacks)]
         )
 
