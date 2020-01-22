@@ -22,6 +22,7 @@ front = I18nBlueprint('front', __name__)
 
 _footer_snippets = []
 _template_hooks = {}
+_conditionnal_template_hooks = {}
 
 
 def footer_snippet(func):
@@ -34,9 +35,25 @@ def template_hook(func):
     return func
 
 
+def conditionnal_template_hook(condition):
+
+    def wrapper(func):
+        _conditionnal_template_hooks[func.__name__] = {
+            'func': func,
+            'condition': condition,
+        }
+
+    return wrapper
+
+
 @front.app_context_processor
 def inject_template_hooks():
     return {'hook_%s' % k: v for (k, v) in _template_hooks.items()}
+
+
+@front.app_context_processor
+def inject_conditionnal_template_hooks():
+    return {'conditionnal_hooks': _conditionnal_template_hooks}
 
 
 @front.app_context_processor
