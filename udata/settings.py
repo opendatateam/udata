@@ -25,7 +25,6 @@ class Defaults(object):
     CONTACT_EMAIL = 'contact@example.org'
     TERRITORIES_EMAIL = 'territories@example.org'
 
-    MONGODB_ALIAS = 'udata_con'
     MONGODB_HOST = 'mongodb://localhost:27017/udata'
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
@@ -43,7 +42,7 @@ class Defaults(object):
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         'fanout_prefix': True,
         'fanout_patterns': True,
-    }
+        }
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
     CELERY_RESULT_EXPIRES = 6 * HOUR  # Results are kept 6 hours
     CELERY_TASK_IGNORE_RESULT = True
@@ -53,6 +52,7 @@ class Defaults(object):
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
     CELERY_BEAT_SCHEDULER = 'udata.tasks.Scheduler'
     CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
+    CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS = "udata_scheduler"
 
     # Default celery routing
     CELERY_TASK_DEFAULT_QUEUE = 'default'
