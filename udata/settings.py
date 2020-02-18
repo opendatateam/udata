@@ -52,6 +52,7 @@ class Defaults(object):
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
     CELERY_BEAT_SCHEDULER = 'udata.tasks.Scheduler'
     CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
+    CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS = "udata_scheduler"
 
     # Default celery routing
     CELERY_TASK_DEFAULT_QUEUE = 'default'
