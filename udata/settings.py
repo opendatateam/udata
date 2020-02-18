@@ -42,7 +42,7 @@ class Defaults(object):
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         'fanout_prefix': True,
         'fanout_patterns': True,
-        }
+     }
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
     CELERY_RESULT_EXPIRES = 6 * HOUR  # Results are kept 6 hours
     CELERY_TASK_IGNORE_RESULT = True
