@@ -235,6 +235,34 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
         return result
 
+    @property
+    def members_count(self):
+        return len(self.members)
+
+    @cached_property
+    def datasets_count(self):
+        from udata.models import Dataset
+        return Dataset.objects(organization=self).visible().count()
+
+    @cached_property
+    def reuses_count(self):
+        from udata.models import Reuse
+        return Reuse.objects(organization=self).count()
+
+    @cached_property
+    def folowers_count(self):
+        from udata.models import Follow
+        return Follow.objects.followers(self).count()
+    
+    @property
+    def get_metrics(self):
+        return {
+            "members" : self.members_count,
+            "datasets": self.datasets_count,
+            "reuses": self.reuses_count,
+            "followers": self.folowers_count
+        }
+
 
 pre_save.connect(Organization.pre_save, sender=Organization)
 post_save.connect(Organization.post_save, sender=Organization)

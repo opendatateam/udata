@@ -1,5 +1,6 @@
 from flask import g, current_app
 from werkzeug.local import LocalProxy
+from werkzeug import cached_property
 
 from udata.models import db, WithMetrics
 from udata.core.dataset.models import Dataset
@@ -28,6 +29,57 @@ class Site(WithMetrics, db.Document):
 
     def __str__(self):
         return self.title or ''
+    
+    @cached_property
+    def users_count(self):
+        from udata.models import User
+        return User.objects.count()
+    
+    @cached_property
+    def org_count(self):
+        from udata.models import Organization
+        return Organization.objects.visible().count()
+
+    @cached_property
+    def datasets_count(self):
+        from udata.models import Dataset
+        return Dataset.objects.visible().count()
+    
+    @cached_property
+    def resources_count(self):
+        return next(Dataset.objects.visible().aggregate(
+            {'$project': {'resources': 1}},
+            {'$unwind': '$resources' },
+            {'$group': {'_id': 'result', 'count': {'$sum': 1}}}
+        ), {}).get('count', 0)
+
+    @cached_property
+    def reuses_count(self):
+        from udata.models import Reuse
+        return Reuse.objects.visible().count()
+
+    @cached_property
+    def folowers_count(self):
+        from udata.models import Follow
+        return Follow.objects(until=None).count()
+    
+    @cached_property
+    def dicussion_count(self):
+        from udata.models import Discussion
+        return Discussion.objects.count()
+    
+    @property
+    def get_metrics(self):
+        return {
+            "datasets": 34556,
+            "discussions": 5329,
+            "followers": 21757,
+            "organizations": 2514,
+            "public_services": 462,
+            "resources": 187202,
+            "reuses": 2032,
+            "users": 50458
+        }
 
 
 def get_current_site():

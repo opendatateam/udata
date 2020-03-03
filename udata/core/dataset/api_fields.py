@@ -161,7 +161,7 @@ dataset_fields = api.model('Dataset', {
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-    'metrics': fields.Raw(description='The dataset metrics'),
+    'metrics': fields.Raw(attribute=lambda o: o.get_metrics, description='The dataset metrics'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The producer organization'),

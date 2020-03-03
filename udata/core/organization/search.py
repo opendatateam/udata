@@ -8,7 +8,6 @@ from udata.search.analysis import simple
 from udata.search.fields import TermsFacet, RangeFacet
 from udata.utils import to_iso_datetime
 
-from . import metrics  # noqa: Metrics are need for the mapping
 
 __all__ = ('OrganizationSearch', )
 lazy = search.lazy_config('organization')
