@@ -439,7 +439,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                        resource_id=kwargs['resource_added'])
 
     def clean(self):
-        super(Dataset, self).clean()
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 

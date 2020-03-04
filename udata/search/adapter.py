@@ -158,16 +158,3 @@ class ModelSearchAdapter(DocType, metaclass=AdapterMetaclass):
             parser.add_argument('page_size', type=int, location='args',
                                 default=20, help='The page size')
         return parser
-
-
-metrics_types = {
-    int: Integer,
-    float: Float,
-}
-
-
-def metrics_mapping_for(cls):
-    props = {}
-    for name, metric in Metric.get_for(cls).items():
-        props[metric.name] = metrics_types[metric.value_type]()
-    return Object(properties=props)

@@ -124,7 +124,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         '''Auto populate urlhash from url'''
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        super(Reuse, self).clean()
 
     @classmethod
     def get(cls, id_or_slug):

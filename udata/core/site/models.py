@@ -3,6 +3,7 @@ from werkzeug.local import LocalProxy
 from werkzeug import cached_property
 
 from udata.models import db, WithMetrics
+from udata.core.organization.models import Organization
 from udata.core.dataset.models import Dataset
 from udata.core.reuse.models import Reuse
 
@@ -55,7 +56,6 @@ class Site(WithMetrics, db.Document):
 
     @cached_property
     def reuses_count(self):
-        from udata.models import Reuse
         return Reuse.objects.visible().count()
 
     @cached_property
@@ -63,8 +63,8 @@ class Site(WithMetrics, db.Document):
         from udata.models import Follow
         return Follow.objects(until=None).count()
     
-    @cached_property
-    def dicussion_count(self):
+    @property
+    def discussion_count(self):
         from udata.models import Discussion
         return Discussion.objects.count()
     
@@ -80,6 +80,55 @@ class Site(WithMetrics, db.Document):
             "reuses": 2032,
             "users": 50458
         }
+    
+    @property
+    def max_dataset_followers(self):
+        # dataset = (Dataset.objects(metrics__followers__gt=0).visible()
+        #                   .order_by('-metrics.followers').first())
+        # return dataset.metrics['followers'] if dataset else 0
+        return 0
+
+    @property
+    def max_dataset_reuses(self):
+        # dataset = (Dataset.objects(metrics__reuses__gt=0).visible()
+        #            .order_by('-metrics.reuses').first())
+        # return dataset.metrics['reuses'] if dataset else 0
+        return 0
+    
+    @property
+    def max_reuse_datasets(self):
+        # reuse = (Reuse.objects(metrics__datasets__gt=0).visible()
+        #          .order_by('-metrics.datasets').first())
+        # return reuse.metrics['datasets'] if reuse else 0
+        return 0
+
+    @property
+    def max_reuse_followers(self):
+        # reuse = (Reuse.objects(metrics__followers__gt=0).visible()
+        #          .order_by('-metrics.followers').first())
+        # return reuse.metrics['followers'] if reuse else 0
+        return 0
+
+    @property
+    def max_org_followers(self):
+        # org = (Organization.objects(metrics__followers__gt=0).visible()
+        #        .order_by('-metrics.followers').first())
+        # return org.metrics['followers'] if org else 0
+        return 0
+
+    @property
+    def max_org_reuses(self):
+        # org = (Organization.objects(metrics__reuses__gt=0).visible()
+        #        .order_by('-metrics.reuses').first())
+        # return org.metrics['reuses'] if org else 0
+        return 0
+
+    @property
+    def max_org_datasets(self):
+        # org = (Organization.objects(metrics__datasets__gt=0).visible()
+        #        .order_by('-metrics.datasets').first())
+        # return org.metrics['datasets'] if org else 0
+        return 0
 
 
 def get_current_site():

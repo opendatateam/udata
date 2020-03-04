@@ -1,4 +1,4 @@
-from elasticsearch_dsl import Completion, Date, String
+from elasticsearch_dsl import Completion, Date, String, Integer
 
 from udata import search
 from udata.core.site.models import current_site
@@ -14,15 +14,15 @@ lazy = search.lazy_config('organization')
 
 
 def max_reuses():
-    return max(current_site.metrics.get('max_org_reuses'), 10)
+    return max(current_site.max_org_reuses, 10)
 
 
 def max_datasets():
-    return max(current_site.metrics.get('max_org_datasets'), 10)
+    return max(current_site.max_org_datasets, 10)
 
 
 def max_followers():
-    return max(current_site.metrics.get('max_org_followers'), 10)
+    return max(current_site.max_org_followers, 10)
 
 
 def organization_badge_labelizer(kind):
@@ -45,22 +45,25 @@ class OrganizationSearch(search.ModelSearchAdapter):
     badges = String(index='not_analyzed')
     url = String(index='not_analyzed')
     created = Date(format='date_hour_minute_second')
-    metrics = search.metrics_mapping_for(Organization)
+    metrics_reuses = Integer()
+    metrics_datasets = Integer()
+    metrics_followers = Integer()
+    metrics_views = Integer()
     org_suggest = Completion(analyzer=simple,
                              search_analyzer=simple,
                              payloads=True)
 
     sorts = {
         'name': 'name.raw',
-        'reuses': 'metrics.reuses',
-        'datasets': 'metrics.datasets',
-        'followers': 'metrics.followers',
-        'views': 'metrics.views',
+        'reuses': 'metrics_reuses',
+        'datasets': 'metrics_datasets',
+        'followers': 'metrics_followers',
+        'views': 'metrics_views',
         'created': 'created',
         'last_modified': 'last_modified',
     }
     facets = {
-        'reuses': RangeFacet(field='metrics.reuses',
+        'reuses': RangeFacet(field='metrics_reuses',
                              ranges=[('none', (None, 1)),
                                      ('few', (1, 5)),
                                      ('many', (5, None))],
@@ -71,7 +74,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
                              }),
         'badge': TermsFacet(field='badges',
                             labelizer=organization_badge_labelizer),
-        'datasets': RangeFacet(field='metrics.datasets',
+        'datasets': RangeFacet(field='metrics_datasets',
                                ranges=[('none', (None, 1)),
                                        ('few', (1, 5)),
                                        ('many', (5, None))],
@@ -80,7 +83,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
                                     'few': _('Few datasets'),
                                     'many': _('Many datasets'),
                                }),
-        'followers': RangeFacet(field='metrics.followers',
+        'followers': RangeFacet(field='metrics_followers',
                                 ranges=[('none', (None, 1)),
                                         ('few', (1, 5)),
                                         ('many', (5, None))],
@@ -91,9 +94,9 @@ class OrganizationSearch(search.ModelSearchAdapter):
                                 }),
     }
     boosters = [
-        search.GaussDecay('metrics.followers', max_followers, decay=lazy('followers_decay')),
-        search.GaussDecay('metrics.reuses', max_reuses, decay=lazy('reuses_decay')),
-        search.GaussDecay('metrics.datasets', max_datasets, decay=lazy('datasets_decay')),
+        search.GaussDecay('metrics_followers', max_followers, decay=lazy('followers_decay')),
+        search.GaussDecay('metrics_reuses', max_reuses, decay=lazy('reuses_decay')),
+        search.GaussDecay('metrics_datasets', max_datasets, decay=lazy('datasets_decay')),
     ]
 
     @classmethod
@@ -111,7 +114,10 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'acronym': organization.acronym,
             'description': organization.description,
             'url': organization.url,
-            'metrics': organization.metrics,
+            'metrics_reuses': organization.reuses_count,
+            'metrics_datasets': organization.datasets_count,
+            'metrics_followers': organization.followers_count,
+            'metrics_views': organization.views_count,
             'badges': [badge.kind for badge in organization.badges],
             'created': to_iso_datetime(organization.created_at),
             'org_suggest': {

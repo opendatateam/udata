@@ -42,16 +42,7 @@ class MetricsQuerySet(db.BaseQuerySet):
 
 
 class WithMetrics(object):
-    metrics = db.DictField()
-
-    def clean(self):
-        '''Fill metrics with defaults on create'''
-        if not self.metrics:
-            self.metrics = dict(
-                (name, spec.default) for name, spec
-                in registry.get_for(self.__class__).items()
-            )
-        return super(WithMetrics, self).clean()
+    _metrics = db.DictField()
 
 
 class Metrics(db.Document):

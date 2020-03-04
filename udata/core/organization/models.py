@@ -238,6 +238,10 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     @property
     def members_count(self):
         return len(self.members)
+    
+    @property
+    def views_count(self):
+        return self._metrics.views
 
     @cached_property
     def datasets_count(self):
@@ -250,7 +254,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         return Reuse.objects(organization=self).count()
 
     @cached_property
-    def folowers_count(self):
+    def followers_count(self):
         from udata.models import Follow
         return Follow.objects.followers(self).count()
     
@@ -260,7 +264,8 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             "members" : self.members_count,
             "datasets": self.datasets_count,
             "reuses": self.reuses_count,
-            "followers": self.folowers_count
+            "followers": self.followers_count,
+            "views": self.views_count
         }
 
 
