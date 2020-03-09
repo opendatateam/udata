@@ -1,6 +1,6 @@
 # RDF
 
-udata has built-in [RDF][] support allowing to both expose and harvest RDF metadata.
+udata has built-in [RDF][] support allowing it to both expose and harvest RDF metadata.
 It uses the [Data Catalog Vocabulary][dcat] (or [DCAT][]) as base vocabulary.
 
 ## Endpoints
@@ -34,13 +34,13 @@ Datasets are available through the following URL:
 
     /dataset/{id}/rdf
 
-where `id` is dataset identifier on the udata instance.
+where `id` is the dataset identifier on the udata instance.
 
 This URL performs content negotiation and redirects to:
 
     /dataset/{id}/rdf.{format}
 
-The dataset pages serves as identifier and performs content negotiation too,
+The dataset pages serves as an identifier and performs content negotiation too,
 so the following URLs will all redirect to the same RDF endpoint:
 
     /dataset/{id}
