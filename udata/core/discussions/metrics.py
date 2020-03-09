@@ -1,5 +1,4 @@
 from udata.core.metrics import Metric
-from udata.core.site.metrics import SiteMetric
 from udata.i18n import lazy_gettext as _
 
 from .models import Discussion

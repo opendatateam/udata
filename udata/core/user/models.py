@@ -220,6 +220,7 @@ class User(WithMetrics, UserMixin, db.Document):
         self.website = None
         self.about = None
         self.extras = None
+        self.apikey = None
         self.deleted = datetime.now()
         self.save()
         for organization in self.organizations:
@@ -237,8 +238,27 @@ class User(WithMetrics, UserMixin, db.Document):
         mail.send(_('Account deletion'), copied_user, 'account_deleted')
 
 
-datastore = MongoEngineUserDatastore(db, User, Role)
+# class UDataMongoEngineUserDatastore(MongoEngineUserDatastore):
 
+#     def __init__(self, db, user_model, role_model):
+#         super().__init__(self, db, user_model, role_model)
+    
+#     def find_user(self, **kwargs):
+#         from mongoengine.queryset import Q, QCombination
+#         from mongoengine.errors import ValidationError
+
+#         kwargs['deleted'] = None
+
+#         queries = map(lambda i: Q(**{i[0]: i[1]}), kwargs.items())
+#         query = QCombination(QCombination.AND, queries)
+#         try:
+#             return self.user_model.objects(query).first()
+#         except ValidationError:  # pragma: no cover
+#             return None
+
+
+# datastore = UDataMongoEngineUserDatastore(db, User, Role)
+datastore = MongoEngineUserDatastore(db, User, Role)
 
 pre_save.connect(User.pre_save, sender=User)
 post_save.connect(User.post_save, sender=User)

@@ -42,7 +42,7 @@ class MetricsQuerySet(db.BaseQuerySet):
 
 
 class WithMetrics(object):
-    _metrics = db.DictField()
+    metrics = db.DictField()
 
 
 class Metrics(db.Document):

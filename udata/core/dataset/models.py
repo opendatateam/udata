@@ -678,33 +678,29 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         return result
 
-    @cached_property
     def discussions_count(self):
         from udata.models import Discussion
         return Discussion.objects(subject=self, closed=None).count()
 
-    @cached_property
     def issues_count(self):
         from udata.models import Issue
         return Issue.objects(subject=self, closed=None).count()
 
-    @cached_property
     def reuses_count(self):
         from udata.models import Reuse
-        return Reuse.objects(datasets=self).visible().count()
+        self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
 
-    @cached_property
     def folowers_count(self):
         from udata.models import Follow
         return Follow.objects.followers(self).count()
-    
+
     @property
     def get_metrics(self):
         return {
-            "discussions" : self.discussions_count,
-            "followers": self.folowers_count,
-            "issues": self.issues_count,
-            "reuses": self.reuses_count
+            "discussions" : self.metrics.get("discussions", 0),
+            "issues": self.metrics.get("issues", 0),
+            "reuses": self.metrics.get("reuses", 0),
+            "followers": self.metrics.get("followers", 0)
         }
 
 
