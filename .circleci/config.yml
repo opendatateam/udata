@@ -62,17 +62,12 @@ jobs:
 
   assets:
     docker:
-      - image: node:6-alpine
+      # TODO make an image based on 2-alpine w/ nvm and phantom deps
+      - image: udata/circleci:py3
+    environment:
+       BASH_ENV: /root/.bashrc
     steps:
       - checkout
-      - run:
-          name: Install some tools
-          command: |
-            apk add --update ca-certificates openssl jq fontconfig-dev
-            update-ca-certificates
-            wget -q -O- "https://github.com/dustinblackman/phantomized/releases/download/2.1.1a/dockerized-phantomjs.tar.gz" | tar xz -C /
-            wget https://raw.githubusercontent.com/opendatateam/udata-dockers/2-alpine/circleci/.bashrc
-            . .bashrc
       - run:
           name: Compute JS dependencies key
           command: cat .nvmrc package.json > js.deps
