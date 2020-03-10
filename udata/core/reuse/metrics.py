@@ -1,35 +1,35 @@
-from udata.core.metrics import Metric
-from udata.i18n import lazy_gettext as _
+# from udata.core.metrics import Metric
+# from udata.i18n import lazy_gettext as _
 
-from udata.core.followers.metrics import FollowersMetric
+# from udata.core.followers.metrics import FollowersMetric
 
-from udata.core.issues.metrics import IssuesMetric
+# from udata.core.issues.metrics import IssuesMetric
 
-from .models import Reuse
+# from .models import Reuse
 
-__all__ = (
-    'DatasetsMetric', 'ReuseFollowers', 'ReuseIssuesMetric',
-    'ReuseDiscussionsMetric'
-)
-
-
-class DatasetsMetric(Metric):
-    model = Reuse
-    name = 'datasets'
-    display_name = _('Datasets')
-
-    def get_value(self):
-        return len(self.target.datasets)
-
-DatasetsMetric.connect(Reuse.on_create, Reuse.on_update)
+# __all__ = (
+#     'DatasetsMetric', 'ReuseFollowers', 'ReuseIssuesMetric',
+#     'ReuseDiscussionsMetric'
+# )
 
 
-class ReuseFollowers(FollowersMetric):
-    model = Reuse
+# class DatasetsMetric(Metric):
+#     model = Reuse
+#     name = 'datasets'
+#     display_name = _('Datasets')
+
+#     def get_value(self):
+#         return len(self.target.datasets)
+
+# DatasetsMetric.connect(Reuse.on_create, Reuse.on_update)
 
 
-class ReuseIssuesMetric(IssuesMetric):
-    model = Reuse
+# class ReuseFollowers(FollowersMetric):
+#     model = Reuse
+
+
+# class ReuseIssuesMetric(IssuesMetric):
+#     model = Reuse
 
 
 # class ReuseDiscussionsMetric(DiscussionsMetric):

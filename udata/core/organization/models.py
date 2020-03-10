@@ -5,6 +5,7 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
+from elasticsearch_dsl import Integer, Object
 
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -126,6 +127,13 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         CERTIFIED: _('Certified'),
     }
 
+    __search_metrics__ = Object(properties={
+        "datasets": Integer(),
+        "reuses": Integer(),
+        "followers": Integer(),
+        "views": Integer()
+    })
+
     before_save = Signal()
     after_save = Signal()
     on_create = Signal()
@@ -243,18 +251,23 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     def views_count(self):
         return self.metrics['views']
 
-    def datasets_count(self):
+    def count_datasets(self):
         from udata.models import Dataset
         self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
+        self.save()
 
 
-    def reuses_count(self):
+    def count_reuses(self):
         from udata.models import Reuse
         self.metrics["reuses"] = Reuse.objects(organization=self).count()
+        self.save()
 
-    def followers_count(self):
+    def count_followers(self):
+        print("IN ORGA FOLLOWERS COUNT")
         from udata.models import Follow
         self.metrics["followers"] = Follow.objects.followers(self).count()
+        print(f"FOLLOWERS : {self.metrics['followers']}")
+        self.save()
     
     @property
     def get_metrics(self):

@@ -162,6 +162,41 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['author'] = author
 
         return result
+    
+    @property
+    def views_count(self):
+        return self.metrics['views']
+    
+    @property
+    def datasets_count(self):
+        return len(self.datasets)
+
+    def count_discussions(self):
+        from udata.models import Discussion
+        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.save()
+
+    def count_issues(self):
+        from udata.models import Issue
+        print("IMG")
+        self.metrics["issues"] = Issue.objects(subject=self, closed=None).count()
+        print(self.metrics["issues"])
+        self.save()
+
+    def count_followers(self):
+        from udata.models import Follow
+        self.metrics["followers"] = Follow.objects.followers(self).count()
+        self.save()
+    
+    @property
+    def get_metrics(self):
+        return {
+            "datasets": self.datasets_count,
+            "discussions" : self.metrics.get("discussions", 0),
+            "issues": self.metrics.get("issues", 0),
+            "followers": self.metrics.get("followers", 0),
+            "views": self.metrics.get("views", 0)
+        }
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

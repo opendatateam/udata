@@ -161,7 +161,4 @@ class ModelSearchAdapter(DocType, metaclass=AdapterMetaclass):
 
 
 def metrics_mapping_for(cls):
-    props = {}
-    for key in cls.metrics:
-        props[key] = Integer()
-    return Object(properties=props)
+    pass

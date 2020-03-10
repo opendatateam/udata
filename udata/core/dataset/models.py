@@ -8,6 +8,7 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
+from elasticsearch_dsl import Integer, Object
 
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
@@ -394,6 +395,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         PIVOTAL_DATA: _('Pivotal data'),
     }
 
+    __search_metrics__ = Object(properties={
+        "reuses": Integer(),
+        "followers": Integer(),
+        "views": Integer()
+    })
+
     meta = {
         'indexes': [
             '-created_at',
@@ -678,21 +685,29 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         return result
 
-    def discussions_count(self):
+    @property
+    def views_count(self):
+        return self.metrics['views']
+
+    def count_discussions(self):
         from udata.models import Discussion
-        return Discussion.objects(subject=self, closed=None).count()
+        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.save()
 
-    def issues_count(self):
+    def count_issues(self):
         from udata.models import Issue
-        return Issue.objects(subject=self, closed=None).count()
+        self.metrics["issues"] = Issue.objects(subject=self, closed=None).count()
+        self.save()
 
-    def reuses_count(self):
+    def count_reuses(self):
         from udata.models import Reuse
         self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
+        self.save()
 
-    def folowers_count(self):
+    def count_followers(self):
         from udata.models import Follow
-        return Follow.objects.followers(self).count()
+        self.metrics["followers"] = Follow.objects.followers(self).count()
+        self.save()
 
     @property
     def get_metrics(self):
@@ -700,7 +715,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             "discussions" : self.metrics.get("discussions", 0),
             "issues": self.metrics.get("issues", 0),
             "reuses": self.metrics.get("reuses", 0),
-            "followers": self.metrics.get("followers", 0)
+            "followers": self.metrics.get("followers", 0),
+            "views": self.metrics.get("views", 0)
         }
 
 

@@ -52,7 +52,7 @@ class FollowAPI(API):
     @api.doc(description=NOTE)
     def post(self, id):
         '''Follow an object given its ID'''
-        model = self.model.objects.only('id').get_or_404(id=id)
+        model = self.model.objects.get_or_404(id=id)
         follow, created = Follow.objects.get_or_create(
             follower=current_user.id, following=model, until=None)
         count = Follow.objects.followers(model).count()

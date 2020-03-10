@@ -98,7 +98,7 @@ class DatasetSearch(ModelSearchAdapter):
                               payloads=False)
     created = Date(format='date_hour_minute_second')
     last_modified = Date(format='date_hour_minute_second')
-    metrics = metrics_mapping_for(Dataset)
+    metrics = Dataset.__search_metrics__
     featured = Boolean()
     temporal_coverage = Nested(multi=False, properties={
         'start': Long(),
