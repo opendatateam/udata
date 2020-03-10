@@ -4,6 +4,7 @@
 
 ### New features
 
+- Migration to Python 3.7 [#1766](https://github.com/opendatateam/udata/pull/1766)
 - New migration system [#1956](https://github.com/opendatateam/udata/pull/1956):
   - Use python based migrations instead of relying on mongo internal and deprecated `js_exec`
   - Handle rollback (optionnal)
