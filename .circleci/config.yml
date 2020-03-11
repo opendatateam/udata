@@ -62,7 +62,10 @@ jobs:
 
   assets:
     docker:
-      - image: node:6-alpine
+      # TODO make an image based on 2-alpine w/ nvm and phantom deps
+      - image: udata/circleci:py3
+    environment:
+       BASH_ENV: /root/.bashrc
     steps:
       - checkout
       - run:

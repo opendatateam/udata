@@ -1,5 +1,3 @@
-import warnings
-
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.models import Dataset, Reuse
@@ -18,33 +16,9 @@ def owner_recipients(issue):
         return [issue.subject.owner]
 
 
-def _compat_get_issue(issue_id):
-    if isinstance(issue_id, Issue):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        return issue_id
-    else:
-        return Issue.objects.get(pk=issue_id)
-
-
-def _compat_get_message(issue, message_idx):
-    if isinstance(message_idx, Message):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        return message_idx
-    else:
-        return issue.discussion[message_idx]
-
-
 @connect(on_new_issue, by_id=True)
 def notify_new_issue(issue_id):
-    issue = _compat_get_issue(issue_id)
+    issue = Issue.objects.get(pk=issue_id)
     if isinstance(issue.subject, (Dataset, Reuse)):
         recipients = owner_recipients(issue)
         subject = _('Your %(type)s have a new issue',
@@ -57,8 +31,8 @@ def notify_new_issue(issue_id):
 
 @connect(on_new_issue_comment, by_id=True)
 def notify_new_issue_comment(issue_id, message=None):
-    issue = _compat_get_issue(issue_id)
-    message = _compat_get_message(issue, message)
+    issue = Issue.objects.get(pk=issue_id)
+    message = issue.discussion[message]
     if isinstance(issue.subject, (Dataset, Reuse)):
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
@@ -73,8 +47,8 @@ def notify_new_issue_comment(issue_id, message=None):
 
 @connect(on_issue_closed, by_id=True)
 def notify_issue_closed(issue_id, message=None):
-    issue = _compat_get_issue(issue_id)
-    message = _compat_get_message(issue, message)
+    issue = Issue.objects.get(pk=issue_id)
+    message = issue.discussion[message]
     if isinstance(issue.subject, (Dataset, Reuse)):
         recipients = owner_recipients(issue) + [
             m.posted_by for m in issue.discussion]
