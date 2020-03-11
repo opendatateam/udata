@@ -1,5 +1,4 @@
 import logging
-import warnings
 
 from datetime import date, timedelta
 
@@ -31,12 +30,6 @@ def archive_on_updated(metric):
 
 def _compat(cls, id, name, value=None):
     '''Handle compatibility and deprecation warning on metrics tasks parameters'''
-    if name is None:  # TODO: remove in udata 2.0
-        warnings.warn(
-            'Metric as task parameter is deprecated and will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        return cls  # is already Metric instance
     model = db.resolve_model(cls)
     metrics = get_for(model)
     metric_cls = metrics[name]
