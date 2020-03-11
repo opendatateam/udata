@@ -12,6 +12,7 @@ from udata.utils import to_iso_datetime
 # Metrics are required for user search
 from . import metrics  # noqa
 
+
 __all__ = ('UserSearch', )
 
 

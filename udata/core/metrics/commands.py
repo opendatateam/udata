@@ -5,7 +5,6 @@ import click
 from udata.commands import cli, success, echo, white
 from udata.models import User, Dataset, Reuse, Organization
 
-from . import registry
 from .tasks import update_metrics_for, update_site_metrics
 
 log = logging.getLogger(__name__)
@@ -55,13 +54,3 @@ def update(site=False, organizations=False, users=False, datasets=False,
             update_metrics_for(user)
 
     success('All metrics have been updated')
-
-
-@grp.command()
-def list():
-    '''List all known metrics'''
-    for cls, metrics in registry.items():
-        echo(white(cls.__name__))
-
-        for metric in metrics.keys():
-            echo('> {0}'.format(metric))

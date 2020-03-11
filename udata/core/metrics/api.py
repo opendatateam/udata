@@ -4,7 +4,6 @@ from datetime import date
 from flask_restplus.inputs import boolean
 
 from udata.api import api, API, fields
-from udata.models import Metrics
 
 from udata.core.site.models import current_site
 
@@ -48,33 +47,4 @@ class MetricsAPI(API):
     @api.param('id', 'The object ID to fetch metric for')
     @api.doc(description='If day is set, start and end will be ignored')
     def get(self, id):
-        '''Fetch metrics for an object given its ID'''
-        if id == 'site':
-            object_id = current_site.id
-        else:
-            try:
-                object_id = ObjectId(id)
-            except:
-                object_id = id
-        queryset = Metrics.objects(object_id=object_id).order_by('-date')
-        args = parser.parse_args()
-        if args.get('day'):
-            metrics = [queryset(date=args['day']).first_or_404()]
-        elif args.get('start'):
-            end = args.get('end', date.today().isoformat())
-            metrics = list(queryset(date__gte=args['start'], date__lte=end))
-        else:
-            metrics = [queryset.first_or_404()]
-        if not args.get('cumulative') and metrics:
-            # Turn cumulative data into daily counts based on the first
-            # result. Might return negative values if there is a drop.
-            reference_values = metrics[-1].values.copy()
-            for metric in reversed(metrics):
-                current_values = metric.values.copy()
-                metric.values = {
-                    name: count - reference_values[name]
-                    for name, count in current_values.items()
-                    if name in reference_values
-                }
-                reference_values = current_values
-        return metrics
+        pass

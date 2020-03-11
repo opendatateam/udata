@@ -250,17 +250,19 @@ class User(WithMetrics, UserMixin, db.Document):
         self.metrics["datasets"] = Dataset.objects(owner=self).visible().count()
         self.save()
 
-
     def count_reuses(self):
         from udata.models import Reuse
         self.metrics["reuses"] = Reuse.objects(owner=self).count()
         self.save()
 
     def count_followers(self):
-        print("IN ORGA FOLLOWERS COUNT")
         from udata.models import Follow
-        self.metrics["followers"] = Follow.objects.following(self).count()
-        print(f"FOLLOWERS : {self.metrics['followers']}")
+        self.metrics["followers"] = Follow.objects.followers(self).count()
+        self.save()
+    
+    def count_following(self):
+        from udata.models import Follow
+        self.metrics["following"] = Follow.objects.following(self).count()
         self.save()
     
     @property

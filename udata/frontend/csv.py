@@ -9,7 +9,6 @@ from datetime import datetime, date
 from flask import Response, stream_with_context
 
 from udata.models import db
-from udata.core.metrics import Metric
 from udata.utils import recursive_get
 
 
@@ -184,7 +183,7 @@ def _metric_getter(key, spec):
 def metric_fields(cls):
     return [
         ('metric.{0}'.format(key), _metric_getter(key, spec))
-        for key, spec in Metric.get_for(cls).items()
+        for key, spec in cls.get_metrics
     ]
 
 

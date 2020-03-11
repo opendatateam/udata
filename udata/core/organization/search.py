@@ -14,15 +14,15 @@ lazy = search.lazy_config('organization')
 
 
 def max_reuses():
-    return max(current_site.max_org_reuses, 10)
+    return max(current_site.get_max_metrics['max_org_reuses'], 10)
 
 
 def max_datasets():
-    return max(current_site.max_org_datasets, 10)
+    return max(current_site.get_max_metrics['max_org_datasets'], 10)
 
 
 def max_followers():
-    return max(current_site.max_org_followers, 10)
+    return max(current_site.get_max_metrics['max_org_followers'], 10)
 
 
 def organization_badge_labelizer(kind):

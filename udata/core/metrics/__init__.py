@@ -1,10 +1,5 @@
 from udata import entrypoints
 
-from . import registry
-from .specs import Metric, MetricMetaClass
-
-__all__ = ('Metric', 'MetricMetaClass', 'registry')
-
 
 def init_app(app):
     # Load all core metrics

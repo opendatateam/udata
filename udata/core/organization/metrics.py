@@ -1,4 +1,4 @@
-from udata.models import Dataset, Reuse
+from udata.models import db, Dataset, Reuse, Organization
 
 
 @Dataset.on_create.connect
@@ -15,3 +15,13 @@ def update_datasets_metrics(document, **kwargs):
 def update_reuses_metrics(document, **kwargs):
     if document.organization:
         document.organization.count_reuses()
+
+
+@db.Owned.on_owner_change.connect
+def update_downer_metrics(document, previous):
+    if not isinstance(previous, Organization):
+        return
+    if isinstance(document, Dataset):
+        previous.count_datasets()
+    elif isinstance(document, Reuse):
+        previous.count_reuses()

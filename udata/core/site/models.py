@@ -81,54 +81,59 @@ class Site(WithMetrics, db.Document):
             "users": self.metrics.get("users", 0)
         }
     
-    @property
-    def max_dataset_followers(self):
-        # dataset = (Dataset.objects(metrics__followers__gt=0).visible()
-        #                   .order_by('-metrics.followers').first())
-        # return dataset.metrics['followers'] if dataset else 0
-        return 0
+    def count_max_dataset_followers(self): 
+        dataset = (Dataset.objects(metrics__followers__gt=0).visible()
+                          .order_by('-metrics.followers').first())
+        self.metrics["max_dataset_followers"] = dataset.metrics['followers'] if dataset else 0
+        self.save()
 
-    @property
-    def max_dataset_reuses(self):
-        # dataset = (Dataset.objects(metrics__reuses__gt=0).visible()
-        #            .order_by('-metrics.reuses').first())
-        # return dataset.metrics['reuses'] if dataset else 0
-        return 0
+    def count_max_dataset_reuses(self):
+        dataset = (Dataset.objects(metrics__reuses__gt=0).visible()
+                        .order_by('-metrics.reuses').first())
+        self.metrics["max_dataset_reuses"] = dataset.metrics['reuses'] if dataset else 0
+        self.save()
+    
+    def count_max_reuse_datasets(self):
+        reuse = (Reuse.objects(metrics__datasets__gt=0).visible()
+                 .order_by('-metrics.datasets').first())
+        self.metrics["max_reuse_datasets"] = reuse.metrics['datasets'] if reuse else 0
+        self.save()
+
+    def count_max_reuse_followers(self):
+        reuse = (Reuse.objects(metrics__followers__gt=0).visible()
+                 .order_by('-metrics.followers').first())
+        self.metrics["max_reuse_followers"] = reuse.metrics['followers'] if reuse else 0
+        self.save()
+
+    def count_max_org_followers(self):
+        org = (Organization.objects(metrics__followers__gt=0).visible()
+               .order_by('-metrics.followers').first())
+        self.metrics["max_org_followers"] = org.metrics['followers'] if org else 0
+        self.save()
+
+    def count_max_org_reuses(self):
+        org = (Organization.objects(metrics__reuses__gt=0).visible()
+               .order_by('-metrics.reuses').first())
+        self.metrics["max_org_reuses"] = org.metrics['reuses'] if org else 0
+        self.save()
+
+    def count_max_org_datasets(self):
+        org = (Organization.objects(metrics__datasets__gt=0).visible()
+               .order_by('-metrics.datasets').first())
+        self.metrics["max_org_datasets"] = org.metrics['datasets'] if org else 0
+        self.save()
     
     @property
-    def max_reuse_datasets(self):
-        # reuse = (Reuse.objects(metrics__datasets__gt=0).visible()
-        #          .order_by('-metrics.datasets').first())
-        # return reuse.metrics['datasets'] if reuse else 0
-        return 0
-
-    @property
-    def max_reuse_followers(self):
-        # reuse = (Reuse.objects(metrics__followers__gt=0).visible()
-        #          .order_by('-metrics.followers').first())
-        # return reuse.metrics['followers'] if reuse else 0
-        return 0
-
-    @property
-    def max_org_followers(self):
-        # org = (Organization.objects(metrics__followers__gt=0).visible()
-        #        .order_by('-metrics.followers').first())
-        # return org.metrics['followers'] if org else 0
-        return 0
-
-    @property
-    def max_org_reuses(self):
-        # org = (Organization.objects(metrics__reuses__gt=0).visible()
-        #        .order_by('-metrics.reuses').first())
-        # return org.metrics['reuses'] if org else 0
-        return 0
-
-    @property
-    def max_org_datasets(self):
-        # org = (Organization.objects(metrics__datasets__gt=0).visible()
-        #        .order_by('-metrics.datasets').first())
-        # return org.metrics['datasets'] if org else 0
-        return 0
+    def get_max_metrics(self):
+        return {
+            "max_dataset_followers": self.metrics.get("max_dataset_followers", 0),
+            "max_dataset_reuses": self.metrics.get("max_dataset_reuses", 0),
+            "max_reuse_datasets": self.metrics.get("max_reuse_datasets", 0),
+            "max_reuse_followers": self.metrics.get("max_reuse_followers", 0),
+            "max_org_followers": self.metrics.get("max_org_followers", 0),
+            "max_org_reuses": self.metrics.get("max_org_reuses", 0),
+            "max_org_datasets": self.metrics.get("max_org_datasets", 0)
+        }
 
 
 def get_current_site():

@@ -158,7 +158,6 @@ def init_app(app):
     ContextTask.current_app = app
 
     # Load core tasks
-    import udata.core.metrics.tasks  # noqa
     import udata.core.tags.tasks  # noqa
     import udata.core.activity.tasks  # noqa
     import udata.core.dataset.tasks  # noqa

@@ -8,7 +8,6 @@ from flask import current_app
 
 from udata.search import es, i18n_analyzer
 from udata.search.query import SearchQuery
-from udata.core.metrics import Metric
 
 log = logging.getLogger(__name__)
 
