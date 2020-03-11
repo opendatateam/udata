@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import bson
 import datetime
 import logging
-import warnings
 
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
@@ -33,7 +29,7 @@ class EsJSONSerializer(AttrJSONSerializer):
     # TODO: find a way to reuse UDataJsonEncoder?
     def default(self, data):
         if is_lazy_string(data):
-            return unicode(data)
+            return str(data)
         elif isinstance(data, bson.objectid.ObjectId):
             return str(data)
         elif isinstance(data, datetime.datetime):
@@ -127,16 +123,9 @@ i18n_analyzer = LocalProxy(lambda: get_i18n_analyzer())
 
 
 @task(route='high.search')
-def reindex(obj, id=None):
-    if id is not None:
-        model = db.resolve_model(obj)
-        obj = model.objects.get(pk=id)
-    else:  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Document as task parameter is deprecated and will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        model = obj.__class__
+def reindex(classname, id=None):
+    model = db.resolve_model(classname)
+    obj = model.objects.get(pk=id)
     adapter_class = adapter_catalog.get(model)
     timeout = current_app.config['ELASTICSEARCH_INDEX_TIMEOUT']
     if adapter_class.is_indexable(obj):
@@ -160,16 +149,8 @@ def reindex(obj, id=None):
 
 
 @task(route='high.search')
-def unindex(obj, id=None):
-    if id is not None:
-        model = db.resolve_model(obj)
-    else:  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Document as task parameter is deprecated and will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        model = obj.__class__
-        id = obj.pk if isinstance(obj.pk, basestring) else str(obj.pk)
+def unindex(classname, id=None):
+    model = db.resolve_model(classname)
     adapter_class = adapter_catalog.get(model)
     if adapter_class.exists(id, using=es.client, index=es.index_name):
         log.info('Unindexing %s (%s)', model.__name__, id)
@@ -219,7 +200,7 @@ def facets_for(adapter, params):
     facets = params.pop('facets', [])
     if not adapter.facets:
         return []
-    if isinstance(facets, basestring):
+    if isinstance(facets, str):
         facets = [facets]
     if facets is True or 'all' in facets:
         return adapter.facets.keys()

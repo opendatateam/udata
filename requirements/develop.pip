@@ -1,6 +1,7 @@
-invoke==1.2.0
+invoke==1.3.0
 -r install.pip
 -r test.pip
 -r report.pip
 Flask-DebugToolbar==0.10.1
 wheel
+twine

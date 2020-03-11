@@ -75,16 +75,6 @@ We follow the PEP-0008 and PEP-0257 as mush as possible in the respect of PEP-00
 
 On top of that, we apply the [Python Style Guide][py-style-guide] from Google.
 
-#### Python 3 forward compatible syntax
-
-As it's still planned to migrate to Python 3 some day,
-try to always use a forward compatible syntax in order
-to ensure an easy future migration:
-
-* unicode by default, starts any file with `from __future__ import unicode_literals`
-* Python 3 compatible `print` statement with `from __future__ import print_function`
-* use `io.open` instead of `codecs.open` to manipulate utf-8 files
-
 ### JavaScript style guide
 
 We follow the [JavaScript styleguide][js-styleguide] from airbnb.

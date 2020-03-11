@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from copy import copy
 from datetime import datetime
 from itertools import chain
@@ -34,8 +31,6 @@ class Role(db.Document, RoleMixin):
 
     def __str__(self):
         return self.name
-
-    __unicode__ = __str__
 
 
 class UserSettings(db.EmbeddedDocument):
@@ -94,7 +89,7 @@ class User(WithMetrics, UserMixin, db.Document):
         'ordering': ['-created_at']
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.fullname
 
     @property
@@ -167,10 +162,10 @@ class User(WithMetrics, UserMixin, db.Document):
 
     def generate_api_key(self):
         s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
-        self.apikey = s.dumps({
+        self.apikey = str(s.dumps({
             'user': str(self.id),
             'time': time(),
-        })
+        }))
 
     def clear_api_key(self):
         self.apikey = None

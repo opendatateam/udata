@@ -193,9 +193,7 @@
                     </div>
                 </div></div>
                 {# end button bar #}
-                {% if hook_dataset_recommendations and dataset.extras.recommendations %}
-                    {{ hook_dataset_recommendations(dataset.extras.recommendations)|safe }}
-                {% endif %}
+                {{ hook('dataset.display.after-description') }}
             </div>
             {# end left column #}
 

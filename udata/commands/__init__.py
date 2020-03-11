@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
-
 import logging
 import os
 import pkg_resources
@@ -19,12 +16,12 @@ log = logging.getLogger(__name__)
 
 IS_TTY = sys.__stdin__.isatty()
 
-INFO = '➢'.encode('utf8')
-DEBUG = '⇝'.encode('utf8')
-OK = '✔'.encode('utf8')
-KO = '✘'.encode('utf8')
-WARNING = '⚠'.encode('utf8')
-HEADER = '✯'.encode('utf8')
+INFO = '➢'
+DEBUG = '⇝'
+OK = '✔'
+KO = '✘'
+WARNING = '⚠'
+HEADER = '✯'
 
 NO_CAST = (int, float, bool)
 
@@ -37,7 +34,7 @@ click.disable_unicode_literals_warning = True
 
 
 def color(name, **kwargs):
-    return lambda t: click.style(str(t), fg=name, **kwargs).decode('utf8')
+    return lambda t: click.style(str(t), fg=name, **kwargs)
 
 
 green = color('green', bold=True)
@@ -64,7 +61,7 @@ def error(msg, details=None):
     msg = '{0} {1}'.format(red(KO), white(safe_unicode(msg)))
     msg = safe_unicode(msg)
     if details:
-        msg = b'\n'.join((msg, safe_unicode(details)))
+        msg = '\n'.join((msg, safe_unicode(details)))
     echo(format_multiline(msg))
 
 
@@ -89,7 +86,7 @@ LEVELS_PREFIX = {
 
 def format_multiline(string):
     string = safe_unicode(string)
-    string = string.replace(b'\n', b'\n│ ')
+    string = string.replace('\n', '\n│ ')
     return safe_unicode(replace_last(string, '│', '└'))
 
 
@@ -109,7 +106,7 @@ class CliFormatter(logging.Formatter):
         if not IS_TTY:
             return super(CliFormatter, self).format(record)
         record.msg = format_multiline(record.msg)
-        record.msg = b' '.join((self._prefix(record), record.msg))
+        record.msg = ' '.join((self._prefix(record), record.msg))
         record.args = tuple(a if isinstance(a, NO_CAST) else safe_unicode(a)
                             for a in record.args)
         return super(CliFormatter, self).format(record)
@@ -117,7 +114,7 @@ class CliFormatter(logging.Formatter):
     def formatException(self, ei):
         '''Indent traceback info for better readability'''
         out = super(CliFormatter, self).formatException(ei)
-        return b'│' + format_multiline(out)
+        return '│' + format_multiline(out)
 
     def _prefix(self, record):
         if record.levelno in LEVELS_PREFIX:

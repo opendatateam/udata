@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 
 from flask import url_for
@@ -23,7 +20,7 @@ from udata.core.issues.factories import IssueFactory
 from udata.utils import faker
 
 
-from frontend import FrontTestCase
+from .frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase

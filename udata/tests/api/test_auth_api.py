@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from base64 import b64encode
-from urlparse import parse_qs
+from urllib.parse import parse_qs
 
 from flask import url_for
 
@@ -42,7 +39,8 @@ class FakeAPI(API):
 
 def basic_header(client):
         payload = ':'.join((client.client_id, client.secret))
-        return {'Authorization': 'Basic ' + b64encode(payload)}
+        token = b64encode(payload.encode('utf-8')).decode('utf8')
+        return {'Authorization': 'Basic {}'.format(token)}
 
 
 @pytest.fixture

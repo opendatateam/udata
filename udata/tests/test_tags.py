@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import logging
 import pytest
-import StringIO
+from io import StringIO
 
 from flask import url_for
 
@@ -36,9 +33,9 @@ class TagsTests:
         assert response.mimetype == 'text/csv'
         assert response.charset == 'utf-8'
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         rows = list(reader)
 
         assert header == ['name', 'datasets', 'reuses', 'total']

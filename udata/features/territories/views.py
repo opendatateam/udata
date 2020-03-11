@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from collections import namedtuple
 from datetime import date, datetime
 import unicodedata
@@ -7,8 +5,6 @@ import unicodedata
 from flask import abort, current_app, redirect, url_for
 
 from udata import theme
-from udata.auth import current_user
-from udata.core.dataset.permissions import DatasetEditPermission
 from udata.i18n import I18nBlueprint
 from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
 from udata.sitemap import sitemap

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata import search
 from udata.api import api, API
 
@@ -12,7 +9,7 @@ ns = api.namespace('tags', 'Tags related operations')
 
 parser = api.parser()
 parser.add_argument(
-    'q', type=unicode, help='The string to autocomplete/suggest',
+    'q', type=str, help='The string to autocomplete/suggest',
     location='args', required=True)
 parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import date, timedelta
 
 import factory
@@ -39,7 +36,7 @@ def bucket_agg_factory(buckets):
 
 @pytest.mark.usefixtures('autoindex')
 class FacetTestCase:
-    @pytest.mark.fixture(autouse=True)
+    @pytest.fixture(autouse=True)
     def setup(self):
         self.setUp()
 
@@ -118,7 +115,7 @@ class TermsFacetTest(FacetTestCase):
 
         assert len(result) == 10
         for row in result:
-            assert isinstance(row[0], basestring)
+            assert isinstance(row[0], str)
             assert isinstance(row[1], int)
             assert isinstance(row[2], bool)
 

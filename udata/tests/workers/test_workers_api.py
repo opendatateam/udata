@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from unittest import skip
 
 from flask import url_for
@@ -286,7 +283,7 @@ class JobsAPITest(APITestCase):
     def test_get_task(self):
         @celery.task
         def test_task():
-            print 'hello'
+            print('hello')
 
         result = test_task.delay()  # Always eager so no async
 

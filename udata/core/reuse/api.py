@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 
 from flask import request
@@ -12,6 +9,7 @@ from udata.models import Dataset
 from udata.utils import multi_to_dict
 
 from udata.core.badges import api as badges_api
+from udata.core.dataset.api_fields import dataset_ref_fields
 from udata.core.followers.api import FollowAPI
 from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
@@ -19,7 +17,7 @@ from udata.core.storages.api import (
 
 from .api_fields import (
     reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    reuse_type_fields, dataset_ref_fields
+    reuse_type_fields,
 )
 from .forms import ReuseForm
 from .models import Reuse, REUSE_TYPES

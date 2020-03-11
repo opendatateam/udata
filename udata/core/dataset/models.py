@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime, timedelta
 from collections import OrderedDict
 
@@ -127,7 +124,7 @@ class License(db.Document):
 
     active = db.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     @classmethod
@@ -215,9 +212,9 @@ class ResourceMixin(object):
     title = db.StringField(verbose_name="Title", required=True)
     description = db.StringField()
     filetype = db.StringField(
-        choices=RESOURCE_FILETYPES.keys(), default='file', required=True)
+        choices=list(RESOURCE_FILETYPES), default='file', required=True)
     type = db.StringField(
-        choices=RESOURCE_TYPES.keys(), default='main', required=True)
+        choices=list(RESOURCE_TYPES), default='main', required=True)
     url = db.URLField(required=True)
     urlhash = db.StringField()
     checksum = db.EmbeddedDocumentField(Checksum)
@@ -353,6 +350,11 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     def dataset(self):
         return self._instance
 
+    def save(self, *args, **kwargs):
+        if not self.dataset:
+            raise RuntimeError('Impossible to save an orphan resource')
+        self.dataset.save(*args, **kwargs)
+
 
 class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     created_at = DateTimeField(verbose_name=_('Creation date'),
@@ -372,7 +374,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     resources = db.ListField(db.EmbeddedDocumentField(Resource))
 
     private = db.BooleanField(default=False)
-    frequency = db.StringField(choices=UPDATE_FREQUENCIES.keys())
+    frequency = db.StringField(choices=list(UPDATE_FREQUENCIES.keys()))
     frequency_date = db.DateTimeField(verbose_name=_('Future date of update'))
     temporal_coverage = db.EmbeddedDocumentField(db.DateRange)
     spatial = db.EmbeddedDocumentField(SpatialCoverage)
@@ -385,7 +387,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     deleted = db.DateTimeField()
     archived = db.DateTimeField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title or ''
 
     __badges__ = {

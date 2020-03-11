@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import csv
 import logging
 import pytest
@@ -400,11 +397,11 @@ class HarvestActionsTest:
     def test_attach(self):
         datasets = DatasetFactory.create_batch(3)
 
-        with NamedTemporaryFile() as csvfile:
+        with NamedTemporaryFile(mode='w') as csvfile:
             writer = csv.DictWriter(csvfile,
                                     fieldnames=['local', 'remote'],
-                                    delimiter=b';',
-                                    quotechar=b'"')
+                                    delimiter=';',
+                                    quotechar='"')
 
             writer.writeheader()
             for index, dataset in enumerate(datasets):
@@ -435,11 +432,11 @@ class HarvestActionsTest:
 
         datasets = DatasetFactory.create_batch(3)
 
-        with NamedTemporaryFile() as csvfile:
+        with NamedTemporaryFile(mode='w') as csvfile:
             writer = csv.DictWriter(csvfile,
                                     fieldnames=['local', 'remote'],
-                                    delimiter=b';',
-                                    quotechar=b'"')
+                                    delimiter=';',
+                                    quotechar='"')
 
             writer.writeheader()
             for index, dataset in enumerate(datasets):
@@ -464,11 +461,11 @@ class HarvestActionsTest:
     def test_attach_skip_not_found(self):
         datasets = DatasetFactory.create_batch(3)
 
-        with NamedTemporaryFile() as csvfile:
+        with NamedTemporaryFile(mode='w') as csvfile:
             writer = csv.DictWriter(csvfile,
                                     fieldnames=['local', 'remote'],
-                                    delimiter=b';',
-                                    quotechar=b'"')
+                                    delimiter=';',
+                                    quotechar='"')
 
             writer.writeheader()
             writer.writerow({
@@ -569,7 +566,7 @@ class ExecutionTestMixin(MockBackendsMixin):
         assert len(job.errors) == 0
         assert len(job.items) == COUNT
 
-        items_ok = filter(lambda i: not len(i.errors), job.items)
+        items_ok = [i for i in job.items if not i.errors]
         assert len(items_ok) == COUNT - 1
 
         for item in items_ok:
@@ -578,7 +575,7 @@ class ExecutionTestMixin(MockBackendsMixin):
             assert item.status == 'done'
             assert item.errors == []
 
-        item_ko = filter(lambda i: len(i.errors), job.items)[0]
+        item_ko = next(i for i in job.items if i.errors)
         assert item_ko.started is not None
         assert item_ko.ended is not None
         assert item_ko.status == 'failed'
@@ -697,7 +694,7 @@ class HarvestPreviewTest(MockBackendsMixin):
         assert len(job.errors) == 0
         assert len(job.items) == COUNT
 
-        items_ok = filter(lambda i: not len(i.errors), job.items)
+        items_ok = [i for i in job.items if not i.errors]
         assert len(items_ok) == COUNT - 1
 
         for item in items_ok:
@@ -706,7 +703,7 @@ class HarvestPreviewTest(MockBackendsMixin):
             assert item.status == 'done'
             assert item.errors == []
 
-        item_ko = filter(lambda i: len(i.errors), job.items)[0]
+        item_ko = next(i for i in job.items if i.errors)
         assert item_ko.started is not None
         assert item_ko.ended is not None
         assert item_ko.status == 'failed'

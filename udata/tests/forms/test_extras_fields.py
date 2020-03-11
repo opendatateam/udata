@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import date, datetime
@@ -129,9 +126,9 @@ class ExtrasFieldTest:
             (db.DateField, '2018-05-29', date, date(2018, 5, 29)),
             (db.BooleanField, 'true', bool, True),
             (db.IntField, 42, int, 42),
-            (db.StringField, '42', basestring, '42'),
+            (db.StringField, '42', str, '42'),
             (db.FloatField, '42.0', float, 42.0),
-            (db.URLField, 'http://test.com', basestring, 'http://test.com'),
+            (db.URLField, 'http://test.com', str, 'http://test.com'),
             (db.UUIDField, 'e3b06d6d-90c0-4407-adc0-de81d327f181', UUID,
                 UUID('e3b06d6d-90c0-4407-adc0-de81d327f181')),
     ]])

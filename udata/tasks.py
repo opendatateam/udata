@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from celery import Celery, Task
 from celery.utils.log import get_task_logger
@@ -85,7 +82,7 @@ def job(name, **kwargs):
 
 def as_task_param(obj):
     '''Pass a document as task parameter'''
-    return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, basestring) else str(obj.pk))
+    return obj.__class__.__name__, (obj.pk if isinstance(obj.pk, str) else str(obj.pk))
 
 
 def get_logger(name):

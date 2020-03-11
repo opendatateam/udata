@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from flask import current_app
 
@@ -56,12 +53,12 @@ class BaseResourceForm(ModelForm):
     description = fields.MarkdownField(_('Description'))
     filetype = fields.RadioField(
         _('File type'), [validators.DataRequired()],
-        choices=RESOURCE_FILETYPES.items(), default='file',
+        choices=list(RESOURCE_FILETYPES.items()), default='file',
         description=_('Whether the resource is an uploaded file, '
                       'a remote file or an API'))
     type = fields.RadioField(
         _('Type'), [validators.DataRequired()],
-        choices=RESOURCE_TYPES.items(), default='other',
+        choices=list(RESOURCE_TYPES.items()), default='other',
         description=_('Resource type (documentation, API...)'))
     url = fields.UploadableURLField(
         _('URL'), [validators.DataRequired(), enforce_filetype_file],
@@ -118,7 +115,7 @@ class DatasetForm(ModelForm):
         _('License'), model=License, allow_blank=True)
     frequency = fields.SelectField(
         _('Update frequency'),
-        choices=UPDATE_FREQUENCIES.items(), default=DEFAULT_FREQUENCY,
+        choices=list(UPDATE_FREQUENCIES.items()), default=DEFAULT_FREQUENCY,
         validators=[validators.optional()],
         preprocessors=[map_legacy_frequencies],
         description=_('The frequency at which data are updated.'))

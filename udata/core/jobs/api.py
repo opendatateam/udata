@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from celery import states
 from celery.result import AsyncResult
 from celery.utils import get_full_cls_name

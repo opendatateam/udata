@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from flask import current_app
 
@@ -9,7 +6,7 @@ from .backends import get as get_linkchecker, NoCheckLinkchecker
 
 
 def _get_check_keys(the_dict, resource, previous_status):
-    check_keys = {k: v for k, v in the_dict.iteritems()
+    check_keys = {k: v for k, v in the_dict.items()
                   if k.startswith('check:')}
     check_keys['check:count-availability'] = _compute_count_availability(
             resource, check_keys.get('check:available'), previous_status)

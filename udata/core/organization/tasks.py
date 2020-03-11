@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import warnings
-
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.models import Follow, Activity, Metrics, Dataset
@@ -11,7 +6,7 @@ from udata.tasks import job, task, get_logger
 
 from udata.core.badges.tasks import notify_new_badge
 
-from .models import Organization, Member, MembershipRequest, CERTIFIED, PUBLIC_SERVICE
+from .models import Organization, CERTIFIED, PUBLIC_SERVICE
 
 log = get_logger(__name__)
 
@@ -38,25 +33,8 @@ def purge_organizations(self):
 
 @task(route='high.mail')
 def notify_membership_request(org_id, request_id):
-    if isinstance(org_id, Organization):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        org = org_id
-    else:
-        org = Organization.objects.get(pk=org_id)
-
-    if isinstance(request_id, MembershipRequest):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        request = request_id
-    else:
-        request = next((r for r in org.requests if str(r.id) == request_id), None)
+    org = Organization.objects.get(pk=org_id)
+    request = next((r for r in org.requests if str(r.id) == request_id), None)
 
     recipients = [m.user for m in org.by_role('admin')]
     mail.send(
@@ -66,25 +44,8 @@ def notify_membership_request(org_id, request_id):
 
 @task(route='high.mail')
 def notify_membership_response(org_id, request_id):
-    if isinstance(org_id, Organization):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        org = org_id
-    else:
-        org = Organization.objects.get(pk=org_id)
-
-    if isinstance(request_id, MembershipRequest):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        request = request_id
-    else:
-        request = next((r for r in org.requests if str(r.id) == request_id), None)
+    org = Organization.objects.get(pk=org_id)
+    request = next((r for r in org.requests if str(r.id) == request_id), None)
 
     if request.status == 'accepted':
         subject = _('You are now a member of the organization "%(org)s"',
@@ -97,25 +58,8 @@ def notify_membership_response(org_id, request_id):
 
 @task
 def notify_new_member(org_id, email):
-    if isinstance(org_id, Organization):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        org = org_id
-    else:
-        org = Organization.objects.get(pk=org_id)
-
-    if isinstance(email, Member):  # TODO: Remove this branch in udata 2.0
-        warnings.warn(
-            'Using documents as task parameter is deprecated and '
-            'will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        member = email
-    else:
-        member = next((m for m in org.members if m.user.email == email), None)
+    org = Organization.objects.get(pk=org_id)
+    member = next((m for m in org.members if m.user.email == email), None)
 
     subject = _('You are now a member of the organization "%(org)s"', org=org)
     mail.send(subject, member.user, 'new_member', org=org)

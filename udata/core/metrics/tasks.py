@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
-import warnings
 
 from datetime import date, timedelta
 
@@ -34,12 +30,6 @@ def archive_on_updated(metric):
 
 def _compat(cls, id, name, value=None):
     '''Handle compatibility and deprecation warning on metrics tasks parameters'''
-    if name is None:  # TODO: remove in udata 2.0
-        warnings.warn(
-            'Metric as task parameter is deprecated and will be removed in udata 2.0',
-            DeprecationWarning
-        )
-        return cls  # is already Metric instance
     model = db.resolve_model(cls)
     metrics = get_for(model)
     metric_cls = metrics[name]
@@ -88,8 +78,8 @@ def bump_metrics(self):
         }}
     )
     # Use underlying PyMongo insert for bulk insertion from generator
-    ids = Metrics.objects._collection.insert(new_metrics)
-    log.info('Processed %s document(s)', len(ids))
+    result = Metrics.objects._collection.insert_many(new_metrics)
+    log.info('Processed %s document(s)', len(result.inserted_ids))
 
 
 def update_metrics_for(obj):

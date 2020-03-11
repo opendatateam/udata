@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import re
-import StringIO
+from io import StringIO
 
 import factory
 
@@ -42,7 +39,7 @@ class Fake(db.Document):
     sub = db.EmbeddedDocumentField(NestedFake)
     metrics = db.DictField()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'fake'
 
 
@@ -296,9 +293,9 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         self.assertEqual(header, ['title', 'description'])
 
         rows = list(reader)
@@ -359,9 +356,9 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         self.assertEqual(header, ['title', 'description', 'key', 'alias'])
 
         rows = list(reader)
@@ -381,12 +378,12 @@ class CsvTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
         self.assertEqual(header, ['title', 'description'])
 
-        row = reader.next()
+        row = next(reader)
         self.assertEqual(len(row), len(header))
         self.assertEqual(row[0], fake.title)
         self.assertEqual(row[1], fake.description)

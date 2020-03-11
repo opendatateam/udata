@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import io
 import os
@@ -64,7 +63,7 @@ setup(
     author_email='opendatateam@data.gouv.fr',
     packages=find_packages(),
     include_package_data=True,
-    python_requires='==2.7.*',
+    python_requires='>=3.7',
     install_requires=install_requires,
     setup_requires=['setuptools>=38.6.0'],
     tests_require=tests_require,
@@ -101,8 +100,9 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: System :: Software Distribution',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
         ('License :: OSI Approved :: GNU Affero General Public License v3'
          ' or later (AGPLv3+)'),

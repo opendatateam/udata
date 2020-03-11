@@ -79,7 +79,7 @@
 }|tojson|urlencode }}" />
 
 {% if json_ld %}
-<script id="json_ld" type="application/ld+json">{{ json_ld|safe }}</script>
+<script id="json_ld" type="application/ld+json">{{ json_ld|embedded_json_ld }}</script>
 {% endif %}
 
 {% endmacro %}

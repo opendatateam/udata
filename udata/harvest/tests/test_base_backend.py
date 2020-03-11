@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import datetime, timedelta
-from urlparse import urlparse
-
+from urllib.parse import urlparse
 from dateutil.parser import parse
 from voluptuous import Schema
 
@@ -26,8 +22,8 @@ class Unknown:
 
 class FakeBackend(BaseBackend):
     filters = (
-        HarvestFilter('First filter', 'first', basestring),
-        HarvestFilter('Second filter', 'second', basestring),
+        HarvestFilter('First filter', 'first', str),
+        HarvestFilter('Second filter', 'second', str),
     )
     features = (
         HarvestFeature('feature', 'A test feature'),
@@ -245,20 +241,20 @@ class BaseBackendValidateTest:
         return FakeBackend(HarvestSourceFactory()).validate
 
     def test_valid_data(self, validate):
-        schema = Schema({'key': basestring})
+        schema = Schema({'key': str})
         data = {'key': 'value'}
         assert validate(data, schema) == data
 
     def test_handle_basic_error(self, validate):
-        schema = Schema({'bad-value': basestring})
+        schema = Schema({'bad-value': str})
         data = {'bad-value': 42}
         with pytest.raises(HarvestException) as excinfo:
             validate(data, schema)
         msg = str(excinfo.value)
-        assert '[bad-value] expected basestring: 42' in msg
+        assert '[bad-value] expected str: 42' in msg
 
     def test_handle_required_values(self, validate):
-        schema = Schema({'missing': basestring}, required=True)
+        schema = Schema({'missing': str}, required=True)
         data = {}
         with pytest.raises(HarvestException) as excinfo:
             validate(data, schema)
@@ -267,28 +263,28 @@ class BaseBackendValidateTest:
         assert '[missing] required key not provided: None' not in msg
 
     def test_handle_multiple_errors_on_object(self, validate):
-        schema = Schema({'bad-value': basestring, 'other-bad-value': int})
+        schema = Schema({'bad-value': str, 'other-bad-value': int})
         data = {'bad-value': 42, 'other-bad-value': 'wrong'}
         with pytest.raises(HarvestException) as excinfo:
             validate(data, schema)
         msg = str(excinfo.value)
-        assert '[bad-value] expected basestring: 42' in msg
+        assert '[bad-value] expected str: 42' in msg
         assert '[other-bad-value] expected int: wrong' in msg
 
     def test_handle_multiple_error_on_nested_object(self, validate):
         schema = Schema({'nested': {
-            'bad-value': basestring, 'other-bad-value': int
+            'bad-value': str, 'other-bad-value': int
         }})
         data = {'nested': {'bad-value': 42, 'other-bad-value': 'wrong'}}
         with pytest.raises(HarvestException) as excinfo:
             validate(data, schema)
         msg = str(excinfo.value)
-        assert '[nested.bad-value] expected basestring: 42' in msg
+        assert '[nested.bad-value] expected str: 42' in msg
         assert '[nested.other-bad-value] expected int: wrong' in msg
 
     def test_handle_multiple_error_on_nested_list(self, validate):
         schema = Schema({'nested': [
-            {'bad-value': basestring, 'other-bad-value': int}
+            {'bad-value': str, 'other-bad-value': int}
         ]})
         data = {'nested': [
             {'bad-value': 42, 'other-bad-value': 'wrong'},
@@ -296,14 +292,14 @@ class BaseBackendValidateTest:
         with pytest.raises(HarvestException) as excinfo:
             validate(data, schema)
         msg = str(excinfo.value)
-        assert '[nested.0.bad-value] expected basestring: 42' in msg
+        assert '[nested.0.bad-value] expected str: 42' in msg
         assert '[nested.0.other-bad-value] expected int: wrong' in msg
 
     # See: https://github.com/alecthomas/voluptuous/pull/330
     @pytest.mark.skip(reason='Not yet supported by Voluptuous')
     def test_handle_multiple_error_on_nested_list_items(self, validate):
         schema = Schema({'nested': [
-            {'bad-value': basestring, 'other-bad-value': int}
+            {'bad-value': str, 'other-bad-value': int}
         ]})
         data = {'nested': [
             {'bad-value': 42, 'other-bad-value': 'wrong'},
@@ -312,7 +308,7 @@ class BaseBackendValidateTest:
         with pytest.raises(HarvestException) as excinfo:
             validate(data, schema)
         msg = str(excinfo.value)
-        assert '[nested.0.bad-value] expected basestring: 42' in msg
+        assert '[nested.0.bad-value] expected str: 42' in msg
         assert '[nested.0.other-bad-value] expected int: wrong' in msg
-        assert '[nested.1.bad-value] expected basestring: 43' in msg
+        assert '[nested.1.bad-value] expected str: 43' in msg
         assert '[nested.1.other-bad-value] expected int: bad' in msg

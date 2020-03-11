@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import StringIO
+from io import StringIO
 
 import pytest
 from datetime import datetime
@@ -77,9 +74,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'id')
         self.assertIn('title', header)
@@ -130,9 +127,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'id')
         self.assertIn('title', header)
@@ -169,9 +166,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'dataset.id')
         self.assertIn('dataset.title', header)
@@ -226,9 +223,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'dataset.id')
         self.assertIn('dataset.title', header)
@@ -264,9 +261,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'id')
         self.assertIn('name', header)
@@ -319,9 +316,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'id')
         self.assertIn('name', header)
@@ -355,9 +352,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'id')
         self.assertIn('title', header)
@@ -407,9 +404,9 @@ class SiteViewsTest(FrontTestCase):
         self.assertEqual(response.mimetype, 'text/csv')
         self.assertEqual(response.charset, 'utf-8')
 
-        csvfile = StringIO.StringIO(response.data)
+        csvfile = StringIO(response.data.decode('utf8'))
         reader = csv.get_reader(csvfile)
-        header = reader.next()
+        header = next(reader)
 
         self.assertEqual(header[0], 'id')
         self.assertIn('title', header)

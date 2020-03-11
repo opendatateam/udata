@@ -161,9 +161,6 @@ and implementing the `initialize()` and `process()` methods.
 A minimal harvester adding fake random datasets might looks like:
 
 ```python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.models import db, Resource
 from udata.utils import faker
 

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 import contextlib
 import logging
@@ -14,7 +11,7 @@ from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
 from textwrap import dedent
-from urllib import urlretrieve
+from urllib.request import urlretrieve
 
 import click
 import msgpack
@@ -48,8 +45,8 @@ def grp():
 
 
 def load_levels(col, path):
-    with open(path) as fp:
-        unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
+    with open(path, 'rb') as fp:
+        unpacker = msgpack.Unpacker(fp, raw=False)
         for i, level in enumerate(unpacker, start=1):
             col.objects(id=level['id']).modify(
                 upsert=True,
@@ -61,9 +58,9 @@ def load_levels(col, path):
 
 
 def load_zones(col, path):
-    with open(path) as fp:
-        unpacker = msgpack.Unpacker(fp, encoding=str('utf-8'))
-        unpacker.next()  # Skip headers.
+    with open(path, 'rb') as fp:
+        unpacker = msgpack.Unpacker(fp, raw=False)
+        next(unpacker)  # Skip headers.
         for i, geozone in enumerate(unpacker):
             params = {
                 'slug': slugify.slugify(geozone['name'], separator='-'),
@@ -185,12 +182,6 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     cleanup(prefix)
 
 
-def safe_tarinfo(tarinfo):
-    '''make a tarinfo utf8-compatible'''
-    tarinfo.name = tarinfo.name.decode('utf8')
-    return tarinfo
-
-
 @grp.command()
 @click.argument('filename', metavar='<filename>')
 def load_logos(filename):
@@ -206,8 +197,7 @@ def load_logos(filename):
     log.info('Extracting GeoLogos bundle')
     with contextlib.closing(lzma.LZMAFile(filename)) as xz:
         with tarfile.open(fileobj=xz, encoding='utf8') as tar:
-            decoded = (safe_tarinfo(t) for t in tar.getmembers())
-            tar.extractall(tmp.root, members=decoded)
+            tar.extractall(tmp.root, members=tar.getmembers())
 
     log.info('Moving to the final location and cleaning up')
     if os.path.exists(logos.root):

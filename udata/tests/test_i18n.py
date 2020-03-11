@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import g, url_for
 from werkzeug.routing import BuildError
 

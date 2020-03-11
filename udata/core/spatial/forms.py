@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import geojson
 import json
 import logging
@@ -60,7 +57,7 @@ class GeomField(Field):
         if valuelist:
             value = valuelist[0]
             try:
-                if isinstance(value, basestring):
+                if isinstance(value, str):
                     self.data = geojson.loads(value)
                 else:
                     self.data = geojson.GeoJSON.to_instance(value)

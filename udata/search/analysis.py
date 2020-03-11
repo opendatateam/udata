@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from elasticsearch_dsl import analyzer, tokenizer, token_filter, char_filter
 
 # Custom filters for analyzers.

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from udata.auth import Permission, RoleNeed, UserNeed
 from udata.i18n import lazy_gettext as _
 
