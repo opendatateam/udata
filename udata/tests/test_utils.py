@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import date, datetime
 
 from udata.utils import (
@@ -223,14 +220,14 @@ class RecursiveGetTest:
 
 
 class SafeUnicodeTest(object):
-    def test_unicode_is_encoded(self):
-        assert safe_unicode('ééé') == 'ééé'.encode('utf8')
+    def test_unicode_stays_unicode(self):
+        assert safe_unicode('ééé') == 'ééé'
 
-    def test_bytes_stays_bytes(self):
-        assert safe_unicode(b'xxx') == b'xxx'
+    def test_bytes_is_decoded(self):
+        assert safe_unicode(b'xxx') == 'xxx'
 
     def test_object_to_string(self):
-        assert safe_unicode({}) == b'{}'
+        assert safe_unicode({}) == '{}'
 
     def test_unicode_to_string(self):
-        assert safe_unicode(ValueError('é')) == 'é'.encode('utf8')
+        assert safe_unicode(ValueError('é')) == 'é'

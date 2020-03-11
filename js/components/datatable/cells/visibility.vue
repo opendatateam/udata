@@ -1,5 +1,5 @@
 <template>
-<span class="label label-{{type}}">{{text}}</span>
+<span class="label label-{{ status.type }}">{{ status.label }}</span>
 </template>
 
 <script>
@@ -10,37 +10,33 @@ const VISIBILITIES = {
         label: _('Deleted'),
         type: 'danger'
     },
+    archived: {
+        label: _('Archived'),
+        type: 'warning'
+    },
     private: {
         label: _('Private'),
-        type: 'warning'
+        type: 'info'
     },
     public: {
         label: _('Public'),
-        type: 'info'
+        type: 'success'
     }
 };
 
 export default {
     name: 'datatable-cell-visibility',
     computed: {
-        type: function() {
+        status: function() {
             if (!this.item) return;
             if (this.item.deleted) {
-                return VISIBILITIES.deleted.type;
+                return VISIBILITIES.deleted;
+            } else if (this.item.archived) {
+                return VISIBILITIES.archived;
             } else if (this.item.private) {
-                return VISIBILITIES.private.type;
+                return VISIBILITIES.private;
             } else {
-                return VISIBILITIES.public.type;
-            }
-        },
-        text: function() {
-            if (!this.item) return;
-            if (this.item.deleted) {
-                return VISIBILITIES.deleted.label;
-            } else if (this.item.private) {
-                return VISIBILITIES.private.label;
-            } else {
-                return VISIBILITIES.public.label;
+                return VISIBILITIES.public;
             }
         }
     }

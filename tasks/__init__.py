@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
-import codecs
 import itertools
 import json
 import os
@@ -14,9 +10,9 @@ from sys import exit
 
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
-from invoke import run, task
+from invoke import task
 
-from tasks_helpers import ROOT, info, header, lrun, green
+from .helpers import ROOT, info, header, success, cyan
 
 I18N_DOMAIN = 'udata'
 
@@ -35,7 +31,8 @@ def clean(ctx, node=False, translations=False, all=False):
         patterns.append('udata/translations/*/LC_MESSAGES/udata.mo')
     for pattern in patterns:
         info(pattern)
-    lrun('rm -rf {0}'.format(' '.join(patterns)))
+    with ctx.cd(ROOT):
+        ctx.run('rm -rf {0}'.format(' '.join(patterns)))
 
 
 @task
@@ -46,13 +43,14 @@ def update(ctx, migrate=False):
         msg += ' and migrate data'
     header(msg)
     info('Updating Python dependencies')
-    lrun('pip install -r requirements/develop.pip')
-    lrun('pip install -e .')
-    info('Updating JavaScript dependencies')
-    lrun('npm install')
-    if migrate:
-        info('Migrating database')
-        lrun('udata db migrate')
+    with ctx.cd(ROOT):
+        ctx.run('pi3 install -e .')
+        ctx.run('pip install -r requirements/develop.pip')
+        info('Updating JavaScript dependencies')
+        ctx.run('npm install')
+        if migrate:
+            info('Migrating database')
+            ctx.run('udata db migrate')
 
 
 @task
@@ -88,14 +86,16 @@ def jstest(ctx, watch=False):
     '''Run Karma tests suite'''
     header('Run Karma/Mocha test suite')
     cmd = 'npm run -s test:{0}'.format('watch' if watch else 'unit')
-    lrun(cmd)
+    with ctx.cd(ROOT):
+        ctx.run(cmd)
 
 
 @task
 def doc(ctx):
     '''Build the documentation'''
     header('Building documentation')
-    lrun('mkdocs serve', pty=True)
+    with ctx.cd(ROOT):
+        ctx.run('mkdocs serve', pty=True)
 
 
 @task
@@ -103,31 +103,34 @@ def qa(ctx):
     '''Run a quality report'''
     header('Performing static analysis')
     info('Python static analysis')
-    flake8_results = lrun('flake8 udata --jobs 1', pty=True, warn=True)
+    with ctx.cd(ROOT):
+        flake8_results = ctx.run('flake8 udata --jobs 1', pty=True, warn=True)
     info('JavaScript static analysis')
-    eslint_results = lrun('npm -s run lint', pty=True, warn=True)
+    with ctx.cd(ROOT):
+        eslint_results = ctx.run('npm -s run lint', pty=True, warn=True)
     if flake8_results.failed or eslint_results.failed:
         exit(flake8_results.return_code or eslint_results.return_code)
-    print(green('OK'))
+    success('OK')
 
 
 @task
 def serve(ctx, host='localhost'):
     '''Run a development server'''
-    lrun('python manage.py serve -d -r -h %s' % host)
+    with ctx.cd(ROOT):
+        ctx.run('python manage.py serve -d -r -h %s' % host)
 
 
 @task
 def work(ctx, loglevel='info'):
     '''Run a development worker'''
-    run('celery -A udata.worker worker --purge -l %s' % loglevel,
-        pty=True)
+    ctx.run('celery -A udata.worker worker --purge -l %s' % loglevel,
+            pty=True)
 
 
 @task
 def beat(ctx, loglevel='info'):
     '''Run celery beat process'''
-    run('celery -A udata.worker beat -l %s' % loglevel)
+    ctx.run('celery -A udata.worker beat -l %s' % loglevel)
 
 
 @task
@@ -136,7 +139,8 @@ def i18n(ctx, update=False):
     header('Extract translatable strings')
 
     info('Extract Python strings')
-    lrun('python setup.py extract_messages')
+    with ctx.cd(ROOT):
+        ctx.run('python setup.py extract_messages')
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
@@ -153,7 +157,8 @@ def i18n(ctx, update=False):
         write_po(outfile, catalog, width=80)
 
     if update:
-        lrun('python setup.py update_catalog')
+        with ctx.cd(ROOT):
+            ctx.run('python setup.py update_catalog')
 
     info('Extract JavaScript strings')
     keys = set()
@@ -161,7 +166,7 @@ def i18n(ctx, update=False):
     catalog_filename = join(ROOT, 'js', 'locales',
                             '{}.en.json'.format(I18N_DOMAIN))
     if exists(catalog_filename):
-        with codecs.open(catalog_filename, encoding='utf8') as f:
+        with open(catalog_filename) as f:
             catalog = json.load(f)
 
     globs = '*.js', '*.vue', '*.hbs'
@@ -177,8 +182,8 @@ def i18n(ctx, update=False):
     for directory, _, _ in os.walk(join(ROOT, 'js')):
         glob_patterns = (iglob(join(directory, g)) for g in globs)
         for filename in itertools.chain(*glob_patterns):
-            print('Extracting messages from {0}'.format(green(filename)))
-            content = codecs.open(filename, encoding='utf8').read()
+            print('Extracting messages from {0}'.format(cyan(filename)))
+            content = open(filename).read()
             for regexp in regexps:
                 for match in regexp.finditer(content):
                     key = match.group(1)
@@ -188,77 +193,87 @@ def i18n(ctx, update=False):
                         catalog[key] = key
 
     # Remove old/not found translations
-    for key in catalog.keys():
+    for key in list(catalog.keys()):
         if key not in keys:
             del catalog[key]
 
-    with codecs.open(catalog_filename, 'w', encoding='utf8') as f:
+    with open(catalog_filename, 'w') as f:
         json.dump(catalog, f, sort_keys=True, indent=4, ensure_ascii=False,
-                  encoding='utf8', separators=(',', ': '))
+                  separators=(',', ': '))
 
 
 @task
 def i18nc(ctx):
     '''Compile translations'''
     header('Compiling translations')
-    lrun('python setup.py compile_catalog')
+    with ctx.cd(ROOT):
+        ctx.run('python setup.py compile_catalog')
 
 
 @task
 def assets_build(ctx):
     '''Install and compile assets'''
     header('Building static assets')
-    lrun('npm run assets:build', pty=True)
+    with ctx.cd(ROOT):
+        ctx.run('npm run assets:build', pty=True)
 
 
 @task
 def widgets_build(ctx):
     '''Compile and minify widgets'''
     header('Building widgets')
-    lrun('npm run widgets:build', pty=True)
+    with ctx.cd(ROOT):
+        ctx.run('npm run widgets:build', pty=True)
 
 
 @task
 def oembed_build(ctx):
     '''Compile and minify OEmbed assets'''
     header('Building OEmbed assets')
-    lrun('npm run oembed:build', pty=True)
+    with ctx.cd(ROOT):
+        ctx.run('npm run oembed:build', pty=True)
 
 
 @task
 def assets_watch(ctx):
     '''Build assets on change'''
-    lrun('npm run assets:watch', pty=True)
+    with ctx.cd(ROOT):
+        ctx.run('npm run assets:watch', pty=True)
 
 
 @task
 def widgets_watch(ctx):
     '''Build widgets on changes'''
-    lrun('npm run widgets:watch', pty=True)
+    with ctx.cd(ROOT):
+        ctx.run('npm run widgets:watch', pty=True)
 
 
 @task
 def oembed_watch(ctx):
     '''Build OEmbed assets on changes'''
-    lrun('npm run oembed:watch', pty=True)
+    with ctx.cd(ROOT):
+        ctx.run('npm run oembed:watch', pty=True)
 
 
 @task(clean, i18nc, assets_build, widgets_build, oembed_build, default=True)
 def dist(ctx, buildno=None):
     '''Package for distribution'''
-    perform_dist(buildno)
+    perform_dist(ctx, buildno)
 
 
 @task(i18nc)
 def pydist(ctx, buildno=None):
     '''Perform python packaging (without compiling assets)'''
-    perform_dist(buildno)
+    perform_dist(ctx, buildno)
 
 
-def perform_dist(buildno=None):
+def perform_dist(ctx, buildno=None):
     header('Building a distribuable package')
     cmd = ['python setup.py']
     if buildno:
         cmd.append('egg_info -b {0}'.format(buildno))
     cmd.append('bdist_wheel')
-    lrun(' '.join(cmd), pty=True)
+    with ctx.cd(ROOT):
+        ctx.run(' '.join(cmd), pty=True)
+        ctx.run('twine check dist/*')
+    success('Distribution is available in dist directory')

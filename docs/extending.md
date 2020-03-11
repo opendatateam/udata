@@ -31,6 +31,70 @@ Plugins can expose extra view features via the `udata.views` module entrypoint i
 
 - a blueprint (should be named `blueprint`)
 - some view filters
+- some hooks implementation
+
+#### Hooks
+
+Hooks are small html snippets loaded dynamicaly.
+
+In any template, you can add a placeholder for hooks using one of these syntaxes:
+
+```html+jinja
+# All snippets concatened
+{{ hook('my-custom-hook') }}
+
+# More complex layout with a for loop
+<ul>
+{% for widget in hook('my-widgets') %}
+<li>{{ widget }}</li>
+{% endofr %}
+</ul>
+
+# Optionnal parameters support
+{{ hook('my-parametric-hook', arg1, arg2, kw=value) }}
+```
+
+In a view plugin, a hook implementation is a simple decorated function with the context as first argument.
+
+```python
+from udata.frontend import template_hook
+
+@template_hook
+def my_hook(ctx):  # Will be available in {{ hook('my_hook') }}
+    return 'my hook'
+
+
+@template_hook('another-hook')  # Will be available as {{ hook('another-hook') }}
+def my_custom_hook(ctx):
+    return 'my custom hook'
+```
+
+A hook can render a template as simplfy as any basic view:
+
+```python
+@template_hook
+def my_widget(ctx):
+    return theme.render_template('my/widget.html, **ctx)
+```
+
+Hooks can be conditionnaly rendered:
+
+```python
+@template_hook('conditionnal-hook', when=lambda ctx: 'key' in ctx)
+def my_conditionnal_hook(ctx):
+    return 'key is present in context and value is {}'.format(ctx['key'])
+```
+
+Hooks can also receive parameters in addition to context:
+
+```html+jinja
+{{ hook('with-params', arg1, key=value) }}
+```
+```python
+@template_hook('with-params')
+def my_hook(ctx, arg, **kwargs):
+    # Do something with params
+```
 
 ### Metrics (`udata.metrics`)
 

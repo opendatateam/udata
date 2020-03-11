@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 import warnings
 
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 from flask import current_app
 
@@ -20,7 +17,7 @@ class PreviewWarning(UserWarning):
     pass
 
 
-class PreviewPlugin:
+class PreviewPlugin(ABC):
     '''
     An abstract preview plugin.
 
@@ -30,8 +27,6 @@ class PreviewPlugin:
     - implement abstract methods
     - expose the class on the ``udata.preview`` endpoint
     '''
-    __metaclass__ = ABCMeta
-
     #: Default previews are given only if no specific preview match.
     #: Typically plugins only relying on mimetype or format
     #: should have `fallback = True`

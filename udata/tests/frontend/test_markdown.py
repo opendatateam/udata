@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from bleach._vendor import html5lib
@@ -18,6 +15,28 @@ def assert_md_equal(value, expected):
     assert value.strip() == expected
 
 
+@pytest.fixture
+def assert_md(app):
+    def assertion(text, expected, url='/'):
+        __tracebackhide__ = True
+        with app.test_request_context(url):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            assert_md_equal(result, expected)
+    return assertion
+
+
+@pytest.fixture
+def md2dom(app):
+    def helper(text, expected=None, url='/'):
+        __tracebackhide__ = True
+        with app.test_request_context(url):
+            result = render_template_string('{{ text|markdown }}', text=text)
+            if expected:
+                assert_md_equal(result, expected)
+            return parser.parse(result)
+    return helper
+
+
 @pytest.mark.frontend
 class MarkdownTest:
     def test_excerpt_is_not_removed(self, app):
@@ -32,63 +51,70 @@ class MarkdownTest:
 
         assert result == ''
 
-    def test_markdown_links_nofollow(self, app):
+    def test_markdown_links_nofollow(self, md2dom):
         '''Markdown filter should render links as nofollow'''
         text = '[example](http://example.net/ "Title")'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            parsed = parser.parse(result)
-            el = parsed.getElementsByTagName('a')[0]
-            assert el.getAttribute('rel') == 'nofollow'
-            assert el.getAttribute('href') == 'http://example.net/'
-            assert el.getAttribute('title') == 'Title'
-            assert el.firstChild.data == 'example'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('rel') == 'nofollow'
+        assert el.getAttribute('href') == 'http://example.net/'
+        assert el.getAttribute('title') == 'Title'
+        assert el.firstChild.data == 'example'
 
-    def test_markdown_linkify(self, app):
+    def test_markdown_linkify(self, md2dom):
         '''Markdown filter should transform urls to anchors'''
         text = 'http://example.net/'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            parsed = parser.parse(result)
-            el = parsed.getElementsByTagName('a')[0]
-            assert el.getAttribute('rel') == 'nofollow'
-            assert el.getAttribute('href') == 'http://example.net/'
-            assert el.firstChild.data == 'http://example.net/'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('rel') == 'nofollow'
+        assert el.getAttribute('href') == 'http://example.net/'
+        assert el.firstChild.data == 'http://example.net/'
 
-    def test_markdown_linkify_angle_brackets(self, app):
+    def test_markdown_autolink(self, md2dom):
+        '''Markdown filter should transform urls to anchors'''
+        text = '<http://example.net/>'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('rel') == 'nofollow'
+        assert el.getAttribute('href') == 'http://example.net/'
+        assert el.firstChild.data == 'http://example.net/'
+
+    def test_markdown_linkify_angle_brackets(self, md2dom):
         '''Markdown filter should transform urls to anchors'''
         text = '<http://example.net/path>'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            parsed = parser.parse(result)
-            el = parsed.getElementsByTagName('a')[0]
-            assert el.getAttribute('rel') == 'nofollow'
-            assert el.getAttribute('href') == 'http://example.net/path'
-            assert el.firstChild.data == 'http://example.net/path'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('rel') == 'nofollow'
+        assert el.getAttribute('href') == 'http://example.net/path'
+        assert el.firstChild.data == 'http://example.net/path'
 
-    def test_markdown_linkify_relative(self, app):
+    def test_markdown_linkify_relative(self, md2dom):
         '''Markdown filter should transform relative urls to external ones'''
         text = '[foo](/)'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            parsed = parser.parse(result)
-            el = parsed.getElementsByTagName('a')[0]
-            assert el.getAttribute('rel') == ''
-            assert el.getAttribute('href') == 'http://local.test/'
-            assert el.getAttribute('data-tooltip') == ''
-            assert el.firstChild.data == 'foo'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('rel') == ''
+        assert el.getAttribute('href') == 'http://local.test/'
+        assert el.getAttribute('data-tooltip') == ''
+        assert el.firstChild.data == 'foo'
 
-    def test_markdown_linkify_https(self, app):
+    def test_markdown_linkify_https(self, md2dom):
         '''Markdown filter should transform relative urls with HTTPS'''
         text = '[foo](/foo)'
-        with app.test_request_context('/', base_url='https://local.test'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            parsed = parser.parse(result)
-            el = parsed.getElementsByTagName('a')[0]
-            assert el.getAttribute('rel') == ''
-            assert el.getAttribute('href') == 'https://local.test/foo'
-            assert el.getAttribute('data-tooltip') == ''
-            assert el.firstChild.data == 'foo'
+        dom = md2dom(text, url='https://local.test')
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('rel') == ''
+        assert el.getAttribute('href') == 'https://local.test/foo'
+        assert el.getAttribute('data-tooltip') == ''
+        assert el.firstChild.data == 'foo'
+
+    def test_markdown_linkify_ftp(self, md2dom):
+        '''Markdown filter should transform ftp urls'''
+        text = '[foo](ftp://random.net)'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('href') == 'ftp://random.net'
+        assert el.firstChild.data == 'foo'
 
     def test_markdown_linkify_relative_with_tooltip(self, app):
         '''Markdown filter should transform + add tooltip'''
@@ -103,45 +129,95 @@ class MarkdownTest:
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 
-    def test_markdown_not_linkify_mails(self, app):
+    def test_markdown_not_linkify_mails(self, md2dom):
         '''Markdown filter should not transform emails to anchors'''
         text = 'coucou@cmoi.fr'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            parsed = parser.parse(result)
-            assert parsed.getElementsByTagName('a') == []
-            assert_md_equal(result, '<p>coucou@cmoi.fr</p>')
+        dom = md2dom(text, '<p>coucou@cmoi.fr</p>')
+        assert dom.getElementsByTagName('a') == []
 
-    def test_markdown_linkify_within_pre(self, app):
+    def test_markdown_linkify_within_pre(self, assert_md):
         '''Markdown filter should not transform urls into <pre> anchors'''
         text = '<pre>http://example.net/</pre>'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            assert_md_equal(result, '<pre>http://example.net/</pre>')
+        assert_md(text, '<pre>http://example.net/</pre>')
 
-    def test_markdown_linkify_email_within_pre(self, app):
+    def test_markdown_linkify_email_within_pre(self, assert_md):
         '''Markdown filter should not transform emails into <pre> anchors'''
         text = '<pre>coucou@cmoi.fr</pre>'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            assert_md_equal(result, '<pre>coucou@cmoi.fr</pre>')
+        assert_md(text, '<pre>coucou@cmoi.fr</pre>')
 
-    def test_bleach_sanitize(self, app):
+    def test_bleach_sanitize(self, assert_md):
         '''Markdown filter should sanitize evil code'''
         text = 'an <script>evil()</script>'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            expected = '<p>an &lt;script&gt;evil()&lt;/script&gt;</p>'
-            assert_md_equal(result, expected)
+        assert_md(text, '<p>an &lt;script&gt;evil()&lt;/script&gt;</p>')
 
-    def test_soft_break(self, app):
+    def test_soft_break(self, assert_md):
         '''Markdown should treat soft breaks as br tag'''
         text = 'line 1\nline 2'
-        with app.test_request_context('/'):
-            result = render_template_string('{{ text|markdown }}', text=text)
-            expected = '<p>line 1<br>line 2</p>'
-            assert_md_equal(result, expected)
+        assert_md(text, '<p>line 1<br>\nline 2</p>')
 
+    def test_gfm_tables(self, assert_md):
+        '''Should render GFM tables'''
+        text = '\n'.join((
+            '| first | second |',
+            '|-------|--------|',
+            '| value | value  |',
+        ))
+        expected = '\n'.join((
+            '<table>',
+            '<thead>',
+            '<tr>',
+            '<th>first</th>',
+            '<th>second</th>',
+            '</tr>',
+            '</thead>',
+            '<tbody>',
+            '<tr>',
+            '<td>value</td>',
+            '<td>value</td>',
+            '</tr>',
+            '</tbody>',
+            '</table>'
+        ))
+        assert_md(text, expected)
+
+    def test_gfm_strikethrough(self, assert_md):
+        '''Should render GFM strikethrough (extension)'''
+        text = '~~Hi~~ Hello, world!'
+        assert_md(text, '<p><del>Hi</del> Hello, world!</p>')
+
+    def test_gfm_tagfilter(self, assert_md):
+        '''It should handle GFM tagfilter extension'''
+        # Test extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-
+        text = '\n'.join((
+            '<strong> <title></title> <style></style> <em></em></strong>',
+            '<blockquote>',
+            '  <xmp> is disallowed.  <XMP> is also disallowed.',
+            '</blockquote>',
+        ))
+        expected = '\n'.join((
+            '<p><strong> &lt;title&gt;&lt;/title&gt; &lt;style&gt;&lt;/style&gt; <em></em></strong></p>',
+            '<blockquote>',
+            '  &lt;xmp&gt; is disallowed.  &lt;XMP&gt; is also disallowed.',
+            '</blockquote>',
+        ))
+        assert_md(text, expected)
+
+    def test_gfm_tagfilter_legit(self, assert_md):
+        '''It should not filter legit markup'''
+        text = '\n'.join((
+            '> This is a blockquote',
+            '> with <script>evil()</script> inside',
+        ))
+        expected = '\n'.join((
+            '<blockquote><p>This is a blockquote<br>',
+            'with &lt;script&gt;evil()&lt;/script&gt; inside</p>',
+            '</blockquote>',
+        ))
+        assert_md(text, expected)
+
+
+@pytest.mark.frontend
+class MdStripTest:
     def test_mdstrip_filter(self, app):
         '''mdstrip should truncate the text before rendering'''
         text = '1 2 3 4 5 6 7 8 9 0'
@@ -182,6 +258,16 @@ class MarkdownTest:
             result = render_template_string('{{ text|mdstrip(5) }}', text=text)
 
         assert result.strip() == 'Here…'
+
+    def test_mdstrip_returns_unsafe_string(self, app):
+        '''mdstrip should returns html compliants strings'''
+        text = '&é<script>'
+        with app.test_request_context('/'):
+            unsafe = render_template_string('{{ text|mdstrip }}', text=text)
+            safe = render_template_string('{{ text|mdstrip|safe }}', text=text)
+
+        assert unsafe.strip() == '&amp;é&lt;script&gt;'
+        assert safe.strip() == '&é<script>'
 
     def test_mdstrip_custom_end(self, app):
         '''mdstrip should allow a custom ending string'''

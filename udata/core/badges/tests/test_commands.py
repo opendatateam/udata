@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from tempfile import NamedTemporaryFile
@@ -35,7 +32,7 @@ class BadgeCommandTest:
     def test_toggle_badge_on_from_file(self, cli):
         orgs = [OrganizationFactory() for _ in range(2)]
 
-        with NamedTemporaryFile() as temp:
+        with NamedTemporaryFile(mode='w') as temp:
             temp.write('\n'.join((str(org.id) for org in orgs)))
             temp.flush()
 

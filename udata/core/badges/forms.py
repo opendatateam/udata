@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Badge
@@ -15,7 +12,7 @@ def badge_form(model):
 
         kind = fields.RadioField(
             _('Kind'), [validators.DataRequired()],
-            choices=model.__badges__.items(),
+            choices=list(model.__badges__.items()),
             description=_('Kind of badge (certified, etc)'))
 
     return BadgeForm

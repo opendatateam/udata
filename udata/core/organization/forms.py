@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.auth import current_user
 from udata.forms import Form, ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
@@ -63,5 +60,5 @@ class MemberForm(ModelForm):
     model_class = Member
 
     role = fields.SelectField(
-        _('Role'), default='editor', choices=ORG_ROLES.items(),
+        _('Role'), default='editor', choices=list(ORG_ROLES.items()),
         validators=[validators.DataRequired()])

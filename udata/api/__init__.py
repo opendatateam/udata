@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
+import itertools
 import logging
-import urllib
+import urllib.parse
 
 from functools import wraps
 
@@ -81,7 +79,7 @@ class UDataApi(Api):
         '''Enforce authentication on a given method/verb
         and optionally check a given permission
         '''
-        if isinstance(func, basestring):
+        if isinstance(func, str):
             return self._apply_permission(Permission(RoleNeed(func)))
         elif isinstance(func, Permission):
             return self._apply_permission(func)
@@ -95,7 +93,7 @@ class UDataApi(Api):
 
     def _apply_secure(self, func, permission=None):
         '''Enforce authentication on a given method/verb'''
-        self._handle_api_doc(func, {'security': 'apikey'})
+        self._build_doc(func, {'security': 'apikey'})
 
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -223,7 +221,7 @@ def collect_stats(response):
     if (not current_app.config['TESTING'] and
             request.endpoint not in blacklist):
         extras = {
-            'action_name': urllib.quote(action_name),
+            'action_name': urllib.parse.quote(action_name),
         }
         tracking.send_signal(on_api_call, request, current_user, **extras)
     return response

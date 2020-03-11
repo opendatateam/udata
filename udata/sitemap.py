@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from functools import wraps
 from flask import current_app, request
 from flask_sitemap import Sitemap, sitemap_page_needed

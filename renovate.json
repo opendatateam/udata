@@ -1,0 +1,13 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "baseBranches": ["py3"],
+  "pip_requirements": {
+    "fileMatch": ["requirements/install.pip", "requirements/test.pip"]
+  },
+  "enabledManagers": ["pip_requirements"],
+  "automerge": true,
+  "prHourlyLimit": 5,
+  "masterIssueApproval": true
+}

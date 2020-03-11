@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import factory
 import pytest
 
 from factory.fuzzy import FuzzyChoice
 from flask.signals import Namespace
-from mock import patch
 
 from udata.factories import ModelFactory
 from udata.core.dataset.factories import DatasetFactory
@@ -51,7 +47,7 @@ class FactoryBackend(backends.BaseBackend):
     name = 'factory'
     filters = (
         backends.HarvestFilter('Test', 'test', int, 'An integer'),
-        backends.HarvestFilter('Tag', 'tag', basestring),
+        backends.HarvestFilter('Tag', 'tag', str),
     )
     features = (
         backends.HarvestFeature('test', 'Test'),

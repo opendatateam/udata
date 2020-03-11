@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 from itertools import chain
 
@@ -53,7 +50,7 @@ class Team(db.EmbeddedDocument):
 
 class Member(db.EmbeddedDocument):
     user = db.ReferenceField('User')
-    role = db.StringField(choices=ORG_ROLES.keys(), default=DEFAULT_ROLE)
+    role = db.StringField(choices=list(ORG_ROLES), default=DEFAULT_ROLE)
     since = db.DateTimeField(default=datetime.now, required=True)
 
     @property
@@ -68,7 +65,7 @@ class MembershipRequest(db.EmbeddedDocument):
     id = db.AutoUUIDField()
     user = db.ReferenceField('User')
     status = db.StringField(
-        choices=MEMBERSHIP_STATUS.keys(), default='pending')
+        choices=list(MEMBERSHIP_STATUS), default='pending')
 
     created = db.DateTimeField(default=datetime.now, required=True)
 
@@ -121,7 +118,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         'queryset_class': OrganizationQuerySet,
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
     __badges__ = {

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
 from udata import models
 from udata.commands.fixtures import (
     generate_fixtures, generate_reuses, generate_datasets, generate_licenses

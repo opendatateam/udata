@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import hashlib
 import math
 import re
@@ -78,7 +75,7 @@ class Paginable(object):
     def iter_pages(self, left_edge=2, left_current=2, right_current=5,
                    right_edge=2):
         last = 0
-        for num in xrange(1, self.pages + 1):
+        for num in range(1, self.pages + 1):
             if (num <= left_edge or
                     (num > self.page - left_current - 1 and
                         num < self.page + right_current) or
@@ -190,7 +187,7 @@ def to_bool(value):
     '''
     if isinstance(value, bool):
         return value
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         return value.lower() == 'true' or value.lower() == 't'
     elif isinstance(value, int):
         return value > 0
@@ -207,7 +204,7 @@ def clean_string(value):
 
 def not_none_dict(d):
     '''Filter out None values from a dict'''
-    return {k: v for k, v in d.iteritems() if v is not None}
+    return {k: v for k, v in d.items() if v is not None}
 
 
 def hash_url(url):
@@ -226,7 +223,7 @@ def recursive_get(obj, key):
     '''
     if not obj or not key:
         return
-    parts = key.split('.') if isinstance(key, basestring) else key
+    parts = key.split('.') if isinstance(key, str) else key
     key = parts.pop(0)
     if isinstance(obj, dict):
         value = obj.get(key, None)
@@ -283,13 +280,9 @@ class UDataProvider(BaseProvider):
 @faker_provider  # Replace the default lorem provider with a unicode one
 class UnicodeLoremProvider(LoremProvider):
     '''A Lorem provider that forces unicode in words'''
-    word_list = map(lambda w: w + 'é', LoremProvider.word_list)
+    word_list = [w + 'é' for w in LoremProvider.word_list]
 
 
 def safe_unicode(string):
-    '''Safely transform any object into utf8 encoded bytes'''
-    if not isinstance(string, basestring):
-        string = unicode(string)
-    if isinstance(string, unicode):
-        string = string.encode('utf8')
-    return string
+    '''Safely transform any object into utf8 decoded str'''
+    return string.decode('utf8') if isinstance(string, bytes) else str(string)

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.models import db, Activity
 from udata.tests import TestCase, DBTestMixin, WebTestMixin
 from udata.core.user.factories import UserFactory
@@ -8,18 +5,18 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.auth import login_user
 
 
-class FakeModel(db.Document):
+class FakeSubject(db.Document):
     name = db.StringField()
 
 
 class FakeActivity(Activity):
     key = 'fake'
-    related_to = db.ReferenceField(FakeModel)
+    related_to = db.ReferenceField(FakeSubject)
 
 
 class ActivityTest(WebTestMixin, DBTestMixin, TestCase):
     def setUp(self):
-        self.fake = FakeModel.objects.create(name='fake')
+        self.fake = FakeSubject.objects.create(name='fake')
         self.login()
 
     def test_create_and_retrieve_for_user(self):

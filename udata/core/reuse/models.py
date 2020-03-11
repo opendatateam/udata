@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
@@ -46,7 +43,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     slug = db.SlugField(max_length=255, required=True, populate_from='title',
                         update=True, follow=True)
     description = db.StringField(required=True)
-    type = db.StringField(required=True, choices=REUSE_TYPES.keys())
+    type = db.StringField(required=True, choices=list(REUSE_TYPES))
     url = db.StringField(required=True)
     urlhash = db.StringField(required=True, unique=True)
     image_url = db.StringField()
@@ -66,7 +63,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     featured = db.BooleanField()
     deleted = db.DateTimeField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title or ''
 
     __badges__ = {}

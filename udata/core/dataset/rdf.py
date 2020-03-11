@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 '''
 This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
@@ -7,7 +5,7 @@ import calendar
 import logging
 
 from datetime import date
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
 from flask import current_app, url_for
 from rdflib import Graph, URIRef, Literal, BNode
@@ -296,7 +294,7 @@ def temporal_from_rdf(period_of_time):
 
 
 def frequency_from_rdf(term):
-    if isinstance(term, basestring):
+    if isinstance(term, str):
         try:
             term = URIRef(uris.validate(term))
         except uris.ValidationError:

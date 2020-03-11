@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from tempfile import NamedTemporaryFile
@@ -14,7 +11,7 @@ class DatasetCommandTest:
     def test_dataset_archive_one(self, cli):
         dataset = VisibleDatasetFactory()
 
-        cli('dataset', 'archive_one', str(dataset.id))
+        cli('dataset', 'archive-one', str(dataset.id))
 
         dataset.reload()
         assert dataset.archived is not None
@@ -22,7 +19,7 @@ class DatasetCommandTest:
     def test_dataset_archive(self, cli):
         datasets = [VisibleDatasetFactory() for _ in range(2)]
 
-        with NamedTemporaryFile() as temp:
+        with NamedTemporaryFile(mode='w', encoding='utf8') as temp:
             temp.write('\n'.join((str(d.id) for d in datasets)))
             temp.flush()
 

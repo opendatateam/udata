@@ -2,11 +2,37 @@
 
 ## Current (in progress)
 
+### Breaking changes
+
+- Migration to Python 3.7 [#1766](https://github.com/opendatateam/udata/pull/1766)
+- The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
+- The targeted mongo version is now Mongo 3.6. Backward support is not guaranteed
+
+### New features
+
+- New migration system [#1956](https://github.com/opendatateam/udata/pull/1956):
+  - Use python based migrations instead of relying on mongo internal and deprecated `js_exec`
+  - Handle rollback (optionnal)
+  - Detailled history
+- Template hooks generalization: allows to dynamically extend template with widgets and snippets from extensions. See [the dedicated documentation section](https://udata.readthedocs.io/en/stable/extending/#hooks) [#2323](https://github.com/opendatateam/udata/pull/2323)
+- Markdown now supports [Github Flavored Markdown (GFM) specs](https://github.github.com/gfm/) (ie. the already supported [CommonMark specs](https://spec.commonmark.org) plus tables, strikethrough, autolinks support and predefined disallowed raw HTML) [#2341](https://github.com/opendatateam/udata/pull/2341)
+
+## 1.6.20 (2020-01-21)
+
+- New Crowdin translations [#2360](https://github.com/opendatateam/udata/pull/2360)
+- Fix territory routing for @latest [#2447](https://github.com/opendatateam/udata/pull/2447)
+- Refactor Celery: py2/py3 compatibility, use ids as payload [#2305](https://github.com/opendatateam/udata/pull/2305)
+- Automatically archive dangling harvested datasets :warning: this is enabled by default [#2368](https://github.com/opendatateam/udata/pull/2368)
+- Refactor celery tasks to avoid models/documents in the transport layer [#2305](https://github.com/opendatateam/udata/pull/2305)
+
+## 1.6.19 (2020-01-06)
+
 - `rel=nofollow` on remote source links [#2364](https://github.com/opendatateam/udata/pull/2364)
 - Fix admin messages and fix user roles selector default value [#2365](https://github.com/opendatateam/udata/pull/2365)
 - Fix new harvester's form tooltip showup [#2371](https://github.com/opendatateam/udata/pull/2371)
 - Fix responsive design of search results [#2372](https://github.com/opendatateam/udata/pull/2372)
 - Fix non-unique ids in datasets' comments [#2374](https://github.com/opendatateam/udata/pull/2374)
+- Case insensitive license matching [#2378](https://github.com/opendatateam/udata/pull/2378)
 
 ## 1.6.18 (2019-12-13)
 
@@ -35,6 +61,7 @@
 - Allow `Authorization` as CORS header and OAuth minor fixes [#2298](https://github.com/opendatateam/udata/pull/2298)
 - Set dataset.private to False by default (and fix stock) [#2307](https://github.com/opendatateam/udata/pull/2307)
 - Fixes some inconsistencies between admin display (buttons, actions...) and real permissions [#2308](https://github.com/opendatateam/udata/pull/2308)
+
 
 ## 1.6.14 (2019-08-14)
 

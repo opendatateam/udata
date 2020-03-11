@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from flask_restplus import inputs
@@ -12,7 +9,7 @@ from udata.i18n import gettext as _
 from udata.tests.helpers import assert_json_equal
 from udata.utils import clean_string
 
-from . import Fake, FakeSearch, FakeFactory
+from . import FakeSearchable, FakeSearch, FakeFactory
 
 #############################################################################
 #                  Custom search adapters and metrics                       #
@@ -56,12 +53,12 @@ class FakeSearchWithCoverage(FakeSearch):
 # Register some metrics for testing
 
 class FakeMetricInt(Metric):
-    model = Fake
+    model = FakeSearchable
     name = 'fake-metric-int'
 
 
 class FakeMetricFloat(Metric):
-    model = Fake
+    model = FakeSearchable
     name = 'fake-metric-float'
     value_type = float
 
@@ -108,7 +105,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + tag and other facets + sorts + pagination
         assert len(parser.args) == 7
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'tag', clean_string)
@@ -122,7 +119,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + boolean facet + sorts + pagination
         assert len(parser.args) == 6
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'boolean', inputs.boolean)
@@ -136,7 +133,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + range facet + sorts + pagination
         assert len(parser.args) == 6
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'range', facet.validate_parameter,
@@ -151,7 +148,7 @@ class SearchAdaptorTest:
 
         # query + facets selector + range facet + sorts + pagination
         assert len(parser.args) == 6
-        assertHasArgument(parser, 'q', unicode)
+        assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
         assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'coverage', facet.validate_parameter)
@@ -208,7 +205,7 @@ class IndexingLifecycleTest:
 @pytest.mark.usefixtures('app')
 class MetricsMappingTest:
     def test_map_metrics(self):
-        mapping = search.metrics_mapping_for(Fake)
+        mapping = search.metrics_mapping_for(FakeSearchable)
         assert_json_equal(mapping, {
             'type': 'object',
             'properties': {

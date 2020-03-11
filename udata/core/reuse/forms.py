@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Reuse, REUSE_TYPES
@@ -24,7 +21,7 @@ class ReuseForm(ModelForm):
         _('Description'), [validators.DataRequired()],
         description=_('The details about the reuse (build process, specifics, '
                       'self-critics...).'))
-    type = fields.SelectField(_('Type'), choices=REUSE_TYPES.items())
+    type = fields.SelectField(_('Type'), choices=list(REUSE_TYPES.items()))
     url = fields.URLField(
         _('URL'), [validators.DataRequired(), check_url_does_not_exists])
     image = fields.ImageField(

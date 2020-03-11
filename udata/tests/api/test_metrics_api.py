@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import date, timedelta
@@ -8,15 +5,9 @@ from datetime import date, timedelta
 from flask import url_for
 
 from udata.core.metrics import Metric
-from udata.models import db, WithMetrics, Metrics
+from udata.models import Metrics
 from udata.tests.helpers import assert200, assert404
-
-
-class FakeModel(db.Document, WithMetrics):
-    name = db.StringField()
-
-    def __unicode__(self):
-        return self.name or ''
+from udata.tests.models import FakeModel
 
 
 class FakeModelMetric(Metric):

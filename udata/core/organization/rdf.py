@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 '''
 This module centralize organization helpers
 for RDF/DCAT serialization and parsing

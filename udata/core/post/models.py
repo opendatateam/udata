@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import url_for
 
 from udata.core.storages import images, default_image_basename
@@ -52,7 +49,7 @@ class Post(db.Datetimed, db.Document):
 
     verbose_name = _('post')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
     def url_for(self, *args, **kwargs):

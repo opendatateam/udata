@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import itertools
 import logging
 
@@ -48,9 +45,8 @@ class AdapterMetaclass(DocTypeMeta):
         return new
 
 
-class ModelSearchAdapter(DocType):
+class ModelSearchAdapter(DocType, metaclass=AdapterMetaclass):
     """This class allow to describe and customize the search behavior."""
-    __metaclass__ = AdapterMetaclass
     analyzer = i18n_analyzer
     boosters = None
     facets = None
@@ -135,14 +131,15 @@ class ModelSearchAdapter(DocType):
     def as_request_parser(cls, paginate=True):
         parser = RequestParser()
         # q parameter
-        parser.add_argument('q', type=unicode, location='args',
+        parser.add_argument('q', type=str, location='args',
                             help='The search query')
         # Expected facets
         # (ie. I want all facets or I want both tags and licenses facets)
-        facets = cls.facets.keys()
+        facets = list(cls.facets)
         if facets:
             parser.add_argument('facets', type=str, location='args',
-                                choices=['all'] + facets, action='append',
+                                choices=['all'] + facets,
+                                action='append',
                                 help='Selected facets to fetch')
         # Add facets filters arguments
         # (apply a value to a facet ie. tag=value)
@@ -150,7 +147,7 @@ class ModelSearchAdapter(DocType):
             kwargs = facet.as_request_parser_kwargs()
             parser.add_argument(name, location='args', **kwargs)
         # Sort arguments
-        keys = cls.sorts.keys()
+        keys = list(cls.sorts)
         choices = keys + ['-' + k for k in keys]
         help_msg = 'The field (and direction) on which sorting apply'
         parser.add_argument('sort', type=str, location='args', choices=choices,

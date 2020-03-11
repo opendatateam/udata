@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
-import unicodecsv as csv
+import csv
 
 from collections import namedtuple
 from datetime import datetime, timedelta
@@ -67,6 +64,8 @@ def create_source(name, url, backend,
                   owner=None,
                   organization=None,
                   config=None,
+                  active=None,
+                  autoarchive=None,
                   ):
     '''Create a new harvest source'''
     if owner and not isinstance(owner, User):
@@ -84,6 +83,8 @@ def create_source(name, url, backend,
         owner=owner,
         organization=organization,
         config=config,
+        active=active,
+        autoarchive=autoarchive,
     )
     signals.harvest_source_created.send(source)
     return source
@@ -172,6 +173,8 @@ def preview_from_config(name, url, backend,
                         owner=None,
                         organization=None,
                         config=None,
+                        active=None,
+                        autoarchive=None,
                         ):
     '''Preview an harvesting from a source created with the given parameters'''
     if owner and not isinstance(owner, User):
@@ -189,6 +192,8 @@ def preview_from_config(name, url, backend,
         owner=owner,
         organization=organization,
         config=config,
+        active=active,
+        autoarchive=autoarchive,
     )
     cls = backends.get(current_app, source.backend)
     max_items = current_app.config['HARVEST_PREVIEW_MAX_ITEMS']
@@ -256,9 +261,7 @@ def attach(domain, filename):
     count = 0
     errors = 0
     with open(filename) as csvfile:
-        reader = csv.DictReader(csvfile,
-                                delimiter=b';',
-                                quotechar=b'"')
+        reader = csv.DictReader(csvfile, delimiter=';', quotechar='"')
         for row in reader:
             try:
                 dataset = Dataset.objects.get(id=ObjectId(row['local']))

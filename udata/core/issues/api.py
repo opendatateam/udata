@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 
 from flask_security import current_user
@@ -99,6 +96,7 @@ class IssueAPI(API):
             posted_by=current_user.id
         )
         issue.discussion.append(message)
+        message_idx = len(issue.discussion) - 1
         close = form.close.data
         if close:
             CloseIssuePermission(issue).test()
@@ -106,9 +104,9 @@ class IssueAPI(API):
             issue.closed = datetime.now()
         issue.save()
         if close:
-            on_issue_closed.send(issue, message=message)
+            on_issue_closed.send(issue, message=message_idx)
         else:
-            on_new_issue_comment.send(issue, message=message)
+            on_new_issue_comment.send(issue, message=message_idx)
         return issue
 
 

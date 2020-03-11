@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import date
@@ -256,8 +253,8 @@ class FrontEndRootTest:
         link = ('<link rel="alternate" '
                 'href="/{lang}/i18n/value/?param=other" '
                 'hreflang="{lang}" />')
-        assert response.data == ''.join([link.format(lang='fr'),
-                                         link.format(lang='de')])
+        assert response.data.decode('utf8') == ''.join([link.format(lang='fr'),
+                                                        link.format(lang='de')])
 
     def test_i18n_alternate_links_outside_i18n_blueprint(self, app, client):
         test = Blueprint('test', __name__)
@@ -275,4 +272,4 @@ class FrontEndRootTest:
         }
 
         response = client.get(url_for('test.i18n', key='value', param='other'))
-        assert response.data == ''
+        assert response.data == b''

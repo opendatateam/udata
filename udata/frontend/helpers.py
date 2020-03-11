@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import calendar
+import html
 import logging
 import pkg_resources
 
 from datetime import date, datetime
 from time import time
-from urlparse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit
 
 from babel.numbers import format_decimal
 from flask import g, url_for, request, current_app, json
@@ -17,6 +15,7 @@ from werkzeug import url_decode, url_encode
 from . import front
 
 from udata import assets
+from udata.app import UDataJsonEncoder
 from udata.models import db
 from udata.i18n import format_date, _, pgettext, get_current_locale
 from udata.theme import theme_static_with_version
@@ -109,8 +108,8 @@ def url_del(url=None, *args, **kwargs):
         params.poplist(key)
     for key, value in kwargs.items():
         lst = params.poplist(key)
-        if unicode(value) in lst:
-            lst.remove(unicode(value))
+        if str(value) in lst:
+            lst.remove(str(value))
         params.setlist(key, lst)
     return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
                               fragments)))
@@ -325,13 +324,13 @@ def daterange(value, details=False):
     if details:
         return daterange_with_details(value)
 
-    date_format = 'YYYY'
+    date_format = '%Y'
 
     delta = value.end - value.start
     start, end = None, None
-    start = format_date(value.start, date_format)
+    start = value.start.strftime(date_format)
     if delta.days > 365:
-        end = format_date(value.end, date_format)
+        end = value.end.strftime(date_format)
 
     return '{start!s}–{end!s}'.format(start=start, end=end) if end else start
 
@@ -404,3 +403,26 @@ def filesize(value):
             return "%3.1f%s%s" % (value, unit, suffix)
         value /= 1024.0
     return "%.1f%s%s" % (value, 'Y', suffix)
+
+
+def json_ld_script_preprocessor(o):
+    if isinstance(o, dict):
+        return {k: json_ld_script_preprocessor(v) for k, v in o.items()}
+    elif isinstance(o,  (list, tuple)):
+        return [json_ld_script_preprocessor(v) for v in o]
+    elif isinstance(o, str):
+        return html.escape(o).replace('&#x27;', '&apos;')
+    else:
+        return o
+
+
+@front.app_template_filter()
+def embedded_json_ld(jsonld):
+    '''
+    Sanitize JSON-LD for <script> tag inclusion.
+
+    JSON-LD accepts any string but there is a special case
+    for script tag inclusion.
+    See: https://w3c.github.io/json-ld-syntax/#restrictions-for-contents-of-json-ld-script-elements
+    '''
+    return Markup(json.dumps(json_ld_script_preprocessor(jsonld), ensure_ascii=False))

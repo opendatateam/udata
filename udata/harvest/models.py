@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from collections import OrderedDict
 from datetime import datetime
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from werkzeug import cached_property
 
@@ -41,6 +38,7 @@ HARVEST_ITEM_STATUS = OrderedDict((
     ('done', _('Done')),
     ('failed', _('Failed')),
     ('skipped', _('Skipped')),
+    ('archived', _('Archived'))
 ))
 
 DEFAULT_HARVEST_FREQUENCY = 'manual'
@@ -58,7 +56,7 @@ class HarvestError(db.EmbeddedDocument):
 class HarvestItem(db.EmbeddedDocument):
     remote_id = db.StringField()
     dataset = db.ReferenceField(Dataset)
-    status = db.StringField(choices=HARVEST_ITEM_STATUS.keys(),
+    status = db.StringField(choices=list(HARVEST_ITEM_STATUS),
                             default=DEFAULT_HARVEST_ITEM_STATUS, required=True)
     created = db.DateTimeField(default=datetime.now, required=True)
     started = db.DateTimeField()
@@ -81,7 +79,7 @@ VALIDATION_STATES = {
 
 class HarvestSourceValidation(db.EmbeddedDocument):
     '''Store harvest source validation details'''
-    state = db.StringField(choices=VALIDATION_STATES.keys(),
+    state = db.StringField(choices=list(VALIDATION_STATES),
                            default=VALIDATION_PENDING,
                            required=True)
     by = db.ReferenceField('User')
@@ -105,10 +103,11 @@ class HarvestSource(db.Owned, db.Document):
     periodic_task = db.ReferenceField('PeriodicTask',
                                       reverse_delete_rule=db.NULLIFY)
     created_at = db.DateTimeField(default=datetime.now, required=True)
-    frequency = db.StringField(choices=HARVEST_FREQUENCIES.keys(),
+    frequency = db.StringField(choices=list(HARVEST_FREQUENCIES),
                                default=DEFAULT_HARVEST_FREQUENCY,
                                required=True)
     active = db.BooleanField(default=True)
+    autoarchive = db.BooleanField(default=True)
     validation = db.EmbeddedDocumentField(HarvestSourceValidation,
                                           default=HarvestSourceValidation)
 
@@ -150,7 +149,7 @@ class HarvestSource(db.Owned, db.Document):
         'queryset_class': HarvestSourceQuerySet,
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name or ''
 
 
@@ -159,7 +158,7 @@ class HarvestJob(db.Document):
     created = db.DateTimeField(default=datetime.now, required=True)
     started = db.DateTimeField()
     ended = db.DateTimeField()
-    status = db.StringField(choices=HARVEST_JOB_STATUS.keys(),
+    status = db.StringField(choices=list(HARVEST_JOB_STATUS),
                             default=DEFAULT_HARVEST_JOB_STATUS, required=True)
     errors = db.ListField(db.EmbeddedDocumentField(HarvestError))
     items = db.ListField(db.EmbeddedDocumentField(HarvestItem))

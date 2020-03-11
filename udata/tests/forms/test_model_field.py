@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from werkzeug.datastructures import MultiDict
@@ -219,7 +216,7 @@ class Optionnal:
 class CommonMixin:
     @property
     def form(self):
-        validators = [fields.validators.required()] if self.required else []
+        validators = [fields.validators.DataRequired()] if self.required else []
 
         class Form(ModelForm):
             model_class = self.model

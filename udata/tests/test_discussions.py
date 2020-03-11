@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 
 from flask import url_for
@@ -23,7 +20,7 @@ from udata.core.user.factories import UserFactory, AdminFactory
 from udata.utils import faker
 
 
-from frontend import FrontTestCase
+from .frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
@@ -574,7 +571,7 @@ class DiscussionsMailsTest(FrontTestCase):
         )
 
         with capture_mails() as mails:
-            notify_new_discussion(discussion)
+            notify_new_discussion(discussion.id)
 
         # Should have sent one mail to the owner
         self.assertEqual(len(mails), 1)
@@ -594,7 +591,7 @@ class DiscussionsMailsTest(FrontTestCase):
         )
 
         with capture_mails() as mails:
-            notify_new_discussion_comment(discussion, message=new_message)
+            notify_new_discussion_comment(discussion.id, message=len(discussion.discussion) - 1)
 
         # Should have sent one mail to the owner and the other participants
         # and no mail to the commenter
@@ -619,7 +616,7 @@ class DiscussionsMailsTest(FrontTestCase):
         )
 
         with capture_mails() as mails:
-            notify_discussion_closed(discussion, message=closing_message)
+            notify_discussion_closed(discussion.id, message=len(discussion.discussion) - 1)
 
         # Should have sent one mail to each participant
         # and no mail to the closer

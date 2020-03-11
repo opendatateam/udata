@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.models import db
 from udata.core.dataset.models import ResourceMixin
 

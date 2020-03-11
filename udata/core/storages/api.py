@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 
 from datetime import datetime
@@ -39,7 +36,7 @@ image_parser.add_argument('bbox', type=str, location='form')
 upload_parser = api.parser()
 upload_parser.add_argument('file', type=FileStorage, location='files')
 upload_parser.add_argument('uuid', type=str, location='form')
-upload_parser.add_argument('filename', type=unicode, location='form')
+upload_parser.add_argument('filename', type=str, location='form')
 upload_parser.add_argument('partindex', type=int, location='form')
 upload_parser.add_argument('partbyteoffset', type=int, location='form')
 upload_parser.add_argument('totalparts', type=int, location='form')
@@ -121,7 +118,7 @@ def combine_chunks(storage, args, prefix=None):
     if prefix:
         target = os.path.join(prefix, target)
     with storage.open(target, 'wb') as out:
-        for i in xrange(args['totalparts']):
+        for i in range(args['totalparts']):
             partname = chunk_filename(uuid, i)
             out.write(chunks.read(partname))
             chunks.delete(partname)
@@ -131,7 +128,7 @@ def combine_chunks(storage, args, prefix=None):
 
 def handle_upload(storage, prefix=None):
     args = upload_parser.parse_args()
-    is_chunk = args['totalparts'] > 1
+    is_chunk = args['totalparts'] and args['totalparts'] > 1
     uploaded_file = args['file']
 
     if is_chunk:

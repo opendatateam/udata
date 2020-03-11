@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import copy
 import logging
 
@@ -44,7 +41,7 @@ class SearchQuery(FacetedSearch):
     def extract_sort(self, params):
         '''Extract and build sort query from parameters'''
         sorts = params.pop('sort', [])
-        sorts = [sorts] if isinstance(sorts, basestring) else sorts
+        sorts = [sorts] if isinstance(sorts, str) else sorts
         sorts = [(s[1:], 'desc')
                  if s.startswith('-') else (s, 'asc')
                  for s in sorts]

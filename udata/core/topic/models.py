@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import url_for
 
 from udata.models import db
@@ -27,7 +24,7 @@ class Topic(db.Document):
     featured = db.BooleanField()
     private = db.BooleanField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @property

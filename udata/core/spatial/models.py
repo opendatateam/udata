@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import date
 
 from flask import current_app, url_for
@@ -56,7 +53,12 @@ class GeoZoneQuerySet(db.BaseQuerySet):
         Ensuring the QuerySet unicity for (level, code)
         is you responsibility.
         '''
-        return self.order_by('-validity__end').first()
+        # first try to find a zone without `validity__end`
+        latest = self.filter(validity__end=None).first()
+        # only then try to find the zone with the latest `validity__end`
+        if not latest:
+            latest = self.order_by('-validity__end').first()
+        return latest
 
     def resolve(self, geoid, id_only=False):
         '''
@@ -114,7 +116,7 @@ class GeoZone(db.Document):
         'queryset_class': GeoZoneQuerySet
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return self.id
 
     def __html__(self):
@@ -139,7 +141,7 @@ class GeoZone(db.Document):
         for value in self.keys.values():
             if isinstance(value, list):
                 keys_values += value
-            elif isinstance(value, basestring) and not value.startswith('-'):
+            elif isinstance(value, str) and not value.startswith('-'):
                 # Avoid -99. Should be fixed in geozones
                 keys_values.append(value)
             elif isinstance(value, int) and value >= 0:

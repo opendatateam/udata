@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import mock
 import os
 
@@ -8,7 +5,7 @@ from udata.mail import mail_sent
 
 from contextlib import contextmanager
 from datetime import timedelta
-from urlparse import urljoin, urlparse, parse_qs
+from urllib.parse import urljoin, urlparse, parse_qs
 
 from flask import request, url_for, json
 

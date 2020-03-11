@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import json
 import logging
 from collections import Counter
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 import click
 import redis

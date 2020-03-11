@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import uuid
 
 from dateutil.parser import parse
@@ -44,7 +41,7 @@ class FieldHelper(object):
         return False
 
     def __call__(self, **kwargs):
-        placeholder = kwargs.pop('placeholder', _(self.label.text))
+        placeholder = kwargs.pop('placeholder', self.label.text)
         if placeholder:
             kwargs['placeholder'] = placeholder
         required = kwargs.pop('required', self.flags.required)
@@ -106,7 +103,7 @@ class DateTimeField(Field, fields.DateTimeField):
     def process_formdata(self, valuelist):
         if valuelist:
             dt = valuelist[0]
-            self.data = parse(dt) if isinstance(dt, basestring) else dt
+            self.data = parse(dt) if isinstance(dt, str) else dt
 
 
 class UUIDField(Field):
@@ -367,7 +364,7 @@ class ModelFieldMixin(object):
 
     def _value(self):
         if self.data:
-            return unicode(self.data.id)
+            return str(self.data.id)
         else:
             return ''
 
@@ -387,7 +384,7 @@ class ModelField(Field):
             # Process prefixed values as in FormField
             newdata = {}
             prefix = self.short_name + '-'
-            for key in formdata.keys():
+            for key in list(formdata.keys()):
                 if key.startswith(prefix):
                     value = formdata.pop(key)
                     newdata[key.replace(prefix, '')] = value
@@ -400,7 +397,7 @@ class ModelField(Field):
             return
         specs = valuelist[0]
         model_field = getattr(self._form.model_class, self.name)
-        if isinstance(specs, basestring):
+        if isinstance(specs, str):
             specs = {'id': specs}
         elif not specs.get('id', None):
             raise validators.ValidationError('Missing "id" field')
@@ -449,7 +446,7 @@ class ModelChoiceField(StringField):
 
     def _value(self):
         if self.data:
-            return unicode(self.data.id)
+            return str(self.data.id)
         else:
             return ''
 
@@ -478,7 +475,7 @@ class ModelList(object):
     def process_formdata(self, valuelist):
         if not valuelist:
             return []
-        if len(valuelist) == 1 and isinstance(valuelist[0], basestring):
+        if len(valuelist) == 1 and isinstance(valuelist[0], str):
             oids = [clean_oid(id, self.model)
                     for id in valuelist[0].split(',') if id]
         else:
@@ -619,7 +616,7 @@ class DateRangeField(Field):
     def process_formdata(self, valuelist):
         if valuelist and valuelist[0]:
             value = valuelist[0]
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 start, end = value.split(' - ')
                 self.data = db.DateRange(
                     start=parse(start, yearfirst=True).date(),

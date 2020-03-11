@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import date
 
 from flask import url_for
@@ -12,16 +9,8 @@ from udata.core.site.factories import SiteFactory
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.user.factories import AdminFactory
-from udata.models import db, WithMetrics
 
 from udata.tests.api import APITestCase
-
-
-class FakeModel(db.Document, WithMetrics):
-    name = db.StringField()
-
-    def __unicode__(self):
-        return self.name or ''
 
 
 class FakeSiteMetric(SiteMetric):

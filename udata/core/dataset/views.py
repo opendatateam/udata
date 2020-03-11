@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from collections import defaultdict, OrderedDict
 
 from flask import abort, request, url_for, redirect
@@ -171,5 +168,5 @@ def group_resources_by_type(resources):
     ordered = OrderedDict()
     for rtype, rtype_label in RESOURCE_TYPES.items():
         if groups[rtype]:
-            ordered[(rtype, rtype_label)] = groups[rtype]
+            ordered[(rtype, str(rtype_label))] = groups[rtype]
     return ordered

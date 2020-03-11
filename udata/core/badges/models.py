@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import weakref
 
@@ -23,10 +20,8 @@ class Badge(db.EmbeddedDocument):
     created = db.DateTimeField(default=datetime.now, required=True)
     created_by = db.ReferenceField('User')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.kind
-
-    __str__ = __unicode__
 
     def validate(self, clean=True):
         badges = getattr(self._instance, '__badges__', {})

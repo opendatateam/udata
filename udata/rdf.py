@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''

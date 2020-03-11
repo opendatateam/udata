@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import requests
 
@@ -235,7 +232,7 @@ def get_terms_content():
         # - this is only visible on terms
         response = requests.get(filename, timeout=5)
         response.raise_for_status()
-        return response.content
+        return response.text
     else:
         with open(filename) as terms:
             return terms.read()
