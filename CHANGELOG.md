@@ -7,6 +7,7 @@
 - Migration to Python 3.7 [#1766](https://github.com/opendatateam/udata/pull/1766)
 - The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
 - The targeted mongo version is now Mongo 3.6. Backward support is not guaranteed
+- Deprecated celery tasks have been removed, please ensure all old-style tasks (pre 1.6.20) have been consumed before migrating [#2452](https://github.com/opendatateam/udata/pull/2452)
 
 ### New features
 
