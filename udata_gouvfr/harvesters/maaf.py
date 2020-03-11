@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 import logging
 import re
 
 from collections import OrderedDict
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 import chardet
 
@@ -67,42 +64,42 @@ modalites-de-verification-du-certificat-de-l-igc-a-rsa-4096.html
 '''
 
 schema = Schema({
-    Optional('digest'): All(basestring, Length(min=1)),
+    Optional('digest'): All(str, Length(min=1)),
     'metadata': {
-        'author': basestring,
-        'author_email': Any(All(basestring, email), None),
+        'author': str,
+        'author_email': Any(All(str, email), None),
         'extras': [{
-            'key': basestring,
-            'value': basestring
+            'key': str,
+            'value': str
         }],
         'frequency': All(Lower, In(FREQUENCIES.keys())),
         'groups': Any(None, All(Lower, 'agriculture et alimentation')),
-        'id': basestring,
+        'id': str,
         'license_id': Any('fr-lo'),
-        'maintainer': Any(basestring, None),
-        'maintainer_email': Any(All(basestring, email), None),
-        'notes': All(basestring, normalize_string),
-        'organization': basestring,
+        'maintainer': Any(str, None),
+        'maintainer_email': Any(All(str, email), None),
+        'notes': All(str, normalize_string),
+        'organization': str,
         'private': boolean,
         'resources': All(force_list, [{
-            'name': basestring,
-            'description': All(basestring, normalize_string),
-            'format': All(basestring, Lower, Any('cle', 'csv', 'pdf', 'txt')),
-            Optional('last_modified'): All(basestring, to_date),
-            'url': All(basestring, is_url(full=True)),
+            'name': str,
+            'description': All(str, normalize_string),
+            'format': All(str, Lower, Any('cle', 'csv', 'pdf', 'txt')),
+            Optional('last_modified'): All(str, to_date),
+            'url': All(str, is_url(full=True)),
         }]),
-        'state': Any(basestring, None),
-        'supplier': basestring,
-        'tags': All(basestring, taglist),
+        'state': Any(str, None),
+        'supplier': str,
+        'tags': All(str, taglist),
         'temporal_coverage_from': None,
         'temporal_coverage_to': None,
         'territorial_coverage': {
             'territorial_coverage_code':
-            All(basestring, Lower, In(ZONES.keys())),
+            All(str, Lower, In(ZONES.keys())),
             'territorial_coverage_granularity':
-            All(basestring, Lower, In(GRANULARITIES.keys())),
+            All(str, Lower, In(GRANULARITIES.keys())),
         },
-        'title': basestring,
+        'title': str,
     },
 }, required=True, extra=True)
 
@@ -111,11 +108,11 @@ LIST_KEYS = 'extras', 'resources'
 
 
 def extract(element):
-    lst = filter(lambda r: isinstance(r[0], basestring), map(dictize, element))
+    lst = [r for r in map(dictize, element) if isinstance(r[0], str)]
     for key in LIST_KEYS:
-        values = [v for k, v in filter(lambda r: r[0] == key, lst)]
+        values = [v for k, v in [r for r in lst if r[0] == key]]
         if values:
-            lst = filter(lambda r: r[0] != key, lst) + [(key, values)]
+            lst = [r for r in lst if r[0] != key] + [(key, values)]
     return lst
 
 

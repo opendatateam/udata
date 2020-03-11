@@ -4,9 +4,9 @@ version: 2
 jobs:
   python:
     docker:
-      - image: udata/circleci
-      - image: mongo:3.2
-      - image: redis
+      - image: udata/circleci:2-alpine
+      - image: circleci/mongo:3.6-stretch-ram
+      - image: redis:alpine
       - image: udata/elasticsearch:2.4.5
     environment:
        BASH_ENV: /root/.bashrc
@@ -48,7 +48,8 @@ jobs:
 
   assets:
     docker:
-      - image: udata/circleci
+      # TODO make an image based on 2-alpine w/ nvm and phantom deps
+      - image: udata/circleci:py3
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -89,7 +90,7 @@ jobs:
 
   dist:
     docker:
-      - image: udata/circleci
+      - image: udata/circleci:2-alpine
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -122,20 +123,20 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci
+      - image: udata/circleci:2-alpine
     steps:
       - attach_workspace:
           at: .
       - run:
           name: Install Twine
-          command: pip install twine
+          command: pip3 install twine
       - deploy:
           name: Publish on PyPI
           command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   github:
     docker:
-      - image: udata/circleci
+      - image: udata/circleci:2-alpine
     environment:
        BASH_ENV: /root/.bashrc
     steps:

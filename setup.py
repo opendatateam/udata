@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
 import io
@@ -48,7 +47,7 @@ setup(
     author_email='pypi@data.gouv.fr',
     packages=find_packages(),
     include_package_data=True,
-    python_requires='==2.7.*',
+    python_requires='>=3.7',
     install_requires=pip('install.pip'),
     setup_requires=['setuptools>=38.6.0'],
     tests_require=pip('test.pip'),
@@ -83,8 +82,8 @@ setup(
         "Intended Audience :: Developers",
         "Topic :: System :: Software Distribution",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ('License :: OSI Approved :: GNU Library or Lesser General Public '
          'License (LGPL)'),

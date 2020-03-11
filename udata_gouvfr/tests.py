@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-import cgi
 import json
+
+from html import escape
 
 import pytest
 import pytz
@@ -725,7 +724,7 @@ class OEmbedsTerritoryAPITest:
 
             html = data['html']
             assert territory.title in html
-            assert cgi.escape(territory.url) in html
+            assert escape(territory.url) in html
             assert 'alt="{name}"'.format(name=organization.name) in html
             assert md(territory.description, source_tooltip=True) in html
             assert 'Download from local.test' in html
@@ -763,7 +762,7 @@ class OEmbedsTerritoryAPITest:
 
             html = data['html']
             assert territory.title in html
-            assert cgi.escape(territory.url) in html
+            assert escape(territory.url) in html
             assert 'alt="{name}"'.format(name=organization.name) in html
             assert md(territory.description, source_tooltip=True) in html
             assert 'Download from local.test' in html
@@ -799,7 +798,7 @@ class OEmbedsTerritoryAPITest:
 
             html = data['html']
             assert territory.title in html
-            assert cgi.escape(territory.url) in html
+            assert escape(territory.url) in html
             assert 'alt="{name}"'.format(name=organization.name) in html
             assert md(territory.description, source_tooltip=True) in html
             assert 'Download from local.test' in html
@@ -922,7 +921,7 @@ class SitemapTest:
                                 section=section, _external=True))
 
         for url in urls:
-            assert '<loc>{url}</loc>'.format(url=url) in response.data
+            assert '<loc>{url}</loc>'.format(url=url) in response.data.decode('utf-8')
 
 
 @pytest.mark.usefixtures('clean_db')

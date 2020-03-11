@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Migrate to python3 🐍 [#453](https://github.com/etalab/udata-gouvfr/pull/453)
 
 ## 1.6.13 (2019-12-13)
 
