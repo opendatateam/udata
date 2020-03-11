@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.0.0 (2020-03-11)
 
 - Migrate to python3 🐍 [#453](https://github.com/etalab/udata-gouvfr/pull/453)
