@@ -31,54 +31,54 @@ class Site(WithMetrics, db.Document):
     def __str__(self):
         return self.title or ''
     
-    @cached_property
-    def users_count(self):
+    def count_users(self):
         from udata.models import User
-        return User.objects.count()
+        self.metrics["users"] = User.objects.count()
+        self.save()
     
-    @cached_property
-    def org_count(self):
+    def count_org(self):
         from udata.models import Organization
-        return Organization.objects.visible().count()
+        self.metrics["organization"] = Organization.objects.visible().count()
+        self.save()
 
-    @cached_property
-    def datasets_count(self):
+    def count_datasets(self):
         from udata.models import Dataset
-        return Dataset.objects.visible().count()
+        self.metrics["datasets"] = Dataset.objects.visible().count()
+        self.save()
     
-    @cached_property
-    def resources_count(self):
-        return next(Dataset.objects.visible().aggregate(
+    def count_resources(self):
+        self.metrics["datasets"] = next(Dataset.objects.visible().aggregate(
             {'$project': {'resources': 1}},
             {'$unwind': '$resources' },
             {'$group': {'_id': 'result', 'count': {'$sum': 1}}}
         ), {}).get('count', 0)
+        self.save()
 
-    @cached_property
-    def reuses_count(self):
-        return Reuse.objects.visible().count()
+    def count_reuses(self):
+        self.metrics["reuses"] = Reuse.objects.visible().count()
+        self.save()
 
-    @cached_property
-    def folowers_count(self):
+    def count_followers(self):
         from udata.models import Follow
-        return Follow.objects(until=None).count()
+        self.metrics["followers"] = Follow.objects(until=None).count()
+        self.save()
     
-    @property
-    def discussion_count(self):
+    def count_discussion(self):
         from udata.models import Discussion
-        return Discussion.objects.count()
+        self.metrics["discussions"] = Discussion.objects.count()
+        self.save()
     
     @property
     def get_metrics(self):
         return {
-            "datasets": 34556,
-            "discussions": 5329,
-            "followers": 21757,
-            "organizations": 2514,
-            "public_services": 462,
-            "resources": 187202,
-            "reuses": 2032,
-            "users": 50458
+            "datasets": self.metrics.get("datasets", 0),
+            "discussions": self.metrics.get("discussions", 0),
+            "followers": self.metrics.get("followers", 0),
+            "organizations": self.metrics.get("organizations", 0),
+            "public_services": self.metrics.get("public_services", 0),
+            "resources": self.metrics.get("resources", 0),
+            "reuses": self.metrics.get("reuses", 0),
+            "users": self.metrics.get("users", 0)
         }
     
     @property

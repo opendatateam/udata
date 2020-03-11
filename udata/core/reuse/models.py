@@ -2,6 +2,7 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
+from elasticsearch_dsl import Integer, Object
 
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -67,6 +68,12 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         return self.title or ''
 
     __badges__ = {}
+
+    __search_metrics__ = Object(properties={
+        "datasets": Integer(),
+        "followers": Integer(),
+        "views": Integer()
+    })
 
     meta = {
         'indexes': ['-created_at', 'urlhash'] + db.Owned.meta['indexes'],
@@ -178,9 +185,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     def count_issues(self):
         from udata.models import Issue
-        print("IMG")
         self.metrics["issues"] = Issue.objects(subject=self, closed=None).count()
-        print(self.metrics["issues"])
         self.save()
 
     def count_followers(self):

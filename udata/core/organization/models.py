@@ -263,10 +263,8 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         self.save()
 
     def count_followers(self):
-        print("IN ORGA FOLLOWERS COUNT")
         from udata.models import Follow
         self.metrics["followers"] = Follow.objects.followers(self).count()
-        print(f"FOLLOWERS : {self.metrics['followers']}")
         self.save()
     
     @property

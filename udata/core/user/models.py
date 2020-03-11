@@ -8,6 +8,7 @@ from flask import url_for, current_app
 from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
+from elasticsearch_dsl import Integer, Object
 
 from werkzeug import cached_property
 
@@ -88,6 +89,13 @@ class User(WithMetrics, UserMixin, db.Document):
         'indexes': ['-created_at', 'slug', 'apikey'],
         'ordering': ['-created_at']
     }
+
+    __search_metrics__ = Object(properties={
+        "datasets": Integer(),
+        "reuses": Integer(),
+        "followers": Integer(),
+        "views": Integer()
+    })
 
     def __str__(self):
         return self.fullname
@@ -236,6 +244,32 @@ class User(WithMetrics, UserMixin, db.Document):
         Follow.objects(follower=self).delete()
         Follow.objects(following=self).delete()
         mail.send(_('Account deletion'), copied_user, 'account_deleted')
+
+    def count_datasets(self):
+        from udata.models import Dataset
+        self.metrics["datasets"] = Dataset.objects(owner=self).visible().count()
+        self.save()
+
+
+    def count_reuses(self):
+        from udata.models import Reuse
+        self.metrics["reuses"] = Reuse.objects(owner=self).count()
+        self.save()
+
+    def count_followers(self):
+        print("IN ORGA FOLLOWERS COUNT")
+        from udata.models import Follow
+        self.metrics["followers"] = Follow.objects.following(self).count()
+        print(f"FOLLOWERS : {self.metrics['followers']}")
+        self.save()
+    
+    @property
+    def get_metrics(self):
+        return {
+            "datasets": self.metrics.get("datasets", 0),
+            "reuses": self.metrics.get("reuses", 0),
+            "followers": self.metrics.get("followers", 0)
+        }
 
 
 # class UDataMongoEngineUserDatastore(MongoEngineUserDatastore):
