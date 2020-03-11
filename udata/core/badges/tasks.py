@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import warnings
-
-from udata import mail
-from udata.i18n import lazy_gettext as _
-from udata.models import Organization, CERTIFIED, PUBLIC_SERVICE
-=======
->>>>>>> master
 from udata.tasks import task, get_logger
 
 from .signals import on_badge_added

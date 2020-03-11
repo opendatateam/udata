@@ -69,14 +69,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install some tools
-          command: |
-            apk add --update ca-certificates openssl jq fontconfig-dev
-            update-ca-certificates
-            wget -q -O- "https://github.com/dustinblackman/phantomized/releases/download/2.1.1a/dockerized-phantomjs.tar.gz" | tar xz -C /
-            wget https://raw.githubusercontent.com/opendatateam/udata-dockers/2-alpine/circleci/.bashrc
-            . .bashrc
-      - run:
           name: Compute JS dependencies key
           command: cat .nvmrc package.json > js.deps
       - run:
@@ -88,8 +80,8 @@ jobs:
             - js-cache-{{ arch }}-{{ .Branch }}
             - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
-          name: Install  dependencies
-          command: npm install
+          name: Install NodeJS and dependencies
+          command: nvm install && npm install
       - save_cache:
           key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:
