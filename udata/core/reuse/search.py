@@ -13,8 +13,6 @@ from udata.search import (
 from udata.search.analysis import simple
 from udata.utils import to_iso_datetime
 
-from . import metrics  # noqa: Metrics are require for reuse search
-
 
 __all__ = ('ReuseSearch', )
 lazy = lazy_config('reuse')

@@ -268,6 +268,7 @@ class User(WithMetrics, UserMixin, db.Document):
         return {
             "datasets": self.metrics.get("datasets", 0),
             "reuses": self.metrics.get("reuses", 0),
+            "following": self.metrics.get("following", 0),
             "followers": self.metrics.get("followers", 0)
         }
 

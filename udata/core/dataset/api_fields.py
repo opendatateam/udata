@@ -69,7 +69,8 @@ resource_fields = api.model('Resource', {
     'last_modified': fields.ISODateTime(
         attribute='modified', readonly=True,
         description='The resource last modification date'),
-    'metrics': fields.Raw(description='The resource metrics', readonly=True),
+    'metrics': fields.Raw(
+        description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
     'preview_url': fields.String(description='An optional preview URL to be '
                                  'loaded as a standalone page (ie. iframe or '
