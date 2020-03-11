@@ -21,8 +21,6 @@ from udata.search.fields import (
 )
 from udata.utils import to_iso_datetime
 
-# Metrics are require for dataset search
-from . import metrics  # noqa
 
 __all__ = ('DatasetSearch', )
 

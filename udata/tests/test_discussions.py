@@ -350,7 +350,7 @@ class DiscussionsTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
-        self.assertEqual(dataset.metrics['discussions'], 1)
+        self.assertEqual(dataset.get_metrics['discussions'], 1)
 
     def test_delete_discussion(self):
         self.app.config['USE_METRICS'] = True
@@ -431,7 +431,7 @@ class DiscussionsTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to delete the discussion.
-        self.assertEqual(dataset.metrics['discussions'], 1)
+        self.assertEqual(dataset.get_metrics['discussions'], 1)
 
     def test_delete_discussion_comment_permissions(self):
         dataset = Dataset.objects.create(title='Test dataset')

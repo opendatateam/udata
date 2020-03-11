@@ -3,7 +3,6 @@ from datetime import date
 from flask import url_for
 
 from udata.core.site.models import Site
-from udata.core.site.metrics import SiteMetric
 from udata.core.site.models import current_site
 from udata.core.site.factories import SiteFactory
 from udata.core.dataset.factories import VisibleDatasetFactory
@@ -11,15 +10,6 @@ from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.user.factories import AdminFactory
 
 from udata.tests.api import APITestCase
-
-
-class FakeSiteMetric(SiteMetric):
-    name = 'fake-site-metric'
-    display_name = 'Fake site metric'
-    default = 0
-
-    def get_value(self):
-        return 2
 
 
 class MetricsAPITest(APITestCase):

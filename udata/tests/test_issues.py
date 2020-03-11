@@ -329,7 +329,7 @@ class IssuesTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
-        self.assertEqual(dataset.metrics['issues'], 1)
+        self.assertEqual(dataset.get_metrics['issues'], 1)
 
 
 class IssueCsvTest(FrontTestCase):
