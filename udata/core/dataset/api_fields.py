@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -49,10 +46,10 @@ resource_fields = api.model('Resource', {
     'filetype': fields.String(
         description=('Whether the resource is an uploaded file, '
                      'a remote file or an API'),
-        required=True, enum=RESOURCE_FILETYPES.keys()),
+        required=True, enum=list(RESOURCE_FILETYPES)),
     'type': fields.String(
         description=('Resource type (documentation, API...)'),
-        required=True, enum=RESOURCE_TYPES.keys()),
+        required=True, enum=list(RESOURCE_TYPES)),
     'format': fields.String(description='The resource format', required=True),
     'url': fields.String(description='The resource URL', required=True),
     'latest': fields.String(description='The permanent URL redirecting to '
@@ -159,7 +156,7 @@ dataset_fields = api.model('Dataset', {
             description='The dataset community submitted resources')),
     'frequency': fields.String(
         description='The update frequency', required=True,
-        enum=UPDATE_FREQUENCIES.keys(), default=DEFAULT_FREQUENCY),
+        enum=list(UPDATE_FREQUENCIES), default=DEFAULT_FREQUENCY),
     'frequency_date': fields.ISODateTime(
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),

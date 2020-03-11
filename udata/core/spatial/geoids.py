@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 '''
 This module centralize GeoID resources and helpers.
 
 See https://github.com/etalab/geoids for more details
 '''
-from __future__ import unicode_literals
+
 
 from datetime import date, datetime
 
@@ -44,7 +43,7 @@ def build(level, code, validity=None):
     spatial = ':'.join((level, code))
     if not validity:
         return spatial
-    elif isinstance(validity, basestring):
+    elif isinstance(validity, str):
         return '@'.join((spatial, validity))
     elif isinstance(validity, datetime):
         return '@'.join((spatial, validity.date().isoformat()))

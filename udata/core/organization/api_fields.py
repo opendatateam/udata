@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 
@@ -38,7 +35,7 @@ request_fields = api.model('MembershipRequest', {
         description='The request creation date', readonly=True),
     'status': fields.String(
         description='The current request status', required=True,
-        enum=MEMBERSHIP_STATUS.keys()),
+        enum=list(MEMBERSHIP_STATUS)),
     'comment': fields.String(
         description='A request comment from the user', required=True),
 })
@@ -47,7 +44,7 @@ member_fields = api.model('Member', {
     'user': fields.Nested(user_ref_fields),
     'role': fields.String(
         description='The member role in the organization', required=True,
-        enum=ORG_ROLES.keys(), default=DEFAULT_ROLE)
+        enum=list(ORG_ROLES), default=DEFAULT_ROLE)
 })
 
 org_fields = api.model('Organization', {

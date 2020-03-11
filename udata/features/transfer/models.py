@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 
 from datetime import datetime
@@ -25,7 +22,7 @@ class Transfer(db.Document):
     recipient = db.GenericReferenceField(required=True)
     subject = db.GenericReferenceField(required=True)
     comment = db.StringField()
-    status = db.StringField(choices=TRANSFER_STATUS.keys(), default='pending')
+    status = db.StringField(choices=list(TRANSFER_STATUS), default='pending')
 
     created = db.DateTimeField(default=datetime.now, required=True)
 

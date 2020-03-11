@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import warnings
 
 from celery import chord
@@ -43,7 +40,7 @@ def harvest_job_item(job_id, item_id):
     Backend = backends.get(current_app, job.source.backend)
     backend = Backend(job)
 
-    item = filter(lambda i: i.remote_id == item_id, job.items)[0]
+    item = next(i for i in job.items if i.remote_id == item_id)
 
     backend.process_item(item)
     return item_id

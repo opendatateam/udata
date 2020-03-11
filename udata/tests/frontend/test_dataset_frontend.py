@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from datetime import datetime
 
 import feedparser
@@ -87,7 +84,7 @@ class DatasetBlueprintTest(FrontTestCase):
         dataset = DatasetFactory(license=license,
                                  tags=['foo', 'bar'],
                                  resources=[resource],
-                                 description='a&éèëù$£',
+                                 description='a&éèëù$£<>\'"',
                                  owner=UserFactory(),
                                  extras={'foo': 'bar'})
         community_resource = CommunityResourceFactory(
@@ -103,7 +100,7 @@ class DatasetBlueprintTest(FrontTestCase):
         self.assertEqual(json_ld['@context'], 'http://schema.org')
         self.assertEqual(json_ld['@type'], 'Dataset')
         self.assertEqual(json_ld['@id'], str(dataset.id))
-        self.assertEqual(json_ld['description'], 'a&amp;éèëù$£')
+        self.assertEqual(json_ld['description'], 'a&amp;éèëù$£&lt;&gt;&apos;&quot;')
         self.assertEqual(json_ld['alternateName'], dataset.slug)
         self.assertEqual(json_ld['dateCreated'][:16],
                           dataset.created_at.isoformat()[:16])

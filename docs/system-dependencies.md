@@ -2,8 +2,7 @@
 
 ## Python requirements
 
-udata requires [Python][] 2.7 (installed by default on OSX and many Linux distributions),
-its development tools and some libraries to be installed (with their headers).
+udata requires [Python][] 3.6, its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:
 
@@ -51,7 +50,7 @@ $ brew install automake autoconf libtool pkg-config python \
 
 ## MongoDB, ElasticSearch and Redis
 
-The project depends on [MongoDB][] 3.2+, [ElasticSearch][] 2.4 and [Redis][]
+The project depends on [MongoDB][] 3.6+, [ElasticSearch][] 2.4 and [Redis][]
 (beware of the version, it will not work well if they are not respected).
 
 Elasticsearch requires the [Analysis ICU][analysis-icu] plugin for your specific version.
@@ -73,7 +72,7 @@ On Debian Jessie (cf [mongo-install-instructions][] for other versions), as root
 
 ```
 $ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.2 main" > /etc/apt/sources.list.d/mongodb-org-3.2.list
+$ echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" > /etc/apt/sources.list.d/mongodb-org-3.6.list
 $ apt-get update
 $ apt-get install -y mongodb-org
 $ service mongod start
@@ -121,5 +120,5 @@ $ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
 [analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu
-[mongo-install-instructions]: https://docs.mongodb.com/v3.2/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
+[mongo-install-instructions]: https://docs.mongodb.com/v3.6/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
 [elastic-install-instructions]: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/setup-repositories.html#_apt

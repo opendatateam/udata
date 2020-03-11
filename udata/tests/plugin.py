@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 import shlex
 import sys
 
 from contextlib import contextmanager
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from flask import json, template_rendered, url_for
 from flask.testing import FlaskClient
@@ -134,6 +131,13 @@ def drop_db(app):
 def clean_db(app):
     drop_db(app)
     yield
+
+
+@pytest.fixture(name='db')
+def raw_db(app, clean_db):
+    '''Access to raw PyMongo DB client'''
+    from mongoengine.connection import get_db
+    yield get_db()
     drop_db(app)
 
 

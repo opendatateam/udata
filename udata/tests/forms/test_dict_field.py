@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import date, datetime
-from uuid import UUID
 
 from werkzeug.datastructures import MultiDict
 

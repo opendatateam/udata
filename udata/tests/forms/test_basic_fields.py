@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from werkzeug.datastructures import MultiDict
 
 from udata.forms import Form, fields

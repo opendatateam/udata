@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import json
 import re
 import pytest
@@ -19,9 +16,9 @@ class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
         # In the pattern below, we extract the content of the JSON-LD script
         # The first ? is used to name the extracted string
         # The second ? is used to express the non-greediness of the extraction
-        pattern = ('<script id="json_ld" type="application/ld\+json">'
-                   '(?P<json_ld>[\s\S]*?)'
-                   '</script>')
+        pattern = (r'<script id="json_ld" type="application/ld\+json">'
+                   r'(?P<json_ld>[\s\S]*?)'
+                   r'</script>')
         data = response.data.decode('utf8')
         search = re.search(pattern, data)
         self.assertIsNotNone(search, (pattern, data))

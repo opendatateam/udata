@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import factory
 import pytest
 
@@ -50,7 +47,7 @@ class FactoryBackend(backends.BaseBackend):
     name = 'factory'
     filters = (
         backends.HarvestFilter('Test', 'test', int, 'An integer'),
-        backends.HarvestFilter('Tag', 'tag', basestring),
+        backends.HarvestFilter('Tag', 'tag', str),
     )
     features = (
         backends.HarvestFeature('test', 'Test'),

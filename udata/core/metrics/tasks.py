@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import warnings
 
@@ -88,8 +85,8 @@ def bump_metrics(self):
         }}
     )
     # Use underlying PyMongo insert for bulk insertion from generator
-    ids = Metrics.objects._collection.insert(new_metrics)
-    log.info('Processed %s document(s)', len(ids))
+    result = Metrics.objects._collection.insert_many(new_metrics)
+    log.info('Processed %s document(s)', len(result.inserted_ids))
 
 
 def update_metrics_for(obj):

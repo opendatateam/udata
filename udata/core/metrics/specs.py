@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 
 from datetime import date, datetime
@@ -29,7 +26,7 @@ class MetricMetaClass(type):
         return new_class
 
 
-class Metric(object):
+class Metric(metaclass=MetricMetaClass):
     model = None
     name = None
     display_name = None
@@ -37,8 +34,6 @@ class Metric(object):
     default = 0
     value_type = int
     archived = True
-
-    __metaclass__ = MetricMetaClass
 
     def __init__(self, target):
         '''Apply these metrics on a given target object instance'''
@@ -83,7 +78,7 @@ class Metric(object):
         return last.values[self.name]
 
     def iso(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value
         elif isinstance(value, datetime):
             return value.date().isoformat()

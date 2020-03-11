@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import request, redirect, abort, g, json
 from flask.views import MethodView
 
@@ -181,7 +178,7 @@ class DetailView(SingleObject, Templated, BaseView):
         context = super(DetailView, self).get_context()
 
         if hasattr(self.object, 'json_ld'):
-            context['json_ld'] = json.dumps(self.object.json_ld)
+            context['json_ld'] = self.object.json_ld
         return context
 
 

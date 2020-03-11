@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 from datetime import datetime
 
@@ -30,7 +27,7 @@ def archive(dataset, comment=False):
                 message = Message(content=msg, posted_by=user_id)
                 discussion = Discussion(
                     user=user_id, discussion=[message], subject=dataset,
-                    title=title)
+                    title=str(title))
                 discussion.save()
         else:
             log.warning('ARCHIVE_COMMENT_USER_ID not set, skipping comment')

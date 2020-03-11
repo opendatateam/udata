@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 
 import requests
@@ -95,7 +92,7 @@ class DcatBackend(BaseBackend):
         data = item.kwargs.get('graph', self.job.data['graph'])  # handles legacy graphs
         node = None
 
-        graph.parse(data=data, format='json-ld')
+        graph.parse(data=bytes(data), format='json-ld')
 
         if 'nid' in item.kwargs and 'type' in item.kwargs:
             nid = item.kwargs['nid']

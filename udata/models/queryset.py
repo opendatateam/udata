@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import logging
 
 from bson import ObjectId, DBRef
@@ -82,7 +80,7 @@ class UDataQuerySet(BaseQuerySet):
             if isinstance(value, (list, tuple)) and len(value) == 1:
                 value = value[0]
             if isinstance(value, (list, tuple)):
-                if all(isinstance(v, basestring) for v in value):
+                if all(isinstance(v, str) for v in value):
                     ids = [ObjectId(v) for v in value]
                     query['{0}._ref.$id'.format(key)] = {'$in': ids}
                 elif all(isinstance(v, DBRef) for v in value):
@@ -91,7 +89,7 @@ class UDataQuerySet(BaseQuerySet):
                     query['{0}._ref.$id'.format(key)] = {'$in': value}
             elif isinstance(value, ObjectId):
                 query['{0}._ref.$id'.format(key)] = value
-            elif isinstance(value, basestring):
+            elif isinstance(value, str):
                 query['{0}._ref.$id'.format(key)] = ObjectId(value)
             else:
                 self.error('expect a list of string, ObjectId or DBRef')

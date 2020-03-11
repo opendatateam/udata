@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from elasticsearch_dsl import Completion
 
 from flask import current_app

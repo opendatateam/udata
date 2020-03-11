@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
-
 from udata.auth import Permission, UserNeed
 
 from udata.models import User, Organization

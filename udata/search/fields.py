@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import re
 
@@ -44,7 +41,7 @@ def obj_to_string(obj):
         return None
     elif isinstance(obj, bytes):
         return obj.decode('utf-8')
-    elif isinstance(obj, basestring):
+    elif isinstance(obj, str):
         return obj
     elif is_lazy_string(obj):
         return obj.value
@@ -61,7 +58,7 @@ class Facet(object):
 
     def labelize(self, value):
         labelize = self.labelizer or self.default_labelizer
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             labels = (labelize(v) for v in value.split(OR_SEPARATOR))
             labels = (obj_to_string(l) for l in labels)
             labels = (l for l in labels if l)
@@ -217,7 +214,7 @@ class RangeFacet(Facet, DSLRangeFacet):
         return self.labels.get(value, value)
 
     def as_request_parser_kwargs(self):
-        return {'type': self.validate_parameter, 'choices': self.labels.keys()}
+        return {'type': self.validate_parameter, 'choices': list(self.labels)}
 
     def validate_parameter(self, value):
         if value not in self.labels:
@@ -279,7 +276,7 @@ class TemporalCoverageFacet(Facet, DSLFacet):
         }
 
     def validate_parameter(self, value):
-        if not isinstance(value, basestring) \
+        if not isinstance(value, str) \
                 or not RE_TIME_COVERAGE.match(value):
             msg = '"{0}" does not match YYYY-MM-DD-YYYY-MM-DD'.format(value)
             raise ValueError(msg)

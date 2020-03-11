@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pkg_resources
 
 from kombu import Exchange, Queue
@@ -55,6 +52,7 @@ class Defaults(object):
     CELERY_WORKER_HIJACK_ROOT_LOGGER = False
     CELERY_BEAT_SCHEDULER = 'udata.tasks.Scheduler'
     CELERY_MONGODB_SCHEDULER_COLLECTION = "schedules"
+    CELERY_MONGODB_SCHEDULER_CONNECTION_ALIAS = "udata_scheduler"
 
     # Default celery routing
     CELERY_TASK_DEFAULT_QUEUE = 'default'
@@ -86,12 +84,12 @@ class Defaults(object):
     SECURITY_RECOVERABLE = True
     SECURITY_CHANGEABLE = True
 
-    SECURITY_PASSWORD_HASH = b'bcrypt'
+    SECURITY_PASSWORD_HASH = 'bcrypt'
 
-    SECURITY_PASSWORD_SALT = b'Default uData secret password salt'
-    SECURITY_CONFIRM_SALT = b'Default uData secret confirm salt'
-    SECURITY_RESET_SALT = b'Default uData secret reset salt'
-    SECURITY_REMEMBER_SALT = b'Default uData remember salt'
+    SECURITY_PASSWORD_SALT = 'Default uData secret password salt'
+    SECURITY_CONFIRM_SALT = 'Default uData secret confirm salt'
+    SECURITY_RESET_SALT = 'Default uData secret reset salt'
+    SECURITY_REMEMBER_SALT = 'Default uData remember salt'
 
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
@@ -152,27 +150,61 @@ class Defaults(object):
         'blockquote',
         'code',
         'dd',
+        'del',
         'dl',
         'dt',
         'em',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'hr',
         'i',
+        'img',
         'li',
         'ol',
+        'p',
         'pre',
         'small',
+        'span',
         'strong',
         'ul',
         'sup',
         'sub',
+        'table',
+        'td',
+        'th',
+        'tr',
+        'tbody',
+        'thead',
+        'tfooter',
+        # 'title',
     ]
 
     MD_ALLOWED_ATTRIBUTES = {
-        'a': ['href', 'title'],
+        'a': ['href', 'title', 'rel', 'data-tooltip'],
         'abbr': ['title'],
         'acronym': ['title'],
     }
 
     MD_ALLOWED_STYLES = []
+
+    # Extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-
+    MD_FILTERED_TAGS = [
+        'title',
+        'textarea',
+        'style',
+        'xmp',
+        'iframe',
+        'noembed',
+        'noframes',
+        'script',
+        'plaintext',
+    ]
+
+    MD_ALLOWED_PROTOCOLS = ['http', 'https', 'ftp', 'ftps']
 
     # Tags constraints
     TAG_MIN_LENGTH = 3
@@ -412,6 +444,9 @@ class Defaults(object):
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
     TESTING = True
+    # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f  # noqa
+    # this keeps our legacy tests from failing, we should probably fix the tests instead someday
+    PROPAGATE_EXCEPTIONS = False
     SEND_MAIL = False
     WTF_CSRF_ENABLED = False
     AUTO_INDEX = False

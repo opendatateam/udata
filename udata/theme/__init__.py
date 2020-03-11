@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import logging
 import os
 import pkg_resources
@@ -76,7 +73,8 @@ class ConfigurableTheme(Theme):
     def __init__(self, entrypoint):
         self.entrypoint = entrypoint
         # Compute path without loading the module
-        path = pkgutil.get_loader(entrypoint.module_name).filename
+        path = pkgutil.get_loader(entrypoint.module_name).path
+        path = os.path.dirname(path)
         super(ConfigurableTheme, self).__init__(path)
 
         self.variants = self.info.get('variants', [])

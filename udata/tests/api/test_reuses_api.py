@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import pytest
 
 from datetime import datetime
@@ -361,7 +358,7 @@ class ReuseBadgeAPITest:
     def test_create_2nd(self, api):
         # Explicitely setting the kind to avoid collisions given the
         # small number of choices for kinds.
-        kinds_keys = Reuse.__badges__.keys()
+        kinds_keys = list(Reuse.__badges__)
         self.reuse.add_badge(kinds_keys[0])
         data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]

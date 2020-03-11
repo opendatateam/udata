@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import request
 from flask_security import current_user, logout_user
 
@@ -41,7 +38,7 @@ me = api.namespace('me', 'Connected user related operations')
 search_parser = UserSearch.as_request_parser()
 filter_parser = api.parser()
 filter_parser.add_argument(
-    'q', type=unicode, help='The string to filter items',
+    'q', type=str, help='The string to filter items',
     location='args', required=False)
 
 

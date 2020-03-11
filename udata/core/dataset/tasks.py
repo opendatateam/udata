@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
+import collections
 import os
 
-from compiler.ast import flatten
 from datetime import datetime, timedelta
-from sets import Set
 from tempfile import NamedTemporaryFile
 
 from celery.utils.log import get_task_logger
@@ -24,6 +20,14 @@ from udata.tasks import job
 from .models import Dataset, Resource, UPDATE_FREQUENCIES, Checksum
 
 log = get_task_logger(__name__)
+
+
+def flatten(iterable):
+    for el in iterable:
+        if isinstance(el, collections.Iterable) and not isinstance(el, str):
+            yield from flatten(el)
+        else:
+            yield el
 
 
 @job('purge-datasets')
@@ -70,7 +74,7 @@ def send_frequency_reminder(self):
                 outdated_datasets.append(dataset)
         if outdated_datasets:
             reminded_orgs[org] = outdated_datasets
-    for reminded_org, datasets in reminded_orgs.iteritems():
+    for reminded_org, datasets in reminded_orgs.items():
         print('{org.name} will be emailed for {datasets_nb} datasets'.format(
               org=reminded_org, datasets_nb=len(datasets)))
         recipients = [m.user for m in reminded_org.members]
@@ -80,10 +84,10 @@ def send_frequency_reminder(self):
                   org=reminded_org, datasets=datasets)
 
     print('{nb_orgs} orgs concerned'.format(nb_orgs=len(reminded_orgs)))
-    reminded_people = flatten(reminded_people)
+    reminded_people = list(flatten(reminded_people))
     print('{nb_emails} people contacted ({nb_emails_twice} twice)'.format(
         nb_emails=len(reminded_people),
-        nb_emails_twice=len(reminded_people) - len(Set(reminded_people))))
+        nb_emails_twice=len(reminded_people) - len(set(reminded_people))))
     print('Done')
 
 
@@ -121,7 +125,8 @@ def store_resource(csvfile, model, dataset):
     filename = 'export-%s-%s.csv' % (model, timestr)
     prefix = '/'.join((dataset.slug, timestr))
     storage = storages.resources
-    stored_filename = storage.save(csvfile, prefix=prefix, filename=filename)
+    with open(csvfile.name) as infile:
+        stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
     checksum = r_info.pop('checksum')
     algo, checksum = checksum.split(':', 1)
@@ -148,14 +153,13 @@ def export_csv_for_model(model, dataset):
 
     log.info('Exporting CSV for %s...' % model)
 
-    csvfile = NamedTemporaryFile(delete=False)
+    csvfile = NamedTemporaryFile(mode='w', encoding='utf8', delete=False)
     try:
         # write adapter results into a tmp file
         writer = csv.get_writer(csvfile)
         writer.writerow(adapter.header())
         for row in adapter.rows():
             writer.writerow(row)
-        csvfile.seek(0)
         # make a resource from this tmp file
         created, resource = store_resource(csvfile, model, dataset)
         # add it to the dataset

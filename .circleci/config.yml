@@ -4,9 +4,9 @@ version: 2
 jobs:
   python:
     docker:
-      - image: udata/circleci
-      - image: mongo:3.2
-      - image: redis
+      - image: udata/circleci:2-alpine
+      - image: circleci/mongo:3.6-stretch-ram
+      - image: redis:alpine
       - image: udata/elasticsearch:2.4.5
     environment:
        BASH_ENV: /root/.bashrc
@@ -20,9 +20,9 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py-cache-{{ arch }}-{{ checksum "python.deps" }}
-          - py-cache-{{ arch }}-{{ .Branch }}
-          - py-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py3-cache-v6-{{ arch }}-{{ checksum "python.deps" }}
+          - py3-cache-v6-{{ arch }}-{{ .Branch }}
+          - py3-cache-v6-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
@@ -31,11 +31,11 @@ jobs:
             pip install -e . || pip install -e .
             pip install -r requirements/circleci.pip
       - save_cache:
-          key: py-cache-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v6-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py-cache-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v6-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
@@ -62,7 +62,8 @@ jobs:
 
   assets:
     docker:
-      - image: udata/circleci
+      # TODO make an image based on 2-alpine w/ nvm and phantom deps
+      - image: udata/circleci:py3
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -93,7 +94,6 @@ jobs:
           name: Execute Karma tests
           command: |
             mkdir -p reports/karma
-            nvm use
             REPORT_DIR=reports/karma npm -s run test:unit -- --reporters mocha,junit
       - store_test_results:
           path: reports/karma
@@ -103,7 +103,6 @@ jobs:
       - run:
           name: Compile assets
           command: |
-            nvm use
             npm run assets:build
             npm run widgets:build
             npm run oembed:build
@@ -116,7 +115,7 @@ jobs:
 
   dist:
     docker:
-      - image: udata/circleci
+      - image: udata/circleci:2-alpine
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -127,8 +126,6 @@ jobs:
           name: Build a distributable package
           command: |
             source venv/bin/activate
-            # Check long description renders properly
-            python setup.py check -m -s
             # Build a wheel release
             if [[ $CIRCLE_TAG ]]; then
                 # This is a tagged release
@@ -149,39 +146,25 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci
+      - image: udata/circleci:2-alpine
     steps:
       - attach_workspace:
           at: .
-      - run:
-          name: Install Twine
-          command: pip install twine
       - deploy:
           name: Publish on PyPI
-          command: twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+          command: |
+            pip install twine
+            twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
   github:
     docker:
-      - image: udata/circleci
+      - image: apihackers/ghr
     steps:
       - attach_workspace:
           at: .
       - run:
           name: Upload github release
-          command: |
-            path=$(set -- dist/*.whl; echo "$1")
-            filename=$(basename $path)
-            RELEASE_URL="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/releases/tags/$CIRCLE_TAG"
-            RELEASE_DATA=$(curl -fsSL $RELEASE_URL)
-            RELEASE_PAGE_URL=$(jq -r '.html_url' <<< $RELEASE_DATA)
-            UPLOAD_URL=$(jq -r '.upload_url' <<< $RELEASE_DATA)
-            UPLOAD_URL="$(sed 's/{.*}/?name=/' <<< $UPLOAD_URL)$filename"
-            curl --request POST \
-                --data-binary @$path \
-                --header "Authorization: token $GITHUB_OAUTH_TOKEN" \
-                --header "Content-Type: application/zip" \
-                $UPLOAD_URL
-            echo "Wheel upload to release $RELEASE_PAGE_URL"
+          command: -t ${GITHUB_OAUTH_TOKEN} ${CIRCLE_TAG} dist
 
 workflows:
   version: 2
@@ -197,6 +180,7 @@ workflows:
                 - /pyup-update-.+/
                 - /renovate\/.+/
                 - l10n_master
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - assets:
@@ -209,6 +193,7 @@ workflows:
                 - /pyup-update-.+/
                 - /renovate\/.+/
                 - l10n_master
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - dist:
@@ -224,6 +209,7 @@ workflows:
                 - /pyup-update-.+/
                 - /renovate\/.+/
                 - l10n_master
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
       - publish:
@@ -234,6 +220,7 @@ workflows:
               only:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
+                - /py3(-.*)?/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
           context: org-global

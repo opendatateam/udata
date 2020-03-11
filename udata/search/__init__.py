@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import bson
 import datetime
 import logging
@@ -33,7 +30,7 @@ class EsJSONSerializer(AttrJSONSerializer):
     # TODO: find a way to reuse UDataJsonEncoder?
     def default(self, data):
         if is_lazy_string(data):
-            return unicode(data)
+            return str(data)
         elif isinstance(data, bson.objectid.ObjectId):
             return str(data)
         elif isinstance(data, datetime.datetime):
@@ -169,7 +166,7 @@ def unindex(obj, id=None):
             DeprecationWarning
         )
         model = obj.__class__
-        id = obj.pk if isinstance(obj.pk, basestring) else str(obj.pk)
+        id = obj.pk if isinstance(obj.pk, str) else str(obj.pk)
     adapter_class = adapter_catalog.get(model)
     if adapter_class.exists(id, using=es.client, index=es.index_name):
         log.info('Unindexing %s (%s)', model.__name__, id)
@@ -219,7 +216,7 @@ def facets_for(adapter, params):
     facets = params.pop('facets', [])
     if not adapter.facets:
         return []
-    if isinstance(facets, basestring):
+    if isinstance(facets, str):
         facets = [facets]
     if facets is True or 'all' in facets:
         return adapter.facets.keys()

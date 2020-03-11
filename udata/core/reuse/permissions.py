@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.auth import Permission, UserNeed
 
 from udata.core.organization.permissions import (

@@ -2,7 +2,20 @@
 
 ## Current (in progress)
 
-- Nothing yet
+### Breaking changes
+
+- Migration to Python 3.7 [#1766](https://github.com/opendatateam/udata/pull/1766)
+- The new migration system ([#1956](https://github.com/opendatateam/udata/pull/1956)) uses a new python based format. Pre-2.0 migrations are not compatible so you might need to upgrade to the latest `udata` version `<2.0.0`, execute migrations and then upgrade to `udata` 2+.
+- The targeted mongo version is now Mongo 3.6. Backward support is not guaranteed
+
+### New features
+
+- New migration system [#1956](https://github.com/opendatateam/udata/pull/1956):
+  - Use python based migrations instead of relying on mongo internal and deprecated `js_exec`
+  - Handle rollback (optionnal)
+  - Detailled history
+- Template hooks generalization: allows to dynamically extend template with widgets and snippets from extensions. See [the dedicated documentation section](https://udata.readthedocs.io/en/stable/extending/#hooks) [#2323](https://github.com/opendatateam/udata/pull/2323)
+- Markdown now supports [Github Flavored Markdown (GFM) specs](https://github.github.com/gfm/) (ie. the already supported [CommonMark specs](https://spec.commonmark.org) plus tables, strikethrough, autolinks support and predefined disallowed raw HTML) [#2341](https://github.com/opendatateam/udata/pull/2341)
 
 ## 1.6.20 (2020-01-21)
 

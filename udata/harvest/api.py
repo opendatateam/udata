@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from flask import request
 
 from udata.api import api, API, fields
@@ -41,7 +38,7 @@ item_fields = api.model('HarvestItem', {
                              allow_null=True),
     'status': fields.String(description='The item status',
                             required=True,
-                            enum=HARVEST_ITEM_STATUS.keys()),
+                            enum=list(HARVEST_ITEM_STATUS)),
     'created': fields.ISODateTime(description='The item creation date',
                                   required=True),
     'started': fields.ISODateTime(description='The item start date'),
@@ -62,7 +59,7 @@ job_fields = api.model('HarvestJob', {
     'started': fields.ISODateTime(description='The job start date'),
     'ended': fields.ISODateTime(description='The job end date'),
     'status': fields.String(description='The job status',
-                            required=True, enum=HARVEST_JOB_STATUS.keys()),
+                            required=True, enum=list(HARVEST_JOB_STATUS)),
     'errors': fields.List(fields.Nested(error_fields),
                           description='The job initialization errors'),
     'items': fields.List(fields.Nested(item_fields),
@@ -75,7 +72,7 @@ job_page_fields = api.model('HarvestJobPage', fields.pager(job_fields))
 
 validation_fields = api.model('HarvestSourceValidation', {
     'state': fields.String(description='Is it validated or not',
-                           enum=VALIDATION_STATES.keys(),
+                           enum=list(VALIDATION_STATES),
                            required=True),
     'by': fields.Nested(user_ref_fields, allow_null=True, readonly=True,
                         description='Who performed the validation'),

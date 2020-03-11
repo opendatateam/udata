@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 '''
 OAuth 2 serveur implementation based on Authlib.
 
@@ -81,9 +79,6 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         'collection': 'oauth2_client'
     }
 
-    def __unicode__(self):
-        return self.name
-
     @property
     def client_id(self):
         return str(self.id)
@@ -141,7 +136,7 @@ class OAuth2Grant(db.Document):
         'collection': 'oauth2_grant'
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return '<OAuth2Grant({0.client.name}, {0.user.fullname})>'.format(self)
 
     def is_expired(self):
@@ -159,7 +154,7 @@ class OAuth2Token(db.Document):
     user = db.ReferenceField('User')
 
     # currently only bearer is supported
-    token_type = db.StringField(choices=TOKEN_TYPES.keys(), default='Bearer')
+    token_type = db.StringField(choices=list(TOKEN_TYPES), default='Bearer')
 
     access_token = db.StringField(unique=True)
     refresh_token = db.StringField(unique=True, sparse=True)
@@ -171,7 +166,7 @@ class OAuth2Token(db.Document):
         'collection': 'oauth2_token'
     }
 
-    def __unicode__(self):
+    def __str__(self):
         return '<OAuth2Token({0.client.name})>'.format(self)
 
     def get_scope(self):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''
 TODO: We need to cleanup and give more coherence to these APIs
 - upload enpoints should be singular instead of plural
@@ -17,7 +16,7 @@ These changes might lead to backward compatibility breakage meaning:
 - new API version
 - admin changes
 '''
-from __future__ import unicode_literals
+
 import os
 import logging
 from datetime import datetime

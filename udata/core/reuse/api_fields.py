@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from udata.api import api, fields, base_reference
 
 from udata.core.badges.api import badge_fields
-from udata.core.dataset.api_fields import dataset_fields, dataset_ref_fields
+from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
@@ -19,7 +16,7 @@ reuse_fields = api.model('Reuse', {
     'slug': fields.String(
         description='The reuse permalink string', readonly=True),
     'type': fields.String(
-        description='The reuse type', required=True, enum=REUSE_TYPES.keys()),
+        description='The reuse type', required=True, enum=list(REUSE_TYPES)),
     'url': fields.String(
         description='The reuse remote URL (website)', required=True),
     'description': fields.Markdown(

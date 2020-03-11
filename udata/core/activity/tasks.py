@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import warnings
 import logging
 
 from udata.models import db, User, Organization
-from udata.tasks import task
+from udata.tasks import task, celery
 
 from .signals import new_activity
 

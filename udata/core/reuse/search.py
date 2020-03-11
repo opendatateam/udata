@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
 
 from udata.i18n import lazy_gettext as _
