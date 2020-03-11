@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.0.0 (2020-03-11)
 
 ### Breaking changes
 
