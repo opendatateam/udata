@@ -35,10 +35,6 @@
     <div class="row">
         <resource-list :dataset="dataset" class="col-xs-12"></resource-list>
     </div>
-    <div class="row">
-        <chart-widget id="trafic" class="col-xs-12" :title="_('Audience')"
-            :metrics="metrics" x="date" :y="y"></chart-widget>
-    </div>
 
     <div class="row">
         <reuse-list id="reuses" class="col-xs-12" :reuses="reuses"></reuse-list>

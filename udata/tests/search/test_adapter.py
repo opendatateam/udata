@@ -4,7 +4,6 @@ from flask_restplus import inputs
 from flask_restplus.reqparse import RequestParser
 
 from udata import search
-from udata.core.metrics import Metric
 from udata.i18n import gettext as _
 from udata.tests.helpers import assert_json_equal
 from udata.utils import clean_string
@@ -48,19 +47,6 @@ class FakeSearchWithCoverage(FakeSearch):
     facets = {
         'coverage': search.TemporalCoverageFacet(field='a_coverage_field')
     }
-
-
-# Register some metrics for testing
-
-class FakeMetricInt(Metric):
-    model = FakeSearchable
-    name = 'fake-metric-int'
-
-
-class FakeMetricFloat(Metric):
-    model = FakeSearchable
-    name = 'fake-metric-float'
-    value_type = float
 
 
 #############################################################################
@@ -200,20 +186,3 @@ class IndexingLifecycleTest:
         assert FakeSearch.exists(fake.id)
         fake.delete()
         assert not FakeSearch.exists(fake.id)
-
-
-@pytest.mark.usefixtures('app')
-class MetricsMappingTest:
-    def test_map_metrics(self):
-        mapping = search.metrics_mapping_for(FakeSearchable)
-        assert_json_equal(mapping, {
-            'type': 'object',
-            'properties': {
-                'fake-metric-int': {
-                    'type': 'integer',
-                },
-                'fake-metric-float': {
-                    'type': 'float',
-                },
-            }
-        })

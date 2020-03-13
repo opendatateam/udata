@@ -14,15 +14,6 @@
     </div>
 
     <div class="row">
-        <chart id="trafic-widget" class="col-xs-12"
-            :title="charts.traffic.title" :default="charts.traffic.default"
-            :metrics="metrics"
-            x="date" :y="charts.traffic.y"
-            >
-        </chart>
-    </div>
-
-    <div class="row">
         <dataset-list id="datasets-widget" class="col-xs-12" :datasets="datasets"
             :downloads="downloads">
         </dataset-list>
