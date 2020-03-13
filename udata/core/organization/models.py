@@ -256,7 +256,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
         self.save()
 
-
     def count_reuses(self):
         from udata.models import Reuse
         self.metrics["reuses"] = Reuse.objects(organization=self).count()

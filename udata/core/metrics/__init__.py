@@ -9,6 +9,7 @@ def init_app(app):
     import udata.core.discussions.metrics  # noqa
     import udata.core.dataset.metrics  # noqa
     import udata.core.followers.metrics  # noqa
+    import udata.core.site.metrics # noqa
 
     # Load metrics from plugins
     entrypoints.get_enabled('udata.metrics', app)

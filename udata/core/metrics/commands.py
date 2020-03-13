@@ -3,9 +3,7 @@ import logging
 import click
 
 from udata.commands import cli, success, echo, white
-from udata.models import User, Dataset, Reuse, Organization
-
-from .tasks import update_metrics_for, update_site_metrics
+from udata.models import User, Dataset, Reuse, Organization, Site
 
 log = logging.getLogger(__name__)
 
@@ -31,26 +29,60 @@ def update(site=False, organizations=False, users=False, datasets=False,
 
     if do_all or site:
         log.info('Update site metrics')
-        update_site_metrics()
+        all_sites = Site.objects.timeout(False)
+        with click.progressbar(all_sites) as site_bar:
+            for site in site_bar:
+                site.count_users()
+                site.count_org()
+                site.count_datasets()
+                site.count_resources()
+                site.count_reuses()
+                site.count_followers()
+                site.count_discussion()
+                site.count_max_dataset_followers()
+                site.count_max_dataset_reuses()
+                site.count_max_reuse_datasets()
+                site.count_max_reuse_followers()
+                site.count_max_org_followers()
+                site.count_max_org_reuses()
+                site.count_max_org_datasets()
 
     if do_all or datasets:
         log.info('Update datasets metrics')
-        for dataset in Dataset.objects.timeout(False):
-            update_metrics_for(dataset)
+        all_datasets = Dataset.objects.visible().timeout(False)
+        with click.progressbar(all_datasets, length=Dataset.objects.visible().count()) as dataset_bar:
+            for dataset in dataset_bar:
+                dataset.count_discussions()
+                dataset.count_issues()
+                dataset.count_reuses()
+                dataset.count_followers()
 
     if do_all or reuses:
         log.info('Update reuses metrics')
-        for reuse in Reuse.objects.timeout(False):
-            update_metrics_for(reuse)
+        all_reuses = Reuse.objects.visible().timeout(False)
+        with click.progressbar(all_reuses, length=Reuse.objects.visible().count()) as reuses_bar:
+            for reuse in reuses_bar:
+                reuse.count_discussions()
+                reuse.count_issues()
+                reuse.count_followers()
 
     if do_all or organizations:
         log.info('Update organizations metrics')
-        for organization in Organization.objects.timeout(False):
-            update_metrics_for(organization)
+        all_org = Organization.objects.visible().timeout(False)
+        with click.progressbar(all_org, length=Organization.objects.visible().count()) as org_bar:
+            for organization in org_bar:
+                organization.count_datasets()
+                organization.count_reuses()
+                organization.count_followers()
 
     if do_all or users:
         log.info('Update user metrics')
-        for user in User.objects.timeout(False):
-            update_metrics_for(user)
+        all_users = User.objects.timeout(False)
+        with click.progressbar(all_users, length=User.objects.count()) as users_bar:
+            for user in users_bar:
+                user.count_datasets()
+                user.count_reuses()
+                user.count_followers()
+                user.count_following()
 
     success('All metrics have been updated')

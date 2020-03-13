@@ -709,8 +709,22 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         self.metrics["followers"] = Follow.objects.followers(self).count()
         self.save()
 
+    # @classmethod
+    # def get_metrics_key(cls):
+    #     return [
+    #         "discussions",
+    #         "issues",
+    #         "reuses",
+    #         "followers",
+    #         "views",
+    #     ]
+    
+    # def get_metric_value(self, key):
+    #     return self.metrics.get(key, 0)
+
     @property
     def get_metrics(self):
+        # return {key:self.get_metric_value(key) for key in self.get_metrics_key()}
         return {
             "discussions" : self.metrics.get("discussions", 0),
             "issues": self.metrics.get("issues", 0),

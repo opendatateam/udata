@@ -47,7 +47,7 @@ class Site(WithMetrics, db.Document):
         self.save()
     
     def count_resources(self):
-        self.metrics["datasets"] = next(Dataset.objects.visible().aggregate(
+        self.metrics["resources"] = next(Dataset.objects.visible().aggregate(
             {'$project': {'resources': 1}},
             {'$unwind': '$resources' },
             {'$group': {'_id': 'result', 'count': {'$sum': 1}}}
@@ -67,19 +67,6 @@ class Site(WithMetrics, db.Document):
         from udata.models import Discussion
         self.metrics["discussions"] = Discussion.objects.count()
         self.save()
-    
-    @property
-    def get_metrics(self):
-        return {
-            "datasets": self.metrics.get("datasets", 0),
-            "discussions": self.metrics.get("discussions", 0),
-            "followers": self.metrics.get("followers", 0),
-            "organizations": self.metrics.get("organizations", 0),
-            "public_services": self.metrics.get("public_services", 0),
-            "resources": self.metrics.get("resources", 0),
-            "reuses": self.metrics.get("reuses", 0),
-            "users": self.metrics.get("users", 0)
-        }
     
     def count_max_dataset_followers(self): 
         dataset = (Dataset.objects(metrics__followers__gt=0).visible()
@@ -134,6 +121,21 @@ class Site(WithMetrics, db.Document):
             "max_org_reuses": self.metrics.get("max_org_reuses", 0),
             "max_org_datasets": self.metrics.get("max_org_datasets", 0)
         }
+    
+    @property
+    def get_metrics(self):
+        metrics_dict = {
+            "datasets": self.metrics.get("datasets", 0),
+            "discussions": self.metrics.get("discussions", 0),
+            "followers": self.metrics.get("followers", 0),
+            "organizations": self.metrics.get("organizations", 0),
+            "public_services": self.metrics.get("public_services", 0),
+            "resources": self.metrics.get("resources", 0),
+            "reuses": self.metrics.get("reuses", 0),
+            "users": self.metrics.get("users", 0)
+        }
+        metrics_dict.update(self.get_max_metrics)
+        return metrics_dict
 
 
 def get_current_site():
