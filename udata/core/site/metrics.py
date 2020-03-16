@@ -11,6 +11,7 @@ def update_datasets_metrics(document, **kwargs):
     current_site.count_datasets()
     current_site.count_max_dataset_reuses()
     current_site.count_max_org_datasets()
+    current_site.count_resources()
 
 
 @Reuse.on_create.connect
@@ -22,6 +23,7 @@ def update_reuses_metrics(document, **kwargs):
     current_site.count_max_org_reuses()
 
 
+@Dataset.on_update.connect
 @Resource.on_added.connect
 @Resource.on_deleted.connect
 def update_ressources_metrics(document, **kwargs):

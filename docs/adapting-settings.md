@@ -640,12 +640,6 @@ The cache type, which can be adjusted to your needs (_ex:_ `null`, `memcached`)
 A prefix used for cache keys to avoid conflicts with other middleware.
 It also allows you to use the same backend with different instances.
 
-### USE_METRICS
-
-**default**: `True`
-
-This activates metrics, this is deactivated for tests
-
 ## Flask-FS options
 
 udata use Flask-FS as storage abstraction.

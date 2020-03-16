@@ -12,23 +12,6 @@ from udata.core.user.factories import AdminFactory
 from udata.tests.api import APITestCase
 
 
-class MetricsAPITest(APITestCase):
-    def test_get_metrics_for_site(self):
-        '''It should fetch my user data on GET'''
-        self.app.config['USE_METRICS'] = True
-        with self.app.app_context():
-            FakeSiteMetric.update()
-
-        response = self.get(url_for('api.metrics', id='site'))
-        self.assert200(response)
-
-        data = response.json[0]
-        self.assertEqual(data['level'], 'daily')
-        self.assertEqual(data['date'], date.today().isoformat())
-        self.assertIn('fake-site-metric', data['values'])
-        self.assertEqual(data['values']['fake-site-metric'], 2)
-
-
 class SiteAPITest(APITestCase):
     modules = ['core.site', 'core.dataset', 'core.reuse', 'core.organization']
 

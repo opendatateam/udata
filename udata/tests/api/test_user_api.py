@@ -178,7 +178,7 @@ class UserAPITest(APITestCase):
                 about=faker.paragraph(),
                 website=faker.url(),
                 avatar_url=faker.url(),
-                metrics={'datasets': 10})
+                metrics={'datasets': 10, 'followers': 1, 'following': 0, 'reuses': 2})
         response = self.get(url_for('api.users'))
         self.assert200(response)
         [json] = response.json['data']
