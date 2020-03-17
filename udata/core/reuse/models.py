@@ -193,6 +193,16 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         self.metrics["followers"] = Follow.objects.followers(self).count()
         self.save()
     
+    @classmethod
+    def get_metrics_key(cls):
+        return [
+            "discussions",
+            "issues",
+            "datasets",
+            "followers",
+            "views",
+        ]
+
     @property
     def get_metrics(self):
         return {

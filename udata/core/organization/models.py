@@ -266,6 +266,16 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         self.metrics["followers"] = Follow.objects.followers(self).count()
         self.save()
     
+    @classmethod
+    def get_metrics_keys(cls):
+        return [
+            "datasets",
+            "members",
+            "reuses",
+            "followers",
+            "views",
+        ]
+
     @property
     def get_metrics(self):
         return {
