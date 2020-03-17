@@ -8,6 +8,8 @@ from udata.features.transfer.notifications import (
     transfer_request_notifications
 )
 from udata.models import Member
+from udata.core.user.metrics import update_owner_metrics
+from udata.core.organization.metrics import update_owner_metrics
 
 from udata.utils import faker
 from udata.core.dataset.factories import VisibleDatasetFactory

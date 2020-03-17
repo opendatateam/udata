@@ -25,7 +25,7 @@ def update_user_following_metric(follow):
 
 
 @db.Owned.on_owner_change.connect
-def update_downer_metrics(document, previous):
+def update_owner_metrics(document, previous):
     if not isinstance(previous, User):
         return
     if isinstance(document, Dataset):

@@ -18,7 +18,7 @@ def update_reuses_metrics(document, **kwargs):
 
 
 @db.Owned.on_owner_change.connect
-def update_downer_metrics(document, previous):
+def update_owner_metrics(document, previous):
     if not isinstance(previous, Organization):
         return
     if isinstance(document, Dataset):
