@@ -158,13 +158,15 @@ jobs:
 
   github:
     docker:
-      - image: apihackers/ghr
+      - image: udata/circleci:2-alpine
+    environment:
+       BASH_ENV: /root/.bashrc
     steps:
       - attach_workspace:
           at: .
       - run:
           name: Upload github release
-          command: -t ${GITHUB_OAUTH_TOKEN} ${CIRCLE_TAG} dist
+          command: gh_release
 
 workflows:
   version: 2
