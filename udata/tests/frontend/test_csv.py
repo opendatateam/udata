@@ -41,6 +41,13 @@ class Fake(db.Document):
     def __str__(self):
         return 'fake'
     
+    @classmethod
+    def get_metrics_keys(cls):
+        return [
+            'fake-metric-int',
+            'fake-metric-float'
+        ]
+
     @property
     def get_metrics(self):
         return self.metrics

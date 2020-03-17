@@ -194,7 +194,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         self.save()
     
     @classmethod
-    def get_metrics_key(cls):
+    def get_metrics_keys(cls):
         return [
             "discussions",
             "issues",
