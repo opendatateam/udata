@@ -687,7 +687,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def views_count(self):
-        return self.metrics['views']
+        return self.metrics.get('views', 0)
 
     def count_discussions(self):
         from udata.models import Discussion
