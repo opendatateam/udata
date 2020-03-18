@@ -9,7 +9,7 @@ from udata.features.transfer.notifications import (
 )
 from udata.models import Member
 from udata.core.user.metrics import update_owner_metrics
-from udata.core.organization.metrics import update_owner_metrics
+from udata.core.organization.metrics import update_org_metrics
 
 from udata.utils import faker
 from udata.core.dataset.factories import VisibleDatasetFactory
@@ -113,10 +113,10 @@ class TransferAcceptTest:
                                    subject=subject)
 
         owner.reload()  # Needs updated metrics
-        assert owner.get_metrics['datasets'] == 1
+        assert owner.get_metrics()['datasets'] == 1
 
         recipient.reload()  # Needs updated metrics
-        assert recipient.get_metrics['datasets'] == 0
+        assert recipient.get_metrics()['datasets'] == 0
 
         login_user(recipient)
         transfer = accept_transfer(transfer)
@@ -127,10 +127,10 @@ class TransferAcceptTest:
         assert subject.owner == recipient
 
         recipient.reload()
-        assert recipient.get_metrics['datasets'] == 1
+        assert recipient.get_metrics()['datasets'] == 1
 
         owner.reload()
-        assert owner.get_metrics['datasets'] == 0
+        assert owner.get_metrics()['datasets'] == 0
 
     def test_org_admin_can_accept_transfer(self):
         owner = UserFactory()
@@ -142,13 +142,13 @@ class TransferAcceptTest:
                                    subject=subject)
 
         owner.reload()  # Needs updated metrics
-        assert owner.get_metrics['datasets'] == 1
+        assert owner.get_metrics()['datasets'] == 1
 
         org.reload()  # Needs updated metrics
-        assert org.get_metrics['datasets'] == 0
+        assert org.get_metrics()['datasets'] == 0
 
         admin.reload()  # Needs updated metrics
-        assert admin.get_metrics['datasets'] == 0
+        assert admin.get_metrics()['datasets'] == 0
 
         login_user(admin)
         transfer = accept_transfer(transfer)
@@ -160,13 +160,13 @@ class TransferAcceptTest:
         assert subject.owner is None
 
         org.reload()
-        assert org.get_metrics['datasets'] == 1
+        assert org.get_metrics()['datasets'] == 1
 
         admin.reload()
-        assert admin.get_metrics['datasets'] == 0
+        assert admin.get_metrics()['datasets'] == 0
 
         owner.reload()
-        assert owner.get_metrics['datasets'] == 0
+        assert owner.get_metrics()['datasets'] == 0
 
     def test_org_editor_cant_accept_transfer(self):
         owner = UserFactory()

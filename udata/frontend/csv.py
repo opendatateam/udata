@@ -177,7 +177,7 @@ def get_adapter(cls):
 
 
 def _metric_getter(key):
-    return lambda o: o.get_metrics.get(key, 0)
+    return lambda o: o.get_metrics().get(key, 0)
 
 
 def metric_fields(cls):

@@ -243,47 +243,46 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
         return result
 
-    @property
+    @cached_property
     def members_count(self):
         return len(self.members)
     
     @property
     def views_count(self):
-        return self.metrics['views']
+        return self.metrics.get('views', 0)
 
     def count_datasets(self):
         from udata.models import Dataset
-        self.metrics["datasets"] = Dataset.objects(organization=self).visible().count()
+        self.metrics['datasets'] = Dataset.objects(organization=self).visible().count()
         self.save()
 
     def count_reuses(self):
         from udata.models import Reuse
-        self.metrics["reuses"] = Reuse.objects(organization=self).count()
+        self.metrics['reuses'] = Reuse.objects(organization=self).count()
         self.save()
 
     def count_followers(self):
         from udata.models import Follow
-        self.metrics["followers"] = Follow.objects.followers(self).count()
+        self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
     
     @classmethod
     def get_metrics_keys(cls):
         return [
-            "datasets",
-            "members",
-            "reuses",
-            "followers",
-            "views",
+            'datasets',
+            'members',
+            'reuses',
+            'followers',
+            'views',
         ]
 
-    @property
     def get_metrics(self):
         return {
-            "members" : self.members_count,
-            "datasets": self.metrics.get("datasets", 0),
-            "reuses": self.metrics.get("reuses", 0),
-            "followers": self.metrics.get("followers", 0),
-            "views": self.metrics.get("views", 0)
+            'members' : self.members_count,
+            'datasets': self.metrics.get('datasets', 0),
+            'reuses': self.metrics.get('reuses', 0),
+            'followers': self.metrics.get('followers', 0),
+            'views': self.metrics.get('views', 0)
         }
 
 

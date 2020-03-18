@@ -16,11 +16,11 @@ class SiteMetricTest:
 
         site = Site.objects.get(id=app.config['SITE_ID'])
 
-        assert site.get_metrics['datasets'] == 3
+        assert site.get_metrics()['datasets'] == 3
 
     def test_resources_metric(self, app):
         DatasetFactory.create_batch(3, nb_resources=3)
 
         site = Site.objects.get(id=app.config['SITE_ID'])
 
-        assert site.get_metrics['resources'] == 9
+        assert site.get_metrics()['resources'] == 9

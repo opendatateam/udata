@@ -48,7 +48,7 @@ class IssuesTest(APITestCase):
         self.assert201(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics['issues'], 1)
+        self.assertEqual(dataset.get_metrics()['issues'], 1)
 
         issues = Issue.objects(subject=dataset)
         self.assertEqual(len(issues), 1)
@@ -250,7 +250,7 @@ class IssuesTest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics['issues'], 1)
+        self.assertEqual(dataset.get_metrics()['issues'], 1)
 
         data = response.json
 
@@ -288,7 +288,7 @@ class IssuesTest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics['issues'], 0)
+        self.assertEqual(dataset.get_metrics()['issues'], 0)
 
         data = response.json
 
@@ -326,7 +326,7 @@ class IssuesTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
-        self.assertEqual(dataset.get_metrics['issues'], 1)
+        self.assertEqual(dataset.get_metrics()['issues'], 1)
 
 
 class IssueCsvTest(FrontTestCase):

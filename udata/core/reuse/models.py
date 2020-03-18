@@ -172,45 +172,44 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     
     @property
     def views_count(self):
-        return self.metrics['views']
+        return self.metrics.get('views', 0)
     
-    @property
+    @cached_property
     def datasets_count(self):
         return len(self.datasets)
 
     def count_discussions(self):
         from udata.models import Discussion
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
         self.save()
 
     def count_issues(self):
         from udata.models import Issue
-        self.metrics["issues"] = Issue.objects(subject=self, closed=None).count()
+        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
         self.save()
 
     def count_followers(self):
         from udata.models import Follow
-        self.metrics["followers"] = Follow.objects.followers(self).count()
+        self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
     
     @classmethod
     def get_metrics_keys(cls):
         return [
-            "discussions",
-            "issues",
-            "datasets",
-            "followers",
-            "views",
+            'discussions',
+            'issues',
+            'datasets',
+            'followers',
+            'views',
         ]
 
-    @property
     def get_metrics(self):
         return {
-            "datasets": self.datasets_count,
-            "discussions" : self.metrics.get("discussions", 0),
-            "issues": self.metrics.get("issues", 0),
-            "followers": self.metrics.get("followers", 0),
-            "views": self.metrics.get("views", 0)
+            'datasets': self.datasets_count,
+            'discussions' : self.metrics.get('discussions', 0),
+            'issues': self.metrics.get('issues', 0),
+            'followers': self.metrics.get('followers', 0),
+            'views': self.metrics.get('views', 0)
         }
 
 

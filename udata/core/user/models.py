@@ -264,7 +264,6 @@ class User(WithMetrics, UserMixin, db.Document):
         self.metrics["following"] = Follow.objects.following(self).count()
         self.save()
     
-    @property
     def get_metrics(self):
         return {
             "datasets": self.metrics.get("datasets", 0),

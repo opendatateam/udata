@@ -48,7 +48,6 @@ class Fake(db.Document):
             'fake-metric-float'
         ]
 
-    @property
     def get_metrics(self):
         return self.metrics
 

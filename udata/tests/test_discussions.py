@@ -47,7 +47,7 @@ class DiscussionsTest(APITestCase):
         self.assert201(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics['discussions'], 1)
+        self.assertEqual(dataset.get_metrics()['discussions'], 1)
 
         discussions = Discussion.objects(subject=dataset)
         self.assertEqual(len(discussions), 1)
@@ -271,7 +271,7 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics['discussions'], 1)
+        self.assertEqual(dataset.get_metrics()['discussions'], 1)
 
         data = response.json
 
@@ -309,7 +309,7 @@ class DiscussionsTest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics['discussions'], 0)
+        self.assertEqual(dataset.get_metrics()['discussions'], 0)
 
         data = response.json
 
@@ -347,7 +347,7 @@ class DiscussionsTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
-        self.assertEqual(dataset.get_metrics['discussions'], 1)
+        self.assertEqual(dataset.get_metrics()['discussions'], 1)
 
     def test_delete_discussion(self):
         owner = self.login(AdminFactory())
@@ -368,7 +368,7 @@ class DiscussionsTest(APITestCase):
         self.assertStatus(response, 204)
 
         dataset.reload()
-        self.assertEqual(dataset.get_metrics['discussions'], 0)
+        self.assertEqual(dataset.get_metrics()['discussions'], 0)
         self.assertEqual(Discussion.objects(subject=dataset).count(), 0)
 
     def test_delete_discussion_comment(self):
@@ -426,7 +426,7 @@ class DiscussionsTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to delete the discussion.
-        self.assertEqual(dataset.get_metrics['discussions'], 1)
+        self.assertEqual(dataset.get_metrics()['discussions'], 1)
 
     def test_delete_discussion_comment_permissions(self):
         dataset = Dataset.objects.create(title='Test dataset')

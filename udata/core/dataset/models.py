@@ -687,46 +687,45 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def views_count(self):
-        return self.metrics['views']
+        return self.metrics.get('views', 0)
 
     def count_discussions(self):
         from udata.models import Discussion
-        self.metrics["discussions"] = Discussion.objects(subject=self, closed=None).count()
+        self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
         self.save()
 
     def count_issues(self):
         from udata.models import Issue
-        self.metrics["issues"] = Issue.objects(subject=self, closed=None).count()
+        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
         self.save()
 
     def count_reuses(self):
         from udata.models import Reuse
-        self.metrics["reuses"] = Reuse.objects(datasets=self).visible().count()
+        self.metrics['reuses'] = Reuse.objects(datasets=self).visible().count()
         self.save()
 
     def count_followers(self):
         from udata.models import Follow
-        self.metrics["followers"] = Follow.objects.followers(self).count()
+        self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
 
     @classmethod
     def get_metrics_keys(cls):
         return [
-            "discussions",
-            "issues",
-            "reuses",
-            "followers",
-            "views",
+            'discussions',
+            'issues',
+            'reuses',
+            'followers',
+            'views',
         ]
 
-    @property
     def get_metrics(self):
         return {
-            "discussions" : self.metrics.get("discussions", 0),
-            "issues": self.metrics.get("issues", 0),
-            "reuses": self.metrics.get("reuses", 0),
-            "followers": self.metrics.get("followers", 0),
-            "views": self.metrics.get("views", 0)
+            'discussions' : self.metrics.get('discussions', 0),
+            'issues': self.metrics.get('issues', 0),
+            'reuses': self.metrics.get('reuses', 0),
+            'followers': self.metrics.get('followers', 0),
+            'views': self.metrics.get('views', 0)
         }
 
 

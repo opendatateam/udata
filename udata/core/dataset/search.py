@@ -31,11 +31,11 @@ lazy = lazy_config('dataset')
 
 
 def max_reuses():
-    return max(current_site.get_max_metrics['max_dataset_reuses'], 10)
+    return max(current_site.get_max_metrics()['max_dataset_reuses'], 10)
 
 
 def max_followers():
-    return max(current_site.get_max_metrics['max_dataset_followers'], 10)
+    return max(current_site.get_max_metrics()['max_dataset_followers'], 10)
 
 
 def granularity_labelizer(value):
