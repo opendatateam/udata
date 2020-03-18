@@ -1,6 +1,5 @@
 import pytest
 
-import udata.core.site.metrics
 from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
 from udata.core.site.factories import SiteFactory
 from udata.models import Site
@@ -16,11 +15,16 @@ class SiteMetricTest:
 
         site = Site.objects.get(id=app.config['SITE_ID'])
 
+        site.count_datasets()
+
         assert site.get_metrics()['datasets'] == 3
 
     def test_resources_metric(self, app):
         DatasetFactory.create_batch(3, nb_resources=3)
 
         site = Site.objects.get(id=app.config['SITE_ID'])
+
+        site.count_datasets()
+        site.count_resources()
 
         assert site.get_metrics()['resources'] == 9

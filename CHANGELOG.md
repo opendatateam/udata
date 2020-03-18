@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Full metrics refactoring [2459](https://github.com/opendatateam/udata/pull/2459)
 
 ## 2.0.0 (2020-03-11)
 
