@@ -228,6 +228,7 @@ class User(WithMetrics, UserMixin, db.Document):
         self.website = None
         self.about = None
         self.extras = None
+        self.apikey = None
         self.deleted = datetime.now()
         self.save()
         for organization in self.organizations:

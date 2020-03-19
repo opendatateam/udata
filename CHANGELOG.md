@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Full metrics refactoring [2459](https://github.com/opendatateam/udata/pull/2459)
+- Fix deleted user's authentication on backend side [2460](https://github.com/opendatateam/udata/pull/2460)
 
 ## 2.0.0 (2020-03-11)
 
