@@ -11,7 +11,7 @@ from udata.models import (
     Dataset, Organization, License, User, GeoZone, RESOURCE_TYPES
 )
 from udata.search import (
-    ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
+    ModelSearchAdapter, i18n_analyzer, register,
     lazy_config
 )
 from udata.search.analysis import simple

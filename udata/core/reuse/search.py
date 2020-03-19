@@ -7,7 +7,7 @@ from udata.models import (
 )
 from udata.search import (
     BoolBooster, GaussDecay, ModelSearchAdapter,
-    i18n_analyzer, metrics_mapping_for, register, lazy_config,
+    i18n_analyzer, register, lazy_config,
     RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
 )
 from udata.search.analysis import simple

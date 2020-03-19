@@ -2,6 +2,8 @@ import logging
 
 import click
 
+from flask import current_app
+
 from udata.commands import cli, success, echo, white
 from udata.models import User, Dataset, Reuse, Organization, Site
 
@@ -30,30 +32,28 @@ def update(site=False, organizations=False, users=False, datasets=False,
 
     if do_all or site:
         log.info('Update site metrics')
-        all_sites = Site.objects.timeout(False)
-        with click.progressbar(all_sites) as site_bar:
-            for site in site_bar:
-                if drop:
-                    site.metrics.clear()
-                site.count_users()
-                site.count_org()
-                site.count_datasets()
-                site.count_resources()
-                site.count_reuses()
-                site.count_followers()
-                site.count_discussion()
-                site.count_max_dataset_followers()
-                site.count_max_dataset_reuses()
-                site.count_max_reuse_datasets()
-                site.count_max_reuse_followers()
-                site.count_max_org_followers()
-                site.count_max_org_reuses()
-                site.count_max_org_datasets()
+        site = Site.objects(id=current_app.config['SITE_ID']).first()
+        if drop:
+            site.metrics.clear()
+        site.count_users()
+        site.count_org()
+        site.count_datasets()
+        site.count_resources()
+        site.count_reuses()
+        site.count_followers()
+        site.count_discussions()
+        site.count_max_dataset_followers()
+        site.count_max_dataset_reuses()
+        site.count_max_reuse_datasets()
+        site.count_max_reuse_followers()
+        site.count_max_org_followers()
+        site.count_max_org_reuses()
+        site.count_max_org_datasets()
 
     if do_all or datasets:
         log.info('Update datasets metrics')
-        all_datasets = Dataset.objects.visible().timeout(False)
-        with click.progressbar(all_datasets, length=Dataset.objects.visible().count()) as dataset_bar:
+        all_datasets = Dataset.objects.all()
+        with click.progressbar(all_datasets, length=Dataset.objects.count()) as dataset_bar:
             for dataset in dataset_bar:
                 if drop:
                     dataset.metrics.clear()

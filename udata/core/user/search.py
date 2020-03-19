@@ -3,7 +3,7 @@ from elasticsearch_dsl import Completion, Date, String, Boolean
 from udata.i18n import lazy_gettext as _
 from udata.models import User, Organization
 from udata.search import ModelSearchAdapter
-from udata.search import i18n_analyzer, metrics_mapping_for, register
+from udata.search import i18n_analyzer, register
 from udata.search.fields import ModelTermsFacet, RangeFacet
 from udata.search.fields import GaussDecay
 from udata.search.analysis import simple

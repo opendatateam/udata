@@ -33,7 +33,7 @@ class Site(WithMetrics, db.Document):
     
     def count_users(self):
         from udata.models import User
-        self.metrics['users'] = User.objects.count()
+        self.metrics['users'] = User.objects(confirmed_at__ne=None, deleted=None).count()
         self.save()
     
     def count_org(self):
@@ -63,7 +63,7 @@ class Site(WithMetrics, db.Document):
         self.metrics['followers'] = Follow.objects(until=None).count()
         self.save()
     
-    def count_discussion(self):
+    def count_discussions(self):
         from udata.models import Discussion
         self.metrics['discussions'] = Discussion.objects.count()
         self.save()
