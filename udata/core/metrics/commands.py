@@ -22,8 +22,9 @@ def grp():
               help='Compute datasets metrics')
 @click.option('-r', '--reuses', is_flag=True, help='Compute reuses metrics')
 @click.option('-u', '--users', is_flag=True, help='Compute users metrics')
+@click.option('--drop', is_flag=True, help='Clear old metrics before computing new ones')
 def update(site=False, organizations=False, users=False, datasets=False,
-           reuses=False):
+           reuses=False, drop=False):
     '''Update all metrics for the current date'''
     do_all = not any((site, organizations, users, datasets, reuses))
 
@@ -32,6 +33,8 @@ def update(site=False, organizations=False, users=False, datasets=False,
         all_sites = Site.objects.timeout(False)
         with click.progressbar(all_sites) as site_bar:
             for site in site_bar:
+                if drop:
+                    site.metrics.clear()
                 site.count_users()
                 site.count_org()
                 site.count_datasets()
@@ -52,6 +55,8 @@ def update(site=False, organizations=False, users=False, datasets=False,
         all_datasets = Dataset.objects.visible().timeout(False)
         with click.progressbar(all_datasets, length=Dataset.objects.visible().count()) as dataset_bar:
             for dataset in dataset_bar:
+                if drop:
+                    dataset.metrics.clear()
                 dataset.count_discussions()
                 dataset.count_issues()
                 dataset.count_reuses()
@@ -62,6 +67,8 @@ def update(site=False, organizations=False, users=False, datasets=False,
         all_reuses = Reuse.objects.visible().timeout(False)
         with click.progressbar(all_reuses, length=Reuse.objects.visible().count()) as reuses_bar:
             for reuse in reuses_bar:
+                if drop:
+                    reuse.metrics.clear()
                 reuse.count_discussions()
                 reuse.count_issues()
                 reuse.count_followers()
@@ -71,6 +78,8 @@ def update(site=False, organizations=False, users=False, datasets=False,
         all_org = Organization.objects.visible().timeout(False)
         with click.progressbar(all_org, length=Organization.objects.visible().count()) as org_bar:
             for organization in org_bar:
+                if drop:
+                    organization.metrics.clear()
                 organization.count_datasets()
                 organization.count_reuses()
                 organization.count_followers()
@@ -80,6 +89,8 @@ def update(site=False, organizations=False, users=False, datasets=False,
         all_users = User.objects.timeout(False)
         with click.progressbar(all_users, length=User.objects.count()) as users_bar:
             for user in users_bar:
+                if drop:
+                    user.metrics.clear()
                 user.count_datasets()
                 user.count_reuses()
                 user.count_followers()
