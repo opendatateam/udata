@@ -128,10 +128,10 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     }
 
     __search_metrics__ = Object(properties={
-        "datasets": Integer(),
-        "reuses": Integer(),
-        "followers": Integer(),
-        "views": Integer()
+        'datasets': Integer(),
+        'reuses': Integer(),
+        'followers': Integer(),
+        'views': Integer()
     })
 
     __metrics_keys__ = [
@@ -273,25 +273,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         from udata.models import Follow
         self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
-    
-    # @classmethod
-    # def get_metrics_keys(cls):
-    #     return [
-    #         'datasets',
-    #         'members',
-    #         'reuses',
-    #         'followers',
-    #         'views',
-    #     ]
-
-    # def get_metrics(self):
-    #     return {
-    #         'members' : self.members_count,
-    #         'datasets': self.metrics.get('datasets', 0),
-    #         'reuses': self.metrics.get('reuses', 0),
-    #         'followers': self.metrics.get('followers', 0),
-    #         'views': self.metrics.get('views', 0)
-    #     }
 
 
 pre_save.connect(Organization.pre_save, sender=Organization)

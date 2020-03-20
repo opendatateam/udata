@@ -91,11 +91,18 @@ class User(WithMetrics, UserMixin, db.Document):
     }
 
     __search_metrics__ = Object(properties={
-        "datasets": Integer(),
-        "reuses": Integer(),
-        "followers": Integer(),
-        "views": Integer()
+        'datasets': Integer(),
+        'reuses': Integer(),
+        'followers': Integer(),
+        'views': Integer()
     })
+
+    __metrics_keys__ = [
+        'datasets',
+        'reuses',
+        'following',
+        'followers'
+    ]
 
     def __str__(self):
         return self.fullname
@@ -264,14 +271,6 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import Follow
         self.metrics["following"] = Follow.objects.following(self).count()
         self.save()
-    
-    def get_metrics(self):
-        return {
-            "datasets": self.metrics.get("datasets", 0),
-            "reuses": self.metrics.get("reuses", 0),
-            "following": self.metrics.get("following", 0),
-            "followers": self.metrics.get("followers", 0)
-        }
 
 
 datastore = MongoEngineUserDatastore(db, User, Role)

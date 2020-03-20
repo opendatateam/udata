@@ -396,9 +396,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     }
 
     __search_metrics__ = Object(properties={
-        "reuses": Integer(),
-        "followers": Integer(),
-        "views": Integer()
+        'reuses': Integer(),
+        'followers': Integer(),
+        'views': Integer()
     })
 
     __metrics_keys__ = [
@@ -716,19 +716,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         from udata.models import Follow
         self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
-
-    # @classmethod
-    # def get_metrics_keys(cls):
-    #     return [
-    #         'discussions',
-    #         'issues',
-    #         'reuses',
-    #         'followers',
-    #         'views',
-    #     ]
-
-    # def get_metrics(self):
-    #     return {key:self.metrics.get(key, 0) for key in self.__metrics_keys__}
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
