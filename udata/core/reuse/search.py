@@ -19,11 +19,11 @@ lazy = lazy_config('reuse')
 
 
 def max_datasets():
-    return max(current_site.get_max_metrics()['max_reuse_datasets'], 5)
+    return max(current_site.get_metrics()['max_reuse_datasets'], 5)
 
 
 def max_followers():
-    return max(current_site.get_max_metrics()['max_reuse_followers'], 10)
+    return max(current_site.get_metrics()['max_reuse_followers'], 10)
 
 
 def reuse_type_labelizer(value):

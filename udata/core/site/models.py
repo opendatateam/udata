@@ -59,6 +59,11 @@ class Site(WithMetrics, db.Document):
         self.metrics['organization'] = Organization.objects.visible().count()
         self.save()
 
+    def count_org_for_badge(self, badge_kind):
+        from udata.models import Organization
+        self.metrics[badge_kind] = Organization.objects(badges__kind=badge_kind).visible().count()
+        self.save()
+
     def count_datasets(self):
         from udata.models import Dataset
         self.metrics['datasets'] = Dataset.objects.visible().count()
