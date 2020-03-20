@@ -134,6 +134,14 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         "views": Integer()
     })
 
+    __metrics_keys__ = [
+        'datasets',
+        'members',
+        'reuses',
+        'followers',
+        'views',
+    ]
+
     before_save = Signal()
     after_save = Signal()
     on_create = Signal()
@@ -266,24 +274,24 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
     
-    @classmethod
-    def get_metrics_keys(cls):
-        return [
-            'datasets',
-            'members',
-            'reuses',
-            'followers',
-            'views',
-        ]
+    # @classmethod
+    # def get_metrics_keys(cls):
+    #     return [
+    #         'datasets',
+    #         'members',
+    #         'reuses',
+    #         'followers',
+    #         'views',
+    #     ]
 
-    def get_metrics(self):
-        return {
-            'members' : self.members_count,
-            'datasets': self.metrics.get('datasets', 0),
-            'reuses': self.metrics.get('reuses', 0),
-            'followers': self.metrics.get('followers', 0),
-            'views': self.metrics.get('views', 0)
-        }
+    # def get_metrics(self):
+    #     return {
+    #         'members' : self.members_count,
+    #         'datasets': self.metrics.get('datasets', 0),
+    #         'reuses': self.metrics.get('reuses', 0),
+    #         'followers': self.metrics.get('followers', 0),
+    #         'views': self.metrics.get('views', 0)
+    #     }
 
 
 pre_save.connect(Organization.pre_save, sender=Organization)

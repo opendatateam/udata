@@ -75,6 +75,14 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         "views": Integer()
     })
 
+    __metrics_keys__ = [
+        'discussions',
+        'issues',
+        'datasets',
+        'followers',
+        'views',
+    ]
+
     meta = {
         'indexes': ['-created_at', 'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
@@ -193,24 +201,24 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
     
-    @classmethod
-    def get_metrics_keys(cls):
-        return [
-            'discussions',
-            'issues',
-            'datasets',
-            'followers',
-            'views',
-        ]
+    # @classmethod
+    # def get_metrics_keys(cls):
+    #     return [
+    #         'discussions',
+    #         'issues',
+    #         'datasets',
+    #         'followers',
+    #         'views',
+    #     ]
 
-    def get_metrics(self):
-        return {
-            'datasets': self.datasets_count,
-            'discussions' : self.metrics.get('discussions', 0),
-            'issues': self.metrics.get('issues', 0),
-            'followers': self.metrics.get('followers', 0),
-            'views': self.metrics.get('views', 0)
-        }
+    # def get_metrics(self):
+    #     return {
+    #         'datasets': self.datasets_count,
+    #         'discussions' : self.metrics.get('discussions', 0),
+    #         'issues': self.metrics.get('issues', 0),
+    #         'followers': self.metrics.get('followers', 0),
+    #         'views': self.metrics.get('views', 0)
+    #     }
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

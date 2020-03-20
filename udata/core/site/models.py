@@ -28,6 +28,24 @@ class Site(WithMetrics, db.Document):
     themes = db.DictField()
     settings = db.EmbeddedDocumentField(SiteSettings, default=SiteSettings)
 
+    __metrics_keys__ = [
+        'max_dataset_followers',
+        'max_dataset_reuses',
+        'max_reuse_datasets',
+        'max_reuse_followers',
+        'max_org_followers',
+        'max_org_reuses',
+        'max_org_datasets',
+        'datasets',
+        'discussions',
+        'followers',
+        'organizations',
+        'public_services',
+        'resources',
+        'reuses',
+        'users'
+    ]
+
     def __str__(self):
         return self.title or ''
     
@@ -110,30 +128,30 @@ class Site(WithMetrics, db.Document):
         self.metrics['max_org_datasets'] = org.metrics['datasets'] if org else 0
         self.save()
     
-    def get_max_metrics(self):
-        return {
-            'max_dataset_followers': self.metrics.get('max_dataset_followers', 0),
-            'max_dataset_reuses': self.metrics.get('max_dataset_reuses', 0),
-            'max_reuse_datasets': self.metrics.get('max_reuse_datasets', 0),
-            'max_reuse_followers': self.metrics.get('max_reuse_followers', 0),
-            'max_org_followers': self.metrics.get('max_org_followers', 0),
-            'max_org_reuses': self.metrics.get('max_org_reuses', 0),
-            'max_org_datasets': self.metrics.get('max_org_datasets', 0)
-        }
+    # def get_max_metrics(self):
+    #     return {
+    #         'max_dataset_followers': self.metrics.get('max_dataset_followers', 0),
+    #         'max_dataset_reuses': self.metrics.get('max_dataset_reuses', 0),
+    #         'max_reuse_datasets': self.metrics.get('max_reuse_datasets', 0),
+    #         'max_reuse_followers': self.metrics.get('max_reuse_followers', 0),
+    #         'max_org_followers': self.metrics.get('max_org_followers', 0),
+    #         'max_org_reuses': self.metrics.get('max_org_reuses', 0),
+    #         'max_org_datasets': self.metrics.get('max_org_datasets', 0)
+    #     }
     
-    def get_metrics(self):
-        metrics_dict = {
-            'datasets': self.metrics.get('datasets', 0),
-            'discussions': self.metrics.get('discussions', 0),
-            'followers': self.metrics.get('followers', 0),
-            'organizations': self.metrics.get('organizations', 0),
-            'public_services': self.metrics.get('public_services', 0),
-            'resources': self.metrics.get('resources', 0),
-            'reuses': self.metrics.get('reuses', 0),
-            'users': self.metrics.get('users', 0)
-        }
-        metrics_dict.update(self.get_max_metrics())
-        return metrics_dict
+    # def get_metrics(self):
+    #     metrics_dict = {
+    #         'datasets': self.metrics.get('datasets', 0),
+    #         'discussions': self.metrics.get('discussions', 0),
+    #         'followers': self.metrics.get('followers', 0),
+    #         'organizations': self.metrics.get('organizations', 0),
+    #         'public_services': self.metrics.get('public_services', 0),
+    #         'resources': self.metrics.get('resources', 0),
+    #         'reuses': self.metrics.get('reuses', 0),
+    #         'users': self.metrics.get('users', 0)
+    #     }
+    #     metrics_dict.update(self.get_max_metrics())
+    #     return metrics_dict
 
 
 def get_current_site():

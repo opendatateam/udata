@@ -38,15 +38,13 @@ class Fake(db.Document):
     sub = db.EmbeddedDocumentField(NestedFake)
     metrics = db.DictField()
 
+    __metrics_keys__ = [
+        'fake-metric-int',
+        'fake-metric-float'
+    ]
+
     def __str__(self):
         return 'fake'
-    
-    @classmethod
-    def get_metrics_keys(cls):
-        return [
-            'fake-metric-int',
-            'fake-metric-float'
-        ]
 
     def get_metrics(self):
         return self.metrics

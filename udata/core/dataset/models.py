@@ -401,6 +401,14 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         "views": Integer()
     })
 
+    __metrics_keys__ = [
+        'discussions',
+        'issues',
+        'reuses',
+        'followers',
+        'views',
+    ]
+
     meta = {
         'indexes': [
             '-created_at',
@@ -709,24 +717,18 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         self.metrics['followers'] = Follow.objects.followers(self).count()
         self.save()
 
-    @classmethod
-    def get_metrics_keys(cls):
-        return [
-            'discussions',
-            'issues',
-            'reuses',
-            'followers',
-            'views',
-        ]
+    # @classmethod
+    # def get_metrics_keys(cls):
+    #     return [
+    #         'discussions',
+    #         'issues',
+    #         'reuses',
+    #         'followers',
+    #         'views',
+    #     ]
 
-    def get_metrics(self):
-        return {
-            'discussions' : self.metrics.get('discussions', 0),
-            'issues': self.metrics.get('issues', 0),
-            'reuses': self.metrics.get('reuses', 0),
-            'followers': self.metrics.get('followers', 0),
-            'views': self.metrics.get('views', 0)
-        }
+    # def get_metrics(self):
+    #     return {key:self.metrics.get(key, 0) for key in self.__metrics_keys__}
 
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)

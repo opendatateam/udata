@@ -183,7 +183,7 @@ def _metric_getter(key):
 def metric_fields(cls):
     return [
         ('metric.{0}'.format(key), _metric_getter(key))
-        for key in cls.get_metrics_keys()
+        for key in cls.__metrics_keys__
     ]
 
 
