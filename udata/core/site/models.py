@@ -40,7 +40,7 @@ class Site(WithMetrics, db.Document):
         'discussions',
         'followers',
         'organizations',
-        'public_services',
+        'public-service',
         'resources',
         'reuses',
         'users'
@@ -61,7 +61,7 @@ class Site(WithMetrics, db.Document):
 
     def count_org_for_badge(self, badge_kind):
         from udata.models import Organization
-        self.metrics[badge_kind.lower()] = Organization.objects(badges__kind=badge_kind).visible().count()
+        self.metrics[badge_kind] = Organization.objects(badges__kind=badge_kind).count()
         self.save()
 
     def count_datasets(self):

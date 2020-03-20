@@ -1,8 +1,8 @@
 import pytest
 
-from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
+from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory, OrganizationFactory
 from udata.core.site.factories import SiteFactory
-from udata.models import Site
+from udata.models import Site, Badge, PUBLIC_SERVICE
 from udata.core.site.models import current_site
 from udata.tests.helpers import assert_emit
 
@@ -31,3 +31,19 @@ class SiteMetricTest:
         site.count_resources()
 
         assert site.get_metrics()['resources'] == 9
+
+    def test_badges_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
+
+        ps_badge = Badge(kind=PUBLIC_SERVICE)
+        public_services = [
+            OrganizationFactory(badges=[ps_badge]) for _ in range(2)
+        ]
+        for _ in range(3):
+            OrganizationFactory()
+
+        site.count_org_for_badge(PUBLIC_SERVICE)
+
+        assert site.get_metrics()[PUBLIC_SERVICE] == len(public_services)
