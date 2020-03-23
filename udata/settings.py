@@ -189,6 +189,8 @@ class Defaults(object):
         'acronym': ['title'],
     }
 
+    MD_ALLOWED_IMG = False
+
     MD_ALLOWED_STYLES = []
 
     # Extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-
