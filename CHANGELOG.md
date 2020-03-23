@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add setting to allow images to be displayed in markdown [2462](https://github.com/opendatateam/udata/pull/2462)
 
 ## 2.0.0 (2020-03-11)
 
