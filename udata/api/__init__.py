@@ -100,6 +100,9 @@ class UDataApi(Api):
             if not current_user.is_authenticated:
                 self.abort(401)
 
+            if current_user.deleted:
+                self.abort(401)
+
             if permission is not None:
                 with permission.require():
                     return func(*args, **kwargs)
