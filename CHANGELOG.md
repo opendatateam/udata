@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Allow images to be displayed in markdown by default [2462](https://github.com/opendatateam/udata/pull/2462)
 - Fix deleted user's authentication on backend side [2460](https://github.com/opendatateam/udata/pull/2460)
 
 ## 2.0.0 (2020-03-11)

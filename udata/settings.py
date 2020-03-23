@@ -187,6 +187,7 @@ class Defaults(object):
         'a': ['href', 'title', 'rel', 'data-tooltip'],
         'abbr': ['title'],
         'acronym': ['title'],
+        'img': ['src', 'title']
     }
 
     MD_ALLOWED_STYLES = []
