@@ -85,11 +85,11 @@ class UDataMarkdown(object):
         callbacks = [nofollow_callback]
         if source_tooltip:
             callbacks.append(source_tooltip_callback)
-        
-        allowed_attr_md = current_app.config['MD_ALLOWED_ATTRIBUTES']
-        
-        if current_app.config['MD_ALLOWED_IMG']:
-            allowed_attr_md.update({'img': ['src', 'title']})
+
+        allowed_attr_md = current_app.config['MD_ALLOWED_ATTRIBUTES'].copy()
+
+        if 'img' in current_app.config['MD_ALLOWED_ATTRIBUTES']:
+            allowed_attr_md['img'].append('src')
 
         cleaner = bleach.Cleaner(
             tags=current_app.config['MD_ALLOWED_TAGS'],
