@@ -88,7 +88,7 @@ class UDataMarkdown(object):
 
         cleaner = bleach.Cleaner(
             tags=current_app.config['MD_ALLOWED_TAGS'],
-            attributes=allowed_attr_md,
+            attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
             styles=current_app.config['MD_ALLOWED_STYLES'],
             protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
             strip_comments=False,
