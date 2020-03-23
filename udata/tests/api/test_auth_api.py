@@ -148,6 +148,18 @@ class APIAuthTest:
         assert401(response)
         assert response.content_type == 'application/json'
         assert 'message' in response.json
+    
+    def test_deleted_user(self, api):
+        '''Should raise a HTTP 401 if the user is deleted'''
+        user = UserFactory()
+        user.mark_as_deleted()
+        with api.user(user) as user:
+            response = api.post(url_for('api.fake'),
+                                headers={'X-API-KEY': user.apikey})
+
+        assert401(response)
+        assert response.content_type == 'application/json'
+        assert 'message' in response.json
 
     def test_validation_errors(self, api):
         '''Should raise a HTTP 400 and returns errors on validation error'''
