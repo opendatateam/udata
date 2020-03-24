@@ -19,7 +19,7 @@ from .preview import get_preview_url
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
+    'PIVOTAL_DATA', 'COVID_19', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
 )
 
 #: Udata frequencies with their labels
@@ -91,6 +91,7 @@ CHECKSUM_TYPES = ('sha1', 'sha2', 'sha256', 'md5', 'crc')
 DEFAULT_CHECKSUM_TYPE = 'sha1'
 
 PIVOTAL_DATA = 'pivotal-data'
+COVID_19 = 'covid-19'
 CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 
 # Maximum acceptable Damerau-Levenshtein distance
@@ -392,6 +393,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     __badges__ = {
         PIVOTAL_DATA: _('Pivotal data'),
+        COVID_19: _('Covid-19'),
     }
 
     meta = {

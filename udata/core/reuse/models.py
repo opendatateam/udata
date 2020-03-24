@@ -9,8 +9,9 @@ from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
 
-__all__ = ('Reuse', 'REUSE_TYPES')
+__all__ = ('Reuse', 'REUSE_TYPES', 'COVID_19')
 
+COVID_19 = 'covid-19'
 
 REUSE_TYPES = {
     'api': _('API'),
@@ -66,7 +67,9 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     def __str__(self):
         return self.title or ''
 
-    __badges__ = {}
+    __badges__ = {
+        COVID_19: _('Covid-19'),
+    }
 
     meta = {
         'indexes': ['-created_at', 'urlhash'] + db.Owned.meta['indexes'],
