@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.0.1 (2020-03-24)
 
 - Allow images to be displayed in markdown by default [2462](https://github.com/opendatateam/udata/pull/2462)
