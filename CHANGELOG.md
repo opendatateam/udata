@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add badge for Covid-19 on datasets and reuses [2463](https://github.com/opendatateam/udata/pull/2463)
 - Allow images to be displayed in markdown by default [2462](https://github.com/opendatateam/udata/pull/2462)
 - Fix deleted user's authentication on backend side [2460](https://github.com/opendatateam/udata/pull/2460)
 
