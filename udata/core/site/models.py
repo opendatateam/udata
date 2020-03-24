@@ -43,7 +43,7 @@ class Site(WithMetrics, db.Document):
         'public-service',
         'resources',
         'reuses',
-        'users'
+        'users',
     ]
 
     def __str__(self):

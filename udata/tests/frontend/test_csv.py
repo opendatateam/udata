@@ -40,7 +40,7 @@ class Fake(db.Document):
 
     __metrics_keys__ = [
         'fake-metric-int',
-        'fake-metric-float'
+        'fake-metric-float',
     ]
 
     def __str__(self):

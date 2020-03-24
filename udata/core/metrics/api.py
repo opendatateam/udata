@@ -7,4 +7,4 @@ from udata.api import api, API
 class MetricsAPI(API):
 
     def get(self, id):
-        abort(501)
+        abort(501, 'This endpoint was deprecated because of metrics refactoring')

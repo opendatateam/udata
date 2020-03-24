@@ -52,7 +52,7 @@ def update(site=False, organizations=False, users=False, datasets=False,
 
     if do_all or datasets:
         log.info('Update datasets metrics')
-        all_datasets = Dataset.objects.all()
+        all_datasets = Dataset.objects.visible().timeout(False)
         with click.progressbar(all_datasets, length=Dataset.objects.count()) as dataset_bar:
             for dataset in dataset_bar:
                 if drop:
@@ -95,5 +95,4 @@ def update(site=False, organizations=False, users=False, datasets=False,
                 user.count_reuses()
                 user.count_followers()
                 user.count_following()
-
     success('All metrics have been updated')

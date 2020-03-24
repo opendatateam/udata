@@ -271,7 +271,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     def count_followers(self):
         from udata.models import Follow
-        self.metrics['followers'] = Follow.objects.followers(self).count()
+        self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
         self.save()
 
 

@@ -101,7 +101,7 @@ class User(WithMetrics, UserMixin, db.Document):
         'datasets',
         'reuses',
         'following',
-        'followers'
+        'followers',
     ]
 
     def __str__(self):
@@ -254,22 +254,22 @@ class User(WithMetrics, UserMixin, db.Document):
 
     def count_datasets(self):
         from udata.models import Dataset
-        self.metrics["datasets"] = Dataset.objects(owner=self).visible().count()
+        self.metrics['datasets'] = Dataset.objects(owner=self).visible().count()
         self.save()
 
     def count_reuses(self):
         from udata.models import Reuse
-        self.metrics["reuses"] = Reuse.objects(owner=self).visible().count()
+        self.metrics['reuses'] = Reuse.objects(owner=self).visible().count()
         self.save()
 
     def count_followers(self):
         from udata.models import Follow
-        self.metrics["followers"] = Follow.objects.followers(self).count()
+        self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
         self.save()
     
     def count_following(self):
         from udata.models import Follow
-        self.metrics["following"] = Follow.objects.following(self).count()
+        self.metrics['following'] = Follow.objects.following(self).count()
         self.save()
 
 

@@ -398,7 +398,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     __search_metrics__ = Object(properties={
         'reuses': Integer(),
         'followers': Integer(),
-        'views': Integer()
+        'views': Integer(),
     })
 
     __metrics_keys__ = [
@@ -714,7 +714,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     def count_followers(self):
         from udata.models import Follow
-        self.metrics['followers'] = Follow.objects.followers(self).count()
+        self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
         self.save()
 
 
