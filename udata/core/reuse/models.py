@@ -11,6 +11,7 @@ from udata.utils import hash_url
 
 __all__ = ('Reuse', 'REUSE_TYPES')
 
+
 REUSE_TYPES = {
     'api': _('API'),
     'application': _('Application'),
