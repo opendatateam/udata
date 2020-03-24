@@ -85,7 +85,7 @@ class UDataMarkdown(object):
         callbacks = [nofollow_callback]
         if source_tooltip:
             callbacks.append(source_tooltip_callback)
-        
+
         cleaner = bleach.Cleaner(
             tags=current_app.config['MD_ALLOWED_TAGS'],
             attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
