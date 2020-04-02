@@ -131,7 +131,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         'datasets': Integer(),
         'reuses': Integer(),
         'followers': Integer(),
-        'views': Integer()
+        'views': Integer(),
     })
 
     __metrics_keys__ = [
