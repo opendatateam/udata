@@ -36,3 +36,12 @@ It is collectively taken care of by members of the
 [readthedocs-url]: https://udata.readthedocs.io/en/latest/
 [crowdin-badge]: https://d322cqt584bo4o.cloudfront.net/udata/localized.svg
 [crowdin-url]: https://crowdin.com/project/udata
+
+
+--------
+
+#### installation with scripts
+
+```bash
+sh ./scripts/dev_setup_env.sh
+```

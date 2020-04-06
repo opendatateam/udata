@@ -128,8 +128,12 @@ if [ "$yn" != "${yn#[Yy]}" ] ;then
   ### VIRTUAL ENV
   ### - - - - - - - - - - - - - - - ### 
   echo "${STEPPER}"
+  yn_default="y"
   read -p "Do you wish to install virtual env (y/n)? " yn
   echo
+  if [ "$yn" = "" ] ;then
+    yn=yn_default
+  fi
   if [ "$yn" != "${yn#[Yy]}" ] ;then
 
     echo "${STEPPER} "
@@ -190,8 +194,12 @@ if [ "$yn" != "${yn#[Yy]}" ] ;then
   ### NODE JS
   ### - - - - - - - - - - - - - - - ### 
   echo "${STEPPER}"
+  yn_default="y"
   read -p "Do you wish to rebuild NVM (y/n)? " yn
   echo
+  if [ "$yn" = "" ] ;then
+    yn=yn_default
+  fi
   if [ "$yn" != "${yn#[Yy]}" ] ;then
     echo "${STEPPER}"
     STEP_N="Setting up : NODE_JS" 
@@ -232,8 +240,11 @@ if [ "$yn" != "${yn#[Yy]}" ] ;then
 
 
   # instal theme 
+  yn_default="n"
   read -p "- ${STEP_N} - Do you want to install DATAGOUV-FR theme (y/n)? " answer
-  
+  if [ "$yn" = "" ] ;then
+    yn=yn_default
+  fi
   if [ "$answer" != "${answer#[Yy]}" ] ;then
 
     #rm udata.cfg
@@ -245,7 +256,7 @@ if [ "$yn" != "${yn#[Yy]}" ] ;then
 
     if [ "$answer" != "${answer#[Yy]}" ] ;then
 
-      read -p "- ${STEP_N} - Precise the name of the folder for the theme [${UDATA_GOUVFR_FOLDER}]? " new_folder
+      read -p "- ${STEP_N} - Precise the name you'd like for the theme's folder [${UDATA_GOUVFR_FOLDER}]? " new_folder
       if [ "$new_folder" != "" ] ;then
         UDATA_GOUVFR_FOLDER=$new_folder
         echo 
@@ -327,11 +338,9 @@ if [ "$yn" != "${yn#[Yy]}" ] ;then
 
 
   # Build front + watch hot reload
-  #inv assets-watch
   newtabi "cd ${PWD} && source ${UDATA_VENV}/bin/activate && sh ./scripts/dev_start_watch.sh"
 
   # Run server
-  #inv serve
   #say_what "$STEP_N - étape terminée"
   newtabi "cd ${PWD} && source ${UDATA_VENV}/bin/activate && sh ./scripts/dev_start_serve.sh" 
 
@@ -339,9 +348,7 @@ if [ "$yn" != "${yn#[Yy]}" ] ;then
   ### - - - - - - - - - - - - - - - ### 
   # open http://localhost:7000
 
-# else
-#   echo "... ${CANCEL} ..."
-#   echo
+
 fi
 
 
@@ -359,3 +366,6 @@ echo ............................................
 
 #say_what "Le script est maintenant terminé ..."
 sleep .5
+
+
+exit
