@@ -40,8 +40,18 @@ It is collectively taken care of by members of the
 
 --------
 
-#### installation with scripts
+#### dev environment
 
-```bash
-sh ./scripts/dev_setup_env.sh
-```
+_note : Docker and Python 3.* must be installed_
+
+- chained installation with scripts
+
+  ```bash
+  sh ./scripts/dev_setup_env.sh
+  ```
+
+- run with scripts (only if dev environment is set up)
+
+  ```bash
+  sh ./scripts/dev_setup_env.sh
+  ```
