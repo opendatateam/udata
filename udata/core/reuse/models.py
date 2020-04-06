@@ -72,7 +72,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     __search_metrics__ = Object(properties={
         'datasets': Integer(),
         'followers': Integer(),
-        'views': Integer()
+        'views': Integer(),
     })
 
     __metrics_keys__ = [
