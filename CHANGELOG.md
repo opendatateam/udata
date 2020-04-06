@@ -4,7 +4,14 @@
 
 ### Breaking changes
 
-- Full metrics refactoring [2459](https://github.com/opendatateam/udata/pull/2459)
+- Full metrics refactoring [2459](https://github.com/opendatateam/udata/pull/2459):
+  - Metric collection is now useless and will not be filled anymore.
+  - Not migration was done to remove Metrics collection in order to let users decide what to do with the remaining collection.
+  - Udata-piwik uses now InfluxDB
+  - Most of celery's tasks are removed.
+  - View's graphs are removed from admin and dashboard panel until we have accurate data to populate them.
+  - Site's metrics computation are not triggered by signals anymore.
+  - A specific celery job will be run periodically to compute site's metrics.
 
 ### New features
 

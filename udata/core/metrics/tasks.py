@@ -2,7 +2,7 @@ from flask import current_app
 
 from udata.models import Site
 from udata.tasks import job
-from udata.core.metrics.signals import on_site_metrics
+from udata.core.metrics.signals import on_site_metrics_computed
 
 @job('site-metrics')
 def compute_site_metrics(self):
@@ -22,4 +22,4 @@ def compute_site_metrics(self):
     site.count_max_org_reuses()
     site.count_max_org_datasets()
     # Sending signal
-    on_site_metrics.send(site)
+    on_site_metrics_computed.send(site)
