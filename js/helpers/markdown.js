@@ -15,7 +15,7 @@ const MD_FILTERED_TAGS = [
 const RE_REPLACE_TAGS = new RegExp(`<(\/?(?:${MD_FILTERED_TAGS.join('|')}).*?\/?)>`, 'gi');
 
 const markdown = markdownit({
-    html: true,
+    html: false,
     linkify: true,
     typographer: true,
     breaks: true,
