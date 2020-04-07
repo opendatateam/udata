@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.0.2 (2020-04-07)
 
 - :warning: Breaking change / security fix: disallow html tags in markdown-it (JS markdown rendering) [#2465](https://github.com/opendatateam/udata/pull/2465)
