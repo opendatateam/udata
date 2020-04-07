@@ -2,12 +2,12 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- :warning: Breaking change / security fix: disallow html tags in markdown-it (JS markdown rendering) [#2465](https://github.com/opendatateam/udata/pull/2465)
 
 ## 2.0.1 (2020-03-24)
 
-- Allow images to be displayed in markdown by default [2462](https://github.com/opendatateam/udata/pull/2462)
-- Fix deleted user's authentication on backend side [2460](https://github.com/opendatateam/udata/pull/2460)
+- Allow images to be displayed in markdown by default [#2462](https://github.com/opendatateam/udata/pull/2462)
+- Fix deleted user's authentication on backend side [#2460](https://github.com/opendatateam/udata/pull/2460)
 
 ## 2.0.0 (2020-03-11)
 
