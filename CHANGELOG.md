@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Ajout du _flag_ "recherche" pour activer le _widget_ d'experimentation de recherche [#466](https://github.com/etalab/udata-gouvfr/pull/466/commits/9c42b5aa8e6e0e37f471a32182196b989bc41a68)
 
 ## 2.0.1 (2020-03-24)
 

@@ -199,4 +199,7 @@
 {% endblock %}
 
 {% block extra_js %}
+    {% if request.args.get('flag') == 'recherche' -%}
+        <script src="https://recherche.etalab.studio/js/widget.js"></script>
+    {%- endif %}
 {% endblock %}
