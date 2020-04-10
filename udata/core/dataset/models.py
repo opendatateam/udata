@@ -347,6 +347,10 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
 
+    __metrics_keys__ = [
+        'views',
+    ]
+
     @property
     def dataset(self):
         return self._instance
@@ -728,6 +732,10 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     original dataset
     '''
     dataset = db.ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
+
+    __metrics_keys__ = [
+        'views',
+    ]
 
     meta = {
         'ordering': ['-created_at'],
