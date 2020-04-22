@@ -7,10 +7,6 @@
             :icon="b.icon" :target="b.target">
         </small-box>
     </div>
-    <div class="row">
-        <chart-widget title="Traffic" :metrics="metrics" class="col-xs-12"
-            x="date" :y="y"></chart-widget>
-    </div>
 
     <div class="row">
         <dataset-list id="datasets" class="col-xs-12" :datasets="datasets"></dataset-list>
