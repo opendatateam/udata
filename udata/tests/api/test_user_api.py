@@ -18,6 +18,9 @@ class UserAPITest(APITestCase):
         response = self.post(url_for('api.user_followers', id=to_follow.id))
         self.assert201(response)
 
+        to_follow.count_followers()
+        self.assertEqual(to_follow.get_metrics()['followers'], 1)
+
         nb_followers = Follow.objects.followers(to_follow).count()
 
         self.assertEqual(response.json['followers'], nb_followers)

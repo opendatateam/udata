@@ -182,9 +182,9 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     def views_count(self):
         return self.metrics.get('views', 0)
     
-    @cached_property
-    def datasets_count(self):
-        return len(self.datasets)
+    def count_datasets(self):
+        self.metrics['datasets'] = len(self.datasets)
+        self.save()
 
     def count_discussions(self):
         from udata.models import Discussion

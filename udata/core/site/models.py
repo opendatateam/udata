@@ -56,7 +56,7 @@ class Site(WithMetrics, db.Document):
     
     def count_org(self):
         from udata.models import Organization
-        self.metrics['organization'] = Organization.objects.visible().count()
+        self.metrics['organizations'] = Organization.objects.visible().count()
         self.save()
 
     def count_org_for_badge(self, badge_kind):

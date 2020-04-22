@@ -1,6 +1,7 @@
 import pytest
 
 from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory, OrganizationFactory
+from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.site.factories import SiteFactory
 from udata.models import Site, Badge, PUBLIC_SERVICE
 from udata.core.site.models import current_site
@@ -9,6 +10,26 @@ from udata.tests.helpers import assert_emit
 
 @pytest.mark.usefixtures('clean_db')
 class SiteMetricTest:
+    def test_orga_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
+        OrganizationFactory.create_batch(3)
+
+        site.count_org()
+
+        assert site.get_metrics()['organizations'] == 3
+
+    def test_reuse_metric(self, app):
+        site = SiteFactory.create(
+            id=app.config['SITE_ID']
+        )
+        VisibleReuseFactory.create_batch(4)
+
+        site.count_reuses()
+
+        assert site.get_metrics()['reuses'] == 4
+
     def test_dataset_metric(self, app):
         site = SiteFactory.create(
             id=app.config['SITE_ID']
