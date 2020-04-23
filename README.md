@@ -36,3 +36,22 @@ It is collectively taken care of by members of the
 [readthedocs-url]: https://udata.readthedocs.io/en/latest/
 [crowdin-badge]: https://d322cqt584bo4o.cloudfront.net/udata/localized.svg
 [crowdin-url]: https://crowdin.com/project/udata
+
+
+--------
+
+#### dev environment
+
+_note : Docker and Python 3.* must be installed_
+
+- chained installation with scripts
+
+  ```bash
+  sh ./scripts/dev_setup_env.sh
+  ```
+
+- run with scripts (only if dev environment is set up)
+
+  ```bash
+  sh ./scripts/dev_setup_env.sh
+  ```
