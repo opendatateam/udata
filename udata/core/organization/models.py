@@ -257,6 +257,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
     def count_members(self):
         self.metrics['members'] = len(self.members)
+        self.save()
 
     def count_datasets(self):
         from udata.models import Dataset

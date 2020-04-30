@@ -294,7 +294,9 @@ class MemberAPI(API):
         EditOrganizationPermission(org).test()
         member = org.member(user)
         if member:
-            Organization.objects(id=org.id).update_one(pull__members=member)
+            org = Organization.objects(id=org.id)
+            org.update_one(pull__members=member)
+            org.count_members()
             return '', 204
         else:
             api.abort(404)
