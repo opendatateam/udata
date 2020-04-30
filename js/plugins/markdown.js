@@ -25,7 +25,7 @@ export function install(Vue, options) {
         }
         let parsed = markdown(text);
         if (max_length) {
-            // strip tags (not for sanitization, done by markdown())
+            // strip tags (not for sanitisation, done by markdown())
             parsed = parsed.replace(/(<([^>]+)>)/ig, '');
             return txt.truncate(parsed || '', max_length);
         } else {
