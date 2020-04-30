@@ -220,6 +220,7 @@ class MembershipAcceptAPI(MembershipAPI):
         member = Member(user=membership_request.user, role='editor')
 
         org.members.append(member)
+        org.count_members()
         org.save()
 
         notify_membership_response.delay(str(org.id), str(membership_request.id))
@@ -267,6 +268,7 @@ class MemberAPI(API):
         form = api.validate(MemberForm, member)
         form.populate_obj(member)
         org.members.append(member)
+        org.count_members()
         org.save()
 
         return member, 201

@@ -251,13 +251,12 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
 
         return result
 
-    @cached_property
-    def members_count(self):
-        return len(self.members)
-    
     @property
     def views_count(self):
         return self.metrics.get('views', 0)
+
+    def count_members(self):
+        self.metrics['members'] = len(self.members)
 
     def count_datasets(self):
         from udata.models import Dataset
