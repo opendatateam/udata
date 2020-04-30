@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.0.3 (2020-04-30)
 
 - :warning: Security fix: fix XSS in markdown w/ length JS filter [#2471](https://github.com/opendatateam/udata/pull/2471)
