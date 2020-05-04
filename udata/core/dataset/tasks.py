@@ -125,7 +125,7 @@ def store_resource(csvfile, model, dataset):
     filename = 'export-%s-%s.csv' % (model, timestr)
     prefix = '/'.join((dataset.slug, timestr))
     storage = storages.resources
-    with open(csvfile.name) as infile:
+    with open(csvfile.name, 'rb') as infile:
         stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
     checksum = r_info.pop('checksum')
