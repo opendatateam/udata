@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.0.4 (2020-05-04)
 
 - Fix export-csv command (py3 compat) [#2472](https://github.com/opendatateam/udata/pull/2472)
 
