@@ -6,14 +6,17 @@
 
 - Full metrics refactoring [2459](https://github.com/opendatateam/udata/pull/2459):
   - Metric collection is now useless and will not be filled anymore, you can remove it or keep it for archival sake. It will not be automatically removed.
-  - Not migration was done to remove Metrics collection in order to let users decide what to do with the remaining collection.
   - [udata-piwik](https://github.com/opendatateam/udata-piwik) now uses InfluxDB as a buffer for trafic data before injecting them into udata's models.
   - Most of celery's tasks related to metrics are removed, this should help performance-wise on a big instance.
   - Charts related to metrics are removed from admin and dashboard panel until we have accurate data to populate them.
   - Site's metrics computation are not triggered by signals anymore.
-  - A specific celery job needs to be periodically to compute site's metrics.
+  - A specific celery job needs to be run periodically to compute site's metrics.
 
 ### New features
+
+- Nothing yet
+
+## 2.0.4 (2020-05-04)
 
 - Fix export-csv command (py3 compat) [#2472](https://github.com/opendatateam/udata/pull/2472)
 
