@@ -5,7 +5,7 @@
 ### Breaking changes
 
 - Full metrics refactoring [2459](https://github.com/opendatateam/udata/pull/2459):
-  - Metric collection is now useless and will not be filled anymore.
+  - Metric collection is now useless and will not be filled anymore, you can remove it or keep it for archival sake. It will not be automatically removed.
   - Not migration was done to remove Metrics collection in order to let users decide what to do with the remaining collection.
   - Udata-piwik uses now InfluxDB
   - Most of celery's tasks are removed.
