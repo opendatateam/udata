@@ -9,7 +9,7 @@
   - Not migration was done to remove Metrics collection in order to let users decide what to do with the remaining collection.
   - [udata-piwik](https://github.com/opendatateam/udata-piwik) now uses InfluxDB as a buffer for trafic data before injecting them into udata's models.
   - Most of celery's tasks related to metrics are removed, this should help performance-wise on a big instance.
-  - View's graphs are removed from admin and dashboard panel until we have accurate data to populate them.
+  - Charts related to metrics are removed from admin and dashboard panel until we have accurate data to populate them.
   - Site's metrics computation are not triggered by signals anymore.
   - A specific celery job will be run periodically to compute site's metrics.
 
