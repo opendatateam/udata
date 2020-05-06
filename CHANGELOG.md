@@ -11,7 +11,7 @@
   - Most of celery's tasks related to metrics are removed, this should help performance-wise on a big instance.
   - Charts related to metrics are removed from admin and dashboard panel until we have accurate data to populate them.
   - Site's metrics computation are not triggered by signals anymore.
-  - A specific celery job will be run periodically to compute site's metrics.
+  - A specific celery job needs to be periodically to compute site's metrics.
 
 ### New features
 
