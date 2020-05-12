@@ -7,10 +7,9 @@ import Vue from 'vue';
 
 import ActivityTimeline from 'components/activities/timeline.vue';
 import SmallBox from 'components/containers/small-box.vue';
-import DashboardGraphs from 'components/dashboard/graphs.vue';
 
 
 new Vue({
     mixins: [FrontMixin],
-    components: {ActivityTimeline, DashboardGraphs, SmallBox},
+    components: {ActivityTimeline, SmallBox},
 });

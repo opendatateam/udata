@@ -1,6 +1,6 @@
 from udata import mail
 from udata.i18n import lazy_gettext as _
-from udata.models import Activity, Metrics, Issue, Discussion, Follow
+from udata.models import Activity, Issue, Discussion, Follow
 from udata.tasks import get_logger, job, task
 
 from .models import Reuse
@@ -20,8 +20,6 @@ def purge_reuses(self):
         Discussion.objects(subject=reuse).delete()
         # Remove activity
         Activity.objects(related_to=reuse).delete()
-        # Remove metrics
-        Metrics.objects(object_id=reuse.id).delete()
         reuse.delete()
 
 

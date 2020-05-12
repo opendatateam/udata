@@ -8,22 +8,21 @@ from udata.search.analysis import simple
 from udata.search.fields import TermsFacet, RangeFacet
 from udata.utils import to_iso_datetime
 
-from . import metrics  # noqa: Metrics are need for the mapping
 
 __all__ = ('OrganizationSearch', )
 lazy = search.lazy_config('organization')
 
 
 def max_reuses():
-    return max(current_site.metrics.get('max_org_reuses'), 10)
+    return max(current_site.get_metrics()['max_org_reuses'], 10)
 
 
 def max_datasets():
-    return max(current_site.metrics.get('max_org_datasets'), 10)
+    return max(current_site.get_metrics()['max_org_datasets'], 10)
 
 
 def max_followers():
-    return max(current_site.metrics.get('max_org_followers'), 10)
+    return max(current_site.get_metrics()['max_org_followers'], 10)
 
 
 def organization_badge_labelizer(kind):
@@ -46,7 +45,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     badges = String(index='not_analyzed')
     url = String(index='not_analyzed')
     created = Date(format='date_hour_minute_second')
-    metrics = search.metrics_mapping_for(Organization)
+    metrics = Organization.__search_metrics__
     org_suggest = Completion(analyzer=simple,
                              search_analyzer=simple,
                              payloads=True)

@@ -459,6 +459,9 @@ class MembershipAPITest:
         response = api.post(url)
         assert201(response)
 
+        to_follow.count_followers()
+        assert to_follow.get_metrics()['followers'] == 1
+
         assert Follow.objects.following(to_follow).count() is 0
         assert Follow.objects.followers(to_follow).count() is 1
         follow = Follow.objects.followers(to_follow).first()

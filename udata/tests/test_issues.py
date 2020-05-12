@@ -4,6 +4,7 @@ from flask import url_for
 
 from udata.models import db, Dataset, Member
 from udata.core.issues.models import Issue, Message
+from udata.core.issues.metrics import update_issues_metric
 from udata.core.issues.actions import issues_for
 from udata.core.issues.notifications import issues_notifications
 from udata.core.issues.signals import (
@@ -31,7 +32,6 @@ class IssuesTest(APITestCase):
     modules = ['core.user']
 
     def test_new_issue(self):
-        self.app.config['USE_METRICS'] = True
         user = self.login()
         dataset = Dataset.objects.create(title='Test dataset')
 
@@ -48,7 +48,7 @@ class IssuesTest(APITestCase):
         self.assert201(response)
 
         dataset.reload()
-        self.assertEqual(dataset.metrics['issues'], 1)
+        self.assertEqual(dataset.get_metrics()['issues'], 1)
 
         issues = Issue.objects(subject=dataset)
         self.assertEqual(len(issues), 1)
@@ -231,7 +231,6 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][0]['posted_on'])
 
     def test_add_comment_to_issue(self):
-        self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
@@ -241,8 +240,8 @@ class IssuesTest(APITestCase):
             title='test issue',
             discussion=[message]
         )
-        on_new_issue.send(issue)  # Updating metrics.
 
+        on_new_issue.send(issue)  # Updating metrics.
         poster = self.login()
         with assert_emit(on_new_issue_comment):
             response = self.post(url_for('api.issue', id=issue.id), {
@@ -251,7 +250,7 @@ class IssuesTest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.metrics['issues'], 1)
+        self.assertEqual(dataset.get_metrics()['issues'], 1)
 
         data = response.json
 
@@ -269,7 +268,6 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue(self):
-        self.app.config['USE_METRICS'] = True
         owner = self.login()
         user = UserFactory()
         dataset = Dataset.objects.create(title='Test dataset', owner=owner)
@@ -290,7 +288,7 @@ class IssuesTest(APITestCase):
         self.assert200(response)
 
         dataset.reload()
-        self.assertEqual(dataset.metrics['issues'], 0)
+        self.assertEqual(dataset.get_metrics()['issues'], 0)
 
         data = response.json
 
@@ -308,7 +306,6 @@ class IssuesTest(APITestCase):
         self.assertIsNotNone(data['discussion'][1]['posted_on'])
 
     def test_close_issue_permissions(self):
-        self.app.config['USE_METRICS'] = True
         dataset = Dataset.objects.create(title='Test dataset')
         user = UserFactory()
         message = Message(content='bla bla', posted_by=user)
@@ -329,7 +326,7 @@ class IssuesTest(APITestCase):
 
         dataset.reload()
         # Metrics unchanged after attempt to close the discussion.
-        self.assertEqual(dataset.metrics['issues'], 1)
+        self.assertEqual(dataset.get_metrics()['issues'], 1)
 
 
 class IssueCsvTest(FrontTestCase):

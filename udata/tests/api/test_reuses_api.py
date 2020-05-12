@@ -229,6 +229,9 @@ class ReuseAPITest:
         response = api.post(url_for('api.reuse_followers', id=to_follow.id))
         assert201(response)
 
+        to_follow.count_followers()
+        assert to_follow.get_metrics()['followers'] == 1
+
         assert Follow.objects.following(to_follow).count() == 0
         assert Follow.objects.followers(to_follow).count() == 1
         follow = Follow.objects.followers(to_follow).first()

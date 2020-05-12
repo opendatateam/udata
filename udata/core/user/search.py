@@ -3,14 +3,12 @@ from elasticsearch_dsl import Completion, Date, String, Boolean
 from udata.i18n import lazy_gettext as _
 from udata.models import User, Organization
 from udata.search import ModelSearchAdapter
-from udata.search import i18n_analyzer, metrics_mapping_for, register
+from udata.search import i18n_analyzer, register
 from udata.search.fields import ModelTermsFacet, RangeFacet
 from udata.search.fields import GaussDecay
 from udata.search.analysis import simple
 from udata.utils import to_iso_datetime
 
-# Metrics are required for user search
-from . import metrics  # noqa
 
 __all__ = ('UserSearch', )
 
@@ -28,7 +26,7 @@ class UserSearch(ModelSearchAdapter):
     about = String(analyzer=i18n_analyzer)
     organizations = String(index='not_analyzed')
     visible = Boolean()
-    metrics = metrics_mapping_for(User)
+    metrics = User.__search_metrics__
     created = Date(format='date_hour_minute_second')
     user_suggest = Completion(analyzer=simple,
                               search_analyzer=simple,
