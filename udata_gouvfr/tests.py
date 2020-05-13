@@ -17,7 +17,7 @@ from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.frontend.markdown import md
-from udata.models import Badge, PUBLIC_SERVICE
+from udata.models import Badge
 from udata.settings import Testing
 from udata.tests.features.territories.test_territories_process import (
     create_geozones_fixtures
@@ -30,7 +30,6 @@ from .models import (
     TERRITORY_DATASETS, OPENFIELD16, SPD
 )
 from .views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
-from .metrics import PublicServicesMetric
 
 
 class GouvFrSettings(Testing):
@@ -500,22 +499,6 @@ class GouvFrHomeDiscourseTest:
         rmock.get(url, exc=requests.ConnectionError('Error'))
         response = client.get(url_for('site.home'))
         assert200(response)
-
-
-@pytest.mark.usefixtures('clean_db')
-class GouvFrMetricsTest:
-    '''Check metrics'''
-    settings = GouvFrSettings
-
-    def test_public_services(self):
-        ps_badge = Badge(kind=PUBLIC_SERVICE)
-        public_services = [
-            OrganizationFactory(badges=[ps_badge]) for _ in range(2)
-        ]
-        for _ in range(3):
-            OrganizationFactory()
-
-        assert PublicServicesMetric().get_value() == len(public_services)
 
 
 @pytest.mark.options(DEFAULT_LANGUAGE='en')
