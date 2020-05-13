@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.1.0 (2020-05-13)
 
 - Remove public services metrics [#472](https://github.com/etalab/udata-gouvfr/pull/472)
 
