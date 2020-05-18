@@ -8,6 +8,7 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
+from elasticsearch_dsl import Integer, Object
 
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
@@ -346,6 +347,10 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     on_added = signal('Resource.on_added')
     on_deleted = signal('Resource.on_deleted')
 
+    __metrics_keys__ = [
+        'views',
+    ]
+
     @property
     def dataset(self):
         return self._instance
@@ -394,6 +399,20 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         PIVOTAL_DATA: _('Pivotal data'),
     }
 
+    __search_metrics__ = Object(properties={
+        'reuses': Integer(),
+        'followers': Integer(),
+        'views': Integer(),
+    })
+
+    __metrics_keys__ = [
+        'discussions',
+        'issues',
+        'reuses',
+        'followers',
+        'views',
+    ]
+
     meta = {
         'indexes': [
             '-created_at',
@@ -439,7 +458,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                        resource_id=kwargs['resource_added'])
 
     def clean(self):
-        super(Dataset, self).clean()
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
@@ -679,6 +697,30 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         return result
 
+    @property
+    def views_count(self):
+        return self.metrics.get('views', 0)
+
+    def count_discussions(self):
+        from udata.models import Discussion
+        self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
+        self.save()
+
+    def count_issues(self):
+        from udata.models import Issue
+        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
+        self.save()
+
+    def count_reuses(self):
+        from udata.models import Reuse
+        self.metrics['reuses'] = Reuse.objects(datasets=self).visible().count()
+        self.save()
+
+    def count_followers(self):
+        from udata.models import Follow
+        self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
+        self.save()
+
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)
@@ -690,6 +732,10 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     original dataset
     '''
     dataset = db.ReferenceField(Dataset, reverse_delete_rule=db.NULLIFY)
+
+    __metrics_keys__ = [
+        'views',
+    ]
 
     meta = {
         'ordering': ['-created_at'],

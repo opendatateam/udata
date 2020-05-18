@@ -16,7 +16,7 @@ site_fields = api.model('Site', {
         description='The Site unique identifier', required=True),
     'title': fields.String(
         description='The site display title', required=True),
-    'metrics': fields.Raw(description='The associated metrics', default={}),
+    'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The associated metrics', default={}),
 })
 
 

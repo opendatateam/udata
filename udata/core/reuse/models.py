@@ -2,6 +2,7 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
+from elasticsearch_dsl import Integer, Object
 
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -68,6 +69,20 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     __badges__ = {}
 
+    __search_metrics__ = Object(properties={
+        'datasets': Integer(),
+        'followers': Integer(),
+        'views': Integer(),
+    })
+
+    __metrics_keys__ = [
+        'discussions',
+        'issues',
+        'datasets',
+        'followers',
+        'views',
+    ]
+
     meta = {
         'indexes': ['-created_at', 'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
@@ -124,7 +139,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         '''Auto populate urlhash from url'''
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
-        super(Reuse, self).clean()
 
     @classmethod
     def get(cls, id_or_slug):
@@ -163,6 +177,29 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['author'] = author
 
         return result
+    
+    @property
+    def views_count(self):
+        return self.metrics.get('views', 0)
+    
+    def count_datasets(self):
+        self.metrics['datasets'] = len(self.datasets)
+        self.save()
+
+    def count_discussions(self):
+        from udata.models import Discussion
+        self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
+        self.save()
+
+    def count_issues(self):
+        from udata.models import Issue
+        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
+        self.save()
+
+    def count_followers(self):
+        from udata.models import Follow
+        self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
+        self.save()
 
 
 pre_save.connect(Reuse.pre_save, sender=Reuse)

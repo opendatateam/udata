@@ -48,7 +48,8 @@ reuse_fields = api.model('Reuse', {
     'owner': fields.Nested(
         user_ref_fields, description='The owner user', readonly=True,
         allow_null=True),
-    'metrics': fields.Raw(description='The reuse metrics', readonly=True),
+    'metrics': fields.Raw(attribute=lambda o: o.get_metrics(),
+        description='The reuse metrics', readonly=True),
     'uri': fields.UrlFor(
         'api.reuse', lambda o: {'reuse': o},
         description='The reuse API URI', readonly=True),

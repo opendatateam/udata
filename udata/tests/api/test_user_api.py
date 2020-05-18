@@ -18,6 +18,9 @@ class UserAPITest(APITestCase):
         response = self.post(url_for('api.user_followers', id=to_follow.id))
         self.assert201(response)
 
+        to_follow.count_followers()
+        self.assertEqual(to_follow.get_metrics()['followers'], 1)
+
         nb_followers = Follow.objects.followers(to_follow).count()
 
         self.assertEqual(response.json['followers'], nb_followers)
@@ -178,7 +181,7 @@ class UserAPITest(APITestCase):
                 about=faker.paragraph(),
                 website=faker.url(),
                 avatar_url=faker.url(),
-                metrics={'datasets': 10})
+                metrics={'datasets': 10, 'followers': 1, 'following': 0, 'reuses': 2})
         response = self.get(url_for('api.users'))
         self.assert200(response)
         [json] = response.json['data']

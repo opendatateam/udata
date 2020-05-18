@@ -283,8 +283,6 @@ class Defaults(object):
     # How much time upload chunks are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
 
-    USE_METRICS = True
-
     # Avatar providers parameters
     # Overrides themes and default parameters
     # if set to anything else than `None`
@@ -464,7 +462,6 @@ class Testing(object):
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
-    USE_METRICS = False
     RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_ALLOWED_TLDS = tld_set | set(['test'])

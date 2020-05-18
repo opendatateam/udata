@@ -7,13 +7,11 @@ from udata.models import (
 )
 from udata.search import (
     BoolBooster, GaussDecay, ModelSearchAdapter,
-    i18n_analyzer, metrics_mapping_for, register, lazy_config,
+    i18n_analyzer, register, lazy_config,
     RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
 )
 from udata.search.analysis import simple
 from udata.utils import to_iso_datetime
-
-from . import metrics  # noqa: Metrics are require for reuse search
 
 
 __all__ = ('ReuseSearch', )
@@ -21,11 +19,11 @@ lazy = lazy_config('reuse')
 
 
 def max_datasets():
-    return max(current_site.metrics.get('max_reuse_datasets'), 5)
+    return max(current_site.get_metrics()['max_reuse_datasets'], 5)
 
 
 def max_followers():
-    return max(current_site.metrics.get('max_reuse_followers'), 10)
+    return max(current_site.get_metrics()['max_reuse_followers'], 10)
 
 
 def reuse_type_labelizer(value):
@@ -67,7 +65,7 @@ class ReuseSearch(ModelSearchAdapter):
     )
     created = Date(format='date_hour_minute_second')
     last_modified = Date(format='date_hour_minute_second')
-    metrics = metrics_mapping_for(Reuse)
+    metrics = Reuse.__search_metrics__
     featured = Boolean()
     reuse_suggest = Completion(analyzer=simple,
                                search_analyzer=simple,
