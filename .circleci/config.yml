@@ -156,64 +156,16 @@ jobs:
             pip install twine
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
-  github:
-    docker:
-      - image: udata/circleci:2-alpine
-    environment:
-       BASH_ENV: /root/.bashrc
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Upload github release
-          command: gh_release
-
 workflows:
   version: 2
   build:
     jobs:
-      - python:
-          filters:
-            branches:
-              only:
-                - master
-                - /[0-9]+(\.[0-9]+)+/
-                - /pull/[0-9]+/
-                - /pyup-update-.+/
-                - /renovate\/.+/
-                - l10n_master
-                - /metricsBreakDown(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
-      - assets:
-          filters:
-            branches:
-              only:
-                - master
-                - /[0-9]+(\.[0-9]+)+/
-                - /pull/[0-9]+/
-                - /pyup-update-.+/
-                - /renovate\/.+/
-                - l10n_master
-                - /metricsBreakDown(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
+      - python
+      - assets
       - dist:
           requires:
             - python
             - assets
-          filters:
-            branches:
-              only:
-                - master
-                - /[0-9]+(\.[0-9]+)+/
-                - /pull/[0-9]+/
-                - /pyup-update-.+/
-                - /renovate\/.+/
-                - l10n_master
-                - /metricsBreakDown(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
       - publish:
           requires:
             - dist
@@ -222,16 +174,6 @@ workflows:
               only:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
-                - /metricsBreakDown(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
-          context: org-global
-      - github:
-          requires:
-            - dist
-          filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
           context: org-global
