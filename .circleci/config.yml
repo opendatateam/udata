@@ -169,4 +169,11 @@ workflows:
       - publish:
           requires:
             - dist
+          filters:		
+            branches:		
+              only:		
+                - master		
+                - /[0-9]+(\.[0-9]+)+/		
+            tags:		
+              only: /v[0-9]+(\.[0-9]+)+/		
           context: org-global
