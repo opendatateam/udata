@@ -1,8 +1,8 @@
-# Changelog
+#Changelog
 
 ## Current (in progress)
 
-- Nothing yet
+- Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)
 
 ## 2.1.0 (2020-05-12)
 
@@ -82,6 +82,7 @@
 - Resolved conflict between id and slug [#2356](https://github.com/opendatateam/udata/pull/2356)
 - Fix next link in posts pagination [#2358](https://github.com/opendatateam/udata/pull/2358)
 - Fix organization's members roles translation [#2359](https://github.com/opendatateam/udata/pull/2359)
+
 ## 1.6.17 (2019-10-28)
 
 - Disallow URLs in first and last names [#2345](https://github.com/opendatateam/udata/pull/2345)
@@ -99,7 +100,6 @@
 - Allow `Authorization` as CORS header and OAuth minor fixes [#2298](https://github.com/opendatateam/udata/pull/2298)
 - Set dataset.private to False by default (and fix stock) [#2307](https://github.com/opendatateam/udata/pull/2307)
 - Fixes some inconsistencies between admin display (buttons, actions...) and real permissions [#2308](https://github.com/opendatateam/udata/pull/2308)
-
 
 ## 1.6.14 (2019-08-14)
 
@@ -133,7 +133,6 @@
 - Added `config.HARVEST_JOBS_RETENTION_DAYS` and a `harvest-purge-jobs` job to apply it [#2214](https://github.com/opendatateam/udata/pull/2214) (migration). **Warning, the migration will enforce `config.HARVEST_JOBS_RETENTION_DAYS` and can take some time on a big `HarvestJob` collection**
 - Drop `no_dereference` on indexing to avoid the "`dictionary changed size during iteration`" error until another solution is found. **Warning: this might result in more resources consumption while indexing** [#2237](https://github.com/opendatateam/udata/pull/2237)
 - Fix various issues around discussions UI [#2190](https://github.com/opendatateam/udata/pull/2190)
-
 
 ## 1.6.12 (2019-06-26)
 
@@ -195,7 +194,6 @@
 - Admins can delete a single comment in a discussion thread [#2087](https://github.com/opendatateam/udata/pull/2087)
 - Add cache directives to dataset display blocks [#2129](https://github.com/opendatateam/udata/pull/2129)
 - Export multiple models objects to CSV (dataset of datasets) [#2124](https://github.com/opendatateam/udata/pull/2124)
-
 
 ## 1.6.6 (2019-03-27)
 
@@ -363,11 +361,11 @@ None
 ### Internals
 
 - Backports some Python 3 forward compatible changes and fixes some bugs [#1769](https://github.com/opendatateam/udata/pull/1769):
-    - avoid `filter` and `map` usage instead of list comprehension
-    - explicit encoding handling
-    - avoid comparison to `None`
-    - use `next()` instead of `.next()` to iterate
-    - unhide some implicit casts (in particular search weight)
+  - avoid `filter` and `map` usage instead of list comprehension
+  - explicit encoding handling
+  - avoid comparison to `None`
+  - use `next()` instead of `.next()` to iterate
+  - unhide some implicit casts (in particular search weight)
 - Tests are now run against `local.test` instead of `localhost` to avoid pytest warnings
 
 ## 1.4.1 (2018-06-15)
@@ -548,7 +546,6 @@ None
 
 - Switch to pytest as testing tool and expose a `udata` pytest plugin [#1400](https://github.com/opendatateam/udata/pull/1400)
 
-
 ## 1.2.11 (2018-02-05)
 
 - Translate Flask-Security email subjects [#1413](https://github.com/opendatateam/udata/pull/1413)
@@ -660,16 +657,15 @@ None
 - Improve URLs validation (support new tlds, unicode URLs...) [#1182](https://github.com/opendatateam/udata/pull/1182)
 - Properly serialize empty geometries for zones missing it and prevent leaflet crash on invalid bounds [#1188](https://github.com/opendatateam/udata/pull/1188)
 - Start validating some configuration parameters [#1197](https://github.com/opendatateam/udata/pull/1197)
-- Remove resources without title or url [migration] [#1200](https://github.com/opendatateam/udata/pull/1200)
+- Remove resources without title or url [migration][#1200](https://github.com/opendatateam/udata/pull/1200)
 - Improve harvesting licenses detection [#1203](https://github.com/opendatateam/udata/pull/1203)
 - Added missing delete post and topic admin actions [#1202](https://github.com/opendatateam/udata/pull/1202)
 - Fix the scroll to a discussion sub-thread [#1206](https://github.com/opendatateam/udata/pull/1206)
-- Fix duplication in discussions [migration] [#1209](https://github.com/opendatateam/udata/pull/1209)
+- Fix duplication in discussions [migration][#1209](https://github.com/opendatateam/udata/pull/1209)
 - Display that a discussion has been closed [#1216](https://github.com/opendatateam/udata/pull/1216)
 - Explicit dataset search reuse facet context (only known reuses) [#1219](https://github.com/opendatateam/udata/pull/1219)
 - Optimize indexation a little bit [#1215](https://github.com/opendatateam/udata/pull/1215)
-- Fix some reversed temporal coverage [migration] [#1214](https://github.com/opendatateam/udata/pull/1214)
-
+- Fix some reversed temporal coverage [migration][#1214](https://github.com/opendatateam/udata/pull/1214)
 
 ## 1.1.8 (2017-09-28)
 
@@ -788,6 +784,7 @@ None
 
   - Changed notification style to toast
   - Fix notifications that weren't displayed on form submission
+
 - Add a toggle indicator on dataset quality blocks that are collapsible
   [#915](https://github.com/opendatateam/udata/issues/915)
 - Integrating latest versions of GeoZones and GeoLogos for territories.
@@ -826,6 +823,7 @@ None
   - Allows to define `min` and `max` values to disable some dates
   - Keyboard input is reflected into the calendar
     [#615](https://github.com/opendatateam/udata/issues/615)
+
 - Disable `next` button when no file has been uploaded
   [#930](https://github.com/opendatateam/udata/issues/930)
 - Fix badges notification mails
@@ -864,6 +862,7 @@ None
   - lighter bootstrap style by importing only what's needed
   - make use of bootstrap and admin-lte variables (easier for theming)
   - proper separation between front and admin style
+
 - Drop `ExtractTextPlugin` on Vue components style:
 
   - faster (re)compilation time
@@ -871,6 +870,7 @@ None
     [#555](https://github.com/opendatateam/udata/issues/555)
     [#710](https://github.com/opendatateam/udata/issues/710)
   - allows use of hot components reloading.
+
 - Pure Vue.js modals. Fix the default membership role. Added contribute modal.
   [#873](https://github.com/opendatateam/udata/pull/873)
 - Easier Vue.js development/debugging:
@@ -880,6 +880,7 @@ None
   - `name` on all components: no more `Anonymous Component` in Vue debugger
   - No more `Fragments`
   - More ES6 everywhere
+
 - Make metrics deactivable for tests
   [#905](https://github.com/opendatateam/udata/pull/905)
 
@@ -894,8 +895,7 @@ None
 
 ## 1.0.10 (2017-05-11)
 
-- Fix bad stored (community) resources URLs [migration]
-  [#882](https://github.com/opendatateam/udata/issues/882)
+- Fix bad stored (community) resources URLs [migration][#882](https://github.com/opendatateam/udata/issues/882)
 - Proper producer logo display on dataset pages
 - Fix CKAN harvester empty notes and `metadata` file type handling
 - Remove (temporary) badges metrics
@@ -964,8 +964,7 @@ None
   [#801](https://github.com/opendatateam/udata/pull/801)
 - Cleanup factories
   [#808](https://github.com/opendatateam/udata/pull/808)
-- Fix user default metrics not being set [migration]
-  [#809](https://github.com/opendatateam/udata/pull/809)
+- Fix user default metrics not being set [migration][#809](https://github.com/opendatateam/udata/pull/809)
 - Fix metric update after transfer
   [#810](https://github.com/opendatateam/udata/pull/810)
 - Improve spatial completion ponderation (spatial zones reindexation required)
@@ -1005,35 +1004,35 @@ None
 
 ### Breaking Changes
 
-* 2016-05-11: Upgrade of ElasticSearch from 1.7 to 2.3 [#449](https://github.com/opendatateam/udata/pull/449)
+- 2016-05-11: Upgrade of ElasticSearch from 1.7 to 2.3 [#449](https://github.com/opendatateam/udata/pull/449)
 
 You have to re-initialize the index from scratch, not just use the `reindex` command given that ElasticSearch 2+ doesn't provide a way to [delete mappings](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-mapping.html) anymore. The command is `udata search init` and may take some time given the amount of data you are dealing with.
 
-* 2017-01-18: User search and listing has been removed (privacy concern)
+- 2017-01-18: User search and listing has been removed (privacy concern)
 
 ### New & Improved
 
-* 2017-01-06: Add some dataset ponderation factor: temporal coverage, spatial coverage,
+- 2017-01-06: Add some dataset ponderation factor: temporal coverage, spatial coverage,
   certified provenance and more weight for featured ones. Need reindexation to be taken into account.
 
-* 2016-12-20: Use all the [Dublin Core Frequencies](http://dublincore.org/groups/collections/frequency/)
+- 2016-12-20: Use all the [Dublin Core Frequencies](http://dublincore.org/groups/collections/frequency/)
   plus some extra frequencies.
 
-* 2016-12-01: Add the possibility for a user to delete its account in the admin interface
+- 2016-12-01: Add the possibility for a user to delete its account in the admin interface
 
 In some configurations, this feature should be deactivated, typically when
 there is an SSO in front of udata which may cause some inconsistencies. In
 that case, the configuration parameter DELETE_ME should be set to False (True
 by default).
 
-* 2016-05-12: Add fields masks to reduce API payloads [#451](https://github.com/opendatateam/udata/pull/451)
+- 2016-05-12: Add fields masks to reduce API payloads [#451](https://github.com/opendatateam/udata/pull/451)
 
 The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/mask.html) in Flask-RESTPlus allows us to reduce the retrieved payload within the admin — especially for datasets — and results in a performances boost.
 
 ### Fixes
 
-* 2016-11-29: Mark active users as confirmed [#619](https://github.com/opendatateam/udata/pull/618)
-* 2016-11-28: Merge duplicate users [#617](https://github.com/opendatateam/udata/pull/617)
+- 2016-11-29: Mark active users as confirmed [#619](https://github.com/opendatateam/udata/pull/618)
+- 2016-11-28: Merge duplicate users [#617](https://github.com/opendatateam/udata/pull/617)
   (A reindexation is necessary after this migration)
 
 ### Deprecation
@@ -1041,11 +1040,10 @@ The addition of [fields masks](http://flask-restplus.readthedocs.io/en/stable/ma
 Theses are deprecated and support will be removed in some feature release.
 See [Deprecation Policy](https://udata.readthedocs.io/en/stable/versioning/#deprecation-policy).
 
-* Theses frequencies are deprecated for their Dublin Core counter part:
-    * `fortnighly` ⇨ `biweekly`
-    * `biannual` ⇨ `semiannual`
-    * `realtime` ⇨ `continuous`
-
+- Theses frequencies are deprecated for their Dublin Core counter part:
+  - `fortnighly` ⇨ `biweekly`
+  - `biannual` ⇨ `semiannual`
+  - `realtime` ⇨ `continuous`
 
 ## 0.9.0 (2017-01-10)
 
