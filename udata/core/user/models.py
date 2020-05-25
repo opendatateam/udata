@@ -177,10 +177,11 @@ class User(WithMetrics, UserMixin, db.Document):
 
     def generate_api_key(self):
         s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
-        self.apikey = str(s.dumps({
+        byte_str = s.dumps({
             'user': str(self.id),
             'time': time(),
-        }))
+        })
+        self.apikey = byte_str.decode()
 
     def clear_api_key(self):
         self.apikey = None
