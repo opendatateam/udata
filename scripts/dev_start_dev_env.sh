@@ -23,18 +23,17 @@ newtabi(){
 ### start running DB with docker
 echo "\n...running DBs from docker container"
 newtabi "cd ${PWD} && source ${UDATA_VENV}/bin/activate && sh ./scripts/dev_start_docker_dbs.sh"
-
+sleep 3
 
 ### Build front + watch hot reload
 echo "\n... buiilding assets js with hot reload"
 newtabi "cd ${PWD} && sh ./scripts/dev_start_watch.sh"
-
+sleep 3
 
 ### Run server
 echo "\n... running flask server"
 newtabi "cd ${PWD} && source ${UDATA_VENV}/bin/activate && sh ./scripts/dev_start_serve.sh" 
-
-
+sleep 3
 
 ### Wait and open server in browser
 sleep 10
