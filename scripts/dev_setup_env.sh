@@ -362,6 +362,9 @@ echo "     The job ..."
 echo "       '${JOB_TITLE}' "
 echo "         ... is now completed !"
 echo
+echo "     Check out this url on your browser : "
+echo "             http://localhost:7000/ "
+echo
 echo ............................................
 
 #say_what "Le script est maintenant terminé ..."
