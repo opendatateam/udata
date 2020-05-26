@@ -117,7 +117,7 @@ def get_export_url(model):
     return resource.url
 
 
-@blueprint.route('/datasets.csv', cors=True)
+@blueprint.route('/datasets.csv')
 def datasets_csv():
     params = multi_to_dict(request.args)
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
@@ -130,7 +130,7 @@ def datasets_csv():
     return csv.stream(adapter(datasets), 'datasets')
 
 
-@blueprint.route('/resources.csv', cors=True)
+@blueprint.route('/resources.csv')
 def resources_csv():
     params = multi_to_dict(request.args)
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
@@ -142,7 +142,7 @@ def resources_csv():
     return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
 
 
-@blueprint.route('/organizations.csv', cors=True)
+@blueprint.route('/organizations.csv')
 def organizations_csv():
     params = multi_to_dict(request.args)
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
@@ -154,7 +154,7 @@ def organizations_csv():
     return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
 
 
-@blueprint.route('/reuses.csv', cors=True)
+@blueprint.route('/reuses.csv')
 def reuses_csv():
     params = multi_to_dict(request.args)
     # redirect to EXPORT_CSV dataset if feature is enabled and no filter is set
@@ -244,20 +244,20 @@ def terms():
     return theme.render('terms.html', terms=content)
 
 
-@blueprint.route('/context.jsonld', localize=False, cors=True)
+@blueprint.route('/context.jsonld', localize=False)
 def jsonld_context():
     '''Expose the JSON-LD context'''
     return json.dumps(CONTEXT), 200, {'Content-Type': 'application/ld+json'}
 
 
-@blueprint.route('/data.<format>', localize=False, cors=True)
+@blueprint.route('/data.<format>', localize=False)
 def dataportal(format):
     '''Root RDF endpoint with content negociation handling'''
     url = url_for('site.rdf_catalog_format', format=format)
     return redirect(url)
 
 
-@blueprint.route('/catalog', localize=False, cors=True)
+@blueprint.route('/catalog', localize=False)
 def rdf_catalog():
     '''Root RDF endpoint with content negociation handling'''
     format = RDF_EXTENSIONS[negociate_content()]
@@ -265,7 +265,7 @@ def rdf_catalog():
     return redirect(url)
 
 
-@blueprint.route('/catalog.<format>', localize=False, cors=True)
+@blueprint.route('/catalog.<format>', localize=False)
 def rdf_catalog_format(format):
     params = multi_to_dict(request.args)
     page = int(params.get('page', 1))
