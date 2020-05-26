@@ -66,6 +66,7 @@ org_fields = api.model('Organization', {
         description='The organization deletion date if deleted',
         readonly=True),
     'metrics': fields.Raw(
+        attribute=lambda o: o.get_metrics(),
         description='The organization metrics', readonly=True),
     'uri': fields.UrlFor(
         'api.organization', lambda o: {'org': o},

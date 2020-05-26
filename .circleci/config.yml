@@ -20,9 +20,9 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py3-cache-v6-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v6-{{ arch }}-{{ .Branch }}
-          - py3-cache-v6-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py3-cache-v7-{{ arch }}-{{ checksum "python.deps" }}
+          - py3-cache-v7-{{ arch }}-{{ .Branch }}
+          - py3-cache-v7-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
@@ -31,11 +31,11 @@ jobs:
             pip install -e . || pip install -e .
             pip install -r requirements/circleci.pip
       - save_cache:
-          key: py3-cache-v6-{{ arch }}-{{ checksum "python.deps" }}
+          key: py3-cache-v7-{{ arch }}-{{ checksum "python.deps" }}
           paths:
           - venv
       - save_cache:
-          key: py3-cache-v6-{{ arch }}-{{ .Branch }}
+          key: py3-cache-v7-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:
@@ -156,64 +156,16 @@ jobs:
             pip install twine
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
-  github:
-    docker:
-      - image: udata/circleci:2-alpine
-    environment:
-       BASH_ENV: /root/.bashrc
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Upload github release
-          command: gh_release
-
 workflows:
   version: 2
   build:
     jobs:
-      - python:
-          filters:
-            branches:
-              only:
-                - master
-                - /[0-9]+(\.[0-9]+)+/
-                - /pull/[0-9]+/
-                - /pyup-update-.+/
-                - /renovate\/.+/
-                - l10n_master
-                - /py3(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
-      - assets:
-          filters:
-            branches:
-              only:
-                - master
-                - /[0-9]+(\.[0-9]+)+/
-                - /pull/[0-9]+/
-                - /pyup-update-.+/
-                - /renovate\/.+/
-                - l10n_master
-                - /py3(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
+      - python
+      - assets
       - dist:
           requires:
             - python
             - assets
-          filters:
-            branches:
-              only:
-                - master
-                - /[0-9]+(\.[0-9]+)+/
-                - /pull/[0-9]+/
-                - /pyup-update-.+/
-                - /renovate\/.+/
-                - l10n_master
-                - /py3(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
       - publish:
           requires:
             - dist
@@ -222,16 +174,6 @@ workflows:
               only:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
-                - /py3(-.*)?/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)+/
-          context: org-global
-      - github:
-          requires:
-            - dist
-          filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)+/
           context: org-global

@@ -69,7 +69,8 @@ resource_fields = api.model('Resource', {
     'last_modified': fields.ISODateTime(
         attribute='modified', readonly=True,
         description='The resource last modification date'),
-    'metrics': fields.Raw(description='The resource metrics', readonly=True),
+    'metrics': fields.Raw(
+        description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
     'preview_url': fields.String(description='An optional preview URL to be '
                                  'loaded as a standalone page (ie. iframe or '
@@ -161,7 +162,7 @@ dataset_fields = api.model('Dataset', {
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-    'metrics': fields.Raw(description='The dataset metrics'),
+    'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
         description='The producer organization'),

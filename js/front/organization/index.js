@@ -14,7 +14,6 @@ import Vue from 'vue';
 import FollowButton from 'components/buttons/follow.vue';
 import DetailsModal from './details-modal.vue';
 import ActivityTimeline from 'components/activities/timeline.vue';
-import DashboardGraphs from 'components/dashboard/graphs.vue';
 import Tab from 'components/tab';
 import Tabset from 'components/tabs.vue';
 
@@ -25,7 +24,7 @@ import MembershipRequest from './membership-request.vue';
 
 new Vue({
     mixins: [FrontMixin],
-    components: {FollowButton, Tab, Tabset, ActivityTimeline, DashboardGraphs, SmallBox},
+    components: {FollowButton, Tab, Tabset, ActivityTimeline, SmallBox},
     data() {
         return {
             organization: this.extractOrganization(),

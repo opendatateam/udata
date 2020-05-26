@@ -10,7 +10,6 @@ from factory.mongoengine import MongoEngineFactory
 from flask import url_for, Blueprint
 
 from udata.models import db
-from udata.core.metrics import Metric, init_app as init_metrics
 from udata.frontend import csv
 from udata.utils import faker
 
@@ -39,19 +38,16 @@ class Fake(db.Document):
     sub = db.EmbeddedDocumentField(NestedFake)
     metrics = db.DictField()
 
+    __metrics_keys__ = [
+        'fake-metric-int',
+        'fake-metric-float',
+    ]
+
     def __str__(self):
         return 'fake'
 
-
-class FakeMetricInt(Metric):
-    model = Fake
-    name = 'fake-metric-int'
-
-
-class FakeMetricFloat(Metric):
-    model = Fake
-    name = 'fake-metric-float'
-    value_type = float
+    def get_metrics(self):
+        return self.metrics
 
 
 class NestedFactory(MongoEngineFactory):
@@ -123,7 +119,6 @@ class CsvTest(FrontTestCase):
 
     def create_app(self):
         app = super(CsvTest, self).create_app()
-        init_metrics(app)
         app.register_blueprint(blueprint)
         return app
 

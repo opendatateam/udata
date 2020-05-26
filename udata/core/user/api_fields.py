@@ -58,7 +58,7 @@ user_fields = api.model('User', {
     'uri': fields.UrlFor(
         'api.user', lambda o: {'user': o},
         description='The user API URI', required=True),
-    'metrics': fields.Raw(
+    'metrics': fields.Raw(attribute=lambda o: o.get_metrics(),
         description='The user metrics', readonly=True),
 })
 

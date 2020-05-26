@@ -11,7 +11,7 @@ from udata.models import (
     Dataset, Organization, License, User, GeoZone, RESOURCE_TYPES
 )
 from udata.search import (
-    ModelSearchAdapter, i18n_analyzer, metrics_mapping_for, register,
+    ModelSearchAdapter, i18n_analyzer, register,
     lazy_config
 )
 from udata.search.analysis import simple
@@ -21,8 +21,6 @@ from udata.search.fields import (
 )
 from udata.utils import to_iso_datetime
 
-# Metrics are require for dataset search
-from . import metrics  # noqa
 
 __all__ = ('DatasetSearch', )
 
@@ -33,11 +31,11 @@ lazy = lazy_config('dataset')
 
 
 def max_reuses():
-    return max(current_site.metrics.get('max_dataset_reuses'), 10)
+    return max(current_site.get_metrics()['max_dataset_reuses'], 10)
 
 
 def max_followers():
-    return max(current_site.metrics.get('max_dataset_followers'), 10)
+    return max(current_site.get_metrics()['max_dataset_followers'], 10)
 
 
 def granularity_labelizer(value):
@@ -98,7 +96,7 @@ class DatasetSearch(ModelSearchAdapter):
                               payloads=False)
     created = Date(format='date_hour_minute_second')
     last_modified = Date(format='date_hour_minute_second')
-    metrics = metrics_mapping_for(Dataset)
+    metrics = Dataset.__search_metrics__
     featured = Boolean()
     temporal_coverage = Nested(multi=False, properties={
         'start': Long(),

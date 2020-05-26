@@ -302,6 +302,7 @@ class MeAPITest(APITestCase):
         self.assertIsNotNone(response.json['apikey'])
 
         self.user.reload()
+        self.assertFalse(self.user.apikey.startswith("b'"))
         self.assertIsNotNone(self.user.apikey)
         self.assertEqual(self.user.apikey, response.json['apikey'])
 

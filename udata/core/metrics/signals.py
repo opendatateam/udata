@@ -1,9 +1,6 @@
-from flask.signals import Namespace
+from blinker import Namespace
 
-ns = Namespace()
+namespace = Namespace()
 
-#: Sent when a metric needs to be updated
-metric_need_update = ns.signal('metric:need-update')
-
-#: Sent when a metric has been updated
-metric_updated = ns.signal('metric:updated')
+#: Trigerred when a site's metrics job is done.
+on_site_metrics_computed = namespace.signal('on-site-metrics-computed')
