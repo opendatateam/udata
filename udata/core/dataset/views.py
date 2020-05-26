@@ -123,7 +123,7 @@ class DatasetFollowersView(DatasetView, DetailView):
         return context
 
 
-@blueprint.route('/r/<uuid:id>', endpoint='resource', cors=True)
+@blueprint.route('/r/<uuid:id>', endpoint='resource')
 def resource_redirect(id):
     '''
     Redirect to the latest version of a resource given its identifier.
@@ -132,7 +132,7 @@ def resource_redirect(id):
     return redirect(resource.url.strip()) if resource else abort(404)
 
 
-@blueprint.route('/<dataset:dataset>/rdf', localize=False, cors=True)
+@blueprint.route('/<dataset:dataset>/rdf', localize=False)
 def rdf(dataset):
     '''Root RDF endpoint with content negociation handling'''
     format = RDF_EXTENSIONS[negociate_content()]
@@ -140,7 +140,7 @@ def rdf(dataset):
     return redirect(url)
 
 
-@blueprint.route('/<dataset:dataset>/rdf.<format>', localize=False, cors=True)
+@blueprint.route('/<dataset:dataset>/rdf.<format>', localize=False)
 def rdf_format(dataset, format):
     if not DatasetEditPermission(dataset).can():
         if dataset.private:

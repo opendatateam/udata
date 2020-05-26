@@ -8,7 +8,8 @@ from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
 from flask_fs import UnauthorizedFileType
-from flask_restplus import Api, Resource, cors
+from flask_restplus import Api, Resource
+from flask_cors import CORS
 
 from udata import tracking, theme
 from udata.app import csrf
@@ -60,6 +61,8 @@ PREFLIGHT_HEADERS = (
     'X-Forwarded-Port',
     'X-Forwarded-Proto',
 )
+
+cors = CORS(allow_headers=PREFLIGHT_HEADERS)
 
 
 class UDataApi(Api):
@@ -165,12 +168,7 @@ class UDataApi(Api):
 
 api = UDataApi(
     apiv1,
-    decorators=[csrf.exempt,
-                cors.crossdomain(origin='*',
-                                 credentials=True,
-                                 headers=PREFLIGHT_HEADERS
-                )
-    ],
+    decorators=[csrf.exempt],
     version='1.0', title='uData API',
     description='uData API', default='site',
     default_label='Site global namespace'
@@ -275,9 +273,7 @@ def apidoc_index():
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
-    @api.hide
-    def options(self):
-        pass  # Only here to allow default Flask response
+    pass
 
 
 base_reference = api.model('BaseReference', {
@@ -325,3 +321,4 @@ def init_app(app):
     app.register_blueprint(apiv1)
 
     oauth2.init_app(app)
+    cors.init_app(app)
