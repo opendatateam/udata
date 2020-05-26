@@ -53,5 +53,5 @@ _note : Docker and Python 3.* must be installed_
 - run with scripts (only if dev environment is set up)
 
   ```bash
-  sh ./scripts/dev_setup_env.sh
+  sh ./scripts/dev_start_dev_env.sh
   ```
