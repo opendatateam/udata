@@ -36,7 +36,6 @@ import moment from 'moment';
 
 import Reuses from 'models/reuses';
 import Datasets from 'models/datasets';
-import Metrics from 'models/metrics';
 import Issues from 'models/issues';
 import Discussions from 'models/discussions';
 import Users from 'models/users';
@@ -58,15 +57,6 @@ export default {
     name: 'SiteView',
     data() {
         return {
-            metrics: new Metrics({
-                data: {
-                    loading: true,
-                },
-                query: {
-                    start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                    end: moment().format('YYYY-MM-DD')
-                }
-            }),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
             datasets: new Datasets({query: {sort: '-created', page_size: 10}, mask: DatasetList.MASK}),
             organizations: new Organizations({query: {sort: '-created', page_size: 10}, mask: OrgList.MASK}),
@@ -133,15 +123,7 @@ export default {
         SmallBox,
         UserList,
     },
-    methods: {
-        fetch_metrics() {
-            if (this.$root.site.id) {
-                this.metrics.fetch({id: this.$root.site.id});
-            }
-        }
-    },
     attached() {
-        this.fetch_metrics();
         this.datasets.fetch();
         this.reuses.fetch();
         this.users.fetch();
@@ -149,11 +131,6 @@ export default {
         this.discussions.fetch();
         this.organizations.fetch();
         this.communities.fetch();
-    },
-    watch: {
-        '$root.site.id': function() {
-            this.fetch_metrics();
-        }
     }
 };
 </script>

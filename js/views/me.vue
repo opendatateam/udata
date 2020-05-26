@@ -38,7 +38,6 @@ import config from 'config'
 import moment from 'moment'
 import API from 'api'
 import { PageList } from 'models/base'
-import Metrics from 'models/metrics'
 import Layout from 'components/layout.vue'
 
 import ApikeyWidget from 'components/user/apikey.vue'
@@ -83,7 +82,6 @@ export default {
             ]
           : []
       ),
-      metrics: new Metrics(),
       reuses: new PageList({
         ns: 'me',
         fetch: 'my_reuses',
@@ -127,11 +125,6 @@ export default {
     },
     update() {
       if (this.$root.me.id) {
-        this.metrics.fetch({
-          id: this.$root.me.id,
-          start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-          end: moment().format('YYYY-MM-DD')
-        })
         this.datasets.fetch()
         this.reuses.fetch()
       }

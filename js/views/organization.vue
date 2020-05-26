@@ -44,7 +44,6 @@
 import moment from 'moment';
 import Vue from 'vue';
 import URLs from 'urls';
-import Metrics from 'models/metrics';
 import Organization from 'models/organization';
 import CommunityResources from 'models/communityresources';
 import {PageList, ModelPage} from 'models/base';
@@ -60,10 +59,6 @@ export default {
     data() {
         return {
             org: new Organization(),
-            metrics: new Metrics({query: {
-                start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                end: moment().format('YYYY-MM-DD')
-            }}),
             reuses: new PageList({
                 ns: 'organizations',
                 fetch: 'list_organization_reuses',
@@ -252,7 +247,6 @@ export default {
     watch: {
         'org.id': function(id) {
             if (id) {
-                this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({org: id});
                 this.datasets.clear().fetch({org: id});
                 this.issues.clear().fetch({org: id});

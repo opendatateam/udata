@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)
+- Removed now useless metric fetching [#2482](https://github.com/opendatateam/udata/pull/2484)
 
 ## 2.1.0 (2020-05-12)
 
