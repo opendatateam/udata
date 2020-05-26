@@ -42,11 +42,16 @@ It is collectively taken care of by members of the
 
 #### dev environment
 
-_note : Docker and Python 3.* must be installed_
+- _notes :_
+
+  - _Python 3.* must be installed_
+  - _Docker daemon must be running_
 
 - chained installation with scripts
 
   ```bash
+  git clone https://github.com/co-demos/udata.git udata
+  cd udata
   sh ./scripts/dev_setup_env.sh
   ```
 
