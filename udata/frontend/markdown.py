@@ -52,7 +52,8 @@ def nofollow_callback(attrs, new=False):
     parsed_url = urlparse(attrs[(None, 'href')])
     print(f'>>>>> nofollow_callback / parsed_url : \n{parsed_url}')
 
-    if parsed_url.scheme == u"mailto" :
+    allow_mailto = current_app.config['MD_ALLOW_MAILTO']
+    if parsed_url.scheme == "mailto" :
         print(f'>>>>> nofollow_callback / mailto ...')
         scheme = 'mailto'
         joiner = ':'
