@@ -46,7 +46,7 @@ def nofollow_callback(attrs, new=False):
     # print(f">>>>> nofollow_callback / current_app.config['SERVER_NAME'] : \n{current_app.config['SERVER_NAME']}")
 
     allow_mailto = current_app.config['MD_ALLOW_MAILTO']
-    if (None, u"href") not in attrs or allow_mailto == False :
+    if (None, u"href") not in attrs :
         print(f'>>>>> nofollow_callback / attrs X : \n{attrs}')
         return attrs
 
@@ -69,7 +69,10 @@ def nofollow_callback(attrs, new=False):
         #     netloc=parsed_url.netloc,
         #     path=parsed_url.path
         # )
-        attrs[(None, 'href')] = f'{scheme}{joiner}{parsed_url.netloc}{parsed_url.path}'
+        if allow_mailto : 
+          attrs[(None, 'href')] = f'{scheme}{joiner}{parsed_url.netloc}{parsed_url.path}'
+        else : 
+          attrs[(None, 'href')] = None
         print(f'>>>>> nofollow_callback / attrs A : \n{attrs}')
         return attrs
     else:
