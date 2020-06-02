@@ -80,5 +80,5 @@ data
 # PyCharm
 .idea
 
-# scripts
+# bash scripts
 /scripts
