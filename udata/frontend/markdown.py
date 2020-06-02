@@ -45,14 +45,14 @@ def nofollow_callback(attrs, new=False):
     print(f'\n>>>>> nofollow_callback / attrs : \n{attrs}')
     # print(f">>>>> nofollow_callback / current_app.config['SERVER_NAME'] : \n{current_app.config['SERVER_NAME']}")
 
-    if (None, u"href") not in attrs:
+    allow_mailto = current_app.config['MD_ALLOW_MAILTO']
+    if (None, u"href") not in attrs or allow_mailto == False :
         print(f'>>>>> nofollow_callback / attrs X : \n{attrs}')
         return attrs
 
     parsed_url = urlparse(attrs[(None, 'href')])
     print(f'>>>>> nofollow_callback / parsed_url : \n{parsed_url}')
 
-    allow_mailto = current_app.config['MD_ALLOW_MAILTO']
     if parsed_url.scheme == "mailto" :
         print(f'>>>>> nofollow_callback / mailto ...')
         scheme = 'mailto'

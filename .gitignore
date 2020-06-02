@@ -79,6 +79,3 @@ data
 
 # PyCharm
 .idea
-
-# bash scripts
-/scripts
