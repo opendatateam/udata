@@ -48,7 +48,7 @@ def nofollow_callback(attrs, new=False):
     allow_mailto = current_app.config['MD_ALLOW_MAILTO']
     print(f'\n>>>>> nofollow_callback / allow_mailto : {allow_mailto}')
 
-    if (None, u"href") not in attrs :
+    if (None, "href") not in attrs :
         print(f'>>>>> nofollow_callback / attrs X : \n{attrs}')
         return attrs
 

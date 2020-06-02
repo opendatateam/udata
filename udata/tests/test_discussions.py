@@ -123,7 +123,7 @@ class DiscussionsTest(APITestCase):
         self.assertEqual(discussion.user, user)
         self.assertEqual(len(discussion.discussion), 1)
         self.assertEqual(discussion.title, 'test title')
-        self.assertEqual(discussion.extras, {u'key': u'value'})
+        self.assertEqual(discussion.extras, {'key': 'value'})
 
         message = discussion.discussion[0]
         self.assertEqual(message.content, 'bla bla')
