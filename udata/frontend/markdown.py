@@ -27,6 +27,9 @@ def source_tooltip_callback(attrs, new=False):
     """
     Add a `data-tooltip` attribute with `Source` content for embeds.
     """
+
+    print(f'\n>>>>> source_tooltip_callback / attrs : \n{attrs}')
+
     attrs[(None, 'data-tooltip')] = _('Source')
     return attrs
 
@@ -39,20 +42,42 @@ def nofollow_callback(attrs, new=False):
     That callback is not splitted in order to parse the URL only once.
     """
 
+    print(f'\n>>>>> nofollow_callback / attrs : \n{attrs}')
+    # print(f">>>>> nofollow_callback / current_app.config['SERVER_NAME'] : \n{current_app.config['SERVER_NAME']}")
+
     if (None, u"href") not in attrs:
+        print(f'>>>>> nofollow_callback / attrs X : \n{attrs}')
         return attrs
+
     parsed_url = urlparse(attrs[(None, 'href')])
+    print(f'>>>>> nofollow_callback / parsed_url : \n{parsed_url}')
+
+    if parsed_url.scheme == u"mailto" :
+        print(f'>>>>> nofollow_callback / mailto ...')
+        scheme = 'mailto'
+        joiner = ':'
+    else :
+        scheme='https' if request.is_secure else 'http'
+        joiner = '://'
+
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
-        attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
-            scheme='https' if request.is_secure else 'http',
-            netloc=current_app.config['SERVER_NAME'],
-            path=parsed_url.path)
+        print(f'>>>>> nofollow_callback / parsed_url.netloc in...')
+        # attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
+        #     # scheme='https' if request.is_secure else 'http',
+        #     # netloc=current_app.config['SERVER_NAME'],
+        #     netloc=parsed_url.netloc,
+        #     path=parsed_url.path
+        # )
+        attrs[(None, 'href')] = f'{scheme}{joiner}{parsed_url.netloc}{parsed_url.path}'
+        print(f'>>>>> nofollow_callback / attrs A : \n{attrs}')
         return attrs
     else:
+        print(f'>>>>> nofollow_callback / parsed_url.netloc out...')
         rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]
         if 'nofollow' not in [x.lower() for x in rel]:
             rel.append('nofollow')
         attrs[(None, 'rel')] = ' '.join(rel)
+        print(f'>>>>> nofollow_callback / attrs B : \n{attrs}')
         return attrs
 
 
@@ -76,10 +101,14 @@ class UDataMarkdown(object):
         if not stream:
             return ''
 
+        print(f'\n>>>>> UDataMarkdown.__call__ / stream : \n{stream}')
+
         # Prepare angle bracket autolinks to avoid bleach treating them as tag
         stream = RE_AUTOLINK.sub(r'[\g<1>](\g<1>)', stream)
+
         # Turn markdown to HTML.
         html = self.markdown(stream)
+        print(f'\n>>>>> UDataMarkdown.__call__ / html (just after mistune.Markdown) : \n{html}')
 
         # Deal with callbacks
         callbacks = [nofollow_callback]
@@ -93,10 +122,12 @@ class UDataMarkdown(object):
             protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
             strip_comments=False,
             filters=[
-              partial(LinkifyFilter, 
-              skip_tags=['pre'], 
-              parse_email=False,
-             callbacks=callbacks)
+              partial(
+                LinkifyFilter, 
+                    skip_tags=['pre'], 
+                    parse_email=True,
+                    callbacks=callbacks
+                )
             ]
         )
 
@@ -104,7 +135,11 @@ class UDataMarkdown(object):
 
         if wrap:
             html = '<div class="markdown">{0}</div>'.format(html.strip())
+        
+        print(f'\n>>>>> UDataMarkdown.__call__ / html : \n{html}')
         # Return a `Markup` element considered as safe by Jinja.
+        print(f'\n>>>>> UDataMarkdown.__call__ / Markup(html) : \n{Markup(html)}')
+        print(f'......')
         return Markup(html)
 
 
