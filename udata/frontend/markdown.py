@@ -92,8 +92,12 @@ class UDataMarkdown(object):
             styles=current_app.config['MD_ALLOWED_STYLES'],
             protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
             strip_comments=False,
-            filters=[partial(LinkifyFilter, skip_tags=['pre'], parse_email=False,
-                             callbacks=callbacks)]
+            filters=[
+              partial(LinkifyFilter, 
+              skip_tags=['pre'], 
+              parse_email=False,
+             callbacks=callbacks)
+            ]
         )
 
         html = cleaner.clean(html)
