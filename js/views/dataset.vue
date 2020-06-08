@@ -64,7 +64,6 @@ import {ModelPage} from 'models/base';
 import Dataset from 'models/dataset';
 import Discussions from 'models/discussions';
 import Issues from 'models/issues';
-import Metrics from 'models/metrics';
 import Reuses from 'models/reuses';
 import CommunityResources from 'models/communityresources';
 // Widgets
@@ -102,10 +101,6 @@ export default {
     data() {
         return {
             dataset: new Dataset({mask: '*'}),
-            metrics: new Metrics({query: {
-                start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-                end: moment().format('YYYY-MM-DD')
-            }}),
             reuses: new Reuses({query: {sort: '-created', page_size: 10}, mask: ReuseList.MASK}),
             followers: new ModelPage({
                 query: {page_size: 10},
@@ -260,7 +255,6 @@ export default {
     watch: {
         'dataset.id': function(id) {
             if (id) {
-                this.metrics.fetch({id: id});
                 this.reuses.clear().fetch({dataset: id});
                 this.followers.fetch({id: id});
                 this.issues.fetch({'for': id});

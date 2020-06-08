@@ -62,7 +62,6 @@ import moment from 'moment'
 import { ModelPage } from 'models/base'
 import Reuse from 'models/reuse'
 import Dataset from 'models/dataset'
-import Metrics from 'models/metrics'
 import Vue from 'vue'
 import Issues from 'models/issues'
 import Discussions from 'models/discussions'
@@ -94,12 +93,6 @@ export default {
   data() {
     return {
       reuse: new Reuse({ mask: MASK }),
-      metrics: new Metrics({
-        query: {
-          start: moment().subtract(15, 'days').format('YYYY-MM-DD'),
-          end: moment().format('YYYY-MM-DD')
-        }
-      }),
       followers: new ModelPage({
         query: { page_size: 10 },
         ns: 'reuses',
@@ -245,7 +238,6 @@ export default {
   watch: {
     'reuse.id': function (id) {
       if (id) {
-        this.metrics.fetch({ id: id })
         this.followers.fetch({ id: id })
         this.issues.fetch({ for: id })
         this.discussions.fetch({ for: id })

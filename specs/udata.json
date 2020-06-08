@@ -2348,54 +2348,6 @@
                 ]
             }
         },
-        "/metrics/{id}": {
-            "get": {
-                "description": "If day is set, start and end will be ignored",
-                "operationId": "metrics_for",
-                "parameters": [
-                    {
-                        "description": "Start of the period to fetch",
-                        "in": "query",
-                        "name": "start",
-                        "type": "string"
-                    },
-                    {
-                        "description": "End of the period to fetch",
-                        "in": "query",
-                        "name": "end",
-                        "type": "string"
-                    },
-                    {
-                        "description": "The object ID to fetch metric for",
-                        "in": "path",
-                        "name": "id",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "description": "Specific day date to fetch",
-                        "in": "query",
-                        "name": "day",
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "schema": {
-                            "items": {
-                                "$ref": "#/definitions/Metric"
-                            },
-                            "type": "array"
-                        }
-                    }
-                },
-                "summary": "Fetch metrics for an object given its ID",
-                "tags": [
-                    "site"
-                ]
-            }
-        },
         "/organizations/": {
             "get": {
                 "operationId": "get_organization_list_api",
