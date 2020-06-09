@@ -109,5 +109,9 @@ export default {
         // URLs and hashes are not breakable on words
         word-break: break-all;
     }
+    .modal-body {
+        overflow: scroll;
+        max-height: 80vh;
+    }
 }
 </style>
