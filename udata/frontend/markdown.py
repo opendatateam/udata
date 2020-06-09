@@ -65,6 +65,7 @@ def nofollow_callback(attrs, new=False):
 
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
         print(f'>>>>> nofollow_callback / parsed_url.netloc in...')
+        print(f'>>>>> nofollow_callback / current_app.config["SERVER_NAME"] : {current_app.config["SERVER_NAME"]}')
         print(f'>>>>> nofollow_callback / parsed_url.netloc : {parsed_url.netloc}')
         # attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
         #     # scheme='https' if request.is_secure else 'http',
@@ -77,7 +78,8 @@ def nofollow_callback(attrs, new=False):
           del attrs[(None, 'href')]
 
         else : 
-          attrs[(None, 'href')] = f'{scheme}{joiner}{parsed_url.netloc}{parsed_url.path}'
+          netloc_override = current_app.config['SERVER_NAME']
+          attrs[(None, 'href')] = f'{scheme}{joiner}{netloc_override}{parsed_url.path}'
         print(f'>>>>> nofollow_callback / attrs A : \n{attrs}')
         return attrs
     else:
