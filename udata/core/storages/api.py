@@ -141,14 +141,18 @@ def handle_upload(storage, prefix=None):
     else:
         # Normalize filename including extension
         filename = utils.normalize(uploaded_file.filename)
-        filename = storage.save(uploaded_file, prefix=prefix,
-                                filename=filename)
+        root_filename = storage.save(
+            uploaded_file,
+            prefix=prefix,
+            filename=filename
+        )
 
-    metadata = storage.metadata(filename)
+    metadata = storage.metadata(root_filename)
+    metadata['root_filename'] = root_filename
     checksum = metadata.pop('checksum')
     algo, checksum = checksum.split(':', 1)
     metadata[algo] = checksum
-    metadata['format'] = utils.extension(filename)
+    metadata['format'] = utils.extension(root_filename)
     return metadata
 
 
