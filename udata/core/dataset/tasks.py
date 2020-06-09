@@ -49,7 +49,11 @@ def purge_datasets(self):
             topic.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
-        # Remove
+        # Remove each dataset's resource's file
+        storage = storages.resources
+        for resource in dataset.resources:
+            storage.delete(resource.root_filename)
+        # Remove dataset
         dataset.delete()
 
 
