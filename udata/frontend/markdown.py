@@ -73,12 +73,14 @@ def nofollow_callback(attrs, new=False):
         #     netloc=parsed_url.netloc,
         #     path=parsed_url.path
         # )
-        if parsed_url.scheme == "mailto" and not allow_mailto: 
-          #attrs[(None, 'href')] = ''
-          del attrs[(None, 'href')]
+        netloc_override = current_app.config['SERVER_NAME']
+        if parsed_url.scheme == "mailto":
+          netloc_override = ''
+          if not allow_mailto:
+            #attrs[(None, 'href')] = ''
+            del attrs[(None, 'href')]
 
         else : 
-          netloc_override = current_app.config['SERVER_NAME']
           attrs[(None, 'href')] = f'{scheme}{joiner}{netloc_override}{parsed_url.path}'
         print(f'>>>>> nofollow_callback / attrs A : \n{attrs}')
         return attrs

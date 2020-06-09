@@ -8,6 +8,9 @@ from udata.utils import faker
 
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
+# import logging
+# log = logging.getLogger(__name__)
+
 
 def assert_md_equal(value, expected):
     __tracebackhide__ = True
@@ -31,6 +34,7 @@ def md2dom(app):
         __tracebackhide__ = True
         with app.test_request_context(url):
             result = render_template_string('{{ text|markdown }}', text=text)
+            # log.info(f"\n...result ... : \n{result}\n")
             if expected:
                 assert_md_equal(result, expected)
             return parser.parse(result)
@@ -108,7 +112,7 @@ class MarkdownTest:
         assert el.getAttribute('data-tooltip') == ''
         assert el.firstChild.data == 'foo'
 
-    def test_markdown_linkify_ftp(self, md2dom):
+    def tesft_markdown_linkify_ftp(self, md2dom):
         '''Markdown filter should transform ftp urls'''
         text = '[foo](ftp://random.net)'
         dom = md2dom(text)
@@ -129,14 +133,20 @@ class MarkdownTest:
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 
-    def test_markdown_not_linkify_mails(self, md2dom):
-        '''Markdown filter should not transform emails to anchors'''
+    def test_markdown_not_linkify_mails(self, md2dom, app):
+        '''Markdown filter should not transform emails to anchors if not specified in config'''
+        allow_mailto = app.config['MD_ALLOW_MAILTO']
         text = 'coucou@cmoi.fr'
-        expected_text = '<p><a>coucou@cmoi.fr</a></p>'
+        if allow_mailto :
+            expected_text = f'<p><a href="mailto:{text}">{text}</a></p>'
+        else : 
+            expected_text = f'<p><a>{text}</a></p>'
         dom = md2dom(text, expected_text)
         elements = dom.getElementsByTagName('a')
-        # assert elements == []
-        assert elements[0].getAttribute('href') == ''
+        if allow_mailto :
+            assert elements[0].getAttribute('href') == f'mailto:{text}'
+        else : 
+            assert elements[0].getAttribute('href') == ''
 
     def test_markdown_linkify_within_pre(self, assert_md):
         '''Markdown filter should not transform urls into <pre> anchors'''

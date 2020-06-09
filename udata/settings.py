@@ -473,6 +473,7 @@ class Testing(object):
         'title^2',
         'description',
     )
+    MD_ALLOW_MAILTO = False
 
 
 class Debug(Defaults):
