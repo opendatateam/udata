@@ -129,7 +129,7 @@ class ConfigurableTheme(Theme):
         self._configured = True
 
     def get_processor(self, context_name, default=lambda c: c):
-        log.info(f'\n... self.context_processors : {self.context_processors}\n')
+        log.info(f'\n... ConfigurableTheme / self.context_processors : {self.context_processors}\n')
         return self.context_processors.get(context_name, default)
 
 

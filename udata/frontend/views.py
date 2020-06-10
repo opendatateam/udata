@@ -1,6 +1,6 @@
 import logging
 
-from flask import request, redirect, abort, g, json
+from flask import request, redirect, abort, g, json, current_app
 from flask.views import MethodView
 
 from udata import search, auth, theme
@@ -12,15 +12,20 @@ class Templated(object):
     template_name = None
 
     def get_context(self):
-        return {}
+        basic_context = {}
+        log.info(f'\n... get_context / basic_context : \n{basic_context}\n')
+        return basic_context
 
     def get_template_name(self):
         return self.template_name
 
     def render(self, context=None, **kwargs):
         context = context or self.get_context()
+        log.info(f'\n... render / kwargs : \n{kwargs}\n')
         log.info(f'\n... render / context A : \n{context}\n')
         context.update(kwargs)
+        context['banner_activated'] = current_app.config['BANNER_ACTIVATED']
+        context['banner_html_filename'] = current_app.config['BANNER_HTML_FILENAME']
         log.info(f'\n... render / context B : \n{context}\n')
         return theme.render(self.get_template_name(), **context)
 

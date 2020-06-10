@@ -441,7 +441,7 @@ class Defaults(object):
 
     # Global banner parameters
     BANNER_ACTIVATED = True
-    BANNER_HTML_FILENAME = '2020-datactivist-survey'
+    BANNER_HTML_FILENAME = 'banner-2020-06-datactivist-survey.html'
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
