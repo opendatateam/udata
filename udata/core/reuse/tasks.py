@@ -26,7 +26,7 @@ def purge_reuses(self):
             storage = storages.images
             storage.delete(reuse.image.filename)
             storage.delete(reuse.image.original)
-            for key, value in reuse.image.thumbnails:
+            for key, value in reuse.image.thumbnails.items():
                 storage.delete(value)
         except TypeError:
             log.warning(f'Image of reuse {reuse} is None and thus will not be erased.')
