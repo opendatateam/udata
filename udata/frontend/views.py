@@ -1,9 +1,12 @@
+import logging
+
 from flask import request, redirect, abort, g, json
 from flask.views import MethodView
 
 from udata import search, auth, theme
 from udata.utils import not_none_dict
 
+log = logging.getLogger(__name__)
 
 class Templated(object):
     template_name = None
@@ -16,7 +19,9 @@ class Templated(object):
 
     def render(self, context=None, **kwargs):
         context = context or self.get_context()
+        log.info(f'\n... render / context A : \n{context}\n')
         context.update(kwargs)
+        log.info(f'\n... render / context B : \n{context}\n')
         return theme.render(self.get_template_name(), **context)
 
 

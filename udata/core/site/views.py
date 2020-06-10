@@ -95,7 +95,9 @@ def home():
         ]
     }
     processor = theme.current.get_processor('home')
+    log.info(f'\n... processor : {processor}\n')
     context = processor(context)
+    log.info(f'\n... context : {context}\n')
     return theme.render('home.html', **context)
 
 
