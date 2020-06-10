@@ -363,7 +363,7 @@ class ResourceAPI(ResourceMixin, API):
         resource = self.get_resource_or_404(dataset, rid)
         # Deletes resource's file from file storage
         storage = storages.resources
-        storage.delete(resource.root_filename)
+        storage.delete(resource.fs_filename)
 
         dataset.resources.remove(resource)
         dataset.last_modified = datetime.now()
@@ -443,7 +443,7 @@ class CommunityResourceAPI(API):
         ResourceEditPermission(community).test()
         # Deletes community resource's file from file storage
         storage = storages.resources
-        storage.delete(community.root_filename)
+        storage.delete(community.fs_filename)
         community.delete()
         return '', 204
 

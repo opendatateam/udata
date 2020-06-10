@@ -8,6 +8,7 @@ from flask import url_for
 
 from . import APITestCase
 
+from udata.core import storages
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
@@ -852,12 +853,25 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.resources.append(resource)
         self.dataset.save()
         with self.api_user():
+            upload_response = self.post(
+                url_for(
+                    'api.upload_dataset_resource',
+                    dataset=self.dataset,
+                    rid=str(resource.id)
+                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+
+            data = json.loads(upload_response.data)
+            self.assertEqual(data['title'], 'test.txt')
+
             response = self.delete(url_for('api.resource',
                                            dataset=self.dataset,
                                            rid=str(resource.id)))
+
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
+        self.assertEqual(list(storages.chunks.list_files()), [])
+        # assert list(storages.chunks.list_files()) == []
 
     def test_delete_404(self):
         with self.api_user():
