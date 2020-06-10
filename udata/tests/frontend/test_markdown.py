@@ -8,10 +8,6 @@ from udata.utils import faker
 
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
-# import logging
-# log = logging.getLogger(__name__)
-
-
 def assert_md_equal(value, expected):
     __tracebackhide__ = True
     expected = '<div class="markdown">{0}</div>'.format(expected)
