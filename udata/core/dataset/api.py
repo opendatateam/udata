@@ -362,8 +362,9 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         # Deletes resource's file from file storage
-        storage = storages.resources
-        storage.delete(resource.fs_filename)
+        if resource.fs_filename is not None:
+            storage = storages.resources
+            storage.delete(resource.fs_filename)
 
         dataset.resources.remove(resource)
         dataset.last_modified = datetime.now()
@@ -442,8 +443,9 @@ class CommunityResourceAPI(API):
         '''Delete a given community resource'''
         ResourceEditPermission(community).test()
         # Deletes community resource's file from file storage
-        storage = storages.resources
-        storage.delete(community.fs_filename)
+        if community.fs_filename is not None:
+            storage = storages.resources
+            storage.delete(community.fs_filename)
         community.delete()
         return '', 204
 

@@ -52,7 +52,8 @@ def purge_datasets(self):
         # Remove each dataset's resource's file
         storage = storages.resources
         for resource in dataset.resources:
-            storage.delete(resource.fs_filename)
+            if resource.fs_filename is not None:
+                storage.delete(resource.fs_filename)
         # Remove dataset
         dataset.delete()
 

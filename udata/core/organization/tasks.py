@@ -1,5 +1,6 @@
 from udata import mail
 from udata.i18n import lazy_gettext as _
+from udata.core import storages
 from udata.models import Follow, Activity, Dataset
 from udata.search import reindex
 from udata.tasks import job, task, get_logger
@@ -14,7 +15,7 @@ log = get_logger(__name__)
 @job('purge-organizations')
 def purge_organizations(self):
     for organization in Organization.objects(deleted__ne=None):
-        log.info('Purging organization "{0}"'.format(organization))
+        log.info(f'Purging organization {organization}')
         # Remove followers
         Follow.objects(following=organization).delete()
         # Remove activity
@@ -22,6 +23,15 @@ def purge_organizations(self):
         Activity.objects(organization=organization).delete()
         # Store datasets for later reindexation
         d_ids = [d.id for d in Dataset.objects(organization=organization)]
+        # Remove organization's logo in all sizes
+        try:
+            storage = storages.avatars
+            storage.delete(organization.logo.filename)
+            storage.delete(organization.logo.original)
+            for key, value in organization.logo.thumbnails:
+                storage.delete(value)
+        except TypeError:
+            log.warning(f'Image of organization {organization} is None and thus will not be erased.')
         # Remove
         organization.delete()
         # Reindex the datasets that were linked to the organization
