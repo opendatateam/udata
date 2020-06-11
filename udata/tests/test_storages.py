@@ -139,6 +139,7 @@ class StorageUploadViewTest:
                 'totalparts': parts,
                 'chunksize': 1,
             })
+            
             assert200(response)
             assert response.json['success']
             assert 'filename' not in response.json

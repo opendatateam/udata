@@ -870,8 +870,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
-        self.assertEqual(list(storages.chunks.list_files()), [])
-        # assert list(storages.chunks.list_files()) == []
+        self.assertEqual(list(storages.resources.list_files()), [])
 
     def test_delete_404(self):
         with self.api_user():
