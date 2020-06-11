@@ -61,6 +61,7 @@ def theme_static_with_version(ctx, filename, external=False):
         burst = current.entrypoint.dist.version
         return '{url}?_={burst}'.format(url=url, burst=burst)
 
+
 class ConfigurableTheme(Theme):
     context_processors = None
     defaults = None
