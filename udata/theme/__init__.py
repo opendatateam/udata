@@ -59,8 +59,7 @@ def theme_static_with_version(ctx, filename, external=False):
         burst = time()
     else:
         burst = current.entrypoint.dist.version
-    return f'{url}?_={burst}'
-
+        return '{url}?_={burst}'.format(url=url, burst=burst)
 
 class ConfigurableTheme(Theme):
     context_processors = None
