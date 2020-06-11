@@ -257,6 +257,8 @@ class ScheduleSourceAPI(API):
             data = request.json
         except Exception as e:
             data = request.data
+        if type(data) == bytes:
+            data = data.decode('utf-8')
         return actions.schedule(ident, data)
 
     @api.doc('unschedule_harvest_source')
