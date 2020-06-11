@@ -1,4 +1,5 @@
-import requests
+ import logging 
+ import requests
 
 from flask import request, json, redirect, url_for, current_app, abort
 from mongoengine.errors import DoesNotExist
@@ -28,6 +29,8 @@ from .models import current_site
 from .rdf import build_catalog
 
 blueprint = I18nBlueprint('site', __name__)
+
+log = logging.getLogger(__name__)
 
 
 @blueprint.app_context_processor
