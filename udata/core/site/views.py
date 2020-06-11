@@ -1,5 +1,5 @@
- import logging 
- import requests
+import logging
+import requests
 
 from flask import request, json, redirect, url_for, current_app, abort
 from mongoengine.errors import DoesNotExist
