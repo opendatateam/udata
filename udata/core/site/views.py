@@ -95,11 +95,9 @@ def home():
         ]
     }
     processor = theme.current.get_processor('home')
-    log.info(f'\n... home / processor : {processor}\n')
     context = processor(context)
     context['banner_activated'] = current_app.config['BANNER_ACTIVATED']
     context['banner_html_filename'] = current_app.config['BANNER_HTML_FILENAME']
-    log.info(f'\n... home / context : {context}\n')
     return theme.render('home.html', **context)
 
 

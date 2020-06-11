@@ -44,7 +44,6 @@ default_menu = nav.Bar('default_menu', [
 @contextfunction
 def theme_static_with_version(ctx, filename, external=False):
     '''Override the default theme static to add cache burst'''
-    # log.info(f'... filename : {filename}')
     if current_app.theme_manager.static_folder:
         url = assets.cdn_for('_themes.static',
                              filename=current.identifier + '/' + filename,
@@ -54,7 +53,6 @@ def theme_static_with_version(ctx, filename, external=False):
                              themeid=current.identifier,
                              filename=filename,
                              _external=external)
-    # log.info(f'... url : {url}')
     if url.endswith('/'):  # this is a directory, no need for cache burst
         return url
     if current_app.config['DEBUG']:
@@ -129,7 +127,6 @@ class ConfigurableTheme(Theme):
         self._configured = True
 
     def get_processor(self, context_name, default=lambda c: c):
-        log.info(f'\n... ConfigurableTheme / self.context_processors : {self.context_processors}\n')
         return self.context_processors.get(context_name, default)
 
 
