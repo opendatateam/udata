@@ -1,4 +1,3 @@
-import logging
 import requests
 
 from flask import request, json, redirect, url_for, current_app, abort
@@ -29,8 +28,6 @@ from .models import current_site
 from .rdf import build_catalog
 
 blueprint = I18nBlueprint('site', __name__)
-
-log = logging.getLogger(__name__)
 
 
 @blueprint.app_context_processor
@@ -96,8 +93,6 @@ def home():
     }
     processor = theme.current.get_processor('home')
     context = processor(context)
-    context['banner_activated'] = current_app.config['BANNER_ACTIVATED']
-    context['banner_html_filename'] = current_app.config['BANNER_HTML_FILENAME']
     return theme.render('home.html', **context)
 
 

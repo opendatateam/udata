@@ -12,8 +12,7 @@ class Templated(object):
     template_name = None
 
     def get_context(self):
-        basic_context = {}
-        return basic_context
+        return {}
 
     def get_template_name(self):
         return self.template_name
@@ -21,8 +20,6 @@ class Templated(object):
     def render(self, context=None, **kwargs):
         context = context or self.get_context()
         context.update(kwargs)
-        context['banner_activated'] = current_app.config['BANNER_ACTIVATED']
-        context['banner_html_filename'] = current_app.config['BANNER_HTML_FILENAME']
         return theme.render(self.get_template_name(), **context)
 
 
