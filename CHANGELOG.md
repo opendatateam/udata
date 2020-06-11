@@ -23,7 +23,7 @@
 
 ## 2.0.5 (2020-06-11)
 
-- Adding banner settings () [#2492](https://github.com/opendatateam/udata/pull/2492)
+- Adding banner options in settings for a potential use in an udata's theme [#2492](https://github.com/opendatateam/udata/pull/2492)
 
 ## 2.0.4 (2020-05-04)
 
