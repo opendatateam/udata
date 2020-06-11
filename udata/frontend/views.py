@@ -1,12 +1,11 @@
 import logging
 
-from flask import request, redirect, abort, g, json, current_app
+from flask import request, redirect, abort, g, json
 from flask.views import MethodView
 
 from udata import search, auth, theme
 from udata.utils import not_none_dict
 
-log = logging.getLogger(__name__)
 
 class Templated(object):
     template_name = None
