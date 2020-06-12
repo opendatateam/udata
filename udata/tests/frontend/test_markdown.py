@@ -108,7 +108,7 @@ class MarkdownTest:
         assert el.getAttribute('data-tooltip') == ''
         assert el.firstChild.data == 'foo'
 
-    def tesft_markdown_linkify_ftp(self, md2dom):
+    def test_markdown_linkify_ftp(self, md2dom):
         '''Markdown filter should transform ftp urls'''
         text = '[foo](ftp://random.net)'
         dom = md2dom(text)
