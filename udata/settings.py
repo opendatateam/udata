@@ -190,7 +190,7 @@ class Defaults(object):
         'img': ['src', 'title']
     }
 
-    MD_ALLOW_MAILTO = True
+    MD_ALLOW_MAILTO = False
 
     MD_ALLOWED_STYLES = []
 
