@@ -129,7 +129,7 @@ class MarkdownTest:
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 
-    def test_markdown_not_linkify_mails(self, md2dom, app):
+    def test_markdown_not_linkify_mails(self, md2dom):
         '''Markdown filter should not transform emails to anchors'''
         text = 'dont-linkify-me@cmoi.fr'
         text_b = f'[{text}](mailto:{text})'
