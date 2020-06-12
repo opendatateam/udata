@@ -30,7 +30,6 @@ def md2dom(app):
         __tracebackhide__ = True
         with app.test_request_context(url):
             result = render_template_string('{{ text|markdown }}', text=text)
-            # log.info(f"\n...result ... : \n{result}\n")
             if expected:
                 assert_md_equal(result, expected)
             return parser.parse(result)
@@ -129,21 +128,24 @@ class MarkdownTest:
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 
+    @pytest.mark.options(MD_ALLOW_MAILTO=False)
     def test_markdown_not_linkify_mails(self, md2dom, app):
-        '''Markdown filter should not transform emails to anchors if not specified in config'''
-        allow_mailto = app.config['MD_ALLOW_MAILTO']
+        '''Markdown filter should not transform emails to anchors'''
         text = 'coucou@cmoi.fr'
-        if allow_mailto :
-            expected_text = f'<p><a href="mailto:{text}">{text}</a></p>'
-        else : 
-            expected_text = f'<p><a>{text}</a></p>'
+        expected_text = f'<p><a>{text}</a></p>'
         dom = md2dom(text, expected_text)
         elements = dom.getElementsByTagName('a')
-        if allow_mailto :
-            assert elements[0].getAttribute('href') == f'mailto:{text}'
-        else : 
-            assert elements[0].getAttribute('href') == ''
+        assert elements[0].getAttribute('href') == ''
 
+    @pytest.mark.options(MD_ALLOW_MAILTO=True)
+    def test_markdown_linkify_mails(self, md2dom, app):
+        '''Markdown filter should transform emails to anchors'''
+        text = 'coucou@cmoi.fr'
+        expected_text = f'<p><a href="mailto:{text}">{text}</a></p>'
+        dom = md2dom(text, expected_text)
+        elements = dom.getElementsByTagName('a')
+        assert elements[0].getAttribute('href') == f'mailto:{text}'
+  
     def test_markdown_linkify_within_pre(self, assert_md):
         '''Markdown filter should not transform urls into <pre> anchors'''
         text = '<pre>http://example.net/</pre>'

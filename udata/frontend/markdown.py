@@ -42,12 +42,12 @@ def nofollow_callback(attrs, new=False):
 
     allow_mailto = current_app.config['MD_ALLOW_MAILTO']
 
-    if (None, "href") not in attrs :
+    if (None, 'href') not in attrs :
         return attrs
 
     parsed_url = urlparse(attrs[(None, 'href')])
 
-    if parsed_url.scheme == "mailto" :
+    if parsed_url.scheme == 'mailto' :
         scheme = 'mailto'
         joiner = ':'
     else :
@@ -56,11 +56,10 @@ def nofollow_callback(attrs, new=False):
 
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
         netloc_override = current_app.config['SERVER_NAME']
-        if parsed_url.scheme == "mailto":
-          netloc_override = ''
-          if not allow_mailto:
-            #attrs[(None, 'href')] = ''
-            del attrs[(None, 'href')]
+        if parsed_url.scheme == 'mailto':
+            netloc_override = ''
+            if not allow_mailto:
+                del attrs[(None, 'href')]
 
         else : 
           attrs[(None, 'href')] = f'{scheme}{joiner}{netloc_override}{parsed_url.path}'
