@@ -190,8 +190,6 @@ class Defaults(object):
         'img': ['src', 'title']
     }
 
-    MD_ALLOW_MAILTO = False
-
     MD_ALLOWED_STYLES = []
 
     # Extracted from https://github.github.com/gfm/#disallowed-raw-html-extension-

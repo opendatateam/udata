@@ -9,7 +9,6 @@ from udata.utils import faker
 parser = html5lib.HTMLParser(tree=html5lib.getTreeBuilder("dom"))
 
 
-
 def assert_md_equal(value, expected):
     __tracebackhide__ = True
     expected = '<div class="markdown">{0}</div>'.format(expected)
@@ -130,7 +129,6 @@ class MarkdownTest:
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 
-    @pytest.mark.options(MD_ALLOW_MAILTO=False)
     def test_markdown_not_linkify_mails(self, md2dom, app):
         '''Markdown filter should not transform emails to anchors'''
         text = 'dont-linkify-me@cmoi.fr'
@@ -140,25 +138,6 @@ class MarkdownTest:
         elements = dom.getElementsByTagName('a')
         assert elements[0].getAttribute('href') == ''
         assert elements[1].getAttribute('href') == ''
-
-    @pytest.mark.options(MD_ALLOW_MAILTO=True)
-    def test_markdown_linkify_mails_simple(self, md2dom, app):
-        '''Markdown filter should transform emails to anchors when mail is simple text'''
-        text = 'linkify-me@cmoi.fr'
-        expected_text = f'<p><a href="mailto:{text}">{text}</a></p>'
-        dom = md2dom(text, expected_text)
-        elements = dom.getElementsByTagName('a')
-        assert elements[0].getAttribute('href') == f'mailto:{text}'
-  
-    @pytest.mark.options(MD_ALLOW_MAILTO=True)
-    def test_markdown_linkify_mails_md(self, md2dom, app):
-        '''Markdown filter should transform emails to anchors when email is a markdown link'''
-        text = 'linkify-me-in-md@cmoi.fr'
-        text_b = f'[{text}](mailto:{text})'
-        expected_text = f'<p><a href="mailto:{text}">{text}</a></p>'
-        dom = md2dom(text_b, expected_text)
-        elements = dom.getElementsByTagName('a')
-        assert elements[0].getAttribute('href') == f'mailto:{text}'
 
     def test_markdown_linkify_within_pre(self, assert_md):
         '''Markdown filter should not transform urls into <pre> anchors'''

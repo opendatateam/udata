@@ -40,33 +40,18 @@ def nofollow_callback(attrs, new=False):
     That callback is not splitted in order to parse the URL only once.
     """
 
-    allow_mailto = current_app.config['MD_ALLOW_MAILTO']
-
     if (None, 'href') not in attrs :
-        if '@' in attrs['_text'] and allow_mailto :
-            attrs[(None, 'href')] = f'mailto:{attrs["_text"]}'
-        else : 
-            return attrs
+        return attrs
 
     parsed_url = urlparse(attrs[(None, 'href')])
-
-    if parsed_url.scheme == 'mailto' :
-        scheme = 'mailto'
-        joiner = ':'
-    else :
-        scheme='https' if request.is_secure else 'http'
-        joiner = '://'
-
+    scheme='https' if request.is_secure else 'http'
+  
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
         netloc_override = current_app.config['SERVER_NAME']
         if parsed_url.scheme == 'mailto':
-            netloc_override = ''
-            if not allow_mailto:
-                del attrs[(None, 'href')]
-            else :
-                attrs[(None, 'href')] = f'{scheme}{joiner}{netloc_override}{parsed_url.path}'
-        else : 
-            attrs[(None, 'href')] = f'{scheme}{joiner}{netloc_override}{parsed_url.path}'
+            del attrs[(None, 'href')]
+        else :
+            attrs[(None, 'href')] = f'{scheme}://{netloc_override}{parsed_url.path}'
         return attrs
     else:
         rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]
