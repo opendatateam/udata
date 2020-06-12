@@ -40,14 +40,18 @@ def nofollow_callback(attrs, new=False):
     That callback is not splitted in order to parse the URL only once.
     """
 
+    app_server_name = current_app.config["SERVER_NAME"]
     if (None, 'href') not in attrs:
         return attrs
 
     parsed_url = urlparse(attrs[(None, 'href')])
     scheme = 'https' if request.is_secure else 'http'
-  
-    if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
-        netloc_override = current_app.config['SERVER_NAME']
+    if parsed_url.path.startswith('/'):
+        netloc_override = app_server_name if app_server_name else ''
+    else: 
+        netloc_override = ''
+
+    if parsed_url.netloc in ('', app_server_name):
         if parsed_url.scheme == 'mailto':
             del attrs[(None, 'href')]
         else:
