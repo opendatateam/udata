@@ -39,30 +39,43 @@ def nofollow_callback(attrs, new=False):
     otherwise add `nofollow`.
     That callback is not splitted in order to parse the URL only once.
     """
+    print (f'\n... attrs start : {attrs}')
 
     app_server_name = current_app.config["SERVER_NAME"]
+    print (f'... app_server_name : {app_server_name}')
     if (None, 'href') not in attrs:
         return attrs
 
     parsed_url = urlparse(attrs[(None, 'href')])
-    scheme = 'https' if request.is_secure else 'http'
+    print (f'... parsed_url : {parsed_url}')
+    # print (f'... parsed_url.netloc : {parsed_url.netloc}')
+    # print (f'... parsed_url.path : {parsed_url.path}')
+
+    scheme = 'https://' if request.is_secure else 'http://'
+    no_follow_override = True
     if parsed_url.path.startswith('/'):
         netloc_override = app_server_name if app_server_name else ''
+        no_follow_override = False
+        if app_server_name == None:
+            scheme = ''
     else: 
         netloc_override = ''
+    print (f'... netloc_override : {netloc_override}')
 
+    href = f'{scheme}{netloc_override}{parsed_url.path}'
     if parsed_url.netloc in ('', app_server_name):
         if parsed_url.scheme == 'mailto':
+            no_follow_override = False
             del attrs[(None, 'href')]
         else:
-            attrs[(None, 'href')] = f'{scheme}://{netloc_override}{parsed_url.path}'
-        return attrs
-    else:
+            attrs[(None, 'href')] = href
+    if parsed_url.netloc not in ('', app_server_name) or no_follow_override:
         rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]
         if 'nofollow' not in [x.lower() for x in rel]:
             rel.append('nofollow')
         attrs[(None, 'rel')] = ' '.join(rel)
-        return attrs
+    print (f'... attrs end : {attrs}')
+    return attrs
 
 
 class Renderer(mistune.Renderer):
