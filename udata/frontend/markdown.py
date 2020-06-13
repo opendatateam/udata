@@ -39,17 +39,12 @@ def nofollow_callback(attrs, new=False):
     otherwise add `nofollow`.
     That callback is not splitted in order to parse the URL only once.
     """
-    print (f'\n... attrs start : {attrs}')
 
     app_server_name = current_app.config["SERVER_NAME"]
-    print (f'... app_server_name : {app_server_name}')
     if (None, 'href') not in attrs:
         return attrs
 
     parsed_url = urlparse(attrs[(None, 'href')])
-    print (f'... parsed_url : {parsed_url}')
-    # print (f'... parsed_url.netloc : {parsed_url.netloc}')
-    # print (f'... parsed_url.path : {parsed_url.path}')
 
     scheme = 'https://' if request.is_secure else 'http://'
     no_follow_override = True
@@ -60,7 +55,6 @@ def nofollow_callback(attrs, new=False):
             scheme = ''
     else: 
         netloc_override = ''
-    print (f'... netloc_override : {netloc_override}')
 
     href = f'{scheme}{netloc_override}{parsed_url.path}'
     if parsed_url.netloc in ('', app_server_name):
@@ -74,7 +68,6 @@ def nofollow_callback(attrs, new=False):
         if 'nofollow' not in [x.lower() for x in rel]:
             rel.append('nofollow')
         attrs[(None, 'rel')] = ' '.join(rel)
-    print (f'... attrs end : {attrs}')
     return attrs
 
 
