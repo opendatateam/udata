@@ -17,7 +17,7 @@ from udata.models import (Follow, Issue, Discussion, Activity, Topic,
                           Organization)
 from udata.tasks import job
 
-from .models import Dataset, Resource, UPDATE_FREQUENCIES, Checksum
+from .models import Dataset, Resource, CommunityResource, UPDATE_FREQUENCIES, Checksum
 
 log = get_task_logger(__name__)
 
@@ -54,6 +54,12 @@ def purge_datasets(self):
         for resource in dataset.resources:
             if resource.fs_filename is not None:
                 storage.delete(resource.fs_filename)
+        # Remove each dataset related community resource and it's file
+        community_resources = CommunityResource.objects(dataset=dataset)
+        for community_resource in community_resources:
+            if community_resource.fs_filename is not None:
+                storage.delete(community_resource.fs_filename)
+            community_resource.delete()
         # Remove dataset
         dataset.delete()
 
