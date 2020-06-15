@@ -9,14 +9,19 @@ If none is found the file is deleted.
 import logging
 
 from udata.core import storages
-from udata.models import Dataset, Resource, CommunityResource
+from udata.models import Dataset, CommunityResource, Organization, User, Reuse
 
 log = logging.getLogger(__name__)
 
 
 def migrate(db):
     log.info('Processing resources and community resources')
-    for fs_filename in list(storages.resources.list_files()):
+
+    resource_files = list(storages.resources.list_files())
+    avatar_files = list(storages.avatars.list_files())
+    image_files = list(storages.images.list_files())
+
+    for fs_filename in resource_files:
         split_str = fs_filename.split('/')
         dataset_slug = split_str[0]
         dataset = Dataset.objects(slug=dataset_slug).first()
@@ -45,6 +50,49 @@ def migrate(db):
                 storages.resources.delete(fs_filename)
         else:
             storages.resources.delete(fs_filename)
-    log.info('Processing organizations logos')
+
+    log.info('Processing organizations logos and users avatars')
+    orgs = Organization.objects()
+    users = User.objects()
+    org_index = dict()
+    for org in orgs:
+        if org.logo.filename:
+            split_filename = org.logo.filename.split('.')
+            org_index[str(org.id)] = split_filename[0]
+
+    user_index = dict()
+    for user in users:
+        if user.avatar.filename:
+            split_filename = user.avatar.filename.split('.')
+            user_index[str(user.id)] = split_filename[0]
+
+    for fs_filename in avatar_files:
+        match_org = False
+        match_user = False
+        for key, value in org_index.items():
+            if value in fs_filename:
+                match_org = True
+                break
+        for key, value in user_index.items():
+            if value in fs_filename:
+                match_user = True
+                break
+        if not match_org and not match_user:
+            storages.avatars.delete(fs_filename)
+
     log.info('Processing reuses logos')
-    log.info('Processing users avatars')
+    reuses = Reuse.objects()
+    reuses_index = dict()
+    for reuse in reuses:
+        if reuse.image.filename:
+            split_filename = reuse.image.filename.split('.')
+            reuses_index[str(reuse.id)] = split_filename[0]
+
+    for fs_filename in image_files:
+        match_reuse = False
+        for key, value in reuses_index.items():
+            if value in fs_filename:
+                match_reuse = True
+                break
+        if not match_reuse:
+            storages.images.delete(fs_filename)
