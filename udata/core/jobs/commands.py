@@ -142,7 +142,7 @@ def scheduled():
         for task in PeriodicTask.objects(task=job.name):
             label = job_label(task.task, task.args, task.kwargs)
             echo(SCHEDULE_LINE.format(
-                name=white(task.name.encode('utf8')),
+                name=white(task.name),
                 label=label,
                 schedule=task.schedule_display
-            ).encode('utf8'))
+            ))
