@@ -31,29 +31,62 @@ def source_tooltip_callback(attrs, new=False):
     return attrs
 
 
-def nofollow_callback(attrs, new=False):
+
+def nomailto_callback(attrs, scheme):
+    """
+    Turn mailto links into neutral <a> tags if not markdown
+    """
+    print (f'... nomailto_callback')
+    if scheme == 'mailto':
+        del attrs[(None, 'href')]
+    return attrs
+
+def nofollow_callback(attrs, parsed_url):
     """
     Turn relative links into external ones and avoid `nofollow` for us,
-
     otherwise add `nofollow`.
-    That callback is not splitted in order to parse the URL only once.
     """
+    print (f'... nofollow_callback')
 
-    if (None, u"href") not in attrs:
-        return attrs
-    parsed_url = urlparse(attrs[(None, 'href')])
-    if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
-        attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
-            scheme='https' if request.is_secure else 'http',
-            netloc=current_app.config['SERVER_NAME'],
-            path=parsed_url.path)
-        return attrs
-    else:
+    if parsed_url.netloc not in ('', current_app.config['SERVER_NAME']):
         rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]
         if 'nofollow' not in [x.lower() for x in rel]:
             rel.append('nofollow')
         attrs[(None, 'rel')] = ' '.join(rel)
         return attrs
+
+def clean_attrs_callback(attrs, new=False):
+    """
+    Clean href attribute from mailto | add `nofollow` |  
+    """
+
+    print (f'\n... clean_attrs_callback')
+    print (f'... attrs : {attrs}')
+
+    if (None, u"href") not in attrs:
+        return attrs
+
+    server_name = current_app.config['SERVER_NAME'] 
+    print (f'... server_name : {server_name} - {type(server_name)}')
+    parsed_url = urlparse(attrs[(None, 'href')])
+    print (f'... parsed_url : {parsed_url}')
+
+    # build href
+    scheme = 'https' if request.is_secure else 'http'
+    netloc = f'{server_name}' if server_name else ''
+    href = f'{scheme}://{netloc}{parsed_url.path}'
+    print (f'... href : {href}')
+    if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
+        attrs[(None, 'href')] = href
+
+    # clean href from mailto
+    attrs = nomailto_callback(attrs, scheme)
+
+    # append nofollow
+    if (None, u"href") in attrs:
+        attrs = nofollow_callback(attrs, parsed_url)
+
+    return attrs
 
 
 class Renderer(mistune.Renderer):
@@ -82,7 +115,7 @@ class UDataMarkdown(object):
         html = self.markdown(stream)
 
         # Deal with callbacks
-        callbacks = [nofollow_callback]
+        callbacks = [clean_attrs_callback]
         if source_tooltip:
             callbacks.append(source_tooltip_callback)
 
@@ -92,8 +125,12 @@ class UDataMarkdown(object):
             styles=current_app.config['MD_ALLOWED_STYLES'],
             protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
             strip_comments=False,
-            filters=[partial(LinkifyFilter, skip_tags=['pre'], parse_email=False,
-                             callbacks=callbacks)]
+            filters=[partial(
+              LinkifyFilter, 
+              skip_tags=['pre'], 
+              parse_email=True,
+              callbacks=callbacks
+            )]
         )
 
         html = cleaner.clean(html)
