@@ -15,11 +15,15 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info('Processing resources and community resources')
+    log.info('Processing resources and community resources.')
 
     resource_files = list(storages.resources.list_files())
     avatar_files = list(storages.avatars.list_files())
     image_files = list(storages.images.list_files())
+
+    resource_deletion_count = 0
+    avatar_deletion_count = 0
+    image_deletion_count = 0
 
     for fs_filename in resource_files:
         split_str = fs_filename.split('/')
@@ -47,11 +51,13 @@ def migrate(db):
                         break
 
             if not match_resource and not match_community_resource:
+                resource_deletion_count += 1
                 storages.resources.delete(fs_filename)
         else:
+            resource_deletion_count += 1
             storages.resources.delete(fs_filename)
 
-    log.info('Processing organizations logos and users avatars')
+    log.info('Processing organizations logos and users avatars.')
     orgs = Organization.objects()
     users = User.objects()
     org_index = dict()
@@ -78,9 +84,10 @@ def migrate(db):
                 match_user = True
                 break
         if not match_org and not match_user:
+            avatar_deletion_count += 1
             storages.avatars.delete(fs_filename)
 
-    log.info('Processing reuses logos')
+    log.info('Processing reuses logos.')
     reuses = Reuse.objects()
     reuses_index = dict()
     for reuse in reuses:
@@ -95,4 +102,10 @@ def migrate(db):
                 match_reuse = True
                 break
         if not match_reuse:
+            image_deletion_count += 1
             storages.images.delete(fs_filename)
+
+    log.info('Completed.')
+    log.info(f'{resource_deletion_count} objects of the resources storage were deleted.')
+    log.info(f'{avatar_deletion_count} objects of the avatars storage were deleted.')
+    log.info(f'{image_deletion_count} objects of the images storage were deleted.')
