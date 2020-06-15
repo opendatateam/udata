@@ -1,3 +1,4 @@
+from werkzeug.exceptions import BadRequest
 from flask import request
 
 from udata.api import api, API, fields
@@ -255,8 +256,8 @@ class ScheduleSourceAPI(API):
         # Handle both syntax: quoted and unquoted
         try:
             data = request.json
-        except Exception as e:
-            data = request.data
+        except BadRequest as e:
+            data = request.data.decode('utf-8')
         return actions.schedule(ident, data)
 
     @api.doc('unschedule_harvest_source')
