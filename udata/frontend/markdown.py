@@ -31,7 +31,7 @@ def source_tooltip_callback(attrs, new=False):
     return attrs
 
 
-def nomailto_callback(attrs, scheme):
+def delete_mailto(attrs, scheme):
     """
     Turn any mailto link into neutral <a> tags
     """
@@ -42,7 +42,7 @@ def nomailto_callback(attrs, scheme):
     return attrs, is_mailto
 
 
-def nofollow_callback(attrs, parsed_url):
+def append_nofollow(attrs, parsed_url):
     """
     Turn relative links into external ones and avoid `nofollow` for us,
     otherwise add `nofollow`.
@@ -57,8 +57,8 @@ def nofollow_callback(attrs, parsed_url):
 
 def clean_attrs_callback(attrs, new=False):
     """
-    Clean href attribute from mailto | add `nofollow`
-    if href is present in the attributes
+    Clean href attribute if href is present in the attributes
+    This callback is calling `nomailto` and `nofollow` fns in order to parse the URL only once.
     """
 
     if (None, u"href") not in attrs:
@@ -69,7 +69,7 @@ def clean_attrs_callback(attrs, new=False):
     scheme = parsed_url.scheme
 
     # clean href from mailto
-    attrs, is_mailto = nomailto_callback(attrs, scheme)
+    attrs, is_mailto = delete_mailto(attrs, scheme)
 
     # build href if netloc is local
     is_local_ref = parsed_url.netloc in ('', current_app.config['SERVER_NAME'])
@@ -81,7 +81,7 @@ def clean_attrs_callback(attrs, new=False):
 
     # append nofollow if necessary
     if (None, u"href") in attrs and not is_local_ref:
-        attrs = nofollow_callback(attrs, parsed_url)
+        attrs = append_nofollow(attrs, parsed_url)
 
     return attrs
 
