@@ -129,12 +129,15 @@ class MarkdownTest:
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 
-    def test_markdown_not_linkify_mails(self, md2dom):
-        '''Markdown filter should not transform emails to anchors'''
+    def test_markdown_neutralizing_mails(self, md2dom):
+        '''Markdown filter should transform emails into neutral anchors'''
         text = 'coucou@cmoi.fr'
-        dom = md2dom(text)
+        text_md = f'[{text}](mailto:{text})'
+        dom = md2dom(f'{text} {text_md}')
         el = dom.getElementsByTagName('a')[0]
+        el_md = dom.getElementsByTagName('a')[0]
         assert el.getAttribute('href') == ''
+        assert el_md.getAttribute('href') == ''
 
     def test_markdown_linkify_within_pre(self, assert_md):
         '''Markdown filter should not transform urls into <pre> anchors'''
