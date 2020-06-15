@@ -58,7 +58,7 @@ def append_nofollow(attrs, parsed_url):
 def clean_attrs_callback(attrs, new=False):
     """
     Clean href attribute if href is present in the attributes
-    This callback is calling `nomailto` and `nofollow` fns in order to parse the URL only once.
+    This callback is calling `delete_mailto` and `append_nofollow` functions in order to parse the URL only once.
     """
 
     if (None, u"href") not in attrs:
