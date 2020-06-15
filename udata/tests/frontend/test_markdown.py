@@ -129,6 +129,16 @@ class MarkdownTest:
             assert el.getAttribute('data-tooltip') == 'Source'
             assert el.firstChild.data == 'foo'
 
+    def test_markdown_linkify_relative_no_slash(self, md2dom):
+        '''Markdown filter should transform relative urls to external ones'''
+        text = '[foo](bar)'
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('rel') == ''
+        assert el.getAttribute('href') == 'http://local.test/bar'
+        assert el.getAttribute('data-tooltip') == ''
+        assert el.firstChild.data == 'foo'
+
     def test_markdown_neutralizing_mails(self, md2dom):
         '''Markdown filter should transform emails into neutral anchors'''
         text = 'coucou@cmoi.fr'

@@ -61,11 +61,12 @@ def clean_attrs_callback(attrs, new=False):
     This callback is calling `delete_mailto` and `append_nofollow` functions in order to parse the URL only once.
     """
 
-    if (None, u"href") not in attrs:
+    if (None, 'href') not in attrs:
         return attrs
 
     server_name = current_app.config['SERVER_NAME'] 
     parsed_url = urlparse(attrs[(None, 'href')])
+    path = parsed_url.path
     scheme = parsed_url.scheme
 
     # clean href from mailto
@@ -76,11 +77,12 @@ def clean_attrs_callback(attrs, new=False):
     if is_local_ref and not is_mailto:
         scheme = 'https' if request.is_secure else 'http'
         netloc = f'{server_name}' if server_name else ''
-        href = f'{scheme}://{netloc}{parsed_url.path}'
+        path = path if path.startswith('/') else f'/{path}'
+        href = f'{scheme}://{netloc}{path}'
         attrs[(None, 'href')] = href
 
     # append nofollow if necessary
-    if (None, u"href") in attrs and not is_local_ref:
+    if (None, 'href') in attrs and not is_local_ref:
         attrs = append_nofollow(attrs, parsed_url)
 
     return attrs
