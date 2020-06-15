@@ -31,59 +31,56 @@ def source_tooltip_callback(attrs, new=False):
     return attrs
 
 
-
 def nomailto_callback(attrs, scheme):
     """
-    Turn mailto links into neutral <a> tags if not markdown
+    Turn any mailto link into neutral <a> tags
     """
-    print (f'... nomailto_callback')
+    is_mailto = False
     if scheme == 'mailto':
         del attrs[(None, 'href')]
-    return attrs
+        is_mailto = True
+    return attrs, is_mailto
+
 
 def nofollow_callback(attrs, parsed_url):
     """
     Turn relative links into external ones and avoid `nofollow` for us,
     otherwise add `nofollow`.
     """
-    print (f'... nofollow_callback')
-
     if parsed_url.netloc not in ('', current_app.config['SERVER_NAME']):
         rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]
         if 'nofollow' not in [x.lower() for x in rel]:
             rel.append('nofollow')
         attrs[(None, 'rel')] = ' '.join(rel)
-        return attrs
+    return attrs
+
 
 def clean_attrs_callback(attrs, new=False):
     """
-    Clean href attribute from mailto | add `nofollow` |  
+    Clean href attribute from mailto | add `nofollow`
+    if href is present in the attributes
     """
-
-    print (f'\n... clean_attrs_callback')
-    print (f'... attrs : {attrs}')
 
     if (None, u"href") not in attrs:
         return attrs
 
     server_name = current_app.config['SERVER_NAME'] 
-    print (f'... server_name : {server_name} - {type(server_name)}')
     parsed_url = urlparse(attrs[(None, 'href')])
-    print (f'... parsed_url : {parsed_url}')
-
-    # build href
-    scheme = 'https' if request.is_secure else 'http'
-    netloc = f'{server_name}' if server_name else ''
-    href = f'{scheme}://{netloc}{parsed_url.path}'
-    print (f'... href : {href}')
-    if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
-        attrs[(None, 'href')] = href
+    scheme = parsed_url.scheme
 
     # clean href from mailto
-    attrs = nomailto_callback(attrs, scheme)
+    attrs, is_mailto = nomailto_callback(attrs, scheme)
 
-    # append nofollow
-    if (None, u"href") in attrs:
+    # build href if netloc is local
+    is_local_ref = parsed_url.netloc in ('', current_app.config['SERVER_NAME'])
+    if is_local_ref and not is_mailto:
+        scheme = 'https' if request.is_secure else 'http'
+        netloc = f'{server_name}' if server_name else ''
+        href = f'{scheme}://{netloc}{parsed_url.path}'
+        attrs[(None, 'href')] = href
+
+    # append nofollow if necessary
+    if (None, u"href") in attrs and not is_local_ref:
         attrs = nofollow_callback(attrs, parsed_url)
 
     return attrs

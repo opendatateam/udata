@@ -132,8 +132,9 @@ class MarkdownTest:
     def test_markdown_not_linkify_mails(self, md2dom):
         '''Markdown filter should not transform emails to anchors'''
         text = 'coucou@cmoi.fr'
-        dom = md2dom(text, '<p>coucou@cmoi.fr</p>')
-        assert dom.getElementsByTagName('a') == []
+        dom = md2dom(text)
+        el = dom.getElementsByTagName('a')[0]
+        assert el.getAttribute('href') == ''
 
     def test_markdown_linkify_within_pre(self, assert_md):
         '''Markdown filter should not transform urls into <pre> anchors'''
