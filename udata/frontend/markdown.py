@@ -35,7 +35,6 @@ def source_tooltip_callback(attrs, new=False):
 def nofollow_callback(attrs, new=False):
     """
     Turn relative links into external ones and avoid `nofollow` for us,
-
     otherwise add `nofollow`.
     That callback is not splitted in order to parse the URL only once.
     """
