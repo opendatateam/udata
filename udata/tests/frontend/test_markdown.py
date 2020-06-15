@@ -134,8 +134,9 @@ class MarkdownTest:
         text = 'coucou@cmoi.fr'
         text_md = f'[{text}](mailto:{text})'
         dom = md2dom(f'{text} {text_md}')
-        el = dom.getElementsByTagName('a')[0]
-        el_md = dom.getElementsByTagName('a')[0]
+        els = dom.getElementsByTagName('a')
+        el = els[0]
+        el_md = els[1]
         assert el.getAttribute('href') == ''
         assert el_md.getAttribute('href') == ''
 
