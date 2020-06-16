@@ -5,6 +5,7 @@
 - Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)
 - Removed now useless metric fetching [#2482](https://github.com/opendatateam/udata/pull/2484)
 - Fix bug in harvester's cron schedule [#2493](https://github.com/opendatateam/udata/pull/2493)
+- Adding banner options in settings for a potential use in an udata's theme [#2492](https://github.com/opendatateam/udata/pull/2492)
 
 ## 2.1.0 (2020-05-12)
 
@@ -21,10 +22,6 @@
 ### New features
 
 - Nothing yet
-
-## 2.0.5 (2020-06-11)
-
-- Adding banner options in settings for a potential use in an udata's theme [#2492](https://github.com/opendatateam/udata/pull/2492)
 
 ## 2.0.4 (2020-05-04)
 
