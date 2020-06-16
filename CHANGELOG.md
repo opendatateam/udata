@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.1.1 (2020-06-16)
 
 - Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)
 - Removed now useless metric fetching [#2482](https://github.com/opendatateam/udata/pull/2484)
