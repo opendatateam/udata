@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Fix packaging
+
 ## 2.1.1 (2020-06-11)
 
 - Adding banner with setting inherited from udata's settings [#480](https://github.com/etalab/udata-gouvfr/pull/480)
