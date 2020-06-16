@@ -22,6 +22,10 @@
 
 - Nothing yet
 
+## 2.0.5 (2020-06-11)
+
+- Adding banner options in settings for a potential use in an udata's theme [#2492](https://github.com/opendatateam/udata/pull/2492)
+
 ## 2.0.4 (2020-05-04)
 
 - Fix export-csv command (py3 compat) [#2472](https://github.com/opendatateam/udata/pull/2472)
