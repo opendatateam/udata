@@ -2,7 +2,7 @@ import pytest
 
 from udata.models import Dataset, Topic
 from udata.core.dataset import tasks
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, CommunityResourceFactory
 # csv.adapter for Tag won't be registered if this is not imported :thinking:
 from udata.core.tags import csv as _  # noqa
 
@@ -21,6 +21,13 @@ def test_purge_datasets():
 
     topic = Topic.objects(name='test topic').first()
     assert topic.datasets[0] == datasets[1]
+
+
+def test_purge_datasets_community():
+    dataset = Dataset.objects.create(title='delete me', deleted='2016-01-01')
+    community_resource1 = CommunityResourceFactory()
+    community_resource1.dataset = dataset
+    community_resource1.save()
 
 
 @pytest.mark.usefixtures('instance_path')

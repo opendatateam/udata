@@ -33,7 +33,7 @@ def flatten(iterable):
 @job('purge-datasets')
 def purge_datasets(self):
     for dataset in Dataset.objects(deleted__ne=None):
-        log.info('Purging dataset "{0}"'.format(dataset))
+        log.info(f'Purging dataset {dataset}')
         # Remove followers
         Follow.objects(following=dataset).delete()
         # Remove issues

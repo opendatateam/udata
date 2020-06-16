@@ -1330,6 +1330,30 @@ class CommunityResourceAPITest(APITestCase):
         self.assertIn('dataset', data['errors'])
         self.assertEqual(CommunityResource.objects.count(), 0)
 
+    def test_community_resource_api_delete(self):
+        dataset = VisibleDatasetFactory()
+        self.login()
+
+        response = self.post(
+            url_for('api.upload_new_community_resource', dataset=dataset),
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+        self.assert201(response)
+
+        data = json.loads(response.data)
+        resource_id = data['id']
+        self.assertEqual(data['title'], 'test.txt')
+
+        response = self.put(
+            url_for('api.community_resource', community=resource_id),
+            data)
+        self.assertStatus(response, 200)
+        self.assertEqual(CommunityResource.objects.count(), 1)
+
+        response = self.delete(url_for('api.community_resource', community=resource_id))
+        self.assertStatus(response, 204)
+
+        self.assertEqual(CommunityResource.objects.count(), 0)
+        self.assertEqual(list(storages.resources.list_files()), [])
 
 class ResourcesTypesAPITest(APITestCase):
 
