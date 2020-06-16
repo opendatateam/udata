@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.1.3 (2020-06-16)
 
 - Fix packaging
 
