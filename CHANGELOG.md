@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.1.2 (2020-06-17)
 
 - Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)

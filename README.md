@@ -24,15 +24,15 @@ It is collectively taken care of by members of the
 
 [circleci-url]: https://circleci.com/gh/opendatateam/udata
 [circleci-badge]: https://circleci.com/gh/opendatateam/udata.svg?style=shield
-[requires-io-url]: https://requires.io/github/opendatateam/udata/requirements/?tag=v2.1.2
-[requires-io-badge]: https://requires.io/github/opendatateam/udata/requirements.svg?tag=v2.1.2
+[requires-io-url]: https://requires.io/github/opendatateam/udata/requirements/?branch=master
+[requires-io-badge]: https://requires.io/github/opendatateam/udata/requirements.svg?branch=master
 [david-dm-url]: https://david-dm.org/opendatateam/udata
 [david-dm-badge]: https://img.shields.io/david/opendatateam/udata/status.svg
 [david-dm-dev-url]: https://david-dm.org/opendatateam/udata?type=dev
 [david-dm-dev-badge]: https://david-dm.org/opendatateam/udata/dev-status.svg
 [gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]: https://gitter.im/opendatateam/udata
-[readthedocs-badge]: https://readthedocs.org/projects/udata/badge/?version=v2.1.2
-[readthedocs-url]: https://udata.readthedocs.io/en/v2.1.2/
+[readthedocs-badge]: https://readthedocs.org/projects/udata/badge/?version=latest
+[readthedocs-url]: https://udata.readthedocs.io/en/latest/
 [crowdin-badge]: https://d322cqt584bo4o.cloudfront.net/udata/localized.svg
 [crowdin-url]: https://crowdin.com/project/udata
