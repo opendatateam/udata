@@ -4,7 +4,7 @@
 
 - :warning: Deletion workflow changes [#2488](https://github.com/opendatateam/udata/pull/2488):
   - Deleting a resource now triggers the deletion of the corresponding static file
-  - Deleting a dataset now triggers the deletion of the corresponding community resources and their static files
+  - Deleting a dataset now triggers the deletion of the corresponding resources (including community resources) and their static files
 
 ## 2.1.2 (2020-06-17)
 
