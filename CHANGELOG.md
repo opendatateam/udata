@@ -6,12 +6,16 @@
   - Deleting a resource now triggers the deletion of the corresponding static file
   - Deleting a dataset now triggers the deletion of the corresponding community resources and their static files
 
-## 2.1.1 (2020-06-16)
+## 2.1.2 (2020-06-17)
 
 - Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)
 - Removed now useless metric fetching [#2482](https://github.com/opendatateam/udata/pull/2484)
 - Fix bug in harvester's cron schedule [#2493](https://github.com/opendatateam/udata/pull/2493)
 - Adding banner options in settings for a potential use in an udata's theme [#2492](https://github.com/opendatateam/udata/pull/2492)
+
+## 2.1.1 (2020-06-16)
+
+- Broken release, use 2.1.2
 
 ## 2.1.0 (2020-05-12)
 
