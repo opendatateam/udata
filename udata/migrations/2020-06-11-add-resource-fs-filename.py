@@ -17,15 +17,11 @@ log = logging.getLogger(__name__)
 def migrate(db):
     log.info('Processing resources and community resources.')
 
-    resource_files = list(storages.resources.list_files())
-    avatar_files = list(storages.avatars.list_files())
-    image_files = list(storages.images.list_files())
-
     resource_deletion_count = 0
     avatar_deletion_count = 0
     image_deletion_count = 0
 
-    for fs_filename in resource_files:
+    for fs_filename in storages.resources.list_files():
         split_str = fs_filename.split('/')
         dataset_slug = split_str[0]
         dataset = Dataset.objects(slug=dataset_slug).first()
@@ -35,7 +31,7 @@ def migrate(db):
             match_community_resource = False
 
             for resource in dataset.resources:
-                if fs_filename in resource.url:
+                if resource.url.endwith(fs_filename):
                     match_resource = True
                     resource.fs_filename = fs_filename
                     resource.save()
@@ -44,7 +40,7 @@ def migrate(db):
             if not match_resource:
                 community_resources = CommunityResource.objects(dataset=dataset)
                 for community_resource in community_resources:
-                    if fs_filename in community_resource.url:
+                    if community_resource.url.endwith(fs_filename):
                         match_community_resource = True
                         community_resource.fs_filename = fs_filename
                         community_resource.save()
@@ -72,15 +68,15 @@ def migrate(db):
             split_filename = user.avatar.filename.split('.')
             user_index[str(user.id)] = split_filename[0]
 
-    for fs_filename in avatar_files:
+    for fs_filename in storages.avatars.list_files():
         match_org = False
         match_user = False
         for key, value in org_index.items():
-            if value in fs_filename:
+            if fs_filename.startswith(value):
                 match_org = True
                 break
         for key, value in user_index.items():
-            if value in fs_filename:
+            if fs_filename.startswith(value):
                 match_user = True
                 break
         if not match_org and not match_user:
@@ -95,10 +91,10 @@ def migrate(db):
             split_filename = reuse.image.filename.split('.')
             reuses_index[str(reuse.id)] = split_filename[0]
 
-    for fs_filename in image_files:
+    for fs_filename in storages.images.list_files():
         match_reuse = False
         for key, value in reuses_index.items():
-            if value in fs_filename:
+            if fs_filename.startswith(value):
                 match_reuse = True
                 break
         if not match_reuse:

@@ -24,14 +24,12 @@ def purge_organizations(self):
         # Store datasets for later reindexation
         d_ids = [d.id for d in Dataset.objects(organization=organization)]
         # Remove organization's logo in all sizes
-        try:
+        if organization.logo.filename is not None:
             storage = storages.avatars
             storage.delete(organization.logo.filename)
             storage.delete(organization.logo.original)
             for key, value in organization.logo.thumbnails.items():
                 storage.delete(value)
-        except TypeError:
-            log.warning(f'Image of organization {organization} is None and thus will not be erased.')
         # Remove
         organization.delete()
         # Reindex the datasets that were linked to the organization

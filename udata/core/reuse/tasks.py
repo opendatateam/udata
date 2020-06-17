@@ -21,15 +21,13 @@ def purge_reuses(self):
         Discussion.objects(subject=reuse).delete()
         # Remove activity
         Activity.objects(related_to=reuse).delete()
-        # # Remove reuse's logo in all sizes
-        try:
+        # Remove reuse's logo in all sizes
+        if reuse.image.filename is not None:
             storage = storages.images
             storage.delete(reuse.image.filename)
             storage.delete(reuse.image.original)
             for key, value in reuse.image.thumbnails.items():
                 storage.delete(value)
-        except TypeError:
-            log.warning(f'Image of reuse {reuse} is None and thus will not be erased.')
         reuse.delete()
 
 
