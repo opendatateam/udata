@@ -1,6 +1,6 @@
 import pytest
 
-from udata.models import Dataset, Topic
+from udata.models import Dataset, Topic, CommunityResource
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory, CommunityResourceFactory
 # csv.adapter for Tag won't be registered if this is not imported :thinking:
@@ -29,6 +29,8 @@ def test_purge_datasets_community():
     community_resource1.dataset = dataset
     community_resource1.save()
 
+    tasks.purge_datasets()
+    assert CommunityResource.objects.count() == 0
 
 @pytest.mark.usefixtures('instance_path')
 def test_export_csv(app):
