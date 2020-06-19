@@ -135,14 +135,18 @@
 import Vue from 'vue';
 import API from 'api';
 import Sorter from 'mixins/sorter';
-import Uploader from 'mixins/uploader';
+// import UploaderMixin from 'mixins/uploader';
 import Box from 'components/containers/box.vue';
 import ResourceAvailability from './availability.vue';
 import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'resources-list',
-    mixins: [Uploader, Sorter, DatasetFilters],
+    mixins: [
+        // UploaderMixin,
+        Sorter,
+        DatasetFilters
+    ],
     components: {Box, ResourceAvailability},
     props: {
         dataset: {
@@ -176,9 +180,20 @@ export default {
             this.files.splice(this.files.indexOf(file), 1);
         }
     },
+    init() {
+        // console.log('==='.repeat(10))
+        console.log('=== resources / list.vue > init() > ... ')
+    },
+    beforeCompile() {
+        // console.log('==='.repeat(10))
+        console.log('=== resources / list.vue > BeforeCompile() > ... ')
+    },
     ready() {
         /* In case of a new resource, we display the appropriated popin
            on load. */
+        // console.log('==='.repeat(10))
+        console.log('=== resources / list.vue > ready() > ... ')
+        // console.log('=== resources / list.vue > ready() > ... this.upload_endpoint : ', this.upload_endpoint)
         if ("new_resource" in this.$route.query) {
             this.on_new();
         }

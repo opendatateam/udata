@@ -250,6 +250,10 @@ export default {
         },
         upload_endpoint() {
             const operations = API.datasets.operations;
+            console.log('--- resources / form.vue > computed / upload_endpoint() > ... ')
+            console.log('--- resources / form.vue > computed / upload_endpoint() > this.dataset.id : ', this.dataset.id)
+            console.log('--- resources / form.vue > computed / upload_endpoint() > this.resource.id : ', this.resource.id)
+
             let params = {};
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
@@ -261,10 +265,18 @@ export default {
                     params.rid = this.resource.id;
                 }
             }
+            console.log('--- resources / form.vue > computed / upload_endpoint() > params : ', params)
+
             const route_new = this.resource.id ? '' : 'new_';
             const route_namespace = this.is_community ? 'community_' : 'dataset_';
             const endpoint = `upload_${route_new}${route_namespace}resource`;
-            return operations[endpoint].urlify(params);
+            let up_endpoint = operations[endpoint].urlify(params);
+            // console.log('--- resources / form.vue > computed / upload_endpoint() > route_new : ', route_new)
+            // console.log('--- resources / form.vue > computed / upload_endpoint() > route_namespace : ', route_namespace)
+            console.log('--- resources / form.vue > computed / upload_endpoint() > endpoint : ', endpoint)
+            console.log('--- resources / form.vue > computed / upload_endpoint() > operations[endpoint] : ', operations[endpoint])
+            console.log('--- resources / form.vue > computed / upload_endpoint() > up_endpoint : ', up_endpoint)
+            return up_endpoint
         },
     },
     events: {
@@ -285,6 +297,19 @@ export default {
             this.resource.on_fetched({obj: response});
             this.postUpload();
         },
+    },
+    init() {
+        // console.log('---'.repeat(10))
+        console.log('--- form.vue > init() > ... ')
+    },
+    beforeCompile() {
+        // console.log('---'.repeat(10))
+        console.log('--- form.vue > BeforeCompile() > ... ')
+    },
+    ready() {
+        // console.log('---'.repeat(10))
+        console.log('--- form.vue > ready() > ... ')
+        console.log('--- form.vue > ready() > ... this.upload_endpoint : ', this.upload_endpoint)
     },
     methods: {
         manual() {

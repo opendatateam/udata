@@ -42,7 +42,18 @@ export default {
     data() {
         return {editing: false, submitted: false};
     },
+    init() {
+        // console.log('>>>'.repeat(10))
+        console.log('>>> add-modal > init() > ... ')
+    },
+    beforeCompile() {
+        // console.log('>>>'.repeat(10))
+        console.log('>>> add-modal > BeforeCompile() > ... ')
+    },
     ready() {
+        // console.log('>>>'.repeat(21))
+        console.log('>>> add-modal.vue > ready() > ... ')
+        console.log('>>> add-modal.vue > ready() > ... this.dataset : ', this.dataset)
         // Avoid multiple handlers in case of error
         this.updHandler = this.dataset.$on('updated', this.on_success);
     },

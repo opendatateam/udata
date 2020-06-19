@@ -2,6 +2,7 @@
 <div>
 <layout :title="dataset.full_title || ''" :subtitle="_('Dataset')"
     :actions="actions" :badges="badges" :page="dataset.page || ''">
+    <code><pre>{{ JSON.stringify(dataset) }}</pre></code>
     <div class="row">
         <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
@@ -202,6 +203,18 @@ export default {
         can_edit() {
             return this.$root.me.can_edit(this.dataset);
         }
+    },
+    init() {
+        // console.log('+++'.repeat(10))
+        console.log('+++ dataset.vue > init() > ... ')
+    },
+    beforeCompile() {
+        // console.log('+++'.repeat(10))
+        console.log('+++ dataset.vue > BeforeCompile() > ... ')
+    },
+    ready() {
+        // console.log('+++'.repeat(10))
+        console.log('+++ dataset.vue > ready() > this.dataset : ', this.dataset)
     },
     methods: {
         edit() {
