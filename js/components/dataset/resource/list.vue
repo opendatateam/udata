@@ -141,11 +141,7 @@ import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'resources-list',
-    mixins: [
-        // UploaderMixin,
-        Sorter,
-        DatasetFilters
-    ],
+    mixins: [Sorter, DatasetFilters],
     components: {Box, ResourceAvailability},
     props: {
         dataset: {

@@ -156,7 +156,7 @@ export default {
                 },
                 validation: {allowedExtensions: this.$options.allowedExtensions || allowedExtensions.items},
                 messages,
-            })
+            });
         },
 
         /**
