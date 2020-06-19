@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 from udata.core import storages
 from udata.models import Dataset, CommunityResource, Organization, User, Reuse
+from udata.core.dataset.models import get_resource
 
 log = logging.getLogger(__name__)
 
@@ -22,29 +23,34 @@ def migrate(db):
     avatar_deletion_count = 0
     image_deletion_count = 0
 
-    # Parse every resources URL to make a list of it
-    resource_parsed_url_list = list()
+    # Parse every resources URL to make an index out of it
+    resource_index = dict()
     datasets = Dataset.objects()
     for dataset in datasets:
         for resource in dataset.resources:
-            # Takes only localy stored resources
             if resource.filetype == 'file':
                 parsed = urlparse(resource.url)
                 fs_name = parsed.path.strip('/resource/')
-                resource_parsed_url_list.append(fs_name)
+                resource_index[resource.id] = fs_name
 
-    # Add community resources URL to the list
+    # Add community resources URL to the index
     community_resources = CommunityResource.objects()
     for community_resource in community_resources:
         parsed = urlparse(community_resource.url)
         fs_name = parsed.path.strip('/resource/')
-        resource_parsed_url_list.append(fs_name)
+        resource_index[community_resource.id] = fs_name
 
-    # Diff between urls list and fs files list
     for fs_filename in storages.resources.list_files():
-        if fs_filename in resource_parsed_url_list:
-            continue
-        else:
+        match_resource = False
+        for key, value in resource_index.items():
+            if fs_filename == value:
+                match_resource = True
+                resource = get_resource(key)
+                resource.fs_filename = fs_filename
+                resource.save()
+                break
+
+        if not match_resource:
             resource_deletion_count += 1
             storages.resources.delete(fs_filename)
 
