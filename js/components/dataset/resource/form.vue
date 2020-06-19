@@ -99,6 +99,7 @@
 
 <template>
 <div>
+  <!-- <UploaderMixin> -->
     <form-horizontal v-if="hasData && !isUpload" class="resource-form file-resource-form"
         :fields="fields" :model="resource" v-ref:form>
     </form-horizontal>
@@ -142,6 +143,7 @@
             </a>
         </div>
     </div>
+  <!-- </UploaderMixin> -->
 </div>
 </template>
 
@@ -155,7 +157,10 @@ import UploaderMixin from 'mixins/uploader';
 import resource_types from 'models/resource_types';
 
 export default {
-    components: {FormHorizontal},
+    components: {
+      FormHorizontal,
+      // UploaderMixin
+    },
     mixins: [UploaderMixin],
     props: {
         dataset: {

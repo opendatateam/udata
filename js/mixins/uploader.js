@@ -60,7 +60,6 @@ export default {
             errors: new Set(),  // Track files ID for which errors has already been advertised
             dropping: false,
             upload_endpoint: null,
-            upload_endpoint_bis: 'upload_endpoint_bis',
             HAS_FILE_API,
             // $uploader: undefined,
         };
@@ -103,9 +102,8 @@ export default {
             }
         },
         upload_endpoint() {
-            console.log('...'.repeat(20))
+            // console.log('...'.repeat(20))
             console.log('... uploader.js > watch > upload_endpoint() > this.upload_endpoint : ', this.upload_endpoint)
-            console.log('... uploader.js > watch > upload_endpoint() > this.upload_endpoint_bis : ', this.upload_endpoint_bis)
             this._build_uploader();
         }
     },
@@ -131,9 +129,10 @@ export default {
 
     methods: {
         _build_uploader() {
-            console.log('...'.repeat(20))
+            // console.log('...'.repeat(20))
             console.log('... uploader.js > methods() > _build_uploader() ...')
             console.log('... uploader.js > methods() > _build_uploader() > this.upload_endpoint : ', this.upload_endpoint)
+            console.log('... uploader.js > methods() > _build_uploader() > this.$options : ', this.$options)
             if (!this.upload_endpoint) return;
             this.$uploader = new qq.FineUploaderBasic({
                 debug: DEBUG,
@@ -176,7 +175,7 @@ export default {
                 validation: {allowedExtensions: this.$options.allowedExtensions || allowedExtensions.items},
                 messages,
             })
-            // console.log('... uploader.js > methods() > _build_uploader() > this.$uploader : ', this.$uploader)
+            console.log('... uploader.js > methods() > _build_uploader() > this.$uploader : ', this.$uploader)
         },
 
         /**
@@ -184,8 +183,8 @@ export default {
          */
         upload(params) {
             // console.log('...'.repeat(20))
-            // console.log('... uploader.js > methods() > upload() > params : ', params)
-            // console.log('... uploader.js > methods() > upload() > this.$uploader : ', this.$uploader)
+            console.log('... uploader.js > methods() > upload() > params : ', params)
+            console.log('... uploader.js > methods() > upload() > this.$uploader : ', this.$uploader)
             if (params) {
                 this.$uploader.setParams(params);
             }
@@ -199,7 +198,7 @@ export default {
          */
         on_submit(id) {
             // console.log('...'.repeat(20))
-            // console.log('... uploader.js > methods() > on_submit() > id : ', id)
+            console.log('... uploader.js > methods() > on_submit() > id : ', id)
             if (HAS_FILE_API) {
                 const file = this.$uploader.getFile(id);
                 file.id = id;
@@ -216,7 +215,7 @@ export default {
          */
         on_upload(id) {
             // console.log('...'.repeat(20))
-            // console.log('... uploader.js > methods() > on_upload() > id : ', id)
+            console.log('... uploader.js > methods() > on_upload() > id : ', id)
             this.$emit('uploader:upload', id);
         },
 
@@ -226,8 +225,8 @@ export default {
          * See: http://docs.fineuploader.com/branch/master/api/events.html#progress
          */
         on_progress(id, name, uploaded, total) {
-            console.log('...'.repeat(20))
-            // console.log('... uploader.js > methods() > on_progress() > id : ', id)
+            // console.log('...'.repeat(20))
+            console.log('... uploader.js > methods() > on_progress() > id : ', id)
             // console.log('... uploader.js > methods() > on_progress() > name : ', name)
             // console.log('... uploader.js > methods() > on_progress() > uploaded : ', uploaded)
             // console.log('... uploader.js > methods() > on_progress() > total : ', total)
@@ -262,6 +261,7 @@ export default {
          */
         on_dropped_files_complete(files) {
             console.log('... uploader.js > methods() > on_dropped_files_complete() > files : ', files)
+            console.log('... uploader.js > methods() > on_dropped_files_complete() > this.upload_endpoint : ', this.upload_endpoint)
             if (!this.$uploader) {
                 console.log('\n... !!! ERROR !!! '.repeat(5))
                 console.log('... !!! uploader.js > methods() > on_dropped_files_complete() > !this.$uploader ... ')

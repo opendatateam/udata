@@ -206,11 +206,11 @@ export default {
     },
     init() {
         // console.log('+++'.repeat(10))
-        console.log('+++ dataset.vue > init() > ... ')
+        console.log('+++ dataset.vue > init() > this.dataset : ', this.dataset)
     },
     beforeCompile() {
         // console.log('+++'.repeat(10))
-        console.log('+++ dataset.vue > BeforeCompile() > ... ')
+        console.log('+++ dataset.vue > BeforeCompile() > this.dataset : ', this.dataset)
     },
     ready() {
         // console.log('+++'.repeat(10))
