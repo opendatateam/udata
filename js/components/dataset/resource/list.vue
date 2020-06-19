@@ -135,7 +135,7 @@
 import Vue from 'vue';
 import API from 'api';
 import Sorter from 'mixins/sorter';
-// import UploaderMixin from 'mixins/uploader';
+import UploaderMixin from 'mixins/uploader';
 import Box from 'components/containers/box.vue';
 import ResourceAvailability from './availability.vue';
 import DatasetFilters from 'components/dataset/filters';
@@ -143,7 +143,7 @@ import DatasetFilters from 'components/dataset/filters';
 export default {
     name: 'resources-list',
     mixins: [
-        // UploaderMixin,
+        UploaderMixin,
         Sorter,
         DatasetFilters
     ],
