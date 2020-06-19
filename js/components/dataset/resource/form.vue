@@ -155,7 +155,7 @@ import UploaderMixin from 'mixins/uploader';
 import resource_types from 'models/resource_types';
 
 export default {
-    components: {FormHorizontal,},
+    components: {FormHorizontal},
     mixins: [UploaderMixin],
     props: {
         dataset: {
@@ -250,7 +250,6 @@ export default {
         },
         upload_endpoint() {
             const operations = API.datasets.operations;
-
             let params = {};
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
@@ -262,7 +261,6 @@ export default {
                     params.rid = this.resource.id;
                 }
             }
-
             const route_new = this.resource.id ? '' : 'new_';
             const route_namespace = this.is_community ? 'community_' : 'dataset_';
             const endpoint = `upload_${route_new}${route_namespace}resource`;
