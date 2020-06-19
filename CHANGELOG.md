@@ -5,6 +5,8 @@
 - :warning: Deletion workflow changes [#2488](https://github.com/opendatateam/udata/pull/2488):
   - Deleting a resource now triggers the deletion of the corresponding static file
   - Deleting a dataset now triggers the deletion of the corresponding resources (including community resources) and their static files
+  - Adding a celery job to remove community resources not linked to a dataset
+  - Adding a migration file to populate resources fs_filename new field, and to treat existing resources files
 
 ## 2.1.2 (2020-06-17)
 
