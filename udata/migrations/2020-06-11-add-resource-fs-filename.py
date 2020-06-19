@@ -7,6 +7,7 @@ If one is found the fs_filename field is filled.
 If none is found the file is deleted.
 '''
 import logging
+from urllib.parse import urlparse
 
 from udata.core import storages
 from udata.models import Dataset, CommunityResource, Organization, User, Reuse
@@ -21,34 +22,28 @@ def migrate(db):
     avatar_deletion_count = 0
     image_deletion_count = 0
 
+    # Parse every resources URL to make a list of it
+    resource_parsed_url_list = list()
+    datasets = Dataset.objects()
+    for dataset in datasets:
+        for resource in dataset.resources:
+            # Takes only localy stored resources
+            if resource.filetype == 'file':
+                parsed = urlparse(resource.url)
+                fs_name = parsed.path.strip('/resource/')
+                resource_parsed_url_list.append(fs_name)
+
+    # Add community resources URL to the list
+    community_resources = CommunityResource.objects()
+    for community_resource in community_resources:
+        parsed = urlparse(community_resource.url)
+        fs_name = parsed.path.strip('/resource/')
+        resource_parsed_url_list.append(fs_name)
+
+    # Diff between urls list and fs files list
     for fs_filename in storages.resources.list_files():
-        split_str = fs_filename.split('/')
-        dataset_slug = split_str[0]
-        dataset = Dataset.objects(slug=dataset_slug).first()
-
-        if dataset:
-            match_resource = False
-            match_community_resource = False
-
-            for resource in dataset.resources:
-                if resource.url.endwith(fs_filename):
-                    match_resource = True
-                    resource.fs_filename = fs_filename
-                    resource.save()
-                    break
-
-            if not match_resource:
-                community_resources = CommunityResource.objects(dataset=dataset)
-                for community_resource in community_resources:
-                    if community_resource.url.endwith(fs_filename):
-                        match_community_resource = True
-                        community_resource.fs_filename = fs_filename
-                        community_resource.save()
-                        break
-
-            if not match_resource and not match_community_resource:
-                resource_deletion_count += 1
-                storages.resources.delete(fs_filename)
+        if fs_filename in resource_parsed_url_list:
+            continue
         else:
             resource_deletion_count += 1
             storages.resources.delete(fs_filename)
