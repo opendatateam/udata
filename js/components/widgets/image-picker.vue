@@ -106,7 +106,6 @@ export default {
             return this.endpoint;
         }
     },
-
     events: {
         'uploader:file-submit': function(id, file) {
             if (this.HAS_FILE_API) {
@@ -132,11 +131,6 @@ export default {
             }
             return true;
         }
-    },
-    ready() {
-        console.log('==='.repeat(21))
-        console.log('=== image-picker.vue > ready() > ... ')
-        console.log('=== image-picker.vue > ready() > ... this.upload_endpoint : ', this.upload_endpoint)
     },
     methods: {
         save() {

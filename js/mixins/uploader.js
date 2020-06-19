@@ -61,7 +61,6 @@ export default {
             dropping: false,
             upload_endpoint: null,
             HAS_FILE_API,
-            // $uploader: undefined,
         };
     },
     computed: {
@@ -250,7 +249,7 @@ export default {
             if (xhr && config.sentry.dsn) {
                 const sentryId = xhr.getResponseHeader('X-Sentry-ID');
                 if (sentryId) {
-                    reason = [reason, this._('The error identifier is {id}', {id: sentryId})].join('');
+                    reason = [reason, this._('The error identifier is {id}', {id: sentryId})].join('\n');
                 }
             }
             this.$dispatch('notify', {

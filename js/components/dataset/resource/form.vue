@@ -99,7 +99,6 @@
 
 <template>
 <div>
-  <!-- <UploaderMixin> -->
     <form-horizontal v-if="hasData && !isUpload" class="resource-form file-resource-form"
         :fields="fields" :model="resource" v-ref:form>
     </form-horizontal>
@@ -143,7 +142,6 @@
             </a>
         </div>
     </div>
-  <!-- </UploaderMixin> -->
 </div>
 </template>
 
@@ -157,10 +155,7 @@ import UploaderMixin from 'mixins/uploader';
 import resource_types from 'models/resource_types';
 
 export default {
-    components: {
-      FormHorizontal,
-      // UploaderMixin
-    },
+    components: {FormHorizontal,},
     mixins: [UploaderMixin],
     props: {
         dataset: {
@@ -271,8 +266,7 @@ export default {
             const route_new = this.resource.id ? '' : 'new_';
             const route_namespace = this.is_community ? 'community_' : 'dataset_';
             const endpoint = `upload_${route_new}${route_namespace}resource`;
-            let up_endpoint = operations[endpoint].urlify(params);
-            return up_endpoint
+            return operations[endpoint].urlify(params);
         },
     },
     events: {

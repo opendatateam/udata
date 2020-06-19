@@ -2,7 +2,6 @@
 <div>
 <layout :title="dataset.full_title || ''" :subtitle="_('Dataset')"
     :actions="actions" :badges="badges" :page="dataset.page || ''">
-    <code><pre>{{ JSON.stringify(dataset) }}</pre></code>
     <div class="row">
         <small-box class="col-lg-4 col-xs-6" v-for="b in boxes"
             :value="b.value" :label="b.label" :color="b.color"
