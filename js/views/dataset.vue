@@ -204,18 +204,6 @@ export default {
             return this.$root.me.can_edit(this.dataset);
         }
     },
-    init() {
-        // console.log('+++'.repeat(10))
-        console.log('+++ dataset.vue > init() > this.dataset : ', this.dataset)
-    },
-    beforeCompile() {
-        // console.log('+++'.repeat(10))
-        console.log('+++ dataset.vue > BeforeCompile() > this.dataset : ', this.dataset)
-    },
-    ready() {
-        // console.log('+++'.repeat(10))
-        console.log('+++ dataset.vue > ready() > this.dataset : ', this.dataset)
-    },
     methods: {
         edit() {
             this.$go({name: 'dataset-edit', params: {oid: this.dataset.id}});
