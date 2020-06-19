@@ -4,6 +4,7 @@
 
 - Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)
 - Removed now useless metric fetching [#2482](https://github.com/opendatateam/udata/pull/2484)
+- Fixing an annoying and recurrent bug when drag'n'dropping resources directly from a dataset public view (clicking on the `add a resource` button/block) [#2483](https://github.com/opendatateam/udata/pull/2483)
 
 ## 2.1.0 (2020-05-12)
 
