@@ -249,16 +249,16 @@ export default {
             return this.resource instanceof CommunityResource;
         },
         upload_endpoint() {
-            console.log('+++ form.vue / computed / upload_endpoint() / API :', API)
-            console.log('+++ form.vue / computed / upload_endpoint() / API.datasets :', API.datasets)
+            // console.log('+++ form.vue / computed / upload_endpoint() / API :', API)
+            // console.log('+++ form.vue / computed / upload_endpoint() / API.datasets :', API.datasets)
             const operations = API.datasets.operations;
             if (!operations) return;
             let params = {};
-            console.log('+++ form.vue / computed / upload_endpoint() / this.dataset :', this.dataset)
+            // console.log('+++ form.vue / computed / upload_endpoint() / this.dataset :', this.dataset)
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
             }
-            console.log('+++ form.vue / computed / upload_endpoint() / this.resource :', this.resource)
+            // console.log('+++ form.vue / computed / upload_endpoint() / this.resource :', this.resource)
             if (this.resource.id) {
                 if (this.is_community) {
                     params.community = this.resource.id;
@@ -266,11 +266,11 @@ export default {
                     params.rid = this.resource.id;
                 }
             }
-            console.log('+++ form.vue / computed / upload_endpoint() / params :', params)
+            // console.log('+++ form.vue / computed / upload_endpoint() / params :', params)
             const route_new = this.resource.id ? '' : 'new_';
             const route_namespace = this.is_community ? 'community_' : 'dataset_';
             const endpoint = `upload_${route_new}${route_namespace}resource`;
-            console.log('+++ form.vue / computed / upload_endpoint() / endpoint :', endpoint)
+            // console.log('+++ form.vue / computed / upload_endpoint() / endpoint :', endpoint)
             return operations[endpoint].urlify(params);
         },
     },
