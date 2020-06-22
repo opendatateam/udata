@@ -40,6 +40,7 @@ export default {
         },
         close() {
             this.visible = false;
+            // this.$emit('modal:close');
             return this;
         },
         setVisiblity(visible) {
