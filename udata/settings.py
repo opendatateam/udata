@@ -439,6 +439,9 @@ class Defaults(object):
 
     API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
 
+    # Global banner parameters
+    BANNER_ACTIVATED = False
+    BANNER_HTML_FILENAME = ''
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

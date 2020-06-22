@@ -160,12 +160,21 @@ workflows:
   version: 2
   build:
     jobs:
-      - python
-      - assets
+      - python:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+      - assets:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
       - dist:
           requires:
             - python
             - assets
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
       - publish:
           requires:
             - dist
@@ -175,5 +184,5 @@ workflows:
                 - master
                 - /[0-9]+(\.[0-9]+)+/
             tags:
-              only: /v[0-9]+(\.[0-9]+)+/
+              only: /v[0-9]+(\.[0-9]+)*/
           context: org-global
