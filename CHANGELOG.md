@@ -10,7 +10,7 @@
 - Removed now useless metric fetching [#2482](https://github.com/opendatateam/udata/pull/2484)
 - Fix bug in harvester's cron schedule [#2493](https://github.com/opendatateam/udata/pull/2493)
 - Adding banner options in settings for a potential use in an udata's theme [#2492](https://github.com/opendatateam/udata/pull/2492)
-- Fixing a recurrent bug when opening the drag'n'drop modal directly from a dataset public view for uploading resources (clicking on the `add a resource` button/block) [#2483](https://github.com/opendatateam/udata/pull/2483)
+- Fixing a recurrent bug - see logs in Sentry - when opening the drag'n'drop modal directly from a dataset public view for uploading resources (clicking on the `add a resource` button/block) [#2483](https://github.com/opendatateam/udata/pull/2483)
 
 ## 2.1.1 (2020-06-16)
 
