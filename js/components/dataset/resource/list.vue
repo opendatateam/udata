@@ -182,7 +182,7 @@ export default {
     ready() {
         /* In case of a new resource, we display the appropriated popin
            on load. */
-        // // console.log('>>> list.vue / ready() / this.$route.query :', this.$route.query)
+        console.log('>>> list.vue / ready() / this.$route.query :', this.$route.query)
         // console.log('>>> list.vue / ready() / this.dataset :', this.dataset)
         // console.log('>>> list.vue / ready() / this.dataset.id :', this.dataset.id)
         // if ("new_resource" in this.$route.query) {
@@ -229,7 +229,7 @@ export default {
     },
     watch: {
         'dataset.id': function(id) {
-            // console.log('>>> list.vue / watch / dataset.id :', id)
+            console.log('>>> list.vue / watch / dataset.id :', id)
             if (id) {
                 this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
                 // if ( !this.addModalOn && "new_resource" in this.$route.query) {

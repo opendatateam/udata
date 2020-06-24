@@ -249,16 +249,17 @@ export default {
             return this.resource instanceof CommunityResource;
         },
         upload_endpoint() {
-            // console.log('+++ form.vue / computed / upload_endpoint() / API :', API)
-            // console.log('+++ form.vue / computed / upload_endpoint() / API.datasets :', API.datasets)
+            console.log('+++ form.vue / computed / upload_endpoint() / this.isUpload :', this.isUpload)
+            console.log('+++ form.vue / computed / upload_endpoint() / API :', API)
+            console.log('+++ form.vue / computed / upload_endpoint() / API.datasets :', API.datasets)
             const operations = API.datasets.operations;
             if (!operations) return;
             let params = {};
-            // console.log('+++ form.vue / computed / upload_endpoint() / this.dataset :', this.dataset)
+            console.log('+++ form.vue / computed / upload_endpoint() / this.dataset :', this.dataset)
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
             }
-            // console.log('+++ form.vue / computed / upload_endpoint() / this.resource :', this.resource)
+            console.log('+++ form.vue / computed / upload_endpoint() / this.resource :', this.resource)
             if (this.resource.id) {
                 if (this.is_community) {
                     params.community = this.resource.id;
