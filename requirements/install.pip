@@ -33,7 +33,7 @@ html2text==2019.9.26
 itsdangerous==1.1.0
 Jinja2==2.10.3
 jsonschema==3.2.0
-kombu[redis]==4.4.0
+kombu[redis]==4.6.11
 lxml==4.4.2
 mistune==0.8.4
 mongoengine==0.18.2
