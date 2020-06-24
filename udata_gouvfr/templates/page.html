@@ -1,0 +1,72 @@
+{% extends theme('base.html') %}
+
+{% set meta = {
+    'title': page.title or '',
+    'description': page.description or '',
+    'keywords': page.keywords or [],
+} %}
+
+{% set bundle = 'post' %}
+
+{% set body_class = 'post-display' %}
+
+{% block content %}
+<section class="post-section default">
+    <div class="container post-container">
+        <div class="row">
+
+            <div class="{% if datasets or reuses %}col-sm-8 smaller{% else %}col-xs-12{% endif %}">
+
+                <div class="post-body">
+                    {{ page.content|markdown }}
+                </div>
+
+                {# button bar #}
+                <div class="row main-toolbar"><div class="col-xs-12">
+                    <div class="btn-toolbar pull-right">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ gh_url }}" class="btn btn-success">
+                                <span class="fa fa-pencil"></span>
+                                {{ _('Proposer une modification') }}
+                            </a>
+                        </div>
+                    </div>
+                </div></div>
+                {# end button bar #}
+
+            </div>
+            {# end left column #}
+
+            {% if datasets or reuses %}
+            {# Right sidebar #}
+            <aside class="col-sm-4">
+
+                {# Reuses list #}
+                {% if reuses %}
+                <h3>{{ ngettext('Associated reuse', 'Associated reuses', reuses|length) }}</h3>
+                <div class="card-list">
+                    {% for reuse in reuses %}
+                    {% include theme('reuse/card.html') %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {# end reuses list #}
+
+                {# Datasets list #}
+                {% if datasets %}
+                <h3>{{ ngettext('Associated dataset', 'Associated datasets', datasets|length) }}</h3>
+                <div class="card-list">
+                    {% for dataset in datasets %}
+                    {% include theme('dataset/card.html') %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {# end post list #}
+
+            </aside>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+{% endblock %}

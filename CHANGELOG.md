@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add static /pages/* from md in github repo [#483](https://github.com/etalab/udata-gouvfr/pull/483)
 
 ## 2.1.3 (2020-06-16)
 
