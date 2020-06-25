@@ -221,7 +221,7 @@ export default {
                     this.on_new();
                 }
             }
-        },
+        }
     }
 };
 </script>
