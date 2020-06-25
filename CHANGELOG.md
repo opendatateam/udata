@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix internal links in markdown when not starting w/ slash [#2500](https://github.com/opendatateam/udata/pull/2500)
 
 ## 2.1.2 (2020-06-17)
 
