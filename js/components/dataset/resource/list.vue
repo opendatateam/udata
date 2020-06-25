@@ -153,7 +153,6 @@ export default {
         return {
             reordering: false,
             new_order: [],
-            // addModalOn: false,
         };
     },
     computed: {
@@ -175,24 +174,13 @@ export default {
             const file = this.$uploader.getFile(id);
             this.files.splice(this.files.indexOf(file), 1);
         },
-        // 'modal:close': function() {
-        //   this.addModalOn = false
-        // }
     },
     ready() {
         /* In case of a new resource, we display the appropriated popin
            on load. */
-        console.log('>>> list.vue / ready() / this.$route.query :', this.$route.query)
-        // console.log('>>> list.vue / ready() / this.dataset :', this.dataset)
-        // console.log('>>> list.vue / ready() / this.dataset.id :', this.dataset.id)
-        // if ("new_resource" in this.$route.query) {
-        //     this.on_new();
-        // }
     },
     methods: {
         on_new() {
-            // console.log('>>> list.vue / on_new() / this.dataset.id :', this.dataset.id)
-            // this.addModalOn = true
             this.$root.$modal(
                 require('components/dataset/resource/add-modal.vue'),
                 {dataset: this.dataset}
@@ -229,22 +217,13 @@ export default {
     },
     watch: {
         'dataset.id': function(id) {
-            console.log('>>> list.vue / watch / dataset.id :', id)
             if (id) {
                 this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
-                // if ( !this.addModalOn && "new_resource" in this.$route.query) {
                 if ("new_resource" in this.$route.query) {
                     this.on_new();
                 }
             }
-        }, 
-        // dataset(dataset) {
-          // console.log('>>> list.vue / watch / dataset :', dataset)
-          // console.log('>>> list.vue / watch / dataset.id :', dataset.id)
-          // if ( dataset && !this.addModalOn && "new_resource" in this.$route.query) {
-          //     this.on_new();
-          // }
-        // }
+        },
     }
 };
 </script>

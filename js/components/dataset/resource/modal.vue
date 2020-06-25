@@ -164,10 +164,6 @@ export default {
             }
         }
     },
-    ready() {
-        console.log('/// modal.vue / ready() / this.isUpload :', this.isUpload)
-        console.log('/// modal.vue / ready() / this.edit :', this.edit)
-    },
     route: {
         data() {
             if (this.$route.matched.length > 1) {
@@ -212,7 +208,6 @@ export default {
             }
         },
         upload() {
-            console.log('/// modal.vue / methods() / upload() / ...')
             this.$refs.form.isUpload = true;
         },
         save() {
@@ -252,12 +247,6 @@ export default {
                 this.updHandler = this.dataset.$once('updated', this.on_success)
             }
         }
-    },
-    watch: {
-      isUpload(isUpload) {
-        console.log('/// modal.vue / watch() / isUpload / this.isUpload :', this.isUpload)
-        console.log('/// modal.vue / watch() / isUpload / this.edit :', this.edit)
-      }
     },
     watchRefs: {
         'form.isUpload': function(isUpload) {
