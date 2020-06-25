@@ -214,7 +214,7 @@ export default {
     watch: {
         'dataset.id': function(id) {
             if (id) {
-              this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
+                this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
                 if ("new_resource" in this.$route.query) {
                     /* In case of a new resource and if the dataset is set, we display the appropriated popin
                       on load. */
