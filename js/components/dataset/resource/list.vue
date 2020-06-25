@@ -152,7 +152,7 @@ export default {
     data() {
         return {
             reordering: false,
-            new_order: [],
+            new_order: []
         };
     },
     computed: {
@@ -173,7 +173,7 @@ export default {
             // Remove the progressing file (an error is already displayed globally)
             const file = this.$uploader.getFile(id);
             this.files.splice(this.files.indexOf(file), 1);
-        },
+        }
     },
     ready() {
         /* In case of a new resource, we display the appropriated popin
