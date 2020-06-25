@@ -3,6 +3,7 @@ import requests
 
 from flask import url_for, redirect, abort, current_app
 from jinja2.exceptions import TemplateNotFound
+from mongoengine.errors import ValidationError
 
 from udata import theme
 from udata.app import cache
@@ -77,7 +78,10 @@ def get_object(model, id_or_slug):
     objects = getattr(model, 'objects')
     obj = objects.filter(slug=id_or_slug).first()
     if not obj:
-        obj = objects.filter(id=id_or_slug).first()
+        try:
+            obj = objects.filter(id=id_or_slug).first()
+        except ValidationError:
+            pass
     return obj
 
 
