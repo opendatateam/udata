@@ -175,10 +175,6 @@ export default {
             this.files.splice(this.files.indexOf(file), 1);
         }
     },
-    ready() {
-        /* In case of a new resource, we display the appropriated popin
-           on load. */
-    },
     methods: {
         on_new() {
             this.$root.$modal(
@@ -218,8 +214,10 @@ export default {
     watch: {
         'dataset.id': function(id) {
             if (id) {
-                this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
+              this.upload_endpoint = API.datasets.operations.upload_new_dataset_resource.urlify({dataset: id});
                 if ("new_resource" in this.$route.query) {
+                    /* In case of a new resource and if the dataset is set, we display the appropriated popin
+                      on load. */
                     this.on_new();
                 }
             }
