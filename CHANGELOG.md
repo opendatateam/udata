@@ -10,6 +10,7 @@
 - Removed now useless metric fetching [#2482](https://github.com/opendatateam/udata/pull/2484)
 - Fix bug in harvester's cron schedule [#2493](https://github.com/opendatateam/udata/pull/2493)
 - Adding banner options in settings for a potential use in an udata's theme [#2492](https://github.com/opendatateam/udata/pull/2492)
+- Fix JS error when uploading a resource in certain conditions [#2483](https://github.com/opendatateam/udata/pull/2483)
 
 ## 2.1.1 (2020-06-16)
 
