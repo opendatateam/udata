@@ -265,7 +265,7 @@ export default {
             const route_new = this.resource.id ? '' : 'new_';
             const route_namespace = this.is_community ? 'community_' : 'dataset_';
             const endpoint = `upload_${route_new}${route_namespace}resource`;
-            return operations && operations[endpoint].urlify(params);
+            return operations[endpoint].urlify(params);
         },
     },
     events: {
