@@ -222,6 +222,7 @@ export default {
          * See: http://docs.fineuploader.com/branch/master/features/drag-and-drop.html#processingDroppedFilesComplete
          */
         on_dropped_files_complete(files) {
+            // testing with original condition : only check this.canDrop 
             // if (this.canDrop && this.$uploader) {
             if (this.canDrop) {
                 this.$uploader.addFiles(files); // this submits the dropped files to Fine Uploader
