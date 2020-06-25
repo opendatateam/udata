@@ -249,15 +249,12 @@ export default {
             return this.resource instanceof CommunityResource;
         },
         upload_endpoint() {
-            console.log('+++ form.vue / computed / upload_endpoint() / this.isUpload :', this.isUpload)
-            console.log('+++ form.vue / computed / upload_endpoint() / API :', API)
             const operations = API.datasets && API.datasets.operations;
             if (!this.isUpload || !operations) return;
             let params = {};
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
             }
-            console.log('+++ form.vue / computed / upload_endpoint() / this.resource :', this.resource)
             if (this.resource.id) {
                 if (this.is_community) {
                     params.community = this.resource.id;
