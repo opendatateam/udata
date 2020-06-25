@@ -137,11 +137,12 @@ import API from 'api';
 import Sorter from 'mixins/sorter';
 import Box from 'components/containers/box.vue';
 import ResourceAvailability from './availability.vue';
+import UploaderMixin from 'mixins/uploader';
 import DatasetFilters from 'components/dataset/filters';
 
 export default {
     name: 'resources-list',
-    mixins: [Sorter, DatasetFilters],
+    mixins: [Sorter, UploaderMixin, DatasetFilters],
     components: {Box, ResourceAvailability},
     props: {
         dataset: {
