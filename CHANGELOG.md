@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.1.4 (2020-06-29)
 
 - Add static /pages/* from md in github repo [#483](https://github.com/etalab/udata-gouvfr/pull/483)
