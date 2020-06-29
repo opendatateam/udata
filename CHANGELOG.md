@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.1.3 (2020-06-29)
 
 - Fix internal links in markdown when not starting w/ slash [#2500](https://github.com/opendatateam/udata/pull/2500)
 - Fix JS error when uploading a resource in certain conditions [#2483](https://github.com/opendatateam/udata/pull/2483)
