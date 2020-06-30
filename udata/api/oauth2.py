@@ -24,7 +24,9 @@ from authlib.flask.oauth2 import AuthorizationServer, ResourceProtector
 from authlib.specs.rfc6749 import grants, ClientMixin
 from authlib.specs.rfc6750 import BearerTokenValidator
 from authlib.specs.rfc7009 import RevocationEndpoint
-from flask import abort, request
+from authlib.oauth2.rfc7636 import CodeChallenge
+from authlib.oauth2 import OAuth2Error
+from flask import request
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import gen_salt
@@ -183,6 +185,77 @@ class OAuth2Token(db.Document):
         expired_at += timedelta(days=REFRESH_EXPIRATION)
         return expired_at < datetime.utcnow()
 
+#
+#
+# New CODE
+#
+#
+# class OAuth2Code(db.Document):
+#     user = db.ReferenceField('User', required=True)
+#     client = db.ReferenceField('OAuth2Client', required=True)
+
+#     code = db.StringField(required=True)
+
+#     redirect_uri = db.StringField()
+#     expires = db.DateTimeField()
+
+#     scopes = db.ListField(db.StringField())
+    # code_challenge = db.StringField()
+    # code_challenge_method = db.StringField()
+
+#     meta = {
+#         'collection': 'oauth2_grant'
+#     }
+
+#     def __str__(self):
+#         return '<OAuth2Grant({0.client.name}, {0.user.fullname})>'.format(self)
+
+#     def is_expired(self):
+#         return self.expires < datetime.utcnow()
+
+#     def get_redirect_uri(self):
+#         return self.redirect_uri
+
+#     def get_scope(self):
+#         return ' '.join(self.scopes)
+
+
+# class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
+#     TOKEN_ENDPOINT_AUTH_METHODS = [
+#         'client_secret_basic',
+#         'client_secret_post',
+#         'none',
+#     ]
+
+#     def save_authorization_code(self, code, request):
+#         code_challenge = request.data.get('code_challenge')
+#         code_challenge_method = request.data.get('code_challenge_method')
+#         auth_code = OAuth2AuthorizationCode(
+#             code=code,
+#             client_id=request.client.client_id,
+#             redirect_uri=request.redirect_uri,
+#             scope=request.scope,
+#             user_id=request.user.id,
+#             code_challenge=code_challenge,
+#             code_challenge_method=code_challenge_method,
+#         )
+#         db.session.add(auth_code)
+#         db.session.commit()
+#         return auth_code
+
+#     def query_authorization_code(self, code, client):
+#         auth_code = OAuth2AuthorizationCode.query.filter_by(
+#             code=code, client_id=client.client_id).first()
+#         if auth_code and not auth_code.is_expired():
+#             return auth_code
+
+#     def delete_authorization_code(self, authorization_code):
+#         db.session.delete(authorization_code)
+#         db.session.commit()
+
+#     def authenticate_user(self, authorization_code):
+#         return User.query.get(authorization_code.user_id)
+
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     TOKEN_ENDPOINT_AUTH_METHODS = [
@@ -190,29 +263,47 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         'client_secret_post',
     ]
 
-    def create_authorization_code(self, client, grant_user, request):
-        code = generate_token(48)
+    def save_authorization_code(self, code, request):
+        print('-----------------------------------------------------------------------------------------')
+        print('IN create_authorization_code')
+        print('REQUEST :')
+        print(request)
+        print('-----------------------------------------------------------------------------------------')
+        print(request.data.get('code_challenge'))
+        code_challenge = request.data.get('code_challenge')
+        code_challenge_method = request.data.get('code_challenge_method')
         expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
         scopes = request.scope.split(' ') if request.scope else client.scopes
         OAuth2Grant.objects.create(
             code=code,
-            client=client,
+            client_id=request.client.client_id,
             redirect_uri=request.redirect_uri,
             scopes=scopes,
-            user=ObjectId(grant_user.id),
+            user=ObjectId(request.user.id),
+            code_challenge=code_challenge,
+            code_challenge_method=code_challenge_method,
             expires=expires,
         )
         return code
 
     def parse_authorization_code(self, code, client):
+        print('IN parse_authorization_code')
+        print('CLIENT :')
+        print(client)
         item = OAuth2Grant.objects(code=code, client=client).first()
         if item and not item.is_expired():
             return item
 
     def delete_authorization_code(self, authorization_code):
+        print('IN delete_authorization_code')
+        print('authorization_code :')
+        print(authorization_code)
         authorization_code.delete()
 
     def authenticate_user(self, authorization_code):
+        print('IN authenticate_user')
+        print('authorization_code :')
+        print(authorization_code)
         return authorization_code.user
 
 
@@ -274,7 +365,10 @@ def revoke_token():
 @login_required
 def authorize(*args, **kwargs):
     if request.method == 'GET':
-        grant = oauth.validate_consent_request(end_user=current_user)
+        try:
+            grant = oauth.validate_consent_request(end_user=current_user)
+        except OAuth2Error as error:
+            return error.error
         # Bypass authorization screen for internal clients
         if grant.client.internal:
             return oauth.create_authorization_response(grant_user=current_user)
@@ -287,8 +381,6 @@ def authorize(*args, **kwargs):
         else:
             grant_user = None
         return oauth.create_authorization_response(grant_user=grant_user)
-    else:
-        abort(405)
 
 
 @blueprint.route('/error')
@@ -330,7 +422,7 @@ def init_app(app):
     oauth.init_app(app, query_client=query_client, save_token=save_token)
 
     # support all grants
-    oauth.register_grant(AuthorizationCodeGrant)
+    oauth.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=True)])
     oauth.register_grant(PasswordGrant)
     oauth.register_grant(RefreshTokenGrant)
     oauth.register_grant(grants.ClientCredentialsGrant)

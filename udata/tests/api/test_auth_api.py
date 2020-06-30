@@ -222,7 +222,9 @@ class APIAuthTest:
             'oauth.authorize',
             response_type='code',
             client_id=oauth.client_id,
-            redirect_uri=oauth.default_redirect_uri
+            redirect_uri=oauth.default_redirect_uri,
+            code_challenge='elU6u5zyqQT2f92GRQUq6PautAeNDf4DQPayyR0ek',
+            code_challenge_method='S256'
         ), {
             'scope': 'default',
             'accept': '',
@@ -230,6 +232,9 @@ class APIAuthTest:
 
         assert_status(response, 302)
         uri, params = response.location.split('?')
+
+        print(params)
+        assert False
         assert uri == oauth.default_redirect_uri
 
     def test_authorization_grant_token(self, client, oauth):

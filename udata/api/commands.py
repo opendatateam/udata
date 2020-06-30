@@ -1,13 +1,17 @@
 import logging
 import os
+import time
 
 import click
 
+from werkzeug.security import gen_salt
 from flask import json, current_app
 from flask_restplus import schemas
 
 from udata.api import api
 from udata.commands import cli, success, exit_with_error
+from udata.models import User
+from udata.api.oauth2 import OAuth2Client
 
 log = logging.getLogger(__name__)
 
@@ -59,3 +63,17 @@ def validate():
         success('API specifications are valid')
     except schemas.SchemaValidationError as e:
         exit_with_error('API specifications are not valid', e)
+
+
+@grp.command()
+@click.option('-u', '--user-email', help='User\'s email')
+def create_oauth_client(user_email, uris):
+    '''Creates an OAuth2Client instance in DB'''
+    user = User.objects(email=user_email).first()
+    if user is None:
+        exit_with_error('No matching user to email')
+
+    client = OAuth2Client.objects.create(
+        name='test-client',
+        user=user
+    )
