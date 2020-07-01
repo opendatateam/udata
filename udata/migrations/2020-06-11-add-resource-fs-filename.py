@@ -28,7 +28,9 @@ def migrate(db):
     datasets = Dataset.objects()
     for dataset in datasets:
         for resource in dataset.resources:
-            if resource.filetype == 'file':
+            if resource.url.startswith('https://static.data.gouv.fr'):
+                if resource.filetype != 'file':
+                    log.info(f'Static ressource\'url with unconsistant filetype attribute: {resource.url}.')
                 parsed = urlparse(resource.url)
                 fs_name = parsed.path.strip('/resource/')
                 resource_index[resource.id] = fs_name
