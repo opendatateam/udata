@@ -8,6 +8,11 @@
   - Adding a celery job `purge-orphan-community-resources` to remove community resources not linked to a dataset. This should be scheduled regularly.
   - ⚠️ Adding a migration file to populate resources fs_filename new field, and to delete orphaned resources files
 
+## 2.1.3 (2020-06-29)
+
+- Fix internal links in markdown when not starting w/ slash [#2500](https://github.com/opendatateam/udata/pull/2500)
+- Fix JS error when uploading a resource in certain conditions [#2483](https://github.com/opendatateam/udata/pull/2483)
+
 ## 2.1.2 (2020-06-17)
 
 - Decoded api key byte string [#2482](https://github.com/opendatateam/udata/pull/2482)

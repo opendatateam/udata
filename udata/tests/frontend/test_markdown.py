@@ -88,13 +88,16 @@ class MarkdownTest:
         assert el.getAttribute('href') == 'http://example.net/path'
         assert el.firstChild.data == 'http://example.net/path'
 
-    def test_markdown_linkify_relative(self, md2dom):
+    @pytest.mark.parametrize('link,expected', [
+        ('/', 'http://local.test/'), ('bar', 'http://local.test/bar')
+    ])
+    def test_markdown_linkify_relative(self, md2dom, link, expected):
         '''Markdown filter should transform relative urls to external ones'''
-        text = '[foo](/)'
+        text = f'[foo]({link})'
         dom = md2dom(text)
         el = dom.getElementsByTagName('a')[0]
         assert el.getAttribute('rel') == ''
-        assert el.getAttribute('href') == 'http://local.test/'
+        assert el.getAttribute('href') == expected
         assert el.getAttribute('data-tooltip') == ''
         assert el.firstChild.data == 'foo'
 

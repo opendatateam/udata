@@ -39,14 +39,15 @@ def nofollow_callback(attrs, new=False):
     That callback is not splitted in order to parse the URL only once.
     """
 
-    if (None, u"href") not in attrs:
+    if (None, 'href') not in attrs:
         return attrs
     parsed_url = urlparse(attrs[(None, 'href')])
     if parsed_url.netloc in ('', current_app.config['SERVER_NAME']):
+        path = parsed_url.path
         attrs[(None, 'href')] = '{scheme}://{netloc}{path}'.format(
             scheme='https' if request.is_secure else 'http',
             netloc=current_app.config['SERVER_NAME'],
-            path=parsed_url.path)
+            path=path if path.startswith('/') else f'/{path}')
         return attrs
     else:
         rel = [x for x in attrs.get((None, 'rel'), '').split(' ') if x]
