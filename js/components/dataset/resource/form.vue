@@ -249,7 +249,8 @@ export default {
             return this.resource instanceof CommunityResource;
         },
         upload_endpoint() {
-            const operations = API.datasets.operations;
+            const operations = API.datasets && API.datasets.operations;
+            if (!this.isUpload || !operations) return;
             let params = {};
             if (typeof this.dataset !== 'undefined') {
                 params = {dataset: this.dataset.id};
