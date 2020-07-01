@@ -4,6 +4,12 @@ from base64 import b64encode
 from urllib.parse import parse_qs
 
 from flask import url_for
+from authlib.common.security import generate_token
+from authlib.common.urls import urlparse, url_decode
+from authlib.oauth2.rfc7636 import (
+    CodeChallenge as _CodeChallenge,
+    create_s256_code_challenge,
+)
 
 from udata.api import api, API
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
@@ -38,9 +44,9 @@ class FakeAPI(API):
 
 
 def basic_header(client):
-        payload = ':'.join((client.client_id, client.secret))
-        token = b64encode(payload.encode('utf-8')).decode('utf8')
-        return {'Authorization': 'Basic {}'.format(token)}
+    payload = ':'.join((client.client_id, client.secret))
+    token = b64encode(payload.encode('utf-8')).decode('utf8')
+    return {'Authorization': 'Basic {}'.format(token)}
 
 
 @pytest.fixture
@@ -222,9 +228,7 @@ class APIAuthTest:
             'oauth.authorize',
             response_type='code',
             client_id=oauth.client_id,
-            redirect_uri=oauth.default_redirect_uri,
-            code_challenge='elU6u5zyqQT2f92GRQUq6PautAeNDf4DQPayyR0ek',
-            code_challenge_method='S256'
+            redirect_uri=oauth.default_redirect_uri
         ), {
             'scope': 'default',
             'accept': '',
@@ -233,8 +237,6 @@ class APIAuthTest:
         assert_status(response, 302)
         uri, params = response.location.split('?')
 
-        print(params)
-        assert False
         assert uri == oauth.default_redirect_uri
 
     def test_authorization_grant_token(self, client, oauth):
@@ -256,6 +258,37 @@ class APIAuthTest:
         response = client.post(url_for('oauth.token'), {
             'grant_type': 'authorization_code',
             'code': code,
+        }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+    def test_s256_code_challenge_success(self, client, oauth):
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            code_challenge=code_challenge,
+            code_challenge_method='S256'
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+        assert 'code=' in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params['code']
+
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': code_verifier
         }, headers=basic_header(oauth))
 
         assert200(response)
