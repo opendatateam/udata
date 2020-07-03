@@ -40,6 +40,8 @@ def migrate(db):
         fs_name = parsed.path.strip('/resource/')
         resource_index[community_resource.id] = fs_name
 
+    log.info(f'Length of resources index: {len(resource_index)}')
+
     for fs_filename in storages.resources.list_files():
         match_resource = False
         for key, value in resource_index.items():
@@ -47,7 +49,11 @@ def migrate(db):
                 match_resource = True
                 resource = get_resource(key)
                 resource.fs_filename = fs_filename
-                resource.save()
+                try:
+                    resource.save()
+                except Exception as e:
+                    log.info(e)
+                    pass
                 break
 
         if not match_resource:
