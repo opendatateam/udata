@@ -67,7 +67,7 @@ def validate():
 
 @grp.command()
 @click.option('-u', '--user-email', help='User\'s email')
-def create_oauth_client(user_email, uris):
+def create_oauth_client(user_email):
     '''Creates an OAuth2Client instance in DB'''
     user = User.objects(email=user_email).first()
     if user is None:

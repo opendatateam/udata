@@ -20,9 +20,9 @@ from datetime import datetime, timedelta
 
 from authlib.integrations.flask_oauth2.errors import _HTTPException as AuthlibFlaskException
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
-from authlib.specs.rfc6749 import grants, ClientMixin
-from authlib.specs.rfc6750 import BearerTokenValidator
-from authlib.specs.rfc7009 import RevocationEndpoint
+from authlib.oauth2.rfc6749 import grants, ClientMixin
+from authlib.oauth2.rfc6750 import BearerTokenValidator
+from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from authlib.oauth2.rfc6749.util import scope_to_list, list_to_scope
 from authlib.oauth2 import OAuth2Error
