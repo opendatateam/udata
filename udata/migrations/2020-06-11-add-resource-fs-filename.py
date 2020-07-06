@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info('Processing resources and community resources.')
+    print('Processing resources and community resources.')
 
     resource_deletion_count = 0
     avatar_deletion_count = 0
@@ -31,37 +31,31 @@ def migrate(db):
             if resource.url.startswith('https://static.data.gouv.fr'):
                 parsed = urlparse(resource.url)
                 fs_name = parsed.path.strip('/resource/')
-                resource_index[resource.id] = fs_name
+                resource_index[fs_name] = resource.id
 
     # Add community resources URL to the index
     community_resources = CommunityResource.objects()
     for community_resource in community_resources:
         parsed = urlparse(community_resource.url)
         fs_name = parsed.path.strip('/resource/')
-        resource_index[community_resource.id] = fs_name
+        resource_index[fs_name] = community_resource.id
 
-    log.info(f'Length of resources index: {len(resource_index)}')
+    print(f'Length of resources index: {len(resource_index)}')
 
     for fs_filename in storages.resources.list_files():
-        match_resource = False
-        for key, value in resource_index.items():
-            if fs_filename == value:
-                log.info('MATCH')
-                match_resource = True
-                resource = get_resource(key)
-                resource.fs_filename = fs_filename
-                try:
-                    resource.save()
-                except Exception as e:
-                    log.info(e)
-                    pass
-                break
-
-        if not match_resource:
+        if fs_filename in resource_index.keys():
+            resource = get_resource(resource_index[fs_filename])
+            resource.fs_filename = fs_filename
+            try:
+                resource.save()
+            except Exception as e:
+                print(e)
+                pass
+        else:
             resource_deletion_count += 1
             storages.resources.delete(fs_filename)
 
-    log.info('Processing organizations logos and users avatars.')
+    print('Processing organizations logos and users avatars.')
     orgs = Organization.objects()
     users = User.objects()
     org_index = dict()
@@ -91,7 +85,7 @@ def migrate(db):
             avatar_deletion_count += 1
             storages.avatars.delete(fs_filename)
 
-    log.info('Processing reuses logos.')
+    print('Processing reuses logos.')
     reuses = Reuse.objects()
     reuses_index = dict()
     for reuse in reuses:
@@ -109,7 +103,7 @@ def migrate(db):
             image_deletion_count += 1
             storages.images.delete(fs_filename)
 
-    log.info('Completed.')
-    log.info(f'{resource_deletion_count} objects of the resources storage were deleted.')
-    log.info(f'{avatar_deletion_count} objects of the avatars storage were deleted.')
-    log.info(f'{image_deletion_count} objects of the images storage were deleted.')
+    print('Completed.')
+    print(f'{resource_deletion_count} objects of the resources storage were deleted.')
+    print(f'{avatar_deletion_count} objects of the avatars storage were deleted.')
+    print(f'{image_deletion_count} objects of the images storage were deleted.')
