@@ -81,6 +81,9 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         'collection': 'oauth2_client'
     }
 
+    def get_client_id(self):
+        return str(self.id)
+
     @property
     def client_id(self):
         return str(self.id)
@@ -141,6 +144,7 @@ class OAuth2Token(db.Document):
     created_at = db.DateTimeField(default=datetime.utcnow, required=True)
     expires_in = db.IntField(required=True, default=TOKEN_EXPIRATION)
     scope = db.StringField(default='')
+    revoked = db.BooleanField(default=False)
 
     meta = {
         'collection': 'oauth2_token'
@@ -158,10 +162,15 @@ class OAuth2Token(db.Document):
     def get_expires_at(self):
         return (self.created_at - EPOCH).total_seconds() + self.expires_in
 
-    def is_refresh_token_expired(self):
+    def get_client_id(self):
+        return str(self.client.id)
+
+    def is_refresh_token_valid(self):
+        if self.revoked:
+            return False
         expired_at = datetime.fromtimestamp(self.get_expires_at())
         expired_at += timedelta(days=REFRESH_EXPIRATION)
-        return expired_at < datetime.utcnow()
+        return expired_at > datetime.utcnow()
 
 
 class OAuth2Code(db.Document):
@@ -201,10 +210,6 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     ]
 
     def save_authorization_code(self, code, request):
-        print('IN save_authorization_code')
-        print(f'CODE : {code}')
-        print(f'CLIENT ID : {request.client.client_id}')
-        print(f'USER ID : {request.user.id}')
         code_challenge = request.data.get('code_challenge')
         code_challenge_method = request.data.get('code_challenge_method')
         expires = datetime.utcnow() + timedelta(seconds=GRANT_EXPIRATION)
@@ -221,14 +226,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         return auth_code
 
     def query_authorization_code(self, code, client):
-        print('IN query_authorization_code')
-        print('CLIENT :')
-        print(client)
-        print('CODE :')
-        print(code)
         auth_code = OAuth2Code.objects(code=code, client=client).first()
-        print('AUTH CODE :')
-        print(auth_code)
         if auth_code and not auth_code.is_expired():
             return auth_code
 
@@ -236,9 +234,6 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         authorization_code.delete()
 
     def authenticate_user(self, authorization_code):
-        print('IN authenticate_user')
-        print('authorization_code :')
-        print(authorization_code)
         return authorization_code.user
 
 
@@ -251,26 +246,32 @@ class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
 
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     def authenticate_refresh_token(self, refresh_token):
-        token = OAuth2Token.objects(refresh_token=refresh_token).first()
-        if token and not token.is_refresh_token_expired():
-            return token
+        item = OAuth2Token.objects(refresh_token=refresh_token).first()
+        if item and item.is_refresh_token_valid():
+            return item
 
     def authenticate_user(self, credential):
         return credential.user
+
+    def revoke_old_credential(self, credential):
+        credential.revoked = True
+        credential.save()
 
 
 class RevokeToken(RevocationEndpoint):
     def query_token(self, token, token_type_hint, client):
         qs = OAuth2Token.objects(client=client)
-        if token_type_hint:
-            qs = qs(**{token_type_hint: token})
+        if token_type_hint == 'access_token':
+            return qs.filter(access_token=token).first()
+        elif token_type_hint == 'refresh_token':
+            return qs.filter(refresh_token=token).first()
         else:
             qs = qs(db.Q(access_token=token) | db.Q(refresh_token=token))
-        return qs.first()
+            return qs.first()
 
     def revoke_token(self, token):
-        # TODO: mark token as revoked
-        token.delete()
+        token.revoked = True
+        token.save()
 
 
 class BearerToken(BearerTokenValidator):
@@ -281,8 +282,7 @@ class BearerToken(BearerTokenValidator):
         return False
 
     def token_revoked(self, token):
-        # TODO: return token.revoked
-        return False
+        return token.revoked
 
 
 @blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')

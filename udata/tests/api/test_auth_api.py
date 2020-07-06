@@ -398,8 +398,8 @@ class APIAuthTest:
             'accept': '',
         })
 
-        assert_status(response, 302)
-        assert 'access_token=' in response.location
+        assert_status(response, 400)
+        assert response.json['error'] == 'invalid_grant'
 
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):
@@ -434,7 +434,9 @@ class APIAuthTest:
         }, headers=basic_header(oauth))
 
         assert200(response)
-        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is True
 
     @pytest.mark.parametrize('token_type', ['access_token', 'refresh_token'])
     def test_revoke_token_with_hint(self, client, oauth, token_type):
@@ -449,9 +451,10 @@ class APIAuthTest:
             'token': getattr(token, token_type),
             'token_type_hint': token_type
         }, headers=basic_header(oauth))
-
         assert200(response)
-        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is True
 
     def test_revoke_token_with_bad_hint(self, client, oauth):
         user = UserFactory()
@@ -461,13 +464,15 @@ class APIAuthTest:
             access_token='access-token',
             refresh_token='refresh-token',
         )
+
         response = client.post(url_for('oauth.revoke_token'), {
             'token': token.access_token,
             'token_type_hint': 'refresh_token',
         }, headers=basic_header(oauth))
+        assert200(response)
 
-        assert400(response)
-        assert OAuth2Token.objects(pk=token.pk).first() == token
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is False
 
     def test_value_error(self, api):
         @ns.route('/exception', endpoint='exception')
