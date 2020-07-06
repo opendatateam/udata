@@ -75,5 +75,7 @@ def create_oauth_client(user_email, uris):
 
     client = OAuth2Client.objects.create(
         name='test-client',
-        user=user
+        owner=user
     )
+
+    click.echo(f'New OAuth client created with ID {client.id}')
