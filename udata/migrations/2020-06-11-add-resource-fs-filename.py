@@ -46,6 +46,7 @@ def migrate(db):
         match_resource = False
         for key, value in resource_index.items():
             if fs_filename == value:
+                log.info('MATCH')
                 match_resource = True
                 resource = get_resource(key)
                 resource.fs_filename = fs_filename
