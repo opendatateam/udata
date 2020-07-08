@@ -67,7 +67,8 @@ def validate():
 
 @grp.command()
 @click.option('-u', '--user-email', help='User\'s email')
-def create_oauth_client(user_email):
+@click.option('--uri', default='http://localhost:8080/login', help='Client\'s redirect uri')
+def create_oauth_client(user_email, uri):
     '''Creates an OAuth2Client instance in DB'''
     user = User.objects(email=user_email).first()
     if user is None:
@@ -75,7 +76,10 @@ def create_oauth_client(user_email):
 
     client = OAuth2Client.objects.create(
         name='test-client',
-        owner=user
+        owner=user,
+        redirect_uris=[uri]
     )
 
-    click.echo(f'New OAuth client created with ID {client.id}')
+    click.echo(f'New OAuth client')
+    click.echo(f'Client ID {client.id}')
+    click.echo(f'Client secret {client.secret}')

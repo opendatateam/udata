@@ -292,6 +292,7 @@ def access_token():
 
 
 @blueprint.route('/revoke', methods=['POST'], localize=False)
+@csrf.exempt
 def revoke_token():
     return oauth.create_endpoint_response(RevokeToken.ENDPOINT_NAME)
 
