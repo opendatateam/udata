@@ -77,9 +77,10 @@ def create_oauth_client(user_email, uri):
     client = OAuth2Client.objects.create(
         name='test-client',
         owner=user,
-        redirect_uris=[uri]
+        redirect_uris=uri.split(' ')
     )
 
     click.echo(f'New OAuth client')
-    click.echo(f'Client ID {client.id}')
-    click.echo(f'Client secret {client.secret}')
+    click.echo(f'Client\'s ID {client.id}')
+    click.echo(f'Client\'s secret {client.secret}')
+    click.echo(f'Client\'s URI {client.redirect_uris}')
