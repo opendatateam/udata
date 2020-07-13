@@ -1,11 +1,8 @@
-# uData-gouvfr
+# udata-gouvfr
 
-[![Build status][circleci-badge]][circleci-url]
-[![Join the chat at https://gitter.im/etalab/udata-gouvfr][gitter-badge]][gitter-url]
+udata customizations for Etalab / Data.gouv.fr.
 
-uData customizations for Etalab / Data.gouv.fr.
-
-**Note:** This is a [uData][] extension, you should read the [uData documentation][udata-doc] first.
+**Note:** This is a [udata][] extension, you should read the [udata documentation][udata-doc] first.
 
 ## Compatibility
 
@@ -14,7 +11,7 @@ uData customizations for Etalab / Data.gouv.fr.
 
 ## Installation
 
-Install [uData][].
+Install [udata][].
 
 Remain in the same Python virtual environment
 and install **udata-gouvfr**:
@@ -84,10 +81,6 @@ inv -l
 ```
 
 
-[circleci-url]: https://circleci.com/gh/etalab/udata-gouvfr
-[circleci-badge]: https://circleci.com/gh/etalab/udata-gouvfr.svg?style=shield
-[gitter-badge]: https://badges.gitter.im/Join%20Chat.svg
-[gitter-url]: https://gitter.im/etalab/udata-gouvfr
-[uData]: https://github.com/opendatateam/udata
+[udata]: https://github.com/opendatateam/udata
 [udata-doc]: http://udata.readthedocs.io/en/stable/
 [udata-develop]: http://udata.readthedocs.io/en/stable/development-environment/
