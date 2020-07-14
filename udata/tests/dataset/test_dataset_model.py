@@ -4,7 +4,9 @@ import pytest
 
 from mongoengine import post_save
 
-from udata.models import db, Dataset, License, LEGACY_FREQUENCIES
+from udata.models import (
+    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchemas
+)
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
 )
@@ -413,3 +415,18 @@ class LicenseModelTest:
         found = License.guess('should not match', license.id)
         assert isinstance(found, License)
         assert license.id == found.id
+
+
+class ResourceSchemasTest:
+    def test_resource_schemas_get(self, app, rmock):
+        app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
+        rmock.get('https://example.com/schemas', json={
+            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+        })
+
+        assert ResourceSchemas.get() == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+
+    def test_resource_schemas_get_no_catalog_url(self, app):
+        app.config['SCHEMA_CATALOG_URL'] = None
+
+        assert ResourceSchemas.get() == []

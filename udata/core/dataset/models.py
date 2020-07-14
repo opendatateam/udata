@@ -9,6 +9,7 @@ from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
 from elasticsearch_dsl import Integer, Object
+import requests
 
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
@@ -21,6 +22,7 @@ __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
+    'ResourceSchemas'
 )
 
 #: Udata frequencies with their labels
@@ -223,6 +225,7 @@ class ResourceMixin(object):
     mime = db.StringField()
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     extras = db.ExtrasField()
+    schema = db.StringField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
@@ -745,6 +748,23 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     @property
     def from_community(self):
         return True
+
+
+class ResourceSchemas(object):
+    @staticmethod
+    def get():
+        endpoint = current_app.config.get('SCHEMA_CATALOG_URL')
+        if endpoint is None:
+            return []
+
+        r = requests.get(endpoint)
+        r.raise_for_status()
+
+        result = []
+        for schema in r.json()['schemas']:
+            result.append({'id': schema['name'], 'label': schema['title']})
+
+        return result
 
 
 def get_resource(id):

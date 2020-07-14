@@ -5,6 +5,7 @@ from io import BytesIO
 from uuid import uuid4
 
 from flask import url_for
+import pytest
 
 from . import APITestCase
 
@@ -21,7 +22,7 @@ from udata.models import (
 )
 from udata.tags import MIN_TAG_LENGTH, MAX_TAG_LENGTH
 from udata.utils import unique_string, faker
-
+from udata.tests.helpers import assert200
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -1325,3 +1326,27 @@ class ResourcesTypesAPITest(APITestCase):
         response = self.get(url_for('api.resource_types'))
         self.assert200(response)
         self.assertEqual(len(response.json), len(RESOURCE_TYPES))
+
+
+@pytest.mark.usefixtures('clean_db')
+class DatasetSchemasAPITest:
+    modules = ['core.dataset']
+
+    def test_dataset_schemas_api_list(self, app, api, rmock):
+        app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
+        rmock.get('https://example.com/schemas', json={
+            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+        })
+
+        response = api.get(url_for('api.schemas'))
+
+        assert200(response)
+        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+
+    def test_dataset_schemas_api_list_no_catalog_url(self, app, api):
+        app.config['SCHEMA_CATALOG_URL'] = None
+
+        response = api.get(url_for('api.schemas'))
+
+        assert200(response)
+        assert response.json == []
