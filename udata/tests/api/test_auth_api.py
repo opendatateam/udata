@@ -264,7 +264,7 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
-    def test_s256_code_challenge_success(self, client, oauth):
+    def test_s256_code_challenge_success_client_secret_basic(self, client, oauth):
         code_verifier = generate_token(48)
         code_challenge = create_s256_code_challenge(code_verifier)
 
@@ -290,6 +290,39 @@ class APIAuthTest:
             'code': code,
             'code_verifier': code_verifier
         }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+    def test_s256_code_challenge_success_client_secret_post(self, client, oauth):
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            code_challenge=code_challenge,
+            code_challenge_method='S256'
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+        assert 'code=' in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params['code']
+
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': code_verifier,
+            'client_id': oauth.client_id,
+            'client_secret': oauth.secret
+        })
 
         assert200(response)
         assert response.content_type == 'application/json'
