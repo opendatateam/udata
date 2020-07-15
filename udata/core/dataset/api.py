@@ -24,10 +24,7 @@ from datetime import datetime
 from flask import request, current_app
 from flask_security import current_user
 
-import requests
-
 from udata import search
-from udata.app import cache
 from udata.auth import admin_permission
 from udata.api import api, API, errors
 from udata.core import storages
@@ -52,7 +49,7 @@ from .api_fields import (
 from udata.linkchecker.checker import check_resource
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
-    CommunityResource, RESOURCE_TYPES, ResourceSchemas
+    CommunityResource, RESOURCE_TYPES, ResourceSchema
 )
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
@@ -560,7 +557,6 @@ class ResourceTypesAPI(API):
 class SchemasAPI(API):
     @api.doc('schemas')
     @api.marshal_list_with(schema_fields)
-    @cache.cached(timeout=60*5)
     def get(self):
         '''List all available schemas'''
-        return ResourceSchemas.get()
+        return ResourceSchema.objects()

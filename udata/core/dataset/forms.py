@@ -12,7 +12,7 @@ from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, RESOURCE_FILETYPE_FILE,
-    ResourceSchemas
+    ResourceSchema,
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
@@ -80,9 +80,11 @@ class BaseResourceForm(ModelForm):
         _('Publication date'),
         description=_('The publication date of the resource'))
     extras = fields.ExtrasField()
-    schema = fields.StringField(
+    schema = fields.SelectField(
         _('Schema'),
-        # choices=[schema['id'] for schema in ResourceSchemas.get()],
+        choices=[schema['id'] for schema in ResourceSchema.objects()],
+        default=None,
+        validators=[validators.optional()],
         description=_('The schema slug the resource adheres to'))
 
 

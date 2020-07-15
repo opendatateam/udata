@@ -1332,8 +1332,8 @@ class ResourcesTypesAPITest(APITestCase):
 class DatasetSchemasAPITest:
     modules = ['core.dataset']
 
-    def test_dataset_schemas_api_list(self, app, api, rmock):
-        app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_dataset_schemas_api_list(self, api, rmock):
         rmock.get('https://example.com/schemas', json={
             'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
         })
@@ -1343,9 +1343,8 @@ class DatasetSchemasAPITest:
         assert200(response)
         assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
 
-    def test_dataset_schemas_api_list_no_catalog_url(self, app, api):
-        app.config['SCHEMA_CATALOG_URL'] = None
-
+    @pytest.mark.options(SCHEMA_CATALOG_URL=None)
+    def test_dataset_schemas_api_list_no_catalog_url(self, api):
         response = api.get(url_for('api.schemas'))
 
         assert200(response)

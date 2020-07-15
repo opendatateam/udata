@@ -11,6 +11,7 @@ from werkzeug import cached_property
 from elasticsearch_dsl import Integer, Object
 import requests
 
+from udata.app import cache
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
@@ -22,7 +23,7 @@ __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
-    'ResourceSchemas'
+    'ResourceSchema'
 )
 
 #: Udata frequencies with their labels
@@ -100,6 +101,8 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 # used to guess license
 # (ie. number of allowed character changes)
 MAX_DISTANCE = 2
+
+SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
 
 
 def get_json_ld_extra(key, value):
@@ -750,9 +753,10 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
         return True
 
 
-class ResourceSchemas(object):
+class ResourceSchema(object):
     @staticmethod
-    def get():
+    @cache.cached(timeout=SCHEMA_CACHE_DURATION)
+    def objects():
         endpoint = current_app.config.get('SCHEMA_CATALOG_URL')
         if endpoint is None:
             return []
@@ -760,11 +764,9 @@ class ResourceSchemas(object):
         r = requests.get(endpoint)
         r.raise_for_status()
 
-        result = []
-        for schema in r.json()['schemas']:
-            result.append({'id': schema['name'], 'label': schema['title']})
-
-        return result
+        return [
+            {'id': s['name'], 'label': s['title']} for s in r.json()['schemas']
+        ]
 
 
 def get_resource(id):
