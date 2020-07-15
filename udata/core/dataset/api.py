@@ -21,7 +21,7 @@ import os
 import logging
 from datetime import datetime
 
-from flask import request, current_app
+from flask import request, current_app, abort
 from flask_security import current_user
 
 from udata import search
@@ -559,4 +559,10 @@ class SchemasAPI(API):
     @api.marshal_list_with(schema_fields)
     def get(self):
         '''List all available schemas'''
-        return ResourceSchema.objects()
+        try:
+            # This method call is cached as it makes HTTP requests
+            return ResourceSchema.objects()
+        except LookupError:
+            abort(503, description='No schemas in cache and endpoint unavailable')
+        except ValueError:
+            abort(404, description='Schema catalog endpoint was not found')

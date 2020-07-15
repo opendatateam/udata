@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 
 import pytest
+import requests
 
 from mongoengine import post_save
 
+from udata.app import cache
 from udata.models import (
     db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema
 )
@@ -418,9 +420,19 @@ class LicenseModelTest:
 
 
 class ResourceSchemaTest:
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
+    def test_resource_schema_objects_404_endpoint(self):
+        with pytest.raises(ValueError):
+            ResourceSchema.objects()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
-    def test_resource_schemas_get(self, app, rmock):
+    def test_resource_schema_objects_timeout_no_cache(self, client, rmock):
+        rmock.get('https://example.com/schemas', exc=requests.exceptions.ConnectTimeout)
+        with pytest.raises(LookupError):
+            ResourceSchema.objects()
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_resource_schema_objects(self, app, rmock):
         rmock.get('https://example.com/schemas', json={
             'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
         })
@@ -428,5 +440,21 @@ class ResourceSchemaTest:
         assert ResourceSchema.objects() == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
-    def test_resource_schemas_get_no_catalog_url(self):
+    def test_resource_schema_objects_no_catalog_url(self):
         assert ResourceSchema.objects() == []
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_resource_schema_objects_w_cache(self, rmock, mocker):
+        cache_mock_set = mocker.patch.object(cache, 'set')
+        mocker.patch.object(cache, 'get', return_value='dummy_from_cache')
+
+        # fill cache
+        rmock.get('https://example.com/schemas', json={
+            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+        })
+        ResourceSchema.objects()
+        assert cache_mock_set.called
+
+        rmock.get('https://example.com/schemas', status_code=500)
+        assert 'dummy_from_cache' == ResourceSchema.objects()
+        assert rmock.call_count == 2
