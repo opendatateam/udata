@@ -86,7 +86,7 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
 
     @property
     def client_id(self):
-        return str(self.id)
+        return self.get_client_id()
 
     @property
     def client_secret(self):
