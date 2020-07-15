@@ -28,11 +28,12 @@ class MigrationError(Exception):
     :param output str: An optionnal array of logging output
     :param exc Exception: An optionnal underlying exception
     '''
-    def __init__(self, msg, output=None, exc=None):
+    def __init__(self, msg, output=None, exc=None, traceback=None):
         super().__init__(msg)
         self.msg = msg
         self.output = output
         self.exc = exc
+        self.traceback = traceback
 
 
 class RollbackError(MigrationError):
@@ -223,7 +224,7 @@ class Migration:
                 tb = traceback.format_exc()
                 self.add_record('migrate', out, db._state, False, traceback=tb)
                 fe = MigrationError('Error while executing migration',
-                                    output=out, exc=e)
+                                    output=out, exc=e, traceback=tb)
                 if hasattr(self.module, 'rollback'):
                     try:
                         self.module.rollback(db)

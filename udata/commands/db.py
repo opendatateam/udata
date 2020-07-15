@@ -76,7 +76,7 @@ def migrate(record, dry_run=False):
                 format_output(re.output, not re.exc)
                 success = False
             except migrations.MigrationError as me:
-                format_output(me.output, False)
+                format_output(me.output, False, traceback=me.traceback)
                 success = False
             else:
                 format_output(output, True)
