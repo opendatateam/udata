@@ -34,10 +34,14 @@ def status_label(record):
         return red(record.status)
 
 
-def format_output(output, success=True):
+def format_output(output, success=True, traceback=None):
     echo('  │')
     for level, msg in output:
         echo('  │ {0}'.format(msg))
+    echo('  │')
+    if traceback:
+        for tb in traceback.split('\n'):
+            echo('  │ {0}'.format(tb))
     echo('  │')
     echo('  └──[{0}]'.format(green('OK') if success else red('KO')))
     echo('')
@@ -123,4 +127,4 @@ def display_op(op):
     timestamp = white(op['date'].strftime(DATE_FORMAT))
     label = white(op['type'].title()) + ' '
     echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
-    format_output(op['output'], op['success'])
+    format_output(op['output'], success=op['success'], traceback=op['traceback'])
