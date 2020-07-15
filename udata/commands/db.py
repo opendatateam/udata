@@ -127,4 +127,4 @@ def display_op(op):
     timestamp = white(op['date'].strftime(DATE_FORMAT))
     label = white(op['type'].title()) + ' '
     echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
-    format_output(op['output'], success=op['success'], traceback=op['traceback'])
+    format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
