@@ -3,7 +3,10 @@
 ## Current (in progress)
 
 - CORS are now handled by Flask-CORS instead of Flask-RestPlus[#2485](https://github.com/opendatateam/udata/pull/2485)
-- Authorization code Grant now support PKCE flow [#2510](https://github.com/opendatateam/udata/pull/2510)
+- Oauth changes [#2510](https://github.com/opendatateam/udata/pull/2510):
+  - Authorization code Grant now support PKCE flow
+  - New command to create an OAuth client
+  - Implicit grant is no longer supported
 
 ## 2.1.3 (2020-06-29)
 
