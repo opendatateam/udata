@@ -83,8 +83,7 @@ class DatasetSearch(ModelSearchAdapter):
     resources = Object(properties={
         'title': String(),
         'description': String(),
-        'format': String(index='not_analyzed'),
-        'schema': String(index='not_analyzed')
+        'format': String(index='not_analyzed')
     })
     format_suggest = Completion(analyzer=simple,
                                 search_analyzer=simple,
@@ -136,7 +135,6 @@ class DatasetSearch(ModelSearchAdapter):
         'format': TermsFacet(field='resources.format'),
         'resource_type': TermsFacet(field='resources.type',
                                     labelizer=resource_type_labelizer),
-        'schema': TermsFacet(field='resources.schema'),
         'reuses': RangeFacet(field='metrics.reuses',
                              ranges=[('none', (None, 1)),
                                      ('few', (1, 5)),
@@ -203,7 +201,6 @@ class DatasetSearch(ModelSearchAdapter):
                     'description': r.description,
                     'format': r.format,
                     'type': r.type,
-                    'schema': r.schema,
                 }
                 for r in dataset.resources],
             'format_suggest': [r.format.lower()
