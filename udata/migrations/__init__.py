@@ -6,6 +6,7 @@ import inspect
 import logging
 import os
 import queue
+import traceback
 
 from datetime import datetime
 from logging.handlers import QueueHandler
@@ -27,11 +28,12 @@ class MigrationError(Exception):
     :param output str: An optionnal array of logging output
     :param exc Exception: An optionnal underlying exception
     '''
-    def __init__(self, msg, output=None, exc=None):
+    def __init__(self, msg, output=None, exc=None, traceback=None):
         super().__init__(msg)
         self.msg = msg
         self.output = output
         self.exc = exc
+        self.traceback = traceback
 
 
 class RollbackError(MigrationError):
@@ -83,6 +85,7 @@ class Record(dict):
           - success
           - rollback
           - rollback-error
+          - error
           - recorded
         '''
         if not self.exists():
@@ -117,14 +120,14 @@ class Record(dict):
         op = self.ops[-1]
         return op['success'] and op['type'] in ('migrate', 'record')
 
-    def add(self, type, migration, output, state, success):
+    def add(self, _type, migration, output, state, success):
         script = inspect.getsource(migration)
         return Record(self.collection.find_one_and_update(
             {'plugin': self.plugin, 'filename': self.filename},
             {
                 '$push': {'ops': {
                     'date': datetime.now(),
-                    'type': type,
+                    'type': _type,
                     'script': script,
                     'output': output,
                     'state': state,
@@ -218,9 +221,10 @@ class Migration:
                 out = _extract_output(q)
             except Exception as e:
                 out = _extract_output(q)
-                self.add_record('migrate', out, db._state, False)
+                tb = traceback.format_exc()
+                self.add_record('migrate', out, db._state, False, traceback=tb)
                 fe = MigrationError('Error while executing migration',
-                                    output=out, exc=e)
+                                    output=out, exc=e, traceback=tb)
                 if hasattr(self.module, 'rollback'):
                     try:
                         self.module.rollback(db)
@@ -246,7 +250,7 @@ class Migration:
             return False
         return bool(self.collection.delete_one(self.db_query).deleted_count)
 
-    def add_record(self, type, output, state, success):
+    def add_record(self, type, output, state, success, traceback=None):
         script = inspect.getsource(self.module)
         return Record(self.collection.find_one_and_update(
             self.db_query,
@@ -258,6 +262,7 @@ class Migration:
                     'output': output,
                     'state': state,
                     'success': success,
+                    'traceback': traceback,
                 }}
             },
             upsert=True,

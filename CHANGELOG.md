@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Show traceback for migration errors [#2513](https://github.com/opendatateam/udata/pull/2513)
 
 ## 2.1.3 (2020-06-29)
 
