@@ -7,6 +7,7 @@
   - Deleting a dataset now triggers the deletion of the corresponding resources (including community resources) and their static files
   - Adding a celery job `purge-orphan-community-resources` to remove community resources not linked to a dataset. This should be scheduled regularly.
   - Adding a migration file to populate resources fs_filename new field. Scripts to delete the orphaned files are available [here](https://gist.github.com/quaxsze/dc089e4ecd2e00f82acea573d8d2cfb9).
+- Show traceback for migration errors [#2513](https://github.com/opendatateam/udata/pull/2513)
 
 ## 2.1.3 (2020-06-29)
 
