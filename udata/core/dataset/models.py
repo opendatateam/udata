@@ -758,7 +758,7 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
 
 class ResourceSchema(object):
     @staticmethod
-    @cache.cached(timeout=SCHEMA_CACHE_DURATION)
+    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
     def objects():
         '''
         Get a list of schemas from a schema catalog endpoint.
