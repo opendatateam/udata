@@ -56,6 +56,9 @@ from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
 from .search import DatasetSearch
+from .exceptions import (
+    SchemaCatalogNotFoundException, SchemasCacheUnavailableException
+)
 
 log = logging.getLogger(__name__)
 
@@ -562,7 +565,7 @@ class SchemasAPI(API):
         try:
             # This method call is cached as it makes HTTP requests
             return ResourceSchema.objects()
-        except LookupError:
+        except SchemasCacheUnavailableException:
             abort(503, description='No schemas in cache and endpoint unavailable')
-        except ValueError:
+        except SchemaCatalogNotFoundException:
             abort(404, description='Schema catalog endpoint was not found')

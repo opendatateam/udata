@@ -19,6 +19,9 @@ from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url
 
 from .preview import get_preview_url
+from .exceptions import (
+    SchemaCatalogNotFoundException, SchemasCacheUnavailableException
+)
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
@@ -776,7 +779,7 @@ class ResourceSchema(object):
             response = requests.get(endpoint, timeout=5)
             # do not cache 404 and forward status code
             if response.status_code == 404:
-                raise ValueError('Schemas catalog does not exist')
+                raise SchemaCatalogNotFoundException(f'Schemas catalog does not exist at {endpoint}')
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             log.exception(f'Error while getting schema catalog from {endpoint}')
@@ -790,7 +793,7 @@ class ResourceSchema(object):
         # no cached version or no content
         if not content:
             log.error(f'No content found inc. from cache for schema catalog')
-            raise LookupError('No content in cache for schema catalog')
+            raise SchemasCacheUnavailableException('No content in cache for schema catalog')
 
         return content
 
