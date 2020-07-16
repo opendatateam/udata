@@ -57,7 +57,7 @@ from .forms import (
 )
 from .search import DatasetSearch
 from .exceptions import (
-    SchemaCatalogNotFoundException, SchemasCacheUnavailableException
+    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 
 log = logging.getLogger(__name__)
@@ -567,5 +567,5 @@ class SchemasAPI(API):
             return ResourceSchema.objects()
         except SchemasCacheUnavailableException:
             abort(503, description='No schemas in cache and endpoint unavailable')
-        except SchemaCatalogNotFoundException:
+        except SchemasCatalogNotFoundException:
             abort(404, description='Schema catalog endpoint was not found')

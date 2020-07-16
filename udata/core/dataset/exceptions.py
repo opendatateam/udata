@@ -8,7 +8,7 @@ class ResourceSchemaException(DatasetException):
     pass
 
 
-class SchemaCatalogNotFoundException(ResourceSchemaException):
+class SchemasCatalogNotFoundException(ResourceSchemaException):
     '''Raised when the schema catalog cannot be found'''
     pass
 

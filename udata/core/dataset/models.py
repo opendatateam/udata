@@ -20,7 +20,7 @@ from udata.utils import get_by, hash_url
 
 from .preview import get_preview_url
 from .exceptions import (
-    SchemaCatalogNotFoundException, SchemasCacheUnavailableException
+    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 
 __all__ = (
@@ -779,7 +779,7 @@ class ResourceSchema(object):
             response = requests.get(endpoint, timeout=5)
             # do not cache 404 and forward status code
             if response.status_code == 404:
-                raise SchemaCatalogNotFoundException(f'Schemas catalog does not exist at {endpoint}')
+                raise SchemasCatalogNotFoundException(f'Schemas catalog does not exist at {endpoint}')
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             log.exception(f'Error while getting schema catalog from {endpoint}')

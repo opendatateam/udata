@@ -13,7 +13,7 @@ from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
 )
 from udata.core.dataset.exceptions import (
-    SchemaCatalogNotFoundException, SchemasCacheUnavailableException
+    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 from udata.core.discussions.factories import (
     MessageDiscussionFactory, DiscussionFactory
@@ -425,7 +425,7 @@ class LicenseModelTest:
 class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
     def test_resource_schema_objects_404_endpoint(self):
-        with pytest.raises(SchemaCatalogNotFoundException):
+        with pytest.raises(SchemasCatalogNotFoundException):
             ResourceSchema.objects()
 
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
