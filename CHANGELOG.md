@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Show traceback for migration errors [#2513](https://github.com/opendatateam/udata/pull/2513)
+- Add `schema` field to ressources. This field can be filled based on an external schema catalog [#2512](https://github.com/opendatateam/udata/pull/2512)
 
 ## 2.1.3 (2020-06-29)
 
