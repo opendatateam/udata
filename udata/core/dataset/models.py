@@ -785,7 +785,7 @@ class ResourceSchema(object):
             log.exception(f'Error while getting schema catalog from {endpoint}')
             content = cache.get(cache_key)
         else:
-            schemas = response.json()['schemas']
+            schemas = response.json().get('schemas', [])
             content = [
                 {'id': s['name'], 'label': s['title']} for s in schemas
             ]
