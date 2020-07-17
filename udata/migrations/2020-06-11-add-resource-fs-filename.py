@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 def migrate(db):
     log.info('Processing resources resources.')
 
-    datasets = Dataset.objects()
+    datasets = Dataset.objects().no_cache()
     for dataset in datasets:
         for resource in dataset.resources:
             if resource.url.startswith('https://static.data.gouv.fr'):
@@ -27,7 +27,7 @@ def migrate(db):
 
     log.info('Processing community resources.')
 
-    community_resources = CommunityResource.objects()
+    community_resources = CommunityResource.objects().no_cache()
     for community_resource in community_resources:
         parsed = urlparse(community_resource.url)
         fs_name = parsed.path.strip('/resource/')
