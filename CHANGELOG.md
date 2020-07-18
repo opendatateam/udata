@@ -7,6 +7,7 @@
   - Authorization code Grant now support PKCE flow
   - New command to create an OAuth client
   - Implicit grant is no longer supported
+- Show traceback for migration errors [#2513](https://github.com/opendatateam/udata/pull/2513)
 
 ## 2.1.3 (2020-06-29)
 
