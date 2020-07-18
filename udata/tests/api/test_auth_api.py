@@ -57,6 +57,8 @@ def oauth(app, request):
         name='test-client',
         owner=UserFactory(),
         redirect_uris=['https://test.org/callback'],
+        grant_types=['authorization_code', 'client_credentials', 'refresh_token', 'password'],
+        response_types=['code'],
         **kwargs
     )
 

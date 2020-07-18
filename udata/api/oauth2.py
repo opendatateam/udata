@@ -20,8 +20,6 @@ from datetime import datetime, timedelta
 
 from authlib.integrations.flask_oauth2.errors import _HTTPException as AuthlibFlaskException
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
-from authlib.integrations.flask_helpers import create_oauth_request
-from authlib.oauth2 import OAuth2Request
 from authlib.oauth2.rfc6749 import grants, ClientMixin
 from authlib.oauth2.rfc6750 import BearerTokenValidator
 from authlib.oauth2.rfc7009 import RevocationEndpoint
@@ -43,6 +41,7 @@ from udata.core.storages import images, default_image_basename
 
 
 blueprint = I18nBlueprint('oauth', __name__, url_prefix='/oauth')
+oauth = AuthorizationServer()
 require_oauth = ResourceProtector()
 
 
@@ -59,17 +58,6 @@ SCOPES = {
     'default': _('Default scope'),
     'admin': _('System administrator rights')
 }
-
-
-class AuthServer(AuthorizationServer):
-    def __init__(self, query_client=None, save_token=None):
-        super().__init__(
-            query_client=query_client,
-            save_token=save_token,
-        )
-
-    def create_oauth2_request(self, request):
-        return create_oauth_request(request, OAuth2Request, use_json=True)
 
 
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
@@ -295,9 +283,6 @@ class BearerToken(BearerTokenValidator):
 
     def token_revoked(self, token):
         return token.revoked
-
-
-oauth = AuthServer()
 
 
 @blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')
