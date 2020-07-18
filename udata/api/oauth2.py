@@ -20,6 +20,8 @@ from datetime import datetime, timedelta
 
 from authlib.integrations.flask_oauth2.errors import _HTTPException as AuthlibFlaskException
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
+from authlib.integrations.flask_helpers import create_oauth_request
+from authlib.oauth2 import OAuth2Request
 from authlib.oauth2.rfc6749 import grants, ClientMixin
 from authlib.oauth2.rfc6750 import BearerTokenValidator
 from authlib.oauth2.rfc7009 import RevocationEndpoint
@@ -41,7 +43,6 @@ from udata.core.storages import images, default_image_basename
 
 
 blueprint = I18nBlueprint('oauth', __name__, url_prefix='/oauth')
-oauth = AuthorizationServer()
 require_oauth = ResourceProtector()
 
 
@@ -60,6 +61,17 @@ SCOPES = {
 }
 
 
+class AuthServer(AuthorizationServer):
+    def __init__(self, query_client=None, save_token=None):
+        super().__init__(
+            query_client=query_client,
+            save_token=save_token,
+        )
+
+    def create_oauth2_request(self, request):
+        return create_oauth_request(request, OAuth2Request, use_json=True)
+
+
 class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     secret = db.StringField(default=lambda: gen_salt(50))
 
@@ -72,7 +84,9 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
                           thumbnails=[150, 25])
 
     redirect_uris = db.ListField(db.StringField())
-    scope = db.StringField(default='')
+    scope = db.StringField(default='default')
+    grant_types = db.ListField(db.StringField())
+    response_types = db.ListField(db.StringField())
 
     confidential = db.BooleanField(default=False)
     internal = db.BooleanField(default=False)
@@ -97,7 +111,6 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         return self.redirect_uris[0]
 
     def get_default_redirect_uri(self):
-        '''Implement required ClientMixin method'''
         return self.default_redirect_uri
 
     def get_allowed_scope(self, scope):
@@ -107,7 +120,6 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         return list_to_scope([s for s in scope.split() if s in allowed])
 
     def check_redirect_uri(self, redirect_uri):
-        '''Implement required ClientMixin method'''
         return redirect_uri in self.redirect_uris
 
     def check_client_secret(self, client_secret):
@@ -119,10 +131,10 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         return method in ('client_secret_post', 'client_secret_basic')
 
     def check_response_type(self, response_type):
-        return True
+        return response_type in self.response_types
 
     def check_grant_type(self, grant_type):
-        return True
+        return grant_type in self.grant_types
 
     def check_requested_scope(self, scope):
         allowed = set(self.scope)
@@ -285,10 +297,13 @@ class BearerToken(BearerTokenValidator):
         return token.revoked
 
 
+oauth = AuthServer()
+
+
 @blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')
 @csrf.exempt
 def access_token():
-    return oauth.create_token_response()
+    return oauth.create_token_response(request)
 
 
 @blueprint.route('/revoke', methods=['POST'], localize=False)
