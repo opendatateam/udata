@@ -297,6 +297,16 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
+        token = response.json['access_token']
+
+        response = client.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', token])
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
+
     def test_s256_code_challenge_success_client_secret_post(self, client, oauth):
         code_verifier = generate_token(48)
         code_challenge = create_s256_code_challenge(code_verifier)
@@ -329,6 +339,16 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
+
+        token = response.json['access_token']
+
+        response = client.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', token])
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
 
     def test_authorization_multiple_grant_token(self, client, oauth):
 
@@ -422,8 +442,7 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
-    @pytest.mark.oauth(secret='')
-    def test_implicit_grant_token(self, client, oauth):
+    def test_invalid_implicit_grant_token(self, client, oauth):
         client.login()
         response = client.post(url_for(
             'oauth.authorize',
