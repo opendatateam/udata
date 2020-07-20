@@ -49,6 +49,17 @@ def enforce_filetype_file(form, field):
         ))
 
 
+def enforce_allowed_schemas(form, field):
+    schema = field.data
+    allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
+    if schema not in allowed_schemas:
+        message = _('Schema "{schema}" is not an allowed value. Allowed values: {values}')
+        raise validators.ValidationError(message.format(
+            schema=schema,
+            values=', '.join(allowed_schemas)
+        ))
+
+
 class BaseResourceForm(ModelForm):
     title = fields.StringField(_('Title'), [validators.DataRequired()])
     description = fields.MarkdownField(_('Description'))
@@ -80,11 +91,10 @@ class BaseResourceForm(ModelForm):
         _('Publication date'),
         description=_('The publication date of the resource'))
     extras = fields.ExtrasField()
-    schema = fields.SelectField(
+    schema = fields.StringField(
         _('Schema'),
-        choices=[schema['id'] for schema in ResourceSchema.objects()],
         default=None,
-        validators=[validators.optional()],
+        validators=[validators.optional(), enforce_allowed_schemas],
         description=_('The schema slug the resource adheres to'))
 
 
