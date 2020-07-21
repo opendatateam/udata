@@ -76,6 +76,9 @@ resource_fields = api.model('Resource', {
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
                                  readonly=True),
+    'schema': fields.String(
+        description='The schema slug the resource adheres to',
+        allow_null=True),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {
@@ -209,4 +212,9 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
 resource_type_fields = api.model('ResourceType', {
     'id': fields.String(description='The resource type identifier'),
     'label': fields.String(description='The resource type display name')
+})
+
+schema_fields = api.model('Schema', {
+    'id': fields.String(description='The schema identifier'),
+    'label': fields.String(description='The schema display name')
 })

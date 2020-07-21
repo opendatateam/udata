@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from collections import OrderedDict
+import logging
 
 from blinker import signal
 from dateutil.parser import parse as parse_dt
@@ -9,19 +10,27 @@ from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
 from elasticsearch_dsl import Integer, Object
+import requests
 
+from udata.app import cache
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url
 
 from .preview import get_preview_url
+from .exceptions import (
+    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
+)
 
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
     'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
+    'ResourceSchema'
 )
+
+log = logging.getLogger(__name__)
 
 #: Udata frequencies with their labels
 #:
@@ -98,6 +107,8 @@ CLOSED_FORMATS = ('pdf', 'doc', 'word', 'xls', 'excel')
 # used to guess license
 # (ie. number of allowed character changes)
 MAX_DISTANCE = 2
+
+SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
 
 
 def get_json_ld_extra(key, value):
@@ -224,6 +235,7 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
     extras = db.ExtrasField()
+    schema = db.StringField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
@@ -746,6 +758,45 @@ class CommunityResource(ResourceMixin, WithMetrics, db.Owned, db.Document):
     @property
     def from_community(self):
         return True
+
+
+class ResourceSchema(object):
+    @staticmethod
+    @cache.memoize(timeout=SCHEMA_CACHE_DURATION)
+    def objects():
+        '''
+        Get a list of schemas from a schema catalog endpoint.
+
+        This has a double layer of cache:
+        - @cache.cached decorator w/ short lived cache for normal operations
+        - a long terme cache w/o timeout to be able to always render some content
+        '''
+        endpoint = current_app.config.get('SCHEMA_CATALOG_URL')
+        if endpoint is None:
+            return []
+
+        cache_key = 'schema-catalog-objects'
+        try:
+            response = requests.get(endpoint, timeout=5)
+            # do not cache 404 and forward status code
+            if response.status_code == 404:
+                raise SchemasCatalogNotFoundException(f'Schemas catalog does not exist at {endpoint}')
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            log.exception(f'Error while getting schema catalog from {endpoint}')
+            content = cache.get(cache_key)
+        else:
+            schemas = response.json().get('schemas', [])
+            content = [
+                {'id': s['name'], 'label': s['title']} for s in schemas
+            ]
+            cache.set(cache_key, content)
+        # no cached version or no content
+        if not content:
+            log.error(f'No content found inc. from cache for schema catalog')
+            raise SchemasCacheUnavailableException('No content in cache for schema catalog')
+
+        return content
 
 
 def get_resource(id):

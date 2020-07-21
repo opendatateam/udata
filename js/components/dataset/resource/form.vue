@@ -153,6 +153,7 @@ import CommunityResource from 'models/communityresource';
 import FormHorizontal from 'components/form/horizontal-form.vue';
 import UploaderMixin from 'mixins/uploader';
 import resource_types from 'models/resource_types';
+import schemas from 'models/schemas';
 
 export default {
     components: {FormHorizontal},
@@ -243,7 +244,23 @@ export default {
             }]
         },
         fields() {
-            return this.generic_fields.concat(this.file_fields);
+            return this.generic_fields.concat(this.schema_field).concat(this.file_fields);
+        },
+        schema_field() {
+            if (schemas.has_data) {
+                const values = [{id: '', label: ''}].concat(schemas.data);
+                return [{
+                    id: 'schema',
+                    label: this._('Schema'),
+                    widget: 'select-input',
+                    values,
+                    map: function(item) {
+                        return {value: item.id, text: item.label};
+                    }
+                }];
+            }
+
+            return [];
         },
         is_community() {
             return this.resource instanceof CommunityResource;

@@ -126,6 +126,15 @@ The id of an existing user which will post a comment when a dataset is archived.
 The title of the comment optionaly posted when a dataset is archived.
 NB: the content of the comment is located in `udata/templates/comments/dataset_archived.txt`.
 
+
+### SCHEMA_CATALOG_URL
+
+**default** : `None`
+
+The URL to a schema catalog, listing schemas resources can conform to. The URL should be a JSON endpoint, returning a schema catalog. Example: https://schema.data.gouv.fr/schemas/schemas.json
+
+NB: this is used by the `datasets/schemas` API to fill the `schema` field of a `Resource`.
+
 ## URLs validation
 
 ### URLS_ALLOW_PRIVATE

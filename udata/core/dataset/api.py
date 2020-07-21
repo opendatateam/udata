@@ -21,7 +21,7 @@ import os
 import logging
 from datetime import datetime
 
-from flask import request, current_app
+from flask import request, current_app, abort
 from flask_security import current_user
 
 from udata import search
@@ -44,17 +44,21 @@ from .api_fields import (
     resource_fields,
     resource_type_fields,
     upload_fields,
+    schema_fields,
 )
 from udata.linkchecker.checker import check_resource
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
-    CommunityResource, RESOURCE_TYPES
+    CommunityResource, RESOURCE_TYPES, ResourceSchema
 )
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
 from .search import DatasetSearch
+from .exceptions import (
+    SchemasCatalogNotFoundException, SchemasCacheUnavailableException
+)
 
 log = logging.getLogger(__name__)
 
@@ -557,3 +561,18 @@ class ResourceTypesAPI(API):
         '''List all resource types'''
         return [{'id': id, 'label': label}
                 for id, label in RESOURCE_TYPES.items()]
+
+
+@ns.route('/schemas/', endpoint='schemas')
+class SchemasAPI(API):
+    @api.doc('schemas')
+    @api.marshal_list_with(schema_fields)
+    def get(self):
+        '''List all available schemas'''
+        try:
+            # This method call is cached as it makes HTTP requests
+            return ResourceSchema.objects()
+        except SchemasCacheUnavailableException:
+            abort(503, description='No schemas in cache and endpoint unavailable')
+        except SchemasCatalogNotFoundException:
+            abort(404, description='Schema catalog endpoint was not found')
