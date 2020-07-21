@@ -10,24 +10,27 @@ log = logging.getLogger(__name__)
 
 
 def migrate(db):
-    log.info('Processing resources resources.')
+    log.info('Processing resources.')
 
-    datasets = Dataset.objects().no_cache().batch_size(1000)
+    datasets = Dataset.objects().no_cache().timeout(False)
     for dataset in datasets:
+        save_res = False
         for resource in dataset.resources:
             if resource.url.startswith('https://static.data.gouv.fr'):
                 parsed = urlparse(resource.url)
                 fs_name = parsed.path.strip('/resource/')
                 resource.fs_filename = fs_name
-                try:
-                    resource.save()
-                except Exception as e:
-                    log.warning(e)
-                    pass
+                save_res = True
+        if save_res:
+            try:
+                dataset.save()
+            except Exception as e:
+                log.warning(e)
+                pass
 
     log.info('Processing community resources.')
 
-    community_resources = CommunityResource.objects().no_cache().batch_size(1000)
+    community_resources = CommunityResource.objects().no_cache().timeout(False)
     for community_resource in community_resources:
         parsed = urlparse(community_resource.url)
         fs_name = parsed.path.strip('/resource/')
