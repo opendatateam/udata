@@ -5,9 +5,12 @@ from io import BytesIO
 from uuid import uuid4
 
 from flask import url_for
+import pytest
 
 from . import APITestCase
 
+from udata.app import cache
+from udata.core import storages
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
@@ -21,7 +24,7 @@ from udata.models import (
 )
 from udata.tags import MIN_TAG_LENGTH, MAX_TAG_LENGTH
 from udata.utils import unique_string, faker
-
+from udata.tests.helpers import assert200, assert404
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -852,12 +855,24 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.resources.append(resource)
         self.dataset.save()
         with self.api_user():
+            upload_response = self.post(
+                url_for(
+                    'api.upload_dataset_resource',
+                    dataset=self.dataset,
+                    rid=str(resource.id)
+                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+
+            data = json.loads(upload_response.data)
+            self.assertEqual(data['title'], 'test.txt')
+
             response = self.delete(url_for('api.resource',
                                            dataset=self.dataset,
                                            rid=str(resource.id)))
+
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
+        self.assertEqual(list(storages.resources.list_files()), [])
 
     def test_delete_404(self):
         with self.api_user():
@@ -1317,6 +1332,30 @@ class CommunityResourceAPITest(APITestCase):
         self.assertIn('dataset', data['errors'])
         self.assertEqual(CommunityResource.objects.count(), 0)
 
+    def test_community_resource_api_delete(self):
+        dataset = VisibleDatasetFactory()
+        self.login()
+
+        response = self.post(
+            url_for('api.upload_new_community_resource', dataset=dataset),
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+        self.assert201(response)
+
+        data = json.loads(response.data)
+        resource_id = data['id']
+        self.assertEqual(data['title'], 'test.txt')
+
+        response = self.put(
+            url_for('api.community_resource', community=resource_id),
+            data)
+        self.assertStatus(response, 200)
+        self.assertEqual(CommunityResource.objects.count(), 1)
+
+        response = self.delete(url_for('api.community_resource', community=resource_id))
+        self.assertStatus(response, 204)
+
+        self.assertEqual(CommunityResource.objects.count(), 0)
+        self.assertEqual(list(storages.resources.list_files()), [])
 
 class ResourcesTypesAPITest(APITestCase):
 
@@ -1325,3 +1364,64 @@ class ResourcesTypesAPITest(APITestCase):
         response = self.get(url_for('api.resource_types'))
         self.assert200(response)
         self.assertEqual(len(response.json), len(RESOURCE_TYPES))
+
+
+@pytest.mark.usefixtures('clean_db')
+class DatasetSchemasAPITest:
+    modules = ['core.dataset']
+
+    def test_dataset_schemas_api_list(self, api, rmock, app):
+        # Can't use @pytest.mark.options otherwise a request will be
+        # made before setting up rmock at module load, resulting in a 404
+        app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
+
+        rmock.get('https://example.com/schemas', json={
+            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+        })
+
+        response = api.get(url_for('api.schemas'))
+
+        assert200(response)
+        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL=None)
+    def test_dataset_schemas_api_list_no_catalog_url(self, api):
+        response = api.get(url_for('api.schemas'))
+
+        assert200(response)
+        assert response.json == []
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/notfound')
+    def test_dataset_schemas_api_list_not_found(self, api):
+        response = api.get(url_for('api.schemas'))
+        assert404(response)
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_dataset_schemas_api_list_error_no_cache(self, api, rmock):
+        rmock.get('https://example.com/schemas', status_code=500)
+
+        response = api.get(url_for('api.schemas'))
+        assert response.status_code == 503
+
+    @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
+    def test_dataset_schemas_api_list_error_w_cache(self, api, rmock, mocker):
+        cache_mock_set = mocker.patch.object(cache, 'set')
+        mocker.patch.object(cache, 'get', return_value=[{"id": "etalab/schema-irve", "label": "Schéma IRVE"}])
+
+        # Fill cache
+        rmock.get('https://example.com/schemas', json={
+            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+        })
+        response = api.get(url_for('api.schemas'))
+        assert200(response)
+        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+        assert cache_mock_set.called
+
+        # Endpoint becomes unavailable
+        rmock.get('https://example.com/schemas', status_code=500)
+
+        # Long term cache is used
+        response = api.get(url_for('api.schemas'))
+        assert200(response)
+        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+

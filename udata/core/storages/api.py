@@ -135,20 +135,24 @@ def handle_upload(storage, prefix=None):
         if uploaded_file:
             save_chunk(uploaded_file, args)
         else:
-            filename = combine_chunks(storage, args, prefix=prefix)
+            fs_filename = combine_chunks(storage, args, prefix=prefix)
     elif not uploaded_file:
         raise UploadError('Missing file parameter')
     else:
         # Normalize filename including extension
         filename = utils.normalize(uploaded_file.filename)
-        filename = storage.save(uploaded_file, prefix=prefix,
-                                filename=filename)
+        fs_filename = storage.save(
+            uploaded_file,
+            prefix=prefix,
+            filename=filename
+        )
 
-    metadata = storage.metadata(filename)
+    metadata = storage.metadata(fs_filename)
+    metadata['fs_filename'] = fs_filename
     checksum = metadata.pop('checksum')
     algo, checksum = checksum.split(':', 1)
     metadata[algo] = checksum
-    metadata['format'] = utils.extension(filename)
+    metadata['format'] = utils.extension(fs_filename)
     return metadata
 
 

@@ -17,7 +17,7 @@ from udata.models import (Follow, Issue, Discussion, Activity, Topic,
                           Organization)
 from udata.tasks import job
 
-from .models import Dataset, Resource, UPDATE_FREQUENCIES, Checksum
+from .models import Dataset, Resource, CommunityResource, UPDATE_FREQUENCIES, Checksum
 
 log = get_task_logger(__name__)
 
@@ -33,7 +33,7 @@ def flatten(iterable):
 @job('purge-datasets')
 def purge_datasets(self):
     for dataset in Dataset.objects(deleted__ne=None):
-        log.info('Purging dataset "{0}"'.format(dataset))
+        log.info(f'Purging dataset {dataset}')
         # Remove followers
         Follow.objects(following=dataset).delete()
         # Remove issues
@@ -49,8 +49,32 @@ def purge_datasets(self):
             topic.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
-        # Remove
+        # Remove each dataset's resource's file
+        storage = storages.resources
+        for resource in dataset.resources:
+            if resource.fs_filename is not None:
+                storage.delete(resource.fs_filename)
+        # Remove each dataset related community resource and it's file
+        community_resources = CommunityResource.objects(dataset=dataset)
+        for community_resource in community_resources:
+            if community_resource.fs_filename is not None:
+                storage.delete(community_resource.fs_filename)
+            community_resource.delete()
+        # Remove dataset
         dataset.delete()
+
+
+@job('purge-orphan-community-resources')
+def purge_orphan_community_resources(self):
+    '''
+    Gets community resources not linked with a dataset
+    and deletes them along with their files.
+    '''
+    community_resources = CommunityResource.objects(dataset=None)
+    for community_resource in community_resources:
+        if community_resource.fs_filename is not None:
+            storages.resources.delete(community_resource.fs_filename)
+        community_resource.delete()
 
 
 @job('send-frequency-reminder')

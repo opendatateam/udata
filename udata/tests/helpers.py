@@ -1,6 +1,10 @@
 import mock
 import os
 
+from io import BytesIO
+
+from PIL import Image
+
 from udata.mail import mail_sent
 
 from contextlib import contextmanager
@@ -219,3 +223,11 @@ def assert_cors(response):
     '''CORS headers presence assertion'''
     __tracebackhide__ = True
     assert 'Access-Control-Allow-Origin' in response.headers
+
+def create_test_image():
+    file = BytesIO()
+    image = Image.new('RGBA', size=(50, 50), color=(155, 0, 0))
+    image.save(file, 'png')
+    file.name = 'test.png'
+    file.seek(0)
+    return file

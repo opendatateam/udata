@@ -1,8 +1,10 @@
 from flask import url_for
 
+from udata.core import storages
 from udata.core.user.factories import AdminFactory, UserFactory
 from udata.models import Follow
 from udata.utils import faker
+from udata.tests.helpers import create_test_image
 
 from . import APITestCase
 
@@ -286,7 +288,15 @@ class UserAPITest(APITestCase):
         user = AdminFactory()
         self.login(user)
         other_user = UserFactory()
+        file = create_test_image()
+
+        response = self.post(
+            url_for('api.user_avatar', user=other_user),
+            {'file': (file, 'test.png')},
+            json=False)
+
         response = self.delete(url_for('api.user', user=other_user))
+        self.assertEqual(list(storages.avatars.list_files()), [])
         self.assert204(response)
         other_user.reload()
         response = self.delete(url_for('api.user', user=other_user))

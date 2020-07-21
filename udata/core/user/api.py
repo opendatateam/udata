@@ -3,6 +3,7 @@ from flask_security import current_user, logout_user
 
 from udata import search
 from udata.api import api, API
+from udata.core import storages
 from udata.auth import admin_permission
 from udata.models import CommunityResource, Dataset, Reuse, User
 
@@ -298,6 +299,12 @@ class UserAPI(API):
         if user == current_user._get_current_object():
             api.abort(403, 'You cannot delete yourself with this API. ' +
                       'Use the "me" API instead.')
+        if user.avatar.filename is not None:
+            storage = storages.avatars
+            storage.delete(user.avatar.filename)
+            storage.delete(user.avatar.original)
+            for key, value in user.avatar.thumbnails.items():
+                storage.delete(value)
         user.mark_as_deleted()
         return '', 204
 
