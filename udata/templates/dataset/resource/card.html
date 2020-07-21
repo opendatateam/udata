@@ -41,6 +41,7 @@
             </ul>
         </div>
         <div class="resource-card-actions btn-toolbar">
+            {{ hook('dataset.resource.card.extra-buttons') }}
             {% if config.PREVIEW_MODE and resource.preview_url %}
             <a class="btn btn-sm btn-primary"
                 {% if config.PREVIEW_MODE == 'iframe' %}
