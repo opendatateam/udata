@@ -119,10 +119,10 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
         return method in ('client_secret_post', 'client_secret_basic')
 
     def check_response_type(self, response_type):
-        return response_type in self.response_types
+        return True
 
     def check_grant_type(self, grant_type):
-        return grant_type in self.grant_types
+        return True
 
     def check_requested_scope(self, scope):
         allowed = set(self.scope)
@@ -288,7 +288,7 @@ class BearerToken(BearerTokenValidator):
 @blueprint.route('/token', methods=['POST'], localize=False, endpoint='token')
 @csrf.exempt
 def access_token():
-    return oauth.create_token_response(request)
+    return oauth.create_token_response()
 
 
 @blueprint.route('/revoke', methods=['POST'], localize=False)
