@@ -93,7 +93,7 @@ setup(
     license='GNU AGPLv3+',
     keywords='udata opendata portal data',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
         'Environment :: Web Environment',
         'Operating System :: OS Independent',
