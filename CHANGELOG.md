@@ -2,6 +2,11 @@
 
 ## Current (in progress)
 
+- CORS are now handled by Flask-CORS instead of Flask-RestPlus[#2485](https://github.com/opendatateam/udata/pull/2485)
+- :warning: Oauth changes [#2510](https://github.com/opendatateam/udata/pull/2510):
+  - Authorization code Grant now support PKCE flow
+  - New command to create an OAuth client
+  - Implicit grant is no longer supported
 - :warning: Deletion workflow changes [#2488](https://github.com/opendatateam/udata/pull/2488):
   - Deleting a resource now triggers the deletion of the corresponding static file
   - Deleting a dataset now triggers the deletion of the corresponding resources (including community resources) and their static files

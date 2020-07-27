@@ -223,9 +223,6 @@ def assert_cors(response):
     '''CORS headers presence assertion'''
     __tracebackhide__ = True
     assert 'Access-Control-Allow-Origin' in response.headers
-    assert 'Access-Control-Allow-Methods' in response.headers
-    assert 'Access-Control-Max-Age' in response.headers
-
 
 def create_test_image():
     file = BytesIO()

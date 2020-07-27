@@ -98,14 +98,14 @@ def organization_dashboard(org):
     return redirect('%s#dashboard' % url_for('organizations.show', org=org), code=301)
 
 
-@blueprint.route('/<org:org>/datasets.csv', cors=True)
+@blueprint.route('/<org:org>/datasets.csv')
 def datasets_csv(org):
     datasets = search.iter(Dataset, organization=str(org.id))
     adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-datasets'.format(org.slug))
 
 
-@blueprint.route('/<org:org>/issues.csv', cors=True)
+@blueprint.route('/<org:org>/issues.csv')
 def issues_csv(org):
     datasets = Dataset.objects.filter(organization=str(org.id))
     issues = [Issue.objects.filter(subject=dataset)
@@ -115,7 +115,7 @@ def issues_csv(org):
     return csv.stream(adapter, '{0}-issues'.format(org.slug))
 
 
-@blueprint.route('/<org:org>/discussions.csv', cors=True)
+@blueprint.route('/<org:org>/discussions.csv')
 def discussions_csv(org):
     datasets = Dataset.objects.filter(organization=str(org.id))
     discussions = [Discussion.objects.filter(subject=dataset)
@@ -125,7 +125,7 @@ def discussions_csv(org):
     return csv.stream(adapter, '{0}-discussions'.format(org.slug))
 
 
-@blueprint.route('/<org:org>/datasets-resources.csv', cors=True)
+@blueprint.route('/<org:org>/datasets-resources.csv')
 def datasets_resources_csv(org):
     datasets = search.iter(Dataset, organization=str(org.id))
     adapter = ResourcesCsvAdapter(datasets)

@@ -4,6 +4,12 @@ from base64 import b64encode
 from urllib.parse import parse_qs
 
 from flask import url_for
+from authlib.common.security import generate_token
+from authlib.common.urls import urlparse, url_decode
+from authlib.oauth2.rfc7636 import (
+    CodeChallenge as _CodeChallenge,
+    create_s256_code_challenge,
+)
 
 from udata.api import api, API
 from udata.api.oauth2 import OAuth2Client, OAuth2Token
@@ -38,9 +44,9 @@ class FakeAPI(API):
 
 
 def basic_header(client):
-        payload = ':'.join((client.client_id, client.secret))
-        token = b64encode(payload.encode('utf-8')).decode('utf8')
-        return {'Authorization': 'Basic {}'.format(token)}
+    payload = ':'.join((client.client_id, client.secret))
+    token = b64encode(payload.encode('utf-8')).decode('utf8')
+    return {'Authorization': 'Basic {}'.format(token)}
 
 
 @pytest.fixture
@@ -230,6 +236,7 @@ class APIAuthTest:
 
         assert_status(response, 302)
         uri, params = response.location.split('?')
+
         assert uri == oauth.default_redirect_uri
 
     def test_authorization_grant_token(self, client, oauth):
@@ -256,6 +263,90 @@ class APIAuthTest:
         assert200(response)
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
+
+    def test_s256_code_challenge_success_client_secret_basic(self, client, oauth):
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            code_challenge=code_challenge,
+            code_challenge_method='S256'
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+        assert 'code=' in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params['code']
+
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': code_verifier
+        }, headers=basic_header(oauth))
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+        token = response.json['access_token']
+
+        response = client.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', token])
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
+
+    def test_s256_code_challenge_success_client_secret_post(self, client, oauth):
+        code_verifier = generate_token(48)
+        code_challenge = create_s256_code_challenge(code_verifier)
+
+        client.login()
+
+        response = client.post(url_for(
+            'oauth.authorize',
+            response_type='code',
+            client_id=oauth.client_id,
+            code_challenge=code_challenge,
+            code_challenge_method='S256'
+        ), {
+            'scope': 'default',
+            'accept': '',
+        })
+        assert 'code=' in response.location
+
+        params = dict(url_decode(urlparse.urlparse(response.location).query))
+        code = params['code']
+
+        response = client.post(url_for('oauth.token'), {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'code_verifier': code_verifier,
+            'client_id': oauth.client_id,
+            'client_secret': oauth.secret
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert 'access_token' in response.json
+
+        token = response.json['access_token']
+
+        response = client.post(url_for('api.fake'), headers={
+            'Authorization': ' '.join(['Bearer', token])
+        })
+
+        assert200(response)
+        assert response.content_type == 'application/json'
+        assert response.json == {'success': True}
 
     def test_authorization_multiple_grant_token(self, client, oauth):
 
@@ -349,8 +440,7 @@ class APIAuthTest:
         assert response.content_type == 'application/json'
         assert 'access_token' in response.json
 
-    @pytest.mark.oauth(secret='')
-    def test_implicit_grant_token(self, client, oauth):
+    def test_invalid_implicit_grant_token(self, client, oauth):
         client.login()
         response = client.post(url_for(
             'oauth.authorize',
@@ -360,8 +450,8 @@ class APIAuthTest:
             'accept': '',
         })
 
-        assert_status(response, 302)
-        assert 'access_token=' in response.location
+        assert_status(response, 400)
+        assert response.json['error'] == 'invalid_grant'
 
     @pytest.mark.oauth(confidential=True)
     def test_refresh_token(self, client, oauth):
@@ -396,7 +486,9 @@ class APIAuthTest:
         }, headers=basic_header(oauth))
 
         assert200(response)
-        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is True
 
     @pytest.mark.parametrize('token_type', ['access_token', 'refresh_token'])
     def test_revoke_token_with_hint(self, client, oauth, token_type):
@@ -411,9 +503,10 @@ class APIAuthTest:
             'token': getattr(token, token_type),
             'token_type_hint': token_type
         }, headers=basic_header(oauth))
-
         assert200(response)
-        assert OAuth2Token.objects(pk=token.pk).first() is None
+
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is True
 
     def test_revoke_token_with_bad_hint(self, client, oauth):
         user = UserFactory()
@@ -423,13 +516,15 @@ class APIAuthTest:
             access_token='access-token',
             refresh_token='refresh-token',
         )
+
         response = client.post(url_for('oauth.revoke_token'), {
             'token': token.access_token,
             'token_type_hint': 'refresh_token',
         }, headers=basic_header(oauth))
+        assert200(response)
 
-        assert400(response)
-        assert OAuth2Token.objects(pk=token.pk).first() == token
+        tok = OAuth2Token.objects(pk=token.pk).first()
+        assert tok.revoked is False
 
     def test_value_error(self, api):
         @ns.route('/exception', endpoint='exception')

@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 blueprint = I18nBlueprint('tags', __name__)
 
 
-@blueprint.route('/tags.csv', endpoint='csv', cors=True)
+@blueprint.route('/tags.csv', endpoint='csv')
 def tags_csv():
     adapter = TagCsvAdapter(Tag.objects.order_by('-total'))
     return csv.stream(adapter, 'tags')
