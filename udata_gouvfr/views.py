@@ -1,4 +1,5 @@
 import frontmatter
+import logging
 import requests
 
 from flask import url_for, redirect, abort, current_app
@@ -15,11 +16,14 @@ from .models import (
     DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR, OPENFIELD16, SPD
 )
 
+log = logging.getLogger(__name__)
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='templates',
                           static_folder='static',
                           static_url_path='/static/gouvfr')
+
+PAGE_CACHE_DURATION = 60 * 5  # in seconds
 
 
 @blueprint.route('/dataset/<dataset>/')
@@ -61,17 +65,33 @@ def get_pages_gh_urls(slug):
     return raw_url, gh_url
 
 
-@cache.cached(300)
+@cache.memoize(PAGE_CACHE_DURATION)
 def get_page_content(slug):
+    '''
+    Get a page content from gh repo (md).
+    This has a double layer of cache:
+    - @cache.cached decorator w/ short lived cache for normal operations
+    - a long terme cache w/o timeout to be able to always render some content
+    '''
+    cache_key = f'pages-content-{slug}'
     raw_url, gh_url = get_pages_gh_urls(slug)
-    # We let the error appear because:
-    # - we dont want to cache false responses
-    # - this is only visible on static page
-    response = requests.get(raw_url, timeout=5)
-    if response.status_code == 404:
-        abort(404)
-    response.raise_for_status()
-    return response.text, gh_url
+    try:
+        response = requests.get(raw_url, timeout=5)
+        # do not cache 404 and forward status code
+        if response.status_code == 404:
+            abort(404)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        log.exception(f'Error while getting {slug} page from gh: {e}')
+        content = cache.get(cache_key)
+    else:
+        content = response.text
+        cache.set(cache_key, content)
+    # no cached version or no content from gh
+    if not content:
+        log.error(f'No content found inc. from cache for page {slug}')
+        abort(503)
+    return content, gh_url
 
 
 def get_object(model, id_or_slug):

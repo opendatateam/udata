@@ -58,6 +58,7 @@ footer_links = [
     nav.Item(_('Terms of use'), 'site.terms'),
     nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
 ]
+
 export_dataset_id = current_app.config.get('EXPORT_CSV_DATASET_ID')
 if export_dataset_id:
     try:
@@ -68,6 +69,9 @@ if export_dataset_id:
         export_url = url_for('datasets.show', dataset=export_dataset,
                              _external=True)
         footer_links.append(nav.Item(_('Data catalog'), None, url=export_url))
+
+footer_links.append(nav.Item('Données clés par sujet', 'gouvfr.show_page',
+                             args={'slug': 'donnees-cles-par-sujet'}))
 
 nav.Bar('gouvfr_footer', footer_links)
 
@@ -174,7 +178,7 @@ def _discourse_request(url):
         return
 
 
-@cache.cached(50)
+@cache.memoize(50)
 def get_discourse_posts():
     base_url = current_app.config.get('DISCOURSE_URL')
     category_id = current_app.config.get('DISCOURSE_CATEGORY_ID')

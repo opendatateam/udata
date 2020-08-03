@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add footer link to pages summary and page cache [#488](https://github.com/etalab/udata-gouvfr/pull/488)
 
 ## 2.1.4 (2020-06-29)
 
