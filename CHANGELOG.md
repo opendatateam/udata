@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Mise à jour de l'URL de Geo SIRENE [#489](https://github.com/etalab/udata-gouvfr/pull/489)
 - Add footer link to pages summary and page cache [#488](https://github.com/etalab/udata-gouvfr/pull/488)
 
 ## 2.1.4 (2020-06-29)
