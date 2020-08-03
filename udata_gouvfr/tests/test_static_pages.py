@@ -4,6 +4,8 @@ import requests
 from flask import url_for
 
 from udata.app import cache
+from udata.core.dataset.factories import DatasetFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata_gouvfr.views import get_pages_gh_urls
 from udata_gouvfr.tests.tests import GouvFrSettings
 
@@ -58,3 +60,31 @@ class StaticPagesTest:
         response = client.get(url_for('gouvfr.show_page', slug='test'))
         assert response.status_code == 200
         assert b'<h1>test</h1>' in response.data
+
+    def test_page_inject_empty_objects(self, client, rmock):
+        raw_url, gh_url = get_pages_gh_urls('test')
+        rmock.get(raw_url, text=f"""---
+datasets:
+reuses:
+---
+#test
+""")
+        response = client.get(url_for('gouvfr.show_page', slug='test'))
+        assert response.status_code == 200
+
+    def test_page_inject_objects(self, client, rmock):
+        dataset = DatasetFactory()
+        reuse = ReuseFactory()
+        raw_url, gh_url = get_pages_gh_urls('test')
+        rmock.get(raw_url, text=f"""---
+datasets:
+  - {dataset.id}
+reuses:
+  - {reuse.id}
+---
+#test
+""")
+        response = client.get(url_for('gouvfr.show_page', slug='test'))
+        assert response.status_code == 200
+        assert str(dataset.title).encode('utf-8') in response.data
+        assert str(reuse.title).encode('utf-8') in response.data

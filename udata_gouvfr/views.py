@@ -109,8 +109,8 @@ def get_object(model, id_or_slug):
 def show_page(slug):
     content, gh_url = get_page_content(slug)
     page = frontmatter.loads(content)
-    reuses = [get_object(Reuse, r) for r in page.get('reuses', [])]
-    datasets = [get_object(Dataset, d) for d in page.get('datasets', [])]
+    reuses = [get_object(Reuse, r) for r in page.get('reuses') or []]
+    datasets = [get_object(Dataset, d) for d in page.get('datasets') or []]
     reuses = [r for r in reuses if r is not None]
     datasets = [d for d in datasets if d is not None]
     return theme.render(
