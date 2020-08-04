@@ -1,11 +1,49 @@
-{% extends "raw.html" %}
+<!DOCTYPE html>
+{%- set bundle = bundle|default('site') -%}
+{%- set bundle_js = '{0}.js'.format(bundle)-%}
+{%- set bundle_css = '{0}.css'.format(bundle)-%}
+<html lang="{{ g.lang_code }}">
+  <head>
+    {% block raw_head %}
+    {% from theme('macros/metadata.html') import metadata with context %}
+    {{ metadata(meta or {}) }}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ manifest('udata', 'common.css') }}">
+    {% if bundle_css is in_manifest %}
+    <link rel="stylesheet" href="{{ manifest('udata', '{0}.css'.format(bundle)) }}">
+    {% endif %}
+    {% block extra_css %}{% endblock %}
+    {% block theme_css %}
+    <link href="{{ manifest('theme', 'theme.css') }}" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
+    {% endblock %}
+    {# ATOM Feeds #}
+    <link href="{{ url_for('datasets.recent_feed') }}"
+        rel="alternate" type="application/atom+xml"
+        title="{{ _('Recent datasets') }}" />
 
-{% block theme_css %}
-{{ super() }}
-<link href="{{ manifest('theme', 'theme.css') }}" rel="stylesheet">
-{% endblock %}
+    <link href="{{ url_for('reuses.recent_feed') }}"
+        rel="alternate" type="application/atom+xml"
+        title="{{ _('Recent reuses') }}" />
 
-{% block raw_head %}
-{{ super() }}
-<link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
-{% endblock %}
+    {% block extra_head %}{% endblock %}
+
+    {{ hook('header.snippets') }}
+
+    {% endblock raw_head %}
+
+  </head>
+
+  <body class="{{body_class}} theme-{{current_theme.variant}}">
+    {% block body %}{% endblock %}
+
+    <script src="{{ manifest('udata', 'common.js') }}"></script>
+    {% if bundle_js is in_manifest %}
+    <script src="{{ manifest('udata', '{0}.js'.format(bundle)) }}"></script>
+    {% endif %}
+    {% block extra_js %}{% endblock %}
+
+    {{ hook('footer.snippets') }}
+
+  </body>
+</html>
