@@ -1,0 +1,6 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('Your account has now been deleted') }}.
+
+{% endblock %}

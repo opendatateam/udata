@@ -1,0 +1,8 @@
+{% macro badge_if_certified(org) %}
+{% if org.public_service %}
+<img src="{{ theme_static('img/certified-stamp.png', external=True) }}" alt="certified" class="certified"
+    v-popover.literal="{{_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)}}"
+    popover-title="{{ _('Certified public service') }}"
+    popover-trigger="hover"/>
+{% endif %}
+{% endmacro %}

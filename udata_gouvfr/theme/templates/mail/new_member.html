@@ -1,0 +1,27 @@
+{% extends theme('mail/base.html') %}
+{% from theme('mail/button.html') import mail_button %}
+
+
+{% block body %}
+<p style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+{{ _('Congratulations, you are now a member of the organization "%(org)s"',
+    org=(
+        '<a href="'|safe
+        + url_for('organizations.show', org=org, _external=True)
+        + '">'|safe
+        + org.name
+        + '</a>'|safe
+    ),
+) }}.</p>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('See the organization page'),
+                url_for('organizations.show', org=org, _external=True)
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endblock %}

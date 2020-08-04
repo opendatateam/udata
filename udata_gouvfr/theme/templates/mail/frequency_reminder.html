@@ -1,0 +1,34 @@
+{% extends theme('mail/base.html') %}
+{% from theme('mail/button.html') import mail_button %}
+
+{% block body %}
+<p style="margin: 0;padding: 0;">
+{{ _('Some of your datasets need to be updated according to the frequency you set:') }}
+</p>
+<br/>
+
+{% for dataset in datasets %}
+    <p style="margin: 0;padding: 0;"><b>
+    {{ _('Dataset "%(dataset_title)s" last update is on %(published_date)s.',
+        dataset_title=dataset.title,
+        published_date=dataset.last_update.strftime('%d/%m/%Y')) }}
+    </b></p>
+    <p style="margin: 0;padding: 0;">
+    {{ _('Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago.',
+        dataset_frequency=dataset.frequency_str,
+        due_update_days=dataset.outdated.days) }}
+    </p>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center">
+                {{ mail_button(
+                    _('Update the dataset and associated resources'),
+                    url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), _external=True)
+                ) }}
+            </td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+{% endfor %}
+{% endblock %}

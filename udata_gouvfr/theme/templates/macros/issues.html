@@ -1,0 +1,5 @@
+{% macro issues_btn(obj, icons=None) %}
+<issues-button subject-id="{{ obj.id }}" subject-class="{{ obj.__class__.__name__ }}"
+    {% if obj.metrics.issues %}count="{{ obj.metrics.issues }}"{% endif %}>
+</issues-button>
+{% endmacro %}

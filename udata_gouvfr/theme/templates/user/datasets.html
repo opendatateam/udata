@@ -1,0 +1,44 @@
+{% extends theme('user/base.html') %}
+
+
+{% block breadcrumb %}
+    {{ super() }}
+    <li class="active">
+        <a href="{{ url_for('users.datasets', user=user) }}">
+        {{ _('Datasets') }}
+        </a>
+    </li>
+{% endblock %}
+
+{% set user_tab = 'datasets' %}
+
+{% block user_content %}
+
+{% if datasets %}
+
+	<div class="row">
+	    <div class="col-sm-12">
+	        <ul class="card-list card-list--columned">
+	            {% for dataset in datasets %}
+	            <li class="col-sm-6">
+	            {% include theme('dataset/card.html') %}
+	            </li>
+	            {% endfor %}
+	        </ul>
+	    </div>
+	</div>
+
+{% else %}
+
+	<div class="row">
+	    <div class="col-xs-12">
+            <p class="text-center lead">
+            {{ _('%(user)s has not yet published any dataset', user=user.fullname) }}
+            </p>
+	    </div>
+	</div>
+
+
+{% endif %}
+
+{% endblock %}

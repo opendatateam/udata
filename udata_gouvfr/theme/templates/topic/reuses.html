@@ -1,0 +1,62 @@
+{% extends theme("topic/display_base.html") %}
+
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% set meta = {
+    'title': _('%(topic)s reuses', topic=topic.name),
+    'description': _("%(site)s %(topic)s related reuses", site=config['SITE_TITLE'], topic=topic.name),
+    'keywords': [_('search'), _('reuses'), _('topic')] + topic.tags,
+    'robots': 'noindex',
+} %}
+
+{% block breadcrumb %}
+    <li>
+        <a href="{{ url_for('topics.display', topic=topic) }}">
+        {{ topic.name }}
+        </a>
+    </li>
+    <li class="active">
+        {{ _('Reuses') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=reuses.page_start,
+            end=reuses.page_end,
+            total=reuses.total) }}</small>
+        {% include "reuse/search-labels.html" %}
+    </li>
+{% endblock %}
+
+{% block toolbar %}
+{{ s.breadcrum_toolbar(reuses, url=url,
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    datasets=(_('Datasets'), 'desc'),
+    followers=(_('Followers'), 'desc')
+) }}
+{% endblock %}
+
+{% block main_content %}
+<section class="default">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-lg-9 smaller">
+
+                <ul class="search-results">
+                    {% for reuse in reuses %}
+                    {% include theme('reuse/search-result.html') %}
+                    {% endfor %}
+                </ul>
+
+                <div class="clearfix"></div>
+                {{ paginator(reuses) }}
+            </div>
+
+            <aside class="col-md-4 col-lg-3">
+            {% include theme('reuse/search-panel.html') %}
+            </aside>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

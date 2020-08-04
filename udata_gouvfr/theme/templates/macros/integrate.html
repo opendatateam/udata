@@ -1,0 +1,10 @@
+{% macro integrate_btn(obj) %}
+{% set basename = obj.__class__.__name__|lower %}
+{% set widget_url = static('oembed.js', _burst=False, _external=True) %}
+<integrate-button title="{{ _('Integrate') }}"
+    object-type="{{ basename }}" object-id="{{ obj.id }}"
+    widget-url="{{ widget_url }}"
+    {% if config.CDN_DOMAIN %}root-url="{{ url_for('site.home_redirect', _external=True) }}"{% endif %}
+    >
+</integrate-button>
+{% endmacro %}

@@ -1,0 +1,240 @@
+{% set nb_displayed_aggregations = 5 %}
+
+{% macro breadcrum_toolbar(result, url=None, exports=None) %}
+{% if kwargs %}
+    {% set to_url = result.query.to_url %}
+    {% if in_url('sort') %}
+        {% if request.args.sort.startswith('-') %}
+            {% set current_sort, current_order = request.args.sort[1:], 'desc' %}
+        {% else %}
+            {% set current_sort, current_order = request.args.sort, 'asc' %}
+        {% endif %}
+        {% if current_sort in kwargs %}
+            {% set label, default_order = kwargs[current_sort] %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+<span class="text">{{ _('Sort by') }}</span>
+<div class="btn-group">
+    <button type="button" class="btn btn-sorter btn-xs dropdown-toggle" data-toggle="dropdown">
+        <span class="fa fa-fw fa-chevron-down hidden-sm"></span>
+        {{ label|truncate(12, True) or _('Relevance') }}
+    </button>
+    <ul class="dropdown-menu">
+        <li>
+            <a href="{{ to_url(url=url, sort=None) }}">
+                ---
+            </a>
+        </li>
+        {% for field, (label, order) in kwargs|dictsort(by='value') %}
+            {% set sort = field if order == 'asc' else '-'+field %}
+            <li>
+                <a href="{{ to_url(url=url, replace=True, sort=sort) }}">
+                    {{ label }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% if current_sort and current_order and default_order %}
+    {% set btn_class = 'btn-default' if current_order == default_order else 'btn-warning' %}
+    <a class="btn {{ btn_class }} btn-xs"
+        href="{{ to_url(url=url, replace=True, sort=current_sort if current_order == 'desc' else '-'+current_sort) }}"
+        title="{{ _('Ascending') if current_order == 'asc' else _('Descending') }}">
+        <span class="fa fa-sort-amount-{{current_order}}"></span>
+    </a>
+{% endif %}
+{% if result.total and exports %}
+    <div class="dropdown pull-right">
+        <button class="btn btn-xs btn-warning export-btn dropdown-toggle" type="button" id="export-btn" data-toggle="dropdown">
+            <span class="fa fa-download"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="export-btn">
+            <li role="presentation" class="dropdown-header">{{ _('Export') }}</li>
+            {% for label, endpoint, type in exports %}
+            <li role="presentation">
+                <a role="menuitem" tabindex="-1" href="{{ to_url(
+                    url_for(endpoint), facets=None, page=None, page_size=None, replace=true)
+                }}">
+                {{label}}
+                <span class="label label-primary">{{type}}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+{% endmacro %}
+
+{% macro filter_label(name, label, icon=None, labelize=None) %}
+{% set values = request.args.getlist(name) or [] %}
+{% for value in values %}
+<span class="tag label label-info" title="{{ label }}">
+    {% if icon %}
+    <span class="{{ icon }} fa-fw"></span>
+    {% endif %}
+    <span>{{ labelize(value) if labelize else value }}</span>
+    <a href="{{ ''|url_del('page', **{name: value}) }}">
+        <span class="close-icon fa fa-remove"></span>
+    </a>
+</span>
+{% endfor %}
+{% endmacro %}
+
+{% macro facet_panel(result, name, label, icon=None, url=None, classes='list-group') %}
+<div class="panel-heading clickable" @click="togglePanel('{{result.class_name}}-{{name}}', $event)">
+    <h3 class="panel-title">
+        <span class="{{icon or 'fa fa-filter'}} fa-fw"></span>
+        {{ label or name }}
+        <span id="chevrons-{{result.class_name}}-{{name}}" class="fa fa-chevron-down pull-right"></span>
+    </h3>
+</div>
+<div id="facet-{{result.class_name}}-{{name}}" class="{{ classes }} collapse in">
+    {{ caller() }}
+</div>
+{% endmacro %}
+
+{% macro term_item(result, facet, url, term, count, selected) %}
+{% if selected %}
+<a href="{{ url|url_del('page', **{facet: term}) }}"
+    class="list-group-item active">
+    <span class="fa fa-times pull-right"></span>
+    {{ result.query.facets[facet].labelize(term) }}
+</a>
+{% else %}
+<a href="{{ result.query.to_url(url, **{facet: term}) }}"
+    class="list-group-item">
+    <span class="badge">{{ count }}</span>
+    {{ result.query.facets[facet].labelize(term) }}
+</a>
+{% endif %}
+{% endmacro %}
+
+{% macro terms_facet(result, name, label, icon, url=None) %}
+{% set terms = result.facets[name] %}
+{% if terms|length > 1 %}
+    {% call facet_panel(result, name, label, icon, url) %}
+    {% for term, count, selected in terms[:nb_displayed_aggregations] %}
+        {{ term_item(result, name, url, term, count, selected) }}
+    {% endfor %}
+    {% if terms|length > nb_displayed_aggregations %}
+        <button class="list-group-item more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
+            {{ _('More results…') }}
+        </button>
+        <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
+        {% for term, count, selected in terms[nb_displayed_aggregations:] %}
+            {{ term_item(result, name, url, term, count, selected) }}
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endcall %}
+{% endif %}
+{% endmacro %}
+
+{% macro model_term_item(result, facet, url, obj, count, selected) %}
+{% if selected %}
+<a href="{{ url|url_del('page', **{facet: obj.id|string}) }}"
+    class="list-group-item active">
+    <span class="fa fa-times pull-right"></span>
+    {{ result.query.facets[facet].labelize(obj) }}
+</a>
+{% else %}
+<a href="{{ result.query.to_url(url, **{facet:  obj.id|string}) }}"
+    class="list-group-item">
+    <span class="badge">{{ count }}</span>
+    {{ result.query.facets[facet].labelize(obj) }}
+</a>
+{% endif %}
+{% endmacro %}
+
+
+{% macro model_terms_facet(result, name, label, icon, url=None) %}
+{% set objects = result.facets[name] %}
+{% if objects|length > 1 %}
+    {% call facet_panel(result, name, label, icon, url) %}
+    {% for obj, count, selected in objects[:nb_displayed_aggregations] %}
+        {{ model_term_item(result, name, url, obj, count, selected) }}
+    {% endfor %}
+    {% if objects|length > nb_displayed_aggregations %}
+        <button class="list-group-item more" @click="expandPanel('{{result.class_name}}-{{name}}', $event)">
+            {{ _('More results…') }}
+        </button>
+        <div id="facet-{{result.class_name}}-{{name}}-more" class="list-group collapse list-group-more">
+        {% for obj, count, selected in objects[nb_displayed_aggregations:] %}
+            {{ model_term_item(result, name, url, obj, count, selected) }}
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endcall %}
+{% endif %}
+{% endmacro %}
+
+{% macro range_facet(result, name, label, icon, url=None) %}
+{% set ranges = result.facets[name] %}
+{% if ranges|length > 1 %}
+    {% call facet_panel(result, name, label, icon, url) %}
+    {% for key, count, selected in ranges %}
+        <a href="{{ result.query.to_url(url, **{name: key}) }}"
+            class="list-group-item">
+            <span class="badge">{{ count }}</span>
+            {{ result.query.facets[name].labelize(key) }}
+        </a>
+    {% endfor %}
+    {% endcall %}
+{% endif %}
+{% endmacro %}
+
+{% macro temporal_coverage_facet(result, name, label, icon, url=None) %}
+{% set coverage = result.facets[name] %}
+{% if coverage and coverage.days > 2 %}
+    {% call facet_panel(result, name, label, icon, url, classes='panel-body temporal-coverage') %}
+        <temporal-coverage-facet name="{{ name }}"
+            min="{{ coverage.min.isoformat() }}" max="{{ coverage.max.isoformat() }}">
+        </temporal-coverage-facet>
+    {% endcall %}
+{% endif %}
+{% endmacro %}
+
+{% macro panel_header(result, csv_endpoint=None) %}
+<div class="panel-heading">
+    {% if result.total %}
+        {{ _('Results %(start)s to %(end)s on %(total)s found',
+            start=result.page_start,
+            end=result.page_end,
+            total=result.total,
+        ) }}
+        {% if csv_endpoint %}
+        <a class="btn btn-xs btn-info pull-right"
+            href="{{ result.query.to_url(
+                url_for(csv_endpoint), facets=None, page=None, page_size=None, replace=true)
+            }}">
+            <span class="fa fa-download"></span>
+            CSV
+        </a>
+        {% endif %}
+    {% else %}
+        {{ _('No result found') }}
+    {% endif %}
+</div>
+{% endmacro %}
+
+
+{# Display the site search component with raw html fallback #}
+{% set default_action = url_for('search.index') %}
+{% set default_placeholder = _('Search') %}
+{% macro site_search(action=default_action, placeholder=default_placeholder, territory=None, size=None, class=None) -%}
+<site-search v-ref:search action="{{ action }}" placeholder="{{ placeholder }}"
+    {% if class %}class="{{ class }}"{% endif %}
+    {% if size %}size="{{ size }}"{% endif %}
+    {% if territory %}territory-id="{{ territory.id }}"{% endif %}>
+    <form class="site-search{% if class %} {{ class }}{% endif %}" action="{{ action }}">
+        <div class="input-group {% if size %}input-group-{{ size }}{% endif%}">
+            <div class="input-group-btn">
+                <button class="btn" type="submit"><i class="fa fa-search"></i></button>
+            </div>
+            <label for="search" class="hidden">{{ placeholder }}</label>
+            <input id="search" name="q" type="search" class="form-control" placeholder="{{ placeholder }}" />
+        </div>
+    </form>
+</site-search>
+{%- endmacro %}

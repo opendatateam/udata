@@ -1,0 +1,58 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% set toolbar_class='search-toolbar' %}
+
+{% set meta = {
+    'title': _('Organizations'),
+    'description': _("%(site)s organization search", site=config['SITE_TITLE']),
+    'keywords': [_('search'), _('organizations')],
+    'robots': 'noindex',
+} %}
+
+{% set bundle = 'search' %}
+
+{% block breadcrumb %}
+    <li class="active">
+        {{ _('Organizations') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=organizations.page_start,
+            end=organizations.page_end,
+            total=organizations.total) }}</small>
+        {% include "organization/search-labels.html" %}
+    </li>
+{% endblock %}
+
+{# // 'site.organizations_csv', url=url, #}
+{% block toolbar %}
+{{ s.breadcrum_toolbar(organizations, url=url,
+    exports=(
+        (_('Organizations'), 'site.organizations_csv', 'csv'),
+    ),
+    name=(_('Name'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    datasets=(_('Datasets'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Followers'), 'desc')
+) }}
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-md-8 col-lg-9 smaller">
+
+        <ul class="search-results">
+        {% for organization in organizations %}
+        {% include theme('organization/search-result.html') %}
+        {% endfor %}
+        </ul>
+        {{ paginator(organizations) }}
+    </div>
+
+    <aside class="col-md-4 col-lg-3">
+        {% include theme('organization/search-panel.html') %}
+    </aside>
+</div>
+{% endblock %}

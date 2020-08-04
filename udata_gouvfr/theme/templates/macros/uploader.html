@@ -1,0 +1,32 @@
+{% macro uploader(endpoint) %}
+<div class="uploader" data-endpoint="{{ endpoint }}">
+    <div class="row drop-pane">
+        <div class="text-center col-xs-12">
+            <span class="fa fa-download fa-4x dropicon"></span>
+        </div>
+        <div class="text-center col-xs-12 lead">
+            <p>{{ _("Drag a file here") }}</p>
+        </div>
+        <div class="text-center col-xs-12">
+            <p>{{ _( "or") }}</p>
+        </div>
+        <div class="text-center col-xs-12">
+            <span class="btn btn-default btn-file">
+            {{ _("Select a file from your computer") }}
+                <input type="file"/>
+            </span>
+        </div>
+    </div>
+
+    <div class="row progress-pane hide">
+        <div class="col-xs-12">
+            <div class="progress">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,11 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('%(user)s followed your organization %(org)s',
+    user=follow.follower.fullname,
+    org=follow.following.name,
+) }}.
+
+{{ _('See %(user)s profile', user=follow.follower.fullname) }}:
+{{ url_for('users.show', user=follow.follower, _external=True) }}
+{% endblock %}

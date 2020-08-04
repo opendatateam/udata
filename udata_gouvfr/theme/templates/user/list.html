@@ -1,0 +1,59 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% set toolbar_class='search-toolbar' %}
+
+{% set meta = {
+    'title': _('Users'),
+    'description': _("%(site)s user search", site=config['SITE_TITLE']),
+    'keywords': [_('search'), _('users')],
+    'robots': 'noindex,nofollow',
+} %}
+
+{% set bundle = 'search' %}
+
+{% block breadcrumb %}
+    <li class="active">
+        {{ _('Users') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=users.page_start,
+            end=users.page_end,
+            total=users.total) }}</small>
+        {% include "user/search-labels.html" %}
+    </li>
+{% endblock %}
+
+{# // 'site.reuses_csv', url=url, #}
+{% block toolbar %}
+{{ s.breadcrum_toolbar(users, url=url,
+    title=(_('Last name'), 'asc'),
+    datasets=(_('Datasets'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Followers'), 'desc'),
+    last_name=(_('Name'), 'desc')
+) }}
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-lg-8">
+
+        <ul class="search-results row">
+            {% for user in users %}
+            <li class="col-xs-12">
+            {% include theme('user/card.html') %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <div class="clearfix"></div>
+        {{ paginator(users) }}
+    </div>
+
+    <aside class="col-lg-4">
+    {% include theme('user/search-panel.html') %}
+    </aside>
+
+</div>
+{% endblock %}

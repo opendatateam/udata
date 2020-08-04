@@ -1,0 +1,75 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% set toolbar_class='search-toolbar' %}
+
+{% set meta = {
+    'title': _('Datasets'),
+    'description': _("%(site)s dataset search", site=config['SITE_TITLE']),
+    'keywords': [_('search'), _('datasets')],
+    'robots': 'noindex',
+} %}
+
+{% set bundle = 'search' %}
+
+{% block breadcrumb %}
+    <li class="active">
+
+        {{ _('Datasets') }}
+
+        {% if datasets.total > 0 %}
+            <small>{{ _('%(start)s to %(end)s on %(total)s',
+                start=datasets.page_start,
+                end=datasets.page_end,
+                total=datasets.total) }}</small>
+		{% endif %}
+
+        {% include "dataset/search-labels.html" %}
+    </li>
+{% endblock %}
+
+{% block toolbar %}
+{{ s.breadcrum_toolbar(datasets, url=url,
+    exports=(
+        (_('Datasets'), 'site.datasets_csv', 'csv'),
+        (_('Resources'), 'site.resources_csv', 'csv'),
+    ),
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Followers'), 'desc')
+) }}
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+
+    {% if datasets %}
+        <div class="col-md-8 col-lg-9 smaller">
+
+            <ul class="search-results">
+                {% for dataset in datasets %}
+                {% include theme('dataset/search-result.html') %}
+                {% endfor %}
+            </ul>
+
+            <div class="clearfix"></div>
+
+            {{ paginator(datasets) }}
+
+    </div>
+
+    <aside class="col-md-4 col-lg-3">
+    {% include theme('dataset/search-panel.html') %}
+    </aside>
+    {% else %}
+        <p class="text-center">
+            <strong>
+                {{ _('No results found, try to be less specific.') }}
+            </strong>
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

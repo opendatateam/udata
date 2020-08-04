@@ -1,0 +1,37 @@
+{% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
+<a class="card organization-card" title="{{organization.name}}"
+     href="{{ url_for('organizations.show', org=organization, _external=True) }}">
+    <div class="card-logo">
+        <img alt=""
+            src="{{ organization.logo(60, external=True)|placeholder('organization', external=True) }}"
+            width="60" height="60">
+    </div>
+    {{ badge_if_certified(organization) }}
+    <div class="card-body">
+        <h4>{{ organization.name }}</h4>
+        <div class="clamp-3">{{ organization.description|mdstrip(180) }}</div>
+    </div>
+
+    <footer class="card-footer">
+        <ul>
+            {% if organization.metrics.datasets %}
+            <li v-tooltip title="{{ _('Number of datasets') }}">
+                <span class="{{ ficon('fa-cubes') }} fa-fw"></span>
+                {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
+            </li>
+            {% endif %}
+            {% if organization.metrics.reuses %}
+            <li v-tooltip title="{{ _('Number of reuses') }}">
+                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
+                {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
+            </li>
+            {% endif %}
+            <li v-tooltip title="{{ _('Stars') }}">
+                <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                {{ organization.metrics.followers or 0 }}
+            </li>
+        </ul>
+    </footer>
+</a>
+{% endcache %}

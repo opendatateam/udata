@@ -1,0 +1,16 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('%(user)s commented an discussion on your %(type)s %(subject)s',
+    type=discussion.subject.verbose_name,
+    user=message.posted_by.fullname,
+    subject=discussion.subject|string
+) }}.
+
+
+{{ _('Title') }}: {{ discussion.title }}
+
+
+{{ _('You can see the discussion on this page:') }}
+{{ discussion.external_url }}
+{% endblock %}

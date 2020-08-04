@@ -1,0 +1,47 @@
+<modal v-ref:publish-action-modal :visible="false">
+    <div class="modal-body">
+        <div class="list-group actions-list">
+            <a class="list-group-item" href="{{ url_for('admin.index', path='dataset/new/') }}">
+                <div class="action-icon">
+                    <span class="{{ ficon('fa-cubes') }} fa-3x"></span>
+                </div>
+                <h4 class="list-group-item-heading">
+                    {# TRANSLATORS: This is a call to action. #}
+                    {{ _('Publish a dataset') }}
+                </h4>
+                 <p class="list-group-item-text">
+                {# TRANSLATORS: This is a call to action details. #}
+                {{ _('Contribute and add a new dataset to this site catalog.') }}
+                </p>
+            </a>
+
+            <a class="list-group-item" href="{{ url_for('admin.index', path='reuse/new/') }}">
+                <div class="action-icon">
+                    <span class="{{ ficon('fa-recycle') }} fa-3x"></span>
+                </div>
+                <h4 class="list-group-item-heading">
+                    {# TRANSLATORS: This is a call to action. #}
+                    {{ _('Publish a reuse') }}
+                </h4>
+                <p class="list-group-item-text">
+                {# TRANSLATORS: This is a call to action details. #}
+                {{ _('Contribute and add a new reuse to this site catalog.') }}
+                </p>
+            </a>
+
+            <a class="list-group-item" href="{{ url_for('admin.index', path='organization/new/') }}">
+                <div class="action-icon">
+                    <span class="{{ ficon('fa-building-o') }} fa-3x"></span>
+                </div>
+                <h4 class="list-group-item-heading">
+                    {# TRANSLATORS: This is a call to action. #}
+                    {{ _('Create or find your organization') }}
+                </h4>
+                <p class="list-group-item-text">
+                {# TRANSLATORS: This is a call to action details. #}
+                {{ _("You can create a new organization or find yours.") }}
+                </p>
+            </a>
+        </div>
+    </div>
+</modal>

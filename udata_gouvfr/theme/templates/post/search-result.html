@@ -1,0 +1,26 @@
+{% cache cache_duration, 'post-search-result', post.id|string, g.lang_code %}
+<li class="search-result post-result">
+    <a href="{{ post.display_url }}" title="{{ post.name }}">
+        <div class="result-logo pull-left">
+            <img alt="{{ post.name }}"
+                src="{{ post.image(70)|placeholder('post') }}"
+                width="70" height="70">
+        </div>
+        <div class="result-body">
+            <h4 class="result-title ellipsis">{{ post.name }}</h4>
+            <div class="result-description clamp-2">
+            {{ post.headline|mdstrip(300) }}
+            </div>
+        </div>
+        <ul class="list-inline result-infos">
+            <li>
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
+                    title="{{ _('Posted on') }}">
+                    <span class="fa fa-calendar fa-fw"></span>
+                    {{ post.published|dateformat(format='long') }}
+                </a>
+            </li>
+        </ul>
+    </a>
+</li>
+{% endcache %}

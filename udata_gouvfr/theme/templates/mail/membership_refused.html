@@ -1,0 +1,20 @@
+{% extends theme('mail/base.html') %}
+{% from theme('mail/button.html') import mail_button %}
+
+
+{% block body %}
+<p style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+{{ _('Your membership for the organization "%(org)s" has been refused',
+    org=(
+        '<a href="'|safe
+        + url_for('organizations.show', org=org, _external=True)
+        + '">'|safe
+        + org.name
+        + '</a>'|safe
+    )
+) }}.</p>
+
+<br/>
+<p style="margin: 0;padding: 0;"><b>{{ _('Refusal reason') }}:</b></p>
+<p style="margin: 0;padding: 0;">{{ request.refusal_comment }}</p>
+{% endblock %}

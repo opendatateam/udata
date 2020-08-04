@@ -1,0 +1,35 @@
+{% extends theme('user/base.html') %}
+
+{% set user_tab = 'followers' %}
+
+{% block breadcrumb %}
+    {{ super() }}
+    <li class="active">{{ _('Followers') }}</li>
+{% endblock %}
+
+{% block user_content %}
+{% if followers|length > 0 %}
+    <h3>{{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}</h3>
+    <div class="row">
+        <ul class="card-list card-list--columned">
+            {% for follow in followers %}
+            <li class="col-md-4">
+                {% include theme('follow/follower-card.html') %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+{% else %}
+
+<div class="row">
+    <div class="col-xs-12">
+
+    </div>
+</div>
+<p class="text-center lead">
+{{ _('%(user)s has no follower', user=user.fullname) }}
+</p>
+
+{% endif %}
+{% endblock %}

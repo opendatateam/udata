@@ -1,0 +1,39 @@
+{% cache cache_duration, 'territory-search-result', territory.id, g.lang_code %}
+{% set logo=territory.logo_url() or theme_static('img/placeholder_territory_medium.png') %}
+<li class="search-result territory-result">
+    <a href="{{ territory.url }}" title="{{ territory.name }}">
+        <div class="result-logo pull-left">
+            <img alt="{{ territory.name }}"
+                src="{{ logo }}"
+                width="64" height="70">
+        </div>
+        <div class="result-body">
+            <h4 class="result-title ellipsis">{{ territory.name }}</h4>
+            <div class="result-description clamp-2">
+                {{ _('INSEE code:') }} {{ territory.code }}<br/>
+                {% if territory.postal_string %}
+                    {{ _('Postal code:') }} {{ territory.postal_string }}
+                {% endif %}
+            </div>
+        </div>
+        <ul class="list-inline result-infos">
+            <li>
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
+                    title="{{ _('Administrative level') }}">
+                    <span class="fa fa-bullseye fa-fw"></span>
+                    {{ territory.level_i18n_name }}
+                </a>
+            </li>
+            {% if territory.population %}
+            <li>
+                <a class="btn btn-xs" v-tooltip tooltip-placement="top"
+                    title="{{ _('Population') }}">
+                    <span class="fa fa-users fa-fw"></span>
+                    {{ territory.population|format_number }}
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </a>
+</li>
+{% endcache %}

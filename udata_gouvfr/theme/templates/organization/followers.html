@@ -1,0 +1,35 @@
+{% extends theme('organization/display_base.html') %}
+{% from theme('macros/follow.html') import follow_btn with context %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+    <li><a href="{{ url_for('organizations.show', org=org) }}">{{ org.name|truncate(120) }}</a></li>
+    <li class="active">{{ _('Followers') }}</li>
+{% endblock %}
+
+{% block toolbar %}
+{% if can_edit %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}" class="btn btn-success">
+        <span class="fa fa-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+{% endif %}
+<div class="btn-group btn-group-xs">
+    {{ follow_btn(org) }}
+</div>
+{% endblock %}
+
+{% block org_content %}
+<h3>
+    {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
+</h3>
+<div class="row">
+    {% for follow in followers %}
+    <div class="col-md-4">
+      {% include theme('follow/follower-card.html') %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

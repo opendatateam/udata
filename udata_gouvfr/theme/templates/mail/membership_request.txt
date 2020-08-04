@@ -1,0 +1,12 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('As an administrator of "%(org)s" you are being informed than a new membership request from %(user)s is pending for validation',
+    user=request.user.fullname,
+    org=org.name
+) }}.
+
+
+{{ _('You can go on your organization backoffice to accept or refuse the request') }}:
+{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id), _anchor='membership-requests', _external=True) }}
+{% endblock %}

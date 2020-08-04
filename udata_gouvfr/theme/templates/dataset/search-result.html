@@ -1,0 +1,77 @@
+{% cache cache_duration, 'dataset-search-result', dataset.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
+<li class="search-result dataset-result">
+    <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}">
+        {% if dataset.organization %}
+        <div class="result-logo pull-left">
+            <img alt="{{ dataset.organization.title }}"
+                src="{{ dataset.organization.logo(70)|placeholder('organization') }}"
+                width="70" height="70">
+        </div>
+        {{ badge_if_certified(dataset.organization) }}
+        {% elif dataset.owner %}
+        <div class="result-logo pull-left">
+            <img alt="{{ dataset.owner.fullname }}"
+                src="{{ dataset.owner.avatar(70)|placeholder('user') }}"
+                width="70" height="70">
+        </div>
+        {% else %}
+        <div class="result-logo pull-left">
+            <img src="{{ ''|placeholder('organization') }}" alt="">
+        </div>
+        {% endif %}
+        <div class="result-body">
+            <h4 class="result-title ellipsis">{{ dataset.full_title }}</h4>
+
+            <div class="result-description clamp-2">
+                {{ dataset.description|mdstrip(300) }}
+            </div>
+        </div>
+
+        <ul class="list-inline result-infos">
+
+            {# Temporal coverage #}
+            {% if dataset.temporal_coverage %}
+            <li title="{{ _('Temporal coverage') }}">
+                <span class="fa fa-calendar fa-fw"></span>
+                {{ dataset.temporal_coverage|daterange }}
+            </li>
+            {% endif %}
+
+            {# Periodicity #}
+            {% if dataset.frequency %}
+            <li title="{{ _('Frequency') }}">
+                <span class="fa fa-clock-o fa-fw"></span>
+                {{ dataset.frequency_label }}
+            </li>
+            {% endif %}
+
+            {# Spatial coverage #}
+            {% if dataset.spatial.zones %}
+            <li title="{{ _('Spatial coverage') }}">
+                    <span class="fa fa-map-marker fa-fw"></span>
+                    {{ dataset.spatial.top_label }}
+            </li>
+            {% endif %}
+
+            {% if dataset.spatial.granularity %}
+            <li title="{{ _('Territorial coverage granularity') }}">
+                <span class="fa fa-bullseye fa-fw"></span>
+                {{ dataset.spatial.granularity_label }}
+            </li>
+            {% endif %}
+
+            <li title="{{ _('Reuse number') }}">
+                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
+                {{ dataset.metrics.reuses or 0 }}
+            </li>
+
+            <li title="{{ _('Number of followers') }}">
+                <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                {{ dataset.metrics.followers or 0 }}
+            </li>
+
+        </ul>
+    </a>
+</li>
+{% endcache %}

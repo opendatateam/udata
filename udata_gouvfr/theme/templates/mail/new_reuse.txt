@@ -1,0 +1,11 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('A new reuse "%(reuse)s" of your dataset "%(dataset)s" as been published',
+    reuse=reuse.title, dataset=dataset.name
+) }}.
+{{ _('You can see this new reuse on its own page:') }}
+{{ url_for('reuses.show', reuse=reuse.id, _external=True) }}
+{{ _('Or in the reuse list on you dataset page:')}}
+{{ url_for('datasets.show', dataset=dataset.id, _external=True) }}#reuse-{{reuse.id}}
+{% endblock %}

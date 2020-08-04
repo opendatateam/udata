@@ -1,0 +1,200 @@
+{% extends theme("organization/display_base.html") %}
+
+{% set is_hidden = (reuses.total or 0) + (datasets.total or 0) <= 0 %}
+{% set meta = {
+    'title': org.name,
+    'description': org.description|mdstrip(60)|forceescape,
+    'image': org.logo(external=True),
+    'keywords': [_('organization')],
+    'robots': 'noindex, nofollow' if is_hidden else '',
+} %}
+
+
+{% set bundle = 'organization' %}
+
+{% block breadcrumb %}
+    {{ super() }}
+    <li class="active">{{ org.name }}</li>
+{% endblock %}
+
+{% block main_content %}
+    <div v-el:modal></div>
+    <h1>
+        {{ org.name }}
+        {% if can_edit %}
+        <small>
+            <a class="btn btn-xs btn-default"
+                href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">
+                <span class="fa fa-edit" ></span>
+                {{ _('Edit') }}
+            </a>
+        </small>
+        {% endif %}
+    </h1>
+
+    <div class="row">
+        <p class="col-md-12">
+            {% if org.deleted %}
+            <small class="deleted" popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
+                v-popover.literal="{{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}"
+                >{{ _('Deleted') }}</small>
+            {% endif %}
+        </p>
+    </div>
+    <div>{{ org.description|markdown }}</div>
+{% endblock %}
+
+{% block secondary_content %}
+{# Datasets and reuses tabs #}
+{% set dataset_tabs = (
+    ('datasets', ngettext('%(num)d dataset', '%(num)d datasets', datasets.total or 0), datasets, {'organization': org.id|string}),
+    ('private-datasets', ngettext('%(num)d private dataset', '%(num)d private datasets', private_datasets|length), private_datasets, {}),
+) %}
+{% set reuse_tabs = (
+    ('reuses', ngettext('%(num)d reuse', '%(num)d reuses', reuses.total or 0), reuses, {'organization': org.id|string}),
+    ('private-reuses', ngettext('%(num)d private reuse', '%(num)d private reuses', private_reuses|length), private_reuses, {}),
+) %}
+{% set user_tabs = (
+    ('members', _('Members'), org.members, {}),
+    ('followers', _('Followers'), followers, {}),
+) %}
+
+<tabset :active.sync="currentTab" v-ref:tabs nav-style="pills">
+    {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
+    {% if datasets %}
+    <tab id="{{tab_id}}" header="{{label}}">
+        <ul class="card-list card-list--columned">
+
+            {% for dataset in datasets %}
+            <li class="col-md-4 col-sm-6 col-xs-12">
+                {% include theme('dataset/card.html') %}
+            </li>
+            {% endfor %}
+
+        </ul>
+        {% if datasets.total %}
+        <div class="clearfix"></div>
+        <div class="text-center card-list-footer">
+            {% if datasets.total > datasets|length %}
+            <a class="btn btn-default"
+                href="{{ url_for('datasets.list', sort='-created', **kwargs) }}">
+                <span class="fa fa-fw fa-list"></span>
+                {{ _('See the %(nb)d datasets', nb=datasets.total) }}
+            </a>
+            {% endif %}
+            <div class="dropdown">
+                <button id="{{tab_id}}-download-btn" data-toggle="dropdown"
+                    class="btn btn-default dropdown-toggle" type="button">
+                    <span class="fa fa-file-o"></span>
+                    {{ _('Download as CSV') }}
+                </button>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="{{tab_id}}-download-btn">
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.{0}_csv'.format(tab_id.replace('-', '_')), org=org) }}">
+                        {{ _('Datasets list') }}
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.{0}_resources_csv'.format(tab_id.replace('-', '_')), org=org) }}">
+                        {{ _('Resources list') }}
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.issues_csv', org=org) }}">
+                        {{ _('Issues list') }}
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a role="menuitem" tabindex="-1" href="{{ url_for('organizations.discussions_csv', org=org) }}">
+                        {{ _('Discussions list') }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </tab>
+    {% endif %}
+    {% endfor %}
+
+    {% for tab_id, label, reuses, kwargs in reuse_tabs  %}
+    {% if reuses %}
+    <tab id="{{tab_id}}" header="{{label}}">
+        <ul class="card-list card-list--columned">
+
+            {% for reuse in reuses %}
+            <li class="col-md-4 col-sm-6 col-xs-12">
+                {% include theme('reuse/card.html') %}
+            </li>
+            {% endfor %}
+
+        </ul>
+        {% if reuses.total and reuses.total > reuses|length %}
+        <div class="clearfix"></div>
+        <p class="text-center">
+            <a class="btn btn-default"
+                href="{{ url_for('reuses.list', sort='-created', **kwargs) }}">
+                <span class="fa fa-fw fa-list" ></span>
+                {{ _('See the %(nb)d reuses', nb=reuses.total) }}
+            </a>
+        </p>
+        {% endif %}
+    </tab>
+    {% endif %}
+    {% endfor %}
+
+    {% if org.members %}
+    <tab id="members" header="{{ ngettext('%(num)d member', '%(num)d members', org.members | length) }}">
+        <div class="card-list card-list--columned">
+            {% for member in org.members %}
+            <div class="col-md-4 col-sm-6 col-xs-12">
+                {% include theme('organization/member-card.html') %}
+            </div>
+            {% endfor %}
+        </div>
+    </tab>
+    {% endif %}
+
+    {% if followers %}
+    <tab id="followers" header="{{ ngettext('%(num)d follower', '%(num)d followers', followers | length) }}">
+        <div class="card-list card-list--columned">
+            {% for follow in followers %}
+            <div class="col-md-4 col-sm-6 col-xs-12" {% if loop.index > 15 %}:class="{hidden: !followersVisible}"{% endif %}">
+                {% include theme('follow/follower-card.html') %}
+            </div>
+            {% endfor %}
+            {% if followers|length > 15 %}
+                <div class="clearfix"></div>
+                <p class="text-center">
+                    <a class="btn btn-default display-followers"
+                        href="#" @click="showFollowers" v-show="!followersVisible">
+                        <span class="fa fa-fw fa-list" ></span>
+                        {{ _('Display all followers') }}
+                    </a>
+                </p>
+            {% endif %}
+        </div>
+    </tab>
+    {% endif %}
+</tabset>
+{# end tabs #}
+{% endblock %}
+
+{% block after_content %}
+ <section class="community">
+     <header>
+         <div class="container">
+             <div class="cover-communaute"></div>
+             <div class="page-header">
+                 <h2>{{ _('Community activity') }}</h2>
+             </div>
+         </div>
+     </header>
+     <div class="container">
+         <activity-timeline class="col-sm-12" organization-id="{{ org.id }}">
+             {# Load spinner until JS is ready #}
+             <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+         </activity-timeline>
+     </div>
+ </section>
+ {% endblock %}

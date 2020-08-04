@@ -1,0 +1,10 @@
+{% extends theme("errors/base.html") %}
+
+{% set title = _('Internal server error') %}
+
+{% block details %}
+<p class="lead">{{ _("The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.") }}</p>
+{% if g.sentry_event_id %}
+<p>{{ _('The error identifier is {id}').format(id=g.sentry_event_id) }}</p>
+{% endif %}
+{% endblock %}
