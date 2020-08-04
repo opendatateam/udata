@@ -167,6 +167,8 @@ def init_app(app):
     themes.init_themes(app, app_identifier='udata', loaders=[themes_loader])
 
     # Load all theme assets
+    if not app.config['THEME']:
+        raise Exception('You must install and set a theme using the THEME config var.')
     theme = app.theme_manager.themes[app.config['THEME']]
     prefix = '/'.join(('_themes', theme.identifier))
     app.config['STATIC_DIRS'].append((prefix, theme.static_path))

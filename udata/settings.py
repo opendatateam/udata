@@ -127,7 +127,7 @@ class Defaults(object):
     SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
 
     PLUGINS = []
-    THEME = 'default'
+    THEME = None
 
     STATIC_DIRS = []
 
