@@ -14,18 +14,6 @@ const public_path = '/static/';
 module.exports = {
     entry: {
         admin: './js/admin.js',
-        dataset: './js/front/dataset',
-        territory: './js/front/territory',
-        reuse: './js/front/reuse',
-        site: './js/front/site.js',
-        home: './js/front/home.js',
-        search: './js/front/search.js',
-        dashboard: './js/front/dashboard.js',
-        organization: './js/front/organization',
-        covermap: './js/front/covermap',
-        topic: './js/front/topic',
-        post: './js/front/post',
-        user: './js/front/user',
     },
     output: {
         path: path.join(__dirname, 'udata', 'static'),
