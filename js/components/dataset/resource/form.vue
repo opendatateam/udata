@@ -179,8 +179,13 @@ export default {
             default: false,
         },
     },
+    created() {
+        // Refresh list of schemas once fetched from the API
+        schemas.$on('updated', () => {this.hasSchemas = schemas.has_data;});
+    },
     data() {
         return {
+            hasSchemas: schemas.has_data,
             hasChosenRemoteFile: false,
             generic_fields: [{
                     id: 'title',
@@ -247,7 +252,7 @@ export default {
             return this.generic_fields.concat(this.schema_field).concat(this.file_fields);
         },
         schema_field() {
-            if (schemas.has_data) {
+            if (this.hasSchemas) {
                 const values = [{id: '', label: ''}].concat(schemas.data);
                 return [{
                     id: 'schema',
