@@ -1,0 +1,204 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% set body_class = 'multisearch' %}
+{% set toolbar_class = '' %}
+
+{% set meta = {
+    'title': _('Search'),
+    'description': _("%(site)s search", site=config['SITE_TITLE']),
+    'keywords': [_('search')],
+    'robots': 'noindex',
+} %}
+
+{% set bundle = 'search' %}
+
+{% set datasets_search_url = url_for('datasets.list') %}
+{% set reuses_search_url = url_for('reuses.list') %}
+{% set organizations_search_url = url_for('organizations.list') %}
+{% set breadcrum_class='search-bar'%}
+
+{% block breadcrumb_bar %}
+<!-- Nav tabs -->
+<ul class="nav nav-tabs search-tabs nav-tabs--search-tabs">
+    {% if datasets %}
+        <li class="active" data-tab="datasets">
+            <a href @click.prevent="setTab('datasets')">
+                {{ ngettext('%(num)d dataset', '%(num)d datasets',datasets.total)}}
+            </a>
+        </li>
+    {% endif %}
+    {% if reuses %}
+        <li{% if not datasets %} class="active"{% endif %} data-tab="reuses">
+            <a href @click.prevent="setTab('reuses')">
+                {{ ngettext('%(num)d reuse', '%(num)d reuses', reuses.total) }}
+            </a>
+        </li>
+    {% endif %}
+    {% if organizations %}
+        <li{% if not datasets and not reuses %} class="active"{% endif %} data-tab="organizations">
+            <a href @click.prevent="setTab('organizations')">
+                {{ ngettext('%(num)d organization', '%(num)d organizations', organizations.total) }}
+            </a>
+        </li>
+    {% endif %}
+    {% if territories %}
+        <li{% if not datasets and not reuses and not organizations %} class="active"{% endif %} data-tab="territories">
+            {% set total=territories|length %}
+            <a href{% if total==1 %}="{{ territories.0.url }}"{% else %}  @click.prevent="setTab('territories')"{% endif %}>
+                {{ ngettext('Territory: %(name)s', '%(num)d territories', total, name=territories.0.name) }}
+            </a>
+
+        </li>
+    {% endif %}
+</ul>
+<div class="label-list">
+    {{ s.filter_label('tag', _('Tag'), ficon('tag'),
+        labelize=datasets.label_func('tag')
+    ) }}
+    {{ s.filter_label('badge', _('Badge'), ficon('bookmark'),
+        labelize=datasets.label_func('badge')
+    ) }}
+</div>
+{% endblock %}
+
+{% block toolbar_container %}
+{% if datasets %}
+<div class="btn-toolbar search-toolbar wrapper" data-tab="datasets">
+{{ s.breadcrum_toolbar(datasets, url=datasets_search_url,
+    exports=(
+        (_('Datasets'), 'site.datasets_csv', 'csv'),
+        (_('Resources'), 'site.resources_csv', 'csv'),
+    ),
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    reuses=(_('Reuses'), 'desc'),
+    followers=(_('Stars'), 'desc')
+) }}
+</div>
+{% endif %}
+{% if reuses %}
+<div class="btn-toolbar search-toolbar wrapper hide" data-tab="reuses">
+{{ s.breadcrum_toolbar(reuses, url=reuses_search_url,
+    exports=(
+        (_('Reuses'), 'site.reuses_csv', 'csv'),
+    ),
+    title=(_('Title'), 'asc'),
+    created=(_('Creation date'), 'desc'),
+    last_modified=(_('Last modification date'), 'desc'),
+    datasets=(_('Datasets used'), 'desc'),
+    followers=(_('Stars'), 'desc'),
+) }}
+</div>
+{% endif %}
+{% if organizations %}
+    <div class="btn-toolbar search-toolbar wrapper hide" data-tab="organizations">
+    {{ s.breadcrum_toolbar(organizations, url=organizations_search_url,
+        exports=(
+            (_('Organizations'), 'site.organizations_csv', 'csv'),
+        ),
+        name=( _('Name'), 'asc'),
+        datasets=(_('Datasets'), 'desc'),
+        reuses=(_('Reuses'), 'desc'),
+        followers=(_('Followers'), 'desc'),
+    ) }}
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block main_content %}
+<div class="tab-content">
+
+    {% if not datasets and not reuses and not organizations and not territories %}
+        <p class="text-center">
+            <strong>
+                {{ _('No results found, try to be less specific.') }}
+            </strong>
+        </p>
+    {% endif %}
+
+    <div class="tab-pane row{% if datasets %} active{% endif %}" id="datasets">
+        {% if datasets %}
+            <div class="col-md-8 col-lg-9 smaller">
+                <ul class="search-results">
+                    {% for dataset in datasets %}
+                    {% include theme('dataset/search-result.html') %}
+                    {% endfor %}
+                </ul>
+
+                {{ paginator(
+                    datasets,
+                    url=url_for('datasets.list', **request.args)
+                ) }}
+            </div>
+
+            <aside class="col-md-4 col-lg-3">
+                {% set search_url = datasets_search_url %}
+                {% include theme('dataset/search-panel.html') %}
+            </aside>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane row{% if reuses and not datasets %} active{% endif %}" id="reuses">
+        {% if reuses %}
+            <div class="col-md-8 col-lg-9 smaller">
+                <ul class="search-results">
+                    {% for reuse in reuses %}
+                    {% include theme('reuse/search-result.html') %}
+                    {% endfor %}
+                </ul>
+
+                {{ paginator(
+                    reuses,
+                    url=url_for('reuses.list', **request.args)
+                ) }}
+            </div>
+
+            <aside class="col-md-4 col-lg-3">
+                {% set search_url = reuses_search_url %}
+                {% include theme('reuse/search-panel.html') %}
+            </aside>
+        {% else %}
+        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane row{% if organizations and not reuses and not datasets %} active{% endif %}" id="organizations">
+        {% if organizations %}
+            <div class="col-md-8 col-lg-9 smaller">
+                <ul class="search-results">
+                    {% for organization in organizations %}
+                    {% include theme('organization/search-result.html') %}
+                    {% endfor %}
+                </ul>
+
+                {{ paginator(
+                    organizations, url=url_for('organizations.list', **request.args)
+                ) }}
+            </div>
+
+            <aside class="col-md-4 col-lg-3">
+                {% set search_url = organizations_search_url %}
+                {% include theme('organization/search-panel.html') %}
+            </aside>
+        {% else %}
+        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
+        {% endif %}
+    </div>
+
+    {% if territories %}
+    <div class="tab-pane row{% if territories and not organizations and not reuses and not datasets %} active{% endif %}" id="territories">
+        <div class="col-xs-12">
+            <ul class="search-results">
+                {% for territory in territories %}
+                {% include theme('territories/search-result.html') %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

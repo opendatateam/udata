@@ -1,0 +1,12 @@
+{% macro follow_btn(obj, class=None) %}
+{% set basename = obj.__class__.__name__|lower %}
+
+<follow-button
+    {% if is_following(obj) %}following{% endif %}
+    url="{{ url_for('api.{0}_followers'.format(basename), id=obj.id|string) }}"
+    classes="{{kwargs.get('btn_class', 'btn-primary')}}"
+    tooltip-placement="top"
+    {% if obj.metrics.followers %}:followers="{{obj.metrics.followers}}"{% endif %}
+    >
+</follow-button>
+{% endmacro %}

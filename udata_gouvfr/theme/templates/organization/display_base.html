@@ -1,0 +1,162 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/follow.html') import follow_btn with context %}
+
+{% set bundle = 'organization' %}
+{% set body_class = 'org-display' %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+{% endblock %}
+
+{% block content %}
+{% cache cache_duration, 'organization-content', org.id|string, g.lang_code, current_user.slug or 'anonymous' %}
+<div v-el:modal></div>
+<section class="default">
+    <div class="container organization-container"
+        data-organization-id="{{ org.id }}"
+        data-organization-title="{{ org.title }}">
+
+        <div class="row">
+
+            <div class="col-md-8 col-lg-9">
+                {% block main_content %}{% endblock %}
+            </div>
+
+            {# Right sidebar with organization aside ( counters, logo, social...) #}
+            <aside class="col-md-4 col-lg-3">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {% if org.public_service %}
+                            <img src="{{ theme_static('img/certified-stamp.png') }}" alt="certified" class="certified"
+                                v-popover.literal="{{ _('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR) }}"
+                                popover-title="{{ _('Certified public service') }}"
+                                popover-placement="left" popover-trigger="hover"/>
+                        {% endif %}
+                        <div class="text-center">
+                            <img src="{{org.logo|placeholder('organization') }}"
+                                alt="{{ org.title }}" class="scalable" />
+                        </div>
+                        <br/>
+                        <div class="badges tab-links">
+                            {# Badges #}
+                            {% if org.badges %}
+                            <p class="text-center">
+                                {% for badge in org.badges %}
+                                    <small class="small-badge">
+                                        <a href="{{ url_for('search.index', badge=badge) }}"
+                                            title="{{ _('See all organizations with that badge.') }}">
+                                            <span class="fa fa-bookmark"></span>
+                                            {{ org.badge_label(badge) }}</a>
+                                    </small>
+                                {% endfor %}
+                            </p>
+                            {% endif %}
+
+                            {% if org.metrics.datasets %}
+                            <p class="text-center">
+                                <strong>
+                                    <a href="{{url_for('organizations.show', org=org)}}#datasets">
+                                    {{ ngettext('%(num)d dataset', '%(num)d datasets', org.metrics.datasets or 0) }}
+                                    </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            {% if org.metrics.members %}
+                            <p class="text-center">
+                                <strong>
+                                    <a href="{{url_for('organizations.show', org=org)}}#members">
+                                    {{ ngettext('%(num)d member', '%(num)d members', org.metrics.members or 0) }}
+                                    </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            {% if org.metrics.followers %}
+                            <p class="text-center">
+                                <strong>
+                                    <a href="{{url_for('organizations.show', org=org)}}#followers">
+                                    {{ ngettext('%(num)d follower', '%(num)d followers', org.metrics.followers or 0) }}
+                                    </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                            {% if org.metrics.reuses %}
+                            <p class="text-center">
+                                <strong>
+                                <a href="{{url_for('organizations.show', org=org)}}#reuses"
+                                    v-tooltip tooltip-placement="left"
+                                    title="{{ _('Use of data by that organization for the community') }}">
+                                    {{ ngettext('%(num)d reuse', '%(num)d reuses', org.metrics.reuses or 0) }}
+                                </a>
+                                </strong>
+                            </p>
+                            {% endif %}
+                        </div>
+                        {% set member = org.member(current_user) %}
+                        {% if not member %}
+                            {% set pending_request = org.pending_request(current_user) %}
+                            {% if not pending_request %}
+                            <a href class="btn btn-primary btn-block btn-sm btn-left membership"
+                                v-tooltip tooltip-placement="left"
+                                title="{{ _('I belong to this organization') }}"
+                                @click.prevent="requestMembership('{{ url_for('api.request_membership', org=org) }}')">
+                                <span class="fa fa-user-plus"></span>
+                                {{ _('Join') }}
+                            </a>
+                            {% endif %}
+                            <a id="pending-button" href v-tooltip tooltip-placement="left"
+                                title="{{ _('Waiting for approval') }}"
+                                class="btn btn-default btn-block btn-sm btn-left disabled {% if not pending_request %}hide{% endif %}"
+                                >
+                                <span class="fa fa-user-plus"></span>
+                                {{ _('Pending request') }}
+                            </a>
+                        {% elif member.role == 'admin' %}
+                        <a href v-tooltip tooltip-placement="left"
+                            class="btn btn-default btn-block btn-sm btn-left disabled"
+                            title="{{ _('You are an administrator of this organization') }}">
+                            <span class="fa fa-user"></span>
+                            {{ _('Administrator') }}
+                        </a>
+                        {% elif member.role == 'editor' %}
+                        <a href v-tooltip tooltip-placement="left"
+                            class="btn btn-default btn-block btn-sm btn-left disabled"
+                            title="{{ _('You are editor in this organization') }}">
+                            <span class="fa fa-user"></span>
+                            {{ _('Editor') }}
+                        </a>
+                        {% else %}
+                        <a href v-tooltip tooltip-placement="left"
+                            class="btn btn-default btn-block btn-sm btn-left disabled"
+                            title="{{ _('You are a member of this organization') }}">
+                            <span class="fa fa-user"></span>
+                            {{ _('Member') }}
+                        </a>
+                        {% endif %}
+
+                        <follow-button with-label classes="btn-primary btn-block btn-sm btn-left"
+                            class="btn-block"  {# Necessary until Vue.config.replace can be reverted to true #}
+                            {% if is_following(org) %}following{% endif %}
+                            url="{{ url_for('api.organization_followers', id=org.id|string) }}"
+                            tooltip="{{ _('I\'ll be informed about this organization news') }}"
+                            >
+                        </follow-button>
+
+                        <button type="button" @click="showDetails"
+                            class="btn btn-primary btn-extras btn-block btn-sm btn-left"
+                            title="{{ _('Details') }}">
+                            <span class="fa fa-info-circle"></span>
+                            {{ _('Details') }}
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        {% block secondary_content %}{% endblock %}
+
+    </div>
+</section>
+
+{% block after_content %}{% endblock %}
+{% endcache %}
+{% endblock %}

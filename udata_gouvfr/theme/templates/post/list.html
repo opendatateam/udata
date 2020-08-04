@@ -1,0 +1,37 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/paginator.html') import paginator with context %}
+
+{% set meta = {
+    'title': _('Posts'),
+    'description': _("%(site)s posts", site=config['SITE_TITLE']),
+    'keywords': [_('posts')],
+    'robots': 'noindex',
+} %}
+
+{% set bundle = 'search' %}
+
+{% block breadcrumb %}
+    <li class="active">
+        {{ _('Posts') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=posts.page_start,
+            end=posts.page_end,
+            total=posts.total) }}</small>
+    </li>
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-xs-12">
+
+        <ul class="search-results">
+            {% for post in posts %}
+            {% include theme('post/search-result.html') %}
+            {% endfor %}
+        </ul>
+
+        <div class="clearfix"></div>
+        {{ paginator(posts) }}
+    </div>
+</div>
+{% endblock %}

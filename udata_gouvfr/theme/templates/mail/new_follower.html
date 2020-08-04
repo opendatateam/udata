@@ -1,0 +1,39 @@
+{% extends theme('mail/base.html') %}
+{% from theme('mail/button.html') import mail_button %}
+{% from theme('user/mail_card.html') import user_mail_card with context %}
+
+
+{% block body %}
+<p style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+{{ _('%(user)s followed you',
+    user=(
+        '<a href="'|safe
+        + url_for('users.show', user=follow.follower, _external=True)
+        + '">'|safe
+        + follow.follower.fullname
+        + '</a>'|safe
+    )
+) }}.</p>
+
+<br/>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td width="15%"></td>
+        <td width="70%" align="center">
+            {{ user_mail_card(follow.follower) }}
+        </td>
+        <td width="15%"></td>
+    </tr>
+</table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('See his profile'),
+                url_for('users.show', user=follow.follower, _external=True)
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endblock %}

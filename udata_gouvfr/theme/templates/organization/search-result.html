@@ -1,0 +1,43 @@
+{% cache cache_duration, 'org-search-result', organization.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
+<li class="search-result organization-result">
+    <a href="{{ url_for('organizations.show', org=organization) }}" title="{{ organization.name }}">
+        <div class="result-logo pull-left">
+            <img alt="{{ organization.title }}"
+                src="{{ organization.logo(70)|placeholder('organization') }}"
+                width="70" height="70">
+        </div>
+        {{ badge_if_certified(organization) }}
+        <div class="result-body">
+            <h4 class="result-title ellipsis">{{ organization.name }}</h4>
+            <div class="result-description clamp-2">
+                {{ organization.description|mdstrip(300) }}
+            </div>
+        </div>
+        <ul class="list-inline result-infos">
+            {% if organization.metrics.datasets %}
+            <li title="{{ _('Number of datasets') }}">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
+            </li>
+            {% endif %}
+            {% if organization.metrics.reuses %}
+            <li title="{{ _('Number of reuses by the organization') }}">
+                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
+                {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
+            </li>
+            {% endif %}
+            {% if organization.metrics.followers %}
+            <li title="{{ _('Number of followers') }}">
+                <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                {{ ngettext('%(num)d follower', '%(num)d followers', organization.metrics.followers or 0) }}
+            </li>
+            {% endif %}
+            <li title="{{ _('Number of members') }}">
+                <span class="fa fa-users fa-fw"></span>
+                {{ ngettext('%(num)d members', '%(num)d members', organization.members|length) }}
+            </li>
+        </ul>
+    </a>
+</li>
+{% endcache %}

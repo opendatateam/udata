@@ -1,0 +1,62 @@
+{% extends theme('layouts/center-panel.html') %}
+
+{% set meta = {
+    'title': _('External application authorization'),
+} %}
+
+
+{% block panel_content %}
+<div class="panel-body oauth-authorize">
+    <div class="row">
+        <div class="col-xs-12">
+            <img src="{{ grant.client.image(100) }}" class="pull-left app-logo" width="100" height="100" alt="">
+            <p class="lead prompt">
+            {{ _(
+                '%(app)s want to access your %(site)s account.',
+                app='<span class="app">%s</span>'|format(grant.client.name)|safe,
+                site='<span class="site">%s</span>'|format(config.SITE_TITLE)|safe
+            ) }}
+            </p>
+        </div>
+    </div>
+</div>
+<div class="panel-body oauth-authorize">
+    <div class="row">
+        <div class="col-xs-12">
+            <h4>{{ _('Details') }}</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="scope-details">
+                <div class="scope-picto">
+                    <span class="fa fa-male fa-4x"></span>
+                </div>
+                <div class="scope-body">
+                    <h4>{{ _('Access your profile') }}</h4>
+                    <p>{{ _('Read your profile, the orgnization you belong to, your publications') }}</p>
+                </div>
+            </div>
+            <div class="scope-details">
+                <div class="scope-picto">
+                    <span class="fa fa-file-o fa-4x"></span>
+                </div>
+                <div class="scope-body">
+                    <h4>{{ _('Publish data') }}</h4>
+                    <p>{{ _('Publish datasets, reuses, follow or unfollow') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-body">
+    <form class="form text-center" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="scope" value="{{ (grant.scopes or ['default']) | join(' ') }}" />
+        <input type="submit" name="accept" value="{{ _('Accept') }}"
+            class="btn btn-success btn-lg" />
+        <input type="submit" name="decline" value="{{ _('Refuse') }}"
+            class="btn btn-danger btn-lg" />
+    </form>
+</div>
+{% endblock %}

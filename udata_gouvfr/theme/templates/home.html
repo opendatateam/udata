@@ -1,5 +1,12 @@
-{% extends "home.html" %}
+{% extends theme('base.html') %}
 
+{% set meta = {
+    'title': _('Home'),
+    'description': _("%(site)s home", site=config['SITE_TITLE']),
+    'keywords': [_('home')],
+} %}
+
+{% set bundle = 'home' %}
 {% set body_class = 'home' %}
 
 {% block subnav %}

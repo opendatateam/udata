@@ -1,0 +1,18 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('Some of your datasets need to be updated according to the frequency you set:') }}
+
+{% for dataset in datasets %}
+* {{ _('Dataset "%(dataset_title)s" last update is on %(published_date)s.',
+    dataset_title=dataset.title,
+    published_date=dataset.last_update.strftime('%d/%m/%Y')) }}
+  {{ _('Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago.',
+    dataset_frequency=dataset.frequency_str,
+    due_update_days=dataset.outdated.days) }}
+  {{ _('You can update the dataset and associated resources at:') }}
+  {{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), _external=True) }}
+
+{% endfor %}
+
+{% endblock %}

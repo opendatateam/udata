@@ -1,0 +1,10 @@
+{% extends theme("errors/base.html") %}
+
+{% set title = _('Bad request') %}
+
+{% block details %}
+<p class="lead">{{ error.message }}</p>
+{% if g.sentry_event_id %}
+<p>{{ _('The error identifier is {id}').format(id=g.sentry_event_id) }}</p>
+{% endif %}
+{% endblock %}

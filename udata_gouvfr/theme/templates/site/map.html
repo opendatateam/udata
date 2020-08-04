@@ -1,0 +1,21 @@
+{% extends theme('base.html') %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
+
+{% set meta = {
+    'title': _('Coverage map'),
+    'description': _('Display datasets on a map'),
+    'keywords': [_('coverage'), _('map')],
+} %}
+
+{% set bundle = 'covermap' %}
+
+{% block breadcrumb %}
+    <li class="active">{{ _('Coverage map') }}</li>
+{% endblock %}
+
+{% block content %}
+{{ breadcrumb(self) }}
+<section class="big-map">
+    <leaflet-map :fixed="false" v-ref:map></leaflet-map>
+</section>
+{% endblock %}

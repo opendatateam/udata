@@ -1,0 +1,31 @@
+{% cache cache_duration, 'reuse-search-result', reuse.id|string, g.lang_code %}
+<li class="search-result reuse-result">
+    <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}">
+        <div class="result-logo pull-left">
+            <img alt="{{ reuse.title }}"
+                src="{{ reuse.image(70)|placeholder('reuse') }}"
+                width="70" height="70">
+        </div>
+        <div class="result-body">
+            <h4 class="result-title ellipsis">{{ reuse.title }}</h4>
+            <div class="result-description clamp-2">
+            {{ reuse.description|mdstrip(300) }}
+            </div>
+        </div>
+        <ul class="list-inline result-infos">
+            <li title="{{ _('Type') }}">
+                <span class="fa fa-file fa-fw"></span>
+                {{ reuse.type_label }}
+            </li>
+            <li title="{{ _('Number of dataset') }}">
+                <span class="fa fa-cubes fa-fw"></span>
+                {{ ngettext('%(num)d dataset', '%(num)d datasets', reuse.datasets|length) }}
+            </li>
+            <li title="{{ _('Number of followers') }}">
+                <span class="fa fa-star fa-fw"></span>
+                {{ ngettext('%(num)d follower', '%(num)d followers', reuse.metrics.followers or 0) }}
+            </li>
+        </ul>
+    </a>
+</li>
+{% endcache %}

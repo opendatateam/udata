@@ -1,0 +1,64 @@
+{% extends theme("topic/display_base.html") %}
+
+
+{% block main_content %}
+<!-- Nav tabs -->
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a href="#datasets" data-toggle="tab">
+            {{ _('Datasets')}}
+            <span class="badge">{{ datasets.total }}</span>
+        </a>
+    </li>
+    <li>
+        <a href="#reuses" data-toggle="tab">
+            {{ _('Reuses') }}
+            <span class="badge">{{ reuses.total }}</span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    <div class="tab-pane active" id="datasets">
+        {% if datasets %}
+        <ul class="search-results">
+            {% for dataset in datasets %}
+            {% include theme('dataset/search-result.html') %}
+            {% endfor %}
+        </ul>
+            {% if datasets.has_next %}
+            <p class="text-center">
+                <a class="btn btn-grey btn-sm" href="{{ url_for('datasets.list', **request.args) }}">
+                    <span class="fa fa-fw fa-list"></span>
+                    {{ _('See the %(total)s results', total=datasets.total) }}
+                </a>
+            </p>
+            {% endif %}
+        {% else %}
+        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane" id="reuses">
+        {% if reuses %}
+        <ul class="search-results">
+            {% for reuse in reuses %}
+            {% include theme('reuse/search-result.html') %}
+            {% endfor %}
+        </ul>
+            {% if reuses.has_next %}
+            <p class="text-center">
+                <a class="btn btn-grey btn-sm" href="{{ url_for('reuses.list', **request.args) }}">
+                    <span class="fa fa-fw fa-list"></span>
+                    {{ _('See the %(total)s results', total=reuses.total) }}
+                </a>
+            </p>
+            {% endif %}
+        {% else %}
+        <p class="text-center"><strong>{{ _('No results found') }}</strong></p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
