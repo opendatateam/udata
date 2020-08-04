@@ -16,9 +16,21 @@ const less_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'
 module.exports = {
     context: source_path,
     entry: {
-        theme: "theme",
-        admin: "admin",
-        oembed: 'oembed',
+        theme: "js/theme",
+        admin: "js/admin",
+        oembed: 'js/oembed',
+        dataset: "js/dataset",
+        territory: "js/territory",
+        reuse: "js/reuse",
+        site: "js/site.js",
+        home: "js/home.js",
+        search: "js/search.js",
+        dashboard: "js/dashboard.js",
+        organization: "js/organization",
+        covermap: "js/covermap",
+        topic: "js/topic",
+        post: "js/post",
+        user: "js/user",
     },
     output: {
         path: static_path,
@@ -27,19 +39,23 @@ module.exports = {
         chunkFilename: 'chunks/[id].[hash].js'
     },
     resolve: {
-        root: source_path
+        root: source_path,
+        alias: {
+            'jquery-slimscroll': path.join(node_path, 'jquery-slimscroll/jquery.slimscroll'),
+        }
     },
     devtools: 'eval-source-map',
     module: {
         loaders: [
-            {test: /img\/.*\.(jpg|jpeg|png|gif|svg)$/, loader: 'file?name=[path][name].[ext]'},
+            {test: /\.(jpg|jpeg|png|gif|svg)$/, loader: 'file-loader'},
             {test: /\.css$/, loader: css_loader},
             {test: /\.less$/, loader: less_loader},
-            {test: /\.json$/, loader: "json"},
-            {test: /\.html$/, loader: "html"},
-            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: "file?name=[name].[ext]"},
+            {test: /\.vue$/, loader: 'vue-loader'},
+            {test: /\.json$/, loader: 'json-loader'},
+            {test: /\.(woff|svg|ttf|eot|otf)([\?]?.*)$/, exclude: /img/, loader: 'file-loader?name=[name].[ext]'},
             {test: /\.js$/, loader: 'babel-loader', include: [
-                    path.resolve(source_path, 'js'),
+                    path.resolve(__dirname, 'js'),
+                    path.resolve(__dirname, 'node_modules/vue-strap/src'),
                 ]
             }
         ]
@@ -49,12 +65,22 @@ module.exports = {
         comments: false,
         plugins: ['transform-runtime']
     },
+    vue: {
+        loaders: {
+            css: 'vue-style?sourceMap!css?sourceMap',
+            less: 'vue-style?sourceMap!css?sourceMap!less?sourceMap=source-map-less-inline',
+            js: 'babel-loader'
+        }
+    },
     plugins: [
         new ManifestPlugin({
             fileName: path.join(theme_path, 'manifest.json'),
             // Filter out chunks and source maps
             filter: ({name, isInitial, isChunk}) => !name.endsWith('.map') && (isInitial || !isChunk),
             publicPath: public_path,
+        }),
+        new webpack.ProvidePlugin({
+            jQuery: 'jquery',  // Required by bootstrap.js
         }),
         new ExtractTextPlugin('[name].[contenthash].css'),
         require('webpack-fail-plugin'),
