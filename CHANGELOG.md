@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.2.0 (2020-08-05)
 
 - CORS are now handled by Flask-CORS instead of Flask-RestPlus[#2485](https://github.com/opendatateam/udata/pull/2485)
