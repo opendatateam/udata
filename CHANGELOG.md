@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.1.5 (2020-08-05)
 
 - Mise à jour de l'URL de Geo SIRENE [#489](https://github.com/etalab/udata-gouvfr/pull/489)
