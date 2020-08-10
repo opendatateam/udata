@@ -10,8 +10,11 @@ const public_path = '/_themes/gouvfr/'
 const ManifestPlugin = require('webpack-manifest-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-const css_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap');
-const less_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap!less?sourceMap=source-map-less-inline');
+// replaces the static URLs from less/css to public_path/*
+const css_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap');
+const less_loader = ExtractTextPlugin.extract('style', 'css?root='+source_path+'&sourceMap!less?sourceMap=source-map-less-inline');
+// const css_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap');
+// const less_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap!less?sourceMap=source-map-less-inline');
 
 const languages = ['en', 'es', 'fr', 'pt', 'sr'];
 
