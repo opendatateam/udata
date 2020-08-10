@@ -9,7 +9,7 @@
     {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ manifest('theme', 'common.css') }}">
-    {% if bundle_css is in_manifest %}
+    {% if bundle_css is in_manifest('theme') %}
     <link rel="stylesheet" href="{{ manifest('theme', '{0}.css'.format(bundle)) }}">
     {% endif %}
     {% block extra_css %}{% endblock %}
@@ -38,7 +38,7 @@
     {% block body %}{% endblock %}
 
     <script src="{{ manifest('theme', 'common.js') }}"></script>
-    {% if bundle_js is in_manifest %}
+    {% if bundle_js is in_manifest('theme') %}
     <script src="{{ manifest('theme', '{0}.js'.format(bundle)) }}"></script>
     {% endif %}
     {% block extra_js %}{% endblock %}
