@@ -164,8 +164,8 @@ export default {
 @import "~less/udata/variables";
 
 @import "~bootstrap/less/mixins";
-@import "~admin-lte/build/less/mixins";
-@import "~admin-lte/build/less/timeline";
+// @import "~admin-lte/build/less/mixins";
+// @import "~admin-lte/build/less/timeline";
 
 .timeline {
     li > .timeline-item > .timeline-header {
