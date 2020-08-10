@@ -1,13 +1,25 @@
-<!-- TODO put back udata's admin.html here -->
-
-{% extends "admin.html" %}
-
-{% block theme_css %}
-{{ super() }}
-<link href="{{ manifest('theme', 'admin.css') }}" rel="stylesheet">
-{% endblock %}
-
-{% block raw_head %}
-{{ super() }}
-<link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
-{% endblock %}
+<!DOCTYPE html>
+<html lang="{{ g.lang_code }}">
+    <head>
+        {% block raw_head %}
+        {% from theme('macros/metadata.html') import metadata with context %}
+        {{ metadata({
+            'title': _('Admin'),
+            'description': 'Administration',
+            'keywords': ['administration'],
+            'robots': 'noindex',
+        }) }}
+        <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport' />
+        <link href="{{ manifest('udata', 'common.css') }}" rel="stylesheet" />
+        <link href="{{ manifest('udata', 'admin.css') }}" rel="stylesheet" />
+        {% block theme_css %}{% endblock %}
+        {% block extra_head %}{% endblock %}
+        {% endblock raw_head %}
+    </head>
+    <body class="skin-blue fixed sidebar-mini">
+        <div id="app"></div>
+        <script src="{{ manifest('udata', 'common.js') }}"></script>
+        <script src="{{ manifest('udata', 'admin.js') }}"></script>
+        {% block theme_js %}{% endblock %}
+    </body>
+</html>
