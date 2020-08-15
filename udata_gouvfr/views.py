@@ -8,9 +8,11 @@ from mongoengine.errors import ValidationError
 
 from udata import theme
 from udata.app import cache
+from udata.frontend import template_hook
 from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
+from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
 
 from .models import (
     DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR, OPENFIELD16, SPD
@@ -279,3 +281,14 @@ def gouvfr_sitemap_urls():
         yield 'gouvfr.faq_redirect', {'section': section}, None, 'weekly', 0.7
     yield 'gouvfr.dataconnexions_redirect', {}, None, 'monthly', 0.4
     yield 'gouvfr.redevances_redirect', {}, None, 'yearly', 0.4
+
+
+def has_apis(ctx):
+    dataset = ctx['dataset']
+    return dataset.extras.get(APIGOUVFR_EXTRAS_KEY, [])
+
+
+@template_hook('dataset.display.after-description', when=has_apis)
+def dataset_apis(ctx):
+    dataset = ctx['dataset']
+    return theme.render('dataset-apis.html', apis=dataset.extras.get(APIGOUVFR_EXTRAS_KEY))

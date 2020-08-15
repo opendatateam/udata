@@ -25,6 +25,7 @@ from udata.tests.features.territories.test_territories_process import (
 from udata.utils import faker
 from udata.tests.helpers import assert200, assert404, assert_redirects, assert_equal_dates
 
+from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
 from udata_gouvfr.models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
     TERRITORY_DATASETS, OPENFIELD16, SPD
@@ -100,6 +101,24 @@ class GouvFrThemeTest:
 
         response = client.get(url_for('datasets.show', dataset=dataset))
         assert200(response)
+
+    def test_render_dataset_w_api(self, client):
+        '''It should render the dataset page'''
+        dataset = DatasetFactory()
+        dataset.extras[APIGOUVFR_EXTRAS_KEY] = [{
+            'title': 'une API',
+            'tagline': 'tagline',
+            'path': '/path',
+            'slug': 'slug',
+            'owner': 'owner',
+            'openness': 'open',
+            'logo': '/logo.png',
+        }]
+        dataset.save()
+
+        response = client.get(url_for('datasets.show', dataset=dataset))
+        assert200(response)
+        assert 'une API' in response.data.decode('utf8')
 
     def test_render_organization_page(self, client):
         '''It should render the organization page'''
