@@ -6,6 +6,11 @@ See [System dependencies](system-dependencies.md) for base system requirements.
 
 An alternative way to use middlewares (ie. ElasticSearch, Redis, MongoDB) is provided
 for getting started easily so it's not mandatory to install those natively.
+
+Note that the [docker-udata](https://github.com/opendatateam/docker-udata) project provides 
+an easier way to start udata on your machine. Follow the instructions in this document if 
+you intend to work on the source code. 
+
 See [Middlewares](#middlewares) for details.
 
 ## Retrieving the sources
@@ -24,9 +29,9 @@ $ git clone https://github.com/opendatateam/udata.git
 
 ## Middlewares
 
-We will use [docker-compose][] to manage all that.
-[Install Docker-Compose for your system][docker-compose-install]
-then start the services:
+We will use [docker-compose][https://docs.docker.com/compose/] to manage all that. Note that the separate [docker-udata](https://github.com/opendatateam/docker-udata) repository provides an "All-in-one" way to start udata. The Docker script in the main repository only contains core platform dependencies like ElasticSearch.
+
+[Install Docker-Compose for your system][docker-compose-install] then start the services:
 
 ```shell
 $ cd udata
@@ -44,7 +49,7 @@ On the very first run it will download and install Docker images which takes a w
 ## Python and virtual environment
 
 It is recommended to work within a virtualenv to ensure proper dependencies isolation.
-If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
+If you're not familiar with that concept, read [Python Virtual Environments - a Primer](https://realpython.com/python-virtual-environments-a-primer/).
 
 Alright, now you can [install virtualenv][install-virtualenv] and then type these commands knowing what you are doing:
 
