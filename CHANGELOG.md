@@ -2,7 +2,10 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Some fixes for the static files deletion [#2526](https://github.com/opendatateam/udata/pull/2526):
+  - Adding variable FS_URL in udata's setting.
+  - Use of FS_URL or CDN_DOMAIN variables by the static files migration to be more agnostic.
+  - Removing the deletion script link in the CHANGELOG previous entry.
 
 ## 2.2.0 (2020-08-05)
 
