@@ -253,6 +253,9 @@ class Defaults(object):
     DELETE_ME = True
 
     # Optimize uploaded images
+    FS_URL = 'https://static.data.gouv.fr'
+
+    # Optimize uploaded images
     FS_IMAGES_OPTIMIZE = True
 
     # Default resources extensions whitelist

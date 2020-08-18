@@ -4,6 +4,8 @@ The purpose here is to fill every resource with a fs_filename string field.
 import logging
 from urllib.parse import urlparse
 
+from flask import current_app
+
 from udata.models import Dataset, CommunityResource
 
 log = logging.getLogger(__name__)
@@ -12,11 +14,19 @@ log = logging.getLogger(__name__)
 def migrate(db):
     log.info('Processing resources.')
 
+    try:
+        if current_app.config['CDN_DOMAIN'] is not None:
+            fs_url = current_app.config['FS_URL']
+        else:
+            fs_url = current_app.config['FS_URL']
+    except KeyError:
+        raise KeyError('CDN_DOMAIN and FS_URL must exist in configuration')
+
     datasets = Dataset.objects().no_cache().timeout(False)
     for dataset in datasets:
         save_res = False
         for resource in dataset.resources:
-            if resource.url.startswith('https://static.data.gouv.fr'):
+            if resource.url.startswith(fs_url):
                 parsed = urlparse(resource.url)
                 fs_name = parsed.path.strip('/resource/')
                 resource.fs_filename = fs_name
