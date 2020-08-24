@@ -23,8 +23,8 @@ def migrate(db):
                 resource.fs_filename = fs_name
                 save_res = True
             elif resource.fs_filename is not None:
-                    resource.fs_filename = None
-                    save_res = True
+                resource.fs_filename = None
+                save_res = True
         if save_res:
             try:
                 dataset.save()
@@ -43,8 +43,8 @@ def migrate(db):
             community_resource.fs_filename = fs_name
             save_res = True
         elif community_resource.fs_filename is not None:
-                community_resource.fs_filename = None
-                save_res = True
+            community_resource.fs_filename = None
+            save_res = True
         if save_res:
             try:
                 community_resource.save()
