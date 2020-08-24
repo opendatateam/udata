@@ -22,6 +22,10 @@ def migrate(db):
                 fs_name = parsed.path.replace('/resources/', '')
                 resource.fs_filename = fs_name
                 save_res = True
+            else:
+                if resource.fs_filename is not None:
+                    resource.fs_filename = None
+                    save_res = True
         if save_res:
             try:
                 dataset.save()
@@ -37,10 +41,13 @@ def migrate(db):
             parsed = urlparse(community_resource.url)
             fs_name = parsed.path.replace('/resources/', '')
             community_resource.fs_filename = fs_name
-            try:
-                community_resource.save()
-            except Exception as e:
-                log.warning(e)
-                pass
+        else:
+            if community_resource.fs_filename is not None:
+                community_resource.fs_filename = None
+        try:
+            community_resource.save()
+        except Exception as e:
+            log.warning(e)
+            pass
 
     log.info('Completed.')
