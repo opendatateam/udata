@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 from flask import current_app
 
+from udata.core import storages
 from udata.models import Dataset, CommunityResource
 
 log = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ def migrate(db):
     for dataset in datasets:
         save_res = False
         for resource in dataset.resources:
-            if resource.url.startswith(current_app.config['FS_URL']):
+            if resource.url.startswith(storages.resources.base_url):
                 parsed = urlparse(resource.url)
                 fs_name = parsed.path.replace('/resources/', '')
                 resource.fs_filename = fs_name
@@ -34,7 +35,7 @@ def migrate(db):
 
     community_resources = CommunityResource.objects().no_cache().timeout(False)
     for community_resource in community_resources:
-        if community_resource.url.startswith(current_app.config['FS_URL']):
+        if community_resource.url.startswith(storages.resources.base_url):
             parsed = urlparse(community_resource.url)
             fs_name = parsed.path.replace('/resources/', '')
             community_resource.fs_filename = fs_name
