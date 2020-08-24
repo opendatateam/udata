@@ -4,8 +4,6 @@ The purpose here is to fill every resource with a fs_filename string field.
 import logging
 from urllib.parse import urlparse
 
-from flask import current_app
-
 from udata.core import storages
 from udata.models import Dataset, CommunityResource
 
