@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2019-05-23 12:50+0200\n"
-"PO-Revision-Date: 2020-04-23 03:51\n"
+"POT-Creation-Date: 2020-08-14 14:03+0200\n"
+"PO-Revision-Date: 2020-08-25 11:38\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -11,53 +11,55 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.3\n"
+"Generated-By: Babel 2.8.0\n"
 "X-Crowdin-Project: udata-gouvfr\n"
+"X-Crowdin-Project-ID: 295536\n"
 "X-Crowdin-Language: es-ES\n"
 "X-Crowdin-File: /master/udata_gouvfr/theme/translations/gouvfr.pot\n"
+"X-Crowdin-File-ID: 20\n"
 
-#: __init__.py:47
+#: __init__.py:44
 msgid "Data"
 msgstr "Datos"
 
-#: __init__.py:48 templates/dataset/display.html:41 templates/footer.html:70
-#: templates/footer.html:72
+#: __init__.py:45 templates/dataset/display.html:41 templates/footer.html:93
+#: templates/footer.html:95
 msgid "Reuses"
 msgstr "Reutilizaciones"
 
-#: __init__.py:49 templates/header.html:78
+#: __init__.py:46 templates/header.html:86
 msgid "Organizations"
 msgstr "Organizaciones"
 
-#: __init__.py:50
+#: __init__.py:47
 msgid "Dashboard"
 msgstr "Tablero de mando"
 
-#: __init__.py:51 __init__.py:57
+#: __init__.py:48 __init__.py:54
 msgid "Documentation"
 msgstr ""
 
-#: __init__.py:58
+#: __init__.py:55
 msgid "Reference Data"
 msgstr ""
 
-#: __init__.py:59
+#: __init__.py:56
 msgid "Licences"
 msgstr ""
 
-#: __init__.py:60
+#: __init__.py:57
 msgid "API"
 msgstr ""
 
-#: __init__.py:61
+#: __init__.py:58
 msgid "Terms of use"
 msgstr "Términos de uso"
 
-#: __init__.py:62
+#: __init__.py:59
 msgid "Tracking and privacy"
 msgstr ""
 
-#: __init__.py:73
+#: __init__.py:71
 msgid "Data catalog"
 msgstr ""
 
@@ -81,31 +83,35 @@ msgstr "Vínculo"
 msgid "Contact Us"
 msgstr ""
 
-#: templates/footer.html:61
-msgid "Feeds"
-msgstr "Alimentaciones"
+#: templates/footer.html:66
+msgid "You can contact us at "
+msgstr ""
 
-#: templates/footer.html:65 templates/footer.html:67
-msgid "Datasets"
-msgstr "Conjunto de datos"
-
-#: templates/footer.html:79
+#: templates/footer.html:71
 msgid "Go to Etalab’s blog"
 msgstr ""
 
-#: templates/footer.html:82
+#: templates/footer.html:84
+msgid "Feeds"
+msgstr "Alimentaciones"
+
+#: templates/footer.html:88 templates/footer.html:90
+msgid "Datasets"
+msgstr "Conjunto de datos"
+
+#: templates/footer.html:100
 msgid "Open-source engine"
 msgstr ""
 
-#: templates/footer.html:83 templates/footer.html:86
+#: templates/footer.html:101 templates/footer.html:104
 msgid "Deployed version"
 msgstr ""
 
-#: templates/footer.html:85
+#: templates/footer.html:103
 msgid "Data.gouv.fr extension"
 msgstr ""
 
-#: templates/footer.html:89
+#: templates/footer.html:106
 msgid "Back to top"
 msgstr "Volver arriba"
 
@@ -137,27 +143,27 @@ msgstr ""
 msgid "More information →"
 msgstr ""
 
-#: templates/header.html:12
+#: templates/header.html:20
 msgid "Toggle navigation"
 msgstr "Navegador"
 
-#: templates/header.html:18
+#: templates/header.html:26
 msgid "Open platform for French public data"
 msgstr ""
 
-#: templates/header.html:74
+#: templates/header.html:82
 msgid "My profile"
 msgstr "Mi perfil"
 
-#: templates/header.html:93
+#: templates/header.html:101
 msgid "Administration"
 msgstr "Administración"
 
-#: templates/header.html:100
+#: templates/header.html:108
 msgid "Logout"
 msgstr "Cerrar sesión"
 
-#: templates/header.html:107 templates/header.html:110
+#: templates/header.html:115 templates/header.html:118
 msgid "Sign In / Register"
 msgstr "Conexión / Registro"
 
