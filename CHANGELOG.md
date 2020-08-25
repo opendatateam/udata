@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.2.0 (2020-08-25)
 
 - Show api.gouv.fr APIs on dataset page [#493](https://github.com/etalab/udata-gouvfr/pull/493)
