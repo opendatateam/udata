@@ -35,7 +35,7 @@
                 <tbody>
                     <tr v-for="extra in dataset.extras">
                         <td>{{ extra.name }}</td>
-                        <td>{{ extra.value }}</td>
+                        <td>{{ stringify(extra.value) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -57,6 +57,15 @@ export default {
     props: {
         dataset: Object
     },
-    components: {Modal}
+    components: {Modal},
+    methods: {
+        stringify(value) {
+            console.log(value, typeof value);
+            if (typeof value === 'string' || value instanceof String) {
+                return value;
+            }
+            return JSON.stringify(value);
+        }
+    }
 };
 </script>
