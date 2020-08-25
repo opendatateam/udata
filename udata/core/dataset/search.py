@@ -83,7 +83,8 @@ class DatasetSearch(ModelSearchAdapter):
     resources = Object(properties={
         'title': String(),
         'description': String(),
-        'format': String(index='not_analyzed')
+        'format': String(index='not_analyzed'),
+        'schema': String(index='not_analyzed'),
     })
     format_suggest = Completion(analyzer=simple,
                                 search_analyzer=simple,
@@ -133,6 +134,7 @@ class DatasetSearch(ModelSearchAdapter):
         'granularity': TermsFacet(field='granularity',
                                   labelizer=granularity_labelizer),
         'format': TermsFacet(field='resources.format'),
+        'schema': TermsFacet(field='resources.schema'),
         'resource_type': TermsFacet(field='resources.type',
                                     labelizer=resource_type_labelizer),
         'reuses': RangeFacet(field='metrics.reuses',
@@ -201,6 +203,7 @@ class DatasetSearch(ModelSearchAdapter):
                     'description': r.description,
                     'format': r.format,
                     'type': r.type,
+                    'schema': r.schema,
                 }
                 for r in dataset.resources],
             'format_suggest': [r.format.lower()

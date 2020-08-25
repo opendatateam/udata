@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add a schema facet to the dataset search 🚧 requires datasets reindexation [#2523](https://github.com/opendatateam/udata/pull/2523)
 
 ## 2.2.0 (2020-08-05)
 
