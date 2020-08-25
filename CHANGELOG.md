@@ -8,6 +8,7 @@
     - Fixed the fs_filename string formating.
     - Now checks the community ressource's URLs too.
   - Removing the deletion script link in the CHANGELOG previous entry.
+- Add a schema facet to the dataset search 🚧 requires datasets reindexation [#2523](https://github.com/opendatateam/udata/pull/2523)
 
 ## 2.2.0 (2020-08-05)
 
