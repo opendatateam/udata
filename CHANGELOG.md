@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Show stringified extras in dataset modal [#2527](https://github.com/opendatateam/udata/pull/2527)
 
 ## 2.2.1 (2020-08-25)
 
