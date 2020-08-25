@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.2.1 (2020-08-25)
 
 - Some fixes for the static files deletion [#2526](https://github.com/opendatateam/udata/pull/2526):
   - New static files migration replacing the older one:
