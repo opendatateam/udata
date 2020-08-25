@@ -60,7 +60,6 @@ export default {
     components: {Modal},
     methods: {
         stringify(value) {
-            console.log(value, typeof value);
             if (typeof value === 'string' || value instanceof String) {
                 return value;
             }
