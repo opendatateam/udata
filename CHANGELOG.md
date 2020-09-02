@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Plugin's translations are now correctly loaded [#2529](https://github.com/opendatateam/udata/pull/2529)
 
 ## 2.2.1 (2020-08-25)
 
