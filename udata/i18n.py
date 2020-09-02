@@ -1,8 +1,7 @@
-import os
 import pkgutil
 
 from contextlib import contextmanager
-from os.path import exists, join
+from os.path import exists, join, dirname
 from glob import iglob
 
 from flask import (  # noqa
@@ -70,7 +69,7 @@ class PluggableDomain(Domain):
 
                 for pkg in entrypoints.get_roots(current_app):
                     loader = pkgutil.get_loader(pkg)
-                    path = join(os.path.dirname(loader.path), 'translations')
+                    path = join(dirname(loader.path), 'translations')
                     domains = [f.replace(path, '').replace('.pot', '')[1:]
                                for f in iglob(join(path, '*.pot'))]
                     for domain in domains:
