@@ -2,6 +2,20 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 2.2.1 (2020-08-25)
+
+- Some fixes for the static files deletion [#2526](https://github.com/opendatateam/udata/pull/2526):
+  - New static files migration replacing the older one:
+    - The migration now uses FS_URL.
+    - Fixed the fs_filename string formating.
+    - Now checks the community ressource's URLs too.
+  - Removing the deletion script link in the CHANGELOG previous entry.
+- Add a schema facet to the dataset search 🚧 requires datasets reindexation [#2523](https://github.com/opendatateam/udata/pull/2523)
+
+## 2.2.0 (2020-08-05)
+
 - CORS are now handled by Flask-CORS instead of Flask-RestPlus[#2485](https://github.com/opendatateam/udata/pull/2485)
 - Oauth changes [#2510](https://github.com/opendatateam/udata/pull/2510):
   - Authorization code Grant now support PKCE flow
@@ -11,7 +25,8 @@
   - Deleting a resource now triggers the deletion of the corresponding static file
   - Deleting a dataset now triggers the deletion of the corresponding resources (including community resources) and their static files
   - Adding a celery job `purge-orphan-community-resources` to remove community resources not linked to a dataset. This should be scheduled regularly.
-  - Adding a migration file to populate resources fs_filename new field. Scripts to delete the orphaned files are available [here](https://gist.github.com/quaxsze/dc089e4ecd2e00f82acea573d8d2cfb9).
+  - Adding a migration file to populate resources fs_filename new field. Deleting the orphaned files is pretty deployment specific.
+    A custom script should be writen in order to find and delete those files.
 - Show traceback for migration errors [#2513](https://github.com/opendatateam/udata/pull/2513)
 - Add `schema` field to ressources. This field can be filled based on an external schema catalog [#2512](https://github.com/opendatateam/udata/pull/2512)
 - Add 2 new template hooks: `base.modals` (base template) and `dataset.resource.card.extra-buttons` (dataset resource card) [#2514](https://github.com/opendatateam/udata/pull/2514)
