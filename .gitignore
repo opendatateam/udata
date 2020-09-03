@@ -57,3 +57,6 @@ nosetests.xml
 .project
 .pydevproject
 .noseids
+
+udata.cfg
+stylemark/

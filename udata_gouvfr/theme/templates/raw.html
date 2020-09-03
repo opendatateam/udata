@@ -8,13 +8,9 @@
     {% from theme('macros/metadata.html') import metadata with context %}
     {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ manifest('theme', 'common.css') }}">
-    {% if bundle_css is in_manifest('theme') %}
-    <link rel="stylesheet" href="{{ manifest('theme', '{0}.css'.format(bundle)) }}">
-    {% endif %}
     {% block extra_css %}{% endblock %}
     {% block theme_css %}
-    <link href="{{ manifest('theme', 'theme.css') }}" rel="stylesheet">
+    <link href="{{ theme_static('index.css') }}" rel="stylesheet">
     <link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
     {% endblock %}
     {# ATOM Feeds #}

@@ -1,0 +1,49 @@
+.footer {
+    .logo-etalab {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        svg {
+            width: 150px;
+        }
+
+        //Somehow, if we call it back-to-top, it disappears.
+        //Weird, right ?!
+        .back-to-t {
+            svg {
+                width: 52px;
+                height: 52px;
+            }
+        }
+    }
+
+    .lang-picker {
+        text-align: right;
+    }
+
+    ul {
+        li {
+            a {
+                color: @grey-400;
+                font-size: @font-size-sm;
+            }
+        }
+    }
+
+    p {
+        color: @grey-300;
+        font-size: @font-size-sm;
+        margin: 0;
+    }
+
+    strong {
+        font-size: @font-size-sm;
+        font-weight: @font-weight-normal;
+    }
+
+    //Vertical align because of the absence of title here
+    section.col-3.pt-md {
+        padding-top: 2em;
+    }
+}

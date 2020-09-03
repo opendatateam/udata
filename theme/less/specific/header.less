@@ -1,0 +1,67 @@
+.nav-header {
+    border-bottom: 1px solid @grey-200;
+
+    .header-logo {
+        display: flex;
+        align-items: center;
+        color: @grey-400;
+
+        svg {
+            height: 55px;
+            fill: unset;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .mobile-menu {
+            display: none;
+
+            svg {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        @media @query-hg {
+            justify-content: space-between;
+            padding: 0 @spacing-md;
+
+            .mobile-menu {
+                display: unset;
+            }
+
+            //To horizontally center, we create a fake third element
+            &::after {
+                content: " ";
+            }
+        }
+
+        .logotype {
+            height: 24px;
+        }
+    }
+
+    .login-box {
+        display: flex;
+        justify-content: flex-end;
+
+        a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: @grey-300;
+            font-weight: @font-weight-bold;
+        }
+
+        .search-box {
+            border-left: 1px solid @grey-200;
+
+            svg {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    }
+}
