@@ -1,21 +1,34 @@
 {# Totally modified #}
+{% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
 
 <article class="dataset-card">
+    {% if dataset.organization %}
     <div class="card-logo">
-        <img src="https://static.data.gouv.fr/avatars/3c/2a35d973814c2681b6941e11810ff3-100.png" />
+        <img src="{{ dataset.organization.logo(100, external=True)|placeholder('organization', external=True) }}" alt="{{ dataset.organization.name }}" />
     </div>
+    {% elif dataset.owner %}
+    <div class="card-logo">
+        <img src="{{ dataset.owner.avatar(100)|placeholder('user') }}" alt="{{ dataset.owner.fullname }}" />
+    </div>
+    {% else %}
+    <div class="card-logo">
+        <img src="{{ ''|placeholder('organization', external=True) }}" alt=""/>
+    </div>
+    {% endif %}
     <div class="card-cert p-xl p-lg-md">
         {% include theme("svg/certified.svg") %}
     </div>
     <div class="card-data">
         <h4 class="card-body">
-            Données « temps réel » de mesure des concentrations de polluants atmosphériques réglementés
+            {{ dataset.full_title }}
         </h4>
         <div class="card-footer">
             <ul class="card-features">
-                <li>252 ressources</li>
-                <li>2 réutilisations</li>
+                <li>{{ dataset.resources | length  }} {{ _('@@ressources') }}</li>
+                <li>{{ dataset.metrics.reuses or 0 }} {{ _('@@réutilisations') }}</li>
             </ul>
         </div>
     </div>
 </article>
+
+{% endcache %}

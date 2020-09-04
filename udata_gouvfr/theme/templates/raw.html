@@ -33,10 +33,6 @@
   <body class="{{body_class}} theme-{{current_theme.variant}}">
     {% block body %}{% endblock %}
 
-    <script src="{{ manifest('theme', 'common.js') }}"></script>
-    {% if bundle_js is in_manifest('theme') %}
-    <script src="{{ manifest('theme', '{0}.js'.format(bundle)) }}"></script>
-    {% endif %}
     {% block extra_js %}{% endblock %}
 
     {{ hook('footer.snippets') }}

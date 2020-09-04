@@ -24,14 +24,13 @@
 </section>
 #}
 {# End Carousels section #}
-
 <section class="default hidden">
     <div class="container">
 
         {# First row #}
         <div class="row first-row">
 
-            {# {% if current_site.settings.home_reuses.length %} #}
+            {% if current_site.settings.home_reuses.length %}
             <div class="col-xs-12">
                 <h3>{{ _('Best reuse cases') }}</h3>
 
@@ -46,7 +45,7 @@
                     </ul>
                 </div>
             </div>
-            {# {% endif %} #}
+            {% endif %}
 
             {# Last reuses #}
             <div class="col-xs-12">
@@ -168,11 +167,12 @@
 </div>
 
 {# Datasets section #}
-{# {% set nb_datasets = current_site.settings.home_datasets|length %} #}
-{# {% set dataset_tabs = (
+{% set nb_datasets = current_site.settings.home_datasets|length %}
+{% set dataset_tabs = (
     ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
     ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
-) %} #}
+) %}
+
 <section class="container datasets py-hg">
     {# Dataset tabs #}
     <div class="row">
@@ -181,58 +181,34 @@
         </div>
         <div class="col-10 col-lg-4">
             <nav class="tabs">
-                <a href="#" class="tab hidden-lg">{{ _('Jeux de données à la une') }}</a>
+                <a href="#" class="tab active hidden-lg">{{ _('Jeux de données à la une') }}</a>
                 <a href="#" class="tab hidden-lg">{{ _('Derniers jeux de données') }}</a>
                 <a href="#" class="tab hidden-lg">{{ _('Jeux de données de référence') }}</a>
                 <a href="#" class="tab">{{ _('Voir plus') }}</a>
                 {# {% for tab_id, label, _, _ in dataset_tabs %}
-                            <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %}">{{ label }}</a>
-                        {% endfor %} #}
+                    <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %}">{{ label }}</a>
+                {% endfor %} #}
             </nav>
         </div>
     </div>
-    <div class="row tab-content pt-xl pt-md-md">
+    {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
+    <div class="row tab-content pt-xl pt-md-md {% if loop.first %}active{% endif %}">
+        {% for dataset in datasets %}
         <div class="col-lg-12 col-6">
             {% include theme('dataset/card.html') %}
         </div>
-        <div class="col-lg-12 col-6">
-            {% include theme('dataset/card.html') %}
-        </div>
-        <div class="col-lg-12 col-6">
-            {% include theme('dataset/card.html') %}
-        </div>
-        <div class="col-lg-12 col-6">
-            {% include theme('dataset/card.html') %}
-        </div>
-        <div class="col-lg-12 col-6">
-            {% include theme('dataset/card.html') %}
-        </div>
-        <div class="col-lg-12 col-6">
-            {% include theme('dataset/card.html') %}
-        </div>
-        {# {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
-                <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-                    <div class="card-list card-list--columned">
-
-                        {% for dataset in datasets %}
-                        <div class="col-xs-12 col-md-4 col-sm-6">
-                            {% include theme('dataset/card.html') %}
-                        </div>
-                        {% endfor %}
-
-                    </div>
-
-                    {#
-                    <div class="clearfix"></div>
-                    <p class="text-center">
-                        <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default">
-                            <span class="fa fa-fw fa-list" ></span>
-                            {{ _('See more') }}
-                        </a>
-                    </p>
-                </div>
-                {% endfor %} #}
+        {% endfor %}
+        {#
+        <div class="clearfix"></div>
+        <p class="text-center">
+            <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default">
+                <span class="fa fa-fw fa-list" ></span>
+                {{ _('See more') }}
+            </a>
+        </p> 
+        #}
     </div>
+    {% endfor %}
     {# end Dataset tabs #}
 </section>
 {# End datasets section #}
