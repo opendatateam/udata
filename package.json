@@ -14,7 +14,9 @@
     "build": "npm run-script build-style && npm run-script build-stylemark",
     "start": "npm run-script dev"
   },
-  "dependencies": {},
+  "dependencies": {
+    "yargs": "^15.4.1"
+  },
   "devDependencies": {
     "autoprefixer": "^9.8.6",
     "browserslist": "^4.0.0",
