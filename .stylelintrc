@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    "stylelint-no-unsupported-browser-features"
+  ],
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-rational-order"
+  ],
+  "rules": {
+    "indentation": 4
+  }
+}
