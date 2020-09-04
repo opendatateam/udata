@@ -7,27 +7,27 @@
   "scripts": {
     "format": "stylelint 'theme/less/**/*.less' --fix",
     "check-rules": "stylelint 'theme/less/**/*.less' --config .stylelintrc_browser",
-    "watch-style": "parcel theme/less/index.less -d udata_gouvfr/theme/static/",
+    "watch-style": "parcel theme/js/index.js theme/less/index.less -d udata_gouvfr/theme/static/",
     "build-stylemark": "parcel build theme/less/index.less -d udata_gouvfr/theme/static/stylemark --no-minify && stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark/ -o udata_gouvfr/theme/stylemark/",
-    "build-style": "parcel build theme/less/index.less -d udata_gouvfr/theme/static/",
-    "dev": "concurrently --restart-tries 5 'npm:watch-style'",
+    "build-style": "parcel build theme/less/index.less theme/js/index.js -d udata_gouvfr/theme/static/",
+    "dev": "npm run-script watch-style",
     "build": "npm run-script build-style && npm run-script build-stylemark",
     "start": "npm run-script dev"
   },
   "dependencies": {
+    "vue": "^2.6.12",
     "yargs": "^15.4.1"
   },
   "staticFiles": {
     "staticPath": [
-      "theme"
-    ],
-    "excludeGlob": [
-      "less",
-      "less/**"
-    ],
-    "staticOutDir": "udata_gouvfr/theme/static/"
+      {
+        "staticPath": "theme/img",
+        "staticOutDir": "/img/"
+      }
+    ]
   },
   "devDependencies": {
+    "@vue/component-compiler-utils": "^3.2.0",
     "autoprefixer": "^9.8.6",
     "browserslist": "^4.0.0",
     "concurrently": "^5.3.0",
@@ -47,6 +47,8 @@
     "stylelint-config-standard": "^20.0.0",
     "stylelint-no-unsupported-browser-features": "^4.0.0",
     "stylelint-order": "^4.1.0",
-    "stylemark": "^3.1.7"
+    "stylemark": "^3.1.7",
+    "vue-template-compiler": "^2.6.12",
+    "vue-hot-reload-api": "^2.3.4"
   }
 }

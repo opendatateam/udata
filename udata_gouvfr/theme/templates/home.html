@@ -180,6 +180,7 @@
             <h3>{{ _('Données') }}</h3>
         </div>
         <div class="col-10 col-lg-4">
+            <tabs>
             <nav class="tabs">
                 <a href="#" class="tab active hidden-lg">{{ _('Jeux de données à la une') }}</a>
                 <a href="#" class="tab hidden-lg">{{ _('Derniers jeux de données') }}</a>
@@ -189,6 +190,7 @@
                     <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %}">{{ label }}</a>
                 {% endfor %} #}
             </nav>
+        </tabs>
         </div>
     </div>
     {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
