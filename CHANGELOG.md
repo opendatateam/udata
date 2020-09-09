@@ -3,6 +3,9 @@
 ## Current (in progress)
 
 - Plugin's translations are now correctly loaded [#2529](https://github.com/opendatateam/udata/pull/2529)
+- Fix reuses metrics [#2531](https://github.com/opendatateam/udata/pull/2531):
+    - Reuses "datasets" metrics are now triggered correctly
+    - New job to update the datasets "reuses" metrics
 
 ## 2.2.1 (2020-08-25)
 
