@@ -3,7 +3,6 @@ from datetime import datetime
 from udata.models import Reuse
 
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.core.issues.factories import IssueFactory
@@ -64,7 +63,6 @@ class ReuseModelTest(TestCase, DBTestMixin):
             reuse.save()
     
     def test_reuse_metrics(self):
-        dataset = DatasetFactory()
         reuse = VisibleReuseFactory()
         issue = IssueFactory(subject=reuse)
         DiscussionFactory(subject=reuse)
