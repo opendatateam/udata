@@ -106,6 +106,8 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @classmethod
     def post_save(cls, sender, document, **kwargs):
+        if 'post_save' in kwargs.get('ignores', []):
+            return
         cls.after_save.send(document)
         if kwargs.get('created'):
             cls.on_create.send(document)
@@ -184,7 +186,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     
     def count_datasets(self):
         self.metrics['datasets'] = len(self.datasets)
-        self.save()
+        self.save(signal_kwargs={'ignores': ['post_save']})
 
     def count_discussions(self):
         from udata.models import Discussion

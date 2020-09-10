@@ -76,10 +76,3 @@ class ReuseModelTest(TestCase, DBTestMixin):
         assert reuse.get_metrics()['datasets'] == 1
         assert reuse.get_metrics()['issues'] == 1
         assert reuse.get_metrics()['discussions'] == 1
-
-        with assert_emit(Reuse.on_update):
-            reuse.datasets.append(dataset)
-            reuse.save()
-        reuse.count_datasets()
-        assert reuse.get_metrics()['datasets'] == 2
-
