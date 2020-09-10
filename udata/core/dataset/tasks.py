@@ -115,7 +115,8 @@ def send_frequency_reminder(self):
 
 @job('update-datasets-reuses-metrics')
 def update_datasets_reuses_metrics(self):
-    for dataset in Dataset.objects():
+    all_datasets = Dataset.objects.visible().timeout(False)
+    for dataset in all_datasets:
         dataset.count_reuses()
 
 
