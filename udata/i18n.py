@@ -1,7 +1,7 @@
 import pkgutil
 
 from contextlib import contextmanager
-from os.path import exists, join
+from os.path import exists, join, dirname
 from glob import iglob
 
 from flask import (  # noqa
@@ -19,7 +19,6 @@ from babel.support import NullTranslations, Translations
 from flask_babelex import Babel, Domain, refresh
 from flask_babelex import format_date, format_datetime  # noqa
 from flask_babelex import get_locale as get_current_locale  # noqa
-# from flask_restplus import cors
 
 from werkzeug.local import LocalProxy
 
@@ -70,7 +69,7 @@ class PluggableDomain(Domain):
 
                 for pkg in entrypoints.get_roots(current_app):
                     loader = pkgutil.get_loader(pkg)
-                    path =   join(loader.path, 'translations')
+                    path = join(dirname(loader.path), 'translations')
                     domains = [f.replace(path, '').replace('.pot', '')[1:]
                                for f in iglob(join(path, '*.pot'))]
                     for domain in domains:
@@ -101,17 +100,20 @@ babel = Babel(default_domain=domain)
 def gettext(*args, **kwargs):
     return domain.gettext(*args, **kwargs)
 
+
 _ = gettext
 
 
 def ngettext(*args, **kwargs):
     return domain.ngettext(*args, **kwargs)
 
+
 N_ = ngettext
 
 
 def pgettext(*args, **kwargs):
     return domain.pgettext(*args, **kwargs)
+
 
 P_ = pgettext
 
@@ -122,6 +124,7 @@ def npgettext(*args, **kwargs):
 
 def lazy_gettext(*args, **kwargs):
     return domain.lazy_gettext(*args, **kwargs)
+
 
 L_ = lazy_gettext
 

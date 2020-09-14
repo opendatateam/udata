@@ -2,8 +2,10 @@ from datetime import datetime
 
 from udata.models import Reuse
 
+from udata.core.dataset import tasks as dataset_tasks
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.user.factories import UserFactory
 from udata.core.issues.factories import IssueFactory
 from udata.core.discussions.factories import DiscussionFactory
@@ -63,6 +65,7 @@ class ReuseModelTest(TestCase, DBTestMixin):
             reuse.save()
     
     def test_reuse_metrics(self):
+        dataset = VisibleDatasetFactory()
         reuse = VisibleReuseFactory()
         issue = IssueFactory(subject=reuse)
         DiscussionFactory(subject=reuse)
@@ -75,3 +78,20 @@ class ReuseModelTest(TestCase, DBTestMixin):
         assert reuse.get_metrics()['issues'] == 1
         assert reuse.get_metrics()['discussions'] == 1
 
+        with assert_emit(Reuse.on_update):
+            reuse.datasets.append(dataset)
+            reuse.save()
+        
+        reuse.count_datasets()
+        assert reuse.get_metrics()['datasets'] == 2
+
+        dataset.count_reuses()
+        assert dataset.get_metrics()['reuses'] == 1
+
+        with assert_emit(Reuse.on_update):
+            reuse.datasets.remove(dataset)
+            reuse.save()
+
+        dataset_tasks.update_datasets_reuses_metrics()
+        dataset.reload()
+        assert dataset.get_metrics()['reuses'] == 0
