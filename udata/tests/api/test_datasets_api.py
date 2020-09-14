@@ -868,6 +868,7 @@ class DatasetResourceAPITest(APITestCase):
             response = self.delete(url_for('api.resource',
                                            dataset=self.dataset,
                                            rid=str(resource.id)))
+
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
