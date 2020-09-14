@@ -873,29 +873,6 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(self.dataset.resources), 0)
         self.assertEqual(list(storages.resources.list_files()), [])
 
-    def test_delete_function(self):
-        resource = ResourceFactory()
-        self.dataset.resources.append(resource)
-        self.dataset.save()
-        with self.api_user():
-            upload_response = self.post(
-                url_for(
-                    'api.upload_dataset_resource',
-                    dataset=self.dataset,
-                    rid=str(resource.id)
-                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
-
-            data = json.loads(upload_response.data)
-            self.assertEqual(data['title'], 'test.txt')
-
-        res = get_resource(resource.id)
-        self.dataset.remove_resource(res)
-        self.dataset.save()
-
-        self.dataset.reload()
-        self.assertEqual(len(self.dataset.resources), 0)
-        self.assertEqual(list(storages.resources.list_files()), [])
-
     def test_delete_404(self):
         with self.api_user():
             response = self.delete(url_for('api.resource',
