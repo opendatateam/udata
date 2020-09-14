@@ -674,8 +674,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             storages.resources.delete(resource.fs_filename)
 
         self.resources.remove(resource)
-        self.last_modified = datetime.now()
-        self.save()
 
     @property
     def community_resources(self):

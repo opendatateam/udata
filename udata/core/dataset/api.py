@@ -366,6 +366,8 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         dataset.remove_resource(resource)
+        dataset.last_modified = datetime.now()
+        dataset.save()
         return '', 204
 
 

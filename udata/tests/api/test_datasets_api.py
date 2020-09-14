@@ -14,7 +14,7 @@ from udata.core import storages
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
-from udata.core.dataset.models import RESOURCE_FILETYPE_FILE, ResourceMixin
+from udata.core.dataset.models import RESOURCE_FILETYPE_FILE, ResourceMixin, get_resource
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
@@ -850,7 +850,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
-    def test_delete(self):
+    def test_delete_api(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
@@ -868,8 +868,31 @@ class DatasetResourceAPITest(APITestCase):
             response = self.delete(url_for('api.resource',
                                            dataset=self.dataset,
                                            rid=str(resource.id)))
-
         self.assertStatus(response, 204)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.resources), 0)
+        self.assertEqual(list(storages.resources.list_files()), [])
+
+    def test_delete_function(self):
+        resource = ResourceFactory()
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        with self.api_user():
+            upload_response = self.post(
+                url_for(
+                    'api.upload_dataset_resource',
+                    dataset=self.dataset,
+                    rid=str(resource.id)
+                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+
+            data = json.loads(upload_response.data)
+            self.assertEqual(data['title'], 'test.txt')
+
+        res = get_resource(resource.id)
+        assert res is resource
+        self.dataset.remove_resource(res)
+        self.dataset.save()
+
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 0)
         self.assertEqual(list(storages.resources.list_files()), [])
