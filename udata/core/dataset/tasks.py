@@ -113,6 +113,13 @@ def send_frequency_reminder(self):
     print('Done')
 
 
+@job('update-datasets-reuses-metrics')
+def update_datasets_reuses_metrics(self):
+    all_datasets = Dataset.objects.visible().timeout(False)
+    for dataset in all_datasets:
+        dataset.count_reuses()
+
+
 def get_queryset(model_cls):
     # special case for resources
     if model_cls.__name__ == 'Resource':
