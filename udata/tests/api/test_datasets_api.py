@@ -14,7 +14,7 @@ from udata.core import storages
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
-from udata.core.dataset.models import RESOURCE_FILETYPE_FILE, ResourceMixin, get_resource
+from udata.core.dataset.models import RESOURCE_FILETYPE_FILE, ResourceMixin
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
@@ -850,7 +850,7 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
-    def test_delete_api(self):
+    def test_delete(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
