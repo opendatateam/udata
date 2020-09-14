@@ -889,7 +889,6 @@ class DatasetResourceAPITest(APITestCase):
             self.assertEqual(data['title'], 'test.txt')
 
         res = get_resource(resource.id)
-        assert res is resource
         self.dataset.remove_resource(res)
         self.dataset.save()
 
