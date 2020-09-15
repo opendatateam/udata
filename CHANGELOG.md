@@ -7,6 +7,7 @@
 - Fix reuses metrics [#2531](https://github.com/opendatateam/udata/pull/2531):
   - Reuses "datasets" metrics are now triggered correctly
   - New job to update the datasets "reuses" metrics: `update-datasets-reuses-metrics` to be scheduled
+- Add a specific dataset's method for resource removal [#2534](https://github.com/opendatateam/udata/pull/2534)
 
 ## 2.2.1 (2020-08-25)
 
