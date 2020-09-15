@@ -9,8 +9,8 @@ from flask_principal import PermissionDenied  # noqa: facade pattern
 from flask_principal import RoleNeed
 from flask_principal import UserNeed  # noqa: facade pattern
 
-from flask_security import (  # noqa
-    Security, current_user, login_required, login_user  # noqa
+from flask_security import ( # noqa
+    Security, current_user, login_required, login_user # noqa
 )
 from werkzeug.utils import import_string
 

@@ -8,6 +8,9 @@
   - Reuses "datasets" metrics are now triggered correctly
   - New job to update the datasets "reuses" metrics: `update-datasets-reuses-metrics` to be scheduled
 - Add a specific dataset's method for resource removal [#2534](https://github.com/opendatateam/udata/pull/2534)
+- Flask-Security update [#2535](https://github.com/opendatateam/udata/pull/2535):
+  - Switch to fork Flask-Security-Too
+  - New settings to set the required password length and complexity
 
 ## 2.2.1 (2020-08-25)
 

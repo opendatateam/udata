@@ -85,6 +85,8 @@ class Defaults(object):
     SECURITY_CHANGEABLE = True
 
     SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_LENGTH_MIN = 6
+    SECURITY_PASSWORD_COMPLEXITY_CHECKER = 'zxcvbn'
 
     SECURITY_PASSWORD_SALT = 'Default uData secret password salt'
     SECURITY_CONFIRM_SALT = 'Default uData secret confirm salt'
