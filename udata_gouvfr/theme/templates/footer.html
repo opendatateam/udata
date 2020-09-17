@@ -6,62 +6,31 @@
             <section class="col-3 col-hg-6 col-md-12 pt-md-md">
                 <h4>{{ _('The Open Data') }}</h4>
                 <ul>
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">Données de référence</a></li>
-                    <li><a href="#">Licences</a></li>
-                    <li><a href="#">API</a></li>
-                    <li><a href="#">Conditions générales d'utilisation</a></li>
-                    <li><a href="#">Politique de confidentialité</a></li>
-                    <li><a href="#">Catalogue des données</a></li>
-                    {# {% for item in nav.gouvfr_footer %}
+                    {% for item in nav.gouvfr_footer %}
                     <li>
                         <a href="{{ '' if item.items else item.url }}">{{ item.label }}</a>
-                        {% if item.items %}
-                        <ul>
-                            {% for subitem in item.items %}
-                            <li><a href="{{ subitem.url }}">{{ subitem.label }}</a></li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
                     </li>
-                    {% endfor %} #}
+                    {% endfor %}
                 </ul>
             </section>
             <section class="col-3 col-hg-6 col-md-12 pt-md-md">
                 <h4>{{ _('Topics') }}</h4>
                 <ul>
-                    <li><a href="#">Agriculture et alimentation</a></li>
-                    <li><a href="#">Culture, Communications</a></li>
-                    <li><a href="#">Comptes, Economie et Emploi</a></li>
-                    <li><a href="#">Education, Recherche, Formation</a></li>
-                    <li><a href="#">International, Europe</a></li>
-                    <li><a href="#">Environnement, Energie, Logement</a></li>
-                    <li><a href="#">Santé et Social</a></li>
-                    <li><a href="#">Société, Droit, Institutions</a></li>
-                    <li><a href="#">Territoires, Transports, Tourisme</a></li>
-                    {# {% for topic in g.featured_topics %}
+                    {% for topic in g.featured_topics %}
                     <li>
                         <a href="{{ url_for('topics.display', topic=topic) }}" title="{{ topic.name }}">
                             {{ topic.name }}
                         </a>
                     </li>
-                    {% endfor %} #}
+                    {% endfor %}
                 </ul>
             </section>
             <section class="col-3 col-hg-6 col-md-12 pt-md-md">
                 <h4>{{ _('Network') }}</h4>
                 <ul>
-                    <li><a href="#">Gouvernement.fr</a></li>
-                    <li><a href="#">France.fr</a></li>
-                    <li><a href="#">Legifrance.gouv.fr</a></li>
-                    <li><a href="#">Service-public.fr</a></li>
-                    <li><a href="#">Opendata France</a></li>
-                    <li><a href="#">CADA.fr</a></li>
-                    <li><a href="#">Gouvernement</a></li>
-                    <li><a href="#">Gouvernement</a></li>
-                    {# {% for item in nav.gouvfr_network %}
+                    {% for item in nav.gouvfr_network %}
                     <li><a href="{{ item.url }}">{{ item.label }}</a></li>
-                    {% endfor %} #}
+                    {% endfor %}
                 </ul>
             </section>
             <section class="col-3 col-hg-6 col-md-12 pt-md-md">
