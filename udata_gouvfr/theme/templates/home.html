@@ -24,104 +24,28 @@
 </section>
 #}
 {# End Carousels section #}
-<section class="default hidden">
-    <div class="container">
-
-        {# First row #}
-        <div class="row first-row">
-
-            {% if current_site.settings.home_reuses.length %}
-            <div class="col-xs-12">
-                <h3>{{ _('Best reuse cases') }}</h3>
-
-                <div class="row">
-                    <ul class="card-list card-list--columned">
-                        {# {% for reuse in current_site.settings.home_reuses %} #}
-                        {% set features = ['preview'] %}
-                        <li class="col-sm-4 col-xs-12">
-                            {% include theme('reuse/card.html') %}
-                        </li>
-                        {# {% endfor %} #}
-                    </ul>
-                </div>
-            </div>
-            {% endif %}
-
-            {# Last reuses #}
-            <div class="col-xs-12">
-                <h3>
-                    <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}">
-                        {{ _('Latest reuses') }}
-                    </a>
-                </h3>
-                <div class="row">
-                    <ul class="card-list card-list--columned">
-                        {# {% for reuse in recent_reuses[:3] %} #}
-                        {% set features = ['preview'] %}
-                        <li class="col-sm-4 col-xs-12">
-                            {% include theme('reuse/card.html') %}
-                        </li>
-                        {# {% endfor %} #}
-                    </ul>
-                </div>
-            </div>
-            {# End last reuses #}
-
-
-
-        </div>
-        {# end first row #}
-    </div>
-
-</section>
-
-{% if last_post %}
-{% set post = last_post %}
-<section class="highlight-bar">
-
-    <div class="photo-bg">
-        <img src="{{ post.image|placeholder('post') }}" alt="{{ post.name }}">
-    </div>
-    <div class="color-overlay"></div>
-
-    <div class="container">
-        <div class="row">
-            <div class="photo hidden-xs col-xs-4">
-                <img src="{{ post.image|placeholder('post') }}" alt="{{ post.name }}">
-            </div>
-
-            <div class="body col-sm-8">
-                <label>{{ _('News in data') }}</label>
-                <h3 class="title">
-                    <a href="{{ url_for('posts.show', post=post) }}" title="{{ post.name }}">
-                        {{ post.name }}
-                    </a>
-                </h3>
-                <p>{{(post.headline or post.content)|mdstrip(280)}}</p>
-            </div>
-        </div>
-    </div>
-</section>
-{% endif %}
-
 <section class="hero py-xl py-lg-lg">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-5 col-lg-12">
-                <h1 class="mb-lg-md">Plateforme ouverte des données publiques françaises</h1>
+                <h1 class="mb-lg-md">{{ _('@@Plateforme ouverte des données publiques françaises') }}</h1>
                 <form action="#" class="hero-search">
                     <input type="text" placeholder="Recherche" />
                 </form>
             </div>
             <div class="col-6 offset-1 offset-lg-0 mt-lg-lg col-lg-12 text-align-center">
-                <div class="hero-news mb-xl" style="background-image: url('https://placekitten.com/700/900');">
+                {% if last_post %}
+                {% set post = last_post %}
+                {% set image = post.image|placeholder('post') %}
+                <div class="hero-news mb-xl" style="background-image: url('{{image}}')">
                     <div class="news-content">
-                        <strong class="text-yellow-100 fs-md">L'actualité en données</strong>
-                        <h2 class="my-md text-white">Retour sur les activités de data.gouv.fr en 2019</h2>
-                        <a class="btn-primary mt-md">Voir plus</a>
+                        <strong class="text-yellow-100 fs-md">{{ _('News in data') }}</strong>
+                        <h2 class="my-md text-white fs-hg">{{ post.name }}</h2>
+                        <a class="btn-primary mt-md" href="{{ url_for('posts.show', post=post) }}" title="{{ post.name }}">{{ _('See more') }}</a>
                     </div>
                 </div>
-                <a href="#" class="nav-link">toutes les actualités</a>
+                <a href="{{ url_for('posts.list') }}" class="nav-link">{{ _('@@toutes les actualités') }}</a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -177,43 +101,39 @@
     {# Dataset tabs #}
     <div class="row">
         <div class="col-2 col-lg-8">
-            <h3>{{ _('Données') }}</h3>
+            <h3>{{ _('@@Données') }}</h3>
         </div>
         <div class="col-10 col-lg-4">
-            <tabs>
             <nav class="tabs">
-                <a href="#" class="tab active hidden-lg">{{ _('Jeux de données à la une') }}</a>
-                <a href="#" class="tab hidden-lg">{{ _('Derniers jeux de données') }}</a>
+                {% for tab_id, label, _, _ in dataset_tabs %}
+                    <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                {% endfor %}
                 <a href="#" class="tab hidden-lg">{{ _('Jeux de données de référence') }}</a>
-                <a href="#" class="tab">{{ _('Voir plus') }}</a>
-                {# {% for tab_id, label, _, _ in dataset_tabs %}
-                    <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %}">{{ label }}</a>
-                {% endfor %} #}
+                <a href="{{ url_for('datasets.list') }}" class="tab">{{ _('See more') }}</a>
             </nav>
-        </tabs>
         </div>
     </div>
     {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
-    <div class="row tab-content pt-xl pt-md-md {% if loop.first %}active{% endif %}">
-        {% for dataset in datasets %}
-        <div class="col-lg-12 col-6">
-            {% include theme('dataset/card.html') %}
+    <div class="tab-content {% if loop.first %}active{% endif %}" id={{tab_id}}>
+        <div class="row pt-xl pt-md-md">
+            {% for dataset in datasets %}
+            <div class="col-lg-12 col-6">
+                <a class="unstyled" href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.name }}">{% include theme('dataset/card.html') %}</a>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-        {#
-        <div class="clearfix"></div>
-        <p class="text-center">
-            <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default">
-                <span class="fa fa-fw fa-list" ></span>
-                {{ _('See more') }}
-            </a>
-        </p> 
-        #}
     </div>
     {% endfor %}
     {# end Dataset tabs #}
 </section>
 {# End datasets section #}
+
+{# Datasets section #}
+{% set nb_reuses = current_site.settings.home_reuses|length %}
+{% set reuses_tabs = (
+    ('best-reuses', _('@@Selection Etalab'), current_site.settings.home_reuses, {}),
+    ('latest-reuses', _('Latest reuses'), recent_reuses[:3], {'sort': '-created'}),
+) %}
 
 {# Reuse section #}
 <section class="reuse py-md">
@@ -224,28 +144,27 @@
             </div>
             <div class="col-10 col-lg-4">
                 <nav class="tabs">
-                    <a href="#" class="tab hidden-lg">{{ _('Selection Etalab') }}</a>
-                    <a href="#" class="tab hidden-lg">{{ _('Dernières réutilisations') }}</a>
-                    <a href="#" class="tab">{{ _('Voir plus') }}</a>
+                    {% for tab_id, label, _, _ in reuses_tabs %}
+                        <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                    {% endfor %}
+                    <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}" class="tab">{{ _('Voir plus') }}</a>
                 </nav>
             </div>
         </div>
     </div>
     <div class="container reuse-cards">
-        <div class="row tab-content pt-xl pt-md-md">
-            <div class="col-3">
-                {% include theme('reuse/card.html') %}
+        {% for tab_id, label, reuses, kwargs in reuses_tabs  %}
+            <div class="tab-content  {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+                <div class="row pt-xl pt-md-md">
+                    {% for reuse in reuses %}
+                        {% set features = ['preview'] %}
+                        <div class="col-3">
+                            {% include theme('reuse/card.html') %}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="col-3">
-                {% include theme('reuse/card.html') %}
-            </div>
-            <div class="col-3">
-                {% include theme('reuse/card.html') %}
-            </div>
-            <div class="col-3">
-                {% include theme('reuse/card.html') %}
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </section>
 {# End reuse section #}
@@ -256,20 +175,24 @@
     <div class="container py-hg">
         <div class="row align-items-center">
             <div class="col-6 col-sm-12 mb-sm-lg text-white">
-                <h3 class="mb-0">Découvrez</h3>
+                <h3 class="mb-0">{{ _('@@Découvrez') }}</h3>
             </div>
             <div class="col-3 col-sm-12">
                 <ul class="nav-list fs-md">
-                    <li><a href="#" class="nav-link text-decoration-none text-white">transport.data.gouv.fr</a></li>
-                    <li><a href="#" class="nav-link text-decoration-none text-white">entreprise.data.gouv.fr</a></li>
-                    <li><a href="#" class="nav-link text-decoration-none text-white">transport.data.gouv.fr</a></li>
+                        {% for item in nav.gouvfr_network %}
+                            {% if (loop.index % 2 == 1) %}
+                                <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a></li>
+                            {% endif %}
+                        {% endfor %}
                 </ul>
             </div>
-            <div class="col-3 col-sm-12">
+            <div class="col-3 col-sm-12 self-start">
                 <ul class="nav-list fs-md">
-                    <li><a href="#" class="nav-link text-decoration-none text-white">transport.data.gouv.fr</a></li>
-                    <li><a href="#" class="nav-link text-decoration-none text-white">entreprise.data.gouv.fr</a></li>
-                    <li><a href="#" class="nav-link text-decoration-none text-white">transport.data.gouv.fr</a></li>
+                        {% for item in nav.gouvfr_network %}
+                            {% if (loop.index % 2 == 0) %}
+                                <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a></li>
+                            {% endif %}
+                        {% endfor %}
                 </ul>
             </div>
         </div>
@@ -282,23 +205,15 @@
 {# Probably subnav-large #}
 <section class="topics p-xl px-xl-0 py-xl-lg bg-blue-100">
     <div class="container">
-        <h3>Thématiques</h3>
+        <h3>{{_('Topics')}}</h3>
         <ul class="row fs-lg">
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Agriculture et alimentation</a>
+            {% for topic in g.featured_topics %}
+            <li class="col-6 col-lg-12 pb-xs">
+                <a class="text-grey-400" href="{{ url_for('topics.display', topic=topic) }}" title="{{ topic.name }}">
+                    {{ topic.name }}
+                </a>
             </li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Culture, Communications</a></li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Comptes, Economie et Emploi</a>
-            </li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Education, Recherche,
-                    Formation</a></li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">International, Europe</a></li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Environnement, Energie,
-                    Logement</a></li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Santé et Social</a></li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Société, Droit, Institutions</a>
-            </li>
-            <li class="col-6 col-lg-12 pb-xs"><a href="#" class="text-grey-400">Territoires, Transports,
-                    Tourisme</a></li>
+            {% endfor %}
     </div>
     </div>
 </section>
