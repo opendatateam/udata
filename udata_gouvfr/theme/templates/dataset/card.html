@@ -16,7 +16,9 @@
     </div>
     {% endif %}
     <div class="card-cert p-xl p-lg-md">
-        {% include theme("svg/certified.svg") %}
+        {% if dataset.organization.public_service %}
+            {% include theme("svg/certified.svg") %}
+        {% endif %}
     </div>
     <div class="card-data">
         <h4 class="card-body">
