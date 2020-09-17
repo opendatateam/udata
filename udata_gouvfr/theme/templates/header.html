@@ -15,19 +15,20 @@
                         {% include theme('svg/burger-menu.svg') %}
                     </a>
                 </nav>
-                <a href="{{ url_for('site.home') }}" title="_('Retourner à l'accueil de data.gouv.fr')" class="p-xs">
+                <a href="{{ url_for('site.home') }}" title="{{ _('@@Retourner à l\'accueil de data.gouv.fr') }}" class="p-xs">
                     {% include theme('svg/marianne.svg') %} {% include theme('svg/logotype.svg') %}
                 </a>
             </div>
             <nav class="nav-tabs col hidden-hg">
-                <a class="tab active" href="#">Données</a>
-                <a class="tab" href="#">Réutilisations</a>
-                <a class="tab" href="#">Organisations</a>
+                {# TODO : active tab #}
+                {% for item in current_theme.menu %}
+                <a class="tab {% if loop.first %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
+                {% endfor %}
             </nav>
             <div class="col-3 login-box hidden-hg">
                 <a href="{{ url_for('security.login', next=request.url) }}" title="{{ _('Sign In / Register') }}"
                     class="mr-md">
-                    {{ _('Se connecter') }}
+                    {{ _('@@Se connecter') }}
                 </a>
                 <a class="search-box px-lg" href="#">
                     {% include theme('svg/search.svg') %}
