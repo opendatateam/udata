@@ -1,0 +1,73 @@
+@import "variables";
+
+@font-face {
+  font-family: 'udata-oembed';
+  src:
+    url('@{icomoon-font-path}/udata-oembed.ttf?hg673o') format('truetype'),
+    url('@{icomoon-font-path}/udata-oembed.woff?hg673o') format('woff'),
+    url('@{icomoon-font-path}/udata-oembed.svg?hg673o#udata-oembed') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.fa {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'udata-oembed' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fa-star {
+  &:before {
+    content: @fa-star; 
+  }
+}
+.fa-user {
+  &:before {
+    content: @fa-user; 
+  }
+}
+.fa-file-o {
+  &:before {
+    content: @fa-file-o; 
+  }
+}
+.fa-map-marker {
+  &:before {
+    content: @fa-map-marker; 
+  }
+}
+.fa-calendar {
+  &:before {
+    content: @fa-calendar; 
+  }
+}
+.fa-retweet {
+  &:before {
+    content: @fa-retweet; 
+  }
+}
+.fa-spinner {
+  &:before {
+    content: @fa-spinner; 
+  }
+}
+.fa-bullseye {
+  &:before {
+    content: @fa-bullseye; 
+  }
+}
+.fa-cubes {
+  &:before {
+    content: @fa-cubes; 
+  }
+}
+

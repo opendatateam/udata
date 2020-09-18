@@ -1,0 +1,297 @@
+// Search results
+ul.search-results {
+    padding-left: 0;
+    list-style: none;
+
+    .search-result {
+        position: relative;
+        border-bottom: 1px solid #F0F0F0;
+        overflow: hidden;
+        zoom: 1;
+        padding: 18px 10px 18px 0px;
+        @hover-bg-color: #f3f3f3;
+
+
+        &:first-of-type {
+           padding-top: 8px;
+
+           img.certified {
+                top: 0;
+            }
+        }
+        &:last-of-type {
+           border: none;
+           padding-bottom: 10px;
+        }
+        &:hover {
+            background-color: @hover-bg-color;
+            box-shadow: -8px 0px @hover-bg-color;
+        }
+
+        @logo-size: 70px;
+
+        .result-logo {
+            display: table-cell;
+            text-align: center;
+            line-height: 77px;
+            width: @logo-size + 10px;
+            height: @logo-size + 10px;
+            border: 1px solid @gray-lighter;
+            background-color: white;
+
+            img {
+                max-width: 70px;
+                max-height: 70px;
+            }
+        }
+
+        img.certified {
+            position: absolute;
+            top: 10px;
+            left: @logo-size * 3/ 4;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+        }
+
+        .result-body {
+            padding-left: 93px;
+            color: #4f4f4f;
+            max-height: 60px;
+
+            .result-title {
+                margin: 0 0 5px;
+                line-height: 17px;
+                font-size: 14px;
+                color: #494949;
+                font-weight: bold;
+            }
+
+            .result-description.clamp-2 {
+                font-size: 13px;
+                .clamp-sizing(2, 15px);
+            }
+        }
+
+        a:hover {
+            text-decoration: none;
+
+            .result-title {
+                text-decoration: underline;
+            }
+        }
+
+        .result-infos {
+            @color: #6a6a6a;
+            padding-left: 93px;
+            display: block;
+            width: 100%;
+            height: 24px;
+            line-height: 25px;
+            font-weight: bold;
+            font-size: 12px;
+            color: @color;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            position: absolute;
+            bottom: 16px;
+
+            .fa {
+                background: none !important;
+                color: #bababa;
+            }
+
+            &:after {
+                background: linear-gradient(to right, rgba(255, 255, 255, 0), white 80%);
+                content: "";
+                height: 100%;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 35px;
+            }
+
+        }
+
+
+        &:hover {
+            .result-body .result-description.clamp-2 {
+                .clamp-color(@hover-bg-color);
+            }
+            .result-infos {
+                .clamp-color(@hover-bg-color);
+            }
+        }
+    }
+}
+
+.list-search-bar {
+    .form-group {
+        margin-bottom: 5px;
+    }
+}
+
+.label-list {
+    .label {
+        display: inline-block;
+        margin-right: 5px;
+
+        .close-icon {
+            color: white;
+
+            &:hover {
+                color: red;
+            }
+        }
+        margin-bottom: 10px;
+    }
+}
+
+.advanced-search-panel {
+    .list-group {
+        margin-bottom: 0;
+
+        .list-group-item {
+            // Fix the badge position on long facet labels
+            &:not(.more) {
+                @padding:15px; // Hard coded in bootstrap list-group component
+                padding-right: @padding + 37px;
+                position: relative;
+
+                .badge, .fa-times {
+                    position: absolute;
+                    top: 50%;
+                    right: @padding;
+                    transform: translateY(-50%);
+                }
+
+                .fa-times:hover {
+                    color: red;
+                }
+            }
+
+            // Center the more button
+            &.more {
+                text-align: center;
+            }
+        }
+
+        .list-group-more {
+            // Fix bootstrap hiding first border
+            .list-group-item:first-child {
+                border-top-width: 1px;
+            }
+        }
+    }
+
+    .btn-remove:hover {
+        color: red;
+    }
+}
+
+.btn-sorter {
+    color: @gray;
+    background: none !important;
+    border: 1px solid @gray !important;
+
+    font-size: 11px;
+    padding: 2px 8px;
+    margin-left: 2px;
+    min-width: 138px;
+    text-align: left;
+
+    span.fa {
+        float: right;
+        position: relative;
+        top: 3px;
+        right: -3px;
+    }
+}
+
+
+.search-toolbar {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    z-index: 100;
+}
+
+.multisearch {
+
+    section.breadcrumb-bar {
+        @height: 42px;
+        height: @height;
+
+        .left-bar {
+            background: none;
+            padding: 0;
+            min-height: @height;
+        }
+
+        .search-toolbar {
+            padding-top: 9px;
+            padding-bottom: 9px;
+        }
+
+        @media (max-width: @screen-md-min) {
+            @height: 84px;
+            height: @height;
+        }
+
+        @media (max-width: @screen-sm-min) {
+            @height: 120px;
+            height: @height;
+        }
+    }
+
+    .nav-tabs {
+        padding-top: 11px;
+        border: none;
+        display: inline-block;
+
+        > li {
+            > a {
+                border-radius: 0;
+                background-color: #d3d3d3;
+                margin-right: 1px;
+                font-size: 12px;
+                font-weight: bold;
+                color: #777777;
+                padding: 7px 10px;
+                border: none;
+            }
+
+            &.active > a {
+                border: none;
+                background-color: white;
+                color: #555;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 0px;
+            margin-left: 22px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #9a9a9a;
+            vertical-align: middle;
+            white-space: nowrap;
+            float: right;
+            text-align: right;
+            background: none;
+        }
+    }
+
+    .label-list {
+        display: inline-block;
+        position: absolute;
+        margin-left: 5px;
+        bottom: 5px;
+        padding-bottom: 5px;
+
+        .label {
+            margin-bottom: 0;
+        }
+    }
+}

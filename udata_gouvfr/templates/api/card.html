@@ -1,0 +1,22 @@
+{% cache cache_duration, 'api-card', api.slug|string, g.lang_code %}
+<a class="card reuse-card"  href="https://api.gouv.fr{{ api.path }}">
+    {% if api.logo %}
+    <div class="card-logo">
+        <img alt="{{ api.owner }}"
+            src="https://api.gouv.fr{{ api.logo }}"
+            width="70" height="70">
+    </div>
+    {% endif %}
+    <div class="card-body">
+        <h4>{{ api.title }}</h4>
+        <div class="clamp-3">{{ api.tagline|mdstrip(180) }}</div>
+    </div>
+    <footer class="card-footer">
+        <ul>
+            <li v-tooltip title="{{ _('Producer') }}">
+                {{ api.owner  }}
+            </li>
+        </ul>
+    </footer>
+</a>
+{% endcache %}

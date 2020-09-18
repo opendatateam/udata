@@ -66,7 +66,10 @@ setup(
         ],
         'udata.harvesters': [
             'maaf = udata_gouvfr.harvesters.maaf:MaafBackend',
-        ]
+        ],
+        'udata.tasks': [
+             'gouvfr = udata_gouvfr.tasks',
+        ],
     },
     license='LGPL',
     zip_safe=False,

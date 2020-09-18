@@ -2,6 +2,14 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 2.2.0 (2020-08-25)
+
+- Show api.gouv.fr APIs on dataset page [#493](https://github.com/etalab/udata-gouvfr/pull/493)
+
+## 2.1.5 (2020-08-05)
+
 - Mise à jour de l'URL de Geo SIRENE [#489](https://github.com/etalab/udata-gouvfr/pull/489)
 - Add footer link to pages summary and page cache [#488](https://github.com/etalab/udata-gouvfr/pull/488)
 
