@@ -1,5 +1,5 @@
-{# {% cache cache_duration, 'footer', g.lang_code|default(config.DEFAULT_LANGUAGE)|string,
-'-'.join((package_version('udata'), package_version('udata-gouvfr'))) %} #}
+{% cache cache_duration, 'footer', g.lang_code|default(config.DEFAULT_LANGUAGE)|string,
+'-'.join((package_version('udata'), package_version('udata-gouvfr'))) %}
 <section class="footer py-hg py-md-md">
     <div class="container">
         <footer class="row">
@@ -112,4 +112,4 @@
         </footer>
     </div>
 </section>
-{# {% endcache %} #}
+{% endcache %}
