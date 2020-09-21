@@ -91,7 +91,7 @@ In addition we have a nice litle set of CSS Utilities to quickly build front end
 lives in the css located in `theme/less/` and is built using [Stylemark](https://github.com/mpetrovich/stylemark), you can read the live documentation
 in `udata_gouvfr/theme/stylemark/` after building it using `npm run build-stylemark`.
 
-When building pages, here are a few templates to look out for in `udata_gouvfr/theme/templates` : 
+When building pages, here are a few templates to look out for in `udata_gouvfr/theme/templates` :
 - `home.html` : well, duh.
 - `header.html` and `footer.html` : same idea.
 - `raw.html` : contains the general html structure exposing a `body` block where we can write our page's body.
@@ -105,7 +105,7 @@ Here are our reusable components :
 - `macros` : **TODO**
 - `svg` : contains SVG assets to be included in our pages.
 
-Whenever a components needs some special styling, you can find their corresponding definitions inside `theme/less/specific/<component>`, 
+Whenever a components needs some special styling, you can find their corresponding definitions inside `theme/less/specific/<component>`,
 it's best if we can avoid having too much specific styling, but sometimes you just really need it.
 
 Finally, we have a bunch of commands to make your life a tad easier, that you can run through `npm run`.
