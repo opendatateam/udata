@@ -6,7 +6,7 @@ udata customizations for Etalab / Data.gouv.fr.
 
 ## Compatibility
 
-**udata-gouvfr** requires Python 2.7+ and [udata][].w
+**udata-gouvfr** requires Python 3.7+ and [udata][].
 
 
 ## Installation
