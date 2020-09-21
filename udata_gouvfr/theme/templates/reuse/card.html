@@ -1,3 +1,5 @@
+{% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
+
 {# TODO : what was "preview" used for ? #}
 <a class="unstyled" href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" title="{{ reuse.title }}">
   <article class="reuse-card text-align-center px-sm">
@@ -19,3 +21,5 @@
     </div>
   </article>
 </a>
+
+{% endcache %}
