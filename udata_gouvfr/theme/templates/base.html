@@ -20,7 +20,6 @@
     {% endwith %}
     {% block content %}{% endblock %}
     {% include theme('footer.html') %}
-    {% include theme('publish-action-modal.html') %}
     {{ hook('base.modals') }}
     {% block modals %}{% endblock %}
 {% endblock %}

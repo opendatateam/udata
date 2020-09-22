@@ -10,101 +10,85 @@
 {% set body_class = 'home' %}
 
 {% block subnav %}
-    {% include theme('subnav-large.html') %}
+{# {% include theme('subnav-large.html') %} #}
 {% endblock %}
 
 {% block content %}
 {% cache cache_duration, 'home', g.lang_code %}
 {# Carousels section #}
+{#
 <section class="default">
     <div class="container">
         {% include theme('carousel.html')  %}
     </div>
 </section>
+#}
 {# End Carousels section #}
-
-<section class="default">
+<section class="hero py-xl py-lg-lg">
     <div class="container">
-
-        {# First row #}
-        <div class="row first-row">
-
-            {% if current_site.settings.home_reuses.length %}
-            <div class="col-xs-12">
-                <h3>{{ _('Best reuse cases') }}</h3>
-
-                <div class="row">
-                    <ul class="card-list card-list--columned">
-                        {% for reuse in current_site.settings.home_reuses %}
-                        {% set features = ['preview'] %}
-                        <li class="col-sm-4 col-xs-12">
-                            {% include theme('reuse/card.html') %}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+        <div class="row align-items-center">
+            <div class="col-5 col-lg-12">
+                <h1 class="mb-lg-md">{{ _('@@Plateforme ouverte des données publiques françaises') }}</h1>
+                <form action="#" class="hero-search">
+                    <input type="text" placeholder="Recherche" />
+                </form>
             </div>
-            {% endif %}
-
-            {# Last reuses #}
-            <div class="col-xs-12">
-                <h3>
-                    <a href="{{ url_for('reuses.list', sort='-created') }}"
-                        title="{{ _('Latest reuses') }}">
-                        {{ _('Latest reuses') }}
-                    </a>
-                </h3>
-                <div class="row">
-                    <ul class="card-list card-list--columned">
-                        {% for reuse in recent_reuses[:3] %}
-                        {% set features = ['preview'] %}
-                        <li class="col-sm-4 col-xs-12">
-                            {% include theme('reuse/card.html') %}
-                        </li>
-                        {% endfor %}
-                    </ul>
+            <div class="col-6 offset-1 offset-lg-0 mt-lg-lg col-lg-12 text-align-center">
+                {% if last_post %}
+                {% set post = last_post %}
+                {% set image = post.image|placeholder('post') %}
+                <div class="hero-news mb-xl" style="background-image: url('{{image}}')">
+                    <div class="news-content">
+                        <strong class="text-yellow-100 fs-md">{{ _('News in data') }}</strong>
+                        <h2 class="my-md text-white fs-hg">{{ post.name }}</h2>
+                        <a class="btn-primary mt-md" href="{{ url_for('posts.show', post=post) }}" title="{{ post.name }}">{{ _('See more') }}</a>
+                    </div>
                 </div>
+                <a href="{{ url_for('posts.list') }}" class="nav-link">{{ _('@@toutes les actualités') }}</a>
+                {% endif %}
             </div>
-            {# End last reuses #}
-
         </div>
-        {# end first row #}
     </div>
-
 </section>
 
-{% if last_post %}
-{% set post = last_post %}
-<section class="highlight-bar">
-
-    <div class="photo-bg">
-        <img src="{{ post.image|placeholder('post') }}"
-            alt="{{ post.name }}">
-    </div>
-    <div class="color-overlay"></div>
-
-    <div class="container">
+{# Donnees Section #}
+<div class="donnees callout bg-green-300 inset-green-400">
+    <div class="container py-hg fs-xl">
         <div class="row">
-            <div class="photo hidden-xs col-xs-4">
-                <img src="{{ post.image|placeholder('post') }}"
-                    alt="{{ post.name }}">
+            <div class="col-3 col-sm-12 text-align-center-sm">
+                <h3 class="mb-sm-lg text-green-500 fs-xl">data.gouv.fr c’est</h3>
             </div>
-
-            <div class="body col-sm-8">
-                <label>{{ _('News in data') }}</label>
-                <h3 class="title">
-                    <a href="{{ url_for('posts.show', post=post) }}"
-                        title="{{ post.name }}">
-                        {{ post.name }}
-                    </a>
-                </h3>
-                <p>{{(post.headline or post.content)|mdstrip(280)}}</p>
+            <div class="col-4 col-sm-12 donnees-data-table">
+                <div class="donnees-data">
+                    <span class="donnees-data-number text-align-right text-white">34 401</span>
+                    <span class="donnees-data-caption text-green-500">Jeux de données</span>
+                </div>
+                <div class="donnees-data">
+                    <span class="donnees-data-number text-align-right text-white">186 621</span>
+                    <span class="donnees-data-caption text-green-500">Ressources</span>
+                </div>
+                <div class="donnees-data">
+                    <span class="donnees-data-number text-align-right text-white">2 021</span>
+                    <span class="donnees-data-caption text-green-500">Réutilisations</span>
+                </div>
+            </div>
+            <div class="col-4 col-sm-12 donnees-data-table">
+                <div class="donnees-data">
+                    <span class="donnees-data-number text-align-right text-white">34 401</span>
+                    <span class="donnees-data-caption text-green-500">Jeux de données</span>
+                </div>
+                <div class="donnees-data">
+                    <span class="donnees-data-number text-align-right text-white">186 621</span>
+                    <span class="donnees-data-caption text-green-500">Ressources</span>
+                </div>
+                <div class="donnees-data">
+                    <span class="donnees-data-number text-align-right text-white">2 021</span>
+                    <span class="donnees-data-caption text-green-500">Réutilisations</span>
+                </div>
             </div>
         </div>
     </div>
-</section>
-{% endif %}
-
+</div>
 
 {# Datasets section #}
 {% set nb_datasets = current_site.settings.home_datasets|length %}
@@ -113,87 +97,160 @@
     ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
 ) %}
 
-<section class="default spaced">
-      <div class="container">
-            {# Dataset tabs #}
-            <div class="row">
-                <div class="col-xs-12">
-                    <ul class="nav nav-pills" data-tabs="tabs">
-                        {% for tab_id, label, _, _ in dataset_tabs %}
-                        <li {% if loop.first %}class="active"{% endif %}>
-                            <a href="#{{tab_id}}" data-toggle="tab">{{ label }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+<section class="container datasets py-hg">
+    {# Dataset tabs #}
+    <div class="row">
+        <div class="col-2 col-lg-8">
+            <h3>{{ _('@@Données') }}</h3>
+        </div>
+        <div class="col-10 col-lg-4">
+            <nav class="tabs">
+                {% for tab_id, label, _, _ in dataset_tabs %}
+                    <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                {% endfor %}
+                <a href="#" class="tab hidden-lg">{{ _('Jeux de données de référence') }}</a>
+                <a href="{{ url_for('datasets.list') }}" class="tab">{{ _('See more') }}</a>
+            </nav>
+        </div>
+    </div>
+    {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
+    <div class="tab-content {% if loop.first %}active{% endif %}" id={{tab_id}}>
+        <div class="row pt-xl pt-md-md">
+            {% for dataset in datasets %}
+            <div class="col-lg-12 col-6">
+                <a class="unstyled" href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.name }}">{% include theme('dataset/card.html') %}</a>
             </div>
-
-            <div class="row">
-                <div class="tab-content">
-
-                    {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
-                    <div class="tab-pane {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-                        <div class="card-list card-list--columned">
-
-                            {% for dataset in datasets %}
-                            <div class="col-xs-12 col-md-4 col-sm-6">
-                                {% include theme('dataset/card.html') %}
-                            </div>
-                            {% endfor %}
-
-                        </div>
-                        <div class="clearfix"></div>
-                        <p class="text-center">
-                            <a href="{{ url_for('datasets.list', **kwargs) }}" class="btn btn-default">
-                                <span class="fa fa-fw fa-list" ></span>
-                                {{ _('See more') }}
-                            </a>
-                        </p>
-                    </div>
-                    {% endfor %}
-
-                </div>
-            </div>
-            {# end Dataset tabs #}
-      </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {# end Dataset tabs #}
 </section>
 {# End datasets section #}
+
+{# Datasets section #}
+{% set nb_reuses = current_site.settings.home_reuses|length %}
+{% set reuses_tabs = (
+    ('best-reuses', _('@@Selection Etalab'), current_site.settings.home_reuses, {}),
+    ('latest-reuses', _('Latest reuses'), recent_reuses[:3], {'sort': '-created'}),
+) %}
+
+{# Reuse section #}
+<section class="reuse py-md">
+    <div class="container">
+        <div class="row">
+            <div class="col-2 col-lg-8">
+                <h3>{{ _('Réutilisations') }}</h3>
+            </div>
+            <div class="col-10 col-lg-4">
+                <nav class="tabs">
+                    {% for tab_id, label, _, _ in reuses_tabs %}
+                        <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                    {% endfor %}
+                    <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}" class="tab">{{ _('Voir plus') }}</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="container reuse-cards">
+        {% for tab_id, label, reuses, kwargs in reuses_tabs  %}
+            <div class="tab-content  {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+                <div class="row pt-xl pt-md-md">
+                    {% for reuse in reuses %}
+                        {% set features = ['preview'] %}
+                        <div class="col-3">
+                            {% include theme('reuse/card.html') %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{# End reuse section #}
+
+
+{# Decouvrez #}
+<div class="decouvrez bg-blue-500">
+    <div class="container py-hg">
+        <div class="row align-items-center">
+            <div class="col-6 col-sm-12 mb-sm-lg text-white">
+                <h3 class="mb-0">{{ _('@@Découvrez') }}</h3>
+            </div>
+            <div class="col-3 col-sm-12">
+                <ul class="nav-list fs-md">
+                        {% for item in nav.gouvfr_network %}
+                            {% if (loop.index % 2 == 1) %}
+                                <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                </ul>
+            </div>
+            <div class="col-3 col-sm-12 self-start">
+                <ul class="nav-list fs-md">
+                        {% for item in nav.gouvfr_network %}
+                            {% if (loop.index % 2 == 0) %}
+                                <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{# End of Decouvrez #}
+
+{% include theme("participez/participez.html") %}
+
+{# Probably subnav-large #}
+<section class="topics p-xl px-xl-0 py-xl-lg bg-blue-100">
+    <div class="container">
+        <h3>{{_('Topics')}}</h3>
+        <ul class="row fs-lg">
+            {% for topic in g.featured_topics %}
+            <li class="col-6 col-lg-12 pb-xs">
+                <a class="text-grey-400" href="{{ url_for('topics.display', topic=topic) }}" title="{{ topic.name }}">
+                    {{ topic.name }}
+                </a>
+            </li>
+            {% endfor %}
+    </div>
+    </div>
+</section>
 
 {# Blog section #}
 {% if blogpost %}
 <section class="default blog">
-      <div class="container blog-container">
-            <div class="row">
-                <div class="col-xs-12">
-                    <h3>{{ _('The blog') }}</h3>
-                </div>
+    <div class="container blog-container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h3>{{ _('The blog') }}</h3>
             </div>
+        </div>
 
-            <div class="row gray">
-                {% set has_thumbnail = blogpost.image_url is defined %}
-                {% if has_thumbnail %}
-                <div class="col-xs-12 col-sm-4 photo blog-thumbnail">
-                    <img src="{{ blogpost.image_url|safe }}" alt="{{ blogpost.title|safe }}">
-                </div>
-                {% endif  %}
-                <div class="col-xs-12 {% if has_thumbnail %}col-sm-8 {% endif %}body">
-                    <span class="post-date">{{blogpost.date|dateformat('long')|title}}</span>
-                    <h4>
-                        <a href="{{ blogpost.link }}"
-                            title="{{ blogpost.title|safe }}">
-                            {{ blogpost.title|safe }}
-                        </a>
-                    </h4>
-                    <p>
-                        {{ blogpost.summary|striptags|truncate(400) }}
-                        <a href="{{ blogpost.link }}"
-                            title="{{ _('more') }}"
-                            class="btn btn-grey btn-primary btn-mini">+</a>
-                    </p>
-
-                </div>
+        <div class="row gray">
+            {% set has_thumbnail = blogpost.image_url is defined %}
+            {% if has_thumbnail %}
+            <div class="col-xs-12 col-sm-4 photo blog-thumbnail">
+                <img src="{{ blogpost.image_url|safe }}" alt="{{ blogpost.title|safe }}">
             </div>
-      </div>
+            {% endif  %}
+            <div class="col-xs-12 {% if has_thumbnail %}col-sm-8 {% endif %}body">
+                <span class="post-date">{{blogpost.date|dateformat('long')|title}}</span>
+                <h4>
+                    <a href="{{ blogpost.link }}" title="{{ blogpost.title|safe }}">
+                        {{ blogpost.title|safe }}
+                    </a>
+                </h4>
+                <p>
+                    {{ blogpost.summary|striptags|truncate(400) }}
+                    <a href="{{ blogpost.link }}" title="{{ _('more') }}"
+                        class="btn btn-grey btn-primary btn-mini">+</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
 </section>
 {% endif %}
 {% if forum_topics %}
@@ -206,7 +263,7 @@
 {% endblock %}
 
 {% block extra_js %}
-    {% if request.args.get('flag') == 'recherche' -%}
-        <script src="https://recherche.etalab.studio/js/widget.js"></script>
-    {%- endif %}
+{% if request.args.get('flag') == 'recherche' -%}
+<script src="https://recherche.etalab.studio/js/widget.js"></script>
+{%- endif %}
 {% endblock %}

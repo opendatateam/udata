@@ -8,13 +8,9 @@
     {% from theme('macros/metadata.html') import metadata with context %}
     {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ manifest('theme', 'common.css') }}">
-    {% if bundle_css is in_manifest('theme') %}
-    <link rel="stylesheet" href="{{ manifest('theme', '{0}.css'.format(bundle)) }}">
-    {% endif %}
     {% block extra_css %}{% endblock %}
     {% block theme_css %}
-    <link href="{{ manifest('theme', 'theme.css') }}" rel="stylesheet">
+    <link href="{{ theme_static('less/index.css') }}" rel="stylesheet">
     <link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
     {% endblock %}
     {# ATOM Feeds #}
@@ -35,12 +31,11 @@
   </head>
 
   <body class="{{body_class}} theme-{{current_theme.variant}}">
-    {% block body %}{% endblock %}
+    <section id="app">
+      {% block body %}{% endblock %}
+    </section>
 
-    <script src="{{ manifest('theme', 'common.js') }}"></script>
-    {% if bundle_js is in_manifest('theme') %}
-    <script src="{{ manifest('theme', '{0}.js'.format(bundle)) }}"></script>
-    {% endif %}
+    <script src="{{ theme_static('js/index.js') }}"></script>
     {% block extra_js %}{% endblock %}
 
     {{ hook('footer.snippets') }}

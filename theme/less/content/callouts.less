@@ -1,0 +1,36 @@
+/*
+---
+name: Callouts
+category: Content
+---
+
+Callouts are areas that are meant to pop "out" of the page, usually with a coloured background.
+
+```callouts.html
+<div class="callout bg-blue-200 inset-blue-300">
+    <div class="container p-hg"></div>
+</div>
+```
+*/
+
+.callout {
+    position: relative;
+
+    each(@colors, {
+        &.inset-@{value}::before {
+            width: @spacing-hg;
+            left: 0;
+            height: 100%;
+            background-color: @@value;
+            position: absolute;
+            display: block;
+            content: '';
+        }
+
+        @media @query-md {
+            &.inset-@{value}::before {
+                width: @spacing-sm;
+            }
+        }
+    });
+}

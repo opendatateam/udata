@@ -1,0 +1,133 @@
+/*
+---
+name: Buttons
+category: Components
+---
+
+## Primary buttons
+The `.btn` classes are designed to be used with the `<button>` element.
+
+However, you can also use these classes on `<a>` or `<input>` elements (though some browsers may apply a slightly different rendering).
+When using button classes on `<a>` elements that are used to trigger in-page functionality (like collapsing content), rather than linking to new pages or sections within the current page, these links should be given a `role="button"` to appropriately convey their purpose to assistive technologies such as screen readers.
+
+Primary buttons exist for every color in this UI-kit. Please refer to the [colors page](/#colors) to see available text and background colors.
+
+*Some of them are unusable due to the low contrast they offer.*
+
+```buttons-primary.html
+<p><a href="#" role="button" class="btn-primary">Default button</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-white">btn-primary-white</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-blue-100">btn-primary-blue-100</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-blue-200">btn-primary-blue-200</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-blue-300">btn-primary-blue-300</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-blue-400">btn-primary-blue-400</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-blue-500">btn-primary-blue-500</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-orange-100">btn-primary-orange-100</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-grey-100">btn-primary-grey-100</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-grey-200">btn-primary-grey-200</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-grey-300">btn-primary-grey-300</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-grey-400">btn-primary-grey-400</a></p>
+```
+
+## Secondary buttons
+As for primary buttons, secondary buttons exist in every color available.
+
+```buttons-secondary.html
+<p><a href="#" role="button" class="btn-secondary">Default button</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-white">btn-secondary-white</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-100">btn-secondary-blue-100</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-200">btn-secondary-blue-200</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-300">btn-secondary-blue-300</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-400">btn-secondary-blue-400</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-500">btn-secondary-blue-500</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-orange-100">btn-secondary-orange-100</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-100">btn-secondary-grey-100</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-200">btn-secondary-grey-200</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-300">btn-secondary-grey-300</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-400">btn-secondary-grey-400</a></p>
+```
+
+## Active state
+Buttons will appear pressed (with a lighter background, darker border, and inset shadow) when active. There’s no need to add a class to `<button>s` as they use a pseudo-class. However, you can still force the same active appearance with `.active` (and include the `aria-pressed="true"` attribute) should you need to replicate the state programmatically.
+
+```buttons-active.html
+<p><a href="#" role="button" class="btn-primary active">Primary button</a></p>
+<p><a href="#" role="button" class="btn-secondary active">Secondary button</a></p>
+```
+
+## Disabled state
+Make buttons look inactive by adding the disabled boolean attribute to any `<button>` element.
+
+`<a>`s don’t support the disabled attribute, so you must add the `.disabled` class to make it visually appear disabled.
+Disabled buttons should include the `aria-disabled="true"` attribute to indicate the state of the element to assistive technologies.
+
+```buttons-disabled.html
+<p><a href="#" role="button" class="btn-primary disabled">Primary button</a></p>
+<p><a href="#" role="button" class="btn-secondary disabled">Secondary button</a></p>
+```
+*/
+
+.btn {
+    display: inline-block;
+    padding: @spacing-sm @spacing-lg;
+    font-weight: bold;
+    font-size: @font-size-sm;
+    line-height: 1em;
+    letter-spacing: 0.025em;
+    text-decoration: none;
+    border-radius: 3em;
+    cursor: pointer;
+
+    &:disabled,
+    &.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+}
+
+.btn-primary {
+    .btn;
+
+    color: white;
+    background-color: @blue-400;
+
+    &:active,
+    &:hover,
+    &.active {
+        background-color: lighten(@blue-400, 10%);
+    }
+
+    each(@colors, {
+        &.btn-primary-@{value} {
+            @contrast: 'contrast-@{value}';
+            background-color: @@value;
+            color: @@contrast;
+
+            &:active, &:hover, &.active {
+                background-color: lighten(@@value, 10%);
+            }
+        }
+    });
+}
+
+.btn-secondary {
+    .btn;
+
+    color: @blue-400;
+    border: 1px solid transparent;
+    border-color: @blue-400;
+
+    &:active,
+    &:hover,
+    &.active {
+        text-decoration: underline;
+    }
+
+    each(@colors, {
+        &.btn-secondary-@{value} {
+            @contrast: 'contrast-@{value}';
+            border-color: @@value;
+            color: @@value;
+        }
+    });
+}

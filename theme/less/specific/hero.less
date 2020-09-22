@@ -1,0 +1,25 @@
+.hero {
+    h1 {
+        @media @query-xl {
+            font-size: @font-size-xl;
+        }
+    }
+
+    .hero-search {
+        //TODO : extract this and better it
+        input {
+            width: 100%;
+            padding: @spacing-md;
+            border: 2px solid @grey-200;
+        }
+    }
+
+    .hero-news {
+        display: flex;
+        align-items: center;
+        min-height: 400px;
+        padding: @spacing-hg;
+        background-position: center center;
+        background-size: cover;
+    }
+}
