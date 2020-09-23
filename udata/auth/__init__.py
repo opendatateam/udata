@@ -40,10 +40,11 @@ admin_permission = Permission()
 
 def init_app(app):
     from .forms import ExtendedRegisterForm
+    from .tasks import sendmail_proxy
     from .views import create_security_blueprint
     from udata.models import datastore
     state = security.init_app(app, datastore, register_blueprint=False,
-                              confirm_register_form=ExtendedRegisterForm)
+                              confirm_register_form=ExtendedRegisterForm, send_mail=sendmail_proxy)
 
     security_bp = create_security_blueprint(state, 'security_blueprint')
 
