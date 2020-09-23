@@ -11,6 +11,7 @@
 - Flask-Security update [#2535](https://github.com/opendatateam/udata/pull/2535):
   - Switch to fork Flask-Security-Too
   - New settings to set the required password length and complexity
+- Fix Flask-security sendmail overriding [#2536](https://github.com/opendatateam/udata/pull/2536)
 
 ## 2.2.1 (2020-08-25)
 
