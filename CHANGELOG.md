@@ -12,6 +12,7 @@
   - Switch to fork Flask-Security-Too
   - New settings to set the required password length and complexity
 - Fix Flask-security sendmail overriding [#2536](https://github.com/opendatateam/udata/pull/2536)
+- Add a custom password complexity checker to Flask-Security [#2537](https://github.com/opendatateam/udata/pull/2537)
 
 ## 2.2.1 (2020-08-25)
 
