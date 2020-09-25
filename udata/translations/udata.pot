@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata 2.2.2.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2020-09-25 16:37+0200\n"
-"PO-Revision-Date: 2020-09-25 16:37+0200\n"
+"POT-Creation-Date: 2020-09-25 16:57+0200\n"
+"PO-Revision-Date: 2020-09-25 16:57+0200\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -87,19 +87,23 @@ msgstr ""
 msgid "Last name is required"
 msgstr ""
 
-#: udata/auth/password_validation.py:11
+#: udata/auth/password_validation.py:12
 msgid "Password too short"
 msgstr ""
 
-#: udata/auth/password_validation.py:15
+#: udata/auth/password_validation.py:16
+msgid "Password must contain lowercases"
+msgstr ""
+
+#: udata/auth/password_validation.py:20
 msgid "Password must contain digits"
 msgstr ""
 
-#: udata/auth/password_validation.py:19
+#: udata/auth/password_validation.py:24
 msgid "Password must contain uppercases"
 msgstr ""
 
-#: udata/auth/password_validation.py:23
+#: udata/auth/password_validation.py:28
 msgid "Password must contain symbols"
 msgstr ""
 
