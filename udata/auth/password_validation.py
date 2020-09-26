@@ -27,6 +27,4 @@ def password_validator(password, is_register, **kwargs):
     if current_app.config.get('SECURITY_PASSWORD_REQUIREMENTS_SYMBOLS') and (re.search(r"[ !#$%&'()*+,-./[\\\]^_`{|}~"+r'"]', password) is None):
         error_list.append(_('Password must contain symbols'))
 
-    if error_list:
-        return error_list
-    return None
+    return error_list or None
