@@ -8,8 +8,10 @@ from udata.i18n import lazy_gettext as _
 def password_validator(password, is_register, **kwargs):
     error_list = []
     # calculating the length
-    if len(password) < current_app.config.get('SECURITY_PASSWORD_LENGTH_MIN'):
-        error_list.append(_('Password too short'))
+    pass_length = current_app.config.get('SECURITY_PASSWORD_LENGTH_MIN')
+    if len(password) < pass_length:
+        message = _('Password must be at least {pass_length} characters long')
+        error_list.append(message.format(pass_length=pass_length))
 
     # searching for lowercase
     if current_app.config.get('SECURITY_PASSWORD_REQUIREMENTS_LOWERCASE') and (re.search(r"[a-z]", password) is None):
