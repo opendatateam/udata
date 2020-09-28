@@ -11,10 +11,10 @@
                 {{ tpl.breadcrumb_bar() }}
             </div>
             {% elif tpl.breadcrumb and tpl.breadcrumb() %}
-            <ol class="breadcrumbs col-md-8 col-lg-9">
+            <ol class="breadcrumb col-md-8 col-lg-9">
                 <li>
                     <a href="{{ url_for('site.home') }}" title="{{ _('Home') }}">
-                        {{ _('Home') }}
+                        <span class="fa fa-home"></span>
                     </a>
                 </li>
                 {{ tpl.breadcrumb() }}

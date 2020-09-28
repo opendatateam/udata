@@ -2,6 +2,7 @@
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/integrate.html') import integrate_btn with context %}
 {% from theme('macros/issues.html') import issues_btn with context %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 
 {% set meta = {
     'title': dataset.full_title,
@@ -17,6 +18,9 @@
 
 {% set community_subtitle = _('Explore with %(certifier)s', certifier=config.SITE_TITLE ) %}
 
+{% block subnav %}
+{# We should probably delete this block if it's not used anymore #}
+{% endblock %}
 {% block extra_head %}
 {% cache cache_duration, 'dataset-extra-head', dataset.id|string, g.lang_code %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
@@ -27,16 +31,17 @@
 {% endblock %}
 
 {% block breadcrumb %}
-{% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %}
+{# {% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %} #}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
     <li class="active">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
-{% endcache %}
+{# {% endcache %} #}
 {% endblock %}
 
 {% block content %}
-{% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %}
+{# {% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %} #}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
+
 
 {% if dataset.archived %}
 <div class="container-fluid alert alert-warning">
@@ -50,116 +55,140 @@
 </div>
 {% endif %}
 
-<section class="content {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
-    <div class="container dataset-container">
-        <div class="row">
+{# TODO : should this be based on 1-column template ? #}
+{{ breadcrumb(self,
+    breadcrum_class=breadcrum_class,
+    toolbar_class=toolbar_class
+) }}
 
-            <div class="col-md-9 col-sm-9">
-                <div class="page-header">
-                    <h2>{{ dataset.title }}
-                        {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
-                    </h2>
-
-                    <div class="row">
-                        <p class="col-md-12">
-                            {% if dataset.organization %}
-                                <small>
-                                    {% if dataset.organization.public_service %}
-                                    <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
-                                    {% endif %}
-                                </small>
-                            {% elif dataset.owner %}
-                                <small>
-                                    {% trans
-                                        date=dataset.created_at|dateformat(format='long'),
-                                        update=dataset.last_update|dateformat(format='long'),
-                                        author=dataset.owner.fullname,
-                                        url=url_for('users.show', user=dataset.owner)
-                                    %}This dataset has been published on {{date}} and updated on {{update}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
-                                </small>
-                            {% endif %}
-                            {% for badge in dataset.badges %}
-                                <small class="small-badge">
-                                    <a href="{{ url_for('search.index', badge=badge) }}"
-                                        title="{{ _('See all datasets with that badge.') }}">
-                                        <span class="fa fa-bookmark"></span>
-                                        {{ dataset.badge_label(badge) }}</a>
-                                </small>
-                            {% endfor %}
-                            {% if dataset.private %}
-                            <small class="private"
-                                v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
-                                popover-title="{{ _('Private') }}" popover-trigger="hover" popover-placement="top"
-                                >{{ _('Private') }}</small>
-                            {% endif %}
-                            {% if dataset.deleted %}
-                            <small class="deleted"
-                                v-popover.literal="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
-                                popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
-                                >{{ _('Deleted') }}</small>
-                            {% endif %}
-                            {% if dataset.archived %}
-                            <small class="archived"
-                                v-popover.literal="{{ _('This dataset has been archived.') }}"
-                                popover-title="{{ _('Archived') }}" popover-trigger="hover" popover-placement="top"
-                                >{{ _('Archived') }}</small>
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-xs-12">
-                    {{ dataset.description|markdown }}
-                    </div>
-                </div>
-
-                <div class="resources-list">
-                    <div class="resources-list-header">
-                        <h3>{{ _('Resources') }}</h3>
-                        {% if dataset.community_resources|length %}
-                        <span class="community-resources-anchor">
-                            <small><a href="#community-resources">{{ _('See also: community resources') }}</a></small>
-                        </span>
-                        {% endif %}
-                    </div>
-
-                    {% set grouped_resources = dataset.resources|group_resources_by_type %}
-                    {% set nb_groups = grouped_resources.keys()|length %}
-                    {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
-                    {% for (type, type_label), resources in grouped_resources.items() %}
-                        {% if nb_groups > 1 %}<h4 class="resource-type">{{ type_label }}</h4>{% endif %}
-                        {% for resource in resources %}
-                            {% if loop.index0 == max_resources %}
-                            <div v-if="isTypeListVisible('{{ type }}')" v-cloak transition="expand">
-                            {% endif %}
-                            {% include theme('dataset/resource/card.html') %}
-                        {% endfor %}
-                        {% if resources|length > max_resources %}
-                            </div>
-                            <p class="text-center expander">
-                                <button type="button" class="btn btn-default" @click.prevent="expandResources($event, '{{ type }}')">
-                                    <span class="fa fa-list" ></span>
-                                    {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
-                                </button>
-                            </p>
-                        {% endif %}
-                    {% else %}
-                    <p class="text-center">{{ _('No resources') }}</p>
-                    {% endfor %}
-
-                    {% if can_edit %}
-                    <a class="card resource-card add"
-                        href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
-                        <div class="card-logo"><span>+</span></div>
-                        <div class="card-body">
-                            <h4>{{ _('Add a resource') }}</h4>
-                        </div>
-                    </a>
+<section class="content container {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
+    <h1>{{ dataset.title }}
+        {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
+    </h1>
+    <div class="row align-items-center">
+        <div class="col-3">
+            {% if dataset.organization %}
+            <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">{{ _('Producer') }}</a>
+            {% elif dataset.owner %}
+            <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">{{ _('Author') }}</a>
+            {% endif %}
+            <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">{{ _('Informations') }}</a>
+        </div>
+        <div class="col-3">
+            <a href="#" class="nav-link text-decoration-none">{{ _('Community resources') }}</a>
+        </div>
+    </div>
+</section>
+{# TODO : Informations tab, author tab if not producer #}
+<section class="callout p-hg my-lg bg-blue-300">
+        {% with organization=dataset.organization %}
+            {% include theme('organization/producer-panel.html') %}
+        {% endwith %}
+        {#
+        <div class="panel panel-default text-center">
+            <div class="panel-body">
+                <h3 class="text-left">{{ _('Author') }}</h3>
+                {#
+                {% with user=dataset.owner %}
+                    {% include theme('user/sidebar-user.html') %}
+                {% endwith %}
+            </div>
+        </div>
+        #}
+</section>
+<section class="content-body container">
+    {# TODO : decide what to do with this block #}
+    <div class="row">
+        <p class="col-md-12">
+            {% if dataset.organization %}
+                <small>
+                    {% if dataset.organization.public_service %}
+                    <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
                     {% endif %}
+                </small>
+            {% elif dataset.owner %}
+                <small>
+                    {% trans
+                        date=dataset.created_at|dateformat(format='long'),
+                        update=dataset.last_update|dateformat(format='long'),
+                        author=dataset.owner.fullname,
+                        url=url_for('users.show', user=dataset.owner)
+                    %}This dataset has been published on {{date}} and updated on {{update}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
+                </small>
+            {% endif %}
+            {% for badge in dataset.badges %}
+                <small class="small-badge">
+                    <a href="{{ url_for('search.index', badge=badge) }}"
+                        title="{{ _('See all datasets with that badge.') }}">
+                        <span class="fa fa-bookmark"></span>
+                        {{ dataset.badge_label(badge) }}</a>
+                </small>
+            {% endfor %}
+            {% if dataset.private %}
+            <small class="private"
+                v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
+                popover-title="{{ _('Private') }}" popover-trigger="hover" popover-placement="top"
+                >{{ _('Private') }}</small>
+            {% endif %}
+            {% if dataset.deleted %}
+            <small class="deleted"
+                v-popover.literal="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+                popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
+                >{{ _('Deleted') }}</small>
+            {% endif %}
+            {% if dataset.archived %}
+            <small class="archived"
+                v-popover.literal="{{ _('This dataset has been archived.') }}"
+                popover-title="{{ _('Archived') }}" popover-trigger="hover" popover-placement="top"
+                >{{ _('Archived') }}</small>
+            {% endif %}
+        </p>
+    </div>
+    <div class="row">
+        <div class="col-12 text-grey-300">
+        {{ dataset.description|markdown }}
+        </div>
+    </div>
+    <div class="ressources">
+        <h2 class="fs-xxl">{{ _('Resources') }} <sup>{{dataset.resources | length}}</sup></h2>
+        {% if dataset.community_resources|length or 1 %}
+            <a class="nav-link" href="#community-resources">{{ _('See also: community resources') }}</a>
+        {% endif %}
 
+        <div class="ressources-files my-xl">
+            {% set grouped_resources = dataset.resources|group_resources_by_type %}
+            {% set nb_groups = grouped_resources.keys()|length %}
+            {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
+            {% for (type, type_label), resources in grouped_resources.items() %}
+                {% if nb_groups > 1 %}<h4 class="fs-lg">{{ type_label }} <sup>{{resources|length }}</sup></h4>{% endif %}
+                {% for resource in resources %}
+                    {% if loop.index0 == max_resources %}
+                    <div v-if="isTypeListVisible('{{ type }}')" v-cloak transition="expand">
+                    {% endif %}
+                    {% include theme('dataset/resource/card.html') %}
+                {% endfor %}
+                {% if resources|length > max_resources %}
+                    <p class="text-center expander">
+                        <button type="button" class="btn btn-default" @click.prevent="expandResources($event, '{{ type }}')">
+                            <span class="fa fa-list" ></span>
+                            {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
+                        </button>
+                    </p>
+                {% endif %}
+            {% else %}
+            <p class="text-center">{{ _('No resources') }}</p>
+            {% endfor %}
+
+            {% if can_edit %}
+            <a class="card resource-card add"
+                href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                <div class="card-logo"><span>+</span></div>
+                <div class="card-body">
+                    <h4>{{ _('Add a resource') }}</h4>
                 </div>
-                {# end resources #}
+            </a>
+            {% endif %}
+        </div>
 
                 {# button bar #}
                 <div class="row opinion"><div class="col-xs-12">
@@ -196,33 +225,12 @@
                 </div></div>
                 {# end button bar #}
                 {{ hook('dataset.display.after-description') }}
-            </div>
+
             {# end left column #}
 
             {# Right sidebar #}
             <aside class="col-md-3 col-sm-3">
 
-                {# Optionnal organization panel #}
-                {% if dataset.organization %}
-                <div class="panel panel-default text-center">
-                    <div class="panel-body">
-                        <h3 class="text-left">{{ _('Producer') }}</h3>
-                        {% with organization=dataset.organization %}
-                            {% include theme('organization/sidebar-producer.html') %}
-                        {% endwith %}
-                    </div>
-                </div>
-                {% elif dataset.owner %}
-                <div class="panel panel-default text-center">
-                    <div class="panel-body">
-                        <h3 class="text-left">{{ _('Author') }}</h3>
-
-                        {% with user=dataset.owner %}
-                            {% include theme('user/sidebar-user.html') %}
-                        {% endwith %}
-                    </div>
-                </div>
-                {% endif %}
 
                 {# Information panel #}
                 <div class="panel panel-default">
@@ -384,7 +392,6 @@
 
             </aside>
         </div>
-    </div>
 </section>
 
 {% block community %}
@@ -463,5 +470,5 @@
     </div>
 </section>
 {% endblock %}
-{% endcache %}
+{# {% endcache %} #}
 {% endblock %}
