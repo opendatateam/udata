@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2020-09-25 16:57+0200\n"
-"PO-Revision-Date: 2020-09-28 09:42\n"
+"POT-Creation-Date: 2020-09-28 15:25+0200\n"
+"PO-Revision-Date: 2020-09-28 14:32\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:100
+#: udata/settings.py:101
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:101
+#: udata/settings.py:102
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:102
+#: udata/settings.py:103
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/settings.py:103
+#: udata/settings.py:104
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/settings.py:104
+#: udata/settings.py:105
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:106
+#: udata/settings.py:107
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:442
+#: udata/settings.py:443
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -84,23 +84,23 @@ msgstr "Nom"
 msgid "Last name is required"
 msgstr "Nom de famille requis"
 
-#: udata/auth/password_validation.py:12
-msgid "Password too short"
-msgstr "Mot de passe trop court"
+#: udata/auth/password_validation.py:13
+msgid "Password must be at least {pass_length} characters long"
+msgstr "Le mot de passe doit contenir au moins {pass_length} caractères"
 
-#: udata/auth/password_validation.py:16
+#: udata/auth/password_validation.py:18
 msgid "Password must contain lowercases"
 msgstr "Le mot de passe doit contenir des minuscules"
 
-#: udata/auth/password_validation.py:20
+#: udata/auth/password_validation.py:22
 msgid "Password must contain digits"
 msgstr "Le mot de passe doit contenir des chiffres"
 
-#: udata/auth/password_validation.py:24
+#: udata/auth/password_validation.py:26
 msgid "Password must contain uppercases"
 msgstr "Le mot de passe doit contenir des majuscules"
 
-#: udata/auth/password_validation.py:28
+#: udata/auth/password_validation.py:30
 msgid "Password must contain symbols"
 msgstr "Le mot de passe doit contenir des caractères spéciaux"
 
