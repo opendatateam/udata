@@ -9,8 +9,8 @@ from flask_principal import PermissionDenied  # noqa: facade pattern
 from flask_principal import RoleNeed
 from flask_principal import UserNeed  # noqa: facade pattern
 
-from flask_security import (  # noqa
-    Security, current_user, login_required, login_user  # noqa
+from flask_security import ( # noqa
+    Security, current_user, login_required, login_user # noqa
 )
 from werkzeug.utils import import_string
 
@@ -40,10 +40,13 @@ admin_permission = Permission()
 
 def init_app(app):
     from .forms import ExtendedRegisterForm
+    from .tasks import sendmail_proxy
     from .views import create_security_blueprint
+    from .password_validation import password_validator
     from udata.models import datastore
     state = security.init_app(app, datastore, register_blueprint=False,
-                              confirm_register_form=ExtendedRegisterForm)
+                              confirm_register_form=ExtendedRegisterForm, send_mail=sendmail_proxy)
+    state.password_validator(password_validator)
 
     security_bp = create_security_blueprint(state, 'security_blueprint')
 

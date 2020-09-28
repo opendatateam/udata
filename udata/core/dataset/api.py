@@ -365,11 +365,7 @@ class ResourceAPI(ResourceMixin, API):
         '''Delete a given resource on a given dataset'''
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
-        # Deletes resource's file from file storage
-        if resource.fs_filename is not None:
-            storages.resources.delete(resource.fs_filename)
-
-        dataset.resources.remove(resource)
+        dataset.remove_resource(resource)
         dataset.last_modified = datetime.now()
         dataset.save()
         return '', 204

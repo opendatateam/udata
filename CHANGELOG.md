@@ -4,6 +4,15 @@
 
 - Plugin's translations are now correctly loaded [#2529](https://github.com/opendatateam/udata/pull/2529)
 - Vine version is now pinned in requirements [#2532](https://github.com/opendatateam/udata/pull/2532)
+- Fix reuses metrics [#2531](https://github.com/opendatateam/udata/pull/2531):
+  - Reuses "datasets" metrics are now triggered correctly
+  - New job to update the datasets "reuses" metrics: `update-datasets-reuses-metrics` to be scheduled
+- Add a specific dataset's method for resource removal [#2534](https://github.com/opendatateam/udata/pull/2534)
+- Flask-Security update [#2535](https://github.com/opendatateam/udata/pull/2535):
+  - Switch to fork Flask-Security-Too
+  - New settings to set the required password length and complexity
+- Fix Flask-security sendmail overriding [#2536](https://github.com/opendatateam/udata/pull/2536)
+- Add a custom password complexity checker to Flask-Security [#2537](https://github.com/opendatateam/udata/pull/2537)
 
 ## 2.2.1 (2020-08-25)
 
