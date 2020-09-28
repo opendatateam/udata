@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2020-09-28 15:25+0200\n"
-"PO-Revision-Date: 2020-09-28 14:12\n"
+"PO-Revision-Date: 2020-09-28 14:22\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -86,7 +86,7 @@ msgstr "Nom de famille requis"
 
 #: udata/auth/password_validation.py:13
 msgid "Password must be at least {pass_length} characters long"
-msgstr ""
+msgstr "Les mots de passe doivent contenir au moins {pass_length} caractères"
 
 #: udata/auth/password_validation.py:18
 msgid "Password must contain lowercases"
