@@ -1,0 +1,81 @@
+.resource-card {
+    border-top: 1px solid @grey-100;
+    border-bottom: 1px solid @grey-100;
+
+    &:nth-of-type(2n+1) {
+        background: @grey-50;
+    }
+
+    @left-padding: 100px; //Spacing for buttons
+
+    .card-header {
+        padding: @spacing-lg;
+
+        display: flex;
+        align-items: center;
+
+        .header-text {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+
+            h4 {
+                margin: @spacing-xs 0;
+            }
+        }
+
+        .button-bar {
+            ul {
+                display: flex;
+                align-items: center;
+
+                li {
+                    margin: @spacing-lg;
+                }
+            }
+        }
+
+        .filetype {
+            text-align: right;
+            font-size: @font-size-sm;
+
+            em {
+                font-weight: @font-weight-bold;
+                font-style: initial;
+                color: @grey-300;
+            }
+        }
+    }
+
+    .resource-infos {
+        margin: 0;
+
+        div {
+            display: flex;
+
+            dt {
+                min-width: 200px;
+                color: @grey-300;
+            }
+
+            dd {
+                padding: 0;
+                color: @grey-400;
+            }
+        }
+    }
+
+    .card-header, .resource-description, .resource-infos div {
+        padding: @spacing-sm @spacing-sm;
+        padding-left: @left-padding;
+        border-bottom: 1px solid @grey-100;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    + .resource-card {
+        margin-top: @spacing-lg;
+    }
+}

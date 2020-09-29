@@ -62,7 +62,7 @@
 ) }}
 
 <section class="content container {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
-    <h1>{{ dataset.title }}
+    <h1 class="fs-hg">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
     <div class="row align-items-center">
@@ -75,7 +75,7 @@
             <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">{{ _('Informations') }}</a>
         </div>
         <div class="col-3">
-            <a href="#" class="nav-link text-decoration-none">{{ _('Community resources') }}</a>
+            <a href="#community-resources" class="nav-link text-decoration-none fs-sm text-grey-300">{{ _('Community resources') }}</a>
         </div>
     </div>
 </section>
@@ -149,7 +149,7 @@
         {{ dataset.description|markdown }}
         </div>
     </div>
-    <div class="ressources">
+    <div class="ressources mt-xl">
         <h2 class="fs-xxl">{{ _('Resources') }} <sup>{{dataset.resources | length}}</sup></h2>
         {% if dataset.community_resources|length or 1 %}
             <a class="nav-link" href="#community-resources">{{ _('See also: community resources') }}</a>
@@ -160,7 +160,7 @@
             {% set nb_groups = grouped_resources.keys()|length %}
             {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
             {% for (type, type_label), resources in grouped_resources.items() %}
-                {% if nb_groups > 1 %}<h4 class="fs-lg">{{ type_label }} <sup>{{resources|length }}</sup></h4>{% endif %}
+                {% if nb_groups > 1 %}<h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>{% endif %}
                 {% for resource in resources %}
                     {% if loop.index0 == max_resources %}
                     <div v-if="isTypeListVisible('{{ type }}')" v-cloak transition="expand">
