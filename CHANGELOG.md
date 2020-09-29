@@ -7,6 +7,7 @@
 - Fix reuses metrics [#2531](https://github.com/opendatateam/udata/pull/2531):
   - Reuses "datasets" metrics are now triggered correctly
   - New job to update the datasets "reuses" metrics: `update-datasets-reuses-metrics` to be scheduled
+- Add a migration to set the reuses datasets metrics to the correct value [#2540](https://github.com/opendatateam/udata/pull/2540)
 - Add a specific dataset's method for resource removal [#2534](https://github.com/opendatateam/udata/pull/2534)
 - Flask-Security update [#2535](https://github.com/opendatateam/udata/pull/2535):
   - Switch to fork Flask-Security-Too
