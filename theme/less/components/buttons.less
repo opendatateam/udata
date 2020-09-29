@@ -131,3 +131,17 @@ Disabled buttons should include the `aria-disabled="true"` attribute to indicate
         }
     });
 }
+
+.btn-action {
+    svg {
+        transition: transform ease 0.15s;
+        border-radius: 50%;
+    }
+
+    &:hover {
+        svg {
+            box-shadow: 1px 1px 3px 1px rgba(0,0,0,0.05);
+            transform: scale(1.1);
+        }
+    }
+}
