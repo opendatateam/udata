@@ -1,5 +1,5 @@
 {% set resource_format = resource.format|trim|lower %}
-<article id="resource-{{resource.id}}" class="card resource-card {% if resource.from_community %}resource-card-community{% endif %}"
+<article id="resource-{{resource.id}}" class="card resource-card {% if dark %}dark{% endif %} {% if resource.from_community %}resource-card-community{% endif %}"
     @click.prevent="showResource('{{resource.id}}', {{ resource.owner is defined|tojson }})">
 
 
