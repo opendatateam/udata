@@ -129,19 +129,26 @@ h5,
     font-weight: bold;
 
     sup {
-        font-weight: @font-weight-light;
+        .sup;
+    }
 
-        &::before {
-            color: @grey-200;
-            vertical-align: baseline;
-            content: '(';
-        }
+}
 
-        &::after {
-            color: @grey-200;
-            vertical-align: baseline;
-            content: ')';
-        }
+.sup {
+    display: inline-block;
+    font-weight: @font-weight-light;
+    text-decoration: none;
+
+    &::before {
+        color: @grey-200;
+        vertical-align: baseline;
+        content: '(';
+    }
+
+    &::after {
+        color: @grey-200;
+        vertical-align: baseline;
+        content: ')';
     }
 }
 
