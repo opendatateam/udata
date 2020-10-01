@@ -10,3 +10,5 @@ examples:
   css:
     - udata_gouvfr/theme/static/stylemark/index.css
     - theme/less/examples.css
+  js:
+    - udata_gouvfr/theme/static/stylemark/index.js
