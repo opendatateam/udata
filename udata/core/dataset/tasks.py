@@ -64,19 +64,6 @@ def purge_datasets(self):
         dataset.delete()
 
 
-@job('purge-orphan-community-resources')
-def purge_orphan_community_resources(self):
-    '''
-    Gets community resources not linked with a dataset
-    and deletes them along with their files.
-    '''
-    community_resources = CommunityResource.objects(dataset=None)
-    for community_resource in community_resources:
-        if community_resource.fs_filename is not None:
-            storages.resources.delete(community_resource.fs_filename)
-        community_resource.delete()
-
-
 @job('send-frequency-reminder')
 def send_frequency_reminder(self):
     # We exclude irrelevant frequencies.
