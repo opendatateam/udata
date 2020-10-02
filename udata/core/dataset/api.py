@@ -215,6 +215,8 @@ class ResourcesAPI(API):
         ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
+        if form._fields.get('filetype').data != 'remote':
+            return 'This endpoint is only made for remote resources', 400
         form.populate_obj(resource)
         dataset.add_resource(resource)
         dataset.last_modified = datetime.now()
@@ -353,6 +355,8 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
+        if resource.filetype == 'file':
+            form._fields.get('url').data = resource.url
         form.populate_obj(resource)
         resource.modified = datetime.now()
         dataset.last_modified = datetime.now()

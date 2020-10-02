@@ -14,7 +14,7 @@ from udata.core import storages
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
-from udata.core.dataset.models import RESOURCE_FILETYPE_FILE, ResourceMixin
+from udata.core.dataset.models import ResourceMixin
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
@@ -602,6 +602,7 @@ class DatasetResourceAPITest(APITestCase):
     def test_create(self):
         data = ResourceFactory.as_dict()
         data['extras'] = {'extra:id': 'id'}
+        data['filetype'] = 'remote'
         with self.api_user():
             response = self.post(url_for('api.resources',
                                          dataset=self.dataset), data)
@@ -610,9 +611,17 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(self.dataset.resources), 1)
         self.assertEqual(self.dataset.resources[0].extras, {'extra:id': 'id'})
 
+    def test_unallowed_create_local(self):
+        data = ResourceFactory.as_dict()
+        with self.api_user():
+            response = self.post(url_for('api.resources',
+                                         dataset=self.dataset), data)
+        self.assert400(response)
+
     def test_create_normalize_format(self):
         _format = ' FORMAT '
         data = ResourceFactory.as_dict()
+        data['filetype'] = 'remote'
         data['format'] = _format
         with self.api_user():
             response = self.post(url_for('api.resources',
@@ -627,6 +636,7 @@ class DatasetResourceAPITest(APITestCase):
         self.dataset.save()
 
         data = ResourceFactory.as_dict()
+        data['filetype'] = 'remote'
         with self.api_user():
             response = self.post(url_for('api.resources',
                                          dataset=self.dataset), data)
@@ -698,37 +708,6 @@ class DatasetResourceAPITest(APITestCase):
         data = json.loads(response.data)
         self.assertEqual(data['title'], 'test.txt')
 
-    def test_create_filetype_file_unallowed_domain(self):
-        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
-        data = ResourceFactory.as_dict()
-        data['filetype'] = RESOURCE_FILETYPE_FILE
-        with self.api_user():
-            response = self.post(url_for('api.resources',
-                                         dataset=self.dataset), data)
-        self.assert400(response)
-
-    def test_create_filetype_file_allowed_domain(self):
-        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = [
-            'udata.gouv.fr',
-        ]
-        data = ResourceFactory.as_dict()
-        data['filetype'] = RESOURCE_FILETYPE_FILE
-        data['url'] = 'http://udata.gouv.fr/resource'
-        with self.api_user():
-            response = self.post(url_for('api.resources',
-                                         dataset=self.dataset), data)
-        self.assert201(response)
-
-    def test_create_filetype_file_server_name(self):
-        self.app.config['RESOURCES_FILE_ALLOWED_DOMAINS'] = []
-        data = ResourceFactory.as_dict()
-        data['filetype'] = RESOURCE_FILETYPE_FILE
-        data['url'] = 'http://%s/resource' % self.app.config['SERVER_NAME']
-        with self.api_user():
-            response = self.post(url_for('api.resources',
-                                         dataset=self.dataset), data)
-        self.assert201(response)
-
     def test_reorder(self):
         # Register an extra field in order to test
         # https://github.com/opendatateam/udata/issues/1794
@@ -755,7 +734,7 @@ class DatasetResourceAPITest(APITestCase):
                          [str(r['id']) for r in expected_order])
         self.assertEqual(self.dataset.last_modified, initial_last_modified)
 
-    def test_update(self):
+    def test_update_local(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
@@ -779,6 +758,37 @@ class DatasetResourceAPITest(APITestCase):
         updated = self.dataset.resources[0]
         self.assertEqual(updated.title, data['title'])
         self.assertEqual(updated.description, data['description'])
+        # Url should NOT have been updated as it is a hosted resource
+        self.assertNotEqual(updated.url, data['url'])
+        self.assertEqual(updated.extras, {'extra:id': 'id'})
+        self.assertEqualDates(updated.published, now)
+
+    def test_update_remote(self):
+        resource = ResourceFactory()
+        resource.filetype = 'remote'
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        now = datetime.now()
+        data = {
+            'title': faker.sentence(),
+            'description': faker.text(),
+            'url': faker.url(),
+            'published': now.isoformat(),
+            'extras': {
+                'extra:id': 'id',
+            }
+        }
+        with self.api_user():
+            response = self.put(url_for('api.resource',
+                                        dataset=self.dataset,
+                                        rid=str(resource.id)), data)
+        self.assert200(response)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.resources), 1)
+        updated = self.dataset.resources[0]
+        self.assertEqual(updated.title, data['title'])
+        self.assertEqual(updated.description, data['description'])
+        # Url should have been updated as it is a remote resource
         self.assertEqual(updated.url, data['url'])
         self.assertEqual(updated.extras, {'extra:id': 'id'})
         self.assertEqualDates(updated.published, now)
