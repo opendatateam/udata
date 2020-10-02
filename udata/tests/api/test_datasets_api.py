@@ -611,11 +611,13 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(self.dataset.resources), 1)
         self.assertEqual(self.dataset.resources[0].extras, {'extra:id': 'id'})
 
-    def test_unallowed_create_local(self):
+    def test_unallowed_create_filetype_file(self):
         data = ResourceFactory.as_dict()
+        data['filetype'] = 'file'  # to be explicit
         with self.api_user():
             response = self.post(url_for('api.resources',
                                          dataset=self.dataset), data)
+        # should fail because the POST endpoint only supports URL setting for remote resources
         self.assert400(response)
 
     def test_create_normalize_format(self):
@@ -1293,6 +1295,7 @@ class CommunityResourceAPITest(APITestCase):
         user = self.login()
         dataset = VisibleDatasetFactory()
         attrs = CommunityResourceFactory.as_dict()
+        attrs['filetype'] = 'remote'
         attrs['dataset'] = str(dataset.id)
         response = self.post(
             url_for('api.community_resources'),
@@ -1308,15 +1311,31 @@ class CommunityResourceAPITest(APITestCase):
         self.assertEqual(community_resource.owner, user)
         self.assertIsNone(community_resource.organization)
 
+    def test_community_resource_api_unallowed_create_filetype_file(self):
+        '''It should create a remote community resource from the API'''
+        user = self.login()
+        dataset = VisibleDatasetFactory()
+        attrs = CommunityResourceFactory.as_dict()
+        attrs['filetype'] = 'file'  # to be explicit
+        attrs['dataset'] = str(dataset.id)
+        response = self.post(
+            url_for('api.community_resources'),
+            attrs
+        )
+        # should fail because the POST endpoint only supports URL setting for remote community resources
+        self.assert400(response)
+
     def test_community_resource_api_create_remote_needs_dataset(self):
         '''
         It should prevent remote community resource creation without dataset
         from the API
         '''
         self.login()
+        attrs = CommunityResourceFactory.as_dict()
+        attrs['filetype'] = 'remote'
         response = self.post(
             url_for('api.community_resources'),
-            CommunityResourceFactory.as_dict()
+            attrs
         )
         self.assertStatus(response, 400)
         data = json.loads(response.data)

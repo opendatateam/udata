@@ -55,8 +55,7 @@ class BaseResourceForm(ModelForm):
         choices=list(RESOURCE_TYPES.items()), default='other',
         description=_('Resource type (documentation, API...)'))
     url = fields.UploadableURLField(
-        _('URL'), [validators.DataRequired()],
-        storage=resources)
+        _('URL'), [validators.DataRequired()], storage=resources)
     format = fields.StringField(
         _('Format'),
         filters=[normalize_format],

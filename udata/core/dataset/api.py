@@ -216,7 +216,7 @@ class ResourcesAPI(API):
         form = api.validate(ResourceForm)
         resource = Resource()
         if form._fields.get('filetype').data != 'remote':
-            return 'This endpoint is only made for remote resources', 400
+            return 'This endpoint only supports remote resources', 400
         form.populate_obj(resource)
         dataset.add_resource(resource)
         dataset.last_modified = datetime.now()
@@ -355,6 +355,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
+         # ensure API client does not override url on self-hosted resources
         if resource.filetype == 'file':
             form._fields.get('url').data = resource.url
         form.populate_obj(resource)
@@ -401,6 +402,8 @@ class CommunityResourcesAPI(API):
     def post(self):
         '''Create a new community resource'''
         form = api.validate(CommunityResourceForm)
+        if form._fields.get('filetype').data != 'remote':
+            return 'This endpoint only supports remote community resources', 400
         resource = CommunityResource()
         form.populate_obj(resource)
         if not resource.dataset:
@@ -432,6 +435,8 @@ class CommunityResourceAPI(API):
         '''Update a given community resource'''
         ResourceEditPermission(community).test()
         form = api.validate(CommunityResourceForm, community)
+        if community.filetype == 'file':
+            form._fields.get('url').data = community.url
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()
