@@ -66,13 +66,13 @@
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
     <div class="row align-items-center">
-        <div class="col-3">
+        <div class="col-3 tabs">
             {% if dataset.organization %}
-            <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">{{ _('Producer') }}</a>
+            <a href="#dataset-producer" role="button" class="dropdown tab active"><span class="label">{{ _('Producer') }}</span></a>
             {% elif dataset.owner %}
-            <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">{{ _('Author') }}</a>
+            <a href="#dataset-producer" role="button" class="dropdown tab active"><span class="label">{{ _('Author') }}</span></a>
             {% endif %}
-            <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">{{ _('Informations') }}</a>
+            <a href="#dataset-informations" role="button" class="dropdown tab"><span class="label">{{ _('Informations') }}</span></a>
         </div>
         <div class="col-3">
             <a href="#community-resources" class="nav-link text-decoration-none fs-sm text-grey-300">{{ _('Community resources') }}</a>
@@ -81,9 +81,17 @@
 </section>
 {# TODO : Informations tab, author tab if not producer #}
 <section class="callout p-hg my-lg bg-blue-300">
+    <div id="dataset-producer" class="tab-content active">
         {% with organization=dataset.organization %}
             {% include theme('organization/producer-panel.html') %}
         {% endwith %}
+    </div>
+    <div id="dataset-informations" class="tab-content">
+        INFORMATIONS !
+        {% with organization=dataset.organization %}
+            {% include theme('organization/producer-panel.html') %}
+        {% endwith %}
+    </div>
         {#
         <div class="panel panel-default text-center">
             <div class="panel-body">
@@ -502,5 +510,6 @@
     </div>
 </section>
 {% endblock %}
+{% include theme('participez/participez.html') %}
 {# {% endcache %} #}
 {% endblock %}
