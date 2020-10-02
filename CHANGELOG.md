@@ -4,10 +4,10 @@
 
 - :warning: Resources and community resources creation API change [#2545](https://github.com/opendatateam/udata/pull/2545):
   - Remove the RESOURCES_FILE_ALLOWED_DOMAINS setting and mechanism.
-  - The resource's url could be set from the client side, event in the case of a hosted one, which is illogical.
-    A hosted resource's url should only be the matter of the backend.
+  - The community resource's/resource's url could be set from the client side, event in the case of a hosted one, which is illogical.
+    A hosted community resource's/resource's url should only be the matter of the backend.
   - Consequently, the POST endpoint of the community resources/resources API is only meant for the remote ones.
-  - The PUT endpoint of the resources API will take the existing resource's url to override the one sent by the client.
+  - The PUT endpoint of the community resources/resources API will take the existing resource's url to override the one sent by the client.
 
 ## 2.3.0 (2020-09-29)
 
