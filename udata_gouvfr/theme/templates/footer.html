@@ -107,7 +107,12 @@
                 {% endif %}
             </section>
             <section class="col-3 col-hg-6 col-md-12 self-end lang-picker">
-                <a href="#" role="button" class="btn-secondary btn-secondary-grey-400">Français</a>
+                <div class="btn-secondary btn-secondary-grey-400 dropdown">
+                    <select id="lang-picker">
+                        <option selected>Français</option>
+                        <option>English</option>
+                    </select>
+                </div>
             </section>
         </footer>
     </div>
