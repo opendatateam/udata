@@ -6,6 +6,9 @@ category: Components
 
 Tabs allow for easy navigation between categories. You can toggle a `.active` class to make them appear selected.
 
+Warning : `.tab` first immediate child (`.tab > *`) has a `pointer-events: none` property set so that clicks actually register to the tab element and not the children.
+This prevents messy event handling with bubbling prevention, but might cause you trouble in some edge cases.
+
 ```tabs.html
 <nav class="tabs">
     <a class="tab active" href="#">Selection Etalab</a>
@@ -31,6 +34,12 @@ Tabs allow for easy navigation between categories. You can toggle a `.active` cl
 
         + .tab {
             margin-left: @spacing-sm;
+        }
+
+        //Prevents children from taking the click events.
+        //Might be dangerous, remove if needed
+        >* {
+            pointer-events: none;
         }
 
         &.active,
