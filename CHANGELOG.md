@@ -2,7 +2,9 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Community resources changes [#2546](https://github.com/opendatateam/udata/pull/2546):
+  - Dataset is now correctly set at community resource creation
+  - Remove now useless job 'purge-orphan-community-resources'
 
 ## 2.3.0 (2020-09-29)
 
