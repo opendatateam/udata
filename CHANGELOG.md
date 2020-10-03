@@ -6,8 +6,7 @@
   - Remove the RESOURCES_FILE_ALLOWED_DOMAINS setting and mechanism.
   - The community resource's/resource's url could be set from the client side, even in the case of a hosted one, which is illogical.
     A hosted community resource's/resource's url should only be the sole responsibility of the backend.
-  - Consequently, the POST endpoint of the community resources/resources API is only meant for the remote ones.
-  - The PUT endpoint of the community resources/resources API will take the existing resource's url to override the one sent by the client.
+  - Consequently, the POST endpoint of the community resources/resources API is only meant for the remote ones and the PUT endpoint of the community resources/resources API will take the existing resource's url to override the one sent by the client.
 
 ## 2.3.0 (2020-09-29)
 
