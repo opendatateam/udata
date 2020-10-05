@@ -284,6 +284,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         '''Upload a new community resource'''
         infos = self.handle_upload(dataset)
         infos['owner'] = current_user._get_current_object()
+        infos['dataset'] = dataset
         community_resource = CommunityResource.objects.create(**infos)
         return community_resource, 201
 

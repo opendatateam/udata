@@ -33,17 +33,6 @@ def test_purge_datasets_community():
     assert CommunityResource.objects.count() == 0
 
 
-def test_purge_orphan_community():
-    dataset = Dataset.objects.create(title='test_dataset')
-    community_resource1 = CommunityResourceFactory(title='test_community_1')
-    community_resource2 = CommunityResourceFactory(title='test_community_2')
-    community_resource1.dataset = dataset
-    community_resource1.save()
-
-    tasks.purge_orphan_community_resources()
-    assert CommunityResource.objects.count() == 1
-
-
 @pytest.mark.usefixtures('instance_path')
 def test_export_csv(app):
     dataset = DatasetFactory()

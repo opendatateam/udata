@@ -1193,6 +1193,18 @@ class CommunityResourceAPITest(APITestCase):
         data = json.loads(response.data)
         self.assertEqual(data['id'], str(community_resource.id))
 
+    def test_community_resource_api_create_dataset_binding(self):
+        '''It should create a community resource linked to the right dataset'''
+        dataset = VisibleDatasetFactory()
+        self.login()
+        response = self.post(
+            url_for('api.upload_new_community_resource', dataset=dataset),
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+        self.assert201(response)
+        self.assertEqual(CommunityResource.objects.count(), 1)
+        community_resource = CommunityResource.objects.first()
+        self.assertEqual(community_resource.dataset, dataset)
+
     def test_community_resource_api_create(self):
         '''It should create a community resource from the API'''
         dataset = VisibleDatasetFactory()
