@@ -862,6 +862,34 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
+    def test_file_update_old_file_deletion(self):
+        '''It should update a resource's file and delete the old one'''
+        resource = ResourceFactory()
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        with self.api_user():
+            upload_response = self.post(
+                url_for(
+                    'api.upload_dataset_resource',
+                    dataset=self.dataset,
+                    rid=str(resource.id)
+                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+
+            data = json.loads(upload_response.data)
+            self.assertEqual(data['title'], 'test.txt')
+
+            upload_response = self.post(
+                url_for(
+                    'api.upload_dataset_resource',
+                    dataset=self.dataset,
+                    rid=str(resource.id)
+                    ), {'file': (BytesIO(b'aaa'), 'test_update.txt')}, json=False)
+
+            data = json.loads(upload_response.data)
+            self.assertEqual(data['title'], 'test-update.txt')
+
+        self.assertEqual(len(list(storages.resources.list_files())), 1)
+
     def test_delete(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)

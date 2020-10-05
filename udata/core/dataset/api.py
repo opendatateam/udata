@@ -310,6 +310,8 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         infos = self.handle_upload(dataset)
+        if resource.fs_filename is not None:
+            storages.resources.delete(resource.fs_filename)
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
