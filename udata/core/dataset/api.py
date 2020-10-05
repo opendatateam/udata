@@ -331,6 +331,8 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         '''Update the file related to a given community resource'''
         ResourceEditPermission(community).test()
         infos = self.handle_upload(community.dataset)
+        if community.fs_filename is not None:
+            storages.resources.delete(community.fs_filename)
         community.update(**infos)
         community.reload()
         return community
