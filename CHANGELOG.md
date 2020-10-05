@@ -10,7 +10,7 @@
 - Community resources changes [#2546](https://github.com/opendatateam/udata/pull/2546):
   - Dataset is now correctly set at community resource creation
   - Remove now useless job 'purge-orphan-community-resources'
-- Remove old file when updating resource from API [#2548](https://github.com/opendatateam/udata/pull/2548)
+- Remove old file when updating resources and community resources from API [#2548](https://github.com/opendatateam/udata/pull/2548)
 
 ## 2.3.0 (2020-09-29)
 
