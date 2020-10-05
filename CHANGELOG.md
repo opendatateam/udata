@@ -10,7 +10,7 @@
 - Community resources changes [#2546](https://github.com/opendatateam/udata/pull/2546):
   - Dataset is now correctly set at community resource creation
   - Remove now useless job 'purge-orphan-community-resources'
-- Setting fs_filename correctly in "store_resource" dataset's task.[#2547](https://github.com/opendatateam/udata/pull/2547)
+- Using the fs_filename logic when uploading a new resource on the data catalog.[#2547](https://github.com/opendatateam/udata/pull/2547)
 
 ## 2.3.0 (2020-09-29)
 
