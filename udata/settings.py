@@ -337,9 +337,9 @@ class Defaults(object):
     # Map/Tiles configuration
     ###########################################################################
     # Tiles URL for SD displays
-    MAP_TILES_URL = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'
+    MAP_TILES_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
     # Tiles URL for HD/HiDPI displays
-    MAP_TILES_URL_HIDPI = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'
+    MAP_TILES_URL_HIDPI = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'
     # Leaflet tiles config, see https://leafletjs.com/reference-0.7.7.html#tilelayer
     MAP_TILES_CONFIG = {
         'subdomains': 'abcd',
@@ -347,7 +347,7 @@ class Defaults(object):
             '&copy;'
             '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
             '/'
-            '<a href="https://cartodb.com/attributions">CartoDB</a>'
+            '<a href="https://carto.com/about-carto/">CARTO</a>'
         )
     }
     # Initial map center position
