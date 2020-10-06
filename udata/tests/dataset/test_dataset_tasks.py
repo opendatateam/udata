@@ -3,8 +3,11 @@ import pytest
 from udata.models import Dataset, Topic, CommunityResource
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory, CommunityResourceFactory
-# csv.adapter for Tag won't be registered if this is not imported :thinking:
-from udata.core.tags import csv as _  # noqa
+# Those imports seem mandatory for the csv adapters to be registered. This might be because of the decorator mechanism.
+from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter, IssuesOrDiscussionCsvAdapter
+from udata.core.organization.csv import OrganizationCsvAdapter
+from udata.core.reuse.csv import ReuseCsvAdapter
+from udata.core.tags.csv import TagCsvAdapter
 
 
 pytestmark = pytest.mark.usefixtures('clean_db')
@@ -44,3 +47,5 @@ def test_export_csv(app):
     extras = [r.extras.get('csv-export:model') for r in dataset.resources]
     for model in models:
         assert model in extras
+    fs_filenames = [r.fs_filename for r in dataset.resources if r.url.endswith(r.fs_filename)]
+    assert len(fs_filenames) == len(dataset.resources)
