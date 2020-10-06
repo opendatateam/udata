@@ -862,6 +862,34 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(dataset.resources), 1)
         self.assertTrue(dataset.resources[0].url.endswith('test.txt'))
 
+    def test_file_update_old_file_deletion(self):
+        '''It should update a resource's file and delete the old one'''
+        resource = ResourceFactory()
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        with self.api_user():
+            upload_response = self.post(
+                url_for(
+                    'api.upload_dataset_resource',
+                    dataset=self.dataset,
+                    rid=str(resource.id)
+                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+
+            data = json.loads(upload_response.data)
+            self.assertEqual(data['title'], 'test.txt')
+
+            upload_response = self.post(
+                url_for(
+                    'api.upload_dataset_resource',
+                    dataset=self.dataset,
+                    rid=str(resource.id)
+                    ), {'file': (BytesIO(b'aaa'), 'test_update.txt')}, json=False)
+
+            data = json.loads(upload_response.data)
+            self.assertEqual(data['title'], 'test-update.txt')
+
+        self.assertEqual(len(list(storages.resources.list_files())), 1)
+
     def test_delete(self):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
@@ -1301,6 +1329,32 @@ class CommunityResourceAPITest(APITestCase):
                          'new description')
         self.assertTrue(
             CommunityResource.objects.first().url.endswith('test.txt'))
+    
+    def test_community_resource_file_update_old_file_deletion(self):
+        '''It should update a community resource's file and delete the old one'''
+        dataset = VisibleDatasetFactory()
+        user = self.login()
+        community_resource = CommunityResourceFactory(dataset=dataset,
+                                                      owner=user)
+        response = self.post(
+            url_for('api.upload_community_resource',
+                    community=community_resource),
+            {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+        self.assert200(response)
+        data = json.loads(response.data)
+        self.assertEqual(data['id'], str(community_resource.id))
+        self.assertEqual(data['title'], 'test.txt')
+
+        response = self.post(
+            url_for('api.upload_community_resource',
+                    community=community_resource),
+            {'file': (BytesIO(b'aaa'), 'test_update.txt')}, json=False)
+        self.assert200(response)
+        data = json.loads(response.data)
+        self.assertEqual(data['id'], str(community_resource.id))
+        self.assertEqual(data['title'], 'test-update.txt')
+
+        self.assertEqual(len(list(storages.resources.list_files())), 1)
 
     def test_community_resource_api_create_remote(self):
         '''It should create a remote community resource from the API'''
