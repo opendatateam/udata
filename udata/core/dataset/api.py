@@ -309,14 +309,15 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         '''Upload a file related to a given resource on a given dataset'''
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
+        fs_filename_to_remove = resource.fs_filename
         infos = self.handle_upload(dataset)
-        if resource.fs_filename is not None:
-            storages.resources.delete(resource.fs_filename)
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
         dataset.last_modified = datetime.now()
         dataset.save()
+        if fs_filename_to_remove is not None:
+            storages.resources.delete(resource.fs_filename)
         return resource
 
 
@@ -330,11 +331,12 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     def post(self, community):
         '''Update the file related to a given community resource'''
         ResourceEditPermission(community).test()
+        fs_filename_to_remove = community.fs_filename
         infos = self.handle_upload(community.dataset)
-        if community.fs_filename is not None:
-            storages.resources.delete(community.fs_filename)
         community.update(**infos)
         community.reload()
+        if fs_filename_to_remove is not None:
+            storages.resources.delete(community.fs_filename)
         return community
 
 
