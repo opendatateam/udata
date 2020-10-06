@@ -65,6 +65,10 @@ class User(WithMetrics, UserMixin, db.Document):
     # when SECURITY_CONFIRMABLE is True
     confirmed_at = db.DateTimeField()
 
+    # The field below will be used to trigger
+    # password rotations when needed
+    password_rotation_needed = db.BooleanField(default=False)
+
     # The 5 fields below are required for Flask-security
     # when SECURITY_TRACKABLE is True
     last_login_at = db.DateTimeField()

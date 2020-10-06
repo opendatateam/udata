@@ -106,6 +106,9 @@ class UDataApi(Api):
             if current_user.deleted:
                 self.abort(401)
 
+            if current_user.password_rotation_needed:
+                self.abort(401)
+
             if permission is not None:
                 with permission.require():
                     return func(*args, **kwargs)
