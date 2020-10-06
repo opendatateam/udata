@@ -144,6 +144,7 @@ def store_resource(csvfile, model, dataset):
     with open(csvfile.name, 'rb') as infile:
         stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
+    r_info['fs_filename'] = stored_filename
     checksum = r_info.pop('checksum')
     algo, checksum = checksum.split(':', 1)
     r_info[algo] = checksum
