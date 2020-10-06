@@ -111,7 +111,7 @@
     "respond.js": "^1.4.2",
     "selectize": "^0.12.2",
     "sifter": "^0.5.3",
-    "sortablejs": "1.10.2",
+    "sortablejs": "~1.10.2",
     "source-sans-pro": "^2.0.10",
     "string_score": "^0.1.22",
     "swagger-client": "2.1.13",
