@@ -23,13 +23,13 @@
     "url": "http://github.com/etalab/udata.git"
   },
   "browserslist": [
-      "> 0.5%",
-      "last 2 versions",
-      "not ie <= 10",
-      "not ie_mob <= 11",
-      "Firefox ESR",
-      "not bb <= 10",
-      "not op_mob <= 12.1"
+    "> 0.5%",
+    "last 2 versions",
+    "not ie <= 10",
+    "not ie_mob <= 11",
+    "Firefox ESR",
+    "not bb <= 10",
+    "not op_mob <= 12.1"
   ],
   "devDependencies": {
     "babel-core": "^6.10.4",
@@ -111,7 +111,7 @@
     "respond.js": "^1.4.2",
     "selectize": "^0.12.2",
     "sifter": "^0.5.3",
-    "sortablejs": "^1.4.2",
+    "sortablejs": "~1.10.2",
     "source-sans-pro": "^2.0.10",
     "string_score": "^0.1.22",
     "swagger-client": "2.1.13",

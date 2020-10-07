@@ -81,7 +81,10 @@ jobs:
             - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install NodeJS and dependencies
-          command: nvm install && npm install
+          command: |
+            nvm install
+            npm install
+            npm list || true
       - save_cache:
           key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
           paths:

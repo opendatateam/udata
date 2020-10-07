@@ -12,6 +12,7 @@
   - Remove now useless job 'purge-orphan-community-resources'
 - Using the fs_filename logic when uploading a new resource on the data catalog.[#2547](https://github.com/opendatateam/udata/pull/2547)
 - Remove old file when updating resources and community resources from API [#2548](https://github.com/opendatateam/udata/pull/2548)
+- Sortable.js upgrade to fix an issue in udata's editorial page when reordering featured datasets [#2550](https://github.com/opendatateam/udata/pull/2550)
 
 ## 2.3.0 (2020-09-29)
 
