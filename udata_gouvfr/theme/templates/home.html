@@ -95,6 +95,7 @@
 {% set dataset_tabs = (
     ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
     ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
+    ('reference-datasets', _('Jeux de données de référence'), spd, {}),
 ) %}
 
 <section class="container datasets py-hg">
@@ -108,7 +109,6 @@
                 {% for tab_id, label, _, _ in dataset_tabs %}
                     <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
                 {% endfor %}
-                <a href="#" class="tab hidden-lg">{{ _('Jeux de données de référence') }}</a>
                 <a href="{{ url_for('datasets.list') }}" class="tab">{{ _('See more') }}</a>
             </nav>
         </div>
