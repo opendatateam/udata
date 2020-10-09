@@ -106,8 +106,8 @@ class UDataApi(Api):
             if current_user.deleted:
                 self.abort(401)
 
-            if current_user.password_rotation_needed:
-                self.abort(401)
+            if current_user.password_rotation_demand:
+                self.abort(401, 'Password must be changed for security reasons')
 
             if permission is not None:
                 with permission.require():

@@ -1,3 +1,5 @@
+import datetime
+
 from flask_security import current_user
 from flask_security.forms import RegisterForm, LoginForm, ResetPasswordForm
 from udata.forms import fields
@@ -19,7 +21,7 @@ class ExtendedLoginForm(LoginForm):
         if not super().validate():
             return False
 
-        if self.user.password_rotation_needed:
+        if self.user.password_rotation_demand:
             self.password.errors.append(_('Password must be changed for security reasons'))
             return False
 
@@ -31,8 +33,9 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
         if not super().validate():
             return False
 
-        if self.user.password_rotation_needed:
-            self.user.password_rotation_needed = False
+        if self.user.password_rotation_demand:
+            self.user.password_rotation_demand = None
+            self.user.password_rotation_performed = datetime.datetime.now()
             self.user.save()
 
         return True
