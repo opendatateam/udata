@@ -630,6 +630,38 @@ The OAuth2 token duration.
 
 The OAuth2 error page. Do not modify unless you know what you are doing.
 
+## Flask-Security options
+
+### SECURITY_PASSWORD_LENGTH_MIN
+
+**default**: `6`
+
+The minimum required password length.
+
+### SECURITY_PASSWORD_REQUIREMENTS_LOWERCASE
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one lowercase character.
+
+### SECURITY_PASSWORD_REQUIREMENTS_DIGITS
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one digit.
+
+### SECURITY_PASSWORD_REQUIREMENTS_UPPERCASE
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one uppercase character.
+
+### SECURITY_PASSWORD_REQUIREMENTS_SYMBOLS
+
+**default**: `False`
+
+If set to `True`, the new passwords will need to contain at least one symbol.
+
 ## Flask-Cache options
 
 udata uses Flask-Cache to handle cache and use Redis by default.
