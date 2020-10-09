@@ -14,7 +14,7 @@
 - Remove old file when updating resources and community resources from API [#2548](https://github.com/opendatateam/udata/pull/2548)
 - Sortable.js upgrade to fix an issue in udata's editorial page when reordering featured datasets [#2550](https://github.com/opendatateam/udata/pull/2550)
 - Password rotation mechanism [#2551](https://github.com/opendatateam/udata/pull/2551):
-  - Date fields 'password_rotation_demand' and 'password_rotation_performed' added to user model.
+  - Datetime fields `password_rotation_demand` and `password_rotation_performed` added to user model.
   - Override Flask-Security's lofin and reset password forms to implement the password rotation checks.
 
 ## 2.3.0 (2020-09-29)
