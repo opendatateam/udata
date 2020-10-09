@@ -65,7 +65,7 @@ class User(WithMetrics, UserMixin, db.Document):
     # when SECURITY_CONFIRMABLE is True
     confirmed_at = db.DateTimeField()
 
-    password_rotation_demand = db.DateTimeField()
+    password_rotation_demanded = db.DateTimeField()
     password_rotation_performed = db.DateTimeField()
 
     # The 5 fields below are required for Flask-security

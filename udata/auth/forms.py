@@ -21,7 +21,7 @@ class ExtendedLoginForm(LoginForm):
         if not super().validate():
             return False
 
-        if self.user.password_rotation_demand:
+        if self.user.password_rotation_demanded:
             self.password.errors.append(_('Password must be changed for security reasons'))
             return False
 
@@ -33,8 +33,8 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
         if not super().validate():
             return False
 
-        if self.user.password_rotation_demand:
-            self.user.password_rotation_demand = None
+        if self.user.password_rotation_demanded:
+            self.user.password_rotation_demanded = None
             self.user.password_rotation_performed = datetime.datetime.now()
             self.user.save()
 

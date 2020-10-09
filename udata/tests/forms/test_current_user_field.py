@@ -197,7 +197,7 @@ class CurrentUserFieldTest(TestCase):
 
     def test_password_rotation(self):
         today = datetime.datetime.now()
-        user = UserFactory(password='password', password_rotation_demand=today, confirmed_at=today)
+        user = UserFactory(password='password', password_rotation_demanded=today, confirmed_at=today)
 
         form = ExtendedLoginForm.from_json({
             'email': user.email,
