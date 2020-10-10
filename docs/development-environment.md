@@ -46,10 +46,10 @@ On the very first run it will download and install Docker images which takes a w
 It is recommended to work within a virtualenv to ensure proper dependencies isolation.
 If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
 
-Alright, now you can [install virtualenv][install-virtualenv] and then type these commands knowing what you are doing:
+Alright, now you can type these commands knowing what you are doing:
 
 ```shell
-$ virtualenv --python=python2.7 venv
+$ python3 -m venv venv
 $ source venv/bin/activate
 $ pip install -r requirements/develop.pip
 $ pip install -e .
