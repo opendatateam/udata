@@ -49,8 +49,8 @@ If you're not familiar with that concept, read [Python Virtual Environments - a 
 Alright, now you can type these commands knowing what you are doing:
 
 ```shell
-$ python3 -m venv udata_env
-$ source udata_env/bin/activate
+$ python3 -m venv venv
+$ source venv/bin/activate
 $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
