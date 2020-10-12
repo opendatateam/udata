@@ -39,13 +39,18 @@ admin_permission = Permission()
 
 
 def init_app(app):
-    from .forms import ExtendedRegisterForm
+    from .forms import ExtendedRegisterForm, ExtendedLoginForm, ExtendedResetPasswordForm
     from .tasks import sendmail_proxy
     from .views import create_security_blueprint
     from .password_validation import password_validator
     from udata.models import datastore
-    state = security.init_app(app, datastore, register_blueprint=False,
-                              confirm_register_form=ExtendedRegisterForm, send_mail=sendmail_proxy)
+    state = security.init_app(app, datastore,
+                              register_blueprint=False,
+                              login_form=ExtendedLoginForm,
+                              confirm_register_form=ExtendedRegisterForm,
+                              reset_password_form=ExtendedResetPasswordForm,
+                              send_mail=sendmail_proxy
+                            )
     state.password_validator(password_validator)
 
     security_bp = create_security_blueprint(state, 'security_blueprint')
