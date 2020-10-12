@@ -1,10 +1,7 @@
 {% set resource_format = resource.format|trim|lower %}
-<article id="resource-{{resource.id}}" class="card resource-card {% if dark %}dark{% endif %} {% if resource.from_community %}resource-card-community{% endif %}"
-    @click.prevent="showResource('{{resource.id}}', {{ resource.owner is defined|tojson }})">
-
-
+<article class="card resource-card {% if dark %}dark{% endif %} {% if resource.from_community %}resource-card-community{% endif %}">
     <div class="card-body">
-        <header class="card-header">
+        <header class="card-header" id="resource-{{resource.id}}-header">
             <div class="edit-button"></div>
             <div class="header-text">
                 <span class="fs-sm text-grey-200">  {{ resource.metrics.views or 0 }} {{ _('@@téléchargements') }}</span>
@@ -13,10 +10,14 @@
             </div>
             <div class="button-bar">
                 <ul>
-                    <li><a href="#" class="card-toggle">{% include theme('svg/chevron.svg') %}</a></li>
+                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="true" aria-controls="#resource-{{resource.id}}" class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
                     <li><a href="#" class="btn-action">{% include theme('svg/actions/eye.svg') %}</a></li>
-                    <li><a href="#" class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
-                    <li><a href="#" class="btn-action">{% include theme('svg/actions/download.svg') %}</a></li>
+                    <li><a @click.prevent href="#" title="{{ _('Copy permalink to clipboard') }}" v-clipboard="'{{resource.latest}}'" class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
+                    {% if resource.format == 'url' %}
+                    <li><a href="{{ resource.latest }}" class="btn-action">{% include theme('svg/actions/download.svg') %}</a></li>
+                    {% else %}
+                    <li><a href="{{ resource.latest }}" class="btn-action" download>{% include theme('svg/actions/download.svg') %}</a></li>
+                    {% endif %}
                 </ul>
                 <div class="filetype">
                     <strong>{{ resource_format }}</strong>
@@ -26,44 +27,46 @@
                 </div>
             </div>
         </header>
-        {% if resource.description %}
-        <p class="resource-description">
-            {{ resource.description|mdstrip(180) }}
-        </p>
-        {% endif %}
-        <dl class="resource-infos">
-            <div>
-                <dt>{{ _('URL') }}</dt>
-                <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
-            </div>
-            <div>
-                <dt>{{ _('@@URL stable') }}</dt>
-                <dd><a href="{{resource.json_ld.url}}">{{resource.json_ld.url}}</a></dd>
-            </div>
-            <div>
-                <dt>{{ _('@@Type') }}</dt>
-                <dd>{{type_label}}</dd>
-            </div>
-            <div>
-                <dt>{{ _('@@Type MIME') }}</dt>
-                <dd>{{resource.mime}}</dd>
-            </div>
-            <div>
-                <dt>{{ _('@@sha1') }}</dt>
-                <dd>{{resource.sha}}</dd>
-            </div>
-            <div>
-                <dt>{{ _('@@Créée le') }}</dt>
-                <dd>{{resource.created_at|dateformat(format='long')}}</dd>
-            </div>
-            <div>
-                <dt>{{ _('@@Modifiée le') }}</dt>
-                <dd>{{resource.last_update}}</dd>
-            </div>
-            <div>
-                <dt>{{ _('@@Publiée le') }}</dt>
-                <dd>{{resource.publish_date}}</dd>
-            </div>
-        </dl>
+        <section class="card-content accordion-content active" aria-labelledby="resource-{{resource.id}}-header" id="resource-{{resource.id}}">
+            {% if resource.description %}
+            <p class="resource-description">
+                {{ resource.description|mdstrip(180) }}
+            </p>
+            {% endif %}
+            <dl class="resource-infos">
+                <div>
+                    <dt>{{ _('URL') }}</dt>
+                    <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@URL stable') }}</dt>
+                    <dd><a href="{{resource.json_ld.url}}">{{resource.json_ld.url}}</a></dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Type') }}</dt>
+                    <dd>{{type_label}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Type MIME') }}</dt>
+                    <dd>{{resource.mime}}</dd>
+                </div>
+                <div>
+                    <dt>{{resource.checksum.type}}</dt>
+                    <dd>{{resource.checksum.value}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Créée le') }}</dt>
+                    <dd>{{resource.created_at|dateformat(format='long')}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Modifiée le') }}</dt>
+                    <dd>{{resource.modified|dateformat(format='long')}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Publiée le') }}</dt>
+                    <dd>{{resource.published|dateformat(format='long')}}</dd>
+                </div>
+            </dl>
+        </section>
     </div>
 </article>

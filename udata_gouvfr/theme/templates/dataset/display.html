@@ -42,7 +42,6 @@
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
 
-
 {% if dataset.archived %}
 <div class="container-fluid alert alert-warning">
     <div class="container" role="alert">
@@ -86,11 +85,33 @@
             {% include theme('organization/producer-panel.html') %}
         {% endwith %}
     </div>
-    <div id="dataset-informations" class="tab-content">
-        INFORMATIONS !
-        {% with organization=dataset.organization %}
-            {% include theme('organization/producer-panel.html') %}
-        {% endwith %}
+    <div id="dataset-informations" class="tab-content container">
+        <h3 class="text-white">
+            Informations
+        </h3>
+        <ul class="nav-list fs-base">
+            {% if dataset.license %}
+            <li>
+                {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
+                {{ dataset.license.title }}
+                {% if dataset.license.url %}</a>{% endif %}
+            </li>
+            {% endif %}
+            {% if dataset.frequency %}
+            <li>
+                {{ dataset.frequency_label }}
+            </li>
+            {% endif %}
+            <li>
+                {{ dataset.created_at|dateformat(format='long') }}
+            </li>
+            <li>
+                {{ dataset.last_modified|dateformat(format='long') }}
+            </li>
+            <li>
+                {{ dataset.last_update|dateformat(format='long') }}
+            </li>
+        </ul>
     </div>
         {#
         <div class="panel panel-default text-center">
@@ -172,13 +193,13 @@
                 {% if nb_groups > 1 %}<h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>{% endif %}
                 {% for resource in resources %}
                     {% if loop.index0 == max_resources %}
-                    {# TODO : JS for toggling #}
                     <div v-if="isTypeListVisible('{{ type }}')" v-cloak transition="expand">
                     {% endif %}
                     {% include theme('dataset/resource/card.html') %}
                 {% endfor %}
                 {% if resources|length > max_resources %}
                     <p class="text-center expander">
+                        {# TODO : JS to see more #}
                         <button type="button" class="btn btn-default" @click.prevent="expandResources($event, '{{ type }}')">
                             <span class="fa fa-list" ></span>
                             {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}

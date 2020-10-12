@@ -40,6 +40,17 @@
 
                 li {
                     margin: @spacing-lg;
+
+                    //We should maybe extract this into the accordion component
+                    .accordion-button {
+                        display: inline-block;
+                        transform: rotate(90deg);
+                        transition: transform ease 0.3s; //Warning : if you change the timing here, change it in accordion.js as well
+
+                        &[aria-expanded="true"] {
+                            transform: rotate(-90deg);
+                        }
+                    }
                 }
             }
         }
