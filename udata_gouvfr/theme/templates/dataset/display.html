@@ -65,7 +65,7 @@
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
     <div class="row align-items-center">
-        <div class="col-3 tabs">
+        <div class="col-3 col-md-12 tabs">
             {% if dataset.organization %}
             <a href="#dataset-producer" role="button" class="dropdown tab active"><span class="label">{{ _('Producer') }}</span></a>
             {% elif dataset.owner %}
@@ -73,13 +73,13 @@
             {% endif %}
             <a href="#dataset-informations" role="button" class="dropdown tab"><span class="label">{{ _('Informations') }}</span></a>
         </div>
-        <div class="col-3">
+        <div class="col-3 hidden-md">
             <a href="#community-resources" class="nav-link text-decoration-none fs-sm text-grey-300">{{ _('Community resources') }}</a>
         </div>
     </div>
 </section>
 {# TODO : Informations tab, author tab if not producer #}
-<section class="callout p-hg my-lg bg-blue-300">
+<section class="callout p-hg p-md-md my-lg bg-blue-300">
     <div id="dataset-producer" class="tab-content active">
         {% with organization=dataset.organization %}
             {% include theme('organization/producer-panel.html') %}
@@ -445,7 +445,7 @@
     <header>
         <div class="container">
             <div class="row">
-                <div class="col-3">
+                <div class="col-3 col-md-12">
                     <h2>{{ _('Community contributions') }}</h2>
                     <ul class="nav-list my-xl">
                         <li><a href='#' class="nav-link text-white">{{ _('Community resources') }} <sup class="sup">{{ dataset.community_resources|length }}</sup></a><li>
@@ -460,7 +460,7 @@
     <div class="container">
         <h2 id="community-resources" class="fs-hg">{{ _('Community resources') }} <sup>{{ dataset.community_resources|length }}</sup></h2>
         <div class="row mb-lg">
-            <div class="col-4 text-grey-300">
+            <div class="col-4 col-md-12 text-grey-300">
                 <p>{{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}</p>
             </div>
         </div>
@@ -484,16 +484,16 @@
         {% block reuses_section %}
             <h2 id="community-reuses" class="fs-hg">{{ _('Reuses') }} <sup>{{ reuses|length }}</sup></h2>
             <div class="row mb-lg">
-                <div class="col-4 text-grey-300">
+                <div class="col-4 col-md-12 text-grey-300">
                     {% trans %}You reused these data and published an article, a computer graphics, or an application?
                     It's time to let you know!
                     Reference your work in just a few clicks and increase your visibility.{% endtrans %}
                 </div>
             </div>
-            <div class="row mt-xl pt-md-md">
+            <div class="row mt-xl pt-md-md reuse-cards">
                 {% for reuse in reuses %}
                     {% set features = ['preview'] %}
-                    <div class="col-3">
+                    <div class="col-3 col-md-4">
                         {% include theme('reuse/card.html') %}
                     </div>
                 {% endfor %}
@@ -516,7 +516,7 @@
                     subject-class="{{ dataset.__class__.__name__ }}">
                 </discussion-threads>
             </div>
-            <div class="col-4 text-grey-300">
+            <div class="col-4 col-md-12 text-grey-300">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
         </div>
