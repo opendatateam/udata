@@ -16,6 +16,7 @@
 - Password rotation mechanism [#2551](https://github.com/opendatateam/udata/pull/2551):
   - Datetime fields `password_rotation_demanded` and `password_rotation_performed` added to user model.
   - Override Flask-Security's login and reset password forms to implement the password rotation checks.
+- Password complexity settings hardening [#2554](https://github.com/opendatateam/udata/pull/2554)
 
 ## 2.3.0 (2020-09-29)
 
