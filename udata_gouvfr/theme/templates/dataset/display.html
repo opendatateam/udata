@@ -1,4 +1,4 @@
-{% extends theme('base.html') %}
+{% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/integrate.html') import integrate_btn with context %}
 {% from theme('macros/issues.html') import issues_btn with context %}
@@ -31,14 +31,14 @@
 {% endblock %}
 
 {% block breadcrumb %}
-{# {% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %} #}
+{% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
     <li class="active">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
-{# {% endcache %} #}
+{% endcache %}
 {% endblock %}
 
 {% block content %}
-{# {% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %} #}
+{% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %}
 <!-- Placeholder for non-routable modals -->
 <div v-el:modal></div>
 
@@ -54,7 +54,6 @@
 </div>
 {% endif %}
 
-{# TODO : should this be based on 1-column template ? #}
 {{ breadcrumb(self,
     breadcrum_class=breadcrum_class,
     toolbar_class=toolbar_class
