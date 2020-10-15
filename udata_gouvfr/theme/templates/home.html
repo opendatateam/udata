@@ -51,6 +51,14 @@
     </div>
 </section>
 
+{% set metrics = [
+    (_('Datasets'), 'datasets'),
+    (_('Resources'), 'resources'),
+    (_('Reuses'), 'reuses'),
+    (_('Users'), 'users'),
+    (_('Organizations'), 'organizations'),
+    (_('Discussions'), 'discussions'),
+] %}
 {# Donnees Section #}
 <div class="donnees callout bg-green-300 inset-green-400">
     <div class="container py-hg fs-xl">
@@ -59,32 +67,20 @@
                 <h3 class="mb-sm-lg text-green-500 fs-xl">data.gouv.fr c’est</h3>
             </div>
             <div class="col-4 col-sm-12 donnees-data-table">
-                <div class="donnees-data">
-                    <span class="donnees-data-number text-align-right text-white">34 401</span>
-                    <span class="donnees-data-caption text-green-500">Jeux de données</span>
-                </div>
-                <div class="donnees-data">
-                    <span class="donnees-data-number text-align-right text-white">186 621</span>
-                    <span class="donnees-data-caption text-green-500">Ressources</span>
-                </div>
-                <div class="donnees-data">
-                    <span class="donnees-data-number text-align-right text-white">2 021</span>
-                    <span class="donnees-data-caption text-green-500">Réutilisations</span>
-                </div>
+            {% for (label, metric) in metrics[:3] %}
+            <div class="donnees-data">
+                <span class="donnees-data-number text-align-right text-white">{{current_site.metrics[metric]}}</span>
+                <span class="donnees-data-caption text-green-500">{{label}}</span>
+            </div>
+            {% endfor %}
             </div>
             <div class="col-4 col-sm-12 donnees-data-table">
-                <div class="donnees-data">
-                    <span class="donnees-data-number text-align-right text-white">34 401</span>
-                    <span class="donnees-data-caption text-green-500">Jeux de données</span>
-                </div>
-                <div class="donnees-data">
-                    <span class="donnees-data-number text-align-right text-white">186 621</span>
-                    <span class="donnees-data-caption text-green-500">Ressources</span>
-                </div>
-                <div class="donnees-data">
-                    <span class="donnees-data-number text-align-right text-white">2 021</span>
-                    <span class="donnees-data-caption text-green-500">Réutilisations</span>
-                </div>
+            {% for (label, metric) in metrics[3:] %}
+            <div class="donnees-data">
+                <span class="donnees-data-number text-align-right text-white">{{current_site.metrics[metric]}}</span>
+                <span class="donnees-data-caption text-green-500">{{label}}</span>
+            </div>
+            {% endfor %}
             </div>
         </div>
     </div>
@@ -95,6 +91,7 @@
 {% set dataset_tabs = (
     ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
     ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
+    ('reference-datasets', _('@@Jeux de données de référence'), spd, {}),
 ) %}
 
 <section class="container datasets py-hg">
@@ -108,7 +105,6 @@
                 {% for tab_id, label, _, _ in dataset_tabs %}
                     <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
                 {% endfor %}
-                <a href="#" class="tab hidden-lg">{{ _('Jeux de données de référence') }}</a>
                 <a href="{{ url_for('datasets.list') }}" class="tab">{{ _('See more') }}</a>
             </nav>
         </div>

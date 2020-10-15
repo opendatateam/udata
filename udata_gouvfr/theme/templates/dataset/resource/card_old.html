@@ -1,0 +1,77 @@
+{% set resource_format = resource.format|trim|lower %}
+<article id="resource-{{resource.id}}" class="card resource-card {% if resource.from_community %}resource-card-community{% endif %}"
+    @click.prevent="showResource('{{resource.id}}', {{ resource.owner is defined|tojson }})">
+
+    {% if resource.from_community %}
+        <div class="card-logo">
+            <img alt="{{ resource|owner_name }}"
+                src="{{ resource|owner_avatar_url(70)}} "
+                width="70" height="70">
+        </div>
+    {% endif %}
+
+    <div class="card-body">
+        <h4 class="ellipsis">{{ resource.title or _('Nameless resource') }}</h4>
+        <div class="resource-card-description">{{ resource.description|mdstrip(180) }}</div>
+    </div>
+
+    <footer>
+        <div class="card-footer">
+            <ul>
+                <li v-tooltip title="{{ _('File informations') }}">
+                    <span class="fa fa-file"></span>
+                    {{ resource_format }}
+                    {% if resource.filesize %}
+                    <span class="filesize">({{ resource.filesize | filesize }})</span>
+                    {% endif %}
+                </li>
+                <li v-tooltip title="{{ _('Download count') }}">
+                    <span class="fa fa-cloud-download"></span>
+                    {{ resource.metrics.views or 0 }}
+                </li>
+                {% if not resource.from_community %}
+                <li class="healthcheck-container">
+                    <availability v-if="isCheckEnabled('{{ resource.type }}')"
+                                  :resource="getResourceById('{{ resource.id }}')"
+                                  :checkurl="'{{ url_for('api.check_dataset_resource', dataset=dataset.id, rid=resource.id) }}'"
+                                  :need-check="{{ resource.need_check()|tojson }}">
+                    </availability>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="resource-card-actions btn-toolbar">
+            {{ hook('dataset.resource.card.extra-buttons') }}
+            {% if config.PREVIEW_MODE and resource.preview_url %}
+            <a class="btn btn-sm btn-primary"
+                {% if config.PREVIEW_MODE == 'iframe' %}
+                @click.stop="showPreview('{{ resource.preview_url }}')"
+                {% else %}
+                @click.stop href="{{ resource.preview_url }}" target="_blank"
+                {% endif %}
+                >
+                {{ _('Preview') }}
+            </a>
+            {% endif %}
+            {% if resource.format == 'url' %}
+            <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary">{{ _('Visit') }}</a>
+            {% else %}
+            <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary" download>{{ _('Download') }}</a>
+            {% endif %}
+            <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Copy permalink to clipboard') }}" v-clipboard="{{ resource.latest }}">
+                <span class="fa fa-clipboard"></span>
+            </a>
+            {% if can_edit_resource(resource if resource.from_community else dataset) %}
+                {% if resource.from_community %}
+                    {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
+                {% else %}
+                    {% set edit_path = 'dataset/{id}/resource/{rid}' %}
+                {% endif %}
+                <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Edit this resource') }}"
+                    href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
+                    <span class="fa fa-pencil"></span>
+                </a>
+            {% endif %}
+        </div>
+    </footer>
+</article>

@@ -23,10 +23,16 @@ Primary buttons exist for every color in this UI-kit. Please refer to the [color
 <p><a href="#" role="button" class="btn-primary btn-primary-blue-400">btn-primary-blue-400</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-blue-500">btn-primary-blue-500</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-orange-100">btn-primary-orange-100</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-yellow-100">btn-primary-yellow-100</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-grey-50">btn-primary-grey-50</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-grey-100">btn-primary-grey-100</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-grey-200">btn-primary-grey-200</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-grey-300">btn-primary-grey-300</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-grey-380">btn-primary-grey-380</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-grey-400">btn-primary-grey-400</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-green-300">btn-primary-green-300</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-green-400">btn-primary-green-400</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-green-500">btn-primary-green-500</a></p>
 ```
 
 ## Secondary buttons
@@ -41,10 +47,16 @@ As for primary buttons, secondary buttons exist in every color available.
 <p><a href="#" role="button" class="btn-secondary btn-secondary-blue-400">btn-secondary-blue-400</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-blue-500">btn-secondary-blue-500</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-orange-100">btn-secondary-orange-100</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-yellow-100">btn-secondary-yellow-100</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-50">btn-secondary-grey-50</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-grey-100">btn-secondary-grey-100</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-grey-200">btn-secondary-grey-200</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-grey-300">btn-secondary-grey-300</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-380">btn-secondary-grey-380</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-grey-400">btn-secondary-grey-400</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-green-300">btn-secondary-green-300</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-green-400">btn-secondary-green-400</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-green-500">btn-secondary-green-500</a></p>
 ```
 
 ## Active state
@@ -64,6 +76,14 @@ Disabled buttons should include the `aria-disabled="true"` attribute to indicate
 ```buttons-disabled.html
 <p><a href="#" role="button" class="btn-primary disabled">Primary button</a></p>
 <p><a href="#" role="button" class="btn-secondary disabled">Secondary button</a></p>
+```
+
+## Action buttons
+Action buttons combine an icon with an optional call to action to provide maximum usability.
+Because of technical limitations, this styleguide hardcodes the svg icon. When using it in the uData ecosystem, please use something like this : `{% include('svg/myIcon.svg') %}`.
+
+```buttons-action.html
+<p><a href="#" role="button" class="btn-action"><?xml version="1.0" encoding="UTF-8"?><svg id="SVGDoc" width="37" height="37.5" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 74 75"><defs></defs><desc>Generated with Avocode.</desc><g><g><title>&lt;Path&gt;</title><path d="M74.0327,37.2026c0,20.435 -16.565,37 -37,37c-20.435,0 -37,-16.565 -37,-37c0,-20.434 16.565,-37 37,-37c20.435,0 37,16.566 37,37z" fill="#008452" fill-opacity="1"></path></g><g><title>&lt;Rectangle&gt;</title><path d="M40.182,49.011v0h-6.298v0v-23.617v0h6.298v0z" fill="#f9f9f9" fill-opacity="1"></path></g><g><title>&lt;Rectangle&gt;</title><path d="M25.224,34.054v0h23.617v0v6.298v0h-23.617v0z" fill="#f9f9f9" fill-opacity="1"></path></g></g></svg>Ajouter une ressource communautaire</a></p>
 ```
 */
 
@@ -130,4 +150,26 @@ Disabled buttons should include the `aria-disabled="true"` attribute to indicate
             color: @@value;
         }
     });
+}
+
+.btn-action {
+    display: inline-block;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: @grey-200;
+    text-underline-position: under;
+
+    svg {
+        transition: transform ease 0.15s;
+        border-radius: 50%;
+
+        margin-right: @spacing-md;
+    }
+
+    &:hover {
+        svg {
+            box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.05);
+            transform: scale(1.05);
+        }
+    }
 }

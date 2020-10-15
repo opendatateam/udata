@@ -1,0 +1,28 @@
+<div class="row producer-panel justify-between">
+    <div class="col-auto">
+        <a href="{{ url_for('organizations.show', org=organization, _external=True) }}"
+        title="{{ organization.name }}">
+            <img src="{{ organization.logo|placeholder('organization') }}"
+                alt="{{ organization.name }}" class="organization-logo producer img-responsive"/>
+        </a>
+    </div>
+    <div class="col container mt-md-md">
+        <h3 class="text-white">
+            {# TODO : include certified #}
+            {% if organization.public_service %}
+            <img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified" class="certified"
+                v-popover.literal="{{ _('The identity of this public service public is certified by Etalab') }}"
+                popover-title="{{ _('Certified public service') }}"
+                popover-placement="left" popover-trigger="hover"/>
+            {% endif %}
+            {{ organization.name }}
+        </h3>
+        <ul class="nav-list fs-base">
+            <li><a class="nav-link text-decoration-none" href="{{ url_for('organizations.show', org=organization) }}" title="{{ _('View Profile') }}">
+                {{ _('View Profile') }}</a></li>
+            <li><a class="nav-link text-decoration-none" href="{{ url_for('organizations.show', org=organization) }}" title="{{ _('Contact the producer') }}">{{ _('Contact the producer') }}</a></li>
+            <li><a class="nav-link text-decoration-none" href="{{ url_for('api.organization_followers', id=organization.id|string) }}" title="">{{ _('@@Suivre le producteur') }}</a></li>
+        </ul>
+    </div>
+    <div class="col-auto"></div>
+</div>

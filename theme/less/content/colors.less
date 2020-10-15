@@ -16,10 +16,16 @@ Convey meaning through color with a handful of color utility classes. Colors are
 <p class="text-blue-400">text-blue-400</p>
 <p class="text-blue-500">text-blue-500</p>
 <p class="text-orange-100">text-orange-100</p>
+<p class="text-yellow-100">text-yellow-100</p>
+<p class="text-grey-50">text-grey-50</p>
 <p class="text-grey-100">text-grey-100</p>
 <p class="text-grey-200">text-grey-200</p>
 <p class="text-grey-300">text-grey-300</p>
-<p class="text-grey-300">text-grey-400</p>
+<p class="text-grey-380">text-grey-380</p>
+<p class="text-grey-400">text-grey-400</p>
+<p class="text-green-300">text-green-300</p>
+<p class="text-green-400">text-green-400</p>
+<p class="text-green-500">text-green-500</p>
 ```
 
 ## Link colors
@@ -33,10 +39,16 @@ Includes support for styling links with hover states, too.
 <p><a href="#" class="text-blue-400">text-blue-400</a></p>
 <p><a href="#" class="text-blue-500">text-blue-500</a></p>
 <p><a href="#" class="text-orange-100">text-orange-100</a></p>
+<p><a href="#" class="text-yellow-100">text-yellow-100</a></p>
+<p><a href="#" class="text-grey-50">text-grey-50</a></p>
 <p><a href="#" class="text-grey-100">text-grey-100</a></p>
 <p><a href="#" class="text-grey-200">text-grey-200</a></p>
 <p><a href="#" class="text-grey-300">text-grey-300</a></p>
-<p><a href="#" class="text-grey-300">text-grey-400</a></p>
+<p><a href="#" class="text-grey-380">text-grey-380</a></p>
+<p><a href="#" class="text-grey-400">text-grey-400</a></p>
+<p><a href="#" class="text-green-300">text-green-300</a></p>
+<p><a href="#" class="text-green-400">text-green-400</a></p>
+<p><a href="#" class="text-green-500">text-green-500</a></p>
 ```
 
 ## Background color
@@ -50,10 +62,16 @@ Similar to the contextual text color classes, easily set the background of an el
 <p><span class="pill bg-blue-400"></span>bg-blue-400</p>
 <p><span class="pill bg-blue-500"></span>bg-blue-500</p>
 <p><span class="pill bg-orange-100"></span>bg-orange-100</p>
+<p><span class="pill bg-yellow-100"></span>bg-yellow-100</p>
+<p><span class="pill bg-grey-50"></span>bg-grey-50</p>
 <p><span class="pill bg-grey-100"></span>bg-grey-100</p>
 <p><span class="pill bg-grey-200"></span>bg-grey-200</p>
 <p><span class="pill bg-grey-300"></span>bg-grey-300</p>
-<p><span class="pill bg-grey-300"></span>bg-grey-400</p>
+<p><span class="pill bg-grey-380"></span>bg-grey-380</p>
+<p><span class="pill bg-grey-400"></span>bg-grey-400</p>
+<p><span class="pill bg-green-300"></span>bg-green-300</p>
+<p><span class="pill bg-green-400"></span>bg-green-400</p>
+<p><span class="pill bg-green-500"></span>bg-green-500</p>
 ```
 
 */
@@ -66,9 +84,11 @@ Similar to the contextual text color classes, easily set the background of an el
 @blue-500: #070d54;
 @orange-100: #ff5900;
 @yellow-100: #fff200;
+@grey-50: #f9f9f9;
 @grey-100: #eeeee8;
 @grey-200: #d7d7d7;
 @grey-300: #7c7c7c;
+@grey-380: #2d2d2d;
 @grey-400: #232323;
 @green-300: #00be7b;
 @green-400: #008452;
@@ -82,15 +102,17 @@ Similar to the contextual text color classes, easily set the background of an el
 @contrast-blue-500: @white;
 @contrast-orange-100: @white;
 @contrast-yellow-100: @grey-400;
+@contrast-grey-50: @grey-400;
 @contrast-grey-100: @grey-400;
 @contrast-grey-200: @white;
 @contrast-grey-300: @white;
+@contrast-grey-380: @white;
 @contrast-grey-400: @white;
 @contrast-green-300: @white;
 @contrast-green-400: @white;
 @contrast-green-500: @white;
 
-@colors: white, blue-100, blue-200, blue-300, blue-400, blue-500, orange-100, yellow-100, grey-100, grey-200, grey-300, grey-400, green-300, green-400, green-500;
+@colors: white, blue-100, blue-200, blue-300, blue-400, blue-500, orange-100, yellow-100, grey-50, grey-100, grey-200, grey-300, grey-380, grey-400, green-300, green-400, green-500;
 
 each(@colors, {
     .text-@{value} {

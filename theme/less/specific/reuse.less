@@ -1,15 +1,20 @@
+//Home section
 .reuse {
-    .reuse-cards {
-        @media @query-xl {
-            overflow-x: scroll;
-        }
-    }
-
     .tab-content {
         min-width: @breakpoint-lg;
     }
+}
 
+.reuse-cards {
+    @media @query-xl {
+        overflow-x: scroll;
+    }
+}
+
+//Generic reuse cards
+.reuse-card {
     .reuse-image {
         border-radius: @spacing-md;
+        max-width: 100%;
     }
 }

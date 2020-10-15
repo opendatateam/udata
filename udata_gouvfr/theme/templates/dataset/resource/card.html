@@ -1,77 +1,72 @@
 {% set resource_format = resource.format|trim|lower %}
-<article id="resource-{{resource.id}}" class="card resource-card {% if resource.from_community %}resource-card-community{% endif %}"
-    @click.prevent="showResource('{{resource.id}}', {{ resource.owner is defined|tojson }})">
-
-    {% if resource.from_community %}
-        <div class="card-logo">
-            <img alt="{{ resource|owner_name }}"
-                src="{{ resource|owner_avatar_url(70)}} "
-                width="70" height="70">
-        </div>
-    {% endif %}
-
+<article class="card resource-card {% if dark %}dark{% endif %} {% if resource.from_community %}resource-card-community{% endif %}">
     <div class="card-body">
-        <h4 class="ellipsis">{{ resource.title or _('Nameless resource') }}</h4>
-        <div class="resource-card-description">{{ resource.description|mdstrip(180) }}</div>
-    </div>
-
-    <footer>
-        <div class="card-footer">
-            <ul>
-                <li v-tooltip title="{{ _('File informations') }}">
-                    <span class="fa fa-file"></span>
-                    {{ resource_format }}
-                    {% if resource.filesize %}
-                    <span class="filesize">({{ resource.filesize | filesize }})</span>
+        <header class="card-header" id="resource-{{resource.id}}-header">
+            <div class="edit-button"></div>
+            <div class="header-text">
+                <span class="fs-sm text-grey-200">  {{ resource.metrics.views or 0 }} {{ _('@@téléchargements') }}</span>
+                <h4>{{ resource.title or _('Nameless resource') }}</h4>
+                <strong class="text-green-300">Disponible</strong>
+            </div>
+            <div class="button-bar">
+                <ul>
+                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="true" aria-controls="#resource-{{resource.id}}" class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
+                    <li><a href="#" class="btn-action">{% include theme('svg/actions/eye.svg') %}</a></li>
+                    <li><a @click.prevent href="#" title="{{ _('Copy permalink to clipboard') }}" v-clipboard="'{{resource.latest}}'" class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
+                    {% if resource.format == 'url' %}
+                    <li><a href="{{ resource.latest }}" class="btn-action">{% include theme('svg/actions/download.svg') %}</a></li>
+                    {% else %}
+                    <li><a href="{{ resource.latest }}" class="btn-action" download>{% include theme('svg/actions/download.svg') %}</a></li>
                     {% endif %}
-                </li>
-                <li v-tooltip title="{{ _('Download count') }}">
-                    <span class="fa fa-cloud-download"></span>
-                    {{ resource.metrics.views or 0 }}
-                </li>
-                {% if not resource.from_community %}
-                <li class="healthcheck-container">
-                    <availability v-if="isCheckEnabled('{{ resource.type }}')"
-                                  :resource="getResourceById('{{ resource.id }}')"
-                                  :checkurl="'{{ url_for('api.check_dataset_resource', dataset=dataset.id, rid=resource.id) }}'"
-                                  :need-check="{{ resource.need_check()|tojson }}">
-                    </availability>
-                </li>
-                {% endif %}
-            </ul>
-        </div>
-        <div class="resource-card-actions btn-toolbar">
-            {{ hook('dataset.resource.card.extra-buttons') }}
-            {% if config.PREVIEW_MODE and resource.preview_url %}
-            <a class="btn btn-sm btn-primary"
-                {% if config.PREVIEW_MODE == 'iframe' %}
-                @click.stop="showPreview('{{ resource.preview_url }}')"
-                {% else %}
-                @click.stop href="{{ resource.preview_url }}" target="_blank"
-                {% endif %}
-                >
-                {{ _('Preview') }}
-            </a>
+                </ul>
+                <div class="filetype">
+                    <strong>{{ resource_format }}</strong>
+                    {% if resource.filesize %}
+                    <em>({{ resource.filesize | filesize }})</em>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+        <section class="card-content accordion-content active" aria-labelledby="resource-{{resource.id}}-header" id="resource-{{resource.id}}">
+            {% if resource.description %}
+            <p class="resource-description">
+                {{ resource.description|mdstrip(180) }}
+            </p>
             {% endif %}
-            {% if resource.format == 'url' %}
-            <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary">{{ _('Visit') }}</a>
-            {% else %}
-            <a @click.stop href="{{ resource.latest }}" class="btn btn-sm btn-primary" download>{{ _('Download') }}</a>
-            {% endif %}
-            <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Copy permalink to clipboard') }}" v-clipboard="{{ resource.latest }}">
-                <span class="fa fa-clipboard"></span>
-            </a>
-            {% if can_edit_resource(resource if resource.from_community else dataset) %}
-                {% if resource.from_community %}
-                    {% set edit_path = 'dataset/{id}/community-resource/{rid}' %}
-                {% else %}
-                    {% set edit_path = 'dataset/{id}/resource/{rid}' %}
-                {% endif %}
-                <a @click.stop class="btn btn-sm btn-default" v-tooltip title="{{ _('Edit this resource') }}"
-                    href="{{ url_for('admin.index', path=edit_path.format(id=dataset.id, rid=resource.id)) }}">
-                    <span class="fa fa-pencil"></span>
-                </a>
-            {% endif %}
-        </div>
-    </footer>
+            <dl class="resource-infos">
+                <div>
+                    <dt>{{ _('@@URL') }}</dt>
+                    <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@URL stable') }}</dt>
+                    <dd><a href="{{resource.json_ld.url}}">{{resource.json_ld.url}}</a></dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Type') }}</dt>
+                    <dd>{{type_label}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Type MIME') }}</dt>
+                    <dd>{{resource.mime}}</dd>
+                </div>
+                <div>
+                    <dt>{{resource.checksum.type}}</dt>
+                    <dd>{{resource.checksum.value}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Créée le') }}</dt>
+                    <dd>{{resource.created_at|dateformat(format='long')}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Modifiée le') }}</dt>
+                    <dd>{{resource.modified|dateformat(format='long')}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('@@Publiée le') }}</dt>
+                    <dd>{{resource.published|dateformat(format='long')}}</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
 </article>

@@ -14,6 +14,10 @@ from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
 
+from udata_gouvfr.models import (
+    SPD
+)
+
 RE_POST_IMG = re.compile(
     r'''
     <img .*? (?:(?:
@@ -250,4 +254,5 @@ def get_discourse_posts():
 def home_context(context):
     context['blogpost'] = get_blog_post(g.lang_code)
     context['forum_topics'] = get_discourse_posts()
+    context['spd'] = Dataset.objects(badges__kind=SPD).order_by('title')
     return context

@@ -1,0 +1,87 @@
+/*
+---
+name: Dropdown
+category: Components
+---
+
+## Dropdown
+Dropdowns are used throughout the website, as selectors, or as togglers.
+Their construction is based on a standard secondary button, but with some specifics (arrow inserted after the text, supports an `.active` class...)
+You an use a `<select>` element that will be reset to display correctly on all browsers, or any arbitrary HTML element with the `.label` and `.select` classes.
+
+A: without label (options are the label)
+
+B: without options (only specified label is shown)
+
+For interactivity, please check the corresponding section of this styleguide.
+
+```dropdown-select.html
+<div class="dropdown">
+    <select>
+        <option>Option A</option>
+        <option>Option B</option>
+    </select>
+</div>
+```
+*/
+
+.dropdown {
+    .btn;
+    .btn-secondary;
+
+    padding: 0 !important;
+
+    &:focus-within {
+        select,
+        .select,
+        label,
+        .label {
+            text-decoration: underline;
+        }
+    }
+
+    select,
+    .select,
+    label,
+    .label {
+        display: inline-block;
+        appearance: none;
+        border: none;
+        background: none;
+        color: inherit;
+        padding: @spacing-xs @spacing-sm;
+
+        cursor: pointer;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    .label {
+        &:after {
+            content: " ";
+            width: 8px;
+            height: 8px;
+            display: inline-block;
+            margin-left: @spacing-xs;
+            transform: rotate(90deg);
+
+            transition: transform ease 0.1s;
+
+            background-image: url(~"@{icon-chevron}");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+    }
+
+    &.active {
+        label,
+        .label {
+            &:after {
+                transform: rotate(-90deg);
+            }
+        }
+    }
+}

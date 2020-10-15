@@ -36,9 +36,11 @@ All HTML headings, `<h1>` through `<h5>`, are available.
 
 ## Headings Exponents
 For most headings we can have an exponent representing the amount of things found in the current section, you can use a `<sup>` tag to reprensent those
+You can also apply the `.sup` class to any arbitrary element (preferably a `<sup>` to respect semantics) to add an exponent as well.
 
 ```headingsexponents.html
 <h2>Ressources <sup>64</sup></h2>
+<strong>Reuses <sup class="sup">12</sup></strong>
 ```
 
 ## Font Sizes
@@ -129,19 +131,26 @@ h5,
     font-weight: bold;
 
     sup {
-        font-weight: @font-weight-light;
+        .sup;
+    }
 
-        &::before {
-            color: @grey-200;
-            vertical-align: baseline;
-            content: '(';
-        }
+}
 
-        &::after {
-            color: @grey-200;
-            vertical-align: baseline;
-            content: ')';
-        }
+.sup {
+    display: inline-block;
+    font-weight: @font-weight-light;
+    text-decoration: none;
+
+    &::before {
+        color: @grey-200;
+        vertical-align: baseline;
+        content: '(';
+    }
+
+    &::after {
+        color: @grey-200;
+        vertical-align: baseline;
+        content: ')';
     }
 }
 

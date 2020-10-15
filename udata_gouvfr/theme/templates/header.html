@@ -20,9 +20,8 @@
                 </a>
             </div>
             <nav class="nav-tabs col hidden-hg">
-                {# TODO : active tab #}
                 {% for item in current_theme.menu %}
-                <a class="tab {% if loop.first %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
+                <a class="tab {% if item.endpoint == request.url_rule.endpoint %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
                 {% endfor %}
             </nav>
             <div class="col-3 login-box hidden-hg">
