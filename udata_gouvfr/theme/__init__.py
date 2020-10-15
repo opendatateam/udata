@@ -255,42 +255,4 @@ def home_context(context):
     context['blogpost'] = get_blog_post(g.lang_code)
     context['forum_topics'] = get_discourse_posts()
     context['spd'] = Dataset.objects(badges__kind=SPD).order_by('title')
-    context['metrics'] = ({
-        'title': _('Data'),
-        'widgets': [
-            {
-                'title': _('Datasets'),
-                'metric': 'datasets',
-                'type': 'line',
-                'endpoint': 'datasets.list',
-            },
-            {
-                'title': _('Reuses'),
-                'metric': 'reuses',
-                'type': 'line',
-                'endpoint': 'reuses.list',
-            },
-            {
-                'title': _('Resources'),
-                'metric': 'resources',
-                'type': 'line',
-            }
-        ]
-    }, {
-        'title': _('Community'),
-        'widgets': [
-            {
-                'title': _('Organizations'),
-                'metric': 'organizations',
-                'type': 'bar',
-                'endpoint': 'organizations.list',
-            },
-            {
-                'title': _('Users'),
-                'metric': 'users',
-                'type': 'bar',
-                'endpoint': 'users.list'
-            }
-        ]
-    })
     return context
