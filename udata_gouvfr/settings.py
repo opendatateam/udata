@@ -4,7 +4,7 @@ Default settings for udata-gouvfr
 
 # Frontend banner parameters
 BANNER_ACTIVATED = False
-BANNER_HTML_FILENAME = ''
+BANNER_HTML_CONTENT = ''
 
 # Static pages from github repo
 PAGES_GH_REPO_NAME = 'etalab/datagouvfr-pages'

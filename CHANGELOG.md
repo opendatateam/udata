@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Banner is now generic and configurable [#499](https://github.com/etalab/udata-gouvfr/pull/499)
 - Fix links in static pages
 
 ## 2.2.0 (2020-08-25)
