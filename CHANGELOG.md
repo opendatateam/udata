@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Pinned udata version to fix transitive requests dependances [#500](https://github.com/etalab/udata-gouvfr/pull/500)
 
 ## 2.2.1 (2020-10-16)
 
