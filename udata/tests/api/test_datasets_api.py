@@ -888,7 +888,9 @@ class DatasetResourceAPITest(APITestCase):
             data = json.loads(upload_response.data)
             self.assertEqual(data['title'], 'test-update.txt')
 
-        self.assertEqual(len(list(storages.resources.list_files())), 1)
+        resource_strorage = list(storages.resources.list_files())
+        self.assertEqual(len(resource_strorage), 1)
+        self.assertEqual(resource_strorage[0][-15:], 'test-update.txt')
 
     def test_delete(self):
         resource = ResourceFactory()
