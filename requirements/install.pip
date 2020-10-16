@@ -48,7 +48,7 @@ pytz==2019.3
 rdflib-jsonld==0.4.0
 redis==3.3.11
 rdflib==4.2.2
-requests==2.22.0
+requests==2.24.0
 simplejson==3.17.0
 StringDist==1.0.9
 tlds
