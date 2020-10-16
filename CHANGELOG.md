@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.4.0 (2020-10-16)
 
 - :warning: Resources and community resources creation API change [#2545](https://github.com/opendatateam/udata/pull/2545):
   - Remove the RESOURCES_FILE_ALLOWED_DOMAINS setting and mechanism.
