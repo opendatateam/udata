@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.2.1 (2020-10-16)
 
 - Banner is now generic and configurable [#499](https://github.com/etalab/udata-gouvfr/pull/499)
