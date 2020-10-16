@@ -317,7 +317,7 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         dataset.last_modified = datetime.now()
         dataset.save()
         if fs_filename_to_remove is not None:
-            storages.resources.delete(resource.fs_filename)
+            storages.resources.delete(fs_filename_to_remove)
         return resource
 
 
@@ -336,7 +336,7 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
         community.update(**infos)
         community.reload()
         if fs_filename_to_remove is not None:
-            storages.resources.delete(community.fs_filename)
+            storages.resources.delete(fs_filename_to_remove)
         return community
 
 
