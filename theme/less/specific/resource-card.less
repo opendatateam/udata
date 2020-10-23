@@ -87,29 +87,7 @@
         }
     }
 
-    .resource-infos {
-        margin: 0;
-
-        div {
-            display: flex;
-
-            dt {
-                min-width: 200px;
-                color: @grey-300;
-
-                @media @query-md {
-                    min-width: 120px;
-                }
-            }
-
-            dd {
-                padding: 0;
-                color: @grey-400;
-            }
-        }
-    }
-
-    &.dark .resource-infos {
+    &.dark .description-list {
         div {
             dt {
                 color: white;
@@ -123,7 +101,7 @@
 
     .card-header,
     .resource-description,
-    .resource-infos div {
+    .description-list div {
         padding: @spacing-sm @spacing-sm;
         padding-left: @left-padding;
         border-bottom: 1px solid @grey-100;
@@ -139,7 +117,7 @@
 
     &.dark .card-header,
     .resource-description,
-    .resource-infos div {
+    .description-list div {
         border-bottom: 1px solid @grey-300;
     }
 

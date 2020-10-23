@@ -1,0 +1,48 @@
+/*
+---
+name: Description list
+category: Components
+---
+
+Description lists enclose a list of groups of temps (defined with the `<dt>` element) and their description (`<dd>` elements).
+This is used to lists of key-values pairs.
+
+```dl.html
+<div class="description-list">
+    <div>
+        <dt>Definition title</dt>
+        <dd>Definition text</dd>
+    </div>
+    <div>
+        <dt>Definition title</dt>
+        <dd>Definition text</dd>
+    </div>
+    <div>
+        <dt>Definition title</dt>
+        <dd>Definition text</dd>
+    </div>
+</div>
+```
+*/
+
+.description-list {
+    margin: 0;
+
+    >div {
+        display: flex;
+
+        dt {
+            min-width: 200px;
+            color: @grey-300;
+
+            @media @query-md {
+                min-width: 120px;
+            }
+        }
+
+        dd {
+            padding: 0;
+            color: @grey-400;
+        }
+    }
+}
