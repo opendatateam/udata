@@ -9,10 +9,6 @@
 {% set bundle = 'home' %}
 {% set body_class = 'home' %}
 
-{% block subnav %}
-{# {% include theme('subnav-large.html') %} #}
-{% endblock %}
-
 {% block content %}
 {% cache cache_duration, 'home', g.lang_code %}
 {# Carousels section #}
@@ -198,7 +194,6 @@
 
 {% include theme("participez/participez.html") %}
 
-{# Probably subnav-large #}
 <section class="topics p-xl px-xl-0 py-xl-lg bg-blue-100">
     <div class="container">
         <h3>{{_('Topics')}}</h3>
