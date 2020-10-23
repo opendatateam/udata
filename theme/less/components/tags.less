@@ -1,0 +1,38 @@
+/*
+---
+name: Tags
+category: Components
+---
+
+Tags allow for easy categorization of datasets.
+
+```tags.html
+<ul class="tags">
+    <li>coronavirus</li>
+    <li>covid-19</li>
+    <li>covid19</li>
+</ul>
+```
+*/
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+
+    >li {
+        display: inline-block;
+        border-radius: 12px;
+        font-size: @font-size-xs;
+
+        background: @grey-400;
+        padding: 2px @spacing-xs;
+
+        margin-bottom: @spacing-xs;
+        margin-right: @spacing-xs;
+
+        a {
+            color: @contrast-grey-400;
+            cursor: pointer;
+        }
+    }
+}
