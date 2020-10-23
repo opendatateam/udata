@@ -61,15 +61,16 @@
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
     <div class="row align-items-center">
-        <div class="col-3 col-md-12 tabs">
+        <div class="col-auto col-md-12 tabs">
             {% if dataset.organization %}
             <a href="#dataset-producer" role="button" class="dropdown tab active"><span class="label">{{ _('Producer') }}</span></a>
             {% elif dataset.owner %}
             <a href="#dataset-producer" role="button" class="dropdown tab active"><span class="label">{{ _('Author') }}</span></a>
             {% endif %}
             <a href="#dataset-informations" role="button" class="dropdown tab"><span class="label">{{ _('Informations') }}</span></a>
+            <a href="#dataset-extras" role="button" class="dropdown tab"><span class="label">{{ _('@@Extras') }}</span></a>
         </div>
-        <div class="col-3 hidden-md">
+        <div class="col-auto hidden-md">
             <a href="#community-resources" class="nav-link text-decoration-none fs-sm text-grey-300">{{ _('Community resources') }}</a>
         </div>
     </div>
@@ -83,32 +84,123 @@
     </div>
     <div id="dataset-informations" class="tab-content container">
         <h3 class="text-white">
-            Informations
+            {{ _('Informations') }}
         </h3>
-        <ul class="nav-list fs-base">
+        <dl class="description-list fs-base">
             {% if dataset.license %}
-            <li>
-                {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
+            <div>
+                <dt class="f-bold text-grey-400">{{ _('License') }}</dt>
+                <dd>{% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
                 {{ dataset.license.title }}
-                {% if dataset.license.url %}</a>{% endif %}
-            </li>
+                {% if dataset.license.url %}</a>{% endif
+                %}</dd>
+            </div>
             {% endif %}
+
+            {# Harvesting source #}
+            {% set source = dataset.extras['remote_url'] %}
+            {% if source %}
+            <div>
+                <dt class="f-bold text-grey-400">{{ _('Remote source') }}</dt>
+                <dd><a rel="nofollow" href="{{ source }}">{{ _('Remote source') }}</a></dd>
+            </div>
+            {% endif%}
+
+            {# Temporal coverage #}
+            {% if dataset.temporal_coverage %}
+            <div>
+                <dt class="f-bold text-grey-400">{{ _('Temporal coverage') }}</dt>
+                <dd>{{ dataset.temporal_coverage|daterange(details=True) }}</dd>
+            </div>
+            {% endif %}
+
             {% if dataset.frequency %}
-            <li>
-                {{ dataset.frequency_label }}
-            </li>
+            <div>
+                <dt class="f-bold text-grey-400">{{ _('Frequency') }}</dt>
+                <dd>{{ dataset.frequency_label }}</dd>
+            </div>
             {% endif %}
-            <li>
-                {{ dataset.created_at|dateformat(format='long') }}
-            </li>
-            <li>
-                {{ dataset.last_modified|dateformat(format='long') }}
-            </li>
-            <li>
-                {{ dataset.last_update|dateformat(format='long') }}
-            </li>
-        </ul>
+
+            <div>
+                <dt class="f-bold text-grey-400">{{ _('Creation date') }}</dt>
+                <dd>{{ dataset.created_at|dateformat(format='long') }}</dd>
+            </div>
+
+            <div>
+                <dt class="f-bold text-grey-400">{{ _('Modification date') }}</dt>
+                <dd>{{ dataset.last_modified|dateformat(format='long') }}</dd>
+            </div>
+
+            <div>
+                <dt class="f-bold text-grey-400">{{ _('Latest resource update') }}</dt>
+                <dd>{{ dataset.last_update|dateformat(format='long') }}</dd>
+            </div>
+
+            {# Spatial coverage #}
+            {% if dataset.spatial %}
+                {% if dataset.spatial.granularity %}
+                <div>
+                    <dt class="f-bold text-grey-400">{{ _('Territorial coverage granularity') }}</dt>
+                    <dd>{{ dataset.spatial.granularity_label }}</dd>
+                </div>
+                {% endif %}
+                {% if dataset.spatial.territories %}
+                <div>
+                    <dt class="f-bold text-grey-400">{{ _('Territorial coverage') }}"></dt>
+                    <dd>{{ dataset.spatial.top_label }}</dd>
+                </div>
+                {% endif %}
+            {% endif %}
+        </dl>
     </div>
+    <div id="dataset-extras" class="tab-content container">
+            <h3 class="text-white">
+                {{ _('@@Extras') }}
+            </h3>
+            <dl class="description-list fs-base">
+                <div>
+                    <dt class="f-bold text-grey-400">{{ _('ID') }}</dt>
+                    <dd>{{dataset.id}}</dd>
+                </div>
+
+                <div>
+                    <dt class="f-bold text-grey-400">{{ _('Creation date') }}</dt>
+                    <dd>{{ dataset.created_at|dateformat(format='long') }}</dd>
+                </div>
+
+                <div>
+                    <dt class="f-bold text-grey-400">{{ _('Modification date') }}</dt>
+                    <dd>{{ dataset.last_modified|dateformat(format='long') }}</dd>
+                </div>
+
+                <div class="mt-xs">
+                    <dt class="f-bold text-grey-400">{{_('Tags')}}</dt>
+                    <dd>
+                        <ul class="tags">
+                                {% for tag in dataset.tags %}
+                                <li>
+                                    <a href="{{ url_for('search.index', tag=tag) }}"
+                                    class="label label-default"
+                                    title="{{ tag }}">
+                                        {{ tag|truncate(14, True) }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                                <li><a href="@">coronavirus</a></li>
+
+                                <li>
+                                    <a @click="suggestTag"
+                                        class="label label-primary suggest-tag"
+                                        title="{{ _('Suggest a tag with a new discussion thread') }}"
+                                        v-tooltip tooltip-placement="right">
+                                        {{ _('Suggest a tag') }}
+                                    </a>
+                                </li>
+                            </ul>
+                    </dd>
+                </div>
+            </dl>
+        </div>
         {#
         <div class="panel panel-default text-center">
             <div class="panel-body">
@@ -141,14 +233,6 @@
                     %}This dataset has been published on {{date}} and updated on {{update}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
                 </small>
             {% endif %}
-            {% for badge in dataset.badges %}
-                <small class="small-badge">
-                    <a href="{{ url_for('search.index', badge=badge) }}"
-                        title="{{ _('See all datasets with that badge.') }}">
-                        <span class="fa fa-bookmark"></span>
-                        {{ dataset.badge_label(badge) }}</a>
-                </small>
-            {% endfor %}
             {% if dataset.private %}
             <small class="private"
                 v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
@@ -162,10 +246,10 @@
                 >{{ _('Deleted') }}</small>
             {% endif %}
             {% if dataset.archived %}
-            <small class="archived"
+            <!-- <small class="archived"
                 v-popover.literal="{{ _('This dataset has been archived.') }}"
                 popover-title="{{ _('Archived') }}" popover-trigger="hover" popover-placement="top"
-                >{{ _('Archived') }}</small>
+                >{{ _('Archived') }}</small> -->
             {% endif %}
         </p>
     </div>
