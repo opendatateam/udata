@@ -10,6 +10,7 @@ Because accordion are not only seen in the subway, you can use this tidbit to cr
 The button needs to have :
 - `.accordion-button` class
 - `aria-controls` and `href` set to a valid `#id` on the page
+- `aria-label` to explain what the button does if there's not enough text in the button itself (like an icon)
 - `aria-expanded` set to either `true` (if the accordion is visible by default) or `false`
 
 The accordion panel needs to have :

@@ -110,7 +110,7 @@
         <div class="row pt-xl pt-md-md">
             {% for dataset in datasets %}
             <div class="col-lg-12 col-6">
-                <a class="unstyled" href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.name }}">{% include theme('dataset/card.html') %}</a>
+                <a class="unstyled" href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.full_title }}">{% include theme('dataset/card.html') %}</a>
             </div>
             {% endfor %}
         </div>
