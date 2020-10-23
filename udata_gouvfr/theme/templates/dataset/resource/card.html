@@ -10,7 +10,7 @@
             </div>
             <div class="button-bar">
                 <ul>
-                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="true" aria-controls="#resource-{{resource.id}}" class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
+                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="true" aria-label="{{_('@@Voir plus de détails')}}" aria-controls="resource-{{resource.id}}" class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
                     <li><a href="#" class="btn-action">{% include theme('svg/actions/eye.svg') %}</a></li>
                     <li><a @click.prevent href="#" title="{{ _('Copy permalink to clipboard') }}" v-clipboard="'{{resource.latest}}'" class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
                     {% if resource.format == 'url' %}
