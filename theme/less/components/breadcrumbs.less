@@ -17,13 +17,13 @@ Being lost on a website isn't fun for your users, thanks to `.breadcrumbs` you c
 
 .breadcrumbs {
     padding-left: 0;
+    margin: 0;
     font-size: @font-size-xs;
 
     li {
         position: relative;
         display: inline-block;
         max-width: 20em;
-        margin-left: 0.5em;
         padding-left: 1em;
         overflow: hidden;
         white-space: nowrap;
@@ -31,6 +31,10 @@ Being lost on a website isn't fun for your users, thanks to `.breadcrumbs` you c
 
         a {
             color: inherit;
+        }
+
+        + li {
+            margin-left: 0.5em;
         }
 
         &:last-child {
