@@ -27,20 +27,25 @@ This is used to lists of key-values pairs.
 
 .description-list {
     margin: 0;
+    display: table;
 
     >div {
-        display: flex;
+        display: table-row;
 
         dt {
+            display: table-cell;
             min-width: 200px;
+            padding-right: 20px;
+
             color: @grey-300;
 
             @media @query-md {
-                min-width: 120px;
+                min-width: 135px;
             }
         }
 
         dd {
+            display: table-cell;
             padding: 0;
             color: @grey-400;
         }

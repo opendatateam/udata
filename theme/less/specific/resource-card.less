@@ -99,16 +99,26 @@
         }
     }
 
+    .description-list {
+        width: 100%;
+
+        > div {
+            &:last-child {
+                dd,
+                dt {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+
     .card-header,
     .resource-description,
-    .description-list div {
+    .description-list dd,
+    .description-list dt {
         padding: @spacing-sm @spacing-sm;
         padding-left: @left-padding;
         border-bottom: 1px solid @grey-100;
-
-        &:last-child {
-            border-bottom: none;
-        }
 
         @media @query-md {
             padding-left: @spacing-sm;
@@ -117,7 +127,8 @@
 
     &.dark .card-header,
     .resource-description,
-    .description-list div {
+    .description-list dd,
+    .description-list dt {
         border-bottom: 1px solid @grey-300;
     }
 
