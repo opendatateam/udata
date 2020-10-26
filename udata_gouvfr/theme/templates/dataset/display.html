@@ -78,9 +78,15 @@
 {# TODO : Informations tab, author tab if not producer #}
 <section class="callout p-hg p-md-md my-lg bg-blue-300">
     <div id="dataset-producer" class="tab-content active">
-        {% with organization=dataset.organization %}
-            {% include theme('organization/producer-panel.html') %}
-        {% endwith %}
+        {% if dataset.organization %}
+            {% with organization=dataset.organization %}
+                {% include theme('organization/producer-panel.html') %}
+            {% endwith %}
+        {% elif dataset.owner %}
+            {% with organization=dataset.owner, details_view = url_for("users.show", user=dataset.owner, _external=True) %}
+                {% include theme('organization/producer-panel.html') %}
+            {% endwith %}
+        {% endif %}
     </div>
     <div id="dataset-informations" class="tab-content container">
         <h3 class="text-white">
@@ -234,10 +240,10 @@
                 </small>
             {% endif %}
             {% if dataset.private %}
-            <small class="private"
+            {# <small class="private"
                 v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
                 popover-title="{{ _('Private') }}" popover-trigger="hover" popover-placement="top"
-                >{{ _('Private') }}</small>
+                >{{ _('Private') }}</small> #}
             {% endif %}
             {% if dataset.deleted %}
             <small class="deleted"
