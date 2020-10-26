@@ -255,20 +255,18 @@
             {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
             {% for (type, type_label), resources in grouped_resources.items() %}
                 {% if nb_groups > 1 %}<h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>{% endif %}
-                {% for resource in resources %}
-                    {% if loop.index0 == max_resources %}
-                    <div v-if="isTypeListVisible('{{ type }}')" v-cloak transition="expand">
-                    {% endif %}
+                {% for resource in resources[:max_resources] %}
                     {% include theme('dataset/resource/card.html') %}
                 {% endfor %}
                 {% if resources|length > max_resources %}
-                    <p class="text-center expander">
-                        {# TODO : JS to see more #}
-                        <button type="button" class="btn btn-default" @click.prevent="expandResources($event, '{{ type }}')">
-                            <span class="fa fa-list" ></span>
-                            {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
-                        </button>
-                    </p>
+                    <a id="{{type}}-btn" class="btn btn-secondary accordion-button trigger-once mt-md" aria-expanded="false" aria-controls="{{type}}-additional" href="#{{type}}-additional">
+                        {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
+                    </a>
+                    <div id="{{type}}-additional" style="height: 0px" aria-labelledby="{{type}}-btn" class="accordion-content mt-md">
+                        {% for resource in resources[max_resources:] %}
+                            {% include theme('dataset/resource/card.html') %}
+                        {% endfor %}
+                    </div>
                 {% endif %}
             {% else %}
             <p class="text-center">{{ _('No resources') }}</p>
