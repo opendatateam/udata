@@ -36,20 +36,6 @@
 
 {% block content %}
 {% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %}
-<!-- Placeholder for non-routable modals -->
-<div v-el:modal></div>
-
-{% if dataset.archived %}
-<div class="container-fluid alert alert-warning">
-    <div class="container" role="alert">
-        {% if dataset.extras.get('harvest:archived') == 'not-on-remote' %}
-        {{ _('This dataset has been archived automatically because it has been deleted from the remote platform.') }}
-        {% else %}
-        {{ _('This dataset has been archived.') }}
-        {% endif %}
-    </div>
-</div>
-{% endif %}
 
 {{ breadcrumb(self,
     breadcrum_class=breadcrum_class,
@@ -57,6 +43,26 @@
 ) }}
 
 <section class="content container {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
+    {% if dataset.private %}
+    <span class="big tag"
+        title="{{ _('This dataset is private and will not be visible by other users') }}"
+        >{{ _('Private') }}
+    </span>
+    {% endif %}
+    {% if dataset.deleted %}
+    <span class="big tag"
+        title="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+        >{{ _('Deleted') }}
+    </span>
+    {% endif %}
+    {% if dataset.archived %}
+    {% set title = _('This dataset has been archived automatically because it has been deleted from the remote platform.')
+        if dataset.extras.get('harvest:archived') == 'not-on-remote' else
+        _('This dataset has been archived.') %}
+        <span class="big tag" title="{{ title }}">
+            {{_('Archived')}}
+        </span>
+    {% endif %}
     <h1 class="fs-hg">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
@@ -208,46 +214,30 @@
         </div>
 </section>
 <section class="content-body container">
-    {# TODO : decide what to do with this block #}
     <div class="row">
-        <p class="col-md-12">
+        <div class="col-12">
             {% if dataset.organization %}
-                <small>
+                <div class="well well green-300">
                     {% if dataset.organization.public_service %}
+                    {% include theme("svg/certified.svg") %}
                     <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
                     {% endif %}
-                </small>
+                </div>
             {% elif dataset.owner %}
-                <small>
+                <div class="well well-grey-100">
                     {% trans
                         date=dataset.created_at|dateformat(format='long'),
                         update=dataset.last_update|dateformat(format='long'),
                         author=dataset.owner.fullname,
                         url=url_for('users.show', user=dataset.owner)
-                    %}This dataset has been published on {{date}} and updated on {{update}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
-                </small>
+                    %}
+                        This dataset has been published on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a><br />
+                        Published on {{date}} and updated on {{update}}
+                    {% endtrans %}
+                </div>
             {% endif %}
-            {% if dataset.private %}
-            {# <small class="private"
-                v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
-                popover-title="{{ _('Private') }}" popover-trigger="hover" popover-placement="top"
-                >{{ _('Private') }}</small> #}
-            {% endif %}
-            {% if dataset.deleted %}
-            <small class="deleted"
-                v-popover.literal="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
-                popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
-                >{{ _('Deleted') }}</small>
-            {% endif %}
-            {% if dataset.archived %}
-            <!-- <small class="archived"
-                v-popover.literal="{{ _('This dataset has been archived.') }}"
-                popover-title="{{ _('Archived') }}" popover-trigger="hover" popover-placement="top"
-                >{{ _('Archived') }}</small> -->
-            {% endif %}
-        </p>
+        </div>
     </div>
-    {# End of TODO #}
     <div class="row">
         <div class="col-12 text-grey-300">
         {{ dataset.description|markdown }}
