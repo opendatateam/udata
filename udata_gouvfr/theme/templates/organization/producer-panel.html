@@ -1,22 +1,16 @@
 {% set details_view = details_view or url_for("organizations.show", org=organization, _external=True) %}
+{% set name = organization.name or organization.fullname %}
 <div class="row producer-panel justify-between">
     <div class="col-auto">
         <a href="{{ details_view }}"
-        title="{{ organization.name }}">
+        title="{{ name }}">
             <img src="{{ organization.logo|placeholder('organization') }}"
-                alt="{{ organization.name }}" class="organization-logo producer img-responsive"/>
+                alt="{{ name }}" class="organization-logo producer img-responsive"/>
         </a>
     </div>
     <div class="col container mt-md-md">
         <h3 class="text-white">
-            {# TODO : include certified #}
-            {% if organization.public_service %}
-            <img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified" class="certified"
-                v-popover.literal="{{ _('The identity of this public service public is certified by Etalab') }}"
-                popover-title="{{ _('Certified public service') }}"
-                popover-placement="left" popover-trigger="hover"/>
-            {% endif %}
-            {{ organization.name }}
+            {{ name }}
         </h3>
         <ul class="nav-list fs-base">
             <li><a class="nav-link text-decoration-none" href="{{ details_view }}" title="{{ _('View Profile') }}">
