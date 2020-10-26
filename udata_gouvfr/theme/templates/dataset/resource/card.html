@@ -50,10 +50,12 @@
                     <dt>{{ _('@@Type MIME') }}</dt>
                     <dd>{{resource.mime}}</dd>
                 </div>
+                {% if resource.checksum %}
                 <div>
                     <dt>{{resource.checksum.type}}</dt>
                     <dd>{{resource.checksum.value}}</dd>
                 </div>
+                {% endif %}
                 <div>
                     <dt>{{ _('@@Créée le') }}</dt>
                     <dd>{{resource.created_at|dateformat(format='long')}}</dd>
