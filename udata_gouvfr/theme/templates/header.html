@@ -20,8 +20,11 @@
                 </a>
             </div>
             <nav class="nav-tabs col hidden-hg">
+                {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] %}
                 {% for item in current_theme.menu %}
-                <a class="tab {% if item.endpoint == request.url_rule.endpoint %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
+                    {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
+                    {% set active = request.url_rule.endpoint != "site.home" and (link_endpoint == current_endpoint) %}
+                    <a class="tab {% if active %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
                 {% endfor %}
             </nav>
             <div class="col-3 login-box hidden-hg">
