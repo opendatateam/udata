@@ -271,18 +271,6 @@
             {% else %}
             <p class="text-center">{{ _('No resources') }}</p>
             {% endfor %}
-
-            {# TODO : Editing button #}
-            {#
-            {% if can_edit %}
-            <a class="card resource-card add"
-                href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
-                <div class="card-logo"><span>+</span></div>
-                <div class="card-body">
-                    <h4>{{ _('Add a resource') }}</h4>
-                </div>
-            </a>
-            {% endif %} #}
         </div>
 
         {# button bar #}
