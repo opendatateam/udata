@@ -256,7 +256,9 @@
             {% for (type, type_label), resources in grouped_resources.items() %}
                 {% if nb_groups > 1 %}<h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>{% endif %}
                 {% for resource in resources[:max_resources] %}
-                    {% include theme('dataset/resource/card.html') %}
+                    {% with expanded = "true" if type == "main" else "false" %}
+                        {% include theme('dataset/resource/card.html') %}
+                    {% endwith %}
                 {% endfor %}
                 {% if resources|length > max_resources %}
                     <a id="{{type}}-btn" class="btn btn-secondary accordion-button trigger-once mt-md" aria-expanded="false" aria-controls="{{type}}-additional" href="#{{type}}-additional">
