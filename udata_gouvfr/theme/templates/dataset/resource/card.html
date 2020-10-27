@@ -2,7 +2,13 @@
 <article class="card resource-card {% if dark %}dark{% endif %} {% if resource.from_community %}resource-card-community{% endif %}">
     <div class="card-body">
         <header class="card-header" id="resource-{{resource.id}}-header">
-            <div class="edit-button"></div>
+            <div class="edit-button">
+            {% if can_edit %}
+                <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                    {% include theme('svg/actions/edit.svg') %}
+                </a>
+            {% endif %}
+            </div>
             <div class="header-text">
                 <span class="fs-sm text-grey-200">  {{ resource.metrics.views or 0 }} {{ _('@@téléchargements') }}</span>
                 <h4>{{ resource.title or _('Nameless resource') }}</h4>

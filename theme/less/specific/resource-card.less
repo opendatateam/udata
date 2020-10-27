@@ -23,12 +23,27 @@
 
     .card-header {
         padding: @spacing-lg;
+        padding-left: 0!important;
 
         display: flex;
         align-items: center;
 
         @media @query-md {
             flex-wrap: wrap;
+        }
+
+        .edit-button {
+            min-width: 100px;
+            text-align: center;
+
+            svg {
+                width: 45px;
+                height: 45px;
+            }
+
+            @media @query-md {
+                order: 2;
+            }
         }
 
         .header-text {
@@ -41,13 +56,14 @@
             }
 
             @media @query-md {
-                flex-basis: 100%;
+                order: 1;
             }
         }
 
         .button-bar {
             @media @query-md {
                 flex-basis: 100%;
+                order: 3;
             }
 
             ul {
