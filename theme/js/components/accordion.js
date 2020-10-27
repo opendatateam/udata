@@ -51,15 +51,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (target.classList.contains("active")) {
           tween({
-            from: 0,
+            from: { height: 0 },
             to: { height: target.scrollHeight },
             duration: 300,
             ease: easing.anticipate,
-          }).start(divStyler.set);
+          }).start({
+            update: divStyler.set,
+            complete: () => divStyler.set({height: "auto"})
+          });
         } else {
           tween({
             from: { height: target.scrollHeight },
-            to: 0,
+            to: { height: 0 },
             duration: 300,
             ease: easing.anticipate,
           }).start(divStyler.set);
