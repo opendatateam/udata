@@ -1,4 +1,5 @@
 {% set resource_format = resource.format|trim|lower %}
+{% set expanded = expanded or "false" %}
 <article class="card resource-card {% if dark %}dark{% endif %} {% if resource.from_community %}resource-card-community{% endif %}">
     <div class="card-body">
         <header class="card-header" id="resource-{{resource.id}}-header">
@@ -16,7 +17,7 @@
             </div>
             <div class="button-bar">
                 <ul>
-                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="true" aria-label="{{_('@@Voir plus de détails')}}" aria-controls="resource-{{resource.id}}" class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
+                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="{{expanded}}" aria-label="{{_('@@Voir plus de détails')}}" aria-controls="resource-{{resource.id}}" class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
                     <li><a href="#" class="btn-action">{% include theme('svg/actions/eye.svg') %}</a></li>
                     <li><a @click.prevent href="#" title="{{ _('Copy permalink to clipboard') }}" v-clipboard="'{{resource.latest}}'" class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
                     {% if resource.format == 'url' %}
@@ -33,7 +34,7 @@
                 </div>
             </div>
         </header>
-        <section class="card-content accordion-content active" aria-labelledby="resource-{{resource.id}}-header" id="resource-{{resource.id}}">
+        <section class="card-content accordion-content {% if expanded != 'false' %}active{% endif %}" {% if expanded == 'false' %}style="height: 0px"{% endif %} aria-labelledby="resource-{{resource.id}}-header" id="resource-{{resource.id}}">
             {% if resource.description %}
             <p class="resource-description">
                 {{ resource.description|mdstrip(180) }}
