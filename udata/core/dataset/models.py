@@ -13,6 +13,7 @@ from elasticsearch_dsl import Integer, Object
 import requests
 
 from udata.app import cache
+from udata.core import storages
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
@@ -666,6 +667,13 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         self.update(**data)
         self.reload()
         post_save.send(self.__class__, document=self)
+
+    def remove_resource(self, resource):
+        # Deletes resource's file from file storage
+        if resource.fs_filename is not None:
+            storages.resources.delete(resource.fs_filename)
+
+        self.resources.remove(resource)
 
     @property
     def community_resources(self):

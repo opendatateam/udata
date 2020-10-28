@@ -1,14 +1,9 @@
-from flask_security import (
-    changeable, confirmable, passwordless, recoverable, registerable
-)
-
-from . import mail
-from .tasks import task
-
-from udata.models import datastore
+from udata import mail
+from udata.core.user.models import datastore
+from udata.tasks import task
 
 
-@task(route='high.mail')
+@task
 def sendmail(subject, email, template, **context):
     user = datastore.get_user(email)
     context['user'] = user
@@ -20,10 +15,3 @@ def sendmail_proxy(subject, email, template, **context):
     """Cast the lazy_gettext'ed subject to string before passing to Celery"""
     context.pop('user')  # Remove complex user object, fetched by mail in task
     sendmail.delay(subject.value, email, template, **context)
-
-
-changeable.send_mail = sendmail_proxy
-confirmable.send_mail = sendmail_proxy
-passwordless.send_mail = sendmail_proxy
-recoverable.send_mail = sendmail_proxy
-registerable.send_mail = sendmail_proxy

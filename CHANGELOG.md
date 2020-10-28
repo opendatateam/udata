@@ -2,7 +2,42 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 2.4.0 (2020-10-16)
+
+- :warning: Resources and community resources creation API change [#2545](https://github.com/opendatateam/udata/pull/2545):
+  - Remove the RESOURCES_FILE_ALLOWED_DOMAINS setting and mechanism.
+  - The community resource's/resource's url could be set from the client side, even in the case of a hosted one, which is illogical.
+    A hosted community resource's/resource's url should only be the sole responsibility of the backend.
+  - Consequently, the POST endpoint of the community resources/resources API is only meant for the remote ones and the PUT endpoint of the community resources/resources API will take the existing resource's url to override the one sent by the client.
+- Community resources changes [#2546](https://github.com/opendatateam/udata/pull/2546):
+  - Dataset is now correctly set at community resource creation
+  - Remove now useless job 'purge-orphan-community-resources'
+- Using the fs_filename logic when uploading a new resource on the data catalog.[#2547](https://github.com/opendatateam/udata/pull/2547)
+- Remove old file when updating resources and community resources from API [#2548](https://github.com/opendatateam/udata/pull/2548)
+- Sortable.js upgrade to fix an issue in udata's editorial page when reordering featured datasets [#2550](https://github.com/opendatateam/udata/pull/2550)
+- Password rotation mechanism [#2551](https://github.com/opendatateam/udata/pull/2551):
+  - Datetime fields `password_rotation_demanded` and `password_rotation_performed` added to user model.
+  - Override Flask-Security's login and reset password forms to implement the password rotation checks.
+- Password complexity settings hardening [#2554](https://github.com/opendatateam/udata/pull/2554)
+- Migrate ODS datasets urls [#2559](https://github.com/opendatateam/udata/pull/2559)
+
+## 2.3.0 (2020-09-29)
+
 - Plugin's translations are now correctly loaded [#2529](https://github.com/opendatateam/udata/pull/2529)
+- Vine version is now pinned in requirements [#2532](https://github.com/opendatateam/udata/pull/2532)
+- Fix reuses metrics [#2531](https://github.com/opendatateam/udata/pull/2531):
+  - Reuses "datasets" metrics are now triggered correctly
+  - New job to update the datasets "reuses" metrics: `update-datasets-reuses-metrics` to be scheduled
+- Add a migration to set the reuses datasets metrics to the correct value [#2540](https://github.com/opendatateam/udata/pull/2540)
+- Add a specific dataset's method for resource removal [#2534](https://github.com/opendatateam/udata/pull/2534)
+- Flask-Security update [#2535](https://github.com/opendatateam/udata/pull/2535):
+  - Switch to fork Flask-Security-Too
+  - New settings to set the required password length and complexity
+- Fix Flask-security sendmail overriding [#2536](https://github.com/opendatateam/udata/pull/2536)
+- Add a custom password complexity checker to Flask-Security [#2537](https://github.com/opendatateam/udata/pull/2537)
+- Change too short password error message [#2538](https://github.com/opendatateam/udata/pull/2538)
 
 ## 2.2.1 (2020-08-25)
 

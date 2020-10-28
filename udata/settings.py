@@ -85,6 +85,11 @@ class Defaults(object):
     SECURITY_CHANGEABLE = True
 
     SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_LENGTH_MIN = 8
+    SECURITY_PASSWORD_REQUIREMENTS_LOWERCASE = True
+    SECURITY_PASSWORD_REQUIREMENTS_DIGITS = True
+    SECURITY_PASSWORD_REQUIREMENTS_UPPERCASE = True
+    SECURITY_PASSWORD_REQUIREMENTS_SYMBOLS = False
 
     SECURITY_PASSWORD_SALT = 'Default uData secret password salt'
     SECURITY_CONFIRM_SALT = 'Default uData secret confirm salt'
@@ -276,9 +281,6 @@ class Defaults(object):
         # RDF
         'rdf', 'ttl', 'n3',
     ]
-    # Whitelist of urls domains for resource with filetype `file`
-    # SERVER_NAME is always included, `*` is a supported value (wildcard)
-    RESOURCES_FILE_ALLOWED_DOMAINS = []
 
     # How much time upload chunks are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
@@ -466,7 +468,6 @@ class Testing(object):
     ACTIVATE_TERRITORIES = False
     LOGGER_HANDLER_POLICY = 'never'
     CELERYD_HIJACK_ROOT_LOGGER = False
-    RESOURCES_FILE_ALLOWED_DOMAINS = ['*']
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False

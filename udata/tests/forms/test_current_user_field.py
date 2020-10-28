@@ -1,8 +1,10 @@
+import datetime
 from bson import ObjectId
 
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
+from udata.auth.forms import ExtendedLoginForm, ExtendedResetPasswordForm
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.forms import ModelForm, fields
 from udata.models import db, User
@@ -192,3 +194,16 @@ class CurrentUserFieldTest(TestCase):
         form.validate()
         self.assertIn('owner', form.errors)
         self.assertEqual(len(form.errors['owner']), 1)
+
+    def test_password_rotation(self):
+        today = datetime.datetime.now()
+        user = UserFactory(password='password', password_rotation_demanded=today, confirmed_at=today)
+
+        form = ExtendedLoginForm.from_json({
+            'email': user.email,
+            'password': 'password'
+        })
+
+        form.validate()
+
+        self.assertIn('Password must be changed for security reasons', form.errors['password'])

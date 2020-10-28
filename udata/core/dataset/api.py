@@ -215,6 +215,8 @@ class ResourcesAPI(API):
         ResourceEditPermission(dataset).test()
         form = api.validate(ResourceForm)
         resource = Resource()
+        if form._fields.get('filetype').data != 'remote':
+            return 'This endpoint only supports remote resources', 400
         form.populate_obj(resource)
         dataset.add_resource(resource)
         dataset.last_modified = datetime.now()
@@ -282,6 +284,7 @@ class UploadNewCommunityResources(UploadMixin, API):
         '''Upload a new community resource'''
         infos = self.handle_upload(dataset)
         infos['owner'] = current_user._get_current_object()
+        infos['dataset'] = dataset
         community_resource = CommunityResource.objects.create(**infos)
         return community_resource, 201
 
@@ -306,12 +309,15 @@ class UploadDatasetResource(ResourceMixin, UploadMixin, API):
         '''Upload a file related to a given resource on a given dataset'''
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
+        fs_filename_to_remove = resource.fs_filename
         infos = self.handle_upload(dataset)
         for k, v in infos.items():
             resource[k] = v
         dataset.update_resource(resource)
         dataset.last_modified = datetime.now()
         dataset.save()
+        if fs_filename_to_remove is not None:
+            storages.resources.delete(fs_filename_to_remove)
         return resource
 
 
@@ -325,9 +331,12 @@ class ReuploadCommunityResource(ResourceMixin, UploadMixin, API):
     def post(self, community):
         '''Update the file related to a given community resource'''
         ResourceEditPermission(community).test()
+        fs_filename_to_remove = community.fs_filename
         infos = self.handle_upload(community.dataset)
         community.update(**infos)
         community.reload()
+        if fs_filename_to_remove is not None:
+            storages.resources.delete(fs_filename_to_remove)
         return community
 
 
@@ -353,6 +362,9 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
+         # ensure API client does not override url on self-hosted resources
+        if resource.filetype == 'file':
+            form._fields.get('url').data = resource.url
         form.populate_obj(resource)
         resource.modified = datetime.now()
         dataset.last_modified = datetime.now()
@@ -365,11 +377,7 @@ class ResourceAPI(ResourceMixin, API):
         '''Delete a given resource on a given dataset'''
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
-        # Deletes resource's file from file storage
-        if resource.fs_filename is not None:
-            storages.resources.delete(resource.fs_filename)
-
-        dataset.resources.remove(resource)
+        dataset.remove_resource(resource)
         dataset.last_modified = datetime.now()
         dataset.save()
         return '', 204
@@ -401,6 +409,8 @@ class CommunityResourcesAPI(API):
     def post(self):
         '''Create a new community resource'''
         form = api.validate(CommunityResourceForm)
+        if form._fields.get('filetype').data != 'remote':
+            return 'This endpoint only supports remote community resources', 400
         resource = CommunityResource()
         form.populate_obj(resource)
         if not resource.dataset:
@@ -432,6 +442,8 @@ class CommunityResourceAPI(API):
         '''Update a given community resource'''
         ResourceEditPermission(community).test()
         form = api.validate(CommunityResourceForm, community)
+        if community.filetype == 'file':
+            form._fields.get('url').data = community.url
         form.populate_obj(community)
         if not community.organization and not community.owner:
             community.owner = current_user._get_current_object()

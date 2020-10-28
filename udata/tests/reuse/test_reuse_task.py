@@ -36,5 +36,5 @@ class ReuseTasksTest(APITestCase):
         # Check reuse's image is deleted
         self.assertEqual(list(storages.images.list_files()), [])
 
-        organization = Reuse.objects(title='test-reuse').first()
-        self.assertIsNone(organization)
+        deleted_reuse = Reuse.objects(title='test-reuse').first()
+        self.assertIsNone(deleted_reuse)

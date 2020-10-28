@@ -64,19 +64,6 @@ def purge_datasets(self):
         dataset.delete()
 
 
-@job('purge-orphan-community-resources')
-def purge_orphan_community_resources(self):
-    '''
-    Gets community resources not linked with a dataset
-    and deletes them along with their files.
-    '''
-    community_resources = CommunityResource.objects(dataset=None)
-    for community_resource in community_resources:
-        if community_resource.fs_filename is not None:
-            storages.resources.delete(community_resource.fs_filename)
-        community_resource.delete()
-
-
 @job('send-frequency-reminder')
 def send_frequency_reminder(self):
     # We exclude irrelevant frequencies.
@@ -111,6 +98,13 @@ def send_frequency_reminder(self):
         nb_emails=len(reminded_people),
         nb_emails_twice=len(reminded_people) - len(set(reminded_people))))
     print('Done')
+
+
+@job('update-datasets-reuses-metrics')
+def update_datasets_reuses_metrics(self):
+    all_datasets = Dataset.objects.visible().timeout(False)
+    for dataset in all_datasets:
+        dataset.count_reuses()
 
 
 def get_queryset(model_cls):
@@ -150,6 +144,7 @@ def store_resource(csvfile, model, dataset):
     with open(csvfile.name, 'rb') as infile:
         stored_filename = storage.save(infile, prefix=prefix, filename=filename)
     r_info = storage.metadata(stored_filename)
+    r_info['fs_filename'] = stored_filename
     checksum = r_info.pop('checksum')
     algo, checksum = checksum.split(':', 1)
     r_info[algo] = checksum
