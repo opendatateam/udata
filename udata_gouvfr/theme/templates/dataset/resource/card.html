@@ -21,7 +21,7 @@
                     <li><a href="#" class="btn-action">{% include theme('svg/actions/eye.svg') %}</a></li>
                     <li><a @click.prevent href="#" title="{{ _('Copy permalink to clipboard') }}" v-clipboard="'{{resource.latest}}'" class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
                     {% if resource.format == 'url' %}
-                    <li><a href="{{ resource.latest }}" class="btn-action">{% include theme('svg/actions/download.svg') %}</a></li>
+                    <li><a href="{{ resource.latest }}" class="btn-action">{% include theme('svg/actions/link.svg') %}</a></li>
                     {% else %}
                     <li><a href="{{ resource.latest }}" class="btn-action" download>{% include theme('svg/actions/download.svg') %}</a></li>
                     {% endif %}
