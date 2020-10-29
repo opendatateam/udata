@@ -20,7 +20,7 @@
                 </a>
             </div>
             <nav class="nav-tabs col hidden-hg">
-                {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] %}
+                {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] if request.url_rule or None %}
                 {% for item in current_theme.menu %}
                     {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
                     {% set active = request.url_rule.endpoint != "site.home" and (link_endpoint == current_endpoint) %}
