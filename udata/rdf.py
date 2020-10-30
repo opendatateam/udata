@@ -256,4 +256,4 @@ def graph_response(graph, format):
         kwargs['context'] = context
     if isinstance(graph, RdfResource):
         graph = graph.graph
-    return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs).decode("utf-8")), 200, headers
+    return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs).decode('utf-8')), 200, headers
