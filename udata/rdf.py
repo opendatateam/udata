@@ -86,6 +86,7 @@ RDF_EXTENSIONS = {
     # 'trix': 'trix',
 }
 
+# Includes control characters, unicode surrogate characters and unicode end-of-plane non-characters
 ILLEGAL_XML_CHARS = '[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]'
 
 

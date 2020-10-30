@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Escaping XML's forbidden characters [#2562](https://github.com/opendatateam/udata/pull/2562)
 
 ## 2.4.0 (2020-10-16)
 
