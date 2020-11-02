@@ -15,6 +15,7 @@ from udata.settings import Testing
 class LinkcheckerTestSettings(Testing):
     LINKCHECKING_ENABLED = True
     LINKCHECKING_IGNORE_DOMAINS = ['example-ignore.com']
+    LINKCHECKING_IGNORE_PATTERNS = ['format=shp']
     LINKCHECKING_MIN_CACHE_DURATION = 0.5
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
     LINKCHECKING_MAX_CACHE_DURATION = 100
@@ -125,6 +126,14 @@ class LinkcheckerTest(TestCase):
     def test_check_resource_ignored_domain(self):
         self.resource.extras = {}
         self.resource.url = 'http://example-ignore.com/url'
+        self.resource.save()
+        res = check_resource(self.resource)
+        self.assertEqual(res.get('check:status'), 204)
+        self.assertEqual(res.get('check:available'), True)
+
+    def test_check_resource_ignored_pattern(self):
+        self.resource.extras = {}
+        self.resource.url = 'http://example.com/url?format=shp'
         self.resource.save()
         res = check_resource(self.resource)
         self.assertEqual(res.get('check:status'), 204)
