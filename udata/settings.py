@@ -242,6 +242,7 @@ class Defaults(object):
     # Resource types ignored by linkchecker
     LINKCHECKING_UNCHECKED_TYPES = ('api', )
     LINKCHECKING_IGNORE_DOMAINS = []
+    LINKCHECKING_IGNORE_PATTERNS = ['format=shp']
     LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
     LINKCHECKING_MAX_CACHE_DURATION = 1080  # in minutes (1 week)
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100

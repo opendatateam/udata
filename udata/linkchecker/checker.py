@@ -20,13 +20,16 @@ def _compute_count_availability(resource, status, previous_status):
 
 
 def is_ignored(resource):
-    '''Check of the resource's URL is part of LINKCHECKING_IGNORE_DOMAINS'''
+    '''Check if the resource's URL is to be ignored'''
     ignored_domains = current_app.config['LINKCHECKING_IGNORE_DOMAINS']
+    ignored_patterns = current_app.config['LINKCHECKING_IGNORE_PATTERNS']
     url = resource.url
-    if url:
-        parsed_url = urlparse(url)
-        return parsed_url.netloc in ignored_domains
-    return True
+    if not url:
+        return True
+    parsed_url = urlparse(url)
+    ignored_domains_match = parsed_url.netloc in ignored_domains
+    ignored_patterns_match = any([p in url for p in ignored_patterns])
+    return ignored_domains_match or ignored_patterns_match
 
 
 def dummy_check_response():

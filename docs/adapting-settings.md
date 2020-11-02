@@ -459,6 +459,12 @@ An entrypoint key of `udata.linkcheckers` that will be used as a default link ch
 
 A list of domains to ignore when triggering link checking of resources urls.
 
+### LINKCHECKING_IGNORE_PATTERNS
+
+**default**: ['format=shp']
+
+A list patterns found in checked URL to ignore (ie `pattern in url`).
+
 ### LINKCHECKING_MIN_CACHE_DURATION
 
 **default**: 60
