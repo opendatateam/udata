@@ -20,7 +20,7 @@ def _compute_count_availability(resource, status, previous_status):
 
 
 def is_ignored(resource):
-    '''Check of the resource's URL is to be ignored'''
+    '''Check if the resource's URL is to be ignored'''
     ignored_domains = current_app.config['LINKCHECKING_IGNORE_DOMAINS']
     ignored_patterns = current_app.config['LINKCHECKING_IGNORE_PATTERNS']
     url = resource.url
