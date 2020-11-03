@@ -2,7 +2,7 @@ import re
 
 from flask import current_app
 
-from udata.i18n import lazy_gettext as _
+from udata.i18n import gettext as _
 
 
 def password_validator(password, is_register, **kwargs):
