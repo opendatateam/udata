@@ -4,6 +4,7 @@
 
 - Escaping XML's forbidden characters [#2562](https://github.com/opendatateam/udata/pull/2562)
 - Ignore pattern feature for linkchecker [#2564](https://github.com/opendatateam/udata/pull/2564)
+- Fix i18n in CLI for password complexity checker [#2566](https://github.com/opendatateam/udata/pull/2566)
 
 ## 2.4.0 (2020-10-16)
 
