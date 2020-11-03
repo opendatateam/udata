@@ -1,5 +1,6 @@
 import datetime
 
+from flask import current_app
 from flask_security import current_user
 from flask_security.forms import RegisterForm, LoginForm, ResetPasswordForm
 from udata.forms import fields
@@ -14,6 +15,17 @@ class ExtendedRegisterForm(RegisterForm):
     last_name = fields.StringField(
         _('Last name'), [validators.DataRequired(_('Last name is required')),
                          validators.NoURLs(_('URLs not allowed in this field'))])
+    
+    def validate(self):
+        if current_app.config['READ_ONLY_MODE']:
+            self.email.errors = list()
+            self.email.errors.append(_('Signing up is currently disabled for security reasons.'))
+            return False
+
+        if not super().validate():
+            return False
+
+        return True
 
 
 class ExtendedLoginForm(LoginForm):
