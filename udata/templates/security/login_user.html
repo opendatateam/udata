@@ -34,6 +34,7 @@
             </form>
     </div>
     <div class="col-sm-6">
+        {% if read_only_mode == False %}
         <form class="form-horizontal">
             <fieldset>
                 <legend>{{ _('Sign up') }}</legend>
@@ -49,6 +50,7 @@
                 </div>
             </fieldset>
         </form>
+        {% endif %}
     </div>
 </div>
 

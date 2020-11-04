@@ -1,4 +1,4 @@
-from flask import request, redirect, abort, g, json
+from flask import current_app, request, redirect, abort, g, json
 from flask.views import MethodView
 
 from udata import search, auth, theme
@@ -17,6 +17,7 @@ class Templated(object):
     def render(self, context=None, **kwargs):
         context = context or self.get_context()
         context.update(kwargs)
+        context.update({'read_only_mode': current_app.config['READ_ONLY_MODE']})
         return theme.render(self.get_template_name(), **context)
 
 
