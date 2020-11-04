@@ -450,7 +450,7 @@ class Defaults(object):
     ####################
     # This mode can be used to stop a spam attack.
     # It disables the methods listed in the following block list.
-    READ_ONLY_MODE = True
+    READ_ONLY_MODE = False
     METHOD_BLOCKLIST = ['OrganizationListAPI.post',
                         'ReuseListAPI.post',
                         'DatasetListAPI.post',
