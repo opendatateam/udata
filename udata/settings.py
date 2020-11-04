@@ -453,7 +453,15 @@ class Defaults(object):
     READ_ONLY_MODE = True
     METHOD_BLOCKLIST = ['OrganizationListAPI.post',
                         'ReuseListAPI.post',
-                        'CommunityResourcesAPI.post']
+                        'DatasetListAPI.post',
+                        'CommunityResourcesAPI.post',
+                        'UploadNewCommunityResources.post',
+                        'DiscussionAPI.post',
+                        'DiscussionsAPI.post',
+                        'IssuesAPI.post',
+                        'IssueAPI.post',
+                        'SourcesAPI.post',
+                        'FollowAPI.post']
 
 
 class Testing(object):
