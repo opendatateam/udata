@@ -18,8 +18,6 @@ class ExtendedRegisterForm(RegisterForm):
     
     def validate(self):
         if current_app.config['READ_ONLY_MODE']:
-            self.email.errors = list()
-            self.email.errors.append(_('Signing up is currently disabled for security reasons.'))
             return False
 
         if not super().validate():
