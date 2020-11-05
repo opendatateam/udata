@@ -25,6 +25,7 @@
                     {% else %}
                     <li><a href="{{ resource.latest }}" class="btn-action" download>{% include theme('svg/actions/download.svg') %}</a></li>
                     {% endif %}
+                    {{ hook('dataset.resource.card.extra-buttons') }}
                 </ul>
                 <div class="filetype">
                     <strong>{{ resource_format }}</strong>
