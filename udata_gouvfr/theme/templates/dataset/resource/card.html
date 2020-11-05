@@ -12,7 +12,12 @@
             </div>
             <div class="header-text">
                 <span class="fs-sm text-grey-200">  {{ resource.metrics.views or 0 }} {{ _('@@téléchargements') }}</span>
-                <h4>{{ resource.title or _('Nameless resource') }}</h4>
+                <h4>
+                {{ resource.title or _('Nameless resource') }}
+                {% if resource.from_community and resource.owner %}
+                <p class="fs-sm m-0 text-grey-100">{{resource.owner}}</p>
+                {% endif %}
+                </h4>
                 <strong class="text-green-300">Disponible</strong>
             </div>
             <div class="button-bar">
