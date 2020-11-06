@@ -40,7 +40,7 @@ def create():
         user = datastore.create_user(**data)
         success('User(id={u.id} email={u.email}) created'.format(u=user))
         return user
-    errors = '\n'.join('\n'.join(e) for e in form.errors.values())
+    errors = '\n'.join('\n'.join([str(m) for m in e]) for e in form.errors.values())
     exit_with_error('Error creating user', errors)
 
 

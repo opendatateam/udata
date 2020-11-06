@@ -4,6 +4,7 @@
 
 - Escaping XML's forbidden characters [#2562](https://github.com/opendatateam/udata/pull/2562)
 - Ignore pattern feature for linkchecker [#2564](https://github.com/opendatateam/udata/pull/2564)
+- Fix TypeError when creating a superuser with an incorrect password [#2567](https://github.com/opendatateam/udata/pull/2567)
 
 ## 2.4.0 (2020-10-16)
 
