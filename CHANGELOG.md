@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add news link to posts list [#504](https://github.com/etalab/udata-gouvfr/pull/504)
 
 ## 2.2.2 (2020-10-16)
 
