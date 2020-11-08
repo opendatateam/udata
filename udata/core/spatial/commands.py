@@ -141,6 +141,7 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     prefix = 'geozones-{0}'.format(ts)
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
+        tmp.backend.ensure_path(GEOZONE_FILENAME)
         filename, _ = urlretrieve(filename, tmp.path(GEOZONE_FILENAME))
 
     log.info('Extracting GeoZones bundle')
