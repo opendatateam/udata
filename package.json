@@ -18,6 +18,7 @@
     "popmotion": "^8.7",
     "v-clipboard": "^2.2.3",
     "vue": "^2.6.12",
+    "vue-js-modal": "^2.0.0-rc.6",
     "yargs": "^15.4.1"
   },
   "staticFiles": {
