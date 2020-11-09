@@ -3,8 +3,6 @@
 {% block body %}
     {% include theme("header.html") with context %}
 
-    <notification-zone></notification-zone>
-
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         {% for message in messages %}
