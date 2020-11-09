@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.4.1 (2020-11-09)
 
 - Escaping XML's forbidden characters [#2562](https://github.com/opendatateam/udata/pull/2562)
 - Ignore pattern feature for linkchecker [#2564](https://github.com/opendatateam/udata/pull/2564)
