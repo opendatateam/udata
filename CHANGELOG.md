@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.2.3 (2020-11-09)
 
 - Add news link to posts list [#504](https://github.com/etalab/udata-gouvfr/pull/504)
