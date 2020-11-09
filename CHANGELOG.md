@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.4.1 (2020-11-09)
 
 - Escaping XML's forbidden characters [#2562](https://github.com/opendatateam/udata/pull/2562)
