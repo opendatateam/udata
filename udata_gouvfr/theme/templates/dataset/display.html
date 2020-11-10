@@ -1,7 +1,6 @@
 {% extends 'dataset/display.html' %}
 
 {% set community_subtitle = _('Explore with %(certifier)s', certifier=config.SITE_TITLE ) %}
-{% set read_only_mode = config.READ_ONLY_MODE %}
 
 {% block community %}
 <section class="community_container" id="community">
@@ -23,7 +22,6 @@
                 {% for resource in dataset.community_resources %}
                     {% include theme('dataset/resource/card.html') %}
                 {% endfor %}
-                {% if read_only_mode == False %}
                 <a class="card resource-card add"
                     href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
                     <div class="card-logo"><span>+</span></div>
@@ -31,7 +29,6 @@
                         <h4>{{ _('Add a community resource') }}</h4>
                     </div>
                 </a>
-                {% endif %}
                 </div>
             </div>
 
@@ -53,9 +50,7 @@
                     {% endfor %}
 
                     <div class="col-md-4 col-sm-6 col-xs-12">
-                        {% if not read_only_mode %}
-                        {% include theme('dataset/add-reuse-card.html') %}
-                        {% endif %}
+                         {% include theme('dataset/add-reuse-card.html') %}
 					</div>
 
                 </div>

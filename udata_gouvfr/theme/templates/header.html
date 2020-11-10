@@ -5,16 +5,6 @@
     </div>
     <![endif]-->
 
-    {% if config['READ_ONLY_MODE'] %}
-    <nav class="navbar navbar-static-top navbar-banner-red">
-        <div class="container banner">
-            <p class="text-center text-white">
-                {{ _('Due to unusual activities, the creation of new content is currently disabled.') }}
-            </p>
-        </div>
-    </nav>
-    {% endif %}
-
     {% if config['BANNER_ACTIVATED'] %}
       {% block banner %}
         {% set b_content = config['BANNER_HTML_CONTENT'] %}
