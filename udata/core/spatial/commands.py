@@ -11,7 +11,7 @@ from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
 from textwrap import dedent
-from urllib.request import urlretrieve
+from urllib.request import urlretrieve, urlopen
 
 import click
 import msgpack
@@ -141,8 +141,9 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     prefix = 'geozones-{0}'.format(ts)
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
-        tmp.backend.ensure_path(GEOZONE_FILENAME)
-        filename, _ = urlretrieve(filename, tmp.path(GEOZONE_FILENAME))
+        with tmp.open(GEOZONE_FILENAME, 'wb') as f:
+            f.write(urlopen(filename).read())
+            filename = tmp.path(GEOZONE_FILENAME)
 
     log.info('Extracting GeoZones bundle')
     with handle_error(prefix):
