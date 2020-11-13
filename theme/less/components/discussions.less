@@ -1,0 +1,111 @@
+.discussions-wrapper {
+    @thread-left-padding: 200px;
+
+    textarea, input {
+        display: block;
+        width: 100%;
+        padding: @spacing-sm;
+        border-radius: 3px;
+        border: none;
+
+        margin-bottom: @spacing-md;
+    }
+
+    .thread-wrapper {
+        margin-top: @spacing-md;
+
+        .thread-header {
+            display: flex;
+            justify-content: space-between;
+            background: @grey-380;
+
+            padding: @spacing-md;
+
+            .thread-status {
+                width: @thread-left-padding;
+                flex-shrink: 0;
+                flex-grow: 0;
+                color: @orange-100;
+                font-weight: @font-weight-bold;
+            }
+
+            .thread-title, .thread-link {
+                flex-grow: 0;
+                flex-shrink: 0;
+            }
+
+            .thread-title {
+                flex-grow: 1;
+            }
+        }
+
+        .thread-footer {
+            display: flex;
+            background: @grey-380;
+            padding: @spacing-md;
+            padding-left: @thread-left-padding;
+
+            .thread-reply {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .thread-comment {
+            display: flex;
+            background: @grey-50;
+            justify-content: space-between;
+            padding: @spacing-md 0;
+
+            color: @black;
+
+            .avatar {
+                width: @thread-left-padding;
+                padding-left: @spacing-md;
+                flex-shrink: 0;
+                // align-self: center;
+                // text-align: center;
+
+                img {
+                    max-width: 60px;
+                    max-height: 60px;
+                }
+            }
+
+            .thread-box {
+                flex-grow: 1;
+
+                >strong {
+                    display: inline-block;
+                    color: @blue-400;
+                    margin-bottom: @spacing-xs;
+                }
+            }
+
+            >a {
+                flex-shrink: 0;
+                padding-right: @spacing-sm;
+            }
+
+            + .thread-comment {
+                border-top: 1px solid @grey-400;
+            }
+        }
+    }
+
+    .thread-create {
+        margin-top: @spacing-lg;
+
+        form {
+            width: 100%;
+            background: @grey-380;
+            padding: @spacing-md;
+
+            padding-left: @thread-left-padding;
+
+            input, textarea {
+
+            }
+        }
+    }
+}

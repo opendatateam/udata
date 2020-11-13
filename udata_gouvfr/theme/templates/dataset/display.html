@@ -417,24 +417,15 @@
 
         <h2 id="community-discussions" class="fs-hg">{{ _('Discussions') }} <sup>{{ dataset.discussions|length }}</sup></h2>
         <div class="row">
-            <div class="">
-                <discussion-threads v-ref:discussions
-                    subject-id="{{ dataset.id }}"
-                    subject-class="{{ dataset.__class__.__name__ }}">
-                </discussion-threads>
-            </div>
             <div class="col-4 col-md-12 text-grey-300">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
         </div>
-        <div class="row">
-            <div class="col-12">
-                <a class="btn-action my-xl"
-                href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}">
-                    {% include theme("svg/actions/add.svg") %}{{ _('Start a new discussion') }}
-                </a>
-            </div>
-        </div>
+         <discussion-threads
+            ref="discussions"
+            subject-id="{{ dataset.id }}"
+            subject-class="{{ dataset.__class__.__name__ }}">
+        </discussion-threads>
     </div>
 </section>
 {% endblock %}
