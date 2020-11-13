@@ -1,7 +1,7 @@
 import Vue from "vue/dist/vue.js";
 
-import Tabs from "./components/tabs.js";
-import Accordion from "./components/accordion";
+import Tabs from "./components/vanilla/tabs";
+import Accordion from "./components/vanilla/accordion";
 
 import Clipboard from "v-clipboard";
 import VModal from "vue-js-modal";
