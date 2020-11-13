@@ -6,7 +6,7 @@ import Accordion from "./components/vanilla/accordion";
 import Clipboard from "v-clipboard";
 import VModal from "vue-js-modal";
 
-import { showModal } from "./components/vue/modals";
+import { showModal } from "./plugins/modals";
 import Api from "./plugins/api";
 import Auth from "./plugins/auth";
 
@@ -19,7 +19,7 @@ new Vue({
   el: "#app",
   delimiters: ["[[", "]]"],
   methods: {
-    showModal
+    showModal,
   },
 });
 
