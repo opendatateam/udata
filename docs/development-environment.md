@@ -65,6 +65,23 @@ $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
 
+### Macos Big Sur caveat
+
+If installing `cryptography` fails:
+
+```
+brew install openssl
+export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+pip install -r requirements/develop.pip
+```
+
+If installing `Pillow` fails:
+```
+brew install libjpeg
+pip install -r requirements/develop.pip
+```
+
 ## NodeJS and modules
 
 NodeJS is required to build or run the frontend. Please check the .nvmrc at the root of the repository to check the exact version of NodeJS you need.
