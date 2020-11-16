@@ -100,7 +100,10 @@ class UDataApi(Api):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if not current_user.sysadmin and current_app.config['READ_ONLY_MODE'] and any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST']):
+            if not current_user.is_anonymous and \
+                not current_user.sysadmin and \
+                current_app.config['READ_ONLY_MODE'] and \
+                any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST']):
                 self.abort(423, 'Due to unusual activities, the creation of new content is currently disabled.')
 
             if not current_user.is_authenticated:
