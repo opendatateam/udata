@@ -7,6 +7,7 @@ import Threads from "./components/discussions/threads.vue";
 
 import Clipboard from "v-clipboard";
 import VModal from "vue-js-modal";
+import Toast from "vue-toasted";
 
 import { showModal } from "./plugins/modals";
 import Api from "./plugins/api";
@@ -14,6 +15,7 @@ import Auth from "./plugins/auth";
 
 Vue.use(Clipboard);
 Vue.use(VModal);
+Vue.use(Toast);
 Vue.use(Api);
 Vue.use(Auth);
 
