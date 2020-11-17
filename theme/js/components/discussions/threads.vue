@@ -19,44 +19,54 @@
         :subjectClass="subjectClass"
       />
     </div>
+    <pagination
+      :page="current_page"
+      :page_size="page_size"
+      :total_results="total_results"
+      :changePage="changePage"
+    />
   </section>
 </template>
 
 <script>
 import config from "../../config";
+import Pagination from "./pagination.vue";
 import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
 
 const log = console.log;
+
 const sorts = [
-  { name: "Créé", getter: (item) => item.created },
+  { name: "Créé", getter: (item) => item.created, key: "-created" },
   {
     name: "Dernier post",
     getter: (item) =>
       item.discussion.length >= 1 && item.discussion.slice(-1)[0]["posted_on"],
+    key: "-discussion[-1:].posted_on",
   },
 ];
 
 export default {
   components: {
     "create-thread": CreateThread,
-    "thread": Thread
+    thread: Thread,
+    pagination: Pagination,
   },
   data() {
     return {
       discussions: [],
       current_page: 1,
+      page_size: 20,
+      next_page: null,
+      previous_page: null,
+      total_results: 0,
       loading: true,
       current_sort: sorts[0],
     };
   },
   computed: {
     sortedDiscussions: function () {
-      return this.discussions.sort(
-        (a, b) =>
-          new Date(this.current_sort.getter(b)) -
-          new Date(this.current_sort.getter(a))
-      );
+      return this.discussions;
     },
   },
   props: {
@@ -72,26 +82,42 @@ export default {
       this.loading = true;
 
       this.$api
-        .get("/discussions/", { params: { page: page } })
+        .get("/discussions/", {
+          params: { page, for: this.subjectId, sort: this.current_sort.key },
+        })
         .then((resp) => resp.data)
         .then((data) => {
-          if (data.data) this.discussions = data.data;
+          if (data.data) {
+            this.discussions = data.data;
+            this.total_results = data.total;
+            this.next_page = data.next_page;
+            this.previous_page = data.previous_page;
+          }
         })
         .catch((err) => {
           log(err);
+          this.$toasted.error("Error fetching discussions");
           this.discussion = [];
         })
         .finally(() => (this.loading = false));
     },
+    changePage(index) {
+      this.current_page = index;
+      this.loadPage(index);
+    },
     createThread: function (data) {
       const vm = this;
-      return this.$api.post("/discussions/", data).then(() =>{
-        vm.current_page = 1;
-        vm.loadPage(1);
-      });
+      return this.$api
+        .post("/discussions/", data)
+        .then(() => {
+          vm.current_page = 1;
+          vm.loadPage(1);
+        })
+        .catch((err) => this.$toasted.error("Error posting new thread", err));
     },
     changeSort: function (index = 0) {
       this.current_sort = sorts[index];
+      this.loadPage(this.page);
     },
   },
 };

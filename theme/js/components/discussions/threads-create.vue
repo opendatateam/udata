@@ -6,7 +6,8 @@
         @click.prevent="showForm = true"
         v-if="!showForm"
       >
-        {{ "Start a new discussion" }}
+        <span v-html="AddIcon"></span>
+        <span> Start a new discussion</span>
       </a>
       <form @submit.prevent="submit" v-if="showForm">
         <input type="text" v-model="title" placeholder="Title" />
@@ -19,6 +20,7 @@
 
 <script>
 import config from "../../config";
+import AddIcon from "svg/actions/add.svg"; //Not the best but we don't have many svg
 
 const log = console.log;
 
@@ -29,6 +31,7 @@ export default {
       showForm: false,
       title: "",
       comment: "",
+      AddIcon,
     };
   },
   props: {

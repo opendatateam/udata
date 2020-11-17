@@ -38,10 +38,14 @@ export default {
       };
 
       if (this.onSubmit)
-        this.onSubmit(values).finally(() => {
-          vm.loading = false;
-          vm.comment = "";
-        });
+        this.onSubmit(values)
+          .catch((err) => {
+            vm.$toasted.error("Error posting comment");
+          })
+          .finally(() => {
+            vm.loading = false;
+            vm.comment = "";
+          });
     },
   },
 };

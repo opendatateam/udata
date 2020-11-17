@@ -1,7 +1,8 @@
 .discussions-wrapper {
     @thread-left-padding: 200px;
 
-    textarea, input {
+    textarea,
+    input {
         display: block;
         width: 100%;
         padding: @spacing-sm;
@@ -16,10 +17,13 @@
 
         .thread-header {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             background: @grey-380;
 
-            padding: @spacing-md;
+            > * {
+                padding: @spacing-md;
+            }
 
             .thread-status {
                 width: @thread-left-padding;
@@ -27,68 +31,140 @@
                 flex-grow: 0;
                 color: @orange-100;
                 font-weight: @font-weight-bold;
+
+                @media @query-md {
+                    width: auto;
+                    margin: auto;
+                    padding: @spacing-xs;
+                    order: 2;
+                }
             }
 
-            .thread-title, .thread-link {
+            .thread-title,
+            .thread-link {
                 flex-grow: 0;
                 flex-shrink: 0;
             }
 
             .thread-title {
                 flex-grow: 1;
+                padding: @spacing-md;
+
+                @media @query-md {
+                    padding: @spacing-md;
+                }
+            }
+
+            .thread-link {
+                svg * {
+                    fill: white;
+                }
             }
         }
 
-        .thread-footer {
+        .thread-footer > div {
             display: flex;
+            flex-wrap: wrap;
             background: @grey-380;
-            padding: @spacing-md;
+            padding: @spacing-md @spacing-xs;
             padding-left: @thread-left-padding;
 
             .thread-reply {
                 width: 100%;
                 text-align: center;
             }
+
+            .thread-reply-cta {
+                cursor: pointer;
+            }
+
+            @media @query-md {
+                padding-left: 0;
+                justify-content: center;
+            }
         }
 
         .thread-comment {
             display: flex;
+            flex-wrap: wrap;
             background: @grey-50;
             justify-content: space-between;
             padding: @spacing-md 0;
 
             color: @black;
 
+            @media @query-md {
+                padding-top: 0;
+            }
+
             .avatar {
                 width: @thread-left-padding;
                 padding-left: @spacing-md;
                 flex-shrink: 0;
-                // align-self: center;
-                // text-align: center;
 
                 img {
                     max-width: 60px;
                     max-height: 60px;
+                }
+
+                @media @query-md {
+                    width: auto;
+                    padding-right: @spacing-md;
                 }
             }
 
             .thread-box {
                 flex-grow: 1;
 
-                >strong {
+                > strong {
                     display: inline-block;
                     color: @blue-400;
                     margin-bottom: @spacing-xs;
                 }
             }
 
-            >a {
+            .thread-link {
                 flex-shrink: 0;
                 padding-right: @spacing-sm;
+                color: @grey-400;
+                font-weight: @font-weight-bold;
+                font-size: @font-size-sm;
+
+                a {
+                    margin-left: @spacing-md;
+                    vertical-align: middle;
+                }
+
+                @media @query-md {
+                    order: -1;
+                    flex-basis: 100%;
+                    display: flex;
+                    padding: @spacing-xs;
+                    justify-content: space-between;
+                }
             }
 
             + .thread-comment {
                 border-top: 1px solid @grey-400;
+            }
+        }
+
+        .thread-collapse {
+            background: @grey-380;
+            color: @grey-300;
+            font-size: @font-size-sm;
+
+            cursor: pointer;
+
+            padding: @spacing-md;
+            padding-left: @thread-left-padding;
+
+            border-top: 1px solid @grey-400;
+            border-bottom: 1px solid @grey-400;
+
+            @media @query-md {
+                padding-left: @spacing-md;
+                text-align: center;
             }
         }
     }
@@ -102,10 +178,6 @@
             padding: @spacing-md;
 
             padding-left: @thread-left-padding;
-
-            input, textarea {
-
-            }
         }
     }
 }
