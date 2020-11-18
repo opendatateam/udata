@@ -16,9 +16,7 @@
         class="thread-comment"
         :id="commentUrl(id, index)"
       >
-        <div class="avatar">
-          <img src="https://placekitten.com/500/500" />
-        </div>
+        <avatar :user="comment.posted_by"></avatar>
         <div class="thread-box">
           <strong class="author">
             {{
@@ -68,6 +66,7 @@
 
 <script>
 import ThreadReply from "./thread-reply.vue";
+import Avatar from "./avatar.vue";
 import LinkIcon from "svg/permalink.svg";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
@@ -94,6 +93,7 @@ export default {
   },
   components: {
     "thread-reply": ThreadReply,
+    Avatar
   },
   methods: {
     discussionUrl: (id, link = false) => (link ? "#" : "") + "discussion-" + id, //Permalink helpers
