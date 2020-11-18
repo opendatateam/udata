@@ -45,7 +45,7 @@
         <div
           class="thread-reply-cta"
           v-if="!showForm"
-          @click.stop="showForm = true"
+          @click.stop="displayForm"
         >
           + Ajouter un commentaire
         </div>
@@ -109,6 +109,10 @@ export default {
           this.updatedDiscussion = updatedDiscussion.discussion;
           this.showForm = false;
         });
+    },
+    displayForm: function() {
+       this.$auth('You need to be logged in to start a discussion.');
+       this.showForm = true;
     },
     formatDate: function (date) {
       return dayjs(date).format("D MMMM YYYY");

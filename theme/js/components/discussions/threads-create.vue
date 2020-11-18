@@ -3,7 +3,7 @@
     <div class="col-12">
       <a
         class="btn-action my-xl"
-        @click.prevent="showForm = true"
+        @click.prevent="displayForm"
         v-if="!showForm"
       >
         <span v-html="AddIcon"></span>
@@ -40,6 +40,10 @@ export default {
     onSubmit: Function,
   },
   methods: {
+    displayForm: function() {
+       this.$auth('You need to be logged in to start a discussion.');
+       this.showForm = true;
+    },
     submit() {
       const vm = this;
       this.loading = true;
