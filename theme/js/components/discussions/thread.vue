@@ -10,26 +10,29 @@
       </div>
     </header>
     <div class="thread-content">
-      <article
-        v-for="(comment, index) in _discussion"
-        v-if="!_collapsed"
-        class="thread-comment"
-        :id="commentUrl(id, index)"
-      >
-        <avatar :user="comment.posted_by"></avatar>
-        <div class="thread-box">
-          <strong class="author">
-            {{
-              comment.posted_by.first_name + " " + comment.posted_by.last_name
-            }}
-          </strong>
-          <p class="m-0">{{ comment.content }}</p>
-        </div>
-        <div class="thread-link">
-          <span class="thread-date">{{ formatDate(comment.posted_on) }}</span>
-          <a :href="commentUrl(id, index, true)" v-html="LinkIcon"></a>
-        </div>
-      </article>
+      <transition-group name="list">
+        <article
+          v-for="(comment, index) in _discussion"
+          v-if="!_collapsed"
+          class="thread-comment"
+          :id="commentUrl(id, index)"
+          :key="commentUrl(id, index)"
+        >
+          <avatar :user="comment.posted_by"></avatar>
+          <div class="thread-box">
+            <strong class="author">
+              {{
+                comment.posted_by.first_name + " " + comment.posted_by.last_name
+              }}
+            </strong>
+            <p class="m-0">{{ comment.content }}</p>
+          </div>
+          <div class="thread-link">
+            <span class="thread-date">{{ formatDate(comment.posted_on) }}</span>
+            <a :href="commentUrl(id, index, true)" v-html="LinkIcon"></a>
+          </div>
+        </article>
+      </transition-group>
       <article
         class="thread-collapse"
         v-if="_collapsed"
@@ -93,7 +96,7 @@ export default {
   },
   components: {
     "thread-reply": ThreadReply,
-    Avatar
+    Avatar,
   },
   methods: {
     discussionUrl: (id, link = false) => (link ? "#" : "") + "discussion-" + id, //Permalink helpers
@@ -110,9 +113,9 @@ export default {
           this.showForm = false;
         });
     },
-    displayForm: function() {
-       this.$auth('You need to be logged in to start a discussion.');
-       this.showForm = true;
+    displayForm: function () {
+      this.$auth("You need to be logged in to start a discussion.");
+      this.showForm = true;
     },
     formatDate: function (date) {
       return dayjs(date).format("D MMMM YYYY");
