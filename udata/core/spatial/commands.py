@@ -6,12 +6,13 @@ import tarfile
 import shutil
 import signal
 import sys
+import tempfile
 
 from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
 from textwrap import dedent
-from urllib.request import urlretrieve, urlopen
+from urllib.request import urlretrieve
 
 import click
 import msgpack
@@ -31,7 +32,6 @@ log = logging.getLogger(__name__)
 
 
 DEFAULT_GEOZONES_FILE = 'https://github.com/etalab/geozones/releases/download/2019.0/geozones-countries-2019-0-msgpack.tar.xz'
-GEOZONE_FILENAME = 'geozones.tar.xz'
 
 
 def level_ref(level):
@@ -98,8 +98,6 @@ def load_zones(col, path):
 def cleanup(prefix):
     log.info('Removing temporary files')
     tmp.delete(prefix)
-    if tmp.exists(GEOZONE_FILENAME):  # Has been downloaded
-        tmp.delete(GEOZONE_FILENAME)
 
 
 @contextmanager
@@ -139,17 +137,20 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     '''
     ts = datetime.now().isoformat().replace('-', '').replace(':', '').split('.')[0]
     prefix = 'geozones-{0}'.format(ts)
+    file = None
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
-        with tmp.open(GEOZONE_FILENAME, 'wb') as f:
-            f.write(urlopen(filename).read())
-            filename = tmp.path(GEOZONE_FILENAME)
+        file = tempfile.NamedTemporaryFile()
+        filename, _ = urlretrieve(filename, file.name)
 
     log.info('Extracting GeoZones bundle')
     with handle_error(prefix):
         with contextlib.closing(lzma.LZMAFile(filename)) as xz:
             with tarfile.open(fileobj=xz) as f:
                 f.extractall(tmp.path(prefix))
+
+    if file:
+        file.close()
 
     log.info('Loading GeoZones levels')
 
