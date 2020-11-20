@@ -63,9 +63,33 @@
             {{_('Archived')}}
         </span>
     {% endif %}
-    <h1 class="fs-hg">{{ dataset.title }}
+    <h1 class="fs-hg mb-0">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
+    <div class="row py-md">
+        <div class="col-12">
+            {% if dataset.organization %}
+                    {% if dataset.organization.public_service %}
+                    <div class="well well-green-300">
+                        {% include theme("svg/certified.svg") %}
+                        <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
+                    </div>
+                    {% endif %}
+            {% elif dataset.owner %}
+                <div class="well well-grey-100">
+                    {% trans
+                        date=dataset.created_at|dateformat(format='long'),
+                        update=dataset.last_update|dateformat(format='long'),
+                        author=dataset.owner.fullname,
+                        url=url_for('users.show', user=dataset.owner)
+                    %}
+                        This dataset has been published on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a><br />
+                        Published on {{date}} and updated on {{update}}
+                    {% endtrans %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
     <div class="row align-items-center">
         <div class="col-auto col-md-12 tabs">
             {% if dataset.organization %}
@@ -215,30 +239,6 @@
 </section>
 <section class="content-body container">
     <div class="row">
-        <div class="col-12">
-            {% if dataset.organization %}
-                <div class="well well-green-300">
-                    {% if dataset.organization.public_service %}
-                    {% include theme("svg/certified.svg") %}
-                    <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
-                    {% endif %}
-                </div>
-            {% elif dataset.owner %}
-                <div class="well well-grey-100">
-                    {% trans
-                        date=dataset.created_at|dateformat(format='long'),
-                        update=dataset.last_update|dateformat(format='long'),
-                        author=dataset.owner.fullname,
-                        url=url_for('users.show', user=dataset.owner)
-                    %}
-                        This dataset has been published on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a><br />
-                        Published on {{date}} and updated on {{update}}
-                    {% endtrans %}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    <div class="row">
         <div class="col-12 text-grey-300">
         {{ dataset.description|markdown }}
         </div>
@@ -306,6 +306,7 @@
         </div></div>
         {# end button bar #}
 
+        {# Maybe put this after the real description instead of after the resource cards ? Not sure #}
         {{ hook('dataset.display.after-description') }}
 
             {# Geospatial panel #}
