@@ -61,6 +61,12 @@ comment_discussion_fields = api.model('DiscussionResponse', {
         description='Is this a closing response. Only subject owner can close')
 })
 
+
+edit_comment_discussion_fields = api.model('DiscussionResponse', {
+    'comment': fields.String(
+        description='The comment to submit', required=True),
+})
+
 discussion_page_fields = api.model('DiscussionPage',
                                    fields.pager(discussion_fields))
 
@@ -133,9 +139,21 @@ class DiscussionAPI(API):
 
 @ns.route('/<id>/comments/<int:cidx>', endpoint='discussion_comment')
 class DiscussionCommentAPI(API):
-    '''
-    Base class for a comment in a discussion thread.
-    '''
+    @api.secure
+    @api.doc('edit_discussion_comment')
+    @api.response(403, 'Not allowed to edit this comment')
+    @api.marshal_with(edit_comment_discussion_fields)
+    def patch(self, id, cidx):
+        '''Edit a comment given its index'''
+        discussion = Discussion.objects.get_or_404(id=id)
+        if len(discussion.discussion) <= cidx:
+            api.abort(404, 'Comment does not exist')
+        # TODO: check if current user is author of the comment
+        form = api.validate(DiscussionCommentForm)
+        discussion.discussion[cidx].content = form.comment.data
+        discussion.save()
+        return discussion
+
     @api.secure(admin_permission)
     @api.doc('delete_discussion_comment')
     @api.response(403, 'Not allowed to delete this comment')
