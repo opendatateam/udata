@@ -3,7 +3,7 @@ from udata.i18n import lazy_gettext as _
 
 from .models import Discussion
 
-__all__ = ('DiscussionCreateForm', 'DiscussionCommentForm')
+__all__ = ('DiscussionCreateForm', 'DiscussionCommentForm', 'EditDiscussionCommentForm')
 
 
 class DiscussionCreateForm(ModelForm):
@@ -18,3 +18,7 @@ class DiscussionCreateForm(ModelForm):
 class DiscussionCommentForm(Form):
     comment = fields.StringField(_('Comment'), [validators.DataRequired()])
     close = fields.BooleanField(default=False)
+
+
+class EditDiscussionCommentForm(Form):
+    comment = fields.StringField(_('Comment'), [validators.DataRequired()])

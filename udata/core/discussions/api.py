@@ -7,7 +7,7 @@ from udata.auth import admin_permission
 from udata.api import api, API, fields
 from udata.core.user.api_fields import user_ref_fields
 
-from .forms import DiscussionCreateForm, DiscussionCommentForm
+from .forms import DiscussionCreateForm, DiscussionCommentForm, EditDiscussionCommentForm
 from .models import Message, Discussion
 from .permissions import CloseDiscussionPermission
 from .signals import (
@@ -149,7 +149,7 @@ class DiscussionCommentAPI(API):
         if len(discussion.discussion) <= cidx:
             api.abort(404, 'Comment does not exist')
         # TODO: check if current user is author of the comment
-        form = api.validate(DiscussionCommentForm)
+        form = api.validate(EditDiscussionCommentForm)
         discussion.discussion[cidx].content = form.comment.data
         discussion.save()
         return discussion
