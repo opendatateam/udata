@@ -72,7 +72,7 @@ class PostsAPI(API):
     def get(self):
         '''List all posts'''
         args = parser.parse_args()
-        return (Post.objects.order_by(args['sort'])
+        return (Post.objects.published().order_by(args['sort'])
                             .paginate(args['page'], args['page_size']))
 
     @api.doc('create_post')
