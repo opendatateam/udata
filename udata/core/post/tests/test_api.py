@@ -20,7 +20,7 @@ class PostsAPITest:
 
         response = api.get(url_for('api.posts'))
         assert200(response)
-        # Response should not contain the unplublished post
+        # Response should not contain the unpublished post
         assert len(response.json['data']) == 3
 
     def test_post_api_get(self, api):
