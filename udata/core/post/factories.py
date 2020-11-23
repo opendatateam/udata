@@ -7,6 +7,15 @@ from udata.factories import ModelFactory
 from .models import Post
 
 
+class UnpublishedPostFactory(ModelFactory):
+    class Meta:
+        model = Post
+
+    name = factory.Faker('sentence')
+    headline = factory.Faker('sentence')
+    content = factory.Faker('text')
+
+
 class PostFactory(ModelFactory):
     class Meta:
         model = Post
