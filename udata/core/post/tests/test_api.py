@@ -2,7 +2,7 @@ import pytest
 
 from flask import url_for
 
-from udata.core.post.factories import PostFactory, UnpublishedPostFactory
+from udata.core.post.factories import PostFactory
 from udata.core.post.models import Post
 from udata.core.user.factories import AdminFactory
 
@@ -16,7 +16,7 @@ class PostsAPITest:
     def test_post_api_list(self, api):
         '''It should fetch a post list from the API'''
         posts = PostFactory.create_batch(3)
-        posts.append(UnpublishedPostFactory())
+        posts.append(PostFactory(published=None))
 
         response = api.get(url_for('api.posts'))
         assert200(response)
