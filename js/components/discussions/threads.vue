@@ -158,7 +158,7 @@ export default {
             loading: true,
             formDisplayed: false,
             currentUser: config.user,
-            readOnlyEnabled: config.read_only_enabled
+            readOnlyEnabled: config.read_only_enabled && !config.user.roles.includes('admin')
         }
     },
     props: {
