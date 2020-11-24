@@ -23,7 +23,7 @@ export default {
         return {
             fields: [{
                     id: 'title',
-                    label: this._('Name')
+                    label: this._('Title')
                 }, {
                     id: 'url',
                     label: this._('URL'),
