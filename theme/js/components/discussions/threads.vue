@@ -22,29 +22,36 @@
         </vue-content-loading>
       </div>
       <div v-if="!loading" ref="top" key="top">
-        Trié par : {{ current_sort.name }}
-        <a @click.stop="changeSort(0)">Trier par créé</a>
-        <a @click.stop="changeSort(1)">Trier par discussion</a>
-        <ul>
-          <li
-            :id="'discussion-' + discussion.id"
-            v-for="discussion in sortedDiscussions"
-          >
-            <thread v-bind="discussion" />
-          </li>
-        </ul>
-        <create-thread
-          :onSubmit="this.createThread"
-          :subjectId="subjectId"
-          :subjectClass="subjectClass"
-        ></create-thread>
-        <pagination
-          v-if="total_results > page_size"
-          :page="current_page"
-          :page_size="page_size"
-          :total_results="total_results"
-          :changePage="changePage"
-        />
+        <div v-if="threadFromURL">
+          You're seeing a single thread from your URL !
+          <a @click.prevent="viewAllDiscussions">View all</a>
+          <thread v-bind="threadFromURL"></thread>
+        </div>
+        <div v-else>
+          Trié par : {{ current_sort.name }}
+          <a @click.stop="changeSort(0)">Trier par créé</a>
+          <a @click.stop="changeSort(1)">Trier par discussion</a>
+          <ul>
+            <li
+              :id="'discussion-' + discussion.id"
+              v-for="discussion in discussions"
+            >
+              <thread v-bind="discussion" />
+            </li>
+          </ul>
+          <create-thread
+            :onSubmit="this.createThread"
+            :subjectId="subjectId"
+            :subjectClass="subjectClass"
+          ></create-thread>
+          <pagination
+            v-if="total_results > page_size"
+            :page="current_page"
+            :page_size="page_size"
+            :total_results="total_results"
+            :changePage="changePage"
+          />
+        </div>
       </div>
     </transition>
   </section>
@@ -59,14 +66,13 @@ import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
 
 const log = console.log;
+const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
 
 const sorts = [
-  { name: "Créé", getter: (item) => item.created, key: "-created" },
+  { name: "Créé", key: "-created" },
   {
     name: "Dernier post",
-    getter: (item) =>
-      item.discussion.length >= 1 && item.discussion.slice(-1)[0]["posted_on"],
-    key: "-discussion[-1:].posted_on",
+    key: "-discussion.posted_on",
   },
 ];
 
@@ -79,47 +85,55 @@ export default {
   },
   data() {
     return {
-      discussions: [],
+      discussions: [], //Store list of discussions (page)
+      threadFromURL: null, //Single thread (load from URL)
       current_page: 1,
       page_size: 20,
-      next_page: null,
-      previous_page: null,
       total_results: 0,
       loading: true,
       current_sort: sorts[0],
     };
-  },
-  computed: {
-    sortedDiscussions: function () {
-      return this.discussions;
-    },
   },
   props: {
     subjectId: String,
     subjectClass: String,
   },
   mounted() {
-    this.loadPage(this.current_page);
+    //Check if URL contains a thread
+    const hash = window.location.hash.substring(1);
+    const [ a, discussionId, b] = URL_REGEX.exec(hash) || [];
+
+    //If not, we load the first page
+    if (!discussionId) return this.loadPage(this.current_page);
+
+    //If it does, it gets loaded
+    this.loadThread(discussionId);
   },
   methods: {
+    //Loads a full page
     loadPage: function (page = 1, scroll = false) {
       log("Loading page", page);
       this.loading = true;
 
+      //We can pass a second "scroll" variable to true if we want to scroll to the top of the dicussions section
+      //This is useful for bottom of the page navigation buttons
       if (this.$refs.top && scroll)
         this.$refs.top.scrollIntoView({ behavior: "smooth" });
 
-      this.$api
+      return this.$api
         .get("/discussions/", {
-          params: { page, for: this.subjectId, sort: this.current_sort.key },
+          params: {
+            page,
+            for: this.subjectId,
+            sort: this.current_sort.key,
+            page_size: this.page_size,
+          },
         })
         .then((resp) => resp.data)
         .then((data) => {
           if (data.data) {
             this.discussions = data.data;
             this.total_results = data.total;
-            this.next_page = data.next_page;
-            this.previous_page = data.previous_page;
           }
         })
         .catch((err) => {
@@ -131,9 +145,41 @@ export default {
           this.loading = false;
         });
     },
-    changePage(index) {
+    //Loads a single thread, used to load a single thread from URL for instance
+    loadThread: function (id) {
+      if (!id) return;
+
+      log("Loading thread", id)
+
+      this.loading = true;
+
+      return this.$api
+        .get("/discussions/" + id)
+        .then((resp) => resp.data)
+        .then((data) => {
+          if (data)
+            this.threadFromURL = data;
+        })
+        .catch((err) => {
+          log(err);
+          this.$toasted.error("Error fetching discussion " + id);
+          this.loadPage(1); //In case loading a single comment didn't work, we load the first page. Better than nothing !
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    //Removes the specific discussion from URL
+    //And loads the first page
+    viewAllDiscussions(){
+      this.threadFromURL = null;
+      history.pushState(null, null, ' ')
+      this.loadPage(1);
+    },
+    //Pagination handler
+    changePage(index, scroll = true) {
       this.current_page = index;
-      this.loadPage(index, true);
+      this.loadPage(index, scroll);
     },
     createThread: function (data) {
       const vm = this;
