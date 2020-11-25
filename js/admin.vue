@@ -51,7 +51,7 @@ export default {
                 type: 'error',
                 icon: 'exclamation-triangle',
                 title: this._('Attention'),
-                details: this._('Due to unusual activities, the creation of new content is currently disabled.'),
+                details: this._('Due to security reasons, the creation of new content is currently disabled.'),
             });
         }
         // Displays an error identifier un uncaught error
