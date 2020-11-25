@@ -106,7 +106,7 @@ class UDataApi(Api):
                 current_app.config['READ_ONLY_MODE'] and 
                 any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST'])
             ):
-                self.abort(423, 'Due to unusual activities, the creation of new content is currently disabled.')
+                self.abort(423, 'Due to security reasons, the creation of new content is currently disabled.')
 
             if not current_user.is_authenticated:
                 self.abort(401)
