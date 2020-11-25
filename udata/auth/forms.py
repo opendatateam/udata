@@ -17,6 +17,7 @@ class ExtendedRegisterForm(RegisterForm):
                          validators.NoURLs(_('URLs not allowed in this field'))])
     
     def validate(self):
+        # no register allowed when read only mode is on
         if not super().validate() or current_app.config.get('READ_ONLY_MODE'):
             return False
 
