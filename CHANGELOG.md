@@ -4,6 +4,12 @@
 
 - Change reuse's form's label name to title [#2575](https://github.com/opendatateam/udata/pull/2575)
 - Unpublished posts are no longer served by the `Post.list` API endpoint [#2578](https://github.com/opendatateam/udata/pull/2578)
+- Read only mode can now be toggled in settings [#2565](https://github.com/opendatateam/udata/pull/2565):
+  - Toggles a warning banner on the frontend view and a warning toast on the admin view.
+  - Prevents new users to register.
+  - Prevents non admin users to create new content such as organizations, datasets, community resources or discussions.
+  - Will return a `423` response code to any non-admin request to endpoints specified in `METHOD_BLOCKLIST` setting.
+  - Existing content can still be updated.
 
 ## 2.4.1 (2020-11-09)
 
