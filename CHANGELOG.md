@@ -2,7 +2,10 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Read Only Mode modifications on theme [#509](https://github.com/etalab/udata-gouvfr/pull/509):
+  - Will display a warning banner on the frontend view.
+  - Hides the contribute's home's modal.
+  - Hides the Reuse's creation card and community resource's creation card on dataset view.
 
 ## 2.2.3 (2020-11-09)
 
