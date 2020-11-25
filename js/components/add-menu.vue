@@ -1,5 +1,5 @@
 <template>
-<li class="dropdown add-menu notifications-menu">
+<li class="dropdown add-menu notifications-menu" v-show="!readOnlyEnabled">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
         <i class="fa fa-plus"></i>
     </a>
@@ -21,8 +21,15 @@
 </template>
 
 <script>
+import config from 'config';
+
 export default {
     name: 'add-menu',
+    data() {
+        return {
+            readOnlyEnabled: config.read_only_enabled && !config.user.roles.includes('admin')
+        }
+    },
     computed: {
         actions() {
             var actions = [{
