@@ -179,10 +179,14 @@
                     <dd>{{ dataset.spatial.granularity_label }}</dd>
                 </div>
                 {% endif %}
-                {% if dataset.spatial.territories %}
+                {% if dataset.spatial.zones %}
                 <div>
-                    <dt class="f-bold text-grey-400">{{ _('Territorial coverage') }}"></dt>
-                    <dd>{{ dataset.spatial.top_label }}</dd>
+                    <dt class="f-bold text-grey-400">{{ _('Territorial coverage') }}</dt>
+                    <dd>
+                        {% for zone in dataset.spatial.zones %}
+                            {{zone.name}}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    </dd>
                 </div>
                 {% endif %}
             {% endif %}
@@ -308,41 +312,6 @@
 
         {# Maybe put this after the real description instead of after the resource cards ? Not sure #}
         {{ hook('dataset.display.after-description') }}
-
-            {# Geospatial panel #}
-            {#
-            {% if dataset.spatial.geom or dataset.spatial.zones %}
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <h3>{{ _('Spatial coverage') }}</h3>
-                    {% if dataset.spatial.zones %}
-                        <leaflet-map v-ref:map class="aside-map"
-                            data-zones="{{ url_for('api.zones', ids=dataset.spatial.zones) }}">
-                        </leaflet-map>
-                    {% elif dataset.spatial.geom %}
-                        <leaflet-map class="aside-map"
-                            :geojson="{{dataset.spatial.geom|to_json}}">
-                        </leaflet-map>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-
-            {# Territories panel #}
-            {#
-            {% if dataset.spatial.handled_zones %}
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <h3>{{ _('Territories')}}</h3>
-                    {% for territory in dataset.spatial.handled_zones %}
-                        <img src="{{ territory.logo_url(external=True) or theme_static('img/placeholder_territory_mini.png') }}" alt="{{ territory.name }}" class="float-left" width="13px" /> <a href="{{ territory.url }}" title="{{ territory.name }}">{{ territory.name }}</a>{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-        </aside>
-        #}
         </div>
 </section>
 
