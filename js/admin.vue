@@ -54,7 +54,7 @@ export default {
                 details: this._('Due to security reasons, the creation of new content is currently disabled.'),
             });
         }
-        // Displays an error identifier un uncaught error
+        // Displays an error identifier on uncaught error
         document.addEventListener('ravenSuccess', (e) => {
             this.notifications.push({
                 type: 'error',
