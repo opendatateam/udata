@@ -98,6 +98,14 @@ export default {
     subjectId: String,
     subjectClass: String,
   },
+  watch: {
+    //Update DOM counter on results count change
+    total_results: (count) => {
+      const els = document.querySelectorAll('.discussions-count');
+      if(els)
+        els.forEach(el => el.innerHTML = count);
+    }
+  },
   mounted() {
     //Check if URL contains a thread
     const hash = window.location.hash.substring(1);
@@ -157,8 +165,10 @@ export default {
         .get("/discussions/" + id)
         .then((resp) => resp.data)
         .then((data) => {
-          if (data)
+          if (data) {
             this.threadFromURL = data;
+            this.total_results = 1;
+          }
         })
         .catch((err) => {
           log(err);

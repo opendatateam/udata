@@ -357,7 +357,7 @@
                     <ul class="nav-list my-xl">
                         <li><a href='#' class="nav-link text-white">{{ _('Community resources') }} <sup class="sup">{{ dataset.community_resources|length }}</sup></a><li>
                         <li><a href='#' class="nav-link text-white">{{ _('Reuses') }} <sup class="sup">{{ reuses|length }}</sup></a><li>
-                        <li><a href='#' class="nav-link text-white">{{ _('Discussions') }} <sup class="sup">{{ dataset.discussions|length }}</sup></a><li>
+                        <li><a href='#community-discussions' class="nav-link text-white">{{ _('Discussions') }} <sup class="sup discussions-count">0</sup></a><li>
                     </ul>
                 </div>
             </div>
@@ -415,7 +415,7 @@
             </div>
         {% endblock %}
 
-        <h2 id="community-discussions" class="fs-hg">{{ _('Discussions') }} <sup>{{ dataset.discussions|length }}</sup></h2>
+        <h2 id="community-discussions" class="fs-hg">{{ _('Discussions') }} <sup class="discussions-count">0</sup></h2>
         <div class="row">
             <div class="col-4 col-md-12 text-grey-300">
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
