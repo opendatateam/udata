@@ -26,6 +26,7 @@ export default {
             toggled: true,
             notifications: [],
             site, me, config,
+            readOnlyEnabled: config.read_only_enabled,
         };
     },
     components: {AppHeader, Sidebar},
@@ -44,7 +45,16 @@ export default {
         }
     },
     ready() {
-        // Display an error identifier un uncaught error
+        // Displays a toast if read only mode is enabled
+        if (this.readOnlyEnabled) {
+            this.notifications.push({
+                type: 'error',
+                icon: 'exclamation-triangle',
+                title: this._('Attention'),
+                details: this._('Due to security reasons, the creation of new content is currently disabled.'),
+            });
+        }
+        // Displays an error identifier on uncaught error
         document.addEventListener('ravenSuccess', (e) => {
             this.notifications.push({
                 type: 'error',

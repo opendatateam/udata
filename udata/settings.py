@@ -446,6 +446,23 @@ class Defaults(object):
 
     API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
 
+    # Read Only Mode 
+    ####################
+    # This mode can be used to mitigate a spam attack for example.
+    # It disables the methods listed in the following block list.
+    READ_ONLY_MODE = False
+    METHOD_BLOCKLIST = ['OrganizationListAPI.post',
+                        'ReuseListAPI.post',
+                        'DatasetListAPI.post',
+                        'CommunityResourcesAPI.post',
+                        'UploadNewCommunityResources.post',
+                        'DiscussionAPI.post',
+                        'DiscussionsAPI.post',
+                        'IssuesAPI.post',
+                        'IssueAPI.post',
+                        'SourcesAPI.post',
+                        'FollowAPI.post']
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

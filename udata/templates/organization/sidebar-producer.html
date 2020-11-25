@@ -19,6 +19,7 @@
     <span class="fa fa-users"></span>
     {{ _('View Profile') }}
 </a>
+{% if not read_only_mode or sysadmin %}
 <button type="button" class="btn btn-sm btn-block btn-left btn-warning" @click="$refs.discussions.start('')"
     v-tooltip="'{{ _('Contact the producer') }}'" tooltip-placement="left">
     <span class="fa fa-envelope-o"></span>
@@ -31,4 +32,5 @@
     tooltip="{{ _('I\'ll be informed about this organization news') }}"
     >
 </follow-button>
+{% endif %}
 </div>

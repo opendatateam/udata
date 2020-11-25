@@ -2,6 +2,7 @@
 {% import 'macros/forms.html' as forms with context %}
 
 {% set section_class = 'form' %}
+{% set read_only_mode = config.READ_ONLY_MODE %}
 
 {% block main_content %}
 
@@ -34,6 +35,7 @@
             </form>
     </div>
     <div class="col-sm-6">
+        {% if not read_only_mode %}
         <form class="form-horizontal">
             <fieldset>
                 <legend>{{ _('Sign up') }}</legend>
@@ -49,6 +51,7 @@
                 </div>
             </fieldset>
         </form>
+        {% endif %}
     </div>
 </div>
 

@@ -39,7 +39,7 @@
        ></threadmessage>
     </div>
 
-    <div class="add-comment" v-show="detailed && !discussion.closed">
+    <div class="add-comment" v-show="detailed && !discussion.closed && !readOnlyEnabled">
         <button v-show="!formDisplayed && detailed && !discussion.closed"
             type="button"
             class="btn btn-primary"
@@ -86,6 +86,7 @@ export default {
             detailed: true,
             formDisplayed: false,
             currentUser: config.user,
+            readOnlyEnabled: config.read_only_enabled && !config.user.roles.includes('admin')
         }
     },
     events: {

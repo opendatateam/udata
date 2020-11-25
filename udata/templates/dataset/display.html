@@ -15,6 +15,8 @@
 
 {% set body_class = 'dataset-display' %}
 
+{% set read_only_mode = config.READ_ONLY_MODE %}
+
 {% block extra_head %}
 {% cache cache_duration, 'dataset-extra-head', dataset.id|string, g.lang_code %}
 <link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
@@ -175,6 +177,7 @@
                             <featured-button subject-id="{{ dataset.id }}" subject-type="dataset" :featured="{{ dataset.featured|to_json }}"></featured-button>
                         </div>
                         {% endif %}
+                        {% if not read_only_mode or sysadmin %}
                         <div class="btn-group btn-group-sm">
                             <button type="button" class="btn btn-warning" @click="$refs.discussions.start('')">
                                 <span class="fa fa-envelope-o"></span>
@@ -190,6 +193,7 @@
                         <div class="btn-group btn-group-sm">
                             {{ issues_btn(dataset) }}
                         </div>
+                        {% endif %}
                     </div>
                 </div></div>
                 {# end button bar #}
