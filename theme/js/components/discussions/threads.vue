@@ -88,7 +88,7 @@ export default {
     return {
       discussions: [], //Store list of discussions (page)
       threadFromURL: null, //Single thread (load from URL)
-      current_page: 1,
+      current_page: 1, //Current pagination page
       page_size: 20,
       total_results: 0,
       loading: true,
@@ -101,6 +101,7 @@ export default {
   },
   watch: {
     //Update DOM counter on results count change
+    //Simply add .discussion-count class to any DOM element for it to be updated
     total_results: (count) => {
       const els = document.querySelectorAll(".discussions-count");
       if (els) els.forEach((el) => (el.innerHTML = count));

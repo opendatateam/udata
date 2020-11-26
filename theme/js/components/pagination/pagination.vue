@@ -6,7 +6,7 @@ category: Interactions
 
 # Pagination
 
-A simple pagination front-end only component that allow you to paginate long collections.
+A simple pagination Vue component that allow you to paginate long collections.
 
 ## Usage
 
