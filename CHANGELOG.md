@@ -10,6 +10,7 @@
   - Prevents non admin users to create new content such as organizations, datasets, community resources or discussions.
   - Will return a `423` response code to any non-admin request to endpoints specified in `METHOD_BLOCKLIST` setting.
   - Existing content can still be updated.
+- Add an alert block in layout template, to be overrided in installed theme [#2580](https://github.com/opendatateam/udata/pull/2580)
 
 ## 2.4.1 (2020-11-09)
 
