@@ -278,38 +278,18 @@
             <p class="text-center">{{ _('No resources') }}</p>
             {% endfor %}
         </div>
-
-        {# button bar #}
-        {#
-        <div class="row opinion"><div class="col-xs-12">
-            <div class="btn-toolbar pull-right">
+        <div class="ressources-action my-hg">
+            <h2 class="fs-xxl">{{ _('Actions') }}</h2>
+            <ul class="nav-list">
                 {% if can_edit %}
-                <div class="btn-group btn-group-sm">
-                    <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-success">
-                        <span class="fa fa-pencil"></span>
-                        {{ _('Edit') }}
-                    </a>
-                </div>
+                <li class="my-md">
+                        <a class="nav-link" href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}">{{ _('Modifier des informations') }}</a>
+                </li>
                 {% endif %}
-                {% if sysadmin %}
-                <div class="btn-group btn-group-sm">
-                    <featured-button subject-id="{{ dataset.id }}" subject-type="dataset" :featured="{{ dataset.featured|to_json }}"></featured-button>
-                </div>
-                {% endif %}
-                <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-warning" @click="$refs.discussions.start('')">
-                        <span class="fa fa-envelope-o"></span>
-                        {{ _('Contact the producer') }}
-                    </button>
-                </div>
-
-                <div class="btn-group btn-group-sm">
-                    {{ integrate_btn(dataset) }}
-                </div>
-            </div>
-        </div></div>
-        {# end button bar #}
-
+                <li class="my-md"><a class="nav-link">{{ integrate_btn(dataset) }}</a></li>
+                <li class="my-md"><a class="nav-link" @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a></li>
+            </ul>
+        </div>
         {# Maybe put this after the real description instead of after the resource cards ? Not sure #}
         {{ hook('dataset.display.after-description') }}
         </div>
