@@ -62,7 +62,7 @@
 import config from "../../config";
 import VueContentLoading from "vue-content-loading";
 
-import Pagination from "./pagination.vue";
+import Pagination from "../pagination/pagination.vue";
 import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
 
