@@ -279,16 +279,28 @@
             {% endfor %}
         </div>
         <div class="ressources-action my-hg">
-            <h2 class="fs-xxl">{{ _('Actions') }}</h2>
-            <ul class="nav-list">
-                {% if can_edit %}
-                <li class="my-md">
-                        <a class="nav-link" href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}">{{ _('Modifier des informations') }}</a>
-                </li>
-                {% endif %}
-                <li class="my-md"><a class="nav-link">{{ integrate_btn(dataset) }}</a></li>
-                <li class="my-md"><a class="nav-link" @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a></li>
-            </ul>
+                <div class="row">
+                        <div class="col-6 col-md-12">
+                            <h2 class="fs-xxl">{{ _('Actions') }}</h2>
+                            <ul class="nav-list">
+                                {% if can_edit %}
+                                <li class="my-md">
+                                    <a class="nav-link" href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}">{{ _('Modifier des informations') }}</a>
+                                </li>
+                                {% endif %}
+                                <li class="my-md">
+                                    <a href="#" class="nav-link" @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-6 col-md-12 my-md-lg">
+                            <h2 class="fs-xxl">Embed</h2>
+                            <p class="text-grey-300 fs-sm">
+                                Embed is cool, embed is life. Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolore, consectetur adipisicing elit.
+                            </p>
+                            {{integrate_btn(dataset)}}
+                        </div>
+                </div>
         </div>
         {# Maybe put this after the real description instead of after the resource cards ? Not sure #}
         {{ hook('dataset.display.after-description') }}
