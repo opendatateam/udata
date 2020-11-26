@@ -40,6 +40,7 @@
             </li>
           </ul>
           <create-thread
+            ref="createThread"
             :onSubmit="this.createThread"
             :subjectId="subjectId"
             :subjectClass="subjectClass"
@@ -101,15 +102,14 @@ export default {
   watch: {
     //Update DOM counter on results count change
     total_results: (count) => {
-      const els = document.querySelectorAll('.discussions-count');
-      if(els)
-        els.forEach(el => el.innerHTML = count);
-    }
+      const els = document.querySelectorAll(".discussions-count");
+      if (els) els.forEach((el) => (el.innerHTML = count));
+    },
   },
   mounted() {
     //Check if URL contains a thread
     const hash = window.location.hash.substring(1);
-    const [ a, discussionId, b] = URL_REGEX.exec(hash) || [];
+    const [a, discussionId, b] = URL_REGEX.exec(hash) || [];
 
     //If not, we load the first page
     if (!discussionId) return this.loadPage(this.current_page);
@@ -119,7 +119,7 @@ export default {
   },
   methods: {
     //Loads a full page
-    loadPage: function (page = 1, scroll = false) {
+    loadPage(page = 1, scroll = false) {
       log("Loading page", page);
       this.loading = true;
 
@@ -154,10 +154,10 @@ export default {
         });
     },
     //Loads a single thread, used to load a single thread from URL for instance
-    loadThread: function (id) {
+    loadThread(id) {
       if (!id) return;
 
-      log("Loading thread", id)
+      log("Loading thread", id);
 
       this.loading = true;
 
@@ -181,9 +181,9 @@ export default {
     },
     //Removes the specific discussion from URL
     //And loads the first page
-    viewAllDiscussions(){
+    viewAllDiscussions() {
       this.threadFromURL = null;
-      history.pushState(null, null, ' ')
+      history.pushState(null, null, " ");
       this.loadPage(1);
     },
     //Pagination handler
@@ -191,7 +191,15 @@ export default {
       this.current_page = index;
       this.loadPage(index, scroll);
     },
-    createThread: function (data) {
+    //Can be called from outside the component to start a new thread programmatically
+    startThread() {
+      if (!this.$refs.createThread) return;
+
+      this.$refs.createThread.displayForm();
+      this.$refs.createThread.$el.scrollIntoView()
+    },
+    //Callback that will be passed to the create-thread component
+    createThread(data) {
       const vm = this;
       return this.$api
         .post("/discussions/", data)
@@ -201,7 +209,8 @@ export default {
         })
         .catch((err) => this.$toasted.error("Error posting new thread", err));
     },
-    changeSort: function (index = 0) {
+    //Changing sort order
+    changeSort(index = 0) {
       this.current_sort = sorts[index];
       this.loadPage(this.page);
     },
