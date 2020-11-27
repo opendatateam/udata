@@ -6,6 +6,10 @@
   - Will display a warning banner on the frontend view.
   - Hides the contribute's home's modal.
   - Hides the Reuse's creation card and community resource's creation card on dataset view.
+- Newsletter's subscription banner [#512](https://github.com/etalab/udata-gouvfr/pull/512):
+  - Override alert section in posts list template to display newsletter's subscription banner.
+  - Add settings `POST_BANNER_ACTIVATED` to toggle banner's activation.
+  - Add settings `POST_BANNER_LINK` and `POST_BANNER_MESSAGE` to configure subscription's link and message.
 
 ## 2.2.3 (2020-11-09)
 

@@ -1,0 +1,14 @@
+{% extends 'post/list.html' %}
+
+{% set a_link = config['POST_BANNER_LINK'] %}
+{% set a_content = config['POST_BANNER_MESSAGE'] %}
+
+{% block alert_section %}
+{% if config['POST_BANNER_ACTIVATED'] %}
+<div class="container-fluid alert-info alert">
+    <div class="container" role="alert">
+        <a href="{{ a_link }}">{{ a_content|safe }}</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
