@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.5.0 (2020-11-30)
 
 - Change reuse's form's label name to title [#2575](https://github.com/opendatateam/udata/pull/2575)
