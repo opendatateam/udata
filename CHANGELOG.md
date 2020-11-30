@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.3.0 (2020-11-30)
 
 - Read Only Mode modifications on theme [#509](https://github.com/etalab/udata-gouvfr/pull/509):
   - Will display a warning banner on the frontend view.
