@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.5.0 (2020-11-30)
 
 - Change reuse's form's label name to title [#2575](https://github.com/opendatateam/udata/pull/2575)
 - Unpublished posts are no longer served by the `Post.list` API endpoint [#2578](https://github.com/opendatateam/udata/pull/2578)
