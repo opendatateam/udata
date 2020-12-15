@@ -10,6 +10,10 @@ from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
     Organization, Reuse, Dataset, Follow, Issue, Discussion
 )
+from udata.rdf import (
+    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    negociate_content, want_rdf, graph_response
+)
 from udata.sitemap import sitemap
 
 from udata.core.dataset.csv import (
@@ -19,6 +23,7 @@ from udata.core.dataset.csv import (
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
+from .rdf import organization_to_rdf
 
 
 blueprint = I18nBlueprint('organizations', __name__,
@@ -91,6 +96,23 @@ class OrganizationDetailView(OrgView, DetailView):
                 if can_view else []),
         })
         return context
+
+
+@blueprint.route('/<org:org>/rdf', localize=False)
+def rdf(org):
+    '''Root RDF endpoint with content negociation handling'''
+    format = RDF_EXTENSIONS[negociate_content()]
+    url = url_for('organizations.rdf_format', org=org.id, format=format)
+    return redirect(url)
+
+
+@blueprint.route('/<org:org>/rdf.<format>', localize=False)
+def rdf_format(org, format):
+    if not EditOrganizationPermission(org).can() and org.deleted:
+        abort(410)
+
+    resource = organization_to_rdf(org)
+    return graph_response(resource, format)
 
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')
