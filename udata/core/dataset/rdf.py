@@ -25,6 +25,8 @@ from udata.utils import get_by, safe_unicode
 
 from .models import Dataset, Resource, Checksum, License
 
+from unidecode import unidecode
+
 log = logging.getLogger(__name__)
 
 # Map extra frequencies (ie. not defined in Dublin Core) to closest equivalent
@@ -183,8 +185,8 @@ def dataset_to_rdf(dataset, graph=None):
     d = graph.resource(id)
     d.set(RDF.type, DCAT.Dataset)
     d.set(DCT.identifier, Literal(identifier))
-    d.set(DCT.title, Literal(dataset.title))
-    d.set(DCT.description, Literal(dataset.description))
+    d.set(DCT.title, Literal(unidecode(dataset.title)))
+    d.set(DCT.description, Literal(unidecode(dataset.description)))
     d.set(DCT.issued, Literal(dataset.created_at))
     d.set(DCT.modified, Literal(dataset.last_modified))
 
