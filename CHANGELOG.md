@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.5.1 (2020-12-31)
 
 - Add title's and description's length limit in forms [#2585](https://github.com/opendatateam/udata/pull/2585)
