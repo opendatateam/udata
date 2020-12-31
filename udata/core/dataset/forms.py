@@ -102,11 +102,12 @@ def map_legacy_frequencies(form, field):
 class DatasetForm(ModelForm):
     model_class = Dataset
 
-    title = fields.StringField(_('Title'), [validators.DataRequired()])
+    title = fields.StringField(
+        _('Title'), [validators.DataRequired(), validators.Length(max=350)])
     acronym = fields.StringField(_('Acronym'),
                                  description=_('An optional acronym'))
     description = fields.MarkdownField(
-        _('Description'), [validators.DataRequired()],
+        _('Description'), [validators.DataRequired(), validators.Length(max=100000)],
         description=_('The details about the dataset '
                       '(collection process, specifics...).'))
     license = fields.ModelSelectField(
