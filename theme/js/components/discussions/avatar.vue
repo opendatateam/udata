@@ -1,7 +1,7 @@
 <template>
   <div class="avatar">
     <a :href="user.page">
-      <img :src="avatar_url" />
+      <img :src="avatar_url" :alt="user.name + ' avatar'" />
     </a>
   </div>
 </template>

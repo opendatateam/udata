@@ -118,13 +118,13 @@
         {% endif %}
     </div>
     <div id="dataset-informations" class="tab-content container">
-        <h3 class="text-white">
+        <h2>
             {{ _('Informations') }}
-        </h3>
+        </h2>
         <dl class="description-list fs-base">
             {% if dataset.license %}
             <div>
-                <dt class="f-bold text-grey-400">{{ _('License') }}</dt>
+                <dt class="f-bold">{{ _('License') }}</dt>
                 <dd>{% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
                 {{ dataset.license.title }}
                 {% if dataset.license.url %}</a>{% endif
@@ -193,9 +193,9 @@
         </dl>
     </div>
     <div id="dataset-extras" class="tab-content container">
-            <h3 class="text-white">
+            <h2>
                 {{ _('@@Extras') }}
-            </h3>
+            </h2>
             <dl class="description-list fs-base">
                 <div>
                     <dt class="f-bold text-grey-400">{{ _('ID') }}</dt>

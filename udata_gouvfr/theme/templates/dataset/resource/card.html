@@ -5,7 +5,7 @@
         <header class="card-header" id="resource-{{resource.id}}-header">
             <div class="edit-button">
             {% if can_edit %}
-                <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}" aria-label="{{ _('@@Edit button') }}">
                     {% include theme('svg/actions/edit.svg') %}
                 </a>
             {% endif %}
@@ -28,9 +28,9 @@
                     {% endif %}
                     <li><a @click.prevent href="#" title="{{ _('Copy permalink to clipboard') }}" v-clipboard="'{{resource.latest}}'" class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
                     {% if resource.format == 'url' %}
-                    <li><a href="{{ resource.latest }}" class="btn-action">{% include theme('svg/actions/link.svg') %}</a></li>
+                    <li><a href="{{ resource.latest }}" class="btn-action" aria-label="{{ _('@@Resource link') }}">{% include theme('svg/actions/link.svg') %}</a></li>
                     {% else %}
-                    <li><a href="{{ resource.latest }}" class="btn-action" download>{% include theme('svg/actions/download.svg') %}</a></li>
+                    <li><a href="{{ resource.latest }}" class="btn-action" aria-label="{{ _('@@Download resource') }}" download>{% include theme('svg/actions/download.svg') %}</a></li>
                     {% endif %}
                     {{ hook('dataset.resource.card.extra-buttons') }}
                 </ul>

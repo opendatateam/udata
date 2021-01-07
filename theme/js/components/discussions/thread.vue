@@ -6,7 +6,7 @@
       </div>
       <div class="thread-title">{{ title }}</div>
       <div class="thread-link">
-        <a :href="discussionUrl(id, true)" v-html="LinkIcon"></a>
+        <a aria-label="Permalink to discussion" :href="discussionUrl(id, true)" v-html="LinkIcon"></a>
       </div>
     </header>
     <div class="thread-content">
@@ -29,7 +29,7 @@
           </div>
           <div class="thread-link">
             <span class="thread-date">{{ formatDate(comment.posted_on) }}</span>
-            <a :href="commentUrl(id, index, true)" v-html="LinkIcon"></a>
+            <a aria-label="Permalink to comment" :href="commentUrl(id, index, true)" v-html="LinkIcon"></a>
           </div>
         </article>
       </transition-group>

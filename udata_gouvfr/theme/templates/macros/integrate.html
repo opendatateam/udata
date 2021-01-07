@@ -6,7 +6,7 @@
 
 {% set script = '<div data-udata-' + basename + '="' ~ obj.id + '"></div><script' + root + ' src="' + widget_url + '" async defer></script>' %}
 <div class="embed-wrapper">
-    <input type="text" value="{{script}}" onClick="this.select();" />
-    <div class="icon-copy" v-clipboard="'{{script}}'" title="Copy this">{% include theme('svg/copy.svg') %}</div>
+    <input type="text" value="{{script}}" onClick="this.select();" id="embed-wrapper" />
+    <label for="embed-wrapper" class="icon-copy" v-clipboard="'{{script}}'" title="Copy this">{% include theme('svg/copy.svg') %}</label>
 </div>
 {% endmacro %}

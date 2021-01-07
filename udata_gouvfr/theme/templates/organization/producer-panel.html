@@ -8,15 +8,15 @@
                 alt="{{ name }}" class="organization-logo producer img-responsive"/>
         </a>
     </div>
-    <div class="col container mt-md-md">
-        <h3 class="text-white">
+    <div class="col container mt-md-md text-blue-500">
+        <h2>
             {{ name }}
-        </h3>
+        </h2>
         <ul class="nav-list fs-base">
-            <li><a class="nav-link text-decoration-none" href="{{ details_view }}" title="{{ _('View Profile') }}">
+            <li><a class="nav-link text-decoration-none text-blue-500" href="{{ details_view }}" title="{{ _('View Profile') }}">
                 {{ _('View Profile') }}</a></li>
-            <li><a class="nav-link text-decoration-none" @click="$refs.discussions.startThread()" title="{{ _('Contact the producer') }}">{{ _('Contact the producer') }}</a></li>
-            <li><a class="nav-link text-decoration-none" href="{{ url_for('api.organization_followers', id=organization.id|string) }}" title="">{{ _('@@Suivre le producteur') }}</a></li>
+            <li><a class="nav-link text-decoration-none text-blue-500" @click="$refs.discussions.startThread()" title="{{ _('Contact the producer') }}">{{ _('Contact the producer') }}</a></li>
+            <li><a class="nav-link text-decoration-none text-blue-500" href="{{ url_for('api.organization_followers', id=organization.id|string) }}" title="">{{ _('@@Suivre le producteur') }}</a></li>
         </ul>
     </div>
     <div class="col-auto"></div>
