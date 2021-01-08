@@ -20,7 +20,7 @@
 
 <script>
 import config from "../../config";
-import AddIcon from "svg/actions/add.svg"; //Not the best but we don't have many svg
+import AddIcon from "url:svg/actions/add.svg"; //Not the best but we don't have many svg
 
 const log = console.log;
 

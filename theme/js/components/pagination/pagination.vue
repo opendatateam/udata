@@ -65,7 +65,7 @@ export default {
         :class="['previous', page === 1 ? 'disabled' : '']"
         :aria-disabled="page === 1"
         @click.prevent="_onClick(page - 1)"
-        ><</a
+        >&lt;</a
       >
     </li>
     <li v-for="index in pages">
@@ -81,7 +81,7 @@ export default {
         :class="['next', page === pages.length ? 'disabled' : '']"
         :aria-disabled="page === pages.length"
         @click.prevent="_onClick(page + 1)"
-        >></a
+        >&gt;</a
       >
     </li>
     <li>
