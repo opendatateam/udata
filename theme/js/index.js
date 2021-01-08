@@ -12,10 +12,12 @@ import Toast from "vue-toasted";
 import { showModal } from "./plugins/modals";
 import Api from "./plugins/api";
 import Auth from "./plugins/auth";
+import i18n from "./plugins/i18n";
 
 Vue.use(Clipboard);
 Vue.use(VModal);
 Vue.use(Toast);
+Vue.use(i18n);
 Vue.use(Api);
 Vue.use(Auth);
 
@@ -23,7 +25,7 @@ new Vue({
   el: "#app",
   delimiters: ["[[", "]]"],
   components: {
-    "discussion-threads": Threads,
+    "discussion-threads": Threads
   },
   methods: {
     showModal,
