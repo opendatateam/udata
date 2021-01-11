@@ -3,37 +3,35 @@
   "version": "1.0.0",
   "description": "Open Data Portal - French customization",
   "author": "Etalab",
-  "license": "MIT",
   "scripts": {
-    "watch-app": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/",
-    "build-stylemark": "parcel build theme/less/index.less -d udata_gouvfr/theme/static/stylemark --no-minify && parcel build theme/js/index.js -d udata_gouvfr/theme/static/stylemark --no-minify &&  stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark/ -o udata_gouvfr/theme/stylemark/",
+    "build": "npm run clean && npm run-script build-app && npm run-script build-stylemark",
     "build-app": "parcel build theme/less/index.less theme/js/index.js -d udata_gouvfr/theme/static/",
+    "build-stylemark": "parcel build theme/less/index.less -d udata_gouvfr/theme/static/stylemark --no-minify && parcel build theme/js/index.js -d udata_gouvfr/theme/static/stylemark --no-minify &&  stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark/ -o udata_gouvfr/theme/stylemark/",
     "clean": "rimraf .parcel-cache",
     "dev": "npm run clean && npm run-script watch-app",
-    "build": "npm run clean && npm run-script build-app && npm run-script build-stylemark",
-    "start": "npm run-script dev"
+    "start": "npm run-script dev",
+    "watch-app": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/"
   },
   "dependencies": {
     "@parcel/transformer-less": "^2.0.0-alpha.3",
     "axios": "^0.21.0",
     "dayjs": "^1.9.6",
     "less": "^3.13.1",
+    "parcel-reporter-copystatic": "file:parcel-reporter-copystatic",
     "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",
-    "v-clipboard": "^2.2.3",
-    "vue": "^2.6.12",
+    "vue": "^3.0.0-beta.1",
     "vue-content-loading": "^1.6.0",
     "vue-i18n": "^8.22.2",
     "vue-js-modal": "^2.0.0-rc.6",
     "vue-notification": "^1.3.20",
     "vue-toast-notification": "^0.6.0",
     "vue-toasted": "^1.1.28",
+    "vue3-clipboard": "^1.0.0",
     "yargs": "^15.4.1"
   },
-  "alias": {
-    "svg": "./udata_gouvfr/theme/templates/svg"
-  },
   "devDependencies": {
+    "@vue/compiler-sfc": "^3.0.0-beta.1",
     "autoprefixer": "^9.8.6",
     "browserslist": "^4.0.0",
     "cssnano": "^4.1.10",
@@ -44,5 +42,17 @@
     "prettier": "2.0.5",
     "rimraf": "^3.0.2",
     "stylemark": "^3.1.7"
-  }
+  },
+  "staticFiles": {
+    "staticPath": [
+      {
+        "staticPath": "theme/img",
+        "staticOutDir": "udata_gouvfr/theme/static/img/"
+      }
+    ]
+  },
+  "alias": {
+    "svg": "./udata_gouvfr/theme/templates/svg"
+  },
+  "license": "MIT"
 }
