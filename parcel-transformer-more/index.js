@@ -63,7 +63,6 @@ exports.default = (new Transformer({
       asset.setMap(map);
 
       for (let source of rawMap.sources) {
-        console.log(source)
         if(source !== asset.filePath)
           await asset.addIncludedFile(source)
       }

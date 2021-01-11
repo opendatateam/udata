@@ -18,9 +18,10 @@ const copier = new Reporter({
     const src = options.projectRoot + "/" + config.staticPath[0].staticPath;
     const dest = options.projectRoot + "/" + config.staticPath[0].staticOutDir;
 
-    await copy("**", dest, { cwd: src });
+    const result = await copy("**", dest, { cwd: src });
 
-    console.log(`📄 Wrote static files from : ${src} to: ${dest}`);
+    if(result.some(val => (val !== false && val !== "dir")))
+      console.log(`📄 Wrote static files from : ${src} to: ${dest}`);
   },
 });
 
