@@ -5,14 +5,12 @@
   "author": "Etalab",
   "license": "MIT",
   "scripts": {
-    "format": "stylelint 'theme/less/**/*.less' --fix",
-    "check-rules": "stylelint 'theme/less/**/*.less' --config .stylelintrc_browser",
-    "watch-style": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/ --log-level 4",
+    "watch-app": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/",
     "build-stylemark": "parcel build theme/less/index.less -d udata_gouvfr/theme/static/stylemark --no-minify && parcel build theme/js/index.js -d udata_gouvfr/theme/static/stylemark --no-minify &&  stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark/ -o udata_gouvfr/theme/stylemark/",
-    "build-style": "parcel build theme/less/index.less theme/js/index.js -d udata_gouvfr/theme/static/",
-    "postbuild": "ncp theme/img/ udata_gouvfr/theme/static/img/ --filter '**/*.*'",
-    "dev": "npm run-script watch-style",
-    "build": "npm run-script build-style && npm run-script build-stylemark",
+    "build-app": "parcel build theme/less/index.less theme/js/index.js -d udata_gouvfr/theme/static/",
+    "clean": "rimraf .parcel-cache",
+    "dev": "npm run clean && npm run-script watch-app",
+    "build": "npm run clean && npm run-script build-app && npm run-script build-stylemark",
     "start": "npm run-script dev"
   },
   "dependencies": {
@@ -36,31 +34,15 @@
     "svg": "./udata_gouvfr/theme/templates/svg"
   },
   "devDependencies": {
-    "@vue/compiler-sfc": "^3.0.5",
-    "@vue/component-compiler-utils": "^3.2.0",
     "autoprefixer": "^9.8.6",
     "browserslist": "^4.0.0",
-    "concurrently": "^5.3.0",
     "cssnano": "^4.1.10",
-    "eslint": "^7.6.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-compat": "^3.8.0",
-    "eslint-plugin-prettier": "^3.1.4",
     "parcel": "^2.0.0-beta.1",
     "postcss": "^8.2.3",
-    "postcss-debug": "^0.4.2",
     "postcss-less": "^4.0.0",
     "postcss-normalize": "^9.0.0",
-    "postcss-reporter": "^7.0.2",
-    "postcss-wcag-contrast": "^2.0.0",
     "prettier": "2.0.5",
-    "stylelint": "^13.6.1",
-    "stylelint-config-rational-order": "^0.1.2",
-    "stylelint-config-standard": "^20.0.0",
-    "stylelint-no-unsupported-browser-features": "^4.0.0",
-    "stylelint-order": "^4.1.0",
-    "stylemark": "^3.1.7",
-    "vue-hot-reload-api": "^2.3.4",
-    "vue-template-compiler": "^2.6.12"
+    "rimraf": "^3.0.2",
+    "stylemark": "^3.1.7"
   }
 }
