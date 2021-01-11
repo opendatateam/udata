@@ -16,9 +16,9 @@ def check_url_does_not_exists(form, field):
 class ReuseForm(ModelForm):
     model_class = Reuse
 
-    title = fields.StringField(_('Title'), [validators.DataRequired()])
+    title = fields.StringField(_('Title'), [validators.DataRequired(), validators.Length(max=350)])
     description = fields.MarkdownField(
-        _('Description'), [validators.DataRequired()],
+        _('Description'), [validators.DataRequired(), validators.Length(max=20000)],
         description=_('The details about the reuse (build process, specifics, '
                       'self-critics...).'))
     type = fields.SelectField(_('Type'), choices=list(REUSE_TYPES.items()))

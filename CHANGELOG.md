@@ -4,6 +4,10 @@
 
 - Nothing yet
 
+## 2.5.1 (2020-12-31)
+
+- Add title's and description's length limit in forms [#2585](https://github.com/opendatateam/udata/pull/2585)
+
 ## 2.5.0 (2020-11-30)
 
 - Change reuse's form's label name to title [#2575](https://github.com/opendatateam/udata/pull/2575)

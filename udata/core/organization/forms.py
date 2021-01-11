@@ -17,11 +17,11 @@ __all__ = (
 class OrganizationForm(ModelForm):
     model_class = Organization
 
-    name = fields.StringField(_('Name'), [validators.DataRequired()])
+    name = fields.StringField(_('Name'), [validators.DataRequired(), validators.Length(max=350)])
     acronym = fields.StringField(
         _('Acronym'), description=_('Shorter organization name'))
     description = fields.MarkdownField(
-        _('Description'), [validators.DataRequired()],
+        _('Description'), [validators.DataRequired(), validators.Length(max=20000)],
         description=_('The details about your organization'))
     url = fields.URLField(
         _('Website'), description=_('The organization website URL'))
