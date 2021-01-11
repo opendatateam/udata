@@ -1,35 +1,30 @@
-import Vue from "vue/dist/vue.js";
-
-import Tabs from "./components/vanilla/tabs";
-import Accordion from "./components/vanilla/accordion";
+import { createApp } from "vue";
 
 import Threads from "./components/discussions/threads.vue";
 
-import Clipboard from "v-clipboard";
-import VModal from "vue-js-modal";
-import Toast from "vue-toasted";
+import VueClipboard from "vue3-clipboard";
+// import VModal from "vue-js-modal";
+// import Toast from "vue-toasted";
 
-import { showModal } from "./plugins/modals";
+// import { showModal } from "./plugins/modals";
 import Api from "./plugins/api";
 import Auth from "./plugins/auth";
-import i18n from "./plugins/i18n";
+// import i18n from "./plugins/i18n";
 
-Vue.use(Clipboard);
-Vue.use(VModal);
-Vue.use(Toast);
-Vue.use(i18n);
-Vue.use(Api);
-Vue.use(Auth);
+const app = createApp({});
 
-new Vue({
-  el: "#app",
-  delimiters: ["[[", "]]"],
-  components: {
-    "discussion-threads": Threads
-  },
-  methods: {
-    showModal,
-  },
+app.use(VueClipboard, {
+  autosetContainer: true
 });
+// app.use(VModal);
+// app.use(Toast);
+// app.use(i18n);
+app.use(Api);
+app.use(Auth);
+
+app.component("discussion-threads", Threads);
+// app.component(showModal);
+
+app.mount('#app');
 
 console.log("JS is injected !");

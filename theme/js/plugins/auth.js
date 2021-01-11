@@ -24,11 +24,11 @@ export function get_auth_url(message) {
   );
 }
 
-export default function install(Vue) {
+export default function install(app) {
   /**
    * Expose the current user
    */
-  Vue.prototype.$user = config.user;
+  app.config.globalProperties.$user = config.user;
 
   /**
    * Checks if the current user is authenticated
@@ -40,7 +40,7 @@ export default function install(Vue) {
    * @param  {String} message The contextual message to display on login screen
    * @throws  {Error} When the user is not authentified
    */
-  Vue.prototype.$auth = function (message) {
+  app.config.globalProperties.$auth = function (message) {
     if (!this.$user) {
       window.location = get_auth_url(message);
       throw new Error(message); // This avoid calling function to continue its execution

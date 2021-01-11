@@ -82,7 +82,7 @@ export default {
     "create-thread": CreateThread,
     Thread,
     Pagination,
-    VueContentLoading,
+    // VueContentLoading,
   },
   data() {
     return {

@@ -8,8 +8,8 @@ const api = axios.create({
   baseURL: config.api_root,
 });
 
-export const install = (Vue) => {
-  Vue.prototype.$api = Vue.api = api;
+export const install = (app) => {
+  app.config.globalProperties.$api = api;
 };
 
 export default install;
