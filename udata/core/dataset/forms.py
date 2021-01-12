@@ -43,7 +43,8 @@ def enforce_allowed_schemas(form, field):
 
 
 class BaseResourceForm(ModelForm):
-    title = fields.StringField(_('Title'), [validators.DataRequired()])
+    title = fields.StringField(
+        _('Title'), [validators.DataRequired(), validators.Length(max=350)])
     description = fields.MarkdownField(
         _('Description'), [validators.Length(max=100000)])
     filetype = fields.RadioField(
