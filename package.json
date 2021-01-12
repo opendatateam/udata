@@ -4,12 +4,12 @@
   "description": "Open Data Portal - French customization",
   "author": "Etalab",
   "scripts": {
-    "build": "npm run clean && npm run-script build-app && npm run-script build-stylemark",
-    "build-app": "parcel build theme/less/index.less theme/js/index.js -d udata_gouvfr/theme/static/",
-    "build-stylemark": "parcel build theme/less/index.less -d udata_gouvfr/theme/static/stylemark --no-minify && parcel build theme/js/index.js -d udata_gouvfr/theme/static/stylemark --no-minify &&  stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark/ -o udata_gouvfr/theme/stylemark/",
+    "build": "npm run clean && npm run build-app && npm run build-stylemark",
+    "build-app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/",
+    "build-stylemark": "npm run clean && parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/stylemark_temp --no-minify && stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark_temp/ -o udata_gouvfr/theme/static/stylemark/",
     "clean": "rimraf .parcel-cache",
-    "dev": "npm run clean && npm run-script watch-app",
-    "start": "npm run-script dev",
+    "dev": "npm run clean && npm run watch-app",
+    "start": "npm run dev",
     "watch-app": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/"
   },
   "dependencies": {
