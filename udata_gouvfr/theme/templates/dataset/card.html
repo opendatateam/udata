@@ -4,7 +4,8 @@
 <article class="dataset-card">
     {% if dataset.organization %}
     <div class="card-logo">
-        <img src="{{ dataset.organization.logo(100, external=True)|placeholder('organization', external=True) }}" alt="{{ dataset.organization.name }}" />
+        <img src="{{ dataset.organization.logo(100, external=True)|placeholder('organization', external=True) }}"
+            alt="{{ dataset.organization.name }}" />
     </div>
     {% elif dataset.owner %}
     <div class="card-logo">
@@ -12,12 +13,12 @@
     </div>
     {% else %}
     <div class="card-logo">
-        <img src="{{ ''|placeholder('organization', external=True) }}" alt=""/>
+        <img src="{{ ''|placeholder('organization', external=True) }}" alt="" />
     </div>
     {% endif %}
     <div class="card-cert p-xl p-lg-md">
         {% if dataset.organization.public_service %}
-            {% include theme("svg/certified.svg") %}
+        {% include theme("svg/certified.svg") %}
         {% endif %}
     </div>
     <div class="card-data">

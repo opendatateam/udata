@@ -2,24 +2,21 @@
 
 {# TODO : what was "preview" used for ? #}
 <a class="unstyled" href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" title="{{ reuse.title }}">
-  <article class="reuse-card text-align-center px-sm">
-    <img
-      class="reuse-image mb-sm"
-      alt="{{ reuse.title }}"
-      src="{{ reuse.image(86, external=True)|placeholder('reuse', external=True) }}"
-    />
-    <div class="reuse-info">
-      <div class="reuse-info-type fs-xs">
-        {{ reuse.type_label }}
-      </div>
-      <div class="reuse-info-amount fs-xs text-grey-300 mb-xs">
-        {{ reuse.datasets|length or 0 }} {{ _("@@jeux de données") }}
-      </div>
-      <div class="reuse-info-title h4">
-        {{ reuse.title }}
-      </div>
-    </div>
-  </article>
+    <article class="reuse-card text-align-center px-sm">
+        <img class="reuse-image mb-sm" alt="{{ reuse.title }}"
+            src="{{ reuse.image(86, external=True)|placeholder('reuse', external=True) }}" />
+        <div class="reuse-info">
+            <div class="reuse-info-type fs-xs">
+                {{ reuse.type_label }}
+            </div>
+            <div class="reuse-info-amount fs-xs text-grey-300 mb-xs">
+                {{ reuse.datasets|length or 0 }} {{ _("@@jeux de données") }}
+            </div>
+            <div class="reuse-info-title h4">
+                {{ reuse.title }}
+            </div>
+        </div>
+    </article>
 </a>
 
 {% endcache %}

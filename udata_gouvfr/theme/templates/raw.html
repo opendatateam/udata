@@ -3,7 +3,8 @@
 {%- set bundle_js = '{0}.js'.format(bundle)-%}
 {%- set bundle_css = '{0}.css'.format(bundle)-%}
 <html lang="{{ g.lang_code }}">
-  <head>
+
+<head>
     {% block raw_head %}
     {% from theme('macros/metadata.html') import metadata with context %}
     {{ metadata(meta or {}) }}
@@ -15,12 +16,10 @@
     <link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
     {% endblock %}
     {# ATOM Feeds #}
-    <link href="{{ url_for('datasets.recent_feed') }}"
-        rel="alternate" type="application/atom+xml"
+    <link href="{{ url_for('datasets.recent_feed') }}" rel="alternate" type="application/atom+xml"
         title="{{ _('Recent datasets') }}" />
 
-    <link href="{{ url_for('reuses.recent_feed') }}"
-        rel="alternate" type="application/atom+xml"
+    <link href="{{ url_for('reuses.recent_feed') }}" rel="alternate" type="application/atom+xml"
         title="{{ _('Recent reuses') }}" />
 
     {% block extra_head %}{% endblock %}
@@ -29,11 +28,11 @@
 
     {% endblock raw_head %}
 
-  </head>
+</head>
 
-  <body class="{{body_class}} theme-{{current_theme.variant}}">
+<body class="{{body_class}} theme-{{current_theme.variant}}">
     <section id="app">
-      {% block body %}{% endblock %}
+        {% block body %}{% endblock %}
     </section>
 
     <script src="{{ theme_static('js/index.js') }}"></script>
@@ -41,5 +40,6 @@
 
     {{ hook('footer.snippets') }}
 
-  </body>
+</body>
+
 </html>

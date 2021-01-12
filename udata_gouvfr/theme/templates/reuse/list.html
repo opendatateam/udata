@@ -14,15 +14,15 @@
 {% set bundle = 'search' %}
 
 {% block breadcrumb %}
-    <li class="active">
-        {{ _('Reuses') }}
-        <small>{{ _('%(start)s to %(end)s on %(total)s',
+<li class="active">
+    {{ _('Reuses') }}
+    <small>{{ _('%(start)s to %(end)s on %(total)s',
             start=reuses.page_start,
             end=reuses.page_end,
             total=reuses.total) }}</small>
-        {% include theme('reuse/search-labels.html') %}
+    {% include theme('reuse/search-labels.html') %}
 
-    </li>
+</li>
 {% endblock %}
 
 
@@ -44,9 +44,9 @@
 <div class="row">
     <div class="col-md-8 col-lg-9 smaller">
         <ul class="search-results">
-        {% for reuse in reuses %}
-        {% include theme('reuse/search-result.html') %}
-        {% endfor %}
+            {% for reuse in reuses %}
+            {% include theme('reuse/search-result.html') %}
+            {% endfor %}
         </ul>
         <div class="clearfix"></div>
         {{ paginator(reuses) }}
