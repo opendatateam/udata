@@ -29,7 +29,7 @@
                             class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
                     {% if resource.preview_url %}
                     <li><a href="#" class="btn-action"
-                            @click.prevent="showModal('preview', {url: '{{ resource.preview_url }}'}, true)">{% include theme('svg/actions/eye.svg') %}</a>
+                            @click.prevent="$showModal('preview', {url: '{{ resource.preview_url }}'}, true)">{% include theme('svg/actions/eye.svg') %}</a>
                     </li>
                     {% endif %}
                     <li><a @click.prevent href="#" title="{{ _('Copy permalink to clipboard') }}"

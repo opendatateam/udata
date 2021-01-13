@@ -1,5 +1,6 @@
 <template>
   <section class="discussions-wrapper">
+    <ModalsContainer></ModalsContainer>
     <transition mode="out-in">
       <div v-if="loading" key="loader">
         <vue-content-loading
