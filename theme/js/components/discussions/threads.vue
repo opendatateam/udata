@@ -3,26 +3,9 @@
     <ModalsContainer></ModalsContainer>
     <transition mode="out-in">
       <div v-if="loading" key="loader">
-        <vue-content-loading
-          class="mt-md"
-          :width="950"
-          :height="180"
-          :speed="2"
-          secondary="#7c7c7c"
-          primary="#2d2d2d"
-        >
-          <rect x="0" y="0" rx="3" ry="3" width="490" height="10"></rect>
-          <rect x="26" y="27" rx="5" ry="5" width="60" height="60"></rect>
-          <rect x="97" y="29" rx="3" ry="3" width="120" height="8"></rect>
-          <rect x="98" y="46" rx="3" ry="3" width="250" height="5"></rect>
-          <rect x="98" y="59" rx="3" ry="3" width="250" height="5"></rect>
-          <rect x="26" y="100" rx="5" ry="5" width="60" height="60"></rect>
-          <rect x="97" y="100" rx="3" ry="3" width="120" height="8"></rect>
-          <rect x="98" y="118" rx="3" ry="3" width="250" height="5"></rect>
-          <rect x="98" y="131" rx="3" ry="3" width="250" height="5"></rect>
-        </vue-content-loading>
+        <span class="mt-md" v-html="LoaderSvg" />
       </div>
-      <div v-if="!loading" ref="top" key="top">
+      <div v-else ref="top" key="top">
         <div v-if="threadFromURL">
           You're seeing a single thread from your URL !
           <a @click.prevent="viewAllDiscussions">View all</a>
@@ -42,7 +25,7 @@
           </ul>
           <create-thread
             ref="createThread"
-            :onSubmit="this.createThread"
+            :onSubmit="createThread"
             :subjectId="subjectId"
             :subjectClass="subjectClass"
           ></create-thread>
@@ -61,11 +44,11 @@
 
 <script>
 import config from "../../config";
-import VueContentLoading from "vue-content-loading";
 
 import Pagination from "../pagination/pagination.vue";
 import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
+import LoaderSvg from "svg/loaders/threads.svg";
 
 const log = console.log;
 const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
@@ -83,7 +66,6 @@ export default {
     "create-thread": CreateThread,
     Thread,
     Pagination,
-    // VueContentLoading,
   },
   data() {
     return {
@@ -94,6 +76,7 @@ export default {
       total_results: 0,
       loading: true,
       current_sort: sorts[0],
+      LoaderSvg
     };
   },
   props: {
@@ -198,7 +181,7 @@ export default {
       if (!this.$refs.createThread) return;
 
       this.$refs.createThread.displayForm();
-      this.$refs.createThread.$el.scrollIntoView()
+      this.$refs.createThread.$el.scrollIntoView();
     },
     //Callback that will be passed to the create-thread component
     createThread(data) {

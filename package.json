@@ -21,7 +21,6 @@
     "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",
     "vue": "^3.0.0-beta.1",
-    "vue-content-loading": "^1.6.0",
     "vue-final-modal": "^3.0.0-beta.1",
     "vue-i18n": "^8.22.2",
     "vue3-clipboard": "^1.0.0",
@@ -34,9 +33,7 @@
     "cssnano": "^4.1.10",
     "parcel": "^2.0.0-beta.1",
     "postcss": "^8.2.3",
-    "postcss-less": "^4.0.0",
     "postcss-normalize": "^9.0.0",
-    "prettier": "2.0.5",
     "rimraf": "^3.0.2",
     "stylemark": "^3.1.7"
   },
