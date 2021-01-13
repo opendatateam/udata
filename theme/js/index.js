@@ -2,6 +2,9 @@ import { createApp } from "vue";
 
 import Threads from "./components/discussions/threads.vue";
 
+import Tabs from "./components/vanilla/tabs";
+import Accordion from "./components/vanilla/accordion";
+
 import VueClipboard from "vue3-clipboard";
 // import VModal from "vue-js-modal";
 // import Toast from "vue-toasted";
