@@ -70,7 +70,7 @@
 <script>
 import ThreadReply from "./thread-reply.vue";
 import Avatar from "./avatar.vue";
-import LinkIcon from "url:svg/permalink.svg";
+import LinkIcon from "svg/permalink.svg";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
 
