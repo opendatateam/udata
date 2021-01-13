@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Add Inventory cards on homepage [#514](https://github.com/etalab/udata-gouvfr/pull/514)
+
 ## 2.3.0 (2020-11-30)
 
 - Read Only Mode modifications on theme [#509](https://github.com/etalab/udata-gouvfr/pull/509):
