@@ -40,11 +40,21 @@ Sometimes you really want more than one link, that's what `.nav-list` are for.
 */
 
 a {
+    display: inline-block;
     color: @blue-400;
     text-decoration: none;
+    cursor: pointer;
 
     &:hover {
         text-decoration: underline;
+    }
+
+    &:focus {
+        outline: 5px auto -webkit-focus-ring-color;
+    }
+
+    &:active {
+        outline: none;
     }
 
     &.unstyled {
