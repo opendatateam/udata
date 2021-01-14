@@ -54,26 +54,35 @@ export default {
   <ul class="pagination-wrapper" role="navigation" aria-label="pagination">
     <li>
       <a
-        :class="['first', page === 1 ? 'disabled' : '']"
-        :aria-disabled="page === 1"
-        @click.prevent="_onClick(1)"
-        >«</a
-      >
-    </li>
-    <li>
-      <a
         :class="['previous', page === 1 ? 'disabled' : '']"
         :aria-disabled="page === 1"
         @click.prevent="_onClick(page - 1)"
-        >&lt;</a
+      ></a>
+    </li>
+    <li>
+      <a
+        :class="['first', page === 1 ? 'active' : '']"
+        :aria-disabled="page === 1"
+        @click.prevent="_onClick(1)"
+        >1</a
       >
     </li>
-    <li v-for="index in pages">
+    <li v-for="index in visible_pages">
       <a
         :class="[page === index ? 'active' : false]"
         :aria-current="page === index ? 'page' : false"
         @click.prevent="_onClick(index)"
+        v-if="index"
         >{{ index }}</a
+      >
+      <span class="ellipsis" role="img" aria-label="ellipsis" v-else>...</span>
+    </li>
+    <li>
+      <a
+        :class="['last', page === pages.length ? 'active' : '']"
+        :aria-disabled="page === pages.length"
+        @click.prevent="_onClick(pages.length)"
+        >{{ pages.length }}</a
       >
     </li>
     <li>
@@ -81,21 +90,16 @@ export default {
         :class="['next', page === pages.length ? 'disabled' : '']"
         :aria-disabled="page === pages.length"
         @click.prevent="_onClick(page + 1)"
-        >&gt;</a
-      >
-    </li>
-    <li>
-      <a
-        :class="['last', page === pages.length ? 'disabled' : '']"
-        :aria-disabled="page === pages.length"
-        @click.prevent="_onClick(pages.length)"
-        >»</a
-      >
+      ></a>
     </li>
   </ul>
 </template>
 
 <script>
+function range(size, startAt = 1) {
+  return [...Array(size).keys()].map((i) => i + startAt);
+}
+
 export default {
   props: {
     page: Number,
@@ -105,9 +109,19 @@ export default {
   },
   computed: {
     pages() {
-      return [
-        ...Array(Math.ceil(this.total_results / this.page_size)).keys(),
-      ].map((k) => k + 1);
+      return range(Math.ceil(this.total_results / this.page_size));
+    },
+    visible_pages() {
+      const length = this.pages.length;
+      const pagesAround = 1; //Pages around current one, has to be even
+      const pagesShown = Math.min(pagesAround * 2 + 1, length);
+
+      if (this.page <= pagesShown) return [...range(pagesShown, 2), null];
+
+      if (this.page >= length - pagesShown + 1)
+        return [null, ...range(pagesShown, length - pagesShown)];
+
+      return [null, ...range(pagesShown, this.page - pagesAround), null];
     },
   },
   methods: {

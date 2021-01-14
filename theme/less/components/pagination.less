@@ -3,52 +3,67 @@
     justify-content: center;
 
     li {
-        a {
+        a, span {
             display: inline-block;
             padding: @spacing-xs @spacing-sm;
-            width: 35px;
-            height: 35px;
+
             text-align: center;
             vertical-align: middle;
 
-            background: white;
-            border-radius: 50%;
-            font-weight: @font-weight-bold;
+            color: @grey-300;
+
+            font-weight: @font-weight-normal;
 
             cursor: pointer;
-
             text-decoration: none;
 
-            &.previous {
-                margin-left: @spacing-xxs;
-                margin-right: @spacing-xs;
+            &.previous, &.next {
+                width: 35px;
+                height: 35px;
+
+                background: @grey-380;
+                border-radius: 50%;
+
+                color: @grey-100;
+
+                margin: 0 @spacing-xs;
+
+                background-image: url(@icon-left-chevron);
+                background-repeat: no-repeat;
+                background-position: 12px 12px;
+                background-size: 25%;
+
+                &:hover {
+                    background-color: @grey-300;
+                }
             }
 
             &.next {
-                margin-left: @spacing-xs;
-                margin-right: @spacing-xxs;
+                transform: rotate(180deg);
             }
 
             &:hover {
-                background: @blue-300;
+                color: white;
+            }
+
+            &.ellipsis {
+                content: "…";
             }
 
             &.active {
-                background: @blue-400;
                 color: white;
+                font-weight: @font-weight-bold;
                 pointer-events: none;
             }
 
             &.disabled {
-                opacity: 0.4;
+                opacity: 0.2;
                 pointer-events: none;
             }
         }
 
-        +li:not(:nth-last-of-type(3)) {
-            a {
-                margin-right: @spacing-xs;
-            }
+        span {
+            pointer-events: none;
         }
     }
 }
