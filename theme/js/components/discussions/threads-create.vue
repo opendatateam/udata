@@ -5,9 +5,10 @@
         class="btn-action my-xl"
         @click.prevent="displayForm"
         v-if="!showForm"
+        tabindex="0"
       >
         <span v-html="AddIcon"></span>
-        <span> Start a new discussion</span>
+        <span>Start a new discussion</span>
       </a>
       <form @submit.prevent="submit" v-if="showForm">
         <input type="text" v-model="title" placeholder="Title" />
@@ -20,7 +21,7 @@
 
 <script>
 import config from "../../config";
-import AddIcon from "url:svg/actions/add.svg"; //Not the best but we don't have many svg
+import AddIcon from "svg/actions/add.svg"; //Not the best but we don't have many svg
 
 const log = console.log;
 

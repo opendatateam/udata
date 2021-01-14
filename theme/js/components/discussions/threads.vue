@@ -12,9 +12,18 @@
           <thread v-bind="threadFromURL"></thread>
         </div>
         <div v-else>
-          Trié par : {{ current_sort.name }}
-          <a @click.stop="changeSort(0)">Trier par créé</a>
-          <a @click.stop="changeSort(1)">Trier par discussion</a>
+          <div class="row-inline justify-end">
+            Trier par :
+            <select
+              name="sortBy"
+              id="sortBy"
+              @change="changeSort(current_sort)"
+              v-model="current_sort"
+              class="ml-xs"
+            >
+              <option v-for="sort in sorts" :value="sort" :selected="sort === current_sort">{{sort.name}}</option>
+            </select>
+          </div>
           <ul>
             <li
               :id="'discussion-' + discussion.id"
@@ -54,9 +63,9 @@ const log = console.log;
 const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
 
 const sorts = [
-  { name: "Créé", key: "-created" },
+  { name: "Début de discussion", key: "-created" },
   {
-    name: "Dernier post",
+    name: "Dernière réponse",
     key: "-discussion.posted_on",
   },
 ];
@@ -72,11 +81,12 @@ export default {
       discussions: [], //Store list of discussions (page)
       threadFromURL: null, //Single thread (load from URL)
       current_page: 1, //Current pagination page
-      page_size: 20,
+      page_size: 2,
       total_results: 0,
       loading: true,
       current_sort: sorts[0],
-      LoaderSvg
+      sorts,
+      LoaderSvg,
     };
   },
   props: {
@@ -195,8 +205,8 @@ export default {
         .catch((err) => this.$toasted.error("Error posting new thread", err));
     },
     //Changing sort order
-    changeSort(index = 0) {
-      this.current_sort = sorts[index];
+    changeSort(sort) {
+      this.current_sort = sort;
       this.loadPage(this.page);
     },
   },

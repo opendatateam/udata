@@ -1,43 +1,27 @@
 .discussions-wrapper {
     @thread-left-padding: 200px;
 
-    textarea,
-    input {
-        display: block;
-        width: 100%;
-        padding: @spacing-sm;
-        border-radius: 3px;
-        border: none;
-
-        margin-bottom: @spacing-md;
-    }
-
     .thread-wrapper {
         margin-top: @spacing-md;
+        background: @grey-380;
 
         .thread-header {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
             justify-content: space-between;
-            background: @grey-380;
+
+            border-bottom: 1px solid @grey-400;
 
             > * {
                 padding: @spacing-md;
             }
 
             .thread-status {
-                width: @thread-left-padding;
                 flex-shrink: 0;
                 flex-grow: 0;
                 color: @orange-100;
                 font-weight: @font-weight-bold;
-
-                @media @query-md {
-                    width: auto;
-                    margin: auto;
-                    padding: @spacing-xs;
-                    order: 2;
-                }
             }
 
             .thread-title,
@@ -48,7 +32,8 @@
 
             .thread-title {
                 flex-grow: 1;
-                padding: @spacing-md;
+                padding: @spacing-sm;
+                font-size: @font-size-lg;
 
                 @media @query-md {
                     padding: @spacing-md;
@@ -62,85 +47,43 @@
             }
         }
 
-        .thread-footer > div {
-            display: flex;
-            flex-wrap: wrap;
-            background: @grey-380;
-            padding: @spacing-md @spacing-xs;
-            padding-left: @thread-left-padding;
-
-            .thread-reply {
-                width: 100%;
-                text-align: center;
-            }
-
-            .thread-reply-cta {
-                cursor: pointer;
-            }
-
-            @media @query-md {
-                padding-left: 0;
-                justify-content: center;
-            }
-        }
-
         .thread-comment {
-            display: flex;
-            flex-wrap: wrap;
-            background: @grey-50;
-            justify-content: space-between;
-            padding: @spacing-md 0;
+            padding: @spacing-md @spacing-sm;
+            color: @grey-100;
 
-            color: @black;
+            .comment-meta {
+                display: flex;
+                align-items: center;
 
-            @media @query-md {
-                padding-top: 0;
-            }
+                .avatar {
+                    padding-right: @spacing-sm;
+                    flex-shrink: 0;
 
-            .avatar {
-                width: @thread-left-padding;
-                padding-left: @spacing-md;
-                flex-shrink: 0;
+                    img {
+                        width: 60px;
+                        height: 60px;
 
-                img {
-                    width: 60px;
-                    height: 60px;
+                        border-radius: 2px;
+                    }
                 }
 
-                @media @query-md {
-                    width: auto;
-                    padding-right: @spacing-md;
+                .author {
+                    display: block;
                 }
             }
 
             .thread-box {
-                flex-grow: 1;
-
-                > strong {
-                    display: inline-block;
-                    color: @blue-400;
-                    margin-bottom: @spacing-xs;
-                }
+                padding-top: @spacing-md;
+                white-space: pre-wrap; //Preserve new lines
             }
 
             .thread-link {
                 flex-shrink: 0;
-                padding-right: @spacing-sm;
-                color: @grey-400;
-                font-weight: @font-weight-bold;
-                font-size: @font-size-sm;
+                margin-left: auto; //Aligned to the right
+                padding-right: @spacing-xs;
 
-                a {
-                    margin-left: @spacing-md;
-                    vertical-align: middle;
-                }
-
-                @media @query-md {
-                    order: -1;
-                    flex-basis: 100%;
-                    display: flex;
-                    padding: @spacing-xs;
-                    justify-content: space-between;
+                svg * {
+                    fill: white;
                 }
             }
 
@@ -157,15 +100,40 @@
             cursor: pointer;
 
             padding: @spacing-md;
-            padding-left: @thread-left-padding;
 
-            border-top: 1px solid @grey-400;
-            border-bottom: 1px solid @grey-400;
 
             @media @query-md {
                 padding-left: @spacing-md;
                 text-align: center;
             }
+        }
+
+        .thread-footer {
+            padding: @spacing-sm;
+            border-top: 1px solid @grey-400;
+
+            .thread-reply-cta {
+                cursor: pointer;
+                text-decoration: underline;
+                text-underline-position: under;
+
+                &:before {
+                    display: inline-block;
+                    content: "＋";
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+
+    .thread-reply {
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            border-radius: 2px;
+
+            padding: @spacing-sm;
+            margin-bottom: @spacing-sm;
         }
     }
 
@@ -176,8 +144,6 @@
             width: 100%;
             background: @grey-380;
             padding: @spacing-md;
-
-            padding-left: @thread-left-padding;
         }
     }
 }

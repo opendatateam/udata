@@ -1,8 +1,18 @@
 <template>
   <div class="thread-reply">
-    <form @submit.prevent="submit">
+    <strong class="fs-sm">Répondre à la discussion</strong>
+    <form @submit.prevent="submit" class="my-sm">
       <textarea v-model="comment" placeholder="Commentaire" />
-      <input type="submit" value="Submit" class="btn-primary" />
+      <footer class="row-inline justify-between align-items-center">
+        <span class="text-grey-300 fs-sm"
+          >Répondre en tant que <strong>{{user.first_name + " " + user.last_name}}</strong></span
+        >
+        <input
+          type="submit"
+          value="Valider"
+          class="btn-secondary btn-secondary-green-300"
+        />
+      </footer>
     </form>
   </div>
 </template>
@@ -17,6 +27,7 @@ export default {
     return {
       loading: false,
       comment: "",
+      user: config.user
     };
   },
   props: {

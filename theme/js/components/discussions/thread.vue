@@ -1,12 +1,16 @@
 <template>
   <div class="thread-wrapper" :id="discussionUrl(id)">
     <header class="thread-header">
-      <div class="thread-status">
-        <span v-if="closed">Discussion fermée</span>
+      <div class="thread-status" v-if="closed">
+        <span>Discussion fermée</span>
       </div>
       <div class="thread-title">{{ title }}</div>
       <div class="thread-link">
-        <a aria-label="Permalink to discussion" :href="discussionUrl(id, true)" v-html="LinkIcon"></a>
+        <a
+          aria-label="Permalink to discussion"
+          :href="discussionUrl(id, true)"
+          v-html="LinkIcon"
+        ></a>
       </div>
     </header>
     <div class="thread-content">
@@ -18,18 +22,31 @@
           :id="commentUrl(id, index)"
           :key="commentUrl(id, index)"
         >
-          <avatar :user="comment.posted_by"></avatar>
-          <div class="thread-box">
-            <strong class="author">
-              {{
-                comment.posted_by.first_name + " " + comment.posted_by.last_name
-              }}
-            </strong>
-            <p class="m-0">{{ comment.content }}</p>
+          <div class="comment-meta">
+            <avatar :user="comment.posted_by"></avatar>
+            <div>
+              <strong class="author">
+                {{
+                  comment.posted_by.first_name +
+                  " " +
+                  comment.posted_by.last_name
+                }}
+                <span class="badge ml-sm">Admin</span>
+              </strong>
+              <div class="text-grey-300 mt-xxs">
+                {{ formatDate(comment.posted_on) }}
+              </div>
+            </div>
+            <div class="thread-link">
+              <a
+                aria-label="Permalink to comment"
+                :href="commentUrl(id, index, true)"
+                v-html="LinkIcon"
+              ></a>
+            </div>
           </div>
-          <div class="thread-link">
-            <span class="thread-date">{{ formatDate(comment.posted_on) }}</span>
-            <a aria-label="Permalink to comment" :href="commentUrl(id, index, true)" v-html="LinkIcon"></a>
+          <div class="thread-box">
+            <p class="m-0">{{ comment.content }}</p>
           </div>
         </article>
       </transition-group>
@@ -43,16 +60,17 @@
     </div>
     <footer class="thread-footer">
       <div v-if="!closed">
-        <div
-          class="thread-reply-cta"
+        <a
+          class="thread-reply-cta unstyled"
           v-if="!showForm"
           @click.stop="displayForm"
+          tabindex="0"
         >
-          + Ajouter un commentaire
-        </div>
+          Répondre
+        </a>
         <thread-reply
           :subjectId="id"
-          v-if="showForm"
+          v-else="showForm"
           :onSubmit="replyToThread"
         />
       </div>
