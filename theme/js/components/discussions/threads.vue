@@ -81,7 +81,7 @@ export default {
       discussions: [], //Store list of discussions (page)
       threadFromURL: null, //Single thread (load from URL)
       current_page: 1, //Current pagination page
-      page_size: 2,
+      page_size: 20,
       total_results: 0,
       loading: true,
       current_sort: sorts[0],
