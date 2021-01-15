@@ -7,6 +7,7 @@
     "build": "npm run clean && npm run build-app && npm run build-stylemark",
     "build-app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/",
     "build-stylemark": "npm run clean && parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/stylemark_temp --no-minify && stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark_temp/ -o udata_gouvfr/theme/static/stylemark/",
+    "report:i18n": "npx vue-i18n-extract report -v 'theme/**/*.vue' -l 'theme/js/locales/**/*'",
     "clean": "rimraf .parcel-cache",
     "dev": "npm run clean && npm run watch-app",
     "start": "npm run dev",
@@ -20,9 +21,10 @@
     "parcel-reporter-copystatic": "file:parcel-reporter-copystatic",
     "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",
+    "prettier": "^2.2.1",
     "vue": "^3.0.0-beta.1",
     "vue-final-modal": "^3.0.0-beta.1",
-    "vue-i18n": "^8.22.2",
+    "vue-i18n": "^9.0.0-rc.2",
     "vue3-clipboard": "^1.0.0",
     "yargs": "^15.4.1"
   },
@@ -35,7 +37,8 @@
     "postcss": "^8.2.3",
     "postcss-normalize": "^9.0.0",
     "rimraf": "^3.0.2",
-    "stylemark": "^3.1.7"
+    "stylemark": "^3.1.7",
+    "vue-i18n-extract": "^1.1.10"
   },
   "staticFiles": {
     "staticPath": [
