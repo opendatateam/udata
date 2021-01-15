@@ -7,9 +7,22 @@
       </div>
       <div v-else ref="top" key="top">
         <div v-if="threadFromURL">
-          You're seeing a single thread from your URL !
-          <a @click.prevent="viewAllDiscussions">View all</a>
+          <div class="well well-secondary-green-300">
+            <div class="row-inline justify-between">
+              Vous consultez une discussion spécifique sur ce jeu de données
+              <a
+                @click.prevent="viewAllDiscussions"
+                class="unstyled"
+                v-html="CloseIcon"
+              ></a>
+            </div>
+          </div>
           <thread v-bind="threadFromURL"></thread>
+          <a
+            class="nav-link text-white mt-xl"
+            @click.prevent="viewAllDiscussions"
+            >Voir toutes les discussions sur ce jeu de données</a
+          >
         </div>
         <div v-else>
           <div class="row-inline justify-end">
@@ -21,7 +34,13 @@
               v-model="current_sort"
               class="ml-xs"
             >
-              <option v-for="sort in sorts" :value="sort" :selected="sort === current_sort">{{sort.name}}</option>
+              <option
+                v-for="sort in sorts"
+                :value="sort"
+                :selected="sort === current_sort"
+              >
+                {{ sort.name }}
+              </option>
             </select>
           </div>
           <ul>
@@ -58,6 +77,7 @@ import Pagination from "../pagination/pagination.vue";
 import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
 import LoaderSvg from "svg/loaders/threads.svg";
+import CloseIcon from "svg/close.svg";
 
 const log = console.log;
 const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
@@ -87,6 +107,7 @@ export default {
       current_sort: sorts[0],
       sorts,
       LoaderSvg,
+      CloseIcon,
     };
   },
   props: {
