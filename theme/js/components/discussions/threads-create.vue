@@ -1,20 +1,54 @@
 <template>
-  <div class="row thread-create">
-    <div class="col-12">
-      <a
-        class="btn-action my-xl"
-        @click.prevent="displayForm"
-        v-if="!showForm"
-        tabindex="0"
-      >
-        <span v-html="AddIcon"></span>
-        <span>Start a new discussion</span>
-      </a>
-      <form @submit.prevent="submit" v-if="showForm">
-        <input type="text" v-model="title" placeholder="Title" />
-        <textarea v-model="comment" placeholder="Commentaire" />
-        <input type="submit" class="btn-primary" value="Submit" />
-      </form>
+  <div class="thread-create">
+    <a
+      class="btn-action my-xl"
+      @click.prevent="displayForm"
+      v-if="!showForm"
+      tabindex="0"
+    >
+      <span v-html="AddIcon"></span>
+      <span>Start a new discussion</span>
+    </a>
+    <div v-if="showForm" class="thread-wrapper">
+      <div class="thread-header">
+        <div class="thread-title">Nouvelle discussion</div>
+      </div>
+      <div class="thread-comment">
+        <form @submit.prevent="submit">
+          <div>
+            <label for="thread-title" class="fs-sm f-bold mb-sm">Titre</label>
+          </div>
+          <input
+            type="text"
+            id="thread-title"
+            v-model="title"
+            placeholder="Titre"
+          />
+          <div>
+            <label for="thread-comment" class="fs-sm f-bold my-sm"
+              >Message</label
+            >
+          </div>
+          <textarea
+            id="thread-comment"
+            v-model="comment"
+            placeholder="Commentaire"
+          />
+          <footer class="row-inline justify-between align-items-center">
+            <span class="text-grey-300 fs-sm"
+              >Commenter en tant que
+              <strong>{{
+                user.first_name + " " + user.last_name
+              }}</strong></span
+            >
+            <input
+              type="submit"
+              value="Valider"
+              class="btn-secondary btn-secondary-green-300"
+            />
+          </footer>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -32,6 +66,7 @@ export default {
       showForm: false,
       title: "",
       comment: "",
+      user: config.user,
       AddIcon,
     };
   },
@@ -41,9 +76,9 @@ export default {
     onSubmit: Function,
   },
   methods: {
-    displayForm: function() {
-       this.$auth('You need to be logged in to start a discussion.');
-       this.showForm = true;
+    displayForm: function () {
+      this.$auth("You need to be logged in to start a discussion.");
+      this.showForm = true;
     },
     submit() {
       const vm = this;

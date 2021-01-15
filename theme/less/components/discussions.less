@@ -1,5 +1,4 @@
 .discussions-wrapper {
-    @thread-left-padding: 200px;
 
     .thread-wrapper {
         margin-top: @spacing-md;
@@ -34,6 +33,7 @@
                 flex-grow: 1;
                 padding: @spacing-sm;
                 font-size: @font-size-lg;
+                font-weight: @font-weight-bold;
 
                 @media @query-md {
                     padding: @spacing-md;
@@ -126,24 +126,23 @@
         }
     }
 
-    .thread-reply {
-        textarea {
+    .thread-reply, .thread-create {
+        label {
+            display: block;
+        }
+
+        textarea, input[type="text"] {
             width: 100%;
-            min-height: 140px;
+            appearance: none;
+            border: none;
             border-radius: 2px;
 
             padding: @spacing-sm;
             margin-bottom: @spacing-sm;
         }
-    }
 
-    .thread-create {
-        margin-top: @spacing-lg;
-
-        form {
-            width: 100%;
-            background: @grey-380;
-            padding: @spacing-md;
+        textarea {
+            min-height: 140px;
         }
     }
 }
