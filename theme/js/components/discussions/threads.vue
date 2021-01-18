@@ -9,7 +9,11 @@
         <div v-if="threadFromURL">
           <div class="well well-secondary-green-300">
             <div class="row-inline justify-between">
-              Vous consultez une discussion spécifique sur ce jeu de données
+              {{
+                $t(
+                  "Vous consultez une discussion spécifique sur ce jeu de données"
+                )
+              }}
               <a
                 @click.prevent="viewAllDiscussions"
                 class="unstyled"
@@ -21,12 +25,12 @@
           <a
             class="nav-link text-white mt-xl"
             @click.prevent="viewAllDiscussions"
-            >Voir toutes les discussions sur ce jeu de données</a
+            >{{ $t("Voir toutes les discussions sur ce jeu de données") }}</a
           >
         </div>
         <div v-else>
           <div class="row-inline justify-end">
-            Trier par :
+            {{ $t("Trier par :") }}
             <select
               name="sortBy"
               id="sortBy"
@@ -72,6 +76,7 @@
 
 <script>
 import config from "../../config";
+import i18n from "../../plugins/i18n";
 
 import Pagination from "../pagination/pagination.vue";
 import CreateThread from "./threads-create.vue";
@@ -83,9 +88,9 @@ const log = console.log;
 const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
 
 const sorts = [
-  { name: "Début de discussion", key: "-created" },
+  { name: i18n.global.t("Début de discussion"), key: "-created" },
   {
-    name: "Dernière réponse",
+    name: i18n.global.t("Dernière réponse"),
     key: "-discussion.posted_on",
   },
 ];
@@ -162,7 +167,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toasted.error("Error fetching discussions");
+          this.$toasted.error($t("Error fetching discussions"));
           this.discussion = [];
         })
         .finally(() => {
@@ -188,7 +193,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toasted.error("Error fetching discussion " + id);
+          this.$toasted.error($t("Error fetching discussion ") + id);
           this.loadPage(1); //In case loading a single comment didn't work, we load the first page. Better than nothing !
         })
         .finally(() => {
@@ -223,7 +228,9 @@ export default {
           vm.current_page = 1;
           vm.loadPage(1, true);
         })
-        .catch((err) => this.$toasted.error("Error posting new thread", err));
+        .catch((err) =>
+          this.$toasted.error($t("Error posting new thread"), err)
+        );
     },
     //Changing sort order
     changeSort(sort) {

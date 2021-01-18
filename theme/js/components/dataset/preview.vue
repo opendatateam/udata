@@ -5,9 +5,7 @@
     </div>
 
     <footer class="modal-footer">
-      <a href="#" class="btn-primary" @click.prevent="close()">
-        X
-      </a>
+      <a href="#" class="btn-primary" @click.prevent="close()"> X </a>
     </footer>
   </vue-final-modal>
 </template>
@@ -17,7 +15,7 @@ export default {
   name: "Preview",
   props: {
     url: String,
-    close: Function
-  }
+    close: Function,
+  },
 };
 </script>

@@ -1,15 +1,16 @@
 <template>
   <div class="thread-reply">
-    <strong class="fs-sm">Répondre à la discussion</strong>
+    <strong class="fs-sm">{{ $t("Répondre à la discussion") }}</strong>
     <form @submit.prevent="submit" class="my-sm">
-      <textarea v-model="comment" placeholder="Commentaire" />
+      <textarea v-model="comment" :placeholder="$t('Commentaire')" />
       <footer class="row-inline justify-between align-items-center">
         <span class="text-grey-300 fs-sm"
-          >Répondre en tant que <strong>{{user.first_name + " " + user.last_name}}</strong></span
+          >{{ $t("Répondre en tant que") }}
+          <strong>{{ user.first_name + " " + user.last_name }}</strong></span
         >
         <input
           type="submit"
-          value="Valider"
+          :value="$t('Valider')"
           class="btn-secondary btn-secondary-green-300"
         />
       </footer>
@@ -27,7 +28,7 @@ export default {
     return {
       loading: false,
       comment: "",
-      user: config.user
+      user: config.user,
     };
   },
   props: {

@@ -2,12 +2,12 @@
   <div class="thread-wrapper" :id="discussionUrl(id)">
     <header class="thread-header">
       <div class="thread-status" v-if="closed">
-        <span>Discussion fermée</span>
+        <span>{{ $t("Discussion fermée") }}</span>
       </div>
       <div class="thread-title">{{ title }}</div>
       <div class="thread-link">
         <a
-          aria-label="Permalink to discussion"
+          :aria-label="$t('Permalien vers la discussion')"
           :href="discussionUrl(id, true)"
           v-html="LinkIcon"
         ></a>
@@ -31,7 +31,7 @@
                   " " +
                   comment.posted_by.last_name
                 }}
-                <span class="badge ml-sm">Admin</span>
+                <span class="badge ml-sm">{{ $t("Admin") }}</span>
               </strong>
               <div class="text-grey-300 mt-xxs">
                 {{ formatDate(comment.posted_on) }}
@@ -39,7 +39,7 @@
             </div>
             <div class="thread-link">
               <a
-                aria-label="Permalink to comment"
+                :aria-label="$t('Permalien vers le commentaire')"
                 :href="commentUrl(id, index, true)"
                 v-html="LinkIcon"
               ></a>
@@ -55,7 +55,7 @@
         v-if="_collapsed"
         @click.prevent="collapsed = false"
       >
-        {{ _discussion.length }} messages
+        {{ _discussion.length }} {{ $t("messages") }}
       </article>
     </div>
     <footer class="thread-footer">
@@ -66,7 +66,7 @@
           @click.stop="displayForm"
           tabindex="0"
         >
-          Répondre
+          {{ $t("Répondre") }}
         </a>
         <thread-reply
           :subjectId="id"
@@ -75,11 +75,11 @@
         />
       </div>
       <div v-if="closed" class="text-grey-300">
-        La discussion a été close par&#32;
+        {{ $t("La discussion a été close par") }} &#32;
         <span class="text-blue-200 px-xxs">{{
           closed_by.first_name + " " + closed_by.last_name
         }}</span>
-        le {{ formatDate(closed) }}
+        {{ $t("le") }} {{ formatDate(closed) }}
       </div>
     </footer>
   </div>
@@ -89,10 +89,12 @@
 import ThreadReply from "./thread-reply.vue";
 import Avatar from "./avatar.vue";
 import LinkIcon from "svg/permalink.svg";
+import config from "../../config";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
+import "dayjs/locale/en";
 
-dayjs.locale("fr");
+dayjs.locale(config.lang);
 
 export default {
   data() {
@@ -132,7 +134,7 @@ export default {
         });
     },
     displayForm: function () {
-      this.$auth("You need to be logged in to start a discussion.");
+      this.$auth($t("Vous devez être connecté pour commencer une discussion."));
       this.showForm = true;
     },
     formatDate: function (date) {
