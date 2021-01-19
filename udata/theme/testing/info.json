@@ -1,0 +1,11 @@
+{
+    "application": "udata",
+    "identifier": "testing",
+    "name": "Dummy testing udata theme",
+    "author": "Etalab",
+    "description": "Only for testing purposes",
+    "website": "http://data.gouv.fr",
+    "license": "AGPL",
+    "version": "1.0.0",
+    "doctype": "html5"
+}

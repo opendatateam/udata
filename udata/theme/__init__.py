@@ -164,10 +164,11 @@ def context(name):
 
 def init_app(app):
     app.config.setdefault('THEME_VARIANT', 'default')
-    themes.init_themes(app, app_identifier='udata', loaders=[themes_loader])
 
     if not app.config['THEME']:
         raise Exception('You must install and set a theme using the THEME config var.')
+
+    themes.init_themes(app, app_identifier='udata', loaders=[themes_loader])
 
     # Load all theme assets
     theme = app.theme_manager.themes[app.config['THEME']]

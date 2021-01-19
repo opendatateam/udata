@@ -75,6 +75,9 @@ setup(
         'console_scripts': [
             'udata = udata.commands:cli',
         ],
+        'udata.themes': [
+            'test = udata.theme.testing',
+        ],
         'udata.harvesters': [
             'dcat = udata.harvest.backends.dcat:DcatBackend',
         ],
