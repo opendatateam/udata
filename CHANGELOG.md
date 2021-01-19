@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add resource's description and title size limit [#2586](https://github.com/opendatateam/udata/pull/2586)
 
 ## 2.5.1 (2020-12-31)
 

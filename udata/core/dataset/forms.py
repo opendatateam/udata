@@ -11,7 +11,7 @@ from udata.core.spatial.forms import SpatialCoverageField
 from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
-    LEGACY_FREQUENCIES, RESOURCE_TYPES,
+    LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
     ResourceSchema,
 )
 
@@ -43,8 +43,10 @@ def enforce_allowed_schemas(form, field):
 
 
 class BaseResourceForm(ModelForm):
-    title = fields.StringField(_('Title'), [validators.DataRequired()])
-    description = fields.MarkdownField(_('Description'))
+    title = fields.StringField(
+        _('Title'), [validators.DataRequired(), validators.Length(max=TITLE_SIZE_LIMIT)])
+    description = fields.MarkdownField(
+        _('Description'), [validators.Length(max=DESCRIPTION_SIZE_LIMIT)])
     filetype = fields.RadioField(
         _('File type'), [validators.DataRequired()],
         choices=list(RESOURCE_FILETYPES.items()), default='file',
@@ -103,11 +105,11 @@ class DatasetForm(ModelForm):
     model_class = Dataset
 
     title = fields.StringField(
-        _('Title'), [validators.DataRequired(), validators.Length(max=350)])
+        _('Title'), [validators.DataRequired(), validators.Length(max=TITLE_SIZE_LIMIT)])
     acronym = fields.StringField(_('Acronym'),
                                  description=_('An optional acronym'))
     description = fields.MarkdownField(
-        _('Description'), [validators.DataRequired(), validators.Length(max=100000)],
+        _('Description'), [validators.DataRequired(), validators.Length(max=DESCRIPTION_SIZE_LIMIT)],
         description=_('The details about the dataset '
                       '(collection process, specifics...).'))
     license = fields.ModelSelectField(
