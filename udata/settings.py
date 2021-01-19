@@ -242,6 +242,7 @@ class Defaults(object):
     # Resource types ignored by linkchecker
     LINKCHECKING_UNCHECKED_TYPES = ('api', )
     LINKCHECKING_IGNORE_DOMAINS = []
+    LINKCHECKING_IGNORE_PATTERNS = ['format=shp']
     LINKCHECKING_MIN_CACHE_DURATION = 60  # in minutes
     LINKCHECKING_MAX_CACHE_DURATION = 1080  # in minutes (1 week)
     LINKCHECKING_UNAVAILABLE_THRESHOLD = 100
@@ -444,6 +445,23 @@ class Defaults(object):
     SCHEMA_CATALOG_URL = None
 
     API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
+
+    # Read Only Mode 
+    ####################
+    # This mode can be used to mitigate a spam attack for example.
+    # It disables the methods listed in the following block list.
+    READ_ONLY_MODE = False
+    METHOD_BLOCKLIST = ['OrganizationListAPI.post',
+                        'ReuseListAPI.post',
+                        'DatasetListAPI.post',
+                        'CommunityResourcesAPI.post',
+                        'UploadNewCommunityResources.post',
+                        'DiscussionAPI.post',
+                        'DiscussionsAPI.post',
+                        'IssuesAPI.post',
+                        'IssueAPI.post',
+                        'SourcesAPI.post',
+                        'FollowAPI.post']
 
 
 class Testing(object):

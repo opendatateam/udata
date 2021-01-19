@@ -1,6 +1,8 @@
 '''
 This module centralize udata-wide RDF helpers and configuration
 '''
+import re
+
 from flask import request, url_for, abort
 
 from rdflib import Graph, Literal, URIRef
@@ -83,6 +85,9 @@ RDF_EXTENSIONS = {
     # 'nquads': 'nq',
     # 'trix': 'trix',
 }
+
+# Includes control characters, unicode surrogate characters and unicode end-of-plane non-characters
+ILLEGAL_XML_CHARS = '[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]'
 
 
 def guess_format(string):
@@ -231,6 +236,11 @@ def url_from_rdf(rdf, prop):
         return value.identifier.toPython()
 
 
+def escape_xml_illegal_chars(val, replacement='?'):
+    illegal_xml_chars_RE = re.compile(ILLEGAL_XML_CHARS)
+    return illegal_xml_chars_RE.sub(replacement, val)
+
+
 def graph_response(graph, format):
     '''
     Return a proper flask response for a RDF resource given an expected format.
@@ -246,4 +256,4 @@ def graph_response(graph, format):
         kwargs['context'] = context
     if isinstance(graph, RdfResource):
         graph = graph.graph
-    return graph.serialize(format=fmt, **kwargs), 200, headers
+    return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs).decode('utf-8')), 200, headers

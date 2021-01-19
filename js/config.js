@@ -165,6 +165,11 @@ export const is_search_autocomplete_enabled = _jsonMeta('search-autocomplete-ena
  */
 export const search_autocomplete_debounce = _jsonMeta('search-autocomplete-debounce');
 
+/**
+ * Whether the 'read only mode' feature is enabled or not.
+ */
+export const read_only_enabled = _jsonMeta('read-only-enabled');
+
 
 export default {
     user,
@@ -190,4 +195,5 @@ export default {
     is_search_autocomplete_enabled,
     search_autocomplete_debounce,
     markdown,
+    read_only_enabled,
 };

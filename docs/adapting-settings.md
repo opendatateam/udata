@@ -459,6 +459,12 @@ An entrypoint key of `udata.linkcheckers` that will be used as a default link ch
 
 A list of domains to ignore when triggering link checking of resources urls.
 
+### LINKCHECKING_IGNORE_PATTERNS
+
+**default**: ['format=shp']
+
+A list patterns found in checked URL to ignore (ie `pattern in url`).
+
 ### LINKCHECKING_MIN_CACHE_DURATION
 
 **default**: 60
@@ -813,6 +819,19 @@ A list of extra exceptions to ignore.
 udata already ignores Werkzeug `HTTPException` and some internal ones
 that don't need to be listed here.
 
+## Read only mode
+
+### READ_ONLY_MODE
+
+**default**: `False`
+
+Enables the app's read only mode.
+
+### METHOD_BLOCKLIST
+
+**default**: `['OrganizationListAPI.post', 'ReuseListAPI.post', 'DatasetListAPI.post', 'CommunityResourcesAPI.post', 'UploadNewCommunityResources.post', 'DiscussionAPI.post', 'DiscussionsAPI.post', 'IssuesAPI.post', 'IssueAPI.post', 'SourcesAPI.post', 'FollowAPI.post']`
+
+List of API's endpoints to block when `READ_ONLY_MODE` is set to `True`. Endpoints listed here will return a `423` response code to any non-admin request.
 
 ## Example configuration file
 

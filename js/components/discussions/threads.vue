@@ -100,7 +100,7 @@
     </discussion-thread>
 
     <!-- New discussion -->
-    <a class="card discussion-card add" @click="displayForm" v-show="!formDisplayed">
+    <a class="card discussion-card add" @click="displayForm" v-show="!formDisplayed && !readOnlyEnabled">
         <div class="card-logo"><span>+</span></div>
         <div class="card-body">
             <h4>{{ _('Start a new discussion') }}</h4>
@@ -157,7 +157,8 @@ export default {
             p: {},
             loading: true,
             formDisplayed: false,
-            currentUser: config.user
+            currentUser: config.user,
+            readOnlyEnabled: config.read_only_enabled && !config.user.roles.includes('admin')
         }
     },
     props: {

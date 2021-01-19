@@ -10,11 +10,13 @@ class DiscussionCreateForm(ModelForm):
     model_class = Discussion
 
     title = fields.StringField(_('Title'), [validators.DataRequired()])
-    comment = fields.StringField(_('Comment'), [validators.DataRequired()])
+    comment = fields.StringField(
+        _('Comment'), [validators.DataRequired(), validators.Length(max=50000)])
     subject = fields.ModelField(_('Subject'), [validators.DataRequired()])
     extras = fields.ExtrasField()
 
 
 class DiscussionCommentForm(Form):
-    comment = fields.StringField(_('Comment'), [validators.DataRequired()])
+    comment = fields.StringField(
+        _('Comment'), [validators.DataRequired(), validators.Length(max=50000)])
     close = fields.BooleanField(default=False)
