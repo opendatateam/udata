@@ -106,7 +106,7 @@ def rdf(org):
     return redirect(url)
 
 
-@blueprint.route('/<org:org>/rdf.<format>', localize=False)
+@blueprint.route('/<org:org>/catalog.<format>', localize=False)
 def rdf_format(org, format):
     if not EditOrganizationPermission(org).can() and org.deleted:
         abort(410)
