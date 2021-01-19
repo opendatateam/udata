@@ -1,6 +1,6 @@
 import itertools
 
-from flask import g, abort, redirect, url_for
+from flask import g, abort, redirect, url_for, request
 from flask_security import current_user
 
 from udata import search
@@ -10,11 +10,12 @@ from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import (
     Organization, Reuse, Dataset, Follow, Issue, Discussion
 )
+
 from udata.rdf import (
-    RDF_MIME_TYPES, RDF_EXTENSIONS,
-    negociate_content, want_rdf, graph_response
+    RDF_EXTENSIONS, negociate_content, graph_response
 )
 from udata.sitemap import sitemap
+from udata.utils import multi_to_dict
 
 from udata.core.dataset.csv import (
     DatasetCsvAdapter, IssuesOrDiscussionCsvAdapter, ResourcesCsvAdapter
@@ -23,7 +24,7 @@ from udata.core.dataset.csv import (
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
-from .rdf import organization_to_rdf
+from .rdf import org_catalog
 
 
 blueprint = I18nBlueprint('organizations', __name__,
@@ -99,7 +100,7 @@ class OrganizationDetailView(OrgView, DetailView):
 
 
 @blueprint.route('/<org:org>/catalog', localize=False)
-def rdf(org):
+def rdf_catalog(org):
     '''Root RDF endpoint with content negociation handling'''
     format = RDF_EXTENSIONS[negociate_content()]
     url = url_for('organizations.rdf_format', org=org.id, format=format)
@@ -107,12 +108,14 @@ def rdf(org):
 
 
 @blueprint.route('/<org:org>/catalog.<format>', localize=False)
-def rdf_format(org, format):
+def rdf_catalog_format(org, format):
     if org.deleted:
         abort(410)
-
-    datasets = Dataset.objects(organization=org).visible()
-    catalog = organization_to_rdf(org, datasets)
+    params = multi_to_dict(request.args)
+    page = int(params.get('page', 1))
+    page_size = int(params.get('page_size', 100))
+    datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
+    catalog = org_catalog(org, datasets, format=format)
     return graph_response(catalog, format)
 
 
