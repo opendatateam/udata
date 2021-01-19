@@ -24,7 +24,7 @@ from udata.core.dataset.csv import (
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
-from .rdf import org_catalog
+from .rdf import build_org_catalog
 
 
 blueprint = I18nBlueprint('organizations', __name__,
@@ -115,7 +115,7 @@ def rdf_catalog_format(org, format):
     page = int(params.get('page', 1))
     page_size = int(params.get('page_size', 100))
     datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
-    catalog = org_catalog(org, datasets, format=format)
+    catalog = build_org_catalog(org, datasets, format=format)
     return graph_response(catalog, format)
 
 

@@ -35,18 +35,11 @@ def organization_to_rdf(org, graph=None):
     return o
 
 
-def org_catalog(org, datasets, format=None):
+def build_org_catalog(org, datasets, format=None):
     graph = Graph(namespace_manager=namespace_manager)
+    org_catalog_url = url_for('organizations.rdf_catalog', org=org.id, _external=True)
 
-    if org.id:
-        org_url = url_for('organizations.show_redirect',
-                          org=org.id,
-                          _external=True)
-        id = URIRef(org_url)
-    else:
-        id = BNode()
-
-    catalog = graph.resource(id)
+    catalog = graph.resource(URIRef(org_catalog_url))
     catalog.set(RDF.type, DCAT.Catalog)
     catalog.set(DCT.publisher, organization_to_rdf(org, graph))
 
