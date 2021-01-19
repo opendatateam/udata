@@ -6,6 +6,8 @@ from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF
 
 from udata.core.dataset.rdf import dataset_to_rdf
+from udata.core.organization.rdf import organization_to_rdf
+from udata.core.user.rdf import user_to_rdf
 from udata.rdf import DCAT, DCT, HYDRA, namespace_manager
 from udata.utils import Paginable
 
@@ -29,7 +31,12 @@ def build_catalog(site, datasets, format=None):
     catalog.set(DCT.publisher, publisher)
 
     for dataset in datasets:
-        catalog.add(DCAT.dataset, dataset_to_rdf(dataset, graph))
+        rdf_dataset = dataset_to_rdf(dataset, graph)
+        if dataset.owner:
+            rdf_dataset.add(DCT.publisher, user_to_rdf(dataset.owner, graph))
+        elif dataset.organization:
+            rdf_dataset.add(DCT.publisher, organization_to_rdf(dataset.organization, graph))
+        catalog.add(DCAT.dataset, rdf_dataset)
 
     if isinstance(datasets, Paginable):
         if not format:

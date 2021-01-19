@@ -108,11 +108,12 @@ def rdf(org):
 
 @blueprint.route('/<org:org>/catalog.<format>', localize=False)
 def rdf_format(org, format):
-    if not EditOrganizationPermission(org).can() and org.deleted:
+    if org.deleted:
         abort(410)
 
-    resource = organization_to_rdf(org)
-    return graph_response(resource, format)
+    datasets = Dataset.objects(organization=org).visible()
+    catalog = organization_to_rdf(org, datasets)
+    return graph_response(catalog, format)
 
 
 @blueprint.route('/<org:org>/dashboard/', endpoint='dashboard')
