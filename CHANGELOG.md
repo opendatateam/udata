@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add resource's description and title size limit [#2586](https://github.com/opendatateam/udata/pull/2586)
+- Add RDF catalog view for organizations [#2583](https://github.com/opendatateam/udata/pull/2583)
 
 ## 2.5.1 (2020-12-31)
 
