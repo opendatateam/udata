@@ -98,7 +98,7 @@ class OrganizationDetailView(OrgView, DetailView):
         return context
 
 
-@blueprint.route('/<org:org>/rdf', localize=False)
+@blueprint.route('/<org:org>/catalog', localize=False)
 def rdf(org):
     '''Root RDF endpoint with content negociation handling'''
     format = RDF_EXTENSIONS[negociate_content()]
