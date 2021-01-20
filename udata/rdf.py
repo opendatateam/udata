@@ -8,7 +8,7 @@ from flask import request, url_for, abort
 from rdflib import Graph, Literal, URIRef
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import (
-    Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS
+    Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
 from rdflib_jsonld.context import Context
@@ -239,6 +239,39 @@ def url_from_rdf(rdf, prop):
 def escape_xml_illegal_chars(val, replacement='?'):
     illegal_xml_chars_RE = re.compile(ILLEGAL_XML_CHARS)
     return illegal_xml_chars_RE.sub(replacement, val)
+
+
+def paginate_catalog(catalog, graph, datasets, format, rdf_catalog_endpoint, **values):
+    if not format:
+        raise ValueError('Pagination requires format')
+    catalog.add(RDF.type, HYDRA.Collection)
+    catalog.set(HYDRA.totalItems, Literal(datasets.total))
+    kwargs = {
+        'format': format,
+        'page_size': datasets.page_size,
+        '_external': True,
+    }
+
+    kwargs.update(values)
+
+    first_url = url_for(rdf_catalog_endpoint, page=1, **kwargs)
+    page_url = url_for(rdf_catalog_endpoint, page=datasets.page, **kwargs)
+    last_url = url_for(rdf_catalog_endpoint, page=datasets.pages, **kwargs)
+    pagination = graph.resource(URIRef(page_url))
+    pagination.set(RDF.type, HYDRA.PartialCollectionView)
+
+    pagination.set(HYDRA.first, URIRef(first_url))
+    pagination.set(HYDRA.last, URIRef(last_url))
+    if datasets.has_next:
+        next_url = url_for(rdf_catalog_endpoint, page=datasets.page + 1, **kwargs)
+        pagination.set(HYDRA.next, URIRef(next_url))
+    if datasets.has_prev:
+        prev_url = url_for(rdf_catalog_endpoint, page=datasets.page - 1, **kwargs)
+        pagination.set(HYDRA.previous, URIRef(prev_url))
+
+    catalog.set(HYDRA.view, pagination)
+
+    return catalog
 
 
 def graph_response(graph, format):
