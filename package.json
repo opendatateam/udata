@@ -4,21 +4,23 @@
   "description": "Open Data Portal - French customization",
   "author": "Etalab",
   "scripts": {
-    "build": "npm run clean && npm run build-app && npm run build-stylemark",
-    "build-app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/",
-    "build-stylemark": "npm run clean && parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/stylemark_temp --no-minify && stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark_temp/ -o udata_gouvfr/theme/static/stylemark/",
-    "report:i18n": "npx vue-i18n-extract report -v 'theme/**/*.vue' -l 'theme/js/locales/**/*'",
+    "dev": "npm run clean && npm run watch",
+    "build": "npm run clean && npm run build:stylemark && npm run build:app",
+    "build:app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/",
+    "build:stylemark": "npm run build:app -- --no-minify",
+    "i18n:report": "vue-i18n-extract report -v 'theme/**/*.vue' -l 'theme/js/locales/**/*'",
+    "i18n:extract": "npm run i18n:report -- -a",
     "clean": "rimraf .parcel-cache",
-    "dev": "npm run clean && npm run watch-app",
     "start": "npm run dev",
-    "watch-app": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/"
+    "watch": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/"
   },
   "dependencies": {
     "@parcel/transformer-less": "^2.0.0-alpha.3",
     "axios": "^0.21.0",
     "dayjs": "^1.9.6",
     "less": "^3.13.1",
-    "parcel-reporter-copystatic": "file:parcel-reporter-copystatic",
+    "parcel-reporter-copystatic": "^1.0.0",
+    "parcel-reporter-stylemark": "^1.0.0",
     "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",
     "prettier": "^2.2.1",
@@ -49,7 +51,8 @@
     ]
   },
   "alias": {
-    "svg": "./udata_gouvfr/theme/templates/svg"
+    "svg": "./udata_gouvfr/theme/templates/svg",
+    "vue": "vue/dist/vue.cjs.js"
   },
   "license": "MIT"
 }

@@ -4,5 +4,5 @@
     "*.less": ["parcel-transformer-more"],
     "*.svg": ["@parcel/transformer-inline-string"]
   },
-  "reporters": ["...", "parcel-reporter-copystatic"]
+  "reporters": ["...", "parcel-reporter-copystatic", "parcel-reporter-stylemark"]
 }
