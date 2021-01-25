@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.5.0 (2021-01-25)
 
 - Add Inventory cards on homepage [#514](https://github.com/etalab/udata-gouvfr/pull/514)
