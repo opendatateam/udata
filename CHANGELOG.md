@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix url_for method in organization's catalog's view [#2587](https://github.com/opendatateam/udata/pull/2587)
 
 ## 2.6.0 (2021-01-25)
 
