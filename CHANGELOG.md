@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add Inventory cards on homepage [#514](https://github.com/etalab/udata-gouvfr/pull/514)
+- Add documentation's dropdown menu with links to technical documentation and open data guides [#516](https://github.com/etalab/udata-gouvfr/pull/516)
 
 ## 2.3.0 (2020-11-30)
 
