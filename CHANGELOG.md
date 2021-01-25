@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.6.0 (2021-01-25)
 
 - Add resource's description and title size limit [#2586](https://github.com/opendatateam/udata/pull/2586)
