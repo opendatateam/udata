@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- New Crowdin translations [#511](https://github.com/etalab/udata-gouvfr/pull/511)
 
 ## 2.5.0 (2021-01-25)
 
