@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.6.1 (2021-01-26)
 
 - Fix url_for method in organization's catalog's view [#2587](https://github.com/opendatateam/udata/pull/2587)
 
