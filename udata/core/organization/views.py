@@ -103,7 +103,7 @@ class OrganizationDetailView(OrgView, DetailView):
 def rdf_catalog(org):
     '''Root RDF endpoint with content negociation handling'''
     format = RDF_EXTENSIONS[negociate_content()]
-    url = url_for('organizations.rdf_format', org=org.id, format=format)
+    url = url_for('organizations.rdf_catalog_format', org=org.id, format=format)
     return redirect(url)
 
 
