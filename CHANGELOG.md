@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Keep tracking to strictly necessary [#517](https://github.com/etalab/udata-gouvfr/pull/517)
 
 ## 2.5.1 (2021-01-26)
 
