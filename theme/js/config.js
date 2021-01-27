@@ -159,6 +159,24 @@ export const dataset_max_resources_uncollapsed = _jsonMeta(
  */
 export const markdown = _jsonMeta("markdown-config");
 
+// New generic `js-config-*` variables : simply add them to `metadata.html` with a meta name="js-config-something", content="yourValue" and import this file.
+// Everything is exported in the `values` variable as key: value pairs
+const valuesPrefix = "js-config-";
+
+export const values = [
+  ...document.querySelectorAll(`meta[name^="${valuesPrefix}"]`),
+].reduce((acc, el) => {
+  if (!el) return acc;
+
+  //Stripping prefix from name, camelizing it too (kebab-case is delicious but hard to use in Javascript)
+  const propertyName = el
+    .getAttribute("name")
+    .replace(valuesPrefix, "")
+    .replace(/-./g, (x) => x[1].toUpperCase());
+
+  return { ...acc, [propertyName]: el.getAttribute("content") };
+}, {});
+
 export default {
   user,
   debug,
@@ -179,6 +197,7 @@ export default {
   hidpi,
   map,
   tags,
+  values,
   dataset_max_resources_uncollapsed,
   markdown,
 };
