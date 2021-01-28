@@ -1,6 +1,9 @@
 import axios from "axios";
 import config from "../config";
 
+const CancelToken = axios.CancelToken;
+export const generateCancelToken = () => CancelToken.source();
+
 //Instanciate axios with base URL from config
 //No need for CSRF or anything fancy here
 //TODO : maybe add interceptor to better handle errors ?

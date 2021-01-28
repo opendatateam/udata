@@ -25,8 +25,8 @@
         <div class="row align-items-center">
             <div class="col-5 col-lg-12">
                 <h1 class="mb-lg-md">{{ _('@@Plateforme ouverte des données publiques françaises') }}</h1>
-                <form action="#" class="hero-search">
-                    <input type="text" placeholder="Recherche" />
+                <form action="/search" method="get" class="hero-search">
+                    <input type="text" name="q" placeholder="Recherche" />
                 </form>
             </div>
             <div class="col-6 offset-1 offset-lg-0 mt-lg-lg col-lg-12 text-align-center">

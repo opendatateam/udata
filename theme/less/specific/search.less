@@ -1,0 +1,34 @@
+.search-wrapper {
+  position: absolute;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+  height: calc(100vh - 72px);
+
+  .container {
+      background: white;
+      border-radius: 4px;
+
+      box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.02), 0px 10px 10px rgba(0, 0, 0, 0.04), 0px 4px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .row {
+      padding: @spacing-md;
+
+      .col {
+          padding: @spacing-md;
+      }
+  }
+}
+
+.search-input {
+    padding: @spacing-md;
+    border-bottom: 1px solid @grey-100;
+}
