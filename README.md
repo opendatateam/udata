@@ -105,13 +105,32 @@ Here are our reusable components :
 - `macros` : **TODO**
 - `svg` : contains SVG assets to be included in our pages.
 
+### TODO
+Front docs todo :
+- Parcel 2 architecture
+  - Static copy
+  - Stylemark build
+  - VueJS compiler mode
+- VanillaJS IIFE architecture
+- Vue 3 architecture
+  - Modals
+  - I18n
+  - Config plugin
+  - Components
+Back docs todo :
+- CSS/JS file inclusion
+- Static route for UI-Kit
+
 Whenever a components needs some special styling, you can find their corresponding definitions inside `theme/less/specific/<component>`,
 it's best if we can avoid having too much specific styling, but sometimes you just really need it.
 
 Finally, we have a bunch of commands to make your life a tad easier, that you can run through `npm run`.
-- `format`: Formats the less files using `stylelint`.
-- `check-rules`: Checks that we're not using incompatible CSS rules, most of them are very strict, you should use your own judgement.
-- `build`: Builds the final CSS file and the CSS Documentation.
+- `build`: Builds the final CSS/JS files and the UI-Kit Documentation. You should probably use this one.
+- `build:app`: Builds the final CSS/JS files without the UI-Kit
+- `build:stylemark`: Builds the UI-Kit files and also the CSS/JS files but unminifed (do not use those static files in production)
+- `i18n:report`: Generates a report of the i18n missing and unused keys
+- `i18n:extract`: Same as above, but also automatically adds missing keys to translation files
+- `clean`: Cleans Parcel cache. Use this if you stumble upon weird bugs to start anew.
 - `start`: Get to coding with live reload and things
 
 [udata]: https://github.com/opendatateam/udata

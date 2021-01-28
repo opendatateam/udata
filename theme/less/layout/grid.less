@@ -19,6 +19,10 @@ It's a grid. You know how grids work. Even if you don't, you'll understand in no
 
 `.row` is used to denote a new row. Pretty easy.
 
+#### Inline-row
+
+`.row-inline` can be used to create an inline "row" without margin. It simply sets a `display: flex` and `flex-wrap: wrap`.
+
 ### Auto layout
 
 By default, `.col` classes allow for an easy auto-layout : they all take an equal space within the row.
@@ -155,6 +159,11 @@ Sometimes you need to occupy the available space fully, you can use `.container-
     display: flex;
     flex-wrap: wrap;
     margin: 0 -@gutter;
+}
+
+.row-inline {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 //Row vertical alignments

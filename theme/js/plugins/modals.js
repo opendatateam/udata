@@ -10,7 +10,7 @@ Because sometimes the whole page isn't enough to show all the data you want to s
 You can define modal templates in the form of VueJS templates and call them anywhere within the site.
 
 1. Defining a modal
-Modals are defined in the `theme/js/components/vue/` folder. You'll find an example below.
+Modals are defined in the `theme/js/components/**` folder. You'll find an example below.
 Note that you can define variables in the `props` part of the Vue template definition and pass them to the modal later on.
 
 ```modals-definition.vue
@@ -55,19 +55,29 @@ The first argument is the modal name, the second one is an object containing the
 The third argument to the `showModal` method is an override for the `scrollable` property. Defaults to false, but when set to true, the modal is scrollable.
 
 ```modal-opening.html
-<a @click.prevent="showModal('mymodal', {myparam: '{{ django.injected_param }}'}, true)">Click me !</a>
+<a @click.prevent="$showModal('mymodal', {myparam: '{{ django.injected_param }}'}, true)">Click me !</a>
 ```
 */
 
-import Preview from "./preview";
+import Preview from "../components/dataset/preview";
 
 const modals = { preview: Preview };
 
-export function showModal(name, params, scrollable = false) {
-  this.$modal.show(modals[name], params, {
-    scrollable,
-    adaptive: true,
-    height: "auto",
-    width: "60%",
+const _showModal = (app) => (name, params) => {
+  const Vue = app.config.globalProperties;
+
+  Vue.$vfm.show({
+    component: modals[name],
+    bind: {
+      name,
+      escToClose: true,
+      lockScroll: true,
+      ...params,
+      close: () => Vue.$vfm.hide(name),
+    },
   });
 };
+
+export default function install(app) {
+  app.config.globalProperties.$showModal = _showModal(app);
+}

@@ -1,22 +1,31 @@
-import Vue from "vue/dist/vue.js";
+import { createApp } from "vue";
 
-import Tabs from "./components/tabs.js";
-import Accordion from "./components/accordion";
+import Threads from "./components/discussions/threads.vue";
 
-import Clipboard from "v-clipboard";
-import VModal from "vue-js-modal";
+import Tabs from "./components/vanilla/tabs";
+import Accordion from "./components/vanilla/accordion";
 
-import { showModal } from "./components/vue/modals";
+import VueClipboard from "vue3-clipboard";
+import VueFinalModal from "vue-final-modal";
+import Toaster from "@meforma/vue-toaster";
 
-Vue.use(Clipboard);
-Vue.use(VModal);
+import Api from "./plugins/api";
+import Auth from "./plugins/auth";
+import Modals from "./plugins/modals";
+import i18n from "./plugins/i18n";
 
-new Vue({
-  el: "#app",
-  delimiters: ["[[", "]]"],
-  methods: {
-    showModal
-  },
-});
+const app = createApp({});
+
+app.use(VueClipboard, {});
+app.use(Api);
+app.use(Auth);
+app.use(VueFinalModal());
+app.use(Modals); //Has to be loaded after VueFinalModal
+app.use(i18n);
+app.use(Toaster);
+
+app.component("discussion-threads", Threads);
+
+app.mount("#app");
 
 console.log("JS is injected !");
