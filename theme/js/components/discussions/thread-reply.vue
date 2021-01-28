@@ -52,7 +52,7 @@ export default {
       if (this.onSubmit)
         this.onSubmit(values)
           .catch((err) => {
-            vm.$toasted.error("Error posting comment");
+            vm.$toast.error(vm.$t("Error posting comment"));
           })
           .finally(() => {
             vm.loading = false;

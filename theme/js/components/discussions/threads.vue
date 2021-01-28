@@ -167,7 +167,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toasted.error($t("Error fetching discussions"));
+          this.$toast.error(this.$t("Error fetching discussions"));
           this.discussion = [];
         })
         .finally(() => {
@@ -193,7 +193,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toasted.error($t("Error fetching discussion ") + id);
+          this.$toast.error(this.$t("Error fetching discussion ") + id);
           this.loadPage(1); //In case loading a single comment didn't work, we load the first page. Better than nothing !
         })
         .finally(() => {
@@ -229,7 +229,7 @@ export default {
           vm.loadPage(1, true);
         })
         .catch((err) =>
-          this.$toasted.error($t("Error posting new thread"), err)
+          this.$toast.error(this.$t("Error posting new thread"), err)
         );
     },
     //Changing sort order

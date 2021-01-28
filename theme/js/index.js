@@ -7,6 +7,7 @@ import Accordion from "./components/vanilla/accordion";
 
 import VueClipboard from "vue3-clipboard";
 import VueFinalModal from "vue-final-modal";
+import Toaster from "@meforma/vue-toaster";
 
 import Api from "./plugins/api";
 import Auth from "./plugins/auth";
@@ -21,6 +22,7 @@ app.use(Auth);
 app.use(VueFinalModal());
 app.use(Modals); //Has to be loaded after VueFinalModal
 app.use(i18n);
+app.use(Toaster);
 
 app.component("discussion-threads", Threads);
 

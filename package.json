@@ -15,6 +15,7 @@
     "watch": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/"
   },
   "dependencies": {
+    "@meforma/vue-toaster": "^1.2.0",
     "@parcel/transformer-less": "^2.0.0-alpha.3",
     "axios": "^0.21.0",
     "dayjs": "^1.9.6",
