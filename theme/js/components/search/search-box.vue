@@ -1,47 +1,47 @@
 <template>
   <section class="search-wrapper bg-blue-300">
-    <div class="container col-12">
+    <div class="container">
       <search-input :onChange="onChange" />
-      <div class="row">
-        <div class="col col-md-12">
+      <div class="row p-md results">
+        <div class="p-md col col-md-12">
           <h2>
             Jeux de données <sup>{{ results?.datasets?.length || 0 }}</sup>
           </h2>
-          <p class="text-grey-300">
+          <p class="text-grey-300 m-0">
             Nullam neque bibendum convallis enim aliquam. Integer egestas
             accumsan, in varius lectus. Elementum a facilisis nibh pellentesque
             enim egestas porta.
           </p>
-
-          <ul>
+          <span v-if="loading" key="dataset-loader" v-html="DatasetsLoader" />
+          <ul v-else>
             <li v-for="dataset in results.datasets">
               <a :href="dataset.page" :title="dataset.title" class="unstyled">
                 <Dataset v-bind="dataset" />
               </a>
             </li>
           </ul>
-          <a class="nav-link mt-md" :href="datasetUrl"
+          <a class="nav-link pt-md" :href="datasetUrl"
             >Rechercher dans les jeux de données</a
           >
         </div>
-        <div class="col col-md-12">
+        <div class="p-md col col-md-12">
           <h2>
             Réutilisations <sup>{{ results?.reuses?.length || 0 }}</sup>
           </h2>
-          <p class="text-grey-300">
+          <p class="text-grey-300 m-0">
             Nullam neque bibendum convallis enim aliquam. Integer egestas
             accumsan, in varius lectus. Elementum a facilisis nibh pellentesque
             enim egestas porta.
           </p>
-
-          <ul class="reuse-cards">
-            <li v-for="reuse in results.reuses">
+          <span v-if="loading" key="reuses-loader" v-html="ReusesLoader" />
+          <ul class="reuse-cards row" v-else>
+            <li v-for="reuse in results.reuses" class="col text-align-center">
               <a :href="reuse.page" :title="reuse.title" class="unstyled">
                 <Reuse v-bind="reuse" />
               </a>
             </li>
           </ul>
-          <a class="nav-link mt-md" :href="reuseUrl"
+          <a class="nav-link pt-md" :href="reuseUrl"
             >Rechercher dans les réutilisations</a
           >
         </div>
@@ -55,10 +55,18 @@ import SearchInput from "./search-input";
 import Dataset from "../dataset/card";
 import Reuse from "../reuse/card";
 
+import DatasetsLoader from "svg/loaders/datasets.svg";
+import ReusesLoader from "svg/loaders/reuses.svg";
+
+console.log(DatasetsLoader, ReusesLoader);
+
 import config from "../../config";
 import { generateCancelToken } from "../../plugins/api";
 
-const endpoints = ["datasets", "reuses"];
+const endpoints = [
+  { name: "datasets", size: 4 },
+  { name: "reuses", size: 2 },
+];
 
 export default {
   components: {
@@ -69,18 +77,20 @@ export default {
   data() {
     return {
       results: {},
-      loading: false,
+      loading: true,
       currentRequest: null,
       queryString: "",
+      DatasetsLoader,
+      ReusesLoader
     };
   },
   computed: {
     datasetUrl() {
-      return `${config.values.datasetUrl}?q=${this.queryString}`
+      return `${config.values.datasetUrl}?q=${this.queryString}`;
     },
     reuseUrl() {
-      return `${config.values.reuseUrl}?q=${this.queryString}`
-    }
+      return `${config.values.reuseUrl}?q=${this.queryString}`;
+    },
   },
   methods: {
     onChange(queryString) {
@@ -91,17 +101,17 @@ export default {
 
       this.currentRequest = generateCancelToken();
 
-      const promises = endpoints.map((endpoint) =>
+      const promises = endpoints.map(({ name, size }) =>
         this.$api
-          .get(endpoint + "/suggest/", {
+          .get(name + "/suggest/", {
             cancelToken: this.currentRequest.token,
             params: {
               q: queryString,
-              size: 4,
+              size,
             },
           })
           .then((res) => ({
-            [endpoint]: res.data,
+            [name]: res.data,
           }))
       );
 

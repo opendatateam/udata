@@ -19,11 +19,17 @@
       box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.02), 0px 10px 10px rgba(0, 0, 0, 0.04), 0px 4px 4px rgba(0, 0, 0, 0.1);
   }
 
-  .row {
-      padding: @spacing-md;
+  .results {
+      //Half (reuse | dataset)
+      >.col {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
 
-      .col {
-          padding: @spacing-md;
+          //"See more" link
+          >a {
+            margin-top: auto;
+          }
       }
   }
 }
