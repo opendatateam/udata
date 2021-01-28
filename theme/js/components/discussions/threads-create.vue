@@ -37,12 +37,10 @@
             :placeholder="$t('@@Commentaire')"
           />
           <footer class="row-inline justify-between align-items-center">
-            <span class="text-grey-300 fs-sm"
-              >{{ $t("@@Commenter en tant que") }}
-              <strong>{{
-                user.first_name + " " + user.last_name
-              }}</strong></span
-            >
+            <span class="text-grey-300 fs-sm">
+              {{ $t("@@Commenter en tant que") }}
+              <Author :author="user" />
+            </span>
             <input
               type="submit"
               :value="$t('@@Valider')"
@@ -57,11 +55,15 @@
 
 <script>
 import config from "../../config";
+import Author from "./author";
 import AddIcon from "svg/actions/add.svg"; //Not the best but we don't have many svg
 
 const log = console.log;
 
 export default {
+  components: {
+    Author
+  },
   data() {
     return {
       loading: false,
@@ -79,7 +81,9 @@ export default {
   },
   methods: {
     displayForm: function () {
-      this.$auth(this.$t("@@Vous devez être connecté pour commencer une discussion."));
+      this.$auth(
+        this.$t("@@Vous devez être connecté pour commencer une discussion.")
+      );
       this.showForm = true;
     },
     submit() {

@@ -4,10 +4,10 @@
     <form @submit.prevent="submit" class="my-sm">
       <textarea v-model="comment" :placeholder="$t('@@Commentaire')" />
       <footer class="row-inline justify-between align-items-center">
-        <span class="text-grey-300 fs-sm"
-          >{{ $t("@@Répondre en tant que") }}
-          <strong>{{ user.first_name + " " + user.last_name }}</strong></span
-        >
+        <span class="text-grey-300 fs-sm">
+          {{ $t("@@Répondre en tant que") }}
+          <Author :author="user" />
+        </span>
         <input
           type="submit"
           :value="$t('@@Valider')"
@@ -20,10 +20,14 @@
 
 <script>
 import config from "../../config";
+import Author from "./author";
 
 const log = console.log;
 
 export default {
+  components: {
+    Author,
+  },
   data() {
     return {
       loading: false,

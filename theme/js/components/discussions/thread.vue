@@ -25,14 +25,7 @@
           <div class="comment-meta">
             <avatar :user="comment.posted_by"></avatar>
             <div>
-              <strong class="author">
-                {{
-                  comment.posted_by.first_name +
-                  " " +
-                  comment.posted_by.last_name
-                }}
-                <span class="badge ml-sm">{{ $t("@@Admin") }}</span>
-              </strong>
+              <Author :author="comment.posted_by" :badge="true" />
               <div class="text-grey-300 mt-xxs">
                 {{ formatDate(comment.posted_on) }}
               </div>
@@ -76,9 +69,7 @@
       </div>
       <div v-if="closed" class="text-grey-300">
         {{ $t("@@La discussion a été close par") }} &#32;
-        <span class="text-blue-200 px-xxs">{{
-          closed_by.first_name + " " + closed_by.last_name
-        }}</span>
+        <span class="text-blue-200 px-xxs"><Author :author="closed_by" /></span>
         {{ $t("@@le") }} {{ formatDate(closed) }}
       </div>
     </footer>
@@ -88,6 +79,7 @@
 <script>
 import ThreadReply from "./thread-reply.vue";
 import Avatar from "./avatar.vue";
+import Author from "./author.vue";
 import LinkIcon from "svg/permalink.svg";
 import config from "../../config";
 import dayjs from "dayjs";
@@ -117,6 +109,7 @@ export default {
   components: {
     "thread-reply": ThreadReply,
     Avatar,
+    Author,
   },
   methods: {
     discussionUrl: (id, link = false) => (link ? "#" : "") + "discussion-" + id, //Permalink helpers
@@ -134,7 +127,9 @@ export default {
         });
     },
     displayForm: function () {
-      this.$auth(this.$t("@@Vous devez être connecté pour commencer une discussion."));
+      this.$auth(
+        this.$t("@@Vous devez être connecté pour commencer une discussion.")
+      );
       this.showForm = true;
     },
     formatDate: function (date) {
