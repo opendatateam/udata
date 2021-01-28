@@ -7,45 +7,45 @@
       tabindex="0"
     >
       <span v-html="AddIcon"></span>
-      <span>{{ $t("Démarrer une nouvelle discussion") }}</span>
+      <span>{{ $t("@@Démarrer une nouvelle discussion") }}</span>
     </a>
     <div v-if="showForm" class="thread-wrapper">
       <div class="thread-header">
-        <div class="thread-title">{{ $t("Nouvelle discussion") }}</div>
+        <div class="thread-title">{{ $t("@@Nouvelle discussion") }}</div>
       </div>
       <div class="thread-comment">
         <form @submit.prevent="submit">
           <div>
             <label for="thread-title" class="fs-sm f-bold mb-sm">{{
-              $t("Titre")
+              $t("@@Titre")
             }}</label>
           </div>
           <input
             type="text"
             id="thread-title"
             v-model="title"
-            :placeholder="$t('Titre')"
+            :placeholder="$t('@@Titre')"
           />
           <div>
             <label for="thread-comment" class="fs-sm f-bold my-sm">{{
-              $t("Message")
+              $t("@@Message")
             }}</label>
           </div>
           <textarea
             id="thread-comment"
             v-model="comment"
-            :placeholder="$t('Commentaire')"
+            :placeholder="$t('@@Commentaire')"
           />
           <footer class="row-inline justify-between align-items-center">
             <span class="text-grey-300 fs-sm"
-              >{{ $t("Commenter en tant que") }}
+              >{{ $t("@@Commenter en tant que") }}
               <strong>{{
                 user.first_name + " " + user.last_name
               }}</strong></span
             >
             <input
               type="submit"
-              :value="$t('Valider')"
+              :value="$t('@@Valider')"
               class="btn-secondary btn-secondary-green-300"
             />
           </footer>
@@ -79,7 +79,7 @@ export default {
   },
   methods: {
     displayForm: function () {
-      this.$auth($t("Vous devez être connecté pour commencer une discussion."));
+      this.$auth(this.$t("@@Vous devez être connecté pour commencer une discussion."));
       this.showForm = true;
     },
     submit() {

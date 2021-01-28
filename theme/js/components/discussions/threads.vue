@@ -11,7 +11,7 @@
             <div class="row-inline justify-between">
               {{
                 $t(
-                  "Vous consultez une discussion spécifique sur ce jeu de données"
+                  "@@Vous consultez une discussion spécifique sur ce jeu de données"
                 )
               }}
               <a
@@ -25,12 +25,12 @@
           <a
             class="nav-link text-white mt-xl"
             @click.prevent="viewAllDiscussions"
-            >{{ $t("Voir toutes les discussions sur ce jeu de données") }}</a
+            >{{ $t("@@Voir toutes les discussions sur ce jeu de données") }}</a
           >
         </div>
         <div v-else>
           <div class="row-inline justify-end">
-            {{ $t("Trier par :") }}
+            {{ $t("@@Trier par :") }}
             <select
               name="sortBy"
               id="sortBy"
@@ -167,7 +167,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toast.error(this.$t("Error fetching discussions"));
+          this.$toast.error(this.$t("@@Une erreur est survenue lors de la récupération des discussions"));
           this.discussion = [];
         })
         .finally(() => {
@@ -193,7 +193,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toast.error(this.$t("Error fetching discussion ") + id);
+          this.$toast.error(this.$t("@@Une erreur est survenue lors de la récupération de la discussion ") + id);
           this.loadPage(1); //In case loading a single comment didn't work, we load the first page. Better than nothing !
         })
         .finally(() => {
@@ -229,7 +229,7 @@ export default {
           vm.loadPage(1, true);
         })
         .catch((err) =>
-          this.$toast.error(this.$t("Error posting new thread"), err)
+          this.$toast.error(this.$t("@@Une erreur est survenue lors de la création de la discussion "), err)
         );
     },
     //Changing sort order

@@ -1,16 +1,16 @@
 <template>
   <div class="thread-reply">
-    <strong class="fs-sm">{{ $t("Répondre à la discussion") }}</strong>
+    <strong class="fs-sm">{{ $t("@@Répondre à la discussion") }}</strong>
     <form @submit.prevent="submit" class="my-sm">
-      <textarea v-model="comment" :placeholder="$t('Commentaire')" />
+      <textarea v-model="comment" :placeholder="$t('@@Commentaire')" />
       <footer class="row-inline justify-between align-items-center">
         <span class="text-grey-300 fs-sm"
-          >{{ $t("Répondre en tant que") }}
+          >{{ $t("@@Répondre en tant que") }}
           <strong>{{ user.first_name + " " + user.last_name }}</strong></span
         >
         <input
           type="submit"
-          :value="$t('Valider')"
+          :value="$t('@@Valider')"
           class="btn-secondary btn-secondary-green-300"
         />
       </footer>
@@ -52,7 +52,7 @@ export default {
       if (this.onSubmit)
         this.onSubmit(values)
           .catch((err) => {
-            vm.$toast.error(vm.$t("Error posting comment"));
+            vm.$toast.error(vm.$t("@@Erreur lors de l'envoi de la réponse"));
           })
           .finally(() => {
             vm.loading = false;
