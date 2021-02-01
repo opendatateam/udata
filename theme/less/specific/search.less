@@ -1,37 +1,51 @@
 .search-wrapper {
-  position: absolute;
-  z-index: 100;
+    position: absolute;
+    z-index: 100;
 
-  display: flex;
-  align-items: center;
-  flex-grow: 1;
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
 
-  bottom: 0;
-  left: 0;
+    bottom: 0;
+    left: 0;
 
-  width: 100%;
-  height: calc(100vh - 72px);
+    width: 100%;
+    height: calc(100vh - 72px);
 
-  .container {
-      background: white;
-      border-radius: 4px;
+    .container {
+        background: white;
+        border-radius: 4px;
 
-      box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.02), 0px 10px 10px rgba(0, 0, 0, 0.04), 0px 4px 4px rgba(0, 0, 0, 0.1);
-  }
+        box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.02),
+            0px 10px 10px rgba(0, 0, 0, 0.04), 0px 4px 4px rgba(0, 0, 0, 0.1);
+    }
 
-  .results {
-      //Half (reuse | dataset)
-      >.col {
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
+    .results {
+        min-height: 65vh;
 
-          //"See more" link
-          >a {
-            margin-top: auto;
-          }
-      }
-  }
+        //Half (reuse | dataset)
+        > .col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+
+            //Make the two half the same height
+            height: 100%;
+
+            //"See more" link is going to the bottom
+            > a {
+                margin-top: auto;
+            }
+        }
+
+        .search-empty {
+            flex-grow: 1;
+        }
+    }
 }
 
 .search-input {

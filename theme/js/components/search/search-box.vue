@@ -13,16 +13,29 @@
             enim egestas porta.
           </p>
           <dataset-loader v-if="loading" />
-          <ul v-else>
-            <li v-for="dataset in results.datasets">
-              <a :href="dataset.page" :title="dataset.title" class="unstyled">
-                <Dataset v-bind="dataset" />
-              </a>
-            </li>
-          </ul>
-          <a class="nav-link pt-md" :href="datasetUrl"
-            >Rechercher dans les jeux de données</a
-          >
+          <Empty
+            v-else-if="!results.datasets.length > 0"
+            :cta="$t('@@Voir tous les jeux de données')"
+            :copy="
+              $t(
+                '@@Nous n’avons pas de jeu de données correspondant à votre requête'
+              )
+            "
+            :queryString="queryString"
+            :link="datasetUrl"
+          />
+          <div class="my-md cards-container" v-else>
+            <ul>
+              <li v-for="dataset in results.datasets">
+                <a :href="dataset.page" :title="dataset.title" class="unstyled">
+                  <Dataset v-bind="dataset" />
+                </a>
+              </li>
+            </ul>
+            <a class="nav-link pt-md" :href="datasetUrl">{{
+              $t("@@Rechercher dans les jeux de données")
+            }}</a>
+          </div>
         </div>
         <div class="p-md col col-md-12">
           <h2>
@@ -34,16 +47,29 @@
             enim egestas porta.
           </p>
           <reuse-loader class="my-md" v-if="loading" />
-          <ul class="reuse-cards row" v-else>
-            <li v-for="reuse in results.reuses" class="col text-align-center">
-              <a :href="reuse.page" :title="reuse.title" class="unstyled">
-                <Reuse v-bind="reuse" />
-              </a>
-            </li>
-          </ul>
-          <a class="nav-link pt-md" :href="reuseUrl"
-            >Rechercher dans les réutilisations</a
-          >
+          <Empty
+            v-else-if="!results.reuses.length > 0"
+            :cta="$t('@@Voir toutes les réutilisations')"
+            :copy="
+              $t(
+                '@@Nous n’avons pas de réutilisation correspondant à votre requête'
+              )
+            "
+            :queryString="queryString"
+            :link="reuseUrl"
+          />
+          <div class="my-md cards-container" v-else>
+            <ul class="reuse-cards row">
+              <li v-for="reuse in results.reuses" class="col text-align-center">
+                <a :href="reuse.page" :title="reuse.title" class="unstyled">
+                  <Reuse v-bind="reuse" />
+                </a>
+              </li>
+            </ul>
+            <a class="nav-link pt-md" :href="reuseUrl">{{
+              $t("@@Rechercher dans les réutilisations")
+            }}</a>
+          </div>
         </div>
       </div>
     </div>
@@ -56,7 +82,7 @@ import Dataset from "../dataset/card";
 import DatasetLoader from "../dataset/loader";
 import Reuse from "../reuse/card";
 import ReuseLoader from "../reuse/loader";
-
+import Empty from "./empty.vue";
 
 import config from "../../config";
 import { generateCancelToken } from "../../plugins/api";
@@ -73,6 +99,7 @@ export default {
     Reuse,
     DatasetLoader,
     ReuseLoader,
+    Empty,
   },
   data() {
     return {
