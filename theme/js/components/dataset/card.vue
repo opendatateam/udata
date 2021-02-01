@@ -1,5 +1,5 @@
 <template>
-  <article class="dataset-card no-border">
+  <article class="dataset-card compact">
     <div class="card-logo">
       <Placeholder type="reuse" :src="image_url" :alt="title" />
     </div>

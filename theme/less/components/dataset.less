@@ -7,7 +7,7 @@ category: Components
 Datasets cards are used to display... data sets.
 Pretty simple layout that could be achieved using the standard grid, but using a customized component allow for less verbose and less redundant HTML.
 
-There's also a `.no-border` version for smaller areas (like the search popover) without separators
+There's also a `.compact` version for smaller areas (like the search popover) without separators and overall smaller elements.
 
 ```datasets.html
 <article class="dataset-card">
@@ -31,7 +31,7 @@ There's also a `.no-border` version for smaller areas (like the search popover) 
 </article>
 ```
 
-```dataset-no-border.html
+```dataset-compact.html
 <article class="dataset-card compact">
     <div class="card-logo">
         <img src="https://static.data.gouv.fr/avatars/3c/2a35d973814c2681b6941e11810ff3-100.png" alt="Ministère xxx" />
@@ -84,10 +84,10 @@ There's also a `.no-border` version for smaller areas (like the search popover) 
 
         ul {
             display: flex;
+            font-size: @font-size-sm;
 
             li {
                 color: @grey-300;
-                font-size: @font-size-sm;
 
                 + li {
                     margin-left: 15px;
@@ -111,7 +111,22 @@ There's also a `.no-border` version for smaller areas (like the search popover) 
         background: @grey-200;
     }
 
-    &.no-border {
+    //Smaller version with no border for display in small spaces (search box for instance)
+    &.compact {
+        padding: @spacing-xs 0;
+
+        .card-logo {
+            flex: 0 1 80px;
+
+            img {
+                max-width: 80px;
+            }
+        }
+
+        .card-features {
+            font-size: @font-size-xs!important;
+        }
+
         &:after {
             display: none;
         }
