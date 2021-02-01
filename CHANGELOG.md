@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Keep tracking to strictly necessary [#517](https://github.com/etalab/udata-gouvfr/pull/517)
+- Changed the title of the elections inventory page [#520](https://github.com/etalab/udata-gouvfr/pull/520)
 
 ## 2.5.1 (2021-01-26)
 
