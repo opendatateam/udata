@@ -12,7 +12,7 @@
             accumsan, in varius lectus. Elementum a facilisis nibh pellentesque
             enim egestas porta.
           </p>
-          <span v-if="loading" key="dataset-loader" v-html="DatasetsLoader" />
+          <dataset-loader v-if="loading" />
           <ul v-else>
             <li v-for="dataset in results.datasets">
               <a :href="dataset.page" :title="dataset.title" class="unstyled">
@@ -33,7 +33,7 @@
             accumsan, in varius lectus. Elementum a facilisis nibh pellentesque
             enim egestas porta.
           </p>
-          <span v-if="loading" key="reuses-loader" v-html="ReusesLoader" />
+          <reuse-loader class="my-md" v-if="loading" />
           <ul class="reuse-cards row" v-else>
             <li v-for="reuse in results.reuses" class="col text-align-center">
               <a :href="reuse.page" :title="reuse.title" class="unstyled">
@@ -53,12 +53,10 @@
 <script>
 import SearchInput from "./search-input";
 import Dataset from "../dataset/card";
+import DatasetLoader from "../dataset/loader";
 import Reuse from "../reuse/card";
+import ReuseLoader from "../reuse/loader";
 
-import DatasetsLoader from "svg/loaders/datasets.svg";
-import ReusesLoader from "svg/loaders/reuses.svg";
-
-console.log(DatasetsLoader, ReusesLoader);
 
 import config from "../../config";
 import { generateCancelToken } from "../../plugins/api";
@@ -73,6 +71,8 @@ export default {
     SearchInput,
     Dataset,
     Reuse,
+    DatasetLoader,
+    ReuseLoader,
   },
   data() {
     return {
@@ -80,8 +80,6 @@ export default {
       loading: true,
       currentRequest: null,
       queryString: "",
-      DatasetsLoader,
-      ReusesLoader
     };
   },
   computed: {

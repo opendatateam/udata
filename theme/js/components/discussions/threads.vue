@@ -3,7 +3,7 @@
     <ModalsContainer></ModalsContainer>
     <transition mode="out-in">
       <div v-if="loading" key="loader">
-        <span class="mt-md" v-html="LoaderSvg" />
+        <Loader class="mt-md" />
       </div>
       <div v-else ref="top" key="top">
         <div v-if="threadFromURL">
@@ -81,7 +81,7 @@ import i18n from "../../plugins/i18n";
 import Pagination from "../pagination/pagination.vue";
 import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
-import LoaderSvg from "svg/loaders/threads.svg";
+import Loader from "./loader.vue"
 import CloseIcon from "svg/close.svg";
 
 const log = console.log;
@@ -100,6 +100,7 @@ export default {
     "create-thread": CreateThread,
     Thread,
     Pagination,
+    Loader
   },
   data() {
     return {
@@ -111,7 +112,6 @@ export default {
       loading: true,
       current_sort: sorts[0],
       sorts,
-      LoaderSvg,
       CloseIcon,
     };
   },
