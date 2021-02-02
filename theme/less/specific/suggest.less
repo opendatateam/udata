@@ -15,6 +15,11 @@
 
         box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.02),
             0px 10px 10px rgba(0, 0, 0, 0.04), 0px 4px 4px rgba(0, 0, 0, 0.1);
+
+        @media @query-md {
+            border-radius: 0;
+            padding: 0;
+        }
     }
 
     .see-all {
@@ -111,6 +116,10 @@
         will-change: transform filter opacity;
         transition: @suggest-transition;
         transition-property: transform filter opacity;
+    }
+
+    .search-box {
+        transition: background @suggest-transition;
     }
 
     //Shifting them with the same timing
