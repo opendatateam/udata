@@ -1,3 +1,7 @@
+<!--
+Nothing to see here ! Well actually it's a small component that says this.
+-->
+
 <template>
   <div class="search-empty bg-grey-50 p-lg my-md pb-hg">
     <div v-html="Empty" />
@@ -20,7 +24,7 @@ export default {
     queryString: String,
     cta: String,
     copy: String,
-    link: String
+    link: String,
   },
   data() {
     return {

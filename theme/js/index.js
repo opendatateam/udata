@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 
 import Threads from "./components/discussions/threads.vue";
-import Search from "./components/search/search";
+import Suggest from "./components/search/suggest-box";
 
 import Tabs from "./components/vanilla/tabs";
 import Accordion from "./components/vanilla/accordion";
@@ -26,7 +26,7 @@ app.use(i18n);
 app.use(Toaster);
 
 app.component("discussion-threads", Threads);
-app.component("search", Search);
+app.component("suggest", Suggest);
 
 app.mount("#app");
 

@@ -26,7 +26,8 @@
             <div class="col-5 col-lg-12">
                 <h1 class="mb-lg-md">{{ _('@@Plateforme ouverte des données publiques françaises') }}</h1>
                 <form action="/search" method="get" class="hero-search">
-                    <input type="text" name="q" placeholder="Recherche" />
+                    <input type="text" name="q" placeholder="{{_('@@Recherche')}}" aria-label="{{_('@@Recherche')}}"
+                        @keypress.prevent.stop="e => $refs.suggest.startSearch(e.key)" />
                 </form>
             </div>
             <div class="col-6 offset-1 offset-lg-0 mt-lg-lg col-lg-12 text-align-center">
