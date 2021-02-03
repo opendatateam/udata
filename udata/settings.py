@@ -446,7 +446,7 @@ class Defaults(object):
 
     API_DOC_EXTERNAL_LINK = 'https://doc.data.gouv.fr/api/reference/'
 
-    # Read Only Mode 
+    # Read Only Mode
     ####################
     # This mode can be used to mitigate a spam attack for example.
     # It disables the methods listed in the following block list.

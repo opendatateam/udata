@@ -25,12 +25,14 @@
                             {{ _('Recover your password') }}
                         </a>
                     </p>
+                    {% if config.SECURITY_CONFIRMABLE %}
                     <p>
                         {{ _('Confirmation instructions not received?') }}
                         <a href="{{ url_for('security.send_confirmation') }}">
                             {{ _('Send the instructions again') }}
                         </a>
                     </p>
+                    {% endif %}
                 </fieldset>
             </form>
     </div>

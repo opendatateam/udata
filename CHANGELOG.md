@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix SECURITY_CONFIRMABLE=False [#2588](https://github.com/opendatateam/udata/pull/2588)
 - Support dct:license on DCAT harvester [#2589](https://github.com/opendatateam/udata/pull/2589)
 
 ## 2.6.1 (2021-01-26)
