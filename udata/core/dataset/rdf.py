@@ -418,6 +418,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
                 licenses.add(value.identifier.toPython())
 
     default_license = dataset.license or License.default()
-    dataset.license = License.guess(*licenses, default=default_license)
+    dataset_license = rdf_value(d, DCT.license)
+    dataset.license = License.guess(dataset_license, *licenses, default=default_license)
 
     return dataset
