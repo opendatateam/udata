@@ -17,7 +17,7 @@
             cursor: pointer;
             text-decoration: none;
 
-            &.previous, &.next {
+            &.previous, &.next, &.first, &.last {
                 width: 35px;
                 height: 35px;
 
@@ -35,6 +35,10 @@
 
                 &:hover {
                     background-color: @grey-300;
+                }
+
+                &.first, &.last {
+                    background-image: none;
                 }
             }
 
@@ -64,6 +68,24 @@
 
         span {
             pointer-events: none;
+        }
+    }
+
+    &.light {
+        li {
+            a, span {
+                &.active, &:hover {
+                    color: @grey-400;
+                }
+
+                &.previous, &.next, &.last, &.first  {
+                    background-color: @grey-400;
+
+                    &:hover {
+                        background-color: @grey-300;
+                    }
+                }
+            }
         }
     }
 }
