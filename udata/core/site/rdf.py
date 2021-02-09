@@ -8,12 +8,13 @@ from rdflib.namespace import RDF, FOAF
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.rdf import DCAT, DCT, HYDRA, namespace_manager
 from udata.utils import Paginable
+from udata.uris import endpoint_for
 
 
 def build_catalog(site, datasets, format=None):
     '''Build the DCAT catalog for this site'''
-    site_url = url_for('site.home_redirect', _external=True)
-    catalog_url = url_for('site.rdf_catalog', _external=True)
+    site_url = endpoint_for('site.home_redirect', 'api.site', _external=True)
+    catalog_url = url_for('api.site_rdf_catalog', _external=True)
     graph = Graph(namespace_manager=namespace_manager)
     catalog = graph.resource(URIRef(catalog_url))
 
@@ -42,10 +43,10 @@ def build_catalog(site, datasets, format=None):
             '_external': True,
         }
 
-        first_url = url_for('site.rdf_catalog_format', page=1, **kwargs)
-        page_url = url_for('site.rdf_catalog_format',
+        first_url = url_for('api.site_rdf_catalog_format', page=1, **kwargs)
+        page_url = url_for('api.site_rdf_catalog_format',
                            page=datasets.page, **kwargs)
-        last_url = url_for('site.rdf_catalog_format',
+        last_url = url_for('api.site_rdf_catalog_format',
                            page=datasets.pages, **kwargs)
         pagination = graph.resource(URIRef(page_url))
         pagination.set(RDF.type, HYDRA.PartialCollectionView)
@@ -53,11 +54,11 @@ def build_catalog(site, datasets, format=None):
         pagination.set(HYDRA.first, URIRef(first_url))
         pagination.set(HYDRA.last, URIRef(last_url))
         if datasets.has_next:
-            next_url = url_for('site.rdf_catalog_format',
+            next_url = url_for('api.site_rdf_catalog_format',
                                page=datasets.page + 1, **kwargs)
             pagination.set(HYDRA.next, URIRef(next_url))
         if datasets.has_prev:
-            prev_url = url_for('site.rdf_catalog_format',
+            prev_url = url_for('api.site_rdf_catalog_format',
                                page=datasets.page - 1, **kwargs)
             pagination.set(HYDRA.previous, URIRef(prev_url))
 

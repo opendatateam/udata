@@ -1,0 +1,57 @@
+{% extends theme('admin/base.html') %}
+
+{% block tab_content %}
+<div class="row">
+    <div class="col-xs-12">
+        <table class="table table-stripped jobs-table">
+            <thead>
+                <tr>
+                    <th width="20px" class="text-center"></th>
+                    <th>{{ _('Name') }}</th>
+                    <th>{{ _('Maintainer') }}</th>
+                    <th width="100px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr class="oauth-client" data-id="{{ client.id }}">
+                    <td class="text-center">
+                        <img src="{{ client.image(20)|placeholder }}"
+                            width="20" height="20" alt="{{ client.name }}">
+                    </td>
+                    <td>{{ client.name }}</td>
+                    <td class="maintainer">
+                        <a href="{{ client|owner_url }}">
+                        {{ client|owner_avatar(20) }}
+                        {{ client|owner_name }}
+                        </a>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-xs">
+                            <button class="btn btn-warning client-edit" title="{{ _('Edit') }}">
+                                <span class="fa fa-fw fa-edit"></span>
+                            </button>
+                            <a class="btn btn-danger client-delete" title="{{ _('Delete') }}">
+                                <span class="fa fa-fw fa-times"></span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr class="empty {% if jobs %}hide{% endif %}">
+                    <td colspan="5" class="text-center">{{ _('No OAuth clients') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <a class="btn btn-success add-btn pull-right">
+            <span class="fa fa-plus-circle"></span>
+            {{ _('Add a client') }}
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@ from udata.utils import get_by
 
 from udata.utils import faker
 from udata.tests.api import APITestCase
-from udata.tests.features.territories.test_territories_process import (
+from udata.tests.features.territories import (
     create_geozones_fixtures, TerritoriesSettings
 )
 from udata.tests.helpers import assert_json_equal
@@ -16,7 +16,7 @@ from udata.core.spatial.factories import (
 
 
 class SpatialApiTest(APITestCase):
-    modules = ['core.dataset']
+    modules = []
 
     def test_zones_api_one(self):
         zone = GeoZoneFactory()
@@ -395,7 +395,7 @@ class SpatialApiTest(APITestCase):
 
 
 class SpatialTerritoriesApiTest(APITestCase):
-    modules = ['core.dataset']
+    modules = []
     settings = TerritoriesSettings
 
     def test_zone_datasets_with_dynamic_and_setting(self):

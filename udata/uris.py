@@ -1,6 +1,7 @@
 import re
 
-from flask import current_app
+from werkzeug.routing import BuildError
+from flask import current_app, url_for
 from netaddr import IPAddress, AddrFormatError
 
 from udata.settings import Defaults
@@ -61,6 +62,16 @@ def config_for(value, key):
         return current_app.config[key]
     except RuntimeError:
         return getattr(Defaults, key)
+
+
+def endpoint_for(endpoint, fallback_endpoint=None, **values):
+    try:
+        return url_for(endpoint, **values)
+    except BuildError:
+        if fallback_endpoint:
+            return url_for(fallback_endpoint, **values)
+        return None
+
 
 
 def idna(string):

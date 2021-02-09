@@ -40,7 +40,7 @@ topic_fields = api.model('Topic', {
         description='The topic API URI', readonly=True),
     'page': fields.UrlFor(
         'topics.display', lambda o: {'topic': o},
-        description='The topic page URL', readonly=True),
+        description='The topic page URL', readonly=True, fallback_endpoint='api.topic'),
 }, mask='*,datasets{id,title,uri,page},reuses{id,title, image, image_thumbnail,uri,page}')
 
 

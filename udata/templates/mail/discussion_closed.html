@@ -1,0 +1,46 @@
+{% extends theme('mail/base.html') %}
+{% from theme('mail/button.html') import mail_button %}
+
+{% block body %}
+<p style="margin: 0;padding: 0;">{{
+    _('%(user)s closed an discussion on your %(type)s %(subject)s',
+        type=discussion.subject.verbose_name,
+        user=(
+            '<a href="'|safe
+            + url_for('users.show', user=message.posted_by, _external=True)
+            + '">'|safe
+            + message.posted_by.fullname
+            + '</a>'|safe
+        ),
+        subject=(
+            '<a href="'|safe
+            + discussion.external_url
+            + '">'|safe
+            + discussion.subject|string
+            + '</a>'|safe
+        )
+    )
+}}.</p>
+<br/>
+<p style="margin: 0;padding: 0;">
+    <b>{{ _('Title') }}:</b>
+    {{ discussion.title }}
+</p>
+
+<p style="margin: 0;padding: 0;">
+    <b>{{ _('Message') }}:</b>
+    {{ message.content | markdown }}
+</p>
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td align="center">
+            {{ mail_button(
+                _('See the discussion'),
+                discussion.external_url
+            ) }}
+        </td>
+    </tr>
+</table>
+{% endblock %}

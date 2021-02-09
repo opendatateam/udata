@@ -3,11 +3,11 @@ This module centralize organization helpers
 for RDF/DCAT serialization and parsing
 '''
 
-from flask import url_for
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, RDFS, FOAF
 
 from udata.rdf import namespace_manager
+from udata.uris import endpoint_for
 
 
 def organization_to_rdf(org, graph=None):
@@ -16,9 +16,8 @@ def organization_to_rdf(org, graph=None):
     '''
     graph = graph or Graph(namespace_manager=namespace_manager)
     if org.id:
-        org_url = url_for('organizations.show_redirect',
-                          org=org.id,
-                          _external=True)
+        org_url = endpoint_for('organizations.show_redirect', 'api.organization',
+                                org=org.id, _external=True)
         id = URIRef(org_url)
     else:
         id = BNode()

@@ -33,6 +33,7 @@ def get_current_theme():
 current = LocalProxy(get_current_theme)
 
 
+#TO DELETE
 default_menu = nav.Bar('default_menu', [
     nav.Item(_('Organizations'), 'organizations.list'),
     nav.Item(_('Datasets'), 'datasets.list'),
@@ -143,6 +144,9 @@ def render(template, **context):
         * Theme
     '''
     theme = current_app.config['THEME']
+    themo = get_theme(theme)
+    print(template)
+    print(themo.templates_path)
     return render_theme_template(get_theme(theme), template, **context)
 
 

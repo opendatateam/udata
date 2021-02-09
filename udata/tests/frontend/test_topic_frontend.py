@@ -7,7 +7,7 @@ from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.dataset.search import DatasetSearch
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.topic.factories import TopicFactory
-from udata.core.topic.views import topic_search_for
+from udata.core.topic.search import topic_search_for
 
 
 class TopicSearchTest(SearchTestMixin, TestCase):

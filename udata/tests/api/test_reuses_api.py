@@ -23,7 +23,7 @@ pytestmark = [
 
 
 class ReuseAPITest:
-    modules = ['core.dataset', 'core.reuse', 'core.user', 'core.organization']
+    modules = []
 
     def test_reuse_api_list(self, api, autoindex):
         '''It should fetch a reuse list from the API'''
@@ -323,7 +323,7 @@ class ReuseAPITest:
 
 
 class ReuseBadgeAPITest:
-    modules = ['core.dataset', 'core.reuse', 'core.user', 'core.organization']
+    modules = []
 
     @pytest.fixture(autouse=True)
     def setup(self, api, clean_db):
@@ -387,7 +387,7 @@ class ReuseBadgeAPITest:
 
 
 class ReuseReferencesAPITest:
-    modules = ['core.reuse']
+    modules = []
 
     def test_reuse_types_list(self, api):
         '''It should fetch the reuse types list from the API'''

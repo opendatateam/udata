@@ -105,7 +105,7 @@ dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
         description='The API URI for this dataset', readonly=True),
     'page': fields.UrlFor(
         'datasets.show', lambda d: {'dataset': d},
-        description='The web page URL for this dataset', readonly=True),
+        description='The web page URL for this dataset', readonly=True, fallback_endpoint='api.dataset'),
 })
 
 community_resource_fields = api.inherit('CommunityResource', resource_fields, {
@@ -185,7 +185,7 @@ dataset_fields = api.model('Dataset', {
         description='The dataset API URI', required=True),
     'page': fields.UrlFor(
         'datasets.show', lambda o: {'dataset': o},
-        description='The dataset page URL', required=True),
+        description='The dataset page URL', required=True, fallback_endpoint='api.dataset'),
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
@@ -205,7 +205,7 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
         description='The dataset (organization) logo URL'),
     'page': fields.UrlFor(
         'datasets.show_redirect', lambda d: {'dataset': d['slug']},
-        description='The web page URL for this dataset'),
+        description='The web page URL for this dataset', fallback_endpoint='api.dataset'),
     'score': fields.Float(description='The internal match score'),
 })
 

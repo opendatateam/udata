@@ -1,0 +1,15 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('%(user)s submitted a new discussion on your %(type)s %(subject)s',
+        type=discussion.subject.verbose_name,
+        user=discussion.user.fullname,
+        subject=discussion.subject|string
+) }}.
+
+
+{{ _('Title') }}: {{ discussion.title }}
+
+{{ _('You can see the discussion on this page:') }}
+{{ discussion.subject.external_url }}
+{% endblock %}

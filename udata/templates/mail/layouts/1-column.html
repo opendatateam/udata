@@ -1,0 +1,19 @@
+{% extends theme('base.html') %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
+{% set section_class = section_class|default('default') %}
+{% set toolbar_class = toolbar_class|default('') %}
+
+{% block content %}
+{{ breadcrumb(self,
+    breadcrum_class=breadcrum_class,
+    toolbar_class=toolbar_class
+) }}
+
+<section class="{{ section_class }}">
+    <div class="{{ container_class }}">
+        {% block main_content %}{% endblock %}
+    </div>
+</section>
+
+{% block extra_sections %}{% endblock %}
+{% endblock %}

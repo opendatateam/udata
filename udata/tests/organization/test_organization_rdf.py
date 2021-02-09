@@ -4,8 +4,8 @@ from rdflib import URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF, RDFS
 from rdflib.resource import Resource as RdfResource
 
+from udata import api
 from udata.tests import TestCase, DBTestMixin
-from udata.core.organization.views import blueprint as org_blueprint
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.rdf import organization_to_rdf
 from udata.utils import faker
@@ -14,7 +14,7 @@ from udata.utils import faker
 class OrganizationToRdfTest(DBTestMixin, TestCase):
     def create_app(self):
         app = super(OrganizationToRdfTest, self).create_app()
-        app.register_blueprint(org_blueprint)
+        api.init_app(app)
         return app
 
     def test_minimal(self):
@@ -33,7 +33,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
 
     def test_all_fields(self):
         org = OrganizationFactory(url=faker.uri())
-        org_url = url_for('organizations.show_redirect',
+        org_url = url_for('api.organization',
                           org=org.id,
                           _external=True)
         o = organization_to_rdf(org)

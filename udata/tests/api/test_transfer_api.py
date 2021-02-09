@@ -12,7 +12,7 @@ from . import APITestCase
 
 
 class TransferAPITest(APITestCase):
-    modules = ['core.user', 'core.dataset']
+    modules = []
 
     @patch('udata.features.transfer.api.request_transfer')
     def test_request_dataset_transfer(self, action):

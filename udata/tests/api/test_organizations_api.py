@@ -23,15 +23,13 @@ from udata.tests.helpers import (
     assert_status
 )
 
-import udata.core.badges.tasks  # noqa
-
 pytestmark = [
     pytest.mark.usefixtures('clean_db'),
 ]
 
 
 class OrganizationAPITest:
-    modules = ['core.organization', 'core.user']
+    modules = []
 
     def test_organization_api_list(self, api, autoindex):
         '''It should fetch an organization list from the API'''
@@ -153,7 +151,7 @@ class OrganizationAPITest:
 
 
 class MembershipAPITest:
-    modules = ['core.user', 'core.organization']
+    modules = []
 
     def test_request_membership(self, api):
         organization = OrganizationFactory()
@@ -627,7 +625,7 @@ class MembershipAPITest:
 
 
 class OrganizationDatasetsAPITest:
-    modules = ['core.organization', 'core.dataset']
+    modules = []
 
     def test_list_org_datasets(self, api):
         '''Should list organization datasets'''
@@ -676,7 +674,7 @@ class OrganizationDatasetsAPITest:
 
 
 class OrganizationReusesAPITest:
-    modules = ['core.organization', 'core.reuse']
+    modules = []
 
     def test_list_org_reuses(self, api):
         '''Should list organization reuses'''
@@ -713,7 +711,7 @@ class OrganizationReusesAPITest:
 
 
 class OrganizationIssuesAPITest:
-    modules = ['core.user']
+    modules = []
 
     def test_list_org_issues(self, api):
         '''Should list organization issues'''
@@ -741,7 +739,7 @@ class OrganizationIssuesAPITest:
 
 
 class OrganizationDiscussionsAPITest:
-    modules = ['core.user']
+    modules = []
 
     def test_list_org_discussions(self, api):
         '''Should list organization discussions'''
@@ -769,7 +767,7 @@ class OrganizationDiscussionsAPITest:
 
 
 class OrganizationBadgeAPITest:
-    modules = ['core.user', 'core.organization']
+    modules = []
 
     @pytest.fixture(autouse=True)
     def setUp(self, api, clean_db):
@@ -797,38 +795,6 @@ class OrganizationBadgeAPITest:
             assert201(response)
         self.organization.reload()
         assert len(self.organization.badges) is 1
-
-    def test_create_badge_certified_mail(self, api):
-        member = Member(user=self.user, role='admin')
-        org = OrganizationFactory(members=[member])
-
-        data = self.factory.as_dict()
-        data['kind'] = CERTIFIED
-
-        with capture_mails() as mails:
-            api.post(url_for('api.organization_badges', org=org), data)
-
-        # Should have sent one mail to each member of organization
-        members_emails = [m.user.email for m in org.members]
-        assert len(mails) == len(members_emails)
-        assert [m.recipients[0] for m in mails] == members_emails
-
-    def test_create_badge_public_service_mail(self, api):
-        member = Member(user=self.user, role='admin')
-        org = OrganizationFactory(members=[member])
-
-        data = self.factory.as_dict()
-        data['kind'] = PUBLIC_SERVICE
-
-        with capture_mails() as mails:
-            api.post(url_for('api.organization_badges', org=org), data)
-            # do it a second time, no email expected for this one
-            api.post(url_for('api.organization_badges', org=self.organization), data)
-
-        # Should have sent one mail to each member of organization
-        members_emails = [m.user.email for m in org.members]
-        assert len(mails) == len(members_emails)
-        assert [m.recipients[0] for m in mails] == members_emails
 
     def test_create_same(self, api):
         data = self.factory.as_dict()

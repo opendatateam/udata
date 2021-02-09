@@ -5,7 +5,6 @@ from flask import url_for
 from udata.models import Dataset, Member
 from udata.core.discussions.models import Message, Discussion
 from udata.core.discussions.notifications import discussions_notifications
-from udata.core.discussions.metrics import update_discussions_metric
 from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment,
     on_discussion_closed, on_discussion_deleted,
@@ -15,7 +14,6 @@ from udata.core.discussions.tasks import (
     notify_discussion_closed
 )
 from udata.core.dataset.factories import DatasetFactory
-from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.utils import faker
@@ -25,11 +23,11 @@ from .frontend import FrontTestCase
 
 from . import TestCase, DBTestMixin
 from .api import APITestCase
-from .helpers import assert_starts_with, capture_mails, assert_emit
+from .helpers import capture_mails, assert_emit
 
 
 class DiscussionsTest(APITestCase):
-    modules = ['core.user']
+    modules = []
 
     def test_new_discussion(self):
         user = self.login()
@@ -444,35 +442,6 @@ class DiscussionsTest(APITestCase):
         self.assert403(response)
 
 
-class DiscussionCsvTest(FrontTestCase):
-    modules = ['core.organization']
-
-    def test_discussions_csv_content_empty(self):
-        organization = OrganizationFactory()
-        response = self.get(
-            url_for('organizations.discussions_csv', org=organization))
-        self.assert200(response)
-
-        self.assertEqual(
-            response.data.decode('utf8'),
-            ('"id";"user";"subject";"title";"size";"messages";"created";'
-             '"closed";"closed_by"\r\n')
-        )
-
-    def test_discussions_csv_content_filled(self):
-        organization = OrganizationFactory()
-        dataset = DatasetFactory(organization=organization)
-        user = UserFactory(first_name='John', last_name='Snow')
-        discussion = DiscussionFactory(subject=dataset, user=user)
-        response = self.get(
-            url_for('organizations.discussions_csv', org=organization))
-        self.assert200(response)
-
-        headers, data = response.data.decode('utf-8').strip().split('\r\n')
-        expected = '"{discussion.id}";"{discussion.user}"'
-        assert_starts_with(data, expected.format(discussion=discussion))
-
-
 class DiscussionsNotificationsTest(TestCase, DBTestMixin):
     def test_notify_user_discussions(self):
         owner = UserFactory()
@@ -552,7 +521,7 @@ class DiscussionsNotificationsTest(TestCase, DBTestMixin):
 
 
 class DiscussionsMailsTest(FrontTestCase):
-    modules = ['core.user', 'core.dataset']
+    modules = []
 
     def test_new_discussion_mail(self):
         user = UserFactory()
