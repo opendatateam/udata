@@ -9,6 +9,8 @@ Pretty simple layout that could be achieved using the standard grid, but using a
 
 There's also a `.compact` version for smaller areas (like the search popover) without separators and overall smaller elements.
 
+For displaying dataset search results, a `.dataset-search-result` version is available. It's essentially the same informations in a different order, with a part that appears only on hover.
+
 ```datasets.html
 <article class="dataset-card">
     <div class="card-logo">
@@ -52,6 +54,32 @@ There's also a `.compact` version for smaller areas (like the search popover) wi
     </div>
 </article>
 ```
+
+```dataset-search-result.html
+<article class="dataset-card dataset-search-result">
+    <div class="card-logo">
+        <img alt=" " src="/_themes/gouvfr/img/placeholders/organization.png?_=1612877424.1487374">
+    </div>
+    <div class="card-data">
+        <h4 class="card-title">Recusandaeé suscipité ameté nihilé natusé doloreé magnié commodié.</h4>
+        <div class="card-description text-grey-300 mt-xs"> Quiaé aliasé exé. Architectoé laudantiumé corporisé
+            consequaturé laboriosamé esté. Teneturé incidunté voluptatemé minimaé fugité inventoreé fugiaté. </div>
+    </div>
+    <dl class="card-hover">
+        <div>
+            <dt>Frequency</dt>
+            <dd>Unknown</dd>
+            <dt>Other stuff</dt>
+            <dd>Any value</dd>
+        </div>
+    </dl>
+    <ul class="card-footer">
+        <li><strong>131</strong> ressources</li>
+        <li><strong>22</strong> réutilisations </li>
+        <li><strong>174</strong> abonnés </li>
+    </ul>
+</article>
+```
 */
 
 .dataset-card {
@@ -63,34 +91,35 @@ There's also a `.compact` version for smaller areas (like the search popover) wi
     padding: @spacing-sm 0;
 
     .card-logo {
-        flex: 0 1 100px;
+        flex: 0 0 100px;
 
         img {
-            max-width: 100px;
+            max-width: 100%;
         }
     }
 
     .card-data {
+        flex-grow: 1;
         position: relative;
-        padding: @spacing-xs;
+        margin: 0 @spacing-sm;
 
         h4 {
             margin-bottom: 0;
         }
-    }
 
-    .card-footer {
-        margin-top: @spacing-xs;
+        .card-footer {
+            margin-top: @spacing-xs;
 
-        ul {
-            display: flex;
-            font-size: @font-size-sm;
+            ul {
+                display: flex;
+                font-size: @font-size-sm;
 
-            li {
-                color: @grey-300;
+                li {
+                    color: @grey-300;
 
-                + li {
-                    margin-left: 15px;
+                    + li {
+                        margin-left: 15px;
+                    }
                 }
             }
         }
@@ -125,6 +154,85 @@ There's also a `.compact` version for smaller areas (like the search popover) wi
 
         .card-features {
             font-size: @font-size-xs!important;
+        }
+
+        &:after {
+            display: none;
+        }
+    }
+
+    //Fancier version for search results, with an hover section for details
+    &.dataset-search-result {
+        padding: 0; //Unfortunately, we need some sweet borders
+
+        border-top: 1px solid @grey-100;
+
+        >* {
+            padding: @spacing-md 0;
+        }
+
+        .card-logo {
+            padding: 0 @spacing-xs;
+        }
+
+        .card-hover {
+            flex-basis: 260px;
+            flex-shrink: 0;
+
+            visibility: hidden;
+            align-self: stretch;
+
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: @spacing-md;
+
+            border-left: 1px solid @grey-100;
+
+            >div {
+                flex-basis: 50%;
+                flex-grow: 1;
+                text-align: right;
+
+                margin-bottom: @spacing-sm;
+
+                color: @grey-300;
+                font-size: @font-size-xs;
+
+                dd {
+                    font-weight: @font-weight-bold;
+                }
+            }
+        }
+
+        &:hover {
+            background: @blue-100;
+
+            .card-hover {
+                visibility: visible;
+            }
+        }
+
+        .card-footer {
+            align-self: stretch;
+            border-left: 1px solid @grey-100;
+
+            flex-basis: 140px;
+            flex-shrink: 0;
+
+            text-align: right;
+            padding: @spacing-md;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            color: @grey-300;
+            font-size: @font-size-xs;
+
+            li {
+                margin: @spacing-xxs 0;
+            }
         }
 
         &:after {
