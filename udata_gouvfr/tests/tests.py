@@ -18,8 +18,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.frontend.markdown import md
 from udata.models import Badge
-from udata.settings import Testing
-from udata.tests.features.territories.test_territories_process import (
+from udata.tests.features.territories import (
     create_geozones_fixtures
 )
 from udata.utils import faker
@@ -30,16 +29,9 @@ from udata_gouvfr.models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
     TERRITORY_DATASETS, OPENFIELD16, SPD
 )
-from udata_gouvfr.views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 
-
-class GouvFrSettings(Testing):
-    TEST_WITH_THEME = True
-    TEST_WITH_PLUGINS = True
-    PLUGINS = ['gouvfr']
-    THEME = 'gouvfr'
-    WP_ATOM_URL = None  # Only activated on specific tests
-    DISCOURSE_URL = None  # Only activated on specific tests
+from udata_gouvfr.views.base import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
+from udata_gouvfr.tests import GouvFrSettings
 
 
 class GouvFrThemeTest:

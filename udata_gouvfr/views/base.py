@@ -2,7 +2,7 @@ import frontmatter
 import logging
 import requests
 
-from flask import url_for, redirect, abort, current_app
+from flask import url_for, redirect, abort, current_app, render_template
 from jinja2.exceptions import TemplateNotFound
 from mongoengine.errors import ValidationError
 
@@ -12,16 +12,17 @@ from udata.frontend import template_hook
 from udata.models import Reuse, Organization, Dataset
 from udata.i18n import I18nBlueprint
 from udata.sitemap import sitemap
+
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
 
-from .models import (
+from udata_gouvfr.models import (
     DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR, OPENFIELD16, SPD
 )
 
 log = logging.getLogger(__name__)
 
 blueprint = I18nBlueprint('gouvfr', __name__,
-                          template_folder='templates',
+                          template_folder='../templates',
                           static_folder='static',
                           static_url_path='/static/gouvfr')
 

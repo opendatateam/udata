@@ -5,7 +5,7 @@ from flask import current_app
 
 from udata.core.dataset.factories import DatasetFactory
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
-from udata_gouvfr.tests.tests import GouvFrSettings
+from udata_gouvfr.tests import GouvFrSettings
 from udata_gouvfr.tasks import apigouvfr_load_apis
 
 
