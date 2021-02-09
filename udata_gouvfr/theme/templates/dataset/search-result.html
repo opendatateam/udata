@@ -1,77 +1,71 @@
 {% cache cache_duration, 'dataset-search-result', dataset.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
-<li class="search-result dataset-result">
-    <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}">
-        {% if dataset.organization %}
-        <div class="result-logo pull-left">
-            <img alt="{{ dataset.organization.title }}"
-                src="{{ dataset.organization.logo(70)|placeholder('organization') }}"
-                width="70" height="70">
-        </div>
+<article class="dataset-card dataset-search-result">
+    {% if dataset.organization %}
+    <div class="card-logo">
+        <img alt=" {{ dataset.organization.title }}"
+            src="{{ dataset.organization.logo(80)|placeholder('organization') }}">
         {{ badge_if_certified(dataset.organization) }}
-        {% elif dataset.owner %}
-        <div class="result-logo pull-left">
-            <img alt="{{ dataset.owner.fullname }}"
-                src="{{ dataset.owner.avatar(70)|placeholder('user') }}"
-                width="70" height="70">
+    </div>
+    {% elif dataset.owner %}
+    <div class="card-logo">
+        <img alt="{{ dataset.owner.fullname }}" src="{{ dataset.owner.avatar(70)|placeholder('user') }}" width="70"
+            height="70">
+    </div>
+    {% else %}
+    <div class="card-logo">
+        <img src="{{ ''|placeholder('organization') }}" alt="">
+    </div>
+    {% endif %}
+    <div class="card-data">
+        <h4 class="card-title">{{ dataset.full_title }}</h4>
+        <div class="card-description text-grey-300 mt-xs">
+            {{ dataset.description|mdstrip(300) }}
         </div>
-        {% else %}
-        <div class="result-logo pull-left">
-            <img src="{{ ''|placeholder('organization') }}" alt="">
+    </div>
+
+    <dl class="card-hover">
+        {# Temporal coverage #}
+        {% if dataset.temporal_coverage %}
+        <div>
+            <dt>{{ _('Temporal coverage') }}</dt>
+            <dd>{{ dataset.temporal_coverage|daterange }}</dd>
         </div>
         {% endif %}
-        <div class="result-body">
-            <h4 class="result-title ellipsis">{{ dataset.full_title }}</h4>
 
-            <div class="result-description clamp-2">
-                {{ dataset.description|mdstrip(300) }}
-            </div>
+        {# Periodicity #}
+        {% if dataset.frequency %}
+        <div>
+            <dt>{{ _('Frequency') }}</dt>
+            <dd>{{ dataset.frequency_label }}</dd>
         </div>
+        {% endif %}
 
-        <ul class="list-inline result-infos">
+        {# Spatial coverage #}
+        {% if dataset.spatial.zones %}
+        <div>
+            <dt>{{ _('Spatial coverage') }}</dt>
+            <dd>{{ dataset.spatial.top_label }}</dd>
+        </div>
+        {% endif %}
 
-            {# Temporal coverage #}
-            {% if dataset.temporal_coverage %}
-            <li title="{{ _('Temporal coverage') }}">
-                <span class="fa fa-calendar fa-fw"></span>
-                {{ dataset.temporal_coverage|daterange }}
-            </li>
-            {% endif %}
+        {% if dataset.spatial.granularity %}
+        <div>
+            <dt>{{ _('Territorial coverage granularity') }}</dt>
+            <dd>{{ dataset.spatial.granularity_label }}</dd>
+        </div>
+        {% endif %}
 
-            {# Periodicity #}
-            {% if dataset.frequency %}
-            <li title="{{ _('Frequency') }}">
-                <span class="fa fa-clock-o fa-fw"></span>
-                {{ dataset.frequency_label }}
-            </li>
-            {% endif %}
-
-            {# Spatial coverage #}
-            {% if dataset.spatial.zones %}
-            <li title="{{ _('Spatial coverage') }}">
-                    <span class="fa fa-map-marker fa-fw"></span>
-                    {{ dataset.spatial.top_label }}
-            </li>
-            {% endif %}
-
-            {% if dataset.spatial.granularity %}
-            <li title="{{ _('Territorial coverage granularity') }}">
-                <span class="fa fa-bullseye fa-fw"></span>
-                {{ dataset.spatial.granularity_label }}
-            </li>
-            {% endif %}
-
-            <li title="{{ _('Reuse number') }}">
-                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
-                {{ dataset.metrics.reuses or 0 }}
-            </li>
-
-            <li title="{{ _('Number of followers') }}">
-                <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                {{ dataset.metrics.followers or 0 }}
-            </li>
-
-        </ul>
-    </a>
-</li>
+    </dl>
+    <ul class="card-footer">
+        <li>
+            <strong>{{ dataset.metrics.ressources or 0 }}</strong> {{ _('@@ressources') }}</li>
+        <li>
+            <strong>{{ dataset.metrics.reuses or 0 }}</strong> {{ _('@@réutilisations') }}
+        </li>
+        <li>
+            <strong>{{ dataset.metrics.followers or 0 }}</strong> {{ _('@@abonnés') }}
+        </li>
+    </ul>
+</article>
 {% endcache %}
