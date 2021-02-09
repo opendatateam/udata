@@ -23,6 +23,10 @@ It's a grid. You know how grids work. Even if you don't, you'll understand in no
 
 `.row-inline` can be used to create an inline "row" without margin. It simply sets a `display: flex` and `flex-wrap: wrap`.
 
+### Utilities
+
+`.w-100` can be used to apply a 100% width to an element. `w-auto` does the same for the `auto` value.
+
 ### Auto layout
 
 By default, `.col` classes allow for an easy auto-layout : they all take an equal space within the row.
@@ -281,3 +285,11 @@ each(@breakpoints, .(@bk, @_k, @_i) {
         }
     }
 });
+
+.w-100 {
+    width: 100%;
+}
+
+.w-auto {
+    width: auto;
+}
