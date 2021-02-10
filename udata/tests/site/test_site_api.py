@@ -13,7 +13,7 @@ from udata.tests.api import APITestCase
 
 
 class SiteAPITest(APITestCase):
-    modules = ['core.site', 'core.dataset', 'core.reuse', 'core.organization']
+    modules = []
 
     def test_get_site(self):
         response = self.get(url_for('api.site'))

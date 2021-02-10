@@ -18,7 +18,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 
 from udata.tests.helpers import (
-    capture_mails, assert_emit, assert_not_emit,
+    assert_emit, assert_not_emit,
     assert200, assert201, assert204, assert403, assert404, assert410,
     assert_status
 )

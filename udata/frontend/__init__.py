@@ -97,7 +97,7 @@ def _load_views(app, module):
         app.register_blueprint(blueprint)
 
 
-VIEWS = ['core.storages', 'core.tags', 'admin', 'search']
+VIEWS = ['core.storages', 'core.tags', 'admin']
 
 
 def init_app(app, views=None):

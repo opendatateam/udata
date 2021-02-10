@@ -9,6 +9,7 @@ from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
+from udata.uris import endpoint_for
 
 __all__ = ('Reuse', 'REUSE_TYPES')
 
@@ -117,7 +118,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
             cls.on_delete.send(document)
 
     def url_for(self, *args, **kwargs):
-        return url_for('reuses.show', reuse=self, *args, **kwargs)
+        return endpoint_for('reuses.show', 'api.reuse', reuse=self, *args, **kwargs)
 
     display_url = property(url_for)
 
@@ -160,7 +161,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
             'alternateName': self.slug,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.last_modified.isoformat(),
-            'url': url_for('reuses.show', reuse=self, _external=True),
+            'url': endpoint_for('reuses.show', 'api.reuse', reuse=self, _external=True),
             'name': self.title,
             'isBasedOnUrl': self.url,
         }
