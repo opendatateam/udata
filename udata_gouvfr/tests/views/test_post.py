@@ -12,7 +12,7 @@ from udata_gouvfr.tests import GouvFrSettings
 @pytest.mark.usefixtures('clean_db')
 class PostBlueprintTest:
     settings = GouvFrSettings
-    modules = ['admin', 'search']
+    modules = ['admin']
 
     def test_render_list(self, client, templates):
         '''It should render the post list page'''

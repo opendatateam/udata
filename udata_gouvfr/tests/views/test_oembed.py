@@ -186,7 +186,7 @@ class OEmbedSettings(Testing):
 
 class OEmbedsDatasetAPITest:
     modules = []
-    settings = GouvFrSettings
+    settings = OEmbedSettings
 
     @pytest.fixture(autouse=True)
     def copy_territoy_datasets(self):

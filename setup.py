@@ -72,6 +72,7 @@ setup(
             'gouvfr_user = udata_gouvfr.views.user',
             'gouvfr_follower = udata_gouvfr.views.follower',
             'gouvfr_territories = udata_gouvfr.views.territories',
+            'gouvfr_search = udata_gouvfr.views.search',
         ],
         'udata.apis': [
             'gouvfr_oembed = udata_gouvfr.views.oembed',
