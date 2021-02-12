@@ -5,6 +5,7 @@ from rdflib.namespace import RDF, FOAF, RDFS
 from rdflib.resource import Resource as RdfResource
 
 from udata import api
+from udata.rdf import DCAT, DCT, HYDRA
 from udata.tests import TestCase, DBTestMixin
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.rdf import organization_to_rdf, build_org_catalog
@@ -54,7 +55,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
 
     def test_catalog(self):
         origin_org = OrganizationFactory()
-        uri = url_for('organizations.rdf_catalog', org=origin_org.id, _external=True)
+        uri = url_for('api.organization_rdf', org=origin_org.id, _external=True)
 
         datasets = VisibleDatasetFactory.create_batch(3, organization=origin_org)
         catalog = build_org_catalog(origin_org, datasets)
@@ -84,10 +85,10 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         origin_org = OrganizationFactory()
         page_size = 3
         total = 4
-        uri = url_for('organizations.rdf_catalog', org=origin_org.id, _external=True)
-        uri_first = url_for('organizations.rdf_catalog_format', org=origin_org.id, format='json',
+        uri = url_for('api.organization_rdf', org=origin_org.id, _external=True)
+        uri_first = url_for('api.organization_rdf_format', org=origin_org.id, format='json',
                             page=1, page_size=page_size, _external=True)
-        uri_last = url_for('organizations.rdf_catalog_format', org=origin_org.id, format='json',
+        uri_last = url_for('api.organization_rdf_format', org=origin_org.id, format='json',
                            page=2, page_size=page_size, _external=True)
         VisibleDatasetFactory.create_batch(total, organization=origin_org)
 

@@ -200,9 +200,9 @@ class DatasetRdfFormatAPI(API):
     def get(self, dataset, format):
         if not DatasetEditPermission(dataset).can():
             if dataset.private:
-                abort(404)
+                api.abort(404)
             elif dataset.deleted:
-                abort(410)
+                api.abort(410)
 
         resource = dataset_to_rdf(dataset)
         return graph_response(resource, format)

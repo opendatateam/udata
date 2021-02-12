@@ -7,7 +7,7 @@ from udata.auth import admin_permission
 from udata.models import Dataset, Reuse
 from udata.utils import multi_to_dict
 from udata.rdf import (
-    CONTEXT, RDF_MIME_TYPES, RDF_EXTENSIONS,
+    CONTEXT, RDF_EXTENSIONS,
     negociate_content, graph_response
 )
 

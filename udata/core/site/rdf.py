@@ -40,6 +40,6 @@ def build_catalog(site, datasets, format=None):
         catalog.add(DCAT.dataset, rdf_dataset)
 
     if isinstance(datasets, Paginable):
-        paginate_catalog(catalog, graph, datasets, format, 'api.rdf_catalog_format')
+        paginate_catalog(catalog, graph, datasets, format, 'api.site_rdf_catalog_format')
 
     return catalog
