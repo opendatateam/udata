@@ -60,3 +60,4 @@ nosetests.xml
 
 udata.cfg
 stylemark/
+.parcel-cache

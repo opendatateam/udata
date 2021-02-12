@@ -3,55 +3,58 @@
   "version": "1.0.0",
   "description": "Open Data Portal - French customization",
   "author": "Etalab",
-  "license": "MIT",
   "scripts": {
-    "format": "stylelint 'theme/less/**/*.less' --fix",
-    "check-rules": "stylelint 'theme/less/**/*.less' --config .stylelintrc_browser",
-    "watch-style": "parcel theme/js/index.js theme/less/index.less -d udata_gouvfr/theme/static/",
-    "build-stylemark": "parcel build theme/less/index.less -d udata_gouvfr/theme/static/stylemark --no-minify && parcel build theme/js/index.js -d udata_gouvfr/theme/static/stylemark --no-minify &&  stylemark -c .stylemark.yml -i udata_gouvfr/theme/static/stylemark/ -o udata_gouvfr/theme/stylemark/",
-    "build-style": "parcel build theme/less/index.less theme/js/index.js -d udata_gouvfr/theme/static/",
-    "dev": "npm run-script watch-style",
-    "build": "npm run-script build-style && npm run-script build-stylemark",
-    "start": "npm run-script dev"
+    "dev": "npm run clean && npm run watch",
+    "build": "npm run clean && npm run build:stylemark && npm run build:app",
+    "build:app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/static/",
+    "build:stylemark": "npm run build:app -- --no-minify",
+    "i18n:report": "vue-i18n-extract report -v 'theme/**/*.vue' -l 'theme/js/locales/**/*'",
+    "i18n:extract": "npm run i18n:report -- -a",
+    "clean": "rimraf .parcel-cache",
+    "start": "npm run dev",
+    "watch": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/static/"
   },
   "dependencies": {
+    "@meforma/vue-toaster": "^1.2.0",
+    "@parcel/transformer-less": "^2.0.0-alpha.3",
+    "axios": "^0.21.0",
+    "dayjs": "^1.9.6",
+    "less": "^3.13.1",
+    "parcel-reporter-copystatic": "^1.0.0",
+    "parcel-reporter-stylemark": "^1.0.0",
+    "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",
-    "v-clipboard": "^2.2.3",
-    "vue": "^2.6.12",
-    "vue-js-modal": "^2.0.0-rc.6",
+    "prettier": "^2.2.1",
+    "vue": "^3.0.0-beta.1",
+    "vue-content-loader": "^2.0.0",
+    "vue-final-modal": "^3.0.0-beta.1",
+    "vue-i18n": "^9.0.0-rc.2",
+    "vue3-clipboard": "^1.0.0",
     "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "@vue/compiler-sfc": "^3.0.0-beta.1",
+    "autoprefixer": "^9.8.6",
+    "browserslist": "^4.0.0",
+    "cssnano": "^4.1.10",
+    "parcel": "^2.0.0-beta.1",
+    "postcss": "^8.2.3",
+    "postcss-normalize": "^9.0.0",
+    "rimraf": "^3.0.2",
+    "stylemark": "^3.1.7",
+    "vue-i18n-extract": "^1.1.10"
   },
   "staticFiles": {
     "staticPath": [
       {
         "staticPath": "theme/img",
-        "staticOutDir": "/img/"
+        "staticOutDir": "udata_gouvfr/theme/static/img/"
       }
     ]
   },
-  "devDependencies": {
-    "@vue/component-compiler-utils": "^3.2.0",
-    "autoprefixer": "^9.8.6",
-    "browserslist": "^4.0.0",
-    "concurrently": "^5.3.0",
-    "cssnano": "^4.1.10",
-    "eslint": "^7.6.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-compat": "^3.8.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "less": "^3.12.2",
-    "parcel-bundler": "^1.12.4",
-    "parcel-plugin-static-files-copy": "^2.5.0",
-    "postcss-modules": "^3.2.0",
-    "postcss-normalize": "^9.0.0",
-    "prettier": "2.0.5",
-    "stylelint": "^13.6.1",
-    "stylelint-config-rational-order": "^0.1.2",
-    "stylelint-config-standard": "^20.0.0",
-    "stylelint-no-unsupported-browser-features": "^4.0.0",
-    "stylelint-order": "^4.1.0",
-    "stylemark": "^3.1.7",
-    "vue-hot-reload-api": "^2.3.4",
-    "vue-template-compiler": "^2.6.12"
-  }
+  "alias": {
+    "svg": "./udata_gouvfr/theme/templates/svg",
+    "vue": "vue/dist/vue.cjs.js"
+  },
+  "license": "MIT"
 }

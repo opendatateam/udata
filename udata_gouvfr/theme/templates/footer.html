@@ -1,5 +1,4 @@
-{% cache cache_duration, 'footer', g.lang_code|default(config.DEFAULT_LANGUAGE)|string,
-'-'.join((package_version('udata'), package_version('udata-gouvfr'))) %}
+{% cache cache_duration, 'footer', g.lang_code|default(config.DEFAULT_LANGUAGE)|string,'-'.join((package_version('udata'), package_version('udata-gouvfr'))) %}
 <section class="footer py-hg py-md-md">
     <div class="container">
         <footer class="row">
@@ -108,7 +107,7 @@
             </section>
             <section class="col-3 col-hg-6 col-md-12 self-end lang-picker">
                 <div class="btn-secondary btn-secondary-grey-400 dropdown">
-                    <select id="lang-picker">
+                    <select id="lang-picker" aria-label="{{ _('@@Lang selector') }}">
                         <option selected>Français</option>
                         <option>English</option>
                     </select>

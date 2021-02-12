@@ -7,6 +7,8 @@ category: Components
 Datasets cards are used to display... data sets.
 Pretty simple layout that could be achieved using the standard grid, but using a customized component allow for less verbose and less redundant HTML.
 
+There's also a `.compact` version for smaller areas (like the search popover) without separators and overall smaller elements.
+
 ```datasets.html
 <article class="dataset-card">
     <div class="card-logo">
@@ -29,6 +31,27 @@ Pretty simple layout that could be achieved using the standard grid, but using a
 </article>
 ```
 
+```dataset-compact.html
+<article class="dataset-card compact">
+    <div class="card-logo">
+        <img src="https://static.data.gouv.fr/avatars/3c/2a35d973814c2681b6941e11810ff3-100.png" alt="Ministère xxx" />
+    </div>
+    <div class="card-cert">
+        <img src="https://placehold.it/18x24" alt="Certified dataset" />
+    </div>
+    <div class="card-data">
+        <h4 class="card-body">
+            Données « temps réel » de mesure des concentrations de polluants atmosphériques réglementés
+        </h4>
+        <div class="card-footer">
+            <ul class="card-features">
+                <li>252 ressources</li>
+                <li>2 réutilisations</li>
+            </ul>
+        </div>
+    </div>
+</article>
+```
 */
 
 .dataset-card {
@@ -61,10 +84,10 @@ Pretty simple layout that could be achieved using the standard grid, but using a
 
         ul {
             display: flex;
+            font-size: @font-size-sm;
 
             li {
                 color: @grey-300;
-                font-size: @font-size-sm;
 
                 + li {
                     margin-left: 15px;
@@ -86,5 +109,26 @@ Pretty simple layout that could be achieved using the standard grid, but using a
         width: calc(100% - 135px); //Minus the image width + little margin
         height: 1px;
         background: @grey-200;
+    }
+
+    //Smaller version with no border for display in small spaces (search box for instance)
+    &.compact {
+        padding: @spacing-xs 0;
+
+        .card-logo {
+            flex: 0 1 80px;
+
+            img {
+                max-width: 80px;
+            }
+        }
+
+        .card-features {
+            font-size: @font-size-xs!important;
+        }
+
+        &:after {
+            display: none;
+        }
     }
 }

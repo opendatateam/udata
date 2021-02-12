@@ -22,12 +22,14 @@
                     <div class="col-6 col-md-12 px-md-md">
                         {% include theme('svg/datasets/datasets-latest.svg') %}
                         <h3 class="my-md">Jeux de données les plus récents</h3>
-                        <p class="text-grey-300">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab perspiciatis dolore dolor optio ratione piditate tempora impedit officiis?</p>
+                        <p class="text-grey-300">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab
+                            perspiciatis dolore dolor optio ratione piditate tempora impedit officiis?</p>
                     </div>
                     <div class="col-6 col-md-12 px-md-md">
                         {% include theme('svg/datasets/datasets-love.svg') %}
                         <h3 class="my-md">Jeux de données les plus populaires</h3>
-                        <p class="text-grey-300">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab perspiciatis dolore dolor optio ratione piditate tempora impedit officiis?</p>
+                        <p class="text-grey-300">Lorem ipsum dolor sit amet consectetur adipisicing elit. Ab
+                            perspiciatis dolore dolor optio ratione piditate tempora impedit officiis?</p>
                     </div>
                 </div>
             </div>
@@ -54,11 +56,11 @@
         </div>
         <div class="row justify-between text-align-center mt-hg">
             {% for topic in g.featured_topics[:4] %}
-                <a href="{{ url_for('topics.display', topic=topic) }}" class="unstyled col-3 col-md-6 col-sm-12 mt-md-md">
-                    {% set slug = topic.slug or "generic" %}
-                    {% include theme('svg/topics/' + slug + '.svg') %}
-                    <h4 class="mt-md">{{topic.name}}</h4>
-                </a>
+            <a href="{{ url_for('topics.display', topic=topic) }}" class="unstyled col-3 col-md-6 col-sm-12 mt-md-md">
+                {% set slug = topic.slug or "generic" %}
+                {% include theme('svg/topics/' + slug + '.svg') %}
+                <h4 class="mt-md">{{topic.name}}</h4>
+            </a>
             {% endfor %}
         </div>
     </div>
@@ -69,7 +71,9 @@
             <div class="col-6 col-md-12">
                 <h3>Administrations</h3>
                 <ul class="mt-hg">
-                    <li><h4>Lorem ipsum dolor sit amet</h4></li>
+                    <li>
+                        <h4>Lorem ipsum dolor sit amet</h4>
+                    </li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
@@ -79,7 +83,9 @@
                     <li><a href="#">lorem ipsum</a></li>
                 </ul>
                 <ul class="mt-hg">
-                    <li><h4>Lorem ipsum dolor sit amet</h4></li>
+                    <li>
+                        <h4>Lorem ipsum dolor sit amet</h4>
+                    </li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
@@ -89,7 +95,9 @@
                     <li><a href="#">lorem ipsum</a></li>
                 </ul>
                 <ul class="mt-hg">
-                    <li><h4>Lorem ipsum dolor sit amet</h4></li>
+                    <li>
+                        <h4>Lorem ipsum dolor sit amet</h4>
+                    </li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
@@ -102,7 +110,9 @@
             <div class="col-6 col-md-12">
                 <h3>Collectivités territoriales</h3>
                 <ul class="mt-hg">
-                    <li><h4>Lorem ipsum dolor sit amet</h4></li>
+                    <li>
+                        <h4>Lorem ipsum dolor sit amet</h4>
+                    </li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
@@ -112,7 +122,9 @@
                     <li><a href="#">lorem ipsum</a></li>
                 </ul>
                 <ul class="mt-hg">
-                    <li><h4>Lorem ipsum dolor sit amet</h4></li>
+                    <li>
+                        <h4>Lorem ipsum dolor sit amet</h4>
+                    </li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
@@ -122,7 +134,9 @@
                     <li><a href="#">lorem ipsum</a></li>
                 </ul>
                 <ul class="mt-hg">
-                    <li><h4>Lorem ipsum dolor sit amet</h4></li>
+                    <li>
+                        <h4>Lorem ipsum dolor sit amet</h4>
+                    </li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>
                     <li><a href="#">lorem ipsum</a></li>

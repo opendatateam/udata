@@ -29,6 +29,7 @@ Where *sides* is one of:
 Where *size* is one of:
 
 * `0` - for classes that eliminate the `margin` or `padding` by setting it to `0`
+* `xxs` - for classes that set the `margin` or `padding` to `0.25rem; // 4px`
 * `xs` - for classes that set the `margin` or `padding` to `0.5rem; // 8px`
 * `sm` - for classes that set the `margin` or `padding` to `0.75rem; // 12px`
 * `md` - for classes that set the `margin` or `padding` to `1rem; // 16px`
@@ -55,7 +56,7 @@ Where *size* is one of:
 @spacing-auto: auto;
 @spacing-0: 0;
 
-@spacing: xs, sm, md, lg, xl, hg, auto, 0;
+@spacing: xxs, xs, sm, md, lg, xl, hg, auto, 0;
 
 each(@spacing, {
     .mt-@{value} {

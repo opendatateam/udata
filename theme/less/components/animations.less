@@ -1,0 +1,52 @@
+//Enter & leave
+.v-enter-active,
+.v-leave-active {
+    transition: all ease 0.3s;
+    opacity: 1;
+}
+
+.v-leave-from,
+.v-enter-to {
+    opacity: 1;
+}
+
+.v-leave-to,
+.v-enter-from {
+    opacity: 0;
+}
+
+//Enter only
+.enterOnly-enter-active {
+    transition: all ease 0.3s;
+}
+
+.enterOnly-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.enterOnly-enter-from {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+//List enter & leave
+.list-enter-active,
+.list-leave-active {
+    transition: all ease 0.3s;
+}
+
+.list-enter-from {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.list-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.list-move {
+    opacity: 0;
+    transform: translateX(-20px);
+}

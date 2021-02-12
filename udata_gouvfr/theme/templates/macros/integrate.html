@@ -1,10 +1,12 @@
 {% macro integrate_btn(obj) %}
 {% set basename = obj.__class__.__name__|lower %}
 {% set widget_url = static('oembed.js', _burst=False, _external=True) %}
-<integrate-button title="{{ _('Integrate') }}"
-    object-type="{{ basename }}" object-id="{{ obj.id }}"
-    widget-url="{{ widget_url }}"
-    {% if config.CDN_DOMAIN %}root-url="{{ url_for('site.home_redirect', _external=True) }}"{% endif %}
-    >
-</integrate-button>
+{% set root_url= url_for('site.home_redirect', _external=True) %}
+{% set root = ('data-udata="' + root_url + '"') if (root_url and not widget_url.startswith(root_url)) else "" %}
+
+{% set script = '<div data-udata-' + basename + '="' ~ obj.id + '"></div><script' + root + ' src="' + widget_url + '" async defer></script>' %}
+<div class="embed-wrapper">
+    <input type="text" value="{{script}}" onClick="this.select();" id="embed-wrapper" />
+    <label for="embed-wrapper" class="icon-copy" v-clipboard="'{{script}}'" title="Copy this">{% include theme('svg/copy.svg') %}</label>
+</div>
 {% endmacro %}

@@ -28,8 +28,9 @@
         <div class="row align-items-center">
             <div class="col-5 col-lg-12">
                 <h1 class="mb-lg-md">{{ _('@@Plateforme ouverte des données publiques françaises') }}</h1>
-                <form action="#" class="hero-search">
-                    <input type="text" placeholder="Recherche" />
+                <form action="/search" method="get" class="hero-search">
+                    <input type="text" name="q" placeholder="{{_('@@Recherche')}}" aria-label="{{_('@@Recherche')}}"
+                        @keypress.prevent.stop="e => $refs.suggest.startSearch(e.key)" />
                 </form>
             </div>
             <div class="col-6 offset-1 offset-lg-0 mt-lg-lg col-lg-12 text-align-center">
@@ -40,7 +41,8 @@
                     <div class="news-content">
                         <strong class="text-yellow-100 fs-md">{{ _('News in data') }}</strong>
                         <h2 class="my-md text-white fs-hg">{{ post.name }}</h2>
-                        <a class="btn-primary mt-md" href="{{ url_for('posts.show', post=post) }}" title="{{ post.name }}">{{ _('See more') }}</a>
+                        <a class="btn-primary mt-md" href="{{ url_for('posts.show', post=post) }}"
+                            title="{{ post.name }}">{{ _('See more') }}</a>
                     </div>
                 </div>
                 <a href="{{ url_for('posts.list') }}" class="nav-link">{{ _('@@toutes les actualités') }}</a>
@@ -104,20 +106,22 @@
                 <h3 class="mb-sm-lg text-green-500 fs-xl">data.gouv.fr c’est</h3>
             </div>
             <div class="col-4 col-sm-12 donnees-data-table">
-            {% for (label, metric) in metrics[:3] %}
-            <div class="donnees-data">
-                <span class="donnees-data-number text-align-right text-white">{{current_site.metrics[metric]}}</span>
-                <span class="donnees-data-caption text-green-500">{{label}}</span>
-            </div>
-            {% endfor %}
+                {% for (label, metric) in metrics[:3] %}
+                <div class="donnees-data">
+                    <span
+                        class="donnees-data-number text-align-right text-white">{{current_site.metrics[metric]}}</span>
+                    <span class="donnees-data-caption text-green-500">{{label}}</span>
+                </div>
+                {% endfor %}
             </div>
             <div class="col-4 col-sm-12 donnees-data-table">
-            {% for (label, metric) in metrics[3:] %}
-            <div class="donnees-data">
-                <span class="donnees-data-number text-align-right text-white">{{current_site.metrics[metric]}}</span>
-                <span class="donnees-data-caption text-green-500">{{label}}</span>
-            </div>
-            {% endfor %}
+                {% for (label, metric) in metrics[3:] %}
+                <div class="donnees-data">
+                    <span
+                        class="donnees-data-number text-align-right text-white">{{current_site.metrics[metric]}}</span>
+                    <span class="donnees-data-caption text-green-500">{{label}}</span>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -140,7 +144,7 @@
         <div class="col-10 col-lg-4">
             <nav class="tabs">
                 {% for tab_id, label, _, _ in dataset_tabs %}
-                    <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
                 {% endfor %}
                 <a href="{{ url_for('datasets.list') }}" class="tab">{{ _('See more') }}</a>
             </nav>
@@ -151,7 +155,8 @@
         <div class="row pt-xl pt-md-md">
             {% for dataset in datasets %}
             <div class="col-lg-12 col-6">
-                <a class="unstyled" href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.full_title }}">{% include theme('dataset/card.html') %}</a>
+                <a class="unstyled" href="{{ url_for('datasets.show', dataset=dataset) }}"
+                    title="{{ dataset.full_title }}">{% include theme('dataset/card.html') %}</a>
             </div>
             {% endfor %}
         </div>
@@ -178,25 +183,26 @@
             <div class="col-10 col-lg-4">
                 <nav class="tabs">
                     {% for tab_id, label, _, _ in reuses_tabs %}
-                        <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                    <a href="#{{tab_id}}" class="tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
                     {% endfor %}
-                    <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}" class="tab">{{ _('Voir plus') }}</a>
+                    <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}"
+                        class="tab">{{ _('Voir plus') }}</a>
                 </nav>
             </div>
         </div>
     </div>
     <div class="container reuse-cards">
         {% for tab_id, label, reuses, kwargs in reuses_tabs  %}
-            <div class="tab-content  {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-                <div class="row pt-xl pt-md-md">
-                    {% for reuse in reuses %}
-                        {% set features = ['preview'] %}
-                        <div class="col-3 col-md-4">
-                            {% include theme('reuse/card.html') %}
-                        </div>
-                    {% endfor %}
+        <div class="tab-content  {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+            <div class="row pt-xl pt-md-md">
+                {% for reuse in reuses %}
+                {% set features = ['preview'] %}
+                <div class="col-3 col-md-4">
+                    {% include theme('reuse/card.html') %}
                 </div>
+                {% endfor %}
             </div>
+        </div>
         {% endfor %}
     </div>
 </section>
@@ -212,20 +218,22 @@
             </div>
             <div class="col-3 col-sm-12">
                 <ul class="nav-list fs-md">
-                        {% for item in nav.gouvfr_network %}
-                            {% if (loop.index % 2 == 1) %}
-                                <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a></li>
-                            {% endif %}
-                        {% endfor %}
+                    {% for item in nav.gouvfr_network %}
+                    {% if (loop.index % 2 == 1) %}
+                    <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
                 </ul>
             </div>
             <div class="col-3 col-sm-12 self-start">
                 <ul class="nav-list fs-md">
-                        {% for item in nav.gouvfr_network %}
-                            {% if (loop.index % 2 == 0) %}
-                                <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a></li>
-                            {% endif %}
-                        {% endfor %}
+                    {% for item in nav.gouvfr_network %}
+                    {% if (loop.index % 2 == 0) %}
+                    <li><a href="{{ item.url }}" class="nav-link text-decoration-none text-white">{{ item.label }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
                 </ul>
             </div>
         </div>
@@ -246,7 +254,7 @@
                 </a>
             </li>
             {% endfor %}
-    </div>
+        </ul>
     </div>
 </section>
 
