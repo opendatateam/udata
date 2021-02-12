@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-gouvfr\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2020-08-14 14:03+0200\n"
-"PO-Revision-Date: 2020-08-25 11:38\n"
+"POT-Creation-Date: 2021-01-25 12:34+0100\n"
+"PO-Revision-Date: 2021-01-25 16:12\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -22,12 +22,12 @@ msgstr ""
 msgid "Data"
 msgstr "Données"
 
-#: __init__.py:45 templates/dataset/display.html:41 templates/footer.html:93
+#: __init__.py:45 templates/dataset/display.html:44 templates/footer.html:93
 #: templates/footer.html:95
 msgid "Reuses"
 msgstr "Réutilisations"
 
-#: __init__.py:46 templates/header.html:86
+#: __init__.py:46 templates/header.html:96
 msgid "Organizations"
 msgstr "Organisations"
 
@@ -35,35 +35,47 @@ msgstr "Organisations"
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: __init__.py:48 __init__.py:54
+#: __init__.py:48 __init__.py:59
 msgid "Documentation"
 msgstr "Documentation"
 
-#: __init__.py:55
+#: __init__.py:49
+msgid "Technical documentation"
+msgstr "Documentation technique"
+
+#: __init__.py:50
+msgid "Open data guides"
+msgstr "Guides de l’Open Data"
+
+#: __init__.py:52 __init__.py:58
+msgid "News"
+msgstr "Actualités"
+
+#: __init__.py:60
 msgid "Reference Data"
 msgstr "Données de référence"
 
-#: __init__.py:56
+#: __init__.py:61
 msgid "Licences"
 msgstr "Licences"
 
-#: __init__.py:57
+#: __init__.py:62
 msgid "API"
 msgstr "API"
 
-#: __init__.py:58
+#: __init__.py:63
 msgid "Terms of use"
 msgstr "Conditions générales d'utilisation"
 
-#: __init__.py:59
+#: __init__.py:64
 msgid "Tracking and privacy"
 msgstr "Politique de confidentialité"
 
-#: __init__.py:71
+#: __init__.py:76
 msgid "Data catalog"
 msgstr "Catalogue des données"
 
-#: templates/carousel.html:6 templates/home.html:27
+#: templates/carousel.html:6 templates/home.html:29
 msgid "Best reuse cases"
 msgstr "Meilleures réutilisations"
 
@@ -143,55 +155,59 @@ msgstr "Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jou
 msgid "More information →"
 msgstr "Plus d'informations →"
 
-#: templates/header.html:20
+#: templates/header.html:12
+msgid "Due to security reasons, the creation of new content is currently disabled."
+msgstr "Pour des raisons de sécurité, la création de nouveaux contenus est actuellement désactivée."
+
+#: templates/header.html:30
 msgid "Toggle navigation"
 msgstr "Navigation"
 
-#: templates/header.html:26
+#: templates/header.html:36
 msgid "Open platform for French public data"
 msgstr "Plateforme ouverte des données publiques françaises"
 
-#: templates/header.html:82
+#: templates/header.html:92
 msgid "My profile"
 msgstr "Mon profil"
 
-#: templates/header.html:101
+#: templates/header.html:111
 msgid "Administration"
 msgstr "Administration"
 
-#: templates/header.html:108
+#: templates/header.html:118
 msgid "Logout"
 msgstr "Se déconnecter"
 
-#: templates/header.html:115 templates/header.html:118
+#: templates/header.html:125 templates/header.html:128
 msgid "Sign In / Register"
 msgstr "Connexion / Inscription"
 
-#: templates/home.html:46 templates/home.html:47
+#: templates/home.html:48 templates/home.html:49
 msgid "Latest reuses"
 msgstr "Dernières réutilisations"
 
-#: templates/home.html:87
+#: templates/home.html:125
 msgid "News in data"
 msgstr "L'actualité en données"
 
-#: templates/home.html:105
+#: templates/home.html:143
 msgid "Featured datasets"
 msgstr "Jeux de données à la une"
 
-#: templates/home.html:106
+#: templates/home.html:144
 msgid "Latest datasets"
 msgstr "Derniers jeux de données"
 
-#: templates/home.html:142
+#: templates/home.html:180
 msgid "See more"
 msgstr "Voir plus"
 
-#: templates/home.html:161
+#: templates/home.html:199
 msgid "The blog"
 msgstr "Le blog"
 
-#: templates/home.html:183
+#: templates/home.html:221
 msgid "more"
 msgstr "plus"
 
@@ -199,7 +215,7 @@ msgstr "plus"
 msgid "Share, improve and reuse public data"
 msgstr "Partagez, améliorez et réutilisez les données publiques"
 
-#: templates/subnav-large.html:36 templates/subnav-large.html:40
+#: templates/subnav-large.html:37 templates/subnav-large.html:41
 msgid "Contribute!"
 msgstr "Contribuez !"
 
@@ -220,23 +236,23 @@ msgstr "Recherche"
 msgid "Explore with %(certifier)s"
 msgstr "Explorer avec %(certifier)s"
 
-#: templates/dataset/display.html:11
+#: templates/dataset/display.html:12
 msgid "Community contributions"
 msgstr "Contributions communautaires"
 
-#: templates/dataset/display.html:18
+#: templates/dataset/display.html:19
 msgid "Community resources"
 msgstr "Ressources communautaires"
 
-#: templates/dataset/display.html:29
+#: templates/dataset/display.html:31
 msgid "Add a community resource"
 msgstr "Ajouter une ressource communautaire"
 
-#: templates/dataset/display.html:36
+#: templates/dataset/display.html:39
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
 msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
 
-#: templates/dataset/display.html:59
+#: templates/dataset/display.html:64
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
@@ -244,11 +260,11 @@ msgstr "Vous avez réutilisé ces données et publié un article, une infographi
 "C'est le moment de vous faire connaître !\n"
 "Référencez votre travail en quelques clics et augmentez votre visibilité."
 
-#: templates/dataset/display.html:66
+#: templates/dataset/display.html:71
 msgid "Discussions"
 msgstr "Discussions"
 
-#: templates/dataset/display.html:75
+#: templates/dataset/display.html:80
 msgid "Discussion between the organization and the community about this dataset."
 msgstr "Discussion entre l'organisation et la communauté à propos de ce jeu de données."
 

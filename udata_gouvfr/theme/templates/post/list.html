@@ -1,37 +1,14 @@
-{% extends theme('layouts/1-column.html') %}
-{% from theme('macros/paginator.html') import paginator with context %}
+{% extends 'post/list.html' %}
 
-{% set meta = {
-    'title': _('Posts'),
-    'description': _("%(site)s posts", site=config['SITE_TITLE']),
-    'keywords': [_('posts')],
-    'robots': 'noindex',
-} %}
+{% set a_link = config['POST_BANNER_LINK'] %}
+{% set a_content = config['POST_BANNER_MESSAGE'] %}
 
-{% set bundle = 'search' %}
-
-{% block breadcrumb %}
-    <li class="active">
-        {{ _('Posts') }}
-        <small>{{ _('%(start)s to %(end)s on %(total)s',
-            start=posts.page_start,
-            end=posts.page_end,
-            total=posts.total) }}</small>
-    </li>
-{% endblock %}
-
-{% block main_content %}
-<div class="row">
-    <div class="col-xs-12">
-
-        <ul class="search-results">
-            {% for post in posts %}
-            {% include theme('post/search-result.html') %}
-            {% endfor %}
-        </ul>
-
-        <div class="clearfix"></div>
-        {{ paginator(posts) }}
+{% block alert_section %}
+{% if config['POST_BANNER_ACTIVATED'] %}
+<div class="container-fluid alert-info alert">
+    <div class="container" role="alert">
+        <a href="{{ a_link }}">{{ a_content|safe }}</a>
     </div>
 </div>
+{% endif %}
 {% endblock %}

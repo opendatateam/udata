@@ -7,20 +7,44 @@
         </div>
     <![endif]-->
 
-    <header class="container-fluid nav-header">
-        <div class="row">
-            <div class="col-3 col-hg-12 header-logo">
-                <nav class="mobile-menu">
-                    <a href="#" title="">
-                        {% include theme('svg/burger-menu.svg') %}
-                    </a>
-                </nav>
-                <a href="{{ url_for('site.home') }}" title="{{ _('@@Retourner à l\'accueil de data.gouv.fr') }}" class="p-xs">
-                    {% include theme('svg/marianne.svg') %} {% include theme('svg/logotype.svg') %}
-                </a>
-            </div>
-            <nav class="nav-tabs col hidden-hg">
-                {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] if request.url_rule or None %}
+    {% if config['READ_ONLY_MODE'] %}
+    <nav class="navbar navbar-static-top navbar-banner-red">
+        <div class="container banner">
+            <p class="text-center text-white">
+                {{ _('Due to security reasons, the creation of new content is currently disabled.') }}
+            </p>
+        </div>
+    </nav>
+    {% endif %}
+
+    {% if config['BANNER_ACTIVATED'] %}
+      {% block banner %}
+        {% set b_content = config['BANNER_HTML_CONTENT'] %}
+        {% include theme('banners/generic.html') with context %}
+      {% endblock %}
+    {% endif %}
+
+    <div class="container">
+        <nav class="navbar navbar-default navbar-static-top">
+            <header class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target=".navbar-collapse, .subnav-collapse, .sidebg-collapse">
+                    <span class="sr-only">{{ _('Toggle navigation') }}</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('site.home') }}">{{ g.site.title }}</a>
+                <p class="navbar-text pull-right">{{ _('Open platform for French public data') }}</p>
+            </header>
+        </nav>
+    </div>
+</section>
+
+<section class="topmenu collapse navbar-collapse">
+    <div class="container">
+        <nav class="navbar navbar-default navbar-static-top">
+            <ul class="nav navbar-nav links">
                 {% for item in current_theme.menu %}
                     {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
                     {% set active = request.url_rule.endpoint != "site.home" and (link_endpoint == current_endpoint) %}
