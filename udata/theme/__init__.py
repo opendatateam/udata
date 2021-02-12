@@ -144,9 +144,6 @@ def render(template, **context):
         * Theme
     '''
     theme = current_app.config['THEME']
-    themo = get_theme(theme)
-    print(template)
-    print(themo.templates_path)
     return render_theme_template(get_theme(theme), template, **context)
 
 
