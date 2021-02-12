@@ -2,7 +2,7 @@ from udata.forms import ModelForm, fields, validators
 from udata.i18n import lazy_gettext as _
 from udata.models import Reuse, REUSE_TYPES
 
-from .models import IMAGE_SIZES
+from .models import IMAGE_SIZES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT
 
 __all__ = ('ReuseForm', )
 
@@ -16,9 +16,9 @@ def check_url_does_not_exists(form, field):
 class ReuseForm(ModelForm):
     model_class = Reuse
 
-    title = fields.StringField(_('Title'), [validators.DataRequired(), validators.Length(max=350)])
+    title = fields.StringField(_('Title'), [validators.DataRequired(), validators.Length(max=TITLE_SIZE_LIMIT)])
     description = fields.MarkdownField(
-        _('Description'), [validators.DataRequired(), validators.Length(max=20000)],
+        _('Description'), [validators.DataRequired(), validators.Length(max=DESCRIPTION_SIZE_LIMIT)],
         description=_('The details about the reuse (build process, specifics, '
                       'self-critics...).'))
     type = fields.SelectField(_('Type'), choices=list(REUSE_TYPES.items()))

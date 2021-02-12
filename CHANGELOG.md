@@ -2,7 +2,17 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix SECURITY_CONFIRMABLE=False [#2588](https://github.com/opendatateam/udata/pull/2588)
+- Support dct:license on DCAT harvester [#2589](https://github.com/opendatateam/udata/pull/2589)
+
+## 2.6.1 (2021-01-26)
+
+- Fix url_for method in organization's catalog's view [#2587](https://github.com/opendatateam/udata/pull/2587)
+
+## 2.6.0 (2021-01-25)
+
+- Add resource's description and title size limit [#2586](https://github.com/opendatateam/udata/pull/2586)
+- Add RDF catalog view for organizations [#2583](https://github.com/opendatateam/udata/pull/2583)
 
 ## 2.5.1 (2020-12-31)
 

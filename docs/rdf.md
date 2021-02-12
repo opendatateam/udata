@@ -28,13 +28,31 @@ and redirects to a set of format specific URLs.
 The default format is JSON-LD.
 
 
+### Organization
+
+Organizations are available through the following URL:
+
+    /organization/{id}/catalog
+
+where `id` is the organization's identifier on the udata instance.
+
+This URL performs content negotiation and redirects to:
+
+    /organization/{id}/catalog.{format}
+
+It is exposed as a [DCAT Catalog][dcat-catalog] and a [Hydra Collection][hydra-collection]
+This allows pagination through the `hydra:PartialCollectionView` class.
+
+The organization's catalog embeds the organization's datasets.
+
+
 ### Dataset
 
 Datasets are available through the following URL:
 
     /dataset/{id}/rdf
 
-where `id` is the dataset identifier on the udata instance.
+where `id` is the dataset's identifier on the udata instance.
 
 This URL performs content negotiation and redirects to:
 

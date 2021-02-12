@@ -150,36 +150,6 @@ class DatasetToRdfTest:
         assert (checksum.value(SPDX.checksumValue)
                 == Literal(resource.checksum.value))
 
-    def test_with_org(self):
-        org = OrganizationFactory()
-        dataset = DatasetFactory(organization=org)
-        d = dataset_to_rdf(dataset)
-        g = d.graph
-
-        assert isinstance(d, RdfResource)
-        datasets = g.subjects(RDF.type, DCAT.Dataset)
-        organizations = g.subjects(RDF.type, FOAF.Organization)
-        assert len(list(datasets)) == 1
-        assert len(list(organizations)) == 1
-
-        publisher = d.value(DCT.publisher)
-        assert publisher.value(RDF.type).identifier == FOAF.Organization
-
-    def test_with_owner(self):
-        user = UserFactory()
-        dataset = DatasetFactory(owner=user)
-        d = dataset_to_rdf(dataset)
-        g = d.graph
-
-        assert isinstance(d, RdfResource)
-        datasets = g.subjects(RDF.type, DCAT.Dataset)
-        users = g.subjects(RDF.type, FOAF.Person)
-        assert len(list(datasets)) == 1
-        assert len(list(users)) == 1
-
-        publisher = d.value(DCT.publisher)
-        assert publisher.value(RDF.type).identifier == FOAF.Person
-
     def test_temporal_coverage(self):
         start = faker.past_date(start_date='-30d')
         end = faker.future_date(end_date='+30d')

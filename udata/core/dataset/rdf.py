@@ -15,8 +15,6 @@ from rdflib.namespace import RDF
 from udata import i18n, uris
 from udata.frontend.markdown import parse_html
 from udata.models import db
-from udata.core.organization.rdf import organization_to_rdf
-from udata.core.user.rdf import user_to_rdf
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
     namespace_manager, url_from_rdf
@@ -196,11 +194,6 @@ def dataset_to_rdf(dataset, graph=None):
 
     for resource in dataset.resources:
         d.add(DCAT.distribution, resource_to_rdf(resource, dataset, graph))
-
-    if dataset.owner:
-        d.add(DCT.publisher, user_to_rdf(dataset.owner, graph))
-    elif dataset.organization:
-        d.add(DCT.publisher, organization_to_rdf(dataset.organization, graph))
 
     if dataset.temporal_coverage:
         d.set(DCT.temporal, temporal_to_rdf(dataset.temporal_coverage, graph))
@@ -425,6 +418,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
                 licenses.add(value.identifier.toPython())
 
     default_license = dataset.license or License.default()
-    dataset.license = License.guess(*licenses, default=default_license)
+    dataset_license = rdf_value(d, DCT.license)
+    dataset.license = License.guess(dataset_license, *licenses, default=default_license)
 
     return dataset

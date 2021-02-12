@@ -6,6 +6,9 @@ from udata.models import db
 log = logging.getLogger(__name__)
 
 
+COMMENT_SIZE_LIMIT = 50000
+
+
 class Message(db.EmbeddedDocument):
     content = db.StringField(required=True)
     posted_on = db.DateTimeField(default=datetime.now, required=True)

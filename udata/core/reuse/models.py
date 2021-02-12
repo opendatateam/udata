@@ -29,6 +29,9 @@ REUSE_TYPES = {
 IMAGE_SIZES = [100, 50, 25]
 IMAGE_MAX_SIZE = 800
 
+TITLE_SIZE_LIMIT = 350
+DESCRIPTION_SIZE_LIMIT = 100000
+
 
 class ReuseQuerySet(db.OwnedQuerySet):
     def visible(self):

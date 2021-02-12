@@ -39,6 +39,9 @@ LOGO_SIZES = [100, 60, 25]
 PUBLIC_SERVICE = 'public-service'
 CERTIFIED = 'certified'
 
+TITLE_SIZE_LIMIT = 350
+DESCRIPTION_SIZE_LIMIT = 100000
+
 
 class Team(db.EmbeddedDocument):
     name = db.StringField(required=True)
