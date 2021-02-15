@@ -1,0 +1,82 @@
+@import "udata/variables";
+@import "udata/mixins";
+
+.tab-pane {
+  margin-top: 15px;
+}
+
+/* Half Page Height Carousel Customization */
+.carousel {
+  height: 50%;
+}
+
+.item,
+.active,
+.carousel-inner {
+  height: 100%;
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+}
+
+/* Social Icons Styles */
+.list-social-icons {
+  margin-bottom: 45px;
+}
+
+.tooltip-social a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.facebook-link a:hover {
+  color: #3b5998;
+}
+
+.linkedin-link a:hover {
+  color: #007fb1;
+}
+
+.twitter-link a:hover {
+  color: #39a9e0;
+}
+
+.google-plus-link a:hover {
+  color: #d14836;
+}
+
+/* Service Page Styles */
+.service-icon {
+  font-size: 50px;
+}
+
+/* 404 Page Styles */
+.error-404 {
+  font-size: 8em;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 767px) {
+  .carousel {
+    height: 70%; /* increases the carousel height so it looks good on phones */
+  }
+}
+
+
+
+h3 {
+    font-family: @title-font;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0px;
+    margin-right: 15px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+    color: @text-dark;
+}

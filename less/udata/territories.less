@@ -1,0 +1,59 @@
+.territory {
+    .territory-announcement {
+        padding: 1em;
+    }
+    .dataset-list {
+        .dataset-card {
+            margin: 0 0 @grid-gutter-width 0 !important;
+        }
+    }
+    .panel {
+        margin-bottom: 0;
+
+        .tab-links {
+            margin-top: 1em;
+        }
+    }
+    .dataset-item--cta {
+        @base-color: #7d8489;
+        border: 1px solid @base-color;
+        margin-bottom: @grid-gutter-width;
+        margin-top: @grid-gutter-width;
+        overflow: hidden;
+
+        .format-label {
+            width: 1em;
+            height: 1em;
+            background-color: #f9f9f9;
+            margin: 0px;
+            color: @base-color;
+            text-align: center;
+            font-size: 6em;
+            font-weight: bold;
+            line-height: .8;
+            border-right: 1px solid @base-color;
+
+            span {
+                line-height: 52px;
+                text-align: center;
+                font-weight: bold;
+                text-transform: uppercase;
+                display: block;
+            }
+        }
+
+        p {
+            text-align: center;
+            font-size: 1.5em;
+            padding: .5em 1em 0 5em;
+
+            a {
+                text-decoration: underline;
+                color: white;
+            }
+        }
+    }
+}
+.territories-list li img {
+    margin-right: 4px;
+}
