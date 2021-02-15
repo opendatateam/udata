@@ -2,7 +2,7 @@ import frontmatter
 import logging
 import requests
 
-from flask import url_for, redirect, abort, current_app, render_template
+from flask import url_for, redirect, abort, current_app
 from jinja2.exceptions import TemplateNotFound
 from mongoengine.errors import ValidationError
 
@@ -295,7 +295,10 @@ def dataset_apis(ctx):
     dataset = ctx['dataset']
     return theme.render('dataset-apis.html', apis=dataset.extras.get(APIGOUVFR_EXTRAS_KEY))
 
+
 # TODO : better this, redirect is not the best. How to serve it instead ?!
 @blueprint.route('/_stylemark/<path:filename>')
 def stylemark(filename):
-    return redirect(theme_static_with_version(None, filename="stylemark/index.html", _external=True))
+    return redirect(theme_static_with_version(None,
+                                              filename="stylemark/index.html",
+                                              _external=True))

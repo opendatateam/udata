@@ -10,8 +10,6 @@ from udata.models import (
 
 from udata.frontend import csv
 from udata.core.badges.factories import badge_factory
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.user.factories import AdminFactory
 
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory, ResourceFactory
@@ -19,7 +17,6 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 
-from udata.tests.helpers import capture_mails
 from udata.tests.frontend import FrontTestCase
 from udata.tests.helpers import capture_mails, assert_starts_with
 

@@ -6,7 +6,7 @@ from flask_security import current_user
 from udata import search
 from udata.frontend import csv
 from udata.frontend.views import DetailView, SearchView
-from udata.i18n import I18nBlueprint, lazy_gettext as _
+from udata.i18n import I18nBlueprint
 from udata.models import (
     Organization, Reuse, Dataset, Follow, Issue, Discussion
 )
@@ -73,8 +73,12 @@ class OrganizationDetailView(OrgView, DetailView):
         if self.organization.deleted and not can_view.can():
             abort(410)
 
-        datasets = Dataset.objects(organization=self.organization).order_by('-temporal_coverage.end', '-metrics.reuses', '-metrics.followers').visible()
-        reuses = Reuse.objects(organization=self.organization).order_by('-metrics.reuses', '-metrics.followers').visible()
+        datasets = Dataset.objects(
+            organization=self.organization).order_by(
+                '-temporal_coverage.end', '-metrics.reuses', '-metrics.followers').visible()
+        reuses = Reuse.objects(
+            organization=self.organization).order_by(
+                '-metrics.reuses', '-metrics.followers').visible()
         followers = (Follow.objects.followers(self.organization)
                                    .order_by('follower.fullname'))
         context.update({

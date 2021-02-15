@@ -2,7 +2,7 @@ from flask import url_for
 
 from udata.core.issues.models import Issue, Message
 from udata.core.issues.factories import IssueFactory
-from udata.core.issues.signals import (
+from udata.core.issues.signals import (  # noqa
     on_new_issue, on_new_issue_comment, on_issue_closed
 )
 from udata.core.issues.tasks import (

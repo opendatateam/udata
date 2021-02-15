@@ -1,7 +1,7 @@
 import logging
 import requests
 
-from flask import request, json, redirect, url_for, current_app, abort
+from flask import request, redirect, url_for, current_app, abort
 from mongoengine.errors import DoesNotExist
 from werkzeug.contrib.atom import AtomFeed
 

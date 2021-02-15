@@ -11,6 +11,7 @@ from udata.tests.features.territories import (
     TerritoriesSettings
 )
 
+
 class GouvFrTerritoriesSettings(TerritoriesSettings):
     TEST_WITH_THEME = True
     TEST_WITH_PLUGINS = True

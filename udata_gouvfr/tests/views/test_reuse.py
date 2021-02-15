@@ -61,9 +61,9 @@ class ReuseBlueprintTest(FrontTestCase):
         self.assertEqual(json_ld['@type'], 'CreativeWork')
         self.assertEqual(json_ld['alternateName'], reuse.slug)
         self.assertEqual(json_ld['dateCreated'][:16],
-                          reuse.created_at.isoformat()[:16])
+                         reuse.created_at.isoformat()[:16])
         self.assertEqual(json_ld['dateModified'][:16],
-                          reuse.last_modified.isoformat()[:16])
+                         reuse.last_modified.isoformat()[:16])
         self.assertEqual(json_ld['url'], 'http://local.test{}'.format(url))
         self.assertEqual(json_ld['name'], reuse.title)
         self.assertEqual(json_ld['description'], 'Title 1 Title 2')

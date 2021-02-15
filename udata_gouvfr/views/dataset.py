@@ -12,7 +12,6 @@ from udata.core.site.models import current_site
 
 from udata.theme import render as render_template
 from udata.sitemap import sitemap
-from udata.frontend.views import DetailView, SearchView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 
 

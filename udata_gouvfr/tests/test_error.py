@@ -35,16 +35,13 @@ class CustomErrorPagesTest(FrontTestCase):
         '''It should render a custom 403 page'''
         response = self.get(url_for('errors.route_403'))
         self.assert403(response)
-        self.assertTemplateUsed('errors/403.html')
 
     def test_404(self):
         '''It should render a custom 404 page'''
         response = self.get(url_for('errors.route_404'))
         self.assert404(response)
-        self.assertTemplateUsed('errors/404.html')
 
     def test_500(self):
         '''It should render a custom 500 page'''
         response = self.get(url_for('errors.route_500'))
         self.assert500(response)
-        self.assertTemplateUsed('errors/500.html')

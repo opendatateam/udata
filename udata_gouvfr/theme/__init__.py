@@ -12,11 +12,11 @@ from udata.app import cache, nav
 from udata.models import Dataset
 from udata.i18n import lazy_gettext as _
 
-log = logging.getLogger(__name__)
-
 from udata_gouvfr.models import (
     SPD
 )
+
+log = logging.getLogger(__name__)
 
 RE_POST_IMG = re.compile(
     r'''
