@@ -7,7 +7,7 @@ category: Suggest
 # Search input
 
 It's an input that calls the passed `onChange` function on each change.
-You can also pass it a `queryString` prop that will populate the field.
+You can also pass it a `value` prop that will populate the field.
 -->
 
 <template>
@@ -21,7 +21,7 @@ You can also pass it a `queryString` prop that will populate the field.
       />
       <input
         type="text"
-        v-model="queryString"
+        :value="queryString"
         @input="_onChange"
         @keydown.delete="onDelete"
         ref="input"
@@ -40,6 +40,11 @@ export default {
     this.icon = Icon;
     this.queryString = this.value;
   },
+  watch: {
+    value: function(val) {
+      this.queryString = val
+    }
+  },
   async mounted() {
     //this.$nextTick doesn't work because of browsers®
     setTimeout(() => this.focus(), 100);
@@ -54,8 +59,8 @@ export default {
     };
   },
   methods: {
-    _onChange() {
-      if (this.onChange) this.onChange(this.queryString);
+    _onChange(e) {
+      if (this.onChange) this.onChange(e.target.value);
     },
     onDelete() {
       if (this.queryString === "") this.onChange(this.queryString);
