@@ -18,11 +18,11 @@
             text-decoration: none;
 
             &.previous, &.next, &.first, &.last {
-                width: 35px;
+                min-width: 35px;
                 height: 35px;
 
                 background: @grey-380;
-                border-radius: 50%;
+                border-radius: 35px;
 
                 color: @grey-100;
 
@@ -80,6 +80,7 @@
 
                 &.previous, &.next, &.last, &.first  {
                     background-color: @grey-400;
+                    color: white;
 
                     &:hover {
                         background-color: @grey-300;
