@@ -16,6 +16,7 @@ Simply provide necessary props :
 * page_size : page... size. How many elements will be on each page
 * total_results : total collection length
 * changePage : a function that will be called on each button click. It will be passed a single argument : the new page number
+* light : optional param that will add a `.light` class and trigger the corresponding color scheme
 
 Check the example below for more infos :
 
@@ -51,7 +52,12 @@ export default {
 -->
 
 <template>
-  <ul class="pagination-wrapper" role="navigation" aria-label="pagination">
+  <ul
+    class="pagination-wrapper"
+    :class="light && 'light'"
+    role="navigation"
+    aria-label="pagination"
+  >
     <li>
       <a
         :class="['previous', page === 1 ? 'disabled' : '']"
@@ -61,7 +67,7 @@ export default {
     </li>
     <li>
       <a
-        :class="['first', page === 1 ? 'active' : '']"
+        :class="[page === 1 ? 'active' : '']"
         :aria-disabled="page === 1"
         @click.prevent="_onClick(1)"
         >1</a
@@ -79,7 +85,7 @@ export default {
     </li>
     <li>
       <a
-        :class="['last', page === pages.length ? 'active' : '']"
+        :class="[page === pages.length ? 'active' : '']"
         :aria-disabled="page === pages.length"
         @click.prevent="_onClick(pages.length)"
         >{{ pages.length }}</a
@@ -106,6 +112,7 @@ export default {
     changePage: Function,
     page_size: Number,
     total_results: Number,
+    light: Boolean,
   },
   computed: {
     pages() {
@@ -115,6 +122,8 @@ export default {
       const length = this.pages.length;
       const pagesAround = 1; //Pages around current one, has to be even
       const pagesShown = Math.min(pagesAround * 2 + 1, length);
+
+      if (length < pagesAround + 2) return [];
 
       if (this.page <= pagesShown) return [...range(pagesShown, 2), null];
 
