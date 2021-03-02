@@ -17,6 +17,7 @@
   "dependencies": {
     "@meforma/vue-toaster": "^1.2.0",
     "@parcel/transformer-less": "^2.0.0-alpha.3",
+    "@vueform/multiselect": "^1.3.2",
     "axios": "^0.21.0",
     "dayjs": "^1.9.6",
     "less": "^3.13.1",

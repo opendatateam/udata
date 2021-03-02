@@ -16,15 +16,24 @@
     <h4>Critères de recherche</h4>
     <div class="filters-wrapper">
       <div class="row-inline justify-between align-items-center">
-        <select>
-          <option>Organisations</option>
-        </select>
-        <select>
-          <option>Mots-clés</option>
-        </select>
-        <select>
-          <option>Licenses</option>
-        </select>
+        <div class="col-3">
+          <Suggestor
+            placeholder="Organizations"
+            listUrl="/organizations"
+            suggestUrl="/organizations/suggest/"
+            :onChange="handleSuggestorChange('organization')"
+          />
+        </div>
+        <div class="col-3">
+          <Suggestor
+            placeholder="Mots clés"
+            suggestUrl="/tags/suggest"
+            :onChange="handleSuggestorChange('keywords')"
+          />
+        </div>
+        <div class="col-3">
+          <Suggestor placeholder="Licenses" />
+        </div>
         <select>
           <option>Formats</option>
         </select>
@@ -93,6 +102,7 @@
 <script>
 import config from "../../config";
 import SearchInput from "./search-input";
+import Suggestor from "./suggestor";
 import Dataset from "../dataset/card";
 import Loader from "../dataset/loader";
 import Empty from "./empty";
@@ -102,6 +112,7 @@ import { generateCancelToken } from "../../plugins/api";
 export default {
   components: {
     "search-input": SearchInput,
+    Suggestor,
     Dataset,
     Empty,
     Loader,
@@ -121,16 +132,20 @@ export default {
       current_page: 1,
       total_results: 0,
       queryString: "",
-      facets: {
-        organization: "",
-        tag: "",
-      },
+      facets: {},
     };
   },
   methods: {
     handleSearchChange(input) {
       this.queryString = input;
       this.search();
+    },
+    handleSuggestorChange(facet) {
+      const that = this;
+      return function (values) {
+        that.facets[facet] = values.map((obj) => obj.value);
+        that.search();
+      };
     },
     changePage(page) {
       this.current_page = page;

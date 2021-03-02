@@ -1,0 +1,77 @@
+.suggestor {
+    .multiselect-input {
+        padding: 0 40px 0 10px;
+    }
+
+    //Labels when the dropdown is closed (with the "+n" label when more than two options are selected)
+    .suggestor-labels {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        overflow: hidden;
+
+        > span {
+            flex-basis: auto;
+            overflow: hidden;
+        }
+
+        &.is-opened {
+            flex-wrap: wrap;
+            padding: @spacing-xs 0;
+
+            .multiselect-tag + .multiselect-tag {
+                margin-top: @spacing-xxs;
+            }
+        }
+    }
+
+    //Generic tags class, overwrite the lib defaults
+    .multiselect-tag {
+        margin: 0;
+        margin-right: @spacing-xxs;
+        padding: @spacing-xxs;
+
+        display: block;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+
+        //"+3" label
+        &.more {
+            flex-shrink: 0;
+        }
+    }
+
+    //Tags that appear in the dropdown, fully expanded
+    .suggestor-search-labels {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        overflow: hidden;
+        padding: @spacing-xs;
+        border-bottom: 1px solid @grey-100;
+
+        .multiselect-tag {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            white-space: normal;
+
+            margin-bottom: @spacing-xxs;
+        }
+    }
+
+    //When dropdown is closed, search should take no width
+    &.is-multiple .multiselect-search{
+        width: 0;
+    }
+
+    &.is-open .multiselect-search {
+        width: 100%;
+    }
+
+    //Makes the already selected options disappear
+    .multiselect-option.is-selected {
+        display: none;
+    }
+}
