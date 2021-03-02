@@ -37,6 +37,7 @@ user_fields = api.model('User', {
         description='The user first name', required=True),
     'last_name': fields.String(
         description='The user last name', required=True),
+    'email': fields.String(description='The user email', required=True),
     'avatar': fields.ImageField(original=True,
         description='The user avatar URL'),
     'avatar_thumbnail': fields.ImageField(attribute='avatar', size=BIGGEST_AVATAR_SIZE,
@@ -63,7 +64,6 @@ user_fields = api.model('User', {
 })
 
 me_fields = api.inherit('Me', user_fields, {
-    'email': fields.String(description='The user email', required=True),
     'apikey': fields.String(description='The user API Key', readonly=True),
 })
 
