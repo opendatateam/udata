@@ -133,7 +133,7 @@ export default {
             const actions = [];
             if (this.can_edit) {
                 actions.push({
-                    label: this._('Edit the dataset'),
+                    label: this._('Edit this dataset'),
                     icon: 'edit',
                     method: this.edit
                 }, {

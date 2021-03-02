@@ -125,7 +125,7 @@ export default {
       if (this.can_edit) {
         actions.push(
           {
-            label: this._('Edit the reuse'),
+            label: this._('Edit this reuse'),
             icon: 'edit',
             method: this.edit
           },
