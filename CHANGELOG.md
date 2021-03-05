@@ -4,6 +4,7 @@
 
 - Fix SECURITY_CONFIRMABLE=False [#2588](https://github.com/opendatateam/udata/pull/2588)
 - Support dct:license on DCAT harvester [#2589](https://github.com/opendatateam/udata/pull/2589)
+- Add `nofollow` attribute to links in discussions comments [#2593](https://github.com/opendatateam/udata/pull/2593)
 
 ## 2.6.1 (2021-01-26)
 
