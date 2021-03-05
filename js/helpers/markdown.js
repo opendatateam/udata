@@ -29,6 +29,11 @@ function escapeRule(tokens, idx, options, env, self) {
 }
 
 markdown.use(function(md) {
+    md.renderer.rules.link_open = function(tokens, idx, options, env, self) {
+        const link_open = tokens[idx];
+        link_open.attrs.push(['rel','nofollow']);
+        return self.renderToken(tokens, idx, options);
+    };
     // Render ~~<text>~~ as del tag
     md.renderer.rules.s_open = function(tokens, idx, options, env, self) {
         const s_open = tokens[idx];
