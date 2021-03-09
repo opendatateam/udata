@@ -11,6 +11,7 @@
     mode="multiple"
     class="suggestor"
     @change="onChange"
+    @select="onSelect"
     @open="opened = true"
     @close="opened = false"
     object
@@ -53,6 +54,7 @@ export default {
     listUrl: String,
     placeholder: String,
     searchPlaceholder: String,
+    values: [Array, String],
     emptyPlaceholder: {
       type: String,
       default: "Aucun résultat.",
@@ -64,6 +66,8 @@ export default {
       this.searchPlaceholder || this.placeholder;
   },
   async created() {
+    this.fillInitialValues();
+
     //If we're in "suggest" mode, the options will be the suggest function that will be called on each search change
     //If not, we call the getInitialOptions fn that will populate the options var
     if (this.suggestUrl) this.options = this.suggest;
@@ -72,10 +76,16 @@ export default {
   data() {
     return {
       value: [],
-      loading: false,
       opened: false,
       options: null,
     };
+  },
+  watch: {
+    values: function (value) {
+      //This lib doesn't support `undefined` values and will not reset its state.
+      //This allows to reset the value if the parent component decides to clear the value.
+      if (typeof value === "undefined") this.value = [];
+    },
   },
   methods: {
     suggest: function (q) {
@@ -92,13 +102,19 @@ export default {
           .get(this.suggestUrl, { params: { q } })
           .then((resp) => resp.data);
 
-      //todo : better serializer
-      return query.then((data) =>
-        data.map((obj) => ({
-          label: obj.name,
-          value: obj.id,
-        }))
-      );
+      return query.then(this.serializer);
+    },
+    fillInitialValues: function () {
+      //On creation, if values are pre-provided (from URL or parent state) in `this.values`,
+      //we should fetch those from the API to fill the select with values + labels in `this.value`
+      //This isn't ideal but shouldn't happen very often.
+      //In the meantime, since this is a bit too complicated we'll just fill the select with the "value" as label.
+      let selected = null;
+      if (typeof this.values === "string") selected = [this.values];
+      else if (typeof this.values === "array") selected = this.values;
+      else selected = [];
+
+      selected.forEach((value) => this.value.push({ label: value, value }));
     },
     getInitialOptions: async function () {
       if (!this.listUrl) return [];
@@ -106,9 +122,20 @@ export default {
       return await this.$api
         .get(this.listUrl)
         .then((resp) => resp.data)
-        .then((data) =>
-          data.map((obj) => ({ label: obj.name || obj.title, value: obj.id }))
-        );
+        .then(this.serializer);
+    },
+    serializer: function (data) {
+      return data.map((obj) => ({
+        label: obj.name || obj.title || obj.text,
+        value: obj.id || obj.text,
+      }));
+    },
+    onSelect: function (value) {
+      //This is a temporary dirty thing that limits the selected options to 1.
+      if (this.value.length === 2) {
+        this.deselect(this.value[0])
+        this.$refs.multiselect.close();
+      }
     },
     deselect: function (value) {
       if (this.$refs.multiselect) this.$refs.multiselect.deselect(value);
