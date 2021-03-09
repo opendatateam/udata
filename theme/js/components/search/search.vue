@@ -25,6 +25,7 @@
             searchPlaceholder="Chercher une organisation..."
             listUrl="/organizations/"
             suggestUrl="/organizations/suggest/"
+            :values="facets.organization"
             :onChange="handleSuggestorChange('organization')"
           />
         </div>
@@ -32,6 +33,7 @@
           <Suggestor
             placeholder="Mots clés"
             suggestUrl="/tags/suggest/"
+            :values="facets.keywords"
             :onChange="handleSuggestorChange('keywords')"
           />
         </div>
@@ -39,6 +41,7 @@
           <Suggestor
             placeholder="Licenses"
             listUrl="/datasets/licenses/"
+            :values="facets.license"
             :onChange="handleSuggestorChange('license')"
           />
         </div>
@@ -46,6 +49,7 @@
           <Suggestor
             placeholder="Formats"
             suggestUrl="/datasets/suggest/formats/"
+            :values="facets.format"
             :onChange="handleSuggestorChange('format')"
           />
         </div>
@@ -123,6 +127,8 @@ import Empty from "./empty";
 import Pagination from "../pagination/pagination";
 import { generateCancelToken } from "../../plugins/api";
 
+import queryString from "query-string";
+
 export default {
   components: {
     "search-input": SearchInput,
@@ -133,13 +139,24 @@ export default {
     Pagination,
   },
   created() {
-    //TODO : queryString from URL
+    //Update facets from URL for deep linking
+    const url = new URL(window.location);
+    const searchParams = queryString.parse(url.search);
+
+    this.facets = searchParams;
     this.search();
   },
   watch: {
-    facets: function(val) {
-      console.log(val)
-    }
+    facets: {
+      deep: true,
+      handler(val) {
+        //Update URL to match current facets value for deep linking
+        let url = new URL(window.location);
+        const searchParams = queryString.stringify(val, { skipNull: true });
+        url.search = searchParams;
+        history.pushState(null, "", url);
+      },
+    },
   },
   data() {
     return {
@@ -162,7 +179,11 @@ export default {
     handleSuggestorChange(facet) {
       const that = this;
       return function (values) {
-        that.facets[facet] = values.map((obj) => obj.value);
+        if (values.length > 1)
+          that.facets[facet] = values.map((obj) => obj.value);
+        else if (values.length === 1) that.facets[facet] = values[0].value;
+        else that.facets[facet] = null;
+
         that.search();
       };
     },
@@ -200,6 +221,8 @@ export default {
     },
     resetFilters() {
       this.queryString = "";
+      this.facets = {};
+      this.search();
     },
   },
 };

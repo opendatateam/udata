@@ -26,6 +26,7 @@
     "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",
     "prettier": "^2.2.1",
+    "query-string": "^6.14.1",
     "vue": "^3.0.0-beta.1",
     "vue-content-loader": "^2.0.0",
     "vue-final-modal": "^3.0.0-beta.1",
