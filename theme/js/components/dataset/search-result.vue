@@ -1,0 +1,83 @@
+<!-- This is similar to the Jinja2 `dataset/search-result.html` template but in
+Vue. -->
+
+<template>
+  <article class="dataset-card dataset-search-result">
+    <div class="card-logo" v-if="organization">
+      <Placeholder
+        type="dataset"
+        :src="organization.logo_thumbnail"
+        :alt="organization.name"
+      />
+    </div>
+    <div class="card-logo" v-else-if="owner">
+      <Placeholder
+        type="dataset"
+        :src="owner.logo_thumbnail"
+        :alt="owner.name"
+      />
+    </div>
+    <div class="card-logo" v-else>
+      <Placeholder type="dataset" />
+    </div>
+    <div class="card-data">
+      <h4 class="card-title">{{ title }}</h4>
+      <div class="card-description text-grey-300 mt-xs">
+        {{ description }}
+      </div>
+    </div>
+    <dl class="card-hover">
+      <div v-if="temporal_coverage">
+        <dt>{{ $t("@@Temporal coverage") }}</dt>
+        <dd>{{ temporal_coverage }}</dd>
+      </div>
+      <div v-if="frequency">
+        <dt>{{ $t("@@Frequency") }}</dt>
+        <dd>{{ frequency }}</dd>
+      </div>
+      <div v-if="spatial?.top_label">
+        <dt>{{ $t("@@Spatial coverage") }}</dt>
+        <dd>{{ spatial.top_label }}</dd>
+      </div>
+      <div v-if="spatial?.granularity">
+        <dt>{{ $t("@@Territorial coverage granularity") }}</dt>
+        <dd>{{ spatial.granularity }}</dd>
+      </div>
+    </dl>
+    <ul class="card-footer">
+      <li>
+        <strong>{{ metrics.ressources || 0 }}</strong>
+        {{ $t("@@ressources") }}
+      </li>
+      <li>
+        <strong>{{ metrics.reuses || 0 }}</strong>
+        {{ $t("@@réutilisations") }}
+      </li>
+      <li>
+        <strong>{{ metrics.followers || 0 }}</strong>
+        {{ $t("@@abonnés") }}
+      </li>
+    </ul>
+  </article>
+</template>
+
+<script>
+import Placeholder from "../utils/placeholder";
+
+export default {
+  props: {
+    title: String,
+    image_url: String,
+    organization: Object,
+    owner: Object,
+    description: String,
+    temporal_coverage: String,
+    frequency: String,
+    spatial: Object,
+    metrics: Object,
+  },
+  components: {
+    Placeholder,
+  },
+};
+</script>
