@@ -1,6 +1,6 @@
 .suggestor {
     .multiselect-input {
-        padding: 0 40px 0 10px;
+        padding: @spacing-xxs 40px @spacing-xxs @spacing-xxs;
     }
 
     //Labels when the dropdown is closed (with the "+n" label when more than two options are selected)
@@ -29,7 +29,9 @@
     .multiselect-tag {
         margin: 0;
         margin-right: @spacing-xxs;
-        padding: @spacing-xxs;
+        padding: @spacing-xs;
+        background-color: @blue-300;
+        border-radius: 2px;
 
         display: block;
         white-space: nowrap;
@@ -42,7 +44,7 @@
         }
     }
 
-    //Tags that appear in the dropdown, fully expanded
+    //Tags already selected that appear in the dropdown, fully expanded
     .suggestor-search-labels {
         display: flex;
         flex-wrap: wrap;
@@ -57,7 +59,33 @@
             align-items: center;
             white-space: normal;
 
-            margin-bottom: @spacing-xxs;
+            +.multiselect-tag {
+                margin-top: @spacing-xxs;
+            }
+        }
+    }
+
+    //Unselected option
+    .multiselect-option {
+        border-radius: 2px;
+        padding: 0;
+        min-height: 0;
+        color: @blue-500;
+
+        margin: @spacing-xs;
+
+        span {
+            background: @blue-100;
+            padding: @spacing-xs;
+            border-radius: 2px;
+        }
+
+        &:hover {
+            text-decoration: none;
+        }
+
+        &.is-pointed {
+            background: none;
         }
     }
 
@@ -68,6 +96,11 @@
 
     &.is-open .multiselect-search {
         width: 100%;
+
+        input {
+            padding: @spacing-xs;
+            padding-left: 10px; //Same as placeholder
+        }
     }
 
     //Makes the already selected options disappear
