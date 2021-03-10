@@ -9,6 +9,7 @@
   - The user's profile now displays the user's email
   - The button "Edit" and the dropdown were merged. The button is now only a dropdown listing the actions.
   - "Edit" action has been renamed to "Edit the dataset/reuse/organization/profile" according to the current object to edit.
+- Add `nofollow` attribute to links in discussions comments [#2593](https://github.com/opendatateam/udata/pull/2593)
 
 ## 2.6.1 (2021-01-26)
 
