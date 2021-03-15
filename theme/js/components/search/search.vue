@@ -16,7 +16,7 @@
   </div>
   <section class="search-filters">
     <h4 class="mt-md mb-xs fs-sm">{{ $t("@@Critères de recherche") }}</h4>
-    <div class="filters-wrapper p-xs">
+    <div class="filters-wrapper p-sm">
       <div class="row justify-between align-items-center">
         <div class="col-3">
           <Suggestor
@@ -55,8 +55,8 @@
             :onChange="handleSuggestorChange('format')"
           />
         </div>
-        <div class="col-1">
-          <a class="btn btn-grey-100" @click="extendedForm = !extendedForm">
+        <div class="col-1 text-align-center">
+          <a class="btn-secondary btn-secondary-grey-200 px-md" @click="extendedForm = !extendedForm">
             <span v-if="!extendedForm">&#8230;</span>
             <span v-else>X</span>
           </a>
