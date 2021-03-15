@@ -1,0 +1,35 @@
+{% extends 'layouts/1-column.html' %}
+{% import 'macros/forms.html' as forms with context %}
+
+{% set section_class = 'form' %}
+
+{% block main_content %}
+
+<div class="container auth-container">
+    <form class="form-horizontal validate col-md-offset-2 col-md-8"
+        method="post" action="{{ url_for('security.register') }}">
+        <fieldset>
+            <legend>{{ _('Sign Up') }}</legend>
+            {{ forms.render(register_user_form, exclude=[register_user_form.submit]) }}
+            <div class="form-group">
+                <div class="col-xs-2 col-md-4 col-lg-3 text-right">
+                    <label class="required">
+                        <input type="checkbox" name="accept_conditions" required/>
+                    </label>
+                </div>
+                <div class="col-xs-10 col-md-8 col-lg-9 text-left">
+                    <label>{{ _('I have read and accept <a href="%(url)s"> the terms and conditions of the service.</a>', url=url_for('site.terms')) }}</label>
+
+                    {% block extra_tos %}
+                    {% endblock %}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary btn-block">{{ _('Sign up') }}</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+{% endblock %}

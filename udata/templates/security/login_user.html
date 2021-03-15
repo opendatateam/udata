@@ -1,0 +1,59 @@
+{% import 'macros/forms.html' as forms with context %}
+
+{% set section_class = 'form' %}
+{% set read_only_mode = config.READ_ONLY_MODE %}
+
+{% block main_content %}
+
+<div class="container auth-container">
+    <div class="row">
+        <div class="col-sm-6">
+            <form class="form-horizontal col-lg-10 col-lg-offset-1 validation validate"
+                method="post" action="{{ url_for('security.login') }}">
+                <fieldset>
+                    <legend>{{ _('Sign In') }}</legend>
+                    {{ forms.render(login_user_form, exclude=[login_user_form.submit]) }}
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary btn-block">{{ _('Sign in') }}</button>
+                        </div>
+                    </div>
+                    <p>
+                        {{ _('Forgot your password?') }}
+                        <a href="{{ url_for('security.forgot_password', next=request.url) }}">
+                            {{ _('Recover your password') }}
+                        </a>
+                    </p>
+                    {% if config.SECURITY_CONFIRMABLE %}
+                    <p>
+                        {{ _('Confirmation instructions not received?') }}
+                        <a href="{{ url_for('security.send_confirmation') }}">
+                            {{ _('Send the instructions again') }}
+                        </a>
+                    </p>
+                    {% endif %}
+                </fieldset>
+            </form>
+    </div>
+    <div class="col-sm-6">
+        {% if not read_only_mode %}
+        <form class="form-horizontal">
+            <fieldset>
+                <legend>{{ _('Sign up') }}</legend>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <a title="{{ _('Register') }}"
+                            href="{{ url_for('security.register', next=request.url) }}"
+                            class="btn btn-primary btn-block btn-lg"
+                            >
+                            {{ _('Create an account') }}
+                        </a>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
