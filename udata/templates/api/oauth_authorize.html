@@ -2,19 +2,14 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ theme_static('less/index.css') }}" rel="stylesheet">
-    <link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
   </head>
 
-  <body class="{{body_class}} theme-{{current_theme.variant}}">
+  <body class="{{body_class}}">
     <section id="app">
       <div class="container">
     <div class="row">
         <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
             <div class="panel panel-default">
-                <div class="panel-center-band">
-                    <img src="{{ theme_static('img/header.jpg') }}" alt="">
-                </div>
                 <div class="panel-body oauth-authorize">
     <div class="row">
         <div class="col-xs-12">
@@ -71,14 +66,7 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-12 text-center">
-            <img src="{{ theme_static('img/filigrane.jpg') }}" class="filigrane" alt="">
-        </div>
-    </div>
 </div>
     </section>
-
-    <script src="{{ theme_static('js/index.js') }}"></script>
   </body>
 </html>

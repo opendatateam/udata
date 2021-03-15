@@ -26,12 +26,11 @@ from authlib.oauth2.rfc7009 import RevocationEndpoint
 from authlib.oauth2.rfc7636 import CodeChallenge
 from authlib.oauth2.rfc6749.util import scope_to_list, list_to_scope
 from authlib.oauth2 import OAuth2Error
-from flask import request
+from flask import request, render_template
 from flask_security.utils import verify_password
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import gen_salt
 
-from udata import theme
 from udata.app import csrf
 from udata.auth import current_user, login_required, login_user
 from udata.i18n import I18nBlueprint, lazy_gettext as _
@@ -308,7 +307,7 @@ def authorize(*args, **kwargs):
         # Bypass authorization screen for internal clients
         if grant.client.internal:
             return oauth.create_authorization_response(grant_user=current_user)
-        return theme.render('api/oauth_authorize.html', grant=grant)
+        return render_template('api/oauth_authorize.html', grant=grant)
     elif request.method == 'POST':
         accept = 'accept' in request.form
         decline = 'decline' in request.form
@@ -321,7 +320,7 @@ def authorize(*args, **kwargs):
 
 @blueprint.route('/error')
 def oauth_error():
-    return theme.render('api/oauth_error.html')
+    return render_template('api/oauth_error.html')
 
 
 def query_client(client_id):

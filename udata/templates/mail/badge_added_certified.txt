@@ -1,4 +1,4 @@
-{% extends theme('mail/base.txt') %}
+{% extends 'mail/base.txt' %}
 
 {% block body %}
 {{ _('%(user)s has certified your organization "%(name)s"',

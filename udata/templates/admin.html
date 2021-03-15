@@ -2,7 +2,7 @@
 <html lang="{{ g.lang_code }}">
     <head>
         {% block raw_head %}
-        {% from theme('macros/metadata.html') import metadata with context %}
+        {% from 'macros/metadata.html' import metadata with context %}
         {{ metadata({
             'title': _('Admin'),
             'description': 'Administration',

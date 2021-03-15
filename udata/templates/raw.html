@@ -5,13 +5,11 @@
 <html lang="{{ g.lang_code }}">
   <head>
     {% block raw_head %}
-    {% from theme('macros/metadata.html') import metadata with context %}
+    {% from 'macros/metadata.html' import metadata with context %}
     {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block extra_css %}{% endblock %}
     {% block theme_css %}
-    <link href="{{ theme_static('less/index.css') }}" rel="stylesheet">
-    <link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
     {% endblock %}
 
     {% block extra_head %}{% endblock %}
@@ -22,12 +20,11 @@
 
   </head>
 
-  <body class="{{body_class}} theme-{{current_theme.variant}}">
+  <body class="{{body_class}}">
     <section id="app">
       {% block body %}{% endblock %}
     </section>
 
-    <script src="{{ theme_static('js/index.js') }}"></script>
     {% block extra_js %}{% endblock %}
 
     {{ hook('footer.snippets') }}

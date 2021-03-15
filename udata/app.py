@@ -14,7 +14,6 @@ from flask import (
 from flask_caching import Cache
 
 from flask_wtf.csrf import CSRFProtect
-from flask_navigation import Navigation
 from speaklater import is_lazy_string
 from werkzeug.contrib.fixers import ProxyFix
 
@@ -28,7 +27,6 @@ log = logging.getLogger(__name__)
 
 cache = Cache()
 csrf = CSRFProtect()
-nav = Navigation()
 
 
 def send_static(directory, filename, cache_timeout):
@@ -204,7 +202,7 @@ def standalone(app):
 
 def register_extensions(app):
     from udata import (
-        models, routing, tasks, mail, i18n, auth, theme, search, sitemap,
+        models, routing, tasks, mail, i18n, auth, search, sitemap,
         sentry
     )
     tasks.init_app(app)
@@ -214,8 +212,6 @@ def register_extensions(app):
     auth.init_app(app)
     cache.init_app(app)
     csrf.init_app(app)
-    nav.init_app(app)
-    theme.init_app(app)
     mail.init_app(app)
     search.init_app(app)
     sitemap.init_app(app)

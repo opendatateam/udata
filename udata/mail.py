@@ -3,10 +3,10 @@ from contextlib import contextmanager
 
 from blinker import signal
 
-from flask import current_app
+from flask import current_app, render_template
 from flask_mail import Mail, Message
 
-from udata import theme, i18n
+from udata import i18n
 
 
 log = logging.getLogger(__name__)
@@ -57,10 +57,10 @@ def send(subject, recipients, template_base, **kwargs):
                     'Sending mail "%s" to recipient "%s"', subject, recipient)
                 msg = Message(subject, sender=sender,
                               recipients=[recipient.email])
-                msg.body = theme.render(
+                msg.body = render_template(
                     'mail/{0}.txt'.format(template_base), subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
-                msg.html = theme.render(
+                msg.html = render_template(
                     'mail/{0}.html'.format(template_base), subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
                 conn.send(msg)

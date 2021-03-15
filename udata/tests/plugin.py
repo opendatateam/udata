@@ -88,16 +88,16 @@ def _load_frontend(request, _configure_application):
         api.init_app(app)
         frontend.init_app(app, modules)
 
-    if app.config['THEME'] != 'default':
-        # Unload theme to allow multiple run with initialization
-        from udata import theme
-        with app.app_context():
-            theme_module = theme.current.entrypoint.module_name
+    # if app.config['THEME'] != 'gouvfr':
+    #     # Unload theme to allow multiple run with initialization
+    #     from udata import theme
+    #     with app.app_context():
+    #         theme_module = theme.current.entrypoint.module_name
 
-        def unload_theme():
-            if theme_module in sys.modules:
-                del sys.modules[theme_module]
-        request.addfinalizer(unload_theme)
+    #     def unload_theme():
+    #         if theme_module in sys.modules:
+    #             del sys.modules[theme_module]
+    #     request.addfinalizer(unload_theme)
 
 
 @pytest.fixture

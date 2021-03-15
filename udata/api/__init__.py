@@ -7,13 +7,13 @@ from functools import wraps
 from importlib import import_module
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint, render_template
 )
 from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource
 from flask_cors import CORS
 
-from udata import tracking, theme, entrypoints
+from udata import tracking, entrypoints
 from udata.app import csrf
 from udata.i18n import I18nBlueprint, get_locale
 from udata.auth import (
@@ -292,7 +292,7 @@ def default_api():
 
 @apidoc.route('/apidoc/')
 def apidoc_index():
-    return theme.render('apidoc.html')
+    return render_template('apidoc.html')
 
 
 class API(Resource):  # Avoid name collision as resource is a core model

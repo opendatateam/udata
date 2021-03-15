@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime
 
-from flask import current_app
+from flask import current_app, render_template
 
-from udata import theme, i18n
+from udata import i18n
 from udata.models import Discussion, Message
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def archive(dataset, comment=False):
         user_id = current_app.config['ARCHIVE_COMMENT_USER_ID']
         if user_id:
             with i18n.language(lang):
-                msg = theme.render('comments/dataset_archived.txt')
+                msg = render_template('comments/dataset_archived.txt')
                 message = Message(content=msg, posted_by=user_id)
                 discussion = Discussion(
                     user=user_id, discussion=[message], subject=dataset,

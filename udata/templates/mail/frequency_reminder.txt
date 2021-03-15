@@ -1,4 +1,4 @@
-{% extends theme('mail/base.txt') %}
+{% extends 'mail/base.txt' %}
 
 {% block body %}
 {{ _('Some of your datasets need to be updated according to the frequency you set:') }}
