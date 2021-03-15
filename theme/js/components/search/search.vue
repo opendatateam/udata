@@ -3,26 +3,25 @@
     class="my-md fs-xl"
     :onChange="handleSearchChange"
     :value="queryString"
-    placeholder="Recherchez des données..."
+    :placeholder="$t('@@Recherchez des données...')"
     ref="input"
   />
   <div class="row-inline mt-sm justify-between align-items-center">
     <h1 class="m-0 h2">
-      Jeux de données<sup>{{ total_results || 0 }}</sup>
+      {{ $t("@@Jeux de données") }}<sup>{{ total_results || 0 }}</sup>
     </h1>
-    <a href="" title="" class="nav-link fs-sm">
-      Rechercher dans les réutilisations
+    <a :href="reuseUrl" title="" class="nav-link fs-sm">
+      {{ $t("@@Rechercher dans les réutilisations") }}
     </a>
-    <!-- TODO : link this-->
   </div>
   <section class="search-filters">
-    <h4 class="mt-md mb-xs fs-sm">Critères de recherche</h4>
+    <h4 class="mt-md mb-xs fs-sm">{{ $t("@@Critères de recherche") }}</h4>
     <div class="filters-wrapper p-xs">
       <div class="row justify-between align-items-center">
         <div class="col-3">
           <Suggestor
-            placeholder="Organisations"
-            searchPlaceholder="Chercher une organisation..."
+            :placeholder="$t('@@Organisations')"
+            :searchPlaceholder="$t('@@Chercher une organisation...')"
             listUrl="/organizations/"
             suggestUrl="/organizations/suggest/"
             :values="facets.organization"
@@ -31,7 +30,8 @@
         </div>
         <div class="col-3">
           <Suggestor
-            placeholder="Mots clés"
+            :placeholder="$t('@@Mots clés')"
+            :searchPlaceholder="$t('@@Chercher un mot clé...')"
             suggestUrl="/tags/suggest/"
             :values="facets.keywords"
             :onChange="handleSuggestorChange('keywords')"
@@ -39,7 +39,8 @@
         </div>
         <div class="col-3">
           <Suggestor
-            placeholder="Licenses"
+            :placeholder="$t('@@Licenses')"
+            :searchPlaceholder="$t('@@Chercher une license...')"
             listUrl="/datasets/licenses/"
             :values="facets.license"
             :onChange="handleSuggestorChange('license')"
@@ -47,7 +48,8 @@
         </div>
         <div class="col-2">
           <Suggestor
-            placeholder="Formats"
+            :placeholder="$t('@@Formats')"
+            :searchPlaceholder="$t('@@Chercher un format...')"
             suggestUrl="/datasets/suggest/formats/"
             :values="facets.format"
             :onChange="handleSuggestorChange('format')"
@@ -139,7 +141,7 @@ export default {
     Pagination,
   },
   created() {
-    //Update facets from URL for deep linking
+    //Update facets from URL on page load for deep linking
     const url = new URL(window.location);
     const searchParams = queryString.parse(url.search);
 
@@ -171,11 +173,21 @@ export default {
       facets: {},
     };
   },
+  computed: {
+    //Url for doing the same search (queryString only) on the reuse page
+    reuseUrl: function () {
+      return (
+        config.values.reuseUrl +
+        (this.queryString ? "?q=" + this.queryString : "")
+      );
+    },
+  },
   methods: {
     handleSearchChange(input) {
       this.queryString = input;
       this.search();
     },
+    //Called on every facet selector change, updates the `facets.xxx` object then searches with new values
     handleSuggestorChange(facet) {
       const that = this;
       return function (values) {

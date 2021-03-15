@@ -23,7 +23,11 @@ Vue. -->
     <div class="card-data">
       <h4 class="card-title">{{ title }}</h4>
       <div class="card-description text-grey-300 mt-xs">
-        {{ description }}
+        {{
+          description.length > 300
+            ? description.slice(0, 300) + "…"
+            : description
+        }}
       </div>
     </div>
     <dl class="card-hover">
