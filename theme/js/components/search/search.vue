@@ -62,19 +62,31 @@
           </a>
         </div>
       </div>
-      <div
-        v-if="extendedForm"
-        class="row-inline justify-between align-items-center"
-      >
-        <select>
-          <option>Plage temporelle</option>
-        </select>
-        <select>
-          <option>Zone géographique</option>
-        </select>
-        <select>
-          <option>Granularité géographique</option>
-        </select>
+      <div v-if="extendedForm" class="row mt-sm align-items-center">
+        <div class="col-5 row-inline">
+          <Rangepicker
+            :value="facets.temporal_coverage"
+            :onChange="handleSuggestorChange('temporal_coverage')"
+          />
+        </div>
+        <div class="col-3">
+          <Suggestor
+            :placeholder="$t('@@Zone géographique')"
+            :searchPlaceholder="$t('@@Chercher une zone...')"
+            suggestUrl="/spatial/zones/suggest"
+            :values="facets.geozone"
+            :onChange="handleSuggestorChange('geozone')"
+          />
+        </div>
+        <div class="col-3">
+          <Suggestor
+            :placeholder="$t('@@Granularité géographique')"
+            :searchPlaceholder="$t('@@Chercher une granularité...')"
+            listUrl="/spatial/granularities"
+            :values="facets.granularity"
+            :onChange="handleSuggestorChange('granularity')"
+          />
+        </div>
       </div>
     </div>
   </section>
@@ -123,6 +135,7 @@
 import config from "../../config";
 import SearchInput from "./search-input";
 import Suggestor from "./suggestor";
+import Rangepicker from "./rangepicker";
 import Dataset from "../dataset/search-result";
 import Loader from "../dataset/loader";
 import Empty from "./empty";
@@ -134,6 +147,7 @@ import queryString from "query-string";
 export default {
   components: {
     "search-input": SearchInput,
+    Rangepicker,
     Suggestor,
     Dataset,
     Empty,
@@ -191,10 +205,15 @@ export default {
     handleSuggestorChange(facet) {
       const that = this;
       return function (values) {
-        if (values.length > 1)
-          that.facets[facet] = values.map((obj) => obj.value);
-        else if (values.length === 1) that.facets[facet] = values[0].value;
-        else that.facets[facet] = null;
+        //Values can either be an array of varying length, or a String.
+        if (Array.isArray(values)) {
+          if (values.length > 1)
+            that.facets[facet] = values.map((obj) => obj.value);
+          else if (values.length === 1) that.facets[facet] = values[0].value;
+          else that.facets[facet] = null;
+        } else {
+          that.facets[facet] = values;
+        }
 
         that.search();
       };
