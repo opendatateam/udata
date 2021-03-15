@@ -1,7 +1,7 @@
 <!--
 ---
 name: Suggestor
-category: Interactions
+category: Search
 ---
 
 # Suggestor
