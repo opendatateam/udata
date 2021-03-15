@@ -5,6 +5,8 @@ from importlib import import_module
 
 from udata import assets, entrypoints
 
+from .markdown import init_app as init_markdown
+
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +23,8 @@ VIEWS = ['core.storages', 'core.tags', 'admin']
 
 def init_app(app, views=None):
     views = views or VIEWS
+
+    init_markdown(app)
 
     for view in views:
         _load_views(app, 'udata.{}.views'.format(view))
