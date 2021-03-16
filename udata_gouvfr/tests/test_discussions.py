@@ -10,6 +10,7 @@ from udata.tests.helpers import capture_mails
 from udata_gouvfr.tests import GouvFrSettings
 from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
+
 class DiscussionsMailsTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = []

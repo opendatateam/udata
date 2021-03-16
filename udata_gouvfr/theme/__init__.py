@@ -11,7 +11,6 @@ from flask_themes2 import (
 )
 from jinja2 import contextfunction
 from udata import assets
-from udata.i18n import lazy_gettext as _
 
 
 log = logging.getLogger(__name__)
@@ -111,7 +110,7 @@ class ConfigurableTheme(Theme):
             self.site.themes[self.identifier] = self.defaults
             try:
                 self.site.save()
-            except:
+            except Exception:
                 log.exception('Unable to save theme configuration')
         self._configured = True
 

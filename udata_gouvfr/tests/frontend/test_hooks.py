@@ -103,7 +103,7 @@ def app(app):
 @pytest.mark.frontend
 class HooksTest:
     settings = GouvFrSettings
-    
+
     def test_empty_template_hook(self, client):
         response = client.get(url_for('hooks_tests.render_empty'))
         assert200(response)

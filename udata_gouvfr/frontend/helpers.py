@@ -15,7 +15,6 @@ from werkzeug import url_decode, url_encode
 from . import front
 
 from udata import assets
-from udata.app import UDataJsonEncoder
 from udata.models import db
 from udata.i18n import format_date, _, pgettext, get_current_locale
 from udata.utils import camel_to_lodash

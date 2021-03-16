@@ -4,7 +4,6 @@ from jinja2 import Markup, contextfunction
 from flask import abort, current_app
 from flask_navigation import Navigation
 from udata.i18n import I18nBlueprint
-from udata import assets, entrypoints
 
 nav = Navigation()
 
