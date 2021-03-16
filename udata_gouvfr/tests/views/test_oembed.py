@@ -3,7 +3,7 @@ import pytest
 
 from flask import url_for
 
-from udata import theme
+from udata_gouvfr import theme
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.spatial.factories import GeoZoneFactory
@@ -13,10 +13,10 @@ from udata.features.territories.models import (
     TerritoryDataset, TERRITORY_DATASETS
 )
 
-from udata.frontend.markdown import mdstrip
 from udata.settings import Testing
 from udata.utils import faker
 from udata.tests.helpers import assert200, assert400, assert404, assert_status, assert_cors
+from udata.frontend.markdown import mdstrip
 
 from udata_gouvfr.tests import GouvFrSettings
 

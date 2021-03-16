@@ -5,11 +5,11 @@ from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.models import Member
-from udata.tests.frontend import FrontTestCase
 from udata.tests.features.territories import (
     create_geozones_fixtures, create_old_new_regions_fixtures,
     TerritoriesSettings
 )
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 
 class GouvFrTerritoriesSettings(TerritoriesSettings):
@@ -20,7 +20,7 @@ class GouvFrTerritoriesSettings(TerritoriesSettings):
 
 
 @pytest.mark.skip(reason='Territories logic changed because of gouvfr')
-class TerritoriesTest(FrontTestCase):
+class TerritoriesTest(GouvfrFrontTestCase):
     modules = ['admin']
     settings = GouvFrTerritoriesSettings
 
@@ -404,7 +404,7 @@ class TerritoriesTest(FrontTestCase):
 
 
 @pytest.mark.skip(reason='Territories logic changed because of gouvfr')
-class TerritoriesGenTest(FrontTestCase):
+class TerritoriesGenTest(GouvfrFrontTestCase):
     modules = ['admin']
     settings = GouvFrTerritoriesSettings
 

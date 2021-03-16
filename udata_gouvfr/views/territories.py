@@ -4,10 +4,10 @@ import unicodedata
 
 from flask import abort, current_app, redirect, url_for
 
-from udata import theme
 from udata.i18n import I18nBlueprint
 from udata.models import Dataset, GeoZone, TERRITORY_DATASETS
 from udata.sitemap import sitemap
+from udata_gouvfr import theme
 
 blueprint = I18nBlueprint('territories', __name__)
 

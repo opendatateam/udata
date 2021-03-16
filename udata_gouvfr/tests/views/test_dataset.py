@@ -12,13 +12,11 @@ from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.models import Follow
 
-from udata.tests.frontend import FrontTestCase
-
 from udata_gouvfr.tests import GouvFrSettings
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 
-class DatasetBlueprintTest(FrontTestCase):
-
+class DatasetBlueprintTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
 
     def test_render_list(self):

@@ -17,17 +17,17 @@ from udata.core.discussions.factories import DiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory, AdminFactory
 
-from udata.tests.frontend import FrontTestCase
 from udata.tests.helpers import capture_mails, assert_starts_with
 
 from udata_gouvfr.tests import GouvFrSettings
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 pytestmark = [
     pytest.mark.usefixtures('clean_db'),
 ]
 
 
-class OrganizationBlueprintTest(FrontTestCase):
+class OrganizationBlueprintTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = ['admin']
 
@@ -325,7 +325,7 @@ class OrganizationBadgeAPITest:
         assert [m.recipients[0] for m in mails] == members_emails
 
 
-class DiscussionCsvTest(FrontTestCase):
+class DiscussionCsvTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = []
 

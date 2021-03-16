@@ -13,11 +13,11 @@ from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.models import current_site
 from udata.core.reuse.factories import ReuseFactory
-from udata.tests.frontend import FrontTestCase
 from udata_gouvfr.tests import GouvFrSettings
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 
-class SiteViewsTest(FrontTestCase):
+class SiteViewsTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = ['admin']
 

@@ -1,8 +1,7 @@
 from flask import abort, url_for, Blueprint
 
-from udata.tests.frontend import FrontTestCase
 from udata_gouvfr.tests import GouvFrSettings
-
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 errors = Blueprint('errors', __name__)
 
@@ -22,7 +21,7 @@ def route_500():
     abort(500)
 
 
-class CustomErrorPagesTest(FrontTestCase):
+class CustomErrorPagesTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = ['admin']
 

@@ -1,10 +1,11 @@
 from flask import g, request
 
-from udata import theme, search
+from udata import search
 from udata.i18n import I18nBlueprint
 from udata.models import Topic
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
+from udata_gouvfr import theme
 
 from udata.core.dataset.search import DatasetSearch
 from udata.core.reuse.search import ReuseSearch

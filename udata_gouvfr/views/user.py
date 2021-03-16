@@ -3,7 +3,7 @@ import logging
 from flask import abort, g
 from flask_security import current_user
 
-from udata.frontend.views import DetailView
+from udata_gouvfr.views.base import DetailView
 from udata.models import User, Activity, Organization, Dataset, Reuse, Follow
 from udata.i18n import I18nBlueprint
 

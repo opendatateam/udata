@@ -16,21 +16,20 @@ from udata.core.dataset.factories import (
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
-from udata.frontend.markdown import md
 from udata.models import Badge
 from udata.tests.features.territories import (
     create_geozones_fixtures
 )
 from udata.utils import faker
 from udata.tests.helpers import assert200, assert404, assert_redirects, assert_equal_dates
+from udata.frontend.markdown import md
 
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
 from udata_gouvfr.models import (
     DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
     TERRITORY_DATASETS, OPENFIELD16, SPD
 )
-
-from udata_gouvfr.views.base import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
+from udata_gouvfr.views.gouvfr import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
 from udata_gouvfr.tests import GouvFrSettings
 
 

@@ -5,11 +5,11 @@ from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.tests.frontend import FrontTestCase
 from udata_gouvfr.tests import GouvFrSettings
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 
-class UserBlueprintTest(FrontTestCase):
+class UserBlueprintTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = ['admin']
 

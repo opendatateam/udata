@@ -1,304 +1,221 @@
-import frontmatter
-import logging
-import requests
+from flask import request, redirect, abort, g
+from flask.views import MethodView
 
-from flask import url_for, redirect, abort, current_app
-from jinja2.exceptions import TemplateNotFound
-from mongoengine.errors import ValidationError
-
-from udata import theme
-from udata.theme import theme_static_with_version
-from udata.app import cache
-from udata.frontend import template_hook
-from udata.models import Reuse, Organization, Dataset
-from udata.i18n import I18nBlueprint
-from udata.sitemap import sitemap
-
-from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
-
-from udata_gouvfr.models import (
-    DATACONNEXIONS_5_CANDIDATE, C3, NECMERGITUR, OPENFIELD16, SPD
-)
-
-log = logging.getLogger(__name__)
-
-blueprint = I18nBlueprint('gouvfr', __name__,
-                          template_folder='../templates',
-                          static_folder='static',
-                          static_url_path='/static/gouvfr')
-
-PAGE_CACHE_DURATION = 60 * 5  # in seconds
+from udata import search, auth
+from udata.utils import not_none_dict
+from udata_gouvfr import theme
 
 
-@blueprint.route('/dataset/<dataset>/')
-def redirect_datasets(dataset):
-    '''Route Legacy CKAN datasets'''
-    return redirect(url_for('datasets.show', dataset=dataset))
+class Templated(object):
+    template_name = None
+
+    def get_context(self):
+        return {}
+
+    def get_template_name(self):
+        return self.template_name
+
+    def render(self, context=None, **kwargs):
+        context = context or self.get_context()
+        context.update(kwargs)
+        return theme.render(self.get_template_name(), **context)
 
 
-@blueprint.route('/organization/')
-def redirect_organizations_list():
-    '''Route legacy CKAN organizations listing'''
-    return redirect(url_for('organizations.list'))
+class BaseView(MethodView):
+    require = None
+
+    def dispatch_request(self, *args, **kwargs):
+        self.kwargs = kwargs
+        self.set_identity(g.identity)
+        if not self.can(*args, **kwargs):
+            return abort(403)
+        return super(BaseView, self).dispatch_request(*args, **kwargs)
+
+    def can(self, *args, **kwargs):
+        '''Overwrite this method to implement custom contextual permissions'''
+        if isinstance(self.require, auth.Permission):
+            return self.require.can()
+        elif callable(self.require):
+            return self.require()
+        elif isinstance(self.require, bool):
+            return self.require
+        else:
+            return True
+
+    def set_identity(self, *args, **kwargs):
+        pass
 
 
-@blueprint.route('/organization/<org>/')
-def redirect_organizations(org):
-    '''Route legacy CKAN organizations'''
-    return redirect(url_for('organizations.show', org=org))
-
-
-@blueprint.route('/group/<topic>/')
-def redirect_topics(topic):
-    '''Route legacy CKAN topics'''
-    return redirect(url_for('topics.display', topic=topic))
-
-
-@blueprint.route('/Redevances')
-def redevances():
-    return theme.render('redevances.html')
-
-
-def get_pages_gh_urls(slug):
-    repo = current_app.config.get('PAGES_GH_REPO_NAME')
-    if not repo:
-        abort(404)
-    branch = current_app.config.get('PAGES_REPO_BRANCH', 'master')
-    raw_url = f'https://raw.githubusercontent.com/{repo}/{branch}/pages/{slug}.md'
-    gh_url = f'https://github.com/{repo}/blob/{branch}/pages/{slug}.md'
-    return raw_url, gh_url
-
-
-@cache.memoize(PAGE_CACHE_DURATION)
-def get_page_content(slug):
+class ListView(Templated, BaseView):
     '''
-    Get a page content from gh repo (md).
-    This has a double layer of cache:
-    - @cache.cached decorator w/ short lived cache for normal operations
-    - a long terme cache w/o timeout to be able to always render some content
+    Render a Queryset as a list.
     '''
-    cache_key = f'pages-content-{slug}'
-    raw_url, gh_url = get_pages_gh_urls(slug)
-    try:
-        response = requests.get(raw_url, timeout=5)
-        # do not cache 404 and forward status code
-        if response.status_code == 404:
-            abort(404)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        log.exception(f'Error while getting {slug} page from gh: {e}')
-        content = cache.get(cache_key)
-    else:
-        content = response.text
-        cache.set(cache_key, content)
-    # no cached version or no content from gh
-    if not content:
-        log.error(f'No content found inc. from cache for page {slug}')
-        abort(503)
-    return content, gh_url
+    model = None
+    context_name = 'objects'
+    default_page_size = 20
 
+    def get_queryset(self):
+        return self.model.objects
 
-def get_object(model, id_or_slug):
-    objects = getattr(model, 'objects')
-    obj = objects.filter(slug=id_or_slug).first()
-    if not obj:
+    def get_context(self):
+        context = super(ListView, self).get_context()
+        context[self.context_name] = self.get_queryset()
+        return context
+
+    @property
+    def page(self):
         try:
-            obj = objects.filter(id=id_or_slug).first()
-        except ValidationError:
-            pass
-    return obj
+            params_page = int(request.args.get('page', 1) or 1)
+            return max(params_page, 1)
+        except ValueError:  # Cast exception
+            # Failsafe, if page cannot be parsed, we falback on first page
+            return 1
+
+    @property
+    def page_size(self):
+        try:
+            params_page_size = request.args.get('page_size',
+                                                self.default_page_size)
+            return int(params_page_size or self.default_page_size)
+        except ValueError:  # Cast exception
+            # Failsafe, if page_size cannot be parsed, we falback on default
+            return self.default_page_size
+
+    def get(self, **kwargs):
+        return self.render()
 
 
-@blueprint.route('/pages/<slug>')
-def show_page(slug):
-    content, gh_url = get_page_content(slug)
-    page = frontmatter.loads(content)
-    reuses = [get_object(Reuse, r) for r in page.get('reuses') or []]
-    datasets = [get_object(Dataset, d) for d in page.get('datasets') or []]
-    reuses = [r for r in reuses if r is not None]
-    datasets = [d for d in datasets if d is not None]
-    return theme.render(
-        'page.html',
-        page=page, reuses=reuses, datasets=datasets, gh_url=gh_url
-    )
+class SearchView(Templated, BaseView):
+    '''
+    Render a Queryset as a list.
+    '''
+    model = None
+    context_name = 'objects'
+    search_adapter = None
+
+    def get_queryset(self):
+        adapter = search.adapter_for(self.search_adapter or self.model)
+        parser = adapter.as_request_parser()
+        params = not_none_dict(parser.parse_args())
+        params['facets'] = True
+        adapter = self.search_adapter or self.model
+        result = search.query(adapter, **params)
+        return result
+
+    def get_context(self):
+        context = super(SearchView, self).get_context()
+        context[self.context_name] = self.get_queryset()
+        return context
+
+    def get(self, **kwargs):
+        return self.render()
 
 
-@blueprint.route('/dataconnexions/')
-def dataconnexions():
-    '''Redirect to latest dataconnexions edition page'''
-    return redirect(url_for('gouvfr.dataconnexions6'))
+class SingleObject(object):
+    model = None
+    object_name = 'object'
+    object = None
+
+    def get_object(self):
+        if not self.object:
+            if self.object_name in self.kwargs:
+                self.object = self.kwargs[self.object_name]
+            if 'slug' in self.kwargs:
+                self.object = self.model.objects.get_or_404(
+                    slug=self.kwargs.get('slug'))
+            elif 'id' in self.kwargs:
+                self.object = self.model.objects.get_or_404(
+                    self.kwargs.get('id'))
+        return self.object
+
+    def get_context(self):
+        context = super(SingleObject, self).get_context()
+        context[self.object_name] = self.get_object()
+        return context
 
 
-DATACONNEXIONS_5_CATEGORIES = [
-    ('datadmin', 'Datadmin', (
-        'Projets portés par un acteur public (administration centrale ou '
-        'déconcentrée, collectivité...) qui a utilisé l’open data pour '
-        'améliorer son action, pour résoudre un problème…'
-    )),
-    ('data2b', 'Data-2-B', 'Projets destinés à un usage professionnel'),
-    ('data2c', 'Data-2-C', 'Projets destinés au grand public'),
-    ('datautile', 'Data-utile', (
-        'Projets d’intérêt général, engagés par exemple dans les champs de '
-        'la solidarité, du développement durable ou de la lutte contre '
-        'les discriminations, ou portés par une association, une ONG, '
-        'une entreprise sociale, un entrepreneur social ou un citoyen.'
-    )),
-    ('datajournalisme', 'Data-journalisme',
-     'Projets s’inscrivants dans la thématique du journalisme de données.'),
-]
+class NestedObject(SingleObject):
+    nested_model = None
+    nested_object_name = 'nested'
+    _nested_object = None
+    nested_attribute = None
+    nested_id = None
+
+    @property
+    def nested_object(self):
+        if not self._nested_object:
+            obj = self.get_object()
+            if not self.nested_attribute:
+                raise ValueError('nested_attribute should be set')
+            if self.nested_object_name in self.kwargs:
+                self.nested_id = self.kwargs[self.nested_object_name]
+            nested = getattr(obj, self.nested_attribute)
+            if isinstance(nested, (list, tuple)):
+                for item in nested:
+                    if self.is_nested(item):
+                        self._nested_object = item
+                        break
+            else:
+                self.nested_object = nested
+        return self._nested_object
+
+    def is_nested(self, obj):
+        return str(obj.id) == self.nested_id
+
+    def get_context(self):
+        context = super(NestedObject, self).get_context()
+        context[self.nested_object_name] = self.nested_object
+        return context
 
 
-DATACONNEXIONS_6_CATEGORIES = [
-    ('impact-demo', 'Impact démocratique', (
-        'Projets destinés à renforcer la transparence et la participation '
-        'dans une logique de co-production pour un gouvernement ouvert.')),
-    ('impact-soc', 'Impact social et environnemental', (
-        'Projets qui contribuent à la résolution de problématiques sociales '
-        '(éducation, santé, emploi, pauvreté, exclusion) '
-        '- ou environnementales.')),
-    ('impact-eco', 'Impact économique et scientifique', (
-        'Projets créateurs de valeur économique ou scientifique à travers des '
-        'nouveaux produits ou services qui visent le grand public, '
-        'le monde professionnel ou la recherche.')),
-    ('impact-adm', 'Impact administratif et territorial', (
-        'Projets destinés à renforcer l’efficacité, la visibilité '
-        'et la mise en réseau des administrations, des collectivités et '
-        'des communautés territoriales.')),
-]
+class DetailView(SingleObject, Templated, BaseView):
+    '''
+    Render a single object.
+    '''
+
+    def get(self, **kwargs):
+        return self.render()
+
+    def get_context(self):
+        context = super(DetailView, self).get_context()
+
+        if hasattr(self.object, 'json_ld'):
+            context['json_ld'] = self.object.json_ld
+        return context
 
 
-@blueprint.route('/dataconnexions-5')
-def dataconnexions5():
-    reuses = Reuse.objects(badges__kind=DATACONNEXIONS_5_CANDIDATE).visible()
+class FormView(Templated, BaseView):
+    form = None
 
-    categories = [{
-        'tag': tag,
-        'label': label,
-        'description': description,
-        'reuses': reuses(tags=tag),
-    } for tag, label, description in DATACONNEXIONS_5_CATEGORIES]
-    return theme.render('dataconnexions-5.html', categories=categories)
+    def get_context(self):
+        context = super(FormView, self).get_context()
+        form = self.get_form(request.form)
+        context['form'] = self.initialize_form(form)
+        return context
 
+    def get_form(self, data, obj=None):
+        return self.form(data, obj=obj)
 
-@blueprint.route('/dataconnexions-6')
-def dataconnexions6():
-    # Use tags until we are sure all reuse are correctly labeled
-    # reuses = Reuse.objects(badges__kind=DATACONNEXIONS_6_CANDIDATE)
-    reuses = Reuse.objects(tags='dataconnexions-6').visible()
+    def initialize_form(self, form):
+        return form
 
-    categories = [{
-        'tag': tag,
-        'label': label,
-        'description': description,
-        'reuses': reuses(tags=tag),
-    } for tag, label, description in DATACONNEXIONS_6_CATEGORIES]
-    return theme.render('dataconnexions-6.html', categories=categories)
+    def get(self, **kwargs):
+        return self.render()
 
+    def on_form_valid(self, form):
+        return redirect(self.get_success_url())
 
-C3_PARTNERS = (
-    'institut-national-de-l-information-geographique-et-forestiere',
-    'meteo-france',
-    'etalab',
-    'ministere-de-l-ecologie-du-developpement-durable-et-de-l-energie',
-    'museum-national-dhistoire-naturelle',
-    'irstea',
-    'electricite-reseau-distribution-france',
-)
-NB_DISPLAYED_DATASETS = 18
+    def on_form_error(self, form):
+        return self.render(form=form)
 
+    def get_success_url(self, obj):
+        return obj.display_url
 
-@blueprint.route('/c3')
-def c3():
-    return redirect(url_for('gouvfr.climate_change_challenge'))
+    def post(self, **kwargs):
+        context = self.get_context()
+        form = context['form']
 
+        if form.validate():
+            return self.on_form_valid(form)
 
-@blueprint.route('/climate-change-challenge')
-def climate_change_challenge():
-    partners = Organization.objects(slug__in=C3_PARTNERS)
-    datasets = (Dataset.objects(badges__kind=C3).visible()
-                .order_by('-metrics.followers'))
-    return theme.render('c3.html',
-                        partners=partners,
-                        datasets=datasets,
-                        badge=C3,
-                        nb_displayed_datasets=NB_DISPLAYED_DATASETS)
-
-
-@blueprint.route('/nec-mergitur')
-def nec_mergitur():
-    datasets = (Dataset.objects(badges__kind=NECMERGITUR).visible()
-                .order_by('-metrics.followers'))
-    return theme.render('nec_mergitur.html',
-                        datasets=datasets,
-                        badge=NECMERGITUR,
-                        nb_displayed_datasets=NB_DISPLAYED_DATASETS)
-
-
-@blueprint.route('/openfield16')
-def openfield16():
-    datasets = (Dataset.objects(badges__kind=OPENFIELD16).visible()
-                .order_by('-metrics.followers'))
-    return theme.render('openfield16.html',
-                        datasets=datasets,
-                        badge=OPENFIELD16,
-                        nb_displayed_datasets=NB_DISPLAYED_DATASETS)
-
-
-@blueprint.route('/reference')
-def spd():
-    datasets = Dataset.objects(badges__kind=SPD).order_by('title')
-    return theme.render('spd.html', datasets=datasets, badge=SPD)
-
-
-@blueprint.route('/licences')
-def licences():
-    try:
-        return theme.render('licences.html')
-    except TemplateNotFound:
-        abort(404)
-
-
-@blueprint.route('/suivi')
-def suivi():
-    try:
-        return theme.render('suivi.html')
-    except TemplateNotFound:
-        abort(404)
-
-
-@blueprint.route('/faq/', defaults={'section': 'home'})
-@blueprint.route('/faq/<string:section>/')
-def faq(section):
-    try:
-        return theme.render('faq/{0}.html'.format(section), page_name=section)
-    except TemplateNotFound:
-        abort(404)
-
-
-@sitemap.register_generator
-def gouvfr_sitemap_urls():
-    yield 'gouvfr.faq_redirect', {}, None, 'weekly', 1
-    for section in ('citizen', 'producer', 'reuser', 'developer',
-                    'system-integrator'):
-        yield 'gouvfr.faq_redirect', {'section': section}, None, 'weekly', 0.7
-    yield 'gouvfr.dataconnexions_redirect', {}, None, 'monthly', 0.4
-    yield 'gouvfr.redevances_redirect', {}, None, 'yearly', 0.4
-
-
-def has_apis(ctx):
-    dataset = ctx['dataset']
-    return dataset.extras.get(APIGOUVFR_EXTRAS_KEY, [])
-
-
-@template_hook('dataset.display.after-description', when=has_apis)
-def dataset_apis(ctx):
-    dataset = ctx['dataset']
-    return theme.render('dataset-apis.html', apis=dataset.extras.get(APIGOUVFR_EXTRAS_KEY))
-
-
-# TODO : better this, redirect is not the best. How to serve it instead ?!
-@blueprint.route('/_stylemark/<path:filename>')
-def stylemark(filename):
-    return redirect(theme_static_with_version(None,
-                                              filename="stylemark/index.html",
-                                              _external=True))
+        return self.on_form_error(form)

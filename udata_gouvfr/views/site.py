@@ -5,7 +5,7 @@ from flask import request, redirect, url_for, current_app, abort
 from mongoengine.errors import DoesNotExist
 from werkzeug.contrib.atom import AtomFeed
 
-from udata import search, theme
+from udata import search
 from udata.app import cache
 from udata.core.activity.models import Activity
 from udata.core.dataset.csv import ResourcesCsvAdapter
@@ -16,10 +16,11 @@ from udata.core.post.models import Post
 from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.core.reuse.models import Reuse
 from udata.frontend import csv
-from udata.frontend.views import DetailView
+from udata_gouvfr.views.base import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.sitemap import sitemap
 from udata.utils import multi_to_dict
+from udata_gouvfr import theme
 
 from udata.core.site.models import current_site
 

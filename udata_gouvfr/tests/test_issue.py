@@ -12,12 +12,12 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.utils import faker
-from udata.tests.frontend import FrontTestCase
 from udata.tests.helpers import capture_mails, assert_starts_with
 from udata_gouvfr.tests import GouvFrSettings
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 
-class IssuesMailsTest(FrontTestCase):
+class IssuesMailsTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = []
 
@@ -91,7 +91,7 @@ class IssuesMailsTest(FrontTestCase):
             self.assertNotIn(owner.email, mail.recipients)
 
 
-class IssueCsvTest(FrontTestCase):
+class IssueCsvTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = []
 

@@ -1,8 +1,9 @@
-from udata import search, theme
+from udata import search
 from udata.models import Dataset, Organization, Reuse
 from udata.utils import not_none_dict
 from udata.features.territories import check_for_territories
 from udata.i18n import I18nBlueprint
+from udata_gouvfr import theme
 
 blueprint = I18nBlueprint('search', __name__)
 

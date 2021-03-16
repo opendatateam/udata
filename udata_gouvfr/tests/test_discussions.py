@@ -6,12 +6,11 @@ from udata.core.discussions.tasks import (
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import UserFactory
 from udata.utils import faker
-from udata.tests.frontend import FrontTestCase
 from udata.tests.helpers import capture_mails
 from udata_gouvfr.tests import GouvFrSettings
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
-
-class DiscussionsMailsTest(FrontTestCase):
+class DiscussionsMailsTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = []
 

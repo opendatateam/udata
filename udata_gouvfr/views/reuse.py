@@ -1,12 +1,12 @@
 from flask import abort, request, url_for
 from werkzeug.contrib.atom import AtomFeed
 
-from udata.app import nav
-from udata.frontend.views import SearchView, DetailView
+from udata_gouvfr.views.base import SearchView, DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
 from udata.models import Follow
 from udata.sitemap import sitemap
-from udata.theme import render as render_template
+from udata_gouvfr.frontend import nav
+from udata_gouvfr.theme import render as render_template
 
 from udata.core.reuse.models import Reuse
 from udata.core.reuse.permissions import ReuseEditPermission

@@ -1,13 +1,13 @@
 from flask import url_for
 
-from udata.tests.frontend import FrontTestCase
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.reuse.factories import VisibleReuseFactory
 from udata.core.topic.factories import TopicFactory
 from udata_gouvfr.tests import GouvFrSettings
+from udata_gouvfr.tests.frontend import GouvfrFrontTestCase
 
 
-class TopicsBlueprintTest(FrontTestCase):
+class TopicsBlueprintTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = ['admin']
 
