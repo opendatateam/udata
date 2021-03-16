@@ -1,4 +1,4 @@
-from udata.auth.helpers import request_is_admin
+from udata.auth.helpers import current_user_is_admin_or_self
 from udata.api import api, fields, base_reference
 
 from .models import AVATAR_SIZES
@@ -38,7 +38,7 @@ user_fields = api.model('User', {
     'last_name': fields.String(
         description='The user last name', required=True),
     'email': fields.Raw(
-        attribute=lambda o: o.email if request_is_admin() else None,
+        attribute=lambda o: o.email if current_user_is_admin_or_self() else None,
         description='The user email', readonly=True),
     'avatar': fields.ImageField(original=True,
         description='The user avatar URL'),
