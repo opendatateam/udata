@@ -8,7 +8,7 @@ theme:
     textColor: "#070d54"
 examples:
   css:
-    - udata_gouvfr/theme/static/less/index.css
+    - udata_gouvfr/theme/gouvfr/static/less/index.css
     - theme/less/examples.css
   js:
-    - udata_gouvfr/theme/static/js/index.js
+    - udata_gouvfr/theme/gouvfr/static/js/index.js

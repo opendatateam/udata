@@ -56,24 +56,12 @@ setup(
     },
     entry_points={
         'udata.themes': [
-            'gouvfr = udata_gouvfr.theme',
+            'gouvfr = udata_gouvfr.theme.gouvfr',
         ],
         'udata.models': [
             'gouvfr = udata_gouvfr.models',
         ],
-        'udata.views': [
-            'gouvfr = udata_gouvfr.views.base',
-            'gouvfr_dataset = udata_gouvfr.views.dataset',
-            'gouvfr_organization = udata_gouvfr.views.organization',
-            'gouvfr_post = udata_gouvfr.views.post',
-            'gouvfr_reuse = udata_gouvfr.views.reuse',
-            'gouvfr_site = udata_gouvfr.views.site',
-            'gouvfr_topic = udata_gouvfr.views.topic',
-            'gouvfr_user = udata_gouvfr.views.user',
-            'gouvfr_follower = udata_gouvfr.views.follower',
-            'gouvfr_territories = udata_gouvfr.views.territories',
-            'gouvfr_search = udata_gouvfr.views.search',
-        ],
+        'udata.front': 'gouvfr = udata_gouvfr.frontend',
         'udata.apis': [
             'gouvfr_oembed = udata_gouvfr.views.oembed',
         ],
