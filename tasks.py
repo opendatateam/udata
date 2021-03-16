@@ -10,7 +10,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 I18N_ROOT = 'udata_gouvfr/translations'
 
-THEME_ROOT = os.path.join(ROOT, 'udata_gouvfr', 'theme')
+THEME_ROOT = os.path.join(ROOT, 'udata_gouvfr/theme', 'gouvfr')
 
 LANGUAGES = ['fr']
 
