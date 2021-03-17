@@ -26,7 +26,7 @@
                 :endpoint="endpoint" :editable="can_edit">
             </image-button>
         <div v-markdown="user.about"></div>
-        <h4>{{user.email}}</h4>
+        <h4 v-if="user.email">{{user.email}}</h4>
     </div>
 </box>
 </div>
