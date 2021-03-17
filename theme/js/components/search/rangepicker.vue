@@ -106,18 +106,23 @@ export default {
   },
   methods: {
     _onChange: function () {
-      if (!this.dateRange.start || !this.dateRange.end || !this.onChange)
-        return;
+      if (!this.onChange) return;
 
-      return this.onChange(
-        format(this.dateRange.start, "yyyy-MM-dd") +
+      let value = null;
+
+      if (this.dateRange.start && this.dateRange.end)
+        value =
+          format(this.dateRange.start, "yyyy-MM-dd") +
           "-" +
-          format(this.dateRange.end, "yyyy-MM-dd")
-      );
+          format(this.dateRange.end, "yyyy-MM-dd");
+
+      return this.onChange(value);
     },
     clear: function () {
       this.dateRange.start = null;
       this.dateRange.end = null;
+
+      this._onChange();
     },
   },
 };
