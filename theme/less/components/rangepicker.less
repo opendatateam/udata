@@ -1,4 +1,22 @@
 .rangepicker {
+    .datepicker {
+        position: relative;
+
+        .clear {
+            position: absolute;
+
+            right: @spacing-xs;
+            top: 50%;
+            margin-top: -9px;
+
+            cursor: pointer;
+
+            * {
+                fill: @grey-200;
+            }
+        }
+    }
+
     .v3dp__datepicker {
         input {
             appearance: none;
