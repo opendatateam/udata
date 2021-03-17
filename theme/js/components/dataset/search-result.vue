@@ -39,9 +39,9 @@ Vue. -->
         <dt>{{ $t("@@Frequency") }}</dt>
         <dd>{{ frequency }}</dd>
       </div>
-      <div v-if="spatial?.top_label">
+      <div v-if="geozone">
         <dt>{{ $t("@@Spatial coverage") }}</dt>
-        <dd>{{ spatial.top_label }}</dd>
+        <dd>{{ geozone.join(", ") }}</dd>
       </div>
       <div v-if="spatial?.granularity">
         <dt>{{ $t("@@Territorial coverage granularity") }}</dt>
@@ -82,6 +82,26 @@ export default {
   },
   components: {
     Placeholder,
+  },
+  data() {
+    return {
+      geozone: null,
+    };
+  },
+  async mounted() {
+    //Fetching geozone names on load (they're not included in the dataset object)
+
+    const zones = this?.spatial?.zones;
+    if (zones) {
+      let promises = zones.map((zone) =>
+        this.$api
+          .get("spatial/zone/" + zone)
+          .then((resp) => resp.data)
+          .then((obj) => obj && obj?.properties?.name)
+      );
+
+      this.geozone = await Promise.all(promises);
+    }
   },
 };
 </script>
