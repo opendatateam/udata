@@ -19,15 +19,15 @@ Simply provide the many necessary props :
 
 * onChange: Function that will be called on each value select/deselect action,
 * suggestUrl: This is the URL that will be called (if provided) when the user performs a search within the select.
- If not provided, suggest mode will be disabled and typing in the select will only filter the existing options.
+  If not provided, suggest mode will be disabled and typing in the select will only filter the existing options.
 * listUrl: This is the URL that will be called to populate the select options on mount.
-If not provided, the select will start empty and will fill with options when the user starts typing some text,
+  If not provided, the select will start empty and will fill with options when the user starts typing some text,
+* entityUrl: This is the URL that will be called to fetch labels for options provided before the component mounts,
 * placeholder: Need I say more ? It's something to hold the place while the thingy is empty or something like that,
 * searchPlaceholder: Same as above, but for the input where you can type your request,
 * emptyPlaceholder: Placeholder when the search returns null or everything crashed,
 * values: Initial values if the select needs to be pre-filled before the user even touches it. Can be a String (single value) or an Array of values.
-  Passing a label is not supported currently, but should be one day (quite trivial). Maybe one day labels should be fetched from an external API.
-  For now, we simply use the provided value(s) as label(s)
+  Labels will be fetched either from the entityUrl for each value, or from the options list if listUrl is provided, or the value will be used as label.
 
 ```
 -->
@@ -85,6 +85,7 @@ export default {
     onChange: Function,
     suggestUrl: String,
     listUrl: String,
+    entityUrl: String,
     placeholder: String,
     searchPlaceholder: String,
     values: [Array, String],
@@ -99,13 +100,13 @@ export default {
       this.searchPlaceholder || this.placeholder;
   },
   async created() {
-    //We start by filling the select with existing value if there is any
-    this.fillInitialValues();
-
     //If we're in "suggest" mode, the options will be the suggest function that will be called on each search change
     //If not, we call the getInitialOptions fn that will populate the options var
     if (this.suggestUrl) this.options = this.suggest;
     else this.options = await this.getInitialOptions();
+
+    //Then we fill the select with existing value if there is any, using the previously made list if needs be
+    this.fillInitialValues();
   },
   data() {
     return {
@@ -140,17 +141,42 @@ export default {
     },
     fillInitialValues: function () {
       //On creation, if values are pre-provided by the parent (from URL or parent state) in `this.values`,
-      //we should be fetching those from the API to fill the select with values + labels in `this.value`
-      //This isn't ideal but shouldn't happen very often.
-      //In the meantime, since this is a bit too complicated we'll just fill the select with the "value" as label.
-
+      //we have to fetch those from the API to fill the select with values + labels in `this.value`
       //`this.values` can be a single value (String) or an array of values so we need to normalize it
+
       let selected = null;
       if (typeof this.values === "string") selected = [this.values];
       else if (typeof this.values === "array") selected = this.values;
       else selected = [];
 
-      selected.forEach((value) => this.value.push({ label: value, value }));
+      //Now for each value, three cases :
+      // * We have a entityUrl prop that we will call for each value to get the corresponding label
+      // * We don't have a entityUrl but we have an option list that we can search into
+      // * We have nothing, YOLO let's simply use the value as a label
+      selected.forEach(async (value) => {
+        let label = value;
+
+        if (this.entityUrl) {
+          //Fetch it from API
+          let entity = await this.$api
+            .get(this.entityUrl + value)
+            .then((resp) => resp.data)
+            .then((data) => this.serializer([data]));
+
+          if (entity.length >= 1) label = entity[0].label;
+        } else if (this.options?.length > 0) {
+          //Find it in the options list
+          let option = Object.keys(this.options).find(
+            (opt) => this.options[opt].value === value
+          );
+
+          //If found, populate
+          option = this?.options[option];
+          if (option) label = option.label;
+        }
+
+        this.value.push({ label, value });
+      });
     },
     getInitialOptions: async function () {
       if (!this.listUrl) return [];
@@ -160,9 +186,10 @@ export default {
         .then((resp) => resp.data)
         .then(this.serializer);
     },
+    //Tries to guess values and labels. Harder than it looks.
     serializer: function (data) {
       return data.map((obj) => ({
-        label: obj.name || obj.title || obj.text,
+        label: obj.name || obj.title || obj.text || obj?.properties?.name,
         value: obj.id || obj.text,
       }));
     },
