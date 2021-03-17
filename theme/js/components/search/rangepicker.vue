@@ -49,8 +49,9 @@ import 'vue3-datepicker/dist/vue3-datepicker.css';
 import { format } from "date-fns";
 import fr from "date-fns/locale/fr";
 import en from "date-fns/locale/en-GB";
+import es from "date-fns/locale/es";
 
-const locales = { fr, en };
+const locales = { fr, en, es };
 
 export default {
   components: {
