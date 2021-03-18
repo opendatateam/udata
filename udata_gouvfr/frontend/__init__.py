@@ -93,7 +93,6 @@ VIEWS = ['gouvfr', 'dataset', 'organization', 'follower', 'post',
 
 
 def init_app(app):
-    print('IN FRONTEND INIT')
     from udata_gouvfr import theme
 
     nav.init_app(app)
