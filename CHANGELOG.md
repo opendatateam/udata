@@ -11,6 +11,7 @@
   - "Edit" action has been renamed to "Edit the dataset/reuse/organization/profile" according to the current object to edit.
 - Add `nofollow` attribute to links in discussions comments [#2593](https://github.com/opendatateam/udata/pull/2593)
 - Add pip upgrade in circle's publish step [2596](https://github.com/opendatateam/udata/pull/2596)
+- Pin Twine's version [2597](https://github.com/opendatateam/udata/pull/2597)
 
 ## 2.6.1 (2021-01-26)
 
