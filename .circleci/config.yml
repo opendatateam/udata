@@ -156,6 +156,7 @@ jobs:
       - deploy:
           name: Publish on PyPI
           command: |
+            pip install --upgrade pip
             pip install twine
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
