@@ -27,7 +27,7 @@
         <!-- Menu Footer-->
         <li class="user-footer">
             <div class="pull-left">
-                <a :href="'/users/' + $root.me.slug" class="btn btn-default btn-flat" v-i18n="Profile"></a>
+                <a :href="'/users/' + $root.me.slug" class="btn btn-default btn-flat" v-i18n="Public profile"></a>
             </div>
             <div class="pull-right">
                 <a href="/logout" class="btn btn-default btn-flat" v-i18n="Sign out"></a>

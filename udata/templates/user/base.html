@@ -28,6 +28,13 @@
 {% if current_user != user %}
 <div class="btn-group btn-group-xs">
     {{ follow_btn(user) }}
+    {% if sysadmin %}
+    <div class="btn btn-primary">
+        <a href="{{ url_for('admin.index', path='user/{id}/'.format(id=user.id)) }}" class="btn-primary">
+            {{ _("User's admin profile") }}
+        </a>
+    </div>
+    {% endif %}
 </div>
 {% endif %}
 {% endblock %}
