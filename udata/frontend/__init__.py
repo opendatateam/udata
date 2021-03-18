@@ -34,7 +34,7 @@ def init_app(app, views=None):
         front_module = module if inspect.ismodule(module) else import_module(module)
         front_module.init_app(app)
 
-        # Load core manifest
+    # Load core manifest
     with app.app_context():
         assets.register_manifest('udata')
         for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
