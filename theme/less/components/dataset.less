@@ -10,6 +10,7 @@ Pretty simple layout that could be achieved using the standard grid, but using a
 There's also a `.compact` version for smaller areas (like the search popover) without separators and overall smaller elements.
 
 For displaying dataset search results, a `.dataset-search-result` version is available. It's essentially the same informations in a different order, with a part that appears only on hover.
+Disclaimer : the search-result component is weird in styling and uses a lot of fixed pixel values. Please beware if you make any changes in it, you might break responsive.
 
 ```datasets.html
 <article class="dataset-card">
@@ -162,6 +163,7 @@ For displaying dataset search results, a `.dataset-search-result` version is ava
     }
 
     //Fancier version for search results, with an hover section for details
+    //Disclaimer : the search-result component is weird in styling and uses a lot of fixed pixel values. Please beware if you make any changes in it, you might break responsive.
     &.dataset-search-result {
         padding: 0; //Unfortunately, we need some sweet borders
 
@@ -171,8 +173,22 @@ For displaying dataset search results, a `.dataset-search-result` version is ava
             padding: @spacing-md 0;
         }
 
+        @media @query-lg {
+            align-items: flex-start;
+            flex-wrap: wrap;
+
+            .card-data {
+                flex-basis: 0;
+                padding-bottom: 0;
+            }
+        }
+
         .card-logo {
             padding: 0 @spacing-xs;
+
+            @media @query-lg {
+                padding-top: @spacing-md;
+            }
         }
 
         .card-hover {
@@ -203,6 +219,10 @@ For displaying dataset search results, a `.dataset-search-result` version is ava
                     font-weight: @font-weight-bold;
                 }
             }
+
+            @media @query-lg {
+                display: none;
+            }
         }
 
         &:hover {
@@ -232,6 +252,17 @@ For displaying dataset search results, a `.dataset-search-result` version is ava
 
             li {
                 margin: @spacing-xxs 0;
+            }
+
+            @media @query-lg {
+                min-width: 100%;
+                border-left: none;
+
+                padding: @spacing-xs;
+                padding-left: 112px; //Logo width + little margin
+
+                flex-direction: row;
+                justify-content: space-between;
             }
         }
 
