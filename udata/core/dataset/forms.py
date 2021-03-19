@@ -34,7 +34,7 @@ def normalize_format(data):
 def enforce_allowed_schemas(form, field):
     schema = field.data
     allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
-    if schema not in allowed_schemas:
+    if schema.startswith(tuple(allowed_schemas)):
         message = _('Schema "{schema}" is not an allowed value. Allowed values: {values}')
         raise validators.ValidationError(message.format(
             schema=schema,
