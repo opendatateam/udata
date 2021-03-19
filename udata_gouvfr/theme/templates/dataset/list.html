@@ -4,7 +4,7 @@
 
 {% set toolbar_class='search-toolbar' %}
 
-{% block breadcrumb %}
+{# {% block breadcrumb %}
 <li class="active">
     {{ _('Datasets') }}
     <small>{{ _('%(start)s to %(end)s on %(total)s',
@@ -12,7 +12,7 @@
             end=datasets.page_end,
             total=datasets.total) }}</small>
 </li>
-{% endblock %}
+{% endblock %} #}
 
 {% set meta = {
     'title': _('Datasets'),
@@ -32,10 +32,10 @@
                 <input type="text" name="q" aria-label="{{ _('@@Search...') }}" placeholder="{{ _('@@Search...') }}" />
             </form>
         </div>
-        <div class="row-inline pt-xl justify-between align-items-center">
+        <div class="row-inline pt-xl pt-lg-lg justify-between align-items-center">
             <h1 class="m-0 h2">{{ _('@@Jeux de données')}} <sup>{{datasets.total}}</sup></h1>
             <a href="{{ url_for('reuses.list') }}" title=""
-                class="nav-link fs-sm">{{ _('@@Rechercher dans les réutilisations') }}</a>
+                class="nav-link fs-sm mt-lg-sm">{{ _('@@Rechercher dans les réutilisations') }}</a>
         </div>
         <ul class="search-results mt-lg">
             {% for dataset in datasets %}
