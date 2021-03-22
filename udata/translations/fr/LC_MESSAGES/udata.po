@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2021-03-22 16:01+0100\n"
-"PO-Revision-Date: 2021-03-22 15:22\n"
+"PO-Revision-Date: 2021-03-22 15:41\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -2717,7 +2717,7 @@ msgstr "profil"
 
 #: udata/templates/user/base.html:34
 msgid "User's admin profile"
-msgstr ""
+msgstr "Profil admin de l'utilisateur"
 
 #: udata/templates/user/base.html:80
 #, python-format
