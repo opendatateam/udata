@@ -157,7 +157,7 @@ jobs:
           name: Publish on PyPI
           command: |
             pip install --upgrade pip
-            pip install twine
+            pip install twine==3.3.0
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
 workflows:
