@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Extraction of translation's strings [2602](https://github.com/opendatateam/udata/pull/2602)
 
 ## 2.6.2 (2021-03-22)
 
