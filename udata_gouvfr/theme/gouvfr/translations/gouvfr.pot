@@ -1,0 +1,307 @@
+# English translations for PROJECT.
+# Copyright (C) 2021 Etalab
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
+"POT-Creation-Date: 2021-01-25 12:34+0100\n"
+"PO-Revision-Date: 2021-01-25 12:34+0100\n"
+"Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
+"Language: en\n"
+"Language-Team: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+
+#: __init__.py:44
+msgid "Data"
+msgstr ""
+
+#: __init__.py:45 templates/dataset/display.html:44 templates/footer.html:93
+#: templates/footer.html:95
+msgid "Reuses"
+msgstr ""
+
+#: __init__.py:46 templates/header.html:96
+msgid "Organizations"
+msgstr ""
+
+#: __init__.py:47
+msgid "Dashboard"
+msgstr ""
+
+#: __init__.py:48 __init__.py:59
+msgid "Documentation"
+msgstr ""
+
+#: __init__.py:49
+msgid "Technical documentation"
+msgstr ""
+
+#: __init__.py:50
+msgid "Open data guides"
+msgstr ""
+
+#: __init__.py:52 __init__.py:58
+msgid "News"
+msgstr ""
+
+#: __init__.py:60
+msgid "Reference Data"
+msgstr ""
+
+#: __init__.py:61
+msgid "Licences"
+msgstr ""
+
+#: __init__.py:62
+msgid "API"
+msgstr ""
+
+#: __init__.py:63
+msgid "Terms of use"
+msgstr ""
+
+#: __init__.py:64
+msgid "Tracking and privacy"
+msgstr ""
+
+#: __init__.py:76
+msgid "Data catalog"
+msgstr ""
+
+#: templates/carousel.html:6 templates/home.html:29
+msgid "Best reuse cases"
+msgstr ""
+
+#: templates/footer.html:9
+msgid "The Open Data"
+msgstr ""
+
+#: templates/footer.html:26
+msgid "Topics"
+msgstr ""
+
+#: templates/footer.html:39
+msgid "Network"
+msgstr ""
+
+#: templates/footer.html:48
+msgid "Contact Us"
+msgstr ""
+
+#: templates/footer.html:66
+msgid "You can contact us at "
+msgstr ""
+
+#: templates/footer.html:71
+msgid "Go to Etalab’s blog"
+msgstr ""
+
+#: templates/footer.html:84
+msgid "Feeds"
+msgstr ""
+
+#: templates/footer.html:88 templates/footer.html:90
+msgid "Datasets"
+msgstr ""
+
+#: templates/footer.html:100
+msgid "Open-source engine"
+msgstr ""
+
+#: templates/footer.html:101 templates/footer.html:104
+msgid "Deployed version"
+msgstr ""
+
+#: templates/footer.html:103
+msgid "Data.gouv.fr extension"
+msgstr ""
+
+#: templates/footer.html:106
+msgid "Back to top"
+msgstr ""
+
+#: templates/forum.html:4
+msgid "Latest forum discussions"
+msgstr ""
+
+#: templates/forum.html:13
+msgid "Title"
+msgstr ""
+
+#: templates/forum.html:14
+msgid "Users"
+msgstr ""
+
+#: templates/forum.html:15
+msgid "Last post"
+msgstr ""
+
+#: templates/forum.html:16
+msgid "Replies"
+msgstr ""
+
+#: templates/header.html:4
+msgid ""
+"Internet Explorer 8 and below are not anymore supported. Please upgrade or "
+"change your browser to access the website."
+msgstr ""
+
+#: templates/header.html:4
+msgid "More information →"
+msgstr ""
+
+#: templates/header.html:12
+msgid "Due to security reasons, the creation of new content is currently disabled."
+msgstr ""
+
+#: templates/header.html:30
+msgid "Toggle navigation"
+msgstr ""
+
+#: templates/header.html:36
+msgid "Open platform for French public data"
+msgstr ""
+
+#: templates/header.html:92
+msgid "My profile"
+msgstr ""
+
+#: templates/header.html:111
+msgid "Administration"
+msgstr ""
+
+#: templates/header.html:118
+msgid "Logout"
+msgstr ""
+
+#: templates/header.html:125 templates/header.html:128
+msgid "Sign In / Register"
+msgstr ""
+
+#: templates/home.html:48 templates/home.html:49
+msgid "Latest reuses"
+msgstr ""
+
+#: templates/home.html:125
+msgid "News in data"
+msgstr ""
+
+#: templates/home.html:143
+msgid "Featured datasets"
+msgstr ""
+
+#: templates/home.html:144
+msgid "Latest datasets"
+msgstr ""
+
+#: templates/home.html:180
+msgid "See more"
+msgstr ""
+
+#: templates/home.html:199
+msgid "The blog"
+msgstr ""
+
+#: templates/home.html:221
+msgid "more"
+msgstr ""
+
+#: templates/subnav-large.html:33
+msgid "Share, improve and reuse public data"
+msgstr ""
+
+#: templates/subnav-large.html:37 templates/subnav-large.html:41
+msgid "Contribute!"
+msgstr ""
+
+#: templates/subnav-small.html:10
+msgid "Search in datasets"
+msgstr ""
+
+#: templates/subnav-small.html:13
+msgid "Search in this "
+msgstr ""
+
+#: templates/subnav-small.html:16
+msgid "Search"
+msgstr ""
+
+#: templates/dataset/display.html:3 templates/reuse/display.html:3
+#, python-format
+msgid "Explore with %(certifier)s"
+msgstr ""
+
+#: templates/dataset/display.html:12
+msgid "Community contributions"
+msgstr ""
+
+#: templates/dataset/display.html:19
+msgid "Community resources"
+msgstr ""
+
+#: templates/dataset/display.html:31
+msgid "Add a community resource"
+msgstr ""
+
+#: templates/dataset/display.html:39
+msgid ""
+"You have built a more comprehensive database than those presented here? This "
+"is the time to share it!"
+msgstr ""
+
+#: templates/dataset/display.html:64
+msgid ""
+"You reused these data and published an article, a computer graphics, or an "
+"application?\n"
+"                It's time to let you know!\n"
+"                Reference your work in just a few clicks and increase your "
+"visibility."
+msgstr ""
+
+#: templates/dataset/display.html:71
+msgid "Discussions"
+msgstr ""
+
+#: templates/dataset/display.html:80
+msgid "Discussion between the organization and the community about this dataset."
+msgstr ""
+
+#: templates/mail/base.html:45
+msgid "on your browser."
+msgstr ""
+
+#: templates/mail/base.html:48
+#, python-format
+msgid "View this email %(link)s"
+msgstr ""
+
+#: templates/mail/base.html:81
+#, python-format
+msgid "Hi %(user)s"
+msgstr ""
+
+#: templates/mail/base.html:92
+msgid "See you soon on the platform"
+msgstr ""
+
+#: templates/mail/base.html:93
+#, python-format
+msgid "The %(site)s team"
+msgstr ""
+
+#: templates/organization/sidebar-producer.html:3
+msgid "The identity of this public service public is certified by Etalab"
+msgstr ""
+
+#: templates/organization/sidebar-producer.html:4
+msgid "Certified public service"
+msgstr ""
+

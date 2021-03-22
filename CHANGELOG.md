@@ -2,7 +2,41 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Keep tracking to strictly necessary [#517](https://github.com/etalab/udata-gouvfr/pull/517)
+- Changed the title of the elections inventory page [#520](https://github.com/etalab/udata-gouvfr/pull/520)
+
+## 2.5.1 (2021-01-26)
+
+- New Crowdin translations [#511](https://github.com/etalab/udata-gouvfr/pull/511)
+
+## 2.5.0 (2021-01-25)
+
+- Add Inventory cards on homepage [#514](https://github.com/etalab/udata-gouvfr/pull/514)
+- Add documentation's dropdown menu with links to technical documentation and open data guides [#516](https://github.com/etalab/udata-gouvfr/pull/516)
+
+## 2.3.0 (2020-11-30)
+
+- Read Only Mode modifications on theme [#509](https://github.com/etalab/udata-gouvfr/pull/509):
+  - Will display a warning banner on the frontend view.
+  - Hides the contribute's home's modal.
+  - Hides the Reuse's creation card and community resource's creation card on dataset view.
+- Newsletter's subscription banner [#512](https://github.com/etalab/udata-gouvfr/pull/512):
+  - Override alert section in posts list template to display newsletter's subscription banner.
+  - Add settings `POST_BANNER_ACTIVATED` to toggle banner's activation.
+  - Add settings `POST_BANNER_LINK` and `POST_BANNER_MESSAGE` to configure subscription's link and message.
+
+## 2.2.3 (2020-11-09)
+
+- Add news link to posts list [#504](https://github.com/etalab/udata-gouvfr/pull/504)
+
+## 2.2.2 (2020-10-16)
+
+- Pinned udata version to fix transitive requests dependencies [#500](https://github.com/etalab/udata-gouvfr/pull/500)
+
+## 2.2.1 (2020-10-16)
+
+- Banner is now generic and configurable [#499](https://github.com/etalab/udata-gouvfr/pull/499)
+- Fix links in static pages
 
 ## 2.2.0 (2020-08-25)
 

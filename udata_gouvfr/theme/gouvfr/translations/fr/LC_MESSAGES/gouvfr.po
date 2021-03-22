@@ -1,0 +1,301 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: udata-gouvfr\n"
+"Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
+"POT-Creation-Date: 2021-01-25 12:34+0100\n"
+"PO-Revision-Date: 2021-01-25 16:12\n"
+"Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
+"Language: fr\n"
+"Language-Team: French\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+"X-Crowdin-Project: udata-gouvfr\n"
+"X-Crowdin-Project-ID: 295536\n"
+"X-Crowdin-Language: fr\n"
+"X-Crowdin-File: /master/udata_gouvfr/theme/translations/gouvfr.pot\n"
+"X-Crowdin-File-ID: 20\n"
+
+#: __init__.py:44
+msgid "Data"
+msgstr "Données"
+
+#: __init__.py:45 templates/dataset/display.html:44 templates/footer.html:93
+#: templates/footer.html:95
+msgid "Reuses"
+msgstr "Réutilisations"
+
+#: __init__.py:46 templates/header.html:96
+msgid "Organizations"
+msgstr "Organisations"
+
+#: __init__.py:47
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#: __init__.py:48 __init__.py:59
+msgid "Documentation"
+msgstr "Documentation"
+
+#: __init__.py:49
+msgid "Technical documentation"
+msgstr "Documentation technique"
+
+#: __init__.py:50
+msgid "Open data guides"
+msgstr "Guides de l’Open Data"
+
+#: __init__.py:52 __init__.py:58
+msgid "News"
+msgstr "Actualités"
+
+#: __init__.py:60
+msgid "Reference Data"
+msgstr "Données de référence"
+
+#: __init__.py:61
+msgid "Licences"
+msgstr "Licences"
+
+#: __init__.py:62
+msgid "API"
+msgstr "API"
+
+#: __init__.py:63
+msgid "Terms of use"
+msgstr "Conditions générales d'utilisation"
+
+#: __init__.py:64
+msgid "Tracking and privacy"
+msgstr "Politique de confidentialité"
+
+#: __init__.py:76
+msgid "Data catalog"
+msgstr "Catalogue des données"
+
+#: templates/carousel.html:6 templates/home.html:29
+msgid "Best reuse cases"
+msgstr "Meilleures réutilisations"
+
+#: templates/footer.html:9
+msgid "The Open Data"
+msgstr "L'Open Data"
+
+#: templates/footer.html:26
+msgid "Topics"
+msgstr "Thématiques"
+
+#: templates/footer.html:39
+msgid "Network"
+msgstr "Réseau"
+
+#: templates/footer.html:48
+msgid "Contact Us"
+msgstr "Contactez-nous"
+
+#: templates/footer.html:66
+msgid "You can contact us at "
+msgstr "Vous pouvez nous contacter à l'adresse "
+
+#: templates/footer.html:71
+msgid "Go to Etalab’s blog"
+msgstr "Aller sur le blog d'Etalab"
+
+#: templates/footer.html:84
+msgid "Feeds"
+msgstr "Flux"
+
+#: templates/footer.html:88 templates/footer.html:90
+msgid "Datasets"
+msgstr "Jeux de données"
+
+#: templates/footer.html:100
+msgid "Open-source engine"
+msgstr "Moteur open-source"
+
+#: templates/footer.html:101 templates/footer.html:104
+msgid "Deployed version"
+msgstr "Version déployée"
+
+#: templates/footer.html:103
+msgid "Data.gouv.fr extension"
+msgstr "Extension pour Data.gouv.fr"
+
+#: templates/footer.html:106
+msgid "Back to top"
+msgstr "Haut de page"
+
+#: templates/forum.html:4
+msgid "Latest forum discussions"
+msgstr "Dernières discussions du forum"
+
+#: templates/forum.html:13
+msgid "Title"
+msgstr "Titre"
+
+#: templates/forum.html:14
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: templates/forum.html:15
+msgid "Last post"
+msgstr "Dernière publication"
+
+#: templates/forum.html:16
+msgid "Replies"
+msgstr "Réponses"
+
+#: templates/header.html:4
+msgid "Internet Explorer 8 and below are not anymore supported. Please upgrade or change your browser to access the website."
+msgstr "Internet Explorer 8 et en dessous ne sont plus supportés. Mettez à jour ou changez de navigateur pour accéder à ce site."
+
+#: templates/header.html:4
+msgid "More information →"
+msgstr "Plus d'informations →"
+
+#: templates/header.html:12
+msgid "Due to security reasons, the creation of new content is currently disabled."
+msgstr "Pour des raisons de sécurité, la création de nouveaux contenus est actuellement désactivée."
+
+#: templates/header.html:30
+msgid "Toggle navigation"
+msgstr "Navigation"
+
+#: templates/header.html:36
+msgid "Open platform for French public data"
+msgstr "Plateforme ouverte des données publiques françaises"
+
+#: templates/header.html:92
+msgid "My profile"
+msgstr "Mon profil"
+
+#: templates/header.html:111
+msgid "Administration"
+msgstr "Administration"
+
+#: templates/header.html:118
+msgid "Logout"
+msgstr "Se déconnecter"
+
+#: templates/header.html:125 templates/header.html:128
+msgid "Sign In / Register"
+msgstr "Connexion / Inscription"
+
+#: templates/home.html:48 templates/home.html:49
+msgid "Latest reuses"
+msgstr "Dernières réutilisations"
+
+#: templates/home.html:125
+msgid "News in data"
+msgstr "L'actualité en données"
+
+#: templates/home.html:143
+msgid "Featured datasets"
+msgstr "Jeux de données à la une"
+
+#: templates/home.html:144
+msgid "Latest datasets"
+msgstr "Derniers jeux de données"
+
+#: templates/home.html:180
+msgid "See more"
+msgstr "Voir plus"
+
+#: templates/home.html:199
+msgid "The blog"
+msgstr "Le blog"
+
+#: templates/home.html:221
+msgid "more"
+msgstr "plus"
+
+#: templates/subnav-large.html:33
+msgid "Share, improve and reuse public data"
+msgstr "Partagez, améliorez et réutilisez les données publiques"
+
+#: templates/subnav-large.html:37 templates/subnav-large.html:41
+msgid "Contribute!"
+msgstr "Contribuez !"
+
+#: templates/subnav-small.html:10
+msgid "Search in datasets"
+msgstr "Rechercher dans les jeux de données"
+
+#: templates/subnav-small.html:13
+msgid "Search in this "
+msgstr "Chercher dans "
+
+#: templates/subnav-small.html:16
+msgid "Search"
+msgstr "Recherche"
+
+#: templates/dataset/display.html:3 templates/reuse/display.html:3
+#, python-format
+msgid "Explore with %(certifier)s"
+msgstr "Explorer avec %(certifier)s"
+
+#: templates/dataset/display.html:12
+msgid "Community contributions"
+msgstr "Contributions communautaires"
+
+#: templates/dataset/display.html:19
+msgid "Community resources"
+msgstr "Ressources communautaires"
+
+#: templates/dataset/display.html:31
+msgid "Add a community resource"
+msgstr "Ajouter une ressource communautaire"
+
+#: templates/dataset/display.html:39
+msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
+msgstr "Vous avez construit une base de données plus complète que celles présentées ici ? C'est le moment de la partager !"
+
+#: templates/dataset/display.html:64
+msgid "You reused these data and published an article, a computer graphics, or an application?\n"
+"                It's time to let you know!\n"
+"                Reference your work in just a few clicks and increase your visibility."
+msgstr "Vous avez réutilisé ces données et publié un article, une infographie, ou une application ?\n"
+"C'est le moment de vous faire connaître !\n"
+"Référencez votre travail en quelques clics et augmentez votre visibilité."
+
+#: templates/dataset/display.html:71
+msgid "Discussions"
+msgstr "Discussions"
+
+#: templates/dataset/display.html:80
+msgid "Discussion between the organization and the community about this dataset."
+msgstr "Discussion entre l'organisation et la communauté à propos de ce jeu de données."
+
+#: templates/mail/base.html:45
+msgid "on your browser."
+msgstr "dans votre navigateur"
+
+#: templates/mail/base.html:48
+#, python-format
+msgid "View this email %(link)s"
+msgstr "Voir cet email %(link)s"
+
+#: templates/mail/base.html:81
+#, python-format
+msgid "Hi %(user)s"
+msgstr "Bonjour %(user)s"
+
+#: templates/mail/base.html:92
+msgid "See you soon on the platform"
+msgstr "A bientôt sur la plateforme"
+
+#: templates/mail/base.html:93
+#, python-format
+msgid "The %(site)s team"
+msgstr "L'équipe de %(site)s"
+
+#: templates/organization/sidebar-producer.html:3
+msgid "The identity of this public service public is certified by Etalab"
+msgstr "L'identité de ce service public est certifiée par Etalab"
+
+#: templates/organization/sidebar-producer.html:4
+msgid "Certified public service"
+msgstr "Service public certifié"
+

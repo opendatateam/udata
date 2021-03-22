@@ -6,8 +6,8 @@ from flask import url_for
 from udata.app import cache
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.reuse.factories import ReuseFactory
-from udata_gouvfr.views import get_pages_gh_urls
-from udata_gouvfr.tests.tests import GouvFrSettings
+from udata_gouvfr.views.gouvfr import get_pages_gh_urls
+from udata_gouvfr.tests import GouvFrSettings
 
 
 @pytest.mark.usefixtures('clean_db')
