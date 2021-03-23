@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.5.3 (2021-03-23)
 
 - Add venv activation in CircleCI's publish step [#526](https://github.com/etalab/udata-gouvfr/pull/526)
 
