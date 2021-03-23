@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.6.3 (2021-03-23)
 
 - Extraction of translation's strings [2602](https://github.com/opendatateam/udata/pull/2602)
 
