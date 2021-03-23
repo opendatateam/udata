@@ -1,4 +1,5 @@
 -r test.pip
 invoke==1.3.0
 wheel
-twine
+# Pinned Twine's version. The newest one pulls a version of the cryptography pkg that's make the CircleCi build fail.
+twine==3.3.0

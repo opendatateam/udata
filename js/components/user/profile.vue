@@ -20,13 +20,13 @@
 
 <template>
 <div>
-<box :title="title" icon="user" boxclass="user-profile-widget">
-    <h3>{{user.fullname}}</h3>
+<box :title="user.fullname" icon="user" boxclass="user-profile-widget">
         <div class="profile-body">
             <image-button :src="user | avatar_url 100" :size="100" class="avatar-button"
                 :endpoint="endpoint" :editable="can_edit">
             </image-button>
         <div v-markdown="user.about"></div>
+        <h4 v-if="user.email">{{user.email}}</h4>
     </div>
 </box>
 </div>

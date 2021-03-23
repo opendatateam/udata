@@ -111,6 +111,9 @@ MAX_DISTANCE = 2
 
 SCHEMA_CACHE_DURATION = 60 * 5  # In seconds
 
+TITLE_SIZE_LIMIT = 350
+DESCRIPTION_SIZE_LIMIT = 100000
+
 
 def get_json_ld_extra(key, value):
     '''Serialize an extras key, value pair into JSON-LD'''

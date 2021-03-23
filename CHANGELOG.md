@@ -2,7 +2,34 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Extraction of translation's strings [2602](https://github.com/opendatateam/udata/pull/2602)
+
+## 2.6.2 (2021-03-22)
+
+- Fix SECURITY_CONFIRMABLE=False [#2588](https://github.com/opendatateam/udata/pull/2588)
+- Support dct:license on DCAT harvester [#2589](https://github.com/opendatateam/udata/pull/2589)
+- Admin small enhancements [#2591](https://github.com/opendatateam/udata/pull/2591):
+  - The sidebar "Me" label has been renamed "Profile"
+  - The user's profile now displays the user's email
+  - The button "Edit" and the dropdown were merged. The button is now only a dropdown listing the actions.
+  - "Edit" action has been renamed to "Edit the dataset/reuse/organization/profile" according to the current object to edit.
+- Add `nofollow` attribute to links in discussions comments [#2593](https://github.com/opendatateam/udata/pull/2593)
+- Add pip upgrade in circle's publish step [2596](https://github.com/opendatateam/udata/pull/2596)
+- Pin Twine's version [2597](https://github.com/opendatateam/udata/pull/2597)
+- Pin twine'version in circle's publish step [2598](https://github.com/opendatateam/udata/pull/2598)
+
+## 2.6.1 (2021-01-26)
+
+- Fix url_for method in organization's catalog's view [#2587](https://github.com/opendatateam/udata/pull/2587)
+
+## 2.6.0 (2021-01-25)
+
+- Add resource's description and title size limit [#2586](https://github.com/opendatateam/udata/pull/2586)
+- Add RDF catalog view for organizations [#2583](https://github.com/opendatateam/udata/pull/2583)
+
+## 2.5.1 (2020-12-31)
+
+- Add title's and description's length limit in forms [#2585](https://github.com/opendatateam/udata/pull/2585)
 
 ## 2.5.0 (2020-11-30)
 

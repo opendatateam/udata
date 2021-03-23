@@ -44,7 +44,7 @@ const MENU = [{
     icon: 'dashboard',
     route: '/'
 }, {
-    label: i18n._('Me'),
+    label: i18n._('Profile'),
     icon: 'male',
     route: '/me/',
     children: [{

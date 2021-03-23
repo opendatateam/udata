@@ -7,6 +7,7 @@ from datetime import date
 
 from udata.models import Dataset, License
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.dataset.factories import LicenseFactory
 
 from .factories import HarvestSourceFactory
 from .. import actions
@@ -44,11 +45,6 @@ def mock_pagination(rmock, path, pattern):
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.options(PLUGINS=['dcat'])
 class DcatBackendTest:
-    @pytest.fixture(autouse=True)
-    def inject_licenses(self):
-        # Create fake licenses
-        for license_id in 'lool', 'fr-lo':
-            License.objects.create(id=license_id, title=license_id)
 
     def test_simple_flat(self, rmock):
         filename = 'flat.jsonld'
@@ -217,6 +213,23 @@ class DcatBackendTest:
         assert job.status == 'done'
         assert job.errors == []
         assert len(job.items) == 3
+
+    def test_xml_catalog(self, rmock):
+        LicenseFactory(id='lov2', title='Licence Ouverte Version 2.0')
+
+        url = mock_dcat(rmock, 'catalog.xml', path='catalog.xml')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+
+        actions.run(source.slug)
+
+        # test dct:license support
+        extras = {'extras__dct:identifier': '3'}
+        dataset = Dataset.objects.get(**extras)
+        assert dataset.license.id == 'lov2'
+
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)

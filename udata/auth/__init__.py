@@ -48,6 +48,7 @@ def init_app(app):
                               register_blueprint=False,
                               login_form=ExtendedLoginForm,
                               confirm_register_form=ExtendedRegisterForm,
+                              register_form=ExtendedRegisterForm,
                               reset_password_form=ExtendedResetPasswordForm,
                               send_mail=sendmail_proxy
                             )

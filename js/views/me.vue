@@ -62,7 +62,7 @@ export default {
     return {
       actions: [
         {
-          label: this._('Edit'),
+          label: this._('Edit the profile'),
           icon: 'edit',
           method: this.edit
         },
