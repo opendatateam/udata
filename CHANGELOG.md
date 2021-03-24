@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Enhance self endpoint verification [2604](https://github.com/opendatateam/udata/pull/2604)
 
 ## 2.6.3 (2021-03-23)
 
