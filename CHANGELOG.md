@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Fix possible bypass in `current_user_is_admin_or_self` function []()
+- Enhance self endpoint verification []()
 
 ## 2.6.3 (2021-03-23)
 
