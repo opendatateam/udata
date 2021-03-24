@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.6.4 (2021-03-24)
 
 - Enhance self endpoint verification [2604](https://github.com/opendatateam/udata/pull/2604)
