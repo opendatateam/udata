@@ -1,0 +1,37 @@
+<div class="container">
+    <div class="stories row">
+        <div class="story">
+            <a href="#" @click="$refs.publishActionModal.show" class="me">
+                <img class="profile" src="{{ current_user|avatar_url(120) }}">
+                <img class="plus" src="{{ theme_static('img/stories/plus.png') }}">
+            </a>
+            <p class="me">
+                Ajouter
+            </p>
+        </div>
+        <div class="story">
+            <a href="#">
+                <img class="profile" src="{{ theme_static('img/stories/ll.png') }}">
+            </a>
+            <p>
+                Laure Lucchesi
+            </p>
+        </div>
+        <div class="story">
+            <a href="#">
+                <img class="profile" src="{{ theme_static('img/stories/mh.png') }}">
+            </a>
+            <p>
+                Mathilde Hoang
+            </p>
+        </div>
+        <div class="story">
+            <a href="#">
+                <img class="profile" src="{{ theme_static('img/stories/etalab.jpg') }}">
+            </a>
+            <p>
+                Etalab
+            </p>
+        </div>
+    </div>
+</div>
