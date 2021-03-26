@@ -360,20 +360,16 @@
         <div class="row">
             <div class="col-sm-9">
                 <div class="resources-list">
-                {% for resource in dataset.community_resources %}
+                    {% for resource in dataset.community_resources %}
                     {% include theme('dataset/resource/card.html') %}
-                {% endfor %}
-                {% if not read_only_mode %}
-                <a class="card resource-card add"
-                    href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                    {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
-                </a>
-                {% endif %}
+                    {% endfor %}
+                    {% if not read_only_mode %}
+                    <a class="btn-action mb-lg"
+                        href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                        {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
+                    </a>
+                    {% endif %}
                 </div>
-            </div>
-
-            <div class="col-sm-3 note">
-                <p>{{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}</p>
             </div>
         </div>
 
