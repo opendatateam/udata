@@ -1,5 +1,6 @@
 <div class="container">
     <div class="stories row">
+        {% if current_user.is_authenticated %}
         <div class="story">
             <a href="#" @click="$refs.publishActionModal.show" class="me">
                 <img class="profile" src="{{ current_user|avatar_url(120) }}">
@@ -9,6 +10,7 @@
                 Ajouter
             </p>
         </div>
+        {% endif %}
         <div class="story">
             <a href="#">
                 <img class="profile" src="{{ theme_static('img/stories/ll.png') }}">
