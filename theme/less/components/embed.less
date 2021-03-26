@@ -22,13 +22,18 @@ This component is a single input and its accompanying copy-to-clipboard button.
     border-radius: 4px;
     background: @grey-50;
 
-    input {
+    input, textarea {
         flex-grow: 1;
         appearance: none;
         border: none;
         background: none;
         padding: @spacing-xs;
         color: @grey-300;
+
+        line-height: @spacing-lg;
+
+        white-space: nowrap;
+        resize: none;
     }
 
     .icon-copy {
