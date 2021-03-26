@@ -1,16 +1,25 @@
 <div class="container">
     <div class="stories row">
-        {% if current_user.is_authenticated %}
         <div class="story">
-            <a href="#" @click="$refs.publishActionModal.show" class="me">
+            <a 
+                {% if current_user.is_authenticated %}
+                href="#" @click="$refs.publishActionModal.show"
+                {% else %}
+                href="{{ url_for('security.login', next=request.url) }}"
+                {% endif %} 
+                class="me"
+            >
+                {% if current_user.is_authenticated %}
                 <img class="profile" src="{{ current_user|avatar_url(120) }}">
+                {% else %}
+                <img class="profile" src="{{ ''|placeholder('user') }}">
+                {% endif %}
                 <img class="plus" src="{{ theme_static('img/stories/plus.png') }}">
             </a>
             <p class="me">
                 Ajouter
             </p>
         </div>
-        {% endif %}
         <div class="story">
             <a href="#">
                 <img class="profile" src="{{ theme_static('img/stories/ll.png') }}">
