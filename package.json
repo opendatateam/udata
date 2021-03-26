@@ -22,7 +22,7 @@
     "dayjs": "^1.9.6",
     "less": "^3.13.1",
     "parcel-reporter-copystatic": "^1.0.0",
-    "parcel-reporter-stylemark": "^1.0.0",
+    "parcel-reporter-stylemark": "^1.1.0",
     "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",
     "prettier": "^2.2.1",
@@ -54,6 +54,10 @@
         "staticOutDir": "udata_gouvfr/theme/gouvfr/static/img/"
       }
     ]
+  },
+  "stylemarkPath": {
+    "input": "udata_gouvfr/theme/gouvfr/static/",
+    "output": "udata_gouvfr/theme/gouvfr/static/stylemark/"
   },
   "alias": {
     "svg": "./udata_gouvfr/theme/gouvfr/templates/svg",
