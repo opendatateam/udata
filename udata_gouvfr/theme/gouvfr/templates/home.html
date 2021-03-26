@@ -9,7 +9,7 @@
 {% set read_only_mode = config.READ_ONLY_MODE %}
 
 {% block subnav %}
-    {% include theme('subnav-large.html') %}
+{% include theme('subnav-large.html') %}
 {% endblock %}
 
 {% block content %}
@@ -51,6 +51,7 @@
             {# End last reuses #}
 
             {# Last inventories #}
+            {# this isn't displayed on the new version.
             <div class="col-xs-12">
                 <h3>
                     <a href="{{ url_for('gouvfr.show_page', slug='donnees-cles-par-sujet') }}"
@@ -62,23 +63,27 @@
                     <ul class="card-list card-list--columned">
                         <li class="col-sm-4 col-xs-12">
                             <a class="card-link" href="{{ url_for('gouvfr.show_page', slug='donnees-coronavirus') }}">
-                            <div class="inventory-card green">
-                                <h4 class="inventory-text">Données relatives à la<span class="inventory-title">COVID-19</span></h4>
-                            </div>
+                                <div class="inventory-card green">
+                                    <h4 class="inventory-text">Données relatives à la<span
+                                            class="inventory-title">COVID-19</span></h4>
+                                </div>
                             </a>
                         </li>
                         <li class="col-sm-4 col-xs-12">
                             <a class="card-link" href="{{ url_for('gouvfr.show_page', slug='donnees-des-elections') }}">
-                            <div class="inventory-card blue">
-                                <h4 class="inventory-text">Données relatives aux<span class="inventory-title">ÉLECTIONS</span></h4>
-                            </div>
+                                <div class="inventory-card blue">
+                                    <h4 class="inventory-text">Données relatives aux<span
+                                            class="inventory-title">ÉLECTIONS</span></h4>
+                                </div>
                             </a>
                         </li>
                         <li class="col-sm-4 col-xs-12">
-                            <a class="card-link" href="{{ url_for('gouvfr.show_page', slug='donnees-comptes-publics') }}">
-                            <div class="inventory-card violet">
-                                <h4 class="inventory-text">Données relatives aux<span class="inventory-title">COMPTES PUBLICS</span></h4>
-                            </div>
+                            <a class="card-link"
+                                href="{{ url_for('gouvfr.show_page', slug='donnees-comptes-publics') }}">
+                                <div class="inventory-card violet">
+                                    <h4 class="inventory-text">Données relatives aux<span
+                                            class="inventory-title">COMPTES PUBLICS</span></h4>
+                                </div>
                             </a>
                         </li>
                     </ul>
@@ -197,7 +202,7 @@
             <div class="row pt-xl pt-md-md">
                 {% for reuse in reuses %}
                 {% set features = ['preview'] %}
-                <div class="col-3 col-md-4">
+                <div class="col-3 col-md-4 text-align-center">
                     {% include theme('reuse/card.html') %}
                 </div>
                 {% endfor %}
