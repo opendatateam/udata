@@ -23,15 +23,6 @@ This prevents messy event handling with bubbling prevention, but might cause you
     display: flex;
 
     .tab {
-        padding: @spacing-xs @spacing-sm;
-        color: @grey-200;
-        font-size: @font-size-sm;
-        text-decoration: none;
-        border: 1px solid @grey-200;
-        border-radius: 3em;
-        transition: border ease 0.1s;
-        transition-property: border, color;
-
         + .tab {
             margin-left: @spacing-sm;
         }
@@ -40,12 +31,6 @@ This prevents messy event handling with bubbling prevention, but might cause you
         //Might be dangerous, remove if needed
         >* {
             pointer-events: none;
-        }
-
-        &.active,
-        &:hover {
-            color: @grey-400;
-            border: 1px solid @grey-400;
         }
 
         &.active {
