@@ -93,15 +93,15 @@
     <div class="row align-items-center">
         <div class="col-auto col-md-12 tabs">
             {% if dataset.organization %}
-            <a href="#dataset-producer" role="button" class="dropdown tab active"><span
+            <a href="#dataset-producer" role="button" class="dropdown btn-tab tab active"><span
                     class="label">{{ _('Producer') }}</span></a>
             {% elif dataset.owner %}
-            <a href="#dataset-producer" role="button" class="dropdown tab active"><span
+            <a href="#dataset-producer" role="button" class="dropdown btn-tab tab active"><span
                     class="label">{{ _('Author') }}</span></a>
             {% endif %}
-            <a href="#dataset-informations" role="button" class="dropdown tab"><span
+            <a href="#dataset-informations" role="button" class="dropdown btn-tab tab"><span
                     class="label">{{ _('Informations') }}</span></a>
-            <a href="#dataset-extras" role="button" class="dropdown tab"><span
+            <a href="#dataset-extras" role="button" class="dropdown btn-tab tab"><span
                     class="label">{{ _('@@Extras') }}</span></a>
         </div>
         <div class="col-auto hidden-md">
