@@ -1,0 +1,110 @@
+/*
+---
+name: Forms
+category: Components
+---
+
+Simple forms for simple needs.
+
+We're assuming some well formed `fieldsets` with proper `legends`, this is mostyly used in the login/signup flows.
+
+A well formed form (eh) should include one main fieldset with a proper legend.
+
+```form.html
+    <form class="form"">
+        <fieldset>
+            <legend>Legend</legend>
+            <div class="field">
+                <label for="field" class="required">
+                    Label
+                </label>
+                <input id="field" name="field" type="email" required></input>
+            </div>
+        </fieldset>
+    </form>
+```
+*/
+
+.form-container {
+    background-color: @white;
+    border: 1px solid @grey-100;
+    border-radius: 4px;
+    padding: @spacing-lg;
+}
+
+form.form {
+    padding: @spacing-sm 0;
+
+    legend {
+        padding: 0;
+    }
+
+    fieldset {
+        border-radius: 4px;
+        margin-inline-start: 0;
+        margin-inline-end: 0;
+        padding-block-start: 0;
+        padding-block-end: 0;
+        padding-inline-start: 0;
+        padding-inline-end: 0;
+        min-inline-size: min-content;
+        border: 0;
+    }
+
+    .field {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: @spacing-lg;
+    }
+
+    label {
+        font-size: @font-size-sm;
+        margin-bottom: @spacing-xxs;
+        position: relative;
+
+        &.required::after {
+            position: absolute;
+            top: 2px;
+            margin-left: @spacing-xxs;
+            width: @spacing-xxs;
+            height: @spacing-xxs;
+            background-color: @blue-400;
+            content: '';
+            display: inline-block;
+            border-radius: @spacing-xxs;
+        }
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        display: block;
+        padding: @spacing-xxs @spacing-xs;
+
+        font-size: @font-size-md;
+        font-family: @font-family-base;
+        line-height: 2;
+
+        border: 1px solid @grey-100;
+        border-radius: 4px;
+        appearance: none;
+        flex-grow: 1;
+    }
+
+    .field-checkbox {
+         flex-direction: row;
+
+         label {
+             margin-left: @spacing-xs;
+             line-height: @font-size-lg;
+         }
+    }
+
+    input[type="checkbox"] {
+        width: @font-size-lg;
+        height: @font-size-lg;
+        border-color: @grey-100;
+        display: inline;
+    }
+}
