@@ -76,12 +76,9 @@
             <a href="{{ reuse.url }}" rel="nofollow" class="btn-secondary btn-secondary-blue-400">
                 {{ _('See the reuse') }}
             </a>
-            <a class="ml-md text-orange-100 f-bold">
-                <span class="btn-secondary btn-secondary-orange-100">
-                    {% include theme("svg/arrow-right.svg") %}
-                </span>
-                <span class="ml-md">{{follower|length}} {{_('@@followers')}}</span>
-            </a>
+            <div class="ml-md">
+                {{follow_btn(reuse)}}
+            </div>
         </div>
     </header>
     <section class="reuse-infos my-lg">
@@ -144,12 +141,6 @@
         <div class="row-inline mt-xl mb-lg">
             <a href="{{ reuse.url }}" rel="nofollow" class="btn-secondary btn-secondary-blue-400">
                 {{ _('See the reuse') }}
-            </a>
-            <a class="ml-md text-orange-100 f-bold">
-                <span class="btn-secondary btn-secondary-orange-100">
-                    {% include theme("svg/arrow-right.svg") %}
-                </span>
-                <span class="ml-md">{{follower|length}} {{_('@@followers')}}</span>
             </a>
         </div>
     </section>

@@ -1,0 +1,68 @@
+<!--
+---
+name: Follow
+category: Interactions
+---
+
+# Follow button
+
+A simple button to follow various entities on the website.
+The `following` prop allow to pass the current state (user is already following or user is not following) and makes the component react accordingly on click (follow/unfollow)
+`followers` is the number of current followers
+The `url` prop is the API URL.
+-->
+
+<template>
+  <a @click.prevent="toggleFollow" title="" class="unstyled">
+    <span class="btn-secondary btn-secondary-orange-100 p-sm follow-button">
+      <span
+        v-html="icon"
+        :style="{ color: _following ? 'inherit' : 'white' }"
+      />
+    </span>
+    <strong class="text-orange-100 ml-sm"
+      >{{ _followers }} {{ $t("@@followers") }}</strong
+    >
+  </a>
+</template>
+
+<script>
+import config from "../../config";
+import icon from "svg/actions/star.svg";
+
+export default {
+  props: {
+    followers: Number,
+    url: String,
+    following: Boolean,
+  },
+  created() {
+    this.icon = icon;
+  },
+  data() {
+    return {
+      loading: false,
+      _followers: this.followers || 0,
+      _following: this.following,
+    };
+  },
+  methods: {
+    toggleFollow: function () {
+      this.loading = true;
+
+      let request;
+
+      if (!this._following) request = this.$api.post(this.url);
+      else request = this.$api.delete(this.url);
+
+      request
+        .then((resp) => resp.data)
+        .then((data) => {
+          this._followers = data.followers;
+          this._following = !this._following;
+        })
+        .finally(() => (this.loading = false));
+    },
+  },
+};
+</script>
