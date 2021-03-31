@@ -1,60 +1,54 @@
-{% extends theme('layouts/1-column.html') %}
-{% import 'macros/forms.html' as forms with context %}
+{% extends theme('base.html') %}
+{% import theme('macros/forms2.html') as forms with context %}
 
-{% set section_class = 'form' %}
-{% set read_only_mode = config.READ_ONLY_MODE %}
-
-{% block main_content %}
-
-<div class="container auth-container">
-    <div class="row">
-        <div class="col-sm-6">
-            <form class="form-horizontal col-lg-10 col-lg-offset-1 validation validate"
-                method="post" action="{{ url_for('security.login') }}">
-                <fieldset>
-                    <legend>{{ _('Sign In') }}</legend>
-                    {{ forms.render(login_user_form, exclude=[login_user_form.submit]) }}
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            <button type="submit" class="btn btn-primary btn-block">{{ _('Sign in') }}</button>
+{% block content %}
+{% cache cache_duration, 'home', g.lang_code %}
+<section class="py-xl py-lg-lg bg-grey-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 text-align-center offset-3 form-container col-sm-12 col-sm-offset-0">
+                <form class="form" method="post" action="{{ url_for('security.login') }}">
+                    <fieldset>
+                        <legend class="h2 mb-0">{{ _('@@Connectez-vous') }}</legend>
+                        <p class="mt-xs mb-xl f-light fs-sm">
+                            Petit blabla un peu court sur ce qu'on gagne à se connecter, proablement un laïus sur les
+                            discussions ou les réutilisations.
+                        </p>
+                        {{ forms.render_fields(login_user_form, submit=_('Sign In')) }}
+                        <div class="mt-lg">
+                            <p class="fs-sm mb-sm">
+                                {{ _('Forgot your password?') }}
+                                <a href="{{ url_for('security.forgot_password', next=request.url) }}">
+                                    {{ _('Recover your password') }}
+                                </a>
+                            </p>
+                            {% if config.SECURITY_CONFIRMABLE %}
+                            <p class="fs-sm mb-sm">
+                                {{ _('Confirmation instructions not received?') }}
+                                <a href="{{ url_for('security.send_confirmation') }}">
+                                    {{ _('Send the instructions again') }}
+                                </a>
+                            </p>
+                            {% endif %}
                         </div>
-                    </div>
-                    <p>
-                        {{ _('Forgot your password?') }}
-                        <a href="{{ url_for('security.forgot_password', next=request.url) }}">
-                            {{ _('Recover your password') }}
-                        </a>
-                    </p>
-                    {% if config.SECURITY_CONFIRMABLE %}
-                    <p>
-                        {{ _('Confirmation instructions not received?') }}
-                        <a href="{{ url_for('security.send_confirmation') }}">
-                            {{ _('Send the instructions again') }}
-                        </a>
-                    </p>
-                    {% endif %}
-                </fieldset>
-            </form>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            {% if not read_only_mode %}
+            <div class="col-6 offset-3 form-container text-align-center mt-lg col-sm-12 col-sm-offset-0">
+                <h3 class="fs-sm mb-sm">
+                    {{ _('@@Vous n\'avez pas de compte ?')}}
+                </h3>
+                <a title="{{ _('Register') }}" href="{{ url_for('security.register', next=request.url) }}"
+                    class="btn btn-primary btn-block btn-lg">
+                    {{ _('Create an account') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    <div class="col-sm-6">
-        {% if not read_only_mode %}
-        <form class="form-horizontal">
-            <fieldset>
-                <legend>{{ _('Sign up') }}</legend>
-                <div class="form-group">
-                    <div class="col-md-12">
-                        <a title="{{ _('Register') }}"
-                            href="{{ url_for('security.register', next=request.url) }}"
-                            class="btn btn-primary btn-block btn-lg"
-                            >
-                            {{ _('Create an account') }}
-                        </a>
-                    </div>
-                </div>
-            </fieldset>
-        </form>
-        {% endif %}
-    </div>
-</div>
-
+</section>
+{% endcache %}
 {% endblock %}
