@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.5.4 (2021-03-31)
 
 - 🦀
 
