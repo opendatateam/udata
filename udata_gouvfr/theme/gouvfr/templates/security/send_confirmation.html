@@ -1,24 +1,25 @@
-{% extends theme('layouts/1-column.html') %}
-{% import theme('macros/forms.html') as forms with context %}
+{% extends theme('base.html') %}
+{% import theme('macros/forms2.html') as forms with context %}
 
-{% set section_class = 'form' %}
-
-{% block main_content %}
-
-<div class="container auth-container">
-    <form class="form-horizontal validate col-md-offset-2 col-md-8"
-          action="{{ url_for('security.send_confirmation') }}" method="POST" name="send_confirmation_form">
-        <fieldset>
-            <legend>{{ _('Resend confirmation instructions') }}</legend>
-              {{ send_confirmation_form.hidden_tag() }}
-
-              {{ forms.field(send_confirmation_form.email) }}
-            <div class="form-group">
-                <div class="col-md-12">
-                    <button type="submit" class="btn btn-primary btn-block">{{ _('Submit') }}</button>
-                </div>
+{% block content %}
+{% cache cache_duration, 'home', g.lang_code %}
+<section class="py-xl py-lg-lg bg-grey-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 text-align-center offset-3 form-container col-sm-12 col-sm-offset-0">
+                <form class="form" method="post" action="{{ url_for('security.send_confirmation') }}">
+                    <fieldset>
+                        <legend class="h2 mb-0">{{ _('Resend confirmation instructions') }}</legend>
+                        <p class="mt-xs mb-xl f-light fs-sm">
+                            Petit blabla un peu court sur ce qu'on gagne à se connecter, proablement un laïus sur les
+                            discussions ou les réutilisations.
+                        </p>
+                        {{ forms.render_fields(send_confirmation_form, submit=_('Submit')) }}
+                    </fieldset>
+                </form>
             </div>
-        </fieldset>
-    </form>
-</div>
+        </div>
+    </div>
+</section>
+{% endcache %}
 {% endblock %}
