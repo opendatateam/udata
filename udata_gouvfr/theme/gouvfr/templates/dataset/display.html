@@ -65,7 +65,10 @@
     <h1 class="fs-hg mb-0">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
-    <div class="row py-md">
+    <div class="my-sm">
+        {{follow_btn(dataset)}}
+    </div>
+    <div class="row py-sm">
         <div class="col-12">
             {% if dataset.organization %}
             {% if dataset.organization.public_service %}
