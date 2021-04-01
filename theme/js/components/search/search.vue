@@ -89,7 +89,7 @@
           <Suggestor
             :placeholder="$t('@@Zone géographique')"
             :searchPlaceholder="$t('@@Chercher une zone...')"
-            suggestUrl="/spatial/zones/suggest"
+            suggestUrl="/spatial/zones/suggest/"
             entityUrl="/spatial/zone/"
             :values="facets.geozone"
             :onChange="handleSuggestorChange('geozone')"
@@ -99,7 +99,7 @@
           <Suggestor
             :placeholder="$t('@@Granularité géographique')"
             :searchPlaceholder="$t('@@Chercher une granularité...')"
-            listUrl="/spatial/granularities"
+            listUrl="/spatial/granularities/"
             :values="facets.granularity"
             :onChange="handleSuggestorChange('granularity')"
           />
