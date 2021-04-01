@@ -72,7 +72,7 @@
             </small>
             {% endif %}
         </div>
-        <div class="row-inline my-md">
+        <div class="row-inline my-md align-items-center">
             <a href="{{ reuse.url }}" rel="nofollow" class="btn-secondary btn-secondary-blue-400">
                 {{ _('See the reuse') }}
             </a>
@@ -96,12 +96,15 @@
                     </div>
                     <div class="col-10 py-xl">
                         <div id="reuse-producer" class="tab-content active">
-                            <h2 class="text-white">Etalab</h2>
-                            <p class="text-grey-400">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Veniam
-                                beatae
-                                doloribus sed repudiandae
-                                id pariatur, saepe magnam, reprehenderit optio nam amet quis tempore necessitatibus.
-                                Exercitationem consequuntur neque vero animi quaerat!</p>
+                            {% if reuse.organization %}
+                            {% with organization=reuse.organization %}
+                            {% include theme('organization/producer-panel.html') %}
+                            {% endwith %}
+                            {% elif reuse.owner %}
+                            {% with organization=reuse.owner, details_view = url_for("users.show", user=reuse.owner, _external=True) %}
+                            {% include theme('organization/producer-panel.html') %}
+                            {% endwith %}
+                            {% endif %}
                         </div>
                         <div id="reuse-tags" class="tab-content">
                             <h2>{{ _('@@Informations') }}</h2>
