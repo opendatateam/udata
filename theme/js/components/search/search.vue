@@ -238,19 +238,18 @@ export default {
     },
     //Called on every facet selector change, updates the `facets.xxx` object then searches with new values
     handleSuggestorChange(facet) {
-      const that = this;
-      return function (values) {
+      return (values) => {
         //Values can either be an array of varying length, or a String.
         if (Array.isArray(values)) {
           if (values.length > 1)
-            that.facets[facet] = values.map((obj) => obj.value);
-          else if (values.length === 1) that.facets[facet] = values[0].value;
-          else that.facets[facet] = null;
+            this.facets[facet] = values.map((obj) => obj.value);
+          else if (values.length === 1) this.facets[facet] = values[0].value;
+          else this.facets[facet] = null;
         } else {
-          that.facets[facet] = values;
+          this.facets[facet] = values;
         }
 
-        that.search();
+        this.search();
       };
     },
     changePage(page) {
