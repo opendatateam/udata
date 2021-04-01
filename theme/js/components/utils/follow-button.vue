@@ -17,6 +17,8 @@ The `url` prop is the API URL.
     <span class="btn-secondary btn-secondary-orange-100 p-sm follow-button">
       <span
         v-html="icon"
+        class="magic"
+        :class="{ active: animating }"
         :style="{ color: _following ? 'inherit' : 'white' }"
       />
     </span>
@@ -44,6 +46,7 @@ export default {
       loading: false,
       _followers: this.followers || 0,
       _following: this.following,
+      animating: false,
     };
   },
   methods: {
@@ -60,6 +63,12 @@ export default {
         .then((data) => {
           this._followers = data.followers;
           this._following = !this._following;
+
+          //Trigger sparkles animation
+          if (this._following) {
+            this.animating = true;
+            setTimeout(() => (this.animating = false), 1300);
+          }
         })
         .finally(() => (this.loading = false));
     },
