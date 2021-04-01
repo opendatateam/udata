@@ -76,6 +76,7 @@ Simply provide the many necessary props :
 import config from "../../config";
 import Multiselect from "@vueform/multiselect";
 import "@vueform/multiselect/themes/default.css";
+import i18n from "../../plugins/i18n";
 
 export default {
   components: {
@@ -91,7 +92,7 @@ export default {
     values: [Array, String],
     emptyPlaceholder: {
       type: String,
-      default: "Aucun résultat.",
+      default: i18n.global.t("@@Aucun résultat."),
     },
   },
   mounted() {
