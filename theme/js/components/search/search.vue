@@ -120,7 +120,12 @@
         <Loader />
       </div>
       <ul v-else-if="results.length">
-        <a v-for="result in results" :href="result.page" class="unstyled w-100">
+        <a
+          v-for="result in results"
+          :key="result.id"
+          :href="result.page"
+          class="unstyled w-100"
+        >
           <Dataset v-bind="result" />
         </a>
         <Pagination
