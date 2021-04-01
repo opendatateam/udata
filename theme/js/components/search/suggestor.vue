@@ -146,7 +146,7 @@ export default {
 
       let selected = null;
       if (typeof this.values === "string") selected = [this.values];
-      else if (typeof this.values === "array") selected = this.values;
+      else if (Array.isArray(this.values)) selected = this.values;
       else selected = [];
 
       //Now for each value, three cases :
