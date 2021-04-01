@@ -51,7 +51,7 @@
         <div class="col-3 col-lg-5 col-md-12 mt-lg-md">
           <Suggestor
             :placeholder="$t('@@Licenses')"
-            :searchPlaceholder="$t('@@Chercher une license...')"
+            :searchPlaceholder="$t('@@Chercher une licence...')"
             listUrl="/datasets/licenses/"
             :values="facets.license"
             :onChange="handleSuggestorChange('license')"
