@@ -3,9 +3,12 @@ Nothing to see here ! Well actually it's a small component that says this.
 -->
 
 <template>
-  <div class="search-empty bg-grey-50 p-lg my-md pb-hg" :class="wide && 'row-inline'">
-    <div :class="wide && 'pr-lg'" v-html="Empty" />
-    <div :class="!wide && 'mt-lg'">
+  <div
+    class="search-empty bg-grey-50 p-lg my-md pb-hg"
+    :class="{ 'row-inline': wide }"
+  >
+    <div :class="{ 'pr-lg': wide }" v-html="Empty" />
+    <div :class="{ 'mt-lg': !wide }">
       <h4>
         {{ $t("@@Aucun résultat ne correspond à votre recherche") }}
       </h4>
@@ -31,7 +34,7 @@ export default {
     copyAfter: String,
     link: String,
     onClick: Function,
-    wide: Boolean
+    wide: Boolean,
   },
   data() {
     return {

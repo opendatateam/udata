@@ -54,20 +54,21 @@ export default {
 <template>
   <ul
     class="pagination-wrapper"
-    :class="light && 'light'"
+    :class="{ light }"
     role="navigation"
     aria-label="pagination"
   >
     <li>
       <a
-        :class="['previous', page === 1 ? 'disabled' : '']"
+        :class="{ disabled: page === 1 }"
+        class="previous"
         :aria-disabled="page === 1"
         @click.prevent="_onClick(page - 1)"
       ></a>
     </li>
     <li>
       <a
-        :class="[page === 1 ? 'active' : '']"
+        :class="{ active: page === 1 }"
         :aria-disabled="page === 1"
         @click.prevent="_onClick(1)"
         >1</a
@@ -75,7 +76,7 @@ export default {
     </li>
     <li v-for="index in visible_pages">
       <a
-        :class="[page === index ? 'active' : false]"
+        :class="{ active: page === index }"
         :aria-current="page === index ? 'page' : false"
         @click.prevent="_onClick(index)"
         v-if="index"
@@ -85,7 +86,7 @@ export default {
     </li>
     <li>
       <a
-        :class="[page === pages.length ? 'active' : '']"
+        :class="{ active: page === pages.length }"
         :aria-disabled="page === pages.length"
         @click.prevent="_onClick(pages.length)"
         >{{ pages.length }}</a
@@ -93,7 +94,8 @@ export default {
     </li>
     <li>
       <a
-        :class="['next', page === pages.length ? 'disabled' : '']"
+        :class="{ disabled: page === pages.length }"
+        class="next"
         :aria-disabled="page === pages.length"
         @click.prevent="_onClick(page + 1)"
       ></a>
@@ -120,7 +122,7 @@ export default {
     },
     visible_pages() {
       const length = this.pages.length;
-      const pagesAround = 1; //Pages around current one, has to be even
+      const pagesAround = 1; //Pages around current one
       const pagesShown = Math.min(pagesAround * 2 + 1, length);
 
       if (length < pagesAround + 2) return [];

@@ -22,7 +22,7 @@
       {{ $t("@@Rechercher dans les réutilisations") }}
     </a>
   </div>
-  <section class="search-filters p-md-md" :class="extendedForm && 'active'">
+  <section class="search-filters p-md-md" :class="{ active: extendedForm }">
     <h4 class="mt-md mt-md-0 mb-xs mb-md-md fs-sm">
       {{ $t("@@Critères de recherche") }}
     </h4>
