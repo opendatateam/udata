@@ -2,7 +2,7 @@
 {% from theme('macros/certified.html') import badge_if_certified with context %}
 <article class="row-inline p-sm mb-sm align-items-center">
     <div class="result-logo col-1">
-        <img alt=" {{ organization.title }}" src="{{ organization.logo(70)|placeholder('organization') }}" width="70"
+        <img alt="{{ organization.title }}" src="{{ organization.logo(70)|placeholder('organization') }}" width="70"
             height="70">
     </div>
     {{ badge_if_certified(organization) }}
