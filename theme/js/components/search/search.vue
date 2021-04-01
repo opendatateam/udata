@@ -217,10 +217,7 @@ export default {
   computed: {
     //Url for doing the same search (queryString only) on the reuse page
     reuseUrl: function () {
-      return (
-        config.values.reuseUrl +
-        (this.queryString ? "?q=" + this.queryString : "")
-      );
+      return `${config.values.reuseUrl}?q=${this.queryString}`;
     },
     //Is any filter active ?
     isFiltered: function () {
