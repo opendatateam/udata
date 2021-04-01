@@ -51,15 +51,15 @@ Vue. -->
     <ul class="card-footer">
       <li>
         <strong>{{ metrics.ressources || 0 }}</strong>
-        {{ $t("@@ressources") }}
+        {{ $tc("@@ressources", metrics.ressources || 0) }}
       </li>
       <li>
         <strong>{{ metrics.reuses || 0 }}</strong>
-        {{ $t("@@réutilisations") }}
+        {{ $tc("@@réutilisations", metrics.reuses || 0) }}
       </li>
       <li>
         <strong>{{ metrics.followers || 0 }}</strong>
-        {{ $t("@@abonnés") }}
+        {{ $tc("@@abonnés", metrics.followers || 0) }}
       </li>
     </ul>
   </article>
