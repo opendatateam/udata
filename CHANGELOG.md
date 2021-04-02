@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.5.5 (2021-04-02)
 
 - Thanks for all the fish [#529](https://github.com/etalab/udata-gouvfr/pull/529)
