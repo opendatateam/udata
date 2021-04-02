@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Thanks for all the fish [#529](https://github.com/etalab/udata-gouvfr/pull/529)
 
 ## 2.5.4 (2021-03-31)
 
