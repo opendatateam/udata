@@ -12,7 +12,7 @@ from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
-    ResourceSchema,
+    ResourceSchema
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
@@ -30,17 +30,23 @@ def normalize_format(data):
     if data:
         return data.strip().lower()
 
-
 def enforce_allowed_schemas(form, field):
     schema = field.data
     allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
-    if not schema.startswith(tuple(allowed_schemas)):
+    if schema.get('name') not in allowed_schemas:
         message = _('Schema "{schema}" is not an allowed value. Allowed values: {values}')
         raise validators.ValidationError(message.format(
-            schema=schema,
+            schema=schema.get('name'),
             values=', '.join(allowed_schemas)
         ))
 
+    allowed_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')][0]
+    if schema.get('version') not in allowed_versions:
+        message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
+        raise validators.ValidationError(message.format(
+            version=schema.get('version'),
+            values=', '.join(allowed_versions)
+        ))
 
 class BaseResourceForm(ModelForm):
     title = fields.StringField(
@@ -74,8 +80,8 @@ class BaseResourceForm(ModelForm):
         _('Publication date'),
         description=_('The publication date of the resource'))
     extras = fields.ExtrasField()
-    schema = fields.StringField(
-        _('Schema'),
+    schema = fields.DictField(
+        _('Schema'), 
         default=None,
         validators=[validators.optional(), enforce_allowed_schemas],
         description=_('The schema slug the resource adheres to'))
