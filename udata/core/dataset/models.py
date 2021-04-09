@@ -799,7 +799,11 @@ class ResourceSchema(object):
         else:
             schemas = response.json().get('schemas', [])
             content = [
-                {'id': s['name'], 'label': s['title'], 'versions': [d['version_name'] for d in s['versions']]} for s in schemas
+                {
+                    'id': s['name'], 
+                    'label': s['title'], 
+                    'versions': [d['version_name'] for d in s['versions']],
+                } for s in schemas
             ]
             cache.set(cache_key, content)
         # no cached version or no content
