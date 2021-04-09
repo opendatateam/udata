@@ -3,7 +3,6 @@ from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
-from udata.core.schema.api_fields import schema_ref_fields
 
 from .models import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
@@ -77,9 +76,8 @@ resource_fields = api.model('Resource', {
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
                                  readonly=True),
-    'schema': fields.Nested(
-        schema_ref_fields, allow_null=True,
-        description='Reference to the associated schema'),
+    'schema': fields.Raw(
+        description='Reference to the associated schema', readonly=True),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {

@@ -1473,13 +1473,13 @@ class DatasetSchemasAPITest:
         app.config['SCHEMA_CATALOG_URL'] = 'https://example.com/schemas'
 
         rmock.get('https://example.com/schemas', json={
-            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE","versions":[{"version_name": "1.0.0"},{"version_name": "1.0.1"},{"version_name": "1.0.2"}]}]
         })
 
         response = api.get(url_for('api.schemas'))
 
         assert200(response)
-        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":[{"version_name": "1.0.0"},{"version_name": "1.0.1"},{"version_name": "1.0.2"}]}]
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_dataset_schemas_api_list_no_catalog_url(self, api):
@@ -1503,7 +1503,7 @@ class DatasetSchemasAPITest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_dataset_schemas_api_list_error_w_cache(self, api, rmock, mocker):
         cache_mock_set = mocker.patch.object(cache, 'set')
-        mocker.patch.object(cache, 'get', return_value=[{"id": "etalab/schema-irve", "label": "Schéma IRVE"}])
+        mocker.patch.object(cache, 'get', return_value=[{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":["1.0.0","1.0.1","1.0.2","1.0.3"]}])
 
         # Fill cache
         rmock.get('https://example.com/schemas', json={
@@ -1511,7 +1511,7 @@ class DatasetSchemasAPITest:
         })
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":["1.0.0","1.0.1","1.0.2","1.0.3"]}]
         assert cache_mock_set.called
 
         # Endpoint becomes unavailable
@@ -1520,5 +1520,5 @@ class DatasetSchemasAPITest:
         # Long term cache is used
         response = api.get(url_for('api.schemas'))
         assert200(response)
-        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+        assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":["1.0.0","1.0.1","1.0.2","1.0.3"]}]
 

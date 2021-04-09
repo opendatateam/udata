@@ -32,22 +32,24 @@ def normalize_format(data):
 
 def enforce_allowed_schemas(form, field):
     schema = field.data
-    allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
-    if schema.get('name') not in allowed_schemas:
-        message = _('Schema "{schema}" is not an allowed value. Allowed values: {values}')
-        raise validators.ValidationError(message.format(
-            schema=schema.get('name'),
-            values=', '.join(allowed_schemas)
-        ))
-
-    allowed_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')][0]
-    if "version" in schema:
-        if schema.get('version') not in allowed_versions:
-            message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
+    if schema != {}:
+        allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
+        if schema.get('name') not in allowed_schemas:
+            print(schema)
+            message = _('Schema "{schema}" is not an allowed value. Allowed values: {values}')
             raise validators.ValidationError(message.format(
-                version=schema.get('version'),
-                values=', '.join(allowed_versions)
+                schema=schema.get('name'),
+                values=', '.join(allowed_schemas)
             ))
+
+        allowed_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')][0]
+        if "version" in schema:
+            if schema.get('version') not in allowed_versions:
+                message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
+                raise validators.ValidationError(message.format(
+                    version=schema.get('version'),
+                    values=', '.join(allowed_versions)
+                ))
 
 class BaseResourceForm(ModelForm):
     title = fields.StringField(
@@ -83,7 +85,7 @@ class BaseResourceForm(ModelForm):
     extras = fields.ExtrasField()
     schema = fields.DictField(
         _('Schema'),
-        default=None,
+        default={},
         validators=[validators.optional(), enforce_allowed_schemas],
         description=_('The schema slug the resource adheres to'))
 
