@@ -82,7 +82,7 @@ class BaseResourceForm(ModelForm):
         description=_('The publication date of the resource'))
     extras = fields.ExtrasField()
     schema = fields.DictField(
-        _('Schema'), 
+        _('Schema'),
         default=None,
         validators=[validators.optional(), enforce_allowed_schemas],
         description=_('The schema slug the resource adheres to'))
