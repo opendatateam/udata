@@ -191,7 +191,6 @@ class DatasetSearch(ModelSearchAdapter):
             image_url = owner.avatar(40, external=True)
 
         certified = organization and organization.certified
-        
         document = {
             'title': dataset.title,
             'description': dataset.description,
