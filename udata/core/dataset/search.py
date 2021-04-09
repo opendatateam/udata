@@ -205,7 +205,7 @@ class DatasetSearch(ModelSearchAdapter):
                     'format': r.format,
                     'type': r.type,
                     'schema': dict(r.schema).get('name',{}),
-                    'schema_version': dict(r.schema).get('version',{})
+                    'schema_version': dict(r.schema).get('version',{}),
                 }
                 for r in dataset.resources],
             'format_suggest': [r.format.lower()
