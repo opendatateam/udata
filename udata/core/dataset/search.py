@@ -85,7 +85,7 @@ class DatasetSearch(ModelSearchAdapter):
         'description': String(),
         'format': String(index='not_analyzed'),
         'schema': String(index='not_analyzed'),
-        'schema_version': String(index='not_analyzed')
+        'schema_version': String(index='not_analyzed'),
     })
     format_suggest = Completion(analyzer=simple,
                                 search_analyzer=simple,
