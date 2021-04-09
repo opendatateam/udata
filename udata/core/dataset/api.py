@@ -44,7 +44,7 @@ from .api_fields import (
     resource_fields,
     resource_type_fields,
     upload_fields,
-    schema_fields
+    schema_fields,
 )
 from udata.linkchecker.checker import check_resource
 from .models import (
@@ -587,4 +587,3 @@ class SchemasAPI(API):
             abort(503, description='No schemas in cache and endpoint unavailable')
         except SchemasCatalogNotFoundException:
             abort(404, description='Schema catalog endpoint was not found')
-
