@@ -440,7 +440,7 @@ class ResourceSchemaTest:
             'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE","versions":[{"version_name": "1.0.0"},{"version_name": "1.0.1"},{"version_name": "1.0.2"}]}]
         })
 
-        assert ResourceSchema.objects() == [{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":["1.0.0","1.0.1","1.0.2","1.0.3"]}]
+        assert ResourceSchema.objects() == [{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":["1.0.0","1.0.1","1.0.2"]}]
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_resource_schema_objects_no_catalog_url(self):
