@@ -36,7 +36,7 @@ def enforce_allowed_schemas(form, field):
         allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
         if schema.get('name') not in allowed_schemas:
             print(schema)
-            message = _('Schema "{schema}" is not an allowed value. Allowed values: {values}')
+            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
             raise validators.ValidationError(message.format(
                 schema=schema.get('name'),
                 values=', '.join(allowed_schemas)
