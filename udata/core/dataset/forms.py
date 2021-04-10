@@ -50,6 +50,14 @@ def enforce_allowed_schemas(form, field):
                     version=schema.get('version'),
                     values=', '.join(allowed_versions)
                 ))
+        properties = ["name","version"]
+        for prop in schema:
+            if(prop not in properties):
+                message = _('Sub-property "{prop}" is not allowed value in schema field. Allowed values is : {properties}')
+                raise validators.ValidationError(message.format(
+                    prop=prop,
+                    properties=', '.join(properties)
+                ))
 
 class BaseResourceForm(ModelForm):
     title = fields.StringField(
