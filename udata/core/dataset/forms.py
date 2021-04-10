@@ -43,6 +43,7 @@ def enforce_allowed_schemas(form, field):
             ))
 
         allowed_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')][0]
+        allowed_versions.append('latest')
         if "version" in schema:
             if schema.get('version') not in allowed_versions:
                 message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
