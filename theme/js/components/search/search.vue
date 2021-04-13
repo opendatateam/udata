@@ -73,7 +73,7 @@
             class="btn-secondary btn-secondary-grey-200 px-md"
             @click="extendedForm = !extendedForm"
           >
-            <span v-if="!extendedForm">&#8230;</span>
+            <span v-if="!extendedForm">…</span>
             <span v-else>X</span>
           </a>
         </div>
