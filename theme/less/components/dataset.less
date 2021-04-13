@@ -88,11 +88,13 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
     display: flex;
     align-items: center;
 
-    // margin-top: @spacing-md;
-    padding: @spacing-sm 0;
+    padding: @spacing-xxs 0;
 
     .card-logo {
         flex: 0 0 100px;
+        background: white;
+        border: 1px solid @grey-50;
+        padding: @spacing-sm;
 
         img {
             max-width: 100%;
@@ -102,7 +104,7 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
     .card-data {
         flex-grow: 1;
         position: relative;
-        margin: 0 @spacing-sm;
+        margin: 0 @spacing-md;
 
         h4 {
             margin-bottom: 0;
@@ -126,21 +128,6 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
         }
     }
 
-    //Separator
-    &:after {
-        content: " ";
-        display: block;
-
-        position: absolute;
-
-        bottom: 0;
-        right: 0;
-
-        width: calc(100% - 135px); //Minus the image width + little margin
-        height: 1px;
-        background: @grey-200;
-    }
-
     //Smaller version with no border for display in small spaces (search box for instance)
     &.compact {
         padding: @spacing-xs 0;
@@ -156,16 +143,12 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
         .card-features {
             font-size: @font-size-xs!important;
         }
-
-        &:after {
-            display: none;
-        }
     }
 
     //Fancier version for search results, with an hover section for details
     //Disclaimer : the search-result component is weird in styling and uses a lot of fixed pixel values. Please beware if you make any changes in it, you might break responsive.
     &.dataset-search-result {
-        padding: 0; //Unfortunately, we need some sweet borders
+        padding: 0 @spacing-xxs; //Unfortunately, we need some sweet borders
 
         border-top: 1px solid @grey-100;
 
@@ -184,7 +167,8 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
         }
 
         .card-logo {
-            padding: 0 @spacing-xs;
+            padding: @spacing-xs @spacing-xs;
+            margin: @spacing-xxs 0;
 
             @media @query-lg {
                 padding-top: @spacing-md;
