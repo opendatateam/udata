@@ -1,13 +1,13 @@
 {% set details_view = details_view or url_for("organizations.show", org=organization, _external=True) %}
 {% set name = organization.name or organization.fullname %}
-<div class="row producer-panel justify-between">
-    <div class="col-auto">
+<div class="producer-panel row justify-between">
+    <div class="col-1 col-md-12">
         <a href="{{ details_view }}" title="{{ name }}">
             <img src="{{ organization.logo|placeholder('organization') }}" alt="{{ name }}"
-                class="organization-logo producer img-responsive" />
+                class="organization-logo producer mw-100" />
         </a>
     </div>
-    <div class="col container mt-md-md text-blue-500">
+    <div class="col-10 col-md-12 mt-md-md text-blue-500">
         <h2>
             {{ name }}
         </h2>
@@ -22,5 +22,5 @@
                     title="">{{ _('@@Suivre le producteur') }}</a></li> #}
         </ul>
     </div>
-    <div class="col-auto"></div>
+    <div class="col-1"></div>
 </div>
