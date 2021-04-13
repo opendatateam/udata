@@ -23,7 +23,7 @@ The `url` prop is the API URL.
       />
     </span>
     <strong class="text-orange-100 ml-sm"
-      >{{ _followers }} {{ $t("@@followers") }}</strong
+      >{{ _followers }} {{ $tc("@@followers", _followers) }}</strong
     >
   </a>
 </template>
