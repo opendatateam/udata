@@ -14,7 +14,7 @@ Nothing to see here ! Well actually it's a small component that says this.
       </h4>
       <p>
         {{ copy }}
-        {{ queryString && `"${queryString}"` }}
+        <span v-if="queryString">{{`"${queryString}"` }}</span>
       </p>
       <p v-if="copyAfter">{{ copyAfter }}</p>
       <a class="nav-link mt-md" @click="onClick" v-if="onClick">{{ cta }}</a>
