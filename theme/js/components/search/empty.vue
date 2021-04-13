@@ -3,16 +3,23 @@ Nothing to see here ! Well actually it's a small component that says this.
 -->
 
 <template>
-  <div class="search-empty bg-grey-50 p-lg my-md pb-hg">
-    <div v-html="Empty" />
-    <h4 class="mt-lg">
-      {{ $t("@@Aucun résultat ne correspond à votre recherche") }}
-    </h4>
-    <p>
-      {{ copy }}
-      "{{ queryString }}"
-    </p>
-    <a class="nav-link mt-md" :href="link">{{ cta }}</a>
+  <div
+    class="search-empty bg-grey-50 p-lg my-md pb-hg"
+    :class="{ 'row-inline': wide }"
+  >
+    <div :class="{ 'pr-lg': wide }" v-html="Empty" />
+    <div :class="{ 'mt-lg': !wide }">
+      <h4>
+        {{ $t("@@Aucun résultat ne correspond à votre recherche") }}
+      </h4>
+      <p>
+        {{ copy }}
+        <span v-if="queryString">{{ `"${queryString}"` }}</span>
+      </p>
+      <p v-if="copyAfter">{{ copyAfter }}</p>
+      <a class="nav-link mt-md" @click="onClick" v-if="onClick">{{ cta }}</a>
+      <a class="nav-link mt-md" :href="link" v-else>{{ cta }}</a>
+    </div>
   </div>
 </template>
 
@@ -24,7 +31,10 @@ export default {
     queryString: String,
     cta: String,
     copy: String,
+    copyAfter: String,
     link: String,
+    onClick: Function,
+    wide: Boolean,
   },
   data() {
     return {

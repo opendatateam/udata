@@ -22,6 +22,19 @@
         }
     }
 
+    .search-input {
+        border-bottom: 1px solid @grey-100;
+        padding: @spacing-md;
+
+        .icon {
+            svg {
+                width: 36px;
+                height: 36px;
+            }
+        }
+    }
+
+
     .see-all {
         svg {
             will-change: transform;
@@ -60,35 +73,6 @@
         .search-empty {
             flex-grow: 1;
         }
-    }
-}
-
-.search-input {
-    padding: @spacing-md;
-    border-bottom: 1px solid @grey-100;
-
-    .icon {
-        svg {
-            width: 36px;
-            height: 36px;
-
-            * {
-                transition: stroke ease 0.2s;
-            }
-        }
-
-        &.active svg * {
-            stroke: @blue-400;
-        }
-    }
-
-    input[type="text"] {
-        margin-left: @spacing-md;
-        padding: @spacing-xxs @spacing-xs;
-
-        border: none;
-        appearance: none;
-        flex-grow: 1;
     }
 }
 

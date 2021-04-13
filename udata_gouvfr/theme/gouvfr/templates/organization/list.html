@@ -14,18 +14,18 @@
 {% set bundle = 'search' %}
 
 {% block breadcrumb %}
-    <li class="active">
-        {{ _('Organizations') }}
-        <small>{{ _('%(start)s to %(end)s on %(total)s',
+<li class="active">
+    {{ _('Organizations') }}
+    <small>{{ _('%(start)s to %(end)s on %(total)s',
             start=organizations.page_start,
             end=organizations.page_end,
             total=organizations.total) }}</small>
-        {% include theme('organization/search-labels.html') %}
-    </li>
+    {% include theme('organization/search-labels.html') %}
+</li>
 {% endblock %}
 
 {# // 'site.organizations_csv', url=url, #}
-{% block toolbar %}
+{# {% block toolbar %}
 {{ s.breadcrum_toolbar(organizations, url=url,
     exports=(
         (_('Organizations'), 'site.organizations_csv', 'csv'),
@@ -37,22 +37,25 @@
     reuses=(_('Reuses'), 'desc'),
     followers=(_('Followers'), 'desc')
 ) }}
-{% endblock %}
+{% endblock %} #}
 
 {% block main_content %}
-<div class="row">
-    <div class="col-md-8 col-lg-9 smaller">
-
-        <ul class="search-results">
+<div class="container">
+    <h1>{{ _('@@Organizations') }}</h1>
+    <ul class="search-results">
         {% for organization in organizations %}
-        {% include theme('organization/search-result.html') %}
+        <li class="search-result organization-result">
+            <a href="{{ url_for('organizations.show', org=organization) }}" class="unstyled w-100"
+                title="{{ organization.name }}">
+                {% include theme('organization/search-result.html') %}
+            </a>
+        </li>
         {% endfor %}
-        </ul>
-        {{ paginator(organizations) }}
-    </div>
-
-    <aside class="col-md-4 col-lg-3">
-        {% include theme('organization/search-panel.html') %}
-    </aside>
+    </ul>
+    {{ paginator(organizations) }}
 </div>
+
+{# <aside class="col-md-4 col-lg-3">
+        {% include theme('organization/search-panel.html') %}
+    </aside> #}
 {% endblock %}
