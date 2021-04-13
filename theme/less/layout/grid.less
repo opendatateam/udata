@@ -26,6 +26,9 @@ It's a grid. You know how grids work. Even if you don't, you'll understand in no
 ### Utilities
 
 `.w-100` can be used to apply a 100% width to an element. `w-auto` does the same for the `auto` value.
+`.mw-100` applies `max-width: 100%` to any element.
+
+`.overflow-hidden` and `.overflow-visible` can be used to trigger the corresponding overflow classes for special edge cases where you need a container that can or cannot overflow.
 
 ### Auto layout
 
@@ -190,6 +193,14 @@ in which case you'll have one column on each side and the main content will span
     }
 }
 
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-visible {
+    overflow: visible;
+}
+
 .hagrid {
     max-width: (12 * @breakpoint-xl)/10;
     margin: auto;
@@ -325,6 +336,10 @@ each(@breakpoints, .(@bk, @_k, @_i) {
 
 .w-100 {
     width: 100%;
+}
+
+.mw-100 {
+    max-width: 100%;
 }
 
 .w-auto {
