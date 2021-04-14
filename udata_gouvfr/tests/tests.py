@@ -450,67 +450,6 @@ class GetBlogPostRssTest(GetBlogPostMixin):
         return feed.rss_str().decode('utf8')
 
 
-DISCOURSE_URL = 'http://somewhere.test/discourse'
-
-
-@pytest.mark.options(DISCOURSE_URL=DISCOURSE_URL,
-                     DISCOURSE_LISTING_TYPE='latest',
-                     DISCOURSE_CATEGORY_ID=None)
-class GouvFrHomeDiscourseTest:
-    '''Ensure home page render with forum'''
-    settings = GouvFrSettings
-    modules = []
-
-    def test_render_home_with_discourse(self, rmock, client):
-        '''It should render the home page with the latest forum topic'''
-        data = {
-            'categories': [{
-                'id': 1,
-                'name': 'Category #1',
-            }]
-        }
-        data_latest = {
-            'users': [],
-            'topic_list': {
-                'topics': [
-                    {
-                        'last_posted_at': '2017-01-01',
-                        'id': 1,
-                        'title': 'Title',
-                        'fancy_title': 'Fancy Title',
-                        'slug': 'title',
-                        'category_id': 1,
-                        'posts_count': 1,
-                        'reply_count': 1,
-                        'like_count': 1,
-                        'views': 1,
-                        'created_at': '2017-01-01',
-                        'posters': [],
-                    }
-                ],
-            },
-        }
-        rmock.get('%s/site.json' % DISCOURSE_URL, json=data)
-        rmock.get('%s/l/latest.json' % DISCOURSE_URL, json=data_latest)
-        response = client.get(url_for('site.home'))
-        assert200(response)
-        assert 'Title' in response.data.decode('utf8')
-
-    def test_render_home_if_discourse_timeout(self, rmock, client):
-        '''It should render the home page when forum time out'''
-        url = '%s/site.json' % DISCOURSE_URL
-        rmock.get(url, exc=requests.Timeout('Blog timed out'))
-        response = client.get(url_for('site.home'))
-        assert200(response)
-
-    def test_render_home_if_discourse_error(self, rmock, client):
-        '''It should render the home page when forum is not available'''
-        url = '%s/site.json' % DISCOURSE_URL
-        rmock.get(url, exc=requests.ConnectionError('Error'))
-        response = client.get(url_for('site.home'))
-        assert200(response)
-
-
 @pytest.mark.options(DEFAULT_LANGUAGE='en')
 class LegacyUrlsTest:
     settings = GouvFrSettings

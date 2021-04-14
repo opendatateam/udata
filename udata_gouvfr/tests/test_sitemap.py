@@ -11,17 +11,17 @@ class SitemapTest:
     settings = GouvFrSettings
     modules = []
 
-    def test_topics_within_sitemap(self, sitemap):
-        '''It should return a topic list from the sitemap.'''
-        topics = TopicFactory.create_batch(3)
+    # def test_topics_within_sitemap(self, sitemap):
+    #     '''It should return a topic list from the sitemap.'''
+    #     topics = TopicFactory.create_batch(3)
 
-        sitemap.fetch()
+    #     sitemap.fetch()
 
-        for topic in topics:
-            url = sitemap.get_by_url('topics.display_redirect', topic=topic)
-            assert url is not None
-            # assert url is not None
-            sitemap.assert_url(url, 0.8, 'weekly')
+    #     for topic in topics:
+    #         url = sitemap.get_by_url('topics.display_redirect', topic=topic)
+    #         assert url is not None
+    #         # assert url is not None
+    #         sitemap.assert_url(url, 0.8, 'weekly')
 
     def test_organizations_within_sitemap(self, sitemap):
         '''It should return an organization list from the sitemap.'''

@@ -7,4 +7,3 @@ class GouvFrSettings(Testing):
     PLUGINS = ['gouvfr']
     THEME = 'gouvfr'
     WP_ATOM_URL = None  # Only activated on specific tests
-    DISCOURSE_URL = None  # Only activated on specific tests
