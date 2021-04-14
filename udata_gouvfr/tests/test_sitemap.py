@@ -2,7 +2,7 @@ from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.post.factories import PostFactory
 from udata.core.reuse.factories import VisibleReuseFactory
-from udata.core.topic.factories import TopicFactory
+# from udata.core.topic.factories import TopicFactory
 
 from udata_gouvfr.tests import GouvFrSettings
 
