@@ -59,6 +59,7 @@
             {% set author_url = url_for('users.show', user=reuse.owner) %}
             {% endif %}
             <p class="m-0 text-grey-300">
+                {# FIXME: from @abulte : We're piping some user generated content into safe, this is probably a bad idea. #}
                 {{ _('Published on %(date)s by %(user)s',
                     date=reuse.created_at|dateformat(format='long'),
                     user='<a href="%(url)s" title="%(name)s">%(name)s</a>'|format(
@@ -73,7 +74,7 @@
                 {{ _('See the reuse') }}
             </a>
             <div class="ml-md">
-                {{follow_btn(reuse)}}
+                {{ follow_btn(reuse) }}
             </div>
         </div>
     </header>
@@ -102,14 +103,14 @@
                     <div>
                         <dt class="f-bold text-grey-400">{{ _('@@Type') }}</dt>
                         <dd>
-                            {{reuse.type_label}}
+                            {{ reuse.type_label }}
                         </dd>
                     </div>
                     <div>
                         <dt class="f-bold text-grey-400">{{ _('@@Mots clés') }}</dt>
                         <dd>
                             {% for tag in reuse.tags %}
-                            <a href="{{ url_for('search.index', tag=tag) }}"><span class="tag">{{tag}}</span></a>
+                            <a href="{{ url_for('search.index', tag=tag) }}"><span class="tag">{{ tag }}</span></a>
                             {% endfor %}
                         </dd>
                     </div>
@@ -134,7 +135,7 @@
         <div class="row-inline">
             <h2>
                 {{ _('Used datasets') }}
-                <sup>{{reuse.datasets|length}}</sup>
+                <sup>{{ reuse.datasets|length }}</sup>
             </h2>
         </div>
         <ul class="row">
@@ -167,12 +168,12 @@
                 </ul>
             </div>
             <div class="col-6 col-md-12 my-md-lg">
-                <h2 class="fs-xxl">{{_('@@Embed')}}</h2>
+                <h2 class="fs-xxl">{{ _('@@Embed') }}</h2>
                 <p class="text-grey-300 fs-sm">
                     Embed is cool, embed is life. Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolore,
                     consectetur adipisicing elit.
                 </p>
-                {{integrate_btn(reuse)}}
+                {{ integrate_btn(reuse) }}
             </div>
         </div>
     </section>

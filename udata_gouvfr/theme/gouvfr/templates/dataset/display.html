@@ -59,14 +59,14 @@
         if dataset.extras.get('harvest:archived') == 'not-on-remote' else
         _('This dataset has been archived.') %}
     <span class="big tag" title="{{ title }}">
-        {{_('Archived')}}
+        {{ _('Archived') }}
     </span>
     {% endif %}
     <h1 class="fs-hg mb-0">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
     <div class="my-md">
-        {{follow_btn(dataset)}}
+        {{ follow_btn(dataset) }}
     </div>
     <div class="row">
         {% if dataset.organization %}
