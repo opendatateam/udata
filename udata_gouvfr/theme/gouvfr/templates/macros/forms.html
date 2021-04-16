@@ -1,6 +1,8 @@
-{% macro render_fields(form, submit='') %}
+{% macro render_fields(form, submit='', exclude=None) %}
+{% set excluded = exclude or [] %}
 {% for f in form %}
-{% if f.type in ('CSRFTokenField', 'HiddenField') %}
+{% if f in excluded %}
+{% elif f.type in ('CSRFTokenField', 'HiddenField') %}
 {{ f() }}
 {% elif f.type == 'SubmitField' %}
 <button type="submit" class="btn btn-primary form-submit">{{ submit }}</button>

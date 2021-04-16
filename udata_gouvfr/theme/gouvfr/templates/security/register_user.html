@@ -14,8 +14,7 @@
                             Petit blabla un peu court sur ce qu'on gagne à se connecter, proablement un laïus sur les
                             discussions ou les réutilisations.
                         </p>
-                        {# FIXME: Le bouton de Sign Up est pas au bon endroit dans le modèle de form #}
-                        {{ forms.render(register_user_form, exclude=[register_user_form.submit]) }}
+                        {{ forms.render_fields(register_user_form, exclude=[register_user_form.submit]) }}
                         <div class="field field-checkbox">
                             {% block extra_tos %}
                             {% endblock %}
