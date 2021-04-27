@@ -26,6 +26,9 @@ It's a grid. You know how grids work. Even if you don't, you'll understand in no
 ### Utilities
 
 `.w-100` can be used to apply a 100% width to an element. `w-auto` does the same for the `auto` value.
+`.mw-100` applies `max-width: 100%` to any element.
+
+`.overflow-hidden` and `.overflow-visible` can be used to trigger the corresponding overflow classes for special edge cases where you need a container that can or cannot overflow.
 
 ### Auto layout
 
@@ -140,6 +143,37 @@ Sometimes you need to occupy the available space fully, you can use `.container-
 </div>
 ```
 
+## Hagrid
+
+Hagrid usually refers to a half-giant character in the Harry Potter universe. Because of his large size, small children are very scared of him, as they should be.
+He's also very careless in his attitude and tends to expose children of the school to various dangers.
+
+Our version of `.hagrid` follows the same principles : it's huge (1320px) and dangerous.
+
+This is an extra-width version of the 12 columns-grid, but made such that 10 columns of the Hagrid correspond to 12 columns of the normal grid.
+This allows you to have a full 12-column width content that extend past the normal grid while maintening aligment with the normal grid when needed.
+
+Two main use-cases : to make content bigger than the rest (in which case you'll use the 12 columns within one div), or to place content to the side of the existing grid,
+in which case you'll have one column on each side and the main content will span 10 columns, aligning perfectly with the standard grid.
+
+```hagrid-side.html
+<div class="hagrid">
+    <div class="row">
+        <div class="col-1 bg-blue-200">1 col</div>
+        <div class="col-10 bg-blue-300">10 cols (standard grid width !)</div>
+        <div class="col-1 bg-blue-200">1 col</div>
+    </div>
+</div>
+```
+
+```hagrid-full.html
+<div class="hagrid">
+    <div class="row">
+        <div class="col-12 bg-blue-200">12 cols are bigger than the standard grid and allow extra wide content</div>
+    </div>
+</div>
+```
+
 */
 
 @columns: 12;
@@ -157,6 +191,20 @@ Sometimes you need to occupy the available space fully, you can use `.container-
     @media @query-hg {
         padding: 0 @spacing-md;
     }
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-visible {
+    overflow: visible;
+}
+
+.hagrid {
+    max-width: (12 * @breakpoint-xl)/10;
+    margin: auto;
+    overflow: hidden;
 }
 
 .row {
@@ -288,6 +336,10 @@ each(@breakpoints, .(@bk, @_k, @_i) {
 
 .w-100 {
     width: 100%;
+}
+
+.mw-100 {
+    max-width: 100%;
 }
 
 .w-auto {

@@ -1,9 +1,11 @@
-{# Totally modified #}
 {% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
 
 <article class="dataset-card">
     {% if dataset.organization %}
     <div class="card-logo">
+        {% if dataset.organization.public_service %}
+        <span class="certified-logo">{% include theme("svg/certified.svg") %}</span>
+        {% endif %}
         <img src="{{ dataset.organization.logo(100, external=True)|placeholder('organization', external=True) }}"
             alt="{{ dataset.organization.name }}" />
     </div>
@@ -16,17 +18,12 @@
         <img src="{{ ''|placeholder('organization', external=True) }}" alt="" />
     </div>
     {% endif %}
-    <div class="card-cert p-xl p-lg-md">
-        {% if dataset.organization.public_service %}
-        {% include theme("svg/certified.svg") %}
-        {% endif %}
-    </div>
     <div class="card-data">
         <h4 class="card-body">
             {{ dataset.full_title }}
         </h4>
         <div class="card-footer">
-            <ul class="card-features">
+            <ul class="card-features text-grey-300 fs-xs">
                 <li>{{ dataset.resources | length  }} {{ _('@@ressources') }}</li>
                 <li>{{ dataset.metrics.reuses or 0 }} {{ _('@@réutilisations') }}</li>
             </ul>

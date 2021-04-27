@@ -43,7 +43,7 @@
 ) }}
 
 <section
-    class="content container {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
+    class="content container overflow-visible {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
     {% if dataset.private %}
     <span class="big tag"
         title="{{ _('This dataset is private and will not be visible by other users') }}">{{ _('Private') }}
@@ -59,49 +59,50 @@
         if dataset.extras.get('harvest:archived') == 'not-on-remote' else
         _('This dataset has been archived.') %}
     <span class="big tag" title="{{ title }}">
-        {{_('Archived')}}
+        {{ _('Archived') }}
     </span>
     {% endif %}
     <h1 class="fs-hg mb-0">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
-    <div class="row py-md">
-        <div class="col-12">
-            {% if dataset.organization %}
-            {% if dataset.organization.public_service %}
-            <div class="well well-green-300">
-                {% include theme("svg/certified.svg") %}
-                <strong>{{ _('This dataset comes from a certified public service') }}</strong><br />
-            </div>
-            {% endif %}
-            {% elif dataset.owner %}
-            <div class="well well-grey-100">
-                {% trans
-                        date=dataset.created_at|dateformat(format='long'),
-                        update=dataset.last_update|dateformat(format='long'),
-                        author=dataset.owner.fullname,
-                        url=url_for('users.show', user=dataset.owner)
-                    %}
-                This dataset has been published on the initiative and under the responsibility of <a href="{{url}}"
-                    title="{{author}}">{{author}}</a><br />
-                Published on {{date}} and updated on {{update}}
-                {% endtrans %}
-            </div>
-            {% endif %}
+    <div class="my-md">
+        {{ follow_btn(dataset) }}
+    </div>
+    <div class="row">
+        {% if dataset.organization %}
+        {% if dataset.organization.public_service %}
+        <div class="well well-green-300 py-sm">
+            {% include theme("svg/certified.svg") %}
+            <strong>{{ _('This dataset comes from a certified public service') }}</strong><br />
         </div>
+        {% endif %}
+        {% elif dataset.owner %}
+        <div class="well well-grey-100 py-sm">
+            {% trans
+                    date=dataset.created_at|dateformat(format='long'),
+                    update=dataset.last_update|dateformat(format='long'),
+                    author=dataset.owner.fullname,
+                    url=url_for('users.show', user=dataset.owner)
+                %}
+            This dataset has been published on the initiative and under the responsibility of <a href="{{url}}"
+                title="{{author}}">{{author}}</a><br />
+            Published on {{date}} and updated on {{update}}
+            {% endtrans %}
+        </div>
+        {% endif %}
     </div>
     <div class="row align-items-center">
         <div class="col-auto col-md-12 tabs">
             {% if dataset.organization %}
-            <a href="#dataset-producer" role="button" class="dropdown tab active"><span
+            <a href="#dataset-producer" role="button" class="tab-panel bg-blue-300 tab active"><span
                     class="label">{{ _('Producer') }}</span></a>
             {% elif dataset.owner %}
-            <a href="#dataset-producer" role="button" class="dropdown tab active"><span
+            <a href="#dataset-producer" role="button" class="tab-panel bg-blue-300 tab active"><span
                     class="label">{{ _('Author') }}</span></a>
             {% endif %}
-            <a href="#dataset-informations" role="button" class="dropdown tab"><span
+            <a href="#dataset-informations" role="button" class="tab-panel bg-blue-300 tab"><span
                     class="label">{{ _('Informations') }}</span></a>
-            <a href="#dataset-extras" role="button" class="dropdown tab"><span
+            <a href="#dataset-extras" role="button" class="tab-panel bg-blue-300 tab"><span
                     class="label">{{ _('@@Extras') }}</span></a>
         </div>
         <div class="col-auto hidden-md">
@@ -110,8 +111,8 @@
         </div>
     </div>
 </section>
-<section class="callout p-hg p-md-md my-lg bg-blue-300">
-    <div id="dataset-producer" class="tab-content active">
+<section class="callout p-hg p-md-md mb-lg bg-blue-300">
+    <div id="dataset-producer" class="tab-content hagrid active">
         {% if dataset.organization %}
         {% with organization=dataset.organization %}
         {% include theme('organization/producer-panel.html') %}
@@ -360,20 +361,16 @@
         <div class="row">
             <div class="col-sm-9">
                 <div class="resources-list">
-                {% for resource in dataset.community_resources %}
+                    {% for resource in dataset.community_resources %}
                     {% include theme('dataset/resource/card.html') %}
-                {% endfor %}
-                {% if not read_only_mode %}
-                <a class="card resource-card add"
-                    href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                    {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
-                </a>
-                {% endif %}
+                    {% endfor %}
+                    {% if not read_only_mode %}
+                    <a class="btn-action mb-lg"
+                        href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                        {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
+                    </a>
+                    {% endif %}
                 </div>
-            </div>
-
-            <div class="col-sm-3 note">
-                <p>{{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}</p>
             </div>
         </div>
 

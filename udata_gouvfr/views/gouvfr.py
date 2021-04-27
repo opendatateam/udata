@@ -300,5 +300,4 @@ def dataset_apis(ctx):
 @blueprint.route('/_stylemark/<path:filename>')
 def stylemark(filename):
     return redirect(theme_static_with_version(None,
-                                              filename="stylemark/index.html",
-                                              _external=True))
+                                              filename="stylemark/index.html"))

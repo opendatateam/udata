@@ -33,7 +33,7 @@
                     class="mr-md">
                     {{ _('@@Se connecter') }}
                 </a>
-                <a class="search-box px-lg" href="/search" @click="$refs.suggest.startSearch()"
+                <a class="search-box px-lg" href="/search" @click.prevent="$refs.suggest.startSearch()"
                     aria-label="{{ _('@@Rechercher') }}">
                     {% include theme('svg/search.svg') %}
                 </a>

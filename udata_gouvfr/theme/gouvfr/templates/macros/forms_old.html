@@ -1,0 +1,110 @@
+{% macro render(form, exclude=None) %}
+{% set excluded = exclude or [] %}
+<fieldset>
+{% for f in form %}
+    {% if f in excluded %}
+    {% elif f.type in ('CSRFTokenField', 'HiddenField') %}
+        {{ f() }}
+    {% else %}
+        {{ field(f) }}
+    {% endif %}
+{% endfor %}
+</fieldset>
+{% endmacro %}
+
+{% macro field(f, sizes='sm-2,md-3') %}
+<fieldset>
+    {% if f.subfield %}
+      {% for subfield in f %}
+      {{ field(subfield, sizes) }}
+      {% endfor %}
+    {% endif %}
+</fieldset>
+{% set cols = form_grid(sizes) %}
+<div class="form-group{% if f.errors %} has-error{% endif %}">
+    <label for="{{ f.id }}"
+        class="{{ cols.label }} control-label{% if f.flags.required %} required{% endif %}">
+        {{ f.label.text }}
+    </label>
+    <div class="field-wrapper {{ cols.control }}">
+        {% if f.type == 'RadioField' %}
+        {{ radio(f) }}
+        {% elif f.type == 'BooleanField' %}
+        {{ checkbox(f) }}
+        {% else %}
+        {{ f(class_='form-control') }}
+        {% endif %}
+        {% for error in f.errors %}
+        <label for="{{ f.id }}" class="help-block">{{ error }}</label>
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro radio(field) %}
+{% if field.stacked %}
+{{ radio_stacked(field) }}
+{% else %}
+{{ radio_inline(field) }}
+{% endif %}
+{% endmacro %}
+
+{% macro radio_inline(field) %}
+{% for value, label, selected in field.iter_choices() %}
+<label class="radio-inline">
+    <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
+        {% if selected %}checked="checked"{% endif %}>
+    {{ _(label) }}
+</label>
+{% endfor %}
+{% endmacro %}
+
+{% macro radio_stacked(field) %}
+{% for value, label, selected in field.iter_choices() %}
+<div class="radio">
+    <label>
+        <input type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}"
+            {% if selected %}checked="checked"{% endif %}>
+        {{ _(label) }}
+    </label>
+</div>
+{% endfor %}
+{% endmacro %}
+
+
+{% macro checkbox(field) %}
+{% if field.stacked %}
+{{ checkbox_stacked(field) }}
+{% else %}
+{{ checkbox_inline(field) }}
+{% endif %}
+{% endmacro %}
+
+{% macro checkbox_inline(field) %}
+<label class="checkbox-inline">
+    {{ field() }}
+    {{ _(label) }}
+</label>
+{% endmacro %}
+
+{% macro checkbox_stacked(field) %}
+<div class="checkbox">
+    <label>
+        {{ field() }}
+        {{ _(label) }}
+    </label>
+</div>
+{% endmacro %}
+
+
+{% macro required_disclaimer(sizes='sm-2') %}
+{% set cols = form_grid(sizes) %}
+<div class="form-group">
+    <div class="{{ cols.offset }} {{ cols.control }}">
+        <p class="form-control-static">
+            <span class="red">*</span>
+            <i>{{ _('required fields') }}</i>
+        </p>
+    </div>
+</div>
+{% endmacro %}

@@ -1,4 +1,5 @@
 name: udata_gouvfr Ui-Kit
+match: '/.*\.(sass|scss|less|css|js|vue)/g'
 theme:
   logo: theme/less/images/logo.png
   css:
