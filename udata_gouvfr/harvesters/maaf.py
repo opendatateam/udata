@@ -5,8 +5,6 @@ import re
 from collections import OrderedDict
 from urllib.parse import urljoin
 
-import chardet
-
 from lxml import etree, html
 from voluptuous import Schema, Optional, All, Any, Lower, In, Length
 
@@ -142,8 +140,7 @@ class MaafBackend(BaseBackend):
 
     def process(self, item):
         response = self.get(item.remote_id)
-        encoding = chardet.detect(response.content)['encoding']
-        xml = self.parse_xml(response.content.decode(encoding))
+        xml = self.parse_xml(response.content)
         metadata = xml['metadata']
 
         # Resolve and remote id from metadata
@@ -213,7 +210,7 @@ class MaafBackend(BaseBackend):
         return dataset
 
     def parse_xml(self, xml):
-        root = etree.fromstring(xml.encode('utf8'))
+        root = etree.fromstring(xml)
         self.xsd.validate(root)
         _, tree = dictize(root)
         return self.validate(tree, schema)

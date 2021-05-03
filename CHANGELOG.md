@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- [maaf] fix encoding issue [#531](https://github.com/etalab/udata-gouvfr/pull/531)
 
 ## 2.5.5 (2021-04-02)
 
