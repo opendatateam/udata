@@ -278,7 +278,7 @@ class Defaults(object):
         # Meteorology
         'grib2',
         # Misc
-        'dbf', 'prj', 'sql', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
+        'dbf', 'prj', 'sql', 'sqlite', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
         # RDF
         'rdf', 'ttl', 'n3',
     ]
