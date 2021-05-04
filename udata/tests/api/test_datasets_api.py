@@ -1475,7 +1475,6 @@ class DatasetSchemasAPITest:
         rmock.get('https://example.com/schemas', json={
             'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE","versions":[{"version_name": "1.0.0"},{"version_name": "1.0.1"},{"version_name": "1.0.2"}]}]
         })
-        print("jjj")
         response = api.get(url_for('api.schemas'))
 
         print(response.json)
@@ -1510,7 +1509,6 @@ class DatasetSchemasAPITest:
         rmock.get('https://example.com/schemas', json={
             'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE","versions":[{"version_name": "1.0.0"},{"version_name": "1.0.1"},{"version_name": "1.0.2"}]}]
         })
-        print('yolo')
         response = api.get(url_for('api.schemas'))
         assert200(response)
         assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":["1.0.0","1.0.1","1.0.2"]}]
@@ -1523,4 +1521,3 @@ class DatasetSchemasAPITest:
         response = api.get(url_for('api.schemas'))
         assert200(response)
         assert response.json == [{"id": "etalab/schema-irve", "label": "Schéma IRVE","versions":["1.0.0","1.0.1","1.0.2"]}]
-

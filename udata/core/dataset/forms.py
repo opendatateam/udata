@@ -12,7 +12,7 @@ from .models import (
     Dataset, Resource, License, Checksum, CommunityResource,
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, RESOURCE_FILETYPES, CHECKSUM_TYPES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, TITLE_SIZE_LIMIT, DESCRIPTION_SIZE_LIMIT,
-    ResourceSchema
+    ResourceSchema,
 )
 
 __all__ = ('DatasetForm', 'ResourceForm', 'CommunityResourceForm')
@@ -32,10 +32,9 @@ def normalize_format(data):
 
 def enforce_allowed_schemas(form, field):
     schema = field.data
-    if schema != {}:
+    if schema:
         allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
         if schema.get('name') not in allowed_schemas:
-            print(schema)
             message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
             raise validators.ValidationError(message.format(
                 schema=schema.get('name'),
@@ -44,20 +43,20 @@ def enforce_allowed_schemas(form, field):
 
         allowed_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')][0]
         allowed_versions.append('latest')
-        if "version" in schema:
+        if 'version' in schema:
             if schema.get('version') not in allowed_versions:
                 message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
                 raise validators.ValidationError(message.format(
                     version=schema.get('version'),
                     values=', '.join(allowed_versions)
                 ))
-        properties = ["name","version"]
+        properties = ['name', 'version']
         for prop in schema:
-            if(prop not in properties):
+            if prop not in properties:
                 message = _('Sub-property "{prop}" is not allowed value in schema field. Allowed values is : {properties}')
                 raise validators.ValidationError(message.format(
                     prop=prop,
-                    properties=', '.join(properties)
+                    properties=', '.join(properties),
                 ))
 
 class BaseResourceForm(ModelForm):

@@ -17,10 +17,9 @@ def migrate(db):
         for resource in dataset.resources:
             if hasattr(resource, 'schema'):
                 schema = resource.schema
-                resource.schema = { "name": None }
-                if schema is not None: 
-                    if isinstance(schema, str):
-                        resource.schema = { "name": schema }   
+                resource.schema = {'name': None}
+                if schema is not None and isinstance(schema, str):
+                        resource.schema = {'name': schema}   
                 save_res = True
         if save_res:
             try:

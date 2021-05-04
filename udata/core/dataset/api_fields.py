@@ -76,8 +76,7 @@ resource_fields = api.model('Resource', {
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
                                  readonly=True),
-    'schema': fields.Raw(
-        description='Reference to the associated schema', readonly=True),
+    'schema': fields.Raw(description='Reference to the associated schema', readonly=True),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {
