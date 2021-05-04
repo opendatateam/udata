@@ -30,6 +30,7 @@ def normalize_format(data):
     if data:
         return data.strip().lower()
 
+
 def enforce_allowed_schemas(form, field):
     schema = field.data
     if schema:
@@ -40,8 +41,9 @@ def enforce_allowed_schemas(form, field):
                 schema=schema.get('name'),
                 values=', '.join(allowed_schemas)
             ))
-
-        allowed_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')][0]
+        
+        schema_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')]
+        allowed_versions = schema_versions[0] if schema_versions else []
         allowed_versions.append('latest')
         if 'version' in schema:
             if schema.get('version') not in allowed_versions:
@@ -58,6 +60,7 @@ def enforce_allowed_schemas(form, field):
                     prop=prop,
                     properties=', '.join(properties),
                 ))
+
 
 class BaseResourceForm(ModelForm):
     title = fields.StringField(
