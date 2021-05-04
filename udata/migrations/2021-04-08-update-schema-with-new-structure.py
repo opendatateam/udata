@@ -1,5 +1,6 @@
 '''
-The purpose here is to fill every resource with a fs_filename string field.
+The purpose here is to update every resource's metadata 'schema'
+with a new format (string to object)
 '''
 import logging
 
@@ -19,7 +20,7 @@ def migrate(db):
                 schema = resource.schema
                 resource.schema = {'name': None}
                 if schema is not None and isinstance(schema, str):
-                        resource.schema = {'name': schema}   
+                    resource.schema = {'name': schema}
                 save_res = True
         if save_res:
             try:

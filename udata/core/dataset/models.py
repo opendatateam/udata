@@ -800,8 +800,8 @@ class ResourceSchema(object):
             schemas = response.json().get('schemas', [])
             content = [
                 {
-                    'id': s['name'], 
-                    'label': s['title'], 
+                    'id': s['name'],
+                    'label': s['title'],
                     'versions': [d['version_name'] for d in s['versions']],
                 } for s in schemas
             ]
