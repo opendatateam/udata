@@ -23,6 +23,9 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
     'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
         description='The organization logo thumbnail URL. This is the square '
         '({0}x{0}) and cropped version.'.format(BIGGEST_LOGO_SIZE)),
+    'badges': fields.List(fields.Nested(badge_fields),
+        description='The organization badges',
+        readonly=True),
 })
 
 
