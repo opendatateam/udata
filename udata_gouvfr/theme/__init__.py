@@ -46,17 +46,17 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Organizations'), 'organizations.list'),
     nav.Item(_('Dashboard'), 'site.dashboard'),
     nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr', items=[
-        nav.Item(_('Technical documentation'), None, url='https://doc.data.gouv.fr'),
+        nav.Item(_("Platform's documentation"), None, url='https://doc.data.gouv.fr'),
         nav.Item(_('Open data guides'), None, url='https://guides.etalab.gouv.fr'),
     ]),
     nav.Item(_('News'), 'posts.list'),
+    nav.Item(_('Support'), None, url='https://support.data.gouv.fr/'),
 ])
 
 theme.menu(gouvfr_menu)
 
 footer_links = [
     nav.Item(_('News'), 'posts.list'),
-    nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr'),
     nav.Item(_('Reference Data'), 'gouvfr.spd'),
     nav.Item(_('Licences'), 'gouvfr.licences'),
     nav.Item(_('API'), None, url=current_app.config.get('API_DOC_EXTERNAL_LINK', '#')),
@@ -94,6 +94,14 @@ nav.Bar(
     'gouvfr_network',
     [nav.Item(label, label, url=url) for label, url in NETWORK_LINKS]
 )
+
+footer_support_links = [
+    nav.Item(_("Platform's documentation"), None, url='https://doc.data.gouv.fr'),
+    nav.Item(_('Open data guides'), None, url='https://guides.etalab.gouv.fr'),
+    nav.Item(_('Support'), None, url='https://support.data.gouv.fr/')
+]
+
+nav.Bar('support_network', footer_support_links)
 
 
 @cache.memoize(50)
