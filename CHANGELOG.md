@@ -4,6 +4,11 @@
 
 - [maaf] fix encoding issue [#531](https://github.com/etalab/udata-gouvfr/pull/531)
 - Add link to support page [#532](https://github.com/etalab/udata-gouvfr/pull/532)
+- UX enhancement [#525](https://github.com/etalab/udata-gouvfr/pull/525):
+  - Removed hero's background image.
+  - Removed home page's carrousel.
+  - Changed homepage's layout. Datasets are now on top followed by reuses.
+  - Renamed "Profile" to "Public profile"
 
 ## 2.5.5 (2021-04-02)
 
@@ -21,11 +26,6 @@
 
 - Keep tracking to strictly necessary [#517](https://github.com/etalab/udata-gouvfr/pull/517)
 - Changed the title of the elections inventory page [#520](https://github.com/etalab/udata-gouvfr/pull/520)
-- UX enhancement [#525](https://github.com/etalab/udata-gouvfr/pull/525):
-  - Removed hero's background image.
-  - Removed home page's carrousel.
-  - Changed homepage's layout. Datasets are now on top followed by reuses.
-  - Renamed "Profile" to "Public profile"
 
 ## 2.5.1 (2021-01-26)
 
