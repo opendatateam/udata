@@ -11,7 +11,7 @@ from elasticsearch_dsl.faceted_search import (
     RangeFacet as DSLRangeFacet,
 )
 from flask_restplus import inputs
-from jinja2 import Markup
+from jinja2 import escape
 from speaklater import is_lazy_string
 
 from udata.i18n import lazy_gettext as _, format_date
@@ -63,8 +63,8 @@ class Facet(object):
             labels = (obj_to_string(l) for l in labels)
             labels = (l for l in labels if l)
             or_label = str(' {0} '.format(OR_LABEL))
-            return Markup(or_label.join(labels))
-        return Markup(obj_to_string(labelize(value)))
+            return escape(or_label.join(labels))
+        return escape(obj_to_string(labelize(value)))
 
     def default_labelizer(self, value):
         return clean_string(safe_unicode(value))
