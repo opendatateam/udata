@@ -3,7 +3,6 @@ import logging
 
 import bleach
 from importlib import import_module
-from _pytest.mark.structures import Mark
 
 from flask import abort, current_app
 from jinja2 import Markup, contextfunction
