@@ -64,8 +64,8 @@ class HookRenderer:
                 yield SafeMarkup(func(self.ctx, *self.args, **self.kwargs))
 
 
-# Markup object bypasses Jinja's escaping. This override allows to sanitize the resulting html.
 class SafeMarkup(Markup):
+    '''Markup object bypasses Jinja's escaping. This override allows to sanitize the resulting html.'''
     def __new__(cls, base, *args, **kwargs):
         cleaner = bleach.Cleaner(tags=[
             'a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'span',
