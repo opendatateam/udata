@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix create user by API [2609](https://github.com/opendatateam/udata/pull/2609)
 
 ## 2.6.4 (2021-03-24)
 
