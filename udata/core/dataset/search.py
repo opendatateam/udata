@@ -1,3 +1,4 @@
+from flask import abort
 from elasticsearch_dsl import (
     Boolean, Completion, Date, Long, Object, String, Nested
 )
@@ -43,9 +44,7 @@ def granularity_labelizer(value):
 
 
 def zone_labelizer(value):
-    if value and isinstance(value, str):
-        return GeoZone.objects(id=value).first() or value
-    return value
+    return GeoZone.objects(id=value).first()
 
 
 def dataset_badge_labelizer(kind):
