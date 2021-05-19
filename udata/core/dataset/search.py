@@ -1,4 +1,3 @@
-from flask import abort
 from elasticsearch_dsl import (
     Boolean, Completion, Date, Long, Object, String, Nested
 )
