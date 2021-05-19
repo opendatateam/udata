@@ -51,7 +51,7 @@ class HookRenderer:
         self.kwargs = kwargs
 
     def __html__(self):
-        return SafeMarkup(''.join(
+        return Markup(''.join(
             f(self.ctx, *self.args, **self.kwargs)
             for f, w in self.funcs
             if w is None or w(self.ctx)
@@ -60,7 +60,7 @@ class HookRenderer:
     def __iter__(self):
         for func, when in self.funcs:
             if when is None or when(self.ctx):
-                yield SafeMarkup(func(self.ctx, *self.args, **self.kwargs))
+                yield Markup(func(self.ctx, *self.args, **self.kwargs))
 
 
 class SafeMarkup(Markup):
