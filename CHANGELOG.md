@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.6.5 (2021-05-19)
 
 - Fix create user by API [#2609](https://github.com/opendatateam/udata/pull/2609)
 - Add sqlite, db and ics to allowed extensions [#2610](https://github.com/opendatateam/udata/pull/2610)
