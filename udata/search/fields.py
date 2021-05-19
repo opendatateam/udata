@@ -15,6 +15,7 @@ from flask_restplus import inputs
 from jinja2 import Markup
 from speaklater import is_lazy_string
 
+from udata.frontend import SafeMarkup
 from udata.i18n import lazy_gettext as _, format_date
 from udata.utils import to_bool, safe_unicode, clean_string
 
@@ -58,15 +59,14 @@ class Facet(object):
         self.labelizer = self._params.pop('labelizer', None)
 
     def labelize(self, value):
-        cleaner = bleach.Cleaner()
         labelize = self.labelizer or self.default_labelizer
         if isinstance(value, str):
             labels = (labelize(v) for v in value.split(OR_SEPARATOR))
             labels = (obj_to_string(l) for l in labels)
             labels = (l for l in labels if l)
             or_label = str(' {0} '.format(OR_LABEL))
-            return Markup(cleaner.clean(or_label.join(labels)))
-        return Markup(cleaner.clean(obj_to_string(labelize(value))))
+            return SafeMarkup(or_label.join(labels))
+        return SafeMarkup(obj_to_string(labelize(value)))
 
     def default_labelizer(self, value):
         return clean_string(safe_unicode(value))
