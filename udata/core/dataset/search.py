@@ -51,7 +51,7 @@ def dataset_badge_labelizer(kind):
 
 
 def resource_type_labelizer(value):
-    return RESOURCE_TYPES.get(value, value)
+    return RESOURCE_TYPES.get(value)
 
 
 @register
