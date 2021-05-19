@@ -2,15 +2,16 @@
 
 ## Current (in progress)
 
-- Fix create user by API [2609](https://github.com/opendatateam/udata/pull/2609)
+- Fix create user by API [#2609](https://github.com/opendatateam/udata/pull/2609)
+- Add sqlite, db and ics to allowed extensions [#2610](https://github.com/opendatateam/udata/pull/2610)
 
 ## 2.6.4 (2021-03-24)
 
-- Enhance self endpoint verification [2604](https://github.com/opendatateam/udata/pull/2604)
+- Enhance self endpoint verification [#2604](https://github.com/opendatateam/udata/pull/2604)
 
 ## 2.6.3 (2021-03-23)
 
-- Extraction of translation's strings [2602](https://github.com/opendatateam/udata/pull/2602)
+- Extraction of translation's strings [#2602](https://github.com/opendatateam/udata/pull/2602)
 
 ## 2.6.2 (2021-03-22)
 
@@ -22,9 +23,9 @@
   - The button "Edit" and the dropdown were merged. The button is now only a dropdown listing the actions.
   - "Edit" action has been renamed to "Edit the dataset/reuse/organization/profile" according to the current object to edit.
 - Add `nofollow` attribute to links in discussions comments [#2593](https://github.com/opendatateam/udata/pull/2593)
-- Add pip upgrade in circle's publish step [2596](https://github.com/opendatateam/udata/pull/2596)
-- Pin Twine's version [2597](https://github.com/opendatateam/udata/pull/2597)
-- Pin twine'version in circle's publish step [2598](https://github.com/opendatateam/udata/pull/2598)
+- Add pip upgrade in circle's publish step [#2596](https://github.com/opendatateam/udata/pull/2596)
+- Pin Twine's version [#2597](https://github.com/opendatateam/udata/pull/2597)
+- Pin twine'version in circle's publish step [#2598](https://github.com/opendatateam/udata/pull/2598)
 
 ## 2.6.1 (2021-01-26)
 
