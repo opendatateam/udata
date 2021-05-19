@@ -1,7 +1,9 @@
 import inspect
 import logging
 
+import bleach
 from importlib import import_module
+from _pytest.mark.structures import Mark
 
 from flask import abort, current_app
 from jinja2 import Markup, contextfunction
@@ -50,7 +52,7 @@ class HookRenderer:
         self.kwargs = kwargs
 
     def __html__(self):
-        return Markup(''.join(
+        return SafeMarkup(''.join(
             f(self.ctx, *self.args, **self.kwargs)
             for f, w in self.funcs
             if w is None or w(self.ctx)
@@ -59,7 +61,16 @@ class HookRenderer:
     def __iter__(self):
         for func, when in self.funcs:
             if when is None or when(self.ctx):
-                yield Markup(func(self.ctx, *self.args, **self.kwargs))
+                yield SafeMarkup(func(self.ctx, *self.args, **self.kwargs))
+
+
+class SafeMarkup(Markup):
+    '''Markup object bypasses Jinja's escaping. This override allows to sanitize the resulting html.'''
+    def __new__(cls, base, *args, **kwargs):
+        cleaner = bleach.Cleaner(tags=[
+            'a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'span',
+        ])
+        return super().__new__(cls, cleaner.clean(base), *args, **kwargs)
 
 
 @contextfunction
