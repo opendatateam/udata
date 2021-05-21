@@ -228,6 +228,28 @@ class UserAPITest(APITestCase):
         response = self.get(url_for('api.user', user=user))
         self.assert200(response)
 
+    def test_user_api_create_as_admin(self):
+        '''It should create a user'''
+        self.login(AdminFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email()
+        }
+        response = self.post(url_for('api.users'), data=data)
+        self.assert201(response)
+
+    def test_user_api_create_as_no_admin(self):
+        '''It should not create a user'''
+        self.login(UserFactory())
+        data = {
+            "first_name": faker.first_name(),
+            "last_name": faker.last_name(),
+            "email": faker.email()
+        }
+        response = self.post(url_for('api.users'), data=data)
+        self.assert403(response)
+
     def test_user_api_update(self):
         '''It should update a user'''
         self.login(AdminFactory())

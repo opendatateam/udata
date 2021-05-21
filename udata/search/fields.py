@@ -3,6 +3,7 @@ import re
 
 from datetime import date
 
+import bleach
 from bson.objectid import ObjectId
 from elasticsearch_dsl import Q, A
 from elasticsearch_dsl.faceted_search import (
@@ -14,6 +15,7 @@ from flask_restplus import inputs
 from jinja2 import Markup
 from speaklater import is_lazy_string
 
+from udata.frontend import SafeMarkup
 from udata.i18n import lazy_gettext as _, format_date
 from udata.utils import to_bool, safe_unicode, clean_string
 
@@ -63,8 +65,8 @@ class Facet(object):
             labels = (obj_to_string(l) for l in labels)
             labels = (l for l in labels if l)
             or_label = str(' {0} '.format(OR_LABEL))
-            return Markup(or_label.join(labels))
-        return Markup(obj_to_string(labelize(value)))
+            return SafeMarkup(or_label.join(labels))
+        return SafeMarkup(obj_to_string(labelize(value)))
 
     def default_labelizer(self, value):
         return clean_string(safe_unicode(value))

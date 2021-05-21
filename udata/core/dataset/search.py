@@ -43,9 +43,10 @@ def granularity_labelizer(value):
 
 
 def zone_labelizer(value):
-    if value and isinstance(value, str):
-        return GeoZone.objects(id=value).first() or value
-    return value
+    if isinstance(value, str):
+        return GeoZone.objects(id=value).first()
+    elif isinstance(value, GeoZone):
+        return value
 
 
 def dataset_badge_labelizer(kind):
@@ -53,7 +54,7 @@ def dataset_badge_labelizer(kind):
 
 
 def resource_type_labelizer(value):
-    return RESOURCE_TYPES.get(value, value)
+    return RESOURCE_TYPES.get(value)
 
 
 @register

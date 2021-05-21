@@ -17,6 +17,7 @@ from . import front
 from udata import assets
 from udata.app import UDataJsonEncoder
 from udata.models import db
+from udata.frontend import SafeMarkup
 from udata.i18n import format_date, _, pgettext, get_current_locale
 from udata.theme import theme_static_with_version
 from udata.utils import camel_to_lodash
@@ -83,7 +84,7 @@ def url_rewrite(url=None, **kwargs):
     for key, value in kwargs.items():
         params.setlist(key,
                        value if isinstance(value, (list, tuple)) else [value])
-    return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
+    return SafeMarkup(urlunsplit((scheme, netloc, path, url_encode(params),
                   fragments)))
 
 
@@ -95,7 +96,7 @@ def url_add(url=None, **kwargs):
     for key, value in kwargs.items():
         if value not in params.getlist(key):
             params.add(key, value)
-    return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
+    return SafeMarkup(urlunsplit((scheme, netloc, path, url_encode(params),
                               fragments)))
 
 
@@ -111,7 +112,7 @@ def url_del(url=None, *args, **kwargs):
         if str(value) in lst:
             lst.remove(str(value))
         params.setlist(key, lst)
-    return Markup(urlunsplit((scheme, netloc, path, url_encode(params),
+    return SafeMarkup(urlunsplit((scheme, netloc, path, url_encode(params),
                               fragments)))
 
 
@@ -191,7 +192,7 @@ def avatar(ctx, user, size, classes='', external=False):
         avatar_url=avatar_url(ctx, user, size, external=external),
         classes=classes
     )
-    return Markup(markup)
+    return SafeMarkup(markup)
 
 
 @front.app_template_filter()
@@ -203,7 +204,7 @@ def owner_avatar(ctx, obj, size=32, classes='', external=False):
             width="{size}" height="{size}"/>
         </a>
     '''
-    return Markup(markup.format(
+    return SafeMarkup(markup.format(
         title=owner_name(obj),
         url=owner_url(obj, external=external),
         size=size,
@@ -259,7 +260,7 @@ def tooltip_ellipsis(source, length=0):
     except ValueError:  # invalid literal for int()
         return source  # Fail silently.
     ellipsis = '<a href v-tooltip title="{0}">...</a>'.format(source)
-    return Markup((source[:length] + ellipsis)
+    return SafeMarkup((source[:length] + ellipsis)
                   if len(source) > length and length > 0 else source)
 
 
@@ -383,7 +384,7 @@ def i18n_alternate_links():
 def to_json(data):
     '''Convert data to JSON, you may have to use |safe after it.'''
     if not data:
-        return Markup('')
+        return SafeMarkup('')
     return json.dumps(data)
 
 
