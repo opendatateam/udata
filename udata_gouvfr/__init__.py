@@ -2,7 +2,7 @@
 uData customizations for Data.gouv.fr
 '''
 
-__version__ = '2.5.6.dev'
+__version__ = '2.6.0'
 __description__ = 'uData customizations for Data.gouv.fr'
 
 
