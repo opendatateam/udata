@@ -255,7 +255,7 @@ export default {
             if (this.hasSchemas) {
                 const values = [{id: '', label: ''}].concat(schemas.data);
                 return [{
-                    id: 'schema',
+                    id: 'schema.name',
                     label: this._('Schema'),
                     widget: 'select-input',
                     values,

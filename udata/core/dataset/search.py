@@ -86,6 +86,7 @@ class DatasetSearch(ModelSearchAdapter):
         'description': String(),
         'format': String(index='not_analyzed'),
         'schema': String(index='not_analyzed'),
+        'schema_version': String(index='not_analyzed'),
     })
     format_suggest = Completion(analyzer=simple,
                                 search_analyzer=simple,
@@ -136,6 +137,7 @@ class DatasetSearch(ModelSearchAdapter):
                                   labelizer=granularity_labelizer),
         'format': TermsFacet(field='resources.format'),
         'schema': TermsFacet(field='resources.schema'),
+        'schema_version': TermsFacet(field='resources.schema_version'),
         'resource_type': TermsFacet(field='resources.type',
                                     labelizer=resource_type_labelizer),
         'reuses': RangeFacet(field='metrics.reuses',
@@ -190,7 +192,6 @@ class DatasetSearch(ModelSearchAdapter):
             image_url = owner.avatar(40, external=True)
 
         certified = organization and organization.certified
-
         document = {
             'title': dataset.title,
             'description': dataset.description,
@@ -204,7 +205,8 @@ class DatasetSearch(ModelSearchAdapter):
                     'description': r.description,
                     'format': r.format,
                     'type': r.type,
-                    'schema': r.schema,
+                    'schema': dict(r.schema).get('name', {}),
+                    'schema_version': dict(r.schema).get('version', {}),
                 }
                 for r in dataset.resources],
             'format_suggest': [r.format.lower()
