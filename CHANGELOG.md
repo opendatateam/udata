@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.6.1 (2021-05-25)
 
 - Add new translations [#518](https://github.com/etalab/udata-gouvfr/pull/518)
 
