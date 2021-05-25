@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- New translations [#535](https://github.com/etalab/udata-gouvfr/pull/535)
 
 ## 2.6.1 (2021-05-25)
 
