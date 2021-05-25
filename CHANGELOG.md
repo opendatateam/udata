@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.7.0 (2021-05-25)
 
 - Modify `schema` field to resource. This field is now a nested field containing two sub-properties `name` and `version` [#2600](https://github.com/opendatateam/udata/pull/2600). 
