@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.7.1 (2021-05-27)
 
 - Add migration to roolback on resource's schema's name to None [#2615](https://github.com/opendatateam/udata/pull/2615)
 
