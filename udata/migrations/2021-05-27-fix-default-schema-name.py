@@ -19,7 +19,7 @@ def migrate(db):
                 for key, value in resource.schema.items():
                     if key == 'name' and value is None:
                         resource.schema = {}
-                save_res = True
+                        save_res = True
         if save_res:
             try:
                 dataset.save()
