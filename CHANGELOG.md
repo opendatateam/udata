@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix schema name display in resource modal [#2617](https://github.com/opendatateam/udata/pull/2617)
 
 ## 2.7.1 (2021-05-27)
 
