@@ -1,73 +1,169 @@
-.nav-header {
+.header-brand {
     border-bottom: 1px solid @grey-200;
 
     .header-logo {
-        display: flex;
-        align-items: center;
-        color: @grey-400;
-
         svg {
-            height: 55px;
+            height: 85px;
             fill: unset;
         }
 
         a {
             text-decoration: none;
         }
+    }
 
-        .mobile-menu {
-            display: none;
+    .mobile-menu {
+        svg {
+            width: 25px;
+            height: 25px;
+        }
 
+        .mobile-menu-close {
             svg {
-                width: 30px;
-                height: 30px;
+                width: 8px;
+                height: 8px;
+
+                * {
+                    fill: currentColor;
+                }
             }
         }
+    }
 
-        @media @query-hg {
-            justify-content: space-between;
-            padding: 0 @spacing-md;
-
-            .mobile-menu {
-                display: unset;
-            }
-
-            //To horizontally center, we create a fake third element
-            &::after {
-                content: " ";
-            }
-        }
-
-        .logotype {
-            height: 24px;
+    .header-service {
+        @media @query-xl {
+            margin: @spacing-md auto 0 auto !important;
+            padding-top: @spacing-sm;
+            border-top: 1px solid @grey-200;
         }
     }
 
     .login-box {
-        display: flex;
-        justify-content: flex-end;
+        > * + * {
+            &:before {
+                content: " ";
+                display: inline-block;
+                vertical-align: middle;
+                width: 1px;
+                height: 12px;
 
-        a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: @grey-300;
-            font-weight: @font-weight-bold;
+                margin: 0 @spacing-xs;
+
+                background-color: @grey-200;
+
+                @media @query-xl {
+                    display: none;
+                }
+            }
         }
 
-        .search-box {
-            border-left: 1px solid @grey-200;
+        svg {
+            margin-right: @spacing-xxs;
+            vertical-align: middle;
 
-            svg {
-                width: 30px;
-                height: 30px;
+            * {
+                fill: currentColor;
+            }
+        }
+
+        @media @query-xl {
+            transform: translateX(-100%);
+            transition: transform ease 0.2s;
+
+            display: block;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+
+            z-index: 30;
+
+            padding: @spacing-md 0;
+
+            > a {
+                display: block;
+            }
+
+            > * {
+                padding: @spacing-sm;
+
+                + * {
+                    .border-top;
+                }
             }
         }
     }
 }
 
-.header {
-    @media @query-md {
+.header-nav {
+    border-bottom: 1px solid @grey-200;
+
+    @media @query-xl {
+        transform: translateX(-100%);
+        transition: transform ease 0.2s;
+        position: absolute;
+        background: white;
+        width: 100%;
+
+        opacity: 0;
+
+        min-height: 100vh;
+    }
+
+    .search-box {
+        cursor: pointer;
+
+        form {
+            background: @grey-50;
+            border: 1px solid @grey-100;
+            border-radius: 2px;
+
+            input,
+            button {
+                padding: @spacing-xs @spacing-sm;
+                margin: 0;
+                appearance: none;
+                background: none;
+                border: 0;
+            }
+
+            input {
+                flex-grow: 1;
+            }
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
+
+.site-header {
+    //Mobile header interactivity (burger menu 😋)
+    &.mobile-menu-open {
+        //Hide burger menu & search, show close button
+        .mobile-menu {
+            > a {
+                display: none;
+            }
+
+            .mobile-menu-close {
+                display: block !important;
+            }
+        }
+
+        //Show menu
+        .header-nav,
+        .login-box {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    //Sticky on mobile
+    @media @query-xl {
         position: sticky;
         background: white;
         z-index: 2;

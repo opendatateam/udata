@@ -1,13 +1,18 @@
 {% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
 
 <article class="dataset-card">
     {% if dataset.organization %}
     <div class="card-logo">
-        {% if dataset.organization.public_service %}
-        <span class="certified-logo">{% include theme("svg/certified.svg") %}</span>
-        {% endif %}
         <img src="{{ dataset.organization.logo(100, external=True)|placeholder('organization', external=True) }}"
             alt="{{ dataset.organization.name }}" />
+        <div class="logo-badge">
+            {% if dataset.private %}
+            {% include theme('svg/private.svg') %}
+            {% else %}
+            {{ badge_if_certified(dataset.organization) }}
+            {% endif %}
+        </div>
     </div>
     {% elif dataset.owner %}
     <div class="card-logo">

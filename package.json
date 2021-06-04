@@ -21,7 +21,7 @@
     "axios": "^0.21.0",
     "dayjs": "^1.9.6",
     "less": "^3.13.1",
-    "parcel-reporter-copystatic": "^1.0.0",
+    "parcel-reporter-copystatic": "^1.1.0",
     "parcel-reporter-stylemark": "^1.1.0",
     "parcel-transformer-more": "file:parcel-transformer-more",
     "popmotion": "^8.7",

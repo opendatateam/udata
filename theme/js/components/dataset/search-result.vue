@@ -16,6 +16,10 @@ Vue. -->
         :src="owner.logo_thumbnail"
         :alt="owner.name"
       />
+      <div class="logo-badge">
+        <span v-html="private" v-if="private" />
+        <span v-html="certified" v-else-if="organization.public_service" />
+      </div>
     </div>
     <div class="card-logo" v-else>
       <Placeholder type="dataset" />
@@ -23,9 +27,7 @@ Vue. -->
     <div class="card-data">
       <h4 class="card-title">{{ title }}</h4>
       <div class="card-description text-grey-300 mt-xs">
-        {{
-          $filters.truncate(description)
-        }}
+        {{ $filters.truncate(description) }}
       </div>
     </div>
     <dl class="card-hover">
@@ -65,6 +67,8 @@ Vue. -->
 
 <script>
 import Placeholder from "../utils/placeholder";
+import certified from "svg/certified.svg";
+import private from "svg/private.svg";
 
 export default {
   props: {
@@ -77,6 +81,7 @@ export default {
     frequency: String,
     spatial: Object,
     metrics: Object,
+    private: Boolean,
   },
   components: {
     Placeholder,
@@ -87,6 +92,8 @@ export default {
     };
   },
   async mounted() {
+    this.certified = certified;
+    this.private = private;
     //Fetching geozone names on load (they're not included in the dataset object)
 
     const zones = this?.spatial?.zones;

@@ -8,6 +8,8 @@ Merriam-Webster defines a badge as an emblem awarded for a particular accomplish
 Since we consider moderating and publishing data on this website an amazing feat, we decided to award badges for all the people involved.
 Additionally, it also allows regular-non-awarded people to quickly identify public servants and administrators.
 
+Available colors : `grey-400` (default), `orange-100`, `grey-300`
+
 ```badge.html
 <span class="badge">Admin</span>
 <span class="badge">Owner</span>
@@ -22,9 +24,19 @@ Additionally, it also allows regular-non-awarded people to quickly identify publ
     font-size: @font-size-xs;
     font-weight: @font-weight-bold;
 
-    background: @grey-400;
+    background-color: @grey-400;
     color: @contrast-grey-400;
     padding: @spacing-xxs @spacing-xs;
 
     text-transform: uppercase;
+
+    &.orange-100 {
+        background-color: @orange-100;
+        color: @contrast-orange-100;
+    }
+
+    &.grey-300 {
+        background-color: @grey-300;
+        color: @contrast-grey-300;
+    }
 }

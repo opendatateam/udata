@@ -1,0 +1,99 @@
+/*
+---
+name: Borders
+category: Components
+---
+
+## Round
+
+You spin me right round, baby right round !
+Round all the things with this collection of border-radii
+
+```rounded.html
+<img src="..."  class="rounded-circle" />
+<img src="..."  class="rounded-0" />
+<img src="..."  class="rounded-xxs" />
+```
+
+## Solid border
+
+Solid borders don't really exist in real life, CSS people were fools once again.
+Those utilities make for nice borders.
+
+`.border` simply adds a 1px solid border with grey-50 as the default color.
+
+### Notation
+The classes are named using the format `border-{sides}`
+
+Where *sides* is one of:
+
+* `top` - for classes that set `border-top`
+* `bottom` - for classes that set `border-bottom`
+* `left` - for classes that set `border-left`
+* `right` - for classes that set `border-right`
+* 0 - for classes that resets border
+
+For responsive, currently only the `border-{breakpoint}-0` is supported with the usual breakpoints.
+Feel free to change this if it is ever needed.
+
+Colors modifiers are available, limited supply :
+
+* `.border-orange-100`
+
+```
+<div class="border-orange-100 border-left" />
+```
+
+*/
+
+.rounded-circle {
+    border-radius: 50%;
+}
+
+.rounded-xxs {
+    border-radius: @spacing-xxs;
+}
+
+.rounded-0 {
+    border-radius: 0;
+}
+
+@defaultBorder: 1px solid @grey-200;
+
+.border {
+    border: @defaultBorder;
+}
+
+.border-0 {
+    border: none;
+}
+
+.border-left {
+    border-left: @defaultBorder;
+}
+
+.border-right {
+    border-right: @defaultBorder;
+}
+
+.border-bottom {
+    border-bottom: @defaultBorder;
+}
+
+.border-top {
+    border-top: @defaultBorder;
+}
+
+.border-orange-100 {
+    border-color: @orange-100;
+}
+
+each(@breakpoints, .(@bk, @_k, @_i) {
+    @var: 'query-@{bk}';
+
+    @media @@var {
+            .border-@{bk}-0 {
+                border: none;
+            }
+    }
+});

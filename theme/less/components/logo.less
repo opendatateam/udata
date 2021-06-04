@@ -1,0 +1,46 @@
+/*
+---
+name: Logo
+category: Components
+---
+
+Logo is a Danish toy production company best known for the manufacture of toys consisting mostly of interlocking plastic bricks.
+
+Sometimes your logo is mostly white and can cause disruption in the design.
+Because we can't blame anything or anyone for being too white, we came up with a solution : we build a wall around it.
+
+`.logo` is a very simple utility that adds padding, white background and grey border around logos for consistent display.
+
+
+```logo.html
+<div class="logo"><img src="..." /></div>
+```
+*/
+
+.logo {
+    display: inline-block;
+    position: relative;
+    background: white;
+    border: 1px solid @grey-50;
+    padding: @spacing-sm;
+
+    img {
+        max-width: 100%;
+    }
+
+    @media @query-md {
+        max-width: 140px;
+    }
+
+    //Private or certified badge or whatever
+    .logo-badge {
+        position: absolute;
+        top: -9px;
+        left: -9px;
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+}

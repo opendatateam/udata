@@ -1,4 +1,4 @@
-{% extends theme('base.html') %}
+{% extends theme('layouts/1-column.html') %}
 
 {% set meta = {
     'title': post.name,
@@ -14,201 +14,129 @@
 {% block title %}{{ post.name }}{% endblock %}
 
 {% block breadcrumb %}
-    <li><a href="{{ url_for('posts.list') }}">{{ _('News') }}</a></li>
-    <li class="active">{{ post.name }}</li>
+<li><a href="{{ url_for('posts.list') }}">{{ _('News') }}</a></li>
+<li class="active">{{ post.name }}</li>
 {% endblock %}
 
 
 {% block main_content %}
-<h2>{{ post.name }}</h2>
+<div class="container py-md">
+    <h1 class="m-0">{{ post.name }}</h1>
+    {% if post.published %}
+    <p class="text-grey-300 fs-xs">
+        {{ _('Published on %(date)s',date=post.published|dateformat(format='long')) }}
+    </p>
+    {% else %}
+    <div class="well well-grey-100 py-sm my-lg">
+        {{ _('This post is a draft and will not be visible by other users') }}
+    </div>
+    {% endif %}
+    {% if post.deleted %}
+    <div class="well well-grey-100 py-sm my-lg">
+        {{ _('This post has been deleted. This will be permanent in the next 24 hours') }}
+    </div>
+    {% endif %}
+    <div class="markdown">
+        <blockquote>
+            {{ post.headline|mdstrip(300) }}
+        </blockquote>
+    </div>
+</div>
 
 {% if post.image %}
-<div class="text-center">
-    <img src="{{ post.image }}"
-        alt="{{ post.name }}" class="scalable" />
-
-    {% if post.credit_to %}
-        {{ _('Photo credit') }} to
-        {% if post.credit_url %}<a href="{{ post.credit_url }}" title="{{ post.credit_to }}">{% endif %}
-        {{ post.credit_to }}
-        {% if post.credit_url %}</a>{% endif %}
-    {% endif %}
+<div class="hagrid mb-md">
+    <div class="col">
+        <img src="{{ post.image }}" alt="{{ post.name }}" class="w-100" />
+    </div>
 </div>
 {% endif %}
 
-<div>{{ post.content|markdown }}</div>
-{% endblock %}
+<div class="container markdown pb-lg" v-pre>
+    <div>{{ post.content|markdown }}</div>
+</div>
 
-
-{% block content %}
-<section class="post-section default">
-    <div class="container post-container">
-        <div class="row">
-
-            <div class="{% if post.datasets or post.reuses %}col-sm-8 smaller{% else %}col-xs-12{% endif %}">
-                <div class="page-header">
-                    <h2>{{ post.name }}</h2>
-
-                    <div class="row">
-                        <p class="col-xs-12">
-                            {% if post.published %}
-                            <small>
-                                {{ _('Published on %(date)s',
-                                    date=post.published|dateformat(format='long')
-                                ) }}
-                            </small>
-                            {% else %}
-                            <small class="private" title="{{ _('Draft') }}"
-                                v.popover.literal="{{ _('This post is a draft and will not be visible by other users') }}"
-                                popover-trigger="hover" popover-placement="top"
-                                >{{ _('Draft') }}</small>
-                            {% endif %}
-                            {% if post.deleted %}
-                            <small class="deleted" title="{{ _('Deleted') }}"
-                                v-popover.literal="{{ _('This post has been deleted. This will be permanent in the next 24 hours') }}"
-                                popover-trigger="hover" popover-placement="top"
-                                >{{ _('Deleted') }}</small>
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-
-                {% if post.headline %}
-                <div class="post-headline">{{ post.headline }}</div>
-                {% endif %}
-
-                {% if post.image %}
-                <div class="post-image">
-                    <img src="{{ post.image }}"
-                        alt="{{ post.name }}" class="scalable" />
-                    {% if post.credit_to %}
-                    <div class="credit">
-                        {{ _('Photo credit') }}
-                        {% if post.credit_url %}<a href="{{ post.credit_url }}"
-                            title="{{ post.credit_to }}"
-                            class="credit-link"
-                            >{% endif %}
-                        {{ post.credit_to }}
-                        {% if post.credit_url %}
-                        <span class="fa fa-external-link-square"></span>
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %}
-
-                <div class="clearfix"></div>
-                <br/>
-
-                <div class="post-body">
-                    {{ post.content|markdown }}
-                </div>
-
-                {# button bar #}
-                <div class="row main-toolbar"><div class="col-xs-12">
-                    <div class="btn-toolbar pull-right">
-                        {% if sysadmin %}
-                        <div class="btn-group btn-group-sm">
-                            <a href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}" class="btn btn-success">
-                                <span class="fa fa-pencil"></span>
-                                {{ _('Edit') }}
-                            </a>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div></div>
-                {# end button bar #}
-
-            </div>
-            {# end left column #}
-
-            {% if post.datasets or post.reuses %}
-            {# Right sidebar #}
-            <aside class="col-sm-4">
-
-                {# Reuses list #}
-                {% if post.reuses %}
-                <h3>{{ ngettext('Associated reuse', 'Associated reuses', post.reuses|length) }}</h3>
-                <div class="card-list">
-                    {% for reuse in post.reuses %}
-                    {% include theme('reuse/card.html') %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {# end reuses list #}
-
-                {# Datasets list #}
-                {% if post.datasets %}
-                <h3>{{ ngettext('Associated dataset', 'Associated datasets', post.datasets|length) }}</h3>
-                <div class="card-list">
-                    {% for dataset in post.datasets %}
-                    {% include theme('dataset/card.html') %}
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {# end post list #}
-
-            </aside>
-            {% endif %}
+{% if post.datasets %}
+<div class="container mt-md">
+    <h2>{{ _('Datasets') }} <sup>{{ post.datasets|length }}</sup></h2>
+    <div class="row">
+        <div class="col-12">
+            {% for dataset in post.datasets %}
+            <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
+                class="unstyled w-100">{% include theme('dataset/search-result.html') %}
+            </a>
+            {% endfor %}
         </div>
-
     </div>
-</section>
+</div>
+{% endif %}
+
+{% if post.reuses %}
+<div class="container mt-md">
+    <h2>{{ _('Reuses') }} <sup>{{ post.reuses|length }}</sup></h2>
+    <ul class="row">
+        {% for reuse in post.reuses %}
+        <li class="col-3 col-lg-6 col-sm-12 text-align-center">
+            <a href="{{ url_for('reuses.show', reuse=reuse) }}"
+                title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if sysadmin %}
+<div class="container mt-hg">
+    <div class="col-6 col-md-12">
+        <h2 class="fs-xxl">{{ _('@@Actions') }}</h2>
+        <ul class="nav-list">
+            <li class="my-md">
+                <a class="nav-link"
+                    href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}">{{ _('Edit') }}</a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endif %}
 
 {% if previous_post or next_post %}
-<section class="content nav-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-xs-2 col-sm-4">
-                {% if previous_post %}
-                <a href="{{ previous_post.display_url }}" title="{{ _('Previous post') }}" class="btn btn-primary">
-                    <span class="fa fa-chevron-left"></span>
-                    <span class="hidden-xs">{{ _('Previous post') }}</span>
-                </a>
-                {% endif %}
-            </div>
-            <div class="col-xs-8 col-sm-4 text-center">
-                <a href="{{ url_for('posts.list') }}" class="btn btn-primary">
-                    <span class="fa fa-fw fa-list"></span>
-                    {{ _('All posts') }}
-                </a>
-            </div>
-            <div class="col-xs-2 col-sm-4 text-right">
-                {% if next_post %}
-                <a href="{{ next_post.display_url }}" title="{{ _('Next post') }}" class="btn btn-primary">
-                    <span class="hidden-xs">{{ _('Next post') }}</span>
-                    <span class="fa fa-chevron-right"></span>
-                </a>
-                {% endif %}
-            </div>
+<section class="container my-hg py-lg border-top">
+    <div class="row justify-between">
+        <div class="col-3 col-md-12 text-align-center-md">
+            {% if previous_post %}
+            <a href="{{ previous_post.display_url }}" title="{{ _('Previous post') }}" class="btn btn-secondary">
+                <span class="text-blue-400 mr-sm">
+                    {% include theme('svg/chevron-left.svg') %}
+                </span>
+                <span>{{ _('Previous post') }}</span>
+            </a>
+            {% endif %}
+        </div>
+        <div class="col-6 col-md-12 my-md-md text-align-center">
+            <a href="{{ url_for('posts.list') }}" class="btn btn-secondary">
+                {{ _('All posts') }}
+            </a>
+        </div>
+        <div class="col-3 col-md-12 text-align-right text-align-center-md">
+            {% if next_post %}
+            <a href="{{ next_post.display_url }}" title="{{ _('Next post') }}" class="btn btn-secondary">
+                <span>{{ _('Next post') }}</span>
+                <span class="text-blue-400 ml-sm">
+                    {% include theme('svg/chevron.svg') %}
+                </span>
+            </a>
+            {% endif %}
         </div>
     </div>
 </section>
 {% endif %}
 
-{% if config['POST_DISCUSSIONS_ENABLED'] %}
-<section class="community_container discussions-section">
-    <header>
-        <div class="container">
-            <div class="cover-communaute"></div>
-            <div class="page-header"><h2>{{ _('Discussions') }}</h2></div>
-        </div>
-    </header>
-
+{% if config['POST_DISCUSSIONS_ENABLED'] or True %}
+<section class="community_container bg-grey-400 text-white py-hg">
     <div class="container">
-
-        <h3></h3>
-        <div class="row">
-            <discussion-threads v-ref:discussions class="col-sm-9"
-                subject-id="{{ post.id }}"
-                subject-class="{{ post.__class__.__name__ }}">
-            </discussion-threads>
-            <div class="col-sm-3 note">
-                <p>{{ _('Comments about this post.') }}</p>
-            </div>
-        </div>
-
+        <h2 class="fs-hg">{{ _('Discussions') }} <sup class="discussions-count">0</sup></h2>
+        <discussion-threads ref="discussions" subject-id="{{ post.id }}"
+            subject-class="{{ post.__class__.__name__ }}" />
     </div>
 </section>
 {% endif %}

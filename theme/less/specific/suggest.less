@@ -2,11 +2,10 @@
     position: absolute;
     z-index: 100;
 
-    bottom: 0;
     left: 0;
 
     width: 100%;
-    height: calc(100vh - 72px);
+    height: calc(100vh - 109px); //Header height
 
     .container {
         background: white;
@@ -33,7 +32,6 @@
             }
         }
     }
-
 
     .see-all {
         svg {
@@ -79,12 +77,14 @@
 //Suggest-box entering/leaving transition
 @suggest-transition: ease-out 0.38s;
 
-.suggest-enter-active, .suggest-leave-active {
+.suggest-enter-active,
+.suggest-leave-active {
     transition: all @suggest-transition;
     will-change: transform background;
 }
 
-.suggest-enter-from, .suggest-leave-to {
+.suggest-enter-from,
+.suggest-leave-to {
     transform: translate3d(100%, 0, 0);
     background: fade(@blue-300, 60%);
 }
@@ -96,7 +96,7 @@
 //Suggest rest of the body animation
 #app {
     //Prepare elements for shifting
-    > *:not(.header) {
+    > *:not(.site-header) {
         will-change: transform filter opacity;
         transition: @suggest-transition;
         transition-property: transform filter opacity;
@@ -111,7 +111,7 @@
         height: 100vh;
         overflow: hidden;
 
-        > *:not(.header) {
+        > *:not(.site-header) {
             opacity: 0.3;
             filter: blur(2px);
             transform: translateX(-100%);

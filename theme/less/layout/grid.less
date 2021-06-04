@@ -22,17 +22,20 @@ It's a grid. You know how grids work. Even if you don't, you'll understand in no
 #### Inline-row
 
 `.row-inline` can be used to create an inline "row" without margin. It simply sets a `display: flex` and `flex-wrap: wrap`.
+It's also available for each responsive breakpoint with `.row-inline-{breakpoint}` classes.
 
 ### Utilities
 
 `.w-100` can be used to apply a 100% width to an element. `w-auto` does the same for the `auto` value.
 `.mw-100` applies `max-width: 100%` to any element.
+`.no-wrap` applies `flex-wrap: nowrap`.
 
 `.overflow-hidden` and `.overflow-visible` can be used to trigger the corresponding overflow classes for special edge cases where you need a container that can or cannot overflow.
 
 ### Auto layout
 
 By default, `.col` classes allow for an easy auto-layout : they all take an equal space within the row.
+They're also available for each responsive breakpoint with `.col-{breakpoint}` classes.
 
 ```grid-auto.html
 <div class="container">
@@ -205,6 +208,10 @@ in which case you'll have one column on each side and the main content will span
     max-width: (12 * @breakpoint-xl)/10;
     margin: auto;
     overflow: hidden;
+
+    @media @query-hhg {
+        padding: 0 @spacing-md;
+    }
 }
 
 .row {
@@ -216,6 +223,20 @@ in which case you'll have one column on each side and the main content will span
 .row-inline {
     display: flex;
     flex-wrap: wrap;
+}
+
+each(@breakpoints, .(@bk, @_k, @_i) {
+    @var: 'query-@{bk}';
+
+    @media @@var {
+        .row-inline-@{bk} {
+            .row-inline;
+        }
+    }
+});
+
+.no-wrap {
+    flex-wrap: nowrap;
 }
 
 //Row vertical alignments
@@ -330,6 +351,10 @@ each(@breakpoints, .(@bk, @_k, @_i) {
 
         .offset-@{bk}-0 {
             margin-left: @gutter;
+        }
+
+        .col-@{bk} {
+            .col;
         }
     }
 });

@@ -7,7 +7,7 @@ category: Components
 Content on the site can be styled with Markdown. Ready made styles are provided as below :
 
 ```markdown.html
-<article class="markdown>
+<article class="markdown">
 <p>Quelques semaines plus tard fut ouverte la section occidentale, longtemps attendue, entre Étoilenote 3 et La Défense. Cette simple navette initiale fut d'abord prolongée vers l'est jusqu'à la nouvelle station Auber le 23 novembre 1971, puis vers l'ouest le 1er octobre 1972 jusqu'à Saint-Germain-en-Laye par sa connexion à NanterreB 1 à l'ancienne ligne de Paris à Saint-Germain-en-Laye. La section devait initialement s'appeler « Métro express régional Défense-Étoile », mais le nom fut changé quand on se rendit compte de l'acronyme peu flatteur de l'appellation de départ.</p>
 <p>
     <strong>Bold</strong>
@@ -29,6 +29,29 @@ Content on the site can be styled with Markdown. Ready made styles are provided 
     <li>OL</li>
     <li>OL3</li>
 </ol>
+
+<table>
+    <thead>
+        <tr>
+            <th>foo</th>
+            <th>bar right</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>baz</td>
+            <td>bim</td>
+        </tr>
+        <tr>
+            <td>baz</td>
+            <td>bim</td>
+        </tr>
+        <tr>
+            <td>baz</td>
+            <td>bim</td>
+        </tr>
+    </tbody>
+</table>
 
 <pre><code>Big code snippet</code></pre>
 
@@ -56,14 +79,85 @@ Content on the site can be styled with Markdown. Ready made styles are provided 
     blockquote {
         margin-left: 0;
         padding-left: @spacing-md;
-        border-left: 2px solid @grey-100;
+
+        position: relative;
+
+        &:before {
+            content: " ";
+            position: absolute;
+            left: 0;
+            top: 0;
+
+            width: 5px;
+            height: 100%;
+
+            background-color: @blue-400;
+            border-radius: 2px;
+        }
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    //They are indeed supported !
+    table {
+        width: 100%;
+        border-spacing: 0;
+        border-collapse: separate; //Needed for rounded borders
+
+        margin: @spacing-md 0;
+
+        .rounded-xxs;
+
+        //This below is way too complicated just for some borders. But it works®
+        thead {
+            background: @grey-50;
+
+            th:first-child {
+                border-top-left-radius: 3px;
+            }
+
+            th:last-child {
+                border-top-right-radius: 3px;
+            }
+        }
+
+        tr {
+            th,
+            td {
+                border-right: @defaultBorder;
+                padding: @spacing-xs @spacing-sm;
+
+                &:first-child {
+                    border-left: @defaultBorder;
+                }
+            }
+
+            th {
+                border-top: @defaultBorder;
+            }
+
+            &:last-child {
+                td:first-child {
+                    border-bottom-left-radius: 3px;
+                }
+
+                td:last-child {
+                    border-bottom-right-radius: 3px;
+                }
+            }
+        }
+
+        td {
+            border-bottom: @defaultBorder;
+        }
     }
 
     pre {
         padding: @spacing-md;
         border-radius: 4px;
         background: @grey-50;
-
     }
 
     code {

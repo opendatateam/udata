@@ -22,9 +22,8 @@ They play nice with mobile too, of course.
 .nav-tabs {
     position: relative;
     display: flex;
-    justify-content: center;
 
-    @media @query-md {
+    @media @query-xl {
         display: block;
     }
 
@@ -33,32 +32,34 @@ They play nice with mobile too, of course.
         align-items: center;
         position: relative;
         color: @grey-400;
-        font-weight: @font-weight-bold;
-        font-size: @font-size-md;
         text-decoration: none;
 
+        padding: @spacing-md 0;
+
         + .tab {
-            margin-left: @spacing-md;
+            margin-left: @spacing-lg;
         }
 
         &.active {
+            color: @blue-400;
+
             &::after {
                 position: absolute;
                 right: 0;
                 bottom: 0;
                 left: 0;
-                height: 3px;
+                height: 2px;
                 background-color: @blue-400;
                 content: " ";
             }
         }
 
-        @media @query-md {
-            display: block;
+        &:hover {
+            color: @blue-400;
+        }
 
-            &::after {
-                display: none;
-            }
+        @media @query-xl {
+            display: block;
 
             + .tab {
                 margin-top: @spacing-sm;

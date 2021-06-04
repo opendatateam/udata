@@ -29,6 +29,8 @@ Being lost on a website isn't fun for your users, thanks to `.breadcrumbs` you c
         white-space: nowrap;
         text-overflow: ellipsis;
 
+        line-height: 1; //Corrects the vertical align of the text
+
         color: @grey-300;
 
         a {
@@ -49,11 +51,11 @@ Being lost on a website isn't fun for your users, thanks to `.breadcrumbs` you c
             left: 0;
             width: 0.5em;
             height: 1em;
-            background-image: url(~'@{icon-chevron}');
+            background-image: url(~"@{icon-chevron}");
             background-repeat: no-repeat;
             background-position: center;
             background-size: 75%;
-            content: '';
+            content: "";
         }
 
         &:first-child::before {

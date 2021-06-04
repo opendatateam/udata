@@ -1,16 +1,25 @@
 {% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
 
 {# TODO : what was "preview" used for ? #}
-<a class="unstyled" href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" title="{{ reuse.title }}">
+<a class="unstyled w-100" href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" title="{{ reuse.title }}">
     <article class="reuse-card text-align-center px-sm">
-        <img class="reuse-image mb-sm" alt="{{ reuse.title }}"
-            src="{{ reuse.image(86, external=True)|placeholder('reuse', external=True) }}" />
+        <div class="reuse-image mb-sm" alt="{{ reuse.title }}"
+            style="background-image: url('{{ reuse.image(86, external=True)|placeholder('reuse', external=True) }}')">
+        </div>
         <div class="reuse-info">
-            <div class="reuse-info-type fs-xs">
-                {{ reuse.type_label }}
-            </div>
-            <div class="reuse-info-amount fs-xs text-grey-300 mb-xs">
-                {{ reuse.datasets|length or 0 }} {{ _("@@jeux de données") }}
+            <div class="row-inline justify-between text-align-left">
+                <div>
+                    <span class="reuse-info-type fs-xs">
+                        {{ reuse.type_label }}
+                    </span>
+                    <div class="reuse-info-amount fs-xs text-grey-300 mb-xs">
+                        {{ reuse.datasets|length or 0 }} {{ _("@@jeux de données") }}
+                    </div>
+                </div>
+                <div>
+                    <span class="text-orange-100">{% include theme('svg/actions/star.svg') %}</span>
+                    <span class="badge orange-100 ml-xxs py-xxxs px-xs">{{ reuse.metrics.followers or 0 }}</span>
+                </div>
             </div>
             <div class="reuse-info-title h4">
                 {{ reuse.title }}

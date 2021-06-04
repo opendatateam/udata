@@ -8,33 +8,38 @@ category: Interactions
 
 A very simple component that takes a `type` (dataset, reuse, post...) and an optionnal `src`. If `src` is defined, it simply displays the image (and all props passed are passed to the image).
 However, if `src` is undefined, it falls back to a placeholder. Don't forget to pass the `alt` prop !
+Sometimes you don't need an image but a `<div>` with a background-image property. Simply pass the `backgroundImage` prop and you will get a nice div.
 
 -->
 
 <template>
-    <img :src="path" :alt="alt" v-bind="$attrs" />
+  <div
+    v-if="backgroundImage"
+    v-bind="$attrs"
+    :alt="alt"
+    :style="{ backgroundImage: `url('${path}')` }"
+  />
+  <img :src="path" :alt="alt" v-bind="$attrs" v-else />
 </template>
 
 <script>
 import config from "../../config";
+const static = config.theme_static;
+
+export const placeholderUrl = (src, type) =>
+  src ? src : `${static}img/placeholders/${type}.png`;
 
 export default {
-    props: {
-        type: String,
-        src: String,
-        alt: String
+  props: {
+    type: String,
+    src: String,
+    alt: String,
+    backgroundImage: Boolean,
+  },
+  computed: {
+    path() {
+      return placeholderUrl(this.src, this.type);
     },
-    data() {
-        return {
-            static: config.theme_static
-        }
-    },
-    computed: {
-        path() {
-            if(this.src)
-                return src;
-            return `${this.static}img/placeholders/${this.type}.png`
-        }
-    }
-}
+  },
+};
 </script>
