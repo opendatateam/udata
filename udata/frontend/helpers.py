@@ -192,7 +192,7 @@ def avatar(ctx, user, size, classes='', external=False):
         avatar_url=avatar_url(ctx, user, size, external=external),
         classes=classes
     )
-    return SafeMarkup(markup)
+    return Markup(markup)
 
 
 @front.app_template_filter()
@@ -204,7 +204,7 @@ def owner_avatar(ctx, obj, size=32, classes='', external=False):
             width="{size}" height="{size}"/>
         </a>
     '''
-    return SafeMarkup(markup.format(
+    return Markup(markup.format(
         title=owner_name(obj),
         url=owner_url(obj, external=external),
         size=size,
