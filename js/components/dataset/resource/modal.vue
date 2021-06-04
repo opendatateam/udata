@@ -37,7 +37,7 @@
                 <dd><a :href="resource.url">{{resource.url}}</a></dd>
                 <dt v-if="resource.format">{{ _('Format') }}</dt>
                 <dd v-if="resource.format">{{ resource.format }}</dd>
-                <dt v-if="resource.schema && resource.schema.name">{{ _('Schema') }}</dt>
+                <dt v-if="resource.schema?.name">{{ _('Schema') }}</dt>
                 <dd v-if="resource.schema && resource.schema.name">{{ resource.schema.name }}</dd>
                 <dt v-if="resource.mime">{{ _('Mime Type') }}</dt>
                 <dd v-if="resource.mime">{{ resource.mime }}</dd>
