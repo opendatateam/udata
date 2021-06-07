@@ -8,6 +8,7 @@ services:
           - "27017"
         ports:
         - "27017:27017"
+        user: "${UID}:${GID}"
 
     broker:
         image: redis
@@ -17,6 +18,7 @@ services:
           - "6379"
         ports:
           - "6379:6379"
+        user: "${UID}:${GID}"
 
     search:
         image: udata/elasticsearch:2.4.5
@@ -26,3 +28,4 @@ services:
           - "9200"
         ports:
           - "9200:9200"
+        user: "${UID}:${GID}"
