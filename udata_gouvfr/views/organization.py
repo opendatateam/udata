@@ -75,26 +75,32 @@ class OrganizationDetailView(OrgView, DetailView):
 
         datasets = Dataset.objects(
             organization=self.organization).order_by(
-            '-temporal_coverage.end', '-metrics.reuses', '-metrics.followers')
+            '-temporal_coverage.end', '-metrics.reuses', '-metrics.followers').visible()
 
         reuses = Reuse.objects(
             organization=self.organization).order_by(
-            '-metrics.reuses', '-metrics.followers')
-
-        if not can_view:
-            datasets = datasets.visible()
-            reuses = reuses.visible()
+            '-metrics.reuses', '-metrics.followers').visible()
 
         followers = (Follow.objects.followers(self.organization)
                      .order_by('follower.fullname'))
+
+        private_reuses = list(Reuse.objects(organization=self.object).hidden()) if can_view else []
+        private_datasets = list(Dataset.objects(
+            organization=self.object).hidden()) if can_view else []
+        
+        total_datasets = len(datasets) + len(private_datasets)
+        total_reuses = len(reuses) + len(private_reuses)
+
         context.update({
             'reuses': reuses.paginate(1, self.page_size),
             'datasets': datasets.paginate(1, self.page_size),
-            'total_datasets': len(datasets),
-            'total_reuses': len(reuses),
+            'total_datasets': total_datasets,
+            'total_reuses': total_reuses,
             'followers': followers,
             'can_edit': can_edit,
-            'can_view': can_view
+            'can_view': can_view,
+            'private_reuses': private_reuses,
+            'private_datasets': private_datasets,
         })
         return context
 
