@@ -87,7 +87,7 @@ class OrganizationDetailView(OrgView, DetailView):
         private_reuses = list(Reuse.objects(organization=self.object).hidden()) if can_view else []
         private_datasets = list(Dataset.objects(
             organization=self.object).hidden()) if can_view else []
-        
+
         total_datasets = len(datasets) + len(private_datasets)
         total_reuses = len(reuses) + len(private_reuses)
 
