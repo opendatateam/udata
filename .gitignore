@@ -75,7 +75,7 @@ Procfile
 udata.cfg
 
 # Local data directory
-data
+#data
 
 # PyCharm
 .idea
