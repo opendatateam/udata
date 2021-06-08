@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Add a UdataCleaner class to use udata's markdown configuration on SafeMarkup aswell [#2619](https://github.com/opendatateam/udata/pull/2619)
+- Add a UdataCleaner class to use udata's markdown configuration on SafeMarkup as well [#2619](https://github.com/opendatateam/udata/pull/2619)
 
 ## 2.7.1 (2021-05-27)
 
