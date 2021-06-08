@@ -2,6 +2,7 @@ import inspect
 import logging
 
 from importlib import import_module
+from jinja2 import Markup
 
 from udata import assets, entrypoints
 
