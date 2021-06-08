@@ -617,7 +617,6 @@ class ResourceTypesAPI(API):
         return [{'id': id, 'label': label}
                 for id, label in RESOURCE_TYPES.items()]
 
-
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):
     @api.doc('schemas')

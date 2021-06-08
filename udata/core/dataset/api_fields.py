@@ -76,9 +76,7 @@ resource_fields = api.model('Resource', {
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
                                  readonly=True),
-    'schema': fields.String(
-        description='The schema slug the resource adheres to',
-        allow_null=True),
+    'schema': fields.Raw(description='Reference to the associated schema', readonly=True),
 })
 
 upload_fields = api.inherit('UploadedResource', resource_fields, {
@@ -214,7 +212,9 @@ resource_type_fields = api.model('ResourceType', {
     'label': fields.String(description='The resource type display name')
 })
 
+
 schema_fields = api.model('Schema', {
     'id': fields.String(description='The schema identifier'),
-    'label': fields.String(description='The schema display name')
+    'label': fields.String(description='The schema display name'),
+    'versions': fields.List(fields.String, description='The available versions of the schema'),
 })

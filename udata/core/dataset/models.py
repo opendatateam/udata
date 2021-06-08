@@ -240,7 +240,7 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
     extras = db.ExtrasField()
-    schema = db.StringField()
+    schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
@@ -800,7 +800,11 @@ class ResourceSchema(object):
         else:
             schemas = response.json().get('schemas', [])
             content = [
-                {'id': s['name'], 'label': s['title']} for s in schemas
+                {
+                    'id': s['name'],
+                    'label': s['title'],
+                    'versions': [d['version_name'] for d in s['versions']],
+                } for s in schemas
             ]
             cache.set(cache_key, content)
         # no cached version or no content

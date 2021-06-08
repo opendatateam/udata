@@ -124,7 +124,7 @@ export default {
 
             if (this.org.is_admin(this.$root.me)) {
                 actions.push({
-                    label: this._('Edit'),
+                    label: this._('Edit this organization'),
                     icon: 'edit',
                     method: this.edit
                 });

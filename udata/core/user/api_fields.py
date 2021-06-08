@@ -1,3 +1,4 @@
+from udata.auth.helpers import current_user_is_admin_or_self
 from udata.api import api, fields, base_reference
 
 from .models import AVATAR_SIZES
@@ -25,7 +26,6 @@ user_ref_fields = api.inherit('UserReference', base_reference, {
         '({0}x{0}) and cropped version.'.format(BIGGEST_AVATAR_SIZE)),
 })
 
-
 from udata.core.organization.api_fields import org_ref_fields  # noqa
 
 user_fields = api.model('User', {
@@ -37,6 +37,9 @@ user_fields = api.model('User', {
         description='The user first name', required=True),
     'last_name': fields.String(
         description='The user last name', required=True),
+    'email': fields.Raw(
+        attribute=lambda o: o.email if current_user_is_admin_or_self() else None,
+        description='The user email', readonly=True),
     'avatar': fields.ImageField(original=True,
         description='The user avatar URL'),
     'avatar_thumbnail': fields.ImageField(attribute='avatar', size=BIGGEST_AVATAR_SIZE,
@@ -63,7 +66,6 @@ user_fields = api.model('User', {
 })
 
 me_fields = api.inherit('Me', user_fields, {
-    'email': fields.String(description='The user email', required=True),
     'apikey': fields.String(description='The user API Key', readonly=True),
 })
 

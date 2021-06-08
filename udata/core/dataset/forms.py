@@ -33,13 +33,33 @@ def normalize_format(data):
 
 def enforce_allowed_schemas(form, field):
     schema = field.data
-    allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
-    if schema not in allowed_schemas:
-        message = _('Schema "{schema}" is not an allowed value. Allowed values: {values}')
-        raise validators.ValidationError(message.format(
-            schema=schema,
-            values=', '.join(allowed_schemas)
-        ))
+    if schema:
+        allowed_schemas = [s['id'] for s in ResourceSchema.objects()]
+        if schema.get('name') not in allowed_schemas:
+            message = _('Schema name "{schema}" is not an allowed value. Allowed values: {values}')
+            raise validators.ValidationError(message.format(
+                schema=schema.get('name'),
+                values=', '.join(allowed_schemas)
+            ))
+        
+        schema_versions = [d['versions'] for d in ResourceSchema.objects() if d['id'] == schema.get('name')]
+        allowed_versions = schema_versions[0] if schema_versions else []
+        allowed_versions.append('latest')
+        if 'version' in schema:
+            if schema.get('version') not in allowed_versions:
+                message = _('Version "{version}" is not an allowed value. Allowed values: {values}')
+                raise validators.ValidationError(message.format(
+                    version=schema.get('version'),
+                    values=', '.join(allowed_versions)
+                ))
+        properties = ['name', 'version']
+        for prop in schema:
+            if prop not in properties:
+                message = _('Sub-property "{prop}" is not allowed value in schema field. Allowed values is : {properties}')
+                raise validators.ValidationError(message.format(
+                    prop=prop,
+                    properties=', '.join(properties),
+                ))
 
 
 class BaseResourceForm(ModelForm):
@@ -74,9 +94,9 @@ class BaseResourceForm(ModelForm):
         _('Publication date'),
         description=_('The publication date of the resource'))
     extras = fields.ExtrasField()
-    schema = fields.StringField(
+    schema = fields.DictField(
         _('Schema'),
-        default=None,
+        default={},
         validators=[validators.optional(), enforce_allowed_schemas],
         description=_('The schema slug the resource adheres to'))
 

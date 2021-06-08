@@ -65,6 +65,22 @@ class Renderer(mistune.Renderer):
         ) % (header, body)
 
 
+class UdataCleaner(bleach.Cleaner):
+    def __init__(self, source_tooltip=False) -> None:
+        callbacks = [nofollow_callback]
+        if source_tooltip:
+            callbacks.append(source_tooltip_callback)
+
+        super().__init__(
+            tags=current_app.config['MD_ALLOWED_TAGS'],
+            attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
+            styles=current_app.config['MD_ALLOWED_STYLES'],
+            protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
+            strip_comments=False,
+            filters=[partial(LinkifyFilter, skip_tags=['pre'], parse_email=False,
+                             callbacks=callbacks)])
+
+
 class UDataMarkdown(object):
     """Consistent with Flask's extensions signature."""
 
@@ -82,21 +98,7 @@ class UDataMarkdown(object):
         # Turn markdown to HTML.
         html = self.markdown(stream)
 
-        # Deal with callbacks
-        callbacks = [nofollow_callback]
-        if source_tooltip:
-            callbacks.append(source_tooltip_callback)
-
-        cleaner = bleach.Cleaner(
-            tags=current_app.config['MD_ALLOWED_TAGS'],
-            attributes=current_app.config['MD_ALLOWED_ATTRIBUTES'],
-            styles=current_app.config['MD_ALLOWED_STYLES'],
-            protocols=current_app.config['MD_ALLOWED_PROTOCOLS'],
-            strip_comments=False,
-            filters=[partial(LinkifyFilter, skip_tags=['pre'], parse_email=False,
-                             callbacks=callbacks)]
-        )
-
+        cleaner = UdataCleaner(source_tooltip)
         html = cleaner.clean(html)
 
         if wrap:

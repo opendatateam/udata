@@ -437,10 +437,36 @@ class ResourceSchemaTest:
     @pytest.mark.options(SCHEMA_CATALOG_URL='https://example.com/schemas')
     def test_resource_schema_objects(self, app, rmock):
         rmock.get('https://example.com/schemas', json={
-            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+            "schemas": [
+                {
+                    "name": "etalab/schema-irve",
+                    "title": "Schéma IRVE",
+                    "versions": [
+                        {
+                            "version_name": "1.0.0"
+                        },
+                        {
+                            "version_name": "1.0.1"
+                        },
+                        {
+                            "version_name": "1.0.2"
+                        }
+                    ]
+                }
+            ]
         })
 
-        assert ResourceSchema.objects() == [{"id": "etalab/schema-irve", "label": "Schéma IRVE"}]
+        assert ResourceSchema.objects() == [
+            {
+                "id": "etalab/schema-irve",
+                "label": "Schéma IRVE",
+                "versions": [
+                    "1.0.0",
+                    "1.0.1",
+                    "1.0.2"
+                ]
+            }
+        ]
 
     @pytest.mark.options(SCHEMA_CATALOG_URL=None)
     def test_resource_schema_objects_no_catalog_url(self):
@@ -453,7 +479,23 @@ class ResourceSchemaTest:
 
         # fill cache
         rmock.get('https://example.com/schemas', json={
-            'schemas': [{"name": "etalab/schema-irve", "title": "Schéma IRVE"}]
+            "schemas": [
+                {
+                    "name": "etalab/schema-irve",
+                    "title": "Schéma IRVE",
+                    "versions": [
+                        {
+                            "version_name": "1.0.0"
+                        },
+                        {
+                            "version_name": "1.0.1"
+                        },
+                        {
+                            "version_name": "1.0.2"
+                        }
+                    ]
+                }
+            ]
         })
         ResourceSchema.objects()
         assert cache_mock_set.called

@@ -2,8 +2,47 @@
 
 ## Current (in progress)
 
+- Add a UdataCleaner class to use udata's markdown configuration on SafeMarkup as well [#2619](https://github.com/opendatateam/udata/pull/2619)
+- Fix schema name display in resource modal [#2617](https://github.com/opendatateam/udata/pull/2617)
+
+## 2.7.1 (2021-05-27)
+
+- Add migration to roolback on resource's schema's name to None [#2615](https://github.com/opendatateam/udata/pull/2615)
+
+## 2.7.0 (2021-05-25)
+
+- Modify `schema` field to resource. This field is now a nested field containing two sub-properties `name` and `version` [#2600](https://github.com/opendatateam/udata/pull/2600). 
+- Add a `schema_version` facet to the dataset search (need to be reindex to appear in results) [#2600](https://github.com/opendatateam/udata/pull/2600).
+
+## 2.6.5 (2021-05-19)
+
+- Fix create user by API [#2609](https://github.com/opendatateam/udata/pull/2609)
+- Add sqlite, db and ics to allowed extensions [#2610](https://github.com/opendatateam/udata/pull/2610)
+- Better markup parsing [#2611](https://github.com/opendatateam/udata/pull/2611):
+  - Geozone's and Resource type's labelize function return None if no object is found.
+  - New SafeMarkup class, which inherits from Markup, uses Bleach to sanitize Markup class.
+
+## 2.6.4 (2021-03-24)
+
+- Enhance self endpoint verification [#2604](https://github.com/opendatateam/udata/pull/2604)
+
+## 2.6.3 (2021-03-23)
+
+- Extraction of translation's strings [#2602](https://github.com/opendatateam/udata/pull/2602)
+
+## 2.6.2 (2021-03-22)
+
 - Fix SECURITY_CONFIRMABLE=False [#2588](https://github.com/opendatateam/udata/pull/2588)
 - Support dct:license on DCAT harvester [#2589](https://github.com/opendatateam/udata/pull/2589)
+- Admin small enhancements [#2591](https://github.com/opendatateam/udata/pull/2591):
+  - The sidebar "Me" label has been renamed "Profile"
+  - The user's profile now displays the user's email
+  - The button "Edit" and the dropdown were merged. The button is now only a dropdown listing the actions.
+  - "Edit" action has been renamed to "Edit the dataset/reuse/organization/profile" according to the current object to edit.
+- Add `nofollow` attribute to links in discussions comments [#2593](https://github.com/opendatateam/udata/pull/2593)
+- Add pip upgrade in circle's publish step [#2596](https://github.com/opendatateam/udata/pull/2596)
+- Pin Twine's version [#2597](https://github.com/opendatateam/udata/pull/2597)
+- Pin twine'version in circle's publish step [#2598](https://github.com/opendatateam/udata/pull/2598)
 
 ## 2.6.1 (2021-01-26)
 
