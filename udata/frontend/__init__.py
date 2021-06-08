@@ -10,7 +10,7 @@ from jinja2 import Markup, contextfunction
 from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
 
-from .markdown import init_app as init_markdown
+from .markdown import UdataCleaner, init_app as init_markdown
 
 from .. import theme
 
@@ -66,9 +66,7 @@ class HookRenderer:
 class SafeMarkup(Markup):
     '''Markup object bypasses Jinja's escaping. This override allows to sanitize the resulting html.'''
     def __new__(cls, base, *args, **kwargs):
-        cleaner = bleach.Cleaner(tags=[
-            'a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol', 'strong', 'ul', 'span',
-        ])
+        cleaner = UdataCleaner()
         return super().__new__(cls, cleaner.clean(base), *args, **kwargs)
 
 
