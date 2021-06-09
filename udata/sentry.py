@@ -17,6 +17,7 @@ RE_DSN = re.compile(
 # Controlled exceptions that Sentry should ignore
 IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
 
+# TODO: check if public_dsn is still needed (no secret anymore) ?
 
 def public_dsn(dsn):
     '''Transform a standard Sentry DSN into a public one'''
@@ -31,42 +32,39 @@ def public_dsn(dsn):
 def init_app(app):
     if app.config['SENTRY_DSN']:
         try:
-            from raven.contrib.celery import (
-                register_signal, register_logger_signal
-            )
-            from raven.contrib.flask import Sentry
+            import sentry_sdk
+            from sentry_sdk.integrations.flask import FlaskIntegration
+            from sentry_sdk.integrations.celery import CeleryIntegration
         except ImportError:
-            log.error('raven is required to use Sentry')
+            log.error('sentry-sdk is required to use Sentry')
             return
 
-        sentry = Sentry()
-        tags = app.config['SENTRY_TAGS']
-        log_level_name = app.config['SENTRY_LOGGING']
-        if log_level_name:
-            log_level = getattr(logging, log_level_name.upper())
-            if log_level:
-                sentry.logging = True
-                sentry.level = log_level
+        sentry_public_dsn = public_dsn(app.config['SENTRY_DSN'])
 
         # Do not send HTTPExceptions
         exceptions = set(app.config['SENTRY_IGNORE_EXCEPTIONS'])
         for exception in IGNORED_EXCEPTIONS:
             exceptions.add(exception)
-        app.config['SENTRY_IGNORE_EXCEPTIONS'] = list(exceptions)
 
-        app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
+        sentry_sdk.init(
+            dsn=sentry_public_dsn,
+            integrations=[FlaskIntegration(), CeleryIntegration()],
+            ignore_errors=list(exceptions)
+        )
 
+        # Set log level
+        log_level_name = app.config['SENTRY_LOGGING']
+        if log_level_name:
+            log_level = getattr(logging, log_level_name.upper())
+            sentry_sdk.set_level(log_level)
+
+        # Set sentry tags
+        tags = app.config['SENTRY_TAGS']
+        for tag_key in tags:
+            sentry_sdk.set_tag(tag_key, tags[tag_key])
         # Versions Management: uData and plugins versions as tags.
         for dist in entrypoints.get_plugins_dists(app):
             if dist.version:
-                tags[dist.project_name] = dist.version
+                sentry_sdk.set_tag(dist.project_name, dist.version)
         # Do not forget udata itself
-        tags['udata'] = pkg_resources.get_distribution('udata').version
-
-        sentry.init_app(app)
-
-        # register a custom filter to filter out duplicate logs
-        register_logger_signal(sentry.client, loglevel=sentry.level)
-
-        # hook into the Celery error handler
-        register_signal(sentry.client)
+        sentry_sdk.set_tag('udata', pkg_resources.get_distribution('udata').version)
