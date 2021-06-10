@@ -1,6 +1,7 @@
 import logging
 import pkg_resources
 import re
+import warnings
 
 from werkzeug.exceptions import HTTPException
 from udata import entrypoints
@@ -11,8 +12,10 @@ from .auth import PermissionDenied
 log = logging.getLogger(__name__)
 
 RE_DSN = re.compile(
-    r'(?P<scheme>https?)://(?P<client_id>[0-9a-f]+):[0-9a-f]+'
+    r'(?P<scheme>https?)://(?P<client_id>[0-9a-f]+)(?::(?P<secret>[0-9a-f]+))?'
     '@(?P<domain>.+)/(?P<site_id>\d+)')
+
+SECRET_DSN_DEPRECATED_MSG = 'DSN with secret is deprecated, use a public DSN instead'
 
 # Controlled exceptions that Sentry should ignore
 IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
@@ -20,10 +23,17 @@ IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
 # TODO: check if public_dsn is still needed (no secret anymore) ?
 
 def public_dsn(dsn):
-    '''Transform a standard Sentry DSN into a public one'''
+    '''Check if DSN is public or raise a warning and turn it into a public one'''
     m = RE_DSN.match(dsn)
     if not m:
         log.error('Unable to parse Sentry DSN')
+
+    if not m["secret"]:
+        return dsn
+
+    log.warning(SECRET_DSN_DEPRECATED_MSG)
+    warnings.warn(SECRET_DSN_DEPRECATED_MSG, category=DeprecationWarning, stacklevel=2)
+
     public = '{scheme}://{client_id}@{domain}/{site_id}'.format(
         **m.groupdict())
     return public
