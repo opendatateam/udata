@@ -38,6 +38,10 @@ def init_app(app, views=None):
         _load_views(app, 'udata.{}.views'.format(view))
 
     # Load all plugins views and blueprints
+    for module in entrypoints.get_enabled('udata.views', app).values():
+        _load_views(app, module)
+
+    # Load all plugins views and blueprints
     for module in entrypoints.get_enabled('udata.front', app).values():
         front_module = module if inspect.ismodule(module) else import_module(module)
         front_module.init_app(app)
