@@ -16,6 +16,7 @@ RE_DSN = re.compile(
     r'@(?P<domain>.+)/(?P<site_id>\d+)')
 
 SECRET_DSN_DEPRECATED_MSG = 'DSN with secret is deprecated, use a public DSN instead'
+ERROR_PARSE_DSN_MSG = 'Unable to parse Sentry DSN'
 
 # Controlled exceptions that Sentry should ignore
 IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
@@ -24,13 +25,14 @@ def public_dsn(dsn):
     '''Check if DSN is public or raise a warning and turn it into a public one'''
     m = RE_DSN.match(dsn)
     if not m:
-        log.error('Unable to parse Sentry DSN')
+        log.error(ERROR_PARSE_DSN_MSG)
+        raise ValueError(ERROR_PARSE_DSN_MSG)
 
     if not m["secret"]:
         return dsn
 
     log.warning(SECRET_DSN_DEPRECATED_MSG)
-    warnings.warn(SECRET_DSN_DEPRECATED_MSG, category=DeprecationWarning, stacklevel=2)
+    warnings.warn(SECRET_DSN_DEPRECATED_MSG, category=DeprecationWarning)
 
     public = '{scheme}://{client_id}@{domain}/{site_id}'.format(
         **m.groupdict())
