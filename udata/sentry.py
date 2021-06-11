@@ -13,14 +13,12 @@ log = logging.getLogger(__name__)
 
 RE_DSN = re.compile(
     r'(?P<scheme>https?)://(?P<client_id>[0-9a-f]+)(?::(?P<secret>[0-9a-f]+))?'
-    '@(?P<domain>.+)/(?P<site_id>\d+)')
+    r'@(?P<domain>.+)/(?P<site_id>\d+)')
 
 SECRET_DSN_DEPRECATED_MSG = 'DSN with secret is deprecated, use a public DSN instead'
 
 # Controlled exceptions that Sentry should ignore
 IGNORED_EXCEPTIONS = HTTPException, PermissionDenied, UploadProgress
-
-# TODO: check if public_dsn is still needed (no secret anymore) ?
 
 def public_dsn(dsn):
     '''Check if DSN is public or raise a warning and turn it into a public one'''
