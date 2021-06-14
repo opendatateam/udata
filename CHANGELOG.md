@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Migrate from raven to sentry-sdk [#2620](https://github.com/opendatateam/udata/pull/2620)
 - Add a UdataCleaner class to use udata's markdown configuration on SafeMarkup as well [#2619](https://github.com/opendatateam/udata/pull/2619)
 - Fix schema name display in resource modal [#2617](https://github.com/opendatateam/udata/pull/2617)
 
