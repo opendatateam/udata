@@ -74,26 +74,16 @@ Content on the site can be styled with Markdown. Ready made styles are provided 
     ul {
         padding-left: @spacing-xl;
         list-style-type: disc;
+
+        ul {
+            margin-top: @spacing-xs;
+            margin-bottom: @spacing-xs;
+        }
     }
 
     blockquote {
         margin-left: 0;
-        padding-left: @spacing-md;
-
-        position: relative;
-
-        &:before {
-            content: " ";
-            position: absolute;
-            left: 0;
-            top: 0;
-
-            width: 5px;
-            height: 100%;
-
-            background-color: @blue-400;
-            border-radius: 2px;
-        }
+        .filet;
     }
 
     img {
@@ -173,17 +163,21 @@ Content on the site can be styled with Markdown. Ready made styles are provided 
 
     h2 {
         font-size: @font-size-xl * @markdown-font-size;
+        margin-top: @spacing-lg;
     }
 
     h3 {
         font-size: @font-size-lg * @markdown-font-size;
+        margin-top: @spacing-md;
     }
 
     h4 {
         font-size: @font-size-base * @markdown-font-size;
+        margin-top: @spacing-sm;
     }
 
     h5 {
         font-size: @font-size-xs * @markdown-font-size;
+        margin-top: @spacing-xs;
     }
 }

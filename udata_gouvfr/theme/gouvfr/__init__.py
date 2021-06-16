@@ -46,8 +46,6 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Data'), 'datasets.list'),
     nav.Item(_('Reuses'), 'reuses.list'),
     nav.Item(_('Organizations'), 'organizations.list'),
-    nav.Item(_('Dashboard'), 'site.dashboard'),
-    nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr'),
     nav.Item(_('News'), 'posts.list'),
 ])
 

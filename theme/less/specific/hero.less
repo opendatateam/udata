@@ -1,22 +1,12 @@
 .hero {
-    h1 {
-        @media @query-xl {
-            font-size: @font-size-xl;
+    //On the home page, the post block is a little bit taller and with no padding on its body
+    .hero-post {
+        .hero-image {
+            min-height: 325px;
         }
     }
 
-    .hero-search {
-        //TODO : extract this and better it
-        input {
-            width: 100%;
-            padding: @spacing-md;
-            border: 2px solid @grey-200;
-        }
-    }
-
-    .hero-news {
-        display: flex;
-        align-items: center;
-        padding: @spacing-hg;
+    .result-body {
+        padding: @spacing-md 0 !important;
     }
 }

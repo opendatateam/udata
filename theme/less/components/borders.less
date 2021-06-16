@@ -40,8 +40,22 @@ Colors modifiers are available, limited supply :
 
 * `.border-orange-100`
 
-```
+```border-color.html
 <div class="border-orange-100 border-left" />
+```
+
+## Filet
+
+Even though it sounds delicious, it's actually something rather boring: a left round border before the element you wish to ornate.
+It's similar to blockquotes' typical styling and is originally a play on the fact that users used to abuse
+the blockquote element to create headings in their content.
+It has since made it officially in the design and is used not only for blockquote but for any kind of content.
+
+Technically this class adds a `::before` pseudo-element that will be colored with blue-350 by default.
+You can change this behaviour by using the `filet-currentcolor` class that will set the color to the `currentColor`.
+
+```filet.html
+<div class="filet filet-currentcolor text-green-400">I'm a green text with a green quote-style !</div>
 ```
 
 */
@@ -97,3 +111,28 @@ each(@breakpoints, .(@bk, @_k, @_i) {
             }
     }
 });
+
+.filet {
+    padding-left: @spacing-md;
+
+    position: relative;
+
+    &:before {
+        content: " ";
+        position: absolute;
+        left: 0;
+        top: 0;
+
+        width: 4px;
+        height: 100%;
+
+        background-color: @blue-350;
+        border-radius: 2px;
+    }
+
+    &.filet-currentcolor {
+        &:before {
+            background-color: currentColor;
+        }
+    }
+}
