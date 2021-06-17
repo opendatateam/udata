@@ -16,8 +16,6 @@ DEFAULT_TIMEOUT = 30
 
 def dispatch(event, payload):
     webhooks = current_app.config['WEBHOOKS']
-    if not webhooks:
-        return
     for wh in webhooks:
         _dispatch.delay(event, payload, wh)
 
