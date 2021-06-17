@@ -2,7 +2,6 @@
 {% import theme('macros/forms.html') as forms with context %}
 
 {% block content %}
-{% cache cache_duration, 'home', g.lang_code %}
 <section class="py-xl py-lg-lg bg-grey-50">
     <div class="container">
         <div class="row">
@@ -30,5 +29,4 @@
         </div>
     </div>
 </section>
-{% endcache %}
 {% endblock %}
