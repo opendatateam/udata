@@ -453,6 +453,14 @@ class Defaults(object):
                         'SourcesAPI.post',
                         'FollowAPI.post']
 
+    # Webhooks
+    ##########
+    # expects a list of {
+    #   "url": "https://example.com/webhook",
+    #   "secret": "{secret shared with webhook hub}",
+    # }
+    WEBHOOKS = []
+
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
     RESOURCES_ANALYSER_URI = 'http://localhost:8000'
