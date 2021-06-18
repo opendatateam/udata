@@ -23,18 +23,16 @@ def dispatch(event, payload):
     autoretry_for=(requests.exceptions.HTTPError,), exponential_backoff=DEFAULT_BACKOFF,
     retry_kwargs={'max_retries': DEFAULT_RETRIES}, retry_jitter=True,
 )
-def _dispatch(event, payload, wh):
+def _dispatch(event, event_payload, wh):
     url = wh['url']
     log.debug(f'Dispatching {event} to {url}')
 
-    payload = payload if not type(payload) is str else json.loads(payload)
-    print('payload ----> ', payload)
+    event_payload = event_payload if not type(event_payload) is str else json.loads(event_payload)
     payload = {
         'event': event,
-        'payload': payload,
+        'payload': event_payload,
     }
 
-    print('_dispatch', url)
     r = requests.post(url, json=payload, headers={
         'x-hook-signature': sign(payload, wh.get('secret'))
     }, timeout=DEFAULT_TIMEOUT)
