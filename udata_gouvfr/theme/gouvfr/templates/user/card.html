@@ -2,7 +2,7 @@
 {% set user_url = url_for('users.show', user=user) %}
 
 <a href="{{ user_url }}" title="{{user.fullname}}" class="unstyled w-100">
-    <div class="row-inline align-items-center">
+    <div class="row-inline no-wrap align-items-center">
         <img src="{{ user|avatar_url(60) }}" alt="" class="rounded-circle" />
         <div class="pl-md">
             <strong class="w-100">{{ user.fullname }}</strong>
