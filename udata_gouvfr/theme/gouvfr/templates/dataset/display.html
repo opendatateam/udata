@@ -130,7 +130,7 @@
         <dl class="description-list fs-base">
             {% if dataset.license %}
             <div>
-                <dt class="f-bold">{{ _('License') }}</dt>
+                <dt class="f-bold text-grey-400">{{ _('License') }}</dt>
                 <dd>{% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
                         {{ dataset.license.title }}
                         {% if dataset.license.url %}</a>{% endif
