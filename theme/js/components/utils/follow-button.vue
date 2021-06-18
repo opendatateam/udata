@@ -51,6 +51,8 @@ export default {
   },
   methods: {
     toggleFollow: function () {
+      this.$auth(this.$t("@@Vous devez être connecté pour suivre."));
+
       this.loading = true;
 
       let request;
