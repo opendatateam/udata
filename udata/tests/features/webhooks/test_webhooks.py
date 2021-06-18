@@ -30,16 +30,6 @@ class WebhookUnitTest():
         assert res.headers.get('x-hook-signature') == sign(payload, 'mysecret')
         assert res.json() == payload
 
-    @pytest.mark.skip(reason='requests-mock does not support this since it patches the adapter')
-    def test_webhooks_task_retry(self, rmock):
-        r = rmock.post('https://example.com', text='ko', status_code=500)
-        _dispatch('event', {'tada': 'dam'}, {
-            'url': 'https://example.com',
-            'secret': 'mysecret',
-        })
-        assert r.called
-        assert r.call_count == 3
-
     @pytest.mark.options(WEBHOOKS=[{
         'url': 'https://example.com/1',
         'secret': 'mysecret',
@@ -55,6 +45,21 @@ class WebhookUnitTest():
         assert r1.call_count == 1
         assert r2.called
         assert r2.call_count == 1
+
+    @pytest.mark.skip(reason="""
+        I really tried but no luck :-(
+        (pytest-celery, using requests Retry instead of Celery's...)
+        Made it work in real life on 2021-06-18 (true story)
+    """)
+    @pytest.mark.options(WEBHOOKS=[{
+        'url': 'https://example.com/3',
+        'secret': 'mysecret',
+    }])
+    def test_webhooks_retry(self, rmock):
+        r = rmock.post('https://example.com/3', text='ko', status_code=500)
+        dispatch('event', {'tada': 'dam'})
+        assert r.called
+        assert r.call_count == 3
 
 
 class WebhookIntegrationTest():
