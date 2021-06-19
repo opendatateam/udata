@@ -1,12 +1,10 @@
 import pytest
 
-from flask import url_for
+from datetime import datetime
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.features.webhooks.tasks import dispatch, _dispatch
 from udata.features.webhooks.utils import sign
-# plug the signals in for tests
-from udata.features.webhooks import triggers  # noqa
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 
@@ -79,26 +77,41 @@ class WebhookUnitTest():
     'url': 'https://example.com/publish',
     'events': [
         'datagouvfr.dataset.created',
+        'datagouvfr.dataset.updated',
+        'datagouvfr.dataset.deleted',
     ],
     'secret': 'mysecret',
 }])
 class WebhookIntegrationTest():
     modules = []
+    # plug the signals in for tests
+    from udata.features.webhooks import triggers  # noqa
 
     @pytest.fixture
     def rmock_pub(self, rmock):
         return rmock.post('https://example.com/publish', text='ok', status_code=201)
 
-    def test_dataset_create(self, api, rmock_pub):
-        data = DatasetFactory.as_dict()
-        api.login()
-        res = api.post(url_for('api.datasets'), data)
-        assert res.status_code == 201
+    def test_dataset_create(self, rmock_pub):
+        ds = DatasetFactory()
         assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.dataset.created'
+        assert res['payload']['title'] == ds['title']
 
-    def test_dataset_modified(self, api, rmock_pub):
-        data = DatasetFactory.as_dict()
-        api.login()
-        res = api.post(url_for('api.datasets'), data)
-        assert res.status_code == 201
+    def test_dataset_update(self, rmock_pub):
+        ds = DatasetFactory()
+        ds.title = 'newtitle'
+        ds.save()
         assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.dataset.updated'
+        assert res['payload']['title'] == 'newtitle'
+
+    def test_dataset_delete(self, rmock_pub):
+        ds = DatasetFactory()
+        ds.deleted = datetime.now()
+        ds.save()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.dataset.deleted'
+        assert res['payload']['title'] == ds['title']
