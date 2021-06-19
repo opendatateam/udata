@@ -9,7 +9,6 @@ from udata.core.discussions.factories import DiscussionFactory, MessageDiscussio
 from udata.core.user.factories import UserFactory
 from udata.features.webhooks.tasks import dispatch, _dispatch
 from udata.features.webhooks.utils import sign
-from udata.models import Discussion, Message
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 
