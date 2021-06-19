@@ -1,6 +1,8 @@
+from datetime import datetime
+
 import pytest
 
-from datetime import datetime
+from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.features.webhooks.tasks import dispatch, _dispatch
@@ -79,6 +81,7 @@ class WebhookUnitTest():
         'datagouvfr.dataset.created',
         'datagouvfr.dataset.updated',
         'datagouvfr.dataset.deleted',
+        'datagouvfr.discussion.created',
     ],
     'secret': 'mysecret',
 }])
@@ -115,3 +118,22 @@ class WebhookIntegrationTest():
         res = rmock_pub.last_request.json()
         assert res['event'] == 'datagouvfr.dataset.deleted'
         assert res['payload']['title'] == ds['title']
+
+    def test_discussion_created(self, rmock_pub, api):
+        dataset = DatasetFactory()
+
+        api.login()
+        response = api.post(url_for('api.discussions'), {
+            'title': 'test title',
+            'comment': 'bla bla',
+            'subject': {
+                'class': 'Dataset',
+                'id': dataset.id,
+            }
+        })
+        assert response.status_code == 201
+
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.discussion.created'
+        assert res['payload']['title'] == 'test title'

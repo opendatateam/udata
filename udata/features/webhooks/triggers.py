@@ -1,3 +1,8 @@
+from udata.core.discussions.signals import (
+    on_new_discussion, on_new_discussion_comment, on_discussion_closed,
+    on_discussion_deleted
+)
+
 from udata.features.webhooks.tasks import dispatch
 from udata.models import Dataset
 
@@ -16,3 +21,8 @@ def on_dataset_delete(dataset):
 @Dataset.on_update.connect
 def on_dataset_update(dataset):
     dispatch('datagouvfr.dataset.updated', dataset.to_json())
+
+
+@on_new_discussion.connect
+def on_new_discussion(discussion):
+    dispatch('datagouvfr.discussion.created', discussion.to_json())
