@@ -484,7 +484,7 @@ class Testing(object):
     '''Sane values for testing. Should be applied as override'''
     TESTING = True
     # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f  # noqa
-    # this keeps our legacy tests from failing, we should probably fix the tests instead someday
+    # FIXME: this keeps our legacy tests from failing, we should probably fix the tests instead
     PROPAGATE_EXCEPTIONS = False
     SEND_MAIL = False
     WTF_CSRF_ENABLED = False

@@ -1,7 +1,12 @@
 import pytest
 
+from flask import url_for
+
+from udata.core.dataset.factories import DatasetFactory
 from udata.features.webhooks.tasks import dispatch, _dispatch
 from udata.features.webhooks.utils import sign
+# plug the signals in for tests
+from udata.features.webhooks import triggers  # noqa
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 
@@ -62,5 +67,20 @@ class WebhookUnitTest():
         assert r.call_count == 3
 
 
+@pytest.mark.options(WEBHOOKS=[{
+    'url': 'https://example.com/publish',
+    'secret': 'mysecret',
+}])
 class WebhookIntegrationTest():
-    pass
+    modules = []
+
+    @pytest.fixture
+    def rmock_pub(self, rmock):
+        return rmock.post('https://example.com/publish', text='ok', status_code=201)
+
+    def test_dataset_create(self, api, rmock_pub):
+        data = DatasetFactory.as_dict()
+        api.login()
+        res = api.post(url_for('api.datasets'), data)
+        assert res.status_code == 201
+        assert rmock_pub.called
