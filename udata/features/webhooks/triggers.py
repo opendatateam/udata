@@ -7,9 +7,6 @@ from udata.core.discussions.signals import (
 from udata.features.webhooks.tasks import dispatch
 from udata.models import Dataset, Organization, Reuse, CommunityResource
 
-# TODO: (mvp)
-# - community resource
-
 
 @Dataset.on_create.connect
 def on_dataset_create(dataset):
