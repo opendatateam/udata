@@ -1,6 +1,7 @@
+import json
+
 from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment, on_discussion_closed,
-    on_discussion_deleted
 )
 
 from udata.features.webhooks.tasks import dispatch
@@ -26,3 +27,19 @@ def on_dataset_update(dataset):
 @on_new_discussion.connect
 def on_new_discussion(discussion):
     dispatch('datagouvfr.discussion.created', discussion.to_json())
+
+
+@on_new_discussion_comment.connect
+def on_new_discussion_comment(discussion, message=None):
+    dispatch('datagouvfr.discussion.commented', {
+        'message_id': message,
+        'discussion': json.loads(discussion.to_json()),
+    })
+
+
+@on_discussion_closed.connect
+def on_discussion_closed(discussion, message=None):
+    dispatch('datagouvfr.discussion.closed', {
+        'message_id': message,
+        'discussion': json.loads(discussion.to_json()),
+    })

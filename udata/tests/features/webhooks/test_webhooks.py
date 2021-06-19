@@ -5,8 +5,11 @@ import pytest
 from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.user.factories import UserFactory
 from udata.features.webhooks.tasks import dispatch, _dispatch
 from udata.features.webhooks.utils import sign
+from udata.models import Discussion, Message
 
 pytestmark = pytest.mark.usefixtures('clean_db')
 
@@ -82,6 +85,8 @@ class WebhookUnitTest():
         'datagouvfr.dataset.updated',
         'datagouvfr.dataset.deleted',
         'datagouvfr.discussion.created',
+        'datagouvfr.discussion.closed',
+        'datagouvfr.discussion.commented',
     ],
     'secret': 'mysecret',
 }])
@@ -137,3 +142,52 @@ class WebhookIntegrationTest():
         res = rmock_pub.last_request.json()
         assert res['event'] == 'datagouvfr.discussion.created'
         assert res['payload']['title'] == 'test title'
+
+    def test_discussion_commented(self, rmock_pub, api):
+        dataset = DatasetFactory()
+        user = UserFactory()
+        message = MessageDiscussionFactory(content='bla bla', posted_by=user)
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            title='test discussion',
+            discussion=[message]
+        )
+
+        api.login()
+        response = api.post(url_for('api.discussion', id=discussion.id), {
+            'comment': 'new bla bla'
+        })
+        assert response.status_code == 200
+
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.discussion.commented'
+        assert res['payload']['message_id'] == 1
+        assert res['payload']['discussion']['title'] == 'test discussion'
+        assert res['payload']['discussion']['discussion'][1]['content'] == 'new bla bla'
+
+    def test_discussion_closed(self, rmock_pub, api):
+        owner = api.login()
+        user = UserFactory()
+        dataset = DatasetFactory(title='Test dataset', owner=owner)
+        message = MessageDiscussionFactory(content='bla bla', posted_by=user)
+        discussion = DiscussionFactory(
+            subject=dataset,
+            user=user,
+            title='test discussion',
+            discussion=[message]
+        )
+
+        response = api.post(url_for('api.discussion', id=discussion.id), {
+            'comment': 'close bla bla',
+            'close': True
+        })
+        assert response.status_code == 200
+
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.discussion.closed'
+        assert res['payload']['message_id'] == 1
+        assert res['payload']['discussion']['title'] == 'test discussion'
+        assert res['payload']['discussion']['discussion'][1]['content'] == 'close bla bla'
