@@ -8,8 +8,12 @@ from udata.features.webhooks.utils import sign
 
 log = get_logger(__name__)
 
-DEFAULT_RETRIES = 3
-DEFAULT_BACKOFF = 10
+# number of time we should retry
+DEFAULT_RETRIES = 5
+# exponentional backoff factor (in seconds)
+# https://docs.celeryproject.org/en/v4.3.0/userguide/tasks.html#Task.retry_backoff
+DEFAULT_BACKOFF = 30
+# timeout for a single request
 DEFAULT_TIMEOUT = 30
 
 
@@ -20,8 +24,8 @@ def dispatch(event, payload):
 
 
 @task(
-    autoretry_for=(requests.exceptions.HTTPError,), exponential_backoff=DEFAULT_BACKOFF,
-    retry_kwargs={'max_retries': DEFAULT_RETRIES}, retry_jitter=True,
+    autoretry_for=(requests.exceptions.HTTPError,), retry_backoff=DEFAULT_BACKOFF,
+    retry_kwargs={'max_retries': DEFAULT_RETRIES}
 )
 def _dispatch(event, event_payload, wh):
     url = wh['url']

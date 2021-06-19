@@ -389,7 +389,10 @@ class ResourceMixin(object):
 
         If this resource is updated and `url` changes, this property won't.
         '''
-        return endpoint_for('datasets.resource', 'api.resource_redirect', id=self.id, _external=True)
+        return endpoint_for(
+            'datasets.resource', 'api.resource_redirect',
+            id=self.id, _external=True
+        )
 
     @cached_property
     def json_ld(self):
@@ -945,9 +948,10 @@ class ResourceSchema(object):
             response = requests.get(endpoint, timeout=5)
             # do not cache 404 and forward status code
             if response.status_code == 404:
-                raise SchemasCatalogNotFoundException(f'Schemas catalog does not exist at {endpoint}')
+                msg = f'Schemas catalog does not exist at {endpoint}'
+                raise SchemasCatalogNotFoundException(msg)
             response.raise_for_status()
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             log.exception(f'Error while getting schema catalog from {endpoint}')
             schemas = cache.get(cache_key)
         else:
