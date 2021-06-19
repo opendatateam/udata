@@ -5,7 +5,12 @@ from udata.core.discussions.signals import (
 )
 
 from udata.features.webhooks.tasks import dispatch
-from udata.models import Dataset
+from udata.models import Dataset, Organization
+
+# TODO: (mvp)
+# - organisation
+# - community resource
+# - reuse
 
 
 @Dataset.on_create.connect
@@ -43,3 +48,13 @@ def on_discussion_closed(discussion, message=None):
         'message_id': message,
         'discussion': json.loads(discussion.to_json()),
     })
+
+
+@Organization.on_create.connect
+def on_organization_created(organization):
+    dispatch('datagouvfr.organization.created', organization.to_json())
+
+
+@Organization.on_update.connect
+def on_organization_updated(organization):
+    dispatch('datagouvfr.organization.updated', organization.to_json())

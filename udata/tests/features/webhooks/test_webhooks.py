@@ -6,6 +6,7 @@ from flask import url_for
 
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
+from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.features.webhooks.tasks import dispatch, _dispatch
 from udata.features.webhooks.utils import sign
@@ -86,6 +87,8 @@ class WebhookUnitTest():
         'datagouvfr.discussion.created',
         'datagouvfr.discussion.closed',
         'datagouvfr.discussion.commented',
+        'datagouvfr.organization.created',
+        'datagouvfr.organization.updated',
     ],
     'secret': 'mysecret',
 }])
@@ -190,3 +193,19 @@ class WebhookIntegrationTest():
         assert res['payload']['message_id'] == 1
         assert res['payload']['discussion']['title'] == 'test discussion'
         assert res['payload']['discussion']['discussion'][1]['content'] == 'close bla bla'
+
+    def test_organization_create(self, rmock_pub):
+        org = OrganizationFactory()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.organization.created'
+        assert res['payload']['name'] == org['name']
+
+    def test_organization_update(self, rmock_pub):
+        org = OrganizationFactory()
+        org.name = 'newtitle'
+        org.save()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.organization.updated'
+        assert res['payload']['name'] == 'newtitle'

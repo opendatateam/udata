@@ -459,6 +459,7 @@ class Defaults(object):
     #   'url': 'https://example.com/webhook',
     #   'secret': '{secret shared with webhook recipient}',
     #   # list of events to which the webhook recipient subscribes
+    #   # available events are in `udata/tests/features/webhooks/test_webhooks@WebhookIntegrationTest`  # noqa
     #   'events': [],
     # }
     WEBHOOKS = []
