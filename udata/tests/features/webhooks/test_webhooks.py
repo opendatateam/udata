@@ -113,6 +113,10 @@ class WebhookIntegrationTest():
         assert res['event'] == 'datagouvfr.dataset.created'
         assert res['payload']['title'] == ds['title']
 
+    def test_dataset_create_private(self, rmock_pub):
+        DatasetFactory(private=True)
+        assert not rmock_pub.called
+
     def test_dataset_update(self, rmock_pub):
         ds = DatasetFactory()
         ds.title = 'newtitle'
@@ -121,6 +125,15 @@ class WebhookIntegrationTest():
         res = rmock_pub.last_request.json()
         assert res['event'] == 'datagouvfr.dataset.updated'
         assert res['payload']['title'] == 'newtitle'
+
+    def test_dataset_update_to_public(self, rmock_pub):
+        ds = DatasetFactory(private=True)
+        ds.private = False
+        ds.save()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.dataset.created'
+        assert res['payload']['title'] == ds.title
 
     def test_dataset_delete(self, rmock_pub):
         ds = DatasetFactory()

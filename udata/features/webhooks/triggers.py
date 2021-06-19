@@ -10,8 +10,8 @@ from udata.models import Dataset, Organization, Reuse, CommunityResource
 
 @Dataset.on_create.connect
 def on_dataset_create(dataset):
-    # TODO: emit a private signal somehow (or just rename it to draft)
-    dispatch('datagouvfr.dataset.created', dataset.to_json())
+    if not dataset.private:
+        dispatch('datagouvfr.dataset.created', dataset.to_json())
 
 
 @Dataset.on_delete.connect
@@ -21,7 +21,11 @@ def on_dataset_delete(dataset):
 
 @Dataset.on_update.connect
 def on_dataset_update(dataset):
-    dispatch('datagouvfr.dataset.updated', dataset.to_json())
+    updates, _ = dataset._delta()
+    if 'private' in updates and not dataset.private:
+        dispatch('datagouvfr.dataset.created', dataset.to_json())
+    else:
+        dispatch('datagouvfr.dataset.updated', dataset.to_json())
 
 
 @on_new_discussion.connect
