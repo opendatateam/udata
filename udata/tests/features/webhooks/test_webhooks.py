@@ -7,6 +7,7 @@ from flask import url_for
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.features.webhooks.tasks import dispatch, _dispatch
 from udata.features.webhooks.utils import sign
@@ -89,6 +90,8 @@ class WebhookUnitTest():
         'datagouvfr.discussion.commented',
         'datagouvfr.organization.created',
         'datagouvfr.organization.updated',
+        'datagouvfr.reuse.created',
+        'datagouvfr.reuse.updated',
     ],
     'secret': 'mysecret',
 }])
@@ -209,3 +212,19 @@ class WebhookIntegrationTest():
         res = rmock_pub.last_request.json()
         assert res['event'] == 'datagouvfr.organization.updated'
         assert res['payload']['name'] == 'newtitle'
+
+    def test_reuse_create(self, rmock_pub):
+        reuse = ReuseFactory()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.reuse.created'
+        assert res['payload']['title'] == reuse['title']
+
+    def test_reuse_update(self, rmock_pub):
+        reuse = ReuseFactory()
+        reuse.title = 'newtitle'
+        reuse.save()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.reuse.updated'
+        assert res['payload']['title'] == 'newtitle'

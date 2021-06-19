@@ -5,7 +5,7 @@ from udata.core.discussions.signals import (
 )
 
 from udata.features.webhooks.tasks import dispatch
-from udata.models import Dataset, Organization
+from udata.models import Dataset, Organization, Reuse
 
 # TODO: (mvp)
 # - organisation
@@ -58,3 +58,13 @@ def on_organization_created(organization):
 @Organization.on_update.connect
 def on_organization_updated(organization):
     dispatch('datagouvfr.organization.updated', organization.to_json())
+
+
+@Reuse.on_create.connect
+def on_reuse_created(reuse):
+    dispatch('datagouvfr.reuse.created', reuse.to_json())
+
+
+@Reuse.on_update.connect
+def on_reuse_updated(reuse):
+    dispatch('datagouvfr.reuse.updated', reuse.to_json())
