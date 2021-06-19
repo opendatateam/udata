@@ -456,8 +456,10 @@ class Defaults(object):
     # Webhooks
     ##########
     # expects a list of {
-    #   "url": "https://example.com/webhook",
-    #   "secret": "{secret shared with webhook hub}",
+    #   'url': 'https://example.com/webhook',
+    #   'secret': '{secret shared with webhook recipient}',
+    #   # list of events to which the webhook recipient subscribes
+    #   'events': [],
     # }
     WEBHOOKS = []
 

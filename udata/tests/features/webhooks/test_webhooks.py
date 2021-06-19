@@ -37,19 +37,27 @@ class WebhookUnitTest():
 
     @pytest.mark.options(WEBHOOKS=[{
         'url': 'https://example.com/1',
+        'events': ['event'],
         'secret': 'mysecret',
     }, {
         'url': 'https://example.com/2',
+        'events': ['event'],
+        'secret': 'mysecret',
+    }, {
+        'url': 'https://example.com/3',
+        'events': ['notmyevent'],
         'secret': 'mysecret',
     }])
     def test_webhooks_from_settings(self, rmock):
         r1 = rmock.post('https://example.com/1', text='ok', status_code=200)
         r2 = rmock.post('https://example.com/2', text='ok', status_code=200)
+        r3 = rmock.post('https://example.com/3', text='ok', status_code=200)
         dispatch('event', {})
         assert r1.called
         assert r1.call_count == 1
         assert r2.called
         assert r2.call_count == 1
+        assert not r3.called
 
     @pytest.mark.skip(reason="""
         I really tried but no luck :-(
@@ -69,6 +77,9 @@ class WebhookUnitTest():
 
 @pytest.mark.options(WEBHOOKS=[{
     'url': 'https://example.com/publish',
+    'events': [
+        'datagouvfr.dataset.created',
+    ],
     'secret': 'mysecret',
 }])
 class WebhookIntegrationTest():
@@ -79,6 +90,13 @@ class WebhookIntegrationTest():
         return rmock.post('https://example.com/publish', text='ok', status_code=201)
 
     def test_dataset_create(self, api, rmock_pub):
+        data = DatasetFactory.as_dict()
+        api.login()
+        res = api.post(url_for('api.datasets'), data)
+        assert res.status_code == 201
+        assert rmock_pub.called
+
+    def test_dataset_modified(self, api, rmock_pub):
         data = DatasetFactory.as_dict()
         api.login()
         res = api.post(url_for('api.datasets'), data)
