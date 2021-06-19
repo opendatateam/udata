@@ -4,7 +4,7 @@ import pytest
 
 from flask import url_for
 
-from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.factories import DatasetFactory, CommunityResourceFactory
 from udata.core.discussions.factories import DiscussionFactory, MessageDiscussionFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory
@@ -92,6 +92,8 @@ class WebhookUnitTest():
         'datagouvfr.organization.updated',
         'datagouvfr.reuse.created',
         'datagouvfr.reuse.updated',
+        'datagouvfr.community_resource.created',
+        'datagouvfr.community_resource.updated',
     ],
     'secret': 'mysecret',
 }])
@@ -227,4 +229,20 @@ class WebhookIntegrationTest():
         assert rmock_pub.called
         res = rmock_pub.last_request.json()
         assert res['event'] == 'datagouvfr.reuse.updated'
+        assert res['payload']['title'] == 'newtitle'
+
+    def test_community_resource_create(self, rmock_pub):
+        community_resource = CommunityResourceFactory()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.community_resource.created'
+        assert res['payload']['title'] == community_resource['title']
+
+    def test_community_resource_update(self, rmock_pub):
+        community_resource = CommunityResourceFactory()
+        community_resource.title = 'newtitle'
+        community_resource.save()
+        assert rmock_pub.called
+        res = rmock_pub.last_request.json()
+        assert res['event'] == 'datagouvfr.community_resource.updated'
         assert res['payload']['title'] == 'newtitle'

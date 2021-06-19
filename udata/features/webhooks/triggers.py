@@ -5,12 +5,10 @@ from udata.core.discussions.signals import (
 )
 
 from udata.features.webhooks.tasks import dispatch
-from udata.models import Dataset, Organization, Reuse
+from udata.models import Dataset, Organization, Reuse, CommunityResource
 
 # TODO: (mvp)
-# - organisation
 # - community resource
-# - reuse
 
 
 @Dataset.on_create.connect
@@ -68,3 +66,13 @@ def on_reuse_created(reuse):
 @Reuse.on_update.connect
 def on_reuse_updated(reuse):
     dispatch('datagouvfr.reuse.updated', reuse.to_json())
+
+
+@CommunityResource.on_create.connect
+def on_community_resource_created(community_resource):
+    dispatch('datagouvfr.community_resource.created', community_resource.to_json())
+
+
+@CommunityResource.on_update.connect
+def on_community_resource_updated(community_resource):
+    dispatch('datagouvfr.community_resource.updated', community_resource.to_json())
