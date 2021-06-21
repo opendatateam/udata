@@ -1,7 +1,7 @@
-<div class="udata-oembed">
+<div class="udata-oembed border p-sm">
     <link rel="stylesheet" href="{{ static('oembed.css', _external=True) }}" />
     {% block extra_css %}
-        <link rel="stylesheet" href="{{ theme_static('oembed.css', external=True) }}" />
+    <link rel="stylesheet" href="{{ theme_static('style.css', external=True) }}" />
     {% endblock %}
     {% include theme(type + '/oembed.html') with context %}
 </div>
