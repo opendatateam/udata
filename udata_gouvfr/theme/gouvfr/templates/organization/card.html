@@ -1,37 +1,40 @@
 {% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
-<a class="card organization-card" title="{{organization.name}}"
-     href="{{ url_for('organizations.show', org=organization, _external=True) }}">
-    <div class="card-logo">
-        <img alt=""
-            src="{{ organization.logo(60, external=True)|placeholder('organization', external=True) }}"
-            width="60" height="60">
-    </div>
-    {{ badge_if_certified(organization) }}
-    <div class="card-body">
-        <h4>{{ organization.name }}</h4>
-        <div class="clamp-3">{{ organization.description|mdstrip(180) }}</div>
-    </div>
 
-    <footer class="card-footer">
-        <ul>
-            {% if organization.metrics.datasets %}
-            <li v-tooltip title="{{ _('Number of datasets') }}">
-                <span class="{{ ficon('fa-cubes') }} fa-fw"></span>
-                {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
-            </li>
-            {% endif %}
-            {% if organization.metrics.reuses %}
-            <li v-tooltip title="{{ _('Number of reuses') }}">
-                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
-                {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
-            </li>
-            {% endif %}
-            <li v-tooltip title="{{ _('Stars') }}">
-                <span class="{{ ficon('fa-star') }} fa-fw"></span>
-                {{ organization.metrics.followers or 0 }}
-            </li>
-        </ul>
-    </footer>
+{# This is very similar to the dataset card and not very used so we're recycling the dataset-card class for a quick win #}
+<a class="card organization-card dataset-card unstyled" title="{{organization.name}}"
+    href="{{ url_for('organizations.show', org=organization, _external=True) }}">
+    <div class="card-logo">
+        <img src="{{ organization.logo(100, external=True)|placeholder('organization', external=True) }}"
+            alt="{{ organization.name }}" />
+        <div class="logo-badge">
+            {{ badge_if_certified(organization) }}
+        </div>
+    </div>
+    <div class="card-data">
+        <h4 class="card-body">
+            {{ organization.name }}
+        </h4>
+        <div class="card-description">
+            <p>{{ organization.description|mdstrip(180) }}</p>
+        </div>
+        <div class="card-footer">
+            <ul class="card-features text-grey-300 fs-xs">
+                {% if organization.metrics.datasets %}
+                <li>{{ organization.metrics.datasets or 0 }} {{ _('@@jeux de données') }}</li>
+                {% endif %}
+                {% if organization.metrics.reuses %}
+                <li>{{ organization.metrics.reuses or 0 }} {{ _('@@réutilisations') }}</li>
+                {% endif %}
+                <li>
+                    <div>
+                        <span class="text-orange-100">{% include theme('svg/actions/star.svg') %}</span>
+                        <span
+                            class="badge orange-100 ml-xxs py-xxxs px-xs">{{ organization.metrics.followers or 0 }}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
 </a>
 {% endcache %}
