@@ -25,7 +25,7 @@
           <div class="comment-meta">
             <avatar :user="comment.posted_by"></avatar>
             <div>
-              <Author :author="comment.posted_by" :badge="true" />
+              <Author :author="comment.posted_by" :badge="false" />
               <div class="text-grey-300 mt-xxs">
                 {{ formatDate(comment.posted_on) }}
               </div>

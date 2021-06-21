@@ -130,7 +130,7 @@
         <dl class="description-list fs-base">
             {% if dataset.license %}
             <div>
-                <dt class="f-bold">{{ _('License') }}</dt>
+                <dt class="f-bold text-grey-400">{{ _('License') }}</dt>
                 <dd>{% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
                         {{ dataset.license.title }}
                         {% if dataset.license.url %}</a>{% endif
@@ -231,13 +231,6 @@
                             </a>
                         </li>
                         {% endfor %}
-                        <li>
-                            <a @click="suggestTag" class="label label-primary suggest-tag"
-                                title="{{ _('Suggest a tag with a new discussion thread') }}" v-tooltip
-                                tooltip-placement="right">
-                                {{ _('Suggest a tag') }}
-                            </a>
-                        </li>
                     </ul>
                 </dd>
             </div>
@@ -297,7 +290,7 @@
                         </li>
                         {% endif %}
                         <li class="my-md">
-                            <a href="#" class="nav-link"
+                            <a class="nav-link"
                                 @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a>
                         </li>
                     </ul>
@@ -326,10 +319,10 @@
                 <div class="col-3 col-md-12">
                     <h2>{{ _('Community contributions') }}</h2>
                     <ul class="nav-list my-xl">
-                        <li><a href='#' class="nav-link text-white">{{ _('Community resources') }} <sup
-                                    class="sup">{{ dataset.community_resources|length }}</sup></a>
+                        <li><a href='#community-resources' class="nav-link text-white">{{ _('Community resources') }}
+                                <sup class="sup">{{ dataset.community_resources|length }}</sup></a>
                         <li>
-                        <li><a href='#' class="nav-link text-white">{{ _('Reuses') }} <sup
+                        <li><a href='#community-reuses' class="nav-link text-white">{{ _('Reuses') }} <sup
                                     class="sup">{{ reuses|length }}</sup></a>
                         <li>
                         <li><a href='#community-discussions' class="nav-link text-white">{{ _('Discussions') }} <sup
@@ -362,10 +355,12 @@
             <div class="col-sm-9">
                 <div class="resources-list">
                     {% for resource in dataset.community_resources %}
+                    {% with dark = True %}
                     {% include theme('dataset/resource/card.html') %}
+                    {% endwith %}
                     {% endfor %}
                     {% if not read_only_mode %}
-                    <a class="btn-action mb-lg"
+                    <a class="btn-action my-lg"
                         href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
                         {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
                     </a>

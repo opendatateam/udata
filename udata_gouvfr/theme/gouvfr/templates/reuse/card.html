@@ -4,7 +4,7 @@
 <a class="unstyled w-100" href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" title="{{ reuse.title }}">
     <article class="reuse-card text-align-center px-sm">
         <div class="reuse-image mb-sm" alt="{{ reuse.title }}"
-            style="background-image: url('{{ reuse.image(86, external=True)|placeholder('reuse', external=True) }}')">
+            style="background-image: url('{{ reuse.image|placeholder('reuse', external=True) }}')">
         </div>
         <div class="reuse-info">
             <div class="row-inline justify-between text-align-left">

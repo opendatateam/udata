@@ -18,7 +18,7 @@ Vue. -->
       />
       <div class="logo-badge">
         <span v-html="private" v-if="private" />
-        <span v-html="certified" v-else-if="organization.public_service" />
+        <span v-html="certified" v-else-if="organization?.public_service" />
       </div>
     </div>
     <div class="card-logo" v-else>
@@ -33,7 +33,7 @@ Vue. -->
     <dl class="card-hover">
       <div v-if="temporal_coverage">
         <dt>{{ $t("@@Temporal coverage") }}</dt>
-        <dd>{{ temporal_coverage }}</dd>
+        <dd>{{ Object.values(temporal_coverage).join(" - ") }}</dd>
       </div>
       <div v-if="frequency">
         <dt>{{ $t("@@Frequency") }}</dt>
