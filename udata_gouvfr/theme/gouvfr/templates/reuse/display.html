@@ -141,10 +141,7 @@
         <ul class="row">
             {% for dataset in reuse.datasets %}
             <li class="col-md-12 col-6">
-                <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
-                    class="unstyled w-100">
-                    {% include theme('dataset/card.html') %}
-                </a>
+                {% include theme('dataset/card.html') %}
             </li>
             {% endfor %}
         </ul>
