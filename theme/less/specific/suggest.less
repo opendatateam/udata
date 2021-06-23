@@ -31,6 +31,19 @@
                 height: 36px;
             }
         }
+
+        .close-icon {
+            cursor: pointer;
+
+            svg {
+                width: 25px;
+                height: 25px;
+
+                * {
+                    fill: @blue-400;
+                }
+            }
+        }
     }
 
     .see-all {
@@ -102,10 +115,6 @@
         transition-property: transform, filter, opacity;
     }
 
-    .search-box {
-        transition: background @suggest-transition;
-    }
-
     //Shifting them with the same timing
     &.suggesting {
         height: 100vh;
@@ -119,9 +128,7 @@
 
         //Header search box
         .search-box {
-            form {
-                border-color: @blue-300;
-            }
+            display: none;
         }
     }
 }

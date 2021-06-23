@@ -13,12 +13,7 @@ You can also pass it a `value` prop that will populate the field.
 <template>
   <section class="search-input">
     <form action="" @submit.prevent="onSubmit" class="row-inline">
-      <span
-        class="icon"
-        :class="{ active: queryString }"
-        v-html="icon"
-        width="32"
-      />
+      <span class="icon" :class="{ active: queryString }" v-html="icon" />
       <input
         type="text"
         :value="queryString"
@@ -28,22 +23,30 @@ You can also pass it a `value` prop that will populate the field.
         :aria-label="placeholder || $t('Search...')"
         :placeholder="placeholder || $t('Search...')"
       />
+      <span
+        class="close-icon ml-sm self-center"
+        @click.prevent="stop"
+        v-html="closeIcon"
+        v-if="stop"
+      />
     </form>
   </section>
 </template>
 
 <script>
 import Icon from "svg/search.svg";
+import CloseIcon from "svg/close.svg";
 
 export default {
   created() {
     this.icon = Icon;
+    this.closeIcon = CloseIcon;
     this.queryString = this.value;
   },
   watch: {
-    value: function(val) {
-      this.queryString = val
-    }
+    value: function (val) {
+      this.queryString = val;
+    },
   },
   async mounted() {
     //this.$nextTick doesn't work because of browsers®
@@ -51,8 +54,9 @@ export default {
   },
   props: {
     onChange: Function,
+    stop: Function,
     value: String,
-    placeholder: String
+    placeholder: String,
   },
   data() {
     return {
