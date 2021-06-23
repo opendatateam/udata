@@ -3,6 +3,7 @@ from importlib import import_module
 from jinja2 import Markup, contextfunction
 from flask import abort, current_app
 from flask_navigation import Navigation
+from udata import entrypoints
 from udata.i18n import I18nBlueprint
 
 nav = Navigation()
@@ -102,6 +103,11 @@ def init_app(app):
 
     for view in VIEWS:
         _load_views(app, 'udata_gouvfr.views.{}'.format(view))
+
+    # Load all plugins views and blueprints
+    for module in entrypoints.get_enabled('udata.views', app).values():
+        print(module)
+        _load_views(app, module)
 
     # Optionally register debug views
     if app.config.get('DEBUG'):

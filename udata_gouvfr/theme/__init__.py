@@ -155,7 +155,10 @@ def init_app(app):
 
     themes.init_themes(app, app_identifier='udata', loaders=[themes_loader])
     # Load all theme assets
-    theme = app.theme_manager.themes[app.config['THEME']]
+    try:
+        theme = app.theme_manager.themes[app.config['THEME']]
+    except KeyError:
+        theme = app.theme_manager.themes['gouvfr']
     prefix = '/'.join(('_themes', theme.identifier))
     app.config['STATIC_DIRS'].append((prefix, theme.static_path))
 
