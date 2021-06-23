@@ -20,7 +20,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         :title="$t('Search all datasets')"
       >
         <h2>
-          {{ $t("Datasets") }} <sup>{{ results?.datasets?.length || 0 }}</sup>
+          {{ $t("Datasets") }}
         </h2>
         <span v-html="arrow" />
       </a>
@@ -34,11 +34,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         <Empty
           v-else-if="!results.datasets.length > 0"
           :cta="$t('See all datasets')"
-          :copy="
-            $t(
-              'No dataset matching your query'
-            )
-          "
+          :copy="$t('No dataset matching your query')"
           :queryString="queryString"
           :link="datasetUrl"
         />
@@ -63,7 +59,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         :title="$t('Search in reuses')"
       >
         <h2>
-          {{ $t("Reuses") }} <sup>{{ results?.reuses?.length || 0 }}</sup>
+          {{ $t("Reuses") }}
         </h2>
         <span v-html="arrow" />
       </a>
@@ -77,11 +73,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         <Empty
           v-else-if="!results.reuses.length > 0"
           :cta="$t('See the reuses')"
-          :copy="
-            $t(
-              'No reuse matching your query'
-            )
-          "
+          :copy="$t('No reuse matching your query')"
           :queryString="queryString"
           :link="reuseUrl"
         />
