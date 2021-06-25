@@ -13,7 +13,7 @@ from werkzeug.contrib.atom import AtomFeed
 from udata.core.dataset.factories import (
     DatasetFactory, LicenseFactory, VisibleDatasetFactory
 )
-from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.models import Badge
@@ -25,11 +25,7 @@ from udata.tests.helpers import assert200, assert404, assert_redirects, assert_e
 from udata.frontend.markdown import md
 
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
-from udata_gouvfr.models import (
-    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
-    TERRITORY_DATASETS, OPENFIELD16, SPD
-)
-from udata_gouvfr.views.gouvfr import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
+from udata_gouvfr.models import SPD
 from udata_gouvfr.tests import GouvFrSettings
 
 
@@ -482,77 +478,12 @@ class SpecificUrlsTest:
     settings = GouvFrSettings
     modules = []
 
-    def test_redevances(self, client):
-        response = client.get(url_for('gouvfr.redevances'))
-        assert200(response)
-
     def test_terms(self, client):
         response = client.get(url_for('site.terms'))
         assert200(response)
 
     def test_licences(self, client):
         response = client.get(url_for('gouvfr.licences'))
-        assert200(response)
-
-
-class DataconnexionsTest:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_redirect_to_last_dataconnexions(self, client):
-        response = client.get(url_for('gouvfr.dataconnexions'))
-        assert_redirects(response, url_for('gouvfr.dataconnexions6'))
-
-    def test_render_dataconnexions_5_without_data(self, client):
-        response = client.get(url_for('gouvfr.dataconnexions5'))
-        assert200(response)
-
-    def test_render_dataconnexions_5_with_data(self, client):
-        for tag, label, description in DATACONNEXIONS_5_CATEGORIES:
-            badge = Badge(kind=DATACONNEXIONS_5_CANDIDATE)
-            VisibleReuseFactory(tags=[tag], badges=[badge])
-        response = client.get(url_for('gouvfr.dataconnexions5'))
-        assert200(response)
-
-    def test_render_dataconnexions_6_without_data(self, client):
-        response = client.get(url_for('gouvfr.dataconnexions6'))
-        assert200(response)
-
-    def test_render_dataconnexions_6_with_data(self, client):
-        # Use tags until we are sure all reuse are correctly labeled
-        for tag, label, description in DATACONNEXIONS_6_CATEGORIES:
-            badge = Badge(kind=DATACONNEXIONS_6_CANDIDATE)
-            VisibleReuseFactory(tags=['dataconnexions-6', tag], badges=[badge])
-        response = client.get(url_for('gouvfr.dataconnexions6'))
-        assert200(response)
-
-
-class C3Test:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_redirect_c3(self, client):
-        response = client.get(url_for('gouvfr.c3'))
-        assert_redirects(response, '/en/climate-change-challenge')
-
-    def test_render_c3_without_data(self, client):
-        response = client.get(url_for('gouvfr.climate_change_challenge'))
-        assert200(response)
-
-
-class OpenField16Test:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_render_without_data(self, client):
-        response = client.get(url_for('gouvfr.openfield16'))
-        assert200(response)
-
-    def test_render_with_data(self, client):
-        for i in range(3):
-            badge = Badge(kind=OPENFIELD16)
-            VisibleDatasetFactory(badges=[badge])
-        response = client.get(url_for('gouvfr.openfield16'))
         assert200(response)
 
 

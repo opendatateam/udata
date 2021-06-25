@@ -9,34 +9,12 @@ Organization.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
 Reuse.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
 User.extras.register('datagouv_ckan_last_sync', db.DateTimeField)
 
-COVID = 'covid-19'
-# Reuses badges
-DATACONNEXIONS_5_CANDIDATE = 'dataconnexions-5-candidate'
-DATACONNEXIONS_5_LAUREATE = 'dataconnexions-5-laureate'
-DATACONNEXIONS_6_CANDIDATE = 'dataconnexions-6-candidate'
-DATACONNEXIONS_6_LAUREATE = 'dataconnexions-6-laureate'
-Reuse.__badges__.update({
-    DATACONNEXIONS_5_CANDIDATE: _('Dataconnexions 5 candidate'),
-    DATACONNEXIONS_5_LAUREATE: _('Dataconnexions 5 laureate'),
-    DATACONNEXIONS_6_CANDIDATE: _('Dataconnexions 6 candidate'),
-    DATACONNEXIONS_6_LAUREATE: _('Dataconnexions 6 laureate'),
-    COVID: _('Covid-19'),
-})
 
 # Datasets
-C3 = 'c3'
-NECMERGITUR = 'nec'
-OPENFIELD16 = 'openfield16'
 SPD = 'spd'
 TRANSPORT = 'transport'
-BAL = 'bal'
-Dataset.__badges__[C3] = _('C³')
-Dataset.__badges__[NECMERGITUR] = _('Nec Mergitur')
-Dataset.__badges__[OPENFIELD16] = 'Openfield 16'
 Dataset.__badges__[SPD] = _('Reference Data')
 Dataset.__badges__[TRANSPORT] = _('Transport')
-Dataset.__badges__[BAL] = _('Base Adresse Locale')
-Dataset.__badges__[COVID] = _('Covid-19')
 
 BASE_POPULATION_URL = 'https://www.insee.fr/fr/statistiques/tableaux/2021173'
 POPULATION_FILENAME = 'popleg2013_cc_popleg.xls'
