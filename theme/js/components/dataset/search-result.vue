@@ -27,7 +27,7 @@ Vue. -->
     <div class="card-data">
       <h4 class="card-title">{{ title }}</h4>
       <div class="card-description text-grey-300 mt-xs">
-        {{ $filters.truncate(description) }}
+        {{ $filters.excerpt(description) }}
       </div>
     </div>
     <dl class="card-hover">
