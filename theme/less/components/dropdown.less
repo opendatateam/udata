@@ -30,26 +30,21 @@ For interactivity, please check the corresponding section of this styleguide.
     .btn-secondary;
 
     padding: 0 !important;
+    position: relative;
 
     &:focus-within {
-        select,
-        .select,
-        label,
-        .label {
+        select {
             text-decoration: underline;
         }
     }
 
-    select,
-    .select,
-    label,
-    .label {
+    select {
         display: inline-block;
         appearance: none;
         border: none;
         background: none;
         color: inherit;
-        padding: @spacing-xs @spacing-sm;
+        padding: @spacing-xs @spacing-xl @spacing-xs @spacing-sm;
 
         cursor: pointer;
 
@@ -58,30 +53,32 @@ For interactivity, please check the corresponding section of this styleguide.
         }
     }
 
-    .label {
-        &:after {
-            content: " ";
-            width: 8px;
-            height: 8px;
-            display: inline-block;
-            margin-left: @spacing-xs;
-            transform: rotate(90deg);
+    &:after {
+        content: " ";
+        position: absolute;
 
-            transition: transform ease 0.1s;
+        top: 50%;
+        right: @spacing-xxs;
 
-            background-image: url(~"@{icon-chevron}");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-        }
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        margin: -3px @spacing-xs 0 @spacing-xxs;
+        transform: rotate(90deg);
+
+        pointer-events: all;
+
+        transition: transform ease 0.1s;
+
+        background-color: currentColor;
+        mask-image: url(@icon-chevron);
+        mask-repeat: no-repeat;
+        mask-position: center center;
     }
 
     &.active {
-        label,
-        .label {
-            &:after {
-                transform: rotate(-90deg);
-            }
+        &:after {
+            transform: rotate(-90deg);
         }
     }
 }
