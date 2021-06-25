@@ -116,7 +116,6 @@ def show_page(slug):
     )
 
 
-
 @blueprint.route('/reference')
 def spd():
     datasets = Dataset.objects(badges__kind=SPD).order_by('title')

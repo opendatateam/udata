@@ -25,7 +25,7 @@ from udata.tests.helpers import assert200, assert404, assert_redirects, assert_e
 from udata.frontend.markdown import md
 
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
-from udata_gouvfr.models import SPD
+from udata_gouvfr.models import SPD, TERRITORY_DATASETS
 from udata_gouvfr.tests import GouvFrSettings
 
 
