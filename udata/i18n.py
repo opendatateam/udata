@@ -1,7 +1,7 @@
 import pkgutil
 
 from contextlib import contextmanager
-from os.path import exists, join, dirname
+from os.path import exists, join, dirname, basename
 from glob import iglob
 
 from flask import (  # noqa
@@ -69,24 +69,13 @@ class PluggableDomain(Domain):
 
                 for pkg in entrypoints.get_roots(current_app):
                     loader = pkgutil.get_loader(pkg)
-                    path = join(dirname(loader.path), 'translations')
+                    path = dirname(loader.path)
                     domains = [f.replace(path, '').replace('.pot', '')[1:]
-                               for f in iglob(join(path, '*.pot'))]
+                               for f in iglob(join(path, '**/translations/*.pot'), recursive=True)]
                     for domain in domains:
-                        translations.merge(Translations.load(path, locale,
-                                                             domain=domain))
-
-                # Allows the theme to provide or override translations
-                # from . import theme
-
-                # theme_translations_dir = join(theme.current.path, 'translations')
-                # if exists(theme_translations_dir):
-                #     domain = theme.current.identifier
-                #     theme_translations = Translations.load(theme_translations_dir,
-                #                                            locale,
-                #                                            domain=domain)
-                #     translations.merge(theme_translations)
-
+                        domain_path = join(path, dirname(domain))
+                        translations.merge(Translations.load(domain_path, locale,
+                                                             domain=basename(domain)))
                 cache[str(locale)] = translations
 
         return translations
