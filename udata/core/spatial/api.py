@@ -148,7 +148,7 @@ class SpatialLevelsAPI(API):
         } for level in GeoLevel.objects]
 
 
-@ns.route('/granularities', endpoint='spatial_granularities')
+@ns.route('/granularities/', endpoint='spatial_granularities')
 class SpatialGranularitiesAPI(API):
     @api.doc('spatial_granularities')
     @api.marshal_list_with(granularity_fields)
