@@ -8,7 +8,7 @@ from invoke import task, call
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
-I18N_ROOT = 'udata_gouvfr/translations'
+I18N_ROOT = 'udata_gouvfr/theme/gouvfr/translations'
 
 THEME_ROOT = os.path.join(ROOT, 'udata_gouvfr/theme', 'gouvfr')
 
@@ -127,13 +127,14 @@ def i18n(ctx, update=False):
     '''Extract translatable strings'''
     header(i18n.__doc__)
 
-    # Plugin translations (harvesters, views...)
-    info('Extract plugin translations')
+    # Python translations
+    # TODO: Make it generic for any theme
+    info('Extract python translations')
     with ctx.cd(ROOT):
         ctx.run('python setup.py extract_messages')
-        set_po_metadata(os.path.join(I18N_ROOT, 'udata-gouvfr.pot'), 'en')
+        set_po_metadata(os.path.join(I18N_ROOT, 'gouvfr.pot'), 'en')
         for lang in LANGUAGES:
-            pofile = os.path.join(I18N_ROOT, lang, 'LC_MESSAGES', 'udata-gouvfr.po')
+            pofile = os.path.join(I18N_ROOT, lang, 'LC_MESSAGES', 'gouvfr.po')
             if not os.path.exists(pofile):
                 ctx.run('python setup.py init_catalog -l {}'.format(lang))
                 set_po_metadata(pofile, lang)
@@ -141,26 +142,10 @@ def i18n(ctx, update=False):
                 ctx.run('python setup.py update_catalog -l {}'.format(lang))
                 set_po_metadata(pofile, lang)
 
-    # Theme translations
-    info('Extract theme translations')
-    with ctx.cd(THEME_ROOT):
-        potfile = os.path.join('translations', 'gouvfr.pot')
-        ctx.run('pybabel extract -F babel.cfg -o {0} .'.format(potfile))
-        set_po_metadata(os.path.join(THEME_ROOT, potfile), 'en')
-        for lang in LANGUAGES:
-            pofile = os.path.join(THEME_ROOT, 'translations',
-                                  lang, 'LC_MESSAGES', 'gouvfr.po')
-            if not os.path.exists(pofile):
-                ctx.run('pybabel init -D gouvfr '
-                        '-i translations/gouvfr.pot -d translations '
-                        '-l {lang}'.format(lang=lang, domain='gouvfr'))
-                set_po_metadata(pofile, lang)
-            elif update:
-                ctx.run('pybabel update --ignore-obsolete -D gouvfr '
-                        '-i translations/gouvfr.pot -d translations '
-                        '-l {lang}'.format(lang=lang, domain='gouvfr'))
-                set_po_metadata(pofile, lang)
-
+    # Front translations
+    info('Extract vue translations')
+    with ctx.cd(ROOT):
+        ctx.run('npm run i18n:extract')
     success('Updated translations')
 
 
@@ -172,11 +157,6 @@ def i18nc(ctx):
     info('Compile plugin translations')
     with ctx.cd(ROOT):
         ctx.run('python setup.py compile_catalog')
-
-    # Theme translations
-    info('Compile theme translations')
-    with ctx.cd(THEME_ROOT):
-        ctx.run('pybabel compile -D gouvfr -d translations --statistics')
 
     success('Compiled translations')
 
