@@ -13,7 +13,11 @@ The `url` prop is the API URL.
 -->
 
 <template>
-  <a @click.prevent="toggleFollow" title="" class="unstyled">
+  <a
+    @click.prevent="toggleFollow"
+    title=""
+    class="unstyled row-inline align-items-center"
+  >
     <span class="btn-secondary btn-secondary-orange-100 p-sm follow-button">
       <span
         v-html="icon"
