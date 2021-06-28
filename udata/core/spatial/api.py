@@ -48,7 +48,7 @@ def payload_name(payload):
     return _(name)  # Avoid dict quotes in gettext
 
 
-@ns.route('/zones/suggest', endpoint='suggest_zones')
+@ns.route('/zones/suggest/', endpoint='suggest_zones')
 class SuggestZonesAPI(API):
     @api.marshal_list_with(zone_suggestion_fields)
     @api.expect(suggest_parser)
@@ -70,7 +70,7 @@ class SuggestZonesAPI(API):
         ]
 
 
-@ns.route('/zones/<pathlist:ids>', endpoint='zones')
+@ns.route('/zones/<pathlist:ids>/', endpoint='zones')
 class ZonesAPI(API):
     @api.doc('spatial_zones',
              params={'ids': 'A zone identifiers list (comma separated)'})
@@ -85,7 +85,7 @@ class ZonesAPI(API):
         }
 
 
-@ns.route('/zone/<path:id>/children', endpoint='zone_children')
+@ns.route('/zone/<path:id>/children/', endpoint='zone_children')
 class ZoneChildrenAPI(API):
     @api.doc('spatial_zone_children', params={'id': 'A zone identifier'})
     @api.marshal_list_with(feature_collection_fields)
@@ -100,7 +100,7 @@ class ZoneChildrenAPI(API):
         }
 
 
-@ns.route('/zone/<path:id>/datasets', endpoint='zone_datasets')
+@ns.route('/zone/<path:id>/datasets/', endpoint='zone_datasets')
 class ZoneDatasetsAPI(API):
     @api.doc('spatial_zone_datasets', params={'id': 'A zone identifier'})
     @api.expect(dataset_parser)
@@ -126,7 +126,7 @@ class ZoneDatasetsAPI(API):
         return datasets
 
 
-@ns.route('/zone/<path:id>', endpoint='zone')
+@ns.route('/zone/<path:id>/', endpoint='zone')
 class ZoneAPI(API):
     @api.doc('spatial_zone', params={'id': 'A zone identifier'})
     def get(self, id):
@@ -135,7 +135,7 @@ class ZoneAPI(API):
         return zone.toGeoJSON()
 
 
-@ns.route('/levels', endpoint='spatial_levels')
+@ns.route('/levels/', endpoint='spatial_levels')
 class SpatialLevelsAPI(API):
     @api.doc('spatial_levels')
     @api.marshal_list_with(level_fields)
@@ -160,7 +160,7 @@ class SpatialGranularitiesAPI(API):
         } for id, name in spatial_granularities]
 
 
-@ns.route('/coverage/<path:level>', endpoint='spatial_coverage')
+@ns.route('/coverage/<path:level>/', endpoint='spatial_coverage')
 class SpatialCoverageAPI(API):
     @api.doc('spatial_coverage')
     @api.marshal_list_with(feature_collection_fields)
