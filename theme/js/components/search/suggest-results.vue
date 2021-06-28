@@ -17,10 +17,10 @@ Used by the suggest feature to display typeahead-style results when you type you
       <a
         class="unstyled row-inline justify-between see-all"
         :href="datasetUrl"
-        :title="$t('@@Rechercher dans tous les jeux de données')"
+        :title="$t('Search all datasets')"
       >
         <h2>
-          Jeux de données <sup>{{ results?.datasets?.length || 0 }}</sup>
+          {{ $t("Datasets") }} <sup>{{ results?.datasets?.length || 0 }}</sup>
         </h2>
         <span v-html="arrow" />
       </a>
@@ -33,10 +33,10 @@ Used by the suggest feature to display typeahead-style results when you type you
         <dataset-loader v-if="loading" />
         <Empty
           v-else-if="!results.datasets.length > 0"
-          :cta="$t('@@Voir tous les jeux de données')"
+          :cta="$t('See all datasets')"
           :copy="
             $t(
-              '@@Nous n’avons pas de jeu de données correspondant à votre requête'
+              'No dataset matching your query'
             )
           "
           :queryString="queryString"
@@ -51,7 +51,7 @@ Used by the suggest feature to display typeahead-style results when you type you
             </li>
           </ul>
           <a class="nav-link pt-md" :href="datasetUrl">{{
-            $t("@@Rechercher dans les jeux de données")
+            $t("Search in datasets")
           }}</a>
         </div>
       </transition>
@@ -60,10 +60,10 @@ Used by the suggest feature to display typeahead-style results when you type you
       <a
         class="unstyled row-inline justify-between see-all"
         :href="reuseUrl"
-        :title="$t('@@Rechercher dans toutes les réutilisations')"
+        :title="$t('Search in reuses')"
       >
         <h2>
-          Réutilisations <sup>{{ results?.reuses?.length || 0 }}</sup>
+          {{ $t("Reuses") }} <sup>{{ results?.reuses?.length || 0 }}</sup>
         </h2>
         <span v-html="arrow" />
       </a>
@@ -76,10 +76,10 @@ Used by the suggest feature to display typeahead-style results when you type you
         <reuse-loader class="my-md" v-if="loading" />
         <Empty
           v-else-if="!results.reuses.length > 0"
-          :cta="$t('@@Voir toutes les réutilisations')"
+          :cta="$t('See the reuses')"
           :copy="
             $t(
-              '@@Nous n’avons pas de réutilisation correspondant à votre requête'
+              'No reuse matching your query'
             )
           "
           :queryString="queryString"
@@ -94,7 +94,7 @@ Used by the suggest feature to display typeahead-style results when you type you
             </li>
           </ul>
           <a class="nav-link pt-md" :href="reuseUrl">{{
-            $t("@@Rechercher dans les réutilisations")
+            $t("Search reuses")
           }}</a>
         </div>
       </transition>

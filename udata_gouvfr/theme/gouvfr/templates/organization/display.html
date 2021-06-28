@@ -52,14 +52,14 @@
                         {% if total_datasets > 0 %}
                         <li class="ml-md ml-md-0">
                             <a href="#organization-datasets" class="text-blue-400">
-                                {{ total_datasets }} {{ _('@@Jeux de données') }}
+                                {{ total_datasets }} {{ _('Datasets') }}
                             </a>
                         </li>
                         {% endif %}
                         {% if total_reuses > 0 %}
                         <li class="ml-md">
                             <a href="#organization-reuses" class="text-green-400">
-                                {{ total_reuses }} {{ _('@@Réutilisations') }}
+                                {{ total_reuses }} {{ _('Reuses') }}
                             </a>
                         </li>
                         {% endif %}
@@ -84,7 +84,7 @@
         <div class="hagrid">
             <div class="row">
                 <div class="col-11 offset-1 row-inline justify-between">
-                    <h2>{{ _('@@Jeux de données') }}<sup>{{ datasets|length or 0 }}</sup></h2>
+                    <h2>{{ _('Datasets') }}<sup>{{ datasets|length or 0 }}</sup></h2>
                     <div>
                         <select>
                             <option>Trier par</option>
@@ -109,7 +109,7 @@
     <section id="organization-reuses" class="organization-reuses p-xl">
         <div class="container">
             <div>
-                <h2>{{ _('@@Réutilisations') }}<sup>{{ reuses|length or 0 }}</sup></h2>
+                <h2>{{ _('Reuses') }}<sup>{{ reuses|length or 0 }}</sup></h2>
             </div>
             <div>
                 <ul class="row">
@@ -128,7 +128,7 @@
     {% endif %}
     <section class="organization-members p-xl">
         <div class="container">
-            <h2>{{ _('@@Membres') }}<sup>{{ org.members|length or 0 }}</sup></h2>
+            <h2>{{ _('Members') }}<sup>{{ org.members|length or 0 }}</sup></h2>
             <div class="row">
                 {% for member in org.members %}
                 {% set user = member.user %}
@@ -144,24 +144,24 @@
         <div class="container">
             <div class="row">
                 <div class="col-6 col-md-12">
-                    <h3>{{ _('@@Informations techniques') }}</h3>
+                    <h3>{{ _('Technical details') }}</h3>
                     <dl class="text-grey-300 fs-sm">
                         <div>
                             <dt class="f-light">ID</dt>
                             <dd class="f-bold m-0">{{ org.id }}</dd>
                         </div>
                         <div class="my-sm">
-                            <dt class="f-light">{{ _('@@Date de création') }}</dt>
+                            <dt class="f-light">{{ _('Creation date') }}</dt>
                             <dd class="f-bold m-0">{{ org.created_at|dateformat(format='long') }}</dd>
                         </div>
                         <div>
-                            <dt class="f-light">{{ _('@@Date de mise à jour') }}</dt>
+                            <dt class="f-light">{{ _('Modification date') }}</dt>
                             <dd class="f-bold m-0">{{ org.last_modified|dateformat(format='long') }}</dd>
                         </div>
                     </dl>
                 </div>
                 <div class="col-6 col-md-12  my-md-lg">
-                    <h3>{{ _('@@Actions') }}</h3>
+                    <h3>{{ _('Actions') }}</h3>
                     <ul class="nav-list">
                         {% if can_edit %}
                         <li class="my-md">
@@ -170,8 +170,7 @@
                         </li>
                         {% endif %}
                         <li class="my-md">
-                            <a href="{{ url_for('organizations.datasets_csv', org=org) }}" class="nav-link">{{ _('@@Télécharger
-                                la liste des jeux de données en .csv') }}</a>
+                            <a href="{{ url_for('organizations.datasets_csv', org=org) }}" class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
                         </li>
                     </ul>
                 </div>

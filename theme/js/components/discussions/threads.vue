@@ -11,7 +11,7 @@
             <div class="row-inline justify-between">
               {{
                 $t(
-                  "@@Vous consultez une discussion spécifique sur ce jeu de données"
+                  "You are seeing a specific discussion about this dataset"
                 )
               }}
               <a
@@ -25,12 +25,12 @@
           <a
             class="nav-link text-white mt-xl"
             @click.prevent="viewAllDiscussions"
-            >{{ $t("@@Voir toutes les discussions sur ce jeu de données") }}</a
+            >{{ $t("See all discussions about this dataset") }}</a
           >
         </div>
         <div v-else>
           <div class="row-inline justify-end">
-            {{ $t("@@Trier par :") }}
+            {{ $t("Sort by:") }}
             <select
               name="sortBy"
               id="sortBy"
@@ -88,9 +88,9 @@ const log = console.log;
 const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
 
 const sorts = [
-  { name: i18n.global.t("@@Début de discussion"), key: "-created" },
+  { name: i18n.global.t("Discussion creation"), key: "-created" },
   {
-    name: i18n.global.t("@@Dernière réponse"),
+    name: i18n.global.t("Last reply"),
     key: "-discussion.posted_on",
   },
 ];
@@ -167,7 +167,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toast.error(this.$t("@@Une erreur est survenue lors de la récupération des discussions"));
+          this.$toast.error(this.$t("An error occurred while fetching discussions"));
           this.discussion = [];
         })
         .finally(() => {
@@ -193,7 +193,7 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toast.error(this.$t("@@Une erreur est survenue lors de la récupération de la discussion ") + id);
+          this.$toast.error(this.$t("An error occurred while fetching the discussion ") + id);
           this.loadPage(1); //In case loading a single comment didn't work, we load the first page. Better than nothing !
         })
         .finally(() => {
@@ -229,7 +229,7 @@ export default {
           vm.loadPage(1, true);
         })
         .catch((err) =>
-          this.$toast.error(this.$t("@@Une erreur est survenue lors de la création de la discussion "), err)
+          this.$toast.error(this.$t("An error occurred while creating the discussion "), err)
         );
     },
     //Changing sort order

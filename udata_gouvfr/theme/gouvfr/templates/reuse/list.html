@@ -38,18 +38,18 @@
     <div class="pt-sm search-input">
         <form method="GET" class="row-inline fs-lg">
             <span class="icon active">{% include theme("svg/search.svg") %}</span>
-            <input type="text" name="q" aria-label="{{ _('@@Search...') }}" placeholder="{{ _('@@Search...') }}" />
+            <input type="text" name="q" aria-label="{{ _('Search...') }}" placeholder="{{ _('Search...') }}" />
         </form>
     </div>
     <div class="row-inline pt-xl justify-between align-items-center">
-        <h1 class="m-0 h2">{{ _('@@Réutilisations')}} <sup>{{reuses.total}}</sup></h1>
+        <h1 class="m-0 h2">{{ _('Reuses')}} <sup>{{reuses.total}}</sup></h1>
         <a href="{{ url_for('datasets.list') }}" title=""
-            class="nav-link fs-sm">{{ _('@@Rechercher dans les jeux de données') }}</a>
+            class="nav-link fs-sm">{{ _('Search in datasets') }}</a>
     </div>
     <div class="row-inline py-lg hidden-lg">
         <ul class="tabs">
             <a href="{{ url_for('reuses.list') }}"
-                class="btn-tab tab {% if not reuses.query._filters.type %}active{% endif %}">{{ _('@@Tout') }}</a>
+                class="btn-tab tab {% if not reuses.query._filters.type %}active{% endif %}">{{ _('All') }}</a>
             {% for tab_id, label in reuses_tabs %}
             <a href="{{ reuses.query.to_url(url, replace=True, **{'type': tab_id}) }}"
                 class="btn-tab tab {% if reuses.query._filters and reuses.query._filters.type.type == tab_id %}active{% endif %}">{{ label }}</a>

@@ -42,7 +42,7 @@ For non-JS users, the home search box is a standard input that will still work n
         <div class="suggest-copy text-align-center my-xl">
           <h4 class="text-white">
             {{
-              $t("@@Recherchez des données, réutilisations, contributions...")
+              $t("Search for data, reuses, contributions...")
             }}
           </h4>
         </div>

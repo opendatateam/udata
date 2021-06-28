@@ -4,7 +4,7 @@
       class="my-md my-md-xs fs-xl"
       :onChange="handleSearchChange"
       :value="queryString"
-      :placeholder="$t('@@Recherchez des données...')"
+      :placeholder="$t('Search for data...')"
       ref="input"
     />
     <div
@@ -16,22 +16,22 @@
   </div>
   <div class="row-inline mt-sm justify-between align-items-center">
     <h1 class="m-0 h2">
-      {{ $t("@@Jeux de données") }}<sup>{{ total_results || 0 }}</sup>
+      {{ $t("Datasets") }}<sup>{{ total_results || 0 }}</sup>
     </h1>
     <a :href="reuseUrl" title="" class="nav-link fs-sm mt-lg-sm hidden-md">
-      {{ $t("@@Rechercher dans les réutilisations") }}
+      {{ $t("Search reuses") }}
     </a>
   </div>
   <section class="search-filters p-md-md" :class="{ active: extendedForm }">
     <h4 class="mt-md mt-md-0 mb-xs mb-md-md fs-sm">
-      {{ $t("@@Critères de recherche") }}
+      {{ $t("Search filters") }}
     </h4>
     <div class="filters-wrapper p-sm p-md-0">
       <div class="row justify-between align-items-center">
         <div class="col-3 col-lg-6 col-md-12">
           <Suggestor
-            :placeholder="$t('@@Organisations')"
-            :searchPlaceholder="$t('@@Chercher une organisation...')"
+            :placeholder="$t('Organizations')"
+            :searchPlaceholder="$t('Search an organization...')"
             listUrl="/organizations/"
             suggestUrl="/organizations/suggest/"
             entityUrl="/organizations/"
@@ -41,8 +41,8 @@
         </div>
         <div class="col-3 col-lg-6 col-md-12 mt-md-md">
           <Suggestor
-            :placeholder="$t('@@Mots clés')"
-            :searchPlaceholder="$t('@@Chercher un mot clé...')"
+            :placeholder="$t('Tags')"
+            :searchPlaceholder="$t('Search a tag...')"
             suggestUrl="/tags/suggest/"
             :values="facets.keywords"
             :onChange="handleSuggestorChange('keywords')"
@@ -50,8 +50,8 @@
         </div>
         <div class="col-3 col-lg-5 col-md-12 mt-lg-md">
           <Suggestor
-            :placeholder="$t('@@Licenses')"
-            :searchPlaceholder="$t('@@Chercher une licence...')"
+            :placeholder="$t('Licenses')"
+            :searchPlaceholder="$t('Search a license...')"
             listUrl="/datasets/licenses/"
             :values="facets.license"
             :onChange="handleSuggestorChange('license')"
@@ -59,8 +59,8 @@
         </div>
         <div class="col-2 col-lg-5 col-md-12 mt-lg-md">
           <Suggestor
-            :placeholder="$t('@@Formats')"
-            :searchPlaceholder="$t('@@Chercher un format...')"
+            :placeholder="$t('Formats')"
+            :searchPlaceholder="$t('Search a format...')"
             suggestUrl="/datasets/suggest/formats/"
             :values="facets.format"
             :onChange="handleSuggestorChange('format')"
@@ -87,8 +87,8 @@
         </div>
         <div class="col-3 col-md-12 mt-md-md">
           <Suggestor
-            :placeholder="$t('@@Zone géographique')"
-            :searchPlaceholder="$t('@@Chercher une zone...')"
+            :placeholder="$t('Geographic area')"
+            :searchPlaceholder="$t('Search a geographic area...')"
             suggestUrl="/spatial/zones/suggest/"
             entityUrl="/spatial/zone/"
             :values="facets.geozone"
@@ -97,8 +97,8 @@
         </div>
         <div class="col-3 col-md-12 mt-md-md">
           <Suggestor
-            :placeholder="$t('@@Granularité géographique')"
-            :searchPlaceholder="$t('@@Chercher une granularité...')"
+            :placeholder="$t('Territorial granularity')"
+            :searchPlaceholder="$t('Search a granularity...')"
             listUrl="/spatial/granularities/"
             :values="facets.granularity"
             :onChange="handleSuggestorChange('granularity')"
@@ -110,7 +110,7 @@
       <a
         class="btn-secondary btn-secondary-grey-400"
         @click="extendedForm = !extendedForm"
-        >{{ $t("@@Valider") }}</a
+        >{{ $t("Submit") }}</a
       >
     </div>
   </section>
@@ -142,15 +142,15 @@
         <Empty
           wide
           :queryString="queryString"
-          :cta="$t('@@Réinitialiser les filtres')"
+          :cta="$t('Reset filters')"
           :copy="
             $t(
-              '@@Nous n’avons pas de jeu de données correspondant à votre requête'
+              'No dataset matching your query'
             )
           "
           :copyAfter="
             $t(
-              '@@Vous pouvez essayer de réinitialiser les filtres pour agrandir votre champ de recherche.'
+              'You can try to reset the filters to expand your search.'
             )
           "
           :onClick="() => resetFilters()"

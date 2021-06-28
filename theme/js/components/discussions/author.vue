@@ -5,7 +5,7 @@
         " " +
         author.last_name
     }}
-    <span v-if="badge" class="badge ml-sm">{{ $t("@@Admin") }}</span>
+    <span v-if="badge" class="badge ml-sm">{{ $t("Admin") }}</span>
     </strong>
 </template>
 

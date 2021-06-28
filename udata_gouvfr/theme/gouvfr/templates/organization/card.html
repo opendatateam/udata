@@ -21,10 +21,10 @@
         <div class="card-footer">
             <ul class="card-features text-grey-300 fs-xs">
                 {% if organization.metrics.datasets %}
-                <li>{{ organization.metrics.datasets or 0 }} {{ _('@@jeux de données') }}</li>
+                <li>{{ organization.metrics.datasets or 0 }} {{ _('datasets') }}</li>
                 {% endif %}
                 {% if organization.metrics.reuses %}
-                <li>{{ organization.metrics.reuses or 0 }} {{ _('@@réutilisations') }}</li>
+                <li>{{ organization.metrics.reuses or 0 }} {{ _('reuses') }}</li>
                 {% endif %}
                 <li>
                     <div>

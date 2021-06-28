@@ -23,6 +23,6 @@ export default i18n = createI18n({
   silentTranslationWarn: true,
   missing,
   messages: {
-    en,
+    en
   },
 });

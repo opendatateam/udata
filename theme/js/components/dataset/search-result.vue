@@ -32,34 +32,34 @@ Vue. -->
     </div>
     <dl class="card-hover">
       <div v-if="temporal_coverage">
-        <dt>{{ $t("@@Temporal coverage") }}</dt>
+        <dt>{{ $t("Temporal coverage") }}</dt>
         <dd>{{ Object.values(temporal_coverage).join(" - ") }}</dd>
       </div>
       <div v-if="frequency">
-        <dt>{{ $t("@@Frequency") }}</dt>
+        <dt>{{ $t("Frequency") }}</dt>
         <dd>{{ frequency }}</dd>
       </div>
       <div v-if="geozone">
-        <dt>{{ $t("@@Spatial coverage") }}</dt>
+        <dt>{{ $t("Spatial coverage") }}</dt>
         <dd>{{ geozone.join(", ") }}</dd>
       </div>
       <div v-if="spatial?.granularity">
-        <dt>{{ $t("@@Territorial coverage granularity") }}</dt>
+        <dt>{{ $t("Territorial coverage granularity") }}</dt>
         <dd>{{ spatial.granularity }}</dd>
       </div>
     </dl>
     <ul class="card-footer">
       <li>
         <strong>{{ metrics.ressources || 0 }}</strong>
-        {{ $tc("@@ressources", metrics.ressources || 0) }}
+        {{ $tc("resources", metrics.ressources || 0) }}
       </li>
       <li>
         <strong>{{ metrics.reuses || 0 }}</strong>
-        {{ $tc("@@réutilisations", metrics.reuses || 0) }}
+        {{ $tc("reuses", metrics.reuses || 0) }}
       </li>
       <li>
         <strong>{{ metrics.followers || 0 }}</strong>
-        {{ $tc("@@abonnés", metrics.followers || 0) }}
+        {{ $tc("favourites", metrics.followers || 0) }}
       </li>
     </ul>
   </article>

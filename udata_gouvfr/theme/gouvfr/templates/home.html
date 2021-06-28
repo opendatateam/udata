@@ -15,27 +15,27 @@
     <div class="hagrid">
         <div class="row">
             <div class="col-5 col-lg-12">
-                <h1 class="mt-0">{{ _('@@Plateforme ouverte des données publiques Françaises') }}</h1>
+                <h1 class="mt-0">{{ _('Open platform for French public data') }}</h1>
                 <div class="mt-md mt-lg-sm">
-                    <h4>{{ _('@@Thématiques à la une') }}</h4>
+                    <h4>{{ _('Featured topics') }}</h4>
                     <a href="{{ url_for('gouvfr.spd') }}" class=" btn-venti bg-blue-470">
-                        {{ _('@@Données de') }}
-                        <strong>{{ _('@@Référence') }}</strong>
+                        Données de
+                        <strong>Référence</strong>
                     </a>
                     <a href="{{ url_for('gouvfr.show_page', slug='donnees-coronavirus') }}"
                         class="btn-venti my-md bg-blue-450">
-                        {{ _('@@Données relatives à la') }}
-                        <strong>{{ _('@@COVID-19') }}</strong>
+                        Données relatives à la
+                        <strong>COVID-19</strong>
                     </a>
                     <a href="{{ url_for('gouvfr.show_page', slug='donnees-comptes-publics') }}"
                         class="btn-venti bg-green-350">
-                        {{ _('@@Données relatives aux') }}
-                        <strong>{{ _('@@Comptes Publics') }}</strong>
+                        Données relatives aux
+                        <strong>Comptes Publics</strong>
                     </a>
                 </div>
             </div>
             <div class="col-6 offset-1 offset-lg-0 col-lg-12 mt-lg-md">
-                <h4>{{ _('@@Actualités') }}</h4>
+                <h4>{{ _('News') }}</h4>
                 {% if last_post %}
                 {% set post = last_post %}
                 <a href="{{ post.display_url }}" title="{{ post.name }}" class="unstyled w-100 hero-post">
@@ -43,7 +43,7 @@
                 </a>
                 <div class="row justify-center">
                     <a href="{{ url_for('posts.list') }}"
-                        class="btn-secondary btn-with-arrow">{{ _('@@Toutes les actualités') }}</a>
+                        class="btn-secondary btn-with-arrow">{{ _('All news') }}</a>
                 </div>
                 {% endif %}
             </div>
@@ -65,7 +65,7 @@
 <section class="metrics-bar">
     <div class="hagrid py-hg">
         <div class="bar p-xl">
-            <h3>{% include theme('svg/logotype.svg') %} {{ _('@@c’est') }}</h3>
+            <h3>{% include theme('svg/logotype.svg') %} {{ _('is') }}</h3>
             <div class="row-inline justify-between mt-xl">
                 {% for (label, metric) in metrics %}
                 <div class="filet {% if metric == 'reuses' %}filet-currentcolor text-green-300{% endif %}">
@@ -84,7 +84,7 @@
 {% set dataset_tabs = (
     ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
     ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
-    ('reference-datasets', _('@@Jeux de données de référence'), spd, {}),
+    ('reference-datasets', _('Reference datasets'), spd, {}),
 ) %}
 
 <section class="datasets pb-hg pt-md bg-grey-50">
@@ -92,7 +92,7 @@
         {# Dataset tabs #}
         <div class="row justify-between">
             <div class="col-auto">
-                <h2>{{ _('@@Données') }}</h2>
+                <h2>{{ _('Data') }}</h2>
             </div>
             <div class="col-auto">
                 <nav class="tabs">
@@ -122,7 +122,7 @@
 {# Reuses section #}
 {% set nb_reuses = current_site.settings.home_reuses|length %}
 {% set reuses_tabs = (
-    ('best-reuses', _('@@Selection Etalab'), current_site.settings.home_reuses, {}),
+    ('best-reuses', _('Etalab\'s selection'), current_site.settings.home_reuses, {}),
     ('latest-reuses', _('Latest reuses'), recent_reuses[:3], {'sort': '-created'}),
 ) %}
 
@@ -131,7 +131,7 @@
     <div class="hagrid">
         <div class="row justify-between">
             <div class="col-auto">
-                <h2>{{ _('Réutilisations') }}</h2>
+                <h2>{{ _('Reuses') }}</h2>
             </div>
             <div class="col-auto">
                 <nav class="tabs">
@@ -140,7 +140,7 @@
                         class="btn-tab tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
                     {% endfor %}
                     <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}"
-                        class="btn-tab tab">{{ _('Voir plus') }}</a>
+                        class="btn-tab tab">{{ _('See more') }}</a>
                 </nav>
             </div>
         </div>

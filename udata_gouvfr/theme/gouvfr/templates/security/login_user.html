@@ -8,7 +8,7 @@
             <div class="col-6 text-align-center offset-3 form-container col-md-12 offset-md-0">
                 <form class="form" method="post" action="{{ url_for('security.login') }}">
                     <fieldset>
-                        <legend class="h2 mb-0">{{ _('@@Connectez-vous') }}</legend>
+                        <legend class="h2 mb-0">{{ _('Sign in') }}</legend>
                         <p class="mt-xs mb-xl f-light fs-sm">
                             Petit blabla un peu court sur ce qu'on gagne à se connecter, proablement un laïus sur les
                             discussions ou les réutilisations.
@@ -38,7 +38,7 @@
             {% if not read_only_mode %}
             <div class="col-6 offset-3 form-container text-align-center mt-lg col-md-12 offset-md-0">
                 <h3 class="fs-sm mb-sm">
-                    {{ _('@@Vous n\'avez pas de compte ?')}}
+                    {{ _('Don\'t have an account?')}}
                 </h3>
                 <a title="{{ _('Register') }}" href="{{ url_for('security.register', next=request.url) }}"
                     class="btn btn-primary btn-block btn-lg">

@@ -92,7 +92,7 @@ export default {
     values: [Array, String],
     emptyPlaceholder: {
       type: String,
-      default: i18n.global.t("@@Aucun résultat."),
+      default: i18n.global.t("No results found."),
     },
   },
   mounted() {

@@ -10,7 +10,7 @@ Nothing to see here ! Well actually it's a small component that says this.
     <div :class="{ 'pr-lg': wide }" v-html="Empty" />
     <div :class="{ 'mt-lg': !wide }">
       <h4>
-        {{ $t("@@Aucun résultat ne correspond à votre recherche") }}
+        {{ $t("There are no results for your search") }}
       </h4>
       <p>
         {{ copy }}

@@ -47,7 +47,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Reuses'), 'reuses.list'),
     nav.Item(_('Organizations'), 'organizations.list'),
     nav.Item(_('News'), 'posts.list'),
-    nav.Item(_('@@Nous contacter'), None, url='https://support.data.gouv.fr/'),
+    nav.Item(_('Contact us'), None, url='https://support.data.gouv.fr/'),
 ])
 
 theme.menu(gouvfr_menu)
@@ -73,7 +73,7 @@ if export_dataset_id:
                              _external=True)
         footer_links.append(nav.Item(_('Data catalog'), None, url=export_url))
 
-footer_links.append(nav.Item('Données clés par sujet', 'gouvfr.show_page',
+footer_links.append(nav.Item(_('Featured datasets by topic'), 'gouvfr.show_page',
                              args={'slug': 'donnees-cles-par-sujet'}))
 
 nav.Bar('gouvfr_footer', footer_links)

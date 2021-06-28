@@ -81,9 +81,9 @@
     <section class="reuse-infos my-lg">
         <div class="tabs container">
             <a href="#reuse-producer" role="button" class="tab-panel bg-green-300 tab active"><span
-                    class="label">{{ _('@@Réutilisateur') }}</span></a>
+                    class="label">{{ _('Reuser') }}</span></a>
             <a href="#reuse-tags" role="button" class="tab-panel bg-green-300 tab"><span
-                    class="label">{{ _('@@Mots clés') }}</span></a>
+                    class="label">{{ _('Tags') }}</span></a>
         </div>
         <div class="callout p-hg p-md-md mb-lg bg-green-300">
             <div id="reuse-producer" class="tab-content hagrid active">
@@ -98,16 +98,16 @@
                 {% endif %}
             </div>
             <div id="reuse-tags" class="tab-content container">
-                <h2>{{ _('@@Informations') }}</h2>
+                <h2>{{ _('Information') }}</h2>
                 <dl class="description-list fs-base">
                     <div>
-                        <dt class="f-bold text-grey-400">{{ _('@@Type') }}</dt>
+                        <dt class="f-bold text-grey-400">{{ _('Type') }}</dt>
                         <dd>
                             {{ reuse.type_label }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="f-bold text-grey-400">{{ _('@@Mots clés') }}</dt>
+                        <dt class="f-bold text-grey-400">{{ _('Tags') }}</dt>
                         <dd>
                             {% for tag in reuse.tags %}
                             <a href="{{ url_for('search.index', tag=tag) }}"><span class="tag">{{ tag }}</span></a>
@@ -150,7 +150,7 @@
     <section class="reuse-actions container my-hg">
         <div class="row">
             <div class="col-6 col-md-12">
-                <h2 class="fs-xxl">{{ _('@@Actions') }}</h2>
+                <h2 class="fs-xxl">{{ _('Actions') }}</h2>
                 <ul class="nav-list">
                     {% if can_edit %}
                     <li class="my-md">
@@ -164,7 +164,7 @@
                 </ul>
             </div>
             <div class="col-6 col-md-12 my-md-lg">
-                <h2 class="fs-xxl">{{ _('@@Embed') }}</h2>
+                <h2 class="fs-xxl">{{ _('Embed') }}</h2>
                 <p class="text-grey-300 fs-sm">
                     Embed is cool, embed is life. Lorem ipsum dolor, sit amet consectetur adipisicing elit. Dolore,
                     consectetur adipisicing elit.
@@ -188,7 +188,7 @@
         </div>
     </section>
     <section class="reuse-xsell container py-hg">
-        <h2>{{ _('@@Plus de réutilisations') }}</h2>
+        <h2>{{ _('More reuses') }}</h2>
         <ul class="row">
             {% for reuse in related_reuses %}
             {% set features = ['preview'] %}

@@ -11,27 +11,27 @@
         <div class="hagrid">
             <div class="row align-items-center">
                 <div class="col-auto header-logo">
-                    <a href="{{ url_for('site.home') }}" title="{{ _('@@Retourner à l\'accueil de data.gouv.fr') }}">
+                    <a href="{{ url_for('site.home') }}" title="{{ _('Go back to home page') }}">
                         {% include theme('svg/marianne.svg') %}
                     </a>
                 </div>
                 <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start">
-                    <a href="/search" title="{{ _('@@Rechercher') }}" class="mr-md"
+                    <a href="/search" title="{{ _('Search') }}" class="mr-md"
                         @click.capture.prevent="$refs.suggest.startSearch()">
                         {% include theme('svg/search.svg') %}
                     </a>
                     <a href="#" @click.capture.prevent="$refs.header.classList.add('mobile-menu-open')"
-                        title="{{ _('@@Open menu') }}">
+                        title="{{ _('Open menu') }}">
                         {% include theme('svg/burger-menu.svg') %}
                     </a>
                     <a href="#" @click.capture.prevent="$refs.header.classList.remove('mobile-menu-open')"
-                        title="{{ _('@@Close menu') }}" class="mobile-menu-close hidden">
-                        {{ _('@@Fermer') }}
+                        title="{{ _('Close menu') }}" class="mobile-menu-close hidden">
+                        {{ _('Close') }}
                         {% include theme('svg/close.svg') %}
                     </a>
                 </nav>
                 <div class="col-auto ml-lg ml-xl-0 col-xl-12 header-service">
-                    <a href="{{ url_for('site.home') }}" title="{{ _('@@Retourner à l\'accueil de data.gouv.fr') }}">
+                    <a href="{{ url_for('site.home') }}" title="{{ _('Go back to home page') }}">
                         {% include theme('svg/logotype.svg') %}
                     </a>
                 </div>
@@ -50,10 +50,10 @@
                     </a>
                     {% else %}
                     <a href="{{ url_for('security.login', next=request.url) }}"
-                        title="{{ _('@@Sign In') }}">{% include theme('svg/login.svg') %}{{ _('@@Se connecter') }}
+                        title="{{ _('Sign In') }}">{% include theme('svg/login.svg') %}{{ _('Sign in') }}
                     </a>
                     <a href="{{ url_for('security.register', next=request.url) }}"
-                        title="{{ _('@@Register') }}">{% include theme('svg/register.svg') %}{{ _("@@S'enregistrer") }}
+                        title="{{ _('Register') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
                     </a>
                     {% endif %}
                 </div>
@@ -74,8 +74,8 @@
                 <div class="col-3 hidden-xl search-box">
                     <form action="/search" class="w-100 row-inline justify-between"
                         @click.capture.prevent="$refs.suggest.startSearch()">
-                        <input type="text" name="q" placeholder="{{ _('@@Rechercher') }}" />
-                        <button type="submit" aria-label="{{ _('@@Rechercher') }}">
+                        <input type="text" name="q" placeholder="{{ _('Search') }}" />
+                        <button type="submit" aria-label="{{ _('Search') }}">
                             {% include theme('svg/search.svg') %}
                         </button>
                     </form>

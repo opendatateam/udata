@@ -2,12 +2,12 @@
   <div class="thread-wrapper" :id="discussionUrl(id)">
     <header class="thread-header">
       <div class="thread-status" v-if="closed">
-        <span>{{ $t("@@Discussion fermée") }}</span>
+        <span>{{ $t("Discussion closed") }}</span>
       </div>
       <div class="thread-title">{{ title }}</div>
       <div class="thread-link">
         <a
-          :aria-label="$t('@@Permalien vers la discussion')"
+          :aria-label="$t('Discussion permalink')"
           :href="discussionUrl(id, true)"
           v-html="LinkIcon"
         ></a>
@@ -32,7 +32,7 @@
             </div>
             <div class="thread-link">
               <a
-                :aria-label="$t('@@Permalien vers le commentaire')"
+                :aria-label="$t('Comment permalink')"
                 :href="commentUrl(id, index, true)"
                 v-html="LinkIcon"
               ></a>
@@ -48,7 +48,7 @@
         v-if="_collapsed"
         @click.prevent="collapsed = false"
       >
-        {{ _discussion.length }} {{ $t("@@messages") }}
+        {{ _discussion.length }} {{ $t("messages") }}
       </article>
     </div>
     <footer class="thread-footer">
@@ -59,7 +59,7 @@
           @click.stop="displayForm"
           tabindex="0"
         >
-          {{ $t("@@Répondre") }}
+          {{ $t("Reply") }}
         </a>
         <thread-reply
           :subjectId="id"
@@ -68,9 +68,9 @@
         />
       </div>
       <div v-if="closed" class="text-grey-300">
-        {{ $t("@@La discussion a été close par") }} &#32;
+        {{ $t("The discussion was closed by") }} &#32;
         <span class="text-blue-200 px-xxs"><Author :author="closed_by" /></span>
-        {{ $t("@@le") }} {{ formatDate(closed) }}
+        {{ $t("on") }} {{ formatDate(closed) }}
       </div>
     </footer>
   </div>
@@ -129,7 +129,7 @@ export default {
     },
     displayForm: function () {
       this.$auth(
-        this.$t("@@Vous devez être connecté pour commencer une discussion.")
+        this.$t("You must be logged in to start a discussion.")
       );
       this.showForm = true;
     },
