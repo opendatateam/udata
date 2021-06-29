@@ -118,8 +118,10 @@
             </div>
         </div>
     </section>
-    <section class="reuse-image hagrid">
-        <img src="{{ reuse.image|placeholder('reuse') }}" class="w-100" alt="{{ reuse.title }}" />
+    <section class="reuse-image hagrid text-align-center">
+        <a href="{{ reuse.url }}" rel="nofollow" title="{{reuse.title}}" class="unstyled">
+            <img src="{{ reuse.image|placeholder('reuse') }}" class="mw-100" alt="{{ reuse.title }}" />
+        </a>
     </section>
     <section class="reuse-content container">
         <div class="row-inline">
