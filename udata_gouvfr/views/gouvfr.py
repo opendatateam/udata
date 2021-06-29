@@ -102,7 +102,7 @@ def get_object(model, id_or_slug):
     return obj
 
 
-@blueprint.route('/pages/<slug>')
+@blueprint.route('/pages/<slug>/')
 def show_page(slug):
     content, gh_url = get_page_content(slug)
     page = frontmatter.loads(content)
@@ -116,33 +116,10 @@ def show_page(slug):
     )
 
 
-@blueprint.route('/reference')
-def spd():
-    datasets = Dataset.objects(badges__kind=SPD).order_by('title')
-    return theme.render('spd.html', datasets=datasets, badge=SPD)
-
-
-@blueprint.route('/licences')
-def licences():
-    try:
-        return theme.render('licences.html')
-    except TemplateNotFound:
-        abort(404)
-
-
-@blueprint.route('/suivi')
+@blueprint.route('/suivi/')
 def suivi():
     try:
         return theme.render('suivi.html')
-    except TemplateNotFound:
-        abort(404)
-
-
-@blueprint.route('/faq/', defaults={'section': 'home'})
-@blueprint.route('/faq/<string:section>/')
-def faq(section):
-    try:
-        return theme.render('faq/{0}.html'.format(section), page_name=section)
     except TemplateNotFound:
         abort(404)
 
@@ -167,7 +144,7 @@ def dataset_apis(ctx):
 
 
 # TODO : better this, redirect is not the best. How to serve it instead ?!
-@blueprint.route('/_stylemark/<path:filename>')
+@blueprint.route('/_stylemark/<path:filename>/')
 def stylemark(filename):
     return redirect(theme_static_with_version(None,
                                               filename="stylemark/index.html"))
