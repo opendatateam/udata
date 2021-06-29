@@ -2,7 +2,7 @@
 {% set name = organization.name or organization.fullname %}
 <div class="producer-panel row justify-between">
     <div class="col-1 col-md-12">
-        <a href="{{ details_view }}" title="{{ name }}">
+        <a href="{{ details_view }}" class="logo" title="{{ name }}">
             <img src="{{ organization.logo|placeholder('organization') }}" alt="{{ name }}"
                 class="organization-logo producer mw-100" />
         </a>
