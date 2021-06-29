@@ -110,7 +110,7 @@
                         <dt class="f-bold text-grey-400">{{ _('Tags') }}</dt>
                         <dd>
                             {% for tag in reuse.tags %}
-                            <a href="{{ url_for('reuse.list', keywords=tag) }}"><span class="tag">{{ tag }}</span></a>
+                            <a href="{{ url_for('reuses.list', tag=tag) }}"><span class="tag">{{ tag }}</span></a>
                             {% endfor %}
                         </dd>
                     </div>
