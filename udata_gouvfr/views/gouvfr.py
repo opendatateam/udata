@@ -99,7 +99,7 @@ def get_object(model, id_or_slug):
     return obj
 
 
-@blueprint.route('/pages/<slug>/')
+@blueprint.route('/pages/<path:slug>/')
 def show_page(slug):
     content, gh_url = get_page_content(slug)
     page = frontmatter.loads(content)
