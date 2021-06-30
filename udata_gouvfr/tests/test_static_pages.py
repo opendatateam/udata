@@ -49,20 +49,20 @@ class StaticPagesTest:
 
     def test_page_error_empty_cache(self, client, rmock, mocker):
         mocker.patch.object(cache, 'get', return_value=None)
-        raw_url, gh_url = get_pages_gh_urls('cache1')
+        raw_url, _ = get_pages_gh_urls('cache1')
         rmock.get(raw_url, status_code=500)
         response = client.get(url_for('gouvfr.show_page', slug='cache1'))
         assert response.status_code == 503
 
     def test_page(self, client, rmock):
-        raw_url, gh_url = get_pages_gh_urls('test')
+        raw_url, _ = get_pages_gh_urls('test')
         rmock.get(raw_url, text="""#test""")
         response = client.get(url_for('gouvfr.show_page', slug='test'))
         assert response.status_code == 200
         assert b'<h1>test</h1>' in response.data
 
     def test_page_inject_empty_objects(self, client, rmock):
-        raw_url, gh_url = get_pages_gh_urls('test')
+        raw_url, _ = get_pages_gh_urls('test')
         rmock.get(raw_url, text=f"""---
 datasets:
 reuses:
@@ -75,7 +75,7 @@ reuses:
     def test_page_inject_objects(self, client, rmock):
         dataset = DatasetFactory()
         reuse = ReuseFactory()
-        raw_url, gh_url = get_pages_gh_urls('test')
+        raw_url, _ = get_pages_gh_urls('test')
         rmock.get(raw_url, text=f"""---
 datasets:
   - {dataset.id}
@@ -88,3 +88,10 @@ reuses:
         assert response.status_code == 200
         assert str(dataset.title).encode('utf-8') in response.data
         assert str(reuse.title).encode('utf-8') in response.data
+
+    def test_page_subdir(self, client, rmock):
+        raw_url, _ = get_pages_gh_urls('subdir/test')
+        rmock.get(raw_url, text="""#test""")
+        response = client.get(url_for('gouvfr.show_page', slug='subdir/test'))
+        assert response.status_code == 200
+        assert b'<h1>test</h1>' in response.data
