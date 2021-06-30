@@ -11,7 +11,6 @@ from udata_gouvfr.theme import theme_static_with_version
 from udata.app import cache
 from udata.models import Reuse, Dataset
 from udata.i18n import I18nBlueprint
-from udata.sitemap import sitemap
 
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
 from udata_gouvfr.frontend import template_hook
