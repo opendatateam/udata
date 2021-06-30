@@ -32,7 +32,7 @@
           <Suggestor
             :placeholder="$t('Organizations')"
             :searchPlaceholder="$t('Search an organization...')"
-            listUrl="/organizations/"
+            listUrl="/organizations/?sort=-followers"
             suggestUrl="/organizations/suggest/"
             entityUrl="/organizations/"
             :values="facets.organization"
@@ -143,15 +143,9 @@
           wide
           :queryString="queryString"
           :cta="$t('Reset filters')"
-          :copy="
-            $t(
-              'No dataset matching your query'
-            )
-          "
+          :copy="$t('No dataset matching your query')"
           :copyAfter="
-            $t(
-              'You can try to reset the filters to expand your search.'
-            )
+            $t('You can try to reset the filters to expand your search.')
           "
           :onClick="() => resetFilters()"
         />
