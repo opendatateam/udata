@@ -765,28 +765,6 @@ class SpatialTerritoriesApiTest:
         assert response.json['features'] == []
 
 
-class SitemapTest:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_urls_within_sitemap(self, client):
-        '''It should add gouvfr pages to sitemap.'''
-        response = client.get('sitemap.xml')
-        assert200(response)
-
-        urls = [
-            url_for('gouvfr.redevances_redirect', _external=True),
-            url_for('gouvfr.faq_redirect', _external=True),
-        ]
-        for section in ('citizen', 'producer', 'reuser', 'developer',
-                        'system-integrator'):
-            urls.append(url_for('gouvfr.faq_redirect',
-                                section=section, _external=True))
-
-        for url in urls:
-            assert '<loc>{url}</loc>'.format(url=url) in response.data.decode('utf-8')
-
-
 @pytest.mark.usefixtures('clean_db')
 class SitemapTerritoriesTest:
     settings = TerritoriesSettings

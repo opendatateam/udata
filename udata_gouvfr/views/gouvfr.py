@@ -16,8 +16,6 @@ from udata.sitemap import sitemap
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
 from udata_gouvfr.frontend import template_hook
 
-from udata_gouvfr.models import SPD
-
 log = logging.getLogger(__name__)
 
 blueprint = I18nBlueprint('gouvfr', __name__,
@@ -122,14 +120,6 @@ def suivi():
         return theme.render('suivi.html')
     except TemplateNotFound:
         abort(404)
-
-
-@sitemap.register_generator
-def gouvfr_sitemap_urls():
-    yield 'gouvfr.faq_redirect', {}, None, 'weekly', 1
-    for section in ('citizen', 'producer', 'reuser', 'developer',
-                    'system-integrator'):
-        yield 'gouvfr.faq_redirect', {'section': section}, None, 'weekly', 0.7
 
 
 def has_apis(ctx):
