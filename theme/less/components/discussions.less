@@ -1,12 +1,10 @@
 .discussions-wrapper {
-
     .thread-wrapper {
         margin-top: @spacing-md;
         background: @grey-380;
 
         .thread-header {
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
 
@@ -101,7 +99,6 @@
 
             padding: @spacing-md;
 
-
             @media @query-md {
                 padding-left: @spacing-md;
                 text-align: center;
@@ -126,12 +123,14 @@
         }
     }
 
-    .thread-reply, .thread-create {
+    .thread-reply,
+    .thread-create {
         label {
             display: block;
         }
 
-        textarea, input[type="text"] {
+        textarea,
+        input[type="text"] {
             width: 100%;
             appearance: none;
             border: none;

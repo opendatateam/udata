@@ -52,6 +52,7 @@ For non-JS users, the home search box is a standard input that will still work n
               ref="searchInput"
               :value="queryString"
               :onChange="onChange"
+              :stop="stop"
             />
           </div>
           <div class="suggest-results">

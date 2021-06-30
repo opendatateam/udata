@@ -38,12 +38,13 @@
     <div class="pt-sm search-input">
         <form method="GET" class="row-inline fs-lg">
             <span class="icon active">{% include theme("svg/search.svg") %}</span>
-            <input type="text" name="q" aria-label="{{ _('Search...') }}" placeholder="{{ _('Search...') }}" />
+            <input type="text" name="q" value="{{reuses.query._query}}" aria-label="{{ _('Search...') }}"
+                placeholder="{{ _('Search...') }}" />
         </form>
     </div>
     <div class="row-inline pt-xl justify-between align-items-center">
         <h1 class="m-0 h2">{{ _('Reuses')}} <sup>{{reuses.total}}</sup></h1>
-        <a href="{{ url_for('datasets.list') }}" title=""
+        <a href="{{ url_for('datasets.list') }}" title="{{ _('Search in datasets') }}"
             class="nav-link fs-sm">{{ _('Search in datasets') }}</a>
     </div>
     <div class="row-inline py-lg hidden-lg">

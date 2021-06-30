@@ -221,7 +221,7 @@
                     <ul class="tags">
                         {% for tag in dataset.tags %}
                         <li>
-                            <a href="{{ url_for('search.index', tag=tag) }}" class="label label-default"
+                            <a href="{{ url_for('datasets.list', tag=tag) }}" class="label label-default"
                                 title="{{ tag }}">
                                 {{ tag|truncate(14, True) }}
                             </a>

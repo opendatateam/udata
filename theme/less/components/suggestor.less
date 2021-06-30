@@ -4,6 +4,11 @@
         border-color: @grey-200;
     }
 
+    //Loader spinner
+    .multiselect-spinner {
+        top: 5px;
+    }
+
     //Labels when the dropdown is closed (with the "+n" label when more than two options are selected)
     .suggestor-labels {
         display: flex;
@@ -60,7 +65,7 @@
             align-items: center;
             white-space: normal;
 
-            +.multiselect-tag {
+            + .multiselect-tag {
                 margin-top: @spacing-xxs;
             }
         }
@@ -91,7 +96,7 @@
     }
 
     //When dropdown is closed, search should take no width
-    &.is-multiple .multiselect-search{
+    &.is-multiple .multiselect-search {
         width: 0;
     }
 

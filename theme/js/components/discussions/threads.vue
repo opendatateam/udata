@@ -10,9 +10,7 @@
           <div class="well well-secondary-green-300">
             <div class="row-inline justify-between">
               {{
-                $t(
-                  "You are seeing a specific discussion about this dataset"
-                )
+                $t("You are seeing a specific discussion about this dataset")
               }}
               <a
                 @click.prevent="viewAllDiscussions"
@@ -29,23 +27,25 @@
           >
         </div>
         <div v-else>
-          <div class="row-inline justify-end">
+          <div class="row-inline justify-end align-items-center">
             {{ $t("Sort by:") }}
-            <select
-              name="sortBy"
-              id="sortBy"
-              @change="changeSort(current_sort)"
-              v-model="current_sort"
-              class="ml-xs"
-            >
-              <option
-                v-for="sort in sorts"
-                :value="sort"
-                :selected="sort === current_sort"
+            <div class="dropdown btn-secondary-white ml-md">
+              <select
+                name="sortBy"
+                id="sortBy"
+                @change="changeSort(current_sort)"
+                v-model="current_sort"
+                class="ml-xs"
               >
-                {{ sort.name }}
-              </option>
-            </select>
+                <option
+                  v-for="sort in sorts"
+                  :value="sort"
+                  :selected="sort === current_sort"
+                >
+                  {{ sort.name }}
+                </option>
+              </select>
+            </div>
           </div>
           <ul>
             <li
@@ -81,7 +81,7 @@ import i18n from "../../plugins/i18n";
 import Pagination from "../pagination/pagination.vue";
 import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
-import Loader from "./loader.vue"
+import Loader from "./loader.vue";
 import CloseIcon from "svg/close.svg";
 
 const log = console.log;
@@ -100,7 +100,7 @@ export default {
     "create-thread": CreateThread,
     Thread,
     Pagination,
-    Loader
+    Loader,
   },
   data() {
     return {
@@ -167,7 +167,9 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toast.error(this.$t("An error occurred while fetching discussions"));
+          this.$toast.error(
+            this.$t("An error occurred while fetching discussions")
+          );
           this.discussion = [];
         })
         .finally(() => {
@@ -193,7 +195,9 @@ export default {
         })
         .catch((err) => {
           log(err);
-          this.$toast.error(this.$t("An error occurred while fetching the discussion ") + id);
+          this.$toast.error(
+            this.$t("An error occurred while fetching the discussion ") + id
+          );
           this.loadPage(1); //In case loading a single comment didn't work, we load the first page. Better than nothing !
         })
         .finally(() => {
@@ -229,7 +233,10 @@ export default {
           vm.loadPage(1, true);
         })
         .catch((err) =>
-          this.$toast.error(this.$t("An error occurred while creating the discussion "), err)
+          this.$toast.error(
+            this.$t("An error occurred while creating the discussion "),
+            err
+          )
         );
     },
     //Changing sort order

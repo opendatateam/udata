@@ -72,8 +72,8 @@
                 </nav>
                 <div class="col-3 hidden-xl search-box">
                     <form action="/search" class="w-100 row-inline justify-between"
-                        @click.capture.prevent="$refs.suggest.startSearch()">
-                        <input type="text" name="q" placeholder="{{ _('Search') }}" />
+                        @focus.capture.prevent="$refs.suggest.startSearch()" tabindex="0">
+                        <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search') }}" />
                         <button type="submit" aria-label="{{ _('Search') }}">
                             {% include theme('svg/search.svg') %}
                         </button>

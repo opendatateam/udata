@@ -7,8 +7,8 @@ import FollowButton from "./components/utils/follow-button";
 
 import Tabs from "./components/vanilla/tabs";
 import Accordion from "./components/vanilla/accordion";
+import Clipboard from "./components/vanilla/clipboard";
 
-import VueClipboard from "vue3-clipboard";
 import VueFinalModal from "vue-final-modal";
 import Toaster from "@meforma/vue-toaster";
 
@@ -20,7 +20,6 @@ import filters from "./plugins/filters";
 
 const app = createApp({});
 
-app.use(VueClipboard, {});
 app.use(Api);
 app.use(Auth);
 app.use(VueFinalModal());

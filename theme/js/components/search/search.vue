@@ -44,8 +44,8 @@
             :placeholder="$t('Tags')"
             :searchPlaceholder="$t('Search a tag...')"
             suggestUrl="/tags/suggest/"
-            :values="facets.keywords"
-            :onChange="handleSuggestorChange('keywords')"
+            :values="facets.tag"
+            :onChange="handleSuggestorChange('tag')"
           />
         </div>
         <div class="col-3 col-lg-5 col-md-12 mt-lg-md">
