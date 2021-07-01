@@ -52,14 +52,11 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 
 theme.menu(gouvfr_menu)
 
-footer_links = [
+opendata_links = [
     nav.Item(_('News'), 'posts.list'),
-    nav.Item(_('Documentation'), None, url='https://doc.data.gouv.fr'),
     nav.Item(_('Reference Data'), 'gouvfr.show_page', args={'slug': 'spd/reference'}),
-    nav.Item(_('Licences'), 'gouvfr.show_page', args={'slug': 'legal/licences'}),
-    nav.Item(_('API'), None, url=current_app.config.get('API_DOC_EXTERNAL_LINK', '#')),
-    nav.Item(_('Terms of use'), 'site.terms'),
-    nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
+    nav.Item(_('Featured topics'), 'gouvfr.show_page', args={'slug': 'donnees-cles-par-sujet'}),
+    nav.Item(_('Portal for European data'), None, url='https://data.europa.eu'),
 ]
 
 export_dataset_id = current_app.config.get('EXPORT_CSV_DATASET_ID')
@@ -71,10 +68,25 @@ if export_dataset_id:
     else:
         export_url = url_for('datasets.show', dataset=export_dataset,
                              _external=True)
-        footer_links.append(nav.Item(_('Data catalog'), None, url=export_url))
+        opendata_links.append(nav.Item(_('Data catalog'), None, url=export_url))
 
-footer_links.append(nav.Item(_('Featured datasets by topic'), 'gouvfr.show_page',
-                             args={'slug': 'donnees-cles-par-sujet'}))
+nav.Bar('gouvfr_opendata', opendata_links)
+
+
+support_links = [
+    nav.Item(_("Platform's documentation"), None, url='https://doc.data.gouv.fr'),
+    nav.Item(_("Portal's API"), None, url=current_app.config.get('API_DOC_EXTERNAL_LINK', '#')),
+    nav.Item(_('Open data guides'), None, url='https://guides.etalab.gouv.fr'),
+    nav.Item(_('Contact us'), None, url='https://support.data.gouv.fr'),
+]
+
+nav.Bar('gouvfr_support', support_links)
+
+footer_links = [
+    nav.Item(_('Licences'), 'gouvfr.show_page', args={'slug': 'legal/licences'}),
+    nav.Item(_('Terms of use'), 'site.terms'),
+    nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
+]
 
 nav.Bar('gouvfr_footer', footer_links)
 
