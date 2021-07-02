@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
 
-  <body class="{{body_class}}">
+  <body>
     <section id="app">
       <div class="container">
     <div class="row">
@@ -13,7 +13,6 @@
                 <div class="panel-body oauth-authorize">
     <div class="row">
         <div class="col-xs-12">
-            <img src="{{ grant.client.image(100) }}" class="pull-left app-logo" width="100" height="100" alt="">
             <p class="lead prompt">
             {{ _(
                 '%(app)s want to access your %(site)s account.',
