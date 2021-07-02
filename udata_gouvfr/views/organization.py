@@ -1,6 +1,6 @@
 import itertools
 
-from flask import g, abort, redirect, url_for
+from flask import g, abort, redirect, url_for, request
 from flask_security import current_user
 
 from udata import search
@@ -67,6 +67,9 @@ class OrganizationDetailView(OrgView, DetailView):
     def get_context(self):
         context = super(OrganizationDetailView, self).get_context()
 
+        params_datasets_page = request.args.get('datasets_page', 1, type=int)
+        params_reuses_page = request.args.get('reuses_page', 1, type=int)
+
         can_edit = EditOrganizationPermission(self.organization)
         can_view = OrganizationPrivatePermission(self.organization)
 
@@ -92,8 +95,8 @@ class OrganizationDetailView(OrgView, DetailView):
         total_reuses = len(reuses) + len(private_reuses)
 
         context.update({
-            'reuses': reuses.paginate(1, self.page_size),
-            'datasets': datasets.paginate(1, self.page_size),
+            'reuses': reuses.paginate(params_reuses_page, self.page_size),
+            'datasets': datasets.paginate(params_datasets_page, self.page_size),
             'total_datasets': total_datasets,
             'total_reuses': total_reuses,
             'followers': followers,

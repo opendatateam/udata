@@ -76,7 +76,6 @@
 </section>
 
 {# TODO: proper <select> also needed in discussions and footer, then sort from URL param #}
-{# TODO: wire the pagination for both lists #}
 
 <section class="organization-secondary">
     {% if datasets and datasets|length > 0 %}
@@ -101,7 +100,7 @@
                     {% endfor %}
                 </div>
             </div>
-            {{ paginator(datasets) }}
+            {{ paginator(datasets, arg_name='datasets_page', url='#organization-datasets') }}
         </div>
     </section>
     {% endif %}
@@ -121,7 +120,7 @@
                     </li>
                     {% endfor %}
                 </ul>
-                {{ paginator(reuses) }}
+                {{ paginator(reuses, arg_name='reuses_page', url='#organization-reuses') }}
             </div>
         </div>
     </section>
