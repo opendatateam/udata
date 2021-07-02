@@ -25,9 +25,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         <span v-html="arrow" />
       </a>
       <p class="text-grey-300 m-0">
-        Nullam neque bibendum convallis enim aliquam. Integer egestas accumsan,
-        in varius lectus. Elementum a facilisis nibh pellentesque enim egestas
-        porta.
+        {{ $t('Datasets are collections of data, i.e. structured information, easily readable by a machine.') }}
       </p>
       <transition mode="out-in">
         <dataset-loader v-if="loading" />
@@ -64,9 +62,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         <span v-html="arrow" />
       </a>
       <p class="text-grey-300 m-0">
-        Nullam neque bibendum convallis enim aliquam. Integer egestas accumsan,
-        in varius lectus. Elementum a facilisis nibh pellentesque enim egestas
-        porta.
+        {{ $t('Reuses refer to the use of data for an other purpose than the one they were produced for.') }}
       </p>
       <transition mode="out-in">
         <reuse-loader class="my-md" v-if="loading" />

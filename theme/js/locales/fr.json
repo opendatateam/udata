@@ -65,5 +65,7 @@
   "No reuse matching your query": "Nous n’avons pas de réutilisation correspondant à votre requête",
   "No results found.": "Aucun résultat.",
   "You must be connected to add a favourite.": "Vous devez être connecté pour ajouter un favori.",
-  "Reuses": "Réutilisations"
+  "Reuses": "Réutilisations",
+  "Datasets are collections of data, i.e. structured information, easily readable by a machine.": "",
+  "Reuses refer to the use of data for an other purpose than the one they were produced for.": ""
 }

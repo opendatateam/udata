@@ -8,10 +8,11 @@
             <div class="col-6 text-align-center offset-3 form-container col-md-12 offset-md-0">
                 <form class="form" method="post" action="{{ url_for('security.register') }}">
                     <fieldset>
-                        <legend class="h2 mb-0">{{ _('Sign in') }}</legend>
-                        <p class="mt-xs mb-xl f-light fs-sm">
-                            Petit blabla un peu court sur ce qu'on gagne à se connecter, proablement un laïus sur les
-                            discussions ou les réutilisations.
+                        <legend class="h2 mb-0">{{ _('Sign up') }}</legend>
+                        <p class="mb-xl f-light fs-sm text-align-left">
+                            <a href="https://guides.etalab.gouv.fr/data.gouv.fr/creer-compte-utilisateur/" target="_blank">
+                                {{ _('Why create an account?') }}
+                            </a>
                         </p>
                         {{ forms.render_fields(register_user_form, exclude=[register_user_form.submit]) }}
                         <div class="field field-checkbox">

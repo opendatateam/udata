@@ -65,5 +65,7 @@
   "No reuse matching your query": "No reuse matching your query",
   "No results found.": "No results found.",
   "You must be connected to add a favourite.": "You must be connected to add a favourite.",
-  "Reuses": "Reutilizaciones"
+  "Reuses": "Reutilizaciones",
+  "Datasets are collections of data, i.e. structured information, easily readable by a machine.": "",
+  "Reuses refer to the use of data for an other purpose than the one they were produced for.": ""
 }
