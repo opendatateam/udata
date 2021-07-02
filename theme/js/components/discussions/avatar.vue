@@ -1,8 +1,6 @@
 <template>
   <div class="avatar">
-    <a :href="user.page">
-      <img :src="avatar_url" :alt="user.name + ' avatar'" />
-    </a>
+    <img :src="avatar_url" :alt="user.name + ' avatar'" />
   </div>
 </template>
 

@@ -88,11 +88,11 @@
         <div class="callout p-hg p-md-md mb-lg bg-green-300">
             <div id="reuse-producer" class="tab-content hagrid active">
                 {% if reuse.organization %}
-                {% with organization=reuse.organization %}
+                {% with organization=reuse.organization, producer_type='organization' %}
                 {% include theme('organization/producer-panel.html') %}
                 {% endwith %}
                 {% elif reuse.owner %}
-                {% with organization=reuse.owner, details_view = url_for("users.show", user=reuse.owner, _external=True) %}
+                {% with organization=reuse.owner, producer_type='owner' %}
                 {% include theme('organization/producer-panel.html') %}
                 {% endwith %}
                 {% endif %}

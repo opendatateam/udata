@@ -110,11 +110,11 @@
 <section class="callout p-hg p-md-md mb-lg bg-blue-300">
     <div id="dataset-producer" class="tab-content hagrid active">
         {% if dataset.organization %}
-        {% with organization=dataset.organization %}
+        {% with organization=dataset.organization, producer_type='organization' %}
         {% include theme('organization/producer-panel.html') %}
         {% endwith %}
         {% elif dataset.owner %}
-        {% with organization=dataset.owner, details_view = url_for("users.show", user=dataset.owner, _external=True) %}
+        {% with organization=dataset.owner, producer_type='owner' %}
         {% include theme('organization/producer-panel.html') %}
         {% endwith %}
         {% endif %}
