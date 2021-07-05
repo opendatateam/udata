@@ -25,32 +25,16 @@ def migrate(db):
 
     datasets = Dataset.objects().no_cache().timeout(False)
     for dataset in datasets:
-        save_res = False
-        for badge in dataset.__badges__:
-            if badge in UNUSED_BADGES:
-                del dataset.__badges__[badge]
-                save_res = True
-        if save_res:
-            try:
-                dataset.save()
-            except Exception as e:
-                log.warning(e)
-                pass
+        for badge in UNUSED_BADGES:
+            if dataset.get_badge(badge):
+                dataset.remove_badge(badge)
 
     log.info('Processing reuses.')
 
     reuses = Reuse.objects().no_cache().timeout(False)
     for reuse in reuses:
-        save_res = False
-        for badge in reuse.__badges__:
-            if badge in UNUSED_BADGES:
-                del reuse.__badges__[badge]
-                save_res = True
-        if save_res:
-            try:
-                reuse.save()
-            except Exception as e:
-                log.warning(e)
-                pass
+        for badge in UNUSED_BADGES:
+            if reuse.get_badge(badge):
+                reuse.remove_badge(badge)
 
     log.info('Completed.')
