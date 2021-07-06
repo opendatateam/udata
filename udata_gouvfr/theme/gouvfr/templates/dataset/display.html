@@ -81,9 +81,8 @@
             {% trans
                     date=dataset.created_at|dateformat(format='long'),
                     update=dataset.last_update|dateformat(format='long'),
-                    author=dataset.owner.fullname,
-                    url=url_for('users.show', user=dataset.owner)
-                %}This dataset has been published on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a><br />Published on {{date}} and updated on {{update}}{% endtrans %}
+                    author=dataset.owner.fullname
+                %}This dataset has been published on the initiative and under the responsibility of {{author}}<br />Published on {{date}} and updated on {{update}}{% endtrans %}
         </div>
         {% endif %}
     </div>
