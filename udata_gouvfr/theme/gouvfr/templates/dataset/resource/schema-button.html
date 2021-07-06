@@ -1,0 +1,5 @@
+<button
+  class="btn btn-sm btn-primary"
+  @click.prevent="$showModal('schema', {resource_schema: {{resource.schema}}, documentation_url: '{{documentation_url}}', validation_url: '{{validation_url}}', authorize_validation: {{authorize_validation}} })">
+    Voir le schéma
+</button>

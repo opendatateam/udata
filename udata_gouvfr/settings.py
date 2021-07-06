@@ -2,6 +2,8 @@
 Default settings for udata-gouvfr
 """
 
+# TODO: move this back to an extension
+RESOURCES_SCHEMAGOUVFR_ENABLED = True
 # Frontend banner parameters
 BANNER_ACTIVATED = False
 BANNER_HTML_CONTENT = ''

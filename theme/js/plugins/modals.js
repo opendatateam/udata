@@ -60,8 +60,9 @@ The third argument to the `showModal` method is an override for the `scrollable`
 */
 
 import Preview from "../components/dataset/preview";
+import Schema from '../components/dataset/schema-modal'
 
-const modals = { preview: Preview };
+const modals = { preview: Preview, schema: Schema }
 
 const _showModal = (app) => (name, params) => {
   const Vue = app.config.globalProperties;

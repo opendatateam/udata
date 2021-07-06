@@ -101,12 +101,14 @@ def init_app(app):
 
     from . import helpers, error_handlers  # noqa
 
+    if app.config['RESOURCES_SCHEMAGOUVFR_ENABLED']:
+        VIEWS.append('schema')
+
     for view in VIEWS:
         _load_views(app, 'udata_gouvfr.views.{}'.format(view))
 
     # Load all plugins views and blueprints
     for module in entrypoints.get_enabled('udata.views', app).values():
-        print(module)
         _load_views(app, module)
 
     # Optionally register debug views
