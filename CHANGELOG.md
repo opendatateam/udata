@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- :warning: **breaking change**: most of the theme/templates logic has been moved to https://github.com/etalab/udata-gouvfr. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/master/docs/roadmap/udata-3.md#the-road-to-udata3).
+- :warning: **breaking change**: most of the theme/templates logic has been moved to https://github.com/etalab/udata-gouvfr. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/master/docs/roadmap/udata-3.md#the-road-to-udata3). [#2522](https://github.com/opendatateam/udata/pull/2522)
 - Migrate from raven to sentry-sdk [#2620](https://github.com/opendatateam/udata/pull/2620)
 - Add a UdataCleaner class to use udata's markdown configuration on SafeMarkup as well [#2619](https://github.com/opendatateam/udata/pull/2619)
 - Fix schema name display in resource modal [#2617](https://github.com/opendatateam/udata/pull/2617)
