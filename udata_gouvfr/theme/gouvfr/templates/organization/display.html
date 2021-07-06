@@ -83,7 +83,7 @@
         <div class="hagrid">
             <div class="row">
                 <div class="col-11 offset-1 row-inline justify-between">
-                    <h2>{{ _('Datasets') }}<sup>{{ datasets|length or 0 }}</sup></h2>
+                    <h2>{{ _('Datasets') }}<sup>{{ total_datasets }}</sup></h2>
                     <div>
                         <select>
                             <option>Trier par</option>
@@ -108,7 +108,7 @@
     <section id="organization-reuses" class="organization-reuses p-xl">
         <div class="container">
             <div>
-                <h2>{{ _('Reuses') }}<sup>{{ reuses|length or 0 }}</sup></h2>
+                <h2>{{ _('Reuses') }}<sup>{{ total_reuses }}</sup></h2>
             </div>
             <div>
                 <ul class="row">
