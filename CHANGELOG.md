@@ -3,6 +3,39 @@
 ## Current (in progress)
 
 - :warning: **breaking change**: most of the theme/templates logic has been moved from https://github.com/opendatateam/udata to this repo. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/master/docs/roadmap/udata-3.md#the-road-to-udata3). [#492](https://github.com/etalab/udata-gouvfr/pull/492)
+
+## 2.6.2 (2021-05-25)
+
+- New translations [#535](https://github.com/etalab/udata-gouvfr/pull/535)
+
+## 2.6.1 (2021-05-25)
+
+- Add new translations [#518](https://github.com/etalab/udata-gouvfr/pull/518)
+
+## 2.6.0 (2021-05-25)
+
+- [maaf] fix encoding issue [#531](https://github.com/etalab/udata-gouvfr/pull/531)
+- Add link to support page [#532](https://github.com/etalab/udata-gouvfr/pull/532)
+- UX enhancement [#525](https://github.com/etalab/udata-gouvfr/pull/525):
+  - Removed hero's background image.
+  - Removed home page's carrousel.
+  - Changed homepage's layout. Datasets are now on top followed by reuses.
+  - Renamed "Profile" to "Public profile"
+
+## 2.5.5 (2021-04-02)
+
+- Thanks for all the fish [#529](https://github.com/etalab/udata-gouvfr/pull/529)
+
+## 2.5.4 (2021-03-31)
+
+- 🦀
+
+## 2.5.3 (2021-03-23)
+
+- Add venv activation in CircleCI's publish step [#526](https://github.com/etalab/udata-gouvfr/pull/526)
+
+## 2.5.2 (2021-03-22)
+
 - Keep tracking to strictly necessary [#517](https://github.com/etalab/udata-gouvfr/pull/517)
 - Changed the title of the elections inventory page [#520](https://github.com/etalab/udata-gouvfr/pull/520)
 
