@@ -2,7 +2,11 @@
     <div class="hagrid banner">
         <div class="row align-items-center text-align-center-sm">
             <p class="text-white">
-                {{ _("Welcome to the new <i>beta</i> version of data.gouv.fr! <a href=''>Learn more</a>, go back to <a href='https://legacy.data.gouv.fr'>the old version</a> or <a href='https://github.com/etalab/data.gouv.fr/issues/new?labels=feedback-beta'>send us some feedback</a>.") }}
+                {{ _("Welcome to the new <i>beta</i> version of data.gouv.fr! <a href='{learn_more}'>Learn more</a>, go back to <a href='{legacy}'>the old version</a> or <a href='{feedback}'>send us some feedback</a>.").format(
+                    learn_more='#',
+                    legacy='https://legacy.data.gouv.fr',
+                    feedback='https://github.com/etalab/data.gouv.fr/issues/new?labels=feedback-beta',
+                ) }}
             </p>
         </div>
     </div>
