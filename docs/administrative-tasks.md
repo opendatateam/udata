@@ -35,7 +35,7 @@ $ udata user create
 You can also give a user administrative privileges with:
 
 ```shell
-$ udata user set_admin <email>
+$ udata user set-admin <email>
 ```
 
 ## Purge data flagged as deleted
