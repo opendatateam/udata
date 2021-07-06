@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- :warning: **breaking change**: most of the theme/templates logic has been moved from https://github.com/opendatateam/udata to this repo. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/master/docs/roadmap/udata-3.md#the-road-to-udata3).
+- :warning: **breaking change**: most of the theme/templates logic has been moved from https://github.com/opendatateam/udata to this repo. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/master/docs/roadmap/udata-3.md#the-road-to-udata3). [#492](https://github.com/etalab/udata-gouvfr/pull/492)
 - Keep tracking to strictly necessary [#517](https://github.com/etalab/udata-gouvfr/pull/517)
 - Changed the title of the elections inventory page [#520](https://github.com/etalab/udata-gouvfr/pull/520)
 
