@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- :warning: **breaking change**: most of the theme/templates logic has been moved from https://github.com/opendatateam/udata to this repo. `udata` no longer contains a default theme. In the 3.x series, we hope it will be usable as a "headless" open data platform, but for now you probably need to plug your own theme or use udata-gouvfr. [More info about this change here](https://github.com/opendatateam/udata/blob/master/docs/roadmap/udata-3.md#the-road-to-udata3). [#492](https://github.com/etalab/udata-gouvfr/pull/492)
 
 ## 2.6.2 (2021-05-25)
 

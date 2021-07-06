@@ -1,0 +1,36 @@
+{% macro breadcrumb(tpl,
+    toolbar_class='',
+    breadcrum_class=''
+) %}
+{% if tpl.breadcrumb and tpl.breadcrumb() or tpl.breadcrumb_bar and tpl.breadcrumb_bar() %}
+<section class="breadcrumb-bar py-md {{ breadcrum_class }}">
+    <div class="container">
+        <div class="row">
+            {% if tpl.breadcrumb_bar and tpl.breadcrumb_bar() %}
+            <div class="left-bar col-md-12 col-lg-9">
+                {{ tpl.breadcrumb_bar() }}
+            </div>
+            {% elif tpl.breadcrumb and tpl.breadcrumb() %}
+            <ol class="breadcrumbs col-md-12 col-lg-9">
+                <li>
+                    <a href="{{ url_for('site.home') }}" title="{{ _('Home') }}">
+                        {{ _('Home') }}
+                    </a>
+                </li>
+                {{ tpl.breadcrumb() }}
+            </ol>
+            {% endif %}
+            <div class="col-md-4 col-lg-3 toolbar">
+                {% if tpl.toolbar_container and tpl.toolbar_container() %}
+                    {{ tpl.toolbar_container() }}
+                {% elif tpl.toolbar and tpl.toolbar() %}
+                    <div class="btn-toolbar {{ toolbar_class }}" role="toolbar">
+                    {{ tpl.toolbar() }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,15 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('%(user)s submitted a new issue on your %(type)s %(subject)s',
+        type=issue.subject.verbose_name,
+        user=issue.user.fullname,
+        subject=issue.subject|string
+) }}.
+
+
+{{ _('Title') }}: {{ issue.title }}
+
+{{ _('You can see the issue on this page:') }}
+{{ issue.subject.external_url }}
+{% endblock %}

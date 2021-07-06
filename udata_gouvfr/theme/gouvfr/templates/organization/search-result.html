@@ -1,0 +1,45 @@
+{% cache cache_duration, 'org-search-result', organization.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
+<article class="row-inline p-sm">
+    <div class="result-logo">
+        <div class="logo">
+            <img alt="{{ organization.title }}" src="{{ organization.logo(70)|placeholder('organization') }}" width="70"
+                height="70">
+            <div class="logo-badge">
+                {{ badge_if_certified(organization) }}
+            </div>
+        </div>
+    </div>
+    <div class="result-body col-10 col-md px-lg px-md-sm m-md-0">
+        <h4 class="result-title ellipsis">{{ organization.name }}</h4>
+        <div class="result-description text-grey-300">
+            {{ organization.description|mdstrip(300) }}
+        </div>
+    </div>
+    <ul
+        class="col col-md-12 self-center offset-md-3 row-inline-md mt-md-sm justify-end result-infos fs-sm text-align-right">
+        {% if organization.metrics.datasets %}
+        <li title="{{ _('Number of datasets') }}">
+            <span class="fa fa-cubes fa-fw"></span>
+            {{ ngettext('%(num)d dataset', '%(num)d datasets', organization.metrics.datasets or 0) }}
+        </li>
+        {% endif %}
+        {% if organization.metrics.reuses %}
+        <li title="{{ _('Number of reuses by the organization') }}" class="ml-md-md">
+            <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
+            {{ ngettext('%(num)d reuse', '%(num)d reuses', organization.metrics.reuses or 0) }}
+        </li>
+        {% endif %}
+        {% if organization.metrics.followers %}
+        <li title="{{ _('Number of followers') }}" class="ml-md-md">
+            <span class="{{ ficon('fa-star') }} fa-fw"></span>
+            {{ ngettext('%(num)d follower', '%(num)d followers', organization.metrics.followers or 0) }}
+        </li>
+        {% endif %}
+        <li title="{{ _('Number of members') }}" class="ml-md-md">
+            <span class="fa fa-users fa-fw"></span>
+            {{ ngettext('%(num)d members', '%(num)d members', organization.members|length) }}
+        </li>
+    </ul>
+</article>
+{% endcache %}

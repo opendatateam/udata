@@ -1,0 +1,320 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: udata-gouvfr-fr-en\n"
+"Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
+"POT-Creation-Date: 2021-06-23 12:18+0200\n"
+"PO-Revision-Date: 2021-06-23 13:55\n"
+"Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.8.0\n"
+"X-Crowdin-File: /main-theme-translate/udata_gouvfr/theme/gouvfr/translations/gouvfr@@.pot\n"
+"X-Crowdin-File-ID: 112\n"
+"X-Crowdin-Language: en\n"
+"X-Crowdin-Project: udata-gouvfr-fr-en\n"
+"X-Crowdin-Project-ID: 461514\n"
+
+#: templates/footer.html:58
+msgid "A DINUM department"
+msgstr "Un département de la DINUM"
+
+#: templates/footer.html:59
+msgid "DINUM website"
+msgstr "Le site web de la DINUM"
+
+#: templates/footer.html:85 templates/header.html:14 templates/header.html:34
+msgid "Go back to home page"
+msgstr "Retourner à l'accueil de data.gouv.fr"
+
+#: templates/footer.html:99
+msgid "Language selector"
+msgstr "Sélecteur de langue"
+
+#: templates/header.html:19 templates/header.html:77 templates/header.html:78
+msgid "Search"
+msgstr "Rechercher"
+
+#: templates/header.html:24
+msgid "Open menu"
+msgstr "Ouvrir le menu"
+
+#: templates/header.html:28
+msgid "Close menu"
+msgstr "Fermer le menu"
+
+#: templates/header.html:29
+msgid "Close"
+msgstr "Fermer"
+
+#: templates/header.html:53
+msgid "Sign In"
+msgstr "Se connecter"
+
+#: templates/header.html:53
+msgid "Sign in"
+msgstr "Se connecter"
+
+#: templates/header.html:56
+msgid "Register"
+msgstr "S'enregistrer"
+
+#: templates/header.html:56
+msgid "Sign up"
+msgstr "S'enregistrer"
+
+#: templates/home.html:18
+msgid "Open platform for French public data"
+msgstr "Plateforme ouverte des données publiques Françaises"
+
+#: templates/home.html:20
+msgid "Featured topics"
+msgstr "Thématiques à la une"
+
+
+#: templates/home.html:38
+msgid "News"
+msgstr "Actualités"
+
+#: templates/home.html:46
+msgid "All news"
+msgstr "Toutes les actualités"
+
+#: templates/home.html:68
+msgid "is"
+msgstr "c’est"
+
+#: templates/home.html:87
+msgid "Reference datasets"
+msgstr "Jeux de données de référence"
+
+#: templates/home.html:95
+msgid "Data"
+msgstr "Données"
+
+#: templates/home.html:127
+msgid "Etalab's selection"
+msgstr "Sélection Etalab"
+
+#: templates/dataset/card.html:32 templates/dataset/search-result.html:69
+msgid "resources"
+msgstr "ressources"
+
+#: templates/dataset/card.html:33 templates/dataset/search-result.html:71
+#: templates/organization/card.html:27
+msgid "reuses"
+msgstr "réutilisations"
+
+#: templates/dataset/display.html:106 templates/dataset/display.html:203
+msgid "Extras"
+msgstr "Extras"
+
+#: templates/dataset/explore.html:37
+msgid "Open platform for French public data"
+msgstr "Plateforme ouverte des données publiques françaises"
+
+#: templates/dataset/list.html:32 templates/reuse/list.html:41
+msgid "Search..."
+msgstr "Rechercher..."
+
+#: templates/dataset/list.html:36 templates/organization/display.html:55
+#: templates/organization/display.html:87
+msgid "Datasets"
+msgstr "Jeux de données"
+
+#: templates/dataset/list.html:38
+msgid "Search reuses"
+msgstr "Rechercher dans les réutilisations"
+
+#: templates/dataset/search-result.html:74
+msgid "favourites"
+msgstr "favoris"
+
+#: templates/dataset/resource/card.html:10
+msgid "Edit button"
+msgstr "Bouton d'édition"
+
+#: templates/dataset/resource/card.html:16
+msgid "downloads"
+msgstr "téléchargements"
+
+#: templates/dataset/resource/card.html:28
+msgid "See more details"
+msgstr "Voir plus de détails"
+
+#: templates/dataset/resource/card.html:40
+msgid "Resource link"
+msgstr "Lien de la ressource"
+
+#: templates/dataset/resource/card.html:42
+msgid "Download resource"
+msgstr "Télécharger la ressource"
+
+#: templates/dataset/resource/card.html:65
+msgid "URL"
+msgstr "URL"
+
+#: templates/dataset/resource/card.html:69
+msgid "Permalink"
+msgstr "URL stable"
+
+#: templates/dataset/resource/card.html:73 templates/reuse/display.html:104
+msgid "Type"
+msgstr "Type"
+
+#: templates/dataset/resource/card.html:77
+msgid "MIME Type"
+msgstr "Type MIME"
+
+#: templates/dataset/resource/card.html:87
+msgid "Created on"
+msgstr "Créée le"
+
+#: templates/dataset/resource/card.html:91
+msgid "Modified on"
+msgstr "Modifiée le"
+
+#: templates/dataset/resource/card.html:95
+msgid "Published on"
+msgstr "Publiée le"
+
+#: templates/organization/display.html:62 templates/home.html:134
+#: templates/organization/display.html:112 templates/reuse/list.html:45
+msgid "Reuses"
+msgstr "Réutilisations"
+
+#: templates/organization/display.html:131
+msgid "Members"
+msgstr "Membres"
+
+#: templates/organization/display.html:147
+msgid "Technical details"
+msgstr "Informations techniques"
+
+#: templates/organization/display.html:154
+msgid "Creation date"
+msgstr "Date de création"
+
+#: templates/organization/display.html:158
+msgid "Modification date"
+msgstr "Date de mise à jour"
+
+#: templates/organization/display.html:164 templates/post/display.html:91
+#: templates/reuse/display.html:156
+msgid "Actions"
+msgstr "Actions"
+
+#: templates/organization/display.html:173
+msgid "Download list of datasets as csv file"
+msgstr ""
+"Télécharger la liste des jeux de données en .csv"
+
+#: templates/organization/list.html:44
+msgid "Organizations"
+msgstr "Organisations"
+
+#: templates/participez/participez.html:5
+msgid "Participate"
+msgstr "Participez"
+
+#: templates/participez/participez.html:11
+msgid "Go to documentation"
+msgstr "Accéder à la documentation"
+
+#: templates/post/list.html:29
+msgid "To stay up-to-date, you can subscribe to"
+msgstr ""
+"Pour ne rien manquer, de l’actualité de data.gouv.fr et de l’open data, "
+"inscrivez-vous à"
+
+#: templates/post/list.html:30
+msgid "Subscribe"
+msgstr "S'inscrire"
+
+#: templates/post/list.html:32
+msgid "our newsletter."
+msgstr "notre infolettre."
+
+#: templates/post/search-result.html:8
+msgid "Posted on"
+msgstr "Publié le"
+
+#: templates/reuse/card.html:16 templates/organization/card.html:24
+msgid "datasets"
+msgstr "jeux de données"
+
+#: templates/reuse/display.html:84
+msgid "Reuser"
+msgstr "Réutilisateur"
+
+#: templates/reuse/display.html:86 templates/reuse/display.html:110
+msgid "Tags"
+msgstr "Mots clés"
+
+#: templates/reuse/display.html:101
+msgid "Information"
+msgstr "Informations"
+
+#: templates/reuse/display.html:171
+msgid "Embed"
+msgstr "Intégrer sur votre site"
+
+#: templates/reuse/display.html:195
+msgid "More reuses"
+msgstr "Plus de réutilisations"
+
+#: templates/reuse/list.html:47
+msgid "Search in datasets"
+msgstr "Rechercher dans les jeux de données"
+
+#: templates/reuse/list.html:52
+msgid "All"
+msgstr "Tout"
+
+#: templates/security/change_password.html:11
+#: templates/security/forgot_password.html:11
+#: templates/security/login_user.html:11
+#: templates/security/register_user.html:11
+#: templates/security/reset_password.html:12
+msgid "Sign in"
+msgstr "Connectez-vous"
+
+#: templates/security/login_user.html:41
+msgid "Don't have an account?"
+msgstr "Vous n'avez pas de compte ?"
+
+#: templates/home.html:143
+msgid "See more"
+msgstr "Voir plus"
+
+#: templates/page.html:50
+msgid "Actions"
+msgstr "Actions"
+
+#: templates/organization/producer-panel.html:22
+msgid "Add the producer as favourite"
+msgstr "Ajouter le producteur en favori"
+
+#: templates/territories/territory.html:16 templates/territories/home.html:14
+msgid ""
+"This page is no longer maintained. We are working on new territories "
+"features."
+msgstr ""
+"Cette page n'est plus maintenue. Nous travaillons à de nouvelles "
+"fonctionnalités relatives aux territoires."
+
+#: __init__.py:50
+msgid "Contact us"
+msgstr "Nous contacter"
+
+#: __init__.py:76
+msgid "Featured datasets by topic"
+msgstr "Données clés par sujet"
+
+#: templates/page.html:53
+msgid "Suggest a modification"
+msgstr "Proposer une modification"

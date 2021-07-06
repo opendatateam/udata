@@ -1,0 +1,11 @@
+{% extends "admin.html" %}
+
+{% block theme_css %}
+{{ super() }}
+{# <link href="{{ manifest('theme', 'admin.css') }}" rel="stylesheet"> #}
+{% endblock %}
+
+{% block raw_head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
+{% endblock %}

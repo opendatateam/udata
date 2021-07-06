@@ -1,0 +1,9 @@
+{% extends theme('mail/base.txt') %}
+{% block body %}
+{{ _('Welcome to %(site)s!', site=config.SITE_TITLE) }}
+
+{{ _('To activate your account, please confirm your email address through the link below:') }}
+
+{{ confirmation_link }}
+
+{% endblock %}

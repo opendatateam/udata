@@ -1,0 +1,16 @@
+{% cache cache_duration, 'post-search-result', post.id|string, g.lang_code %}
+<article class="search-result post-result mb-lg">
+    {% set image = post.image|placeholder('post') %}
+    <div class="hero-image w-100 rounded-xxs" style="background-image: url('{{image}}')" alt="{{ post.name }}"></div>
+    <div class="result-body p-md">
+        <h3 class="result-title m-0">{{ post.name }}</h3>
+        <p class="fs-sm text-grey-300 my-sm">
+            {{ _('Published on') }}
+            {{ post.published|dateformat(format='long') }}
+        </p>
+        <div class="result-description f-italic">
+            {{ post.headline|mdstrip(300) }}
+        </div>
+    </div>
+</article>
+{% endcache %}

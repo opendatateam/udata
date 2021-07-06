@@ -1,0 +1,242 @@
+<style scoped>
+    {# Following http://rscss.io/ conventions. #}
+    article, aside {
+        display: block; {# Compatibility with non-HTML5 browsers. #}
+    }
+    .dataset-card {
+        border: 1px solid #EEE;
+        min-width: 0;
+        min-height: 170px;
+        clear: both;
+        margin: 1em;
+        background: #FFF;
+        display: flex;
+        flex-direction: column;
+        max-width: {{ width }}px;
+        max-height: {{ height }}px;
+    }
+    .dataset-card:hover {
+        background: #EEE;
+    }
+    .dataset-card * {
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+        font-size: 13px;
+        text-shadow: none;
+        border: none;
+        background-image: none;
+        line-height: 1.4;
+        padding: 0;
+        margin: 0;
+    }
+    .dataset-card .udata-title {
+        background: #3085C2;
+        font-size: 15px;
+        font-weight: normal;
+        letter-spacing: .9px;
+        color: #FFF;
+        text-align: left;
+        padding: 5px;
+        border-bottom: 1px solid #EEE;
+    }
+    .dataset-card .udata-title a {
+        text-align: center;
+        display: block;
+        color: #FFF;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    .dataset-card .udata-title a:hover,
+    .dataset-card:hover .udata-title a {
+        text-decoration: underline;
+    }
+    .dataset-card .udata-content {
+        flex: 1;
+        display: flex;
+        margin: 3px;
+    }
+    .dataset-card .udata-content p:not(.udata-source) {
+        flex: 1;
+    }
+    .dataset-card .udata-source img {
+        border: 1px solid #EEE;
+        padding: 1px;
+        margin: 0 5px 0 0;
+        background: #FFF;
+    }
+    .dataset-card .udata-meta {
+        border-top: 1px solid #EEE;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 3px;
+        color: #5E5E5E;
+    }
+    .dataset-card .udata-meta a {
+        text-decoration: none;
+        color: #5E5E5E;
+    }
+    .dataset-card aside p {
+        padding-left: 1.5em;
+    }
+    .dataset-card aside p,
+    .dataset-card aside a {
+        font-size: 12px;
+    }
+    {# Base64-ed icons from glyphicons halflings, prefixed to avoid collisions. #}
+    .dataset-card .udata-close {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkVDN0Y4QkI5ODQ3RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkVDN0Y4QkI4ODQ3RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PjUfc2sAAABbSURBVHjalJDLDQAhCESJFVCSpVoSVjQLmyHZDwecZA68PKMoAMSzvObVmMmUbHG+JbBGIaXk4bxAyhX7nUYh6fc9pRTOkIP0ru4uM3IjZnsnux/cpPvhlwADAJXpVkkd0NrdAAAAAElFTkSuQmCC') no-repeat left center;
+    }
+    .dataset-card .udata-code {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAAlwSFlzAAANiQAADYkBUJSCJQAAAnJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyI+CiAgICAgICAgIDx0aWZmOllSZXNvbHV0aW9uPjg4PC90aWZmOllSZXNvbHV0aW9uPgogICAgICAgICA8dGlmZjpDb21wcmVzc2lvbj41PC90aWZmOkNvbXByZXNzaW9uPgogICAgICAgICA8dGlmZjpYUmVzb2x1dGlvbj44ODwvdGlmZjpYUmVzb2x1dGlvbj4KICAgICAgICAgPHhtcDpDcmVhdG9yVG9vbD5GbHlpbmcgTWVhdCBBY29ybiA1LjMuMTwveG1wOkNyZWF0b3JUb29sPgogICAgICAgICA8eG1wOk1vZGlmeURhdGU+MjAxNi0wMy0yMlQxMzozMTo1ODwveG1wOk1vZGlmeURhdGU+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgqPjdwvAAAA70lEQVQoFZ2SPWpCQRRGRyX+bMBGbITsQQjoCxizCivBXbgNFxGwS9KJbiJNipS6ACFl4jnzZmAEKz8489175w7jvGsId6hVnGkS/6e8kXycamfc3rwfbPCA6kEnRrXviecp1+xruDzAH7zAO/RBPcEv/MAnvIJ99kdVrEdYxaxe1tgm5dZPUKU8TAi+YJkLybf4oqi5b5/94RveDFC3tjDCD6CrXLfP/ps3eYM3lbq6yY0p+Jvzm3yLb8qyfoQqF9op8Ov4lR7hA55BDWEHMxMU+8s5WZyD8+mYIN35qSbkwceCE1cD8J+gygYP3K8LqNYkk6JxETMAAAAASUVORK5CYII=') no-repeat left center;
+    }
+    .dataset-card .udata-calendar {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAAMCAYAAAC0qUeeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjQ3N0JDMDhGODQ4ODExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjQ3N0JDMDhFODQ4ODExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PhyMeYcAAAA/SURBVHjaYvr//z8DEHwAYRAbHSPLwTj/icAfGKEMogAjzHiiFJNiMhMDCQCsGOgURmJo0p0x8CaTFIMAAQYAtkdiRCzQqvMAAAAASUVORK5CYII=') no-repeat left center;
+    }
+    .dataset-card .udata-marker {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAANCAYAAACQN/8FAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjA4MUEwRDVBODQ4NDExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjA4MUEwRDU5ODQ4NDExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgYvWcAAAACOSURBVHjadJABDcAgDASRgAQkTAISkDBpSEDCJCBhEuaAweg3TzNImtDvUT7vWmtuVD+hV+nVqEYfvjlBDwE33YfuAWYRq26Yj6voGSBeB1ghGLO+VhqGCJ6gNPAXDRTVswiFjCfREi1Qj6eJxVbib64NlDXHTZbI0y+gMQ+/h85+4oDfc9E32QWrvQIMAMMuzbeiQednAAAAAElFTkSuQmCC') no-repeat left center;
+    }
+    .dataset-card .udata-stats {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAYAAACprHcmAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABBJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ1dWlkOjY1RTYzOTA2ODZDRjExREJBNkUyRDg4N0NFQUNCNDA3IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjdENzA1QzI3ODQ4RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjdENzA1QzI2ODQ4RjExRTVCMDgyQzVGQjZCNUQyM0VBIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE1IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MTgyMjI1ZDItYmFhNy00NTNlLWEyZTEtMzlkODljOGVhMDljIiBzdFJlZjpkb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6ZWJjOWI3YjMtY2NlMC0xMTc4LTg4NTktZjY2YzAxOGQ1YjcyIi8+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+Z2x5cGhpY29uc19oYWxmbGluZ3M8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PkaU3hQAAABPSURBVHjaYvj//z8DMgaCBUAMYixAl2OEKoADRkZGuABQjhFZjomBBEBQMdCmBSDbwDQhZyDzSXIGhu+h7P8Qg1H5eCXR+dQNDbIVAwQYAJyNSJ5I6tz5AAAAAElFTkSuQmCC') no-repeat left center;
+    }
+    .dataset-card .js-hide .udata-source,
+    .dataset-card .js-hide .udata-description {
+        visibility: hidden;
+        height: 0;
+        width: 0;
+    }
+    .dataset-card .js-hide textarea {
+        width: 100%;
+        height: 4em;
+        font-size: 11px;
+    }
+    {# Source: https://github.com/kazzkiq/balloon.css #}
+    .dataset-card [data-tooltip] {
+        position: relative;
+    }
+    .dataset-card [data-tooltip]:before,
+    .dataset-card [data-tooltip]:after {
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+            filter: alpha(opacity=0);
+        -khtml-opacity: 0;
+          -moz-opacity: 0;
+               opacity: 0;
+        pointer-events: none;
+        -webkit-transition: all 0.18s ease-out 0.18s;
+                transition: all 0.18s ease-out 0.18s;
+        bottom: 100%;
+        left: 50%;
+        position: absolute;
+        z-index: 10;
+        -webkit-transform: translate(-50%, 10px);
+            -ms-transform: translate(-50%, 10px);
+                transform: translate(-50%, 10px);
+        -webkit-transform-origin: top;
+            -ms-transform-origin: top;
+                transform-origin: top;
+    }
+    .dataset-card [data-tooltip]:after {
+        background: rgba(17, 17, 17, 0.9);
+        border-radius: 4px;
+        color: #fff;
+        content: attr(data-tooltip);
+        font-size: 12px;
+        padding: .5em 1em;
+        white-space: nowrap;
+        margin-bottom: 11px;
+    }
+    .dataset-card [data-tooltip]:before {
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36px" height="12px"><path   fill="rgba(17, 17, 17, 0.9)" transform="rotate(0)" d="M2.658,0.000 C-13.615,0.000 50.938,0.000 34.662,0.000 C28.662,0.000 23.035,12.002 18.660,12.002 C14.285,12.002 8.594,0.000 2.658,0.000 Z"/></svg>') no-repeat;
+        background-size: 100% auto;
+        height: 6px;
+        width: 18px;
+        content: "";
+        margin-bottom: 5px;
+    }
+    .dataset-card [data-tooltip]:hover:before,
+    .dataset-card [data-tooltip]:hover:after {
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+            filter: alpha(opacity=100);
+        -khtml-opacity: 1;
+          -moz-opacity: 1;
+               opacity: 1;
+        pointer-events: auto;
+        -webkit-transform: translate(-50%, 0);
+            -ms-transform: translate(-50%, 0);
+                transform: translate(-50%, 0);
+    }
+</style>
+<article class="dataset-card" id="{{ item_reference }}">
+    <h4 class="udata-title" data-tooltip="{{ _('Download from ') }}{{ config.SERVER_NAME }}">
+        <a href="{{ item.external_url or item.url }}" title="{{ item.full_title or item.title }}">
+            {{ item.title|mdstrip(80) }}
+        </a>
+    </h4>
+    <div class="udata-content">
+        <p class="udata-source">
+        {% if item.organization %}
+            <a href="{{ item.organization.external_url }}" data-tooltip="{{ _('Producer') }}">
+                <img src="{{ item.organization.logo(70, external=True)|placeholder(external=True) }}"
+                     alt="{{ item.organization.name }}"
+                     height="70" width="70">
+            </a>
+        {% elif item.owner %}
+            <a href="{{ item.owner.external_url }}" data-tooltip="{{ _('Uploader') }}">
+                <img src="{{ item.owner.avatar(70, external=True)|placeholder('user', external=True) }}"
+                     alt="{{ item.owner.fullname }}"
+                     height="70" width="70">
+            </a>
+        {% else %}
+            <a href="{{ item.external_url }}">
+                <img src="{{ ''|placeholder(external=True) }}"
+                     alt=""
+                     height="70" width="70">
+            </a>
+        {% endif %}
+        </p>
+        <div class="udata-description">
+            {% if item.territory %}
+                {{ item.description|markdown(source_tooltip=True) }}
+            {% else %}
+                <p>{{ item.description|mdstrip(110) }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <aside class="udata-meta">
+        <p class="udata-code" data-tooltip="{{ _('Add to your own website') }}">
+            <a href="{{ item.external_url or item.url }}" class="integrate" data-label="{{ _('Close') }}">{{ _('Embed') }}</a>
+        </p>
+        {% if item.temporal_coverage %}
+        <p class="udata-calendar" data-tooltip="{{ _('Temporal coverage') }}">
+            {% if item.territory %}
+                {{ item.temporal_coverage.start }}
+                {% if item.temporal_coverage.end %}
+                    {{ _('to')}} {{ item.temporal_coverage.end }}
+                {% endif %}
+            {% else %}
+                {{ item.temporal_coverage|daterange }}
+            {% endif %}
+        </p>
+        {% endif %}
+        {% if item.spatial and item.spatial.granularity and item.spatial.granularity_label != 'Other' %}
+        <p class="udata-marker" data-tooltip="{{ _('Granularity') }}">
+            {{ item.spatial.granularity_label }}
+        </p>
+        {% elif item.territory %}
+        <p class="udata-marker" data-tooltip="{{ _('Territory') }}">
+            <a href="{{ item.territory.external_url }}">
+                {{ item.territory.name }}
+            </a>
+        </p>
+        {% endif %}
+        {% if item.frequency and item.frequency_label != 'Unknown' %}
+        <p class="udata-stats" data-tooltip="{{ _('Frequency') }}">
+            {{ item.frequency_label }}
+        </p>
+        {% endif %}
+        {% if item.license and item.license.id != 'notspecified' %}
+        <p data-tooltip="{{ _('License:') }} {{ item.license }}">
+            © {{ item.license.id }}
+        </p>
+        {% endif %}
+    </aside>
+</article>

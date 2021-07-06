@@ -1,0 +1,77 @@
+{% extends theme("territories/territory.html") %}
+
+{% set meta = {
+    'title': territory.name,
+    'description': _('Datasets related to the region of %(name)s with INSEE code %(code)s', name=territory.name, code=territory.code),
+    'keywords': [territory.name, territory.code],
+} %}
+
+{% block territory_content %}
+<p class="breadcrumb">
+    <a href="{{ url_for('territories.home') }}">France</a> →
+    {{ _('Region:') }} <a href="{{ territory.url }}">{{ territory.name }}</a>
+</p>
+<div class="col-sm-8 col-xs-12">
+    <div class="col-xs-3">
+        <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
+        {% if territory.logo_url() %}
+        <div class="text-center">
+            <b>
+                {{ _('Source:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a> •
+                {{ _('License:') }} <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>
+            </b>
+        </div>
+        {% else %}
+        <div class="text-center">
+            <b>
+                {{ _('Submit your logo through:') }} <a href="{{ territory.wikipedia_url }}">Wikipedia</a><br>
+                ({{ _('we only expose logos under an open license') }})
+            </b>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-xs-9 tab-links">
+        <h1>{{ territory.name }}</h1>
+        <p>
+            <strong>
+                {{ _('INSEE code:') }} {{ territory.code }}
+            </strong>
+        </p>
+        {% if territory.postal_string %}
+        <p>
+            <strong>
+                {{ _('Postal code:') }} {{ territory.postal_string }}
+            </strong>
+        </p>
+        {% endif %}
+        {% if territory.population %}
+        <p>
+            <strong>
+                {{ _('Population:') }} {{ territory.population|format_number }}
+            </strong>
+        </p>
+        {% endif %}
+        {% if territory.ancestors_objects %}
+        <h3><b>
+                {{ _('Previously:') }}
+                {% for ancestor in territory.ancestors_objects %}
+                <a href="{{ ancestor.url }}">{{ ancestor.name }}</a>{% if not loop.last %},{% endif %}
+                {% endfor %}
+            </b></h3>
+        {% endif %}
+        <h3><b>
+                {{ _('Counties:') }}
+                {% for county in territory.children %}
+                <a href="{{ county.url }}"> {{ county.name }}</a>{% if not loop.last %},{% endif %}
+                {% endfor %}
+            </b></h3>
+    </div>
+</div>
+
+<aside class="col-sm-4 col-xs-12">
+    <div class="panel panel-default">
+    </div>
+</aside>
+
+{% endblock %}

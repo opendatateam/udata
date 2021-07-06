@@ -1,0 +1,22 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': _('API Documentation'),
+    'description': _('%(site)s API documentation', site=config['SITE_TITLE']),
+    'keywords': ['API', 'documentation'],
+} %}
+
+{% block content %}
+<section class="default">
+    <div class="container">
+        <div class="page-header">
+            <h1>{{ meta.title }}</h1>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{{ _("The API documentation is available at") }} <a href="{{ config['API_DOC_EXTERNAL_LINK'] }}">{{ config['API_DOC_EXTERNAL_LINK'] }}</a>.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

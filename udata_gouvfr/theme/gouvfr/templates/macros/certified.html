@@ -1,0 +1,8 @@
+{% macro badge_if_certified(org) %}
+{% if org.public_service %}
+<span class="certified"
+    alt="{{_('The identity of this public service is certified by %(certifier)s', certifier=config.SITE_AUTHOR)}}">
+    {% include theme('svg/certified.svg') %}
+</span>
+{% endif %}
+{% endmacro %}

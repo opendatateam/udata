@@ -1,0 +1,40 @@
+{% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
+
+{# This is very similar to the dataset card and not very used so we're recycling the dataset-card class for a quick win #}
+<a class="card organization-card dataset-card unstyled" title="{{organization.name}}"
+    href="{{ url_for('organizations.show', org=organization, _external=True) }}">
+    <div class="card-logo">
+        <img src="{{ organization.logo(100, external=True)|placeholder('organization', external=True) }}"
+            alt="{{ organization.name }}" />
+        <div class="logo-badge">
+            {{ badge_if_certified(organization) }}
+        </div>
+    </div>
+    <div class="card-data">
+        <h4 class="card-body">
+            {{ organization.name }}
+        </h4>
+        <div class="card-description">
+            <p>{{ organization.description|mdstrip(180) }}</p>
+        </div>
+        <div class="card-footer">
+            <ul class="card-features text-grey-300 fs-xs">
+                {% if organization.metrics.datasets %}
+                <li>{{ organization.metrics.datasets or 0 }} {{ _('datasets') }}</li>
+                {% endif %}
+                {% if organization.metrics.reuses %}
+                <li>{{ organization.metrics.reuses or 0 }} {{ _('reuses') }}</li>
+                {% endif %}
+                <li>
+                    <div>
+                        <span class="text-orange-100">{% include theme('svg/actions/star.svg') %}</span>
+                        <span
+                            class="badge orange-100 ml-xxs py-xxxs px-xs">{{ organization.metrics.followers or 0 }}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</a>
+{% endcache %}

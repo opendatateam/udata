@@ -1,0 +1,71 @@
+{% extends theme("layouts/1-column.html") %}
+{% from theme('macros/paginator.html') import paginator with context %}
+{% import theme('macros/search.html') as s %}
+
+{% set meta = {
+    'title': _('Reuses'),
+    'description': _("%(site)s reuse search", site=config['SITE_TITLE']),
+    'keywords': [_('search'), _('reuses')],
+    'robots': 'noindex',
+} %}
+
+{% set bundle = 'search' %}
+
+{% block breadcrumb %}
+<li class="active">
+    {{ _('Reuses') }}
+    <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=reuses.page_start,
+            end=reuses.page_end,
+            total=reuses.total) }}</small>
+</li>
+{% endblock %}
+
+{# TODO : pull this from somewhere else, results.facet doesn't contain the list when you're already in a filtered mode #}
+{% set reuses_tabs = (
+    ('paper', _('Paper')),
+    ('post', _('Post')),
+    ('visualization', _('Visualization')),
+    ('api', _('Api')),
+    ('hardware', _('Hardware')),
+    ('news_article', _('News article')),
+    ('application', _('Application')),
+    ('idea', _('Idea')),
+) %}
+
+{% block main_content %}
+<section class="container">
+    <div class="pt-sm search-input">
+        <form method="GET" class="row-inline fs-lg">
+            <span class="icon active">{% include theme("svg/search.svg") %}</span>
+            <input type="text" name="q" value="{{reuses.query._query}}" aria-label="{{ _('Search...') }}"
+                placeholder="{{ _('Search...') }}" />
+        </form>
+    </div>
+    <div class="row-inline pt-xl justify-between align-items-center">
+        <h1 class="m-0 h2">{{ _('Reuses')}} <sup>{{reuses.total}}</sup></h1>
+        <a href="{{ url_for('datasets.list') }}" title="{{ _('Search in datasets') }}"
+            class="nav-link fs-sm">{{ _('Search in datasets') }}</a>
+    </div>
+    <div class="row-inline py-lg hidden-lg">
+        <ul class="tabs">
+            <a href="{{ url_for('reuses.list') }}"
+                class="btn-tab tab {% if not reuses.query._filters.type %}active{% endif %}">{{ _('All') }}</a>
+            {% for tab_id, label in reuses_tabs %}
+            <a href="{{ reuses.query.to_url(url, replace=True, **{'type': tab_id}) }}"
+                class="btn-tab tab {% if reuses.query._filters and reuses.query._filters.type.type == tab_id %}active{% endif %}">{{ label }}</a>
+            {% endfor %}
+        </ul>
+    </div>
+    <ul class="search-results row mt-lg-md">
+        {% for reuse in reuses %}
+        <li class="col-3 col-lg-6 col-sm-12 text-align-center">
+            <a href="{{ url_for('reuses.show', reuse=reuse) }}"
+                title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {{ paginator(reuses) }}
+</section>
+{% endblock %}

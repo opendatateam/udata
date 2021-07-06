@@ -1,0 +1,8 @@
+{% macro follow_btn(obj, class=None) %}
+{% set basename = obj.__class__.__name__|lower %}
+
+<follow-button {% if is_following(obj) %}following{% endif %}
+    url="{{ url_for('api.{0}_followers'.format(basename), id=obj.id|string, _external=True) }}"
+    {% if obj.metrics.followers %}:followers="{{ obj.metrics.followers }}" {% endif %}>
+</follow-button>
+{% endmacro %}

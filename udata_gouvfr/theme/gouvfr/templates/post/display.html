@@ -1,0 +1,143 @@
+{% extends theme('layouts/1-column.html') %}
+
+{% set meta = {
+    'title': post.name,
+    'description': post.headline|mdstrip|forceescape,
+    'image': post.image(external=True),
+    'keywords': post.tags
+} %}
+
+{% set bundle = 'post' %}
+
+{% set body_class = 'post-display' %}
+
+{% block title %}{{ post.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('posts.list') }}">{{ _('News') }}</a></li>
+<li class="active">{{ post.name }}</li>
+{% endblock %}
+
+
+{% block main_content %}
+<div class="container py-md">
+    <h1 class="m-0">{{ post.name }}</h1>
+    {% if post.published %}
+    <p class="text-grey-300 fs-xs">
+        {{ _('Published on %(date)s',date=post.published|dateformat(format='long')) }}
+    </p>
+    {% else %}
+    <div class="well well-grey-100 py-sm my-lg">
+        {{ _('This post is a draft and will not be visible by other users') }}
+    </div>
+    {% endif %}
+    {% if post.deleted %}
+    <div class="well well-grey-100 py-sm my-lg">
+        {{ _('This post has been deleted. This will be permanent in the next 24 hours') }}
+    </div>
+    {% endif %}
+    <div class="markdown">
+        <blockquote>
+            {{ post.headline|mdstrip(300) }}
+        </blockquote>
+    </div>
+</div>
+
+{% if post.image %}
+<div class="hagrid mb-md">
+    <div class="col">
+        <img src="{{ post.image }}" alt="{{ post.name }}" class="w-100" />
+    </div>
+</div>
+{% endif %}
+
+<div class="container markdown pb-lg" v-pre>
+    <div>{{ post.content|markdown }}</div>
+</div>
+
+{% if post.datasets %}
+<div class="container mt-md">
+    <h2>{{ _('Datasets') }} <sup>{{ post.datasets|length }}</sup></h2>
+    <div class="row">
+        <div class="col-12">
+            {% for dataset in post.datasets %}
+            <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
+                class="unstyled w-100">{% include theme('dataset/search-result.html') %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if post.reuses %}
+<div class="container mt-md">
+    <h2>{{ _('Reuses') }} <sup>{{ post.reuses|length }}</sup></h2>
+    <ul class="row">
+        {% for reuse in post.reuses %}
+        <li class="col-3 col-lg-6 col-sm-12 text-align-center">
+            <a href="{{ url_for('reuses.show', reuse=reuse) }}"
+                title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if sysadmin %}
+<div class="container mt-hg">
+    <div class="col-6 col-md-12">
+        <h2 class="fs-xxl">{{ _('Actions') }}</h2>
+        <ul class="nav-list">
+            <li class="my-md">
+                <a class="nav-link"
+                    href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}">{{ _('Edit') }}</a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+{% if previous_post or next_post %}
+<section class="container my-hg py-lg border-top">
+    <div class="row justify-between">
+        <div class="col-3 col-md-12 text-align-center-md">
+            {% if previous_post %}
+            <a href="{{ previous_post.display_url }}" title="{{ _('Previous post') }}" class="btn btn-secondary">
+                <span class="text-blue-400 mr-sm">
+                    {% include theme('svg/chevron-left.svg') %}
+                </span>
+                <span>{{ _('Previous post') }}</span>
+            </a>
+            {% endif %}
+        </div>
+        <div class="col-6 col-md-12 my-md-md text-align-center">
+            <a href="{{ url_for('posts.list') }}" class="btn btn-secondary">
+                {{ _('All posts') }}
+            </a>
+        </div>
+        <div class="col-3 col-md-12 text-align-right text-align-center-md">
+            {% if next_post %}
+            <a href="{{ next_post.display_url }}" title="{{ _('Next post') }}" class="btn btn-secondary">
+                <span>{{ _('Next post') }}</span>
+                <span class="text-blue-400 ml-sm">
+                    {% include theme('svg/chevron.svg') %}
+                </span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if config['POST_DISCUSSIONS_ENABLED'] %}
+<section class="community_container discussions-section bg-grey-400 text-white py-hg">
+    <div class="container">
+        <h2 class="fs-hg">{{ _('Discussions') }} <sup class="discussions-count">0</sup></h2>
+        <discussion-threads ref="discussions" subject-id="{{ post.id }}"
+            subject-class="{{ post.__class__.__name__ }}" />
+    </div>
+</section>
+{% endif %}
+{% endblock %}

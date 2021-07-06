@@ -13,33 +13,20 @@ from werkzeug.contrib.atom import AtomFeed
 from udata.core.dataset.factories import (
     DatasetFactory, LicenseFactory, VisibleDatasetFactory
 )
-from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
+from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
-from udata.frontend.markdown import md
 from udata.models import Badge
-from udata.settings import Testing
-from udata.tests.features.territories.test_territories_process import (
+from udata.tests.features.territories import (
     create_geozones_fixtures
 )
 from udata.utils import faker
 from udata.tests.helpers import assert200, assert404, assert_redirects, assert_equal_dates
+from udata.frontend.markdown import md
 
 from udata_gouvfr import APIGOUVFR_EXTRAS_KEY
-from udata_gouvfr.models import (
-    DATACONNEXIONS_5_CANDIDATE, DATACONNEXIONS_6_CANDIDATE,
-    TERRITORY_DATASETS, OPENFIELD16, SPD
-)
-from udata_gouvfr.views import DATACONNEXIONS_5_CATEGORIES, DATACONNEXIONS_6_CATEGORIES
-
-
-class GouvFrSettings(Testing):
-    TEST_WITH_THEME = True
-    TEST_WITH_PLUGINS = True
-    PLUGINS = ['gouvfr']
-    THEME = 'gouvfr'
-    WP_ATOM_URL = None  # Only activated on specific tests
-    DISCOURSE_URL = None  # Only activated on specific tests
+from udata_gouvfr.models import SPD, TERRITORY_DATASETS
+from udata_gouvfr.tests import GouvFrSettings
 
 
 class GouvFrThemeTest:
@@ -459,67 +446,6 @@ class GetBlogPostRssTest(GetBlogPostMixin):
         return feed.rss_str().decode('utf8')
 
 
-DISCOURSE_URL = 'http://somewhere.test/discourse'
-
-
-@pytest.mark.options(DISCOURSE_URL=DISCOURSE_URL,
-                     DISCOURSE_LISTING_TYPE='latest',
-                     DISCOURSE_CATEGORY_ID=None)
-class GouvFrHomeDiscourseTest:
-    '''Ensure home page render with forum'''
-    settings = GouvFrSettings
-    modules = []
-
-    def test_render_home_with_discourse(self, rmock, client):
-        '''It should render the home page with the latest forum topic'''
-        data = {
-            'categories': [{
-                'id': 1,
-                'name': 'Category #1',
-            }]
-        }
-        data_latest = {
-            'users': [],
-            'topic_list': {
-                'topics': [
-                    {
-                        'last_posted_at': '2017-01-01',
-                        'id': 1,
-                        'title': 'Title',
-                        'fancy_title': 'Fancy Title',
-                        'slug': 'title',
-                        'category_id': 1,
-                        'posts_count': 1,
-                        'reply_count': 1,
-                        'like_count': 1,
-                        'views': 1,
-                        'created_at': '2017-01-01',
-                        'posters': [],
-                    }
-                ],
-            },
-        }
-        rmock.get('%s/site.json' % DISCOURSE_URL, json=data)
-        rmock.get('%s/l/latest.json' % DISCOURSE_URL, json=data_latest)
-        response = client.get(url_for('site.home'))
-        assert200(response)
-        assert 'Title' in response.data.decode('utf8')
-
-    def test_render_home_if_discourse_timeout(self, rmock, client):
-        '''It should render the home page when forum time out'''
-        url = '%s/site.json' % DISCOURSE_URL
-        rmock.get(url, exc=requests.Timeout('Blog timed out'))
-        response = client.get(url_for('site.home'))
-        assert200(response)
-
-    def test_render_home_if_discourse_error(self, rmock, client):
-        '''It should render the home page when forum is not available'''
-        url = '%s/site.json' % DISCOURSE_URL
-        rmock.get(url, exc=requests.ConnectionError('Error'))
-        response = client.get(url_for('site.home'))
-        assert200(response)
-
-
 @pytest.mark.options(DEFAULT_LANGUAGE='en')
 class LegacyUrlsTest:
     settings = GouvFrSettings
@@ -552,77 +478,12 @@ class SpecificUrlsTest:
     settings = GouvFrSettings
     modules = []
 
-    def test_redevances(self, client):
-        response = client.get(url_for('gouvfr.redevances'))
-        assert200(response)
-
     def test_terms(self, client):
         response = client.get(url_for('site.terms'))
         assert200(response)
 
     def test_licences(self, client):
         response = client.get(url_for('gouvfr.licences'))
-        assert200(response)
-
-
-class DataconnexionsTest:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_redirect_to_last_dataconnexions(self, client):
-        response = client.get(url_for('gouvfr.dataconnexions'))
-        assert_redirects(response, url_for('gouvfr.dataconnexions6'))
-
-    def test_render_dataconnexions_5_without_data(self, client):
-        response = client.get(url_for('gouvfr.dataconnexions5'))
-        assert200(response)
-
-    def test_render_dataconnexions_5_with_data(self, client):
-        for tag, label, description in DATACONNEXIONS_5_CATEGORIES:
-            badge = Badge(kind=DATACONNEXIONS_5_CANDIDATE)
-            VisibleReuseFactory(tags=[tag], badges=[badge])
-        response = client.get(url_for('gouvfr.dataconnexions5'))
-        assert200(response)
-
-    def test_render_dataconnexions_6_without_data(self, client):
-        response = client.get(url_for('gouvfr.dataconnexions6'))
-        assert200(response)
-
-    def test_render_dataconnexions_6_with_data(self, client):
-        # Use tags until we are sure all reuse are correctly labeled
-        for tag, label, description in DATACONNEXIONS_6_CATEGORIES:
-            badge = Badge(kind=DATACONNEXIONS_6_CANDIDATE)
-            VisibleReuseFactory(tags=['dataconnexions-6', tag], badges=[badge])
-        response = client.get(url_for('gouvfr.dataconnexions6'))
-        assert200(response)
-
-
-class C3Test:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_redirect_c3(self, client):
-        response = client.get(url_for('gouvfr.c3'))
-        assert_redirects(response, '/en/climate-change-challenge')
-
-    def test_render_c3_without_data(self, client):
-        response = client.get(url_for('gouvfr.climate_change_challenge'))
-        assert200(response)
-
-
-class OpenField16Test:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_render_without_data(self, client):
-        response = client.get(url_for('gouvfr.openfield16'))
-        assert200(response)
-
-    def test_render_with_data(self, client):
-        for i in range(3):
-            badge = Badge(kind=OPENFIELD16)
-            VisibleDatasetFactory(badges=[badge])
-        response = client.get(url_for('gouvfr.openfield16'))
         assert200(response)
 
 
@@ -902,28 +763,6 @@ class SpatialTerritoriesApiTest:
         response = client.get(url_for('api.zone_children', id=arles.id))
         assert200(response)
         assert response.json['features'] == []
-
-
-class SitemapTest:
-    settings = GouvFrSettings
-    modules = []
-
-    def test_urls_within_sitemap(self, client):
-        '''It should add gouvfr pages to sitemap.'''
-        response = client.get('sitemap.xml')
-        assert200(response)
-
-        urls = [
-            url_for('gouvfr.redevances_redirect', _external=True),
-            url_for('gouvfr.faq_redirect', _external=True),
-        ]
-        for section in ('citizen', 'producer', 'reuser', 'developer',
-                        'system-integrator'):
-            urls.append(url_for('gouvfr.faq_redirect',
-                                section=section, _external=True))
-
-        for url in urls:
-            assert '<loc>{url}</loc>'.format(url=url) in response.data.decode('utf-8')
 
 
 @pytest.mark.usefixtures('clean_db')

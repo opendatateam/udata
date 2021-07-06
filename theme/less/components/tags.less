@@ -1,0 +1,63 @@
+/*
+---
+name: Tags
+category: Components
+---
+
+Tags allow for easy categorization of datasets.
+They also come in a bigger size with the `.big` class.
+
+```tags.html
+<ul class="tags">
+    <li>coronavirus</li>
+    <li>covid-19</li>
+    <li>covid19</li>
+</ul>
+<span class="big tag">Big tag</span>
+```
+*/
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+
+    > li {
+        .tag;
+    }
+}
+
+.tag {
+    display: inline-block;
+    border-radius: 12px;
+    font-size: @font-size-xs;
+    line-height: 1em;
+
+    background: @grey-400;
+    padding: 2px @spacing-xs 5px;
+
+    margin-bottom: @spacing-xs;
+    margin-right: @spacing-xs;
+
+    > *,
+    & {
+        color: @contrast-grey-400;
+    }
+
+    > a {
+        cursor: pointer;
+    }
+
+    &.big {
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: @font-weight-bold;
+
+        //Maybe make some color classes like tag-grey-200 if more are needed
+        background-color: @grey-200;
+
+        > *,
+        & {
+            color: @grey-300;
+        }
+    }
+}

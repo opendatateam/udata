@@ -1,0 +1,32 @@
+{% macro render_fields(form, submit='', exclude=None) %}
+{% set excluded = exclude or [] %}
+{% for f in form %}
+{% if f in excluded %}
+{% elif f.type in ('CSRFTokenField', 'HiddenField') %}
+{{ f() }}
+{% elif f.type == 'SubmitField' %}
+<button type="submit" class="btn btn-primary form-submit">{{ submit }}</button>
+{% elif f.type == 'BooleanField' %}
+<div class="field field-checkbox">
+    {{ f() }}
+    <label for="{{ f.id }}">
+        {{ f.label.text }}
+    </label>
+</div>
+{% else %}
+<div class="field">
+    <label for="{{ f.id }}" class="{% if f.flags.required %}required{% endif %}">
+        {{ f.label.text }}
+    </label>
+    {% if f.id == "email" %}
+    <input id="{{ f.id }}" name="{{ f.id }}" type="email" {% if f.flags.required %}required{% endif %}></input>
+    {% else %}
+    {{ f() }}
+    {% endif %}
+    {% for error in f.errors %}
+    <label for="{{ f.id }}" class="form-field-error mt-xs text-orange-200">{{ error }}</label>
+    {% endfor %}
+</div>
+{% endif %}
+{% endfor %}
+{% endmacro %}

@@ -1,0 +1,99 @@
+<div class="bg-blue-350">
+    <div class="hagrid banner">
+        <div class="row align-items-center text-align-center-sm">
+            <p class="text-white">
+                {{ _("Welcome to the new <i>beta</i> version of data.gouv.fr! <a href='{learn_more}'>Learn more</a>, go back to <a href='{legacy}'>the old version</a> or <a href='{feedback}'>send us some feedback</a>.").format(
+                    learn_more='https://www.data.gouv.fr/fr/posts/nouvelle-vie-nouvelle-peau-pour-data-gouv-fr/',
+                    legacy='https://legacy.data.gouv.fr',
+                    feedback='https://support.data.gouv.fr/particulier/retour-plateforme',
+                ) }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<section class="site-header" ref="header">
+    <!--[if lte IE 8]>
+        <div class="iewarning">
+            {{ _('Internet Explorer 8 and below are not anymore supported. Please upgrade or change your browser to access the website.') }}
+            <a href="http://browsehappy.com/">{{ _('More information →')}}</a>
+        </div>
+    <![endif]-->
+    <header class="header-brand py-sm">
+        <div class="hagrid">
+            <div class="row align-items-center">
+                <div class="col-auto header-logo">
+                    <a href="{{ url_for('site.home') }}" title="{{ _('Go back to home page') }}">
+                        {% include theme('svg/marianne.svg') %}
+                    </a>
+                </div>
+                <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start">
+                    <a href="/search" title="{{ _('Search') }}" class="mr-md"
+                        @click.capture.prevent="$refs.suggest.startSearch()">
+                        {% include theme('svg/search.svg') %}
+                    </a>
+                    <a href="#" @click.capture.prevent="$refs.header.classList.add('mobile-menu-open')"
+                        title="{{ _('Open menu') }}">
+                        {% include theme('svg/burger-menu.svg') %}
+                    </a>
+                    <a href="#" @click.capture.prevent="$refs.header.classList.remove('mobile-menu-open')"
+                        title="{{ _('Close menu') }}" class="mobile-menu-close hidden">
+                        {{ _('Close') }}
+                        {% include theme('svg/close.svg') %}
+                    </a>
+                </nav>
+                <div class="col-auto ml-lg ml-xl-0 col-xl-12 header-service">
+                    <a href="{{ url_for('site.home') }}" title="{{ _('Go back to home page') }}">
+                        {% include theme('svg/logotype.svg') %}
+                    </a>
+                </div>
+                <div class="col login-box row-inline justify-end align-items-center">
+                    {% if current_user.is_authenticated %}
+                    <div class="row-inline align-items-center">
+                        <img src="{{ current_user|avatar_url(24) }}" alt="{{ current_user.fullname }}"
+                            class="mr-xs rounded-circle" />
+                        <span>{{ current_user.fullname }} </span>
+                    </div>
+                    <a href="{{ url_for('admin.index') }}"
+                        title="{{ _('Administration') }}">{% include theme('svg/administration.svg') %}{{ _('Administration') }}
+                    </a>
+                    <a href="{{ url_for('security.logout') }}"
+                        title="{{ _('Logout') }}">{% include theme('svg/login.svg') %}{{ _('Logout') }}
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('security.login', next=request.url) }}"
+                        title="{{ _('Sign In') }}">{% include theme('svg/login.svg') %}{{ _('Sign in') }}
+                    </a>
+                    <a href="{{ url_for('security.register', next=request.url) }}"
+                        title="{{ _('Register') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+    <nav class="header-nav">
+        <div class="hagrid">
+            <div class="row justify-between align-items-center">
+                <nav class="nav-tabs col">
+                    {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] if request.url_rule or None %}
+                    {% for item in current_theme.menu %}
+                    {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
+                    {% set active = request.url_rule.endpoint != "site.home" and (link_endpoint == current_endpoint) %}
+                    <a class="tab {% if active %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
+                    {% endfor %}
+                </nav>
+                <div class="col-3 hidden-xl search-box">
+                    <form action="/search" class="w-100 row-inline justify-between"
+                        @focus.capture.prevent="$refs.suggest.startSearch()" tabindex="0">
+                        <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search') }}" />
+                        <button type="submit" aria-label="{{ _('Search') }}">
+                            {% include theme('svg/search.svg') %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <suggest ref="suggest" />
+</section>

@@ -1,0 +1,34 @@
+<a href="{{ url_for('users.show', user=user, _external=True) }}"
+   title="{{ user.name }}">
+    <img src="{{ user.avatar | placeholder('user') }}"
+        alt="{{ user.name }}" class="organization-logo producer img-responsive"/>
+</a>
+
+<h4>{{ user.fullname }}</h4>
+
+<div class="caption text-left">
+{% if user.about %}
+<p>
+    {{ user.about|mdstrip(180) }}
+</p>
+{% else %}
+<br/>
+{% endif %}
+<a href="{{ url_for('users.show', user=user) }}"
+    class="btn btn-sm btn-block btn-left btn-warning">
+    <span class="fa fa-users"></span>
+    {{ _('View Profile') }}
+</a>
+<button type="button" class="btn btn-sm btn-block btn-left btn-warning" @click="$refs.discussions.start('')"
+    v-tooltip="'{{ _('Contact the producer') }}'" tooltip-placement="left">
+    <span class="fa fa-envelope-o"></span>
+    {# TRANSLATORS: This is an action (present indicative). #}
+    {{ _('Contact') }}
+</button>
+<follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
+    {% if is_following(user) %}following{% endif %}
+    url="{{ url_for('api.user_followers', id=user.id|string) }}"
+    tooltip="{{ _('I\'ll be informed about this user news') }}"
+    >
+</follow-button>
+</div>

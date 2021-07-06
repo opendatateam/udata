@@ -1,0 +1,252 @@
+/*
+---
+name: Dataset
+category: Components
+---
+
+Datasets cards are used to display... data sets.
+Pretty simple layout that could be achieved using the standard grid, but using a customized component allow for less verbose and less redundant HTML.
+
+There's also a `.compact` version for smaller areas (like the search popover) without separators and overall smaller elements.
+
+For displaying dataset search results, a `.dataset-search-result` version is available. It's essentially the same informations in a different order, with a part that appears only on hover.
+Disclaimer : the search-result component is weird in styling and uses a lot of fixed pixel values. Please beware if you make any changes in it, you might break responsive.
+
+```datasets.html
+<article class="dataset-card">
+    <div class="card-logo">
+        <img src="https://static.data.gouv.fr/avatars/3c/2a35d973814c2681b6941e11810ff3-100.png" alt="Ministère xxx" />
+    </div>
+    <div class="card-cert">
+        <img src="https://placehold.it/18x24" alt="Certified dataset" />
+    </div>
+    <div class="card-data">
+        <h4 class="card-body">
+            Données « temps réel » de mesure des concentrations de polluants atmosphériques réglementés
+        </h4>
+        <div class="card-footer">
+            <ul class="card-features">
+                <li>252 ressources</li>
+                <li>2 réutilisations</li>
+            </ul>
+        </div>
+    </div>
+</article>
+```
+
+```dataset-compact.html
+<article class="dataset-card compact">
+    <div class="card-logo">
+        <img src="https://static.data.gouv.fr/avatars/3c/2a35d973814c2681b6941e11810ff3-100.png" alt="Ministère xxx" />
+    </div>
+    <div class="card-cert">
+        <img src="https://placehold.it/18x24" alt="Certified dataset" />
+    </div>
+    <div class="card-data">
+        <h4 class="card-body">
+            Données « temps réel » de mesure des concentrations de polluants atmosphériques réglementés
+        </h4>
+        <div class="card-footer">
+            <ul class="card-features">
+                <li>252 ressources</li>
+                <li>2 réutilisations</li>
+            </ul>
+        </div>
+    </div>
+</article>
+```
+
+```dataset-search-result.html
+<article class="dataset-card dataset-search-result">
+    <div class="card-logo">
+        <img alt=" " src="/_themes/gouvfr/img/placeholders/organization.png?_=1612877424.1487374">
+    </div>
+    <div class="card-data">
+        <h4 class="card-title">Recusandaeé suscipité ameté nihilé natusé doloreé magnié commodié.</h4>
+        <div class="card-description text-grey-300 mt-xs"> Quiaé aliasé exé. Architectoé laudantiumé corporisé
+            consequaturé laboriosamé esté. Teneturé incidunté voluptatemé minimaé fugité inventoreé fugiaté. </div>
+    </div>
+    <dl class="card-hover">
+        <div>
+            <dt>Frequency</dt>
+            <dd>Unknown</dd>
+            <dt>Other stuff</dt>
+            <dd>Any value</dd>
+        </div>
+    </dl>
+    <ul class="card-footer">
+        <li><strong>131</strong> ressources</li>
+        <li><strong>22</strong> réutilisations </li>
+        <li><strong>174</strong> abonnés </li>
+    </ul>
+</article>
+```
+*/
+
+.dataset-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    padding: @spacing-xxs 0;
+
+    .card-logo {
+        flex: 0 0 100px;
+        .logo;
+    }
+
+    .card-data {
+        flex-grow: 1;
+        position: relative;
+        margin: 0 @spacing-md;
+
+        h4 {
+            margin-bottom: 0;
+        }
+
+        .card-footer {
+            margin-top: @spacing-xs;
+
+            ul {
+                display: flex;
+                font-size: @font-size-sm;
+
+                li {
+                    color: @grey-300;
+
+                    + li {
+                        margin-left: 15px;
+                    }
+                }
+            }
+        }
+    }
+
+    //Smaller version with no border for display in small spaces (search box for instance)
+    &.compact {
+        padding: @spacing-xs 0;
+
+        .card-logo {
+            flex: 0 1 80px;
+
+            img {
+                max-width: 80px;
+            }
+        }
+
+        .card-features {
+            font-size: @font-size-xs!important;
+        }
+    }
+
+    //Fancier version for search results, with an hover section for details
+    //Disclaimer : the search-result component is weird in styling and uses a lot of fixed pixel values. Please beware if you make any changes in it, you might break responsive.
+    &.dataset-search-result {
+        padding: 0 @spacing-xs; //Unfortunately, we need some sweet borders
+
+        border-top: 1px solid @grey-100;
+
+        > * {
+            padding: @spacing-md 0;
+        }
+
+        @media @query-lg {
+            align-items: flex-start;
+            flex-wrap: wrap;
+
+            .card-data {
+                flex-basis: 0;
+                padding-bottom: 0;
+            }
+        }
+
+        .card-logo {
+            padding: @spacing-xs @spacing-xs;
+            margin: @spacing-xxs 0;
+
+            @media @query-lg {
+                padding-top: @spacing-md;
+            }
+        }
+
+        .card-hover {
+            flex-basis: 260px;
+            flex-shrink: 0;
+
+            visibility: hidden;
+            align-self: stretch;
+
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            padding: @spacing-md @spacing-xxs;
+
+            border-left: 1px solid @grey-100;
+
+            > div {
+                flex-basis: 50%;
+                flex-grow: 1;
+                text-align: right;
+
+                margin-bottom: @spacing-sm;
+                padding: 0 @spacing-xs;
+
+                color: @grey-300;
+                font-size: @font-size-xs;
+
+                dd {
+                    font-weight: @font-weight-bold;
+                }
+            }
+
+            @media @query-lg {
+                display: none;
+            }
+        }
+
+        &:hover {
+            background: @blue-100;
+
+            .card-hover {
+                visibility: visible;
+            }
+        }
+
+        .card-footer {
+            align-self: stretch;
+            border-left: 1px solid @grey-100;
+
+            flex-basis: 140px;
+            flex-shrink: 0;
+
+            text-align: right;
+            padding: @spacing-md;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            color: @grey-300;
+            font-size: @font-size-xs;
+
+            li {
+                margin: @spacing-xxs 0;
+            }
+
+            @media @query-lg {
+                min-width: 100%;
+                border-left: none;
+
+                padding: @spacing-xs;
+                padding-left: 112px; //Logo width + little margin
+
+                flex-direction: row;
+                justify-content: space-between;
+            }
+        }
+
+        &:after {
+            display: none;
+        }
+    }
+}

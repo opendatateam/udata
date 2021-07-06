@@ -1,0 +1,19 @@
+{% extends theme('base.html') %}
+{% import theme('macros/forms.html') as forms with context %}
+
+{% block content %}
+<section class="py-xl py-lg-lg bg-grey-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 text-align-center offset-3 form-container col-md-12 offset-md-0">
+                <form class="form" method="post" action="{{ url_for('security.send_confirmation') }}">
+                    <fieldset>
+                        <legend class="h2 mb-xl">{{ _('Resend confirmation instructions') }}</legend>
+                        {{ forms.render_fields(send_confirmation_form, submit=_('Submit')) }}
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

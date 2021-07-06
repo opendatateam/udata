@@ -1,0 +1,6 @@
+{% extends theme('mail/base.txt') %}
+
+{% block body %}
+{{ _('This is a test mail') }}
+{{ _('If you read this, your mail configuration is working') }}
+{% endblock %}

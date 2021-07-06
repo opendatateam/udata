@@ -1,0 +1,183 @@
+/*
+---
+name: Markdown
+category: Components
+---
+
+Content on the site can be styled with Markdown. Ready made styles are provided as below :
+
+```markdown.html
+<article class="markdown">
+<p>Quelques semaines plus tard fut ouverte la section occidentale, longtemps attendue, entre Étoilenote 3 et La Défense. Cette simple navette initiale fut d'abord prolongée vers l'est jusqu'à la nouvelle station Auber le 23 novembre 1971, puis vers l'ouest le 1er octobre 1972 jusqu'à Saint-Germain-en-Laye par sa connexion à NanterreB 1 à l'ancienne ligne de Paris à Saint-Germain-en-Laye. La section devait initialement s'appeler « Métro express régional Défense-Étoile », mais le nom fut changé quand on se rendit compte de l'acronyme peu flatteur de l'appellation de départ.</p>
+<p>
+    <strong>Bold</strong>
+    <em>Italic</em>
+    <h3>Heading</h3>
+    <h1>Mega heading ?</h1>
+    <code>Little code snippet</code>
+     <p><a href="http://lien.com" rel="nofollow">Lien</a>
+     <img src="http://placehold.it/1200x1800" title="entrez le titre de l'image ici">
+ </p>
+
+<ul>
+    <li>Liste</li>
+    <li>Liste 2</li>
+</ul>
+
+<ol>
+    <li>Ol</li>
+    <li>OL</li>
+    <li>OL3</li>
+</ol>
+
+<table>
+    <thead>
+        <tr>
+            <th>foo</th>
+            <th>bar right</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>baz</td>
+            <td>bim</td>
+        </tr>
+        <tr>
+            <td>baz</td>
+            <td>bim</td>
+        </tr>
+        <tr>
+            <td>baz</td>
+            <td>bim</td>
+        </tr>
+    </tbody>
+</table>
+
+<pre><code>Big code snippet</code></pre>
+
+<blockquote>
+    <p>
+    Quote<br>
+    Multiligne ?</p>
+    <p>
+    Quote<br>
+    Quote test</p>
+</blockquote>
+</article>
+```
+
+*/
+
+@markdown-font-size: 0.85em;
+
+.markdown {
+    ul {
+        padding-left: @spacing-xl;
+        list-style-type: disc;
+
+        ul {
+            margin-top: @spacing-xs;
+            margin-bottom: @spacing-xs;
+        }
+    }
+
+    blockquote {
+        margin-left: 0;
+        .filet;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    //They are indeed supported !
+    table {
+        width: 100%;
+        border-spacing: 0;
+        border-collapse: separate; //Needed for rounded borders
+
+        margin: @spacing-md 0;
+
+        .rounded-xxs;
+
+        //This below is way too complicated just for some borders. But it works®
+        thead {
+            background: @grey-50;
+
+            th:first-child {
+                border-top-left-radius: 3px;
+            }
+
+            th:last-child {
+                border-top-right-radius: 3px;
+            }
+        }
+
+        tr {
+            th,
+            td {
+                border-right: @defaultBorder;
+                padding: @spacing-xs @spacing-sm;
+
+                &:first-child {
+                    border-left: @defaultBorder;
+                }
+            }
+
+            th {
+                border-top: @defaultBorder;
+            }
+
+            &:last-child {
+                td:first-child {
+                    border-bottom-left-radius: 3px;
+                }
+
+                td:last-child {
+                    border-bottom-right-radius: 3px;
+                }
+            }
+        }
+
+        td {
+            border-bottom: @defaultBorder;
+        }
+    }
+
+    pre {
+        padding: @spacing-md;
+        border-radius: 4px;
+        background: @grey-50;
+    }
+
+    code {
+        color: @orange-100;
+        background: @grey-50;
+        padding: @spacing-xxs;
+        border-radius: 4px;
+    }
+
+    h1 {
+        font-size: @font-size-hg * @markdown-font-size;
+    }
+
+    h2 {
+        font-size: @font-size-xl * @markdown-font-size;
+        margin-top: @spacing-lg;
+    }
+
+    h3 {
+        font-size: @font-size-lg * @markdown-font-size;
+        margin-top: @spacing-md;
+    }
+
+    h4 {
+        font-size: @font-size-base * @markdown-font-size;
+        margin-top: @spacing-sm;
+    }
+
+    h5 {
+        font-size: @font-size-xs * @markdown-font-size;
+        margin-top: @spacing-xs;
+    }
+}

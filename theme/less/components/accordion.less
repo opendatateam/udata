@@ -1,0 +1,16 @@
+.accordion-button {
+    //Prevent click events bubbling
+    * {
+        pointer-events: none;
+    }
+
+    &.trigger-once {
+        &[aria-expanded="true"] {
+            display: none;
+        }
+    }
+}
+
+.accordion-content {
+    overflow: hidden;
+}

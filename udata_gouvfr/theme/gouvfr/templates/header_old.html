@@ -1,0 +1,125 @@
+<section class="header">
+    <!--[if lte IE 8]>
+    <div class="iewarning">
+        {{ _('Internet Explorer 8 and below are not anymore supported. Please upgrade or change your browser to access the website.') }} <a href="http://browsehappy.com/">{{ _('More information →')}}</a>
+    </div>
+    <![endif]-->
+
+    {% if config['BANNER_ACTIVATED'] %}
+      {% block banner %}
+        {% set b_filename = config['BANNER_HTML_FILENAME'] %}
+        {% include theme('banners/{0}'.format(b_filename)) with context %}
+      {% endblock %}
+    {% endif %}
+
+    <div class="container">
+        <nav class="navbar navbar-default navbar-static-top">
+            <header class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target=".navbar-collapse, .subnav-collapse, .sidebg-collapse">
+                    <span class="sr-only">{{ _('Toggle navigation') }}</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('site.home') }}">{{ g.site.title }}</a>
+                <p class="navbar-text pull-right">{{ _('Open platform for French public data') }}</p>
+            </header>
+        </nav>
+    </div>
+</section>
+
+<section class="topmenu collapse navbar-collapse">
+    <div class="container">
+        <nav class="navbar navbar-default navbar-static-top">
+            <ul class="nav navbar-nav links">
+                {% for item in current_theme.menu %}
+                <li {% if item.items %}class="dropdown dropdown-hover"{% endif %}>
+                    <a href="{{ item.url }}">{{ item.label }}</a>
+                    {% if item.items %}
+                    <ul class="dropdown-menu" role="menu">
+                        {% for subitem in item.items %}
+                        <li><a href="{{ subitem.url }}">{{ subitem.label }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                {% if g.lang_code and request.url %}
+                <li class="dropdown language">
+                    <button class="btn btn-link dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ theme_static('img/flags/{0}.png'.format(g.lang_code)) }}"
+                            alt="Current locale flag"
+                            width="16" height="16" />
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for code, name in config['LANGUAGES'].items() %}
+                        <li>
+                            <a href="{{ request.url.replace('/{0}/'.format(g.lang_code),'/{0}/'.format(code)) }}">
+                                <img src="{{ theme_static('img/flags/{0}.png'.format(code)) }}"
+                                    alt="{{name}} flag"
+                                    width="16" height="16" />
+                                {{name}}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
+                {% if current_user.is_authenticated %}
+                <li class="dropdown user login">
+                    <button class="btn-link dropdown-toggle" data-toggle="dropdown">
+                        <span class="username">{{ current_user.fullname }} </span>
+                        <img src="{{ current_user|avatar_url(30) }}" width="30" height="30" alt="{{ current_user.fullname }}" />
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="{{ url_for('users.show', user=current_user) }}">
+                                <span class="fa fa-fw fa-user"></span>
+                                {{ _('Public profile') }}
+                            </a>
+                        </li>
+                        {% if current_user.organizations %}
+                        <li role="presentation" class="dropdown-header">{{ _('Organizations') }}</li>
+                        {% for org in current_user.organizations %}
+                        <li>
+                            <a href="{{ url_for('organizations.show', org=org) }}">
+                                <img src="{{ org.logo(20)|placeholder('organization') }}"
+                                    width="20" height="20" alt="{{ org.acronym or org.name }}"/>
+                                {{ org.acronym or org.name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        <li class="divider"></li>
+                        {% endif %}
+                        <li>
+                            <a href="{{ url_for('admin.index') }}">
+                                <span class="fa fa-fw fa-wrench"></span>
+                                {{ _('Administration') }}
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ url_for('security.logout') }}">
+                                <span class="fa fa-fw fa-sign-out"></span>
+                                {{ _('Logout') }}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {% else %}
+                <li>
+                    <a title="{{ _('Sign In / Register') }}"
+                        href="{{ url_for('security.login', next=request.url) }}">
+                        <span class="fa fa-fw fa-sign-in"></span>
+                        {{ _('Sign In / Register') }}
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</section>

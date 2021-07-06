@@ -6,7 +6,7 @@ udata customizations for Etalab / Data.gouv.fr.
 
 ## Compatibility
 
-**udata-gouvfr** requires Python 2.7+ and [uData][].
+**udata-gouvfr** requires Python 3.7+ and [udata][].
 
 
 ## Installation
@@ -80,6 +80,58 @@ You can list available development commands with:
 inv -l
 ```
 
+
+## Theme
+
+The front-end theme for the public facing website, is split into two parts :
+- The [Jinja](https://jinja.palletsprojects.com/en/2.11.x/) templates are located inside `udata_gouvfr/theme/templates`.
+- The [Less](http://lesscss.org/) & other sourcefiles for the are located in `theme`.
+
+In addition we have a nice litle set of CSS Utilities to quickly build front end components, inspired by bootstrap, most of its documentation
+lives in the css located in `theme/less/` and is built using [Stylemark](https://github.com/mpetrovich/stylemark), you can read the live documentation
+in `udata_gouvfr/theme/stylemark/` after building it using `npm run build-stylemark`.
+
+When building pages, here are a few templates to look out for in `udata_gouvfr/theme/templates` :
+- `home.html` : well, duh.
+- `header.html` and `footer.html` : same idea.
+- `raw.html` : contains the general html structure exposing a `body` block where we can write our page's body.
+- `base.html` : contains some extra html structure exposing a `content` block for our page's content.
+- `subnav-large.html`, `publish-action-modal.html` and `carousel.html` : **TODO**
+
+Here are our reusable components :
+- `dataset` : datasets listings used in many pages.
+- `reuse` : cards for displaying dataset reused in the real world.
+- `participez` : is the large blue callout seen on multiple pages.
+- `macros` : **TODO**
+- `svg` : contains SVG assets to be included in our pages.
+
+### TODO
+Front docs todo :
+- Parcel 2 architecture
+  - Static copy
+  - Stylemark build
+  - VueJS compiler mode
+- VanillaJS IIFE architecture
+- Vue 3 architecture
+  - Modals
+  - I18n
+  - Config plugin
+  - Components
+Back docs todo :
+- CSS/JS file inclusion
+- Static route for UI-Kit
+
+Whenever a components needs some special styling, you can find their corresponding definitions inside `theme/less/specific/<component>`,
+it's best if we can avoid having too much specific styling, but sometimes you just really need it.
+
+Finally, we have a bunch of commands to make your life a tad easier, that you can run through `npm run`.
+- `build`: Builds the final CSS/JS files and the UI-Kit Documentation. You should probably use this one.
+- `build:app`: Builds the final CSS/JS files without the UI-Kit
+- `build:stylemark`: Builds the UI-Kit files and also the CSS/JS files but unminifed (do not use those static files in production)
+- `i18n:report`: Generates a report of the i18n missing and unused keys
+- `i18n:extract`: Same as above, but also automatically adds missing keys to translation files
+- `clean`: Cleans Parcel cache. Use this if you stumble upon weird bugs to start anew.
+- `start`: Get to coding with live reload and things
 
 [udata]: https://github.com/opendatateam/udata
 [udata-doc]: http://udata.readthedocs.io/en/stable/

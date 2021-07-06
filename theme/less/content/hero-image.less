@@ -1,0 +1,25 @@
+/*
+---
+name: Hero Image
+category: Content
+---
+
+A small utility for hero images used to present user-uploaded images. Used on posts and on the home page for example.
+
+## Usage
+It simply sets some minimum height and some background positionning stuff.
+You have to inject the image as a backgroundImage CSS property, which can be done with Jinja
+
+```hero-image.html
+{% set image = post.image|placeholder('post') %}
+<div class="hero-news mb-xl" style="background-image: url('{{image}}')">
+    <div>You can put some content here and do some stuff if you'd like</div>
+</div>
+```
+*/
+
+.hero-image {
+    min-height: 250px;
+    background-position: center center;
+    background-size: cover;
+}

@@ -1,0 +1,168 @@
+{% extends theme('base.html') %}
+
+{% set meta = {
+    'title': _('Home'),
+    'description': _("%(site)s home", site=config['SITE_TITLE']),
+    'keywords': [_('home')],
+} %}
+
+{% set read_only_mode = config.READ_ONLY_MODE %}
+
+{% block content %}
+{% cache cache_duration, 'home', g.lang_code %}
+
+<section class="hero py-xl py-lg-lg">
+    <div class="hagrid">
+        <div class="row">
+            <div class="col-5 col-lg-12">
+                <h1 class="mt-0">{{ _('Open platform for French public data') }}</h1>
+                <div class="mt-md mt-lg-sm">
+                    <h4>{{ _('Featured topics') }}</h4>
+                    <a href="{{ url_for('gouvfr.show_page', slug='spd/reference') }}" class=" btn-venti bg-blue-470">
+                        Données de
+                        <strong>Référence</strong>
+                    </a>
+                    <a href="{{ url_for('gouvfr.show_page', slug='donnees-coronavirus') }}"
+                        class="btn-venti my-md bg-blue-450">
+                        Données relatives à la
+                        <strong>COVID-19</strong>
+                    </a>
+                    <a href="{{ url_for('gouvfr.show_page', slug='donnees-logement-urbanisme') }}"
+                        class="btn-venti bg-green-350">
+                        Données relatives au
+                        <strong>Logement et à l'Urbanisme</strong>
+                    </a>
+                </div>
+            </div>
+            <div class="col-6 offset-1 offset-lg-0 col-lg-12 mt-lg-md">
+                <h4>{{ _('News') }}</h4>
+                {% if last_post %}
+                {% set post = last_post %}
+                <a href="{{ post.display_url }}" title="{{ post.name }}" class="unstyled w-100 hero-post">
+                    {% include theme('post/search-result.html') %}
+                </a>
+                <div class="row justify-center">
+                    <a href="{{ url_for('posts.list') }}"
+                        class="btn-secondary btn-with-arrow">{{ _('All news') }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% set metrics = [
+    (_('Datasets'), 'datasets'),
+    (_('Resources'), 'resources'),
+    (_('Reuses'), 'reuses'),
+    (_('Users'), 'users'),
+    (_('Organizations'), 'organizations'),
+    (_('Discussions'), 'discussions'),
+] %}
+
+
+{# Metrics Section #}
+<section class="metrics-bar">
+    <div class="hagrid py-hg">
+        <div class="bar p-xl">
+            <h3>{% include theme('svg/logotype.svg') %} {{ _('is') }}</h3>
+            <div class="row-inline justify-between mt-xl">
+                {% for (label, metric) in metrics %}
+                <div class="filet {% if metric == 'reuses' %}filet-currentcolor text-green-300{% endif %}">
+                    <div class="fs-hg f-bold text-grey-400">{{ current_site.metrics[metric] }}</div>
+                    <span class="text-grey-400">{{ label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{# Datasets section #}
+{% set nb_datasets = current_site.settings.home_datasets|length %}
+{% set dataset_tabs = (
+    ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
+    ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
+    ('reference-datasets', _('Reference datasets'), spd, {}),
+) %}
+
+<section class="datasets pb-hg pt-md bg-grey-50">
+    <div class="hagrid overflow-visible">
+        {# Dataset tabs #}
+        <div class="row justify-between">
+            <div class="col-auto">
+                <h2>{{ _('Data') }}</h2>
+            </div>
+            <div class="col-auto">
+                <nav class="tabs">
+                    {% for tab_id, label, _, _ in dataset_tabs %}
+                    <a href="#{{tab_id}}"
+                        class="btn-tab tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                    {% endfor %}
+                    <a href="{{ url_for('datasets.list') }}" class="btn-tab tab">{{ _('See more') }}</a>
+                </nav>
+            </div>
+        </div>
+        {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
+        <div class="tab-content {% if loop.first %}active{% endif %}" id={{tab_id}}>
+            <div class="row pt-xl pt-md-md">
+                {% for dataset in datasets %}
+                <div class="col-lg-12 col-4">{% include theme('dataset/card.html') %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        {# end Dataset tabs #}
+    </div>
+</section>
+{# End datasets section #}
+
+{# Reuses section #}
+{% set nb_reuses = current_site.settings.home_reuses|length %}
+{% set reuses_tabs = (
+    ('best-reuses', _('Etalab\'s selection'), current_site.settings.home_reuses, {}),
+    ('latest-reuses', _('Latest reuses'), recent_reuses[:3], {'sort': '-created'}),
+) %}
+
+{# Reuse section #}
+<section class="reuse py-hg">
+    <div class="hagrid">
+        <div class="row justify-between">
+            <div class="col-auto">
+                <h2>{{ _('Reuses') }}</h2>
+            </div>
+            <div class="col-auto">
+                <nav class="tabs">
+                    {% for tab_id, label, _, _ in reuses_tabs %}
+                    <a href="#{{tab_id}}"
+                        class="btn-tab tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                    {% endfor %}
+                    <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}"
+                        class="btn-tab tab">{{ _('See more') }}</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="hagrid reuse-cards">
+        {% for tab_id, label, reuses, kwargs in reuses_tabs  %}
+        <div class="tab-content  {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+            <div class="row pt-xl pt-md-md">
+                {% for reuse in reuses %}
+                {% set features = ['preview'] %}
+                <div class="col-3 col-md-4 mb-md text-align-center">
+                    {% include theme('reuse/card.html') %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{# End reuse section #}
+
+{% include theme("participez/participez.html") %}
+
+{% endcache %}
+{% endblock %}

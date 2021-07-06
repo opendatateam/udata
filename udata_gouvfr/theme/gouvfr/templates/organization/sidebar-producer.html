@@ -1,0 +1,43 @@
+{% if organization.public_service %}
+<img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified" class="certified"
+    v-popover.literal="{{ _('The identity of this public service public is certified by Etalab') }}"
+    popover-title="{{ _('Certified public service') }}"
+    popover-placement="left" popover-trigger="hover"/>
+{% endif %}
+
+<a href="{{ url_for('organizations.show', org=organization, _external=True) }}"
+   title="{{ organization.name }}">
+    <img src="{{ organization.logo|placeholder('organization') }}"
+        alt="{{ organization.name }}" class="organization-logo producer img-responsive"/>
+</a>
+
+<h4>{{ organization.name }}</h4>
+
+<div class="caption text-left">
+{% if organization.description %}
+<p>
+    {{ organization.description|mdstrip(180) }}
+</p>
+{% else %}
+<br/>
+{% endif %}
+<a href="{{ url_for('organizations.show', org=organization) }}"
+    class="btn btn-sm btn-block btn-left btn-warning">
+    <span class="fa fa-users"></span>
+    {{ _('View Profile') }}
+</a>
+{% if not read_only_mode or sysadmin %}
+<button type="button" class="btn btn-sm btn-block btn-left btn-warning" @click="$refs.discussions.start('')"
+    v-tooltip="'{{ _('Contact the producer') }}'" tooltip-placement="left">
+    <span class="fa fa-envelope-o"></span>
+    {# TRANSLATORS: This is an action (present indicative). #}
+    {{ _('Contact') }}
+</button>
+<follow-button with-label classes="btn-block btn-sm btn-left btn-warning"
+    {% if is_following(organization) %}following{% endif %}
+    url="{{ url_for('api.organization_followers', id=organization.id|string) }}"
+    tooltip="{{ _('I\'ll be informed about this organization news') }}"
+    >
+</follow-button>
+{% endif %}
+</div>

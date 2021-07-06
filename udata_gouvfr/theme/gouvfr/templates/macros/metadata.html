@@ -1,0 +1,82 @@
+{% macro metadata(meta) %}
+{% set title = meta.title or _('Home') %}
+{% set description = meta.description or _('Share, improve and reuse public data') %}
+{% set image = meta.image or theme_static('img/logo-social.png', external=True) %}
+{% set keywords = meta.keywords or [] %}
+{% set meta_type = meta.type or 'website' %}
+<meta charset="utf-8" />
+<title>{{ title }} - {{ current_site.title }}</title>
+<meta property="og:type" content="{{ meta_type }}" />
+<meta property="og:title" content="{{ title }} - {{ current_site.title }}" />
+<link rel="author" href="{{ config.SITE_AUTHOR_URL }}" />
+<meta name="description" content="{{ description }}" />
+{% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow" />
+{% elif meta.robots %}<meta name="robots" content="{{ meta.robots }}" />
+{% endif %}
+<meta property="og:description" content="{{ description }}" />
+<meta property="og:image" content="{{ image }}" />
+<meta name="keywords" content="{{ ', '.join(current_site.keywords + keywords) }}" />
+<meta name="theme-static-root" content="{{ theme_static('') }}" />
+<meta name="static-root" content="{{ static('', _burst=False) }}" />
+<meta name="api-root" content="{{ url_for('api.root') }}" />
+<meta name="admin-root" content="{{ url_for('admin.index') }}" />
+<meta name="api-specs" content="{{ url_for('api.specs', _external=True) }}"/>
+<meta name="auth-url" content="{{ url_for('security.login') }}" />
+<meta name="github" content="{{ config.SITE_GITHUB_URL }}" />
+<meta name="js-config-dataset-url" content="{{ url_for('datasets.list') }}" />
+<meta name="js-config-reuse-url" content="{{ url_for('reuses.list') }}" />
+{{ i18n_alternate_links() }}
+{% if config.SENTRY_PUBLIC_DSN %}
+<meta name="sentry" content="{{config.SENTRY_PUBLIC_DSN}}"
+    data-release="{{config.SENTRY_RELEASE}}"
+    data-tags="{{config.SENTRY_TAGS|default({})|tojson|urlencode}}"
+/>
+{% endif %}
+<meta name="csrf-token" content="{{ csrf_token() }}" />
+<meta name="site-title" content="{{config.SITE_TITLE}}" />
+
+{% if current_user.is_authenticated %}
+<meta name="current-user" content="{{ current_user.id }}"
+    data-slug="{{ current_user.slug }}"
+    data-first_name="{{ current_user.first_name }}"
+    data-last_name="{{ current_user.last_name }}"
+    data-roles="{{ current_user.roles|join(',') }}"
+    data-avatar="{{ current_user.avatar }}"
+/>
+{% endif %}
+
+<meta name="check-urls" content="{{ config.LINKCHECKING_ENABLED|tojson }}" />
+<meta name="unchecked-types" content="{{ config.LINKCHECKING_UNCHECKED_TYPES|tojson|urlencode }}" />
+<meta name="territory-enabled" content="{{ 'true' if config.ACTIVATE_TERRITORIES else 'false' }}">
+<meta name="delete-me-enabled" content="{{ 'true' if config.DELETE_ME else 'false' }}">
+<meta name="search-autocomplete-enabled" content="{{ 'true' if config.SEARCH_AUTOCOMPLETE_ENABLED else 'false' }}">
+<meta name="search-autocomplete-debounce" content="{{ config.SEARCH_AUTOCOMPLETE_DEBOUNCE }}">
+<meta name="dataset-max-resources-uncollapsed" content="{{ config.DATASET_MAX_RESOURCES_UNCOLLAPSED }}">
+<meta name="markdown-config" content="{{ {
+    'tags': config.MD_ALLOWED_TAGS,
+    'attributes': config.MD_ALLOWED_ATTRIBUTES,
+    'styles': config.MD_ALLOWED_STYLES,
+}|tojson|urlencode }}" />
+
+<meta name="map-config" content="{{ {
+    'init': {
+        'center': config.MAP_INITIAL_CENTER,
+        'zoom': config.MAP_INITIAL_ZOOM,
+        'level': config.MAP_INITIAL_LEVEL,
+    },
+    'tiles': {
+        'url': config.MAP_TILES_URL,
+        'hidpi': config.MAP_TILES_URL_HIDPI,
+        'config': config.MAP_TILES_CONFIG,
+    }
+}|to_json|urlencode }}" />
+<meta name="tags-config" content="{{ {
+    'MIN_LENGTH': config.TAG_MIN_LENGTH,
+    'MAX_LENGTH': config.TAG_MAX_LENGTH,
+}|tojson|urlencode }}" />
+
+{% if json_ld %}
+<script id="json_ld" type="application/ld+json">{{ json_ld|embedded_json_ld }}</script>
+{% endif %}
+
+{% endmacro %}

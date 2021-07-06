@@ -10,12 +10,12 @@ reuses.map(function(reuse) {
         created_by: etalab._id
     };
     var result = db.reuse.update({_id: reuse._id},
-                                 {$set: {badges: [dataconnexions_badge]}});
+                                {$set: {badges: [dataconnexions_badge]}});
     counter += result.nModified;
 });
 print(counter, 'reuses badged.');
 
 var result = db.reuse.update({tags: 'dataconnexions'},
-                             {$pull: {tags: 'dataconnexions'}},
-                             {multi: true});
+                            {$pull: {tags: 'dataconnexions'}},
+                            {multi: true});
 print(result.nModified, 'reuses cleaned (removed dataconnexions tag).');

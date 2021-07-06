@@ -1,0 +1,41 @@
+.footer-links {
+    border-top: 5px solid @blue-500;
+
+    .etalab-logo svg {
+        width: 130px;
+    }
+}
+
+.footer-brand {
+    .marianne-logo svg {
+        width: 200px;
+        fill: unset;
+
+        @media @query-lg {
+            width: 130px;
+        }
+    }
+}
+
+.footer-legals {
+    border-top: 1px solid @grey-200;
+
+    .legal-nav {
+        li:not(:last-child) {
+            margin-bottom: @spacing-xs;
+
+            &:after {
+                display: inline-block;
+                vertical-align: middle;
+
+                content: " ";
+                height: 18px;
+                width: 1px;
+                margin: 0 @spacing-xs;
+                margin-top: -1px; //Vertically centering finally done right
+
+                background-color: currentColor;
+            }
+        }
+    }
+}

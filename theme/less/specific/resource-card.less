@@ -1,0 +1,165 @@
+.resource-card {
+    border-top: 1px solid @grey-100;
+    border-bottom: 1px solid @grey-100;
+
+    &.dark {
+        border-top: 1px solid @grey-300;
+        border-bottom: 1px solid @grey-300;
+    }
+
+    &:nth-of-type(2n + 1) {
+        background: @grey-50;
+
+        &.dark {
+            background: @grey-380;
+
+            .accordion-button svg {
+                * {
+                    fill: white;
+                }
+            }
+        }
+    }
+
+    @left-padding: 100px; //Spacing for buttons
+
+    .card-header {
+        padding: @spacing-lg;
+        padding-left: 0 !important;
+
+        display: flex;
+        align-items: center;
+
+        @media @query-md {
+            flex-wrap: wrap;
+        }
+
+        .edit-button {
+            min-width: 100px;
+            text-align: center;
+
+            svg {
+                width: 45px;
+                height: 45px;
+            }
+
+            @media @query-md {
+                order: 2;
+            }
+        }
+
+        .header-text {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+
+            h4 {
+                margin: @spacing-xs 0;
+            }
+
+            @media @query-md {
+                order: 1;
+            }
+        }
+
+        .button-bar {
+            @media @query-md {
+                flex-basis: 100%;
+                order: 3;
+            }
+
+            ul {
+                display: flex;
+                align-items: center;
+
+                @media @query-md {
+                    justify-content: center;
+                }
+
+                li {
+                    margin: @spacing-lg;
+
+                    //We should maybe extract this into the accordion component
+                    .accordion-button {
+                        display: inline-block;
+                        transform: rotate(90deg);
+                        transition: transform ease 0.3s; //Warning : if you change the timing here, change it in accordion.js as well
+
+                        svg {
+                            width: 15px;
+                            height: 15px;
+
+                            * {
+                                fill: @grey-300;
+                            }
+                        }
+
+                        &[aria-expanded="true"] {
+                            transform: rotate(-90deg);
+                        }
+                    }
+                }
+            }
+        }
+
+        .filetype {
+            text-align: right;
+            font-size: @font-size-sm;
+
+            em {
+                font-weight: @font-weight-bold;
+                font-style: initial;
+                color: @grey-300;
+            }
+        }
+    }
+
+    &.dark .description-list {
+        div {
+            dt {
+                color: white;
+            }
+
+            dd {
+                color: @grey-200;
+            }
+        }
+    }
+
+    .description-list {
+        width: 100%;
+
+        > div {
+            &:last-child {
+                dd,
+                dt {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+
+    .card-header,
+    .resource-description,
+    .description-list dd,
+    .description-list dt {
+        padding: @spacing-sm @spacing-sm;
+        padding-left: @left-padding;
+        border-bottom: 1px solid @grey-100;
+
+        @media @query-md {
+            padding-left: @spacing-sm;
+        }
+    }
+
+    &.dark .card-header,
+    .resource-description,
+    .description-list dd,
+    .description-list dt {
+        border-bottom: 1px solid @grey-300;
+    }
+
+    + .resource-card {
+        margin-top: @spacing-lg;
+    }
+}

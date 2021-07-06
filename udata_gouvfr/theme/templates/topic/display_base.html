@@ -1,9 +1,0 @@
-{% extends "topic/display_base.html" %}
-
-{% block subnav %}
-{% cache cache_duration, 'topic-subnav', topic.id|string, g.lang_code %}
-{% include theme('topic/subnav.html') %}
-{% endcache %}
-{% endblock %}
-
-{% block related %}{% endblock %}

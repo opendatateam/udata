@@ -1,0 +1,18 @@
+{% import theme('macros/search.html') as s %}
+<div class="label-list">
+    {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
+        labelize=reuses.label_func('organization')
+    ) }}
+    {{ s.filter_label('type', _('Type'), ficon('fa-file'),
+        labelize=reuses.label_func('type')
+    ) }}
+    {{ s.filter_label('tag', _('Tag'), ficon('fa-tag'),
+        labelize=reuses.label_func('tag')
+    ) }}
+    {{ s.filter_label('datasets', _('Datasets'), ficon('fa-cubes'),
+        labelize=reuses.label_func('datasets')
+    ) }}
+    {{ s.filter_label('followers', _('Followers'), ficon('fa-eye'),
+        labelize=reuses.label_func('followers')
+    ) }}
+</div>

@@ -1,0 +1,28 @@
+{% extends theme("layouts/1-column.html") %}
+{% set bundle = 'territory' %}
+
+{% set meta = {
+    'title': _('French regions'),
+    'description': _('French regions'),
+} %}
+
+{% set body_class="territory" %}
+
+{% block main_content %}
+<div class="hagrid">
+    <div class="well well-grey-100 my-md">
+        {{ _("This page is no longer maintained. We are working on new territories features.") }}
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <h1>{{ _('Click to navigate to the given region:') }}</h1>
+            <div id="map-nav" style="height:100vh; width:100%"></div>
+            <h3>{{ _('Or sorted alphabetically:') }}
+                {% for region in regions %}
+                <a href="{{ region.url }}">{{ region.name }}</a>{% if loop.last %}.{% else %},{% endif %}
+                {% endfor %}
+            </h3>
+        </div>
+    </div>
+</div>
+{% endblock %}

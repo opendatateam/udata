@@ -1,0 +1,21 @@
+{% extends theme('raw.html') %}
+
+{% block body %}
+{% include theme("header.html") with context %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="container py-lg">
+    {% for message in messages %}
+    <div class="well well-secondary-grey-100">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endwith %}
+{% block content %}{% endblock %}
+{% include theme('footer.html') %}
+{{ hook('base.modals') }}
+{% block modals %}{% endblock %}
+{% endblock %}

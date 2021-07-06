@@ -1,0 +1,51 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/paginator.html') import paginator with context %}
+
+{% set meta = {
+    'title': _('Posts'),
+    'description': _("%(site)s posts", site=config['SITE_TITLE']),
+    'keywords': [_('posts')],
+    'robots': 'noindex',
+} %}
+
+{% set bundle = 'search' %}
+
+{% block breadcrumb %}
+<li class="active">
+    {{ _('Posts') }}
+    <span>{{ _('%(start)s to %(end)s on %(total)s',
+            start=posts.page_start,
+            end=posts.page_end,
+            total=posts.total) }}</span>
+</li>
+{% endblock %}
+
+{% block main_content %}
+<div class="container">
+    <h1 class="mb-0">{{ _('Posts') }}</h1>
+</div>
+<div class="alert-info bg-blue-400 text-white my-xl">
+    <div class="container">
+        <p>{{ _('To stay up-to-date, you can subscribe to')}}
+            <a href="https://infolettres.etalab.gouv.fr/subscribe/rn7y93le1" title="{{ _('Subscribe') }}"
+                class="f-bold text-white text-decoration-underline">
+                {{ _('our newsletter.')}}
+            </a>
+        </p>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-4 col-lg-6 col-sm-12">
+            <a href="{{ post.display_url }}" title="{{ post.name }}" class="unstyled w-100">
+                {% include theme('post/search-result.html') %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="row">
+        {{ paginator(posts) }}
+    </div>
+</div>
+{% endblock %}

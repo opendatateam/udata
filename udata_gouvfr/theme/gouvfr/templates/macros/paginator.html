@@ -1,0 +1,41 @@
+{% macro paginator(p, nb=3, url=None, arg_name='page') %}
+
+{% if p.pages > 1 %}
+{% set start = 1 if p.page <= nb else p.page - nb %}
+{% set end = p.pages if p.page + nb > p.pages else p.page + nb %}
+<ul class="pagination-wrapper light my-lg mt-xl" role="navigation" aria-label="pagination">
+    <li>
+        <a {% if p.page > 1 %}href="{{ url_rewrite(url, **{arg_name: 1}) }}" {% endif %}
+            {% if p.page == 1 %}class="first disabled" aria-disabled="true" {% else %}class="first" {% endif %}
+            title="{% trans %}First page{% endtrans %}" rel="nofollow">
+            &laquo;
+        </a>
+    </li>
+    <li>
+        <a {% if p.page > 1 %}href="{{ url_rewrite(url, **{arg_name: p.page - 1}) }}" {% endif %}
+            {% if p.page == 1 %}class="previous disabled" aria-disabled="true" {% else %}class="previous" {% endif %}
+            title="{% trans %}Previous page{% endtrans %}" rel="nofollow">
+        </a>
+    </li>
+    {% for num_page in range(start, end + 1) %}
+    <li>
+        <a href="{{ url_rewrite(url, **{arg_name: num_page}) }}" {% if num_page == p.page %}class="active" aria-current="true"
+            {% endif %} rel="nofollow">{{ num_page }}</a>
+    </li>
+    {% endfor %}
+    <li>
+        <a {% if p.page < p.pages %}href="{{ url_rewrite(url, **{arg_name: p.page + 1}) }}" {% endif %}
+            {% if p.page == p.pages %}class="next disabled" aria-disabled="true" {% else %}class="next" {% endif %}
+            title="{% trans %}Next page{% endtrans %}" rel="nofollow">
+        </a>
+    </li>
+    <li>
+        <a {% if p.page < p.pages %}href="{{ url_rewrite(url, **{arg_name: p.pages}) }}" {% endif %}
+            {% if p.page == p.pages %}class="last disabled" aria-disabled="true" {% else %} class="last" {% endif %}
+            title="{% trans %}Last page{% endtrans %}" rel="nofollow">
+            &raquo;
+        </a>
+    </li>
+</ul>
+{% endif %}
+{% endmacro %}

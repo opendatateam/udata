@@ -1,0 +1,33 @@
+{% set details_view = details_view or url_for("organizations.show", org=organization, _external=True) %}
+{% set name = organization.name or organization.fullname %}
+<div class="producer-panel row justify-between">
+    <div class="col-1 col-md-12">
+        {% if producer_type == 'organization' %}
+        <a href="{{ details_view }}" class="logo" title="{{ name }}">
+            <img src="{{ organization.logo|placeholder('organization') }}" alt="{{ name }}"
+                class="organization-logo producer mw-100" />
+        </a>
+        {% else %}
+            <img src="{{ organization.logo|placeholder('organization') }}" alt="{{ name }}"
+                class="organization-logo producer mw-100" />
+        {% endif %}
+    </div>
+    <div class="col-10 col-md-12 mt-md-md text-blue-500">
+        <h2>
+            {{ name }}
+        </h2>
+        <ul class="nav-list fs-base">
+            {% if producer_type == 'organization' %}
+            <li><a class="nav-link text-decoration-none text-blue-500" href="{{ details_view }}"
+                    title="{{ _('View Profile') }}">
+                    {{ _('View Profile') }}</a></li>
+            {% endif %}
+            <li><a class="nav-link text-decoration-none text-blue-500" @click="$refs.discussions.startThread()"
+                    title="{{ _('Contact the producer') }}">{{ _('Contact the producer') }}</a></li>
+            {# <li><a class="nav-link text-decoration-none text-blue-500"
+                    href="{{ url_for('api.organization_followers', id=organization.id|string) }}"
+                    title="">{{ _('Add the producer as favourite') }}</a></li> #}
+        </ul>
+    </div>
+    <div class="col-1"></div>
+</div>

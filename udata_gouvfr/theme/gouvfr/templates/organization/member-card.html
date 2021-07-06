@@ -1,0 +1,9 @@
+{% extends theme('user/card.html') %}
+
+{% set user =  member.user %}
+
+{% block footer %}
+<div class="label-list">
+    <span class="label label-info">{{ member.role }}</span>
+</div>
+{% endblock %}

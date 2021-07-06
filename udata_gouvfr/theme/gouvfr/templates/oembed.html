@@ -1,0 +1,6 @@
+<div class="border p-sm">
+    {% block extra_css %}
+    <link rel="stylesheet" href="{{ theme_static('less/index.css', external=True) }}" />
+    {% endblock %}
+    {% include theme(type + '/oembed.html') with context %}
+</div>

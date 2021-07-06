@@ -1,0 +1,71 @@
+{% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
+<a class="card dataset-card"  href="{{ url_for('datasets.show', dataset=dataset, _external=True) }}">
+    {% if dataset.organization %}
+        <div class="card-logo">
+            <img alt="{{ dataset.organization.name }}"
+                src="{{ dataset.organization.logo(70, external=True)|placeholder('organization', external=True) }}"
+                width="70" height="70">
+        </div>
+        {{ badge_if_certified(dataset.organization) }}
+    {% elif dataset.owner %}
+    <div class="card-logo">
+        <img alt="{{ dataset.owner.fullname }}"
+            src="{{ dataset.owner.avatar(70)|placeholder('user') }}"
+            width="70" height="70">
+    </div>
+    {% else %}
+    <div class="card-logo">
+        <img src="{{ ''|placeholder('organization', external=True) }}" alt="">
+    </div>
+    {% endif %}
+    <div class="card-body">
+        <h4>{{ dataset.full_title }}</h4>
+        <div class="clamp-3">{{ dataset.description|mdstrip(180) }}</div>
+    </div>
+
+    <footer class="card-footer">
+        <ul>
+            <li v-tooltip title="{{ _('Number of resources') }}">
+                <span class="{{ ficon('fa-cubes') }} fa-fw"></span>
+                {{ dataset.resources | length  }}
+            </li>
+            {% if dataset.metrics %}
+            <li v-tooltip title="{{ _('Reuses') }}">
+                <span class="{{ ficon('fa-recycle') }} fa-fw"></span>
+                {{ dataset.metrics.reuses or 0 }}
+            </li>
+            <li v-tooltip title="{{ _('Stars') }}">
+                <span class="{{ ficon('fa-star') }} fa-fw"></span>
+                {{ dataset.metrics.followers or 0 }}
+            </li>
+            {% endif %}
+
+            {# Temporal coverage #}
+            {% if dataset.temporal_coverage %}
+            <li v-tooltip title="{{ _('Temporal coverage') }}">
+                <span class="fa fa-calendar fa-fw"></span>
+                {{ dataset.temporal_coverage|daterange }}
+            </li>
+            {% endif %}
+
+            {# Territorial coverage #}
+            {% if dataset.spatial.zones %}
+            <li v-tooltip title="{{ _('Territorial coverage') }}">
+                <span class="fa fa-map-marker fa-fw"></span>
+                {{ dataset.spatial.top_label }}
+            </li>
+            {% endif %}
+
+            {# Territorial granularity #}
+            {% if dataset.spatial and dataset.spatial.granularity and dataset.spatial.granularity != 'other' %}
+            <li v-tooltip title="{{ _('Territorial coverage granularity') }}">
+                <span class="fa fa-bullseye fa-fw"></span>
+                {{ dataset.spatial.granularity_label }}
+            </li>
+            {% endif %}
+        </ul>
+
+    </footer>
+</a>
+{% endcache %}

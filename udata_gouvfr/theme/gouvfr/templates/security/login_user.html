@@ -1,0 +1,48 @@
+{% extends theme('base.html') %}
+{% import theme('macros/forms.html') as forms with context %}
+
+{% block content %}
+<section class="py-xl py-lg-lg bg-grey-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 text-align-center offset-3 form-container col-md-12 offset-md-0">
+                <form class="form" method="post" action="{{ url_for('security.login') }}">
+                    <fieldset>
+                        <legend class="h2 mb-xl">{{ _('Sign in') }}</legend>
+                        {{ forms.render_fields(login_user_form, submit=_('Sign In')) }}
+                        <div class="mt-lg">
+                            <p class="fs-sm mb-sm">
+                                {{ _('Forgot your password?') }}
+                                <a href="{{ url_for('security.forgot_password', next=request.url) }}">
+                                    {{ _('Recover your password') }}
+                                </a>
+                            </p>
+                            {% if config.SECURITY_CONFIRMABLE %}
+                            <p class="fs-sm mb-sm">
+                                {{ _('Confirmation instructions not received?') }}
+                                <a href="{{ url_for('security.send_confirmation') }}">
+                                    {{ _('Send the instructions again') }}
+                                </a>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            {% if not read_only_mode %}
+            <div class="col-6 offset-3 form-container text-align-center mt-lg col-md-12 offset-md-0">
+                <h3 class="fs-sm mb-sm">
+                    {{ _('Don\'t have an account?')}}
+                </h3>
+                <a title="{{ _('Register') }}" href="{{ url_for('security.register', next=request.url) }}"
+                    class="btn btn-primary btn-block btn-lg">
+                    {{ _('Create an account') }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

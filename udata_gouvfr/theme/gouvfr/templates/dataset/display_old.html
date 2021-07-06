@@ -1,0 +1,467 @@
+{% extends theme('base.html') %}
+{% from theme('macros/follow.html') import follow_btn with context %}
+{% from theme('macros/integrate.html') import integrate_btn with context %}
+{% from theme('macros/issues.html') import issues_btn with context %}
+
+{% set meta = {
+    'title': dataset.full_title,
+    'description': dataset.description|mdstrip(60)|forceescape,
+    'image': dataset.organization and dataset.organization.logo(external=True) or '',
+    'keywords': [_('dataset')] + dataset.tags,
+    'robots': 'noindex, nofollow' if dataset.is_hidden else '',
+} %}
+
+{% set bundle = 'dataset' %}
+
+{% set body_class = 'dataset-display' %}
+
+{% set community_subtitle = _('Explore with %(certifier)s', certifier=config.SITE_TITLE ) %}
+
+{% block extra_head %}
+{% cache cache_duration, 'dataset-extra-head', dataset.id|string, g.lang_code %}
+<link rel="canonical" href="{{ url_for('datasets.show', dataset=dataset) }}" />
+<link rel="alternate" type="application/json+oembed"
+    href="{{ url_for('api.oembed', url=dataset.external_url) }}"
+    title="{{ dataset.title | urlencode }}" />
+{% endcache %}
+{% endblock %}
+
+{% block breadcrumb %}
+{% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %}
+    <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
+    <li class="active">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
+{% endcache %}
+{% endblock %}
+
+{% block content %}
+{% cache cache_duration, 'dataset-content', dataset.id|string, g.lang_code, current_user.slug or 'anonymous' %}
+<!-- Placeholder for non-routable modals -->
+<div v-el:modal></div>
+
+{% if dataset.archived %}
+<div class="container-fluid alert alert-warning">
+    <div class="container" role="alert">
+        {% if dataset.extras.get('harvest:archived') == 'not-on-remote' %}
+        {{ _('This dataset has been archived automatically because it has been deleted from the remote platform.') }}
+        {% else %}
+        {{ _('This dataset has been archived.') }}
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<section class="content {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
+    <div class="container dataset-container">
+        <div class="row">
+
+            <div class="col-md-9 col-sm-9">
+                <div class="page-header">
+                    <h2>{{ dataset.title }}
+                        {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
+                    </h2>
+
+                    <div class="row">
+                        <p class="col-md-12">
+                            {% if dataset.organization %}
+                                <small>
+                                    {% if dataset.organization.public_service %}
+                                    <strong>{{ _('This dataset comes from a certified public service') }}</strong><br/>
+                                    {% endif %}
+                                </small>
+                            {% elif dataset.owner %}
+                                <small>
+                                    {% trans
+                                        date=dataset.created_at|dateformat(format='long'),
+                                        update=dataset.last_update|dateformat(format='long'),
+                                        author=dataset.owner.fullname,
+                                        url=url_for('users.show', user=dataset.owner)
+                                    %}This dataset has been published on {{date}} and updated on {{update}} on the initiative and under the responsibility of <a href="{{url}}" title="{{author}}">{{author}}</a>{% endtrans %}
+                                </small>
+                            {% endif %}
+                            {% for badge in dataset.badges %}
+                                <small class="small-badge">
+                                    <a href="{{ url_for('search.index', badge=badge) }}"
+                                        title="{{ _('See all datasets with that badge.') }}">
+                                        <span class="fa fa-bookmark"></span>
+                                        {{ dataset.badge_label(badge) }}</a>
+                                </small>
+                            {% endfor %}
+                            {% if dataset.private %}
+                            <small class="private"
+                                v-popover.literal="{{ _('This dataset is private and will not be visible by other users') }}"
+                                popover-title="{{ _('Private') }}" popover-trigger="hover" popover-placement="top"
+                                >{{ _('Private') }}</small>
+                            {% endif %}
+                            {% if dataset.deleted %}
+                            <small class="deleted"
+                                v-popover.literal="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}"
+                                popover-title="{{ _('Deleted') }}" popover-trigger="hover" popover-placement="top"
+                                >{{ _('Deleted') }}</small>
+                            {% endif %}
+                            {% if dataset.archived %}
+                            <small class="archived"
+                                v-popover.literal="{{ _('This dataset has been archived.') }}"
+                                popover-title="{{ _('Archived') }}" popover-trigger="hover" popover-placement="top"
+                                >{{ _('Archived') }}</small>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                    {{ dataset.description|markdown }}
+                    </div>
+                </div>
+
+                <div class="resources-list">
+                    <div class="resources-list-header">
+                        <h3>{{ _('Resources') }}</h3>
+                        {% if dataset.community_resources|length %}
+                        <span class="community-resources-anchor">
+                            <small><a href="#community-resources">{{ _('See also: community resources') }}</a></small>
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% set grouped_resources = dataset.resources|group_resources_by_type %}
+                    {% set nb_groups = grouped_resources.keys()|length %}
+                    {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
+                    {% for (type, type_label), resources in grouped_resources.items() %}
+                        {% if nb_groups > 1 %}<h4 class="resource-type">{{ type_label }}</h4>{% endif %}
+                        {% for resource in resources %}
+                            {% if loop.index0 == max_resources %}
+                            <div v-if="isTypeListVisible('{{ type }}')" v-cloak transition="expand">
+                            {% endif %}
+                            {% include theme('dataset/resource/card.html') %}
+                        {% endfor %}
+                        {% if resources|length > max_resources %}
+                            </div>
+                            <p class="text-center expander">
+                                <button type="button" class="btn btn-default" @click.prevent="expandResources($event, '{{ type }}')">
+                                    <span class="fa fa-list" ></span>
+                                    {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
+                                </button>
+                            </p>
+                        {% endif %}
+                    {% else %}
+                    <p class="text-center">{{ _('No resources') }}</p>
+                    {% endfor %}
+
+                    {% if can_edit %}
+                    <a class="card resource-card add"
+                        href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}">
+                        <div class="card-logo"><span>+</span></div>
+                        <div class="card-body">
+                            <h4>{{ _('Add a resource') }}</h4>
+                        </div>
+                    </a>
+                    {% endif %}
+
+                </div>
+                {# end resources #}
+
+                {# button bar #}
+                <div class="row opinion"><div class="col-xs-12">
+                    <div class="btn-toolbar pull-right">
+                        {% if can_edit %}
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}" class="btn btn-success">
+                                <span class="fa fa-pencil"></span>
+                                {{ _('Edit') }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if sysadmin %}
+                        <div class="btn-group btn-group-sm">
+                            <featured-button subject-id="{{ dataset.id }}" subject-type="dataset" :featured="{{ dataset.featured|to_json }}"></featured-button>
+                        </div>
+                        {% endif %}
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-warning" @click="$refs.discussions.start('')">
+                                <span class="fa fa-envelope-o"></span>
+                                {{ _('Contact the producer') }}
+                            </button>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            {{ follow_btn(dataset) }}
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            {{ integrate_btn(dataset) }}
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            {{ issues_btn(dataset) }}
+                        </div>
+                    </div>
+                </div></div>
+                {# end button bar #}
+                {{ hook('dataset.display.after-description') }}
+            </div>
+            {# end left column #}
+
+            {# Right sidebar #}
+            <aside class="col-md-3 col-sm-3">
+
+                {# Optionnal organization panel #}
+                {% if dataset.organization %}
+                <div class="panel panel-default text-center">
+                    <div class="panel-body">
+                        <h3 class="text-left">{{ _('Producer') }}</h3>
+                        {% with organization=dataset.organization %}
+                            {% include theme('organization/sidebar-producer.html') %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% elif dataset.owner %}
+                <div class="panel panel-default text-center">
+                    <div class="panel-body">
+                        <h3 class="text-left">{{ _('Author') }}</h3>
+
+                        {% with user=dataset.owner %}
+                            {% include theme('user/sidebar-user.html') %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Information panel #}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ _('Informations') }}</h3>
+
+                        <ul class="list-unstyled infos-list">
+
+                            {# Badges #}
+                            {% if dataset.badges %}
+                            <li>
+                                <a href v-tooltip title="{{ _('Badges') }}"><span class="fa fa-fw fa-bookmark"></span></a>
+                                {% for badge in dataset.badges %}
+                                    <a href="{{ url_for('search.index', badge=badge) }}">
+                                        {{ dataset.badge_label(badge) }}</a>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </li>
+                            {% endif %}
+
+                            {# License #}
+                            {% if dataset.license %}
+                            <li>
+                                <a href v-tooltip title="{{ _('License') }}"><span class="fa fa-fw fa-copyright"></span></a>
+                                {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
+                                {{ dataset.license.title }}
+                                {% if dataset.license.url %}</a>{% endif %}
+                            </li>
+                            {% endif %}
+
+                            {# Harvesting source #}
+                            {% set source = dataset.extras['remote_url'] %}
+                            {% if source %}
+                            <li>
+                                <a href v-tooltip title="{{ _('Remote source') }}"><span class="fa fa-fw fa-external-link "></span></a>
+                                <a rel="nofollow" href="{{ source }}">{{ _('Remote source') }}</a>
+                            </li>
+                            {% endif%}
+
+                            {# Temporal coverage #}
+                            {% if dataset.temporal_coverage %}
+                            <li>
+                                <a href v-tooltip title="{{ _('Temporal coverage') }}">
+                                    <span class="fa fa-fw fa-calendar"></span>
+                                </a>
+                                {{ dataset.temporal_coverage|daterange(details=True) }}
+                            </li>
+                            {% endif %}
+
+                            {% if dataset.frequency %}
+                            <li>
+                                <a href v-tooltip title="{{ _('Frequency') }}">
+                                    <span class="fa fa-fw fa-files-o"></span>
+                                </a>
+                                {{ dataset.frequency_label }}
+                            </li>
+                            {% endif %}
+
+                            <li>
+                                <a href v-tooltip title="{{ _('Creation date') }}">
+                                    <span class="fa fa-fw fa-clock-o"></span>
+                                </a>
+                                {{ dataset.created_at|dateformat(format='long') }}
+                            </li>
+
+                            <li>
+                                <a href v-tooltip title="{{ _('Modification date') }}">
+                                    <span class="fa fa-fw fa-refresh"></span>
+                                </a>
+                                {{ dataset.last_modified|dateformat(format='long') }}
+                            </li>
+
+                            <li>
+                                <a href v-tooltip title="{{ _('Latest resource update') }}">
+                                    <span class="fa fa-fw fa-download"></span>
+                                </a>
+                                {{ dataset.last_update|dateformat(format='long') }}
+                            </li>
+
+                            {# Spatial coverage #}
+                            {% if dataset.spatial %}
+                                {% if dataset.spatial.granularity %}
+                                <li>
+                                    <a href v-tooltip title="{{ _('Territorial coverage granularity') }}">
+                                        <span class="fa fa-fw fa-crosshairs"></span>
+                                    </a>
+                                    {{ dataset.spatial.granularity_label }}
+                                </li>
+                                {% endif %}
+                                {% if dataset.spatial.territories %}
+                                <li>
+                                    <a href v-tooltip title="{{ _('Territorial coverage') }}">
+                                        <span class="fa fa-fw fa-map-marker"></span>
+                                    </a>
+                                    {{ dataset.spatial.top_label }}
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                        </ul>
+
+                        <ul class="tags">
+                            {% for tag in dataset.tags %}
+                            <li>
+                                <a href="{{ url_for('search.index', tag=tag) }}"
+                                class="label label-default"
+                                title="{{ tag }}">
+                                    {{ tag|truncate(14, True) }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                            <li>
+                                <a @click="suggestTag"
+                                    class="label label-primary suggest-tag"
+                                    title="{{ _('Suggest a tag with a new discussion thread') }}"
+                                    v-tooltip tooltip-placement="right">
+                                    {{ _('Suggest a tag') }}
+                                </a>
+                            </li>
+                        </ul>
+
+                        <button type="button" @click="showDetails"
+                            class="btn btn-primary btn-extras btn-block btn-sm btn-left"
+                            title="{{ _('Details') }}">
+                            <span class="fa fa-info-circle"></span>
+                            {{ _('Details') }}
+                        </button>
+
+                    </div>
+                </div>
+
+                {# Geospatial panel #}
+                {% if dataset.spatial.geom or dataset.spatial.zones %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ _('Spatial coverage') }}</h3>
+                        {% if dataset.spatial.zones %}
+                            <leaflet-map v-ref:map class="aside-map"
+                                data-zones="{{ url_for('api.zones', ids=dataset.spatial.zones) }}">
+                            </leaflet-map>
+                        {% elif dataset.spatial.geom %}
+                            <leaflet-map class="aside-map"
+                                :geojson="{{dataset.spatial.geom|to_json}}">
+                            </leaflet-map>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Territories panel #}
+                {% if dataset.spatial.handled_zones %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3>{{ _('Territories')}}</h3>
+                        {% for territory in dataset.spatial.handled_zones %}
+                            <img src="{{ territory.logo_url(external=True) or theme_static('img/placeholder_territory_mini.png') }}" alt="{{ territory.name }}" class="float-left" width="13px" /> <a href="{{ territory.url }}" title="{{ territory.name }}">{{ territory.name }}</a>{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% block community %}
+<section class="community_container" id="community">
+    <header>
+        <div class="container">
+            <div class="cover-communaute"></div>
+            <div class="page-header">
+                <h2>{{ _('Community contributions') }}</h2>
+                {% if community_subtitle %}<small>{{ community_subtitle }}</small>{% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h3 id="community-resources">{{ _('Community resources') }}</h3>
+        <div class="row">
+            <div class="col-sm-9">
+                <div class="resources-list">
+                {% for resource in dataset.community_resources %}
+                    {% include theme('dataset/resource/card.html') %}
+                {% endfor %}
+                <a class="card resource-card add"
+                    href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                    <div class="card-logo"><span>+</span></div>
+                    <div class="card-body">
+                        <h4>{{ _('Add a community resource') }}</h4>
+                    </div>
+                </a>
+                </div>
+            </div>
+
+            <div class="col-sm-3 note">
+                <p>{{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}</p>
+            </div>
+        </div>
+
+        {% block reuses_section %}
+        <h3 id="community-reuses">{{ _('Reuses') }}</h3>
+        <div class="row">
+            <div class="col-sm-9 reuses-list">
+                <div class="card-list card-list--columned">
+                    {% for reuse in reuses %}
+                    {% set features = ['preview'] %}
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        {% include theme('reuse/card.html') %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                         {% include theme('dataset/add-reuse-card.html') %}
+					</div>
+
+                </div>
+            </div>
+            <div class="col-sm-3 note">
+                <p>{% trans %}You reused these data and published an article, a computer graphics, or an application?
+                It's time to let you know!
+                Reference your work in just a few clicks and increase your visibility.{% endtrans %}</p>
+            </div>
+        </div>
+        {% endblock %}
+
+        <h3 id="community-discussions">{{ _('Discussions') }}</h3>
+        <div class="row">
+            <div class="col-sm-9">
+                <discussion-threads v-ref:discussions
+                    subject-id="{{ dataset.id }}"
+                    subject-class="{{ dataset.__class__.__name__ }}">
+                </discussion-threads>
+            </div>
+            <div class="col-sm-3 note">
+                <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% endcache %}
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/follow.html') import follow_btn with context %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
+{% from theme('macros/paginator.html') import paginator with context %}
+
+{% set is_hidden = (reuses.total or 0) + (datasets.total or 0) <= 0 %}
+{% set meta = {
+    'title': org.name,
+    'description': org.description|mdstrip(60)|forceescape,
+    'image': org.logo(external=True),
+    'keywords': [_('organization')],
+    'robots': 'noindex, nofollow' if is_hidden else '',
+} %}
+
+
+{% set bundle = 'organization' %}
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
+<li class="active">{{ org.name }}</li>
+{% endblock %}
+
+{% block main_content %}
+<section class="organization-container">
+    <header class="organization-header hagrid">
+        {% if org.deleted %}
+        <div class="well-grey-100 well mb-sm">
+            {{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}
+        </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-1 col-md-6 logo">
+                <img src="{{org.logo(80)|placeholder('organization') }}" alt="{{ org.title }}" />
+            </div>
+            <div class="hidden visible-md col align-items-center justify-end">
+                {{ follow_btn(org) }}
+            </div>
+            <div class="col-10 col-md-12 mt-md-sm">
+                <div class="row-inline no-wrap align-items-center">
+                    {% if org.public_service %}
+                    <span class="icon-lg text-align-center mr-sm">{% include theme("svg/certified.svg") %}</span>
+                    {% endif %}
+                    <h1 class="my-0">
+                        {{ org.name }}
+                    </h1>
+                </div>
+                <div class="mt-xs">
+                    <ul class="row-inline align-items-center f-bold">
+                        <li class="hidden-md">
+                            {{ follow_btn(org) }}
+                        </li>
+                        {% if total_datasets > 0 %}
+                        <li class="ml-md ml-md-0">
+                            <a href="#organization-datasets" class="text-blue-400">
+                                {{ total_datasets }} {{ _('Datasets') }}
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if total_reuses > 0 %}
+                        <li class="ml-md">
+                            <a href="#organization-reuses" class="text-green-400">
+                                {{ total_reuses }} {{ _('Reuses') }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <section class="organization-content container pt-md pb-xl">
+        <div class="row">
+            <div class="col-12">{{ org.description|markdown }}</div>
+        </div>
+    </section>
+</section>
+
+{# TODO: proper <select> also needed in discussions and footer, then sort from URL param #}
+
+<section class="organization-secondary">
+    {% if datasets and datasets|length > 0 %}
+    <section id="organization-datasets" class="organization-datasets bg-grey-50 p-xl p-md-md">
+        <div class="hagrid">
+            <div class="row">
+                <div class="col-11 offset-1 row-inline justify-between">
+                    <h2>{{ _('Datasets') }}<sup>{{ datasets|length or 0 }}</sup></h2>
+                    <div>
+                        <select>
+                            <option>Trier par</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    {% for dataset in datasets %}
+                    <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
+                        class="unstyled w-100">{% include theme('dataset/search-result.html') %}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {{ paginator(datasets, arg_name='datasets_page', url='#organization-datasets') }}
+        </div>
+    </section>
+    {% endif %}
+    {% if reuses and reuses|length > 0 %}
+    <section id="organization-reuses" class="organization-reuses p-xl">
+        <div class="container">
+            <div>
+                <h2>{{ _('Reuses') }}<sup>{{ reuses|length or 0 }}</sup></h2>
+            </div>
+            <div>
+                <ul class="row">
+                    {% for reuse in reuses %}
+                    <li class="col-3 col-lg-6 col-sm-12 text-align-center">
+                        <a href="{{ url_for('reuses.show', reuse=reuse) }}"
+                            title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {{ paginator(reuses, arg_name='reuses_page', url='#organization-reuses') }}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+    <section class="organization-members p-xl">
+        <div class="container">
+            <h2>{{ _('Members') }}<sup>{{ org.members|length or 0 }}</sup></h2>
+            <div class="row">
+                {% for member in org.members %}
+                {% set user = member.user %}
+                {% set role = member.role %}
+                <div
+                    class="col-4 col-md-12 pl-md-0 border-md-0 pb-sm {% if not loop.index0 % 3 == 0 %}border-left pl-lg{% endif %}">
+                    {% include theme('user/card.html') %}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    <section class="organization-actions p-xl">
+        <div class="container">
+            <div class="row">
+                <div class="col-6 col-md-12">
+                    <h3>{{ _('Technical details') }}</h3>
+                    <dl class="text-grey-300 fs-sm">
+                        <div>
+                            <dt class="f-light">ID</dt>
+                            <dd class="f-bold m-0">{{ org.id }}</dd>
+                        </div>
+                        <div class="my-sm">
+                            <dt class="f-light">{{ _('Creation date') }}</dt>
+                            <dd class="f-bold m-0">{{ org.created_at|dateformat(format='long') }}</dd>
+                        </div>
+                        <div>
+                            <dt class="f-light">{{ _('Modification date') }}</dt>
+                            <dd class="f-bold m-0">{{ org.last_modified|dateformat(format='long') }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                <div class="col-6 col-md-12  my-md-lg">
+                    <h3>{{ _('Actions') }}</h3>
+                    <ul class="nav-list">
+                        {% if can_edit %}
+                        <li class="my-md">
+                            <a class="nav-link"
+                                href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">{{ _('Modify information') }}</a>
+                        </li>
+                        {% endif %}
+                        <li class="my-md">
+                            <a href="{{ url_for('organizations.datasets_csv', org=org) }}" class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock %}

@@ -2,6 +2,11 @@
 Default settings for udata-gouvfr
 """
 
+# TODO: move this back to an extension
+RESOURCES_SCHEMAGOUVFR_ENABLED = True
+SCHEMA_GOUVFR_VALIDATA_URL = 'https://validata.etalab.studio'
+SCHEMA_CATALOG_URL = 'https://schema.data.gouv.fr/schemas/schemas.json'
+
 # Frontend banner parameters
 BANNER_ACTIVATED = False
 BANNER_HTML_CONTENT = ''

@@ -1,0 +1,139 @@
+//Enter & leave
+.v-enter-active,
+.v-leave-active {
+    transition: all ease 0.3s;
+    opacity: 1;
+}
+
+.v-leave-from,
+.v-enter-to {
+    opacity: 1;
+}
+
+.v-leave-to,
+.v-enter-from {
+    opacity: 0;
+}
+
+//Enter only
+.enterOnly-enter-active {
+    transition: all ease 0.3s;
+}
+
+.enterOnly-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.enterOnly-enter-from {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+//List enter & leave
+.list-enter-active,
+.list-leave-active {
+    transition: all ease 0.3s;
+}
+
+.list-enter-from {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.list-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.list-move {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+//Magic sparkles™
+//Special thanks to https://stackoverflow.com/questions/54593203/how-to-make-a-sparkling-button-animation
+//Adapted by yours truly
+
+.magic {
+    position: relative;
+    overflow: visible;
+    --r: 21px;
+
+    //Orange circle growing up
+    &:before {
+        content: "";
+        position: absolute;
+        top: calc((50% - var(--r)) + 1px);
+        left: calc(50% - var(--r));
+        width: calc(2 * var(--r));
+        height: calc(2 * var(--r));
+        border-radius: 50%;
+        border: solid @orange-100 var(--r);
+        transform: scale(0);
+        box-sizing: border-box;
+    }
+
+    //Orange & red sparkles flying out
+    &:after {
+        content: "";
+        position: absolute;
+        width: calc(4 * var(--r));
+        height: calc(4 * var(--r));
+        left: calc(50% - 2 * var(--r));
+        top: calc(50% - 2 * var(--r));
+        --c1: radial-gradient(circle, @orange-200 50%, transparent 60%);
+        --c2: radial-gradient(circle, @orange-100 50%, transparent 60%);
+        background: var(--c1), var(--c1), var(--c1), var(--c1), var(--c2),
+            var(--c2), var(--c2), var(--c2);
+
+        background-size: calc(var(--r) / 3) calc(var(--r) / 3);
+        background-position: calc(50% - (var(--r))) calc(50% - (var(--r))),
+            calc(50% + (var(--r))) calc(50% - (var(--r))),
+            calc(50% - (var(--r))) calc(50% + (var(--r))),
+            calc(50% + (var(--r))) calc(50% + (var(--r))),
+            calc(50% + 0px) calc(50% + (var(--r) * 1.414)),
+            calc(50% + (var(--r) * 1.414)) calc(50% + 0px),
+            calc(50% - (var(--r) * 1.414)) calc(50% + 0px),
+            calc(50% + 0px) calc(50% - (var(--r) * 1.414));
+
+        background-repeat: no-repeat;
+        transform: scale(0);
+    }
+
+    @keyframes change {
+        0% {
+            transform: scale(0);
+        }
+        70% {
+            transform: scale(0);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    &.active {
+        &:before {
+            border-width: 0;
+            transform: scale(1);
+            transition: transform 0.4s, border-width 0.4s 0.4s;
+        }
+
+        svg {
+            animation: change ease 0.9s forwards;
+        }
+
+        &:after {
+            transform: scale(1);
+            opacity: 0;
+            background-size: 0 0;
+            transition: transform 0.5s 0.5s, opacity 0.4s 0.9s,
+                background-size 0.5s 0.9s;
+        }
+
+        svg {
+            transform: scale(0);
+        }
+    }
+}

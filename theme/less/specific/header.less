@@ -1,0 +1,182 @@
+.banner {
+    overflow: visible;
+    a {
+        color: white;
+        text-decoration: underline;
+    }
+    p {
+        padding-left: 0.5rem;
+    }
+}
+.header-brand {
+    border-bottom: 1px solid @grey-200;
+
+    .header-logo {
+        svg {
+            height: 85px;
+            fill: unset;
+        }
+
+        a {
+            text-decoration: none;
+        }
+    }
+
+    .mobile-menu {
+        svg {
+            width: 25px;
+            height: 25px;
+        }
+
+        .mobile-menu-close {
+            svg {
+                width: 8px;
+                height: 8px;
+
+                * {
+                    fill: currentColor;
+                }
+            }
+        }
+    }
+
+    .header-service {
+        @media @query-xl {
+            margin: @spacing-md auto 0 auto !important;
+            padding-top: @spacing-sm;
+            border-top: 1px solid @grey-200;
+        }
+    }
+
+    .login-box {
+        > * + * {
+            &:before {
+                content: " ";
+                display: inline-block;
+                vertical-align: middle;
+                width: 1px;
+                height: 12px;
+
+                margin: 0 @spacing-xs;
+
+                background-color: @grey-200;
+
+                @media @query-xl {
+                    display: none;
+                }
+            }
+        }
+
+        svg {
+            margin-right: @spacing-xxs;
+            vertical-align: middle;
+
+            * {
+                fill: currentColor;
+            }
+        }
+
+        @media @query-xl {
+            transform: translateX(-100%);
+            transition: transform ease 0.2s;
+
+            display: block;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+
+            z-index: 30;
+
+            padding: @spacing-md 0;
+
+            > a {
+                display: block;
+            }
+
+            > * {
+                padding: @spacing-sm;
+
+                + * {
+                    .border-top;
+                }
+            }
+        }
+    }
+}
+
+.header-nav {
+    border-bottom: 1px solid @grey-200;
+
+    @media @query-xl {
+        transform: translateX(-100%);
+        transition: transform ease 0.2s;
+        position: absolute;
+        background: white;
+        width: 100%;
+
+        opacity: 0;
+
+        min-height: 100vh;
+    }
+
+    .search-box {
+        cursor: pointer;
+
+        form {
+            background: @grey-50;
+            border: 1px solid @grey-100;
+            border-radius: 2px;
+
+            input,
+            button {
+                padding: @spacing-xs @spacing-sm;
+                margin: 0;
+                appearance: none;
+                background: none;
+                border: 0;
+            }
+
+            input {
+                flex-grow: 1;
+            }
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
+
+.site-header {
+    //Mobile header interactivity (burger menu 😋)
+    &.mobile-menu-open {
+        //Hide burger menu & search, show close button
+        .mobile-menu {
+            > a {
+                display: none;
+            }
+
+            .mobile-menu-close {
+                display: block !important;
+            }
+        }
+
+        //Show menu
+        .header-nav,
+        .login-box {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    //Sticky on mobile
+    @media @query-xl {
+        position: sticky;
+        background: white;
+        z-index: 2;
+        top: 0;
+    }
+}

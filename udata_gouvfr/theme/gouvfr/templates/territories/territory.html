@@ -1,0 +1,70 @@
+{% extends theme("layouts/1-column.html") %}
+
+{% set bundle = 'territory' %}
+{% set logo = territory.logo_url(external=True) or theme_static('img/placeholder_territory.png', external=True) %}
+{#
+   Children variables outside of blocks are set before parents
+   so children template can't access logo outside of blocks.
+   Workaround: inject logo in meta object from parent template (until a better solution is found)
+#}
+{% set ___ = meta.__setitem__('image', logo) %}
+{% set body_class="territory" %}
+
+{% block main_content %}
+<div class="hagrid">
+    <div class="well well-grey-100 my-md">
+        {{ _("This page is no longer maintained. We are working on new territories features.") }}
+    </div>
+    <div class="row">
+        {% if present_territory %}
+        <h2 class="territory-announcement bg-danger">
+            {{ _('This territory has been replaced by:') }}
+            <a href="{{ present_territory.url }}">{{ present_territory }}</a>
+            {{ _('since') }} {{ present_territory.validity.start.year }}.
+        </h2>
+        {% endif %}
+        {% block territory_content %}{% endblock %}
+    </div>
+
+    {% if not territory_datasets %}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="dataset-item--cta bg-primary">
+                <div class="format-label pull-left">+</div>
+                <p>
+                    {% if current_user.is_authenticated %}
+                    {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s).', code=territory.code) }}
+                    {% else %}
+                    {{ _('You want to add your own datasets to that list?') }}<br />
+                    <a title="{{ _('Sign In / Register') }}" href="{{ url_for('security.login', next=request.url) }}">
+                        {{ _('Log in') }}</a>
+                    {{ _('and create resources for that territory.') }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row dataset-list">
+        {% if territory_datasets %}
+        {% for dataset in territory_datasets %}
+        <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
+        {% endfor %}
+        {% endif %}
+
+        {% for dataset in base_datasets %}
+        <div data-udata-territory-id="{{ dataset.slug }}" class="col-sm-4"></div>
+        {% endfor %}
+
+        {% for dataset in other_datasets %}
+        <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ static('widgets.js', _burst=False) }}" id="udata" async defer onload="udataScript.loadDatasets()"
+    {% if config.CDN_DOMAIN %}data-udata="{{ url_for('site.home_redirect', _external=True) }}" {% endif %}></script>
+{% endblock %}

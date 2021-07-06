@@ -1,0 +1,34 @@
+{% import theme('macros/search.html') as s %}
+<div class="label-list">
+    {{ s.filter_label('organization', _('Organization'), ficon('fa-building-o'),
+        labelize=datasets.label_func('organization')
+    ) }}
+    {{ s.filter_label('tag', _('Tag'), ficon('fa-tag'),
+        labelize=datasets.label_func('tag')
+    ) }}
+    {{ s.filter_label('license', _('License'), ficon('fa-copyright'),
+        labelize=datasets.label_func('license')
+    ) }}
+    {{ s.filter_label('badge', _('Badge'), ficon('fa-bookmark'),
+        labelize=datasets.label_func('badge')
+    ) }}
+    {{ s.filter_label('temporal_coverage', _('Temporal coverage'), ficon('fa-calendar'),
+        labelize=datasets.label_func('temporal_coverage')
+    ) }}
+    {{ s.filter_label('geozone', _('Spatial coverage'), ficon('fa-map-marker'),
+        labelize=datasets.label_func('geozone')
+    ) }}
+    {{ s.filter_label('granularity', _('Spatial granularity'), ficon('fa-bullseye'),
+        labelize=datasets.label_func('granularity')
+    ) }}
+    {{ s.filter_label('format', _('Format'), ficon('fa-file')) }}
+    {{ s.filter_label('resource_type', _('Resource type'), ficon('fa-file-o'),
+        labelize=datasets.label_func('resource_type')
+    ) }}
+    {{ s.filter_label('reuses', _('Reuses'), ficon('fa-recycle'),
+        labelize=datasets.label_func('reuses')
+    ) }}
+    {{ s.filter_label('followers', _('Followers'), ficon('fa-eye'),
+        labelize=datasets.label_func('followers')
+    ) }}
+</div>

@@ -1,0 +1,103 @@
+/*
+---
+name: Links
+category: Content
+---
+
+## Anchors
+Simple anchors can be used with a simple `<a>` tag.
+
+```link.html
+<a href="#">Environnement, Énergie, Logement</a>
+```
+
+# Unstyled
+If you need to use a link with no styling (no color or text-decoration), you can use the specially crafted class `.unstyled`.
+This behaviour might be inversed at some point (normal `<a>` having no style by default and a special "styled" class available for colored links) if the current way proves to be too cumbersome.
+
+```link-unstyled.html
+<a href="#" class="unstyled">Unstyled link (useful to wrap other elements)</a>
+```
+
+# Nav Links
+Some links are intented to be used as a secondary navigation within the website, you can use them with `.nav-link`. Their sizes can be tweaked.
+
+```navlink.html
+<p><a href="#" class="nav-link">toutes les actualités</a></p>
+<p class="small"><a href="#" class="nav-link small">toutes les actualités</a></p>
+```
+
+# Nav Lists
+Sometimes you really want more than one link, that's what `.nav-list` are for.
+
+```navlist.html
+<ul class="nav-list">
+    <li><a href="#" class="nav-link">toutes les actualités</a></li>
+    <li><a href="#" class="nav-link">toutes les actualités</a></li>
+    <li><a href="#" class="nav-link">toutes les actualités</a></li>
+</ul>
+```
+*/
+
+a {
+    display: inline-block;
+    color: @blue-400;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    &:focus {
+        outline: 5px auto -webkit-focus-ring-color;
+    }
+
+    &:active {
+        outline: none;
+    }
+
+    &.unstyled {
+        color: unset;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
+}
+
+.nav-link {
+    position: relative;
+    margin-left: 0.75em;
+    color: @grey-400;
+    font-weight: @font-weight-bold;
+    text-decoration: underline;
+    text-decoration-color: @grey-200;
+    text-underline-position: under;
+
+    &.text-decoration-none {
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+    &::before {
+        position: absolute;
+        left: -0.75em;
+        width: 0.5em;
+        height: 1em;
+        text-decoration: none;
+        content: '\203A';
+    }
+}
+
+.nav-list {
+    margin: 0;
+    padding: 0;
+    font-size: @font-size-sm;
+
+    li {
+        margin-bottom: @spacing-xs;
+        margin-left: 0;
+    }
+}

@@ -1,0 +1,58 @@
+{% extends theme('layouts/1-column.html') %}
+
+{% set meta = {
+    'title': page.title or '',
+    'description': page.description or '',
+    'keywords': page.keywords or [],
+} %}
+
+{% set bundle = 'post' %}
+
+{% set body_class = 'post-display' %}
+
+{% block main_content %}
+<div class="container markdown py-lg" v-pre>
+    <div>{{ page.content|markdown }}</div>
+</div>
+
+{% if datasets %}
+<div class="container mt-md">
+    <h2>{{ _('Datasets') }} <sup>{{ datasets|length }}</sup></h2>
+    <div class="row">
+        <div class="col-12">
+            {% for dataset in datasets %}
+            <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
+                class="unstyled w-100">{% include theme('dataset/search-result.html') %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if reuses %}
+<div class="container mt-md">
+    <h2>{{ _('Reuses') }} <sup>{{ reuses|length }}</sup></h2>
+    <ul class="row">
+        {% for reuse in reuses %}
+        <li class="col-3 col-lg-6 col-sm-12 text-align-center">
+            <a href="{{ url_for('reuses.show', reuse=reuse) }}"
+                title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="container my-hg">
+    <div class="col-6 col-md-12">
+        <h2 class="fs-xxl">{{ _('Actions') }}</h2>
+        <ul class="nav-list">
+            <li class="my-md">
+                <a class="nav-link" href="{{ gh_url }}">{{ _('Suggest a modification') }}</a>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

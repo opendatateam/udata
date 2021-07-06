@@ -1,0 +1,21 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': _('Terms'),
+    'description': _('Terms'),
+    'keywords': [
+        'terms', _('terms'),
+    ],
+} %}
+
+{% block content %}
+<section class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                {{ terms|markdown }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends theme('layouts/1-column.html') %}
+{% from theme('macros/follow.html') import follow_btn with context %}
+
+{% set bundle = 'user' %}
+
+{% set meta = {
+    'title': user.fullname,
+    'description': _("%(site)s %(username)s profile", site=config['SITE_TITLE'], username=user.fullname),
+    'keywords': [_('user'), _('profile')],
+    'robots': 'noindex',
+} %}
+
+{% block breadcrumb %}
+    <li>{{ _('Users') }}</li>
+    <li><a href="{{ url_for('users.show', user=user) }}">{{ user.fullname }}</a></li>
+{% endblock %}
+
+{% block toolbar %}
+{% if can_edit %}
+<div class="btn-group btn-group-xs">
+    <a href="{{ url_for('admin.index', path='users/{id}/'.format(id=user.id)) }}" class="btn btn-success">
+        <span class="fa fa-pencil"></span>
+        {{ _('Edit') }}
+    </a>
+</div>
+{% endif %}
+{# Social actions #}
+{% if current_user != user %}
+<div class="btn-group btn-group-xs">
+    {{ follow_btn(user) }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block main_content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="text-center">
+                    <img src="{{ user|avatar_url(150) }}"
+                        alt="{{ user.fullname }}" class="scalable"/>
+                </div>
+                <h2>{{ user.fullname }}</h2>
+                {{ user.about|markdown }}
+                {# <hr/> #}
+                <div>
+                    <ul class="list-unstyled">
+                        {% if user.website %}
+                        <li>
+                            <span class="fa fa-link"></span>
+                            <a href="{{user.website}}" rel="nofollow">{{user.website}}</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="list-group text-center">
+                <a href="{{url_for('users.show', user=user)}}"
+                    class="list-group-item {% if user_tab == 'activity' %}active{% endif %}">
+                    <strong>{{ _('Activity') }}</strong>
+                </a>
+                <a href="{{url_for('users.followers', user=user)}}"
+                    class="list-group-item {% if user_tab == 'followers' %}active{% endif %}">
+                    <strong>
+                        {{ ngettext('%(num)d follower', '%(num)d followers', user.metrics.followers or 0) }}
+                    </strong>
+                </a>
+                <a href="{{url_for('users.following', user=user)}}"
+                    class="list-group-item {% if user_tab == 'following' %}active{% endif %}">
+                    <strong>
+                        {{ ngettext('%(num)d followed', '%(num)d followed', user.metrics.following or 0) }}
+                    </strong>
+                </a>
+                <a href="{{url_for('users.datasets', user=user)}}"
+                    class="list-group-item {% if user_tab == 'datasets' %}active{% endif %}">
+                    <strong>
+                        {{ ngettext('%(num)d dataset', '%(num)d datasets', user.metrics.datasets or 0) }}
+                    </strong>
+                </a>
+                <a href="{{url_for('users.reuses', user=user)}}"
+                    class="list-group-item {% if user_tab == 'reuses' %}active{% endif %}">
+                    <strong>
+                    {{ ngettext('%(num)d reuse', '%(num)d reuses', user.metrics.reuses or 0) }}
+                    </strong>
+                </a>
+            </div>
+
+            {% if organizations %}
+            <div class="panel-body">
+                <h4>{{ _('Organizations') }}</h4>
+                {% for org in organizations %}
+                <a href="{{ url_for('organizations.show', org=org) }}">
+                    <img src="{{ org.logo(48)|placeholder('organization') }}"
+                        class="avatar" width="48" height="48" alt="{{ org.name }}" />
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+    <div class="col-md-9">{% block user_content %}{% endblock %}</div>
+</div>
+{% endblock %}

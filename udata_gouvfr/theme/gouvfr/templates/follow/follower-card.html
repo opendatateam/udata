@@ -1,0 +1,7 @@
+{% extends theme('user/card.html') %}
+
+{% set user =  follow.follower %}
+
+{% block footer %}
+<p>{{ _('Following since %(date)s', date=follow.since|dateformat) }}</p>
+{% endblock %}

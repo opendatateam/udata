@@ -1,0 +1,53 @@
+/*
+---
+name: Embed
+category: Components
+---
+
+# Embed
+
+Embed allows you to display some GitHub-style embedding code capabilities.
+This component is a single input and its accompanying copy-to-clipboard button.
+
+```embed.html
+<div class="embed-wrapper">
+
+</div>
+```
+*/
+
+.embed-wrapper {
+    display: flex;
+    border: 1px solid @grey-200;
+    border-radius: 4px;
+    background: @grey-50;
+
+    input, textarea {
+        flex-grow: 1;
+        appearance: none;
+        border: none;
+        background: none;
+        padding: @spacing-xs;
+        color: @grey-300;
+
+        line-height: @spacing-lg;
+
+        white-space: nowrap;
+        resize: none;
+    }
+
+    .icon-copy {
+        svg {
+            width: 24px;
+            height: 24px;
+
+            * {
+                fill: @grey-300;
+            }
+        }
+
+        border-left: 1px solid @grey-200;
+        padding: @spacing-xs;
+        cursor: pointer;
+    }
+}

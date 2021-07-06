@@ -1,7 +1,0 @@
-{% if organization.public_service %}
-<img src="{{ theme_static('img/certified-stamp.png')}}" alt="certified" class="certified"
-    v-popover.literal="{{ _('The identity of this public service public is certified by Etalab') }}"
-    popover-title="{{ _('Certified public service') }}"
-    popover-placement="left" popover-trigger="hover"/>
-{% endif %}
-{% include 'organization/sidebar-producer.html' %}

@@ -1,0 +1,101 @@
+{% set resource_format = resource.format|trim|lower %}
+{% set expanded = expanded or "false" %}
+<article
+    class="card resource-card {% if dark %}dark{% endif %} {% if resource.from_community %}resource-card-community{% endif %}">
+    <div class="card-body">
+        <header class="card-header" id="resource-{{resource.id}}-header">
+            <div class="edit-button">
+                {% if can_edit %}
+                <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}"
+                    aria-label="{{ _('Edit button') }}">
+                    {% include theme('svg/actions/edit.svg') %}
+                </a>
+                {% endif %}
+            </div>
+            <div class="header-text">
+                <span class="fs-sm text-grey-200"> {{ resource.metrics.views or 0 }} {{ _('downloads') }}</span>
+                <h4>
+                    {{ resource.title or _('Nameless resource') }}
+                    {% if resource.from_community and resource.owner %}
+                    <p class="fs-sm m-0 text-grey-100">{{resource.owner}}</p>
+                    {% endif %}
+                </h4>
+                <strong class="text-green-300">Disponible</strong>
+            </div>
+            <div class="button-bar">
+                <ul>
+                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="{{expanded}}"
+                            aria-label="{{_('See more details')}}" aria-controls="resource-{{resource.id}}"
+                            class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
+                    {% if resource.preview_url %}
+                    <li><a href="#" class="btn-action" title="{{ _('Preview') }}"
+                            @click.prevent="$showModal('preview', {url: '{{ resource.preview_url }}'}, true)">{% include theme('svg/actions/eye.svg') %}</a>
+                    </li>
+                    {% endif %}
+                    <li><a @click.prevent href="#" id="{{resource.id}}-copy"
+                            title="{{ _('Copy permalink to clipboard') }}" data-clipboard-text="{{resource.latest}}"
+                            class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
+                    {% if resource.format == 'url' %}
+                    <li><a href="{{ resource.latest }}" class="btn-action"
+                            aria-label="{{ _('Resource link') }}">{% include theme('svg/actions/link.svg') %}</a></li>
+                    {% else %}
+                    <li><a href="{{ resource.latest }}" class="btn-action" aria-label="{{ _('Download resource') }}"
+                            download>{% include theme('svg/actions/download.svg') %}</a></li>
+                    {% endif %}
+                    {{ hook('dataset.resource.card.extra-buttons') }}
+                </ul>
+                <div class="filetype">
+                    <strong>{{ resource_format }}</strong>
+                    {% if resource.filesize %}
+                    <em>({{ resource.filesize | filesize }})</em>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+        <section class="card-content accordion-content {% if expanded != 'false' %}active{% endif %}"
+            {% if expanded == 'false' %}style="height: 0px" {% endif %}
+            aria-labelledby="resource-{{resource.id}}-header" id="resource-{{resource.id}}">
+            {% if resource.description %}
+            <p class="resource-description">
+                {{ resource.description|mdstrip(180) }}
+            </p>
+            {% endif %}
+            <dl class="description-list">
+                <div>
+                    <dt>{{ _('URL') }}</dt>
+                    <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
+                </div>
+                <div>
+                    <dt>{{ _('Permalink') }}</dt>
+                    <dd><a href="{{resource.json_ld.url}}">{{resource.json_ld.url}}</a></dd>
+                </div>
+                <div>
+                    <dt>{{ _('Type') }}</dt>
+                    <dd>{{type_label}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('MIME Type') }}</dt>
+                    <dd>{{resource.mime}}</dd>
+                </div>
+                {% if resource.checksum %}
+                <div>
+                    <dt>{{resource.checksum.type}}</dt>
+                    <dd>{{resource.checksum.value}}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt>{{ _('Created on') }}</dt>
+                    <dd>{{resource.created_at|dateformat(format='long')}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('Modified on') }}</dt>
+                    <dd>{{resource.modified|dateformat(format='long')}}</dd>
+                </div>
+                <div>
+                    <dt>{{ _('Published on') }}</dt>
+                    <dd>{{resource.published|dateformat(format='long')}}</dd>
+                </div>
+            </dl>
+        </section>
+    </div>
+</article>

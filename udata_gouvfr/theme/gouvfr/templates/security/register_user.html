@@ -1,0 +1,33 @@
+{% extends theme('base.html') %}
+{% import theme('macros/forms.html') as forms with context %}
+
+{% block content %}
+<section class="py-xl py-lg-lg bg-grey-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 text-align-center offset-3 form-container col-md-12 offset-md-0">
+                <form class="form" method="post" action="{{ url_for('security.register') }}">
+                    <fieldset>
+                        <legend class="h2 mb-0">{{ _('Sign up') }}</legend>
+                        <p class="mb-xl f-light fs-sm text-align-left">
+                            <a href="https://guides.etalab.gouv.fr/data.gouv.fr/creer-compte-utilisateur/" target="_blank">
+                                {{ _('Why create an account?') }}
+                            </a>
+                        </p>
+                        {{ forms.render_fields(register_user_form, exclude=[register_user_form.submit]) }}
+                        <div class="field field-checkbox">
+                            {% block extra_tos %}
+                            {% endblock %}
+                            <input id="accept_conditions" type="checkbox" name="accept_conditions" required />
+                            <label for="accept_conditions">
+                                {{ _('I have read and accept <a href="%(url)s"> the terms and conditions of the service.</a>', url=url_for('site.terms')) }}
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">{{ _('Sign up') }}</button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

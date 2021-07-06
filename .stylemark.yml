@@ -1,0 +1,15 @@
+name: udata_gouvfr Ui-Kit
+match: '/.*\.(sass|scss|less|css|js|vue)/g'
+theme:
+  logo: theme/less/images/logo.png
+  css:
+    - theme/less/theme.css
+  sidebar:
+    background: "#b8e2ff"
+    textColor: "#070d54"
+examples:
+  css:
+    - udata_gouvfr/theme/gouvfr/static/less/index.css
+    - theme/less/examples.css
+  js:
+    - udata_gouvfr/theme/gouvfr/static/js/index.js

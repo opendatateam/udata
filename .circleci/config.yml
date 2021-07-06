@@ -85,7 +85,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - udata_gouvfr/theme/static
+            - udata_gouvfr/theme/gouvfr/static
             - udata_gouvfr/theme/manifest.json
 
   dist:
@@ -134,18 +134,6 @@ jobs:
             pip install twine
             twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
-  github:
-    docker:
-      - image: udata/circleci:2-alpine
-    environment:
-       BASH_ENV: /root/.bashrc
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Upload github release
-          command: gh_release
-
 workflows:
   version: 2
   build:
@@ -170,16 +158,8 @@ workflows:
             - dist
           filters:
             branches:
-              ignore: /.*/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*/
-          context: org-global
-      - github:
-          requires:
-            - dist
-          filters:
-            branches:
-              ignore: /.*/
+              only:
+                - master
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
           context: org-global

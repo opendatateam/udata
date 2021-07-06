@@ -1,0 +1,60 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': _('Dashboard'),
+    'description': _('Site metrics and activity'),
+    'keywords': [_('metrics'), _('activity')],
+} %}
+
+{% set bundle = 'dashboard' %}
+
+{% set body_class = 'dashboard' %}
+
+{% block breadcrumb %}
+    <li class="active">{{ _('Dashboard') }}</li>
+{% endblock %}
+
+{% block content %}
+{# Boxes definitions: (label, metric, icon, color) #}
+{% set boxes = [
+    (_('Datasets'), 'datasets', 'cubes', 'aqua'),
+    (_('Resources'), 'resources', 'file-text-o', 'maroon'),
+    (_('Reuses'), 'reuses', 'recycle', 'green'),
+    (_('Users'), 'users', 'users', 'yellow'),
+    (_('Organizations'), 'organizations', 'building', 'purple'),
+    (_('Discussions'), 'discussions', 'comments', 'teal'),
+] %}
+<section class="default">
+    <div class="container">
+        <div class="row">
+            {# Load spinner until JS is ready #}
+            <div v-if="false" class="col-xs-12 text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+            {% for (label, metric, icon, color) in boxes %}
+            <small-box class="col-lg-4 col-md-4 col-xs-6"
+                value="{{current_site.metrics[metric]}}" label="{{label}}" color="{{color}}"
+                icon="{{icon}}">
+            </small-box>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="community">
+    <header>
+        <div class="container">
+            <div class="cover-communaute"></div>
+            <div class="page-header">
+                <h2>{{ _('Community activity') }}</h2>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <div class="row">
+            <activity-timeline class="col-sm-12">
+                {# Load spinner until JS is ready #}
+                <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+            </activity-timeline>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+<button
+  class="btn btn-sm btn-primary hidden-md"
+  @click.prevent="$showModal('schema', {
+      resource_schema: {{resource.schema}},
+      documentation_url: '{{documentation_url}}',
+      validation_url: '{{validation_url}}',
+      authorize_validation: {{'true' if authorize_validation else 'false'}}
+    })">
+    Voir le schéma
+</button>

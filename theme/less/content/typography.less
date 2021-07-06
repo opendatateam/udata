@@ -1,0 +1,262 @@
+/*
+---
+name: Typography
+category: Content
+---
+
+## Base Font
+We use the Aileron font from [Sora Sagano](http://dotcolon.net/) in Light, Regular and Semibold
+
+```font.html
+<h1 style='font-weight: lighter'>Portez ce vieux whisky au juge blond qui fume</h1>
+<h1 style='font-weight: normal'>Portez ce vieux whisky au juge blond qui fume</h1>
+<h1 style='font-weight: bold'>Portez ce vieux whisky au juge blond qui fume</h1>
+```
+
+## Headings
+All HTML headings, `<h1>` through `<h5>`, are available.
+
+```headings.html
+<h1>Portez ce vieux whisky au juge blond qui fume</h1>
+<h2>Portez ce vieux whisky au juge blond qui fume</h2>
+<h3>Portez ce vieux whisky au juge blond qui fume</h3>
+<h4>Portez ce vieux whisky au juge blond qui fume</h4>
+<h5>Portez ce vieux whisky au juge blond qui fume</h5>
+```
+
+`.h1` through `.h5` classes are also available, for when you want to match the font styling of a heading but cannot use the associated HTML element :
+
+```headings-2.html
+<span class="h1">Portez ce vieux whisky au juge blond qui fume</span>
+<span class="h2">Portez ce vieux whisky au juge blond qui fume</span>
+<span class="h3">Portez ce vieux whisky au juge blond qui fume</span>
+<span class="h4">Portez ce vieux whisky au juge blond qui fume</span>
+<span class="h5">Portez ce vieux whisky au juge blond qui fume</span>
+```
+
+## Headings Exponents
+For most headings we can have an exponent representing the amount of things found in the current section, you can use a `<sup>` tag to reprensent those
+You can also apply the `.sup` class to any arbitrary element (preferably a `<sup>` to respect semantics) to add an exponent as well.
+
+```headingsexponents.html
+<h2>Ressources <sup>64</sup></h2>
+<strong>Reuses <sup class="sup">12</sup></strong>
+```
+
+## Font Sizes
+To adjust the font size of an element you can use the `.fs-{font-size}` classes.
+
+```fontsizes.html
+<p class="fs-xs">This line has a font size of <em>0.75em</em> or <em>12px</em></p>
+<p class="fs-sm">This line has a font size of <em>0.875em</em> or <em>14px</em></p>
+<p class="fs-md">This line has a font size of <em>1em</em> or <em>16px</em></p>
+<p class="fs-lg">This line has a font size of <em>1.25em</em> or <em>20px</em></p>
+<p class="fs-xl">This line has a font size of <em>1.5em</em> or <em>24px</em></p>
+<p class="fs-xxl">This line has a font size of <em>2em</em> or <em>32px</em></p>
+<p class="fs-hg">This line has a font size of <em>2.5em</em> or <em>40px</em></p>
+```
+
+## Font weights
+To adjust the font weight, you can use the `.f-{light, normal, bold}` classes.
+
+```fontweight.html
+<p class="f-light">Light weight</p>
+<p class="f-normal">Normal weight</p>
+<p class="f-bold">Bold weight</p>
+```
+
+## Inline Styles
+Styling for common inline HTML5 elements.
+
+```inlinestyles.html
+<p>You can use the mark tag to <mark>highlight</mark> text.</p>
+<p><del>This line of text is meant to be treated as deleted text.</del></p>
+<p><s>This line of text is meant to be treated as no longer accurate.</s></p>
+<p><ins>This line of text is meant to be treated as an addition to the document.</ins></p>
+<p><u>This line of text will render as underlined</u></p>
+<p><small>This line of text is meant to be treated as fine print.</small></p>
+<p><strong>This line rendered as bold text.</strong></p>
+<p><em>This line rendered as italicized text.</em></p>
+<p class="f-italic">This line is also rendered as italicized text.</p>
+<p><u class="text-decoration-none">This line of text will not render as underlined</u></p>
+<p><u class="text-decoration-underline">This line of text **will** render as underlined</u></p>
+```
+
+## Alignment
+You can specify alignment for text blocks, with responsive capabilities, using `.text-align-{left|center|right}` and `.text-align-{left|center|right}-{breakpoint}`.
+
+```alignment.html
+<div class="container">
+    <div class="row">
+        <div class="col bg-blue-200 text-align-left">Left aligned</div>
+        <div class="col bg-blue-200 text-align-center">Centered</div>
+        <div class="col bg-blue-200 text-align-right">Right aligned</div>
+    </div>
+    <div class="row">
+        <div class="col-12 bg-blue-200 text-align-center-sm text-align-left">Left aligned but centered on mobile</div>
+    </div>
+</div>
+```
+
+*/
+
+@font-family-base: "Marianne", "Arial", sans-serif;
+
+@font-size-base: 16px;
+@line-height-base: 1.25;
+
+@font-size-xs: 0.75rem;
+@font-size-sm: 0.875rem;
+@font-size-md: 1rem;
+@font-size-lg: 1.25rem;
+@font-size-xl: 1.5rem;
+@font-size-xxl: 2rem;
+@font-size-hg: 2.5rem; // hg for humongous
+
+@font-sizes: xs, sm, base, lg, xl, xxl, hg;
+
+@font-weight-light: 300;
+@font-weight-normal: 400;
+@font-weight-bold: 600;
+
+html {
+    color: @grey-400;
+    font-size: @font-size-base;
+    font-family: @font-family-base;
+    line-height: @line-height-base;
+    text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5 {
+    display: block;
+    margin-top: 0;
+    font-weight: bold;
+
+    sup {
+        .sup;
+    }
+}
+
+.f-light {
+    font-weight: @font-weight-light;
+}
+
+.f-normal {
+    font-weight: @font-weight-normal;
+}
+
+.f-bold {
+    font-weight: @font-weight-bold;
+}
+
+.f-italic {
+    font-style: italic;
+}
+
+.sup {
+    display: inline-block;
+    font-weight: @font-weight-light;
+    text-decoration: none;
+
+    &::before {
+        color: @grey-200;
+        vertical-align: baseline;
+        content: "(";
+    }
+
+    &::after {
+        color: @grey-200;
+        vertical-align: baseline;
+        content: ")";
+    }
+}
+
+.h1,
+h1 {
+    margin-bottom: @spacing-hg;
+    font-size: @font-size-hg;
+}
+
+.h2,
+h2 {
+    margin-bottom: @spacing-lg;
+    font-size: @font-size-xl;
+}
+
+.h3,
+h3 {
+    margin-bottom: @spacing-md;
+    font-size: @font-size-lg;
+}
+
+.h4,
+h4 {
+    margin-bottom: @spacing-sm;
+    font-size: @font-size-base;
+}
+
+.h5,
+h5 {
+    margin-bottom: @spacing-xs;
+    font-size: @font-size-xs;
+}
+
+.small,
+small {
+    font-size: @font-size-xs;
+}
+
+each(@font-sizes, {
+    @var: 'font-size-@{value}';
+
+    .fs-@{value} {
+        font-size: @@var !important;
+    }
+});
+
+.text-decoration-underline {
+    text-decoration: underline !important;
+}
+
+.text-decoration-none {
+    text-decoration: none !important;
+}
+
+.text-align-center {
+    text-align: center !important;
+}
+
+.text-align-left {
+    text-align: left !important;
+}
+
+.text-align-right {
+    text-align: right !important;
+}
+
+each(@breakpoints, .(@bk, @_k, @_i) {
+    @var: 'query-@{bk}';
+
+    @media @@var {
+        .text-align-center-@{bk} {
+            text-align: center !important;
+        }
+
+        .text-align-left-@{bk} {
+            text-align: left !important;
+        }
+
+        .text-align-right-@{bk} {
+            text-align: right !important;
+        }
+    }
+});

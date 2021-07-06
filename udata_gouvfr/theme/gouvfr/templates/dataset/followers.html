@@ -1,0 +1,23 @@
+{% extends theme('layouts/1-column.html') %}
+
+{% block breadcrumb %}
+    <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
+    <li><a href="{{ url_for('datasets.show', dataset=dataset) }}">{{ dataset.name|truncate(120) }}</a></li>
+    <li class="active">{{ _('Followers') }}</li>
+{% endblock %}
+
+{% block main_content %}
+<h2>
+    {{ dataset.name }}
+    <small>
+        {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
+    </small>
+</h2>
+<div class="row">
+    {% for follow in followers %}
+    <div class="col-md-4">
+      {% include theme('follow/follower-card.html') %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

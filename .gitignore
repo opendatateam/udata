@@ -34,7 +34,7 @@ bower
 /instance/
 /static/
 node_modules
-/udata_gouvfr/theme/static/
+/udata_gouvfr/theme/gouvfr/static/
 /udata_gouvfr/theme/manifest.json
 
 # Installer logs
@@ -57,3 +57,7 @@ nosetests.xml
 .project
 .pydevproject
 .noseids
+
+udata.cfg
+stylemark/
+.parcel-cache
