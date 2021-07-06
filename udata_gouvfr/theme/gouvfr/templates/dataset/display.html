@@ -253,7 +253,7 @@
             {% if nb_groups > 1 %}<h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>
             {% endif %}
             {% for resource in resources[:max_resources] %}
-            {% with expanded = "true" if type == "main" else "false" %}
+            {% with expanded = "false" %}
             {% include theme('dataset/resource/card.html') %}
             {% endwith %}
             {% endfor %}
