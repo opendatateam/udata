@@ -37,7 +37,7 @@ SAMPLE_GEOM = {
 
 
 class DatasetAPITest(APITestCase):
-    modules = ['core.user', 'core.dataset', 'core.organization']
+    modules = []
 
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
@@ -1177,7 +1177,7 @@ class DatasetReferencesAPITest(APITestCase):
 
 
 class DatasetArchivedAPITest(APITestCase):
-    modules = ['core.dataset']
+    modules = []
 
     def test_dataset_api_search_archived(self):
         '''It should search datasets from the API, excluding archived ones'''
@@ -1199,7 +1199,7 @@ class DatasetArchivedAPITest(APITestCase):
 
 
 class CommunityResourceAPITest(APITestCase):
-    modules = ['core.dataset', 'core.user', 'core.organization']
+    modules = []
 
     def test_community_resource_api_get(self):
         '''It should fetch a community resource from the API'''
@@ -1466,7 +1466,7 @@ class ResourcesTypesAPITest(APITestCase):
 
 @pytest.mark.usefixtures('clean_db')
 class DatasetSchemasAPITest:
-    modules = ['core.dataset']
+    modules = []
 
     def test_dataset_schemas_api_list(self, api, rmock, app):
         # Can't use @pytest.mark.options otherwise a request will be

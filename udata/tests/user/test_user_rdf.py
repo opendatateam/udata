@@ -4,8 +4,8 @@ from rdflib import URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF, RDFS
 from rdflib.resource import Resource as RdfResource
 
+from udata import api
 from udata.tests import TestCase, DBTestMixin
-from udata.core.user.views import blueprint as user_blueprint
 from udata.core.user.factories import UserFactory
 from udata.core.user.rdf import user_to_rdf
 from udata.utils import faker
@@ -14,7 +14,7 @@ from udata.utils import faker
 class UserToRdfTest(DBTestMixin, TestCase):
     def create_app(self):
         app = super(UserToRdfTest, self).create_app()
-        app.register_blueprint(user_blueprint)
+        api.init_app(app)
         return app
 
     def test_minimal(self):
@@ -33,7 +33,7 @@ class UserToRdfTest(DBTestMixin, TestCase):
 
     def test_all_fields(self):
         user = UserFactory(website=faker.uri())
-        user_url = url_for('users.show_redirect',
+        user_url = url_for('api.user',
                            user=user.id,
                            _external=True)
         u = user_to_rdf(user)

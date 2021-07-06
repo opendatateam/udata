@@ -4,10 +4,9 @@ from rdflib import URIRef, Literal, BNode
 from rdflib.namespace import RDF, FOAF, RDFS
 from rdflib.resource import Resource as RdfResource
 
-from udata.rdf import CONTEXT, DCAT, DCT, HYDRA
+from udata import api
+from udata.rdf import DCAT, DCT, HYDRA
 from udata.tests import TestCase, DBTestMixin
-from udata.core.dataset.views import blueprint as dataset_blueprint
-from udata.core.organization.views import blueprint as org_blueprint
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.rdf import organization_to_rdf, build_org_catalog
 from udata.core.dataset.factories import VisibleDatasetFactory
@@ -18,8 +17,7 @@ from udata.utils import faker
 class OrganizationToRdfTest(DBTestMixin, TestCase):
     def create_app(self):
         app = super(OrganizationToRdfTest, self).create_app()
-        app.register_blueprint(org_blueprint)
-        app.register_blueprint(dataset_blueprint)
+        api.init_app(app)
         return app
 
     def test_minimal(self):
@@ -38,7 +36,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
 
     def test_all_fields(self):
         org = OrganizationFactory(url=faker.uri())
-        org_url = url_for('organizations.show_redirect',
+        org_url = url_for('api.organization',
                           org=org.id,
                           _external=True)
         o = organization_to_rdf(org)
@@ -57,7 +55,7 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
 
     def test_catalog(self):
         origin_org = OrganizationFactory()
-        uri = url_for('organizations.rdf_catalog', org=origin_org.id, _external=True)
+        uri = url_for('api.organization_rdf', org=origin_org.id, _external=True)
 
         datasets = VisibleDatasetFactory.create_batch(3, organization=origin_org)
         catalog = build_org_catalog(origin_org, datasets)
@@ -87,10 +85,10 @@ class OrganizationToRdfTest(DBTestMixin, TestCase):
         origin_org = OrganizationFactory()
         page_size = 3
         total = 4
-        uri = url_for('organizations.rdf_catalog', org=origin_org.id, _external=True)
-        uri_first = url_for('organizations.rdf_catalog_format', org=origin_org.id, format='json',
+        uri = url_for('api.organization_rdf', org=origin_org.id, _external=True)
+        uri_first = url_for('api.organization_rdf_format', org=origin_org.id, format='json',
                             page=1, page_size=page_size, _external=True)
-        uri_last = url_for('organizations.rdf_catalog_format', org=origin_org.id, format='json',
+        uri_last = url_for('api.organization_rdf_format', org=origin_org.id, format='json',
                            page=2, page_size=page_size, _external=True)
         VisibleDatasetFactory.create_batch(total, organization=origin_org)
 

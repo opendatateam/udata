@@ -11,7 +11,7 @@ from udata.tests.helpers import assert200, assert201, assert204
 
 @pytest.mark.usefixtures('clean_db')
 class PostsAPITest:
-    modules = ['core.dataset', 'core.reuse', 'core.user', 'core.post']
+    modules = []
 
     def test_post_api_list(self, api):
         '''It should fetch a post list from the API'''

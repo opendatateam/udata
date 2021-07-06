@@ -7,10 +7,11 @@ from flask import url_for
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.namespace import RDF, RDFS, FOAF
 
-from udata.rdf import DCAT, DCT, HYDRA, namespace_manager, paginate_catalog
+from udata.rdf import DCAT, DCT, DCAT, namespace_manager, paginate_catalog
 
 from udata.core.dataset.rdf import dataset_to_rdf
 from udata.utils import Paginable
+from udata.uris import endpoint_for
 
 
 def organization_to_rdf(org, graph=None):
@@ -19,9 +20,8 @@ def organization_to_rdf(org, graph=None):
     '''
     graph = graph or Graph(namespace_manager=namespace_manager)
     if org.id:
-        org_url = url_for('organizations.show_redirect',
-                          org=org.id,
-                          _external=True)
+        org_url = endpoint_for('organizations.show_redirect', 'api.organization',
+                                org=org.id, _external=True)
         id = URIRef(org_url)
     else:
         id = BNode()
@@ -37,7 +37,7 @@ def organization_to_rdf(org, graph=None):
 
 def build_org_catalog(org, datasets, format=None):
     graph = Graph(namespace_manager=namespace_manager)
-    org_catalog_url = url_for('organizations.rdf_catalog', org=org.id, _external=True)
+    org_catalog_url = url_for('api.organization_rdf', org=org.id, _external=True)
 
     catalog = graph.resource(URIRef(org_catalog_url))
     catalog.set(RDF.type, DCAT.Catalog)
@@ -49,6 +49,6 @@ def build_org_catalog(org, datasets, format=None):
     values = {'org': org.id}
     
     if isinstance(datasets, Paginable):
-        paginate_catalog(catalog, graph, datasets, format, 'organizations.rdf_catalog_format', **values)
+        paginate_catalog(catalog, graph, datasets, format, 'api.organization_rdf_format', **values)
     
     return catalog

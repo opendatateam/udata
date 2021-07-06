@@ -218,7 +218,7 @@ class UDataContext(Context):
 
     def to_dict(self):
         '''Hackish way to provide the site context URL'''
-        return url_for('site.jsonld_context', _external=True)
+        return url_for('api.site_jsonld_context', _external=True)
 
 
 context = UDataContext(CONTEXT)

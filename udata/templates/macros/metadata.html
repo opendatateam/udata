@@ -24,11 +24,6 @@
 <meta name="auth-url" content="{{ url_for('security.login') }}" />
 <meta name="github" content="{{ config.SITE_GITHUB_URL }}" />
 {{ i18n_alternate_links() }}
-{% if rdf_links %}
-{% for mime, url in rdf_links %}
-<link rel="alternate" type="{{ mime }}" href="{{ url }}" />
-{% endfor %}
-{% endif %}
 {% if config.SENTRY_PUBLIC_DSN %}
 <meta name="sentry" content="{{config.SENTRY_PUBLIC_DSN}}"
     data-release="{{config.SENTRY_RELEASE}}"
@@ -77,7 +72,6 @@
     'MIN_LENGTH': config.TAG_MIN_LENGTH,
     'MAX_LENGTH': config.TAG_MAX_LENGTH,
 }|tojson|urlencode }}" />
-<meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
 
 {% if json_ld %}
 <script id="json_ld" type="application/ld+json">{{ json_ld|embedded_json_ld }}</script>

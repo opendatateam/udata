@@ -93,16 +93,6 @@ jobs:
           key: js-cache-{{ arch }}-{{ .Branch }}
           paths:
           - node_modules
-      # - run:
-      #     name: Execute Karma tests
-      #     command: |
-      #       mkdir -p reports/karma
-      #       REPORT_DIR=reports/karma npm -s run test:unit -- --reporters mocha,junit
-      # - store_test_results:
-      #     path: reports/karma
-      # - store_artifacts:
-      #     path: reports/
-      #     destination: reports
       - run:
           name: Compile assets
           command: |

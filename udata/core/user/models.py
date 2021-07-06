@@ -13,6 +13,7 @@ from elasticsearch_dsl import Integer, Object
 from werkzeug import cached_property
 
 from udata import mail
+from udata.uris import endpoint_for
 from udata.frontend.markdown import mdstrip
 from udata.i18n import lazy_gettext as _
 from udata.models import db, WithMetrics, Follow
@@ -124,7 +125,7 @@ class User(WithMetrics, UserMixin, db.Document):
         return self.has_role('admin')
 
     def url_for(self, *args, **kwargs):
-        return url_for('users.show', user=self, *args, **kwargs)
+        return endpoint_for('users.show', 'api.user', user=self, *args, **kwargs)
 
     display_url = property(url_for)
 

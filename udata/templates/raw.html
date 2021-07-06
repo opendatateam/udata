@@ -5,23 +5,12 @@
 <html lang="{{ g.lang_code }}">
   <head>
     {% block raw_head %}
-    {% from theme('macros/metadata.html') import metadata with context %}
+    {% from 'macros/metadata.html' import metadata with context %}
     {{ metadata(meta or {}) }}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ manifest('udata', 'common.css') }}">
-    {% if bundle_css is in_manifest %}
-    <link rel="stylesheet" href="{{ manifest('udata', '{0}.css'.format(bundle)) }}">
-    {% endif %}
     {% block extra_css %}{% endblock %}
-    {% block theme_css %}{% endblock %}
-    {# ATOM Feeds #}
-    <link href="{{ url_for('datasets.recent_feed') }}"
-        rel="alternate" type="application/atom+xml"
-        title="{{ _('Recent datasets') }}" />
-
-    <link href="{{ url_for('reuses.recent_feed') }}"
-        rel="alternate" type="application/atom+xml"
-        title="{{ _('Recent reuses') }}" />
+    {% block theme_css %}
+    {% endblock %}
 
     {% block extra_head %}{% endblock %}
 
@@ -31,13 +20,11 @@
 
   </head>
 
-  <body class="{{body_class}} theme-{{current_theme.variant}}">
-    {% block body %}{% endblock %}
+  <body class="{{body_class}}">
+    <section id="app">
+      {% block body %}{% endblock %}
+    </section>
 
-    <script src="{{ manifest('udata', 'common.js') }}"></script>
-    {% if bundle_js is in_manifest %}
-    <script src="{{ manifest('udata', '{0}.js'.format(bundle)) }}"></script>
-    {% endif %}
     {% block extra_js %}{% endblock %}
 
     {{ hook('footer.snippets') }}

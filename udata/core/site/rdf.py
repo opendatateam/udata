@@ -10,12 +10,13 @@ from udata.core.organization.rdf import organization_to_rdf
 from udata.core.user.rdf import user_to_rdf
 from udata.rdf import DCAT, DCT, HYDRA, namespace_manager, paginate_catalog
 from udata.utils import Paginable
+from udata.uris import endpoint_for
 
 
 def build_catalog(site, datasets, format=None):
     '''Build the DCAT catalog for this site'''
-    site_url = url_for('site.home_redirect', _external=True)
-    catalog_url = url_for('site.rdf_catalog', _external=True)
+    site_url = endpoint_for('site.home_redirect', 'api.site', _external=True)
+    catalog_url = url_for('api.site_rdf_catalog', _external=True)
     graph = Graph(namespace_manager=namespace_manager)
     catalog = graph.resource(URIRef(catalog_url))
 
@@ -39,6 +40,6 @@ def build_catalog(site, datasets, format=None):
         catalog.add(DCAT.dataset, rdf_dataset)
 
     if isinstance(datasets, Paginable):
-        paginate_catalog(catalog, graph, datasets, format, 'site.rdf_catalog_format')
+        paginate_catalog(catalog, graph, datasets, format, 'api.site_rdf_catalog_format')
 
     return catalog

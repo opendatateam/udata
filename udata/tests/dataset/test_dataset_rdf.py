@@ -47,7 +47,6 @@ else:
 
 @pytest.mark.frontend
 class DatasetToRdfTest:
-    modules = ['core.dataset', 'core.organization', 'core.user', 'core.site']
 
     def test_minimal(self):
         dataset = DatasetFactory.build()  # Does not have an URL
@@ -78,7 +77,7 @@ class DatasetToRdfTest:
         assert g.value(d.identifier, RDF.type) == DCAT.Dataset
 
         assert isinstance(d.identifier, URIRef)
-        uri = url_for('datasets.show_redirect',
+        uri = url_for('api.dataset',
                       dataset=dataset.id, _external=True)
         assert str(d.identifier) == uri
         assert d.value(DCT.identifier) == Literal(dataset.id)
@@ -126,7 +125,7 @@ class DatasetToRdfTest:
         license = LicenseFactory()
         resource = ResourceFactory(format='csv')
         dataset = DatasetFactory(resources=[resource], license=license)
-        permalink = url_for('datasets.resource',
+        permalink = url_for('api.resource_redirect',
                             id=resource.id,
                             _external=True)
 
@@ -772,20 +771,19 @@ class RdfToDatasetTest:
 
 @pytest.mark.frontend
 class DatasetRdfViewsTest:
-    modules = ['core.dataset', 'core.organization', 'core.user', 'core.site']
 
     def test_rdf_default_to_jsonld(self, client):
         dataset = DatasetFactory()
-        expected = url_for('datasets.rdf_format',
+        expected = url_for('api.dataset_rdf_format',
                            dataset=dataset.id, format='json')
-        response = client.get(url_for('datasets.rdf', dataset=dataset))
+        response = client.get(url_for('api.dataset_rdf', dataset=dataset))
         assert_redirects(response, expected)
 
     def test_rdf_perform_content_negociation(self, client):
         dataset = DatasetFactory()
-        expected = url_for('datasets.rdf_format',
+        expected = url_for('api.dataset_rdf_format',
                            dataset=dataset.id, format='xml')
-        url = url_for('datasets.rdf', dataset=dataset)
+        url = url_for('api.dataset_rdf', dataset=dataset)
         headers = {'accept': 'application/xml'}
         response = client.get(url, headers=headers)
         assert_redirects(response, expected)
@@ -793,11 +791,11 @@ class DatasetRdfViewsTest:
     def test_dataset_rdf_json_ld(self, client):
         dataset = DatasetFactory()
         for fmt in 'json', 'jsonld':
-            url = url_for('datasets.rdf_format', dataset=dataset, format=fmt)
-            response = client.get(url)
+            url = url_for('api.dataset_rdf_format', dataset=dataset, format=fmt)
+            response = client.get(url, headers={'Accept': 'application/ld+json'})
             assert200(response)
             assert response.content_type == 'application/ld+json'
-            context_url = url_for('site.jsonld_context', _external=True)
+            context_url = url_for('api.site_jsonld_context', _external=True)
             assert response.json['@context'] == context_url
 
     @pytest.mark.parametrize('fmt,mime', [
@@ -812,7 +810,7 @@ class DatasetRdfViewsTest:
     ])
     def test_dataset_rdf_formats(self, client, fmt, mime):
         dataset = DatasetFactory()
-        url = url_for('datasets.rdf_format', dataset=dataset, format=fmt)
-        response = client.get(url)
+        url = url_for('api.dataset_rdf_format', dataset=dataset, format=fmt)
+        response = client.get(url, headers={'Accept': mime})
         assert200(response)
         assert response.content_type == mime

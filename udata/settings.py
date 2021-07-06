@@ -132,7 +132,7 @@ class Defaults(object):
     SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
 
     PLUGINS = []
-    THEME = 'default'
+    THEME = None
 
     STATIC_DIRS = []
 
@@ -477,7 +477,7 @@ class Testing(object):
     TEST_WITH_PLUGINS = False
     PLUGINS = []
     TEST_WITH_THEME = False
-    THEME = 'default'
+    THEME = 'testing'
     CACHE_TYPE = 'null'
     CACHE_NO_NULL_WARNING = True
     DEBUG_TOOLBAR = False

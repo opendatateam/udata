@@ -5,6 +5,7 @@ from werkzeug.local import LocalProxy
 from werkzeug import cached_property
 
 from udata.app import cache
+from udata.uris import endpoint_for
 from udata.i18n import _, L_, get_locale, language
 from udata.models import db
 from udata.core.storages import logos
@@ -205,11 +206,11 @@ class GeoZone(db.Document):
 
     @property
     def url(self):
-        return url_for('territories.territory', territory=self)
+        return endpoint_for('territories.territory', territory=self)
 
     @property
     def external_url(self):
-        return url_for('territories.territory', territory=self, _external=True)
+        return endpoint_for('territories.territory', territory=self, _external=True)
 
     @cached_property
     def wikipedia_url(self):

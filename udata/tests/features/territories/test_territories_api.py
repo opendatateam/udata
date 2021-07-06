@@ -2,14 +2,14 @@ from flask import url_for
 
 from udata.core.spatial.factories import GeoZoneFactory
 from udata.tests.api import APITestCase
-from udata.tests.features.territories.test_territories_process import (
-    TerritoriesSettings, create_geozones_fixtures,
-    create_old_new_regions_fixtures
+from udata.tests.features.territories import (
+    create_geozones_fixtures, create_old_new_regions_fixtures,
+    TerritoriesSettings
 )
 
 
 class TerritoriesAPITest(APITestCase):
-    modules = ['features.territories']
+    modules = []
     settings = TerritoriesSettings
 
     def setUp(self):

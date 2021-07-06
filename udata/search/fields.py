@@ -3,7 +3,6 @@ import re
 
 from datetime import date
 
-import bleach
 from bson.objectid import ObjectId
 from elasticsearch_dsl import Q, A
 from elasticsearch_dsl.faceted_search import (
@@ -12,7 +11,6 @@ from elasticsearch_dsl.faceted_search import (
     RangeFacet as DSLRangeFacet,
 )
 from flask_restplus import inputs
-from jinja2 import Markup
 from speaklater import is_lazy_string
 
 from udata.frontend import SafeMarkup

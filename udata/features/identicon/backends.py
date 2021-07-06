@@ -5,7 +5,7 @@ import pydenticon
 
 from flask import redirect, send_file, current_app
 
-from udata import theme, entrypoints
+from udata import entrypoints
 from udata.app import cache
 
 ADORABLE_AVATARS_URL = 'https://api.adorable.io/avatars/{size}/{identifier}.png'  # noqa
@@ -41,12 +41,11 @@ def get_config(key):
 
     Precedance order is:
         - application config (`udata.cfg`)
-        - theme config
         - default
     '''
     key = 'AVATAR_{0}'.format(key.upper())
     local_config = current_app.config.get(key)
-    return local_config or getattr(theme.current, key, DEFAULTS[key])
+    return local_config or DEFAULTS[key]
 
 
 def get_internal_config(key):

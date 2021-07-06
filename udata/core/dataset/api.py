@@ -21,7 +21,7 @@ import os
 import logging
 from datetime import datetime
 
-from flask import request, current_app, abort
+from flask import request, current_app, abort, redirect, url_for
 from flask_security import current_user
 
 from udata import search
@@ -32,6 +32,10 @@ from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.utils import get_by, multi_to_dict
+from udata.rdf import (
+    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    negociate_content, graph_response
+)
 
 from .api_fields import (
     community_resource_fields,
@@ -49,7 +53,7 @@ from .api_fields import (
 from udata.linkchecker.checker import check_resource
 from .models import (
     Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES,
-    CommunityResource, RESOURCE_TYPES, ResourceSchema
+    CommunityResource, RESOURCE_TYPES, ResourceSchema, get_resource
 )
 from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
@@ -59,6 +63,7 @@ from .search import DatasetSearch
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
+from .rdf import dataset_to_rdf
 
 log = logging.getLogger(__name__)
 
@@ -176,6 +181,33 @@ class DatasetFeaturedAPI(API):
         return dataset
 
 
+@ns.route('/<dataset:dataset>/rdf', endpoint='dataset_rdf', doc=common_doc)
+@api.response(404, 'Dataset not found')
+@api.response(410, 'Dataset has been deleted')
+class DatasetRdfAPI(API):
+    @api.doc('rdf_dataset')
+    def get(self, dataset):
+        format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for('api.dataset_rdf_format', dataset=dataset.id, format=format)
+        return redirect(url)
+
+
+@ns.route('/<dataset:dataset>/rdf.<format>', endpoint='dataset_rdf_format', doc=common_doc)
+@api.response(404, 'Dataset not found')
+@api.response(410, 'Dataset has been deleted')
+class DatasetRdfFormatAPI(API):
+    @api.doc('rdf_dataset')
+    def get(self, dataset, format):
+        if not DatasetEditPermission(dataset).can():
+            if dataset.private:
+                api.abort(404)
+            elif dataset.deleted:
+                api.abort(410)
+
+        resource = dataset_to_rdf(dataset)
+        return graph_response(resource, format)
+
+
 @ns.route('/badges/', endpoint='available_dataset_badges')
 class AvailableDatasetBadgesAPI(API):
     @api.doc('available_dataset_badges')
@@ -202,6 +234,17 @@ class DatasetBadgeAPI(API):
     def delete(self, dataset, badge_kind):
         '''Delete a badge for a given dataset'''
         return badges_api.remove(dataset, badge_kind)
+
+
+@ns.route('/r/<uuid:id>', endpoint='resource_redirect')
+class ResourceRedirectAPI(API):
+    @api.doc('create_resource', **common_doc)
+    def get(self, id):
+        '''
+        Redirect to the latest version of a resource given its identifier.
+        '''
+        resource = get_resource(id)
+        return redirect(resource.url.strip()) if resource else abort(404)
 
 
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')

@@ -7,7 +7,7 @@ import logging
 from datetime import date
 from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
-from flask import current_app, url_for
+from flask import current_app
 from rdflib import Graph, URIRef, Literal, BNode
 from rdflib.resource import Resource as RdfResource
 from rdflib.namespace import RDF
@@ -20,6 +20,7 @@ from udata.rdf import (
     namespace_manager, url_from_rdf
 )
 from udata.utils import get_by, safe_unicode
+from udata.uris import endpoint_for
 
 from .models import Dataset, Resource, Checksum, License
 
@@ -122,12 +123,12 @@ def resource_to_rdf(resource, dataset=None, graph=None):
     '''
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset and dataset.id:
-        id = URIRef(url_for('datasets.show_redirect', dataset=dataset.id,
+        id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset', dataset=dataset.id,
                             _external=True,
                             _anchor='resource-{0}'.format(resource.id)))
     else:
         id = BNode(resource.id)
-    permalink = url_for('datasets.resource', id=resource.id, _external=True)
+    permalink = endpoint_for('datasets.resource', 'api.resource_redirect', id=resource.id, _external=True)
     r = graph.resource(id)
     r.set(RDF.type, DCAT.Distribution)
     r.set(DCT.identifier, Literal(resource.id))
@@ -166,9 +167,8 @@ def dataset_to_rdf(dataset, graph=None):
     if 'uri' in dataset.extras:
         id = URIRef(dataset.extras['uri'])
     elif dataset.id:
-        id = URIRef(url_for('datasets.show_redirect',
-                            dataset=dataset.id,
-                            _external=True))
+        id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset', 
+                    dataset=dataset.id, _external=True))
     else:
         id = BNode()
     # Expose upstream identifier if present

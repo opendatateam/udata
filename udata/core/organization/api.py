@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import request
+from flask import request, url_for, redirect
 
 from udata import search
 from udata.api import api, API, errors
@@ -8,6 +8,9 @@ from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
 from udata.utils import multi_to_dict
+from udata.rdf import (
+    RDF_EXTENSIONS, negociate_content, graph_response
+)
 
 from .forms import (
     OrganizationForm, MembershipRequestForm, MembershipRefuseForm, MemberForm
@@ -16,6 +19,7 @@ from .models import Organization, MembershipRequest, Member, ORG_ROLES
 from .permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
+from .rdf import build_org_catalog
 from .tasks import notify_membership_request, notify_membership_response
 from .search import OrganizationSearch
 from .api_fields import (
@@ -114,6 +118,33 @@ class OrganizationAPI(API):
         org.deleted = datetime.now()
         org.save()
         return '', 204
+
+
+@ns.route('/<org:org>/catalog', endpoint='organization_rdf', doc=common_doc)
+@api.response(404, 'Organization not found')
+@api.response(410, 'Organization has been deleted')
+class OrganizationRdfAPI(API):
+    @api.doc('rdf_organization')
+    def get(self, org):
+        format = RDF_EXTENSIONS[negociate_content()]
+        url = url_for('api.organization_rdf_format', org=org.id, format=format)
+        return redirect(url)
+
+
+@ns.route('/<org:org>/catalog.<format>', endpoint='organization_rdf_format', doc=common_doc)
+@api.response(404, 'Organization not found')
+@api.response(410, 'Organization has been deleted')
+class OrganizationRdfFormatAPI(API):
+    @api.doc('rdf_organization')
+    def get(self, org, format):
+        if org.deleted:
+            api.abort(410)
+        params = multi_to_dict(request.args)
+        page = int(params.get('page', 1))
+        page_size = int(params.get('page_size', 100))
+        datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
+        catalog = build_org_catalog(org, datasets, format=format)
+        return graph_response(catalog, format)
 
 
 @ns.route('/badges/', endpoint='available_organization_badges')

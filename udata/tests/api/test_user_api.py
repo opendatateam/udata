@@ -10,7 +10,7 @@ from . import APITestCase
 
 
 class UserAPITest(APITestCase):
-    modules = ['core.user']
+    modules = []
 
     def test_follow_user(self):
         '''It should follow an user on POST'''

@@ -1,17 +1,19 @@
 import itertools
+import inspect
 import logging
 import urllib.parse
 
 from functools import wraps
+from importlib import import_module
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint, render_template
 )
 from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource
 from flask_cors import CORS
 
-from udata import tracking, theme
+from udata import tracking, entrypoints
 from udata.app import csrf
 from udata.i18n import I18nBlueprint, get_locale
 from udata.auth import (
@@ -197,6 +199,19 @@ def output_json(data, code, headers=None):
     return resp
 
 
+@api.representation('application/ld+json')
+@api.representation('application/rdf+xml')
+@api.representation('application/trig')
+@api.representation('application/x-turtle')
+@api.representation('application/n-triples')
+@api.representation('text/n3')
+def output_xml(data, code, headers=None):
+    '''Use Flask XML to serialize'''
+    resp = make_response(data, code)
+    resp.headers.extend(headers or {})
+    return resp
+
+
 @apiv1.before_request
 def set_api_language():
     if 'lang' in request.args:
@@ -277,7 +292,7 @@ def default_api():
 
 @apidoc.route('/apidoc/')
 def apidoc_index():
-    return theme.render('apidoc.html')
+    return render_template('apidoc.html')
 
 
 class API(Resource):  # Avoid name collision as resource is a core model
@@ -319,10 +334,12 @@ def init_app(app):
     import udata.core.post.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa
-    import udata.features.oembed.api  # noqa
     import udata.features.identicon.api  # noqa
     import udata.features.territories.api  # noqa
     import udata.harvest.api  # noqa
+
+    for module in entrypoints.get_enabled('udata.apis', app).values():
+        api_module = module if inspect.ismodule(module) else import_module(module)
 
     # api.init_app(app)
     app.register_blueprint(apidoc)

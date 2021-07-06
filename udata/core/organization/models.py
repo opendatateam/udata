@@ -11,6 +11,7 @@ from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
 from udata.models import db, BadgeMixin, WithMetrics
 from udata.i18n import lazy_gettext as _
+from udata.uris import endpoint_for
 
 
 __all__ = (
@@ -165,7 +166,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             cls.on_update.send(document)
 
     def url_for(self, *args, **kwargs):
-        return url_for('organizations.show', org=self, *args, **kwargs)
+        return endpoint_for('organizations.show', 'api.organization', org=self, *args, **kwargs)
 
     display_url = property(url_for)
 
@@ -239,7 +240,7 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
             '@type': type_,
             '@id': str(self.id),
             'alternateName': self.slug,
-            'url': url_for('organizations.show', org=self, _external=True),
+            'url': endpoint_for('organizations.show', 'api.organization', org=self, _external=True),
             'name': self.name,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.last_modified.isoformat()

@@ -55,7 +55,7 @@ reuse_fields = api.model('Reuse', {
         description='The reuse API URI', readonly=True),
     'page': fields.UrlFor(
         'reuses.show', lambda o: {'reuse': o},
-        description='The reuse page URL', readonly=True),
+        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
 }, mask='*,datasets{title,uri,page}')
 
 reuse_page_fields = api.model('ReusePage', fields.pager(reuse_fields))
@@ -68,7 +68,7 @@ reuse_suggestion_fields = api.model('ReuseSuggestion', {
     'image_url': fields.String(description='The reuse thumbnail URL'),
     'page': fields.UrlFor(
         'reuses.show_redirect', lambda o: {'reuse': o['slug']},
-        description='The reuse page URL', readonly=True),
+        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
     'score': fields.Float(
         description='The internal match score', readonly=True),
 })
@@ -85,7 +85,7 @@ reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
         description='The reuse API URI', readonly=True),
     'page': fields.UrlFor(
         'reuses.show', lambda o: {'reuse': o},
-        description='The reuse page URL', readonly=True),
+        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse'),
 })
 
 reuse_type_fields = api.model('ReuseType', {

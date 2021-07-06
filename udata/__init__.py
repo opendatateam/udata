@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 '''
-uData
+udata
 '''
 
-__version__ = '2.7.2.dev'
+__version__ = '3.0.0.dev'
 __description__ = 'Open data portal'

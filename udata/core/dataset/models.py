@@ -18,6 +18,7 @@ from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url
+from udata.uris import endpoint_for
 
 from .preview import get_preview_url
 from .exceptions import (
@@ -314,7 +315,7 @@ class ResourceMixin(object):
 
         If this resource is updated and `url` changes, this property won't.
         '''
-        return url_for('datasets.resource', id=self.id, _external=True)
+        return endpoint_for('datasets.resource', 'api.resource_redirect', id=self.id, _external=True)
 
     @cached_property
     def json_ld(self):
@@ -479,7 +480,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
     def url_for(self, *args, **kwargs):
-        return url_for('datasets.show', dataset=self, *args, **kwargs)
+        return endpoint_for('datasets.show', 'api.dataset', dataset=self, *args, **kwargs)
 
     display_url = property(url_for)
 
@@ -691,7 +692,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             'alternateName': self.slug,
             'dateCreated': self.created_at.isoformat(),
             'dateModified': self.last_modified.isoformat(),
-            'url': url_for('datasets.show', dataset=self, _external=True),
+            'url': endpoint_for('datasets.show', 'api.dataset', dataset=self, _external=True),
             'name': self.title,
             'keywords': ','.join(self.tags),
             'distribution': [resource.json_ld for resource in self.resources],

@@ -35,7 +35,7 @@ def get_enabled(name, app):
     and enabled for the given app.
     '''
     plugins = app.config['PLUGINS']
-    return dict(_ep_to_kv(e) for e in iter_all(name) if e.name in plugins)
+    return dict(_ep_to_kv(e) for e in iter_all(name) if e.name in plugins or e.name.startswith(tuple(plugins)))
 
 
 def get_plugin_module(name, app, plugin):

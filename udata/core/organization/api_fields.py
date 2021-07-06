@@ -17,12 +17,15 @@ org_ref_fields = api.inherit('OrganizationReference', base_reference, {
         required=True),
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
-        description='The organization web page URL', readonly=True),
+        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization'),
     'logo': fields.ImageField(original=True,
         description='The organization logo URL'),
     'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
         description='The organization logo thumbnail URL. This is the square '
         '({0}x{0}) and cropped version.'.format(BIGGEST_LOGO_SIZE)),
+    'badges': fields.List(fields.Nested(badge_fields),
+        description='The organization badges',
+        readonly=True),
 })
 
 
@@ -73,7 +76,7 @@ org_fields = api.model('Organization', {
         description='The organization API URI', readonly=True),
     'page': fields.UrlFor(
         'organizations.show', lambda o: {'org': o},
-        description='The organization page URL', readonly=True),
+        description='The organization page URL', readonly=True, fallback_endpoint='api.organization'),
     'logo': fields.ImageField(original=True,
         description='The organization logo URL'),
     'logo_thumbnail': fields.ImageField(attribute='logo', size=BIGGEST_LOGO_SIZE,
@@ -100,7 +103,7 @@ org_suggestion_fields = api.model('OrganizationSuggestion', {
         description='The organization logo URL', readonly=True),
     'page': fields.UrlFor(
         'organizations.show_redirect', lambda o: {'org': o['slug']},
-        description='The organization web page URL', readonly=True),
+        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization'),
     'score': fields.Float(
         description='The internal match score', readonly=True),
 })

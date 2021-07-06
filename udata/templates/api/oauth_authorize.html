@@ -1,15 +1,18 @@
-{% extends theme('layouts/center-panel.html') %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
 
-{% set meta = {
-    'title': _('External application authorization'),
-} %}
-
-
-{% block panel_content %}
-<div class="panel-body oauth-authorize">
+  <body>
+    <section id="app">
+      <div class="container">
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-body oauth-authorize">
     <div class="row">
         <div class="col-xs-12">
-            <img src="{{ grant.client.image(100) }}" class="pull-left app-logo" width="100" height="100" alt="">
             <p class="lead prompt">
             {{ _(
                 '%(app)s want to access your %(site)s account.',
@@ -59,4 +62,10 @@
             class="btn btn-danger btn-lg" />
     </form>
 </div>
-{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+    </section>
+  </body>
+</html>

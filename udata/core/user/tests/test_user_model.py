@@ -12,7 +12,7 @@ pytestmark = pytest.mark.usefixtures('clean_db')
 
 @pytest.mark.frontend
 class UserModelTest:
-    modules = ['core.user']  # Required for mails
+    modules = []  # Required for mails
 
     def test_mark_as_deleted(self):
         user = UserFactory()
