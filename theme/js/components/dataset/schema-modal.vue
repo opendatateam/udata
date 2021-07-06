@@ -1,13 +1,11 @@
 <template>
   <vue-final-modal class="modal-wrapper">
-    <!-- FIXME: style in css -->
-    <div class="modal-body" style="color: #000000">
+    <div class="modal-body markdown">
+      <h2>Schéma associé</h2>
       <p>
         <span>Cette ressource est associée au schéma <b>{{ resource_schema.name }}</b></span>
-        <div v-if="resource_schema.version">
-          <span>, version {{ resource_schema.version }}, </span>
-        </div>
-       <span>ce qui signifie que le producteur a déclaré qu'elle en respectait la spécification.</span>
+        <span v-if="resource_schema.version">, version {{ resource_schema.version }},</span>
+       <span> ce qui signifie que le producteur a déclaré qu'elle en respectait la spécification.</span>
       </p>
 
       <h3>Documentation</h3>
@@ -20,7 +18,7 @@
           :href="documentation_url"
           rel="noopener noreferrer"
           target="_blank"
-          class="btn btn-info"
+          class="btn btn-sm btn-primary"
         >
           <span class="fa fa-book"></span>
           Lire la documentation
@@ -29,11 +27,9 @@
 
       <div v-if="authorize_validation">
         <h3>Validation</h3>
-        <div class="alert alert-info">
-          <p>
-            La validation d'une ressource par rapport à un schéma consiste à vérifier que la ressource est bien conforme au schéma qu'elle est censée respecter. En cas d'erreurs, un rapport de validation indique les erreurs trouvées : colonnes mal nommées, valeurs non conformes etc.
-          </p>
-        </div>
+        <blockquote>
+          La validation d'une ressource par rapport à un schéma consiste à vérifier que la ressource est bien conforme au schéma qu'elle est censée respecter. En cas d'erreurs, un rapport de validation indique les erreurs trouvées : colonnes mal nommées, valeurs non conformes etc.
+        </blockquote>
 
         <p>
           data.gouv.fr met à votre disposition un outil pour valider vos fichiers par rapport à un schéma et corriger les éventuelles erreurs.
@@ -44,13 +40,13 @@
             :href="validation_url"
             rel="noopener noreferrer"
             target="_blank"
-            class="btn btn-success">
+            class="btn btn-sm btn-primary">
             <span class="fa fa-check"></span>
             Valider la ressource
           </a>
         </div>
       </div>
-      
+
       <h3>Autres ressources</h3>
       <p>
         Il est possible de spécifier qu'une ressource respecte un schéma depuis l'espace d'administration en tant que producteur. Plusieurs ressources respectant ce schéma sont disponibles sur la plateforme.
@@ -61,8 +57,7 @@
           :href="datasetSchemaUrl"
           rel="noopener noreferrer"
           target="_blank"
-          class="btn btn-info"
-        >
+          class="btn btn-sm btn-primary">
           <span class="fa fa-file"></span>
           Voir les jeux de données associés à ce schéma
         </a>
@@ -85,7 +80,6 @@
 <script>
 import config from "../../config";
 
-
 export default {
   name: "Schema",
   props: {
@@ -102,3 +96,14 @@ export default {
   },
 };
 </script>
+
+<style lang="less" scoped>
+  .modal-body {
+    color: #000000;
+    padding: 20px;
+    margin-bottom: 45px;
+  }
+  hr {
+    margin-top: 25px;
+  }
+</style>
