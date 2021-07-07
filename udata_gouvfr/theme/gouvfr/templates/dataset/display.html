@@ -344,23 +344,12 @@
             {% include theme('dataset/resource/card.html') %}
             {% endwith %}
             {% endfor %}
-        </div>
-        <div class="row">
-            <div class="col-sm-9">
-                <div class="resources-list">
-                    {% for resource in dataset.community_resources %}
-                    {% with dark = True %}
-                    {% include theme('dataset/resource/card.html') %}
-                    {% endwith %}
-                    {% endfor %}
-                    {% if not read_only_mode %}
-                    <a class="btn-action my-lg"
-                        href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                        {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
+            {% if not read_only_mode %}
+            <a class="btn-action my-lg"
+                href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
+            </a>
+            {% endif %}
         </div>
 
         {% block reuses_section %}
