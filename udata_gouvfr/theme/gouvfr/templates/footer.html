@@ -106,9 +106,18 @@
                 </ul>
                 <div class="col-2 col-lg-12 self-end text-align-right">
                     <div class="btn-secondary px-lg btn-secondary-grey-400 dropdown">
-                        <select id="lang-picker" aria-label="{{ _('Language selector') }}">
-                            <option selected>Français</option>
-                            <option>English</option>
+                        <select id="lang-picker" aria-label="{{ _('Language selector') }}" onchange="location = location.href.replace(new RegExp('\/\\w{2}\/'), '/' + this.value + '/', regex=true)">
+                            {% for code, name in config['LANGUAGES'].items() %}
+                            {% if g.lang_code == code %}
+                            <option value={{code}} selected>
+                                    {{name}} 
+                            </option>
+                            {% else %}
+                            <option value={{code}}>
+                                    {{name}} 
+                            </option>
+                            {% endif %}
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
