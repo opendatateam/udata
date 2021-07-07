@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- New migration to update community resources schema from string to dict [#2629](https://github.com/opendatateam/udata/pull/2629)
 
 ## 3.0.0 (2021-07-07)
 
