@@ -264,7 +264,7 @@ export default {
             q: this.queryString,
             ...this.facets,
             page_size: this.page_size,
-            page: this.page,
+            page: this.current_page,
           },
         })
         .then((res) => res.data)
