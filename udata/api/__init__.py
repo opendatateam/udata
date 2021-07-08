@@ -15,7 +15,7 @@ from flask_cors import CORS
 
 from udata import tracking, entrypoints
 from udata.app import csrf
-from udata.i18n import I18nBlueprint, get_locale
+from udata.i18n import get_locale
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
@@ -29,7 +29,6 @@ from .signals import on_api_call
 log = logging.getLogger(__name__)
 
 apiv1 = Blueprint('api', __name__, url_prefix='/api/1')
-apidoc = I18nBlueprint('apidoc', __name__)
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
@@ -283,18 +282,6 @@ def handle_unauthorized_file_type(error):
     return {'message': msg}, 400
 
 
-@apidoc.route('/api/')
-@apidoc.route('/api/1/')
-@api.documentation
-def default_api():
-    return redirect(url_for('apidoc.apidoc_index'))
-
-
-@apidoc.route('/apidoc/')
-def apidoc_index():
-    return render_template('apidoc.html')
-
-
 class API(Resource):  # Avoid name collision as resource is a core model
     pass
 
@@ -342,7 +329,6 @@ def init_app(app):
         api_module = module if inspect.ismodule(module) else import_module(module)
 
     # api.init_app(app)
-    app.register_blueprint(apidoc)
     app.register_blueprint(apiv1)
 
     oauth2.init_app(app)
