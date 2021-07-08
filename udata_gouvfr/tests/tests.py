@@ -50,22 +50,6 @@ class GouvFrThemeTest:
         response = client.get(url_for('site.home'))
         assert200(response)
 
-    def test_render_search(self, autoindex, client):
-        '''It should render the search page'''
-        with autoindex:
-            for i in range(3):
-                org = OrganizationFactory()
-                DatasetFactory(organization=org)
-                ReuseFactory(organization=org)
-
-        response = client.get(url_for('search.index'))
-        assert200(response)
-
-    def test_render_search_no_data(self, autoindex, client):
-        '''It should render the search page without data'''
-        response = client.get(url_for('search.index'))
-        assert200(response)
-
     def test_render_metrics(self, client):
         '''It should render the dashboard page'''
         for i in range(3):

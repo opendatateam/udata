@@ -1,6 +1,5 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
-{% import theme('macros/search.html') as s %}
 
 {% set toolbar_class='search-toolbar' %}
 
@@ -20,24 +19,8 @@
             start=organizations.page_start,
             end=organizations.page_end,
             total=organizations.total) }}</small>
-    {% include theme('organization/search-labels.html') %}
 </li>
 {% endblock %}
-
-{# // 'site.organizations_csv', url=url, #}
-{# {% block toolbar %}
-{{ s.breadcrum_toolbar(organizations, url=url,
-    exports=(
-        (_('Organizations'), 'site.organizations_csv', 'csv'),
-    ),
-    name=(_('Name'), 'asc'),
-    created=(_('Creation date'), 'desc'),
-    last_modified=(_('Last modification date'), 'desc'),
-    datasets=(_('Datasets'), 'desc'),
-    reuses=(_('Reuses'), 'desc'),
-    followers=(_('Followers'), 'desc')
-) }}
-{% endblock %} #}
 
 {% block main_content %}
 <div class="container">
@@ -55,7 +38,4 @@
     {{ paginator(organizations) }}
 </div>
 
-{# <aside class="col-md-4 col-lg-3">
-        {% include theme('organization/search-panel.html') %}
-    </aside> #}
 {% endblock %}

@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Removed useless templates, views and tests after v3 [#557](https://github.com/etalab/udata-gouvfr/pull/557)
 
 ## 3.0.0 (2021-07-07)
 
