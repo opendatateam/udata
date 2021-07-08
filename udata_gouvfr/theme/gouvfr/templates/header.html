@@ -28,7 +28,7 @@
                     </a>
                 </div>
                 <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start">
-                    <a href="/search" title="{{ _('Search') }}" class="mr-md"
+                    <a href="/datasets" title="{{ _('Search') }}" class="mr-md"
                         @click.capture.prevent="$refs.suggest.startSearch()">
                         {% include theme('svg/search.svg') %}
                     </a>
@@ -84,7 +84,7 @@
                     {% endfor %}
                 </nav>
                 <div class="col-3 hidden-xl search-box">
-                    <form action="/search" class="w-100 row-inline justify-between"
+                    <form action="/datasets" class="w-100 row-inline justify-between"
                         @focus.capture.prevent="$refs.suggest.startSearch()" tabindex="0">
                         <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search') }}" />
                         <button type="submit" aria-label="{{ _('Search') }}">
