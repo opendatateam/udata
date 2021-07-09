@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove suggest on mobile [#590](https://github.com/etalab/udata-gouvfr/pull/590)
 
 ## 3.0.1 (2021-07-09)
 
