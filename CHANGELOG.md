@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.0.1 (2021-07-09)
 
 - Remove apidoc blueprint, moved to udata-gouvfr [#2628](https://github.com/opendatateam/udata/pull/2628)
