@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 3.0.1 (2021-07-09)
 
 - Remove apidoc blueprint, moved to udata-gouvfr [#2628](https://github.com/opendatateam/udata/pull/2628)
 - New migration to update community resources schema from string to dict [#2629](https://github.com/opendatateam/udata/pull/2629)
