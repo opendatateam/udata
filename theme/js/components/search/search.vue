@@ -228,6 +228,7 @@ export default {
   methods: {
     handleSearchChange(input) {
       this.queryString = input;
+      this.current_page = 1;
       this.search();
     },
     //Called on every facet selector change, updates the `facets.xxx` object then searches with new values
@@ -243,6 +244,7 @@ export default {
           this.facets[facet] = values;
         }
 
+        this.current_page = 1;
         this.search();
       };
     },
@@ -281,6 +283,7 @@ export default {
     resetFilters() {
       this.queryString = "";
       this.facets = {};
+      this.current_page = 1;
       this.search();
     },
   },

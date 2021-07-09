@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix datasets search pagination reset [#588](https://github.com/etalab/udata-gouvfr/pull/588)
 - Replace link to /search route by /datasets [#587](https://github.com/etalab/udata-gouvfr/pull/587)
 - Removed useless templates, views and tests after v3 [#557](https://github.com/etalab/udata-gouvfr/pull/557)
 - Fix datasets search pagination [#585](https://github.com/etalab/udata-gouvfr/pull/585)
