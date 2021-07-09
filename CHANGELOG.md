@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 3.0.1 (2021-07-09)
 
 - Fix datasets search pagination reset [#588](https://github.com/etalab/udata-gouvfr/pull/588)
 - Replace link to /search route by /datasets [#587](https://github.com/etalab/udata-gouvfr/pull/587)
