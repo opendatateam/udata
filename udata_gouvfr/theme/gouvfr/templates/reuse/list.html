@@ -52,7 +52,7 @@
                 class="btn-tab tab {% if not reuses.query._filters.type %}active{% endif %}">{{ _('All') }}</a>
             {% for tab_id, label in reuses_tabs %}
             <a href="{{ reuses.query.to_url(url, replace=True, **{'type': tab_id}) }}"
-                class="btn-tab tab {% if reuses.query._filters and reuses.query._filters.type.type == tab_id %}active{% endif %}">{{ label }}</a>
+                class="btn-tab tab {% if reuses.query._filters and reuses.query._filters.type and reuses.query._filters.type.type == tab_id %}active{% endif %}">{{ label }}</a>
             {% endfor %}
         </ul>
     </div>

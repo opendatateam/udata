@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix reuses filters issue [#592](https://github.com/etalab/udata-gouvfr/pull/592)
 - Remove suggest on mobile [#590](https://github.com/etalab/udata-gouvfr/pull/590)
 
 ## 3.0.1 (2021-07-09)
