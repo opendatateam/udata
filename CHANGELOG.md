@@ -4,6 +4,7 @@
 
 - Fix reuses filters issue [#592](https://github.com/etalab/udata-gouvfr/pull/592)
 - Remove suggest on mobile [#590](https://github.com/etalab/udata-gouvfr/pull/590)
+- Added homepage "venti" button for the new inventory [#591](https://github.com/etalab/udata-gouvfr/pull/591)
 
 ## 3.0.1 (2021-07-09)
 
