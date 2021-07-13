@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix remote resource upload [#2632](https://github.com/opendatateam/udata/pull/2632)
 
 ## 3.0.1 (2021-07-09)
 
