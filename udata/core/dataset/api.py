@@ -238,7 +238,7 @@ class DatasetBadgeAPI(API):
 
 @ns.route('/r/<uuid:id>', endpoint='resource_redirect')
 class ResourceRedirectAPI(API):
-    @api.doc('create_resource', **common_doc)
+    @api.doc('redirect_resource', **common_doc)
     def get(self, id):
         '''
         Redirect to the latest version of a resource given its identifier.
