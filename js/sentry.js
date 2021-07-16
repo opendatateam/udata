@@ -8,10 +8,13 @@ if (config.sentry) {
         Vue: Vue,
         dsn: config.sentry.dsn,
         integrations: [new Integrations.BrowserTracing()],
+        release: config.sentry.release,
         ignoreErrors: [
             'AuthenticationRequired',  // Uncaught but managed
         ],
     })
+
+    Sentry.setTags(config.sentry.tags)
 }
 
 export default Sentry;
