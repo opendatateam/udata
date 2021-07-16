@@ -49,7 +49,7 @@ def init_app(app):
             log.error('sentry-sdk is required to use Sentry')
             return
 
-        sentry_public_dsn = public_dsn(app.config['SENTRY_DSN'])
+        app.config['SENTRY_PUBLIC_DSN'] = public_dsn(app.config['SENTRY_DSN'])
 
         # Do not send HTTPExceptions
         exceptions = set(app.config['SENTRY_IGNORE_EXCEPTIONS'])
@@ -57,7 +57,7 @@ def init_app(app):
             exceptions.add(exception)
 
         sentry_sdk.init(
-            dsn=sentry_public_dsn,
+            dsn=app.config['SENTRY_PUBLIC_DSN'],
             integrations=[FlaskIntegration(), CeleryIntegration()],
             ignore_errors=list(exceptions)
         )
