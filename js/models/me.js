@@ -1,5 +1,5 @@
 import User from 'models/user';
-import Raven from 'raven';
+import Sentry from 'sentry';
 import config from 'config';
 
 class Me extends User {
@@ -16,7 +16,7 @@ class Me extends User {
 
     on_user_fetched(response) {
         if (config.sentry) {
-            Raven.setUserContext({
+            Sentry.setUser({
                 id: response.obj.id,
                 email: response.obj.email,
                 slug: response.obj.slug,

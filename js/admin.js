@@ -4,7 +4,7 @@
 import 'less/admin.less';
 
 // Catch all errors
-import 'raven';
+import 'sentry';
 
 // ES6 environment
 import 'babel-polyfill';
