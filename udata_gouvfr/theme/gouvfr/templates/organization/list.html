@@ -23,19 +23,26 @@
 {% endblock %}
 
 {% block main_content %}
-<div class="container">
-    <h1>{{ _('Organizations') }}</h1>
-    <ul class="search-results">
+<section class="container">
+    <div class="pt-sm search-input">
+        <form method="GET" class="row-inline fs-lg">
+            <span class="icon active">{% include theme("svg/search.svg") %}</span>
+            <input type="text" name="q" value="{{organizations.query._query}}" aria-label="{{ _('Search...') }}"
+                placeholder="{{ _('Search...') }}" />
+        </form>
+    </div>
+    <div class="row-inline pt-xl justify-between align-items-center">
+        <h1 class="m-0 h2">{{ _('Organizations')}} <sup>{{organizations.total}}</sup></h1>
+    </div>
+    <ul class="search-results mt-lg">
         {% for organization in organizations %}
-        <li class="search-result organization-result">
-            <a href="{{ url_for('organizations.show', org=organization) }}" class="unstyled w-100"
-                title="{{ organization.name }}">
-                {% include theme('organization/search-result.html') %}
+        <li>
+            <a href="{{ url_for('organizations.show', org=organization) }}" title="{{ organization.title }}"
+                class="unstyled w-100">{% include theme('organization/search-result.html') %}
             </a>
         </li>
         {% endfor %}
     </ul>
     {{ paginator(organizations) }}
-</div>
-
+</section>
 {% endblock %}
