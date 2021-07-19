@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix sentry id event logging [#2364](https://github.com/opendatateam/udata/pull/2634)
 - Dirty hotfix on RDF api endpoints to prevent json dumping on formated response [#2631](https://github.com/opendatateam/udata/pull/2631)
 - Fix remote resource upload [#2632](https://github.com/opendatateam/udata/pull/2632)
 
