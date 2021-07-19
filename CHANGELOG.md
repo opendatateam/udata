@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix sentry id event logging [#2364](https://github.com/opendatateam/udata/pull/2634)
 - Fix remote resource upload [#2632](https://github.com/opendatateam/udata/pull/2632)
 
 ## 3.0.1 (2021-07-09)
