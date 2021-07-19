@@ -2,7 +2,6 @@
 
 ## Current (in progress)
 
-- Dirty hotfix on RDF api endpoints to prevent json dumping on formated response [#2631](https://github.com/opendatateam/udata/pull/2631)
 - Fix remote resource upload [#2632](https://github.com/opendatateam/udata/pull/2632)
 
 ## 3.0.1 (2021-07-09)

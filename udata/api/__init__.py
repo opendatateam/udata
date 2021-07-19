@@ -21,7 +21,6 @@ from udata.auth import (
 )
 from udata.core.user.models import User
 from udata.utils import safe_unicode
-from udata.rdf import RDF_MIME_TYPES
 
 from . import fields, oauth2
 from .signals import on_api_call
@@ -194,16 +193,7 @@ api.model_reference = api.model('ModelReference', {
 @api.representation('application/json')
 def output_json(data, code, headers=None):
     '''Use Flask JSON to serialize'''
-    # Warning:
-    # This is a dirty quick fix because of the impossibilty
-    # to enforce a representation for a particular endpoint
-    # with flask_restplus. The purpose was to avoid passing
-    # in json representation for RDF endpoints without forcing
-    # the client to specify the mimetype in Accept header.
-    if headers.get('Content-Type', None) in RDF_MIME_TYPES.values():
-        resp = make_response(data, code)
-    else:
-        resp = make_response(json.dumps(data), code)
+    resp = make_response(json.dumps(data), code)
     resp.headers.extend(headers or {})
     return resp
 
