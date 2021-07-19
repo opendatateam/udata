@@ -54,17 +54,16 @@ export default {
                 details: this._('Due to security reasons, the creation of new content is currently disabled.'),
             });
         }
-        // Displays an error identifier on uncaught error
-        document.addEventListener('ravenSuccess', (e) => {
+    },
+    methods: {
+        handleSentryEvents(event) {
             this.notifications.push({
                 type: 'error',
                 icon: 'exclamation-triangle',
                 title: this._('An error occured'),
-                details: this._('The error identifier is {id}', {id: e.data.event_id}),
+                details: this._('The error identifier is {id}', {id: event.data.event_id}),
             });
-        });
-    },
-    methods: {
+        },
         handleApiError(response) {
             const notif = {type: 'error', icon: 'exclamation-circle'};
             if (response.status === 403) {
