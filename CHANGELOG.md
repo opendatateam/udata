@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.0.2 (2021-07-19)
 
 - Fix sentry id event logging [#2364](https://github.com/opendatateam/udata/pull/2634)
