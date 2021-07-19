@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 3.0.2 (2021-07-19)
 
 - Add organization search [#593](https://github.com/etalab/udata-gouvfr/pull/593)
 - Fix reuses filters issue [#592](https://github.com/etalab/udata-gouvfr/pull/592)
