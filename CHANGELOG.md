@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove mail sending task on follow [#2635](https://github.com/opendatateam/udata/pull/2635)
 
 ## 3.0.2 (2021-07-19)
 
