@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix URL for dataset search params [#595](https://github.com/etalab/udata-gouvfr/pull/595)
 
 ## 3.0.2 (2021-07-19)
 

@@ -181,18 +181,26 @@ export default {
   created() {
     this.filterIcon = filterIcon;
 
-    //Update facets from URL on page load for deep linking
+    //Update search params from URL on page load for deep linking
     const url = new URL(window.location);
-    const searchParams = queryString.parse(url.search);
-
+    let searchParams = queryString.parse(url.search);
+    if (searchParams.q) {
+      this.queryString = searchParams.q;
+      delete searchParams.q;
+    }
+    if (searchParams.page) {
+      this.current_page = parseInt(searchParams.page);
+      delete searchParams.page;
+    }
+    // set all other search params as facets
     this.facets = searchParams;
     this.search();
   },
   watch: {
-    facets: {
+    paramUrl: {
       deep: true,
       handler(val) {
-        //Update URL to match current facets value for deep linking
+        //Update URL to match current search params value for deep linking
         let url = new URL(window.location);
         const searchParams = queryString.stringify(val, { skipNull: true });
         url.search = searchParams;
@@ -224,6 +232,17 @@ export default {
         (key) => this.facets[key]?.length > 0
       );
     },
+    paramUrl: function() {
+      let params = {};
+      for (key in this.facets) {
+        params[key] = this.facets[key];
+      }
+      if (this.current_page > 1)
+        params.page = this.current_page;
+      if (this.queryString)
+        params.q = this.queryString;
+      return params;
+    }
   },
   methods: {
     handleSearchChange(input) {
