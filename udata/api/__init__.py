@@ -239,14 +239,15 @@ def extract_name_from_path(path):
 
 @apiv1.after_request
 def collect_stats(response):
-    action_name = extract_name_from_path(request.full_path)
-    blacklist = current_app.config.get('TRACKING_BLACKLIST', [])
-    if (not current_app.config['TESTING'] and
-            request.endpoint not in blacklist):
-        extras = {
-            'action_name': urllib.parse.quote(action_name),
-        }
-        tracking.send_signal(on_api_call, request, current_user, **extras)
+    if request.endpoint != 'api.doc':
+        action_name = extract_name_from_path(request.full_path)
+        blacklist = current_app.config.get('TRACKING_BLACKLIST', [])
+        if (not current_app.config['TESTING'] and
+                request.endpoint not in blacklist):
+            extras = {
+                'action_name': urllib.parse.quote(action_name),
+            }
+            tracking.send_signal(on_api_call, request, current_user, **extras)
     return response
 
 
