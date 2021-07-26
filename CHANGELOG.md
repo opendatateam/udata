@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add new translations [#603](https://github.com/etalab/udata-gouvfr/pull/603)
 - Add vue sentry logging on gouvfr [#594](https://github.com/etalab/udata-gouvfr/pull/594)
 - Add all featured topics button on homepage [#597](https://github.com/etalab/udata-gouvfr/pull/597)
 - Resources descriptions are no longer truncated [#596](https://github.com/etalab/udata-gouvfr/pull/596)
