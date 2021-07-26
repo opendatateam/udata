@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add all featured topics button on homepage [#297](https://github.com/etalab/udata-gouvfr/pull/597)
 - Resources descriptions are no longer truncated [#596](https://github.com/etalab/udata-gouvfr/pull/596)
 - Fix URL for dataset search params [#595](https://github.com/etalab/udata-gouvfr/pull/595)
 
