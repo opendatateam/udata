@@ -18,7 +18,12 @@ import Modals from "./plugins/modals";
 import i18n from "./plugins/i18n";
 import filters from "./plugins/filters";
 
+import InitSentry from './sentry';
+
 const app = createApp({});
+
+// Configure as early as possible in the app's lifecycle
+InitSentry(app);
 
 app.use(Api);
 app.use(Auth);
