@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Remove mail sending task on follow [#2635](https://github.com/opendatateam/udata/pull/2635)
+- Fix root api endpoint error [#2636](https://github.com/opendatateam/udata/pull/2636)
 
 ## 3.0.2 (2021-07-19)
 
