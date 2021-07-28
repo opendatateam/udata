@@ -157,7 +157,7 @@ class TerritoryConverter(PathConverter):
         Note that the slug is not significative but cannot be omitted.
         """
         if '/' not in value:
-            return
+            return NotFound()
 
         level, code = value.split('/')[:2]  # Ignore optional slug
 
