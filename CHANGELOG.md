@@ -2,7 +2,12 @@
 
 ## Current (in progress)
 
-- Dirty hotfix on RDF api endpoints to prevent json dumping on formated response [#2631](https://github.com/opendatateam/udata/pull/2631)
+- Remove mail sending task on follow [#2635](https://github.com/opendatateam/udata/pull/2635)
+- Fix root api endpoint error [#2636](https://github.com/opendatateam/udata/pull/2636)
+
+## 3.0.2 (2021-07-19)
+
+- Fix sentry id event logging [#2364](https://github.com/opendatateam/udata/pull/2634)
 - Fix remote resource upload [#2632](https://github.com/opendatateam/udata/pull/2632)
 
 ## 3.0.1 (2021-07-09)
