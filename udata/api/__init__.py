@@ -227,6 +227,8 @@ def extract_name_from_path(path):
     """
     base_path, query_string = path.split('?')
     infos = base_path.strip('/').split('/')[2:]  # Removes api/version.
+    if base_path == '/api/1/':  # The API root endpoint redirects to swagger doc.
+        return safe_unicode('apidoc')
     if len(infos) > 1:  # This is an object.
         name = '{category} / {name}'.format(
             category=infos[0].title(),
