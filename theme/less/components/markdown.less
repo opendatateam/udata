@@ -159,6 +159,10 @@ Content on the site can be styled with Markdown. Ready made styles are provided 
 
     h1 {
         font-size: @font-size-hg * @markdown-font-size;
+
+        @media @query-md {
+            margin-bottom: @spacing-lg;
+        }
     }
 
     h2 {
