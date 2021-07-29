@@ -113,7 +113,7 @@
             <div>
                 <ul class="row">
                     {% for reuse in reuses %}
-                    <li class="col-3 col-lg-6 col-sm-12 text-align-center">
+                    <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
                         <a href="{{ url_for('reuses.show', reuse=reuse) }}"
                             title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
                         </a>
@@ -169,7 +169,8 @@
                         </li>
                         {% endif %}
                         <li class="my-md">
-                            <a href="{{ url_for('organizations.datasets_csv', org=org) }}" class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
+                            <a href="{{ url_for('organizations.datasets_csv', org=org) }}"
+                                class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
                         </li>
                     </ul>
                 </div>

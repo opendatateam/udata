@@ -25,7 +25,11 @@ Used by the suggest feature to display typeahead-style results when you type you
         <span v-html="arrow" />
       </a>
       <p class="text-grey-300 m-0">
-        {{ $t('Datasets are collections of data, i.e. structured information, easily readable by a machine.') }}
+        {{
+          $t(
+            "Datasets are collections of data, i.e. structured information, easily readable by a machine."
+          )
+        }}
       </p>
       <transition mode="out-in">
         <dataset-loader v-if="loading" />
@@ -36,7 +40,7 @@ Used by the suggest feature to display typeahead-style results when you type you
           :queryString="queryString"
           :link="datasetUrl"
         />
-        <div class="my-md cards-container" v-else>
+        <div class="my-md cards-container reuse-cards" v-else>
           <ul>
             <li v-for="dataset in results.datasets">
               <a :href="dataset.page" :title="dataset.title" class="unstyled">
@@ -62,7 +66,11 @@ Used by the suggest feature to display typeahead-style results when you type you
         <span v-html="arrow" />
       </a>
       <p class="text-grey-300 m-0">
-        {{ $t('Reuses refer to the use of data for an other purpose than the one they were produced for.') }}
+        {{
+          $t(
+            "Reuses refer to the use of data for an other purpose than the one they were produced for."
+          )
+        }}
       </p>
       <transition mode="out-in">
         <reuse-loader class="my-md" v-if="loading" />
@@ -74,7 +82,7 @@ Used by the suggest feature to display typeahead-style results when you type you
           :link="reuseUrl"
         />
         <div class="my-md cards-container" v-else>
-          <ul class="reuse-cards row">
+          <ul class="row">
             <li v-for="reuse in results.reuses" class="col text-align-center">
               <a :href="reuse.page" :title="reuse.title" class="unstyled">
                 <Reuse v-bind="reuse" />

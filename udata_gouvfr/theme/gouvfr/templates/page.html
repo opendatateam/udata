@@ -35,7 +35,7 @@
     <h2>{{ _('Reuses') }} <sup>{{ reuses|length }}</sup></h2>
     <ul class="row">
         {% for reuse in reuses %}
-        <li class="col-3 col-lg-6 col-sm-12 text-align-center">
+        <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
             <a href="{{ url_for('reuses.show', reuse=reuse) }}"
                 title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
             </a>
