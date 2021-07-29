@@ -38,6 +38,14 @@ app.component("suggest", Suggest);
 app.component("search", Search);
 app.component("follow-button", FollowButton);
 
-app.mount("#app");
+//We keep the div HTML from before trying to mount the VueJS App
+const previousHtml = document.querySelector("#app").innerHTML;
+
+try {
+  app.mount("#app");
+} catch (e) {
+  //If the mount wasn't successful, Vue will remove all HTML from the div. We'll put it back so you can use the website.
+  document.querySelector("#app").innerHTML = previousHtml;
+}
 
 console.log("JS is injected !");
