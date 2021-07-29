@@ -47,12 +47,13 @@ try {
   app.mount("#app");
 } catch (e) {
   //If the mount wasn't successful, Vue will remove all HTML from the div. We'll put it back so you can use the website.
+  document.querySelector("#app").innerHTML = previousHtml;
+
   console.log(
     "VueJS template compilation failed. Aborted the process and rolled back the HTML. See error(s) above and below (probably won't help you tho) :"
   );
-
   console.error(e);
-  document.querySelector("#app").innerHTML = previousHtml;
+  throw e;
 }
 
 console.log("JS is injected !");
