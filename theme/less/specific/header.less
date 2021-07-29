@@ -87,7 +87,7 @@
             right: 0;
             opacity: 0;
 
-            z-index: 30;
+            z-index: 210;
 
             padding: @spacing-md 0;
 
@@ -107,6 +107,8 @@
 }
 
 .header-nav {
+    position: relative;
+    z-index: 200; //Above the suggest thingy
     border-bottom: 1px solid @grey-200;
 
     @media @query-xl {
@@ -151,8 +153,20 @@
 }
 
 .site-header {
-    //Mobile header interactivity (burger menu 😋)
-    &.mobile-menu-open {
+    //Sticky on mobile
+    @media @query-xl {
+        position: sticky;
+        background: white;
+        z-index: 2;
+        top: 0;
+    }
+}
+
+//Mobile header interactivity (burger menu 😋)
+.mobile-menu-open {
+    overflow: hidden; //Prevent scroll when menu is open
+
+    .site-header {
         //Hide burger menu & search, show close button
         .mobile-menu {
             > a {
@@ -170,13 +184,5 @@
             transform: translateX(0);
             opacity: 1;
         }
-    }
-
-    //Sticky on mobile
-    @media @query-xl {
-        position: sticky;
-        background: white;
-        z-index: 2;
-        top: 0;
     }
 }

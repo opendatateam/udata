@@ -1,6 +1,6 @@
-<div class="bg-blue-350">
-    <div class="hagrid banner">
-        <div class="row align-items-center text-align-center-sm">
+<div class="bg-blue-350 banner">
+    <div class="hagrid">
+        <div class="inline-row align-items-center text-align-center-sm">
             <p class="text-white">
                 {{ _("Welcome to the new <i>beta</i> version of data.gouv.fr! <a href='{learn_more}'>Learn more</a>, go back to <a href='{legacy}'>the old version</a> or <a href='{feedback}'>send us some feedback</a>.").format(
                     learn_more='https://www.data.gouv.fr/fr/posts/nouvelle-vie-nouvelle-peau-pour-data-gouv-fr/' if g.lang_code == 'fr' else 'https://www.data.gouv.fr/{lang}/posts/en-data-gouv-fr-graphic-redesign/'.format(lang=g.lang_code),
@@ -28,16 +28,14 @@
                     </a>
                 </div>
                 <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start">
-                    <a href="/datasets" title="{{ _('Search') }}" class="mr-md">
-                        <!-- TODO: re-add suggest on mobile when fixed -->
-                        <!-- @click.capture.prevent="$refs.suggest.startSearch()" -->
+                    <a href="/datasets" title="{{ _('Search') }}" class="mr-md"
+                        @click.capture.prevent="$refs.suggest.startSearch()">
                         {% include theme('svg/search.svg') %}
                     </a>
-                    <a href="#" @click.capture.prevent="$refs.header.classList.add('mobile-menu-open')"
-                        title="{{ _('Open menu') }}">
+                    <a href="#" @click.capture.prevent="addBodyClass('mobile-menu-open')" title="{{ _('Open menu') }}">
                         {% include theme('svg/burger-menu.svg') %}
                     </a>
-                    <a href="#" @click.capture.prevent="$refs.header.classList.remove('mobile-menu-open')"
+                    <a href="#" @click.capture.prevent="removeBodyClass('mobile-menu-open')"
                         title="{{ _('Close menu') }}" class="mobile-menu-close hidden">
                         {{ _('Close') }}
                         {% include theme('svg/close.svg') %}
