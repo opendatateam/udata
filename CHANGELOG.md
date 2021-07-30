@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 3.0.3 (2021-07-30)
+
 - Remove mail sending task on follow [#2635](https://github.com/opendatateam/udata/pull/2635)
 - Fix root api endpoint error [#2636](https://github.com/opendatateam/udata/pull/2636)
 - Now returning notfound() http exception when router does not match any territory object instead of None [#2637](https://github.com/opendatateam/udata/pull/2637)
