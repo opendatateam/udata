@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.0.3 (2021-07-30)
 
 - Add new translations [#603](https://github.com/etalab/udata-gouvfr/pull/603)
