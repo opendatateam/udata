@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 3.0.3 (2021-07-30)
 
 - Add new translations [#603](https://github.com/etalab/udata-gouvfr/pull/603)
 - Add vue sentry logging on gouvfr [#594](https://github.com/etalab/udata-gouvfr/pull/594)
