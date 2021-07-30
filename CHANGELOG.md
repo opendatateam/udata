@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix numerous responsive issues and prevent VueJS from crashing the page on compilation error [#605](https://github.com/etalab/udata-gouvfr/pull/605)
 
 ## 3.0.3 (2021-07-30)
 
