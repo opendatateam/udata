@@ -56,9 +56,9 @@
             {% if expanded == 'false' %}style="height: 0px" {% endif %}
             aria-labelledby="resource-{{resource.id}}-header" id="resource-{{resource.id}}">
             {% if resource.description %}
-            <p class="resource-description">
-                {{ resource.description|mdstrip }}
-            </p>
+            <div class="resource-description">
+                {{ resource.description|markdown }}
+            </div>
             {% endif %}
             <dl class="description-list">
                 <div>

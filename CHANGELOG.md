@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Replace mdstrip filter with markdown in resources descriptions [#606](https://github.com/etalab/udata-gouvfr/pull/606)
 - Fix numerous responsive issues and prevent VueJS from crashing the page on compilation error [#605](https://github.com/etalab/udata-gouvfr/pull/605)
 
 ## 3.0.3 (2021-07-30)
