@@ -11,6 +11,12 @@
 
         .row {
             flex-wrap: nowrap;
+
+            //Prevent reuse cards from being too small
+            > div,
+            > li {
+                min-width: 250px;
+            }
         }
     }
 }

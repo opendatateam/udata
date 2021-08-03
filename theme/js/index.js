@@ -16,9 +16,10 @@ import Api from "./plugins/api";
 import Auth from "./plugins/auth";
 import Modals from "./plugins/modals";
 import i18n from "./plugins/i18n";
+import bodyClass from "./plugins/bodyClass";
 import filters from "./plugins/filters";
 
-import InitSentry from './sentry';
+import InitSentry from "./sentry";
 
 const app = createApp({});
 
@@ -30,6 +31,7 @@ app.use(Auth);
 app.use(VueFinalModal());
 app.use(Modals); //Has to be loaded after VueFinalModal
 app.use(i18n);
+app.use(bodyClass);
 app.use(filters);
 app.use(Toaster);
 
@@ -38,6 +40,20 @@ app.component("suggest", Suggest);
 app.component("search", Search);
 app.component("follow-button", FollowButton);
 
-app.mount("#app");
+//We keep the div HTML from before trying to mount the VueJS App
+const previousHtml = document.querySelector("#app").innerHTML;
+
+try {
+  app.mount("#app");
+} catch (e) {
+  //If the mount wasn't successful, Vue will remove all HTML from the div. We'll put it back so you can use the website.
+  document.querySelector("#app").innerHTML = previousHtml;
+
+  console.log(
+    "VueJS template compilation failed. Aborted the process and rolled back the HTML. See error(s) above and below (probably won't help you tho) :"
+  );
+  console.error(e);
+  throw e;
+}
 
 console.log("JS is injected !");

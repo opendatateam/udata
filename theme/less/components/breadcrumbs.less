@@ -20,6 +20,8 @@ Being lost on a website isn't fun for your users, thanks to `.breadcrumbs` you c
     margin: 0;
     font-size: @font-size-xs;
 
+    display: flex;
+
     li {
         position: relative;
         display: inline-block;
@@ -28,6 +30,8 @@ Being lost on a website isn't fun for your users, thanks to `.breadcrumbs` you c
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+
+        flex-shrink: 0;
 
         line-height: 1; //Corrects the vertical align of the text
 
@@ -43,6 +47,7 @@ Being lost on a website isn't fun for your users, thanks to `.breadcrumbs` you c
 
         &:last-child {
             font-weight: @font-weight-bold;
+            flex-shrink: 1;
         }
 
         &::before {

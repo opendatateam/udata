@@ -15,7 +15,7 @@
     <div class="hagrid">
         <div class="row">
             <div class="col-5 col-lg-12">
-                <h1 class="mt-0">{{ _('Open platform for French public data') }}</h1>
+                <h1 class="mt-0 mb-md-md">{{ _('Open platform for French public data') }}</h1>
                 <div class="mt-md mt-lg-sm">
                     <h4>{{ _('Featured topics') }}</h4>
                     <a href="{{ url_for('gouvfr.show_page', slug='donnees-coronavirus') }}"
@@ -47,8 +47,7 @@
                     {% include theme('post/search-result.html') %}
                 </a>
                 <div class="row justify-center">
-                    <a href="{{ url_for('posts.list') }}"
-                        class="btn-secondary btn-with-arrow">{{ _('All news') }}</a>
+                    <a href="{{ url_for('posts.list') }}" class="btn-secondary btn-with-arrow">{{ _('All news') }}</a>
                 </div>
                 {% endif %}
             </div>
@@ -68,12 +67,12 @@
 
 {# Metrics Section #}
 <section class="metrics-bar">
-    <div class="hagrid py-hg">
+    <div class="hagrid py-hg py-md-md">
         <div class="bar p-xl">
             <h3>{% include theme('svg/logotype.svg') %} {{ _('is') }}</h3>
-            <div class="row-inline justify-between mt-xl">
+            <div class="row-inline justify-between mt-xl mt-md-md">
                 {% for (label, metric) in metrics %}
-                <div class="filet {% if metric == 'reuses' %}filet-currentcolor text-green-300{% endif %}">
+                <div class="filet my-md-xxs {% if metric == 'reuses' %}filet-currentcolor text-green-300{% endif %}">
                     <div class="fs-hg f-bold text-grey-400">{{ current_site.metrics[metric] }}</div>
                     <span class="text-grey-400">{{ label }}</span>
                 </div>
@@ -132,7 +131,7 @@
 ) %}
 
 {# Reuse section #}
-<section class="reuse py-hg">
+<section class="reuse py-hg py-md-lg">
     <div class="hagrid">
         <div class="row justify-between">
             <div class="col-auto">
@@ -156,7 +155,7 @@
             <div class="row pt-xl pt-md-md">
                 {% for reuse in reuses %}
                 {% set features = ['preview'] %}
-                <div class="col-3 col-md-4 mb-md text-align-center">
+                <div class="col-3 col-md-7 mb-md text-align-center">
                     {% include theme('reuse/card.html') %}
                 </div>
                 {% endfor %}

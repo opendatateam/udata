@@ -62,7 +62,7 @@
         {{ _('Archived') }}
     </span>
     {% endif %}
-    <h1 class="fs-hg mb-0">{{ dataset.title }}
+    <h1 class="mb-0">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
     </h1>
     <div class="my-md">
@@ -82,7 +82,8 @@
                     date=dataset.created_at|dateformat(format='long'),
                     update=dataset.last_update|dateformat(format='long'),
                     author=dataset.owner.fullname
-                %}This dataset has been published on the initiative and under the responsibility of {{author}}<br />Published on {{date}} and updated on {{update}}{% endtrans %}
+                %}This dataset has been published on the initiative and under the responsibility of
+            {{author}}<br />Published on {{date}} and updated on {{update}}{% endtrans %}
         </div>
         {% endif %}
     </div>
@@ -364,7 +365,7 @@
         <div class="row mt-xl pt-md-md reuse-cards">
             {% for reuse in reuses %}
             {% set features = ['preview'] %}
-            <div class="col-3 col-md-4">
+            <div class="col-3 col-md-6">
                 {% include theme('reuse/card.html') %}
             </div>
             {% endfor %}

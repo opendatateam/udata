@@ -109,7 +109,7 @@
 //Suggest rest of the body animation
 #app {
     //Prepare elements for shifting
-    > *:not(.site-header) {
+    > *:not(.site-header):not(.banner) {
         will-change: transform filter opacity;
         transition: @suggest-transition;
         transition-property: transform, filter, opacity;
@@ -120,15 +120,15 @@
         height: 100vh;
         overflow: hidden;
 
-        > *:not(.site-header) {
+        > *:not(.site-header):not(.banner) {
             opacity: 0.3;
             filter: blur(2px);
             transform: translateX(-100%);
         }
 
-        //Header search box
-        .search-box {
-            display: none;
+        .site-header {
+            height: 100vh; //Allow scroll inside the suggest view but prevent rest of the body scroll
+            overflow: scroll;
         }
     }
 }
