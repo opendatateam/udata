@@ -163,8 +163,10 @@ class DiscussionsAPI(API):
         '''List all Discussions'''
         args = parser.parse_args()
         discussions = Discussion.objects
+        print(args)
         if args['for']:
-            discussions = discussions.generic_in(subject=args['for'])
+            discussions = discussions.in_ids('subject', args['for'])
+            print(discussions)
         if args['closed'] is False:
             discussions = discussions(closed=None)
         elif args['closed'] is True:

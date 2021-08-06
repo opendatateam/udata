@@ -4,15 +4,10 @@ from flask import url_for
 
 from udata.models import Dataset, Member
 from udata.core.discussions.models import Message, Discussion
-from udata.core.discussions.metrics import update_discussions_metric
 from udata.core.discussions.notifications import discussions_notifications
 from udata.core.discussions.signals import (
     on_new_discussion, on_new_discussion_comment,
     on_discussion_closed, on_discussion_deleted,
-)
-from udata.core.discussions.tasks import (
-    notify_new_discussion, notify_new_discussion_comment,
-    notify_discussion_closed
 )
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.organization.factories import OrganizationFactory

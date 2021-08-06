@@ -1,6 +1,8 @@
 import logging
 
+from typing import Iterable
 from bson import ObjectId, DBRef
+
 from flask_mongoengine import BaseQuerySet
 
 from udata.utils import Paginable
@@ -70,6 +72,12 @@ class UDataQuerySet(BaseQuerySet):
                 doc.save(write_concern=write_concern)
             return doc, True
 
+    def in_ids(self, attr: str, ids: Iterable[str]):
+        '''Filter by `attr` in list of `ids`'''
+        ids = [ObjectId(i) for i in ids]
+        q = {f'{attr}__in': ids}
+        return self.filter(**q)
+
     def generic_in(self, **kwargs):
         '''Bypass buggy GenericReferenceField querying issue'''
         query = {}
@@ -93,4 +101,5 @@ class UDataQuerySet(BaseQuerySet):
                 query['{0}._ref.$id'.format(key)] = ObjectId(value)
             else:
                 self.error('expect a list of string, ObjectId or DBRef')
+        print(query)
         return self(__raw__=query)
