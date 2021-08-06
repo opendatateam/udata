@@ -36,23 +36,23 @@ def render():
     count = Counter()
     total = Counter()
 
-    # organizations = Organization.objects(logo__exists=True)
-    # total['orgs'] = organizations.count()
-    # log.info('Processing {0} organizations logos'.format(total['orgs']))
-    # for org in organizations:
-    #     count['orgs'] += render_or_skip(org, 'logo')
+    organizations = Organization.objects(logo__exists=True)
+    total['orgs'] = organizations.count()
+    log.info('Processing {0} organizations logos'.format(total['orgs']))
+    for org in organizations:
+        count['orgs'] += render_or_skip(org, 'logo')
 
-    # users = User.objects(avatar__exists=True)
-    # total['users'] = users.count()
-    # log.info('Processing {0} user avatars'.format(total['users']))
-    # for user in users:
-    #     count['users'] += render_or_skip(user, 'avatar')
+    users = User.objects(avatar__exists=True)
+    total['users'] = users.count()
+    log.info('Processing {0} user avatars'.format(total['users']))
+    for user in users:
+        count['users'] += render_or_skip(user, 'avatar')
 
-    # posts = Post.objects(image__exists=True)
-    # total['posts'] = posts.count()
-    # log.info('Processing {0} post images'.format(total['posts']))
-    # for post in posts:
-    #     count['posts'] += render_or_skip(post, 'image')
+    posts = Post.objects(image__exists=True)
+    total['posts'] = posts.count()
+    log.info('Processing {0} post images'.format(total['posts']))
+    for post in posts:
+        count['posts'] += render_or_skip(post, 'image')
 
     reuses = Reuse.objects(image__exists=True)
     total['reuses'] = reuses.count()
@@ -61,6 +61,9 @@ def render():
         count['reuses'] += render_or_skip(reuse, 'image')
 
     log.info('''Summary:
+    Organization logos: {count[orgs]}/{total[orgs]}
+    User avatars: {count[users]}/{total[users]}
+    Post images: {count[posts]}/{total[posts]}
     Reuse images: {count[reuses]}/{total[reuses]}
     '''.format(count=count, total=total))
     success('Images rendered')
