@@ -126,6 +126,7 @@ class ReuseSearch(ModelSearchAdapter):
 
         and exclude ``_id``, ``_cls`` and ``owner`` fields.
         """
+        print('IN SERIALIZE')
         datasets = Dataset.objects(id__in=[r.id for r in reuse.datasets])
         datasets = list(datasets.only('id', 'title').no_dereference())
         organization = None
@@ -159,7 +160,7 @@ class ReuseSearch(ModelSearchAdapter):
                 'payload': {
                     'title': reuse.title,
                     'slug': reuse.slug,
-                    'image_url': reuse.image(40, external=True),
+                    'image_url': reuse.image(500, external=True),
                 },
             },
         }
