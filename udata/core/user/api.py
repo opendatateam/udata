@@ -301,8 +301,10 @@ class UserAPI(API):
                       'Use the "me" API instead.')
         if user.avatar.filename is not None:
             storage = storages.avatars
-            storage.delete(user.avatar.filename)
-            storage.delete(user.avatar.original)
+            if storage.exists(user.avatar.filename):
+                storage.delete(user.avatar.filename)
+            if storage.exists(user.avatar.original):
+                storage.delete(user.avatar.original)
             for key, value in user.avatar.thumbnails.items():
                 storage.delete(value)
         user.mark_as_deleted()
