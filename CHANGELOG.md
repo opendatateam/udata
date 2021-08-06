@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add larger reuse thumbnail image [#2638](https://github.com/opendatateam/udata/pull/2638)
 
 ## 3.0.3 (2021-07-30)
 

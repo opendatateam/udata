@@ -159,7 +159,7 @@ class ReuseSearch(ModelSearchAdapter):
                 'payload': {
                     'title': reuse.title,
                     'slug': reuse.slug,
-                    'image_url': reuse.image(40, external=True),
+                    'image_url': reuse.image(500, external=True),
                 },
             },
         }
