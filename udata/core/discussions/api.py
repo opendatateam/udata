@@ -1,4 +1,5 @@
 from datetime import datetime
+from bson import ObjectId
 
 from flask_security import current_user
 from flask_restplus.inputs import boolean
@@ -6,6 +7,7 @@ from flask_restplus.inputs import boolean
 from udata.auth import admin_permission
 from udata.api import api, API, fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.models import db
 
 from .forms import DiscussionCreateForm, DiscussionCommentForm
 from .models import Message, Discussion
@@ -162,11 +164,12 @@ class DiscussionsAPI(API):
     def get(self):
         '''List all Discussions'''
         args = parser.parse_args()
-        discussions = Discussion.objects
-        print(args)
-        if args['for']:
-            discussions = discussions.in_ids('subject', args['for'])
-            print(discussions)
+        # this builds an OR query based on `for` arg
+        query = None
+        for subject in args['for'] or []:
+            fragment = db.Q(subject=ObjectId(subject))
+            query = fragment if not query else query | fragment
+        discussions = Discussion.objects(query)
         if args['closed'] is False:
             discussions = discussions(closed=None)
         elif args['closed'] is True:
