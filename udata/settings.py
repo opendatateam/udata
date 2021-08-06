@@ -494,6 +494,7 @@ class Testing(object):
         'title^2',
         'description',
     )
+    FS_IMAGES_OPTIMIZE = True
 
 
 class Debug(Defaults):
