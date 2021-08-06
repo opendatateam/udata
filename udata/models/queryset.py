@@ -1,8 +1,5 @@
 import logging
 
-from typing import Iterable
-from bson import ObjectId, DBRef
-
 from flask_mongoengine import BaseQuerySet
 
 from udata.utils import Paginable
