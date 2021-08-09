@@ -128,3 +128,9 @@ def display_op(op):
     label = white(op['type'].title()) + ' '
     echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
+
+
+@grp.command()
+def check_integrity():
+    '''Check the integrity of the database from a business perspective'''
+    pass
