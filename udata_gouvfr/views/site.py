@@ -81,6 +81,7 @@ def activity_feed():
 @blueprint.route('/')
 def home():
     context = {
+        'spd_datasets': Dataset.objects.filter(badges__kind='spd'),
         'recent_datasets': Dataset.objects.visible(),
         'recent_reuses': Reuse.objects(featured=True).visible(),
         'last_post': Post.objects.published().first()

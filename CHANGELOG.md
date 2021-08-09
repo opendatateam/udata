@@ -5,6 +5,7 @@
 - Replace mdstrip filter with markdown in resources descriptions [#606](https://github.com/etalab/udata-gouvfr/pull/606)
 - Fix numerous responsive issues and prevent VueJS from crashing the page on compilation error [#605](https://github.com/etalab/udata-gouvfr/pull/605)
 - Replace old COVID-19 inventory button with the new one for santé [#608](https://github.com/etalab/udata-gouvfr/pull/608)
+- Add SPD datasets to home page [#609](https://github.com/etalab/udata-gouvfr/pull/609)
 
 ## 3.0.3 (2021-07-30)
 

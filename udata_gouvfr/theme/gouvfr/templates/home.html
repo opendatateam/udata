@@ -88,7 +88,7 @@
 {% set dataset_tabs = (
     ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
     ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
-    ('reference-datasets', _('Reference datasets'), spd, {}),
+    ('reference-datasets', _('Reference datasets'), spd_datasets, {}),
 ) %}
 
 <section class="datasets pb-hg pt-md bg-grey-50">
