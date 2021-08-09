@@ -55,6 +55,13 @@ $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
 
+Also, we're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-compile--pip-sync) with [a pre-commit hook](https://github.com/jazzband/pip-tools/#version-control-integration) to help us manage our requirements. **This is not mandatory unless you're actively contributing to the project.** `pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`. If you need to add or modify a dependency, do it in the `.in` files. The pre-commit hook will compile the `.pip` files and warn you.
+
+```shell
+$ pip install pip-tools pre-commit
+$ pre-commit install
+```
+
 Some dependencies have an optional compilation support for Cython
 resulting in better performances (mostly XML harvesting).
 To enable it, you need to install Cython before all other dependencies:

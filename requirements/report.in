@@ -1,0 +1,5 @@
+-r test.in
+
+flake8==3.7.8
+coverage==4.5.4
+pytest-cov==2.6.1

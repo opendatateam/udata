@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/jazzband/pip-tools
+    rev: 6.2.0
+    hooks:
+      - id: pip-compile
+        name: pip-compile install.in
+        args: [requirements/install.in, --output-file=requirements/install.pip]
+        files: ^requirements/install\.(in|pip)$
+      - id: pip-compile
+        name: pip-compile develop.in
+        args: [requirements/develop.in, --output-file=requirements/develop.pip]
+        files: ^requirements/develop\.(in|pip)$
+      - id: pip-compile
+        name: pip-compile doc.in
+        args: [requirements/doc.in, --output-file=requirements/doc.pip]
+        files: ^requirements/doc\.(in|pip)$
+      - id: pip-compile
+        name: pip-compile test.in
+        args: [requirements/test.in, --output-file=requirements/test.pip]
+        files: ^requirements/test\.(in|pip)$
+      - id: pip-compile
+        name: pip-compile report.in
+        args: [requirements/report.in, --output-file=requirements/report.pip]
+        files: ^requirements/report\.(in|pip)$
