@@ -6,6 +6,7 @@
 - Fix numerous responsive issues and prevent VueJS from crashing the page on compilation error [#605](https://github.com/etalab/udata-gouvfr/pull/605)
 - Replace old COVID-19 inventory button with the new one for santé [#608](https://github.com/etalab/udata-gouvfr/pull/608)
 - Add SPD datasets to home page [#609](https://github.com/etalab/udata-gouvfr/pull/609)
+- Remove duplicate Participate block on dataset page [#611](https://github.com/etalab/udata-gouvfr/pull/611)
 
 ## 3.0.3 (2021-07-30)
 
