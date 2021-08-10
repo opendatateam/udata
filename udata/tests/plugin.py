@@ -101,12 +101,16 @@ def get_settings(request):
     if marker:
         return marker.args[0]
     _settings = getattr(request.cls, 'settings', settings.Testing)
-    # apply the options marker from pytest_flask as soon as app is created
+    # apply the options(plugins) marker from pytest_flask as soon as app is created
     # https://github.com/pytest-dev/pytest-flask/blob/a62ea18cb0fe89e3f3911192ab9ea4f9b12f8a16/pytest_flask/plugin.py#L126
     # this lets us have default settings for plugins applied while testing
+    plugins = []
     for options in request.node.iter_markers('options'):
-        for key, value in options.kwargs.items():
-            setattr(_settings, key.upper(), value)
+        option = options.kwargs.get('plugins') or options.kwargs.get('PLUGINS')
+        if option:
+            plugins += option
+    if plugins:
+        setattr(_settings, 'PLUGINS', plugins)
     return _settings
 
 
