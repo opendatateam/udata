@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add larger reuse thumbnail image [#2638](https://github.com/opendatateam/udata/pull/2638)
+- Activate plugins before creating app when testing [#2643](https://github.com/opendatateam/udata/pull/2643)
 
 ## 3.0.3 (2021-07-30)
 
