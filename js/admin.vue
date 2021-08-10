@@ -12,6 +12,7 @@
 import config from 'config';
 import me from 'models/me';
 import site from 'models/site';
+import Sentry from 'sentry';
 
 import AppHeader from 'components/header.vue';
 import Sidebar from 'components/sidebar.vue';
@@ -55,13 +56,21 @@ export default {
             });
         }
     },
+    created() {
+        Sentry.configureScope((scope) => {
+            scope.addEventProcessor((event, hint) => {
+                this.handleSentryEvents(event);
+                return event;
+            })
+        })
+    },
     methods: {
         handleSentryEvents(event) {
             this.notifications.push({
                 type: 'error',
                 icon: 'exclamation-triangle',
                 title: this._('An error occured'),
-                details: this._('The error identifier is {id}', {id: event.data.event_id}),
+                details: this._('The error identifier is {id}', {id: event.event_id}),
             });
         },
         handleApiError(response) {

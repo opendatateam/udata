@@ -12,14 +12,6 @@ if (config.sentry) {
         ignoreErrors: [
             'AuthenticationRequired',  // Uncaught but managed
         ],
-        beforeSend(event, hint) {
-            // Check if it is an exception, and if so, show the report dialog
-            if (event.exception) {
-                this.$root.handleSentryEvents(event);
-            //   Sentry.showReportDialog({ eventId: event.event_id });
-            }
-            return event;
-        },
     })
 
     Sentry.setTags(config.sentry.tags)
