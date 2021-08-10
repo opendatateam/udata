@@ -106,9 +106,8 @@ def get_settings(request):
     # this lets us have default settings for plugins applied while testing
     plugins = []
     for options in request.node.iter_markers('options'):
-        option = options.kwargs.get('plugins') or options.kwargs.get('PLUGINS')
-        if option:
-            plugins += option
+        option = options.kwargs.get('plugins', []) or options.kwargs.get('PLUGINS', [])
+        plugins += option
     if plugins:
         setattr(_settings, 'PLUGINS', plugins)
     return _settings
