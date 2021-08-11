@@ -53,6 +53,7 @@ For non-JS users, the home search box is a standard input that will still work n
               :value="queryString"
               :onChange="onChange"
               :stop="stop"
+              :submitUrl="submitUrl"
             />
           </div>
           <div class="suggest-results">
@@ -97,6 +98,7 @@ export default {
       currentRequest: null,
       queryString: "",
       active: false,
+      submitUrl: config.values.datasetUrl,
     };
   },
   computed: {

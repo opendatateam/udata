@@ -8,14 +8,16 @@ category: Suggest
 
 It's an input that calls the passed `onChange` function on each change.
 You can also pass it a `value` prop that will populate the field.
+If the submitUrl prop is passed, it will redirect on Submit.
 -->
 
 <template>
   <section class="search-input">
-    <form action="" @submit.prevent="onSubmit" class="row-inline">
+    <form :action="submitUrl" @submit="onSubmit" class="row-inline">
       <span class="icon" :class="{ active: queryString }" v-html="icon" />
       <input
         type="text"
+        name="q"
         :value="queryString"
         @input="_onChange"
         @keydown.delete="onDelete"
@@ -57,6 +59,7 @@ export default {
     stop: Function,
     value: String,
     placeholder: String,
+    submitUrl: String,
   },
   data() {
     return {
@@ -75,6 +78,10 @@ export default {
         preventScroll: true,
       });
     },
+    onSubmit(event) {
+      if (!this.submitUrl)
+        event.preventDefault();
+    }
   },
 };
 </script>

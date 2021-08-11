@@ -7,6 +7,7 @@
 - Replace old COVID-19 inventory button with the new one for santé [#608](https://github.com/etalab/udata-gouvfr/pull/608)
 - Add SPD datasets to home page [#609](https://github.com/etalab/udata-gouvfr/pull/609)
 - Remove duplicate Participate block on dataset page [#611](https://github.com/etalab/udata-gouvfr/pull/611)
+- Add redirect to dataset on submit for suggest search [#612](https://github.com/etalab/udata-gouvfr/pull/612)
 
 ## 3.0.3 (2021-07-30)
 
