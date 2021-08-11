@@ -170,6 +170,8 @@ workflows:
           filters:
             branches:
               only:
+                # FIXME:
+                - upgrade-flask-1.1.4
                 - master
                 - /[0-9]+(\.[0-9]+)+/
             tags:
