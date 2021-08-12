@@ -44,6 +44,7 @@ They exist in many colors and two versions, primary with a solid background and 
     }
 
     a {
+        display: inline;
         color: inherit;
         text-decoration: underline;
         vertical-align: baseline;
@@ -52,6 +53,11 @@ They exist in many colors and two versions, primary with a solid background and 
     &.well-green-300 {
         background: fade(@green-300, 10%);
         color: @green-300;
+    }
+
+    &.well-orange-200 {
+        background: fade(@orange-200, 10%);
+        color: @orange-200;
     }
 
     &.well-grey-100 {

@@ -12,6 +12,7 @@
 - Add SPD datasets to home page [#609](https://github.com/etalab/udata-gouvfr/pull/609)
 - Remove duplicate Participate block on dataset page [#611](https://github.com/etalab/udata-gouvfr/pull/611)
 - Add redirect to dataset on submit for suggest search [#612](https://github.com/etalab/udata-gouvfr/pull/612)
+- Add a banner on geo.data.gouv.fr's datasets [#607](https://github.com/etalab/udata-gouvfr/pull/607)
 
 ## 3.0.3 (2021-07-30)
 

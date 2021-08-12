@@ -4,12 +4,13 @@
 {% from theme('macros/issues.html') import issues_btn with context %}
 {% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 
+## FIXME: remove inspire:indentifier robots condition when geo.data.gouv.fr is shutdown
 {% set meta = {
     'title': dataset.full_title,
     'description': dataset.description|mdstrip(60)|forceescape,
     'image': dataset.organization and dataset.organization.logo(external=True) or '',
     'keywords': [_('dataset')] + dataset.tags,
-    'robots': 'noindex, nofollow' if dataset.is_hidden else '',
+    'robots': 'noindex, nofollow' if dataset.is_hidden or 'inspire:identifier' in dataset.extras else '',
 } %}
 
 {% set bundle = 'dataset' %}
@@ -61,6 +62,17 @@
     <span class="big tag" title="{{ title }}">
         {{ _('Archived') }}
     </span>
+    {% endif %}
+    {# FIXME: remove when geo.data.gouv.fr is shutdown #}
+    {% if 'inspire:identifier' in dataset.extras %}
+    <div class="well well-orange-200 py-sm mb-lg">
+        ⚠️ {{ _("This dataset is handled by the <a href='{geo_link}'>geo.data.gouv.fr</a> platform.
+        This platform is not actively maintained and as a result, you may find some bogus data or metadata.
+        More information about <a href='{blog_link}'>the shutdown of geo.data.gouv.fr is available here.</a>").format(
+            geo_link='https://geo.data.gouv.fr',
+            blog_link='https://www.data.gouv.fr/fr/posts/extinction-de-geo-data-gouv-fr/',
+        ) }}
+    </div>
     {% endif %}
     <h1 class="mb-0">{{ dataset.title }}
         {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
