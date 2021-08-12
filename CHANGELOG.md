@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Now returning notfound() http exception when router does not match any territory object instead of None [#2637](https://github.com/opendatateam/udata/pull/2637)
 - Add larger reuse thumbnail image [#2638](https://github.com/opendatateam/udata/pull/2638)
 - Activate plugins before creating app when testing [#2643](https://github.com/opendatateam/udata/pull/2643)
 
@@ -9,7 +10,6 @@
 
 - Remove mail sending task on follow [#2635](https://github.com/opendatateam/udata/pull/2635)
 - Fix root api endpoint error [#2636](https://github.com/opendatateam/udata/pull/2636)
-- Now returning notfound() http exception when router does not match any territory object instead of None [#2637](https://github.com/opendatateam/udata/pull/2637)
 
 ## 3.0.2 (2021-07-19)
 
