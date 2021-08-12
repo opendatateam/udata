@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.0.4 (2021-08-12)
 
 - Now returning notfound() http exception when router does not match any territory object instead of None [#2637](https://github.com/opendatateam/udata/pull/2637)
