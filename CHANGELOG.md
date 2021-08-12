@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.0.5 (2021-08-12)
 
 - Add a banner on geo.data.gouv.fr's datasets [#607](https://github.com/etalab/udata-gouvfr/pull/607)
