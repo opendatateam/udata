@@ -2,6 +2,7 @@ import os
 import logging
 
 import click
+import mongoengine
 
 from udata.commands import cli, green, yellow, cyan, red, magenta, white, echo
 from udata import migrations
@@ -130,7 +131,97 @@ def display_op(op):
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
 
 
+def check_users():
+    import collections
+    from udata import models
+    from udata.models import db
+
+    errors = collections.defaultdict(list)
+
+    _models = [
+        elt for _, elt in models.__dict__.items()
+        if isinstance(elt, type) and issubclass(elt, (db.Document))
+    ]
+
+    references = []
+    for model in _models:
+        if model.__name__ == 'Activity':
+            print(f'Skipping Activity model, scheduled for deprecation')
+            continue
+        if model.__name__ == 'GeoLevel':
+            print(f'Skipping GeoLevel model, scheduled for deprecation')
+            continue
+        # TODO: GenericReferenceField
+        # TODO: List of Embeded with References (eg Discussion.Message)
+        # TODO: oauth2
+        # TODO: harvesters (not in .models I think)
+        refs = [elt for elt in model._fields.values()
+                if isinstance(elt, mongoengine.fields.ReferenceField)]
+        references += [{
+            'model': model,
+            'repr': f'{model.__name__}.{r.name}',
+            'name': r.name,
+            'destination': r.document_type.__name__,
+            'type': 'direct',
+        } for r in refs]
+
+        # TODO: maybe remove those, we don't have any interesting
+        embeds = [elt for elt in model._fields.values()
+                  if isinstance(elt, mongoengine.fields.EmbeddedDocumentField)]
+        for embed in embeds:
+            embed_refs = [elt for elt in embed.document_type_obj._fields.values()
+                          if isinstance(elt, mongoengine.fields.ReferenceField)]
+            references += [{
+                'model': model,
+                'repr': f'{model.__name__}.{embed.name}__{er.name}',
+                'name': f'{embed.name}__{er.name}',
+                'destination': er.document_type.__name__,
+                'type': 'embed',
+            } for er in embed_refs]
+
+        list_fields = [elt for elt in model._fields.values()
+                       if isinstance(elt, mongoengine.fields.ListField)]
+        list_refs = [elt for elt in list_fields
+                     if isinstance(elt.field, mongoengine.fields.ReferenceField)]
+        # print([lr.field.__dict__ for lr in list_refs])
+        references += [{
+            'model': model,
+            'repr': f'{model.__name__}.{lr.name}',
+            'name': lr.name,
+            'destination': lr.field.document_type.__name__,
+            'type': 'list',
+        } for lr in list_refs]
+
+    print('Those references will be inspected:')
+    for reference in references:
+        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
+    print('')
+
+    for reference in references:
+        print(f'{reference["repr"]}...')
+        query = {f'{reference["name"]}__ne': None}
+        qs = reference['model'].objects(**query).no_cache().all()
+        try:
+            for obj in qs:
+                if reference['type'] == 'direct':
+                    try:
+                        _ = getattr(obj, reference['name'])
+                    except mongoengine.errors.DoesNotExist as e:
+                        errors[reference["repr"]].append(str(e))
+                elif reference['type'] == 'list':
+                    for sub in getattr(obj, reference['name']):
+                        try:
+                            _ = sub.id
+                        except mongoengine.errors.DoesNotExist as e:
+                            errors[reference["repr"]].append(str(e))
+            print('Invalid destination objects', len(errors[reference["repr"]]))
+        except mongoengine.errors.FieldDoesNotExist as e:
+            print('[ERROR]', e)
+    # for field, errs in errors.items():
+    #     print(f'{field}: {len(errs)}')
+
+
 @grp.command()
 def check_integrity():
     '''Check the integrity of the database from a business perspective'''
-    pass
+    check_users()
