@@ -28,7 +28,7 @@
                     </a>
                 </div>
                 <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start">
-                    <a href="/datasets" title="{{ _('Search') }}" class="mr-md"
+                    <a href="/datasets" title="{{ _('Search for data') }}" class="mr-md"
                         @click.capture.prevent="$refs.suggest.startSearch()">
                         {% include theme('svg/search.svg') %}
                     </a>
@@ -61,10 +61,10 @@
                     </a>
                     {% else %}
                     <a href="{{ url_for('security.login', next=request.url) }}"
-                        title="{{ _('Sign In') }}">{% include theme('svg/login.svg') %}{{ _('Sign in') }}
+                        title="{{ _('Log in') }}">{% include theme('svg/login.svg') %}{{ _('Log in') }}
                     </a>
                     <a href="{{ url_for('security.register', next=request.url) }}"
-                        title="{{ _('Register') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
+                        title="{{ _('Sign up') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
                     </a>
                     {% endif %}
                 </div>
@@ -85,8 +85,8 @@
                 <div class="col-3 hidden-xl search-box">
                     <form action="/datasets" class="w-100 row-inline justify-between"
                         @focus.capture.prevent="$refs.suggest.startSearch()" tabindex="0">
-                        <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search') }}" />
-                        <button type="submit" aria-label="{{ _('Search') }}">
+                        <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search for data') }}" />
+                        <button type="submit" aria-label="{{ _('Search for data') }}">
                             {% include theme('svg/search.svg') %}
                         </button>
                     </form>

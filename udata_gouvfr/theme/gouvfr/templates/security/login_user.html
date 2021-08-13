@@ -8,8 +8,8 @@
             <div class="col-6 text-align-center offset-3 form-container col-md-12 offset-md-0">
                 <form class="form" method="post" action="{{ url_for('security.login') }}">
                     <fieldset>
-                        <legend class="h2 mb-xl">{{ _('Sign in') }}</legend>
-                        {{ forms.render_fields(login_user_form, submit=_('Sign In')) }}
+                        <legend class="h2 mb-xl">{{ _('Log in') }}</legend>
+                        {{ forms.render_fields(login_user_form, submit=_('Log in')) }}
                         <div class="mt-lg">
                             <p class="fs-sm mb-sm">
                                 {{ _('Forgot your password?') }}
@@ -36,7 +36,7 @@
                 <h3 class="fs-sm mb-sm">
                     {{ _('Don\'t have an account?')}}
                 </h3>
-                <a title="{{ _('Register') }}" href="{{ url_for('security.register', next=request.url) }}"
+                <a title="{{ _('Sign up') }}" href="{{ url_for('security.register', next=request.url) }}"
                     class="btn btn-primary btn-block btn-lg">
                     {{ _('Create an account') }}
                 </a>

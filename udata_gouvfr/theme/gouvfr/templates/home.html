@@ -96,7 +96,7 @@
         {# Dataset tabs #}
         <div class="row justify-between">
             <div class="col-auto">
-                <h2>{{ _('Data') }}</h2>
+                <h2>{{ _('Datasets') }}</h2>
             </div>
             <div class="col-auto">
                 <nav class="tabs">
@@ -126,7 +126,7 @@
 {# Reuses section #}
 {% set nb_reuses = current_site.settings.home_reuses|length %}
 {% set reuses_tabs = (
-    ('best-reuses', _('Etalab\'s selection'), current_site.settings.home_reuses, {}),
+    ('best-reuses', _('Featured reuses'), current_site.settings.home_reuses, {}),
     ('latest-reuses', _('Latest reuses'), recent_reuses[:3], {'sort': '-created'}),
 ) %}
 
@@ -135,7 +135,7 @@
     <div class="hagrid">
         <div class="row justify-between">
             <div class="col-auto">
-                <h2>{{ _('Reuses') }}</h2>
+                <h2>{{ _('Data reuses') }}</h2>
             </div>
             <div class="col-auto">
                 <nav class="tabs">

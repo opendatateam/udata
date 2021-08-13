@@ -36,7 +36,7 @@
                     {{ _('If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s).', code=territory.code) }}
                     {% else %}
                     {{ _('You want to add your own datasets to that list?') }}<br />
-                    <a title="{{ _('Sign In / Register') }}" href="{{ url_for('security.login', next=request.url) }}">
+                    <a title="{{ _('Log in / Sign up') }}" href="{{ url_for('security.login', next=request.url) }}">
                         {{ _('Log in') }}</a>
                     {{ _('and create resources for that territory.') }}
                     {% endif %}
