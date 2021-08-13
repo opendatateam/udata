@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Update homepage wording [#617](https://github.com/etalab/udata-gouvfr/pull/617)
 
 ## 3.0.5 (2021-08-12)
 
