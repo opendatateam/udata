@@ -1,10 +1,12 @@
 from datetime import datetime
+from bson import ObjectId
 
 from flask_security import current_user
 from flask_restplus.inputs import boolean
 
 from udata.api import api, API, fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.models import db
 
 from .forms import IssueCommentForm, IssueCreateForm
 from .models import Message, Issue
@@ -121,9 +123,12 @@ class IssuesAPI(API):
     def get(self):
         '''List all Issues'''
         args = parser.parse_args()
-        issues = Issue.objects
-        if args['for']:
-            issues = issues.generic_in(subject=args['for'])
+        # this builds an OR query based on `for` arg
+        query = None
+        for subject in args['for'] or []:
+            fragment = db.Q(subject=ObjectId(subject))
+            query = fragment if not query else query | fragment
+        issues = Issue.objects(query)
         if args['closed'] is False:
             issues = issues(closed=None)
         elif args['closed'] is True:

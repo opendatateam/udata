@@ -1,6 +1,5 @@
 import logging
 
-from bson import ObjectId, DBRef
 from flask_mongoengine import BaseQuerySet
 
 from udata.utils import Paginable
@@ -69,28 +68,3 @@ class UDataQuerySet(BaseQuerySet):
             if auto_save:
                 doc.save(write_concern=write_concern)
             return doc, True
-
-    def generic_in(self, **kwargs):
-        '''Bypass buggy GenericReferenceField querying issue'''
-        query = {}
-        for key, value in kwargs.items():
-            if not value:
-                continue
-            # Optimize query for when there is only one value
-            if isinstance(value, (list, tuple)) and len(value) == 1:
-                value = value[0]
-            if isinstance(value, (list, tuple)):
-                if all(isinstance(v, str) for v in value):
-                    ids = [ObjectId(v) for v in value]
-                    query['{0}._ref.$id'.format(key)] = {'$in': ids}
-                elif all(isinstance(v, DBRef) for v in value):
-                    query['{0}._ref'.format(key)] = {'$in': value}
-                elif all(isinstance(v, ObjectId) for v in value):
-                    query['{0}._ref.$id'.format(key)] = {'$in': value}
-            elif isinstance(value, ObjectId):
-                query['{0}._ref.$id'.format(key)] = value
-            elif isinstance(value, str):
-                query['{0}._ref.$id'.format(key)] = ObjectId(value)
-            else:
-                self.error('expect a list of string, ObjectId or DBRef')
-        return self(__raw__=query)

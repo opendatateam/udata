@@ -494,6 +494,7 @@ class Testing(object):
         'title^2',
         'description',
     )
+    MONGODB_HOST_TEST = 'mongomock://localhost:27017/udata'
 
 
 class Debug(Defaults):
