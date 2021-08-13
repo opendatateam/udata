@@ -151,10 +151,12 @@ def check_users():
         if model.__name__ == 'GeoLevel':
             print(f'Skipping GeoLevel model, scheduled for deprecation')
             continue
+
         # TODO: GenericReferenceField
-        # TODO: List of Embeded with References (eg Discussion.Message)
         # TODO: oauth2
         # TODO: harvesters (not in .models I think)
+
+        # find "root" ReferenceField fields
         refs = [elt for elt in model._fields.values()
                 if isinstance(elt, mongoengine.fields.ReferenceField)]
         references += [{
@@ -165,20 +167,7 @@ def check_users():
             'type': 'direct',
         } for r in refs]
 
-        # TODO: maybe remove those, we don't have any interesting
-        embeds = [elt for elt in model._fields.values()
-                  if isinstance(elt, mongoengine.fields.EmbeddedDocumentField)]
-        for embed in embeds:
-            embed_refs = [elt for elt in embed.document_type_obj._fields.values()
-                          if isinstance(elt, mongoengine.fields.ReferenceField)]
-            references += [{
-                'model': model,
-                'repr': f'{model.__name__}.{embed.name}__{er.name}',
-                'name': f'{embed.name}__{er.name}',
-                'destination': er.document_type.__name__,
-                'type': 'embed',
-            } for er in embed_refs]
-
+        # find ListField with ReferenceField
         list_fields = [elt for elt in model._fields.values()
                        if isinstance(elt, mongoengine.fields.ListField)]
         list_refs = [elt for elt in list_fields
@@ -191,6 +180,20 @@ def check_users():
             'destination': lr.field.document_type.__name__,
             'type': 'list',
         } for lr in list_refs]
+
+        # find ListField w/ EmbeddedDocumentField w/ ReferenceField
+        embeds = [(elt, elt.field) for elt in list_fields
+                  if isinstance(elt.field, mongoengine.fields.EmbeddedDocumentField)]
+        for embed, embed_field in embeds:
+            embed_refs = [elt for elt in embed_field.document_type_obj._fields.values()
+                          if isinstance(elt, mongoengine.fields.ReferenceField)]
+            references += [{
+                'model': model,
+                'repr': f'{model.__name__}.{embed.name}__{er.name}',
+                'name': f'{embed.name}__{er.name}',
+                'destination': er.document_type.__name__,
+                'type': 'embed_list',
+            } for er in embed_refs]
 
     print('Those references will be inspected:')
     for reference in references:
@@ -209,9 +212,17 @@ def check_users():
                     except mongoengine.errors.DoesNotExist as e:
                         errors[reference["repr"]].append(str(e))
                 elif reference['type'] == 'list':
+                    # TODO: test if this catches errors
                     for sub in getattr(obj, reference['name']):
                         try:
                             _ = sub.id
+                        except mongoengine.errors.DoesNotExist as e:
+                            errors[reference["repr"]].append(str(e))
+                elif reference['type'] == 'embed_list':
+                    p1, p2 = reference['name'].split('__')
+                    for sub in getattr(obj, p1):
+                        try:
+                            getattr(sub, p2)
                         except mongoengine.errors.DoesNotExist as e:
                             errors[reference["repr"]].append(str(e))
             print('Invalid destination objects', len(errors[reference["repr"]]))
