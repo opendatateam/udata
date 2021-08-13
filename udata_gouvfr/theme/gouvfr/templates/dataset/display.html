@@ -64,7 +64,7 @@
     </span>
     {% endif %}
     {# FIXME: remove when geo.data.gouv.fr is shutdown #}
-    {% if 'inspire:identifier' in dataset.extras %}
+    {% if 'geop:dataset_id' in dataset.extras %}
     <div class="well well-orange-200 py-sm mb-lg">
         ⚠️ {{ _("This dataset is handled by the <a href='{geo_link}'>geo.data.gouv.fr</a> platform.
         This platform is not actively maintained and as a result, you may find some bogus data or metadata.
