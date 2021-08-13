@@ -131,7 +131,7 @@ def display_op(op):
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
 
 
-def check_users():
+def check_references():
     import collections
     from udata import models
     from udata.models import db
@@ -201,7 +201,7 @@ def check_users():
     print('')
 
     for reference in references:
-        print(f'{reference["repr"]}...')
+        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}...')
         query = {f'{reference["name"]}__ne': None}
         qs = reference['model'].objects(**query).no_cache().all()
         try:
@@ -225,14 +225,12 @@ def check_users():
                             getattr(sub, p2)
                         except mongoengine.errors.DoesNotExist as e:
                             errors[reference["repr"]].append(str(e))
-            print('Invalid destination objects', len(errors[reference["repr"]]))
+            print('Errors:', len(errors[reference["repr"]]))
         except mongoengine.errors.FieldDoesNotExist as e:
             print('[ERROR]', e)
-    # for field, errs in errors.items():
-    #     print(f'{field}: {len(errs)}')
 
 
 @grp.command()
 def check_integrity():
     '''Check the integrity of the database from a business perspective'''
-    check_users()
+    check_references()
