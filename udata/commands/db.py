@@ -133,15 +133,19 @@ def display_op(op):
 
 def check_references():
     import collections
-    from udata import models
+    from udata import models as core_models
+    from udata.harvest import models as harvest_models
+    from udata.api import oauth2 as oauth2_models
     from udata.models import db
 
     errors = collections.defaultdict(list)
 
-    _models = [
-        elt for _, elt in models.__dict__.items()
-        if isinstance(elt, type) and issubclass(elt, (db.Document))
-    ]
+    _models = []
+    for models in core_models, harvest_models, oauth2_models:
+        _models += [
+            elt for _, elt in models.__dict__.items()
+            if isinstance(elt, type) and issubclass(elt, (db.Document))
+        ]
 
     references = []
     for model in _models:
@@ -153,8 +157,6 @@ def check_references():
             continue
 
         # TODO: GenericReferenceField
-        # TODO: oauth2
-        # TODO: harvesters (not in .models I think)
 
         # find "root" ReferenceField fields
         refs = [elt for elt in model._fields.values()
@@ -172,7 +174,6 @@ def check_references():
                        if isinstance(elt, mongoengine.fields.ListField)]
         list_refs = [elt for elt in list_fields
                      if isinstance(elt.field, mongoengine.fields.ReferenceField)]
-        # print([lr.field.__dict__ for lr in list_refs])
         references += [{
             'model': model,
             'repr': f'{model.__name__}.{lr.name}',
