@@ -230,6 +230,8 @@ def check_references():
         except mongoengine.errors.FieldDoesNotExist as e:
             print('[ERROR]', e)
 
+    print(f'\n Total errors: {sum([len(v) for _,v in errors.items()])}')
+
 
 @grp.command()
 def check_integrity():
