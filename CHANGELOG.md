@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 3.0.6 (2021-08-16)
 
 - Update homepage wording [#617](https://github.com/etalab/udata-gouvfr/pull/617)
 - Change banner trigger for geo.data.gouv.fr [#618](https://github.com/etalab/udata-gouvfr/pull/618)
