@@ -91,29 +91,38 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
         self.assertEqual(len(rendered_datasets), len(datasets))
 
     def test_render_display_with_private_assets_only_member(self):
-        '''It should render the organization page without private assets'''
+        '''It should render the organization page without private and empty assets'''
         organization = OrganizationFactory()
+        datasets = [VisibleDatasetFactory(organization=organization)
+                    for _ in range(2)]
+        reuses = [VisibleReuseFactory(organization=organization)
+                  for _ in range(2)]
         for _ in range(2):
-            DatasetFactory(organization=organization)
+            DatasetFactory(organization=organization, resources=[])  # Empty asset
             VisibleDatasetFactory(organization=organization, private=True)
-            ReuseFactory(organization=organization)
+            ReuseFactory(organization=organization, datasets=[])  # Empty asset
             VisibleReuseFactory(organization=organization, private=True)
         response = self.get(url_for('organizations.show', org=organization))
 
         self.assert200(response)
 
         rendered_datasets = self.get_context_variable('datasets')
-        self.assertEqual(len(rendered_datasets), 0)
+        self.assertEqual(len(rendered_datasets), len(datasets))
 
         rendered_reuses = self.get_context_variable('reuses')
-        self.assertEqual(len(rendered_reuses), 0)
+        self.assertEqual(len(rendered_reuses), len(reuses))
 
-        rendered_private_datasets = self.get_context_variable(
-            'private_datasets')
+        rendered_private_datasets = [dataset for dataset in rendered_datasets if dataset.private]
         self.assertEqual(len(rendered_private_datasets), 0)
 
-        rendered_private_reuses = self.get_context_variable('private_reuses')
+        rendered_private_reuses = [reuse for reuse in rendered_reuses if reuse.private]
         self.assertEqual(len(rendered_private_reuses), 0)
+
+        total_datasets = self.get_context_variable('total_datasets')
+        self.assertEqual(total_datasets, len(datasets))
+
+        total_reuses = self.get_context_variable('total_reuses')
+        self.assertEqual(total_reuses, len(reuses))
 
     def test_render_display_with_private_datasets(self):
         '''It should render the organization page with some private datasets'''
@@ -121,7 +130,9 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
         member = Member(user=me, role='editor')
         organization = OrganizationFactory(members=[member])
         datasets = [
-            DatasetFactory(organization=organization) for _ in range(2)]
+            VisibleDatasetFactory(organization=organization) for _ in range(2)]
+        empty_datasets = [
+            DatasetFactory(organization=organization, resources=[]) for _ in range(2)]
         private_datasets = [
             VisibleDatasetFactory(organization=organization, private=True)
             for _ in range(2)]
@@ -129,12 +140,15 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
 
         self.assert200(response)
         rendered_datasets = self.get_context_variable('datasets')
-        self.assertEqual(len(rendered_datasets), 0)
+        self.assertEqual(len(rendered_datasets),
+                         len(datasets) + len(private_datasets) + len(empty_datasets))
 
-        rendered_private_datasets = self.get_context_variable(
-            'private_datasets')
-        self.assertEqual(len(rendered_private_datasets),
-                         len(datasets) + len(private_datasets))
+        rendered_private_datasets = [dataset for dataset in rendered_datasets if dataset.private]
+        self.assertEqual(len(rendered_private_datasets), len(private_datasets))
+
+        total_datasets = self.get_context_variable('total_datasets')
+        self.assertEqual(total_datasets,
+                         len(datasets) + len(private_datasets) + len(empty_datasets))
 
     def test_render_display_with_reuses(self):
         '''It should render the organization page with some reuses'''
@@ -152,7 +166,9 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
         me = self.login()
         member = Member(user=me, role='editor')
         organization = OrganizationFactory(members=[member])
-        reuses = [ReuseFactory(organization=organization) for _ in range(2)]
+        reuses = [VisibleReuseFactory(organization=organization) for _ in range(2)]
+        empty_reuses = [
+            ReuseFactory(organization=organization, datasets=[]) for _ in range(2)]
         private_reuses = [
             VisibleReuseFactory(organization=organization, private=True)
             for _ in range(2)]
@@ -160,11 +176,14 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
 
         self.assert200(response)
         rendered_reuses = self.get_context_variable('reuses')
-        self.assertEqual(len(rendered_reuses), 0)
+        self.assertEqual(len(rendered_reuses),
+                         len(reuses) + len(private_reuses) + len(empty_reuses))
 
-        rendered_private_reuses = self.get_context_variable('private_reuses')
-        self.assertEqual(len(rendered_private_reuses),
-                         len(reuses) + len(private_reuses))
+        rendered_private_reuses = [reuse for reuse in rendered_reuses if reuse.private]
+        self.assertEqual(len(rendered_private_reuses), len(private_reuses))
+
+        total_reuses = self.get_context_variable('total_reuses')
+        self.assertEqual(total_reuses, len(reuses) + len(private_reuses) + len(empty_reuses))
 
     def test_render_display_with_followers(self):
         '''It should render the organization page with followers'''

@@ -23,6 +23,7 @@
             </div>
             <div class="reuse-info-title h4">
                 {{ reuse.title }}
+                {% if reuse.private %}<span class="badge grey-300 ml-xs">{{ _('Private') }}</span>{% endif %}
             </div>
         </div>
     </article>
