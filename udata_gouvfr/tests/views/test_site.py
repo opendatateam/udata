@@ -48,6 +48,27 @@ class SiteViewsTest(GouvfrFrontTestCase):
         response = self.get(url_for('site.home'))
         self.assert200(response)
 
+    @pytest.mark.options(BANNER_ACTIVATED=False)
+    @pytest.mark.options(BANNER_HTML_CONTENT_EN='BANNER_TEST')
+    def test_render_home_no_banner(self):
+        '''It should render the home page without banner'''
+        response = self.get(url_for('site.home'))
+        self.assert200(response)
+        self.assertNotIn(b"BANNER_TEST", response.data)
+
+    @pytest.mark.options(BANNER_ACTIVATED=True)
+    @pytest.mark.options(BANNER_HTML_CONTENT_EN='BANNER_TEST_EN')
+    @pytest.mark.options(BANNER_HTML_CONTENT_FR='BANNER_TEST_FR')
+    def test_render_home_with_banner(self):
+        '''It should render the home page with a banner'''
+        response = self.get(url_for('site.home', lang_code='en'))
+        self.assert200(response)
+        self.assertIn(b"BANNER_TEST_EN", response.data)
+
+        response = self.get(url_for('site.home', lang_code='fr'))
+        self.assert200(response)
+        self.assertIn(b"BANNER_TEST_FR", response.data)
+
     def test_render_dashboard(self):
         '''It should render the search page'''
         for i in range(3):

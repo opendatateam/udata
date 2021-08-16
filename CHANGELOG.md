@@ -5,6 +5,7 @@
 - Update homepage wording [#617](https://github.com/etalab/udata-gouvfr/pull/617)
 - Change banner trigger for geo.data.gouv.fr [#618](https://github.com/etalab/udata-gouvfr/pull/618)
 - Show private datasets and reuses on organization page [#619](https://github.com/etalab/udata-gouvfr/pull/619)
+- Make frontend banner configurable and remove newsletter banner settings [#621](https://github.com/etalab/udata-gouvfr/pull/621)
 
 ## 3.0.5 (2021-08-12)
 
