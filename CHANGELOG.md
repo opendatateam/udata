@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.0.6 (2021-08-16)
 
 - Update homepage wording [#617](https://github.com/etalab/udata-gouvfr/pull/617)
