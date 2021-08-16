@@ -1,11 +1,16 @@
-import os
+import collections
 import logging
+import os
 
 import click
 import mongoengine
 
+from udata import migrations, models as core_models
+from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, green, yellow, cyan, red, magenta, white, echo
-from udata import migrations
+from udata.harvest import models as harvest_models
+from udata.models import db
+
 
 # Date format used to for display
 DATE_FORMAT = '%Y-%m-%d %H:%M'
@@ -131,13 +136,7 @@ def display_op(op):
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
 
 
-def check_references():
-    import collections
-    from udata import models as core_models
-    from udata.harvest import models as harvest_models
-    from udata.api import oauth2 as oauth2_models
-    from udata.models import db
-
+def check_references(models_to_check):
     errors = collections.defaultdict(list)
 
     _models = []
@@ -154,6 +153,9 @@ def check_references():
             continue
         if model.__name__ == 'GeoLevel':
             print(f'Skipping GeoLevel model, scheduled for deprecation')
+            continue
+
+        if models_to_check and model.__name__ not in models_to_check:
             continue
 
         # TODO: GenericReferenceField
@@ -213,7 +215,6 @@ def check_references():
                     except mongoengine.errors.DoesNotExist as e:
                         errors[reference["repr"]].append(str(e))
                 elif reference['type'] == 'list':
-                    # TODO: test if this catches errors
                     for sub in getattr(obj, reference['name']):
                         try:
                             _ = sub.id
@@ -234,6 +235,7 @@ def check_references():
 
 
 @grp.command()
-def check_integrity():
+@click.option('--models', multiple=True, default=[], help='Model(s) to check')
+def check_integrity(models):
     '''Check the integrity of the database from a business perspective'''
-    check_references()
+    check_references(models)
