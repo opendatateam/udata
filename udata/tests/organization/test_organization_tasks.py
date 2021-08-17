@@ -1,15 +1,15 @@
 from flask import url_for
 
-from udata.tests.api import APITestCase
-
+from udata.api.oauth2 import OAuth2Client
 from udata.core import storages
-from udata.tests.helpers import create_test_image
-from udata.models import Dataset, Organization, Transfer
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.user.factories import AdminFactory
 from udata.core.dataset.search import DatasetSearch
 from udata.core.organization import tasks
+from udata.models import Dataset, Organization, Transfer
+from udata.tests.api import APITestCase
 from udata.search import es
+from udata.tests.helpers import create_test_image
 
 
 class OrganizationTasksTest(APITestCase):
@@ -35,7 +35,6 @@ class OrganizationTasksTest(APITestCase):
             subject=dataset,
             comment='comment',
         )
-
         transfer_from_org = Transfer.objects.create(
             owner=org,
             recipient=user,
@@ -43,11 +42,21 @@ class OrganizationTasksTest(APITestCase):
             comment='comment',
         )
 
+        oauth_client = OAuth2Client.objects.create(
+            name='test-client',
+            owner=user,
+            organization=org,
+            redirect_uris=['https://test.org/callback'],
+        )
+
         # Delete organization
         response = self.delete(url_for('api.organization', org=org))
         self.assert204(response)
 
         tasks.purge_organizations()
+
+        oauth_client.reload()
+        assert oauth_client.organization is None
 
         assert Transfer.objects.filter(id=transfer_from_org.id).count() == 0
         assert Transfer.objects.filter(id=transfer_to_org.id).count() == 0
