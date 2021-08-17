@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Update crowdin translations [#622](https://github.com/etalab/udata-gouvfr/pull/622)
 
 ## 3.0.6 (2021-08-16)
 
