@@ -14,7 +14,7 @@ from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
 from udata.models import (Follow, Issue, Discussion, Activity, Topic,
-                          Organization)
+                          Organization, Transfer)
 from udata.tasks import job
 
 from .models import Dataset, Resource, CommunityResource, UPDATE_FREQUENCIES, Checksum
@@ -49,6 +49,8 @@ def purge_datasets(self):
             topic.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
+        # Remove associated Transfers
+        Transfer.objects(subject=dataset).delete()
         # Remove each dataset's resource's file
         storage = storages.resources
         for resource in dataset.resources:
