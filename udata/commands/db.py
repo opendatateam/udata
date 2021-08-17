@@ -158,8 +158,6 @@ def check_references(models_to_check):
         if models_to_check and model.__name__ not in models_to_check:
             continue
 
-        # TODO: GenericReferenceField
-
         # find "root" ReferenceField fields
         refs = [elt for elt in model._fields.values()
                 if isinstance(elt, mongoengine.fields.ReferenceField)]
@@ -168,6 +166,17 @@ def check_references(models_to_check):
             'repr': f'{model.__name__}.{r.name}',
             'name': r.name,
             'destination': r.document_type.__name__,
+            'type': 'direct',
+        } for r in refs]
+
+        # find "root" GenericReferenceField
+        refs = [elt for elt in model._fields.values()
+                if isinstance(elt, mongoengine.fields.GenericReferenceField)]
+        references += [{
+            'model': model,
+            'repr': f'{model.__name__}.{r.name}',
+            'name': r.name,
+            'destination': 'Generic',
             'type': 'direct',
         } for r in refs]
 
