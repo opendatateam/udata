@@ -24,6 +24,14 @@ $ udata info
 
 This will display some useful details about your local configuration.
 
+### Check db integrity
+
+```shell
+$ udata db check-integrity
+```
+
+This will output a diagnosis with the most common sources of lack of integrity in udata's model. No fix is applied by this command.
+
 ## Managing users
 
 You can create a user with:
