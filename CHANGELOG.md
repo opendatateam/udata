@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- _major_ Check db integrity and apply temporary and permanent fixes [#2644](https://github.com/opendatateam/udata/pull/2644) :warning: the associated migrations can take a long time to run.
 
 ## 3.0.4 (2021-08-12)
 
