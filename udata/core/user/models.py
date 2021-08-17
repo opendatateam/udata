@@ -271,7 +271,7 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import Follow
         self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
         self.save()
-    
+
     def count_following(self):
         from udata.models import Follow
         self.metrics['following'] = Follow.objects.following(self).count()
