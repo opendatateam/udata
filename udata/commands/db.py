@@ -235,10 +235,7 @@ def check_references(models_to_check):
                         try:
                             getattr(sub, p2)
                         except mongoengine.errors.DoesNotExist as e:
-                            print(obj.id, reference)
-                            print(e)
                             errors[reference["repr"]].append(str(e))
-                            raise e
             print('Errors:', len(errors[reference["repr"]]))
         except mongoengine.errors.FieldDoesNotExist as e:
             print('[ERROR]', e)
