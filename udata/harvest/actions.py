@@ -135,7 +135,13 @@ def delete_source(ident):
 
 def purge_sources():
     '''Permanently remove sources flagged as deleted'''
-    return HarvestSource.objects(deleted__exists=True).delete()
+    sources = HarvestSource.objects(deleted__exists=True)
+    count = sources.count()
+    for source in sources:
+        if source.periodic_task:
+            source.periodic_task.delete()
+        source.delete()
+    return count
 
 
 def purge_jobs():

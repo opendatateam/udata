@@ -243,8 +243,14 @@ def check_references(models_to_check):
     print(f'\n Total errors: {sum([len(v) for _,v in errors.items()])}')
 
 
+def check_harvest():
+    pass
+
+
 @grp.command()
 @click.option('--models', multiple=True, default=[], help='Model(s) to check')
 def check_integrity(models):
     '''Check the integrity of the database from a business perspective'''
     check_references(models)
+    if (models and 'Harvest' in models) or not models:
+        check_harvest()
