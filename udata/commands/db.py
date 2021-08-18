@@ -137,7 +137,7 @@ def display_op(op):
 
 
 def check_references(models_to_check):
-    errors = collections.defaultdict(list)
+    errors = collections.defaultdict(int)
 
     _models = []
     for models in core_models, harvest_models, oauth2_models:
@@ -194,9 +194,9 @@ def check_references(models_to_check):
         } for lr in list_refs]
 
         # find ListField w/ EmbeddedDocumentField w/ ReferenceField
-        embeds = [(elt, elt.field) for elt in list_fields
-                  if isinstance(elt.field, mongoengine.fields.EmbeddedDocumentField)]
-        for embed, embed_field in embeds:
+        list_embeds = [(elt, elt.field) for elt in list_fields
+                       if isinstance(elt.field, mongoengine.fields.EmbeddedDocumentField)]
+        for embed, embed_field in list_embeds:
             embed_refs = [elt for elt in embed_field.document_type_obj._fields.values()
                           if isinstance(elt, mongoengine.fields.ReferenceField)]
             references += [{
@@ -205,6 +205,21 @@ def check_references(models_to_check):
                 'name': f'{embed.name}__{er.name}',
                 'destination': er.document_type.__name__,
                 'type': 'embed_list',
+            } for er in embed_refs]
+
+        # find EmbeddedDocumentField w/ ReferenceField
+        embeds = [elt for elt in model._fields.values()
+                  if isinstance(elt, mongoengine.fields.EmbeddedDocumentField)]
+        for embed_field in embeds:
+            embed_refs = [elt for elt in embed_field.document_type_obj._fields.values()
+                          if isinstance(elt, mongoengine.fields.ReferenceField)]
+            print(embed_refs)
+            references += [{
+                'model': model,
+                'repr': f'{model.__name__}.{embed_field.name}__{er.name}',
+                'name': f'{embed_field.name}__{er.name}',
+                'destination': er.document_type.__name__,
+                'type': 'embed',
             } for er in embed_refs]
 
     print('Those references will be inspected:')
@@ -221,26 +236,35 @@ def check_references(models_to_check):
                 if reference['type'] == 'direct':
                     try:
                         _ = getattr(obj, reference['name'])
-                    except mongoengine.errors.DoesNotExist as e:
-                        errors[reference["repr"]].append(str(e))
+                    except mongoengine.errors.DoesNotExist:
+                        errors[reference["repr"]] += 1
                 elif reference['type'] == 'list':
                     for sub in getattr(obj, reference['name']):
                         try:
                             _ = sub.id
-                        except mongoengine.errors.DoesNotExist as e:
-                            errors[reference["repr"]].append(str(e))
+                        except mongoengine.errors.DoesNotExist:
+                            errors[reference["repr"]] += 1
                 elif reference['type'] == 'embed_list':
                     p1, p2 = reference['name'].split('__')
                     for sub in getattr(obj, p1):
                         try:
                             getattr(sub, p2)
-                        except mongoengine.errors.DoesNotExist as e:
-                            errors[reference["repr"]].append(str(e))
-            print('Errors:', len(errors[reference["repr"]]))
+                        except mongoengine.errors.DoesNotExist:
+                            errors[reference["repr"]] += 1
+                elif reference['type'] == 'embed':
+                    p1, p2 = reference['name'].split('__')
+                    sub = getattr(obj, p1)
+                    try:
+                        getattr(sub, p2)
+                    except mongoengine.errors.DoesNotExist:
+                        errors[reference["repr"]] += 1
+                else:
+                    print(f'Unknown ref type {reference["type"]}')
+            print('Errors:', errors[reference["repr"]])
         except mongoengine.errors.FieldDoesNotExist as e:
             print('[ERROR]', e)
 
-    print(f'\n Total errors: {sum([len(v) for _,v in errors.items()])}')
+    print(f'\n Total errors: {sum(errors.values())}')
 
 
 @grp.command()
