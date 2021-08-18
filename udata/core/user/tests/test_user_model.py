@@ -5,6 +5,7 @@ from udata.core.discussions.factories import (
 )
 from udata.core.followers.models import Follow
 from udata.core.user.factories import UserFactory
+from udata.core.user.models import User
 from udata.core.organization.factories import OrganizationFactory
 
 pytestmark = pytest.mark.usefixtures('clean_db')
@@ -46,3 +47,10 @@ class UserModelTest:
 
         assert user.slug == 'deleted'
         assert other_user.slug == 'deleted-1'
+
+    def test_delete_safeguard(self):
+        user = UserFactory()
+        with pytest.raises(NotImplementedError):
+            user.delete()
+        user._delete()
+        assert User.objects.filter(id=user.id).count() == 0

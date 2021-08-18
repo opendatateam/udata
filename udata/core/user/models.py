@@ -4,7 +4,7 @@ from itertools import chain
 from time import time
 
 from blinker import Signal
-from flask import url_for, current_app
+from flask import current_app
 from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
@@ -227,6 +227,13 @@ class User(WithMetrics, UserMixin, db.Document):
 
         return result
 
+    def _delete(self, *args, **kwargs):
+        return db.Document.delete(self, *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise NotImplementedError('''This method should not be using directly.
+        Use `mark_as_deleted` (or `_delete` if you know what you're doing)''')
+
     def mark_as_deleted(self):
         copied_user = copy(self)
         self.email = '{}@deleted'.format(self.id)
@@ -271,7 +278,7 @@ class User(WithMetrics, UserMixin, db.Document):
         from udata.models import Follow
         self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
         self.save()
-    
+
     def count_following(self):
         from udata.models import Follow
         self.metrics['following'] = Follow.objects.following(self).count()
