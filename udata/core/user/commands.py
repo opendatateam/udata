@@ -67,7 +67,7 @@ def delete():
     if not user:
         exit_with_error('Invalid user')
     user.mark_as_deleted()
-    success('User deleted successfully')
+    success('User marked as deleted successfully')
 
 
 @grp.command()
