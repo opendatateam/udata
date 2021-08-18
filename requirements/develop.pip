@@ -63,6 +63,7 @@ click==7.0
     # via
     #   -r requirements/install.in
     #   flask
+    #   pip-tools
 colorama==0.4.4
     # via twine
 cryptography==2.8
@@ -171,6 +172,7 @@ importlib-metadata==4.6.3
     # via
     #   jsonschema
     #   keyring
+    #   pep517
     #   pluggy
     #   pre-commit
     #   pytest
@@ -227,10 +229,14 @@ packaging==21.0
     #   pytest-sugar
 passlib==1.7.4
     # via flask-security-too
+pep517==0.11.0
+    # via pip-tools
 pillow==7.0.0
     # via
     #   -r requirements/install.in
     #   pydenticon
+pip-tools==6.2.0
+    # via -r requirements/develop.in
 pkginfo==1.7.1
     # via twine
 platformdirs==2.2.0
@@ -352,6 +358,8 @@ tlds==2021081000
     # via -r requirements/install.in
 toml==0.10.2
     # via pre-commit
+tomli==1.2.1
+    # via pep517
 tqdm==4.62.0
     # via twine
 twine==3.3.0
@@ -391,7 +399,9 @@ werkzeug==0.14.1
     #   flask
     #   pytest-flask
 wheel==0.36.2
-    # via -r requirements/develop.in
+    # via
+    #   -r requirements/develop.in
+    #   pip-tools
 wtforms==2.2.1
     # via
     #   -r requirements/install.in
@@ -402,9 +412,12 @@ wtforms-json==0.3.3
 xmltodict==0.12.0
     # via -r requirements/install.in
 zipp==3.5.0
-    # via importlib-metadata
+    # via
+    #   importlib-metadata
+    #   pep517
 zxcvbn==4.4.28
     # via -r requirements/install.in
 
 # The following packages are considered to be unsafe in a requirements file:
+# pip
 # setuptools
