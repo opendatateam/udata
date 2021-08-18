@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Safeguard `User.delete()` [#2646](https://github.com/opendatateam/udata/pull/2646)
 
 ## 3.0.4 (2021-08-12)
 
