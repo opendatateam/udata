@@ -66,7 +66,7 @@ def delete():
     user = User.objects(email=email).first()
     if not user:
         exit_with_error('Invalid user')
-    user.delete()
+    user.mark_as_deleted()
     success('User deleted successfully')
 
 
