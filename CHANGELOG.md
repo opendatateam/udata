@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add About in header [#623](https://github.com/etalab/udata-gouvfr/pull/623)
 
 ## 3.0.7 (2021-08-17)
 
