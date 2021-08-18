@@ -63,13 +63,13 @@ We're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-co
 
 **This is not mandatory unless you're actively contributing to the project.**
 
-`pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`.
-
-If you need to add or modify a dependency, do it in the `.in` files _and commit them_. The pre-commit hook will compile the `.pip` files and warn you.
-
 ```shell
 $ pre-commit install
 ```
+
+`pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`.
+
+If you need to add or modify a dependency, do it in the `.in` files _and commit them_. The pre-commit hook will compile the `.pip` files and warn you.
 
 You can also generate the `.pip` files manually from the `.in` files without commiting them beforehand. For example, if you modified `install.in`:
 
