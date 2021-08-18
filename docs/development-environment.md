@@ -162,6 +162,7 @@ $ inv beat          # Start a scheduler process
 
 $ inv assets-watch  # Continously watch and build assets
 $ inv widgets-watch # Continously watch and build widgets
+$ inv oembed-watch # Continously watch and build oembed
 ```
 
 When you have the development server running,
@@ -170,7 +171,7 @@ Everything should be up and running!
 
 !!! note "Tell us what you think"
     You are always welcome to tell us about your experience _installing udata_.
-    Get in touch with us via our [Gitter chatroom][Gitter] or by raising a [new issue][] on [GitHub][].
+    Get in touch with us by raising a [new issue][] on [GitHub][].
 
 ## Common tasks
 
@@ -212,7 +213,6 @@ or [the documentation](building-documentation.md).
 [docker-compose]: https://docs.docker.com/compose/
 [git]: https://git-scm.com/
 [github]: https://github.com/opendatateam/udata
-[gitter]: https://gitter.im/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
 [homebrew]: http://brew.sh/
 [invoke]: http://www.pyinvoke.org/
