@@ -2,7 +2,6 @@ from datetime import datetime
 from itertools import chain
 
 from blinker import Signal
-from flask import url_for
 from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
 from elasticsearch_dsl import Integer, Object

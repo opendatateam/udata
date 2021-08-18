@@ -5,7 +5,7 @@ from udata.core.reuse.models import Reuse
 from udata.core.post.models import Post
 from udata.tasks import connect, get_logger
 
-from .models import Discussion, Message
+from .models import Discussion
 from .signals import (
     on_new_discussion, on_new_discussion_comment, on_discussion_closed
 )

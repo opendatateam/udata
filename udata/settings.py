@@ -340,7 +340,7 @@ class Defaults(object):
     # Tiles URL for SD displays
     MAP_TILES_URL = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'
     # Tiles URL for HD/HiDPI displays
-    MAP_TILES_URL_HIDPI = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'
+    MAP_TILES_URL_HIDPI = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'  # noqa
     # Leaflet tiles config, see https://leafletjs.com/reference-0.7.7.html#tilelayer
     MAP_TILES_CONFIG = {
         'subdomains': 'abcd',
@@ -463,12 +463,23 @@ class Defaults(object):
                         'SourcesAPI.post',
                         'FollowAPI.post']
 
+    # Webhooks
+    ##########
+    # expects a list of {
+    #   'url': 'https://example.com/webhook',
+    #   'secret': '{secret shared with webhook recipient}',
+    #   # list of events to which the webhook recipient subscribes
+    #   # available events are in `udata/tests/features/webhooks/test_webhooks@WebhookIntegrationTest`  # noqa
+    #   'events': [],
+    # }
+    WEBHOOKS = []
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
     TESTING = True
     # related to https://github.com/noirbizarre/flask-restplus/commit/93e412789f1ef8d1d2eab837f15535cf79bd144d#diff-68876137696247abc8c123622c73a11f  # noqa
-    # this keeps our legacy tests from failing, we should probably fix the tests instead someday
+    # FIXME: this keeps our legacy tests from failing, we should probably fix the tests instead
     PROPAGATE_EXCEPTIONS = False
     SEND_MAIL = False
     WTF_CSRF_ENABLED = False
