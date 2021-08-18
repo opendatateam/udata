@@ -213,7 +213,6 @@ def check_references(models_to_check):
         for embed_field in embeds:
             embed_refs = [elt for elt in embed_field.document_type_obj._fields.values()
                           if isinstance(elt, mongoengine.fields.ReferenceField)]
-            print(embed_refs)
             references += [{
                 'model': model,
                 'repr': f'{model.__name__}.{embed_field.name}__{er.name}',
@@ -221,6 +220,20 @@ def check_references(models_to_check):
                 'destination': er.document_type.__name__,
                 'type': 'embed',
             } for er in embed_refs]
+
+        # find EmbeddedDocumentField w/ ListField w/ ReferenceField
+        for embed_field in embeds:
+            embed_lists = [elt for elt in embed_field.document_type_obj._fields.values()
+                           if isinstance(elt, mongoengine.fields.ListField)]
+            elists_refs = [elt for elt in embed_lists
+                           if isinstance(elt.field, mongoengine.fields.ReferenceField)]
+            references += [{
+                'model': model,
+                'repr': f'{model.__name__}.{embed_field.name}__{lr.name}',
+                'name': f'{embed_field.name}__{lr.name}',
+                'destination': lr.field.document_type.__name__,
+                'type': 'embed_list_ref',
+            } for lr in elists_refs]
 
     print('Those references will be inspected:')
     for reference in references:
@@ -258,6 +271,14 @@ def check_references(models_to_check):
                         getattr(sub, p2)
                     except mongoengine.errors.DoesNotExist:
                         errors[reference["repr"]] += 1
+                elif reference['type'] == 'embed_list_ref':
+                    p1, p2 = reference['name'].split('__')
+                    sub = getattr(getattr(obj, p1), p2)
+                    for obj in sub:
+                        try:
+                            obj.id
+                        except mongoengine.errors.DoesNotExist:
+                            errors[reference["repr"]] += 1
                 else:
                     print(f'Unknown ref type {reference["type"]}')
             print('Errors:', errors[reference["repr"]])
