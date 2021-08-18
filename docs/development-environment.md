@@ -43,6 +43,8 @@ On the very first run it will download and install Docker images which takes a w
 
 ## Python and virtual environment
 
+### Basic installation
+
 It is recommended to work within a virtualenv to ensure proper dependencies isolation.
 If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
 
@@ -55,11 +57,27 @@ $ pip install -r requirements/develop.pip
 $ pip install -e .
 ```
 
-Also, we're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-compile--pip-sync) with [a pre-commit hook](https://github.com/jazzband/pip-tools/#version-control-integration) to help us manage our requirements. **This is not mandatory unless you're actively contributing to the project.** `pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`. If you need to add or modify a dependency, do it in the `.in` files. The pre-commit hook will compile the `.pip` files and warn you.
+### Dependency management
+
+We're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-compile--pip-sync) with [a pre-commit hook](https://github.com/jazzband/pip-tools/#version-control-integration) to help us manage our requirements.
+
+**This is not mandatory unless you're actively contributing to the project.**
+
+`pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`.
+
+If you need to add or modify a dependency, do it in the `.in` files _and commit them_. The pre-commit hook will compile the `.pip` files and warn you.
 
 ```shell
 $ pre-commit install
 ```
+
+You can also generate the `.pip` files manually from the `.in` files without commiting them beforehand. For example, if you modified `install.in`:
+
+```shell
+pip-compile requirements/install.in --output-file requirements/install.pip
+```
+
+### Optmizing performances with Cython
 
 Some dependencies have an optional compilation support for Cython
 resulting in better performances (mostly XML harvesting).
