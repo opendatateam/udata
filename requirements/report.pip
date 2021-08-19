@@ -153,7 +153,7 @@ feedparser==5.2.1
     #   -r requirements/test.in
 flake8==3.7.8
     # via -r requirements/report.in
-flask==1.0.4
+flask==1.1.4
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -602,7 +602,7 @@ webencodings==0.5.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   bleach
-werkzeug==0.14.1
+werkzeug==0.16.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
