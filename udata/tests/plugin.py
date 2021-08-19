@@ -388,9 +388,3 @@ class SitemapClient:
 def sitemap(client):
     sitemap_client = SitemapClient(client)
     return sitemap_client
-
-
-@pytest.fixture
-def gc_disable(request):
-    request.addfinalizer(gc.enable)
-    gc.disable()

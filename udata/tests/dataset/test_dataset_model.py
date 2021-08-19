@@ -267,9 +267,9 @@ class ResourceModelTest:
         dataset = DatasetFactory(resources=[ResourceFactory(url=url)])
         assert dataset.resources[0].url == url.strip()
 
-    # @pytest.mark.usefixtures('gc_disable')
     def test_ignore_post_save_signal(self):
         resource = ResourceFactory()
+        # assigning to a variable to avoid garbage collection issue
         _ = DatasetFactory(resources=[resource])
         unexpected_signals = Dataset.after_save, Dataset.on_update
 
