@@ -269,7 +269,8 @@ class ResourceModelTest:
 
     def test_ignore_post_save_signal(self):
         resource = ResourceFactory()
-        DatasetFactory(resources=[resource])
+        # assigning to a variable to avoid garbage collection issue
+        _ = DatasetFactory(resources=[resource])
         unexpected_signals = Dataset.after_save, Dataset.on_update
 
         with assert_not_emit(*unexpected_signals), assert_emit(post_save):
