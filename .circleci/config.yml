@@ -24,8 +24,8 @@ jobs:
           command: |
             virtualenv venv
             source venv/bin/activate
-            pip install -e . && pip check || pip install -e .
-            pip install -r requirements/develop.pip || pip install -r requirements/develop.pip
+            pip install -r requirements/develop.pip
+            pip install -e .
       - save_cache:
           key: py-cache-v13-{{ arch }}-{{ .Branch }}
           paths:

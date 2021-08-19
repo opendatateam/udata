@@ -1,39 +1,26 @@
 #!/usr/bin/env python
 
 import os
-import io
-import re
 
 from setuptools import setup, find_packages
 
-RE_BADGE = re.compile(r'^\[\!\[(?P<text>.*?)\]\[(?P<badge>.*?)\]\]\[(?P<target>.*?)\]$', re.M)
 
-BADGES_TO_KEEP = ['gitter-badge']
-
-
-def md(filename):
-    '''
-    Load .md (markdown) file and sanitize it for PyPI.
-    '''
-    content = io.open(filename).read()
-
-    for match in RE_BADGE.finditer(content):
-        if match.group('badge') not in BADGES_TO_KEEP:
-            content = content.replace(match.group(0), '')
-
-    return content
-
-
-long_description = '\n'.join((
-    md('README.md'),
-    md('CHANGELOG.md'),
-    ''
-))
+def file_content(filename):
+    '''Load file content'''
+    with open(filename) as ifile:
+        return ifile.read()
 
 
 def pip(filename):
-    """Parse pip reqs file and transform it to setuptools requirements."""
-    return open(os.path.join('requirements', filename)).readlines()
+    """Return path to pip requirements file"""
+    return file_content(os.path.join('requirements', filename))
+
+
+long_description = '\n'.join((
+    file_content('README.md'),
+    file_content('CHANGELOG.md'),
+    ''
+))
 
 
 setup(
@@ -49,11 +36,6 @@ setup(
     include_package_data=True,
     python_requires='>=3.7',
     install_requires=pip('install.pip'),
-    setup_requires=['setuptools>=38.6.0'],
-    tests_require=pip('test.pip'),
-    extras_require={
-        'test': pip('test.pip'),
-    },
     entry_points={
         'udata.themes': [
             'gouvfr = udata_gouvfr.theme.gouvfr',

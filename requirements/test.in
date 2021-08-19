@@ -1,0 +1,9 @@
+-r install.in
+-c install.pip
+
+mock==3.0.5
+pytest==4.6.3
+pytest-flask==0.15.0
+pytest-mock==2.0.0
+requests-mock==1.7.0
+feedgen==0.7.0
