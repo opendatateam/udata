@@ -113,7 +113,7 @@ faker==3.0.0
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   factory-boy
-flask==1.0.4
+flask==1.1.4
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -436,7 +436,7 @@ webencodings==0.5.1
     # via
     #   -c requirements/install.pip
     #   bleach
-werkzeug==0.14.1
+werkzeug==0.16.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in

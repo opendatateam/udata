@@ -159,7 +159,7 @@ feedparser==5.2.1
     #   -r requirements/test.in
 filelock==3.0.12
     # via virtualenv
-flask==1.0.4
+flask==1.1.4
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -646,7 +646,7 @@ webencodings==0.5.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   bleach
-werkzeug==0.14.1
+werkzeug==0.16.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

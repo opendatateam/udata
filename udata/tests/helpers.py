@@ -224,6 +224,7 @@ def assert_cors(response):
     __tracebackhide__ = True
     assert 'Access-Control-Allow-Origin' in response.headers
 
+
 def create_test_image():
     file = BytesIO()
     image = Image.new('RGBA', size=(50, 50), color=(155, 0, 0))
