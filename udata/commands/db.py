@@ -1,10 +1,16 @@
-import os
+import collections
 import logging
+import os
 
 import click
+import mongoengine
 
+from udata import migrations, models as core_models
+from udata.api import oauth2 as oauth2_models
 from udata.commands import cli, green, yellow, cyan, red, magenta, white, echo
-from udata import migrations
+from udata.harvest import models as harvest_models
+from udata.models import db
+
 
 # Date format used to for display
 DATE_FORMAT = '%Y-%m-%d %H:%M'
@@ -128,3 +134,162 @@ def display_op(op):
     label = white(op['type'].title()) + ' '
     echo('{label:.<70} [{date}]'.format(label=label, date=timestamp))
     format_output(op['output'], success=op['success'], traceback=op.get('traceback'))
+
+
+def check_references(models_to_check):
+    errors = collections.defaultdict(int)
+
+    _models = []
+    for models in core_models, harvest_models, oauth2_models:
+        _models += [
+            elt for _, elt in models.__dict__.items()
+            if isinstance(elt, type) and issubclass(elt, (db.Document))
+        ]
+
+    references = []
+    for model in _models:
+        if model.__name__ == 'Activity':
+            print(f'Skipping Activity model, scheduled for deprecation')
+            continue
+        if model.__name__ == 'GeoLevel':
+            print(f'Skipping GeoLevel model, scheduled for deprecation')
+            continue
+
+        if models_to_check and model.__name__ not in models_to_check:
+            continue
+
+        # find "root" ReferenceField fields
+        refs = [elt for elt in model._fields.values()
+                if isinstance(elt, mongoengine.fields.ReferenceField)]
+        references += [{
+            'model': model,
+            'repr': f'{model.__name__}.{r.name}',
+            'name': r.name,
+            'destination': r.document_type.__name__,
+            'type': 'direct',
+        } for r in refs]
+
+        # find "root" GenericReferenceField
+        refs = [elt for elt in model._fields.values()
+                if isinstance(elt, mongoengine.fields.GenericReferenceField)]
+        references += [{
+            'model': model,
+            'repr': f'{model.__name__}.{r.name}',
+            'name': r.name,
+            'destination': 'Generic',
+            'type': 'direct',
+        } for r in refs]
+
+        # find ListField with ReferenceField
+        list_fields = [elt for elt in model._fields.values()
+                       if isinstance(elt, mongoengine.fields.ListField)]
+        list_refs = [elt for elt in list_fields
+                     if isinstance(elt.field, mongoengine.fields.ReferenceField)]
+        references += [{
+            'model': model,
+            'repr': f'{model.__name__}.{lr.name}',
+            'name': lr.name,
+            'destination': lr.field.document_type.__name__,
+            'type': 'list',
+        } for lr in list_refs]
+
+        # find ListField w/ EmbeddedDocumentField w/ ReferenceField
+        list_embeds = [(elt, elt.field) for elt in list_fields
+                       if isinstance(elt.field, mongoengine.fields.EmbeddedDocumentField)]
+        for embed, embed_field in list_embeds:
+            embed_refs = [elt for elt in embed_field.document_type_obj._fields.values()
+                          if isinstance(elt, mongoengine.fields.ReferenceField)]
+            references += [{
+                'model': model,
+                'repr': f'{model.__name__}.{embed.name}__{er.name}',
+                'name': f'{embed.name}__{er.name}',
+                'destination': er.document_type.__name__,
+                'type': 'embed_list',
+            } for er in embed_refs]
+
+        # find EmbeddedDocumentField w/ ReferenceField
+        embeds = [elt for elt in model._fields.values()
+                  if isinstance(elt, mongoengine.fields.EmbeddedDocumentField)]
+        for embed_field in embeds:
+            embed_refs = [elt for elt in embed_field.document_type_obj._fields.values()
+                          if isinstance(elt, mongoengine.fields.ReferenceField)]
+            references += [{
+                'model': model,
+                'repr': f'{model.__name__}.{embed_field.name}__{er.name}',
+                'name': f'{embed_field.name}__{er.name}',
+                'destination': er.document_type.__name__,
+                'type': 'embed',
+            } for er in embed_refs]
+
+        # find EmbeddedDocumentField w/ ListField w/ ReferenceField
+        for embed_field in embeds:
+            embed_lists = [elt for elt in embed_field.document_type_obj._fields.values()
+                           if isinstance(elt, mongoengine.fields.ListField)]
+            elists_refs = [elt for elt in embed_lists
+                           if isinstance(elt.field, mongoengine.fields.ReferenceField)]
+            references += [{
+                'model': model,
+                'repr': f'{model.__name__}.{embed_field.name}__{lr.name}',
+                'name': f'{embed_field.name}__{lr.name}',
+                'destination': lr.field.document_type.__name__,
+                'type': 'embed_list_ref',
+            } for lr in elists_refs]
+
+    print('Those references will be inspected:')
+    for reference in references:
+        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}')
+    print('')
+
+    for reference in references:
+        print(f'- {reference["repr"]}({reference["destination"]}) — {reference["type"]}...')
+        query = {f'{reference["name"]}__ne': None}
+        qs = reference['model'].objects(**query).no_cache().all()
+        try:
+            for obj in qs:
+                if reference['type'] == 'direct':
+                    try:
+                        _ = getattr(obj, reference['name'])
+                    except mongoengine.errors.DoesNotExist:
+                        errors[reference["repr"]] += 1
+                elif reference['type'] == 'list':
+                    for sub in getattr(obj, reference['name']):
+                        try:
+                            _ = sub.id
+                        except mongoengine.errors.DoesNotExist:
+                            errors[reference["repr"]] += 1
+                elif reference['type'] == 'embed_list':
+                    p1, p2 = reference['name'].split('__')
+                    for sub in getattr(obj, p1):
+                        try:
+                            getattr(sub, p2)
+                        except mongoengine.errors.DoesNotExist:
+                            errors[reference["repr"]] += 1
+                elif reference['type'] == 'embed':
+                    p1, p2 = reference['name'].split('__')
+                    sub = getattr(obj, p1)
+                    try:
+                        getattr(sub, p2)
+                    except mongoengine.errors.DoesNotExist:
+                        errors[reference["repr"]] += 1
+                elif reference['type'] == 'embed_list_ref':
+                    p1, p2 = reference['name'].split('__')
+                    sub = getattr(getattr(obj, p1), p2)
+                    for obj in sub:
+                        try:
+                            obj.id
+                        except mongoengine.errors.DoesNotExist:
+                            errors[reference["repr"]] += 1
+                else:
+                    print(f'Unknown ref type {reference["type"]}')
+            print('Errors:', errors[reference["repr"]])
+        except mongoengine.errors.FieldDoesNotExist as e:
+            print('[ERROR]', e)
+
+    print(f'\n Total errors: {sum(errors.values())}')
+
+
+@grp.command()
+@click.option('--models', multiple=True, default=[], help='Model(s) to check')
+def check_integrity(models):
+    '''Check the integrity of the database from a business perspective'''
+    check_references(models)

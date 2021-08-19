@@ -66,7 +66,7 @@ class OAuth2Client(ClientMixin, db.Datetimed, db.Document):
     description = db.StringField()
 
     owner = db.ReferenceField('User')
-    organization = db.ReferenceField('Organization')
+    organization = db.ReferenceField('Organization', reverse_delete_rule=db.NULLIFY)
     image = db.ImageField(fs=images, basename=default_image_basename,
                           thumbnails=[150, 25])
 

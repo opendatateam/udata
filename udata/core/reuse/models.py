@@ -1,5 +1,4 @@
 from blinker import Signal
-from flask import url_for
 from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
 from elasticsearch_dsl import Integer, Object
@@ -183,11 +182,11 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['author'] = author
 
         return result
-    
+
     @property
     def views_count(self):
         return self.metrics.get('views', 0)
-    
+
     def count_datasets(self):
         self.metrics['datasets'] = len(self.datasets)
         self.save(signal_kwargs={'ignores': ['post_save']})

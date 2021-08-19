@@ -369,14 +369,25 @@ class HarvestActionsTest:
         assert source.periodic_task is None
 
     def test_purge_sources(self):
+        periodic_task = PeriodicTask.objects.create(
+            task='harvest',
+            name=faker.name(),
+            description=faker.sentence(),
+            enabled=True,
+            crontab=PeriodicTask.Crontab()
+        )
         now = datetime.now()
-        to_delete = HarvestSourceFactory.create_batch(3, deleted=now)
+        to_delete = HarvestSourceFactory.create_batch(2, deleted=now)
+        to_delete.append(
+            HarvestSourceFactory(periodic_task=periodic_task, deleted=now)
+        )
         to_keep = HarvestSourceFactory.create_batch(2)
 
         result = actions.purge_sources()
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
+        assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
