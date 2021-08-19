@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2021-08-17 15:38+0200\n"
-"PO-Revision-Date: 2021-08-18 07:58\n"
+"PO-Revision-Date: 2021-08-19 08:33\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -149,15 +149,15 @@ msgstr "a supprimé un jeu de données"
 
 #: udata/core/dataset/forms.py:39
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
-msgstr ""
+msgstr "Le nom du schéma \"{schema}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
 #: udata/core/dataset/forms.py:50
 msgid "Version \"{version}\" is not an allowed value. Allowed values: {values}"
-msgstr ""
+msgstr "La version \"{version}\" n'est pas une valeur autorisée. Valeurs autorisées : {values}"
 
 #: udata/core/dataset/forms.py:58
 msgid "Sub-property \"{prop}\" is not allowed value in schema field. Allowed values is : {properties}"
-msgstr ""
+msgstr "La sous-propriété \"{prop}\" n'est pas autorisée dans le champ schéma. Les valeurs autorisées sont : {properties}"
 
 #: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:128
 #: udata/core/discussions/forms.py:12 udata/core/issues/forms.py:12
@@ -229,7 +229,7 @@ msgstr "La date de publication de la ressource"
 
 #: udata/core/dataset/forms.py:98
 msgid "Schema"
-msgstr ""
+msgstr "Schéma"
 
 #: udata/core/dataset/forms.py:101
 msgid "The schema slug the resource adheres to"
