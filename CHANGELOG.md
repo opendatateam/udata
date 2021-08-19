@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Safeguard `User.delete()` [#2646](https://github.com/opendatateam/udata/pull/2646)
+- Fix user delete command [#2647](https://github.com/opendatateam/udata/pull/2647)
 
 ## 3.0.4 (2021-08-12)
 
