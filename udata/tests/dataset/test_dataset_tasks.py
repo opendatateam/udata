@@ -1,13 +1,15 @@
+from udata.core.user.factories import UserFactory
 import pytest
 
-from udata.models import Dataset, Topic, CommunityResource
+from udata.models import Dataset, Topic, CommunityResource, Transfer
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory, CommunityResourceFactory
-# Those imports seem mandatory for the csv adapters to be registered. This might be because of the decorator mechanism.
-from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter, IssuesOrDiscussionCsvAdapter
-from udata.core.organization.csv import OrganizationCsvAdapter
-from udata.core.reuse.csv import ReuseCsvAdapter
-from udata.core.tags.csv import TagCsvAdapter
+# Those imports seem mandatory for the csv adapters to be registered.
+# This might be because of the decorator mechanism.
+from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noqa
+from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
+from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
+from udata.core.tags.csv import TagCsvAdapter  # noqa
 
 
 pytestmark = pytest.mark.usefixtures('clean_db')
@@ -20,7 +22,18 @@ def test_purge_datasets():
     ]
 
     topic = Topic.objects.create(name='test topic', datasets=datasets)
+
+    user = UserFactory()
+    transfer = Transfer.objects.create(
+        owner=user,
+        recipient=user,
+        subject=datasets[0],
+        comment='comment',
+    )
+
     tasks.purge_datasets()
+
+    assert Transfer.objects.filter(id=transfer.id).count() == 0
 
     topic = Topic.objects(name='test topic').first()
     assert topic.datasets[0] == datasets[1]
