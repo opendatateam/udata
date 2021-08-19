@@ -66,8 +66,8 @@ def delete():
     user = User.objects(email=email).first()
     if not user:
         exit_with_error('Invalid user')
-    user.delete()
-    success('User deleted successfully')
+    user.mark_as_deleted()
+    success('User marked as deleted successfully')
 
 
 @grp.command()
