@@ -15,7 +15,7 @@ from flask_caching import Cache
 
 from flask_wtf.csrf import CSRFProtect
 from speaklater import is_lazy_string
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from udata import entrypoints
 

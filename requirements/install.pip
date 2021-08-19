@@ -73,7 +73,7 @@ faker==3.0.0
     # via
     #   -r requirements/install.in
     #   factory-boy
-flask==1.0.4
+flask==1.1.4
     # via
     #   -r requirements/install.in
     #   flask-babelex
@@ -278,7 +278,7 @@ voluptuous==0.11.7
     # via -r requirements/install.in
 webencodings==0.5.1
     # via bleach
-werkzeug==0.14.1
+werkzeug==0.16.1
     # via
     #   -r requirements/install.in
     #   flask

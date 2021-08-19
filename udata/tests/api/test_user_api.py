@@ -315,8 +315,8 @@ class UserAPITest(APITestCase):
         response = self.post(
             url_for('api.user_avatar', user=other_user),
             {'file': (file, 'test.png')},
-            json=False)
-
+            json=False,
+        )
         response = self.delete(url_for('api.user', user=other_user))
         self.assertEqual(list(storages.avatars.list_files()), [])
         self.assert204(response)
