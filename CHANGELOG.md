@@ -5,6 +5,7 @@
 - Safeguard `User.delete()` [#2646](https://github.com/opendatateam/udata/pull/2646)
 - Fix user delete command [#2647](https://github.com/opendatateam/udata/pull/2647)
 - _major_ Use pip-tools for requirements management [#2642](https://github.com/opendatateam/udata/pull/2642). Please [read the doc](https://github.com/opendatateam/udata/blob/master/docs/development-environment.md#python-and-virtual-environment) if you are a udata developer.
+- Avoid weakref when testing post_save_signal [#2649](https://github.com/opendatateam/udata/pull/2649)
 
 ## 3.0.4 (2021-08-12)
 
