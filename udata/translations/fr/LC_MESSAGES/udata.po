@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2021-08-17 15:38+0200\n"
-"PO-Revision-Date: 2021-08-19 08:33\n"
+"PO-Revision-Date: 2021-08-19 08:39\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -233,7 +233,7 @@ msgstr "Schéma"
 
 #: udata/core/dataset/forms.py:101
 msgid "The schema slug the resource adheres to"
-msgstr ""
+msgstr "L'identifiant du schéma auquel la ressource adhère"
 
 #: udata/core/dataset/forms.py:113
 msgid "Related dataset"
@@ -898,7 +898,7 @@ msgstr "a suivi une réutilisation"
 
 #: udata/core/user/forms.py:18
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
@@ -1160,12 +1160,12 @@ msgstr "%(user)s a identifié votre organisation \"%(name)s\" comme étant un se
 
 #: udata/templates/mail/base.html:45
 msgid "on your browser."
-msgstr ""
+msgstr "dans votre navigateur."
 
 #: udata/templates/mail/base.html:48
 #, python-format
 msgid "View this email %(link)s"
-msgstr ""
+msgstr "Voir cet email %(link)s"
 
 #: udata/templates/mail/base.html:76
 #, python-format
