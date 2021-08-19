@@ -28,26 +28,29 @@ both tmpfs based and your tests will make use of it and run faster.
 
 ## Backend unit tests
 
-The easiest way is to run Python tests with [nosetest][].
+The easiest way is to run Python tests with pytest.
 
 ```shell
-$ nosetests --immediate udata
+$ pytest
 ```
 
 You can launch a unique test too:
 
 ```shell
-$ nosetests --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest.test_reorder
+$ pytest udata/tests/api/test_me_api.py -k test_get_profile
 ```
 
-If you want a fancy display, you can use the [nose-mocha-reporter][] (not installed by default)
-with the dedicated option:
+To launch tests with coverage report:
 
 ```shell
-$ nosetests --with-mocha-reporter --immediate --stop --tests=udata/tests/api/test_datasets_api.py:DatasetResourceAPITest
+$ pip install requirements/report.pip
+$ inv cover
 ```
 
 ## Frontend unit tests
+
+!!! warning
+    This part is obsolete and should be rewritten.
 
 For frontend (and administration) testing, we use the following tools:
 

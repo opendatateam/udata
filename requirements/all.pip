@@ -1,3 +1,4 @@
 -r install.pip
 -r test.pip
 -r report.pip
+-r develop.pip

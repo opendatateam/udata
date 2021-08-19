@@ -28,8 +28,8 @@ jobs:
           command: |
             virtualenv venv
             source venv/bin/activate
-            pip install -e . || pip install -e .
-            pip install -r requirements/circleci.pip
+            pip install -r requirements/develop.pip
+            pip install -e .
       - save_cache:
           key: py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
           paths:
@@ -38,11 +38,6 @@ jobs:
           key: py3-cache-v9-{{ arch }}-{{ .Branch }}
           paths:
           - venv
-      - run:
-          name: Check dependencies
-          command: |
-            source venv/bin/activate
-            pip check
       - run:
           name: Run tests
           command: |
