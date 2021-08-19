@@ -6,6 +6,7 @@
 - _major_ Check db integrity and apply temporary and permanent fixes [#2644](https://github.com/opendatateam/udata/pull/2644) :warning: the associated migrations can take a long time to run.
 - Safeguard `User.delete()` [#2646](https://github.com/opendatateam/udata/pull/2646)
 - Fix user delete command [#2647](https://github.com/opendatateam/udata/pull/2647)
+- Protect `test_ignore_post_save_signal` from weak ref error while testing [#2649](https://github.com/opendatateam/udata/pull/2649)
 
 ## 3.0.4 (2021-08-12)
 
