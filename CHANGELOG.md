@@ -2,9 +2,10 @@
 
 ## Current (in progress)
 
+- _major_ Use pip-tools for requirements management [#2642](https://github.com/opendatateam/udata/pull/2642). Please [read the doc](https://github.com/opendatateam/udata/blob/master/docs/development-environment.md#python-and-virtual-environment) if you are a udata developer.
+- _major_ Check db integrity and apply temporary and permanent fixes [#2644](https://github.com/opendatateam/udata/pull/2644) :warning: the associated migrations can take a long time to run.
 - Safeguard `User.delete()` [#2646](https://github.com/opendatateam/udata/pull/2646)
 - Fix user delete command [#2647](https://github.com/opendatateam/udata/pull/2647)
-- _major_ Use pip-tools for requirements management [#2642](https://github.com/opendatateam/udata/pull/2642). Please [read the doc](https://github.com/opendatateam/udata/blob/master/docs/development-environment.md#python-and-virtual-environment) if you are a udata developer.
 
 ## 3.0.4 (2021-08-12)
 

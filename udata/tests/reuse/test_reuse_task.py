@@ -4,13 +4,10 @@ from udata.tests.api import APITestCase
 
 from udata.core import storages
 from udata.tests.helpers import create_test_image
-from udata.models import Dataset, Reuse
-from udata.core.dataset.factories import DatasetFactory
-from udata.core.user.factories import AdminFactory
+from udata.models import Reuse, Transfer
+from udata.core.user.factories import AdminFactory, UserFactory
 from udata.core.reuse.factories import ReuseFactory
-from udata.core.dataset.search import DatasetSearch
 from udata.core.reuse import tasks
-from udata.search import es
 
 
 class ReuseTasksTest(APITestCase):
@@ -31,7 +28,17 @@ class ReuseTasksTest(APITestCase):
         response = self.delete(url_for('api.reuse', reuse=reuse))
         self.assert204(response)
 
+        user = UserFactory()
+        transfer = Transfer.objects.create(
+            owner=user,
+            recipient=user,
+            subject=reuse,
+            comment='comment',
+        )
+
         tasks.purge_reuses()
+
+        assert Transfer.objects.filter(id=transfer.id).count() == 0
 
         # Check reuse's image is deleted
         self.assertEqual(list(storages.images.list_files()), [])
