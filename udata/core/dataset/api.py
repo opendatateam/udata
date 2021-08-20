@@ -21,7 +21,7 @@ import os
 import logging
 from datetime import datetime
 
-from flask import request, current_app, abort, redirect, url_for
+from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
 
 from udata import search
@@ -205,7 +205,8 @@ class DatasetRdfFormatAPI(API):
                 api.abort(410)
 
         resource = dataset_to_rdf(dataset)
-        return graph_response(resource, format)
+        res = graph_response(resource, format)
+        return make_response(*res)
 
 
 @ns.route('/badges/', endpoint='available_dataset_badges')
