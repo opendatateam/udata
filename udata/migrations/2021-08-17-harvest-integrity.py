@@ -34,7 +34,7 @@ def migrate(db):
     for harvest_job in harvest_jobs:
         for item in harvest_job.items:
             try:
-                item.dataset and item.datasets.id
+                item.dataset and item.dataset.id
             except mongoengine.errors.DoesNotExist:
                 count += 1
                 item.dataset = None
