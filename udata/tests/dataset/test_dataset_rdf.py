@@ -2,11 +2,12 @@ import pytest
 import requests
 
 from datetime import date
+from xml.etree.ElementTree import XML
 
 from flask import url_for
 
 from rdflib import Graph, URIRef, Literal, BNode
-from rdflib.namespace import RDF, FOAF
+from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata.models import db
@@ -19,8 +20,6 @@ from udata.core.dataset.rdf import (
     temporal_from_rdf, frequency_to_rdf, frequency_from_rdf,
     EU_RDF_REQUENCIES
 )
-from udata.core.organization.factories import OrganizationFactory
-from udata.core.user.factories import UserFactory
 from udata.rdf import DCAT, DCT, FREQ, SPDX, SCHEMA, SKOS
 from udata.utils import faker
 from udata.tests.helpers import assert200, assert_redirects
@@ -787,6 +786,15 @@ class DatasetRdfViewsTest:
         headers = {'accept': 'application/xml'}
         response = client.get(url, headers=headers)
         assert_redirects(response, expected)
+
+    def test_rdf_perform_content_negociation_response(self, client):
+        '''Check we have valid XML as output'''
+        dataset = DatasetFactory()
+        url = url_for('api.dataset_rdf', dataset=dataset)
+        headers = {'accept': 'application/xml'}
+        response = client.get(url, headers=headers, follow_redirects=True)
+        element = XML(response.data)
+        assert element.tag == '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}RDF'
 
     def test_dataset_rdf_json_ld(self, client):
         dataset = DatasetFactory()

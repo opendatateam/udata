@@ -205,8 +205,9 @@ class DatasetRdfFormatAPI(API):
                 api.abort(410)
 
         resource = dataset_to_rdf(dataset)
-        res = graph_response(resource, format)
-        return make_response(*res)
+        # bypass flask-restplus make_reponse, since graph_response
+        # is handling the content negociation directly
+        return make_response(*graph_response(resource, format))
 
 
 @ns.route('/badges/', endpoint='available_dataset_badges')
