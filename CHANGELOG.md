@@ -9,6 +9,7 @@
 - Fix user delete command [#2647](https://github.com/opendatateam/udata/pull/2647)
 - Protect `test_ignore_post_save_signal` from weak ref error while testing [#2649](https://github.com/opendatateam/udata/pull/2649)
 - Update translations following frontend refactoring (a lot of translations have been moved to udata-gouvfr) [#2648](https://github.com/opendatateam/udata/pull/2648)
+- Fix RDF output content negociation [#2652](https://github.com/opendatateam/udata/pull/2652)
 
 ## 3.0.4 (2021-08-12)
 
