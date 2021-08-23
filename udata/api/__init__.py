@@ -198,19 +198,6 @@ def output_json(data, code, headers=None):
     return resp
 
 
-@api.representation('application/ld+json')
-@api.representation('application/rdf+xml')
-@api.representation('application/trig')
-@api.representation('application/x-turtle')
-@api.representation('application/n-triples')
-@api.representation('text/n3')
-def output_xml(data, code, headers=None):
-    '''Use Flask XML to serialize'''
-    resp = make_response(data, code)
-    resp.headers.extend(headers or {})
-    return resp
-
-
 @apiv1.before_request
 def set_api_language():
     if 'lang' in request.args:
