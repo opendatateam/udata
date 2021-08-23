@@ -6,6 +6,7 @@ from dateutil.parser import parse
 from voluptuous import Schema
 
 from udata.utils import faker
+from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory
 from udata.models import Dataset
 from udata.tests.helpers import assert_equal_dates
@@ -232,6 +233,26 @@ class BaseBackendTest:
         assert dataset.archived is None
         assert 'harvest:archived' not in dataset.extras
         assert 'harvest:archived_at' not in dataset.extras
+
+    def test_harvest_datasets_get_deleted(self):
+        nb_datasets = 3
+        source = HarvestSourceFactory(config={'nb_datasets': nb_datasets})
+        backend = FakeBackend(source)
+
+        job = backend.harvest()
+
+        for item in job.items:
+            assert item.dataset is not None
+
+        for dataset in Dataset.objects():
+            dataset.deleted = '2016-01-01'
+            dataset.save()
+
+        tasks.purge_datasets()
+
+        job.reload()
+        for item in job.items:
+            assert item.dataset is None
 
 
 @pytest.mark.usefixtures('clean_db')
