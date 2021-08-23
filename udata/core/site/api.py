@@ -111,7 +111,10 @@ class SiteRdfCatalogFormat(API):
         # is handling the content negociation directly
         return make_response(*graph_response(catalog, format))
 
+
 @api.route('/site/context.jsonld', endpoint='site_jsonld_context')
 class SiteJsonLdContext(API):
     def get(self):
-        return json.dumps(CONTEXT), 200, {'Content-Type': 'application/ld+json'}
+        response = make_response(json.dumps(CONTEXT))
+        response.headers['Content-Type'] = 'application/ld+json'
+        return response
