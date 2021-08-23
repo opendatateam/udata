@@ -29,7 +29,7 @@ def migrate(db):
 
     log.info('Processing HarvestJob items references.')
 
-    harvest_jobs = HarvestJob.objects.filter(items__0__exists=True)
+    harvest_jobs = HarvestJob.objects.filter(items__0__exists=True).no_cache().all()
     count = 0
     for harvest_job in harvest_jobs:
         for item in harvest_job.items:
