@@ -1,5 +1,5 @@
 '''
-Remove User db integrity problems, and Issue.subject in the process
+Remove User db integrity problems, and Issue.subject and Discussion.subject in the process
 '''
 import logging
 
@@ -19,6 +19,7 @@ def migrate(db):
     for discussion in discussions:
         try:
             discussion.user.id
+            discussion.subject.id
         except mongoengine.errors.DoesNotExist:
             discussion.delete()
             remove_count += 1
@@ -52,6 +53,21 @@ def migrate(db):
                 org.save()
 
     log.info(f'Modified {count} badges')
+
+    log.info('Processing Request user references.')
+
+    organizations = Organization.objects.filter(requests__0__exists=True)
+    count = 0
+    for org in organizations:
+        for request in org.requests:
+            try:
+                request.handled_by and request.handled_by.id
+            except mongoengine.errors.DoesNotExist:
+                count += 1
+                request.handled_by = None
+                org.save()
+
+    log.info(f'Modified {count} requests')
 
     log.info('Processing Issues user references.')
 
