@@ -181,7 +181,7 @@ netaddr==0.7.19
     # via -r requirements/install.in
 passlib==1.7.4
     # via flask-security-too
-pillow==7.0.0
+pillow==8.0.0
     # via
     #   -r requirements/install.in
     #   pydenticon

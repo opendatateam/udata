@@ -390,7 +390,7 @@ passlib==1.7.4
     #   flask-security-too
 pep517==0.11.0
     # via pip-tools
-pillow==7.0.0
+pillow==8.0.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip

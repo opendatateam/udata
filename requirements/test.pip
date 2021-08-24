@@ -293,7 +293,7 @@ passlib==1.7.4
     # via
     #   -c requirements/install.pip
     #   flask-security-too
-pillow==7.0.0
+pillow==8.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
