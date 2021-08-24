@@ -106,6 +106,7 @@ email-validator==1.1.3
     # via
     #   -c requirements/install.pip
     #   flask-security-too
+    #   wtforms
 factory-boy==2.12.0
     # via
     #   -c requirements/install.pip
@@ -173,7 +174,7 @@ flask-mail==0.9.1
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   flask-security-too
-flask-mongoengine==0.9.5
+flask-mongoengine==1.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -201,7 +202,7 @@ flask-themes2==0.1.4
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-flask-wtf==0.14.2
+flask-wtf==0.15.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -239,6 +240,7 @@ itsdangerous==1.1.0
     #   -r requirements/install.in
     #   flask
     #   flask-security-too
+    #   flask-wtf
 jinja2==2.10.3
     # via
     #   -c requirements/install.pip
@@ -263,13 +265,14 @@ markupsafe==2.0.1
     # via
     #   -c requirements/install.pip
     #   jinja2
+    #   wtforms
 mistune==0.8.4
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
 mock==3.0.5
     # via -r requirements/test.in
-mongoengine==0.18.2
+mongoengine==0.23.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -394,13 +397,11 @@ six==1.16.0
     #   faker
     #   flask-cors
     #   flask-fs
-    #   flask-mongoengine
     #   flask-restplus
     #   httpretty
     #   isodate
     #   jsonschema
     #   mock
-    #   mongoengine
     #   pytest
     #   python-dateutil
     #   rdflib
@@ -475,10 +476,11 @@ werkzeug==0.16.1
     #   -r requirements/install.in
     #   flask
     #   pytest-flask
-wtforms==2.2.1
+wtforms[email]==2.3.3
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+    #   flask-mongoengine
     #   flask-wtf
     #   wtforms-json
 wtforms-json==0.3.3

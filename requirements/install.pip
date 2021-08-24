@@ -66,7 +66,9 @@ elasticsearch==2.4.1
 elasticsearch-dsl==2.2.0
     # via -r requirements/install.in
 email-validator==1.1.3
-    # via flask-security-too
+    # via
+    #   flask-security-too
+    #   wtforms
 factory-boy==2.12.0
     # via -r requirements/install.in
 faker==3.0.0
@@ -114,7 +116,7 @@ flask-mail==0.9.1
     # via
     #   -r requirements/install.in
     #   flask-security-too
-flask-mongoengine==0.9.5
+flask-mongoengine==1.0.0
     # via -r requirements/install.in
 flask-navigation==0.2.0
     # via -r requirements/install.in
@@ -128,7 +130,7 @@ flask-sitemap==0.3.0
     # via -r requirements/install.in
 flask-themes2==0.1.4
     # via -r requirements/install.in
-flask-wtf==0.14.2
+flask-wtf==0.15.1
     # via
     #   -r requirements/install.in
     #   flask-mongoengine
@@ -151,6 +153,7 @@ itsdangerous==1.1.0
     #   -r requirements/install.in
     #   flask
     #   flask-security-too
+    #   flask-wtf
 jinja2==2.10.3
     # via
     #   -r requirements/install.in
@@ -167,10 +170,12 @@ kombu[redis]==4.4.0
 lxml==4.4.2
     # via -r requirements/install.in
 markupsafe==2.0.1
-    # via jinja2
+    # via
+    #   jinja2
+    #   wtforms
 mistune==0.8.4
     # via -r requirements/install.in
-mongoengine==0.18.2
+mongoengine==0.23.1
     # via
     #   -r requirements/install.in
     #   celerybeat-mongo
@@ -237,11 +242,9 @@ six==1.16.0
     #   faker
     #   flask-cors
     #   flask-fs
-    #   flask-mongoengine
     #   flask-restplus
     #   isodate
     #   jsonschema
-    #   mongoengine
     #   python-dateutil
     #   rdflib
     #   wtforms-json
@@ -282,9 +285,10 @@ werkzeug==0.16.1
     # via
     #   -r requirements/install.in
     #   flask
-wtforms==2.2.1
+wtforms[email]==2.3.3
     # via
     #   -r requirements/install.in
+    #   flask-mongoengine
     #   flask-wtf
     #   wtforms-json
 wtforms-json==0.3.3
