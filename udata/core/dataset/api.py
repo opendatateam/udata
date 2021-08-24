@@ -21,7 +21,7 @@ import os
 import logging
 from datetime import datetime
 
-from flask import request, current_app, abort, redirect, url_for
+from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
 
 from udata import search
@@ -205,7 +205,9 @@ class DatasetRdfFormatAPI(API):
                 api.abort(410)
 
         resource = dataset_to_rdf(dataset)
-        return graph_response(resource, format)
+        # bypass flask-restplus make_response, since graph_response
+        # is handling the content negociation directly
+        return make_response(*graph_response(resource, format))
 
 
 @ns.route('/badges/', endpoint='available_dataset_badges')

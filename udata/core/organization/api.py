@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import request, url_for, redirect
+from flask import request, url_for, redirect, make_response
 
 from udata import search
 from udata.api import api, API, errors
@@ -144,7 +144,9 @@ class OrganizationRdfFormatAPI(API):
         page_size = int(params.get('page_size', 100))
         datasets = Dataset.objects(organization=org).visible().paginate(page, page_size)
         catalog = build_org_catalog(org, datasets, format=format)
-        return graph_response(catalog, format)
+        # bypass flask-restplus make_response, since graph_response
+        # is handling the content negociation directly
+        return make_response(*graph_response(catalog, format))
 
 
 @ns.route('/badges/', endpoint='available_organization_badges')
