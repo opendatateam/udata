@@ -382,12 +382,14 @@ class HarvestActionsTest:
             HarvestSourceFactory(periodic_task=periodic_task, deleted=now)
         )
         to_keep = HarvestSourceFactory.create_batch(2)
+        harvest_job = HarvestJobFactory(source=to_delete[0])
 
         result = actions.purge_sources()
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
+        assert HarvestJob.objects(id=harvest_job.id).count() == 0
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
