@@ -226,7 +226,7 @@ class Defaults(object):
     HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
 
     # The number of days of harvest jobs to keep (ie. number of days of history kept)
-    HARVEST_JOBS_RETENTION_DAYS = 365
+    HARVEST_JOBS_RETENTION_DAYS = 90
 
     # The number of days since last harvesting date when a missing dataset is archived
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
