@@ -1,3 +1,5 @@
-udata>=3.0.3
+-c udata.pip
+
 feedparser==5.2.1
-python-frontmatter==0.5.0
+python-frontmatter==1.0.0
+sentry-sdk[flask] >= 1.1.0

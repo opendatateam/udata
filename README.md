@@ -32,6 +32,8 @@ THEME = 'gouvfr'
 
 Prepare a [udata development environment][udata-develop].
 
+Note that we're using [pip-tools][udata-deps] on this repository too.
+
 It is recommended to have a workspace with the following layout:
 
 ```shell
@@ -54,8 +56,12 @@ and install it in development mode:
 
 ```shell
 git clone https://github.com/etalab/udata-gouvfr.git
-pip install -e udata-gouvfr
+cd udata-gouvfr
+pre-commit install
+pip install -e . -r requirements/test.pip -r requirements/develop.pip
 ```
+
+> NB: the `udata.(in|pip)` files are used by the CI to stay in sync with `udata` requirements. You shouldn't need to tinker with them on your local environment, but they might be updated by the CI when you make a Pull Request.
 
 Modify your local `udata.cfg` configuration file as following:
 
@@ -136,3 +142,4 @@ Finally, we have a bunch of commands to make your life a tad easier, that you ca
 [udata]: https://github.com/opendatateam/udata
 [udata-doc]: http://udata.readthedocs.io/en/stable/
 [udata-develop]: http://udata.readthedocs.io/en/stable/development-environment/
+[udata-deps]: https://udata.readthedocs.io/en/stable/development-environment/#dependency-management

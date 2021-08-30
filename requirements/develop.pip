@@ -4,385 +4,45 @@
 #
 #    pip-compile --output-file=requirements/develop.pip requirements/develop.in
 #
-amqp==2.6.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   kombu
-aniso8601==9.0.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-restplus
-appdirs==1.4.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   urlextract
 atomicwrites==1.4.0
     # via
     #   -c requirements/test.pip
     #   pytest
 attrs==21.2.0
     # via
-    #   -c requirements/install.pip
     #   -c requirements/test.pip
-    #   jsonschema
     #   pytest
-authlib==0.14.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-awesome-slugify==1.6.5
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-babel==2.8.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-babelex
-    #   udata
-bcrypt==3.1.7
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-billiard==3.6.4.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   celery
 bleach==3.1.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   readme-renderer
-    #   udata
-blinker==1.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-mail
-    #   flask-navigation
-    #   flask-principal
-    #   flask-sitemap
-    #   udata
-celery==4.3.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   celerybeat-mongo
-    #   udata
-celerybeat-mongo==0.2.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-certifi==2021.5.30
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   requests
+    # via readme-renderer
 cffi==1.14.6
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   bcrypt
-    #   cmarkgfm
-    #   cryptography
-chardet==3.0.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   requests
-    #   udata
-click==7.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask
-    #   udata
+    # via cmarkgfm
 cmarkgfm==0.6.0
     # via readme-renderer
 coverage==5.5
     # via pytest-cov
-cryptography==2.8
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   authlib
-    #   udata
-dnspython==2.1.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   email-validator
 docutils==0.17.1
     # via readme-renderer
-elasticsearch==2.4.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   elasticsearch-dsl
-    #   udata
-elasticsearch-dsl==2.2.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-email-validator==1.1.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-security-too
 entrypoints==0.3
     # via flake8
-factory-boy==2.12.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-faker==3.0.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   factory-boy
-    #   udata
-feedgen==0.7.0
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
-feedparser==5.2.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   -r requirements/install.in
 flake8==3.7.7
     # via -r requirements/develop.in
-flask==1.0.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-babelex
-    #   flask-caching
-    #   flask-cdn
-    #   flask-cors
-    #   flask-fs
-    #   flask-gravatar
-    #   flask-login
-    #   flask-mail
-    #   flask-mongoengine
-    #   flask-navigation
-    #   flask-principal
-    #   flask-restplus
-    #   flask-security-too
-    #   flask-sitemap
-    #   flask-themes2
-    #   flask-wtf
-    #   pytest-flask
-    #   udata
-flask-babelex==0.9.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-security-too
-    #   udata
-flask-caching==1.8.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-cdn==1.5.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-cors==3.0.8
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-fs==0.6.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-gravatar==0.5.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-login==0.4.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-security-too
-    #   udata
-flask-mail==0.9.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-security-too
-    #   udata
-flask-mongoengine==0.9.5
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-navigation==0.2.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-principal==0.4.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-security-too
-flask-restplus==0.13.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-security-too==3.4.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-sitemap==0.3.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-themes2==0.1.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-flask-wtf==0.14.2
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-mongoengine
-    #   flask-security-too
-    #   udata
-geojson==2.5.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-html2text==2019.9.26
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-idna==2.10
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   email-validator
-    #   requests
-    #   urlextract
 importlib-metadata==4.6.3
     # via
     #   -c requirements/test.pip
-    #   jsonschema
     #   pluggy
     #   pytest
 invoke==1.2.0
     # via -r requirements/develop.in
-isodate==0.6.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   rdflib
-itsdangerous==1.1.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask
-    #   flask-security-too
-    #   udata
-jinja2==2.10.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask
-    #   flask-babelex
-    #   udata
-jsonschema==3.2.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-restplus
-    #   udata
-kombu[redis]==4.4.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   celery
-    #   udata
-lxml==4.4.2
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   feedgen
-    #   udata
-markupsafe==2.0.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   jinja2
 mccabe==0.6.1
     # via flake8
-mistune==0.8.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-mock==3.0.5
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
-mongoengine==0.18.2
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   celerybeat-mongo
-    #   flask-mongoengine
-    #   udata
 more-itertools==8.8.0
     # via
     #   -c requirements/test.pip
     #   pytest
-msgpack==0.6.2
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-netaddr==0.7.19
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
 packaging==21.0
     # via
     #   -c requirements/test.pip
     #   pytest
-passlib==1.7.4
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-security-too
-pillow==7.0.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   pydenticon
-    #   udata
 pluggy==0.13.1
     # via
     #   -c requirements/test.pip
@@ -394,259 +54,40 @@ py==1.10.0
 pycodestyle==2.5.0
     # via flake8
 pycparser==2.20
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   cffi
-pydenticon==0.3.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
+    # via cffi
 pyflakes==2.1.1
     # via flake8
 pygments==2.9.0
     # via readme-renderer
-pymongo==3.10.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   celerybeat-mongo
-    #   mongoengine
-    #   udata
 pyparsing==2.4.7
     # via
-    #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   packaging
-    #   rdflib
-pyrsistent==0.18.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   jsonschema
 pytest==4.6.3
     # via
     #   -c requirements/test.pip
-    #   -r requirements/test.in
     #   pytest-cov
-    #   pytest-flask
-    #   pytest-mock
 pytest-cov==2.6.1
     # via -r requirements/develop.in
-pytest-flask==0.15.0
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
-pytest-mock==2.0.0
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
-python-dateutil==2.8.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   elasticsearch-dsl
-    #   faker
-    #   feedgen
-    #   flask-fs
-    #   udata
-python-frontmatter==0.5.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   -r requirements/install.in
-pytz==2019.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   babel
-    #   celery
-    #   flask-restplus
-    #   udata
-pyyaml==5.4.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   python-frontmatter
-rdflib==5.0.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   rdflib-jsonld
-    #   udata
-rdflib-jsonld==0.5.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
 readme-renderer[md]==24.0
     # via -r requirements/develop.in
-redis==3.3.11
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   kombu
-    #   udata
-regex==2021.8.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   awesome-slugify
-requests==2.24.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   requests-mock
-    #   udata
-requests-mock==1.7.0
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
-simplejson==3.17.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-themes2
-    #   udata
 six==1.16.0
     # via
-    #   -c requirements/install.pip
     #   -c requirements/test.pip
-    #   bcrypt
     #   bleach
-    #   cryptography
-    #   elasticsearch-dsl
-    #   faker
-    #   flask-cors
-    #   flask-fs
-    #   flask-mongoengine
-    #   flask-restplus
-    #   isodate
-    #   jsonschema
-    #   mock
-    #   mongoengine
     #   pytest
-    #   python-dateutil
-    #   python-frontmatter
-    #   rdflib
     #   readme-renderer
-    #   requests-mock
-    #   wtforms-json
-speaklater==1.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-babelex
-stringdist==1.0.9
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-text-unidecode==1.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   faker
-tlds==2021080900
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
 typing-extensions==3.10.0.0
     # via
     #   -c requirements/test.pip
     #   importlib-metadata
-udata==3.0.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   -r requirements/install.in
-ujson==1.35
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-unicodecsv==0.14.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-unidecode==0.4.21
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   awesome-slugify
-uritools==3.0.2
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   urlextract
-urlextract==0.14.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-urllib3==1.25.11
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   elasticsearch
-    #   requests
-vine==1.3.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   amqp
-    #   celery
-    #   udata
-voluptuous==0.11.7
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
 wcwidth==0.2.5
     # via
     #   -c requirements/test.pip
     #   pytest
 webencodings==0.5.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   bleach
-werkzeug==0.14.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask
-    #   pytest-flask
-    #   udata
-wtforms==2.2.1
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   flask-wtf
-    #   udata
-    #   wtforms-json
-wtforms-json==0.3.3
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-xmltodict==0.12.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
+    # via bleach
 zipp==3.5.0
     # via
     #   -c requirements/test.pip
     #   importlib-metadata
-zxcvbn==4.4.28
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools

@@ -11,9 +11,13 @@ def file_content(filename):
         return ifile.read()
 
 
-def pip(filename):
-    """Return path to pip requirements file"""
-    return file_content(os.path.join('requirements', filename))
+def get_requirements():
+    '''Return content of pip requirements file with very custom logic'''
+    reqs = file_content(os.path.join('requirements', 'udata.pip')).splitlines()
+    # keep only the ref to udata, unpinned if not udata==xxx
+    reqs = [r for r in reqs if r.strip().startswith('udata')] or ['udata']
+    reqs += file_content(os.path.join('requirements', 'install.pip')).splitlines()
+    return reqs
 
 
 long_description = '\n'.join((
@@ -21,7 +25,6 @@ long_description = '\n'.join((
     file_content('CHANGELOG.md'),
     ''
 ))
-
 
 setup(
     name='udata-gouvfr',
@@ -35,7 +38,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     python_requires='>=3.7',
-    install_requires=pip('install.pip'),
+    install_requires=get_requirements(),
     entry_points={
         'udata.themes': [
             'gouvfr = udata_gouvfr.theme.gouvfr',

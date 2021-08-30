@@ -2,6 +2,62 @@
 version: 2
 
 jobs:
+  deps:
+    docker:
+      - image: udata/circleci:2-alpine
+    steps:
+      - checkout
+      # needed to commit changed *.pip files if needed
+      - add_ssh_keys:
+          fingerprints:
+            - 0f:6a:bf:3e:f5:85:d5:41:ca:77:ef:85:7f:f8:b5:9e
+      # FIXME: do we need this? ${CIRCLE_BRANCH} seems ok
+      - run:
+          name: Get the base reference branch
+          command: export BASE_BRANCH=$(base_branch)
+      - restore_cache:
+          keys:
+          - py-cache-v13-{{ arch }}-{{ .Branch }}
+          - py-cache-v13-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+      - run:
+          name: Create venv and install pip-tools
+          command: |
+            virtualenv venv
+            source venv/bin/activate
+            pip install pip-tools
+      - run:
+          name: Upgrade udata to latest pypi release if tagged release
+          command: |
+            if [[ $CIRCLE_TAG ]]; then
+              # upgrade udata to latest pypi release
+              echo "udata" > requirements/udata.in
+              echo "tagged release, using udata as content of udata.in"
+            else
+              echo "not a tagged release, using checked-in udata.in"
+            fi
+      - run:
+          name: Compile python dependencies against udata
+          command: |
+            source venv/bin/activate
+            pip-compile requirements/udata.in --output-file=requirements/udata.pip
+            pip-compile requirements/install.in --output-file=requirements/install.pip
+            pip-compile requirements/test.in --output-file=requirements/test.pip
+            pip-compile requirements/develop.in --output-file=requirements/develop.pip
+      - run:
+          name: Commit any change in compiled *.pip
+          command: |
+            git config --global user.email "robot@data.gouv.fr"
+            git config --global user.name "Circle CI"
+            ( \
+              git ls-files -m|grep -E "(install|test|develop|udata).pip" \
+              && git commit requirements/*.pip -m "[auto] update deps" \
+              && git push origin ${CIRCLE_BRANCH} \
+            ) || true
+      - persist_to_workspace:
+          root: .
+          paths:
+          - venv
+
   python:
     docker:
       - image: udata/circleci:2-alpine
@@ -12,19 +68,16 @@ jobs:
        BASH_ENV: /root/.bashrc
     steps:
       - checkout
-      - run:
-          name: Get the base reference branch
-          command: export BASE_BRANCH=$(base_branch)
-      - restore_cache:
-          keys:
-          - py-cache-v13-{{ arch }}-{{ .Branch }}
-          - py-cache-v13-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+      - attach_workspace:
+          at: .
       - run:
           name: Install python dependencies
           command: |
-            virtualenv venv
             source venv/bin/activate
-            pip install -r requirements/develop.pip
+            pip install -r requirements/udata.pip \
+                        -r requirements/install.pip \
+                        -r requirements/test.pip \
+                        -r requirements/develop.pip
             pip install -e .
       - save_cache:
           key: py-cache-v13-{{ arch }}-{{ .Branch }}
@@ -40,7 +93,6 @@ jobs:
       - store_artifacts:
           path: reports/
           destination: reports
-
       - persist_to_workspace:
           root: .
           paths:
@@ -138,7 +190,13 @@ workflows:
   version: 2
   build:
     jobs:
+      - deps:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
       - python:
+          requires:
+            - deps
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*/
