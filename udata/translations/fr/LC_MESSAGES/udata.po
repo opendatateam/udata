@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2021-08-17 15:38+0200\n"
-"PO-Revision-Date: 2021-08-19 08:39\n"
+"PO-Revision-Date: 2021-08-30 10:18\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -906,7 +906,7 @@ msgstr "Avatar"
 
 #: udata/core/user/forms.py:21
 msgid "About"
-msgstr "À Propos"
+msgstr "À propos"
 
 #: udata/core/user/forms.py:25
 msgid "Roles"
