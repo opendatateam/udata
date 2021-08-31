@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 3.1.0 (2021-08-31)
 
 - Add About in header [#623](https://github.com/etalab/udata-gouvfr/pull/623)
 - Add link to profile in admin for sysadmin [#624](https://github.com/etalab/udata-gouvfr/pull/624)
