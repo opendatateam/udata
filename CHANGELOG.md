@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.1.0 (2021-08-31)
 
 - :warning: Use pip-tools for requirements management [#2642](https://github.com/opendatateam/udata/pull/2642)[#2650](https://github.com/opendatateam/udata/pull/2650)[#2651](https://github.com/opendatateam/udata/pull/2651). Please [read the doc](https://github.com/opendatateam/udata/blob/master/docs/development-environment.md#python-and-virtual-environment) if you are a udata developer.
