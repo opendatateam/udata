@@ -46,13 +46,19 @@ jobs:
       - run:
           name: Commit any change in compiled *.pip
           command: |
-            git config --global user.email "robot@data.gouv.fr"
-            git config --global user.name "Circle CI"
-            ( \
-              git ls-files -m|grep -E "(install|test|develop|udata).pip" \
-              && git commit requirements/*.pip -m "[auto] update deps" \
-              && git push origin ${CIRCLE_BRANCH} \
-            ) || true
+            echo "here is the git diff after dependencies update:"
+            git diff
+            if [[ $CIRCLE_TAG ]]; then
+              echo "This a tag build, do not push changes"
+            else
+              git config --global user.email "robot@data.gouv.fr"
+              git config --global user.name "Circle CI"
+              ( \
+                git ls-files -m|grep -E "(install|test|develop|udata).pip" \
+                && git commit requirements/*.pip -m "[auto] update deps" \
+                && git push origin ${CIRCLE_BRANCH} \
+              ) || true
+            fi
       - persist_to_workspace:
           root: .
           paths:
