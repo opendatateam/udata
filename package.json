@@ -1,18 +1,18 @@
 {
-  "name": "udata-gouvfr",
+  "name": "udata-front",
   "version": "1.0.0",
   "description": "Open Data Portal - French customization",
   "author": "Etalab",
   "scripts": {
     "dev": "npm run clean && npm run watch",
     "build": "npm run clean && npm run build:stylemark && npm run build:app",
-    "build:app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_gouvfr/theme/gouvfr/static/",
+    "build:app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_front/theme/gouvfr/static/",
     "build:stylemark": "npm run build:app -- --no-minify",
     "i18n:report": "vue-i18n-extract report -v 'theme/**/*.vue' -l 'theme/js/locales/**/*'",
     "i18n:extract": "npm run i18n:report -- -a",
     "clean": "rimraf .parcel-cache",
     "start": "npm run dev",
-    "watch": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_gouvfr/theme/gouvfr/static/"
+    "watch": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_front/theme/gouvfr/static/"
   },
   "dependencies": {
     "@meforma/vue-toaster": "^1.2.0",
@@ -54,16 +54,16 @@
     "staticPath": [
       {
         "staticPath": "theme/img",
-        "staticOutDir": "udata_gouvfr/theme/gouvfr/static/img/"
+        "staticOutDir": "udata_front/theme/gouvfr/static/img/"
       }
     ]
   },
   "stylemarkPath": {
-    "input": "udata_gouvfr/theme/gouvfr/static/",
-    "output": "udata_gouvfr/theme/gouvfr/static/stylemark/"
+    "input": "udata_front/theme/gouvfr/static/",
+    "output": "udata_front/theme/gouvfr/static/stylemark/"
   },
   "alias": {
-    "svg": "./udata_gouvfr/theme/gouvfr/templates/svg",
+    "svg": "./udata_front/theme/gouvfr/templates/svg",
     "vue": "vue/dist/vue.cjs.js"
   },
   "license": "MIT"

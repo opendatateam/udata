@@ -143,8 +143,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - udata_gouvfr/theme/gouvfr/static
-            - udata_gouvfr/theme/manifest.json
+            - udata_front/theme/gouvfr/static
+            - udata_front/theme/manifest.json
 
   dist:
     docker:

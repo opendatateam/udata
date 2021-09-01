@@ -1,4 +1,4 @@
-name: udata_gouvfr Ui-Kit
+name: udata_front Ui-Kit
 match: '/.*\.(sass|scss|less|css|js|vue)/g'
 theme:
   logo: theme/less/images/logo.png
@@ -9,7 +9,7 @@ theme:
     textColor: "#070d54"
 examples:
   css:
-    - udata_gouvfr/theme/gouvfr/static/less/index.css
+    - udata_front/theme/gouvfr/static/less/index.css
     - theme/less/examples.css
   js:
-    - udata_gouvfr/theme/gouvfr/static/js/index.js
+    - udata_front/theme/gouvfr/static/js/index.js

@@ -27,12 +27,12 @@ long_description = '\n'.join((
 ))
 
 setup(
-    name='udata-gouvfr',
-    version=__import__('udata_gouvfr').__version__,
-    description=__import__('udata_gouvfr').__description__,
+    name='udata-front',
+    version=__import__('udata_front').__version__,
+    description=__import__('udata_front').__description__,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/etalab/udata-gouvfr',
+    url='https://github.com/etalab/udata-front',
     author='Etalab',
     author_email='pypi@data.gouv.fr',
     packages=find_packages(),
@@ -41,20 +41,20 @@ setup(
     install_requires=get_requirements(),
     entry_points={
         'udata.themes': [
-            'gouvfr = udata_gouvfr.theme.gouvfr',
+            'gouvfr = udata_front.theme.gouvfr',
         ],
         'udata.models': [
-            'gouvfr = udata_gouvfr.models',
+            'front = udata_front.models',
         ],
-        'udata.front': 'gouvfr = udata_gouvfr.frontend',
+        'udata.front': 'front = udata_front.frontend',
         'udata.apis': [
-            'gouvfr_oembed = udata_gouvfr.views.oembed',
+            'front_oembed = udata_front.views.oembed',
         ],
         'udata.harvesters': [
-            'maaf = udata_gouvfr.harvesters.maaf:MaafBackend',
+            'maaf = udata_front.harvesters.maaf:MaafBackend',
         ],
         'udata.tasks': [
-             'gouvfr = udata_gouvfr.tasks',
+            'front = udata_front.tasks',
         ],
     },
     license='LGPL',

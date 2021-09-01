@@ -34,8 +34,8 @@ bower
 /instance/
 /static/
 node_modules
-/udata_gouvfr/theme/gouvfr/static/
-/udata_gouvfr/theme/manifest.json
+/udata_front/theme/gouvfr/static/
+/udata_front/theme/manifest.json
 
 # Installer logs
 pip-log.txt

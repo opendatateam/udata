@@ -1,5 +1,5 @@
 [bumpr]
-file = udata_gouvfr/__init__.py
+file = udata_front/__init__.py
 vcs = git
 commit = true
 tag = true

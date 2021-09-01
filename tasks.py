@@ -8,9 +8,9 @@ from invoke import task, call
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
-I18N_ROOT = 'udata_gouvfr/theme/gouvfr/translations'
+I18N_ROOT = 'udata_front/theme/gouvfr/translations'
 
-THEME_ROOT = os.path.join(ROOT, 'udata_gouvfr/theme', 'gouvfr')
+THEME_ROOT = os.path.join(ROOT, 'udata_front/theme', 'gouvfr')
 
 LANGUAGES = ['fr']
 
@@ -74,7 +74,7 @@ def test(ctx, report=False):
 @task
 def cover(ctx, html=False, report=True):
     '''Run tests suite with coverage'''
-    cmd = 'pytest --cov udata_gouvfr --cov-report term'
+    cmd = 'pytest --cov udata_front --cov-report term'
     if report:
         cmd = ' '.join((cmd, '--junitxml=reports/tests.xml'))
     if html:
@@ -89,7 +89,7 @@ def qa(ctx):
     header(qa.__doc__)
     with ctx.cd(ROOT):
         info('Python Static Analysis')
-        flake8_results = ctx.run('flake8 udata_gouvfr', pty=True, warn=True)
+        flake8_results = ctx.run('flake8 udata_front', pty=True, warn=True)
         if flake8_results.failed:
             error('There is some lints to fix')
         else:

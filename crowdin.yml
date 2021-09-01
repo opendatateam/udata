@@ -1,6 +1,6 @@
 files:
-  - source: /udata_gouvfr/theme/gouvfr/translations/gouvfr.pot
+  - source: /udata_front/theme/gouvfr/translations/gouvfr.pot
     translation: >-
-      /udata_gouvfr/theme/gouvfr/translations/%two_letters_code%/LC_MESSAGES/%file_name%.po
+      /udata_front/theme/gouvfr/translations/%two_letters_code%/LC_MESSAGES/%file_name%.po
   - source: /theme/js/locales/en.json
     translation: /theme/js/locales/%two_letters_code%.json

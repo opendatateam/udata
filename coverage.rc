@@ -1,8 +1,8 @@
 [run]
-source = udata_gouvfr
+source = udata_front
 branch = True
 omit =
-    udata_gouvfr/tests.py
+    udata_front/tests.py
 
 [report]
 # Regexes for lines to exclude from consideration

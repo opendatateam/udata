@@ -1,0 +1,13 @@
+{
+  "application": "udata",
+  "identifier": "gouvfr",
+  "name": "Data.gouv.fr",
+  "author": "Etalab",
+  "description": "Data.gouv.fr theme",
+  "website": "http://data.gouv.fr",
+  "license": "AGPL",
+  "version": "0.1.0",
+  "doctype": "html5",
+  "variants": ["deuil"],
+  "github_faq_url_pattern": "https://github.com/etalab/udata-gouvfr/edit/master/udata_front/templates/faq/{page_name}.html"
+}
