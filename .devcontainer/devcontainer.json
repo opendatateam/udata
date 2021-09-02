@@ -1,0 +1,10 @@
+{
+    "dockerComposeFile": ["../docker-compose.yml", "docker-compose.extend.yml"],
+    "workspaceFolder": "/workspace",
+    "service": "udata",
+	"extensions": [
+		"microsoft.python"
+	],
+    "forwardPorts": [27017, 6379, 9200],
+    "postCreateCommand": "echo 'Setup is ready!'"
+}
