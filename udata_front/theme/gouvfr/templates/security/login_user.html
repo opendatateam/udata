@@ -13,7 +13,7 @@
                         <div class="mt-lg">
                             <p class="fs-sm mb-sm">
                                 {{ _('Forgot your password?') }}
-                                <a href="{{ url_for('security.forgot_password', next=request.endoint) }}">
+                                <a href="{{ url_for('security.forgot_password', next=url_for(request.endpoint, **request.view_args)) }}">
                                     {{ _('Recover your password') }}
                                 </a>
                             </p>
@@ -36,7 +36,7 @@
                 <h3 class="fs-sm mb-sm">
                     {{ _('Don\'t have an account?')}}
                 </h3>
-                <a title="{{ _('Sign up') }}" href="{{ url_for('security.register', next=request.endpoint) }}"
+                <a title="{{ _('Sign up') }}" href="{{ url_for('security.register', next=url_for(request.endpoint, **request.view_args)) }}"
                     class="btn btn-primary btn-block btn-lg">
                     {{ _('Create an account') }}
                 </a>
