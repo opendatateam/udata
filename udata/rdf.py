@@ -11,7 +11,6 @@ from rdflib.namespace import (
     Namespace, NamespaceManager, DCTERMS, SKOS, FOAF, XSD, RDFS, RDF
 )
 from rdflib.util import SUFFIX_FORMAT_MAP, guess_format as raw_guess_format
-from rdflib_jsonld.context import Context
 
 # Extra Namespaces
 ADMS = Namespace('http://www.w3.org/ns/adms#')
@@ -204,26 +203,6 @@ CONTEXT = {
 }
 
 
-class UDataContext(Context):
-    '''
-    An hackish way to serialize context as a root relative URL.
-
-    Exploit this issue https://github.com/RDFLib/rdflib-jsonld/issues/37
-    and the fact that this method is used to render the context in the
-    resulting JSON-LD.
-
-    See:
-        https://github.com/RDFLib/rdflib-jsonld/blob/master/rdflib_jsonld/serializer.py#L101-L103
-    '''
-
-    def to_dict(self):
-        '''Hackish way to provide the site context URL'''
-        return url_for('api.site_jsonld_context', _external=True)
-
-
-context = UDataContext(CONTEXT)
-
-
 def url_from_rdf(rdf, prop):
     '''
     Try to extract An URL from a resource property.
@@ -286,7 +265,7 @@ def graph_response(graph, format):
     }
     kwargs = {}
     if fmt == 'json-ld':
-        kwargs['context'] = context
+        kwargs['context'] = CONTEXT
     if isinstance(graph, RdfResource):
         graph = graph.graph
-    return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs).decode('utf-8')), 200, headers
+    return escape_xml_illegal_chars(graph.serialize(format=fmt, **kwargs)), 200, headers

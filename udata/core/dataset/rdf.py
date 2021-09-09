@@ -147,7 +147,7 @@ def resource_to_rdf(resource, dataset=None, graph=None):
     if resource.mime:
         r.add(DCAT.mediaType, Literal(resource.mime))
     if resource.format:
-        r.add(DCT.term('format'), Literal(resource.format))
+        r.add(DCT.format, Literal(resource.format))
     if resource.checksum:
         checksum = graph.resource(BNode())
         checksum.set(RDF.type, SPDX.Checksum)
@@ -315,7 +315,7 @@ def title_from_rdf(rdf, url):
         last_part = url.split('/')[-1]
         if '.' in last_part and '?' not in last_part:
             return last_part
-    fmt = rdf_value(rdf, DCT.term('format'))
+    fmt = rdf_value(rdf, DCT.format)
     lang = current_app.config['DEFAULT_LANGUAGE']
     with i18n.language(lang):
         if fmt:
@@ -350,7 +350,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
     resource.mime = rdf_value(distrib, DCAT.mediaType)
-    fmt = rdf_value(distrib, DCT.term('format'))
+    fmt = rdf_value(distrib, DCT.format)
     if fmt:
         resource.format = fmt.lower()
     checksum = distrib.value(SPDX.checksum)
