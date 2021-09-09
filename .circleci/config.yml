@@ -26,8 +26,10 @@ jobs:
       - run:
           name: Install python dependencies
           command: |
-            virtualenv venv
+            virtualenv --no-setuptools venv
+            # FIXME set setuptools version due to 58.0.2 release
             source venv/bin/activate
+            pip install setuptools==58.0.0
             pip install -r requirements/develop.pip
             pip install -e .
       - save_cache:
