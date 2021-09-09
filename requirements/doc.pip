@@ -266,7 +266,7 @@ mistune==0.8.4
     #   -r requirements/install.in
 mkdocs==1.0.4
     # via -r requirements/doc.in
-mongoengine==0.18.2
+mongoengine==0.20.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -327,12 +327,7 @@ pytz==2019.3
     #   flask-restplus
 pyyaml==5.4.1
     # via mkdocs
-rdflib==5.0.0
-    # via
-    #   -c requirements/install.pip
-    #   -r requirements/install.in
-    #   rdflib-jsonld
-rdflib-jsonld==0.5.0
+rdflib==6.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -369,9 +364,7 @@ six==1.16.0
     #   isodate
     #   jsonschema
     #   livereload
-    #   mongoengine
     #   python-dateutil
-    #   rdflib
     #   wtforms-json
 speaklater==1.3
     # via
