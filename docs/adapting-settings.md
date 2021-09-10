@@ -849,7 +849,7 @@ SECRET_KEY = 'A unique secret key'
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'
-PLUGINS =  'gouvfr piwik youckan'.split()
+PLUGINS =  'front piwik youckan'.split()
 
 SITE_ID = 'www.data.dev'
 SITE_TITLE = 'Data.dev'
