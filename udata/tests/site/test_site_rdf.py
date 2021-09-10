@@ -164,7 +164,7 @@ class SiteRdfViewsTest:
         response = client.get(url, headers={'Accept': 'application/ld+json'})
         assert200(response)
         assert response.content_type == 'application/ld+json'
-        assert response.json['@context']['@vocab'] == "http://www.w3.org/ns/dcat#"
+        assert response.json['@context']['@vocab'] == 'http://www.w3.org/ns/dcat#'
 
     def test_catalog_rdf_n3(self, client):
         url = url_for('api.site_rdf_catalog_format', format='n3')
