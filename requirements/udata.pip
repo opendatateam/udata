@@ -292,7 +292,7 @@ typing-extensions==3.10.0.0
     # via
     #   importlib-metadata
     #   udata
-https://21428-19141754-gh.circle-artifacts.com/0/dist/udata-3.1.1.dev21428-py2.py3-none-any.whl
+git+https://github.com/opendatateam/udata.git
     # via -r requirements/udata.in
 ujson==1.35
     # via udata
