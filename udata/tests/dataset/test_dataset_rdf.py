@@ -803,8 +803,7 @@ class DatasetRdfViewsTest:
             response = client.get(url, headers={'Accept': 'application/ld+json'})
             assert200(response)
             assert response.content_type == 'application/ld+json'
-            context_url = url_for('api.site_jsonld_context', _external=True)
-            assert response.json['@context'] == context_url
+            assert response.json['@context']['@vocab'] == 'http://www.w3.org/ns/dcat#'
 
     @pytest.mark.parametrize('fmt,mime', [
         ('n3', 'text/n3'),
