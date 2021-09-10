@@ -147,10 +147,6 @@ faker==3.0.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   factory-boy
-feedparser==6.0.8
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
 flake8==3.7.8
     # via -r requirements/report.in
 flask==1.1.4
@@ -486,10 +482,6 @@ requests-mock==1.7.0
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-sgmllib3k==1.0.0
-    # via
-    #   -c requirements/test.pip
-    #   feedparser
 simplejson==3.17.0
     # via
     #   -c requirements/install.pip

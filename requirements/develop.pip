@@ -154,10 +154,6 @@ faker==3.0.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   factory-boy
-feedparser==6.0.8
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
 filelock==3.0.12
     # via virtualenv
 flask==1.1.4
@@ -526,10 +522,6 @@ rfc3986==1.5.0
     # via twine
 secretstorage==3.3.1
     # via keyring
-sgmllib3k==1.0.0
-    # via
-    #   -c requirements/test.pip
-    #   feedparser
 simplejson==3.17.0
     # via
     #   -c requirements/install.pip
