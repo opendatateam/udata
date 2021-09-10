@@ -6,7 +6,7 @@ from rdflib import Graph, URIRef, BNode
 from rdflib.namespace import RDF
 
 from udata.rdf import (
-    DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf, CONTEXT
+    DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
 )
 from udata.core.dataset.rdf import dataset_from_rdf
 
@@ -92,7 +92,7 @@ class DcatBackend(BaseBackend):
         data = item.kwargs.get('graph', self.job.data['graph'])  # handles legacy graphs
         node = None
 
-        graph.parse(data=bytes(data), format='json-ld')
+        graph.parse(data=bytes(data, encoding='utf8'), format='json-ld')
 
         if 'nid' in item.kwargs and 'type' in item.kwargs:
             nid = item.kwargs['nid']

@@ -1,7 +1,6 @@
 -r install.in
 -c install.pip
 
-feedparser==5.2.1
 httpretty==0.9.7
 mock==3.0.5
 pytest==4.6.3

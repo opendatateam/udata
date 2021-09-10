@@ -140,7 +140,7 @@ class DatasetToRdfTest:
         assert r.value(DCAT.accessURL).identifier == URIRef(permalink)
         assert r.value(DCAT.bytesSize) == Literal(resource.filesize)
         assert r.value(DCAT.mediaType) == Literal(resource.mime)
-        assert r.value(DCT.term('format')) == Literal(resource.format)
+        assert r.value(DCT.format) == Literal(resource.format)
 
         checksum = r.value(SPDX.checksum)
         assert r.graph.value(checksum.identifier, RDF.type) == SPDX.Checksum
@@ -395,7 +395,7 @@ class RdfToDatasetTest:
         g.add((node, DCT.modified, Literal(modified)))
         g.add((node, DCAT.bytesSize, Literal(filesize)))
         g.add((node, DCAT.mediaType, Literal(mime)))
-        g.add((node, DCT.term('format'), Literal('CSV')))
+        g.add((node, DCT.format, Literal('CSV')))
 
         checksum = BNode()
         g.add((node, SPDX.checksum, checksum))
@@ -475,7 +475,7 @@ class RdfToDatasetTest:
 
         g.set((node, RDF.type, DCAT.Distribution))
         g.set((node, DCAT.downloadURL, URIRef(url)))
-        g.set((node, DCT.term('format'), Literal('CSV')))
+        g.set((node, DCT.format, Literal('CSV')))
 
         resource = resource_from_rdf(g)
         resource.validate()
@@ -803,8 +803,7 @@ class DatasetRdfViewsTest:
             response = client.get(url, headers={'Accept': 'application/ld+json'})
             assert200(response)
             assert response.content_type == 'application/ld+json'
-            context_url = url_for('api.site_jsonld_context', _external=True)
-            assert response.json['@context'] == context_url
+            assert response.json['@context']['@vocab'] == 'http://www.w3.org/ns/dcat#'
 
     @pytest.mark.parametrize('fmt,mime', [
         ('n3', 'text/n3'),
@@ -812,7 +811,6 @@ class DatasetRdfViewsTest:
         ('ttl', 'application/x-turtle'),
         ('xml', 'application/rdf+xml'),
         ('rdf', 'application/rdf+xml'),
-        ('rdfs', 'application/rdf+xml'),
         ('owl', 'application/rdf+xml'),
         ('trig', 'application/trig'),
     ])

@@ -164,8 +164,7 @@ class SiteRdfViewsTest:
         response = client.get(url, headers={'Accept': 'application/ld+json'})
         assert200(response)
         assert response.content_type == 'application/ld+json'
-        context_url = url_for('api.site_jsonld_context', _external=True)
-        assert response.json['@context'] == context_url
+        assert response.json['@context']['@vocab'] == 'http://www.w3.org/ns/dcat#'
 
     def test_catalog_rdf_n3(self, client):
         url = url_for('api.site_rdf_catalog_format', format='n3')
@@ -179,7 +178,7 @@ class SiteRdfViewsTest:
         assert200(response)
         assert response.content_type == 'application/x-turtle'
 
-    @pytest.mark.parametrize('fmt', ('xml', 'rdf', 'rdfs', 'owl'))
+    @pytest.mark.parametrize('fmt', ('xml', 'rdf', 'owl'))
     def test_catalog_rdf_rdfxml(self, fmt, client):
         url = url_for('api.site_rdf_catalog_format', format=fmt)
         response = client.get(url, headers={'Accept': 'application/rdf+xml'})

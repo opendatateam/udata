@@ -170,7 +170,7 @@ markupsafe==2.0.1
     # via jinja2
 mistune==0.8.4
     # via -r requirements/install.in
-mongoengine==0.18.2
+mongoengine==0.20.0
     # via
     #   -r requirements/install.in
     #   celerybeat-mongo
@@ -210,11 +210,7 @@ pytz==2019.3
     #   babel
     #   celery
     #   flask-restplus
-rdflib==5.0.0
-    # via
-    #   -r requirements/install.in
-    #   rdflib-jsonld
-rdflib-jsonld==0.5.0
+rdflib==6.0.0
     # via -r requirements/install.in
 redis==3.3.11
     # via
@@ -241,9 +237,7 @@ six==1.16.0
     #   flask-restplus
     #   isodate
     #   jsonschema
-    #   mongoengine
     #   python-dateutil
-    #   rdflib
     #   wtforms-json
 speaklater==1.3
     # via flask-babelex

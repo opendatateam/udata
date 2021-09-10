@@ -147,10 +147,6 @@ faker==3.0.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   factory-boy
-feedparser==5.2.1
-    # via
-    #   -c requirements/test.pip
-    #   -r requirements/test.in
 flake8==3.7.8
     # via -r requirements/report.in
 flask==1.1.4
@@ -340,7 +336,7 @@ mock==3.0.5
     # via
     #   -c requirements/test.pip
     #   -r requirements/test.in
-mongoengine==0.18.2
+mongoengine==0.20.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -460,13 +456,7 @@ pytz==2019.3
     #   babel
     #   celery
     #   flask-restplus
-rdflib==5.0.0
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   -r requirements/install.in
-    #   rdflib-jsonld
-rdflib-jsonld==0.5.0
+rdflib==6.0.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -515,10 +505,8 @@ six==1.16.0
     #   isodate
     #   jsonschema
     #   mock
-    #   mongoengine
     #   pytest
     #   python-dateutil
-    #   rdflib
     #   requests-mock
     #   wtforms-json
 speaklater==1.3

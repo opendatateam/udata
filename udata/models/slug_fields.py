@@ -160,9 +160,7 @@ def populate_slug(instance, field):
             qs = qs(id__ne=previous.id)
 
         def exists(s):
-            return qs(
-                class_check=False, **{field.db_field: s}
-            ).limit(1).count(True) > 0
+            return qs(**{field.db_field: s}).clear_cls_query().limit(1).count(True) > 0
 
         while exists(slug):
             slug = '{0}-{1}'.format(base_slug, index)
