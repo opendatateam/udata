@@ -2,7 +2,7 @@ import click
 
 from rdflib import URIRef, BNode
 
-from udata.commands import cli
+from udata.commands import cli, green, yellow, cyan, echo, magenta
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.rdf import dataset_from_rdf
 from udata.harvest.tests.factories import HarvestSourceFactory, HarvestJobFactory
@@ -18,24 +18,26 @@ def grp():
 @click.argument('url')
 def parse_url(url):
     '''Parse the datasets in a DCAT format located at URL (debug)'''
+    echo(cyan('Parsing url {}'.format(url)))
     source = HarvestSourceFactory()
     source.url = url
     backend = DcatBackend(source, dryrun=True)
     job = HarvestJobFactory()
     backend.job = job
     format = backend.get_format()
-    print('format:', format)
+    echo(yellow('Detected format: {}'.format(format)))
     graph = backend.parse_graph(url, format)
-    print('graph', graph)
     for item in job.items:
-        print(item.remote_id, item.kwargs)
+        echo(magenta('Processing item {}'.format(item.remote_id)))
+        echo('Item kwargs: {}'.format(yellow(item.kwargs)))
         node = backend.get_node_from_item(item)
         dataset = DatasetFactory()
         dataset = dataset_from_rdf(graph, dataset, node=node)
-        print('---')
-        print(dataset)
-        print(dataset.license)
-        print(dataset.description)
-        print(dataset.tags)
-        print([(r.title, r.format, r.url) for r in dataset.resources])
-        print('---')
+        echo('')
+        echo(green('Dataset found!'))
+        echo('Title: {}'.format(yellow(dataset)))
+        echo('License: {}'.format(yellow(dataset.license)))
+        echo('Description: {}'.format(yellow(dataset.description)))
+        echo('Tags: {}'.format(yellow(dataset.tags)))
+        echo('Resources: {}'.format(yellow([(r.title, r.format, r.url) for r in dataset.resources])))
+        echo('')
