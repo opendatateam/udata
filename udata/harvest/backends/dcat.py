@@ -47,6 +47,11 @@ class DcatBackend(BaseBackend):
 
     def initialize(self):
         '''List all datasets for a given ...'''
+        fmt = self.get_format()
+        graph = self.parse_graph(self.source.url, fmt)
+        self.job.data = {'graph': graph.serialize(format='json-ld', indent=None)}
+
+    def get_format(self):
         fmt = guess_format(self.source.url)
         # if format can't be guessed from the url
         # we fallback on the declared Content-Type
@@ -60,8 +65,7 @@ class DcatBackend(BaseBackend):
             if not fmt:
                 msg = 'Unsupported mime type "{0}"'.format(mime_type)
                 raise ValueError(msg)
-        graph = self.parse_graph(self.source.url, fmt)
-        self.job.data = {'graph': graph.serialize(format='json-ld', indent=None)}
+        return fmt
 
     def parse_graph(self, url, fmt):
         graph = Graph(namespace_manager=namespace_manager)
@@ -87,16 +91,17 @@ class DcatBackend(BaseBackend):
 
         return graph
 
+    def get_node_from_item(self, item):
+        if 'nid' in item.kwargs and 'type' in item.kwargs:
+            nid = item.kwargs['nid']
+            return URIRef(nid) if item.kwargs['type'] == 'uriref' else BNode(nid)
+
     def process(self, item):
         graph = Graph(namespace_manager=namespace_manager)
         data = item.kwargs.get('graph', self.job.data['graph'])  # handles legacy graphs
-        node = None
 
+        node = self.get_node_from_item(item)
         graph.parse(data=bytes(data, encoding='utf8'), format='json-ld')
-
-        if 'nid' in item.kwargs and 'type' in item.kwargs:
-            nid = item.kwargs['nid']
-            node = URIRef(nid) if item.kwargs['type'] == 'uriref' else BNode(nid)
 
         dataset = self.get_dataset(item.remote_id)
         dataset = dataset_from_rdf(graph, dataset, node=node)

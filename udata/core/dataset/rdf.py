@@ -167,7 +167,7 @@ def dataset_to_rdf(dataset, graph=None):
     if 'uri' in dataset.extras:
         id = URIRef(dataset.extras['uri'])
     elif dataset.id:
-        id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset', 
+        id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
                     dataset=dataset.id, _external=True))
     else:
         id = BNode()
@@ -212,9 +212,16 @@ CHECKSUM_ALGORITHMS = {
 }
 
 
+def serialize_value(value):
+    if isinstance(value, (URIRef, Literal)):
+        return value.toPython()
+    elif isinstance(value, RdfResource):
+        return value.identifier.toPython()
+
+
 def rdf_value(obj, predicate, default=None):
     value = obj.value(predicate)
-    return value.toPython() if value else default
+    return serialize_value(value) if value else default
 
 
 def temporal_from_literal(text):
@@ -338,6 +345,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     download_url = url_from_rdf(distrib, DCAT.downloadURL)
     access_url = url_from_rdf(distrib, DCAT.accessURL)
     url = safe_unicode(download_url or access_url)
+    # we shouldn't create resources without URLs
+    if not url:
+        log.warning(f'Resource without url: {distrib}')
+        return
 
     if dataset:
         resource = get_by(dataset.resources, 'url', url)
@@ -395,7 +406,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         dataset.acronym = acronym
 
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
-    tags += [theme.toPython() for theme in d.objects(DCAT.theme)]
+    tags += [theme.toPython() for theme in d.objects(DCAT.theme) if not isinstance(theme, RdfResource)]
     dataset.tags = list(set(tags))
 
     identifier = rdf_value(d, DCT.identifier)
