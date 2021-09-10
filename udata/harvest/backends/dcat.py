@@ -98,7 +98,7 @@ class DcatBackend(BaseBackend):
 
     def process(self, item):
         graph = Graph(namespace_manager=namespace_manager)
-        data = item.kwargs.get('graph', self.job.data['graph'])  # handles legacy graphs
+        data = self.job.data['graph']
 
         node = self.get_node_from_item(item)
         graph.parse(data=bytes(data, encoding='utf8'), format='json-ld')

@@ -17,7 +17,7 @@ def grp():
 @grp.command()
 @click.argument('url')
 def parse_url(url):
-    '''Parse the graph located at URL'''
+    '''Parse the datasets in a DCAT format located at URL (debug)'''
     source = HarvestSourceFactory()
     source.url = url
     backend = DcatBackend(source, dryrun=True)
