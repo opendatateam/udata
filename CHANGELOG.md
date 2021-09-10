@@ -4,6 +4,7 @@
 
 - :warning: **breaking change**: Package renamming and new repository [#1](https://github.com/etalab/udata-front/pull/1):
   - udata-gouvfr is now udata-front
+- Update feedparser following setuptools 58.0.2 release that drops support for `use_2to3` [#6](https://github.com/etalab/udata-front/pull/6)
 
 ## 3.1.0 (2021-08-31)
 
