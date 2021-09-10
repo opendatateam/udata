@@ -16,7 +16,7 @@ click==7.0
     # via
     #   -c requirements/udata.pip
     #   flask
-feedparser==5.2.1
+feedparser==6.0.8
     # via -r requirements/install.in
 flask==1.1.4
     # via
@@ -40,6 +40,8 @@ pyyaml==5.4.1
     # via python-frontmatter
 sentry-sdk[flask]==1.3.1
     # via -r requirements/install.in
+sgmllib3k==1.0.0
+    # via feedparser
 urllib3==1.25.11
     # via
     #   -c requirements/udata.pip

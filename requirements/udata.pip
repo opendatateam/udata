@@ -196,7 +196,7 @@ markupsafe==2.0.1
     #   udata
 mistune==0.8.4
     # via udata
-mongoengine==0.18.2
+mongoengine==0.20.0
     # via
     #   celerybeat-mongo
     #   flask-mongoengine
@@ -244,11 +244,7 @@ pytz==2019.3
     #   celery
     #   flask-restplus
     #   udata
-rdflib==5.0.0
-    # via
-    #   rdflib-jsonld
-    #   udata
-rdflib-jsonld==0.5.0
+rdflib==6.0.0
     # via udata
 redis==3.3.11
     # via
@@ -277,9 +273,7 @@ six==1.16.0
     #   flask-restplus
     #   isodate
     #   jsonschema
-    #   mongoengine
     #   python-dateutil
-    #   rdflib
     #   udata
     #   wtforms-json
 speaklater==1.3
