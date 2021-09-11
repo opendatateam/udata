@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <dcat:CatalogRecord xmlns:dcat="http://www.w3.org/ns/dcat#"
+                       rdf:about="https://sig.oreme.org/geonetwork/records/0c456d2d-9548-4a2a-94ef-231d9d890ce2">
+      <foaf:primaryTopic xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                         rdf:resource="https://sig.oreme.org/geonetwork/srv/resources/0c456d2d-9548-4a2a-94ef-231d9d890ce2%20https%3A%2F%2Fsig.oreme.org%2Fgeonetwork%2Fsrv%2Fresources0c456d2d-9548-4a2a-94ef-231d9d890ce2"/>
+      <dct:conformsTo xmlns:dct="http://purl.org/dc/terms/"
+                      rdf:resource="https://www.iso.org/standard/32557.html"/>
+      <dct:issued xmlns:dct="http://purl.org/dc/terms/">2021-07-28</dct:issued>
+      <dct:modified xmlns:dct="http://purl.org/dc/terms/">2021-07-28</dct:modified>
+   </dcat:CatalogRecord>
+   <dcat:Dataset xmlns:dcat="http://www.w3.org/ns/dcat#"
+                 rdf:about="https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2">
+      <dct:identifier xmlns:dct="http://purl.org/dc/terms/">0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2</dct:identifier>
+      <dct:title xmlns:dct="http://purl.org/dc/terms/">Data of type chemistry in Le Gardon basin, from the Observatory of the former mining site of Carnoulès (TO Carnoules)</dct:title>
+      <dct:abstract xmlns:dct="http://purl.org/dc/terms/">Data of type chemistry measured on Le Gardon basin within the framework of the Observatory of the former mining site of Carnoulès (TO Carnoules), part of the Pollution downstream of mining sites observatory (SO POLLUMINE) hosted by the Mediterranean Research Observatory of Environment (OSU OREME, http://www.oreme.org). Measurements start on 03-11-2004 and are regularly updated with new data.</dct:abstract>
+      <dcat:keyword>biodiversity dynamics</dcat:keyword>
+      <dcat:theme rdf:resource="http://inspire.ec.europa.eu/theme/ef">Environmental monitoring facilities</dcat:theme>
+      <dcat:theme rdf:resource="http://inspire.ec.europa.eu/theme/hb">Habitats and biotopes</dcat:theme>
+      <dcat:theme rdf:resource="http://www.eionet.europa.eu/gemet/concept/834">biogeochemistry</dcat:theme>
+      <dcat:theme rdf:resource="http://www.eionet.europa.eu/gemet/concept/3305">flora (biology)</dcat:theme>
+      <dcat:theme rdf:resource="http://www.eionet.europa.eu/gemet/concept/5218">microbiology</dcat:theme>
+      <dcat:theme rdf:resource="http://www.eionet.europa.eu/gemet/concept/5261">mine</dcat:theme>
+      <dcat:theme rdf:resource="http://www.eionet.europa.eu/gemet/concept/6445">pollution</dcat:theme>
+      <dcat:theme rdf:resource="http://www.eionet.europa.eu/gemet/concept/3138">fauna</dcat:theme>
+      <dcat:theme rdf:resource="http://aims.fao.org/aos/agrovoc/c_910">biogeochemistry</dcat:theme>
+      <dcat:theme rdf:resource="http://aims.fao.org/aos/agrovoc/c_4800">microbiology</dcat:theme>
+      <dcat:theme rdf:resource="http://aims.fao.org/aos/agrovoc/c_2821">fauna</dcat:theme>
+      <dcat:theme rdf:resource="http://aims.fao.org/aos/agrovoc/c_29036">metals</dcat:theme>
+      <foaf:thumbnail xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                      rdf:resource="https://data.oreme.org/assets/images/carnoules-medium.jpg"/>
+      <dct:spatial xmlns:dct="http://purl.org/dc/terms/">
+         <ogc:Polygon xmlns:ogc="http://www.opengis.net/rdf#">
+            <ogc:asWKT rdf:datatype="http://www.opengis.net/rdf#WKTLiteral">
+            &lt;http://www.opengis.net/def/crs/OGC/1.3/CRS84&gt;
+            Polygon((3.98197778 44.05310833, 3.98197778 44.11806389, 4.00346389 44.11806389, 4.00346389 44.05310833, 3.98197778 44.05310833))
+          </ogc:asWKT>
+         </ogc:Polygon>
+      </dct:spatial>
+      <dct:temporal xmlns:dct="http://purl.org/dc/terms/">2004-11-03T00:00:00+01:00
+          /
+          2005-03-30T00:00:00+02:00</dct:temporal>
+      <dct:issued xmlns:dct="http://purl.org/dc/terms/">2004-11-03</dct:issued>
+      <dct:updated xmlns:dct="http://purl.org/dc/terms/">2021-05-05</dct:updated>
+      <dct:publisher xmlns:dct="http://purl.org/dc/terms/"
+                     rdf:resource="https://sig.oreme.org/geonetwork/srv/resources/organizations/UMR%20HydroSciences%20Montpellier%20%28HSM%29"/>
+      <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">continual</dct:accrualPeriodicity>
+      <dct:language xmlns:dct="http://purl.org/dc/terms/">eng</dct:language>
+      <dct:license xmlns:dct="http://purl.org/dc/terms/">copyright</dct:license>
+      <dct:license xmlns:dct="http://purl.org/dc/terms/">license</dct:license>
+      <dct:license xmlns:dct="http://purl.org/dc/terms/"
+                   rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations">no limitations to public access</dct:license>
+      <dct:license xmlns:dct="http://purl.org/dc/terms/"
+                   rdf:resource="http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply">No conditions apply to access and use.</dct:license>
+      <dcat:distribution rdf:resource="https://sig.oreme.org/geonetwork/records/0c456d2d-9548-4a2a-94ef-231d9d890ce2#WWW%3ALINK-1.0-http--link-Data%20on%20OSU%20OREME%20data%20portal"/>
+      <dcat:distribution rdf:resource="https://sig.oreme.org/geonetwork/records/0c456d2d-9548-4a2a-94ef-231d9d890ce2#WWW%3ALINK-1.0-http--link-Information%20on%20OSU%20OREME%20website"/>
+      <dcat:distribution rdf:resource="https://sig.oreme.org/geonetwork/records/0c456d2d-9548-4a2a-94ef-231d9d890ce2#OGC%3AWMS-carnoules_station"/>
+      <dcat:distribution rdf:resource="https://sig.oreme.org/geonetwork/records/0c456d2d-9548-4a2a-94ef-231d9d890ce2#OGC%3AWFS-carnoules_station"/>
+      <dct:relation xmlns:dct="http://purl.org/dc/terms/"
+                    rdf:resource="https://sig.oreme.org/geonetwork/records/ac9a8cb5-51b7-4d54-9b8c-3e30d09ed5b4"/>
+      <dcat:dataQuality>The measured parameters are: Aluminium (Al) (ppb), Antimony (Sb) (ppb), Arsenic (As) (ppb), Barium (Ba) (ppb), Beryllium (Be) (ppb), Bicarbonate (mg/l), Boron (B) (ppb), Cadmium (Cd) (ppb), Calcium (Ca) (mg/l), Calcium (Ca) (ppb), Carbonate (mg/l), Cerium (Ce) (ppb), Cesium (Cs) (ppb), Chlorine (Cl) (mg/l), Chromium (Cr) (ppb), Cobalt (Co) (ppb), Conductivity (µS/cm (T. ref 25°C)), Copper (Cu) (ppb), Dissolved oxygen (%), Dissolved oxygen (mg/l), Dysprosium (Dy) (ppb), Erbium (Er) (ppb), Europium (Eu) (ppb), Gadolinium (Gd) (ppb), Gallium (Ga) (ppb), Germanium (Ge) (ppb), Hafnium (Hf) (ppb), Holmium (Ho) (ppb), Iron (Fe) (mg/l), Iron (Fe) (ppb), Lanthanum (La) (ppb), Lead (Pb) (ppb), Lithium (Li) (ppb), Lutetium (Lu) (ppb), Magnesium (Mg) (mg/l), Magnesium (Mg) (ppb), m-alkalinity (mg/l), Manganese (Mn) (ppb), Molybdenum (Mo) (ppb), Neodymium (Nd) (ppb), Nickel (Ni) (ppb), Nitrate (mg/l), Oxyded Arsenic As(V) (ppb), Palladium (Pd) (ppb), Phosphorus (P) (ppb), pH (unit), Platinum (Pt) (ppb), Potassium (K) (mg/l), Potassium (K) (ppb), Praseodymium (Pr) (ppb), Redox potential (mV), Reduced Arsenic As(III) (ppb), Reduced Iron Fe(II) (mg/l), Rhenium (Re) (ppb), Rubidium (Rb) (ppb), Samarium (Sm) (ppb), Selenium (Se) (ppb), Silicon (Si) (ppb), Silver (Ag) (ppb), Sodium (Na) (mg/l), Sodium (Na) (ppb), Strontium (Sr) (ppb), Sulfate (mg/l), Sulfur (S) (ppb), Suspended Particulate Matter (mg/l), Terbium (Tb) (ppb), Thallium (Tl) (ppb), Thorium (Th) (ppb), Thulium (Tm) (ppb), Tin (Sn) (ppb), Titanium (Ti) (ppb), Total Dissolved Solids (TDS) (mg/l), Total organic carbon (TOC) (mg/l), Tungsten (W) (ppb), Uranium (U) (ppb), Vanadium (V) (ppb), Water temperature (°C), Ytterbium (Yb) (ppb), Yttrium (Y) (ppb), Zinc (Zn) (ppb), Zirconium (Zr) (ppb).</dcat:dataQuality>
+   </dcat:Dataset>
+</rdf:RDF>

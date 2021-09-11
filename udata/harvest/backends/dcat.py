@@ -49,7 +49,10 @@ class DcatBackend(BaseBackend):
         '''List all datasets for a given ...'''
         fmt = self.get_format()
         graph = self.parse_graph(self.source.url, fmt)
-        self.job.data = {'graph': graph.serialize(format='json-ld', indent=None)}
+        self.job.data = {
+            'graph': graph.serialize(format=fmt, indent=None),
+            'format': fmt,
+        }
 
     def get_format(self):
         fmt = guess_format(self.source.url)
@@ -99,9 +102,10 @@ class DcatBackend(BaseBackend):
     def process(self, item):
         graph = Graph(namespace_manager=namespace_manager)
         data = self.job.data['graph']
+        format = self.job.data['format']
 
         node = self.get_node_from_item(item)
-        graph.parse(data=bytes(data, encoding='utf8'), format='json-ld')
+        graph.parse(data=bytes(data, encoding='utf8'), format=format)
 
         dataset = self.get_dataset(item.remote_id)
         dataset = dataset_from_rdf(graph, dataset, node=node)

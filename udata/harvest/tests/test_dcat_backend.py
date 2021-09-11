@@ -230,6 +230,15 @@ class DcatBackendTest:
         dataset = Dataset.objects.get(**extras)
         assert dataset.license.id == 'lov2'
 
+    def test_geonetwork_xml_catalog(self, rmock):
+        url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+        actions.run(source.slug)
+        dataset = Dataset.objects.filter(organization=org).first()
+        assert dataset is not None
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
