@@ -245,7 +245,7 @@ def home_context(context):
 ```
 
 !!! note
-    You can see an example of advanced hooks usage in the [`gouvfr` theme][gouvfr-hooks].
+    You can see an example of advanced hooks usage in the [`front` plugin][front-hooks].
 
 ## Translations
 
@@ -325,8 +325,7 @@ and setting properly the ``THEME`` parameter in your `udata.cfg`.
 
 Here a list of known themes for udata:
 
-- [`default`][default-theme]: default theme packaged with udata (does nothing)
-- [`gouvfr`][gouvfr-project] as part of the [`gouvfr` plugin][gouvfr-project].
+- [`gouvfr`][front-project] as part of the [`front` plugin][front-project].
 
 
 !!! note
@@ -344,7 +343,6 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 [Babel]: http://babel.pocoo.org/
 [PyPI]: https://pypi.org/
 [gitter-chan]: https://gitter.im/opendatateam/udata
-[gouvfr-hooks]: https://github.com/etalab/udata-gouvfr/blob/master/udata_gouvfr/theme/__init__.py
+[front-hooks]: https://github.com/etalab/udata-front/blob/master/udata_front/theme/__init__.py
 [Poedit]: https://poedit.net/
-[gouvfr-project]: https://github.com/etalab/udata-gouvfr/
-[default-theme]: https://github.com/opendatateam/udata/tree/master/udata/theme/default/
+[front-project]: https://github.com/etalab/udata-front/

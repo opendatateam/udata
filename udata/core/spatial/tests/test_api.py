@@ -410,7 +410,7 @@ class SpatialTerritoriesApiTest(APITestCase):
         response = self.get(
             url_for('api.zone_datasets', id=paca.id), qs={'dynamic': 1})
         self.assert200(response)
-        # No dynamic datasets given that they are added by gouvfr extension.
+        # No dynamic datasets given that they are added by udata-front extension.
         self.assertEqual(len(response.json), 3)
 
     def test_zone_datasets_with_dynamic_and_setting_and_size(self):
@@ -428,5 +428,5 @@ class SpatialTerritoriesApiTest(APITestCase):
                 'size': 2
             })
         self.assert200(response)
-        # No dynamic datasets given that they are added by gouvfr extension.
+        # No dynamic datasets given that they are added by udata-front extension.
         self.assertEqual(len(response.json), 2)
