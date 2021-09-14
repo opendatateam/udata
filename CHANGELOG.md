@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.2.0 (2021-09-14)
 
 - Update dependencies following setuptools 58.0.2 release that drop support for `use_2to3` [#2660](https://github.com/opendatateam/udata/pull/2660):
