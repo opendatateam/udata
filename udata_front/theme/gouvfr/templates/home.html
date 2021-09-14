@@ -127,7 +127,7 @@
 {% set nb_reuses = current_site.settings.home_reuses|length %}
 {% set reuses_tabs = (
     ('best-reuses', _('Featured reuses'), current_site.settings.home_reuses, {}),
-    ('latest-reuses', _('Latest reuses'), recent_reuses[:3], {'sort': '-created'}),
+    ('latest-reuses', _('Latest reuses'), recent_reuses[:nb_reuses], {'sort': '-created'}),
 ) %}
 
 {# Reuse section #}
