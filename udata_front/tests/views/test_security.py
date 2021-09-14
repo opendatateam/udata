@@ -21,3 +21,10 @@ class SecurityViewsTest(GouvfrFrontTestCase):
             dataset = DatasetFactory(slug="dataset-slug")
             response = self.get(url_for('datasets.show', dataset=dataset))
             assert b'<a href="/en/login?next=%2Fen%2Fdatasets%2Fdataset-slug%2F"' in response.data
+
+    def test_security_login_next_exception_site_home(self):
+        '''Login should redirect to the homepage if current request has an exception'''
+        with self.app.test_request_context(''):
+            self.app.preprocess_request()
+            response = self.get(url_for('datasets.show', dataset='dataset-not-found'))
+            assert b'<a href="/en/login?next=%2Fen%2F"' in response.data
