@@ -1,4 +1,5 @@
 {% set banner_activated = config['BANNER_ACTIVATED'] %}
+{% set next_url = url_for(request.endpoint, **request.view_args) if not request.routing_exception else url_for('site.home') %}
 {% if banner_activated %}
 {% block banner %}
     {% set banner_message = config['BANNER_HTML_CONTENT_FR'] if g.lang_code == "fr" else config['BANNER_HTML_CONTENT_EN'] %}
@@ -54,10 +55,10 @@
                         title="{{ _('Logout') }}">{% include theme('svg/login.svg') %}{{ _('Logout') }}
                     </a>
                     {% else %}
-                    <a href="{{ url_for('security.login', next=request.url) }}"
+                    <a href="{{ url_for('security.login', next=next_url) }}"
                         title="{{ _('Log in') }}">{% include theme('svg/login.svg') %}{{ _('Log in') }}
                     </a>
-                    <a href="{{ url_for('security.register', next=request.url) }}"
+                    <a href="{{ url_for('security.register', next=next_url) }}"
                         title="{{ _('Sign up') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
                     </a>
                     {% endif %}

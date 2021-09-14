@@ -1,5 +1,6 @@
 {% extends theme('base.html') %}
 {% import theme('macros/forms.html') as forms with context %}
+{% set next_url = url_for(request.endpoint, **request.view_args) if not request.routing_exception else url_for('site.home') %}
 
 {% block content %}
 <section class="py-xl py-lg-lg bg-grey-50">
@@ -13,7 +14,7 @@
                         <div class="mt-lg">
                             <p class="fs-sm mb-sm">
                                 {{ _('Forgot your password?') }}
-                                <a href="{{ url_for('security.forgot_password', next=request.url) }}">
+                                <a href="{{ url_for('security.forgot_password', next=next_url) }}">
                                     {{ _('Recover your password') }}
                                 </a>
                             </p>
@@ -36,7 +37,7 @@
                 <h3 class="fs-sm mb-sm">
                     {{ _('Don\'t have an account?')}}
                 </h3>
-                <a title="{{ _('Sign up') }}" href="{{ url_for('security.register', next=request.url) }}"
+                <a title="{{ _('Sign up') }}" href="{{ url_for('security.register', next=next_url) }}"
                     class="btn btn-primary btn-block btn-lg">
                     {{ _('Create an account') }}
                 </a>
