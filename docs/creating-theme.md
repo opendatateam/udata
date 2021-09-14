@@ -245,7 +245,7 @@ def home_context(context):
 ```
 
 !!! note
-    You can see an example of advanced hooks usage in the [`front` theme][front-hooks].
+    You can see an example of advanced hooks usage in the [`front` plugin][front-hooks].
 
 ## Translations
 
