@@ -6,6 +6,7 @@
   - :warning: **breaking change** `rdfs` is not supported anymore
   - `jsonld` endpoints have a `@context` dict directly instead of an url to the context endpoint
 - Update documentation with [udata-front plugin renaming](https://github.com/etalab/data.gouv.fr/issues/393) [#2661](https://github.com/opendatateam/udata/pull/2661)
+- Various DCAT fixes (geonetwork compatibility) and debug command [#2662](https://github.com/opendatateam/udata/pull/2662)
 
 ## 3.1.0 (2021-08-31)
 
