@@ -148,5 +148,5 @@ class ResourcesAPI(API):
             'page': page,
             'page_size': page_size,
             'previous_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}" if page > 1 else None,
-            'total': len(dataset.resources)
+            'total': len(dataset.resources),
         }
