@@ -188,7 +188,7 @@ apiv2 = UDataApi(
     apiv2_blueprint,
     decorators=[csrf.exempt],
     version='2.0', title='uData API',
-    description='uData API', default='site',
+    description='udata API', default='site',
     default_label='Site global namespace'
 )
 
