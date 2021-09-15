@@ -24,6 +24,7 @@ If the submitUrl prop is passed, it will redirect on Submit.
         ref="input"
         :aria-label="placeholder || $t('Search...')"
         :placeholder="placeholder || $t('Search...')"
+        data-cy="search-input"
       />
       <span
         class="close-icon ml-sm self-center"
@@ -79,9 +80,8 @@ export default {
       });
     },
     onSubmit(event) {
-      if (!this.submitUrl)
-        event.preventDefault();
-    }
+      if (!this.submitUrl) event.preventDefault();
+    },
   },
 };
 </script>

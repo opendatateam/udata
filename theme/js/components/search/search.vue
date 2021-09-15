@@ -72,13 +72,18 @@
           <a
             class="btn-secondary btn-secondary-grey-200 px-md"
             @click="extendedForm = !extendedForm"
+            data-cy="extend-form"
           >
             <span v-if="!extendedForm">…</span>
             <span v-else>X</span>
           </a>
         </div>
       </div>
-      <div v-if="extendedForm" class="row mt-sm align-items-center">
+      <div
+        v-if="extendedForm"
+        data-cy="extended-form"
+        class="row mt-sm align-items-center"
+      >
         <div class="col-5 col-lg-6 col-md-12 row-inline">
           <Rangepicker
             :value="facets.temporal_coverage"
@@ -232,17 +237,15 @@ export default {
         (key) => this.facets[key]?.length > 0
       );
     },
-    paramUrl: function() {
+    paramUrl: function () {
       let params = {};
       for (key in this.facets) {
         params[key] = this.facets[key];
       }
-      if (this.current_page > 1)
-        params.page = this.current_page;
-      if (this.queryString)
-        params.q = this.queryString;
+      if (this.current_page > 1) params.page = this.current_page;
+      if (this.queryString) params.q = this.queryString;
       return params;
-    }
+    },
   },
   methods: {
     handleSearchChange(input) {
