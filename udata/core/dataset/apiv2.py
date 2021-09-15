@@ -17,7 +17,7 @@ from .api_fields import (
     user_ref_fields,
     temporal_coverage_fields,
     spatial_coverage_fields,
-    DEFAULT_MASK
+    DEFAULT_MASK,
 )
 
 log = logging.getLogger(__name__)
