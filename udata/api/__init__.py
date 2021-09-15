@@ -189,7 +189,7 @@ apiv2 = UDataApi(
     decorators=[csrf.exempt],
     version='2.0', title='uData API',
     description='udata API', default='site',
-    default_label='Site global namespace'
+    default_label='Site global namespace',
 )
 
 
