@@ -1,7 +1,7 @@
 from flask import url_for
 import pytest
 
-from ..api import APITestCase
+from udata.tests.api import APITestCase
 
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory)

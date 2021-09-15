@@ -11,7 +11,6 @@ from .models import (
 from .permissions import DatasetEditPermission
 from .api_fields import (
     resource_fields,
-    dataset_fields,
     badge_fields,
     org_ref_fields,
     user_ref_fields,
