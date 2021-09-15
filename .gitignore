@@ -61,3 +61,6 @@ nosetests.xml
 udata.cfg
 stylemark/
 .parcel-cache
+
+cypress/videos
+cypress/screenshots
