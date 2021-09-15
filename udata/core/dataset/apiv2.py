@@ -104,7 +104,8 @@ dataset_fields = apiv2.model('Dataset', {
 
 resource_page_fields = apiv2.model('ResourcePage', {
     'data': fields.List(
-        fields.Nested(resource_fields, description='The dataset resources')),
+        fields.Nested(resource_fields, description='The dataset resources')
+    ),
     'next_page': fields.String(),
     'previous_page': fields.String(),
     'page': fields.Integer(),
