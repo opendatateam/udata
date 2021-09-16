@@ -57,10 +57,10 @@
                             title="{{ _('Logout') }}">{% include theme('svg/login.svg') %}{{ _('Logout') }}
                         </a>
                         {% else %}
-                        <a href="{{ url_for('security.login', next=request.url) }}"
+                        <a href="{{ url_for('security.login', next=next_url) }}"
                             title="{{ _('Log in') }}">{% include theme('svg/login.svg') %}{{ _('Log in') }}
                         </a>
-                        <a href="{{ url_for('security.register', next=request.url) }}"
+                        <a href="{{ url_for('security.register', next=next_url) }}"
                             title="{{ _('Sign up') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
                         </a>
                         {% endif %}
