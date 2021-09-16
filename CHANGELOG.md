@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Meta read-only-enabled is back [#2664](https://github.com/opendatateam/udata/pull/2664)
 
 ## 3.2.0 (2021-09-14)
 
