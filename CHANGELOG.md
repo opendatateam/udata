@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.0.0 (2021-09-16)
 
 - :warning: **breaking change**: Package renamming and new repository [#1](https://github.com/etalab/udata-front/pull/1):
