@@ -3,6 +3,7 @@ import pytest
 
 from udata.tests.api import APITestCase
 
+from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory)
 
@@ -17,11 +18,11 @@ class DatasetAPIV2Test(APITestCase):
         self.assert200(response)
         data = response.json
         assert data['resources']['rel'] == 'subsection'
-        assert data['resources']['href'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size= 20, _external=True)
+        assert data['resources']['href'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['resources']['type'] == 'GET'
         assert data['resources']['total'] == len(resources)
         assert data['community_resources']['rel'] == 'subsection'
-        assert data['community_resources']['href'] == url_for('api.community_resources', dataset=dataset.id, page=1, page_size= 20, _external=True)
+        assert data['community_resources']['href'] == url_for('api.community_resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['community_resources']['type'] == 'GET'
         assert data['community_resources']['total'] == 0
 
@@ -29,26 +30,53 @@ class DatasetAPIV2Test(APITestCase):
 class DatasetResourceAPIV2Test(APITestCase):
 
     def test_get(self):
-        '''Should fetch paginated resources from the API'''
+        '''Should fetch 1 page of resources from the API'''
         resources = [ResourceFactory() for _ in range(7)]
         dataset = DatasetFactory(resources=resources)
-        page_size = 5
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=page_size))
+        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
-        assert len(data['data']) == page_size
+        assert len(data['data']) == len(resources)
         assert data['total'] == len(resources)
         assert data['page'] == 1
-        assert data['page_size'] == page_size
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=page_size, _external=True)
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] == None
+        assert data['previous_page'] is None
+
+    def test_get_missing_param(self):
+        '''Should fetch 1 page of resources from the API using its default parameters'''
+        resources = [ResourceFactory() for _ in range(7)]
+        dataset = DatasetFactory(resources=resources)
+        response = self.get(url_for('apiv2.resources', dataset=dataset.id))
+        self.assert200(response)
+        data = response.json
+        assert len(data['data']) == len(resources)
+        assert data['total'] == len(resources)
+        assert data['page'] == 1
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] == None
+        assert data['previous_page'] is None
+
+    def test_get_next_page(self):
+        '''Should fetch 2 pages of resources from the API'''
+        resources = [ResourceFactory() for _ in range(80)]
+        dataset = DatasetFactory(resources=resources)
+        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        self.assert200(response)
+        data = response.json
+        assert len(data['data']) == DEFAULT_PAGE_SIZE
+        assert data['total'] == len(resources)
+        assert data['page'] == 1
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
         response = self.get(data['next_page'])
         self.assert200(response)
         data = response.json
-        assert len(data['data']) == 2
+        assert len(data['data']) == len(resources) - DEFAULT_PAGE_SIZE
         assert data['total'] == len(resources)
         assert data['page'] == 2
-        assert data['page_size'] == page_size
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=3, page_size=page_size, _external=True)
-        assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=page_size, _external=True)
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] == None
+        assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)

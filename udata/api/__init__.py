@@ -208,6 +208,7 @@ def output_json(data, code, headers=None):
 
 
 @apiv1_blueprint.before_request
+@apiv2_blueprint.before_request
 def set_api_language():
     if 'lang' in request.args:
         g.lang_code = request.args['lang']
@@ -236,6 +237,7 @@ def extract_name_from_path(path):
 
 
 @apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
     blacklist = current_app.config.get('TRACKING_BLACKLIST', [])

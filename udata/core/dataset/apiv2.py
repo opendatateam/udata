@@ -3,30 +3,32 @@ import logging
 from flask import url_for
 from flask_restplus.reqparse import RequestParser
 
-from udata.api import apiv2, API, fields
+from udata.api import api, apiv2, API, fields
 
+from .api_fields import (
+    badge_fields,
+    DEFAULT_MASK,
+    org_ref_fields,
+    resource_fields,
+    spatial_coverage_fields,
+    temporal_coverage_fields,
+    user_ref_fields,
+)
 from .models import (
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
 )
 from .permissions import DatasetEditPermission
-from .api_fields import (
-    resource_fields,
-    badge_fields,
-    org_ref_fields,
-    user_ref_fields,
-    temporal_coverage_fields,
-    spatial_coverage_fields,
-    DEFAULT_MASK,
-)
+
+DEFAULT_PAGE_SIZE = 50
 
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace('datasets', 'Dataset related operations')
-resources_parser = RequestParser()
+resources_parser = api.parser()
 resources_parser.add_argument(
-    'page', required=True, type=int, default=1, location='args', help='The page to fetch')
+    'page', type=int, default=1, location='args', help='The page to fetch')
 resources_parser.add_argument(
-    'page_size', required=True, type=int, default=20, location='args',
+    'page_size', type=int, default=DEFAULT_PAGE_SIZE, location='args',
     help='The page size to fetch')
 
 common_doc = {
@@ -57,13 +59,13 @@ dataset_fields = apiv2.model('Dataset', {
                           readonly=True),
     'resources': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('apiv2.resources', dataset=o.id, page=1, page_size= 20, _external=True),
+        'href': url_for('apiv2.resources', dataset=o.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.resources)
         }, description='Link to the dataset resources'),
     'community_resources': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('api.community_resources', dataset=o.id, page=1, page_size= 20, _external=True),
+        'href': url_for('api.community_resources', dataset=o.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(o.community_resources)
         }, description='Link to the dataset community resources'),
