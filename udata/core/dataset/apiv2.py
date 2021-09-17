@@ -1,6 +1,6 @@
 import logging
 
-from flask import request, url_for
+from flask import url_for
 from flask_restplus.reqparse import RequestParser
 
 from udata.api import apiv2, API, fields
