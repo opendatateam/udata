@@ -143,7 +143,7 @@ class ResourcesAPI(API):
         res = dataset.resources[offset:(page_size + offset if page_size is not None else None)]
         return {
             'data': res,
-            'next_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}",
+            'next_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}" if page_size + offset < len(dataset.resources) else None,
             'page': page,
             'page_size': page_size,
             'previous_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}" if page > 1 else None,
