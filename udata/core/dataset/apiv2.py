@@ -2,11 +2,10 @@ import logging
 
 from flask import url_for
 
-from udata.api import api, apiv2, API, fields
+from udata.api import apiv2, API, fields
 
 from .api_fields import (
     badge_fields,
-    DEFAULT_MASK,
     org_ref_fields,
     resource_fields,
     spatial_coverage_fields,
@@ -23,7 +22,7 @@ DEFAULT_PAGE_SIZE = 50
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace('datasets', 'Dataset related operations')
-resources_parser = api.parser()
+resources_parser = apiv2.parser()
 resources_parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
 resources_parser.add_argument(
