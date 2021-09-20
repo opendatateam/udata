@@ -28,7 +28,8 @@ from .signals import on_api_call
 
 log = logging.getLogger(__name__)
 
-apiv1 = Blueprint('api', __name__, url_prefix='/api/1')
+apiv1_blueprint = Blueprint('api', __name__, url_prefix='/api/1')
+apiv2_blueprint = Blueprint('apiv2', __name__, url_prefix='/api/2')
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
@@ -176,11 +177,19 @@ class UDataApi(Api):
 
 
 api = UDataApi(
-    apiv1,
+    apiv1_blueprint,
     decorators=[csrf.exempt],
     version='1.0', title='uData API',
     description='uData API', default='site',
     default_label='Site global namespace'
+)
+
+apiv2 = UDataApi(
+    apiv2_blueprint,
+    decorators=[csrf.exempt],
+    version='2.0', title='uData API',
+    description='udata API v2', default='site',
+    default_label='Site global namespace',
 )
 
 
@@ -198,7 +207,8 @@ def output_json(data, code, headers=None):
     return resp
 
 
-@apiv1.before_request
+@apiv1_blueprint.before_request
+@apiv2_blueprint.before_request
 def set_api_language():
     if 'lang' in request.args:
         g.lang_code = request.args['lang']
@@ -226,7 +236,8 @@ def extract_name_from_path(path):
     return safe_unicode(name)
 
 
-@apiv1.after_request
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
 def collect_stats(response):
     action_name = extract_name_from_path(request.full_path)
     blacklist = current_app.config.get('TRACKING_BLACKLIST', [])
@@ -298,6 +309,7 @@ def init_app(app):
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
+    import udata.core.dataset.apiv2  # noqa
     import udata.core.issues.api  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
@@ -318,7 +330,8 @@ def init_app(app):
         api_module = module if inspect.ismodule(module) else import_module(module)
 
     # api.init_app(app)
-    app.register_blueprint(apiv1)
+    app.register_blueprint(apiv1_blueprint)
+    app.register_blueprint(apiv2_blueprint)
 
     oauth2.init_app(app)
     cors.init_app(app)
