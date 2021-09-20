@@ -83,8 +83,9 @@ class DatasetResourceAPIV2Test(APITestCase):
 
     def test_get_specific_type(self):
         '''Should fetch resources of type main from the API'''
+        nb_resources__of_specific_type = 80
         resources = [ResourceFactory() for _ in range(40)]
-        resources += [ResourceFactory(type='main') for _ in range(40)]
+        resources += [ResourceFactory(type='main') for _ in range(nb_resources__of_specific_type)]
         dataset = DatasetFactory(resources=resources)
         # Try without resource type filter
         response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
@@ -98,12 +99,22 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['previous_page'] is None
 
         # Try with resource type filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='documentation'))
+        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main'))
         self.assert200(response)
         data = response.json
-        assert len(data['data']) == 40
-        assert data['total'] == 40
+        assert len(data['data']) == DEFAULT_PAGE_SIZE
+        assert data['total'] == nb_resources__of_specific_type
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == None
+        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
         assert data['previous_page'] is None
+
+        response = self.get(data['next_page'])
+        self.assert200(response)
+        data = response.json
+        assert len(data['data']) == nb_resources__of_specific_type - DEFAULT_PAGE_SIZE
+        assert data['total'] == nb_resources__of_specific_type
+        assert data['page'] == 2
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] == None
+        assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)

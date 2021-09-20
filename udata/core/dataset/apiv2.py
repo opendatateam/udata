@@ -147,20 +147,26 @@ class ResourcesAPI(API):
         args = resources_parser.parse_args()
         page = args['page']
         page_size = args['page_size']
+        next_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}"
+        previous_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}"
+        if args['type']:
+            res = [elem for elem in dataset.resources if elem['type'] == args['type']]
+            next_page += f"&type={args['type']}"
+            previous_page += f"&type={args['type']}"
+        else:
+            res = dataset.resources
+
         if page > 1:
             offset = page_size * (page - 1)
         else:
             offset = 0
-        if args['type']:
-            res = [elem for elem in dataset.resources if elem['type'] == args['type']]
-        else:
-            res = dataset.resources
         paginated_result = res[offset:(page_size + offset if page_size is not None else None)]
+
         return {
             'data': paginated_result,
-            'next_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}" if page_size + offset < len(res) else None,
+            'next_page': next_page if page_size + offset < len(res) else None,
             'page': page,
             'page_size': page_size,
-            'previous_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}" if page > 1 else None,
+            'previous_page': previous_page if page > 1 else None,
             'total': len(res),
         }
