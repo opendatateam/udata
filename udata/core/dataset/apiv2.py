@@ -36,6 +36,9 @@ resources_parser.add_argument(
 resources_parser.add_argument(
     'page_size', type=int, default=DEFAULT_PAGE_SIZE, location='args',
     help='The page size to fetch')
+resources_parser.add_argument(
+    'type', type=str, location='args',
+    help='The type of resources to fetch')
 
 common_doc = {
     'params': {'dataset': 'The dataset ID or slug'}
@@ -148,12 +151,19 @@ class ResourcesAPI(API):
             offset = page_size * (page - 1)
         else:
             offset = 0
-        res = dataset.resources[offset:(page_size + offset if page_size is not None else None)]
+        if args['type']:
+            res = list()
+            for elem in dataset.resources:
+                if elem['type'] == args['type']:
+                    res.append(elem)
+        else:
+            res = dataset.resources
+        paginated_result = res[offset:(page_size + offset if page_size is not None else None)]
         return {
-            'data': res,
-            'next_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}" if page_size + offset < len(dataset.resources) else None,
+            'data': paginated_result,
+            'next_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}" if page_size + offset < len(res) else None,
             'page': page,
             'page_size': page_size,
             'previous_page': f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}" if page > 1 else None,
-            'total': len(dataset.resources),
+            'total': len(res),
         }

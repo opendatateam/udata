@@ -80,3 +80,30 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['page_size'] == DEFAULT_PAGE_SIZE
         assert data['next_page'] == None
         assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
+
+    def test_get_specific_type(self):
+        '''Should fetch resources of type main from the API'''
+        resources = [ResourceFactory() for _ in range(40)]
+        resources += [ResourceFactory(type='main') for _ in range(40)]
+        dataset = DatasetFactory(resources=resources)
+        # Try without resource type filter
+        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        self.assert200(response)
+        data = response.json
+        assert len(data['data']) == DEFAULT_PAGE_SIZE
+        assert data['total'] == len(resources)
+        assert data['page'] == 1
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['previous_page'] is None
+
+        # Try with resource type filter
+        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='documentation'))
+        self.assert200(response)
+        data = response.json
+        assert len(data['data']) == 40
+        assert data['total'] == 40
+        assert data['page'] == 1
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] == None
+        assert data['previous_page'] is None
