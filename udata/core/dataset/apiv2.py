@@ -19,6 +19,14 @@ from .permissions import DatasetEditPermission
 
 DEFAULT_PAGE_SIZE = 50
 
+#: Default mask to make it lightweight by default
+DEFAULT_MASK_APIV2 = ','.join((
+    'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
+    'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date', 'extras',
+    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'uri', 'page', 'last_update', 'archived'
+))
+
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace('datasets', 'Dataset related operations')
@@ -98,7 +106,7 @@ dataset_fields = apiv2.model('Dataset', {
     'quality': fields.Raw(description='The dataset quality', readonly=True),
     'last_update': fields.ISODateTime(
         description='The resources last modification date', required=True),
-})
+}, mask=DEFAULT_MASK_APIV2)
 
 
 resource_page_fields = apiv2.model('ResourcePage', {
