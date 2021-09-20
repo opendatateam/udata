@@ -152,10 +152,7 @@ class ResourcesAPI(API):
         else:
             offset = 0
         if args['type']:
-            res = list()
-            for elem in dataset.resources:
-                if elem['type'] == args['type']:
-                    res.append(elem)
+            res = [elem for elem in dataset.resources if elem['type'] == args['type']]
         else:
             res = dataset.resources
         paginated_result = res[offset:(page_size + offset if page_size is not None else None)]
