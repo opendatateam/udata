@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- First endpoints for APIv2! Add datasets hateoas and resources pagination endpoints [#2663](https://github.com/opendatateam/udata/pull/2663)
 
 ## 3.2.0 (2021-09-14)
 
