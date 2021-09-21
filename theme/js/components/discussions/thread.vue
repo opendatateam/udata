@@ -52,7 +52,7 @@
       </article>
     </div>
     <footer class="thread-footer">
-      <div v-if="!closed">
+      <div v-if="!closed && !readOnlyEnabled">
         <a
           class="thread-reply-cta unstyled"
           v-if="!showForm"
@@ -96,6 +96,7 @@ export default {
       updatedDiscussion: null, //This is a bit ugly, we hold two states here for the updated discussion when the user replies. Should probably hoist this up.
       LinkIcon, //Little svg loading hack
       collapsed: true, //The thread is collapsed by default for closed discussions
+      readOnlyEnabled: config.read_only_enabled,
     };
   },
   computed: {

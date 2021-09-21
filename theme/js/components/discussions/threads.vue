@@ -60,6 +60,7 @@
             :onSubmit="createThread"
             :subjectId="subjectId"
             :subjectClass="subjectClass"
+            v-show="!readOnlyEnabled"
           ></create-thread>
           <pagination
             v-if="total_results > page_size"
@@ -113,6 +114,7 @@ export default {
       current_sort: sorts[0],
       sorts,
       CloseIcon,
+      readOnlyEnabled: config.read_only_enabled,
     };
   },
   props: {

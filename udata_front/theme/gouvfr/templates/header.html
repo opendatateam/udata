@@ -1,5 +1,11 @@
 {% set banner_activated = config['BANNER_ACTIVATED'] %}
+{% set read_only_mode = config['READ_ONLY_MODE'] %}
 {% set next_url = url_for(request.endpoint, **request.view_args) if not request.routing_exception else url_for('site.home') %}
+
+{% if read_only_mode %}
+{% include theme('banners/read-only.html') with context %}
+{% endif %}
+
 {% if banner_activated %}
 {% block banner %}
     {% set banner_message = config['BANNER_HTML_CONTENT_FR'] if g.lang_code == "fr" else config['BANNER_HTML_CONTENT_EN'] %}
@@ -58,9 +64,11 @@
                     <a href="{{ url_for('security.login', next=next_url) }}"
                         title="{{ _('Log in') }}">{% include theme('svg/login.svg') %}{{ _('Log in') }}
                     </a>
+                    {% if not read_only_mode %}
                     <a href="{{ url_for('security.register', next=next_url) }}"
                         title="{{ _('Sign up') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
                     </a>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>

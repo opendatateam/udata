@@ -12,6 +12,7 @@
                     </li>
                 </ul>
             </div>
+            {% if not read_only_mode %}
             <div class="col-3 col-sm-12 py-sm-xs mt-sm-sm">
                 <a href="{{ url_for('admin.index', path='dataset/new/') }}" role="button"
                     class="btn btn-secondary btn-secondary-white btn-with-arrow">{{ _('Publish a dataset') }}</a>
@@ -20,6 +21,7 @@
                 <a href="{{ url_for('admin.index', path='reuse/new/') }}" role="button"
                     class="btn btn-secondary btn-secondary-white btn-with-arrow">{{ _('Publish a reuse') }}</a>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

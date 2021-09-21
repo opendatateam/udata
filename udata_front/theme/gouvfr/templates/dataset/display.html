@@ -297,10 +297,12 @@
                                 href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}">{{ _('Modify information') }}</a>
                         </li>
                         {% endif %}
+                        {% if not read_only_mode %}
                         <li class="my-md">
                             <a class="nav-link"
                                 @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a>
                         </li>
+                        {% endif %}
                     </ul>
                 </div>
                 <div class="col-6 col-md-12 my-md-lg">
@@ -350,6 +352,7 @@
             </div>
         </div>
 
+        {% if not read_only_mode %}
         <div class="resource-list">
             {% for resource in dataset.community_resources %}
             {% with dark = True %}
@@ -363,6 +366,7 @@
             </a>
             {% endif %}
         </div>
+        {% endif %}
 
         {% block reuses_section %}
         <h2 id="community-reuses" class="fs-hg">{{ _('Reuses') }} <sup>{{ reuses|length }}</sup></h2>
@@ -381,6 +385,7 @@
             </div>
             {% endfor %}
         </div>
+        {% if not read_only_mode %}
         <div class="row">
             <div class="col-12">
                 <a class="btn-action my-xl"
@@ -389,6 +394,7 @@
                 </a>
             </div>
         </div>
+        {% endif %}
         {% endblock %}
 
         <h2 id="community-discussions" class="fs-hg">{{ _('Discussions') }} <sup class="discussions-count">0</sup></h2>

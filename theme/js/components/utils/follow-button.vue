@@ -17,6 +17,7 @@ The `url` prop is the API URL.
     @click.prevent="toggleFollow"
     title=""
     class="unstyled row-inline align-items-center"
+    v-show="!readOnlyEnabled"
   >
     <span class="btn-secondary btn-secondary-orange-100 p-sm follow-button">
       <span
@@ -51,6 +52,7 @@ export default {
       _followers: this.followers || 0,
       _following: this.following,
       animating: false,
+      readOnlyEnabled: config.read_only_enabled,
     };
   },
   methods: {

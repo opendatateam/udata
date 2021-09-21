@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add read only mode back on frontend [#10](https://github.com/etalab/udata-front/pull/10)
 
 ## 1.0.0 (2021-09-16)
 

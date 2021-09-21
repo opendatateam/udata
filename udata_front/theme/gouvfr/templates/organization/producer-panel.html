@@ -1,5 +1,6 @@
 {% set details_view = details_view or url_for("organizations.show", org=organization, _external=True) %}
 {% set name = organization.name or organization.fullname %}
+{% set read_only_mode = config['READ_ONLY_MODE'] %}
 <div class="producer-panel row justify-between">
     <div class="col-1 col-md-12">
         {% if producer_type == 'organization' %}
@@ -22,11 +23,10 @@
                     title="{{ _('View Profile') }}">
                     {{ _('View Profile') }}</a></li>
             {% endif %}
+            {% if not read_only_mode %}
             <li><a class="nav-link text-decoration-none text-blue-500" @click="$refs.discussions.startThread()"
                     title="{{ _('Contact the producer') }}">{{ _('Contact the producer') }}</a></li>
-            {# <li><a class="nav-link text-decoration-none text-blue-500"
-                    href="{{ url_for('api.organization_followers', id=organization.id|string) }}"
-                    title="">{{ _('Add the producer as favourite') }}</a></li> #}
+            {% endif %}
         </ul>
     </div>
     <div class="col-1"></div>
