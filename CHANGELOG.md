@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add Cypress front-end tests stub [#9](https://github.com/etalab/udata-front/pull/9)
 
 ## 1.0.0 (2021-09-16)
 
