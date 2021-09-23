@@ -4,6 +4,7 @@ import Threads from "./components/discussions/threads.vue";
 import Suggest from "./components/search/suggest-box";
 import Search from "./components/search/search";
 import FollowButton from "./components/utils/follow-button";
+import RequestMembership from "./components/organization/request-membership";
 
 import Tabs from "./components/vanilla/tabs";
 import Accordion from "./components/vanilla/accordion";
@@ -39,6 +40,7 @@ app.component("discussion-threads", Threads);
 app.component("suggest", Suggest);
 app.component("search", Search);
 app.component("follow-button", FollowButton);
+app.component("request-membership", RequestMembership);
 
 //We keep the div HTML from before trying to mount the VueJS App
 const previousHtml = document.querySelector("#app").innerHTML;

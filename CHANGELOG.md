@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add read only mode back on frontend [#10](https://github.com/etalab/udata-front/pull/10)
+- Add a request membership action on organization page [#12](https://github.com/etalab/udata-front/pull/12)
 
 ## 1.0.0 (2021-09-16)
 

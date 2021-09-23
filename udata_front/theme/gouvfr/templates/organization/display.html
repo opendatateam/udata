@@ -11,7 +11,7 @@
     'keywords': [_('organization')],
     'robots': 'noindex, nofollow' if is_hidden else '',
 } %}
-
+{% set read_only_mode = config.READ_ONLY_MODE %}
 
 {% set bundle = 'organization' %}
 
@@ -157,7 +157,7 @@
                 <div class="col-6 col-md-12  my-md-lg">
                     <h3>{{ _('Actions') }}</h3>
                     <ul class="nav-list">
-                        {% if can_edit %}
+                        {% if can_edit and not read_only_mode %}
                         <li class="my-md">
                             <a class="nav-link"
                                 href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">{{ _('Modify information') }}</a>
@@ -167,6 +167,24 @@
                             <a href="{{ url_for('organizations.datasets_csv', org=org) }}"
                                 class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
                         </li>
+
+                        {% set member = org.member(current_user) %}
+                        {% if not member %}
+                            {% set pending_request = org.pending_request(current_user) %}
+                            {% if not pending_request and not read_only_mode %}
+                            <li class="my-md">
+                                <request-membership orga='{{org.id}}'>
+                                </request-membership>
+                            </li>
+                            {% elif pending_request %}
+                            <li class="my-md">
+                                <span
+                                class="f-light f-italic">{{ _('Pending request to join this organization') }}</a>
+                            </li>
+                            {% endif %}
+                        {% endif %}
+
+
                     </ul>
                 </div>
             </div>
