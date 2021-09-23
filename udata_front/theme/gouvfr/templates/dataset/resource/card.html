@@ -6,7 +6,7 @@
         <header class="card-header" id="resource-{{resource.id}}-header">
             <div class="edit-button">
                 {% if can_edit %}
-                <a href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id), **{'new_resource': ''}) }}"
+                <a href="{{ url_for('admin.index', path='dataset/{id}/resource/{resource_id}'.format(id=dataset.id, resource_id=resource.id)) }}"
                     aria-label="{{ _('Edit button') }}">
                     {% include theme('svg/actions/edit.svg') %}
                 </a>

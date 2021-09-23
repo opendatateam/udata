@@ -1,11 +1,11 @@
 <template>
-  <section class="discussions-wrapper">
+  <section class="discussions-wrapper" ref="top" key="top">
     <ModalsContainer></ModalsContainer>
     <transition mode="out-in">
       <div v-if="loading" key="loader">
         <Loader class="mt-md" />
       </div>
-      <div v-else ref="top" key="top">
+      <div v-else>
         <div v-if="threadFromURL">
           <div class="well well-secondary-green-300">
             <div class="row-inline justify-between">
@@ -185,6 +185,13 @@ export default {
       log("Loading thread", id);
 
       this.loading = true;
+
+      //Scroll the discussion block into view.
+      //SetTimeout is needed (instead of $nextTick) because the DOM updates are too fast for the browser to handle
+      setTimeout(
+        () => this.$refs.top.scrollIntoView({ behavior: "smooth" }),
+        100
+      );
 
       return this.$api
         .get("/discussions/" + id)

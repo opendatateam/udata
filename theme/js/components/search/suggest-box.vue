@@ -41,9 +41,7 @@ For non-JS users, the home search box is a standard input that will still work n
       <section>
         <div class="suggest-copy text-align-center my-xl">
           <h4 class="text-white">
-            {{
-              $t("Search for data, reuses, contributions...")
-            }}
+            {{ $t("Search for data, reuses, contributions...") }}
           </h4>
         </div>
         <div class="container">

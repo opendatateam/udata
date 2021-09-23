@@ -42,21 +42,24 @@
                             </a>
                         </li>
                     </ul>
-                    <ul  class="row-inline my-lg">
+                    <ul class="row-inline my-lg">
                         <li class="fs-sm">
-                            <a href="{{ url_for('datasets.recent_feed') }}" title="RSS" class="unstyled">
+                            <a href="{{ url_for('datasets.recent_feed') }}" title="{{ _('RSS feed') }}"
+                                class="unstyled">
                                 RSS
                             </a>
                         </li>
                         <li class="ml-xl fs-sm">
-                            <a href="https://infolettres.etalab.gouv.fr/subscribe/rn7y93le1" title="{{ _('Newsletter') }}" class="unstyled">
+                            <a href="https://infolettres.etalab.gouv.fr/subscribe/rn7y93le1"
+                                title="{{ _('Newsletter') }}" class="unstyled">
                                 {{ _('Newsletter') }}
                             </a>
                         </li>
                     </ul>
                     <p class="text-black fs-sm">
                         Sauf mention contraire, tous les contenus de ce site sont sous licence
-                        <a href="https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf" title="">etalab-2.0</a>
+                        <a href="https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf"
+                            title="">etalab-2.0</a>
                     </p>
                 </div>
                 <div class="col-3 col-lg-12 mt-lg-lg self-center">
@@ -106,15 +109,16 @@
                 </ul>
                 <div class="col-2 col-lg-12 self-end text-align-right">
                     <div class="btn-secondary px-lg btn-secondary-grey-400 dropdown">
-                        <select id="lang-picker" aria-label="{{ _('Language selector') }}" onchange="location = location.href.replace(new RegExp('\/\\w{2}\/'), '/' + this.value + '/', regex=true)">
+                        <select id="lang-picker" aria-label="{{ _('Language selector') }}"
+                            onchange="location = location.href.replace(new RegExp('\/\\w{2}\/'), '/' + this.value + '/', regex=true)">
                             {% for code, name in config['LANGUAGES'].items() %}
                             {% if g.lang_code == code %}
                             <option value={{code}} selected>
-                                    {{name}} 
+                                {{name}}
                             </option>
                             {% else %}
                             <option value={{code}}>
-                                    {{name}} 
+                                {{name}}
                             </option>
                             {% endif %}
                             {% endfor %}
