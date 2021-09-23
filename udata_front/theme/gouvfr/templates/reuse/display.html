@@ -18,6 +18,8 @@
 
 {% set community_subtitle = _('Explore with %(certifier)s', certifier=config.SITE_TITLE ) %}
 
+{% set read_only_mode = config['READ_ONLY_MODE'] %}
+
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('reuses.show', reuse=reuse) }}" />
 <link rel="alternate" type="application/json+oembed" href="{{ url_for('api.oembed', url=reuse.external_url) }}"
@@ -160,9 +162,11 @@
                             href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}">{{ _('Modify information') }}</a>
                     </li>
                     {% endif %}
+                    {% if not read_only_mode %}
                     <li class="my-md">
                         <a class="nav-link" @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
             <div class="col-6 col-md-12 my-md-lg">

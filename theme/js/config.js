@@ -159,6 +159,11 @@ export const dataset_max_resources_uncollapsed = _jsonMeta(
  */
 export const markdown = _jsonMeta("markdown-config");
 
+/**
+ * Whether the 'read only mode' feature is enabled or not.
+ */
+ export const read_only_enabled = _jsonMeta('read-only-enabled');
+
 // New generic `js-config-*` variables : simply add them to `metadata.html` with a meta name="js-config-something", content="yourValue" and import this file.
 // Everything is exported in the `values` variable as key: value pairs
 const valuesPrefix = "js-config-";
@@ -200,4 +205,5 @@ export default {
   values,
   dataset_max_resources_uncollapsed,
   markdown,
+  read_only_enabled,
 };
