@@ -68,9 +68,9 @@
   "Reuses": "Reuses",
   "Datasets are collections of data, i.e. structured information, easily readable by a machine.": "Datasets are collections of data, i.e. structured information, easily readable by a machine.",
   "Reuses refer to the use of data for an other purpose than the one they were produced for.": "Reuses refer to the use of data for an other purpose than the one they were produced for.",
-  "Ask to join the organization as a producer": "",
-  "You must be connected to join an organization": "",
-  "You can add some details here for your membership request": "",
-  "A request has been sent to the administrators": "",
-  "Error while requesting membership": ""
+  "Ask to join the organization as a producer": "Ask to join the organization as a producer",
+  "You must be connected to join an organization": "You must be connected to join an organization",
+  "You can add some details here for your membership request": "You can add some details here for your membership request",
+  "A request has been sent to the administrators": "A request has been sent to the administrators",
+  "Error while requesting membership": "Error while requesting membership"
 }

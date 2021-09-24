@@ -30,9 +30,9 @@ data() {
   methods: {
     JoinOrga: function () {
 
-      this.$auth(this.$t("You must be connected to join an organization."));
+      this.$auth(this.$t("You must be connected to join an organization"));
 
-      this.comment = prompt(this.$t('You can add some details here for your membership request.'));
+      this.comment = prompt(this.$t('You can add some details here for your membership request'));
 
       this.$api.post("organizations/" + this.orga + "/membership/", {comment: this.comment})
           .then(data => {
