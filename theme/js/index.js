@@ -42,6 +42,9 @@ app.component("search", Search);
 app.component("follow-button", FollowButton);
 app.component("request-membership", RequestMembership);
 
+// unset delimiters used in html templates to prevent injections using {{ }}
+app.config.compilerOptions.delimiters = []
+
 //We keep the div HTML from before trying to mount the VueJS App
 const previousHtml = document.querySelector("#app").innerHTML;
 
