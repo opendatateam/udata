@@ -33,7 +33,7 @@ Vue. -->
     <dl class="card-hover">
       <div v-if="temporal_coverage">
         <dt>{{ $t("Temporal coverage") }}</dt>
-        <dd>{{ Object.values(temporal_coverage).join(" - ") }}</dd>
+        <dd>{{ temporal_coverage.start + " - " + temporal_coverage.end }}</dd>
       </div>
       <div v-if="frequency">
         <dt>{{ $t("Frequency") }}</dt>
@@ -77,7 +77,7 @@ export default {
     organization: Object,
     owner: Object,
     description: String,
-    temporal_coverage: String,
+    temporal_coverage: Object,
     frequency: String,
     spatial: Object,
     metrics: Object,
