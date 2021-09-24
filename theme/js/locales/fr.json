@@ -67,5 +67,10 @@
   "You must be connected to add a favourite.": "Vous devez être connecté pour ajouter un favori.",
   "Reuses": "Réutilisations",
   "Datasets are collections of data, i.e. structured information, easily readable by a machine.": "Les jeux de données sont des recueils de données, c’est-à-dire des informations structurées, facilement lisibles par une machine.",
-  "Reuses refer to the use of data for an other purpose than the one they were produced for.": "Les réutilisations désignent l’utilisation des données à d’autres fins que celle de la mission pour laquelle les données ont été produites."
+  "Reuses refer to the use of data for an other purpose than the one they were produced for.": "Les réutilisations désignent l’utilisation des données à d’autres fins que celle de la mission pour laquelle les données ont été produites.",
+  "Ask to join the organization as a producer": "",
+  "You must be connected to join an organization": "",
+  "You can add some details here for your membership request": "",
+  "A request has been sent to the administrators": "",
+  "Error while requesting membership": ""
 }
