@@ -40,7 +40,7 @@ export default {
     name: 'editorial-view',
     data() {
         return {
-            posts: new Posts({query: {sort: '-created', page_size: 10}, mask: PostList.MASK}),
+            posts: new Posts({query: {sort: '-created_at', page_size: 10}, mask: PostList.MASK}),
             topics: new Topics({query: {sort: '-created', page_size: 10}, mask: TopicList.MASK}),
             home_datasets: new List({ns: 'site', fetch: 'get_home_datasets',
                                      mask: DatasetCardList.MASK, model: Dataset}),
