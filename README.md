@@ -5,9 +5,9 @@
     <i>⚙️ Udata customizations for data.gouv.fr made by Etalab ⚙️</i>
     <br>
     <br>
-    <img src="https://img.shields.io/github/issues/etalab/udata-font">
-    <img src="https://img.shields.io/github/issues-closed/etalab/udata-font">
-    <img src="https://img.shields.io/github/contributors/etalab/udata-font">
+    <img src="https://img.shields.io/github/issues/etalab/udata-front">
+    <img src="https://img.shields.io/github/issues-closed/etalab/udata-front">
+    <img src="https://img.shields.io/github/contributors/etalab/udata-front">
     <img src="https://img.shields.io/github/license/etalab/udata-front">
     <img src="https://img.shields.io/github/commit-activity/m/etalab/udata-front">
 </p>
