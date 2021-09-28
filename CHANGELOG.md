@@ -4,6 +4,7 @@
 
 - Add Cypress front-end tests stub [#9](https://github.com/etalab/udata-front/pull/9)
 - Add read only mode back on frontend [#10](https://github.com/etalab/udata-front/pull/10)
+- Fix RGAA criterion 1.2 Each decorative image is ignored by assistive technologies. [#13](https://github.com/etalab/udata-front/pull/13)
 - Add a request membership action on organization page [#12](https://github.com/etalab/udata-front/pull/12)
 - Unset vue delimiters used in html templates to prevent injections [#11](https://github.com/etalab/udata-front/pull/11)
 - Fix temporal coverage order in search results metadata [#14](https://github.com/etalab/udata-front/pull/14)

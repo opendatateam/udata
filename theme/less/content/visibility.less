@@ -19,11 +19,32 @@ Sometimes you need to hide some elements, mostly while doing some responsive rul
         <div class="col bg-orange-100 hidden visible-sm">Visible on mobile</div>
     </div>
 </div>
+
+## Visually hidden
+
+Sometimes you need to show some elements only to assistive technologies (like screen readers). You can use `.visually-hidden` to do so.
+It was previously called `.sr-only` in CSS frameworks so the name is still often used.
+
+```visually-hidden.html
+<span class="visually-hidden">Some details for screen readers and other assistive technologies.</span>
 ```
 */
 
-.hidden  {
+.hidden {
     display: none !important;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap; /* added line */
+    border: 0;
 }
 
 each(@breakpoints, .(@bk, @_k, @_i) {

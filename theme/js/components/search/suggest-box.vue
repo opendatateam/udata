@@ -13,7 +13,7 @@ It searches using uData search API using separate API calls for Datasets and Reu
 
 The search is composed with multiple components :
 
-* `<search-input>` is an input in which you can type in, the function you'll pass as a callback will be called on each change`
+* `<search-input>` is an input in which you can type in, the function you'll pass as a callback will be called on each change`
 * `<suggest-box>` is the component that displays the suggest box (`search-input` + `suggest-results`). It's responsible for the API calls and such and is the "root" component of the suggest search and is mounted in the HTML.
 * `<suggest-results>` is the component that displays the suggest results after you search for something.
 * `<empty>` is the empty state component when no results have been found for a given suggest

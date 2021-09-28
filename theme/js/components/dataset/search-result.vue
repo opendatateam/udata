@@ -14,7 +14,7 @@ Vue. -->
       <Placeholder
         type="dataset"
         :src="owner.logo_thumbnail"
-        :alt="owner.name"
+        :alt="owner.fullname"
       />
       <div class="logo-badge">
         <span v-html="private" v-if="private" />

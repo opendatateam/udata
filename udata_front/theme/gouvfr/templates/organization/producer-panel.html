@@ -5,11 +5,11 @@
     <div class="col-1 col-md-12">
         {% if producer_type == 'organization' %}
         <a href="{{ details_view }}" class="logo" title="{{ name }}">
-            <img src="{{ organization.logo|placeholder('organization') }}" alt="{{ name }}"
+            <img src="{{ organization.logo|placeholder('organization') }}" alt=""
                 class="organization-logo producer mw-100" />
         </a>
         {% else %}
-            <img src="{{ organization.logo|placeholder('organization') }}" alt="{{ name }}"
+            <img src="{{ organization.logo|placeholder('organization') }}" alt=""
                 class="organization-logo producer mw-100" />
         {% endif %}
     </div>

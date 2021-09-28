@@ -82,7 +82,7 @@ export default {
         v-if="index"
         >{{ index }}</a
       >
-      <span class="ellipsis" role="img" aria-label="ellipsis" v-else>...</span>
+      <span class="ellipsis" role="img" aria-label="ellipsis" aria-hidden="true" v-else>...</span>
     </li>
     <li>
       <a

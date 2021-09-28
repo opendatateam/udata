@@ -134,6 +134,11 @@ def placeholder(ctx, url, name='default', external=False):
 
 
 @front.app_template_filter()
+def placeholder_alt(alt, url):
+    return alt if url else ''
+
+
+@front.app_template_filter()
 def obfuscate(email):
     """Poor-man obfuscation, don't forget the |safe filter after it."""
     return email.replace('@', '%40').replace('.', '&#46;')

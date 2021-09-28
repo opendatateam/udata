@@ -16,10 +16,9 @@ Sometimes you don't need an image but a `<div>` with a background-image property
   <div
     v-if="backgroundImage"
     v-bind="$attrs"
-    :alt="alt"
     :style="{ backgroundImage: `url('${path}')` }"
   />
-  <img :src="path" :alt="alt" v-bind="$attrs" v-else />
+  <img :src="path" :alt="alternativeTextForDefinedImageOnly" v-bind="$attrs" v-else />
 </template>
 
 <script>
@@ -37,6 +36,9 @@ export default {
     backgroundImage: Boolean,
   },
   computed: {
+    alternativeTextForDefinedImageOnly() {
+      return this.src ? this.alt : '';
+    },
     path() {
       return placeholderUrl(this.src, this.type);
     },
