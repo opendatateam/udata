@@ -163,8 +163,9 @@
                     </li>
                     {% endif %}
                     {% if not read_only_mode %}
-                    <li class="my-md">
-                        <a class="nav-link" @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a>
+                    <li class="my-md vuejs">
+                        <a class="nav-link"
+                            @click="$bus.emit('discussions.startThread')">{{ _('Contact the producer') }}</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -179,7 +180,7 @@
         </div>
     </section>
     <section class="community_container bg-grey-400 text-white py-hg" id="community">
-        <div class="container">
+        <div class="container vuejs">
             <h2 id="community-discussions" class="fs-hg">{{ _('Discussions') }} <sup class="discussions-count">0</sup>
             </h2>
             <div class="row">

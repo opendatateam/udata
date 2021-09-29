@@ -107,6 +107,9 @@ export default {
       return `${config.values.reuseUrl}?q=${this.queryString}`;
     },
   },
+  mounted() {
+    this.$bus.on("suggest.startSearch", () => this.startSearch(""));
+  },
   methods: {
     start() {
       this.active = true;

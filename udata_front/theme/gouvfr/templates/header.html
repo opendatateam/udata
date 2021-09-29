@@ -29,9 +29,9 @@
                             {% include theme('svg/marianne.svg') %}
                         </a>
                     </div>
-                    <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start">
+                    <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start vuejs">
                         <a href="/datasets" title="{{ _('Search for data') }}" class="mr-md"
-                            @click.capture.prevent="$refs.suggest.startSearch()">
+                            @click.capture.prevent="$bus.emit('suggest.startSearch')">
                             {% include theme('svg/search.svg') %}
                         </a>
                         <a href="#" @click.capture.prevent="addBodyClass('mobile-menu-open')"
@@ -86,9 +86,9 @@
                         <a class="tab {% if active %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
                         {% endfor %}
                     </nav>
-                    <div class="col-3 hidden-xl search-box">
+                    <div class="col-3 hidden-xl search-box vuejs">
                         <form action="/datasets" class="w-100 row-inline justify-between"
-                            @focus.capture.prevent="$refs.suggest.startSearch()" tabindex="0">
+                            @focus.capture.prevent="$bus.emit('suggest.startSearch')" tabindex="0">
                             <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search for data') }}" />
                             <button type="submit" aria-label="{{ _('Search for data') }}">
                                 {% include theme('svg/search.svg') %}
@@ -98,6 +98,8 @@
                 </div>
             </div>
         </nav>
-        <suggest ref="suggest" />
+        <div class="vuejs">
+            <suggest ref="suggest" />
+        </div>
     </div>
 </section>

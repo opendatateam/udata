@@ -130,6 +130,9 @@ export default {
     },
   },
   mounted() {
+    //Listen to bus events
+    this.$bus.on("discussions.startThread", () => this.startThread());
+
     //Check if URL contains a thread
     const hash = window.location.hash.substring(1);
     const [a, discussionId, b] = URL_REGEX.exec(hash) || [];

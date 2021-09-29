@@ -298,9 +298,9 @@
                         </li>
                         {% endif %}
                         {% if not read_only_mode %}
-                        <li class="my-md">
+                        <li class="my-md vuejs">
                             <a class="nav-link"
-                                @click="$refs.discussions.startThread()">{{ _('Contact the producer') }}</a>
+                                @click="$bus.emit('discussions.startThread')">{{ _('Contact the producer') }}</a>
                         </li>
                         {% endif %}
                     </ul>
@@ -403,9 +403,11 @@
                 <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
             </div>
         </div>
-        <discussion-threads ref="discussions" subject-id="{{ dataset.id }}"
-            subject-class="{{ dataset.__class__.__name__ }}">
-        </discussion-threads>
+        <div class="vuejs">
+            <discussion-threads ref="discussions" subject-id="{{ dataset.id }}"
+                subject-class="{{ dataset.__class__.__name__ }}">
+            </discussion-threads>
+        </div>
     </div>
 </section>
 {% endblock %}

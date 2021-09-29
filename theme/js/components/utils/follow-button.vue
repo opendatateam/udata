@@ -19,7 +19,10 @@ The `url` prop is the API URL.
     class="unstyled row-inline align-items-center"
     v-show="!readOnlyEnabled"
   >
-    <span class="btn-secondary btn-secondary-orange-100 p-sm follow-button">
+    <span
+      class="btn-secondary btn-secondary-orange-100 p-sm"
+      style="line-height: 1"
+    >
       <span
         v-html="icon"
         class="magic"

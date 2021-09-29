@@ -23,18 +23,18 @@
 {% set bundle = 'search' %}
 
 {% block main_content %}
-<section class="container search py-lg">
+<section class="container search py-lg vuejs">
     <Search>
         <div class="pt-sm search-input">
             <form method="GET" class="row-inline fs-lg">
                 <span class="icon active">{% include theme("svg/search.svg") %}</span>
-                <input type="text" name="q" value="{{datasets.query._query}}" aria-label="{{ _('Search...') }}" placeholder="{{ _('Search...') }}" />
+                <input type="text" name="q" value="{{datasets.query._query}}" aria-label="{{ _('Search...') }}"
+                    placeholder="{{ _('Search...') }}" />
             </form>
         </div>
         <div class="row-inline pt-xl pt-lg-lg justify-between align-items-center">
             <h1 class="m-0 h2">{{ _('Datasets')}} <sup>{{datasets.total}}</sup></h1>
-            <a href="{{ url_for('reuses.list') }}" title=""
-                class="nav-link fs-sm mt-lg-sm">{{ _('Search reuses') }}</a>
+            <a href="{{ url_for('reuses.list') }}" title="" class="nav-link fs-sm mt-lg-sm">{{ _('Search reuses') }}</a>
         </div>
         <ul class="search-results mt-lg">
             {% for dataset in datasets %}

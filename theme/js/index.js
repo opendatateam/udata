@@ -14,6 +14,7 @@ import VueFinalModal from "vue-final-modal";
 import Toaster from "@meforma/vue-toaster";
 
 import Api from "./plugins/api";
+import EventBus from "./plugins/eventbus";
 import Auth from "./plugins/auth";
 import Modals from "./plugins/modals";
 import i18n from "./plugins/i18n";
@@ -22,43 +23,54 @@ import filters from "./plugins/filters";
 
 import InitSentry from "./sentry";
 
-const app = createApp({});
+const configAndMountApp = (el) => {
+  const app = createApp({});
 
-// Configure as early as possible in the app's lifecycle
-InitSentry(app);
+  // Configure as early as possible in the app's lifecycle
+  InitSentry(app);
 
-app.use(Api);
-app.use(Auth);
-app.use(VueFinalModal());
-app.use(Modals); //Has to be loaded after VueFinalModal
-app.use(i18n);
-app.use(bodyClass);
-app.use(filters);
-app.use(Toaster);
+  app.use(Api);
+  app.use(EventBus);
+  app.use(Auth);
+  app.use(VueFinalModal());
+  app.use(Modals); //Has to be loaded after VueFinalModal
+  app.use(i18n);
+  app.use(bodyClass);
+  app.use(filters);
+  app.use(Toaster);
 
-app.component("discussion-threads", Threads);
-app.component("suggest", Suggest);
-app.component("search", Search);
-app.component("follow-button", FollowButton);
-app.component("request-membership", RequestMembership);
+  app.component("discussion-threads", Threads);
+  app.component("suggest", Suggest);
+  app.component("search", Search);
+  app.component("follow-button", FollowButton);
+  app.component("request-membership", RequestMembership);
 
-// unset delimiters used in html templates to prevent injections using {{ }}
-app.config.compilerOptions.delimiters = []
+  // unset delimiters used in html templates to prevent injections using {{ }}
+  app.config.compilerOptions.delimiters = [];
 
-//We keep the div HTML from before trying to mount the VueJS App
-const previousHtml = document.querySelector("#app").innerHTML;
+  const vm = app.mount(el);
+};
 
-try {
-  app.mount("#app");
-} catch (e) {
-  //If the mount wasn't successful, Vue will remove all HTML from the div. We'll put it back so you can use the website.
-  document.querySelector("#app").innerHTML = previousHtml;
+const elements = document.querySelectorAll(".vuejs");
 
-  console.log(
-    "VueJS template compilation failed. Aborted the process and rolled back the HTML. See error(s) above and below (probably won't help you tho) :"
-  );
-  console.error(e);
-  throw e;
-}
+elements.forEach((el) => {
+  //We keep the div HTML from before trying to mount the VueJS App
+  const previousHtml = el.innerHTML;
+
+  try {
+    configAndMountApp(el);
+  } catch (e) {
+    //If the mount wasn't successful, Vue will remove all HTML from the div. We'll put it back so you can use the website.
+    el.innerHTML = previousHtml;
+
+    console.log(
+      `VueJS template compilation failed for element ${el}.
+      Aborted the process and rolled back the HTML.
+      See error(s) above and below (probably won't help you tho) :`
+    );
+    console.error(e);
+    throw e;
+  }
+});
 
 console.log("JS is injected !");

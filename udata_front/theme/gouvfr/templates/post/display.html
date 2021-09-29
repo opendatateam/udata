@@ -133,7 +133,7 @@
 
 {% if config['POST_DISCUSSIONS_ENABLED'] %}
 <section class="community_container discussions-section bg-grey-400 text-white py-hg">
-    <div class="container">
+    <div class="container vuejs">
         <h2 class="fs-hg">{{ _('Discussions') }} <sup class="discussions-count">0</sup></h2>
         <discussion-threads ref="discussions" subject-id="{{ post.id }}"
             subject-class="{{ post.__class__.__name__ }}" />

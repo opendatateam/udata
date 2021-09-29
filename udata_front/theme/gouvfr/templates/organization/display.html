@@ -172,7 +172,7 @@
                         {% if not member %}
                             {% set pending_request = org.pending_request(current_user) %}
                             {% if not pending_request and not read_only_mode %}
-                            <li class="my-md">
+                            <li class="my-md vuejs">
                                 <request-membership orga='{{org.id}}'>
                                 </request-membership>
                             </li>

@@ -9,22 +9,22 @@
                 class="organization-logo producer mw-100" />
         </a>
         {% else %}
-            <img src="{{ organization.logo|placeholder('organization') }}" alt=""
-                class="organization-logo producer mw-100" />
+        <img src="{{ organization.logo|placeholder('organization') }}" alt=""
+            class="organization-logo producer mw-100" />
         {% endif %}
     </div>
     <div class="col-10 col-md-12 mt-md-md text-blue-500">
         <h2>
             {{ name }}
         </h2>
-        <ul class="nav-list fs-base">
+        <ul class="nav-list fs-base vuejs">
             {% if producer_type == 'organization' %}
             <li><a class="nav-link text-decoration-none text-blue-500" href="{{ details_view }}"
                     title="{{ _('View Profile') }}">
                     {{ _('View Profile') }}</a></li>
             {% endif %}
             {% if not read_only_mode %}
-            <li><a class="nav-link text-decoration-none text-blue-500" @click="$refs.discussions.startThread()"
+            <li><a class="nav-link text-decoration-none text-blue-500" @click="$bus.emit('discussions.startThread')"
                     title="{{ _('Contact the producer') }}">{{ _('Contact the producer') }}</a></li>
             {% endif %}
         </ul>
