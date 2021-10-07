@@ -54,15 +54,20 @@ To open a modal, simply call the global `showModal` method with your modal name 
 The first argument is the modal name, the second one is an object containing the params passed to the modal.
 The third argument to the `showModal` method is an override for the `scrollable` property. Defaults to false, but when set to true, the modal is scrollable.
 
+You should also add a `<modals-container></modals-container>` element that will host the modal DOM inside the same VueJS app.
+
 ```modal-opening.html
-<a @click.prevent="$showModal('mymodal', {myparam: '{{ django.injected_param }}'}, true)">Click me !</a>
+<span class="vuejs">
+  <modals-container></modals-container>
+  <a @click.prevent="$showModal('mymodal', {myparam: '{{ django.injected_param }}'}, true)">Click me !</a>
+</span>
 ```
 */
 
 import Preview from "../components/dataset/preview";
-import Schema from '../components/dataset/schema-modal'
+import Schema from "../components/dataset/schema-modal";
 
-const modals = { preview: Preview, schema: Schema }
+const modals = { preview: Preview, schema: Schema };
 
 const _showModal = (app) => (name, params) => {
   const Vue = app.config.globalProperties;

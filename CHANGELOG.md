@@ -8,7 +8,7 @@
 - Add a request membership action on organization page [#12](https://github.com/etalab/udata-front/pull/12)
 - Unset vue delimiters used in html templates to prevent injections [#11](https://github.com/etalab/udata-front/pull/11)
 - Fix temporal coverage order in search results metadata [#14](https://github.com/etalab/udata-front/pull/14)
-- VueJS multiple mount points with a global event bus [#15](https://github.com/etalab/udata-front/pull/15)
+- VueJS multiple mount points with a global event bus [#15](https://github.com/etalab/udata-front/pull/15) [#19](https://github.com/etalab/udata-front/pull/19)
 
 ## 1.0.0 (2021-09-16)
 

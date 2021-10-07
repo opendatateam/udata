@@ -1,6 +1,5 @@
 <template>
   <section class="discussions-wrapper" ref="top" key="top">
-    <ModalsContainer></ModalsContainer>
     <transition mode="out-in">
       <div v-if="loading" key="loader">
         <Loader class="mt-md" />

@@ -28,7 +28,9 @@
                             aria-label="{{_('See more details')}}" aria-controls="resource-{{resource.id}}"
                             class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
                     {% if resource.preview_url %}
-                    <li><a href="#" class="btn-action" title="{{ _('Preview') }}"
+                    <li class="vuejs">
+                        <modals-container></modals-container>
+                        <a href="#" class="btn-action" title="{{ _('Preview') }}"
                             @click.prevent="$showModal('preview', {url: '{{ resource.preview_url }}'}, true)">{% include theme('svg/actions/eye.svg') %}</a>
                     </li>
                     {% endif %}
