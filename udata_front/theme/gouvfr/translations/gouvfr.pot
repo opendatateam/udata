@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-front 1.0.1.dev0\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2021-10-07 11:41+0200\n"
-"PO-Revision-Date: 2021-10-07 11:41+0200\n"
+"POT-Creation-Date: 2021-10-08 14:01+0200\n"
+"PO-Revision-Date: 2021-10-08 14:01+0200\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
 "Language: en\n"
 "Language-Team: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
@@ -138,7 +138,7 @@ msgid "Add to your own website"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:206
-#: udata_front/theme/gouvfr/templates/header.html:43
+#: udata_front/theme/gouvfr/templates/header.html:47
 msgid "Close"
 msgstr ""
 
@@ -228,7 +228,7 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/footer.html:101
 #: udata_front/theme/gouvfr/templates/header.html:28
-#: udata_front/theme/gouvfr/templates/header.html:48
+#: udata_front/theme/gouvfr/templates/header.html:52
 msgid "Go back to home page"
 msgstr ""
 
@@ -246,29 +246,33 @@ msgstr ""
 msgid "More information →"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/header.html:33
-#: udata_front/theme/gouvfr/templates/header.html:92
-#: udata_front/theme/gouvfr/templates/header.html:93
+#: udata_front/theme/gouvfr/templates/header.html:35
+msgid "Mobile navigation menu"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/header.html:37
+#: udata_front/theme/gouvfr/templates/header.html:96
+#: udata_front/theme/gouvfr/templates/header.html:97
 msgid "Search for data"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/header.html:38
+#: udata_front/theme/gouvfr/templates/header.html:42
 msgid "Open menu"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/header.html:42
+#: udata_front/theme/gouvfr/templates/header.html:46
 msgid "Close menu"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/header.html:59
+#: udata_front/theme/gouvfr/templates/header.html:63
 msgid "Administration"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/header.html:62
+#: udata_front/theme/gouvfr/templates/header.html:66
 msgid "Logout"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/header.html:66
+#: udata_front/theme/gouvfr/templates/header.html:70
 #: udata_front/theme/gouvfr/templates/security/change_password.html:11
 #: udata_front/theme/gouvfr/templates/security/forgot_password.html:11
 #: udata_front/theme/gouvfr/templates/security/login_user.html:13
@@ -278,11 +282,15 @@ msgstr ""
 msgid "Log in"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/header.html:70
+#: udata_front/theme/gouvfr/templates/header.html:74
 #: udata_front/theme/gouvfr/templates/security/login_user.html:41
 #: udata_front/theme/gouvfr/templates/security/register_user.html:11
 #: udata_front/theme/gouvfr/templates/security/register_user.html:26
 msgid "Sign up"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/header.html:85
+msgid "Main navigation menu"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/api/oauth_error.html:13
@@ -835,49 +843,49 @@ msgstr ""
 msgid "See more details"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:31
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:33
 msgid "Preview"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:36
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:38
 msgid "Copy permalink to clipboard"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:40
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:42
 msgid "Resource link"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:42
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:44
 msgid "Download resource"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:65
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:67
 msgid "URL"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:69
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:71
 msgid "Permalink"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:73
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:75
 #: udata_front/theme/gouvfr/templates/reuse/card_old.html:27
 #: udata_front/theme/gouvfr/templates/reuse/display.html:106
 msgid "Type"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:77
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:79
 msgid "MIME Type"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:87
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:89
 msgid "Created on"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:91
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:93
 msgid "Modified on"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:95
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:97
 #: udata_front/theme/gouvfr/templates/post/search-result.html:8
 msgid "Published on"
 msgstr ""

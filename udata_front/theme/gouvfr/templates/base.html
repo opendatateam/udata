@@ -14,7 +14,9 @@
     {% endif %}
 </div>
 {% endwith %}
-{% block content %}{% endblock %}
+<main>
+    {% block content %}{% endblock %}
+</main>
 {% include theme('footer.html') %}
 {{ hook('base.modals') }}
 {% block modals %}{% endblock %}

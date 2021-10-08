@@ -13,7 +13,7 @@
 {% endblock %}
 {% endif %}
 
-<section class="site-header" ref="header">
+<section class="site-header" ref="header" role="banner">
     <div class="header-inner">
         <!--[if lte IE 8]>
         <div class="iewarning">
@@ -29,9 +29,13 @@
                             {% include theme('svg/marianne.svg') %}
                         </a>
                     </div>
-                    <nav class="col hidden visible-xl mobile-menu row-inline justify-end self-start vuejs">
+                    <nav
+                            class="col hidden visible-xl mobile-menu row-inline justify-end self-start vuejs"
+                            role="navigation"
+                            aria-label="{{ _('Mobile navigation menu') }}"
+                    >
                         <a href="/datasets" title="{{ _('Search for data') }}" class="mr-md"
-                            @click.capture.prevent="$bus.emit('suggest.startSearch')">
+                            @click.capture.prevent="$bus.emit('suggest.startSearch')" role="search">
                             {% include theme('svg/search.svg') %}
                         </a>
                         <a href="#" @click.capture.prevent="addBodyClass('mobile-menu-open')"
@@ -78,7 +82,7 @@
         <nav class="header-nav">
             <div class="hagrid">
                 <div class="row justify-between align-items-center">
-                    <nav class="nav-tabs col">
+                    <nav class="nav-tabs col" role="navigation" aria-label="{{ _('Main navigation menu') }}">
                         {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] if request.url_rule or None %}
                         {% for item in current_theme.menu %}
                         {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
@@ -86,7 +90,7 @@
                         <a class="tab {% if active %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
                         {% endfor %}
                     </nav>
-                    <div class="col-3 hidden-xl search-box vuejs">
+                    <div class="col-3 hidden-xl search-box vuejs" role="search">
                         <form action="/datasets" class="w-100 row-inline justify-between"
                             @focus.capture.prevent="$bus.emit('suggest.startSearch')" tabindex="0">
                             <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search for data') }}" />

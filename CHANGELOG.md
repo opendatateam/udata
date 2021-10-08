@@ -9,6 +9,7 @@
 - Unset vue delimiters used in html templates to prevent injections [#11](https://github.com/etalab/udata-front/pull/11)
 - Fix temporal coverage order in search results metadata [#14](https://github.com/etalab/udata-front/pull/14)
 - VueJS multiple mount points with a global event bus [#15](https://github.com/etalab/udata-front/pull/15) [#19](https://github.com/etalab/udata-front/pull/19)
+- Fix RGAA criterion 12.6 Block of contents from multiple pages can be reached or skipped [#21](https://github.com/etalab/udata-front/pull/21)
 
 ## 1.0.0 (2021-09-16)
 
