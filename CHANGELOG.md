@@ -4,6 +4,7 @@
 
 - Meta read-only-enabled is back [#2664](https://github.com/opendatateam/udata/pull/2664)
 - First endpoints for APIv2! Add datasets hateoas and resources pagination endpoints [#2663](https://github.com/opendatateam/udata/pull/2663)
+- ApiV2 root now links to documentation [#2667](https://github.com/opendatateam/udata/pull/2667)
 
 ## 3.2.0 (2021-09-14)
 
