@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.0 (2021-10-12)
 
 - Add Cypress front-end tests stub [#9](https://github.com/etalab/udata-front/pull/9)
 - Add read only mode back on frontend [#10](https://github.com/etalab/udata-front/pull/10)
