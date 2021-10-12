@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.1.0 (2021-10-12)
 
 - Add Cypress front-end tests stub [#9](https://github.com/etalab/udata-front/pull/9)
