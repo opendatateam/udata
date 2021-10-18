@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-front\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2021-10-08 14:01+0200\n"
-"PO-Revision-Date: 2021-10-08 14:43\n"
+"POT-Creation-Date: 2021-10-15 09:41+0200\n"
+"PO-Revision-Date: 2021-10-18 14:07\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -23,8 +23,8 @@ msgid "Data"
 msgstr "Datos"
 
 #: udata_front/theme/gouvfr/__init__.py:47
-#: udata_front/theme/gouvfr/templates/dataset/display.html:333
-#: udata_front/theme/gouvfr/templates/dataset/display.html:372
+#: udata_front/theme/gouvfr/templates/dataset/display.html:273
+#: udata_front/theme/gouvfr/templates/dataset/display.html:360
 #: udata_front/theme/gouvfr/templates/hetic/page2.html:42
 #: udata_front/theme/gouvfr/templates/home.html:61
 #: udata_front/theme/gouvfr/templates/organization/display.html:62
@@ -123,7 +123,7 @@ msgid "Download from "
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/api/card.html:14
-#: udata_front/theme/gouvfr/templates/dataset/display.html:106
+#: udata_front/theme/gouvfr/templates/dataset/display.html:121
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:177
 msgid "Producer"
 msgstr ""
@@ -141,12 +141,12 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+#: udata_front/theme/gouvfr/templates/dataset/display.html:237
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:206
 #: udata_front/theme/gouvfr/templates/reuse/display.html:174
 msgid "Embed"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:161
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:38
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:209
 msgid "Temporal coverage"
@@ -164,7 +164,7 @@ msgstr ""
 msgid "Territory"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:168
+#: udata_front/theme/gouvfr/templates/dataset/display.html:176
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:46
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:232
 msgid "Frequency"
@@ -338,7 +338,8 @@ msgstr ""
 msgid "Datasets"
 msgstr "Conjunto de datos"
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:256
+#: udata_front/theme/gouvfr/templates/dataset/display.html:262
+#: udata_front/theme/gouvfr/templates/dataset/display.html:296
 #: udata_front/theme/gouvfr/templates/home.html:60
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:21
 msgid "Resources"
@@ -353,8 +354,8 @@ msgstr ""
 msgid "Users"
 msgstr "Usuarios"
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:336
-#: udata_front/theme/gouvfr/templates/dataset/display.html:400
+#: udata_front/theme/gouvfr/templates/dataset/display.html:278
+#: udata_front/theme/gouvfr/templates/dataset/display.html:388
 #: udata_front/theme/gouvfr/templates/home.html:64
 #: udata_front/theme/gouvfr/templates/post/display.html:137
 #: udata_front/theme/gouvfr/templates/reuse/display.html:184
@@ -415,7 +416,7 @@ msgstr ""
 msgid "metrics"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:292
+#: udata_front/theme/gouvfr/templates/dataset/display.html:136
 #: udata_front/theme/gouvfr/templates/organization/display.html:158
 #: udata_front/theme/gouvfr/templates/page.html:50
 #: udata_front/theme/gouvfr/templates/post/display.html:91
@@ -549,7 +550,8 @@ msgid "Due to security reasons, the creation of new content is currently disable
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/add-reuse-card.html:5
-#: udata_front/theme/gouvfr/templates/dataset/display.html:393
+#: udata_front/theme/gouvfr/templates/dataset/display.html:228
+#: udata_front/theme/gouvfr/templates/dataset/display.html:381
 msgid "Add a reuse"
 msgstr ""
 
@@ -561,6 +563,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/dataset/card.html:34
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:71
 #: udata_front/theme/gouvfr/templates/organization/card.html:26
+#: udata_front/theme/gouvfr/templates/organization/producer-summary.html:44
 #: udata_front/theme/gouvfr/templates/reuse/list.html:7
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:8
 msgid "reuses"
@@ -613,100 +616,81 @@ msgid "This dataset is handled by the <a href='{geo_link}'>geo.data.gouv.fr</a> 
 "        More information about <a href='{blog_link}'>the shutdown of geo.data.gouv.fr is available here.</a>"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:88
-msgid "This dataset comes from a certified public service"
+#: udata_front/theme/gouvfr/templates/dataset/display.html:84
+#, python-format
+msgid "Updated on %(date)s"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:93
+#: udata_front/theme/gouvfr/templates/dataset/display.html:97
+msgid "Modify dataset"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:104
 #, python-format
 msgid "This dataset has been published on the initiative and under the responsibility of\n"
 "            %(author)s<br />Published on %(date)s and updated on %(update)s"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:109
+#: udata_front/theme/gouvfr/templates/dataset/display.html:116
+msgid "Dataset informations"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:123
 msgid "Author"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:112
-#: udata_front/theme/gouvfr/templates/dataset/display.html:136
+#: udata_front/theme/gouvfr/templates/dataset/display.html:130
+msgid "Metadata"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:156
 msgid "Informations"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:114
-#: udata_front/theme/gouvfr/templates/dataset/display.html:211
-msgid "Extras"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/display.html:118
-#: udata_front/theme/gouvfr/templates/dataset/display.html:330
-#: udata_front/theme/gouvfr/templates/dataset/display.html:346
-msgid "Community resources"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/display.html:141
+#: udata_front/theme/gouvfr/templates/dataset/display.html:159
 msgid "License"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:153
-#: udata_front/theme/gouvfr/templates/dataset/display.html:154
-msgid "Remote source"
+#: udata_front/theme/gouvfr/templates/dataset/display.html:166
+msgid "ID"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:174
-#: udata_front/theme/gouvfr/templates/dataset/display.html:220
+#: udata_front/theme/gouvfr/templates/dataset/display.html:173
+msgid "Temporality"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:179
 #: udata_front/theme/gouvfr/templates/organization/display.html:148
 msgid "Creation date"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:179
-#: udata_front/theme/gouvfr/templates/dataset/display.html:225
-#: udata_front/theme/gouvfr/templates/organization/display.html:152
-msgid "Modification date"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/display.html:184
+#: udata_front/theme/gouvfr/templates/dataset/display.html:181
 msgid "Latest resource update"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:192
+#: udata_front/theme/gouvfr/templates/dataset/display.html:187
+msgid "Geographic dimensions"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:190
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:61
 msgid "Territorial coverage granularity"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:198
+#: udata_front/theme/gouvfr/templates/dataset/display.html:194
 msgid "Territorial coverage"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:215
-msgid "ID"
+#: udata_front/theme/gouvfr/templates/dataset/display.html:206
+msgid "Extras"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:231
-#: udata_front/theme/gouvfr/templates/reuse/display.html:88
-#: udata_front/theme/gouvfr/templates/reuse/display.html:112
-msgid "Tags"
+#: udata_front/theme/gouvfr/templates/dataset/display.html:225
+#: udata_front/theme/gouvfr/templates/participez/participez.html:5
+msgid "Participate"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:258
-msgid "See also: community resources"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/display.html:276
-#, python-format
-msgid "See the %(nb)d resources of type %(type)s"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/display.html:286
-msgid "No resources"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/display.html:297
-#: udata_front/theme/gouvfr/templates/organization/display.html:163
-#: udata_front/theme/gouvfr/templates/reuse/display.html:162
-msgid "Modify information"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/display.html:303
+#: udata_front/theme/gouvfr/templates/dataset/display.html:233
 #: udata_front/theme/gouvfr/templates/organization/producer-panel.html:28
 #: udata_front/theme/gouvfr/templates/organization/sidebar-producer.html:31
 #: udata_front/theme/gouvfr/templates/reuse/display.html:168
@@ -714,29 +698,53 @@ msgstr ""
 msgid "Contact the producer"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:311
-msgid "You can easily embed this dataset on your website by pasting this snippet in your html page."
+#: udata_front/theme/gouvfr/templates/dataset/display.html:239
+#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:71
+msgid "Permalink"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:328
-msgid "Community contributions"
+#: udata_front/theme/gouvfr/templates/dataset/display.html:255
+msgid "Summary"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:350
+#: udata_front/theme/gouvfr/templates/dataset/display.html:258
+#: udata_front/theme/gouvfr/templates/dataset/display.html:288
+msgid "Description"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:267
+#: udata_front/theme/gouvfr/templates/dataset/display.html:336
+msgid "Community resources"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:298
+msgid "See also: community resources"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:316
+#, python-format
+msgid "See the %(nb)d resources of type %(type)s"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:326
+msgid "No resources"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/display.html:340
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:365
+#: udata_front/theme/gouvfr/templates/dataset/display.html:353
 msgid "Add a community resource"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:375
+#: udata_front/theme/gouvfr/templates/dataset/display.html:363
 msgid "You reused these data and published an article, a computer graphics, or an application?\n"
 "                It's time to let you know!\n"
 "                Reference your work in just a few clicks and increase your visibility."
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/display.html:403
+#: udata_front/theme/gouvfr/templates/dataset/display.html:391
 #: udata_front/theme/gouvfr/templates/reuse/display.html:188
 msgid "Discussion between the organization and the community about this dataset."
 msgstr ""
@@ -760,6 +768,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/dataset/explore.html:9
 #: udata_front/theme/gouvfr/templates/dataset/list.html:19
 #: udata_front/theme/gouvfr/templates/organization/card.html:23
+#: udata_front/theme/gouvfr/templates/organization/producer-summary.html:38
 #: udata_front/theme/gouvfr/templates/reuse/card.html:16
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:8
 msgid "datasets"
@@ -841,10 +850,6 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:67
 msgid "URL"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/dataset/resource/card.html:71
-msgid "Permalink"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:75
@@ -1258,6 +1263,15 @@ msgstr ""
 msgid "Technical details"
 msgstr ""
 
+#: udata_front/theme/gouvfr/templates/organization/display.html:152
+msgid "Modification date"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/organization/display.html:163
+#: udata_front/theme/gouvfr/templates/reuse/display.html:162
+msgid "Modify information"
+msgstr ""
+
 #: udata_front/theme/gouvfr/templates/organization/display.html:168
 msgid "Download list of datasets as csv file"
 msgstr ""
@@ -1347,10 +1361,6 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/organization/sidebar-producer.html:39
 msgid "I'll be informed about this organization news"
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/participez/participez.html:5
-msgid "Participate"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/participez/participez.html:11
@@ -1448,6 +1458,11 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:86
 msgid "Reuser"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/reuse/display.html:88
+#: udata_front/theme/gouvfr/templates/reuse/display.html:112
+msgid "Tags"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:103

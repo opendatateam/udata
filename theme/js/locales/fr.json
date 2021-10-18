@@ -73,8 +73,8 @@
   "You can add some details here for your membership request": "Vous pouvez ajouter des détails sur votre demande d'adhésion",
   "A request has been sent to the administrators": "Une demande a été envoyée aux administrateurs",
   "Error while requesting membership": "Erreur lors de la demande d'adhésion",
-  "Read less": "",
-  "Read more": "",
-  "remove from favorites": "",
-  "add to favorites": ""
+  "Read more": "Lire plus",
+  "Read less": "Lire moins",
+  "remove from favorites": "retirer des favoris",
+  "add to favorites": "ajouter aux favoris"
 }
