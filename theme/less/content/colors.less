@@ -13,6 +13,7 @@ Convey meaning through color with a handful of color utility classes. Colors are
 <p class="text-blue-100">text-blue-100</p>
 <p class="text-blue-200">text-blue-200</p>
 <p class="text-blue-300">text-blue-300</p>
+<p class="text-blue-350">text-blue-350</p>
 <p class="text-blue-400">text-blue-400</p>
 <p class="text-blue-500">text-blue-500</p>
 <p class="text-orange-100">text-orange-100</p>
@@ -36,6 +37,7 @@ Includes support for styling links with hover states, too.
 <p><a href="#" class="text-blue-100">text-blue-100</a></p>
 <p><a href="#" class="text-blue-200">text-blue-200</a></p>
 <p><a href="#" class="text-blue-300">text-blue-300</a></p>
+<p><a href="#" class="text-blue-350">text-blue-350</a></p>
 <p><a href="#" class="text-blue-400">text-blue-400</a></p>
 <p><a href="#" class="text-blue-500">text-blue-500</a></p>
 <p><a href="#" class="text-orange-100">text-orange-100</a></p>
@@ -59,6 +61,7 @@ Similar to the contextual text color classes, easily set the background of an el
 <p><span class="pill bg-blue-100"></span>bg-blue-100</p>
 <p><span class="pill bg-blue-200"></span>bg-blue-200</p>
 <p><span class="pill bg-blue-300"></span>bg-blue-300</p>
+<p><span class="pill bg-blue-350"></span>bg-blue-350</p>
 <p><span class="pill bg-blue-400"></span>bg-blue-400</p>
 <p><span class="pill bg-blue-500"></span>bg-blue-500</p>
 <p><span class="pill bg-orange-100"></span>bg-orange-100</p>
@@ -95,6 +98,7 @@ Similar to the contextual text color classes, easily set the background of an el
 @grey-300: #7c7c7c;
 @grey-380: #2d2d2d;
 @grey-400: #232323;
+@grey-500: #161616;
 @green-300: #00be7b;
 @green-350: #4ca98d;
 @green-400: #008452;
@@ -119,6 +123,7 @@ Similar to the contextual text color classes, easily set the background of an el
 @contrast-grey-300: @white;
 @contrast-grey-380: @white;
 @contrast-grey-400: @white;
+@contrast-grey-500: @white;
 @contrast-green-300: @white;
 @contrast-green-350: @white;
 @contrast-green-400: @white;
@@ -126,7 +131,7 @@ Similar to the contextual text color classes, easily set the background of an el
 
 @colors: white, black, blue-100, blue-200, blue-300, blue-350, blue-400,
     blue-450, blue-470, blue-500, orange-100, orange-200, yellow-100, grey-50,
-    grey-100, grey-200, grey-300, grey-380, grey-400, green-300, green-350,
+    grey-100, grey-200, grey-300, grey-380, grey-400, grey-500, green-300, green-350,
     green-400, green-500;
 
 each(@colors, {
@@ -138,3 +143,7 @@ each(@colors, {
         background-color: @@value;
     }
 });
+
+.bg-beige {
+    background-color: var(--beige);
+}

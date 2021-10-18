@@ -1,0 +1,64 @@
+/*
+---
+name: Summary
+category: Components
+---
+
+Summaries allow users to have an overview of content and navigate between page sections.
+
+```summary.html
+<nav class="fr-summary" role="navigation" aria-labelledby="fr-summary-title">
+    <div class="fr-summary__title" id="fr-summary-title">Sommaire</div>
+    <ol class="fr-summary__list">
+        <li>
+            <a class="fr-summary__link" href="#titre-ancre-1">Titre de l’ancre</a>
+        </li>
+        <li>
+            <a class="fr-summary__link" href="#titre-ancre-2">Titre de l’ancre</a>
+        </li>
+        <li>
+            <a class="fr-summary__link" href="#titre-ancre-3">Titre de l’ancre</a>
+        </li>
+        <li>
+            <a class="fr-summary__link" href="#titre-ancre-4">Titre de l’ancre</a>
+        </li>
+        <li>
+            <a class="fr-summary__link" href="#titre-ancre-5">Titre de l’ancre</a>
+        </li>
+    </ol>
+</nav>
+```
+
+ */
+
+// summaries from dsfr
+@import (less) "@gouvfr/dsfr/dist/css/summary.css";
+
+.fr-summary {
+    --ol-start: 1.5rem;
+    --xl-block: 0.5rem;
+
+    .fr-summary__link {
+        color: @blue-400;
+        .sup, .sup::before, .sup::after  {
+            color: var(--g600);
+        }
+    }
+
+    .fr-summary__link::before {
+        font-weight: normal;
+        color: @grey-500;
+        bottom: 0.5rem;
+    }
+
+    .fr-summary__list {
+        padding-left: var(--ol-start);
+        li {
+            margin-left: -0.5rem;
+        }
+    }
+
+    a:hover {
+        text-decoration: none;
+    }
+}

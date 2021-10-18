@@ -71,6 +71,17 @@ Content on the site can be styled with Markdown. Ready made styles are provided 
 @markdown-font-size: 0.85em;
 
 .markdown {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+
+    & > :first-child {
+        margin-top: 0;
+    }
+
+    & > :last-child {
+        margin-bottom: 0;
+    }
+
     ul {
         padding-left: @spacing-xl;
         list-style-type: disc;

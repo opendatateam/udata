@@ -27,19 +27,18 @@ They also come in a bigger size with the `.big` class.
 }
 
 .tag {
+    .border;
+    border-color: @blue-400;
     display: inline-block;
-    border-radius: 12px;
+    border-radius: 1.5rem;
     font-size: @font-size-xs;
-
-    background: @grey-400;
-    padding: 2px @spacing-xs 5px;
-
+    padding: 0.25rem 0.75rem;
     margin-bottom: @spacing-xs;
     margin-right: @spacing-xs;
 
     > *,
     & {
-        color: @contrast-grey-400;
+        color: @blue-400;
     }
 
     > a {
@@ -51,9 +50,9 @@ They also come in a bigger size with the `.big` class.
         letter-spacing: 1px;
         font-weight: @font-weight-bold;
 
-        //Maybe make some color classes like tag-grey-200 if more are needed
+        // Maybe make some color classes like tag-grey-200 if more are needed
         background-color: @grey-200;
-
+        border: none;
         > *,
         & {
             color: @grey-300;

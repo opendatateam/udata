@@ -13,27 +13,23 @@ The `url` prop is the API URL.
 -->
 
 <template>
-  <a
+  <button
     @click.prevent="toggleFollow"
-    title=""
-    class="unstyled row-inline align-items-center"
+    type="button"
+    class="fr-btn fr-btn--secondary btn-secondary btn-secondary-orange-100 follow-button"
     v-show="!readOnlyEnabled"
+    :aria-label="label"
   >
     <span
-      class="btn-secondary btn-secondary-orange-100 p-sm"
-      style="line-height: 1"
-    >
-      <span
         v-html="icon"
-        class="magic"
+        class="magic row-inline"
         :class="{ active: animating }"
         :style="{ color: _following ? 'inherit' : 'white' }"
-      />
-    </span>
-    <strong class="text-orange-100 ml-sm"
-      >{{ _followers }} {{ $tc("favourites", _followers) }}</strong
-    >
-  </a>
+      ></span>
+      <strong class="text-orange-100">
+        {{ _followers }} {{ $tc("favourites", _followers) }}
+      </strong>
+  </button>
 </template>
 
 <script>
@@ -45,6 +41,12 @@ export default {
     followers: Number,
     url: String,
     following: Boolean,
+  },
+  computed: {
+    label() {
+      let action = this._following ? this.$t('remove from favorites') : this.$t('add to favorites');
+      return this._followers + ' ' + this.$tc('favourites', this._followers) + ', ' + action;
+    }
   },
   created() {
     this.icon = icon;
@@ -75,7 +77,7 @@ export default {
           this._followers = data.followers;
           this._following = !this._following;
 
-          //Trigger sparkles animation
+          // Trigger sparkles animation
           if (this._following) {
             this.animating = true;
             setTimeout(() => (this.animating = false), 1300);

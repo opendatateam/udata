@@ -17,7 +17,7 @@ Vue. -->
         :alt="owner.fullname"
       />
       <div class="logo-badge">
-        <span v-html="private" v-if="private" />
+        <span v-html="lock" v-if="private" />
         <span v-html="certified" v-else-if="organization?.public_service" />
       </div>
     </div>
@@ -68,7 +68,7 @@ Vue. -->
 <script>
 import Placeholder from "../utils/placeholder";
 import certified from "svg/certified.svg";
-import private from "svg/private.svg";
+import lock from "svg/private.svg";
 
 export default {
   props: {
@@ -94,7 +94,7 @@ export default {
   },
   async mounted() {
     this.certified = certified;
-    this.private = private;
+    this.lock = lock;
     //Fetching geozone names on load (they're not included in the dataset object)
 
     const zones = this?.spatial?.zones;

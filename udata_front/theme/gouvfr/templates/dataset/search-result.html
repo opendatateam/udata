@@ -4,7 +4,7 @@
     {% if dataset.organization %}
     <div class="card-logo">
         <img alt="{{ dataset.organization.name|placeholder_alt(dataset.organization.logo) }}"
-            src="{{ dataset.organization.logo(80)|placeholder('organization') }}">
+            src="{{ dataset.organization.logo(80)|placeholder('organization') }}"/>
         <div class="logo-badge">
             {% if dataset.private %}
             {% include theme('svg/private.svg') %}
@@ -16,11 +16,11 @@
     {% elif dataset.owner %}
     <div class="card-logo">
         <img alt="{{ dataset.owner.fullname|placeholder_alt(dataset.owner.avatar)}}" src="{{ dataset.owner.avatar(70)|placeholder('user') }}" width="70"
-            height="70">
+            height="70"/>
     </div>
     {% else %}
     <div class="card-logo">
-        <img src="{{ ''|placeholder('organization') }}" alt="">
+        <img src="{{ ''|placeholder('organization') }}" alt=""/>
     </div>
     {% endif %}
     <div class="card-data">

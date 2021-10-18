@@ -1,0 +1,49 @@
+{% set read_only_mode = config['READ_ONLY_MODE'] %}
+{% set description = organization.description or organization.about %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
+<div class="producer-summary row">
+    <div class="col-2 col-md-12">
+        {% if producer_type == 'organization' %}
+        <div class="logo">
+            <img class="fr-responsive-img" src="{{ organization.logo|placeholder('organization') }}" alt=""/>
+            <div class="logo-badge">
+                {{ badge_if_certified(organization) }}
+            </div>
+        </div>
+        {% elif producer_type == 'owner' %}
+        <div class="logo">
+            <img class="fr-responsive-img" src="{{ organization.avatar|placeholder('user') }}" alt=""/>
+        </div>
+        {% else %}
+        <div class="logo">
+            <img class="fr-responsive-img" src="{{ ''|placeholder('organization') }}" alt=""/>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-10 col-md-12 fr-mt-2w fr-mt-md-0">
+        <h2 class="h3 fr-mb-1v">
+            {% if producer_type == 'organization' %}
+            <a href="{{ url_for("organizations.show", org=organization, _external=True) }}">{{ organization.name }}</a>
+            {% else %}
+            {{ organization.fullname }}
+            {% endif %}
+        </h2>
+        {% if description %}
+        <p class="fr-mt-0 fr-mb-5v">{{ description|mdstrip(300) }}</p>
+        {% endif %}
+        <div class="row">
+            {% if organization.metrics.datasets %}
+            <div class="col-auto">
+                <!-- TODO: add href to organization page when we redesign it -->
+                {{ organization.metrics.datasets }} {{ _('datasets') }}
+            </div>
+            {% endif %}
+            {% if organization.metrics.reuses %}
+            <div class="col-auto">
+                    <!-- TODO: add href to organization page when we redesign it -->
+                    {{ organization.metrics.reuses }} {{ _('reuses') }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

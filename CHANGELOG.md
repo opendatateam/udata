@@ -4,6 +4,7 @@
 
 - Update README to reflect front changes [#17](https://github.com/etalab/udata-front/pull/17)
 - Add Participate banner in the footer [#24](https://github.com/etalab/udata-front/pull/24)
+- Update dataset page with navigation quickfixes and add DSFR components [#18](https://github.com/etalab/udata-front/pull/18)
 
 ## 1.1.0 (2021-10-12)
 
@@ -18,7 +19,7 @@
 
 ## 1.0.0 (2021-09-16)
 
-- :warning: **breaking change**: Package renamming and new repository [#1](https://github.com/etalab/udata-front/pull/1):
+- :warning: **breaking change**: Package renaming and new repository [#1](https://github.com/etalab/udata-front/pull/1):
   - udata-gouvfr is now udata-front
 - Update feedparser following setuptools 58.0.2 release that drops support for `use_2to3` [#6](https://github.com/etalab/udata-front/pull/6)
 - Show correct number of latest reuses on homepage [#3](https://github.com/etalab/udata-front/pull/3)

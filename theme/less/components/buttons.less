@@ -30,6 +30,7 @@ Primary buttons exist for every color in this UI-kit. Please refer to the [color
 <p><a href="#" role="button" class="btn-primary btn-primary-grey-300">btn-primary-grey-300</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-grey-380">btn-primary-grey-380</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-grey-400">btn-primary-grey-400</a></p>
+<p><a href="#" role="button" class="btn-primary btn-primary-grey-500">btn-primary-grey-500</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-green-300">btn-primary-green-300</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-green-400">btn-primary-green-400</a></p>
 <p><a href="#" role="button" class="btn-primary btn-primary-green-500">btn-primary-green-500</a></p>
@@ -54,6 +55,7 @@ As for primary buttons, secondary buttons exist in every color available.
 <p><a href="#" role="button" class="btn-secondary btn-secondary-grey-300">btn-secondary-grey-300</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-grey-380">btn-secondary-grey-380</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-grey-400">btn-secondary-grey-400</a></p>
+<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-500">btn-secondary-grey-500</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-green-300">btn-secondary-green-300</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-green-400">btn-secondary-green-400</a></p>
 <p><a href="#" role="button" class="btn-secondary btn-secondary-green-500">btn-secondary-green-500</a></p>
@@ -66,7 +68,7 @@ Simply add the `btn-with-arrow` class to your secondary button and all the magic
 
 
 ```button-arrow.html
-<a href="#" class="btn-secondary btn-with-arrow">{{ _('@@Toutes les actualités') }}</a>
+<a href="#" class="btn-secondary btn-with-arrow">Toutes les actualités</a>
 ```
 
 ## Active state
@@ -127,14 +129,29 @@ Because developpers are lazy and less code is better code, there's a `.btn-tab` 
     <a href="/fr/datasets/" class="btn-tab tab">See more</a>
 </nav>
 ```
+
+## From DSFR
+
+You can use icons from DSFR. You can find the list on [DSFR documentation](https://gouvfr.atlassian.net/wiki/spaces/DB/pages/222331396/Ic+nes+-+Icons) with their classes.
+There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around the icon.
+
+```button-icons-dsfr.html
+<a
+    class="btn-secondary btn-secondary-grey-500 fr-btn--icon-left fr-fi-edit-line"
+    href="#"
+>
+    Modify information
+</a>
+```
 */
 
+@import (less) "@gouvfr/dsfr/dist/css/buttons.css";
 .btn {
     display: inline-block;
     appearance: none;
-    padding: @spacing-sm @spacing-lg;
-    font-weight: bold;
+    padding: @spacing-xs 1.25rem;
     font-size: @font-size-sm;
+    line-height: @line-height-sm;
     letter-spacing: 0.025em;
     text-decoration: none;
     border-radius: 3em;
@@ -196,6 +213,13 @@ Because developpers are lazy and less code is better code, there's a `.btn-tab` 
         }
     });
 
+    &.fr-btn--secondary {
+        :root:not([data-fr-theme="dark"])  & {
+            --color-hover: transparent;
+        }
+        box-shadow: none;
+    }
+
     &.btn-with-arrow {
         &:after {
             content: " ";
@@ -207,7 +231,7 @@ Because developpers are lazy and less code is better code, there's a `.btn-tab` 
             left: 0;
 
             width: 6px;
-            height: 15px;
+            height: @line-height-sm;
 
             background-color: currentColor;
             mask-image: url(@icon-chevron);

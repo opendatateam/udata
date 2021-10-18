@@ -1,0 +1,26 @@
+.read-more {
+    position: relative;
+    overflow: hidden;
+}
+
+.read-more-link {
+    --gradient-color: var(--w);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding-top: 80px;
+    background-image: linear-gradient(to bottom, transparent, var(--gradient-color) 70%, var(--gradient-color));
+    cursor: pointer;
+}
+
+.bg-beige .read-more-link {
+    --gradient-color: var(--beige);
+}
+
+
+.expand .read-more-link {
+    position: relative;
+    background-image: none;
+    padding-top:10px;
+    height:inherit;
+}

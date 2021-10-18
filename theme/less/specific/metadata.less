@@ -1,0 +1,35 @@
+/*
+---
+name: Metadata
+category: Specific
+---
+
+Metadata are pairs of key-values providing additional informations about a dataset, a reuse or literally everything else.
+To ease the reading experience, a default style is provided here.
+
+```metadata.html
+<dl class="metadata">
+    <dt>Frequency</dt>
+    <dd>Monthly</dd>
+    <dt>Creation date</dt>
+    <dd>August 24, 2018</dd>
+    <dt>Latest resource update</dt>
+    <dd>October 5, 2021</dd>
+</dl>
+```
+ */
+
+// TODO: Merge it with components/description-list.less when all lists have the same style
+.metadata {
+    .fr-my-1w;
+    dt {
+        .fr-text--sm;
+        .fr-mb-0;
+        color: var(--g600);
+    }
+    dd {
+        .fr-text--sm;
+        .fr-ml-0;
+        .fr-mb-2w;
+    }
+}

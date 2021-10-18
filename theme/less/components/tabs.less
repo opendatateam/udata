@@ -30,6 +30,35 @@ There's also a `.tab-panel` class available that simply provides border-radius, 
 </nav>
 ```
 
+## From DSFR
+
+You can use tabs from DSFR. It uses DSFR colors and conventions. It allows you to choose an optional icon in every tabs.
+
+```tab-dsfr.html
+<div class="fr-tabs">
+    <ul class="fr-tabs__list" role="tablist" aria-label="[A modifier | nom du système d'onglet]">
+        <li role="presentation">
+            <button id="tabpanel-404" class="fr-tabs__tab fr-fi-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="0" role="tab" aria-selected="true" aria-controls="tabpanel-404-panel">Label Tab 1</button>
+        </li>
+        <li role="presentation">
+            <button id="tabpanel-405" class="fr-tabs__tab fr-fi-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-405-panel">Label Tab 2</button>
+        </li>
+        <li role="presentation">
+            <button id="tabpanel-406" class="fr-tabs__tab fr-fi-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-406-panel">Label Tab 2</button>
+        </li>
+    </ul>
+    <div id="tabpanel-404-panel" class="fr-tabs__panel fr-tabs__panel--selected" role="tabpanel" aria-labelledby="tabpanel-404" tabindex="0">
+       <p>Contenu 1</p>
+    </div>
+    <div id="tabpanel-405-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tabpanel-405" tabindex="0">
+        <p>Contenu 2</p>
+    </div>
+    <div id="tabpanel-406-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tabpanel-406" tabindex="0">
+        <p>Contenu 3</p>
+    </div>
+</div>
+```
+
 */
 
 .tabs {
@@ -71,4 +100,12 @@ There's also a `.tab-panel` class available that simply provides border-radius, 
     &.active {
         display: inherit;
     }
+}
+
+// tabs from dsfr
+@import (less) "@gouvfr/dsfr/dist/css/tabs.css";
+
+.fr-tabs {
+    --bf500: @blue-400;
+    z-index: 1;
 }

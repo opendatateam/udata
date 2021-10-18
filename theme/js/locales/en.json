@@ -72,5 +72,9 @@
   "You must be connected to join an organization": "You must be connected to join an organization",
   "You can add some details here for your membership request": "You can add some details here for your membership request",
   "A request has been sent to the administrators": "A request has been sent to the administrators",
-  "Error while requesting membership": "Error while requesting membership"
+  "Error while requesting membership": "Error while requesting membership",
+  "Read more": "Read more",
+  "Read less": "Read less",
+  "remove from favorites": "remove from favorites",
+  "add to favorites": "add to favorites"
 }

@@ -2,23 +2,8 @@
     border-top: 1px solid @grey-100;
     border-bottom: 1px solid @grey-100;
 
-    &.dark {
-        border-top: 1px solid @grey-300;
-        border-bottom: 1px solid @grey-300;
-    }
-
     &:nth-of-type(2n + 1) {
         background: @grey-50;
-
-        &.dark {
-            background: @grey-380;
-
-            .accordion-button svg {
-                * {
-                    fill: white;
-                }
-            }
-        }
     }
 
     @left-padding: 100px; //Spacing for buttons
@@ -114,18 +99,6 @@
         }
     }
 
-    &.dark .description-list {
-        div {
-            dt {
-                color: white;
-            }
-
-            dd {
-                color: @grey-200;
-            }
-        }
-    }
-
     .description-list {
         width: 100%;
 
@@ -152,7 +125,6 @@
         }
     }
 
-    &.dark .card-header,
     .resource-description,
     .description-list dd,
     .description-list dt {

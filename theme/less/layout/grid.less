@@ -239,7 +239,11 @@ each(@breakpoints, .(@bk, @_k, @_i) {
     flex-wrap: nowrap;
 }
 
-//Row vertical alignments
+.flex-direction-column {
+    flex-direction: column;
+}
+
+// Row vertical alignments
 .align-items-start {
     align-items: flex-start;
 }
@@ -294,20 +298,20 @@ each(@breakpoints, .(@bk, @_k, @_i) {
     align-self: flex-end;
 }
 
-//Auto columns
+// Auto columns
 .col {
     flex-basis: 0;
     flex-grow: 1;
     margin: 0 @gutter;
 }
 
-//Generic class
+// Generic class
 [class^="col-"] {
     flex-grow: 0;
     margin: 0 @gutter;
 }
 
-//col-{n} generator
+// col-{n} generator
 .col(@i) {
     @width: ((100% / @columns) * @i);
 
@@ -315,14 +319,14 @@ each(@breakpoints, .(@bk, @_k, @_i) {
     width: calc(@width - 2 * @gutter);
 }
 
-//offset-{n} generator
+// offset-{n} generator
 .offset(@i) {
     @width: ((100% / @columns) * @i);
 
     margin-left: calc(@width + @gutter);
 }
 
-//Generating col-{n} classes
+// Generating col-{n} classes
 each(range(@columns), {
     .col-@{index} {
         .col(@index);

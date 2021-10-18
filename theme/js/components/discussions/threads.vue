@@ -20,7 +20,7 @@
           </div>
           <thread v-bind="threadFromURL"></thread>
           <a
-            class="nav-link text-white mt-xl"
+            class="nav-link mt-xl"
             @click.prevent="viewAllDiscussions"
             >{{ $t("See all discussions about this dataset") }}</a
           >
@@ -28,7 +28,7 @@
         <div v-else>
           <div class="row-inline justify-end align-items-center">
             {{ $t("Sort by:") }}
-            <div class="dropdown btn-secondary-white ml-md">
+            <div class="dropdown btn-secondary-grey-500 ml-md">
               <select
                 name="sortBy"
                 id="sortBy"
@@ -67,6 +67,7 @@
             :page_size="page_size"
             :total_results="total_results"
             :changePage="changePage"
+            light
           />
         </div>
       </div>

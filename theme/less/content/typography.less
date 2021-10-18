@@ -113,13 +113,16 @@ You can specify alignment for text blocks, with responsive capabilities, using `
 @font-size-xxl: 2rem;
 @font-size-hg: 2.5rem; // hg for humongous
 
+@line-height-xs: 1.25rem;
+@line-height-sm: 1.5rem;
+
 @font-sizes: xs, sm, base, lg, xl, xxl, hg;
 
 @font-weight-light: 300;
 @font-weight-normal: 400;
 @font-weight-bold: 600;
 
-html {
+html, body {
     color: @grey-400;
     font-size: @font-size-base;
     font-family: @font-family-base;
@@ -132,15 +135,17 @@ h2,
 h3,
 h4,
 h5,
+h6,
 .h1,
 .h2,
 .h3,
 .h4,
-.h5 {
+.h5,
+.h6 {
     display: block;
     margin-top: 0;
     font-weight: bold;
-
+    line-height: @line-height-base;
     sup {
         .sup;
     }
@@ -219,6 +224,14 @@ small {
     font-size: @font-size-xs;
 }
 
+.subtitle {
+    .text-transform-uppercase;
+    font-size: @font-size-xs;
+    font-weight: @font-weight-bold;
+    line-height: @line-height-xs;
+    margin-bottom: 1rem;
+}
+
 each(@font-sizes, {
     @var: 'font-size-@{value}';
 
@@ -233,6 +246,10 @@ each(@font-sizes, {
 
 .text-decoration-none {
     text-decoration: none !important;
+}
+
+.text-transform-uppercase {
+    text-transform: uppercase !important;
 }
 
 .text-align-center {

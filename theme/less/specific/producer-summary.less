@@ -1,0 +1,95 @@
+/*
+---
+name: Producer Summary
+category: Specific
+---
+
+We display some sample about a producer in a short summary. This is used in dataset page and later in reuse page.
+
+The summary shows the organization name and description. There is also their datasets and reuses count with links to
+search pages.
+
+```producer.html
+<div class="producer-summary row">
+    <div class="col-2 col-md-12">
+        <div class="logo">
+            <img class="fr-responsive-img" src="https://static.data.gouv.fr/avatars/3c/2a35d973814c2681b6941e11810ff3-100.png" alt=""/>
+            <div class="logo-badge">
+            </div>
+        </div>
+    </div>
+    <div class="col-10 col-md-12 fr-mt-2w fr-mt-md-0">
+        <h2 class="h3 fr-mb-1v">
+            <a href="https://www.data.gouv.fr/fr/organizations/etalab/">Etalab</a>
+        </h2>
+        <p class="fr-mt-0 fr-mb-5v">Etalab est un département de la direction interministérielle du numérique (DINUM), dont les missions et l’organisation sont fixées par le décret du 30 Octobre 2019. Il coordonne notamment la conception et la mise en œuvre de la stratégie de l’État dans le domaine de la donnée.Ouverture (open data) et partage des donnéesEtalab coordonne la politique d’ouverture et de partage des données publiques (open data) : Il coordonne les actions des administrations de l’Etat et leur apporte son appui pour faciliter la diffusion et la réutilisation de leurs informations publiques.</p>
+        <div class="row">
+        </div>
+    </div>
+</div>
+```
+
+For certified organisation, a badge is shown on the image.
+
+```producer-with-badge.html
+<div class="producer-summary row">
+    <div class="col-2 col-md-12">
+        <div class="logo">
+            <img class="fr-responsive-img" src="https://static.data.gouv.fr/avatars/3c/2a35d973814c2681b6941e11810ff3-100.png" alt=""/>
+            <div class="logo-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="17.5" height="23.5" viewBox="0 0 35 47"><g><g><path fill="#198cf2" d="M33.976 41.31l-7.34-1.28-3.046 6.797-9.196-17.31L24.78 24z"/></g><g><path fill="#198cf2" d="M.02 41.31l7.339-1.28 3.047 6.797 9.195-17.31L9.216 24z"/></g><g><path fill="#fff" d="M33.976 17.807c0 9.029-7.32 16.349-16.35 16.349-9.03 0-16.348-7.32-16.348-16.35 0-9.03 7.319-16.35 16.349-16.35 9.029 0 16.349 7.32 16.349 16.35z"/></g><g><path fill="#198cf2" d="M.536 17.806C.536 8.384 8.204.717 17.627.717c9.424 0 17.09 7.667 17.09 17.09 0 9.422-7.666 17.09-17.09 17.09S.536 27.228.536 17.806zm1.482 0c0 8.608 7.002 15.61 15.609 15.61 8.606 0 15.609-7.002 15.609-15.61 0-8.607-7.003-15.608-15.61-15.608C9.02 2.198 2.018 9.2 2.018 17.806z"/></g><g><path fill="#198cf2" d="M30.831 17.807c0 7.293-5.912 13.205-13.205 13.205S4.421 25.1 4.421 17.807 10.334 4.6 17.627 4.6c7.293 0 13.205 5.913 13.205 13.206z"/></g><g><path fill="#fff" d="M16.2 24.124c-.377 0-.756-.144-1.044-.431l-4.862-4.836a1.481 1.481 0 1 1 2.09-2.1l4.86 4.835a1.48 1.48 0 0 1-1.044 2.532z"/></g><g><path fill="#fff" d="M16.199 24.124a1.483 1.483 0 0 1-1.269-2.244l6.666-11.11a1.481 1.481 0 1 1 2.54 1.525l-6.665 11.11a1.481 1.481 0 0 1-1.272.719z"/></g></g></svg>
+            </div>
+        </div>
+    </div>
+    <div class="col-10 col-md-12 fr-mt-2w fr-mt-md-0">
+        <h2 class="h3 fr-mb-1v">
+            <a href="https://www.data.gouv.fr/fr/organizations/etalab/">Etalab</a>
+        </h2>
+        <p class="fr-mt-0 fr-mb-5v">Etalab est un département de la direction interministérielle du numérique (DINUM), dont les missions et l’organisation sont fixées par le décret du 30 Octobre 2019. Il coordonne notamment la conception et la mise en œuvre de la stratégie de l’État dans le domaine de la donnée.Ouverture (open data) et partage des donnéesEtalab coordonne la politique d’ouverture et de partage des données publiques (open data) : Il coordonne les actions des administrations de l’Etat et leur apporte son appui pour faciliter la diffusion et la réutilisation de leurs informations publiques.</p>
+        <div class="row">
+            <div class="col-auto">
+                <a href='https://www.data.gouv.fr/fr/datasets/?organization=534fff75a3a7292c64a77de4'>
+                    57 jeux de données
+                </a>
+            </div>
+            <div class="col-auto">
+                <a href='https://www.data.gouv.fr/fr/reuses/?sort=-created&organization=534fff75a3a7292c64a77de4'>
+                    31 réutilisations
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+The summary work the same way for a user.
+
+```producer-user.html
+<div class="producer-summary row">
+    <div class="col-2 col-md-12">
+        <div class="logo">
+            <img class="fr-responsive-img" src="https://via.placeholder.com/200" alt=""/>
+        </div>
+    </div>
+    <div class="col-10 col-md-12 fr-mt-2w fr-mt-md-0">
+        <h2 class="h3 fr-mb-1v">
+            <a href="https://www.data.gouv.fr/fr/users/nicolas-kempf/">Nicolas KEMPF</a>
+        </h2>
+        <p class="fr-mt-0 fr-mb-5v">About me.</p>
+        <div class="row">
+        </div>
+    </div>
+</div>
+```
+
+*/
+
+// TODO: Move this to components/logo.less when we want all badge at the bottom right
+.producer-summary {
+    .logo-badge {
+        bottom: -9px;
+        right: -9px;
+        top: inherit;
+        left: inherit;
+    }
+}

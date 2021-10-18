@@ -4,7 +4,9 @@ import Threads from "./components/discussions/threads.vue";
 import Suggest from "./components/search/suggest-box";
 import Search from "./components/search/search";
 import FollowButton from "./components/utils/follow-button";
+import ReadMore from "./components/utils/read-more";
 import RequestMembership from "./components/organization/request-membership";
+import * as dsfr from "@gouvfr/dsfr/dist/js/dsfr.module";
 
 import Tabs from "./components/vanilla/tabs";
 import Accordion from "./components/vanilla/accordion";
@@ -43,6 +45,7 @@ const configAndMountApp = (el) => {
   app.component("suggest", Suggest);
   app.component("search", Search);
   app.component("follow-button", FollowButton);
+  app.component("read-more", ReadMore);
   app.component("request-membership", RequestMembership);
 
   // unset delimiters used in html templates to prevent injections using {{ }}
