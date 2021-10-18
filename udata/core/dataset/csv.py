@@ -31,7 +31,7 @@ class DatasetCsvAdapter(csv.Adapter):
         'last_modified',
         ('tags', lambda o: ','.join(o.tags)),
         ('harchived', lambda o: o.archived or False),
-        ('resources', lambda o: len(o.resources)),
+        ('resources_count', lambda o: len(o.resources)),
     )
 
     def dynamic_fields(self):
