@@ -1,5 +1,8 @@
 {% cache cache_duration, 'footer', g.lang_code|default(config.DEFAULT_LANGUAGE)|string,'-'.join((package_version('udata'), package_version('udata-front'))) %}
 <section class="footer" role="contentinfo">
+    <footer>
+        {% include theme("participez/participez.html") %}
+    </footer>
     <footer class="footer-links bg-grey-50 text-black py-hg py-lg-xl">
         <div class="hagrid">
             <div class="row">

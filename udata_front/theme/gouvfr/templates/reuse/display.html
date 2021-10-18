@@ -142,14 +142,13 @@
                 <sup>{{ reuse.datasets|length }}</sup>
             </h2>
         </div>
-        <ul class="row">
-            {% for dataset in reuse.datasets %}
-            <li class="col-md-12 col-6">
-                {% include theme('dataset/card.html') %}
-            </li>
-            {% endfor %}
-        </ul>
-        </div>
+    <ul class="row">
+        {% for dataset in reuse.datasets %}
+        <li class="col-md-12 col-6">
+            {% include theme('dataset/card.html') %}
+        </li>
+        {% endfor %}
+    </ul>
     </section>
     <section class="reuse-actions container my-hg">
         <div class="row">
@@ -199,11 +198,10 @@
             {% for reuse in related_reuses %}
             {% set features = ['preview'] %}
             <li class="col-3 col-md-6">
-                <a href="{{ url_for('reuses.show', reuse=reuse) }}" title="{{ reuse.title }}" class="unstyled w-100">
-                    {% include theme('reuse/card.html') %}
-                </a>
+                {% include theme('reuse/card.html') %}
             </li>
             {% endfor %}
         </ul>
     </section>
-    {% endblock %}
+</section>
+{% endblock %}
