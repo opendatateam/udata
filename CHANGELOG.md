@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Update README to reflect front changes [#17](https://github.com/etalab/udata-front/pull/17)
 
 ## 1.1.0 (2021-10-12)
 
