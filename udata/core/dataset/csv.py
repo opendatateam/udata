@@ -30,7 +30,7 @@ class DatasetCsvAdapter(csv.Adapter):
         'created_at',
         'last_modified',
         ('tags', lambda o: ','.join(o.tags)),
-        ('harchived', lambda o: o.archived or False),
+        ('archived', lambda o: o.archived or False),
         ('resources_count', lambda o: len(o.resources)),
     )
 
