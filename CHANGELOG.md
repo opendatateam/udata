@@ -6,6 +6,7 @@
 - Add Participate banner in the footer [#24](https://github.com/etalab/udata-front/pull/24)
 - Fix min-heigth used in posts images to center them [#23](https://github.com/etalab/udata-front/pull/23)
 - Update dataset page with navigation quickfixes and add DSFR components [#18](https://github.com/etalab/udata-front/pull/18)
+- Implement feedbacks on quickfixes [#26](https://github.com/etalab/udata-front/pull/26)
 
 ## 1.1.0 (2021-10-12)
 

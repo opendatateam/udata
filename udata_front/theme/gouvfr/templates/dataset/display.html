@@ -14,11 +14,11 @@
 } %}
 
 {% set bundle = 'dataset' %}
-
 {% set body_class = 'dataset-display' %}
-
 {% set community_subtitle = _('Explore with %(certifier)s', certifier=config.SITE_TITLE ) %}
 {% set read_only_mode = config.READ_ONLY_MODE %}
+{# Harvesting source #}
+{% set external_source = dataset.extras['remote_url'] %}
 
 {% block extra_head %}
 {% cache cache_duration, 'dataset-extra-head', dataset.id|string, g.lang_code %}
@@ -81,12 +81,16 @@
                 {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
             </h1>
             <p class="fr-mb-0">
+                {% if not external_source %}
                 {{ _('Updated on %(date)s', date=dataset.last_update|dateformat(format='long')) }}
+                    {% if dataset.license %}
+                    &mdash;
+                    {%  endif %}
+                {% endif %}
                 {% if dataset.license %}
-                &mdash;
                 {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
                 {{ dataset.license.title }}
-                {% if dataset.license.url %}</a>{% endif%}
+                {% if dataset.license.url %}</a>{% endif %}
                 {% endif %}
             </p>
         </div>
@@ -157,7 +161,7 @@
                         <li>
                             <a href="{{ url_for('datasets.list', tag=tag) }}"
                                 title="{{ tag }}">
-                                {{ tag|truncate(14, True) }}
+                                {{ tag|truncate(35, True) }}
                             </a>
                         </li>
                         {% endfor %}
@@ -179,6 +183,10 @@
                                  <dd>
                                      {{dataset.id}}
                                  </dd>
+                                {% if external_source %}
+                                <dt>{{ _('Remote source') }}</dt>
+                                <dd><a rel="nofollow" href="{{ external_source }}">{{ _('Remote source') }}</a></dd>
+                                {% endif%}
                             </dl>
                         </div>
                         <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
