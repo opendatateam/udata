@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Fix default sort with right sort column creation date name, for posts in back-office editorial page [#2665](https://github.com/opendatateam/udata/pull/2665)
 - Meta read-only-enabled is back [#2664](https://github.com/opendatateam/udata/pull/2664)
 - First endpoints for APIv2! Add datasets hateoas and resources pagination endpoints [#2663](https://github.com/opendatateam/udata/pull/2663) [#2667](https://github.com/opendatateam/udata/pull/2667)
 - Add `archived` and `resources_count` fields in the dataset catalog [#2668](https://github.com/opendatateam/udata/pull/2668)
