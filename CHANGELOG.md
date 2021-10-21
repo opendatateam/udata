@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Fix sort with right sort column creation date name, for posts in back-office editorial page #2665
+- Fix default sort with right sort column creation date name, for posts in back-office editorial page [#2665](https://github.com/opendatateam/udata/pull/2665)
 - Meta read-only-enabled is back [#2664](https://github.com/opendatateam/udata/pull/2664)
 - First endpoints for APIv2! Add datasets hateoas and resources pagination endpoints [#2663](https://github.com/opendatateam/udata/pull/2663)
 
