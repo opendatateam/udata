@@ -49,7 +49,7 @@ class ReuseListAPI(API):
     @api.marshal_with(reuse_page_fields)
     def get(self):
         args = reuse_parser.parse_args()
-        reuses = Reuse.objects
+        reuses = Reuse.objects(deleted=None)
         if args['q']:
             reuses = Reuse.objects.search_text(args['q'])
         return (reuses.order_by(args['sort'])

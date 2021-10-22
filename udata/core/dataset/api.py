@@ -79,6 +79,10 @@ dataset_parser.add_argument(
 dataset_parser.add_argument(
     'page_size', type=int, default=20, location='args',
     help='The page size to fetch')
+dataset_parser.add_argument(
+    'organization', type=str,
+    help='Filter activities for that particular organization',
+    location='args')
 
 community_parser = api.parser()
 community_parser.add_argument(
@@ -116,9 +120,9 @@ class DatasetListAPI(API):
     def get(self):
         '''List or search all datasets'''
         args = dataset_parser.parse_args()
-        datasets = Dataset.objects
+        datasets = Dataset.objects(archived=None, deleted=None)
         if args['q']:
-            datasets = Dataset.objects.search_text(args['q'])
+            datasets = datasets.search_text(args['q'])
         return (datasets.order_by(args['sort'])
                 .paginate(args['page'], args['page_size']))
 

@@ -17,7 +17,7 @@ common_doc = {
 }
 
 
-@ns.route('/search', endpoint='search')
+@ns.route('/search', endpoint='organization_search')
 class OrganizationSearchAPI(API):
     '''Organizations collection endpoint'''
     @apiv2.doc('search_organizations')

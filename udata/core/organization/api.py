@@ -71,7 +71,7 @@ class OrganizationListAPI(API):
     def get(self):
         '''List or search all organizations'''
         args = organization_parser.parse_args()
-        organizations = Organization.objects
+        organizations = Organization.objects(deleted=None)
         if args['q']:
             organizations = Organization.objects.search_text(args['q'])
         return (organizations.order_by(args['sort'])

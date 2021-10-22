@@ -129,7 +129,7 @@ resource_page_fields = apiv2.model('ResourcePage', {
 })
 
 
-@ns.route('/search', endpoint='search')
+@ns.route('/search', endpoint='dataset_search')
 class DatasetSearchAPI(API):
     '''Datasets collection search endpoint'''
     @apiv2.doc('search_datasets')

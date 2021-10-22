@@ -60,7 +60,7 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(dataset.id))
 
-    def test_dataset_api_list_filtered_by_org(self):
+    def test_dataset_search_api_filtered_by_org(self):
         '''It should fetch a dataset list for a given org'''
         self.login()
         with self.autoindex():
@@ -69,13 +69,13 @@ class DatasetAPITest(APITestCase):
             VisibleDatasetFactory()
             dataset_org = VisibleDatasetFactory(organization=org)
 
-        response = self.get(url_for('api.datasets'),
+        response = self.get(url_for('apiv2.dataset_search'),
                             qs={'organization': str(org.id)})
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(dataset_org.id))
 
-    def test_dataset_api_list_filtered_by_org_with_or(self):
+    def test_dataset_search_api_filtered_by_org_with_or(self):
         '''It should fetch a dataset list for two given orgs'''
         self.login()
         with self.autoindex():
@@ -87,7 +87,7 @@ class DatasetAPITest(APITestCase):
             dataset_org2 = VisibleDatasetFactory(organization=org2)
 
         response = self.get(
-            url_for('api.datasets'),
+            url_for('apiv2.dataset_search'),
             qs={'organization': '{0}|{1}'.format(org1.id, org2.id)})
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 2)
@@ -95,13 +95,13 @@ class DatasetAPITest(APITestCase):
         self.assertIn(str(dataset_org1.id), returned_ids)
         self.assertIn(str(dataset_org2.id), returned_ids)
 
-    def test_dataset_api_list_with_facets(self):
+    def test_dataset_search_api_with_facets(self):
         '''It should fetch a dataset list from the API with facets'''
         with self.autoindex():
             for i in range(2):
                 VisibleDatasetFactory(tags=['tag-{0}'.format(i)])
 
-        response = self.get(url_for('api.datasets', **{'facets': 'tag'}))
+        response = self.get(url_for('apiv2.dataset_search', **{'facets': 'tag'}))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 2)
         self.assertIn('facets', response.json)
