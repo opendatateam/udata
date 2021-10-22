@@ -20,7 +20,6 @@ from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
 from udata.core.user.models import Role
-from udata.utils import multi_to_dict
 
 from .api_fields import (
     apikey_fields,
@@ -36,7 +35,19 @@ from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
-search_parser = UserSearch.as_request_parser()
+
+user_parser = api.parser()
+user_parser.add_argument('q', type=str, location='args',
+                          help='The search query')
+user_parser.add_argument(
+    'sort', type=str, default='-created', location='args',
+    help='The sorting attribute')
+user_parser.add_argument(
+    'page', type=int, default=1, location='args', help='The page to fetch')
+user_parser.add_argument(
+    'page_size', type=int, default=20, location='args',
+    help='The page size to fetch')
+
 filter_parser = api.parser()
 filter_parser.add_argument(
     'q', type=str, help='The string to filter items',
@@ -230,12 +241,16 @@ class UserListAPI(API):
     search_adapter = UserSearch
 
     @api.doc('list_users')
-    @api.expect(search_parser)
+    @api.expect(user_parser)
     @api.marshal_with(user_page_fields)
     def get(self):
         '''List all users'''
-        search_parser.parse_args()
-        return search.query(UserSearch, **multi_to_dict(request.args))
+        args = user_parser.parse_args()
+        users = User.objects
+        if args['q']:
+            users = User.objects.search_text(args['q'])
+        return (users.order_by(args['sort'])
+                .paginate(args['page'], args['page_size']))
 
     @api.secure(admin_permission)
     @api.doc('create_user')

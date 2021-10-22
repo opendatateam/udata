@@ -29,17 +29,31 @@ ns = api.namespace('reuses', 'Reuse related operations')
 common_doc = {
     'params': {'reuse': 'The reuse ID or slug'}
 }
-search_parser = ReuseSearch.as_request_parser()
+reuse_parser = api.parser()
+reuse_parser.add_argument('q', type=str, location='args',
+                          help='The search query')
+reuse_parser.add_argument(
+    'sort', type=str, default='-created', location='args',
+    help='The sorting attribute')
+reuse_parser.add_argument(
+    'page', type=int, default=1, location='args', help='The page to fetch')
+reuse_parser.add_argument(
+    'page_size', type=int, default=20, location='args',
+    help='The page size to fetch')
 
 
 @ns.route('/', endpoint='reuses')
 class ReuseListAPI(API):
     @api.doc('list_reuses')
-    @api.expect(search_parser)
+    @api.expect(reuse_parser)
     @api.marshal_with(reuse_page_fields)
     def get(self):
-        search_parser.parse_args()
-        return search.query(ReuseSearch, **multi_to_dict(request.args))
+        args = reuse_parser.parse_args()
+        reuses = Reuse.objects
+        if args['q']:
+            reuses = Reuse.objects.search_text(args['q'])
+        return (reuses.order_by(args['sort'])
+                .paginate(args['page'], args['page_size']))
 
     @api.secure
     @api.doc('create_reuse')
@@ -71,8 +85,8 @@ class ReuseAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         '''Update a given reuse'''
-        request_deleted = request.json.get('deleted', True) 
-        if reuse.deleted and request_deleted is not None: 
+        request_deleted = request.json.get('deleted', True)
+        if reuse.deleted and request_deleted is not None:
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         form = api.validate(ReuseForm, reuse)

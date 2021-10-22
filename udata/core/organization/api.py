@@ -21,7 +21,6 @@ from .permissions import (
 )
 from .rdf import build_org_catalog
 from .tasks import notify_membership_request, notify_membership_response
-from .search import OrganizationSearch
 from .api_fields import (
     org_fields,
     org_page_fields,
@@ -34,7 +33,6 @@ from .api_fields import (
 
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
-from udata.core.dataset.search import DatasetSearch
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
 from udata.core.issues.api import issue_fields
@@ -46,8 +44,18 @@ from udata.core.storages.api import (
 )
 
 ns = api.namespace('organizations', 'Organization related operations')
-search_parser = OrganizationSearch.as_request_parser()
-dataset_search_parser = DatasetSearch.as_request_parser()
+
+organization_parser = api.parser()
+organization_parser.add_argument('q', type=str, location='args',
+                                 help='The search query')
+organization_parser.add_argument(
+    'sort', type=str, default='-created', location='args',
+    help='The sorting attribute')
+organization_parser.add_argument(
+    'page', type=int, default=1, location='args', help='The page to fetch')
+organization_parser.add_argument(
+    'page_size', type=int, default=20, location='args',
+    help='The page size to fetch')
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
@@ -58,12 +66,16 @@ common_doc = {
 class OrganizationListAPI(API):
     '''Organizations collection endpoint'''
     @api.doc('list_organizations')
-    @api.expect(search_parser)
+    @api.expect(organization_parser)
     @api.marshal_with(org_page_fields)
     def get(self):
         '''List or search all organizations'''
-        search_parser.parse_args()
-        return search.query(OrganizationSearch, **multi_to_dict(request.args))
+        args = organization_parser.parse_args()
+        organizations = Organization.objects
+        if args['q']:
+            organizations = Organization.objects.search_text(args['q'])
+        return (organizations.order_by(args['sort'])
+                .paginate(args['page'], args['page_size']))
 
     @api.secure
     @api.doc('create_organization', responses={400: 'Validation error'})

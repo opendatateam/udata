@@ -176,6 +176,7 @@ def export_csv_for_model(model, dataset):
     try:
         # write adapter results into a tmp file
         writer = csv.get_writer(csvfile)
+        print(adapter.header())
         writer.writerow(adapter.header())
         for row in adapter.rows():
             writer.writerow(row)

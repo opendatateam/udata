@@ -31,9 +31,9 @@ from udata.core import storages
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.utils import get_by, multi_to_dict
+from udata.utils import get_by
 from udata.rdf import (
-    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    RDF_EXTENSIONS,
     negociate_content, graph_response
 )
 
@@ -59,7 +59,6 @@ from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
-from .search import DatasetSearch
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
@@ -68,7 +67,19 @@ from .rdf import dataset_to_rdf
 log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
-search_parser = DatasetSearch.as_request_parser()
+
+dataset_parser = api.parser()
+dataset_parser.add_argument('q', type=str, location='args',
+                            help='The search query')
+dataset_parser.add_argument(
+    'sort', type=str, default='-created', location='args',
+    help='The sorting attribute')
+dataset_parser.add_argument(
+    'page', type=int, default=1, location='args', help='The page to fetch')
+dataset_parser.add_argument(
+    'page_size', type=int, default=20, location='args',
+    help='The page size to fetch')
+
 community_parser = api.parser()
 community_parser.add_argument(
     'sort', type=str, default='-created', location='args',
@@ -100,12 +111,16 @@ common_doc = {
 class DatasetListAPI(API):
     '''Datasets collection endpoint'''
     @api.doc('list_datasets')
-    @api.expect(search_parser)
+    @api.expect(dataset_parser)
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        search_parser.parse_args()
-        return search.query(Dataset, **multi_to_dict(request.args))
+        args = dataset_parser.parse_args()
+        datasets = Dataset.objects
+        if args['q']:
+            datasets = Dataset.objects.search_text(args['q'])
+        return (datasets.order_by(args['sort'])
+                .paginate(args['page'], args['page_size']))
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})
