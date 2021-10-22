@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.2.1 (2021-10-22)
 
 - Fix default sort with right sort column creation date name, for posts in back-office editorial page [#2665](https://github.com/opendatateam/udata/pull/2665)
