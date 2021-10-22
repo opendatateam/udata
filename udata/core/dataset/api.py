@@ -79,10 +79,6 @@ dataset_parser.add_argument(
 dataset_parser.add_argument(
     'page_size', type=int, default=20, location='args',
     help='The page size to fetch')
-dataset_parser.add_argument(
-    'organization', type=str,
-    help='Filter activities for that particular organization',
-    location='args')
 
 community_parser = api.parser()
 community_parser.add_argument(
