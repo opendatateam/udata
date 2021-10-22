@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.1.1 (2021-10-22)
 
 - Update README to reflect front changes [#17](https://github.com/etalab/udata-front/pull/17)
 - Add Participate banner in the footer [#24](https://github.com/etalab/udata-front/pull/24)
