@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.1.1 (2021-10-22)
 
 - Update README to reflect front changes [#17](https://github.com/etalab/udata-front/pull/17)
