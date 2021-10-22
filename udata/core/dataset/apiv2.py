@@ -1,11 +1,14 @@
 import logging
 
-from flask import url_for
+from flask import url_for, request
 
+from udata import search
 from udata.api import apiv2, API, fields
+from udata.utils import multi_to_dict
 
 from .api_fields import (
     badge_fields,
+    dataset_page_fields,
     org_ref_fields,
     resource_fields,
     spatial_coverage_fields,
@@ -13,9 +16,10 @@ from .api_fields import (
     user_ref_fields,
 )
 from .models import (
-    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
 )
 from .permissions import DatasetEditPermission
+from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
 
@@ -30,6 +34,7 @@ DEFAULT_MASK_APIV2 = ','.join((
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace('datasets', 'Dataset related operations')
+search_parser = DatasetSearch.as_request_parser()
 resources_parser = apiv2.parser()
 resources_parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
@@ -122,6 +127,18 @@ resource_page_fields = apiv2.model('ResourcePage', {
     'page_size': fields.Integer(),
     'total': fields.Integer()
 })
+
+
+@ns.route('/search', endpoint='search')
+class DatasetSearchAPI(API):
+    '''Datasets collection search endpoint'''
+    @apiv2.doc('search_datasets')
+    @apiv2.expect(search_parser)
+    @apiv2.marshal_with(dataset_page_fields)
+    def get(self):
+        '''List or search all datasets'''
+        search_parser.parse_args()
+        return search.query(Dataset, **multi_to_dict(request.args))
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
