@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- :warning: **breaking change** `DATASET_MAX_RESOURCES_UNCOLLAPSED` config is removed.
 
 ## 3.2.1 (2021-10-22)
 

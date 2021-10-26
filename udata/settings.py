@@ -312,11 +312,6 @@ class Defaults(object):
     # Default pagination size on listing
     POST_DEFAULT_PAGINATION = 20
 
-    # Dataset settings
-    ###########################################################################
-    # Max number of resources to display uncollapsed in dataset view
-    DATASET_MAX_RESOURCES_UNCOLLAPSED = 6
-
     # Preview settings
     ###########################################################################
     # Preview mode can be either `iframe` or `page` or `None`
