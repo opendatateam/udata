@@ -9,9 +9,6 @@ from .search import ReuseSearch
 
 ns = apiv2.namespace('reuses', 'Reuse related operations')
 
-common_doc = {
-    'params': {'reuse': 'The reuse ID or slug'}
-}
 search_parser = ReuseSearch.as_request_parser()
 
 

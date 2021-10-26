@@ -73,9 +73,8 @@ class OrganizationListAPI(API):
         args = organization_parser.parse_args()
         organizations = Organization.objects(deleted=None)
         if args['q']:
-            organizations = Organization.objects.search_text(args['q'])
-        return (organizations.order_by(args['sort'])
-                .paginate(args['page'], args['page_size']))
+            return organizations.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
+        return organizations.order_by(args['sort']).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_organization', responses={400: 'Validation error'})

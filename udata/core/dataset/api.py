@@ -116,11 +116,10 @@ class DatasetListAPI(API):
     def get(self):
         '''List or search all datasets'''
         args = dataset_parser.parse_args()
-        datasets = Dataset.objects(archived=None, deleted=None)
+        datasets = Dataset.objects(archived=None, deleted=None, private=False)
         if args['q']:
-            datasets = datasets.search_text(args['q'])
-        return (datasets.order_by(args['sort'])
-                .paginate(args['page'], args['page_size']))
+            return datasets.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
+        return datasets.order_by(args['sort']).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})

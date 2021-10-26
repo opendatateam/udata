@@ -246,11 +246,10 @@ class UserListAPI(API):
     def get(self):
         '''List all users'''
         args = user_parser.parse_args()
-        users = User.objects
+        users = User.objects(deleted=None)
         if args['q']:
-            users = User.objects.search_text(args['q'])
-        return (users.order_by(args['sort'])
-                .paginate(args['page'], args['page_size']))
+            return users.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
+        return users.order_by(args['sort']).paginate(args['page'], args['page_size'])
 
     @api.secure(admin_permission)
     @api.doc('create_user')

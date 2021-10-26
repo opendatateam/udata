@@ -6,7 +6,6 @@ from udata import search
 from udata.api import api, API, errors
 from udata.auth import admin_permission
 from udata.models import Dataset
-from udata.utils import multi_to_dict
 
 from udata.core.badges import api as badges_api
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -22,7 +21,6 @@ from .api_fields import (
 from .forms import ReuseForm
 from .models import Reuse, REUSE_TYPES
 from .permissions import ReuseEditPermission
-from .search import ReuseSearch
 
 ns = api.namespace('reuses', 'Reuse related operations')
 
@@ -49,11 +47,10 @@ class ReuseListAPI(API):
     @api.marshal_with(reuse_page_fields)
     def get(self):
         args = reuse_parser.parse_args()
-        reuses = Reuse.objects(deleted=None)
+        reuses = Reuse.objects(deleted=None, private=False)
         if args['q']:
-            reuses = Reuse.objects.search_text(args['q'])
-        return (reuses.order_by(args['sort'])
-                .paginate(args['page'], args['page_size']))
+            return reuses.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
+        return reuses.order_by(args['sort']).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_reuse')

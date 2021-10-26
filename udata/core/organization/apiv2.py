@@ -10,11 +10,6 @@ from udata.core.dataset.search import DatasetSearch
 
 ns = apiv2.namespace('organizations', 'Organization related operations')
 search_parser = OrganizationSearch.as_request_parser()
-dataset_search_parser = DatasetSearch.as_request_parser()
-
-common_doc = {
-    'params': {'org': 'The organization ID or slug'}
-}
 
 
 @ns.route('/search', endpoint='organization_search')
