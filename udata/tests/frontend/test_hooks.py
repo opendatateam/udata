@@ -1,7 +1,7 @@
 import pytest
 
 from flask import Blueprint, render_template_string, url_for
-from udata.hooks import template_hook
+from udata.frontend import template_hook
 from udata.tests.helpers import assert200
 
 bp = Blueprint('hooks_tests', __name__, url_prefix='/hooks_tests')

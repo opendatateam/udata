@@ -57,7 +57,7 @@ In any template, you can add a placeholder for hooks using one of these syntaxes
 In a view plugin, a hook implementation is a simple decorated function with the context as first argument.
 
 ```python
-from udata.hooks import template_hook
+from udata.frontend import template_hook
 
 @template_hook
 def my_hook(ctx):  # Will be available in {{ hook('my_hook') }}
