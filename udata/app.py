@@ -203,7 +203,7 @@ def standalone(app):
 def register_extensions(app):
     from udata import (
         models, routing, tasks, mail, i18n, auth, search, sitemap,
-        sentry
+        sentry, hooks
     )
     tasks.init_app(app)
     i18n.init_app(app)
@@ -216,6 +216,7 @@ def register_extensions(app):
     search.init_app(app)
     sitemap.init_app(app)
     sentry.init_app(app)
+    hooks.init_app(app)
     return app
 
 
