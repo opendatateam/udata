@@ -188,7 +188,7 @@ class License(db.Document):
                 pass
             else:
                 parsed = urlparse(url)
-                path = parsed.path[:-1] if parsed.path.endswith('/') else parsed.path
+                path = parsed.path.rstrip('/')
                 query = f'{parsed.netloc}{path}'
                 license = qs(db.Q(url__icontains=query) | db.Q(alternate_urls__contains=query)).first()
 
