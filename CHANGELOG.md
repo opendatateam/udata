@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Move template hook logic back to udata [#2671](https://github.com/opendatateam/udata/pull/2671)
 
 ## 3.2.1 (2021-10-22)
 
