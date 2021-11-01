@@ -275,7 +275,6 @@ def suggest(q, field, size=10):
 
 def init_app(app):
     # Register core adapters
-    import udata.core.user.search  # noqa
     import udata.core.dataset.search  # noqa
     import udata.core.reuse.search  # noqa
     import udata.core.organization.search  # noqa

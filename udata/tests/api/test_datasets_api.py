@@ -41,24 +41,48 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
-        with self.autoindex():
-            datasets = [VisibleDatasetFactory() for i in range(2)]
+        datasets = [VisibleDatasetFactory() for i in range(2)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
 
-    def test_dataset_api_search(self):
-        '''It should search datasets from the API'''
-        with self.autoindex():
-            [VisibleDatasetFactory() for i in range(2)]
-            dataset = VisibleDatasetFactory(title="some spécial chars")
+    def test_dataset_api_full_text_search(self):
+        '''Should proceed to full text search on datasets'''
+        [VisibleDatasetFactory() for i in range(2)]
+        dataset = VisibleDatasetFactory(title="some spécial chars")
 
+        # with accent
         response = self.get(url_for('api.datasets', q='spécial'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(dataset.id))
+
+        # without accent
+        response = self.get(url_for('api.datasets', q='special'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(dataset.id))
+
+    def test_dataset_api_sorting(self):
+        '''Should sort datasets results from the API'''
+        user = self.login()
+        [VisibleDatasetFactory() for i in range(2)]
+
+        to_follow = VisibleDatasetFactory(title="dataset to follow")
+
+        response = self.post(url_for('api.dataset_followers', id=to_follow.id))
+        self.assert201(response)
+
+        to_follow.count_followers()
+        self.assertEqual(to_follow.get_metrics()['followers'], 1)
+
+        # without accent
+        response = self.get(url_for('api.datasets', sort='-followers'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(response.json['data'][0]['id'], str(to_follow.id))
 
     def test_dataset_search_api_filtered_by_org(self):
         '''It should fetch a dataset list for a given org'''

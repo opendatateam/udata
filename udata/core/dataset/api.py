@@ -27,6 +27,7 @@ from flask_security import current_user
 from udata import search
 from udata.auth import admin_permission
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.core import storages
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
@@ -64,21 +65,23 @@ from .exceptions import (
 )
 from .rdf import dataset_to_rdf
 
+
+class DatasetApiParser(ModelApiParser):
+    sorts = {
+        'title': 'title.raw',
+        'created': 'created',
+        'last_modified': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+
 log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
 
-dataset_parser = api.parser()
-dataset_parser.add_argument('q', type=str, location='args',
-                            help='The search query')
-dataset_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
-    help='The sorting attribute')
-dataset_parser.add_argument(
-    'page', type=int, default=1, location='args', help='The page to fetch')
-dataset_parser.add_argument(
-    'page_size', type=int, default=20, location='args',
-    help='The page size to fetch')
+dataset_parser = DatasetApiParser()
 
 community_parser = api.parser()
 community_parser.add_argument(
@@ -111,11 +114,11 @@ common_doc = {
 class DatasetListAPI(API):
     '''Datasets collection endpoint'''
     @api.doc('list_datasets')
-    @api.expect(dataset_parser)
+    @api.expect(dataset_parser.parser)
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        args = dataset_parser.parse_args()
+        args = dataset_parser.parse()
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         if args['q']:
             return datasets.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])

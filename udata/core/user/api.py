@@ -1,4 +1,3 @@
-from flask import request
 from flask_security import current_user, logout_user
 
 from udata import search
@@ -31,7 +30,6 @@ from .api_fields import (
     user_role_fields,
 )
 from .forms import UserProfileForm, UserProfileAdminForm
-from .search import UserSearch
 
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
@@ -238,7 +236,6 @@ class UserListAPI(API):
     model = User
     fields = user_fields
     form = UserProfileForm
-    search_adapter = UserSearch
 
     @api.doc('list_users')
     @api.expect(user_parser)
