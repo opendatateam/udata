@@ -5,6 +5,12 @@
   </head>
 
   <body>
+
+    {{ hook('oauth_theme_raw') }}
+
+    {% if has_hook('oauth_theme_content') %}
+        {{ hook('oauth_theme_content') }}
+    {% else %}
     <section id="app">
       <div class="container">
     <div class="row">
@@ -67,5 +73,6 @@
     </div>
 </div>
     </section>
+    {% endif %}
   </body>
 </html>
