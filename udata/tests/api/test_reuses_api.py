@@ -25,7 +25,7 @@ pytestmark = [
 class ReuseAPITest:
     modules = []
 
-    def test_reuse_api_list(self, api, autoindex):
+    def test_reuse_api_list(self, api):
         '''It should fetch a reuse list from the API'''
         reuses = ReuseFactory.create_batch(3, visible=True)
 

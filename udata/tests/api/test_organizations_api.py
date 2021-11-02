@@ -31,10 +31,9 @@ pytestmark = [
 class OrganizationAPITest:
     modules = []
 
-    def test_organization_api_list(self, api, autoindex):
+    def test_organization_api_list(self, api):
         '''It should fetch an organization list from the API'''
-        with autoindex:
-            organizations = OrganizationFactory.create_batch(3)
+        organizations = OrganizationFactory.create_batch(3)
 
         response = api.get(url_for('api.organizations'))
         assert200(response)

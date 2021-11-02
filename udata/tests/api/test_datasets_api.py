@@ -143,9 +143,8 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
-        with self.autoindex():
-            resources = [ResourceFactory() for _ in range(2)]
-            dataset = DatasetFactory(resources=resources)
+        resources = [ResourceFactory() for _ in range(2)]
+        dataset = DatasetFactory(resources=resources)
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
@@ -473,9 +472,8 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
         user = self.login()
-        with self.autoindex():
-            dataset = VisibleDatasetFactory(owner=user)
-            response = self.delete(url_for('api.dataset', dataset=dataset))
+        dataset = VisibleDatasetFactory(owner=user)
+        response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)
         self.assertEqual(Dataset.objects.count(), 1)
