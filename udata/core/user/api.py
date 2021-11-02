@@ -2,6 +2,7 @@ from flask_security import current_user, logout_user
 
 from udata import search
 from udata.api import api, API
+from udata.api.parsers import ModelApiParser
 from udata.core import storages
 from udata.auth import admin_permission
 from udata.models import CommunityResource, Dataset, Reuse, User
@@ -31,20 +32,21 @@ from .api_fields import (
 )
 from .forms import UserProfileForm, UserProfileAdminForm
 
+
+class UserApiParser(ModelApiParser):
+    sorts = {
+        'datasets': 'metrics.datasets',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+        'created': 'created_at',
+    }
+
+
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
 
-user_parser = api.parser()
-user_parser.add_argument('q', type=str, location='args',
-                          help='The search query')
-user_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
-    help='The sorting attribute')
-user_parser.add_argument(
-    'page', type=int, default=1, location='args', help='The page to fetch')
-user_parser.add_argument(
-    'page_size', type=int, default=20, location='args',
-    help='The page size to fetch')
+user_parser = UserApiParser()
 
 filter_parser = api.parser()
 filter_parser.add_argument(
@@ -238,11 +240,11 @@ class UserListAPI(API):
     form = UserProfileForm
 
     @api.doc('list_users')
-    @api.expect(user_parser)
+    @api.expect(user_parser.parser)
     @api.marshal_with(user_page_fields)
     def get(self):
         '''List all users'''
-        args = user_parser.parse_args()
+        args = user_parser.parse()
         users = User.objects(deleted=None)
         if args['q']:
             return users.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])

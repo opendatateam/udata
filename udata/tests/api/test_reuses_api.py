@@ -27,8 +27,7 @@ class ReuseAPITest:
 
     def test_reuse_api_list(self, api, autoindex):
         '''It should fetch a reuse list from the API'''
-        with autoindex:
-            reuses = ReuseFactory.create_batch(3, visible=True)
+        reuses = ReuseFactory.create_batch(3, visible=True)
 
         response = api.get(url_for('api.reuses'))
         assert200(response)

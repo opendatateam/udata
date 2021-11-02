@@ -4,6 +4,7 @@ from flask import request
 
 from udata import search
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.models import Dataset
 
@@ -22,32 +23,34 @@ from .forms import ReuseForm
 from .models import Reuse, REUSE_TYPES
 from .permissions import ReuseEditPermission
 
+
+class ReuseApiParser(ModelApiParser):
+    sorts = {
+        'created': 'created_at',
+        'updated': 'last_modified',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+
 ns = api.namespace('reuses', 'Reuse related operations')
 
 common_doc = {
     'params': {'reuse': 'The reuse ID or slug'}
 }
-reuse_parser = api.parser()
-reuse_parser.add_argument('q', type=str, location='args',
-                          help='The search query')
-reuse_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
-    help='The sorting attribute')
-reuse_parser.add_argument(
-    'page', type=int, default=1, location='args', help='The page to fetch')
-reuse_parser.add_argument(
-    'page_size', type=int, default=20, location='args',
-    help='The page size to fetch')
+
+reuse_parser = ReuseApiParser()
 
 
 @ns.route('/', endpoint='reuses')
 class ReuseListAPI(API):
     @api.doc('list_reuses')
-    @api.expect(reuse_parser)
+    @api.expect(reuse_parser.parser)
     @api.marshal_with(reuse_page_fields)
     def get(self):
-        args = reuse_parser.parse_args()
-        reuses = Reuse.objects(deleted=None, private=False)
+        args = reuse_parser.parse()
+        reuses = Reuse.objects(deleted=None, private__ne=True)
         if args['q']:
             return reuses.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
         return reuses.order_by(args['sort']).paginate(args['page'], args['page_size'])

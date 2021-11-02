@@ -68,9 +68,8 @@ from .rdf import dataset_to_rdf
 
 class DatasetApiParser(ModelApiParser):
     sorts = {
-        'title': 'title.raw',
-        'created': 'created',
-        'last_modified': 'last_modified',
+        'created': 'created_at',
+        'updated': 'last_modified',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',

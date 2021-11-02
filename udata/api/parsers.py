@@ -26,11 +26,11 @@ class ModelApiParser:
     def parse(self):
         args = self.parser.parse_args()
         if args['sort']:
-            try:
-                args['sort'] = self.sorts[args['sort']]
-            except KeyError:
+            if args['sort'].startswith('-'):
                 # Keyerror because of the '-' character in front of the argument.
                 # It is removed to find the value in dict and added back.
                 arg_sort = args['sort'][1:]
                 args['sort'] = '-' + self.sorts[arg_sort]
+            else:
+                args['sort'] = self.sorts[args['sort']]
         return args

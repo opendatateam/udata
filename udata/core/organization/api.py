@@ -4,6 +4,7 @@ from flask import request, url_for, redirect, make_response
 
 from udata import search
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
@@ -43,19 +44,21 @@ from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
 
+
+class OrgApiParser(ModelApiParser):
+    sorts = {
+        'reuses': 'metrics.reuses',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+        'created': 'created_at',
+        'updated': 'last_modified',
+    }
+
+
 ns = api.namespace('organizations', 'Organization related operations')
 
-organization_parser = api.parser()
-organization_parser.add_argument('q', type=str, location='args',
-                                 help='The search query')
-organization_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
-    help='The sorting attribute')
-organization_parser.add_argument(
-    'page', type=int, default=1, location='args', help='The page to fetch')
-organization_parser.add_argument(
-    'page_size', type=int, default=20, location='args',
-    help='The page size to fetch')
+organization_parser = OrgApiParser()
 
 common_doc = {
     'params': {'org': 'The organization ID or slug'}
@@ -66,11 +69,11 @@ common_doc = {
 class OrganizationListAPI(API):
     '''Organizations collection endpoint'''
     @api.doc('list_organizations')
-    @api.expect(organization_parser)
+    @api.expect(organization_parser.parser)
     @api.marshal_with(org_page_fields)
     def get(self):
         '''List or search all organizations'''
-        args = organization_parser.parse_args()
+        args = organization_parser.parse()
         organizations = Organization.objects(deleted=None)
         if args['q']:
             return organizations.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
@@ -408,10 +411,16 @@ class AvatarAPI(API):
         return {'image': org.logo}
 
 
-dataset_parser = api.page_parser()
-dataset_parser.add_argument(
-    'sort', type=str, default='-created', location='args',
-    help='The sorting attribute')
+class DatasetApiParser(ModelApiParser):
+    sorts = {
+        'created': 'created_at',
+        'updated': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+dataset_parser = DatasetApiParser()
 
 
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
@@ -424,26 +433,16 @@ class OrgDatasetsAPI(API):
         'followers': 'metrics.followers',
     }
 
-    def map_sort(self, sort):
-        """Map sort arg from search index attributes to DB attributes"""
-        if not sort:
-            return
-        if sort[0] == '-':
-            mapped = self.sort_mapping.get(sort[1:]) or sort[1:]
-            return '-{}'.format(mapped)
-        else:
-            return self.sort_mapping.get(sort) or sort
-
     @api.doc('list_organization_datasets')
-    @api.expect(dataset_parser)
+    @api.expect(dataset_parser.parser)
     @api.marshal_with(dataset_page_fields)
     def get(self, org):
         '''List organization datasets (including private ones when member)'''
-        args = dataset_parser.parse_args()
+        args = dataset_parser.parse()
         qs = Dataset.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return (qs.order_by(self.map_sort(args['sort']))
+        return (qs.order_by(args['sort'])
                 .paginate(args['page'], args['page_size']))
 
 
