@@ -61,7 +61,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
     def test_user_api_full_text_search_first_name(self):
-        '''It should suggest users based on first name'''
+        '''It should find users based on first name'''
         for i in range(4):
             UserFactory(
                 first_name='test-{0}'.format(i) if i % 2 else faker.word())
@@ -92,7 +92,7 @@ class UserAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(user.id))
 
-    def test_suggest_users_api_no_match(self):
+    def test_find_users_api_no_match(self):
         '''It should not find user if no match'''
         UserFactory.create_batch(3)
 
