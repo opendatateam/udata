@@ -102,12 +102,11 @@ class UserAPITest(APITestCase):
 
     def test_users(self):
         '''It should provide a list of users'''
-        with self.autoindex():
-            user = UserFactory(
-                about=faker.paragraph(),
-                website=faker.url(),
-                avatar_url=faker.url(),
-                metrics={'datasets': 10, 'followers': 1, 'following': 0, 'reuses': 2})
+        user = UserFactory(
+            about=faker.paragraph(),
+            website=faker.url(),
+            avatar_url=faker.url(),
+            metrics={'datasets': 10, 'followers': 1, 'following': 0, 'reuses': 2})
         response = self.get(url_for('api.users'))
         self.assert200(response)
         [json] = response.json['data']
