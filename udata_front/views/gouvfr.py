@@ -9,11 +9,11 @@ from mongoengine.errors import ValidationError
 from udata_front import theme
 from udata_front.theme import theme_static_with_version
 from udata.app import cache
+from udata.frontend import template_hook
 from udata.models import Reuse, Dataset
 from udata.i18n import I18nBlueprint
 
 from udata_front import APIGOUVFR_EXTRAS_KEY
-from udata_front.frontend import template_hook
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +130,12 @@ def has_apis(ctx):
 def dataset_apis(ctx):
     dataset = ctx['dataset']
     return theme.render('dataset-apis.html', apis=dataset.extras.get(APIGOUVFR_EXTRAS_KEY))
+
+
+@template_hook('oauth_theme_content')
+def oauth_theme_content(ctx):
+    grant = ctx['grant']
+    return theme.render('api/oauth_authorize.html', grant=grant)
 
 
 # TODO : better this, redirect is not the best. How to serve it instead ?!

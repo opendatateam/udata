@@ -80,6 +80,7 @@ jobs:
           name: Install python dependencies
           command: |
             source venv/bin/activate
+            pip install --force-reinstall --no-deps -r requirements/udata.in
             pip install -r requirements/udata.pip \
                         -r requirements/install.pip \
                         -r requirements/test.pip \
