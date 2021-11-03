@@ -369,6 +369,13 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_match_by_alternate_url_scheme_slash_mismatch(self):
+        alternate_url = 'https://example.com/license'
+        license = LicenseFactory(alternate_urls=[alternate_url])
+        found = License.guess('http://example.com/license/')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_exact_match_by_title(self):
         license = LicenseFactory()
         found = License.guess(license.title)
