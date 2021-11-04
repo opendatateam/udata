@@ -14,7 +14,7 @@ search_parser = OrganizationSearch.as_request_parser()
 
 @ns.route('/search', endpoint='organization_search')
 class OrganizationSearchAPI(API):
-    '''Organizations collection endpoint'''
+    '''Organizations collection search endpoint'''
     @apiv2.doc('search_organizations')
     @apiv2.expect(search_parser)
     @apiv2.marshal_with(org_page_fields)
