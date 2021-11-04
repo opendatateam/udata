@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Move template hook logic back to udata [#2671](https://github.com/opendatateam/udata/pull/2671)
+- Add dataset's acronym to catalog [#2675](https://github.com/opendatateam/udata/pull/2675)
 
 ## 3.2.1 (2021-10-22)
 
