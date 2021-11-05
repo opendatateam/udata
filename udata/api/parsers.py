@@ -15,7 +15,7 @@ class ModelApiParser:
         keys = list(self.sorts)
         choices = keys + ['-' + k for k in keys]
         help_msg = 'The field (and direction) on which sorting apply'
-        self.parser.add_argument('sort', type=str, location='args', default='-created',
+        self.parser.add_argument('sort', type=str, location='args',
                                  choices=choices, help=help_msg)
         if paginate:
             self.parser.add_argument('page', type=int, location='args',

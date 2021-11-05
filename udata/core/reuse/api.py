@@ -24,6 +24,9 @@ from .models import Reuse, REUSE_TYPES
 from .permissions import ReuseEditPermission
 
 
+DEFAULT_SORTING = '-created_at'
+
+
 class ReuseApiParser(ModelApiParser):
     sorts = {
         'created': 'created_at',
@@ -52,8 +55,14 @@ class ReuseListAPI(API):
         args = reuse_parser.parse()
         reuses = Reuse.objects(deleted=None, private__ne=True)
         if args['q']:
-            return reuses.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
-        return reuses.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            search_reuses = reuses.search_text(args['q'])
+            if args['sort']:
+                return search_reuses.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            else:
+                return search_reuses.order_by('$text_score').paginate(args['page'], args['page_size'])
+        if args['sort']:
+            return reuses.order_by(args['sort']).paginate(args['page'], args['page_size'])
+        return reuses.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_reuse')

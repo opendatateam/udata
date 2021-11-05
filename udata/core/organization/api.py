@@ -46,6 +46,9 @@ from udata.core.storages.api import (
 )
 
 
+DEFAULT_SORTING = '-created_at'
+
+
 class OrgApiParser(ModelApiParser):
     sorts = {
         'reuses': 'metrics.reuses',
@@ -77,8 +80,15 @@ class OrganizationListAPI(API):
         args = organization_parser.parse()
         organizations = Organization.objects(deleted=None)
         if args['q']:
-            return organizations.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
-        return organizations.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            search_organizations = organizations.search_text(args['q'])
+            if args['sort']:
+                return search_organizations.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            else:
+                return search_organizations.order_by('$text_score').paginate(args['page'], args['page_size'])
+        if args['sort']:
+            return organizations.order_by(args['sort']).paginate(args['page'], args['page_size'])
+        return organizations.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
+
 
     @api.secure
     @api.doc('create_organization', responses={400: 'Validation error'})

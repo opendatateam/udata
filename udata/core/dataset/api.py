@@ -66,6 +66,9 @@ from .exceptions import (
 from .rdf import dataset_to_rdf
 
 
+DEFAULT_SORTING = '-created_at'
+
+
 class DatasetApiParser(ModelApiParser):
     sorts = {
         'created': 'created_at',
@@ -120,8 +123,14 @@ class DatasetListAPI(API):
         args = dataset_parser.parse()
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         if args['q']:
-            return datasets.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
-        return datasets.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            search_datasets = datasets.search_text(args['q'])
+            if args['sort']:
+                return search_datasets.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            else:
+                return search_datasets.order_by('$text_score').paginate(args['page'], args['page_size'])
+        if args['sort']:
+            return datasets.order_by(args['sort']).paginate(args['page'], args['page_size'])
+        return datasets.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})

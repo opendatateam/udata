@@ -31,6 +31,9 @@ from .api_fields import (
 from .forms import UserProfileForm, UserProfileAdminForm
 
 
+DEFAULT_SORTING = '-created_at'
+
+
 class UserApiParser(ModelApiParser):
     sorts = {
         'datasets': 'metrics.datasets',
@@ -245,8 +248,15 @@ class UserListAPI(API):
         args = user_parser.parse()
         users = User.objects(deleted=None)
         if args['q']:
-            return users.search_text(args['q']).order_by('$text_score').paginate(args['page'], args['page_size'])
-        return users.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            search_users = users.search_text(args['q'])
+            if args['sort']:
+                return search_users.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            else:
+                return search_users.order_by('$text_score').paginate(args['page'], args['page_size'])
+        if args['sort']:
+            return users.order_by(args['sort']).paginate(args['page'], args['page_size'])
+        return users.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
+
 
     @api.secure(admin_permission)
     @api.doc('create_user')
