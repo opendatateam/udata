@@ -145,11 +145,6 @@ export const map = _jsonMeta('map-config');
 export const tags = _jsonMeta('tags-config');
 
 /**
- * Max number of resources to display uncollapsed in dataset view
- */
-export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
-
-/**
  * Markdown configuration.
  */
 export const markdown = _jsonMeta('markdown-config');
@@ -191,7 +186,6 @@ export default {
     hidpi,
     map,
     tags,
-    dataset_max_resources_uncollapsed,
     is_search_autocomplete_enabled,
     search_autocomplete_debounce,
     markdown,
