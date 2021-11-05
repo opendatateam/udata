@@ -325,6 +325,29 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_match_by_url_with_final_slash(self):
+        license = LicenseFactory(url='https://example.com/license')
+        found = License.guess('https://example.com/license/')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_url_without_final_slash(self):
+        license = LicenseFactory(url='https://example.com/license/')
+        found = License.guess('https://example.com/license')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_url_not_too_fuzzy(self):
+        LicenseFactory(url='https://example.com/licensea')
+        found = License.guess('https://example.com/licenseb')
+        assert found is None
+
+    def test_match_by_url_scheme_mismatch(self):
+        license = LicenseFactory(url='https://example.com/license')
+        found = License.guess('http://example.com/license')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_imatch_by_url(self):
         url = '%s/CAPS.php' % faker.uri()
         license = LicenseFactory(url=url)
@@ -343,6 +366,13 @@ class LicenseModelTest:
         alternate_url = '%s/CAPS.php' % faker.uri()
         license = LicenseFactory(alternate_urls=[alternate_url])
         found = License.guess(alternate_url)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_match_by_alternate_url_scheme_slash_mismatch(self):
+        alternate_url = 'https://example.com/license'
+        license = LicenseFactory(alternate_urls=[alternate_url])
+        found = License.guess('http://example.com/license/')
         assert isinstance(found, License)
         assert license.id == found.id
 
