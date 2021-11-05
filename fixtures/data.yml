@@ -108,6 +108,16 @@
         format: csv
         mime: null
         created_at: 12/01/2021
+        # discussions:
+        #   - title: Nouveau certificat télèchargement fichier stock novembre
+        #     messages:
+        #       - content: >
+        #           Bonjour,
+        #           Nous avons rencontrons des problèmes pour télécharger automatiquement les fichiers mensuel de novembre 2021-11-01-StockUniteLegale_utf8.zip et 2021-11-01-StockEtablissement_utf8.zip à partir du site https://files.data.gouv.fr/insee-sirene/.
+        #           Il semblerait qu’une gestion de certificat ai été mise en place sur le site. Ce certificat a une période de validités très courte de de 3 mois (du Tue, 26 Oct 2021 11:24:44 GMT au Mon, 24 Jan 2022 11:24:43 GMT)
+        #           Pouvez-vous nous confirmer qu’il faudra dès à présent utiliser un certificat pour télécharger les fichiers mensuels. Pouvez-vous nous indiquer la période de validité du certificat et comment le télécharger afin que nous puissions automatiser les actions.
+        #           Merci d’avance pour votre réponse
+        #           Projet ORANGE - RCE France
   - 2:
     organization:
       name: Institut National de la Statistique et des Etudes Economiques (Insee)
@@ -497,13 +507,3 @@
         format: txt
         mime: text/plain
         created_at: 20/10/2021
-        # discussions:
-        #   - title: Nouveau certificat télèchargement fichier stock novembre
-        #     messages:
-        #       - content: >
-        #           Bonjour,
-        #           Nous avons rencontrons des problèmes pour télécharger automatiquement les fichiers mensuel de novembre 2021-11-01-StockUniteLegale_utf8.zip et 2021-11-01-StockEtablissement_utf8.zip à partir du site https://files.data.gouv.fr/insee-sirene/.
-        #           Il semblerait qu’une gestion de certificat ai été mise en place sur le site. Ce certificat a une période de validités très courte de de 3 mois (du Tue, 26 Oct 2021 11:24:44 GMT au Mon, 24 Jan 2022 11:24:43 GMT)
-        #           Pouvez-vous nous confirmer qu’il faudra dès à présent utiliser un certificat pour télécharger les fichiers mensuels. Pouvez-vous nous indiquer la période de validité du certificat et comment le télécharger afin que nous puissions automatiser les actions.
-        #           Merci d’avance pour votre réponse
-        #           Projet ORANGE - RCE France
