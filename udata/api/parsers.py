@@ -2,7 +2,7 @@ from udata.api import api
 
 
 class ModelApiParser:
-    """This class allow to describe and customize the full text search search behavior."""
+    """This class allows to describe and customize the api arguments parser behavior."""
 
     sorts = {}
 

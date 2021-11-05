@@ -32,6 +32,7 @@ from .api_fields import (
     refuse_membership_fields,
 )
 
+from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.api_fields import dataset_page_fields
 from udata.core.dataset.models import Dataset
 from udata.core.discussions.api import discussion_fields
@@ -411,28 +412,11 @@ class AvatarAPI(API):
         return {'image': org.logo}
 
 
-class DatasetApiParser(ModelApiParser):
-    sorts = {
-        'created': 'created_at',
-        'updated': 'last_modified',
-        'reuses': 'metrics.reuses',
-        'followers': 'metrics.followers',
-        'views': 'metrics.views',
-    }
-
 dataset_parser = DatasetApiParser()
 
 
 @ns.route('/<org:org>/datasets/', endpoint='org_datasets')
 class OrgDatasetsAPI(API):
-    sort_mapping = {
-        'created': 'created_at',
-        'views': 'metrics.views',
-        'updated': 'last_modified',
-        'reuses': 'metrics.reuses',
-        'followers': 'metrics.followers',
-    }
-
     @api.doc('list_organization_datasets')
     @api.expect(dataset_parser.parser)
     @api.marshal_with(dataset_page_fields)

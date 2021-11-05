@@ -84,12 +84,16 @@ class UserAPITest(APITestCase):
 
     def test_user_api_full_text_search_unicode(self):
         '''It should find user with special characters'''
+        for i in range(4):
+            UserFactory(
+                first_name='test-{0}'.format(i) if i % 2 else faker.word())
+
         user = UserFactory(first_name='test', last_name='testé')
 
         response = self.get(url_for('api.users', q='test testé'))
         self.assert200(response)
 
-        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(len(response.json['data']), 3)
         self.assertEqual(response.json['data'][0]['id'], str(user.id))
 
     def test_find_users_api_no_match(self):
