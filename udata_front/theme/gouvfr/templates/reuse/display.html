@@ -49,95 +49,177 @@
             {{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}
         </div>
         {% endif %}
-        <div class="row-inline">
-            <h1 class="mb-sm">{{ reuse.title }}</h1>
-        </div>
-        <div class="row-inline">
-            {% if reuse.organization %}
-            {% set author_name = reuse.organization.name %}
-            {% set author_url = url_for('organizations.show', org=reuse.organization) %}
-            {% elif reuse.owner %}
-            {% set author_name = reuse.owner.fullname %}
-            {% set author_url = url_for('users.show', user=reuse.owner) %}
-            {% endif %}
-            <p class="m-0 text-grey-300">
-                {# FIXME: from @abulte : We're piping some user generated content into safe, this is probably a bad idea. #}
-                {{ _('Published on %(date)s by %(user)s',
-                    date=reuse.created_at|dateformat(format='long'),
-                    user='<a href="%(url)s" title="%(name)s">%(name)s</a>'|format(
-                        name=author_name,
-                        url=author_url
-                    )|safe
-                ) }}
-            </p>
-        </div>
-        <div class="row-inline my-md align-items-center">
-            <a href="{{ reuse.url }}" rel="nofollow" class="btn-secondary btn-secondary-blue-400">
-                {{ _('See the reuse') }}
-            </a>
-            <div class="ml-md">
+
+        <div class="row fr-mb-4w">
+            <div class="col">
+                <h1 class="fr-mb-0 fr-h1">
+                    {{ reuse.title }}
+                </h1>
+                <p class="fr-mb-0">
+                    {{ _('Published on %(date)s', date=reuse.created_at|dateformat(format='long')) }}
+                </p>
+            </div>
+            <div class="col-auto fr-mt-1v row-inline align-items-end flex-direction-column">
                 {{ follow_btn(reuse) }}
+                {% if can_edit %}
+                <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
+                        href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}">{{ _('Modify reuse') }}</a>
+                {% endif %}
             </div>
         </div>
     </header>
-    <section class="reuse-infos my-lg">
-        <div class="tabs container">
-            <a href="#reuse-producer" role="button" class="tab-panel bg-green-300 tab active"><span
-                    class="label">{{ _('Reuser') }}</span></a>
-            <a href="#reuse-tags" role="button" class="tab-panel bg-green-300 tab"><span
-                    class="label">{{ _('Tags') }}</span></a>
-        </div>
-        <div class="callout p-hg p-md-md mb-lg bg-green-300">
-            <div id="reuse-producer" class="tab-content hagrid active">
-                {% if reuse.organization %}
-                {% with organization=reuse.organization, producer_type='organization' %}
-                {% include theme('organization/producer-panel.html') %}
-                {% endwith %}
-                {% elif reuse.owner %}
-                {% with organization=reuse.owner, producer_type='owner' %}
-                {% include theme('organization/producer-panel.html') %}
-                {% endwith %}
-                {% endif %}
-            </div>
-            <div id="reuse-tags" class="tab-content container">
-                <h2>{{ _('Information') }}</h2>
-                <dl class="description-list fs-base">
-                    <div>
-                        <dt class="f-bold text-grey-400">{{ _('Type') }}</dt>
-                        <dd>
-                            {{ reuse.type_label }}
-                        </dd>
-                    </div>
-                    <div>
-                        <dt class="f-bold text-grey-400">{{ _('Tags') }}</dt>
-                        <dd>
-                            {% for tag in reuse.tags %}
-                            <span class="tag">{{ tag }}</span>
-                            {% endfor %}
-                        </dd>
-                    </div>
-                </dl>
-            </div>
-        </div>
-    </section>
+
     <section class="reuse-image hagrid text-align-center">
-        <a href="{{ reuse.url }}" rel="nofollow" title="{{reuse.title}}" class="unstyled">
-            <img src="{{ reuse.image|placeholder('reuse') }}" class="mw-100" alt="" />
-        </a>
-    </section>
-    <section class="reuse-content container">
-        <div class="row-inline">
-            {{ reuse.description|markdown }}
-        </div>
-        <div class="row-inline mt-xl mb-lg">
-            <a href="{{ reuse.url }}" rel="nofollow" class="btn-secondary btn-secondary-blue-400">
+        <img src="{{ reuse.image|placeholder('reuse') }}" class="mw-100" alt="" />
+        <div>
+            <a href="{{ reuse.url }}" rel="nofollow"
+            class="btn-secondary btn-secondary-blue-400 fr-fi-eye-line fr-btn--icon-left fr-mt-4w">
                 {{ _('See the reuse') }}
             </a>
+        </div>
+    </section>
+
+    <section class="fr-grid-row fr-grid-row--gutters fr-mt-4w fr-mb-6w container">
+        <div class="fr-col-12 fr-col-md-8">
+            <div class="fr-tabs">
+                <ul class="fr-tabs__list" role="tablist" aria-label="{{ _('Reuse informations') }}">
+                    <li role="presentation">
+                        <button id="tab-producer" class="fr-tabs__tab"
+                                tabindex="0" role="tab" aria-selected="true" aria-controls="tab-producer-panel">
+                            {{ _('Reuser') }}
+                        </button>
+                    </li>
+                    <li role="presentation">
+                        <button id="tab-metadata" class="fr-tabs__tab"
+                                tabindex="-1" role="tab" aria-selected="false" aria-controls="tab-metadata-panel">
+                            {{ _('Metadata') }}
+                        </button>
+                    </li>
+                    <li role="presentation">
+                        <button id="tab-actions" class="fr-tabs__tab"
+                                tabindex="-1" role="tab" aria-selected="false" aria-controls="tab-actions-panel">
+                            {{ _('Actions') }}
+                        </button>
+                    </li>
+                </ul>
+                <div id="tab-producer-panel" class="fr-tabs__panel fr-tabs__panel--selected" role="tabpanel"
+                        aria-labelledby="tab-producer" tabindex="0">
+                    {% if reuse.organization %}
+                    {% with organization=reuse.organization, producer_type='organization' %}
+                    {% include theme('organization/producer-summary.html') %}
+                    {% endwith %}
+                    {% elif reuse.owner %}
+                    {% with organization=reuse.owner, producer_type='owner' %}
+                    {% include theme('organization/producer-summary.html') %}
+                    {% endwith %}
+                    {% endif %}
+                </div>
+                <div id="tab-metadata-panel" class="fr-tabs__panel" role="tabpanel"
+                        aria-labelledby="tab-metadata" tabindex="0">
+                    {% if reuse.tags %}
+                    <ul class="tags fr-mb-3v">
+                        {% for tag in reuse.tags %}
+                        <li>
+                            {{ tag|truncate(35, True) }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                        <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
+                            <h2 class="subtitle">{{ _('Informations') }}</h2>
+                            <dl class="metadata">
+                                <dt>{{ _('Type') }}</dt>
+                                    <dd>
+                                        {{ reuse.type_label }}
+                                    </dd>
+                                <dt>{{ _('ID') }}</dt>
+                                    <dd>
+                                        {{reuse.id}}
+                                    </dd>
+                            </dl>
+                        </div>
+                        <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
+                            <h2 class="subtitle">{{ _('Publication') }}</h2>
+                            <dl class="metadata">
+                                <dt>{{ _('Creation date') }}</dt>
+                                <dd>{{ reuse.created_at|dateformat(format='long') }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div id="tab-actions-panel" class="fr-tabs__panel" role="tabpanel"
+                        aria-labelledby="tab-actions" tabindex="0">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                        <div class="fr-col-12 fr-col-sm-6 vuejs">
+                            <h2 class="subtitle">{{ _('Participate') }}</h2>
+                            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 btn-with-arrow"
+                                href="{{ url_for('admin.index', path='reuse/new/') }}">
+                                {{ _('Add a reuse') }}
+                            </a>
+                            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 btn-with-arrow fr-mt-3v"
+                                href="#"
+                                @click.prevent="$bus.emit('discussions.startThread')">
+                                {{ _('Contact the reuser') }}
+                            </a>
+                        </div>
+                        <div class="fr-col-12 fr-col-sm-6">
+                            <h2 class="subtitle">{{ _('Embed') }}</h2>
+                            {{integrate_btn(reuse)}}
+                            <h2 class="subtitle fr-mt-3w">{{ _('Permalink') }}</h2>
+                            <div class="embed-wrapper">
+                                <input readonly id="permalink" onClick="this.select();"
+                                        value="{{ reuse.external_url }}" />
+                                <label for="permalink" class="icon-copy" id="permalink-copy"
+                                        data-clipboard-target="#permalink" title="Copy this">
+                                    {% include theme('svg/copy.svg') %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="fr-col-12 fr-col-md-4 fr-mt-5w">
+            <nav class="fr-summary" role="navigation" aria-labelledby="fr-summary-title">
+                <div class="fr-summary__title" id="fr-summary-title">{{ _('Summary') }}</div>
+                <ol class="fr-summary__list">
+                    <li>
+                        <a class="fr-summary__link" href="#description">
+                            {{ _('Description') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="fr-summary__link" href="#used-datasets">
+                            {{ _('Used datasets') }} <sup class="sup">{{reuse.datasets | length}}</sup>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="fr-summary__link" href="#community-discussions">
+                            {{ _('Discussions') }} <sup class="sup discussions-count">0</sup>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="fr-summary__link" href="#more-reuses">
+                            {{ _('More reuses') }}
+                        </a>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <section class="bg-beige fr-py-5w">
+        <div class="container vuejs">
+            <h2 id="description" class="fr-h2 fr-mb-0">{{ _('Description') }}</h2>
+            <read-more>
+                {{ reuse.description|markdown }}
+            </read-more>
         </div>
     </section>
     <section class="reuse-sources container overflow-visible my-lg">
         <div class="row-inline">
-            <h2>
+            <h2 id="used-datasets" class="fr-h2">
                 {{ _('Used datasets') }}
                 <sup>{{ reuse.datasets|length }}</sup>
             </h2>
@@ -150,37 +232,9 @@
         {% endfor %}
     </ul>
     </section>
-    <section class="reuse-actions container my-hg">
-        <div class="row">
-            <div class="col-6 col-md-12">
-                <h2 class="fs-xxl">{{ _('Actions') }}</h2>
-                <ul class="nav-list">
-                    {% if can_edit %}
-                    <li class="my-md">
-                        <a class="nav-link"
-                            href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}">{{ _('Modify information') }}</a>
-                    </li>
-                    {% endif %}
-                    {% if not read_only_mode %}
-                    <li class="my-md vuejs">
-                        <a class="nav-link"
-                            @click="$bus.emit('discussions.startThread')">{{ _('Contact the producer') }}</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-            <div class="col-6 col-md-12 my-md-lg">
-                <h2 class="fs-xxl">{{ _('Embed') }}</h2>
-                <p class="text-grey-300 fs-sm">
-                    {{ _('You can easily embed this reuse on your website by pasting this snippet in your html page.') }}
-                </p>
-                {{ integrate_btn(reuse) }}
-            </div>
-        </div>
-    </section>
-    <section class="community_container bg-grey-400 text-white py-hg" id="community">
+    <section class="community_container fr-pb-7w" id="community">
         <div class="container vuejs">
-            <h2 id="community-discussions" class="fs-hg">{{ _('Discussions') }} <sup class="discussions-count">0</sup>
+            <h2 id="community-discussions" class="fr-h2">{{ _('Discussions') }} <sup class="discussions-count">0</sup>
             </h2>
             <div class="row">
                 <div class="col-4 col-md-12 text-grey-300">
@@ -193,7 +247,7 @@
         </div>
     </section>
     <section class="reuse-xsell reuse-cards container py-hg">
-        <h2>{{ _('More reuses') }}</h2>
+        <h2 id="more-reuses" class="fr-h2">{{ _('More reuses') }}</h2>
         <ul class="row">
             {% for reuse in related_reuses %}
             {% set features = ['preview'] %}
