@@ -7,9 +7,9 @@
 - Better URL-based License guess [#2672](https://github.com/opendatateam/udata/pull/2672)
 - :warning: API changes [#2669](https://github.com/opendatateam/udata/pull/2669):
   - List endpoints for organizations, datasets, reuses and users are now querying MongoDB instead of ElasticSearch.
-  - Those endpoints use MongoDB full text search when `q`argument is used.
+  - Those endpoints use MongoDB full text search when `q` argument is used.
   - A new API parser was implemented to replace the search one.
-  - The previous ElasticSearch endpoints were moved to APIv2 with folloing url pattern: `/{object}/search` (ex: `/datasets/search`).
+  - The previous ElasticSearch endpoints were moved to APIv2 with the following url pattern: `/{object}/search` (ex: `/datasets/search`).
 
 ## 3.2.1 (2021-10-22)
 
