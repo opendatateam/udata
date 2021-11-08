@@ -1,8 +1,10 @@
 import logging
+import json
 import yaml
 import sys
 
 import click
+import requests
 from flask import current_app
 
 from udata.commands import cli
@@ -18,26 +20,28 @@ from udata.core.user.factories import UserFactory
 log = logging.getLogger(__name__)
 
 
-@cli.command()
-def generate_fixtures():
-    '''Build sample fixture data (users, datasets and reuses).'''
-    try:
-        fictures_path = current_app.config['FIXTURES_ROOT']
-    except KeyError:
-        raise click.ClickException('FIXTURES_ROOT setting not set.')
-    try:
-        stream = open(fictures_path, 'r')
-        dictionary = yaml.load(stream, Loader=yaml.FullLoader)
-    except FileNotFoundError:
-        raise click.FileError(fictures_path, 'File not found.')
+DEFAULT_FIXTURE_FILE = ''  # noqa
 
-    for fixture in dictionary:
+
+@cli.command()
+@click.argument('source', default=DEFAULT_FIXTURE_FILE)
+def generate_fixtures(source):
+    '''Build sample fixture data (users, datasets, reuses and discussions).'''
+    if source.startswith('http'):
+        json_fixtures = requests.get(source).json()
+    else:
+        with open(source) as f:
+            json_fixtures = json.load(f)
+
+    for fixture in json_fixtures:
         user = UserFactory()
         org = OrganizationFactory(**fixture['organization'], members=[Member(user=user)])
         dataset = DatasetFactory(**fixture['dataset'], organization=org)
         for resource in fixture['resources']:
             res = ResourceFactory(**resource)
             dataset.add_resource(res)
+        for reuse in fixture['reuses']:
+            ReuseFactory(**reuse, datasets=[dataset], owner=user)
             # for discussion in data['discussions']:
             #     user = UserFactory()
             #     messages = []
