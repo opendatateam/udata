@@ -43,7 +43,10 @@ def owned_pre_save(sender, document, **kwargs):
     if not isinstance(document, Owned):
         return
     changed_fields = getattr(document, '_changed_fields', [])
-    if 'organization' in changed_fields and 'owner' not in changed_fields:
+    if 'organization' in changed_fields and 'owner' in changed_fields:
+        # Ownership changes (org to owner or the other way around) have already been made
+        return
+    if 'organization' in changed_fields:
         if document.owner:
             # Change from owner to organization
             document._previous_owner = document.owner
@@ -53,7 +56,7 @@ def owned_pre_save(sender, document, **kwargs):
             # Need to fetch previous value in base
             original = sender.objects.only('organization').get(pk=document.pk)
             document._previous_owner = original.organization
-    elif 'owner' in changed_fields and 'organization' not in changed_fields:
+    elif 'owner' in changed_fields:
         if document.organization:
             # Change from organization to owner
             document._previous_owner = document.organization
