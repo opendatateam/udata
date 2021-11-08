@@ -1,6 +1,8 @@
+import logging
+
 from datetime import datetime, timedelta
 from collections import OrderedDict
-import logging
+from urllib.parse import urlparse
 
 from blinker import signal
 from dateutil.parser import parse as parse_dt
@@ -18,7 +20,8 @@ from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
 from udata.utils import get_by, hash_url
-from udata.uris import endpoint_for
+from udata.uris import ValidationError, endpoint_for
+from udata.uris import validate as validate_url
 
 from .preview import get_preview_url
 from .exceptions import (
@@ -175,16 +178,31 @@ class License(db.Document):
             db.Q(id__iexact=text) | db.Q(slug=slug) | db.Q(url__iexact=text)
             | db.Q(alternate_urls__iexact=text)
         ).first()
+
         if license is None:
-            # Try to single match with a low Damerau-Levenshtein distance
+            # If we're dealing with an URL, let's try some specific stuff
+            # like getting rid of trailing slash and scheme mismatch
+            try:
+               url = validate_url(text)
+            except ValidationError:
+                pass
+            else:
+                parsed = urlparse(url)
+                path = parsed.path.rstrip('/')
+                query = f'{parsed.netloc}{path}'
+                license = qs(db.Q(url__icontains=query) | db.Q(alternate_urls__contains=query)).first()
+
+        if license is None:
+            # Try to single match `slug` with a low Damerau-Levenshtein distance
             computed = ((l, rdlevenshtein(l.slug, slug)) for l in cls.objects)
             candidates = [l for l, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates
             if len(candidates) == 1:
                 license = candidates[0]
+
         if license is None:
-            # Try to single match with a low Damerau-Levenshtein distance
+            # Try to single match `alternate_titles` with a low Damerau-Levenshtein distance
             computed = (
                 (l, rdlevenshtein(cls.slug.slugify(t), slug))
                 for l in cls.objects

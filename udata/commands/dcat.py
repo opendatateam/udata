@@ -22,7 +22,8 @@ def grp():
 @grp.command()
 @click.argument('url')
 @click.option('-q', '--quiet', is_flag=True, help='Ignore warnings')
-def parse_url(url, quiet=False):
+@click.option('-i', '--rid', help='Inspect specific remote id (contains)')
+def parse_url(url, quiet=False, rid=''):
     '''Parse the datasets in a DCAT format located at URL (debug)'''
     if quiet:
         verbose_loggers = ['rdflib', 'udata.core.dataset']
@@ -56,23 +57,24 @@ def parse_url(url, quiet=False):
     graph.parse(data=_graph, format=format)
 
     for item in backend.job.items:
-        echo(magenta('Processing item {}'.format(item.remote_id)))
-        echo('Item kwargs: {}'.format(yellow(item.kwargs)))
-        node = backend.get_node_from_item(item)
-        dataset = MockDatasetFactory()
-        dataset = dataset_from_rdf(graph, dataset, node=node)
-        echo('')
-        echo(green('Dataset found!'))
-        echo('Title: {}'.format(yellow(dataset)))
-        echo('License: {}'.format(yellow(dataset.license)))
-        echo('Description: {}'.format(yellow(dataset.description)))
-        echo('Tags: {}'.format(yellow(dataset.tags)))
-        echo('Resources: {}'.format(yellow([(r.title, r.format, r.url) for r in dataset.resources])))
+        if not rid or rid in item.remote_id:
+            echo(magenta('Processing item {}'.format(item.remote_id)))
+            echo('Item kwargs: {}'.format(yellow(item.kwargs)))
+            node = backend.get_node_from_item(item)
+            dataset = MockDatasetFactory()
+            dataset = dataset_from_rdf(graph, dataset, node=node)
+            echo('')
+            echo(green('Dataset found!'))
+            echo('Title: {}'.format(yellow(dataset)))
+            echo('License: {}'.format(yellow(dataset.license)))
+            echo('Description: {}'.format(yellow(dataset.description)))
+            echo('Tags: {}'.format(yellow(dataset.tags)))
+            echo('Resources: {}'.format(yellow([(r.title, r.format, r.url) for r in dataset.resources])))
 
-        try:
-            dataset.validate()
-        except mongoengine.errors.ValidationError as e:
-            log.error(e, exc_info=True)
-        else:
-            echo(green('Dataset is valid ✅'))
-        echo('')
+            try:
+                dataset.validate()
+            except mongoengine.errors.ValidationError as e:
+                log.error(e, exc_info=True)
+            else:
+                echo(green('Dataset is valid ✅'))
+            echo('')
