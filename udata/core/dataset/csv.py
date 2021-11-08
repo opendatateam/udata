@@ -15,6 +15,7 @@ class DatasetCsvAdapter(csv.Adapter):
         'id',
         'title',
         'slug',
+        'acronym',
         ('url', 'external_url'),
         ('organization', 'organization.name'),
         ('organization_id', 'organization.id'),
