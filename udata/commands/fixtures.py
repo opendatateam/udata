@@ -14,23 +14,6 @@ from udata.core.user.factories import UserFactory
 log = logging.getLogger(__name__)
 
 
-DATASET_SLUGS = [
-    "barometre-des-resultats-de-laction-publique",
-    "base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret",
-    "donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1",
-    "demandes-de-valeurs-foncieres",
-    "logements-sociaux-et-bailleurs-par-region",
-    "base-adresse-locale-de-la-commune-de-garein",
-    "cuisses-de-grenouille-et-escargots-frogs-legs-and-snails",
-    "marche-public-de-la-metropole-de-lyon",
-    "defibrillateurs-presents-sur-la-commune-de-sixt-sur-aff-en-2018",
-    "diagnostics-de-performance-energetique-pour-les-logements-par-habitation",
-    "mairie-de-beynost-borne-de-recharge-pour-vehicules-electriques-1",
-    "vehicules-a-faibles-et-a-tres-faibles-emissions-de-la-prefecture-de-region-auvergne-rhones-alpes",
-    "base-adresse-nationale",
-    "lignes-dautocars-urbains-et-interurbains-de-la-dlva",
-    "nombre-de-personnes-rickrollees-sur-data-gouv-fr",
-    ]
 DATASET_SLUGS = []
 
 
