@@ -28,7 +28,7 @@ DEFAULT_FIXTURE_FILE = 'https://github.com/opendatateam/udata-fixtures/blob/main
 
 @cli.command()
 @click.argument('data-source')
-def generate_fixtures_local_file(data_source):
+def generate_fixtures_file(data_source):
     '''Build sample fixture file based on datasets slugs list (users, datasets, reuses).'''
     json_result = []
 
