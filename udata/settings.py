@@ -463,8 +463,6 @@ class Defaults(object):
                         'SourcesAPI.post',
                         'FollowAPI.post']
 
-    FIXTURES_ROOT = '/Users/stan/work/udata/fixtures/data.yml'
-
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''
