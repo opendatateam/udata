@@ -29,7 +29,7 @@ COMMUNITY_RES_URL = '/api/1/datasets/community_resources'
 DISCUSSION_URL = '/api/1/discussions'
 
 
-DEFAULT_FIXTURE_FILE = 'https://github.com/opendatateam/udata-fixtures/blob/main/results.json'  # noqa
+DEFAULT_FIXTURE_FILE = 'https://raw.githubusercontent.com/opendatateam/udata-fixtures/main/results.json'  # noqa
 
 
 @cli.command()
