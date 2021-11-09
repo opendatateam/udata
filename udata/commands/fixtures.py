@@ -5,38 +5,28 @@ import click
 import requests
 
 from udata.commands import cli
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory, CommunityResourceFactory
+from udata.core.dataset.factories import (
+    DatasetFactory, ResourceFactory, CommunityResourceFactory
+)
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
+from udata.core.discussions.factories import (
+    MessageDiscussionFactory, DiscussionFactory
+)
 
 log = logging.getLogger(__name__)
 
 
-DATASET_SLUGS = [
-    "barometre-des-resultats-de-laction-publique",
-    "base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret",
-    "donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1",
-    "demandes-de-valeurs-foncieres",
-    "logements-sociaux-et-bailleurs-par-region",
-    "base-adresse-locale-de-la-commune-de-garein",
-    "cuisses-de-grenouille-et-escargots-frogs-legs-and-snails",
-    "marche-public-de-la-metropole-de-lyon",
-    "defibrillateurs-presents-sur-la-commune-de-sixt-sur-aff-en-2018",
-    "diagnostics-de-performance-energetique-pour-les-logements-par-habitation",
-    "mairie-de-beynost-borne-de-recharge-pour-vehicules-electriques-1",
-    "vehicules-a-faibles-et-a-tres-faibles-emissions-de-la-prefecture-de-region-auvergne-rhones-alpes",
-    "base-adresse-nationale",
-    "lignes-dautocars-urbains-et-interurbains-de-la-dlva",
-    "nombre-de-personnes-rickrollees-sur-data-gouv-fr",
-]
+DATASET_SLUGS = []
 
 
 DATASET_URL = '/api/1/datasets'
 ORG_URL = '/api/1/organizations'
 REUSE_URL = '/api/1/reuses'
 COMMUNITY_RES_URL = '/api/1/datasets/community_resources'
+DISCUSSION_URL = '/api/1/discussions'
 
 
 DEFAULT_FIXTURE_FILE = 'https://github.com/opendatateam/udata-fixtures/blob/main/results.json'  # noqa
@@ -94,6 +84,16 @@ def generate_fixtures_file(data_source):
                 del com['preview_url']
             json_fixture['community_resources'] = json_community
 
+            json_discussion = requests.get(f"{data_source}{DISCUSSION_URL}/?for={json_dataset['id']}").json()['data']
+            for discussion in json_discussion:
+                del discussion['subject']
+                del discussion['user']
+                del discussion['url']
+                del discussion['class']
+                for message in discussion['discussion']:
+                    del message['posted_by']
+            json_fixture['discussions'] = json_discussion
+
             json_result.append(json_fixture)
     
 
@@ -123,3 +123,7 @@ def generate_fixtures(source):
                 ReuseFactory(**reuse, datasets=[dataset], owner=user)
             for community in fixture['community_resources']:
                 CommunityResourceFactory(**community, dataset=dataset, owner=user)
+            for discussion in fixture['discussions']:
+                messages = discussion.pop('discussion')
+                DiscussionFactory(**discussion, subject=dataset, user=user,
+                    discussion=[MessageDiscussionFactory(**message, posted_by=user) for message in messages])
