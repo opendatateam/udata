@@ -65,15 +65,11 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for('api.datasets', q='spécial'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 3)
-        for data in response.json['data']:
-            self.assertTrue(data['title'] in ['some spécial integer', 'some spécial float', 'some spécial chars'])
 
         # without accent
         response = self.get(url_for('api.datasets', q='special'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 3)
-        for data in response.json['data']:
-            self.assertTrue(data['title'] in ['some spécial integer', 'some spécial float', 'some spécial chars'])
 
     def test_dataset_api_sorting(self):
         '''Should sort datasets results from the API'''
