@@ -33,7 +33,6 @@ class FixturesTest(DBTestMixin, TestCase):
                     "url": "https://dev.local"
                     }]
                 }]
-            
             with open(fixtures_fd, 'w') as f:
                 json.dump(json_fixtures, f)
             generate_fixtures(fixtures_fd)
