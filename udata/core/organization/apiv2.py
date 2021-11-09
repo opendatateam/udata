@@ -6,7 +6,6 @@ from udata.utils import multi_to_dict
 from .search import OrganizationSearch
 from .api_fields import org_page_fields
 
-from udata.core.dataset.search import DatasetSearch
 
 ns = apiv2.namespace('organizations', 'Organization related operations')
 search_parser = OrganizationSearch.as_request_parser()
