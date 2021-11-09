@@ -95,7 +95,6 @@ def generate_fixtures_file(data_source):
             json_fixture['discussions'] = json_discussion
 
             json_result.append(json_fixture)
-    
 
     with open('results.json', 'w') as f:
         json.dump(json_result, f)
