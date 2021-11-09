@@ -19,6 +19,6 @@ class OrganizationSearchAPI(API):
     @apiv2.expect(search_parser)
     @apiv2.marshal_with(org_page_fields)
     def get(self):
-        '''List or search all organizations'''
+        '''Search all organizations'''
         search_parser.parse_args()
         return search.query(OrganizationSearch, **multi_to_dict(request.args))
