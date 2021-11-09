@@ -19,5 +19,6 @@ class ReuseSearchAPI(API):
     @apiv2.expect(search_parser)
     @apiv2.marshal_with(reuse_page_fields)
     def get(self):
+        '''Search all reuses'''
         search_parser.parse_args()
         return search.query(ReuseSearch, **multi_to_dict(request.args))
