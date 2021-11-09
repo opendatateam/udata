@@ -1,5 +1,6 @@
 from flask_security import current_user, logout_user
 
+from udata import search
 from udata.api import api, API
 from udata.api.parsers import ModelApiParser
 from udata.core import storages
@@ -26,6 +27,7 @@ from .api_fields import (
     me_metrics_fields,
     user_fields,
     user_page_fields,
+    user_suggestion_fields,
     user_role_fields,
 )
 from .forms import UserProfileForm, UserProfileAdminForm
@@ -345,6 +347,36 @@ class FollowUserAPI(FollowAPI):
         if id == str(current_user.id):
             api.abort(403, "You can't follow yourself")
         return super(FollowUserAPI, self).post(id)
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    'q', help='The string to autocomplete/suggest', location='args',
+    required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_users')
+class SuggestUsersAPI(API):
+    @api.doc('suggest_users')
+    @api.expect(suggest_parser)
+    @api.marshal_list_with(user_suggestion_fields)
+    def get(self):
+        '''Suggest users'''
+        args = suggest_parser.parse_args()
+        return [
+            {
+                'id': opt['text'],
+                'first_name': opt['payload']['first_name'],
+                'last_name': opt['payload']['last_name'],
+                'avatar_url': opt['payload']['avatar_url'],
+                'slug': opt['payload']['slug'],
+                'score': opt['score'],
+            }
+            for opt in search.suggest(args['q'], 'user_suggest', args['size'])
+        ]
 
 
 @ns.route('/roles/', endpoint='user_roles')

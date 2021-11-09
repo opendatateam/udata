@@ -13,7 +13,7 @@ search_parser = ReuseSearch.as_request_parser()
 
 
 @ns.route('/search', endpoint='reuse_search')
-class ReuseSearchAPI(API):
+class ReuseSearch(API):
     '''Reuses collection search endpoint'''
     @apiv2.doc('search_reuses')
     @apiv2.expect(search_parser)
