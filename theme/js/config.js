@@ -76,9 +76,10 @@ export const check_urls = _jsonMeta("check-urls");
 export const unchecked_types = _jsonMeta("unchecked-types");
 
 /**
- * The API root/base URL
+ * The API root/base URLs
  */
 export const api_root = _meta("api-root");
+export const api_2_root = _meta("api-2-root");
 
 /**
  * The API Swagger specifications URL
@@ -104,6 +105,16 @@ export const admin_root = _meta("admin-root");
  * The authentification URL for logins
  */
 export const auth_url = _meta("auth-url");
+
+/**
+ * The schema catalog URL
+ */
+export const schema_catalog_url = _meta("schema-catalog-url");
+
+/**
+ * The schema validata URL
+ */
+export const schema_validata_url = _meta("schema-validata-url");
 
 /**
  * Sentry configuration (as json) if available
@@ -148,10 +159,10 @@ export const map = _jsonMeta("map-config");
 export const tags = _jsonMeta("tags-config");
 
 /**
- * Max number of resources to display uncollapsed in dataset view
+ * Default page size for resources in dataset view
  */
-export const dataset_max_resources_uncollapsed = _jsonMeta(
-  "dataset-max-resources-uncollapsed"
+export const resources_default_page_size = _jsonMeta(
+  "resources-default-page-size"
 );
 
 /**
@@ -189,11 +200,14 @@ export default {
   title,
   csrf_token,
   api_root,
+  api_2_root,
   api_specs,
   theme_static,
   static_root,
   admin_root,
   auth_url,
+  schema_catalog_url,
+  schema_validata_url,
   sentry,
   check_urls,
   unchecked_types,
@@ -203,7 +217,7 @@ export default {
   map,
   tags,
   values,
-  dataset_max_resources_uncollapsed,
+  resources_default_page_size,
   markdown,
   read_only_enabled,
 };

@@ -27,13 +27,6 @@
                     <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="{{expanded}}"
                             aria-label="{{_('See more details')}}" aria-controls="resource-{{resource.id}}"
                             class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
-                    {% if resource.preview_url %}
-                    <li class="vuejs">
-                        <modals-container></modals-container>
-                        <a href="#" class="btn-action" title="{{ _('Preview') }}"
-                            @click.prevent="$showModal('preview', {url: '{{ resource.preview_url }}'}, true)">{% include theme('svg/actions/eye.svg') %}</a>
-                    </li>
-                    {% endif %}
                     <li><a @click.prevent href="#" id="{{resource.id}}-copy"
                             title="{{ _('Copy permalink to clipboard') }}" data-clipboard-text="{{resource.latest}}"
                             class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
@@ -44,7 +37,6 @@
                     <li><a href="{{ resource.latest }}" class="btn-action" aria-label="{{ _('Download resource') }}"
                             download>{% include theme('svg/actions/download.svg') %}</a></li>
                     {% endif %}
-                    {{ hook('dataset.resource.card.extra-buttons') }}
                 </ul>
                 <div class="filetype">
                     <strong>{{ resource_format }}</strong>

@@ -44,9 +44,6 @@ def init_app(app):
 
     from . import helpers, error_handlers  # noqa
 
-    if app.config['RESOURCES_SCHEMAGOUVFR_ENABLED']:
-        VIEWS.append('schema')
-
     for view in VIEWS:
         _load_views(app, 'udata_front.views.{}'.format(view))
 

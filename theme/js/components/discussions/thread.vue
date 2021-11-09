@@ -27,7 +27,7 @@
             <div>
               <Author :author="comment.posted_by" :badge="false" />
               <div class="text-grey-300 mt-xxs">
-                {{ formatDate(comment.posted_on) }}
+                {{ $filters.formatDate(comment.posted_on) }}
               </div>
             </div>
             <div class="thread-link">
@@ -70,7 +70,7 @@
       <div v-if="closed" class="text-grey-300">
         {{ $t("The discussion was closed by") }} &#32;
         <span class="text-blue-200 px-xxs"><Author :author="closed_by" /></span>
-        {{ $t("on") }} {{ formatDate(closed) }}
+        {{ $t("on") }} {{ $filters.formatDate(closed) }}
       </div>
     </footer>
   </div>
@@ -82,12 +82,6 @@ import Avatar from "./avatar.vue";
 import Author from "./author.vue";
 import LinkIcon from "svg/permalink.svg";
 import config from "../../config";
-import dayjs from "dayjs";
-import "dayjs/locale/fr";
-import "dayjs/locale/en";
-import "dayjs/locale/es";
-
-dayjs.locale(config.lang);
 
 export default {
   data() {
@@ -133,9 +127,6 @@ export default {
         this.$t("You must be logged in to start a discussion.")
       );
       this.showForm = true;
-    },
-    formatDate: function (date) {
-      return dayjs(date).format("D MMMM YYYY");
     },
   },
   props: {

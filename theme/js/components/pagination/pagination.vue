@@ -13,21 +13,20 @@ A simple pagination Vue component that allow you to paginate long collections.
 Simply provide necessary props :
 
 * page : current page
-* page_size : page... size. How many elements will be on each page
+* page_size : how many elements will be on each page
 * total_results : total collection length
 * changePage : a function that will be called on each button click. It will be passed a single argument : the new page number
-* light : optional param that will add a `.light` class and trigger the corresponding color scheme
 
 Check the example below for more infos :
 
 ```pagination-ex.vue
 <template>
     <pagination
-      v-if="total_results > page_size"
-      :page="current_page"
-      :page_size="page_size"
-      :total_results="total_results"
-      :changePage="changePage"
+      v-if="totalResults > pageSize"
+      :page="currentPage"
+      :page-size="pageSize"
+      :total-results="totalResults"
+      :change-page="changePage"
     />
 </template>
 
@@ -41,9 +40,9 @@ export default {
   },
   methods: {
     changePage(index) {
-      this.page = index; //Change current page
-      this.loadPage(); //Load corresponding new info
-      scrollToTop(); //Then scroll to the top
+      this.page = index; // Change current page
+      this.loadPage(); // Load corresponding new info
+      scrollToTop(); // Then scroll to the top
     }
   }
 };
@@ -52,93 +51,128 @@ export default {
 -->
 
 <template>
-  <ul
-    class="pagination-wrapper"
-    :class="{ light }"
-    role="navigation"
-    aria-label="pagination"
-  >
-    <li>
-      <a
-        :class="{ disabled: page === 1 }"
-        class="previous"
-        :aria-disabled="page === 1"
-        @click.prevent="_onClick(page - 1)"
-      ></a>
-    </li>
-    <li>
-      <a
-        :class="{ active: page === 1 }"
-        :aria-disabled="page === 1"
-        @click.prevent="_onClick(1)"
-        >1</a
-      >
-    </li>
-    <li v-for="index in visible_pages">
-      <a
-        :class="{ active: page === index }"
-        :aria-current="page === index ? 'page' : false"
-        @click.prevent="_onClick(index)"
-        v-if="index"
-        >{{ index }}</a
-      >
-      <span class="ellipsis" role="img" aria-label="ellipsis" aria-hidden="true" v-else>...</span>
-    </li>
-    <li>
-      <a
-        :class="{ active: page === pages.length }"
-        :aria-disabled="page === pages.length"
-        @click.prevent="_onClick(pages.length)"
-        >{{ pages.length }}</a
-      >
-    </li>
-    <li>
-      <a
-        :class="{ disabled: page === pages.length }"
-        class="next"
-        :aria-disabled="page === pages.length"
-        @click.prevent="_onClick(page + 1)"
-      ></a>
-    </li>
-  </ul>
+  <nav role="navigation" class="fr-pagination fr-pagination--centered" aria-label="Pagination">
+    <ul class="fr-pagination__list">
+      <li>
+        <a
+          :href="page === 1 ? null :'#'"
+          class="fr-pagination__link fr-pagination__link--first"
+          @click.prevent="_onClick(1)"
+        >
+          {{ $t('First page') }}
+        </a>
+      </li>
+      <li>
+        <a
+          :href="page === 1 ? null : '#'"
+          class="fr-pagination__link fr-pagination__link--prev fr-pagination__link--lg-label"
+          @click.prevent="previousPage"
+        >
+          {{ $t('Previous page') }}
+        </a>
+      </li>
+      <li>
+        <a
+          :aria-current="page === 1 ? 'page' : null"
+          :href="page === 1 ? null : '#'"
+          class="fr-pagination__link"
+          :class="{'fr-displayed-sm': page > 1}"
+          :title="$t('Page', {nb: 1})"
+          @click.prevent="_onClick(1)"
+        >
+          1
+        </a>
+      </li>
+      <li v-for="index in visiblePages">
+        <a
+          class="fr-pagination__link"
+          :class="{'fr-displayed-lg': index < page - 1 || index > page + 1}"
+          :aria-current="page === index ? 'page' : null"
+          :href="page === index ? null : '#'"
+          :title="$t('Page', {nb: index})"
+          @click.prevent="_onClick(index)"
+          v-if="index"
+          >
+          {{ index }}
+        </a>
+        <a class="fr-pagination__link fr-displayed-lg" v-else>
+          …
+        </a>
+      </li>
+      <li>
+        <a
+          class="fr-pagination__link"
+          :aria-current="page === pageCount ? 'page' : null"
+          :href="page === pageCount ? null : '#'"
+          :title="$t('Page', {nb: pageCount})"
+          @click.prevent="_onClick(pageCount)"
+        >
+          {{ pageCount }}
+        </a>
+      </li>
+      <li>
+        <a
+          class="fr-pagination__link fr-pagination__link--next fr-pagination__link--lg-label"
+          :href="page === pageCount ? null : '#'"
+          @click.prevent="nextPage"
+        >
+          {{ $t('Next page') }}
+        </a>
+      </li>
+      <li>
+        <a
+          class="fr-pagination__link fr-pagination__link--last"
+          :href="page === pageCount ? null : '#'"
+          @click.prevent="_onClick(pageCount)"
+        >
+          {{ $t('Last page') }}
+        </a>
+      </li>
+    </ul>
+  </nav>
 </template>
 
 <script>
-function range(size, startAt = 1) {
-  return [...Array(size).keys()].map((i) => i + startAt);
-}
+import getVisiblePages from "../vanilla/pagination";
 
 export default {
   props: {
     page: Number,
     changePage: Function,
-    page_size: Number,
-    total_results: Number,
-    light: Boolean,
+    pageSize: Number,
+    totalResults: Number,
+  },
+  data() {
+    return {
+      pagesAround: 3
+    }
   },
   computed: {
-    pages() {
-      return range(Math.ceil(this.total_results / this.page_size));
+    pageCount() {
+      return Math.ceil(this.totalResults / this.pageSize);
     },
-    visible_pages() {
-      const length = this.pages.length;
-      const pagesAround = 1; //Pages around current one
-      const pagesShown = Math.min(pagesAround * 2 + 1, length);
-
-      if (length < pagesAround + 2) return [];
-
-      if (this.page <= pagesShown) return [...range(pagesShown, 2), null];
-
-      if (this.page >= length - pagesShown + 1)
-        return [null, ...range(pagesShown, length - pagesShown)];
-
-      return [null, ...range(pagesShown, this.page - pagesAround), null];
+    visiblePages() {
+      return getVisiblePages(this.page, this.pageCount);
     },
   },
   methods: {
     _onClick(index) {
-      if (index !== this.page) return this.changePage(index);
+      if (index !== this.page) {
+        return this.changePage(index);
+      }
     },
+    nextPage() {
+      const index = this.page + 1;
+      if (index <= this.pageCount) {
+        return this.changePage(index);
+      }
+    },
+    previousPage() {
+      const index = this.page - 1;
+      if (index > 0) {
+        return this.changePage(index);
+      }
+    }
   },
 };
 </script>

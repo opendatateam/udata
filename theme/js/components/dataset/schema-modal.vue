@@ -1,55 +1,55 @@
 <template>
   <vue-final-modal class="modal-wrapper">
     <div class="modal-body markdown">
-      <h2>Schéma associé</h2>
+      <h2>{{$t('Associated schema')}}</h2>
       <p>
-        <span>Cette ressource est associée au schéma <b>{{ resource_schema.name }}</b></span>
-        <span v-if="resource_schema.version">, version {{ resource_schema.version }},</span>
-       <span> ce qui signifie que le producteur a déclaré qu'elle en respectait la spécification.</span>
+        <span>{{$t('This resource is associated to the schema ')}}<b>{{ resourceSchema.name }}</b></span>
+        <span v-if="resourceSchema.version">, version {{ resourceSchema.version }},</span>
+       <span> {{$t('this means that the producer reports that it adheres to the specification.')}}</span>
       </p>
 
-      <h3>Documentation</h3>
+      <h3>{{$t('Documentation')}}</h3>
       <p>
-        Vous pouvez consulter la documentation de ce schéma, découvrir le contexte et les recommandations destinées aux producteurs de données.
+        {{$t('You can view the schema documentation, discover some context and recommendations for data producers.')}}
       </p>
 
       <div>
         <a
-          :href="documentation_url"
+          :href="documentationUrl"
           rel="noopener noreferrer"
           target="_blank"
           class="btn btn-sm btn-primary"
         >
           <span class="fa fa-book"></span>
-          Lire la documentation
+          {{$t('Read documentation')}}
         </a>
       </div>
 
-      <div v-if="authorize_validation">
-        <h3>Validation</h3>
+      <div v-if="authorizeValidation">
+        <h3>{{$t('Validation')}}</h3>
         <blockquote>
-          La validation d'une ressource par rapport à un schéma consiste à vérifier que la ressource est bien conforme au schéma qu'elle est censée respecter. En cas d'erreurs, un rapport de validation indique les erreurs trouvées : colonnes mal nommées, valeurs non conformes etc.
+          {{$t("Resource validation based on a schema is a way to verify that the resource complies to the schema it is supposed to abide by. In case of errors, a validation report shows the errors found: wrongly named columns, non conform values, etc.")}}
         </blockquote>
 
         <p>
-          data.gouv.fr met à votre disposition un outil pour valider vos fichiers par rapport à un schéma et corriger les éventuelles erreurs.
+          {{$t('data.gouv.fr allows you to validate your files based on a schema and correct the possible errors.')}}
         </p>
 
         <div>
           <a
-            :href="validation_url"
+            :href="validationUrl"
             rel="noopener noreferrer"
             target="_blank"
             class="btn btn-sm btn-primary">
             <span class="fa fa-check"></span>
-            Valider la ressource
+            {{$t('Validate resource')}}
           </a>
         </div>
       </div>
 
-      <h3>Autres ressources</h3>
+      <h3>{{$t('Others resources')}}</h3>
       <p>
-        Il est possible de spécifier qu'une ressource respecte un schéma depuis l'espace d'administration en tant que producteur. Plusieurs ressources respectant ce schéma sont disponibles sur la plateforme.
+        {{$t('You can specify that a resource complies to a schema on your producer dashboard. Other resources complying with the schema are available on the platform.')}}
       </p>
 
       <div>
@@ -59,15 +59,15 @@
           target="_blank"
           class="btn btn-sm btn-primary">
           <span class="fa fa-file"></span>
-          Voir les jeux de données associés à ce schéma
+          {{$t('See dataset linked to this schema')}}
         </a>
       </div>
 
       <hr>
 
-      <h3>À propos des schémas</h3>
+      <h3>{{$t('About schemas')}}</h3>
       <p>
-        Les schémas de données permettent de décrire des modèles de données : quels sont les différents champs, comment sont représentées les données, quelles sont les valeurs possibles. Découvrez comment les schémas améliorent la qualité des données et quels sont les cas d'usages possibles sur <a href="https://schema.data.gouv.fr" rel="noopener noreferrer" target="_blank" title="Site web schema.data.gouv.fr">schema.data.gouv.fr</a>.
+        {{$t('Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ')}} <a href="https://schema.data.gouv.fr" rel="noopener noreferrer" target="_blank" title="Site web schema.data.gouv.fr">schema.data.gouv.fr</a>.
       </p>
     </div>
 
@@ -79,19 +79,25 @@
 
 <script>
 import config from "../../config";
+import CloseIcon from "svg/close.svg";
 
 export default {
   name: "Schema",
   props: {
-    resource_schema: Object,
-    documentation_url: String,
-    validation_url: String,
-    authorize_validation: Boolean,
+    resourceSchema: Object,
+    documentationUrl: String,
+    validationUrl: String,
+    authorizeValidation: Boolean,
     close: Function,
   },
   computed: {
     datasetSchemaUrl() {
-      return `${config.values.datasetUrl}?schema=${this.resource_schema.name}`;
+      return `${config.values.datasetUrl}?schema=${this.resourceSchema.name}`;
+    }
+  },
+  data() {
+    return {
+      CloseIcon,
     }
   },
 };

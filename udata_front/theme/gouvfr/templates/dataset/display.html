@@ -318,32 +318,30 @@
         <a class="nav-link" href="#community-resources">{{ _('See also: community resources') }}</a>
         {% endif %}
 
-        <div class="ressources-files fr-my-4w">
+        <div class="ressources-files fr-my-4w vuejs">
+            {% set show_all_resources = request.args.get('resources') == 'all' %}
             {% set grouped_resources = dataset.resources|group_resources_by_type %}
             {% set nb_groups = grouped_resources.keys()|length %}
-            {% set max_resources = config.DATASET_MAX_RESOURCES_UNCOLLAPSED %}
+            {% set resources_per_page = config.RESOURCES_DEFAULT_PAGE_SIZE %}
             {% for (type, type_label), resources in grouped_resources.items() %}
-            {% if nb_groups > 1 %}<h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>
-            {% endif %}
-            {% for resource in resources[:max_resources] %}
-            {% with expanded = "false" %}
-            {% include theme('dataset/resource/card.html') %}
-            {% endwith %}
-            {% endfor %}
-            {% if resources|length > max_resources %}
-            <a id="{{type}}-btn" class="btn btn-secondary accordion-button trigger-once fr-mt-2w" aria-expanded="false"
-                aria-controls="{{type}}-additional" href="#{{type}}-additional">
-                {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
-            </a>
-            <div id="{{type}}-additional" style="height: 0" aria-labelledby="{{type}}-btn"
-                class="accordion-content fr-mt-2w">
-                {% for resource in resources[max_resources:] %}
-                {% include theme('dataset/resource/card.html') %}
-                {% endfor %}
-            </div>
-            {% endif %}
+                {% if nb_groups > 1 %}
+                    <h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>
+                {% endif %}
+                <dataset-resources dataset-id="{{ dataset.id }}" type="{{ type }}" type-label="{{ type_label }}" :can-edit="{{ can_edit.can()|tojson|safe }}">
+                    {% set max_resources_to_show = resources_per_page if not show_all_resources else resources|length %}
+                    {% for resource in resources[:max_resources_to_show] %}
+                        {% with expanded = "true" %}
+                        {% include theme('dataset/resource/card.html') %}
+                        {% endwith %}
+                    {% endfor %}
+                    {% if resources|length > resources_per_page and not show_all_resources %}
+                        <a class="btn btn-secondary accordion-button trigger-once fr-mt-2w" href="?resources=all">
+                            {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
+                        </a>
+                    {% endif %}
+                </dataset-resources>
             {% else %}
-            <p class="text-center">{{ _('No resources') }}</p>
+                <p class="text-center">{{ _('No resources') }}</p>
             {% endfor %}
         </div>
         {# Maybe put this after the real description instead of after the resource cards ? Not sure #}

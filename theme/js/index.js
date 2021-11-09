@@ -6,6 +6,7 @@ import Search from "./components/search/search";
 import FollowButton from "./components/utils/follow-button";
 import ReadMore from "./components/utils/read-more";
 import RequestMembership from "./components/organization/request-membership";
+import Resources from "./components/dataset/resource/resources.vue";
 import * as dsfr from "@gouvfr/dsfr/dist/js/dsfr.module";
 
 import Tabs from "./components/vanilla/tabs";
@@ -22,6 +23,7 @@ import Modals from "./plugins/modals";
 import i18n from "./plugins/i18n";
 import bodyClass from "./plugins/bodyClass";
 import filters from "./plugins/filters";
+import schemaCatalog from "./plugins/schemaCatalog";
 
 import InitSentry from "./sentry";
 
@@ -39,6 +41,7 @@ const configAndMountApp = (el) => {
   app.use(i18n);
   app.use(bodyClass);
   app.use(filters);
+  app.use(schemaCatalog);
   app.use(Toaster);
 
   app.component("discussion-threads", Threads);
@@ -47,6 +50,7 @@ const configAndMountApp = (el) => {
   app.component("follow-button", FollowButton);
   app.component("read-more", ReadMore);
   app.component("request-membership", RequestMembership);
+  app.component("dataset-resources", Resources);
 
   // unset delimiters used in html templates to prevent injections using {{ }}
   app.config.compilerOptions.delimiters = [];
@@ -67,10 +71,11 @@ elements.forEach((el) => {
     el.innerHTML = previousHtml;
 
     console.log(
-      `VueJS template compilation failed for element ${el}.
+      `VueJS template compilation failed for element ${el.className}.
       Aborted the process and rolled back the HTML.
       See error(s) above and below (probably won't help you tho) :`
     );
+    console.log(el);
     console.error(e);
     throw e;
   }

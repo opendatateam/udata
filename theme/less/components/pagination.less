@@ -4,142 +4,97 @@ name: Pagination
 category: Components
 ---
 
-# Pagination
-
 Sometimes, when you're in luck, your content can be too long for a single screen. Instead of having an infinity scroll or other attention-grabbing mechanisms,
 you can opt for a nice paginator component that will gently display pages and buttons to change pages in various ways.
-It's fully accessible with all aria-* labels and all the bells and whistles !
 
-## Options
+We're now using DSFR pagination component ! 🥳
 
-There's only one option : `.light` that sets the paginator theme to light instead of the classy dark by default.
-
-## Usage - JS
-
-There's a VueJS component that you can use directly. Please check the Pagination documentation under the Interaction section for more info.
-
-## Usage - Jinja
-
+There's a VueJS component that you can use directly in `js/components/pagination`.
 There's also a Jinja2 component that will allow you to paginate everything and more.
-It's located in `templates/macros/paginator.html` and can be used easily, but here's the markup it uses currently so you can build another one from scratch if you need an excuse for a day off :
+It's located in `templates/macros/paginator.html` and can be used easily.
 
-```html
-<ul class="pagination-wrapper light my-lg mt-xl" role="navigation" aria-label="pagination">
-    <li>
-        <a href="" class="first disabled" aria-disabled="true" title="First page" rel="nofollow">
-            &laquo;
-        </a>
-    </li>
-    <li>
-        <a href="" class="previous disabled" aria-disabled="true" title="Previous page" rel="nofollow"></a>
-    </li>
-    {% for num_page in range(start, end + 1) %}
-    <li>
-        <a href="{{ url_rewrite(url, page=num_page) }}" {% if num_page == p.page %}class="active" aria-current="true"
-            {% endif %} rel="nofollow">{{ num_page }}</a>
-    </li>
-    {% endfor %}
-    <li>
-        <a href="" class="next disabled" aria-disabled="true" title="Next page" rel="nofollow"></a>
-    </li>
-    <li>
-        <a href="" class="last disabled" aria-disabled="true" title="Last page" rel="nofollow">
-            &raquo;
-        </a>
-    </li>
-</ul>
+```pagination.html
+<nav role="navigation" class="fr-pagination" aria-label="Pagination">
+    <ul class="fr-pagination__list">
+        <li>
+            <a class="fr-pagination__link fr-pagination__link--first">
+                Première page
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link fr-pagination__link--prev fr-pagination__link--lg-label">
+                Page précédente
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link" aria-current="page" title="Page 1">
+                1
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link" href="#" title="Page 2">
+                2
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link fr-displayed-lg" href="#" title="Page 3">
+                3
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link fr-displayed-lg">
+                …
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link fr-displayed-lg" href="#" title="Page 130">
+                130
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link fr-displayed-lg" href="#" title="Page 131">
+                131
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link" href="#" title="Page 132">
+                132
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link fr-pagination__link--next fr-pagination__link--lg-label" href="#">
+                Page suivante
+            </a>
+        </li>
+        <li>
+            <a class="fr-pagination__link fr-pagination__link--last" href="#">
+                Dernière page
+            </a>
+        </li>
+    </ul>
+</nav>
 ```
 */
 
-.pagination-wrapper {
+@import (less) "@gouvfr/dsfr/dist/css/pagination.css";
+
+.fr-pagination {
+    --bf500: @blue-400;
+    a {
+        color: inherit;
+        &:not([href]) {
+            cursor: not-allowed;
+        }
+    }
+    a:hover {
+        text-decoration: none;
+    }
+    li::before {
+        content: none;
+    }
+}
+
+.fr-pagination--centered {
     display: flex;
     justify-content: center;
-
-    li {
-        a, span {
-            display: inline-block;
-            padding: @spacing-xs @spacing-sm;
-
-            text-align: center;
-            vertical-align: middle;
-
-            color: @grey-300;
-
-            font-weight: @font-weight-normal;
-
-            cursor: pointer;
-            text-decoration: none;
-
-            &.previous, &.next, &.first, &.last {
-                min-width: 35px;
-                height: 35px;
-
-                background: @grey-380;
-                border-radius: 35px;
-
-                color: @grey-100;
-
-                margin: 0 @spacing-xs;
-
-                background-image: url(@icon-left-chevron);
-                background-repeat: no-repeat;
-                background-position: 12px 12px;
-                background-size: 25%;
-
-                &:hover {
-                    background-color: @grey-300;
-                }
-
-                &.first, &.last {
-                    background-image: none;
-                }
-            }
-
-            &.next {
-                transform: rotate(180deg);
-            }
-
-            &:hover {
-                color: white;
-            }
-
-            &.ellipsis {
-                content: "…";
-            }
-
-            &.active {
-                color: white;
-                font-weight: @font-weight-bold;
-                pointer-events: none;
-            }
-
-            &.disabled {
-                opacity: 0.2;
-                pointer-events: none;
-            }
-        }
-
-        span {
-            pointer-events: none;
-        }
-    }
-
-    &.light {
-        li {
-            a, span {
-                &.active, &:hover {
-                    color: @grey-400;
-                }
-
-                &.previous, &.next, &.last, &.first  {
-                    background-color: @grey-400;
-                    color: white;
-
-                    &:hover {
-                        background-color: @grey-300;
-                    }
-                }
-            }
-        }
-    }
 }

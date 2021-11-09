@@ -19,9 +19,12 @@
 <meta name="theme-static-root" content="{{ theme_static('') }}" />
 <meta name="static-root" content="{{ static('', _burst=False) }}" />
 <meta name="api-root" content="{{ url_for('api.root') }}" />
+<meta name="api-2-root" content="{{ url_for('apiv2.root') }}" />
 <meta name="admin-root" content="{{ url_for('admin.index') }}" />
 <meta name="api-specs" content="{{ url_for('api.specs', _external=True) }}"/>
 <meta name="auth-url" content="{{ url_for('security.login') }}" />
+<meta name="schema-catalog-url" content="{{ config.SCHEMA_CATALOG_URL }}" />
+<meta name="schema-validata-url" content="{{ config.SCHEMA_GOUVFR_VALIDATA_URL }}" />
 <meta name="github" content="{{ config.SITE_GITHUB_URL }}" />
 <meta name="js-config-dataset-url" content="{{ url_for('datasets.list') }}" />
 <meta name="js-config-reuse-url" content="{{ url_for('reuses.list') }}" />
@@ -51,7 +54,7 @@
 <meta name="delete-me-enabled" content="{{ 'true' if config.DELETE_ME else 'false' }}">
 <meta name="search-autocomplete-enabled" content="{{ 'true' if config.SEARCH_AUTOCOMPLETE_ENABLED else 'false' }}">
 <meta name="search-autocomplete-debounce" content="{{ config.SEARCH_AUTOCOMPLETE_DEBOUNCE }}">
-<meta name="dataset-max-resources-uncollapsed" content="{{ config.DATASET_MAX_RESOURCES_UNCOLLAPSED }}">
+<meta name="resources-default-page-size" content="{{ config.RESOURCES_DEFAULT_PAGE_SIZE }}">
 <meta name="markdown-config" content="{{ {
     'tags': config.MD_ALLOWED_TAGS,
     'attributes': config.MD_ALLOWED_ATTRIBUTES,

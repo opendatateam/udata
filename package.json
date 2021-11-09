@@ -49,6 +49,7 @@
     "cssnano": "^4.1.10",
     "cypress": "^8.4.0",
     "cypress-axe": "^0.13.0",
+    "markdown-it": "^12.2.0",
     "parcel": "^2.0.0-beta.1",
     "postcss": "^8.2.3",
     "postcss-normalize": "^9.0.0",

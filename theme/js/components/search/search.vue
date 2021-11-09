@@ -16,7 +16,7 @@
   </div>
   <div class="row-inline mt-sm justify-between align-items-center">
     <h1 class="m-0 h2">
-      {{ $t("Datasets") }}<sup>{{ total_results || 0 }}</sup>
+      {{ $t("Datasets") }}<sup>{{ totalResults || 0 }}</sup>
     </h1>
     <a :href="reuseUrl" title="" class="nav-link fs-sm mt-lg-sm hidden-md">
       {{ $t("Search reuses") }}
@@ -134,12 +134,11 @@
           <Dataset v-bind="result" />
         </a>
         <Pagination
-          light
-          v-if="total_results > page_size"
-          :page="current_page"
-          :page_size="page_size"
-          :total_results="total_results"
-          :changePage="changePage"
+          v-if="totalResults > pageSize"
+          :page="currentPage"
+          :page-size="pageSize"
+          :total-results="totalResults"
+          :change-page="changePage"
           class="mt-md"
         />
       </ul>
@@ -186,7 +185,7 @@ export default {
   created() {
     this.filterIcon = filterIcon;
 
-    //Update search params from URL on page load for deep linking
+    // Update search params from URL on page load for deep linking
     const url = new URL(window.location);
     let searchParams = queryString.parse(url.search);
     if (searchParams.q) {
@@ -194,7 +193,7 @@ export default {
       delete searchParams.q;
     }
     if (searchParams.page) {
-      this.current_page = parseInt(searchParams.page);
+      this.currentPage = parseInt(searchParams.page);
       delete searchParams.page;
     }
     // set all other search params as facets
@@ -205,7 +204,7 @@ export default {
     paramUrl: {
       deep: true,
       handler(val) {
-        //Update URL to match current search params value for deep linking
+        // Update URL to match current search params value for deep linking
         let url = new URL(window.location);
         const searchParams = queryString.stringify(val, { skipNull: true });
         url.search = searchParams;
@@ -215,13 +214,13 @@ export default {
   },
   data() {
     return {
-      extendedForm: false, //On desktop, extended form is simply another row of filters. On mobile, form is hidden until extendedForm is triggered
+      extendedForm: false, // On desktop, extended form is simply another row of filters. On mobile, form is hidden until extendedForm is triggered
       results: [],
       loading: false,
       currentRequest: null,
-      page_size: 20,
-      current_page: 1,
-      total_results: 0,
+      pageSize: 20,
+      currentPage: 1,
+      totalResults: 0,
       queryString: "",
       facets: {},
     };
@@ -242,7 +241,7 @@ export default {
       for (key in this.facets) {
         params[key] = this.facets[key];
       }
-      if (this.current_page > 1) params.page = this.current_page;
+      if (this.currentPage > 1) params.page = this.currentPage;
       if (this.queryString) params.q = this.queryString;
       return params;
     },
@@ -250,7 +249,7 @@ export default {
   methods: {
     handleSearchChange(input) {
       this.queryString = input;
-      this.current_page = 1;
+      this.currentPage = 1;
       this.search();
     },
     //Called on every facet selector change, updates the `facets.xxx` object then searches with new values
@@ -266,12 +265,12 @@ export default {
           this.facets[facet] = values;
         }
 
-        this.current_page = 1;
+        this.currentPage = 1;
         this.search();
       };
     },
     changePage(page) {
-      this.current_page = page;
+      this.currentPage = page;
       this.search();
       this.scrollToTop();
     },
@@ -287,14 +286,14 @@ export default {
           params: {
             q: this.queryString,
             ...this.facets,
-            page_size: this.page_size,
-            page: this.current_page,
+            page_size: this.pageSize,
+            page: this.currentPage,
           },
         })
         .then((res) => res.data)
         .then((result) => {
           this.results = result.data;
-          this.total_results = result.total;
+          this.totalResults = result.total;
         })
         .finally(() => (this.loading = false));
     },
@@ -305,7 +304,7 @@ export default {
     resetFilters() {
       this.queryString = "";
       this.facets = {};
-      this.current_page = 1;
+      this.currentPage = 1;
       this.search();
     },
   },

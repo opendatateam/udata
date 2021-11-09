@@ -20,7 +20,7 @@
         }
 
         .edit-button {
-            min-width: 100px;
+            margin: @spacing-sm;
             text-align: center;
 
             svg {
@@ -36,7 +36,7 @@
         .header-text {
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
+            flex: 1;
 
             h4 {
                 margin: @spacing-xs 0;
@@ -59,12 +59,13 @@
 
                 @media @query-md {
                     justify-content: center;
+                    flex-wrap: wrap;
                 }
 
                 li {
-                    margin: @spacing-lg;
+                    margin: @spacing-md;
 
-                    //We should maybe extract this into the accordion component
+                    // We should maybe extract this into the accordion component
                     .accordion-button {
                         display: inline-block;
                         transform: rotate(90deg);
