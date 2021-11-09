@@ -8,7 +8,7 @@
 
     {{ hook('oauth_authorize_theme_raw') }}
 
-    {% if has_hook('oauth_authorize_heme_content') %}
+    {% if has_hook('oauth_authorize_theme_content') %}
         {{ hook('oauth_authorize_theme_content') }}
     {% else %}
     <section id="app">
