@@ -5,7 +5,7 @@ import click
 import requests
 
 from udata.commands import cli
-from udata.core.dataset.factories import DatasetFactory, ResourceFactory
+from udata.core.dataset.factories import DatasetFactory, ResourceFactory, CommunityResourceFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Member
 from udata.core.reuse.factories import ReuseFactory
@@ -14,7 +14,23 @@ from udata.core.user.factories import UserFactory
 log = logging.getLogger(__name__)
 
 
-DATASET_SLUGS = []
+DATASET_SLUGS = [
+    "barometre-des-resultats-de-laction-publique",
+    "base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret",
+    "donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1",
+    "demandes-de-valeurs-foncieres",
+    "logements-sociaux-et-bailleurs-par-region",
+    "base-adresse-locale-de-la-commune-de-garein",
+    "cuisses-de-grenouille-et-escargots-frogs-legs-and-snails",
+    "marche-public-de-la-metropole-de-lyon",
+    "defibrillateurs-presents-sur-la-commune-de-sixt-sur-aff-en-2018",
+    "diagnostics-de-performance-energetique-pour-les-logements-par-habitation",
+    "mairie-de-beynost-borne-de-recharge-pour-vehicules-electriques-1",
+    "vehicules-a-faibles-et-a-tres-faibles-emissions-de-la-prefecture-de-region-auvergne-rhones-alpes",
+    "base-adresse-nationale",
+    "lignes-dautocars-urbains-et-interurbains-de-la-dlva",
+    "nombre-de-personnes-rickrollees-sur-data-gouv-fr",
+]
 
 
 DATASET_URL = '/api/1/datasets'
@@ -41,6 +57,7 @@ def generate_fixtures_file(data_source):
             del json_dataset['page']
             del json_dataset['last_update']
             del json_dataset['license']
+            del json_dataset['spatial']
             json_org = json_dataset.pop('organization')
             json_resources = json_dataset.pop('resources')
             for res in json_resources:
@@ -67,7 +84,14 @@ def generate_fixtures_file(data_source):
                 del reuse['owner']
             json_fixture['reuses'] = json_reuses
 
-            json_community = requests.get(f"{data_source}{COMMUNITY_RES_URL}/?dataset={json_dataset['id']}").json()
+            json_community = requests.get(f"{data_source}{COMMUNITY_RES_URL}/?dataset={json_dataset['id']}").json()['data']
+            for com in json_community:
+                del com['dataset']
+                del com['organization']
+                del com['owner']
+                del com['latest']
+                del com['last_modified']
+                del com['preview_url']
             json_fixture['community_resources'] = json_community
 
             json_result.append(json_fixture)
@@ -87,12 +111,15 @@ def generate_fixtures(source):
         with open(source) as f:
             json_fixtures = json.load(f)
 
-    for fixture in json_fixtures:
-        user = UserFactory()
-        org = OrganizationFactory(**fixture['organization'], members=[Member(user=user)])
-        dataset = DatasetFactory(**fixture['dataset'], organization=org)
-        for resource in fixture['resources']:
-            res = ResourceFactory(**resource)
-            dataset.add_resource(res)
-        for reuse in fixture['reuses']:
-            ReuseFactory(**reuse, datasets=[dataset], owner=user)
+    with click.progressbar(json_fixtures) as bar:
+        for fixture in bar:
+            user = UserFactory()
+            org = OrganizationFactory(**fixture['organization'], members=[Member(user=user)])
+            dataset = DatasetFactory(**fixture['dataset'], organization=org)
+            for resource in fixture['resources']:
+                res = ResourceFactory(**resource)
+                dataset.add_resource(res)
+            for reuse in fixture['reuses']:
+                ReuseFactory(**reuse, datasets=[dataset], owner=user)
+            for community in fixture['community_resources']:
+                CommunityResourceFactory(**community, dataset=dataset, owner=user)
