@@ -30,7 +30,7 @@ DEFAULT_SORTING = '-created_at'
 class ReuseApiParser(ModelApiParser):
     sorts = {
         'created': 'created_at',
-        'updated': 'last_modified',
+        'last_modified': 'last_modified',
         'datasets': 'metrics.datasets',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
@@ -55,14 +55,10 @@ class ReuseListAPI(API):
         args = reuse_parser.parse()
         reuses = Reuse.objects(deleted=None, private__ne=True)
         if args['q']:
-            search_reuses = reuses.search_text(args['q'])
-            if args['sort']:
-                return search_reuses.order_by(args['sort']).paginate(args['page'], args['page_size'])
-            else:
-                return search_reuses.order_by('$text_score').paginate(args['page'], args['page_size'])
-        if args['sort']:
-            return reuses.order_by(args['sort']).paginate(args['page'], args['page_size'])
-        return reuses.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
+            reuses = reuses.search_text(args['q'])
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return reuses.order_by(sort).paginate(args['page'], args['page_size'])
+
 
     @api.secure
     @api.doc('create_reuse')

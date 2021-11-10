@@ -72,12 +72,11 @@ DEFAULT_SORTING = '-created_at'
 class DatasetApiParser(ModelApiParser):
     sorts = {
         'created': 'created_at',
-        'updated': 'last_modified',
+        'last_modified': 'last_modified',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
     }
-
 
 log = logging.getLogger(__name__)
 
@@ -123,14 +122,10 @@ class DatasetListAPI(API):
         args = dataset_parser.parse()
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         if args['q']:
-            search_datasets = datasets.search_text(args['q'])
-            if args['sort']:
-                return search_datasets.order_by(args['sort']).paginate(args['page'], args['page_size'])
-            else:
-                return search_datasets.order_by('$text_score').paginate(args['page'], args['page_size'])
-        if args['sort']:
-            return datasets.order_by(args['sort']).paginate(args['page'], args['page_size'])
-        return datasets.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
+            datasets = datasets.search_text(args['q'])
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return datasets.order_by(sort).paginate(args['page'], args['page_size'])
+    
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})
