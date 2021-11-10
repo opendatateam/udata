@@ -47,21 +47,24 @@ def generate_fixtures_file(data_source):
             del json_dataset['last_update']
             del json_dataset['license']
             del json_dataset['spatial']
-            json_org = json_dataset.pop('organization')
             json_resources = json_dataset.pop('resources')
             for res in json_resources:
                 del res['latest']
                 del res['preview_url']
                 del res['last_modified']
+            if json_dataset['organization'] is None:
+                json_owner = json_dataset.pop('owner')
+                json_dataset['owner'] = json_owner['id']
+            else:
+                json_org = json_dataset.pop('organization')
+                json_org = requests.get(f"{data_source}{ORG_URL}/{json_org['id']}/").json()
+                del json_org['members']
+                del json_org['page']
+                del json_org['uri']
+                del json_org['logo_thumbnail']
+                json_fixture['organization'] = json_org
             json_fixture['resources'] = json_resources
             json_fixture['dataset'] = json_dataset
-
-            json_org = requests.get(f"{data_source}{ORG_URL}/{json_org['id']}/").json()
-            del json_org['members']
-            del json_org['page']
-            del json_org['uri']
-            del json_org['logo_thumbnail']
-            json_fixture['organization'] = json_org
 
             json_reuses = requests.get(f"{data_source}{REUSE_URL}/?dataset={json_dataset['id']}").json()['data']
             for reuse in json_reuses:
@@ -112,10 +115,13 @@ def generate_fixtures(source):
     with click.progressbar(json_fixtures) as bar:
         for fixture in bar:
             user = UserFactory()
-            org = Organization.objects(id=fixture['organization']['id']).first()
-            if not org:
-                org = OrganizationFactory(**fixture['organization'], members=[Member(user=user)])
-            dataset = DatasetFactory(**fixture['dataset'], organization=org)
+            if not fixture['organization']:
+                dataset = DatasetFactory(**fixture['dataset'], owner=user)
+            else:
+                org = Organization.objects(id=fixture['organization']['id']).first()
+                if not org:
+                    org = OrganizationFactory(**fixture['organization'], members=[Member(user=user)])
+                dataset = DatasetFactory(**fixture['dataset'], organization=org)
             for resource in fixture['resources']:
                 res = ResourceFactory(**resource)
                 dataset.add_resource(res)
