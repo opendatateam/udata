@@ -6,10 +6,10 @@
 
   <body>
 
-    {{ hook('oauth_theme_raw') }}
+    {{ hook('oauth_authorize_theme_raw') }}
 
-    {% if has_hook('oauth_theme_content') %}
-        {{ hook('oauth_theme_content') }}
+    {% if has_hook('oauth_authorize_theme_content') %}
+        {{ hook('oauth_authorize_theme_content') }}
     {% else %}
     <section id="app">
       <div class="container">
