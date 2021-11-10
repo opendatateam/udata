@@ -463,7 +463,7 @@ class Defaults(object):
                         'SourcesAPI.post',
                         'FollowAPI.post']
     
-    DATASET_SLUGS = []
+    FIXTURE_DATASET_SLUGS = []
 
 
 class Testing(object):
