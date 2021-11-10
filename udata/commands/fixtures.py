@@ -34,7 +34,7 @@ DEFAULT_FIXTURE_FILE = 'https://raw.githubusercontent.com/opendatateam/udata-fix
 @click.argument('data-source')
 def generate_fixtures_file(data_source):
     '''Build sample fixture file based on datasets slugs list (users, datasets, reuses).'''
-    datasets_slugs = current_app.config['DATASET_SLUGS']
+    datasets_slugs = current_app.config['FIXTURE_DATASET_SLUGS']
     json_result = []
 
     with click.progressbar(datasets_slugs) as bar:
