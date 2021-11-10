@@ -3,6 +3,7 @@ import json
 
 import click
 import requests
+from flask import current_app
 
 from udata.commands import cli
 from udata.core.dataset.factories import (
@@ -19,9 +20,6 @@ from udata.core.discussions.factories import (
 log = logging.getLogger(__name__)
 
 
-DATASET_SLUGS = []
-
-
 DATASET_URL = '/api/1/datasets'
 ORG_URL = '/api/1/organizations'
 REUSE_URL = '/api/1/reuses'
@@ -36,9 +34,10 @@ DEFAULT_FIXTURE_FILE = 'https://raw.githubusercontent.com/opendatateam/udata-fix
 @click.argument('data-source')
 def generate_fixtures_file(data_source):
     '''Build sample fixture file based on datasets slugs list (users, datasets, reuses).'''
+    datasets_slugs = current_app.config['DATASET_SLUGS']
     json_result = []
 
-    with click.progressbar(DATASET_SLUGS) as bar:
+    with click.progressbar(datasets_slugs) as bar:
         for slug in bar:
             json_fixture = {}
 

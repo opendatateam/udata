@@ -462,6 +462,8 @@ class Defaults(object):
                         'IssueAPI.post',
                         'SourcesAPI.post',
                         'FollowAPI.post']
+    
+    DATASET_SLUGS = []
 
 
 class Testing(object):
