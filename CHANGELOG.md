@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Move template hook logic back to udata [#2671](https://github.com/opendatateam/udata/pull/2671)
+- Move template hook logic back to udata [#2671](https://github.com/opendatateam/udata/pull/2671) [#2679](https://github.com/opendatateam/udata/pull/2679)
 - Add dataset's acronym to catalog [#2675](https://github.com/opendatateam/udata/pull/2675)
 - Better URL-based License guess [#2672](https://github.com/opendatateam/udata/pull/2672)
 
