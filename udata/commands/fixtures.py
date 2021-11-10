@@ -9,7 +9,7 @@ from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory
 )
 from udata.core.organization.factories import OrganizationFactory
-from udata.core.organization.models import Member
+from udata.core.organization.models import Member, Organization
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.user.factories import UserFactory
 from udata.core.discussions.factories import (
@@ -114,7 +114,9 @@ def generate_fixtures(source):
     with click.progressbar(json_fixtures) as bar:
         for fixture in bar:
             user = UserFactory()
-            org = OrganizationFactory(**fixture['organization'], members=[Member(user=user)])
+            org = Organization.objects(id=fixture['organization']['id']).first()
+            if not org:
+                org = OrganizationFactory(**fixture['organization'], members=[Member(user=user)])
             dataset = DatasetFactory(**fixture['dataset'], organization=org)
             for resource in fixture['resources']:
                 res = ResourceFactory(**resource)
