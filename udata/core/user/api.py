@@ -38,6 +38,8 @@ DEFAULT_SORTING = '-created_at'
 
 class UserApiParser(ModelApiParser):
     sorts = {
+        'last_name': 'last_name',
+        'first_name': 'first_name',
         'datasets': 'metrics.datasets',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',

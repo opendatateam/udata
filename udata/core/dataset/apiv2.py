@@ -130,7 +130,7 @@ resource_page_fields = apiv2.model('ResourcePage', {
 
 
 @ns.route('/search', endpoint='dataset_search')
-class DatasetSearch(API):
+class DatasetSearchAPI(API):
     '''Datasets collection search endpoint'''
     @apiv2.doc('search_datasets')
     @apiv2.expect(search_parser)

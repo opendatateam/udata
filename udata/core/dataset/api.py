@@ -71,6 +71,7 @@ DEFAULT_SORTING = '-created_at'
 
 class DatasetApiParser(ModelApiParser):
     sorts = {
+        'title': 'title',
         'created': 'created_at',
         'last_modified': 'last_modified',
         'reuses': 'metrics.reuses',

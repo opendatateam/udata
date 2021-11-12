@@ -51,6 +51,7 @@ DEFAULT_SORTING = '-created_at'
 
 class OrgApiParser(ModelApiParser):
     sorts = {
+        'name': 'name',
         'reuses': 'metrics.reuses',
         'datasets': 'metrics.datasets',
         'followers': 'metrics.followers',
