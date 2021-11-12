@@ -114,5 +114,6 @@
   "See dataset linked to this schema": "See dataset linked to this schema",
   "About schemas": "About schemas",
   "Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ": "Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ",
-  "Available": "Available"
+  "Available": "Available",
+  "Unavailable": ""
 }

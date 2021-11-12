@@ -1,62 +1,69 @@
-{% extends theme('layouts/center-panel.html') %}
-
+{% extends theme('base.html') %}
 {% set meta = {
     'title': _('External application authorization'),
 } %}
 
-
-{% block panel_content %}
-<div class="panel-body oauth-authorize">
-    <div class="row">
-        <div class="col-xs-12">
-            <img src="{{ grant.client.image(100) }}" class="pull-left app-logo" width="100" height="100" alt="">
-            <p class="lead prompt">
-            {{ _(
-                '%(app)s want to access your %(site)s account.',
-                app='<span class="app">%s</span>'|format(grant.client.name)|safe,
-                site='<span class="site">%s</span>'|format(config.SITE_TITLE)|safe
-            ) }}
-            </p>
-        </div>
-    </div>
-</div>
-<div class="panel-body oauth-authorize">
-    <div class="row">
-        <div class="col-xs-12">
-            <h4>{{ _('Details') }}</h4>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="scope-details">
-                <div class="scope-picto">
-                    <span class="fa fa-male fa-4x"></span>
-                </div>
-                <div class="scope-body">
-                    <h4>{{ _('Access your profile') }}</h4>
-                    <p>{{ _('Read your profile, the orgnization you belong to, your publications') }}</p>
+{% block content %}
+    <section class="fr-py-3w fr-py-md-9v bg-grey-50">
+        <div class="fr-container">
+            <div class="fr-grid-row fr-grid-row--center">
+                <div class="fr-col-12 fr-col-md-8 fr-col-lg-6 bg-white">
+                    <div class="fr-px-7v fr-py-5w border-bottom border-g200">
+                        <div class="fr-grid-row fr-grid-row--middle">
+                            {% if grant.client.organization %}
+                                <div class="fr-mr-4w fr-mb-3w">
+                                    <img
+                                        alt="{{ grant.client.organization.name|placeholder_alt(grant.client.organization.logo) }}"
+                                        src="{{ grant.client.organization.logo(120)|placeholder('organization') }}"
+                                        class="client-logo"
+                                    />
+                                </div>
+                            {% endif %}
+                            {% if grant.client.image %}
+                            <div class="fr-col-4 fr-mb-3w">
+                                <img src="{{ grant.client.image }}" alt="" class="fr-responsive-img client-logo">
+                            </div>
+                            {% endif %}
+                            <p class="fr-text--lead fr-mb-0">
+                                {{ _(
+                                '%(app)s want to access your %(site)s account.',
+                                app='<strong>%s</strong>'|format(grant.client.name)|safe,
+                                site='<strong>%s</strong>'|format(config.SITE_TITLE)|safe
+                            ) }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="fr-px-7v fr-py-5w">
+                        <div>
+                            <p class="fr-text--sm fr-mb-5v">{{ _('This site request the following rights:') }}</p>
+                            <dl>
+                                <dt class="f-bold">{{ _('Access your profile') }}</dt>
+                                <dd class="fr-text--sm fr-pb-3w fr-mb-5v border-bottom border-g400">{{ _('Read your profile, the orgnization you belong to, your publications') }}</dd>
+                                <dt class="f-bold">{{ _('Publish data') }}</dt>
+                                <dd class="fr-text--sm fr-pb-3w fr-mb-5w border-bottom border-g400">{{ _('Publish datasets, reuses, follow or unfollow') }}</dd>
+                            </dl>
+                        </div>
+                        <form class="fr-grid-row fr-grid-row--center" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <input type="hidden" name="scope" value="{{ (grant.scopes or ['default']) | join(' ') }}" />
+                            <button
+                                type="submit"
+                                name="decline"
+                                class="btn-secondary btn-secondary-grey-500 fr-mr-5w"
+                            >
+                                {{ _('Refuse') }}
+                            </button>
+                            <button
+                                type="submit"
+                                name="accept"
+                                class="btn-primary"
+                            >
+                                {{ _('Accept') }}
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-            <div class="scope-details">
-                <div class="scope-picto">
-                    <span class="fa fa-file-o fa-4x"></span>
-                </div>
-                <div class="scope-body">
-                    <h4>{{ _('Publish data') }}</h4>
-                    <p>{{ _('Publish datasets, reuses, follow or unfollow') }}</p>
-                </div>
-            </div>
         </div>
-    </div>
-</div>
-<div class="panel-body">
-    <form class="form text-center" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <input type="hidden" name="scope" value="{{ (grant.scopes or ['default']) | join(' ') }}" />
-        <input type="submit" name="accept" value="{{ _('Accept') }}"
-            class="btn btn-success btn-lg" />
-        <input type="submit" name="decline" value="{{ _('Refuse') }}"
-            class="btn btn-danger btn-lg" />
-    </form>
-</div>
+    </section>
 {% endblock %}

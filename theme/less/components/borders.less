@@ -103,6 +103,14 @@ You can change this behaviour by using the `filet-currentcolor` class that will 
     border-color: @orange-100;
 }
 
+.border-g200 {
+    border-color: var(--g200);
+}
+
+.border-g400 {
+    border-color: var(--g400);
+}
+
 each(@breakpoints, .(@bk, @_k, @_i) {
     @var: 'query-@{bk}';
 
