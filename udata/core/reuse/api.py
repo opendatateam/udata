@@ -4,9 +4,9 @@ from flask import request
 
 from udata import search
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.models import Dataset
-from udata.utils import multi_to_dict
 
 from udata.core.badges import api as badges_api
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -22,24 +22,44 @@ from .api_fields import (
 from .forms import ReuseForm
 from .models import Reuse, REUSE_TYPES
 from .permissions import ReuseEditPermission
-from .search import ReuseSearch
+
+
+DEFAULT_SORTING = '-created_at'
+
+
+class ReuseApiParser(ModelApiParser):
+    sorts = {
+        'title': 'title',
+        'created': 'created_at',
+        'last_modified': 'last_modified',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
 
 ns = api.namespace('reuses', 'Reuse related operations')
 
 common_doc = {
     'params': {'reuse': 'The reuse ID or slug'}
 }
-search_parser = ReuseSearch.as_request_parser()
+
+reuse_parser = ReuseApiParser()
 
 
 @ns.route('/', endpoint='reuses')
 class ReuseListAPI(API):
     @api.doc('list_reuses')
-    @api.expect(search_parser)
+    @api.expect(reuse_parser.parser)
     @api.marshal_with(reuse_page_fields)
     def get(self):
-        search_parser.parse_args()
-        return search.query(ReuseSearch, **multi_to_dict(request.args))
+        args = reuse_parser.parse()
+        reuses = Reuse.objects(deleted=None, private__ne=True)
+        if args['q']:
+            reuses = reuses.search_text(args['q'])
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return reuses.order_by(sort).paginate(args['page'], args['page_size'])
+
 
     @api.secure
     @api.doc('create_reuse')
@@ -71,8 +91,8 @@ class ReuseAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         '''Update a given reuse'''
-        request_deleted = request.json.get('deleted', True) 
-        if reuse.deleted and request_deleted is not None: 
+        request_deleted = request.json.get('deleted', True)
+        if reuse.deleted and request_deleted is not None:
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         form = api.validate(ReuseForm, reuse)

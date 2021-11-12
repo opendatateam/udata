@@ -27,13 +27,14 @@ from flask_security import current_user
 from udata import search
 from udata.auth import admin_permission
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.core import storages
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.utils import get_by, multi_to_dict
+from udata.utils import get_by
 from udata.rdf import (
-    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    RDF_EXTENSIONS,
     negociate_content, graph_response
 )
 
@@ -59,16 +60,31 @@ from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
-from .search import DatasetSearch
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 from .rdf import dataset_to_rdf
 
+
+DEFAULT_SORTING = '-created_at'
+
+
+class DatasetApiParser(ModelApiParser):
+    sorts = {
+        'title': 'title',
+        'created': 'created_at',
+        'last_modified': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
 log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
-search_parser = DatasetSearch.as_request_parser()
+
+dataset_parser = DatasetApiParser()
+
 community_parser = api.parser()
 community_parser.add_argument(
     'sort', type=str, default='-created', location='args',
@@ -100,12 +116,17 @@ common_doc = {
 class DatasetListAPI(API):
     '''Datasets collection endpoint'''
     @api.doc('list_datasets')
-    @api.expect(search_parser)
+    @api.expect(dataset_parser.parser)
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        search_parser.parse_args()
-        return search.query(Dataset, **multi_to_dict(request.args))
+        args = dataset_parser.parse()
+        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        if args['q']:
+            datasets = datasets.search_text(args['q'])
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return datasets.order_by(sort).paginate(args['page'], args['page_size'])
+    
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})

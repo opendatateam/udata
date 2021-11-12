@@ -60,6 +60,50 @@ class UserAPITest(APITestCase):
         self.assertEqual(Follow.objects.following(user).count(), 0)
         self.assertEqual(Follow.objects.followers(user).count(), 0)
 
+    def test_user_api_full_text_search_first_name(self):
+        '''It should find users based on first name'''
+        for i in range(4):
+            UserFactory(
+                first_name='test-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.users', q='test'))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']), 2)
+
+    def test_user_api_full_text_search_last_name(self):
+        '''It should find users based on last name'''
+        for i in range(4):
+            UserFactory(
+                last_name='test-{0}'.format(i) if i % 2 else faker.word())
+
+        response = self.get(url_for('api.users', q='test'))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']), 2)
+
+    def test_user_api_full_text_search_unicode(self):
+        '''It should find user with special characters'''
+        for i in range(4):
+            UserFactory(
+                first_name='test-{0}'.format(i) if i % 2 else faker.word())
+
+        user = UserFactory(first_name='test', last_name='testé')
+
+        response = self.get(url_for('api.users', q='test testé'))
+        self.assert200(response)
+
+        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(response.json['data'][0]['id'], str(user.id))
+
+    def test_find_users_api_no_match(self):
+        '''It should not find user if no match'''
+        UserFactory.create_batch(3)
+
+        response = self.get(url_for('api.users', q='xxxxxx'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 0)
+
     def test_suggest_users_api_first_name(self):
         '''It should suggest users based on first name'''
         with self.autoindex():
@@ -178,12 +222,11 @@ class UserAPITest(APITestCase):
 
     def test_users(self):
         '''It should provide a list of users'''
-        with self.autoindex():
-            user = UserFactory(
-                about=faker.paragraph(),
-                website=faker.url(),
-                avatar_url=faker.url(),
-                metrics={'datasets': 10, 'followers': 1, 'following': 0, 'reuses': 2})
+        user = UserFactory(
+            about=faker.paragraph(),
+            website=faker.url(),
+            avatar_url=faker.url(),
+            metrics={'datasets': 10, 'followers': 1, 'following': 0, 'reuses': 2})
         response = self.get(url_for('api.users'))
         self.assert200(response)
         [json] = response.json['data']

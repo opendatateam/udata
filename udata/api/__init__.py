@@ -7,7 +7,7 @@ from functools import wraps
 from importlib import import_module
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint, render_template
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
 from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource
@@ -105,7 +105,7 @@ class UDataApi(Api):
             if (
                 not current_user.is_anonymous and
                 not current_user.sysadmin and
-                current_app.config['READ_ONLY_MODE'] and 
+                current_app.config['READ_ONLY_MODE'] and
                 any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST'])
             ):
                 self.abort(423, 'Due to security reasons, the creation of new content is currently disabled.')
@@ -312,7 +312,9 @@ def init_app(app):
     import udata.core.dataset.apiv2  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
+    import udata.core.reuse.apiv2  # noqa
     import udata.core.organization.api  # noqa
+    import udata.core.organization.apiv2  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.site.api  # noqa

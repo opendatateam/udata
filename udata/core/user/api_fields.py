@@ -91,6 +91,7 @@ apikey_fields = api.model('ApiKey', {
 
 user_page_fields = api.model('UserPage', fields.pager(user_fields))
 
+
 user_suggestion_fields = api.model('UserSuggestion', {
     'id': fields.String(description='The user identifier', readonly=True),
     'first_name': fields.String(description='The user first name',
