@@ -11,8 +11,6 @@ from udata.core.dataset.api_fields import (
     community_resource_fields, dataset_fields
 )
 from udata.core.followers.api import FollowAPI
-from udata.core.issues.actions import issues_for
-from udata.core.issues.api import issue_fields
 from udata.core.discussions.actions import discussions_for
 from udata.core.discussions.api import discussion_fields
 from udata.core.reuse.api_fields import reuse_fields
@@ -165,22 +163,6 @@ class MyOrgReusesAPI(API):
         if q:
             reuses = reuses.filter(title__icontains=q)
         return list(reuses)
-
-
-@me.route('/org_issues/', endpoint='my_org_issues')
-class MyOrgIssuesAPI(API):
-    @api.secure
-    @api.doc('my_org_issues')
-    @api.expect(filter_parser)
-    @api.marshal_list_with(issue_fields)
-    def get(self):
-        '''List all issues related to my organizations.'''
-        q = filter_parser.parse_args().get('q')
-        issues = issues_for(current_user._get_current_object())
-        issues = issues.order_by('-created')
-        if q:
-            issues = issues.filter(title__icontains=q)
-        return list(issues)
 
 
 @me.route('/org_discussions/', endpoint='my_org_discussions')

@@ -1,7 +1,7 @@
 from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.core import storages
-from udata.models import Activity, Issue, Discussion, Follow, Transfer
+from udata.models import Activity, Discussion, Follow, Transfer
 from udata.tasks import get_logger, job, task
 
 from .models import Reuse
@@ -15,8 +15,6 @@ def purge_reuses(self):
         log.info(f'Purging reuse {reuse}')
         # Remove followers
         Follow.objects(following=reuse).delete()
-        # Remove issues
-        Issue.objects(subject=reuse).delete()
         # Remove discussions
         Discussion.objects(subject=reuse).delete()
         # Remove activity

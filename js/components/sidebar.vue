@@ -119,10 +119,6 @@ export default {
                         icon: 'recycle',
                         scrollTo: '#reuses-widget'
                     }, {
-                        label: this._('Issues'),
-                        icon: 'warning',
-                        scrollTo: '#issues-widget'
-                    }, {
                         label: this._('Discussions'),
                         icon: 'comment',
                         scrollTo: '#reuses-widget'
