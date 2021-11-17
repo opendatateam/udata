@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 blueprint = I18nBlueprint('gouvfr', __name__,
                           template_folder='../templates',
-                          static_folder='static',
+                          static_folder='../static',
                           static_url_path='/static/gouvfr')
 
 PAGE_CACHE_DURATION = 60 * 5  # in seconds
