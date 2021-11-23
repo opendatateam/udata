@@ -1,7 +1,5 @@
 from datetime import timedelta, date
 
-from udata.core.dataset.factories import DatasetFactory
-from udata.models import db
 from udata.tests import TestCase, DBTestMixin
 from udata.utils import faker
 
