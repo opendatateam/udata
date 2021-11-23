@@ -36,15 +36,6 @@ class SpacialCoverageTest(DBTestMixin, TestCase):
 
         self.assertEqual(coverage.top_label, big.name)
 
-    def test_add_geom_to_dataset_with_zone(self):
-        geom = faker.multipolygon()
-        zone = GeoZoneFactory(name='name', level='level', code='code')
-        coverage = SpatialCoverage(zones=[zone])
-        data = DatasetFactory(spatial=coverage)
-        data.spatial.geom = geom
-        with self.assertRaises(db.ValidationError):
-            data.save()
-
 
 class SpatialTemporalResolutionTest(DBTestMixin, TestCase):
     def test_valid_at_with_validity(self):
