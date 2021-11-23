@@ -1,7 +1,7 @@
 {% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
 
 {# TODO : what was "preview" used for ? #}
-<a class="unstyled w-100" href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" title="{{ reuse.title }}">
+<a class="unstyled w-100 block" href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}" title="{{ reuse.title }}">
     <article class="reuse-card text-align-center px-sm">
         <div class="reuse-image mb-sm"
             style="background-image: url('{{ reuse.image|placeholder('reuse', external=True) }}')">
@@ -16,7 +16,7 @@
                         {{ reuse.datasets|length or 0 }} {{ _('datasets') }}
                     </div>
                 </div>
-                <div>
+                <div class="relative">
                     <span class="text-orange-100">{% include theme('svg/actions/star.svg') %}</span>
                     <span class="badge orange-100 ml-xxs py-xxxs px-xs">{{ reuse.metrics.followers or 0 }}</span>
                     <span class="visually-hidden">{{ _('favourites') }}</span>

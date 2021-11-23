@@ -25,6 +25,8 @@ Sometimes you need to hide some elements, mostly while doing some responsive rul
 
 Sometimes you need to show some elements only to assistive technologies (like screen readers). You can use `.visually-hidden` to do so.
 It was previously called `.sr-only` in CSS frameworks so the name is still often used.
+Because `.visually-hidden` is in `position: absolute`, it'll be placed based on the same rules as other `position: absolute`.
+This can cause some strange behavior with flex no-wrap.
 
 ```visually-hidden.html
 <span class="visually-hidden">Some details for screen readers and other assistive technologies.</span>
