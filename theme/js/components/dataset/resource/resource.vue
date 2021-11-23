@@ -4,11 +4,12 @@
       <div class="card-body">
           <modals-container></modals-container>
           <header class="card-header" :id="'resource-' + resource.id + '-header'">
-              <div class="edit-button" v-if="canEdit">
+              <div class="edit-button">
                   <a
                     :href="adminUrl"
                     :aria-label="$t('Edit resource')"
                     v-html="EditIcon"
+                    v-if="canEdit"
                   >
                   </a>
               </div>
