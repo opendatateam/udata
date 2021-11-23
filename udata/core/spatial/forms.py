@@ -70,7 +70,7 @@ class GeomField(Field):
         if self.data:
             if not isinstance(self.data, geojson.GeoJSON):
                 try:
-                    self.data = geojson.GeoJSON.to_instance(self.data)
+                    geojson.GeoJSON.to_instance(self.data)
                 except:
                     raise validators.ValidationError('Not a valid GeoJSON')
             if not self.data.is_valid:
