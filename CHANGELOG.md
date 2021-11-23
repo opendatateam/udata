@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.2.2 (2021-11-23)
 
 - Move template hook logic back to udata [#2671](https://github.com/opendatateam/udata/pull/2671) [#2679](https://github.com/opendatateam/udata/pull/2679)
