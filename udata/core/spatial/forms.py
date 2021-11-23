@@ -69,12 +69,12 @@ class GeomField(Field):
     def pre_validate(self, form):
         if self.data:
             if not isinstance(self.data, geojson.GeoJSON):
-                try:
-                    geojson.GeoJSON.to_instance(self.data)
-                except:
-                    raise validators.ValidationError('Not a valid GeoJSON')
-            elif not self.data.is_valid:
-                raise validators.ValidationError(self.data.errors())
+                self.data = geojson.GeoJSON.to_instance(self.data)
+            try:
+                if not self.data.is_valid:
+                    raise validators.ValidationError(self.data.errors())
+            except AttributeError:
+                raise ValueError(self.gettext('Not a valid GeoJSON'))
         return True
 
 
