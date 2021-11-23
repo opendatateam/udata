@@ -46,7 +46,6 @@ class SpacialCoverageTest(DBTestMixin, TestCase):
             data.save()
 
 
-
 class SpatialTemporalResolutionTest(DBTestMixin, TestCase):
     def test_valid_at_with_validity(self):
         zone = GeoZoneFactory()
