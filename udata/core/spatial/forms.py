@@ -70,11 +70,10 @@ class GeomField(Field):
         if self.data:
             if not isinstance(self.data, geojson.GeoJSON):
                 self.data = geojson.GeoJSON.to_instance(self.data)
-            try:
-                if not self.data.is_valid:
-                    raise validators.ValidationError(self.data.errors())
-            except AttributeError:
-                raise ValueError(self.gettext('Not a valid GeoJSON'))
+                if not isinstance(self.data, geojson.GeoJSON):
+                    raise ValueError(self.gettext('Not a valid GeoJSON'))
+            if not self.data.is_valid:
+                raise validators.ValidationError(self.data.errors())
         return True
 
 
