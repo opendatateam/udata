@@ -36,7 +36,7 @@
       <div class="row">
         <discussion-list
           id="discussions-widget"
-          class="col-xs-12 col-md-6"
+          class="col-xs-12"
           :discussions="discussions"
         ></discussion-list>
       </div>
