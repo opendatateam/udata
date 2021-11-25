@@ -183,7 +183,7 @@ class License(db.Document):
             # If we're dealing with an URL, let's try some specific stuff
             # like getting rid of trailing slash and scheme mismatch
             try:
-               url = validate_url(text)
+                url = validate_url(text)
             except ValidationError:
                 pass
             else:
@@ -493,6 +493,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                                        resource_id=kwargs['resource_added'])
 
     def clean(self):
+        super(Dataset, self).clean()
         if self.frequency in LEGACY_FREQUENCIES:
             self.frequency = LEGACY_FREQUENCIES[self.frequency]
 
