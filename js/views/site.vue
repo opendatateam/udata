@@ -21,6 +21,9 @@
         <user-list id="users" class="col-xs-12" :users="users"></user-list>
     </div>
     <div class="row">
+        <discussion-list class="col-xs-12" :discussions="discussions"></discussion-list>
+    </div>
+    <div class="row">
         <community-list class="col-xs-12" :communities="communities"></community-list>
     </div>
 </layout>

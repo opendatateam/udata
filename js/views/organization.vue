@@ -24,6 +24,10 @@
     </div>
 
     <div class="row">
+        <discussion-list id="discussions-widget" class="col-xs-12" :discussions="discussions"></discussion-list>
+    </div>
+
+    <div class="row">
         <followers id="followers-widget" class="col-xs-12 col-md-6" :followers="followers"></followers>
         <harvesters id="harvesters-widget" class="col-xs-12 col-md-6" :owner="org"></harvesters>
     </div>
