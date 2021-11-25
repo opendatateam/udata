@@ -315,7 +315,7 @@ class SpatialCoverage(db.EmbeddedDocument):
 
     @property
     def granularity_label(self):
-        return dict(spatial_granularities)[self.granularity or 'other']
+        return dict(spatial_granularities).get(self.granularity or 'other', 'other')
 
     @property
     def top_label(self):

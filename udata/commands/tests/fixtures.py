@@ -1,33 +1,42 @@
+import json
+from tempfile import NamedTemporaryFile
+
 from udata import models
-from udata.commands.fixtures import (
-    generate_fixtures, generate_reuses, generate_datasets, generate_licenses
-)
-from udata.core.user.factories import UserFactory
+from udata.commands.fixtures import generate_fixtures
 from udata.tests import TestCase, DBTestMixin
 
 
 class FixturesTest(DBTestMixin, TestCase):
 
-    def test_generate_datasets(self):
-        generate_datasets(count=2)
-        self.assertEqual(models.Dataset.objects.count(), 2)
-        self.assertEqual(models.DatasetDiscussion.objects.count(), 2)
-
-    def test_generate_reuses(self):
-        generate_reuses(count=2)
-        self.assertEqual(models.Reuse.objects.count(), 2)
-        user = UserFactory()
-        generate_reuses(count=1, user=user)
-        self.assertEqual(models.Reuse.objects(owner=user).count(), 1)
-
-    def test_generate_licenses(self):
-        generate_licenses(count=2)
-        self.assertEqual(models.License.objects.count(), 2)
-
     def test_generate_fixtures(self):
-        generate_fixtures()
-        self.assertEqual(models.Dataset.objects.count(), 10)
-        self.assertEqual(models.DatasetDiscussion.objects.count(), 5)
-        self.assertEqual(models.Reuse.objects.count(), 5)
-        self.assertEqual(models.License.objects.count(), 2)
-        self.assertEqual(models.User.objects.count(), 1)
+        with NamedTemporaryFile(delete=True) as fixtures_fd:
+            json_fixtures = [{
+                "resources": [{
+                        "description": "test description",
+                        "filetype": "remote",
+                        "title": "test",
+                        "url": "https://dev.local"
+                    }],
+                "dataset": {
+                    "description": "### Le Test",
+                    "frequency": "punctual",
+                    "tags": ["action-publique"],
+                    "title": "test"
+                    },
+                "organization": {
+                    "description": "test description",
+                    "name": "Test"
+                },
+                "reuses": [{
+                    "description": "test description",
+                    "title": "test",
+                    "url": "https://dev.local"
+                    }]
+                }]
+            with open(fixtures_fd, 'w') as f:
+                json.dump(json_fixtures, f)
+            generate_fixtures(fixtures_fd)
+            self.assertEqual(models.Organization.objects.count(), 1)
+            self.assertEqual(models.Dataset.objects.count(), 1)
+            self.assertEqual(models.Reuse.objects.count(), 1)
+            self.assertEqual(models.User.objects.count(), 1)

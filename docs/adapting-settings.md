@@ -835,6 +835,14 @@ Enables the app's read only mode.
 
 List of API's endpoints to block when `READ_ONLY_MODE` is set to `True`. Endpoints listed here will return a `423` response code to any non-admin request.
 
+## Fixtures
+
+### FIXTURE_DATASET_SLUGS
+
+**default**: `[]`
+
+List of datasets slugs to query to fill the fixture file.
+
 ## Example configuration file
 
 Here a sample configuration file:
