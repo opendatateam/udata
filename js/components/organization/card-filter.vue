@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import API from 'api';
+import APIV2 from 'apiv2';
 import log from 'logger';
 import Organization from 'models/organization';
 
@@ -84,11 +84,11 @@ export default {
     },
     watch: {
         search_query: function(query) {
-            API.organizations.suggest_organizations({
+            APIV2.organizations.search_organizations({
                 q: query,
                 size: 9
             }, (data) => {
-                this.completions = data.obj;
+                this.completions = data.obj.data;
             }, function(message) {
                 log.error('Unable to fetch organizations', message);
             });

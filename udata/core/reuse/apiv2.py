@@ -4,8 +4,11 @@ from udata import search
 from udata.api import apiv2, API
 from udata.utils import multi_to_dict
 
-from .api_fields import reuse_page_fields
+from .api_fields import reuse_page_fields, reuse_fields
 from .search import ReuseSearch
+
+apiv2.inherit('ReusePage', reuse_page_fields)
+apiv2.inherit('Reuse', reuse_fields)
 
 ns = apiv2.namespace('reuses', 'Reuse related operations')
 

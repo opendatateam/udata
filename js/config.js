@@ -85,6 +85,11 @@ export const api_root = _meta('api-root');
 export const api_specs = _meta('api-specs');
 
 /**
+ * The APIV2 Swagger specifications URL
+ */
+ export const apiv2_specs = _meta('apiv2-specs');
+
+/**
  * The theme static root URL
  */
 export const theme_static = _meta('theme-static-root');
@@ -179,6 +184,7 @@ export default {
     csrf_token,
     api_root,
     api_specs,
+    apiv2_specs,
     theme_static,
     static_root,
     admin_root,

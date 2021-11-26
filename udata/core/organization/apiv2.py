@@ -4,7 +4,11 @@ from udata import search
 from udata.api import apiv2, API
 from udata.utils import multi_to_dict
 from .search import OrganizationSearch
-from .api_fields import org_page_fields
+from .api_fields import org_page_fields, org_fields, member_fields
+
+apiv2.inherit('OrganizationPage', org_page_fields)
+apiv2.inherit('Organization', org_fields)
+apiv2.inherit('Member', member_fields)
 
 
 ns = apiv2.namespace('organizations', 'Organization related operations')

@@ -14,12 +14,24 @@ from .api_fields import (
     spatial_coverage_fields,
     temporal_coverage_fields,
     user_ref_fields,
+    checksum_fields
 )
+from udata.core.spatial.api_fields import geojson
 from .models import (
     Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
+
+apiv2.inherit('DatasetPage', dataset_page_fields)
+apiv2.inherit('Badge', badge_fields)
+apiv2.inherit('OrganizationReference', org_ref_fields)
+apiv2.inherit('UserReference', user_ref_fields)
+apiv2.inherit('Resource', resource_fields)
+apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
+apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
+apiv2.inherit('GeoJSON', geojson)
+apiv2.inherit('Checksum', checksum_fields)
 
 DEFAULT_PAGE_SIZE = 50
 
