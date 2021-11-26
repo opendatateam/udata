@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix transfer ownership from org to user [#2678](https://github.com/opendatateam/udata/pull/2678)
 
 ## 3.2.2 (2021-11-23)
 

@@ -1,7 +1,7 @@
 import logging
 
 from blinker import signal
-from mongoengine import NULLIFY, Q, pre_save, post_save
+from mongoengine import NULLIFY, Q, post_save
 from mongoengine.fields import ReferenceField
 
 from .queryset import UDataQuerySet
@@ -34,35 +34,34 @@ class Owned(object):
         'queryset_class': OwnedQuerySet,
     }
 
-
-def owned_pre_save(sender, document, **kwargs):
-    '''
-    Owned mongoengine.pre_save signal handler
-    Need to fetch original owner before the new one erase it.
-    '''
-    if not isinstance(document, Owned):
-        return
-    changed_fields = getattr(document, '_changed_fields', [])
-    if 'organization' in changed_fields:
-        if document.owner:
-            # Change from owner to organization
-            document._previous_owner = document.owner
-            document.owner = None
-        else:
-            # Change from org to another
-            # Need to fetch previous value in base
-            original = sender.objects.only('organization').get(pk=document.pk)
-            document._previous_owner = original.organization
-    elif 'owner' in changed_fields:
-        if document.organization:
-            # Change from organization to owner
-            document._previous_owner = document.organization
-            document.organization = None
-        else:
-            # Change from owner to another
-            # Need to fetch previous value in base
-            original = sender.objects.only('owner').get(pk=document.pk)
-            document._previous_owner = original.owner
+    def clean(self):
+        '''
+        Verify owner consistency and fetch original owner before the new one erase it.
+        '''
+        changed_fields = self._get_changed_fields()
+        if 'organization' in changed_fields and 'owner' in changed_fields:
+            # Ownership changes (org to owner or the other way around) have already been made
+            return
+        if 'organization' in changed_fields:
+            if self.owner:
+                # Change from owner to organization
+                self._previous_owner = self.owner
+                self.owner = None
+            else:
+                # Change from org to another
+                # Need to fetch previous value in base
+                original = self.__class__.objects.only('organization').get(pk=self.pk)
+                self._previous_owner = original.organization
+        elif 'owner' in changed_fields:
+            if self.organization:
+                # Change from organization to owner
+                self._previous_owner = self.organization
+                self.organization = None
+            else:
+                # Change from owner to another
+                # Need to fetch previous value in base
+                original = self.__class__.objects.only('owner').get(pk=self.pk)
+                self._previous_owner = original.owner
 
 
 def owned_post_save(sender, document, **kwargs):
@@ -78,5 +77,4 @@ def owned_post_save(sender, document, **kwargs):
         Owned.on_owner_change.send(document, previous=document._previous_owner)
 
 
-pre_save.connect(owned_pre_save)
 post_save.connect(owned_post_save)
