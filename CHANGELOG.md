@@ -12,6 +12,7 @@
 - Style oauth page [#34](https://github.com/etalab/udata-front/pull/34)
 - Fix horizontal scroll on mobile [#38](https://github.com/etalab/udata-front/pull/38)
 - Fix gouvfr static path [#39](https://github.com/etalab/udata-front/pull/39)
+- Remove Issues logic [#42](https://github.com/etalab/udata-front/pull/42)
 
 ## 1.1.1 (2021-10-22)
 

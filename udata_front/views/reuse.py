@@ -51,7 +51,6 @@ class ReuseListView(SearchView):
 
 
 navbar = nav.Bar('edit_reuse', [
-    nav.Item(_('Issues'), 'reuses.issues'),
     nav.Item(_('Transfer'), 'reuses.transfer'),
 ])
 

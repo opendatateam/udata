@@ -8,12 +8,12 @@ from udata.frontend import csv
 from udata_front.views.base import DetailView, SearchView
 from udata.i18n import I18nBlueprint
 from udata.models import (
-    Organization, Reuse, Dataset, Follow, Issue, Discussion
+    Organization, Reuse, Dataset, Follow, Discussion
 )
 from udata.sitemap import sitemap
 
 from udata.core.dataset.csv import (
-    DatasetCsvAdapter, IssuesOrDiscussionCsvAdapter, ResourcesCsvAdapter
+    DatasetCsvAdapter, DiscussionCsvAdapter, ResourcesCsvAdapter
 )
 
 from udata.core.organization.permissions import (
@@ -115,23 +115,13 @@ def datasets_csv(org):
     return csv.stream(adapter, '{0}-datasets'.format(org.slug))
 
 
-@blueprint.route('/<org:org>/issues.csv')
-def issues_csv(org):
-    datasets = Dataset.objects.filter(organization=str(org.id))
-    issues = [Issue.objects.filter(subject=dataset)
-              for dataset in datasets]
-    # Turns a list of lists into a flat list.
-    adapter = IssuesOrDiscussionCsvAdapter(itertools.chain(*issues))
-    return csv.stream(adapter, '{0}-issues'.format(org.slug))
-
-
 @blueprint.route('/<org:org>/discussions.csv')
 def discussions_csv(org):
     datasets = Dataset.objects.filter(organization=str(org.id))
     discussions = [Discussion.objects.filter(subject=dataset)
                    for dataset in datasets]
     # Turns a list of lists into a flat list.
-    adapter = IssuesOrDiscussionCsvAdapter(itertools.chain(*discussions))
+    adapter = DiscussionCsvAdapter(itertools.chain(*discussions))
     return csv.stream(adapter, '{0}-discussions'.format(org.slug))
 
 
