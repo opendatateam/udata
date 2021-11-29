@@ -1,3 +1,5 @@
+from mongoengine import post_save
+
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.organization.models import Organization
 from udata.core.user.factories import UserFactory
@@ -10,6 +12,23 @@ from udata.tests import TestCase, DBTestMixin
 
 class Owned(db.Owned, db.Document):
     name = db.StringField()
+
+
+class OwnedPostSave(db.Owned, db.Document):
+    @classmethod
+    def post_save(cls, sender, document, **kwargs):
+        if 'post_save' in kwargs.get('ignores', []):
+            return
+        if kwargs.get('created'):
+            pass
+        else:
+            # on update
+            compute_some_metrics(document, **kwargs)
+
+
+def compute_some_metrics(document, **kwargs):
+    document.metric = 0
+    document.save(signal_kwargs={'ignores': ['post_save']})
 
 
 class TestOwnedMixin(DBTestMixin, TestCase):
@@ -91,6 +110,20 @@ class TestOwnedMixin(DBTestMixin, TestCase):
             owned.save()
 
         self.assertTrue(getattr(handler, 'called', False))
+
+    def test_owner_changed_from_org_to_user_with_owned_postsave_signal(self):
+        # Test with an additionnal post save signal that will retriger save signals
+        user = UserFactory()
+        org = OrganizationFactory()
+
+        owned = OwnedPostSave.objects.create(organization=org)
+
+        with post_save.connected_to(OwnedPostSave.post_save, sender=OwnedPostSave):
+            owned.owner = user
+            owned.save()
+
+        assert owned.owner == user
+        assert owned.organization is None
 
 
 class OwnedQuerysetTest(DBTestMixin, TestCase):
