@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- :warning: Removed `Issues` code and logic. The corresponding MongoDB collection should be deleted when upgrading Udata. [#2681](https://github.com/opendatateam/udata/pull/2681)
 - Fix transfer ownership from org to user [#2678](https://github.com/opendatateam/udata/pull/2678)
 
 ## 3.2.2 (2021-11-23)

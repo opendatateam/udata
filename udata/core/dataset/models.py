@@ -442,7 +442,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     __metrics_keys__ = [
         'discussions',
-        'issues',
         'reuses',
         'followers',
         'views',
@@ -747,11 +746,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     def count_discussions(self):
         from udata.models import Discussion
         self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
-
-    def count_issues(self):
-        from udata.models import Issue
-        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
         self.save()
 
     def count_reuses(self):

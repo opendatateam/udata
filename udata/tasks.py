@@ -165,7 +165,6 @@ def init_app(app):
     import udata.core.reuse.tasks  # noqa
     import udata.core.user.tasks  # noqa
     import udata.core.organization.tasks  # noqa
-    import udata.core.issues.tasks  # noqa
     import udata.core.discussions.tasks  # noqa
     import udata.core.badges.tasks  # noqa
     import udata.core.storages.tasks  # noqa

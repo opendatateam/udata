@@ -310,7 +310,6 @@ def init_app(app):
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
     import udata.core.dataset.apiv2  # noqa
-    import udata.core.issues.api  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
     import udata.core.organization.api  # noqa

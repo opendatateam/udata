@@ -78,7 +78,7 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
 
 
 @csv.adapter(Discussion)
-class IssuesOrDiscussionCsvAdapter(csv.Adapter):
+class DiscussionCsvAdapter(csv.Adapter):
     fields = (
         'id',
         'user',

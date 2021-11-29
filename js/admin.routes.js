@@ -64,12 +64,6 @@ router.map({
             require(['./views/dataset.vue'], resolve);
         },
         subRoutes: {
-            'issue/:issue_id/': {
-                name: 'dataset-issue',
-                component(resolve) {
-                    require(['./components/issues/modal.vue'], resolve);
-                }
-            },
             'discussion/:discussion_id/': {
                 name: 'dataset-discussion',
                 component(resolve) {
@@ -112,12 +106,6 @@ router.map({
             require(['./views/reuse.vue'], resolve);
         },
         subRoutes: {
-            'issue/:issue_id/': {
-                name: 'reuse-issue',
-                component(resolve) {
-                    require(['./components/issues/modal.vue'], resolve);
-                }
-            },
             'discussion/:discussion_id/': {
                 name: 'reuse-discussion',
                 component(resolve) {

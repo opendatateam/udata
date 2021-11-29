@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Organization, Member, MembershipRequest, Follow, Issue, Discussion,
+    Organization, Member, MembershipRequest, Follow, Discussion,
     CERTIFIED, PUBLIC_SERVICE
 )
 
@@ -710,34 +710,6 @@ class OrganizationReusesAPITest:
         assert len(response.json) == len(reuses)
 
 
-class OrganizationIssuesAPITest:
-    modules = []
-
-    def test_list_org_issues(self, api):
-        '''Should list organization issues'''
-        user = UserFactory()
-        org = OrganizationFactory()
-        reuse = ReuseFactory(organization=org)
-        dataset = DatasetFactory(organization=org)
-        issues = [
-            Issue.objects.create(subject=dataset, title='', user=user),
-            Issue.objects.create(subject=reuse, title='', user=user)
-        ]
-
-        # Should not be listed
-        Issue.objects.create(subject=DatasetFactory(), title='', user=user)
-        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
-
-        response = api.get(url_for('api.org_issues', org=org))
-
-        assert200(response)
-        assert len(response.json) == len(issues)
-
-        issues_ids = [str(i.id) for i in issues]
-        for issue in response.json:
-            assert issue['id'] in issues_ids
-
-
 class OrganizationDiscussionsAPITest:
     modules = []
 
@@ -751,10 +723,6 @@ class OrganizationDiscussionsAPITest:
             Discussion.objects.create(subject=dataset, title='', user=user),
             Discussion.objects.create(subject=reuse, title='', user=user)
         ]
-
-        # Should not be listed
-        Issue.objects.create(subject=DatasetFactory(), title='', user=user)
-        Issue.objects.create(subject=ReuseFactory(), title='', user=user)
 
         response = api.get(url_for('api.org_discussions', org=org))
 

@@ -37,8 +37,6 @@ from udata.core.dataset.models import Dataset
 from udata.core.dataset.search import DatasetSearch
 from udata.core.discussions.api import discussion_fields
 from udata.core.discussions.models import Discussion
-from udata.core.issues.api import issue_fields
-from udata.core.issues.models import Issue
 from udata.core.reuse.api_fields import reuse_fields
 from udata.core.reuse.models import Reuse
 from udata.core.storages.api import (
@@ -445,19 +443,6 @@ class OrgReusesAPI(API):
         qs = Reuse.objects.owned_by(org)
         if not OrganizationPrivatePermission(org).can():
             qs = qs(private__ne=True)
-        return list(qs)
-
-
-@ns.route('/<org:org>/issues/', endpoint='org_issues')
-class OrgIssuesAPI(API):
-    @api.doc('list_organization_issues')
-    @api.marshal_list_with(issue_fields)
-    def get(self, org):
-        '''List organization issues'''
-        reuses = Reuse.objects(organization=org).only('id')
-        datasets = Dataset.objects(organization=org).only('id')
-        subjects = list(reuses) + list(datasets)
-        qs = Issue.objects(subject__in=subjects).order_by('-created')
         return list(qs)
 
 
