@@ -9,8 +9,8 @@
     "build:app": "parcel build theme/less/index.less theme/js/index.js --dist-dir udata_front/theme/gouvfr/static/",
     "build:stylemark": "npm run build:app -- --no-minify",
     "test": "cypress run",
-    "i18n:report": "vue-i18n-extract report -v 'theme/**/*.vue' -l 'theme/js/locales/**/*'",
-    "i18n:extract": "npm run i18n:report -- -a",
+    "i18n:report": "vue-i18n-extract report --vueFiles 'theme/**/*.vue' --languageFiles 'theme/js/locales/**/*' --separator '^'",
+    "i18n:extract": "npm run i18n:report -- --add",
     "clean": "rimraf .parcel-cache",
     "start": "npm run dev",
     "watch": "parcel theme/js/index.js theme/less/index.less --dist-dir udata_front/theme/gouvfr/static/"
@@ -55,7 +55,7 @@
     "postcss-normalize": "^9.0.0",
     "rimraf": "^3.0.2",
     "stylemark": "^3.1.7",
-    "vue-i18n-extract": "^1.1.10"
+    "vue-i18n-extract": "^2.0.4"
   },
   "staticFiles": {
     "staticPath": [

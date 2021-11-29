@@ -115,5 +115,7 @@
   "About schemas": "About schemas",
   "Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ": "Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ",
   "Available": "Available",
-  "Unavailable": ""
+  "Unavailable": "Unavailable",
+  "Come try out our": "Come try out our {dataset_search}.",
+  "new dataset search": "new dataset search"
 }

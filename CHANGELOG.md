@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add a banner for the new search beta on datasets search page [#43](https://github.com/etalab/udata-front/pull/43)
 
 ## 1.1.2 (2021-11-23)
 

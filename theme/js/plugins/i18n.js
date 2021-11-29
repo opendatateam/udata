@@ -8,23 +8,11 @@ import { createI18n } from "vue-i18n";
 import en from "../locales/en.json";
 import fr from "../locales/fr.json"
 
-const missing = (locale, key) => {
-  if (key.startsWith("@@")) return key.slice(2);
-
-  console.error(
-    "[Dev][i18n] Found translation key not starting with @@",
-    locale,
-    key
-  );
-  return key;
-};
-
 export default i18n = createI18n({
   locale: config.lang,
-  silentTranslationWarn: true,
-  missing,
   messages: {
     en,
     fr
   },
+  formatFallbackMessages: true
 });

@@ -119,6 +119,16 @@
       >
     </div>
   </section>
+  <section class="bg-blue-100 p-sm mt-lg text-black">
+    <span class="row-inline">
+      <span class="fr-fi-question-line mr-xs" aria-hidden="true"></span>
+      <i18n-t keypath="Come try out our" tag="span">
+        <template #dataset_search>
+          <a :href="rechercherBetaPath">{{ $t('new dataset search') }}</a>
+        </template>
+      </i18n-t>
+    </span>
+  </section>
   <section class="search-results mt-lg mt-md-md">
     <transition mode="out-in">
       <div v-if="loading">
@@ -223,6 +233,7 @@ export default {
       totalResults: 0,
       queryString: "",
       facets: {},
+      rechercherBetaPath: "https://rechercher.etalab.studio/",
     };
   },
   computed: {
