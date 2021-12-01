@@ -7,7 +7,6 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.reuse.factories import ReuseFactory, VisibleReuseFactory
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.user.factories import UserFactory
-from udata.core.issues.factories import IssueFactory
 from udata.core.discussions.factories import DiscussionFactory
 from udata.tests.helpers import assert_emit
 
@@ -67,15 +66,12 @@ class ReuseModelTest(TestCase, DBTestMixin):
     def test_reuse_metrics(self):
         dataset = VisibleDatasetFactory()
         reuse = VisibleReuseFactory()
-        issue = IssueFactory(subject=reuse)
         DiscussionFactory(subject=reuse)
 
         reuse.count_datasets()
-        reuse.count_issues()
         reuse.count_discussions()
 
         assert reuse.get_metrics()['datasets'] == 1
-        assert reuse.get_metrics()['issues'] == 1
         assert reuse.get_metrics()['discussions'] == 1
 
         with assert_emit(Reuse.on_update):

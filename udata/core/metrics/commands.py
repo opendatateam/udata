@@ -63,7 +63,6 @@ def update(site=False, organizations=False, users=False, datasets=False,
                     if drop:
                         dataset.metrics.clear()
                     dataset.count_discussions()
-                    dataset.count_issues()
                     dataset.count_reuses()
                     dataset.count_followers()
                 except Exception as e:
@@ -79,7 +78,6 @@ def update(site=False, organizations=False, users=False, datasets=False,
                     if drop:
                         reuse.metrics.clear()
                     reuse.count_discussions()
-                    reuse.count_issues()
                     reuse.count_followers()
                 except Exception as e:
                     log.info(f'Error during update: {e}')

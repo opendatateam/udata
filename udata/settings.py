@@ -458,8 +458,6 @@ class Defaults(object):
                         'UploadNewCommunityResources.post',
                         'DiscussionAPI.post',
                         'DiscussionsAPI.post',
-                        'IssuesAPI.post',
-                        'IssueAPI.post',
                         'SourcesAPI.post',
                         'FollowAPI.post']
     

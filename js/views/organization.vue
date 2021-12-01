@@ -24,8 +24,7 @@
     </div>
 
     <div class="row">
-        <issue-list id="issues-widget" class="col-xs-12 col-md-6" :issues="issues"></issue-list>
-        <discussion-list id="discussions-widget" class="col-xs-12 col-md-6" :discussions="discussions"></discussion-list>
+        <discussion-list id="discussions-widget" class="col-xs-12" :discussions="discussions"></discussion-list>
     </div>
 
     <div class="row">
@@ -50,7 +49,6 @@ import {PageList, ModelPage} from 'models/base';
 // Widgets
 import DatasetList from 'components/dataset/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
-import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
 import ReuseList from 'components/reuse/list.vue';
 
@@ -71,11 +69,6 @@ export default {
                 fetch: 'list_organization_datasets',
                 search: 'title',
                 mask: DatasetList.MASK.concat(['deleted'])
-            }),
-            issues: new PageList({
-                ns: 'organizations',
-                fetch: 'list_organization_issues',
-                mask: IssueList.MASK
             }),
             discussions: new PageList({
                 ns: 'organizations',
@@ -205,7 +198,6 @@ export default {
         DiscussionList,
         DatasetList,
         ReuseList,
-        IssueList,
         Layout,
     },
     events: {
@@ -249,7 +241,6 @@ export default {
             if (id) {
                 this.reuses.clear().fetch({org: id});
                 this.datasets.clear().fetch({org: id});
-                this.issues.clear().fetch({org: id});
                 this.discussions.clear().fetch({org: id});
                 this.followers.fetch({id: id});
                 this.communities.clear().fetch({organization: id});

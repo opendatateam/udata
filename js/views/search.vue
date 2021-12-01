@@ -9,9 +9,6 @@
     <div class="row" v-if="reuses.loading || reuses.has_data">
         <reuses-list class="col-xs-12" :reuses="reuses"></reuses-list>
     </div>
-    <div class="row" v-if="issues.loading || issues.has_data">
-        <issue-list class="col-xs-12" :issues="issues"></issue-list>
-    </div>
     <div class="row" v-if="discussions.loading || discussions.has_data">
         <discussion-list class="col-xs-12" :discussions="discussions"></discussion-list>
     </div>
@@ -28,7 +25,6 @@ import {PageList} from 'models/base';
 import Layout from 'components/layout.vue';
 import DatasetList from 'components/dataset/list.vue';
 import ReuseList from 'components/reuse/list.vue';
-import IssueList from 'components/issues/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
 import CommunityList from 'components/dataset/communityresource/list.vue';
 
@@ -37,14 +33,13 @@ export default {
     components: {
         CommunityList,
         DiscussionList,
-        IssueList,
         DatasetList,
         ReuseList,
         Layout
     },
     computed: {
         no_results() {
-            const collections = [this.datasets, this.communities, this.reuses, this.issues, this.discussions];
+            const collections = [this.datasets, this.communities, this.reuses, this.discussions];
             return !collections.some(function(collection) {
                 return collection.loading || collection.has_data;
             });
@@ -67,11 +62,6 @@ export default {
                 fetch: 'my_org_reuses',
                 mask: ReuseList.MASK
             }),
-            issues: new PageList({
-                ns: 'me',
-                fetch: 'my_org_issues',
-                mask: IssueList.MASK
-            }),
             discussions: new PageList({
                 ns: 'me',
                 fetch: 'my_org_discussions',
@@ -85,7 +75,6 @@ export default {
             this.datasets.fetch({'q': terms});
             this.communities.fetch({'q': terms});
             this.reuses.fetch({'q': terms});
-            this.issues.fetch({'q': terms});
             this.discussions.fetch({'q': terms});
             this.$scrollTo(this.$el);
         }

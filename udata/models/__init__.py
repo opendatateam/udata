@@ -85,7 +85,6 @@ session_interface = MongoEngineSessionInterface(db)
 # Load all core models and mixins
 from udata.core.spatial.models import *  # noqa
 from udata.core.metrics.models import *  # noqa
-from udata.core.issues.models import *  # noqa
 from udata.core.badges.models import *  # noqa
 from udata.core.discussions.models import *  # noqa
 from udata.core.followers.models import *  # noqa

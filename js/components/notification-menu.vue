@@ -34,7 +34,6 @@ export default {
     },
     // Components name matters (beware of the low dash)
     components: {
-        'issue': require('components/notifications/issue.vue'),
         'discussion': require('components/notifications/discussion.vue'),
         'membership_request': require('components/notifications/membership_request.vue'),
         'transfer_request': require('components/notifications/transfer.vue'),

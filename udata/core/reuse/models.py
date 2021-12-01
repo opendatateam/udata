@@ -80,7 +80,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     __metrics_keys__ = [
         'discussions',
-        'issues',
         'datasets',
         'followers',
         'views',
@@ -141,6 +140,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
         return REUSE_TYPES[self.type]
 
     def clean(self):
+        super(Reuse, self).clean()
         '''Auto populate urlhash from url'''
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
@@ -194,11 +194,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     def count_discussions(self):
         from udata.models import Discussion
         self.metrics['discussions'] = Discussion.objects(subject=self, closed=None).count()
-        self.save()
-
-    def count_issues(self):
-        from udata.models import Issue
-        self.metrics['issues'] = Issue.objects(subject=self, closed=None).count()
         self.save()
 
     def count_followers(self):

@@ -34,14 +34,9 @@
       </div>
 
       <div class="row">
-        <issue-list
-          id="issues-widget"
-          class="col-xs-12 col-md-6"
-          :issues="issues"
-        ></issue-list>
         <discussion-list
           id="discussions-widget"
-          class="col-xs-12 col-md-6"
+          class="col-xs-12"
           :discussions="discussions"
         ></discussion-list>
       </div>
@@ -63,7 +58,6 @@ import { ModelPage } from 'models/base'
 import Reuse from 'models/reuse'
 import Dataset from 'models/dataset'
 import Vue from 'vue'
-import Issues from 'models/issues'
 import Discussions from 'models/discussions'
 import mask from 'models/mask'
 // Widgets
@@ -71,7 +65,6 @@ import Chart from 'components/charts/widget.vue'
 import DatasetCardList from 'components/dataset/card-list.vue'
 import DiscussionList from 'components/discussions/list.vue'
 import FollowerList from 'components/follow/list.vue'
-import IssueList from 'components/issues/list.vue'
 import Layout from 'components/layout.vue'
 import ReuseDetails from 'components/reuse/details.vue'
 import SmallBox from 'components/containers/small-box.vue'
@@ -86,7 +79,6 @@ export default {
     ReuseDetails,
     FollowerList,
     DiscussionList,
-    IssueList,
     DatasetCardList,
     Layout
   },
@@ -97,10 +89,6 @@ export default {
         query: { page_size: 10 },
         ns: 'reuses',
         fetch: 'list_reuse_followers'
-      }),
-      issues: new Issues({
-        query: { sort: '-created', page_size: 10 },
-        mask: IssueList.MASK
       }),
       discussions: new Discussions({
         query: { sort: '-created', page_size: 10 },
@@ -239,7 +227,6 @@ export default {
     'reuse.id': function (id) {
       if (id) {
         this.followers.fetch({ id: id })
-        this.issues.fetch({ for: id })
         this.discussions.fetch({ for: id })
       }
     },

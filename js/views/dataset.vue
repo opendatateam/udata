@@ -41,10 +41,6 @@
     </div>
 
     <div class="row">
-        <issue-list class="col-xs-12" :issues="issues"></issue-list>
-    </div>
-
-    <div class="row">
         <discussion-list class="col-xs-12" :discussions="discussions"></discussion-list>
     </div>
 
@@ -63,7 +59,6 @@ import Vue from 'vue';
 import {ModelPage} from 'models/base';
 import Dataset from 'models/dataset';
 import Discussions from 'models/discussions';
-import Issues from 'models/issues';
 import Reuses from 'models/reuses';
 import CommunityResources from 'models/communityresources';
 // Widgets
@@ -73,7 +68,6 @@ import DatasetDetails from 'components/dataset/details.vue';
 import DatasetFilters from 'components/dataset/filters';
 import DiscussionList from 'components/discussions/list.vue';
 import FollowerList from 'components/follow/list.vue';
-import IssueList from 'components/issues/list.vue';
 import Layout from 'components/layout.vue';
 import MapWidget from 'components/widgets/map.vue';
 import QualityWidget from 'components/dataset/quality.vue';
@@ -90,7 +84,6 @@ export default {
         DatasetDetails,
         DiscussionList,
         FollowerList,
-        IssueList,
         Layout,
         MapWidget,
         QualityWidget,
@@ -107,7 +100,6 @@ export default {
                 ns: 'datasets',
                 fetch: 'list_dataset_followers'
             }),
-            issues: new Issues({query: {sort: '-created', page_size: 10}, mask: IssueList.MASK}),
             discussions: new Discussions({query: {sort: '-created', page_size: 10}, mask: DiscussionList.MASK}),
             communities: new CommunityResources({query: {sort: '-created_at', page_size: 10}, mask: CommunityList.MASK}),
             badges:  [],
@@ -257,7 +249,6 @@ export default {
             if (id) {
                 this.reuses.clear().fetch({dataset: id});
                 this.followers.fetch({id: id});
-                this.issues.fetch({'for': id});
                 this.discussions.fetch({'for': id});
                 this.communities.clear().fetch({dataset: id});
             } else {

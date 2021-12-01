@@ -15,12 +15,6 @@
     </div>
 
     <div class="row">
-        <issue-list id="issues-widget" class="col-xs-12" :issues="issues"
-            :title="_('Issues about your data (including your organizations)')">
-        </issue-list>
-    </div>
-
-    <div class="row">
         <discussion-list id="discussions-widget" class="col-xs-12" :discussions="discussions"
             :title="_('Discussions about your data (including your organizations)')">
         </discussion-list>
@@ -37,7 +31,6 @@ import MyMetrics from 'models/mymetrics';
 import Layout from 'components/layout.vue';
 import SmallBox from 'components/containers/small-box.vue';
 import ReuseList from 'components/reuse/list.vue';
-import IssueList from 'components/issues/list.vue';
 import DiscussionList from 'components/discussions/list.vue';
 
 export default {
@@ -49,11 +42,6 @@ export default {
                 ns: 'me',
                 fetch: 'my_org_reuses',
                 mask: ReuseList.MASK.concat(['deleted'])
-            }),
-            issues: new PageList({
-                ns: 'me',
-                fetch: 'my_org_issues',
-                mask: IssueList.MASK
             }),
             discussions: new PageList({
                 ns: 'me',
@@ -99,7 +87,6 @@ export default {
     components: {
         SmallBox,
         DiscussionList,
-        IssueList,
         ReuseList,
         Layout
     },
@@ -115,7 +102,6 @@ export default {
             if (this.$root.me.id) {
                 this.metrics.fetch();
                 this.reuses.fetch();
-                this.issues.fetch();
                 this.discussions.fetch();
             }
         }
