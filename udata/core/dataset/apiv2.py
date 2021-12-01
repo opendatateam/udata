@@ -34,6 +34,7 @@ apiv2.inherit('GeoJSON', geojson)
 apiv2.inherit('Checksum', checksum_fields)
 
 DEFAULT_PAGE_SIZE = 50
+DEFAULT_SORTING = '-created_at'
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK_APIV2 = ','.join((
@@ -151,6 +152,50 @@ class DatasetSearchAPI(API):
         '''List or search all datasets'''
         search_parser.parse_args()
         return search.query(Dataset, **multi_to_dict(request.args))
+
+
+suggest_parser = apiv2.parser()
+suggest_parser.add_argument(
+    'q', help='The string to autocomplete/suggest', location='args',
+    required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
+
+
+dataset_suggestion_fields = apiv2.model('DatasetSuggestion', {
+    'id': fields.String(description='The dataset identifier'),
+    'title': fields.String(description='The dataset title'),
+    'acronym': fields.String(description='An optional dataset acronym'),
+    'slug': fields.String(
+        description='The dataset permalink string'),
+    'image_url': fields.String(
+        description='The dataset (organization) logo URL'),
+    'page': fields.UrlFor(
+        'datasets.show_redirect', lambda d: {'dataset': d['slug']},
+        description='The web page URL for this dataset', fallback_endpoint='api.dataset')
+})
+
+
+@ns.route('/suggest', endpoint='dataset_suggest')
+class DatasetSuggestAPI(API):
+    @apiv2.doc('suggest_datasets')
+    @apiv2.expect(suggest_parser)
+    @apiv2.marshal_with(dataset_suggestion_fields)
+    def get(self):
+        '''Datasets suggest endpoint using mongoDB contains'''
+        args = suggest_parser.parse_args()
+        datasets = Dataset.objects(archived=None, deleted=None, private=False, title__icontains=args['q'])
+        return [
+            {
+                'id': dataset.id,
+                'title': dataset.title,
+                'acronym': dataset.acronym,
+                'slug': dataset.slug,
+                'image_url': dataset.image_url,
+            }
+            for dataset in datasets.order_by(DEFAULT_SORTING).limit(args['size'])
+        ]
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
