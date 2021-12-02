@@ -43,7 +43,6 @@ from .api_fields import (
     community_resource_page_fields,
     dataset_fields,
     dataset_page_fields,
-    dataset_suggestion_fields,
     frequency_fields,
     license_fields,
     resource_fields,
@@ -535,59 +534,6 @@ class CommunityResourceAPI(API):
         delete={'id': 'unfollow_dataset'})
 class DatasetFollowersAPI(FollowAPI):
     model = Dataset
-
-
-suggest_parser = api.parser()
-suggest_parser.add_argument(
-    'q', help='The string to autocomplete/suggest', location='args',
-    required=True)
-suggest_parser.add_argument(
-    'size', type=int, help='The amount of suggestion to fetch',
-    location='args', default=10)
-
-
-@ns.route('/suggest/', endpoint='suggest_datasets')
-class SuggestDatasetsAPI(API):
-    @api.doc('suggest_datasets')
-    @api.expect(suggest_parser)
-    @api.marshal_list_with(dataset_suggestion_fields)
-    def get(self):
-        '''Suggest datasets'''
-        args = suggest_parser.parse_args()
-        return [
-            {
-                'id': opt['payload']['id'],
-                'title': opt['text'],
-                'acronym': opt['payload'].get('acronym'),
-                'score': opt['score'],
-                'slug': opt['payload']['slug'],
-                'image_url': opt['payload']['image_url'],
-            }
-            for opt in search.suggest(args['q'], 'dataset_suggest',
-                                      args['size'])
-        ]
-
-
-@ns.route('/suggest/formats/', endpoint='suggest_formats')
-class SuggestFormatsAPI(API):
-    @api.doc('suggest_formats')
-    @api.expect(suggest_parser)
-    def get(self):
-        '''Suggest file formats'''
-        args = suggest_parser.parse_args()
-        result = search.suggest(args['q'], 'format_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
-
-
-@ns.route('/suggest/mime/', endpoint='suggest_mime')
-class SuggestFormatsAPI(API):
-    @api.doc('suggest_mime')
-    @api.expect(suggest_parser)
-    def get(self):
-        '''Suggest mime types'''
-        args = suggest_parser.parse_args()
-        result = search.suggest(args['q'], 'mime_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
 
 
 @ns.route('/licenses/', endpoint='licenses')

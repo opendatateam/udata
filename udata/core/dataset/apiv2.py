@@ -1,6 +1,7 @@
 import logging
 
-from flask import url_for, request
+from flask import url_for, request, current_app
+from mongoengine.queryset.visitor import Q
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -177,7 +178,7 @@ dataset_suggestion_fields = apiv2.model('DatasetSuggestion', {
 })
 
 
-@ns.route('/suggest', endpoint='dataset_suggest')
+@ns.route('/suggest', endpoint='suggest_datasets')
 class DatasetSuggestAPI(API):
     @apiv2.doc('suggest_datasets')
     @apiv2.expect(suggest_parser)
@@ -185,7 +186,8 @@ class DatasetSuggestAPI(API):
     def get(self):
         '''Datasets suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
-        datasets = Dataset.objects(archived=None, deleted=None, private=False, title__icontains=args['q'])
+        datasets_query = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = datasets_query.filter(Q(title__icontains=args['q']) | Q(acronym__icontains=args['q']))
         return [
             {
                 'id': dataset.id,
@@ -196,6 +198,28 @@ class DatasetSuggestAPI(API):
             }
             for dataset in datasets.order_by(DEFAULT_SORTING).limit(args['size'])
         ]
+
+
+@ns.route('/suggest/formats/', endpoint='suggest_formats')
+class FormatsSuggestAPI(API):
+    @apiv2.doc('suggest_formats')
+    @apiv2.expect(suggest_parser)
+    def get(self):
+        '''Suggest file formats'''
+        args = suggest_parser.parse_args()
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_EXTENSIONS'] if args['q'] in i]
+        return sorted(results, key=lambda o: len(o['text']))
+
+
+@ns.route('/suggest/mime/', endpoint='suggest_mime')
+class MimesSuggestAPI(API):
+    @apiv2.doc('suggest_mime')
+    @apiv2.expect(suggest_parser)
+    def get(self):
+        '''Suggest mime types'''
+        args = suggest_parser.parse_args()
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_MIMES'] if args['q'] in i]
+        return sorted(results, key=lambda o: len(o['text']))
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)

@@ -283,6 +283,30 @@ class Defaults(object):
         'rdf', 'ttl', 'n3',
     ]
 
+    ALLOWED_RESOURCES_MIMES = [
+        'text/csv',
+        'application/json',
+        'application/pdf',
+        'application/msword',
+        'application/vnd',
+        'application/zip',
+        'application/x-tar',
+        'application/x-bzip',
+        'application/x-bzip2',
+        'application/x-7z-compressed',
+        'application/x-rar-compressed',
+        'application/epub+zip',
+        'application/rtf',
+        'application/xml',
+        'application/xhtml+xml',
+        'image/bmp',
+        'image/jpeg',
+        'image/png',
+        'image/svg+xml',
+        'text/html',
+        'text/calendar',
+    ]
+
     # How much time upload chunks are kept before cleanup
     UPLOAD_MAX_RETENTION = 24 * HOUR
 
@@ -460,7 +484,7 @@ class Defaults(object):
                         'DiscussionsAPI.post',
                         'SourcesAPI.post',
                         'FollowAPI.post']
-    
+
     FIXTURE_DATASET_SLUGS = []
 
 

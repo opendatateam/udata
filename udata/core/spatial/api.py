@@ -3,7 +3,6 @@ from flask import current_app, abort
 from flask_restplus import inputs
 
 from udata.api import api, API
-from udata import search
 from udata.i18n import _
 from udata.models import Dataset, TERRITORY_DATASETS
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -11,7 +10,6 @@ from udata.core.dataset.api_fields import dataset_ref_fields
 from .api_fields import (
     level_fields,
     granularity_fields,
-    zone_suggestion_fields,
     feature_collection_fields,
 )
 from .models import GeoZone, GeoLevel, spatial_granularities
@@ -25,13 +23,6 @@ GEOM_TYPES = (
 
 ns = api.namespace('spatial', 'Spatial references')
 
-suggest_parser = api.parser()
-suggest_parser.add_argument(
-    'q', type=str, help='The string to autocomplete/suggest',
-    location='args', required=True)
-suggest_parser.add_argument(
-    'size', type=int, help='The amount of suggestion to fetch',
-    location='args', default=10)
 
 dataset_parser = api.parser()
 dataset_parser.add_argument(
@@ -40,34 +31,6 @@ dataset_parser.add_argument(
 dataset_parser.add_argument(
     'size', type=int, help='The amount of datasets to fetch',
     location='args', default=25)
-
-
-def payload_name(payload):
-    '''extract payload name and localize it'''
-    name = payload['name']
-    return _(name)  # Avoid dict quotes in gettext
-
-
-@ns.route('/zones/suggest/', endpoint='suggest_zones')
-class SuggestZonesAPI(API):
-    @api.marshal_list_with(zone_suggestion_fields)
-    @api.expect(suggest_parser)
-    @api.doc('suggest_zones')
-    def get(self):
-        '''Suggest geospatial zones'''
-        args = suggest_parser.parse_args()
-        return [
-            {
-                'id': opt['text'],
-                'name': payload_name(opt['payload']),
-                'code': opt['payload']['code'],
-                'level': opt['payload']['level'],
-                'keys': opt['payload']['keys'],
-                'score': opt['score'],
-            }
-            for opt in search.suggest(
-                args['q'], 'zone_suggest', args['size'])
-        ]
 
 
 @ns.route('/zones/<pathlist:ids>/', endpoint='zones')

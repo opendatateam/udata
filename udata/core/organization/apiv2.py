@@ -1,7 +1,7 @@
 from flask import request
 
 from udata import search
-from udata.api import apiv2, API
+from udata.api import apiv2, API, fields
 from udata.utils import multi_to_dict
 from .search import OrganizationSearch
 from .api_fields import org_page_fields, org_fields, member_fields
@@ -39,6 +39,19 @@ suggest_parser.add_argument(
     location='args', default=10)
 
 
+org_suggestion_fields = apiv2.model('OrganizationSuggestion', {
+    'id': fields.String(
+        description='The organization identifier', readonly=True),
+    'name': fields.String(description='The organization name', readonly=True),
+    'acronym': fields.String(
+        description='The organization acronym', readonly=True),
+    'slug': fields.String(
+        description='The organization permalink string', readonly=True),
+    'image_url': fields.String(
+        description='The organization logo URL', readonly=True)
+})
+
+
 @ns.route('/suggest/', endpoint='suggest_organizations')
 class OrganizationSuggestAPI(API):
     @apiv2.doc('suggest_organizations')
@@ -51,7 +64,7 @@ class OrganizationSuggestAPI(API):
         return [
             {
                 'id': org.id,
-                'title': org.title,
+                'name': org.name,
                 'acronym': org.acronym,
                 'slug': org.slug,
                 'image_url': org.image_url,

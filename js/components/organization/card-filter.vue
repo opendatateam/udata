@@ -84,11 +84,11 @@ export default {
     },
     watch: {
         search_query: function(query) {
-            APIV2.organizations.search_organizations({
+            APIV2.organizations.suggest_organizations({
                 q: query,
                 size: 9
             }, (data) => {
-                this.completions = data.obj.data;
+                this.completions = data.obj;
             }, function(message) {
                 log.error('Unable to fetch organizations', message);
             });
