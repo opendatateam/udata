@@ -16,7 +16,7 @@ from udata.core.storages.api import (
 )
 
 from .api_fields import (
-    reuse_fields, reuse_page_fields, reuse_suggestion_fields,
+    reuse_fields, reuse_page_fields,
     reuse_type_fields,
 )
 from .forms import ReuseForm
@@ -190,35 +190,6 @@ class ReuseFeaturedAPI(API):
         delete={'id': 'unfollow_reuse'})
 class FollowReuseAPI(FollowAPI):
     model = Reuse
-
-
-suggest_parser = api.parser()
-suggest_parser.add_argument(
-    'q', help='The string to autocomplete/suggest', location='args',
-    required=True)
-suggest_parser.add_argument(
-    'size', type=int, help='The amount of suggestion to fetch',
-    location='args', default=10)
-
-
-@ns.route('/suggest/', endpoint='suggest_reuses')
-class SuggestReusesAPI(API):
-    @api.doc('suggest_reuses')
-    @api.expect(suggest_parser)
-    @api.marshal_list_with(reuse_suggestion_fields)
-    def get(self):
-        '''Suggest reuses'''
-        args = suggest_parser.parse_args()
-        return [
-            {
-                'id': opt['text'],
-                'title': opt['payload']['title'],
-                'score': opt['score'],
-                'slug': opt['payload']['slug'],
-                'image_url': opt['payload']['image_url'],
-            }
-            for opt in search.suggest(args['q'], 'reuse_suggest', args['size'])
-        ]
 
 
 @ns.route('/<reuse:reuse>/image', endpoint='reuse_image')

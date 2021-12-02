@@ -256,15 +256,14 @@ class ReuseAPITest:
         assert Follow.objects.following(user).count() == 0
         assert Follow.objects.followers(user).count() == 0
 
-    def test_suggest_reuses_api(self, api, autoindex):
+    def test_suggest_reuses_api(self, api):
         '''It should suggest reuses'''
-        with autoindex:
-            for i in range(4):
-                ReuseFactory(
-                    title='test-{0}'.format(i) if i % 2 else faker.word(),
-                    visible=True)
+        for i in range(4):
+            ReuseFactory(
+                title='test-{0}'.format(i) if i % 2 else faker.word(),
+                visible=True)
 
-        response = api.get(url_for('api.suggest_reuses'),
+        response = api.get(url_for('apiv2.suggest_reuses'),
                            qs={'q': 'tes', 'size': '5'})
         assert200(response)
 
@@ -275,19 +274,17 @@ class ReuseAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'title' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
             assert suggestion['title'].startswith('test')
 
-    def test_suggest_reuses_api_unicode(self, api, autoindex):
+    def test_suggest_reuses_api_unicode(self, api):
         '''It should suggest reuses with special characters'''
-        with autoindex:
-            for i in range(4):
-                ReuseFactory(
-                    title='testé-{0}'.format(i) if i % 2 else faker.word(),
-                    visible=True)
+        for i in range(4):
+            ReuseFactory(
+                title='testé-{0}'.format(i) if i % 2 else faker.word(),
+                visible=True)
 
-        response = api.get(url_for('api.suggest_reuses'),
+        response = api.get(url_for('apiv2.suggest_reuses'),
                            qs={'q': 'testé', 'size': '5'})
         assert200(response)
 
@@ -298,24 +295,22 @@ class ReuseAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'title' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
             assert suggestion['title'].startswith('test')
 
-    def test_suggest_reuses_api_no_match(self, api, autoindex):
+    def test_suggest_reuses_api_no_match(self, api):
         '''It should not provide reuse suggestion if no match'''
-        with autoindex:
-            ReuseFactory.create_batch(3, visible=True)
+        ReuseFactory.create_batch(3, visible=True)
 
-        response = api.get(url_for('api.suggest_reuses'),
+        response = api.get(url_for('apiv2.suggest_reuses'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) == 0
 
-    def test_suggest_reuses_api_empty(self, api, autoindex):
+    def test_suggest_reuses_api_empty(self, api):
         '''It should not provide reuse suggestion if no data'''
         # self.init_search()
-        response = api.get(url_for('api.suggest_reuses'),
+        response = api.get(url_for('apiv2.suggest_reuses'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) == 0
