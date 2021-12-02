@@ -6,7 +6,7 @@
         {% if producer_type == 'organization' %}
         <div class="logo">
             <img class="fr-responsive-img" src="{{ organization.logo|placeholder('organization') }}" alt=""/>
-            <div class="logo-badge">
+            <div class="logo-badge logo-badge--bottom-right">
                 {{ badge_if_certified(organization) }}
             </div>
         </div>

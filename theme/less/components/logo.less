@@ -21,7 +21,7 @@ Because we can't blame anything or anyone for being too white, we came up with a
     display: inline-block;
     position: relative;
     background: white;
-    border: 1px solid @grey-50;
+    border: 1px solid @grey-100;
     padding: @spacing-sm;
 
     img {
@@ -32,15 +32,27 @@ Because we can't blame anything or anyone for being too white, we came up with a
         max-width: 140px;
     }
 
-    //Private or certified badge or whatever
+    // Private or certified badge or whatever
+    @logo-inset: -9px;
     .logo-badge {
         position: absolute;
-        top: -9px;
-        left: -9px;
+        top: @logo-inset;
+        left: @logo-inset;
 
         svg {
             width: 24px;
             height: 24px;
         }
     }
+    // TODO: Use this as default when we want all badges at the bottom right
+    .logo-badge--bottom-right {
+            bottom: @logo-inset;
+            right: @logo-inset;
+            top: inherit;
+            left: inherit;
+        }
+}
+
+.logo--80 {
+    width: 80px;
 }

@@ -2,6 +2,7 @@
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 {% from theme('macros/paginator.html') import paginator with context %}
+{% from theme('macros/certified.html') import badge_if_certified with context %}
 
 {% set is_hidden = (reuses.total or 0) + (datasets.total or 0) <= 0 %}
 {% set meta = {
@@ -21,174 +22,154 @@
 {% endblock %}
 
 {% block main_content %}
-<section class="organization-container">
-    <header class="organization-header hagrid">
-        {% if org.deleted %}
-        <div class="well-grey-100 well mb-sm">
-            {{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}
-        </div>
-        {% endif %}
-        <div class="row">
-            <div class="col-1 col-md-6 logo">
-                <img src="{{org.logo(80)|placeholder('organization') }}" alt="" />
-            </div>
-            <div class="hidden visible-md col align-items-center justify-end">
-                {{ follow_btn(org) }}
-            </div>
-            <div class="col-10 col-md-12 mt-md-sm">
-                <div class="row-inline no-wrap align-items-center">
-                    {% if org.public_service %}
-                    <span class="icon-lg text-align-center mr-sm">{% include theme("svg/certified.svg") %}</span>
-                    {% endif %}
-                    <h1 class="my-0">
-                        {{ org.name }}
-                    </h1>
-                </div>
-                <div class="mt-xs">
-                    <ul class="row-inline align-items-center f-bold">
-                        <li class="hidden-md">
-                            {{ follow_btn(org) }}
-                        </li>
-                        {% if total_datasets > 0 %}
-                        <li class="ml-md ml-md-0">
-                            <a href="#organization-datasets" class="text-blue-400">
-                                {{ total_datasets }} {{ _('Datasets') }}
-                            </a>
-                        </li>
-                        {% endif %}
-                        {% if total_reuses > 0 %}
-                        <li class="ml-md">
-                            <a href="#organization-reuses" class="text-green-400">
-                                {{ total_reuses }} {{ _('Reuses') }}
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </header>
-    <section class="organization-content container pt-md pb-xl">
-        <div class="row">
-            <div class="col-12">{{ org.description|markdown }}</div>
-        </div>
-    </section>
-</section>
-
-{# TODO: proper <select> also needed in discussions and footer, then sort from URL param #}
-
-<section class="organization-secondary">
-    {% if datasets and datasets|length > 0 %}
-    <section id="organization-datasets" class="organization-datasets bg-grey-50 p-xl p-md-md">
-        <div class="hagrid">
-            <div class="row">
-                <div class="col-11 offset-1 row-inline justify-between">
-                    <h2>{{ _('Datasets') }}<sup>{{ total_datasets }}</sup></h2>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12">
-                    {% for dataset in datasets %}
-                    <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
-                        class="unstyled w-100">{% include theme('dataset/search-result.html') %}
-                    </a>
-                    {% endfor %}
-                </div>
-            </div>
-            {{ paginator(datasets, arg_name='datasets_page', url='#organization-datasets') }}
-        </div>
-    </section>
+<header class="container">
+    {% if org.deleted %}
+    <div class="well-grey-100 well fr-mb-3v">
+        {{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}
+    </div>
     {% endif %}
-    {% if reuses and reuses|length > 0 %}
-    <section id="organization-reuses" class="organization-reuses p-xl">
-        <div class="container">
-            <div>
-                <h2>{{ _('Reuses') }}<sup>{{ total_reuses }}</sup></h2>
+    <div class="row align-items-start">
+        <div class="col-auto logo logo--80">
+            <img src="{{org.logo(80)|placeholder('organization') }}" alt="" />
+            <div class="logo-badge logo-badge--bottom-right">
+                {{ badge_if_certified(org) }}
             </div>
-            <div>
-                <ul class="row">
-                    {% for reuse in reuses %}
-                    <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
-                        <a href="{{ url_for('reuses.show', reuse=reuse) }}"
-                            title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+        </div>
+        <div class="col">
+            <div class="row-inline no-wrap align-items-center">
+                <h1 class="fr-my-0 fr-h1">
+                    {{ org.name }}
+                </h1>
+            </div>
+            <div class="fr-mt-1w">
+                <ul class="row-inline align-items-center f-bold">
+                    {% if total_datasets > 0 %}
+                    <li>
+                        <a href="#organization-datasets">
+                            {{ total_datasets }} {{ _('Datasets') }}
                         </a>
                     </li>
-                    {% endfor %}
+                    {% endif %}
+                    {% if total_reuses > 0 %}
+                    <li class="fr-ml-2w">
+                        <a href="#organization-reuses">
+                            {{ total_reuses }} {{ _('Reuses') }}
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
-                {{ paginator(reuses, arg_name='reuses_page', url='#organization-reuses') }}
             </div>
         </div>
-    </section>
-    {% endif %}
-    <section class="organization-members p-xl">
-        <div class="container">
-            <h2>{{ _('Members') }}<sup>{{ org.members|length or 0 }}</sup></h2>
-            <div class="row">
-                {% for member in org.members %}
-                {% set user = member.user %}
-                {% set role = member.role %}
-                <div
-                    class="col-4 col-md-12 pl-md-0 border-md-0 pb-sm {% if not loop.index0 % 3 == 0 %}border-left pl-lg{% endif %}">
-                    {% include theme('user/card.html') %}</div>
-                {% endfor %}
-            </div>
+        <div class="col-auto fr-mt-1v row-inline align-items-end flex-direction-column">
+            {{ follow_btn(org) }}
+            {% if can_edit %}
+            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
+                    href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">{{ _('Modify organization') }}</a>
+            {% endif %}
         </div>
-    </section>
-    <section class="organization-actions p-xl">
-        <div class="container">
-            <div class="row">
-                <div class="col-6 col-md-12">
-                    <h3>{{ _('Technical details') }}</h3>
-                    <dl class="text-grey-300 fs-sm">
-                        <div>
-                            <dt class="f-light">ID</dt>
-                            <dd class="f-bold m-0">{{ org.id }}</dd>
-                        </div>
-                        <div class="my-sm">
-                            <dt class="f-light">{{ _('Creation date') }}</dt>
-                            <dd class="f-bold m-0">{{ org.created_at|dateformat(format='long') }}</dd>
-                        </div>
-                        <div>
-                            <dt class="f-light">{{ _('Modification date') }}</dt>
-                            <dd class="f-bold m-0">{{ org.last_modified|dateformat(format='long') }}</dd>
-                        </div>
-                    </dl>
+    </div>
+</header>
+<section class="bg-beige fr-py-5w fr-mt-6w fr-mb-9v">
+    <div class="container vuejs">
+        <h2 id="description" class="fr-h2 fr-mb-0">{{ _('Description') }}</h2>
+        <read-more>
+            {{ org.description|markdown }}
+        </read-more>
+    </div>
+</section>
+{# TODO: proper <select> also needed in discussions and footer, then sort from URL param #}
+{% if datasets and datasets|length > 0 %}
+<section id="organization-datasets" class="fr-py-9v container">
+    <h2>{{ _('Datasets') }}<sup>{{ total_datasets }}</sup></h2>
+    {% for dataset in datasets %}
+        <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
+            class="unstyled w-100">{% include theme('dataset/search-result.html') %}
+        </a>
+    {% endfor %}
+    {{ paginator(datasets, arg_name='datasets_page', url='#organization-datasets') }}
+</section>
+{% endif %}
+{% if reuses and reuses|length > 0 %}
+<section id="organization-reuses" class="fr-py-9v container">
+    <h2>{{ _('Reuses') }}<sup>{{ total_reuses }}</sup></h2>
+    <ul class="row">
+            {% for reuse in reuses %}
+            <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
+                <a href="{{ url_for('reuses.show', reuse=reuse) }}"
+                    title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    {{ paginator(reuses, arg_name='reuses_page', url='#organization-reuses') }}
+</section>
+{% endif %}
+<section class="fr-py-9v container">
+    <h2>{{ _('Members') }}<sup>{{ org.members|length or 0 }}</sup></h2>
+    <div class="row">
+        {% for member in org.members %}
+        {% set user = member.user %}
+        {% set role = member.role %}
+        <div
+            class="col-4 col-md-12 pl-md-0 border-md-0 pb-sm {% if not loop.index0 % 3 == 0 %}border-left pl-lg{% endif %}"
+        >
+            {% include theme('user/card.html') %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<section class="fr-py-9v container">
+    <div class="row">
+        <div class="col-6 col-md-12">
+            <h3>{{ _('Technical details') }}</h3>
+            <dl class="text-grey-300 fs-sm">
+                <div>
+                    <dt class="f-light">ID</dt>
+                    <dd class="f-bold fr-m-0">{{ org.id }}</dd>
                 </div>
-                <div class="col-6 col-md-12  my-md-lg">
-                    <h3>{{ _('Actions') }}</h3>
-                    <ul class="nav-list">
-                        {% if can_edit and not read_only_mode %}
-                        <li class="my-md">
-                            <a class="nav-link"
-                                href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">{{ _('Modify information') }}</a>
-                        </li>
-                        {% endif %}
-                        <li class="my-md">
-                            <a href="{{ url_for('organizations.datasets_csv', org=org) }}"
-                                class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
-                        </li>
-
-                        {% set member = org.member(current_user) %}
-                        {% if not member %}
-                            {% set pending_request = org.pending_request(current_user) %}
-                            {% if not pending_request and not read_only_mode %}
-                            <li class="my-md vuejs">
-                                <request-membership orga='{{org.id}}'>
-                                </request-membership>
-                            </li>
-                            {% elif pending_request %}
-                            <li class="my-md">
-                                <span
-                                class="f-light f-italic">{{ _('Pending request to join this organization') }}</a>
-                            </li>
-                            {% endif %}
-                        {% endif %}
-
-
-                    </ul>
+                <div class="my-sm">
+                    <dt class="f-light">{{ _('Creation date') }}</dt>
+                    <dd class="f-bold fr-m-0">{{ org.created_at|dateformat(format='long') }}</dd>
                 </div>
-            </div>
+                <div>
+                    <dt class="f-light">{{ _('Modification date') }}</dt>
+                    <dd class="f-bold fr-m-0">{{ org.last_modified|dateformat(format='long') }}</dd>
+                </div>
+            </dl>
         </div>
-    </section>
+        <div class="col-6 col-md-12  my-md-lg">
+            <h3>{{ _('Actions') }}</h3>
+            <ul class="nav-list">
+                {% if can_edit and not read_only_mode %}
+                <li class="my-md">
+                    <a class="nav-link"
+                        href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">{{ _('Modify information') }}</a>
+                </li>
+                {% endif %}
+                <li class="my-md">
+                    <a href="{{ url_for('organizations.datasets_csv', org=org) }}"
+                        class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
+                </li>
+
+                {% set member = org.member(current_user) %}
+                {% if not member %}
+                    {% set pending_request = org.pending_request(current_user) %}
+                    {% if not pending_request and not read_only_mode %}
+                    <li class="my-md vuejs">
+                        <request-membership orga='{{org.id}}'>
+                        </request-membership>
+                    </li>
+                    {% elif pending_request %}
+                    <li class="my-md">
+                        <span
+                            class="f-light f-italic">{{ _('Pending request to join this organization') }}</span>
+                    </li>
+                    {% endif %}
+                {% endif %}
+
+
+            </ul>
+        </div>
+    </div>
 </section>
 {% endblock %}

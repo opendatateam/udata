@@ -4,6 +4,8 @@
 
 - Add a banner for the new search beta on datasets search page [#43](https://github.com/etalab/udata-front/pull/43)
 - Remove Issues logic [#42](https://github.com/etalab/udata-front/pull/42)
+- :warning: @grey-100 is now `#e5e5e5`
+- Standardize organization page similar to dataset and reuse pages [#40](https://github.com/etalab/udata-front/pull/40)
 
 ## 1.1.2 (2021-11-23)
 
