@@ -52,5 +52,5 @@ class SuggestZonesAPI(API):
                 'level': geozone.level,
                 'keys': geozone.keys
             }
-            for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size'])
+            for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size']) if geozone.is_current
         ]
