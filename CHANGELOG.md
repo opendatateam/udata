@@ -6,6 +6,7 @@
 - Remove Issues logic [#42](https://github.com/etalab/udata-front/pull/42)
 - :warning: @grey-100 is now `#e5e5e5`
 - Standardize organization page similar to dataset and reuse pages [#40](https://github.com/etalab/udata-front/pull/40)
+- Fix RGAA criterion 10.7 Each element focusable has a visible focus [#46](https://github.com/etalab/udata-front/pull/46)
 
 ## 1.1.2 (2021-11-23)
 
