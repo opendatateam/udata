@@ -17,7 +17,7 @@ export default {
     },
   },
   methods: {
-    identicon: function (id, size = 60) {
+    identicon: function (id, size = 40) {
       return `${config.api_root}avatars/${id}/${size}`;
     },
   },

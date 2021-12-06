@@ -1,75 +1,69 @@
 <template>
-  <div class="thread-wrapper" :id="discussionUrl(id)">
-    <header class="thread-header">
-      <div class="thread-status" v-if="closed">
+  <div class="bg-beige fr-mt-2w" :id="discussionUrl(id)">
+    <header class="fr-grid-row fr-grid-row--middle justify-between fr-py-2w fr-px-3w border-bottom border-g400">
+      <div class="fr-col-auto text-orange-200 fr-text--bold fr-pr-2w" v-if="closed">
         <span>{{ $t("Discussion closed") }}</span>
       </div>
-      <div class="thread-title">{{ title }}</div>
-      <div class="thread-link">
+      <h3 class="fr-p-2w fr-p-md-0 fr-h6 fr-mb-0">{{ title }}</h3>
+      <div class="text-align-right">
         <a
-          :aria-label="$t('Discussion permalink')"
           :href="discussionUrl(id, true)"
-          v-html="LinkIcon"
-        ></a>
+          class="fr-link fr-link--icon-right fr-fi-links-fill unstyled"
+        >
+          {{$t('Copy permalink')}}
+        </a>
       </div>
     </header>
-    <div class="thread-content">
+    <div>
       <transition-group name="list">
         <article
-          v-for="(comment, index) in _discussion"
+          v-for="comment in _discussion"
           v-if="!_collapsed"
-          class="thread-comment"
-          :id="commentUrl(id, index)"
-          :key="commentUrl(id, index)"
+          class="thread-comment fr-py-3w fr-px-3w fr-pr-5w"
+          :key="'comment-' + comment.id"
         >
-          <div class="comment-meta">
-            <avatar :user="comment.posted_by"></avatar>
-            <div>
+          <div class="fr-grid-row fr-grid-row--gutters">
+            <avatar class="fr-col-auto" :user="comment.posted_by"></avatar>
+            <div class="fr-col">
               <Author :author="comment.posted_by" :badge="false" />
-              <div class="text-grey-300 mt-xxs">
+              <div class="fr-text--sm text-g600 fr-mb-0">
                 {{ $filters.formatDate(comment.posted_on) }}
               </div>
+              <div class="white-space-pre-wrap">
+                <p class="fr-mt-3v fr-mb-0">{{ comment.content }}</p>
+              </div>
             </div>
-            <div class="thread-link">
-              <a
-                :aria-label="$t('Comment permalink')"
-                :href="commentUrl(id, index, true)"
-                v-html="LinkIcon"
-              ></a>
-            </div>
-          </div>
-          <div class="thread-box">
-            <p class="m-0">{{ comment.content }}</p>
           </div>
         </article>
       </transition-group>
-      <article
-        class="thread-collapse"
-        v-if="_collapsed"
+      <div class="fr-grid-row" v-if="_collapsed">
+        <button
+        class="fr-px-3w fr-col fr-link text-g600 fr-text--sm fr-mb-0 rounded-0"
         @click.prevent="collapsed = false"
       >
         {{ _discussion.length }} {{ $t("messages") }}
-      </article>
+      </button>
+      </div>
     </div>
-    <footer class="thread-footer">
-      <div v-if="!closed && !readOnlyEnabled">
-        <a
-          class="thread-reply-cta unstyled"
+    <footer class="fr-py-2w fr-px-3w border-top border-g400">
+      <template v-if="!closed && !readOnlyEnabled">
+        <button
+          class="btn--flex btn-secondary btn-secondary-grey-500 fr-btn fr-btn--secondary fr-btn--icon-right fr-fi-arrow-right-s-line"
           v-if="!showForm"
           @click.stop="displayForm"
-          tabindex="0"
         >
           {{ $t("Reply") }}
-        </a>
+        </button>
         <thread-reply
           :subjectId="id"
-          v-else="showForm"
+          v-else
           :onSubmit="replyToThread"
+          @close="showForm = false"
         />
-      </div>
+      </template>
       <div v-if="closed" class="text-grey-300">
         {{ $t("The discussion was closed by") }} &#32;
-        <span class="text-blue-200 px-xxs"><Author :author="closed_by" /></span>
+        <strong class="px-xxs"><Author :author="closed_by" /></strong>
         {{ $t("on") }} {{ $filters.formatDate(closed) }}
       </div>
     </footer>
@@ -80,54 +74,13 @@
 import ThreadReply from "./thread-reply.vue";
 import Avatar from "./avatar.vue";
 import Author from "./author.vue";
-import LinkIcon from "svg/permalink.svg";
 import config from "../../config";
 
 export default {
-  data() {
-    return {
-      showForm: false, //User has clicked on the "add comment" btn
-      updatedDiscussion: null, //This is a bit ugly, we hold two states here for the updated discussion when the user replies. Should probably hoist this up.
-      LinkIcon, //Little svg loading hack
-      collapsed: true, //The thread is collapsed by default for closed discussions
-      readOnlyEnabled: config.read_only_enabled,
-    };
-  },
-  computed: {
-    _discussion: function () {
-      //And this is the logic to get either the original discussion passed in prop or the updated one
-      return this.updatedDiscussion ? this.updatedDiscussion : this.discussion;
-    },
-    _collapsed() {
-      return this.closed && this.collapsed;
-    },
-  },
   components: {
     "thread-reply": ThreadReply,
     Avatar,
     Author,
-  },
-  methods: {
-    discussionUrl: (id, link = false) => (link ? "#" : "") + "discussion-" + id, //Permalink helpers
-    commentUrl: function (id, index, link = false) {
-      return this.discussionUrl(id, link) + "-" + index;
-    },
-    replyToThread: function (values) {
-      const vm = this;
-      return this.$api
-        .post("/discussions/" + vm.id + "/", values)
-        .then((resp) => resp.data)
-        .then((updatedDiscussion) => {
-          this.updatedDiscussion = updatedDiscussion.discussion;
-          this.showForm = false;
-        });
-    },
-    displayForm: function () {
-      this.$auth(
-        this.$t("You must be logged in to start a discussion.")
-      );
-      this.showForm = true;
-    },
   },
   props: {
     id: String,
@@ -137,5 +90,43 @@ export default {
     closed: String,
     closed_by: Object,
   },
+  data() {
+    return {
+      showForm: false,
+      updatedDiscussion: null,
+      collapsed: true,
+      readOnlyEnabled: config.read_only_enabled,
+    };
+  },
+  computed: {
+    _discussion() {
+      // Discussion updates are saved locally only
+      // This is the logic to get either the original discussion or the updated one
+      return this.updatedDiscussion ? this.updatedDiscussion : this.discussion;
+    },
+    _collapsed() {
+      return this.closed && this.collapsed;
+    },
+  },
+  methods: {
+    discussionUrl(id, link = false) {
+      return (link ? "#" : "") + "discussion-" + id;
+    },
+    replyToThread (values) {
+      return this.$api
+        .post("/discussions/" + this.id + "/", values)
+        .then((resp) => resp.data)
+        .then((updatedDiscussion) => {
+          this.updatedDiscussion = updatedDiscussion.discussion;
+          this.showForm = false;
+        });
+    },
+    displayForm() {
+      this.$auth(
+        this.$t("You must be logged in to start a discussion.")
+      );
+      this.showForm = true;
+    },
+  }
 };
 </script>

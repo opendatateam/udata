@@ -1,3 +1,15 @@
+<!--
+---
+name: Read More
+category: Interactions
+---
+
+# Read More
+
+A very simple component that display its content up to a maximum height and then add a "read more" link.
+
+-->
+
 <template>
   <div ref="container" class="read-more" :class="{expand: expanded}" :style="{height: defaultHeight + 'px'}">
     <slot></slot>

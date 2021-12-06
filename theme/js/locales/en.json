@@ -13,8 +13,6 @@
   "Submit": "Submit",
   "Error sending response": "Error sending response",
   "Discussion closed": "Discussion closed",
-  "Discussion permalink": "Discussion permalink",
-  "Comment permalink": "Comment permalink",
   "messages": "messages",
   "Reply": "Reply",
   "The discussion was closed by": "The discussion was closed by",
@@ -24,10 +22,8 @@
   "New discussion": "New discussion",
   "Title": "Title",
   "Message": "Message",
-  "Comment as": "Comment as",
   "You are seeing a specific discussion about this dataset": "You are seeing a specific discussion about this dataset",
   "See all discussions about this dataset": "See all discussions about this dataset",
-  "Sort by:": "Sort by:",
   "Discussion creation": "Discussion creation",
   "Last reply": "Last reply",
   "An error occurred while fetching discussions": "An error occurred while fetching discussions",
@@ -117,5 +113,8 @@
   "Available": "Available",
   "Unavailable": "Unavailable",
   "Come try out our": "Come try out our {dataset_search}.",
-  "new dataset search": "new dataset search"
+  "new dataset search": "new dataset search",
+  "Close": "Close",
+  "Copy permalink": "Copy permalink",
+  "Discussions": "Discussions"
 }

@@ -1,50 +1,54 @@
 <template>
-  <div class="thread-create">
-    <a
-      class="btn-action my-xl"
-      @click.prevent="displayForm"
-      v-if="!showForm"
-      tabindex="0"
-    >
-      <span v-html="AddIcon"></span>
-      <span>{{ $t("Start a new discussion") }}</span>
-    </a>
-    <div v-if="showForm" class="thread-wrapper">
-      <div class="thread-header">
-        <div class="thread-title">{{ $t("New discussion") }}</div>
+  <div class="thread-create fr-mt-2w">
+    <ThreadsCreateButton
+      v-if="showCreateButton && !showForm"
+      :onClick="displayForm"
+    />
+    <div v-if="showForm" class="bg-beige">
+      <div class="fr-grid-row fr-grid-row--middle border-bottom border-g400 fr-py-2w fr-px-3w">
+        <div class="fr-col fr-h6 fr-mb-0">{{ $t("New discussion") }}</div>
+        <div>
+          <button class="fr-link--close fr-link text-grey-500 fr-mr-0" @click="hideForm">
+            {{$t('Close')}}
+          </button>
+        </div>
       </div>
-      <div class="thread-comment">
+      <div class="thread-comment fr-py-3w fr-px-3w">
         <form @submit.prevent="submit">
-          <div>
-            <label for="thread-title" class="fs-sm f-bold mb-sm">{{
-              $t("Title")
-            }}</label>
-          </div>
-          <input
-            type="text"
-            id="thread-title"
-            v-model="title"
-            :placeholder="$t('Title')"
+          <div class="fr-input-group">
+            <label for="thread-title" class="fr-label">
+              {{ $t("Title") }}
+            </label>
+            <input
+              class="fr-input"
+              type="text"
+              id="thread-title"
+              v-model="title"
+              :placeholder="$t('Title')"
+              required="required"
           />
-          <div>
-            <label for="thread-comment" class="fs-sm f-bold my-sm">{{
-              $t("Message")
-            }}</label>
           </div>
-          <textarea
-            id="thread-comment"
-            v-model="comment"
-            :placeholder="$t('Comment')"
-          />
-          <footer class="row-inline justify-between align-items-center">
-            <span class="text-grey-300 fs-sm">
-              {{ $t("Comment as") }}
+          <div class="fr-input-group">
+            <label for="thread-comment" class="fr-label">
+              {{ $t("Message") }}
+            </label>
+            <textarea
+              id="thread-comment"
+              v-model="comment"
+              :placeholder="$t('Comment')"
+              class="fr-input"
+              required="required"
+            ></textarea>
+          </div>
+          <footer class="fr-grid-row justify-between fr-grid-row--middle">
+            <span class="text-g600 fr-text--sm fr-mb-0">
+              {{ $t("Reply as") }}
               <Author :author="user" />
             </span>
             <input
               type="submit"
               :value="$t('Submit')"
-              class="btn-secondary btn-secondary-green-300"
+              class="btn-secondary btn-secondary-grey-500 fr-btn fr-btn--secondary"
             />
           </footer>
         </form>
@@ -56,12 +60,12 @@
 <script>
 import config from "../../config";
 import Author from "./author";
-import AddIcon from "svg/actions/add.svg"; //Not the best but we don't have many svg
-
-const log = console.log;
+import AddIcon from "svg/actions/add.svg";
+import ThreadsCreateButton from "./threads-create-button"; //Not the best but we don't have many svg
 
 export default {
   components: {
+    ThreadsCreateButton,
     Author
   },
   data() {
@@ -75,16 +79,23 @@ export default {
     };
   },
   props: {
+    showCreateButton: {
+      type: Boolean,
+      default: false
+    },
     subjectId: String,
     subjectClass: String,
     onSubmit: Function,
   },
   methods: {
-    displayForm: function () {
+    displayForm() {
       this.$auth(
         this.$t("You must be logged in to start a discussion.")
       );
       this.showForm = true;
+    },
+    hideForm() {
+      this.showForm = false;
     },
     submit() {
       const vm = this;

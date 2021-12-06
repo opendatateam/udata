@@ -1,12 +1,12 @@
 <template>
-    <strong class="author">
+    <span class="fr-text--sm fr-mb-0">
     {{
         author.first_name +
         " " +
         author.last_name
     }}
     <span v-if="badge" class="badge ml-sm">{{ $t("Admin") }}</span>
-    </strong>
+    </span>
 </template>
 
 <script>

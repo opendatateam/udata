@@ -103,6 +103,13 @@ Similar to the contextual text color classes, easily set the background of an el
 @green-350: #4ca98d;
 @green-400: #008452;
 @green-500: #023d13;
+@success-425-625: #18753c; // Todo: Replace it with DSFR variable when we update it to 1.2
+@success-975-75: #dffee6; // Todo: Replace it with DSFR variable when we update it to 1.2
+
+@beige: var(--beige);
+@g200: var(--g200);
+@g400: var(--g400);
+@g600: var(--g600);
 
 @contrast-white: @grey-300;
 @contrast-black: @white;
@@ -145,5 +152,9 @@ each(@colors, {
 });
 
 .bg-beige {
-    background-color: var(--beige);
+    background-color: @beige;
+}
+
+.text-g600 {
+    color: @g600 !important;
 }
