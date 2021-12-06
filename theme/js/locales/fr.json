@@ -13,8 +13,6 @@
   "Submit": "Soumettre",
   "Error sending response": "Erreur lors de l'envoi de la réponse",
   "Discussion closed": "Discussion fermée",
-  "Discussion permalink": "Permalien vers la discussion",
-  "Comment permalink": "Permalien vers le commentaire",
   "messages": "messages",
   "Reply": "Répondre",
   "The discussion was closed by": "La discussion a été close par",
@@ -24,10 +22,8 @@
   "New discussion": "Nouvelle discussion",
   "Title": "Titre",
   "Message": "Message",
-  "Comment as": "Commenter en tant que",
   "You are seeing a specific discussion about this dataset": "Vous consultez une discussion spécifique sur ce jeu de données",
   "See all discussions about this dataset": "Voir toutes les discussions sur ce jeu de données",
-  "Sort by:": "Trier par :",
   "Discussion creation": "Début de discussion",
   "Last reply": "Dernière réponse",
   "An error occurred while fetching discussions": "Une erreur est survenue lors de la récupération des discussions",
@@ -117,5 +113,8 @@
   "Available": "Disponible",
   "Unavailable": "Indisponible",
   "Come try out our": "Venez tester notre {dataset_search}.",
-  "new dataset search": "nouvelle recherche de jeux de données"
+  "new dataset search": "nouvelle recherche de jeux de données",
+  "Close": "",
+  "Copy permalink": "",
+  "Discussions": ""
 }

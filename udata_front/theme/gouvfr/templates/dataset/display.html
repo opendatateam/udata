@@ -401,16 +401,17 @@
         </div>
         {% endif %}
         {% endblock %}
-
-        <h2 id="community-discussions" class="fr-h2">{{ _('Discussions') }} <sup class="discussions-count">0</sup></h2>
-        <div class="row">
-            <div class="col-4 col-md-12 text-grey-300">
-                <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
-            </div>
-        </div>
         <div class="vuejs">
-            <discussion-threads ref="discussions" subject-id="{{ dataset.id }}"
-                subject-class="{{ dataset.__class__.__name__ }}">
+            <discussion-threads
+                ref="discussions"
+                subject-id="{{ dataset.id }}"
+                subject-class="{{ dataset.__class__.__name__ }}"
+            >
+                {% if dataset.organization %}
+                    <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
+                {% elif dataset.owner %}
+                    <p>{{ _('Discussion between the owner and the community about this dataset.') }}</p>
+                {% endif %}
             </discussion-threads>
         </div>
     </div>

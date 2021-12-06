@@ -16,7 +16,7 @@ The `url` prop is the API URL.
   <button
     @click.prevent="toggleFollow"
     type="button"
-    class="fr-btn fr-btn--secondary btn-secondary btn-secondary-orange-100 follow-button"
+    class="fr-btn fr-btn--secondary btn-secondary btn-secondary-orange-100 btn--flex follow-button"
     v-show="!readOnlyEnabled"
     :aria-label="label"
   >

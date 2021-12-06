@@ -233,15 +233,13 @@
     </section>
     <section class="community_container fr-pb-7w" id="community">
         <div class="container vuejs">
-            <h2 id="community-discussions" class="fr-h2">{{ _('Discussions') }} <sup class="discussions-count">0</sup>
-            </h2>
-            <div class="row">
-                <div class="col-4 col-md-12 text-grey-300">
-                    <p>{{ _('Discussion between the organization and the community about this dataset.') }}</p>
-                </div>
-            </div>
             <discussion-threads ref="discussions" subject-id="{{ reuse.id }}"
                 subject-class="{{ reuse.__class__.__name__ }}">
+                {% if reuse.organization %}
+                    <p>{{ _('Discussion between the organization and the community about this reuse.') }}</p>
+                {% elif reuse.owner %}
+                    <p>{{ _('Discussion between the owner and the community about this reuse.') }}</p>
+                {% endif %}
             </discussion-threads>
         </div>
     </section>

@@ -37,7 +37,22 @@ Sometimes you really want more than one link, that's what `.nav-list` are for.
     <li><a href="#" class="nav-link">toutes les actualités</a></li>
 </ul>
 ```
+
+## From DSFR
+
+You can use links from DSFR. It uses DSFR colors and conventions. It allows you to choose an optional icon to show :
+- on the left
+- on the right
+- an icon alone (bad practice)
+
+```dsfr-links.html
+<a class="fr-link" href="#">lien simple</a>
+<a class="fr-link fr-fi-arrow-right-line fr-link--icon-right" href="#">lien simple avec icône à droite</a>
+<a class="fr-link fr-fi-arrow-right-line fr-link--icon-left" href="#">lien simple avec icône à gauche</a>
+```
+
 */
+@import (less) "@gouvfr/dsfr/dist/css/links.css";
 
 a {
     color: @blue-400;
@@ -73,6 +88,7 @@ a {
     position: relative;
     margin-left: 0.75em;
     color: @grey-400;
+    --bf500: @grey-400;
     font-weight: @font-weight-bold;
     text-decoration: underline;
     text-decoration-color: @grey-200;
@@ -84,7 +100,7 @@ a {
         }
     }
 
-    &::before {
+    &:not(.nav-link--no-icon)::before {
         position: absolute;
         left: -0.75em;
         width: 0.5em;
@@ -103,4 +119,8 @@ a {
         margin-bottom: @spacing-xs;
         margin-left: 0;
     }
+}
+
+.fr-link.rounded-0 {
+    .rounded-0;
 }
