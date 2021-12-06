@@ -44,7 +44,10 @@ reuse_suggestion_fields = apiv2.model('ReuseSuggestion', {
     'title': fields.String(description='The reuse title', readonly=True),
     'slug': fields.String(
         description='The reuse permalink string', readonly=True),
-    'image_url': fields.String(description='The reuse thumbnail URL')
+    'image_url': fields.String(description='The reuse thumbnail URL'),
+    'page': fields.UrlFor(
+        'reuses.show_redirect', lambda o: {'reuse': o['slug']},
+        description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse')
 })
 
 

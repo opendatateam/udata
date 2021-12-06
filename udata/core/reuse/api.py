@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import request
 
-from udata import search
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission

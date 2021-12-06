@@ -24,7 +24,6 @@ from datetime import datetime
 from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
 
-from udata import search
 from udata.auth import admin_permission
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser

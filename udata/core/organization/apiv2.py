@@ -48,7 +48,10 @@ org_suggestion_fields = apiv2.model('OrganizationSuggestion', {
     'slug': fields.String(
         description='The organization permalink string', readonly=True),
     'image_url': fields.String(
-        description='The organization logo URL', readonly=True)
+        description='The organization logo URL', readonly=True),
+    'page': fields.UrlFor(
+        'organizations.show_redirect', lambda o: {'org': o['slug']},
+        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization')
 })
 
 

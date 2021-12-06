@@ -1,6 +1,5 @@
 from flask_security import current_user, logout_user
 
-from udata import search
 from udata.api import api, API
 from udata.api.parsers import ModelApiParser
 from udata.core import storages
