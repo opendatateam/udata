@@ -12,7 +12,7 @@ You have to inject the image as a backgroundImage CSS property, which can be don
 
 ```hero-image.html
 {% set image = post.image|placeholder('post') %}
-<div class="hero-news mb-xl" style="background-image: url('{{image}}')">
+<div class="hero-image mb-xl" style="background-image: url('{{image}}')">
     <div>You can put some content here and do some stuff if you'd like</div>
 </div>
 ```

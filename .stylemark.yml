@@ -1,4 +1,5 @@
 name: udata_front Ui-Kit
+match: '\.(js|cjs|vue|mjs|iced|liticed|coffee|litcoffee|ts|tsx|cs|ls|es6|es|jsx|sjs|co|eg|md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron|css|less|scss|sass)$'
 theme:
   logo: theme/less/images/logo.png
   css:
