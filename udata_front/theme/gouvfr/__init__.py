@@ -47,7 +47,7 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Reuses'), 'reuses.list'),
     nav.Item(_('Organizations'), 'organizations.list'),
     nav.Item(_('News'), 'posts.list'),
-    nav.Item(_('About'), 'gouvfr.show_page', args={'slug': 'about/a-propos'}),
+    nav.Item(_('About'), 'gouvfr.show_page', args={'slug': 'about/ressources'}),
     nav.Item(_('Contact us'), None, url='https://support.data.gouv.fr/'),
 ])
 
