@@ -114,8 +114,8 @@
   "Unavailable": "Unavailable",
   "Come try out our": "Come try out our {dataset_search}.",
   "new dataset search": "new dataset search",
-  "Close": "",
-  "Copy permalink": "",
-  "Discussions": "",
-  "Error getting search results.": ""
+  "Close": "Close",
+  "Copy permalink": "Copy permalink",
+  "Discussions": "Discussions",
+  "Error getting search results.": "Error getting search results."
 }

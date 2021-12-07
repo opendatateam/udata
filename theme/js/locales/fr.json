@@ -114,8 +114,8 @@
   "Unavailable": "Indisponible",
   "Come try out our": "Venez tester notre {dataset_search}.",
   "new dataset search": "nouvelle recherche de jeux de données",
-  "Close": "",
-  "Copy permalink": "",
-  "Discussions": "",
-  "Error getting search results.": ""
+  "Close": "Fermer",
+  "Copy permalink": "Copier le lien vers la discussion",
+  "Discussions": "Discussions",
+  "Error getting search results.": "Erreur lors de l'obtention des résultats de la recherche."
 }
