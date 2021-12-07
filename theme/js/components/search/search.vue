@@ -179,7 +179,7 @@ import Empty from "./empty";
 import Pagination from "../pagination/pagination";
 import { generateCancelToken } from "../../plugins/api";
 import filterIcon from "svg/filter.svg";
-
+import axios from "axios";
 import queryString from "query-string";
 
 export default {
@@ -237,17 +237,17 @@ export default {
     };
   },
   computed: {
-    //Url for doing the same search (queryString only) on the reuse page
-    reuseUrl: function () {
+    // Url for doing the same search (queryString only) on the reuse page
+    reuseUrl() {
       return `${config.values.reuseUrl}?q=${this.queryString}`;
     },
-    //Is any filter active ?
-    isFiltered: function () {
+    // Is any filter active ?
+    isFiltered() {
       return Object.keys(this.facets).some(
         (key) => this.facets[key]?.length > 0
       );
     },
-    paramUrl: function () {
+    paramUrl() {
       let params = {};
       for (key in this.facets) {
         params[key] = this.facets[key];
@@ -263,10 +263,10 @@ export default {
       this.currentPage = 1;
       this.search();
     },
-    //Called on every facet selector change, updates the `facets.xxx` object then searches with new values
+    // Called on every facet selector change, updates the `facets.xxx` object then searches with new values
     handleSuggestorChange(facet) {
       return (values) => {
-        //Values can either be an array of varying length, or a String.
+        // Values can either be an array of varying length, or a String.
         if (Array.isArray(values)) {
           if (values.length > 1)
             this.facets[facet] = values.map((obj) => obj.value);
@@ -291,7 +291,7 @@ export default {
 
       this.currentRequest = generateCancelToken();
 
-      const promise = this.$api
+      this.$api
         .get("/datasets/", {
           cancelToken: this.currentRequest.token,
           params: {
@@ -305,8 +305,14 @@ export default {
         .then((result) => {
           this.results = result.data;
           this.totalResults = result.total;
+          this.loading = false;
         })
-        .finally(() => (this.loading = false));
+        .catch((error) => {
+          if (!axios.isCancel(error)) {
+            this.$toast.error(this.$t("Error getting search results."));
+            this.loading = false;
+          }
+        });
     },
     scrollToTop() {
       if (this.$refs.input)
