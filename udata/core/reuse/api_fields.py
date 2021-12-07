@@ -5,7 +5,7 @@ from udata.core.dataset.api_fields import dataset_fields
 from udata.core.organization.api_fields import org_ref_fields
 from udata.core.user.api_fields import user_ref_fields
 
-from .models import REUSE_TYPES, IMAGE_SIZES
+from .models import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
 
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
@@ -26,6 +26,8 @@ reuse_fields = api.model('Reuse', {
     'badges': fields.List(fields.Nested(badge_fields),
                           description='The reuse badges',
                           readonly=True),
+    'topic': fields.String(
+        description='The reuse topic', required=True, enum=list(REUSE_TOPICS)),
     'featured': fields.Boolean(
         description='Is the reuse featured', readonly=True),
     'private': fields.Boolean(
@@ -91,4 +93,9 @@ reuse_ref_fields = api.inherit('ReuseReference', base_reference, {
 reuse_type_fields = api.model('ReuseType', {
     'id': fields.String(description='The reuse type identifier'),
     'label': fields.String(description='The reuse type display name')
+})
+
+reuse_topic_fields = api.model('ReuseTopic', {
+    'id': fields.String(description='The reuse topic identifier'),
+    'label': fields.String(description='The reuse topic display name')
 })
