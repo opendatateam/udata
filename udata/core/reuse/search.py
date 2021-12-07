@@ -3,7 +3,7 @@ from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
 from udata.i18n import lazy_gettext as _
 from udata.core.site.models import current_site
 from udata.models import (
-    Reuse, Organization, Dataset, User, REUSE_TYPES
+    Reuse, Organization, Dataset, User, REUSE_TYPES, REUSE_TOPICS
 )
 from udata.search import (
     BoolBooster, GaussDecay, ModelSearchAdapter,
@@ -30,6 +30,10 @@ def reuse_type_labelizer(value):
     return REUSE_TYPES[value]
 
 
+def reuse_topic_labelizer(value):
+    return REUSE_TOPICS[value]
+
+
 def reuse_badge_labelizer(kind):
     return Reuse.__badges__.get(kind, '')
 
@@ -54,6 +58,7 @@ class ReuseSearch(ModelSearchAdapter):
         'i18n': String(index='not_analyzed')
     })
     badges = String(index='not_analyzed')
+    topic = String(index='not_analyzed')
     tag_suggest = Completion(analyzer=simple,
                              search_analyzer=simple,
                              payloads=False)
@@ -99,6 +104,7 @@ class ReuseSearch(ModelSearchAdapter):
                                 }),
         'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
         'featured': BoolFacet(field='featured'),
+        'topic': TermsFacet(field='topic', labelizer=reuse_topic_labelizer),
     }
     sorts = {
         'title': 'title.raw',
@@ -141,6 +147,7 @@ class ReuseSearch(ModelSearchAdapter):
             'organization': str(organization.id) if organization else None,
             'owner': str(owner.id) if owner else None,
             'type': reuse.type,
+            'topic': reuse.topic,
             'tags': reuse.tags,
             'tag_suggest': reuse.tags,
             'badges': [badge.kind for badge in reuse.badges],
