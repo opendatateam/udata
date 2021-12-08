@@ -22,7 +22,7 @@
         :name="typeFieldName"
         :placeholder="placeholder"
         :required="required"
-        :value="algo"
+        :value="currentType"
         :readonly="field.readonly || false"></input>
     <input type="text" class="form-control"
         :id="field.id"
