@@ -7,7 +7,9 @@
       <h3 class="fr-p-2w fr-p-md-0 fr-h6 fr-mb-0">{{ title }}</h3>
       <div class="text-align-right">
         <a
+          :id="id + '-copy'"
           :href="discussionUrl(id, true)"
+          :data-clipboard-text="discussionExternalUrl(id)"
           class="fr-link fr-link--icon-right fr-fi-links-fill unstyled"
         >
           {{$t('Copy permalink')}}
@@ -111,6 +113,10 @@ export default {
   methods: {
     discussionUrl(id, link = false) {
       return (link ? "#" : "") + "discussion-" + id;
+    },
+    discussionExternalUrl(id) {
+      hash = this.discussionUrl(id, true)
+      return window.location.origin + window.location.pathname + hash
     },
     replyToThread (values) {
       return this.$api
