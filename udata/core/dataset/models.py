@@ -266,6 +266,9 @@ class ResourceMixin(object):
 
     def clean(self):
         super(ResourceMixin, self).clean()
+        # Set checksum field to None if checksum.value isn't set
+        if self.checksum and not self.checksum.value:
+            self.checksum = None
         if not self.urlhash or 'url' in self._get_changed_fields():
             self.urlhash = hash_url(self.url)
 
