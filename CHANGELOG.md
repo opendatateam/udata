@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.0 (2021-12-10)
 
 - Add a banner for the new search beta on datasets search page [#43](https://github.com/etalab/udata-front/pull/43)
 - :warning: Remove Issues logic in accordance with udata [#42](https://github.com/etalab/udata-front/pull/42)
