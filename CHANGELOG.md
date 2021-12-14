@@ -13,6 +13,7 @@
   - Current suggest implementation moved from an Elasticsearch index to a MongoDB query using the term `contains`.
   - The new code is part of APIv2.
   - The previous code in APIv1 was removed.
+  - The user suggest was entirely removed, as its existence is now less pertinent because of the full text search.
   - JS API calls in the admin panel code were changes to reach APIv2 suggest endpoints.
 
 ## 3.2.2 (2021-11-23)

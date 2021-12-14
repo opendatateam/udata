@@ -1001,8 +1001,6 @@ class DatasetResourceAPITest(APITestCase):
 
         self.assertLessEqual(len(response.json), 5)
         self.assertGreater(len(response.json), 1)
-        # Shortest match first.
-        self.assertEqual(response.json[0]['text'], 'kml')
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)
@@ -1041,10 +1039,7 @@ class DatasetResourceAPITest(APITestCase):
         response = self.get(url_for('apiv2.suggest_mime'),
                             qs={'q': 'js', 'size': '5'})
         self.assert200(response)
-
         self.assertLessEqual(len(response.json), 5)
-        # Shortest match first.
-        self.assertEqual(response.json[0]['text'], 'application/json')
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)

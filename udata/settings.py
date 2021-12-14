@@ -277,10 +277,10 @@ class Defaults(object):
         'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson', 'gpkg',
         # Meteorology
         'grib2',
-        # Misc
-        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf', 'ics'
         # RDF
         'rdf', 'ttl', 'n3',
+        # Misc
+        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf', 'ics', 'other'
     ]
 
     ALLOWED_RESOURCES_MIMES = [
@@ -289,6 +289,7 @@ class Defaults(object):
         'application/pdf',
         'application/msword',
         'application/vnd',
+        'application/vnd.geo+json',
         'application/zip',
         'application/x-tar',
         'application/x-bzip',
@@ -297,6 +298,7 @@ class Defaults(object):
         'application/x-rar-compressed',
         'application/epub+zip',
         'application/rtf',
+        'application/rdf+xml',
         'application/xml',
         'application/xhtml+xml',
         'image/bmp',
@@ -305,6 +307,19 @@ class Defaults(object):
         'image/svg+xml',
         'text/html',
         'text/calendar',
+        'text/plain',
+        'text/xml',
+        'text/turtle',
+        'geojson',
+        'json',
+        'csv',
+        'pdf',
+        'html',
+        'zip',
+        'xlsx',
+        'wms',
+        'wfs',
+        'shp'
     ]
 
     # How much time upload chunks are kept before cleanup
