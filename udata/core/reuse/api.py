@@ -17,10 +17,10 @@ from udata.core.storages.api import (
 
 from .api_fields import (
     reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    reuse_type_fields,
+    reuse_type_fields, reuse_topic_fields
 )
 from .forms import ReuseForm
-from .models import Reuse, REUSE_TYPES
+from .models import Reuse, REUSE_TYPES, REUSE_TOPICS
 from .permissions import ReuseEditPermission
 from .search import ReuseSearch
 
@@ -225,3 +225,13 @@ class ReuseTypesAPI(API):
         '''List all reuse types'''
         return [{'id': id, 'label': label}
                 for id, label in REUSE_TYPES.items()]
+
+
+@ns.route('/topics/', endpoint='reuse_topics')
+class ReuseTopicsAPI(API):
+    @api.doc('reuse_topics')
+    @api.marshal_list_with(reuse_topic_fields)
+    def get(self):
+        '''List all reuse topics'''
+        return [{'id': id, 'label': label}
+                for id, label in REUSE_TOPICS.items()]
