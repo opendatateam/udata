@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Change urls in Participate banner to relevant etalab guides [#53](https://github.com/etalab/udata-front/pull/53)
 
 ## 1.2.0 (2021-12-10)
 

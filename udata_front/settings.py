@@ -23,3 +23,10 @@ PAGES_REPO_BRANCH = 'master'
 # api.gouv.fr
 APIGOUVFR_URL = 'https://api.gouv.fr/api/v1/apis'
 APIGOUVFR_ALLOW_OPENNESS = ['open', 'semi_open']
+
+# Etalab Guides
+ETALAB_GUIDES_URL = 'https://guides.etalab.gouv.fr'
+GUIDES_USER_ACCOUNT_URL = 'https://guides.etalab.gouv.fr/data.gouv.fr/creer-compte-utilisateur/'
+GUIDES_ORGANIZATION_URL = 'https://guides.etalab.gouv.fr/data.gouv.fr/creer-rejoindre-organisation/'
+GUIDES_DATASET_URL = 'https://guides.etalab.gouv.fr/data.gouv.fr/publier-jeu-de-donnees/'
+GUIDES_REUSE_URL = 'https://guides.etalab.gouv.fr/reutilisation/publier-reutilisation/'

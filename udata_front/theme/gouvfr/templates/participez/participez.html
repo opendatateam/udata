@@ -4,7 +4,7 @@
             <div class="col-6 col-sm-12 text-white filet filet-currentcolor">
                 <h2 class="h1 mb-md">{{ _('Participate') }}</h2>
                 <ul class="nav-list">
-                    <li><a href="{{ url_for('admin.index', path='organization/new/') }}"
+                    <li><a href="{{ config.GUIDES_ORGANIZATION_URL }}"
                             class="nav-link text-white text-decoration-none">{{ _('Create or find your organization') }}</a>
                     </li>
                     <li><a href="https://doc.data.gouv.fr"
@@ -14,11 +14,11 @@
             </div>
             {% if not read_only_mode %}
             <div class="col-3 col-sm-12 py-sm-xs mt-sm-sm">
-                <a href="{{ url_for('admin.index', path='dataset/new/') }}" role="button"
+                <a href="{{ config.GUIDES_DATASET_URL }}" role="button"
                     class="btn btn-secondary btn-secondary-white btn-with-arrow">{{ _('Publish a dataset') }}</a>
             </div>
             <div class="col-3 col-sm-12 py-sm-xs">
-                <a href="{{ url_for('admin.index', path='reuse/new/') }}" role="button"
+                <a href="{{ config.GUIDES_REUSE_URL }}" role="button"
                     class="btn btn-secondary btn-secondary-white btn-with-arrow">{{ _('Publish a reuse') }}</a>
             </div>
             {% endif %}
