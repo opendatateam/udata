@@ -16,6 +16,7 @@ def migrate(db):
     for reuse in reuses:
         reuse.topic = 'others'
         reuse.save()
+        count += 1
 
     log.info(f'Modified {count} Reuses objects')
     log.info('Done')
