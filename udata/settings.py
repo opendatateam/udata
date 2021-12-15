@@ -309,17 +309,7 @@ class Defaults(object):
         'text/calendar',
         'text/plain',
         'text/xml',
-        'text/turtle',
-        'geojson',
-        'json',
-        'csv',
-        'pdf',
-        'html',
-        'zip',
-        'xlsx',
-        'wms',
-        'wfs',
-        'shp'
+        'text/turtle'
     ]
 
     # How much time upload chunks are kept before cleanup

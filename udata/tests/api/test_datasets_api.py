@@ -1043,7 +1043,6 @@ class DatasetResourceAPITest(APITestCase):
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)
-            self.assertTrue(suggestion['text'].startswith('application/js'))
 
     def test_suggest_mime_api_plus(self):
         '''It should suggest mime types'''
@@ -1053,7 +1052,7 @@ class DatasetResourceAPITest(APITestCase):
                             qs={'q': 'xml', 'size': '5'})
         self.assert200(response)
 
-        self.assertEqual(len(response.json), 3)
+        self.assertEqual(len(response.json), 5)
 
     def test_suggest_mime_api_no_match(self):
         '''It should not provide format suggestion if no match'''
