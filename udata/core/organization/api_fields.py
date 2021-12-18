@@ -91,22 +91,6 @@ org_fields = api.model('Organization', {
 
 org_page_fields = api.model('OrganizationPage', fields.pager(org_fields))
 
-org_suggestion_fields = api.model('OrganizationSuggestion', {
-    'id': fields.String(
-        description='The organization identifier', readonly=True),
-    'name': fields.String(description='The organization name', readonly=True),
-    'acronym': fields.String(
-        description='The organization acronym', readonly=True),
-    'slug': fields.String(
-        description='The organization permalink string', readonly=True),
-    'image_url': fields.String(
-        description='The organization logo URL', readonly=True),
-    'page': fields.UrlFor(
-        'organizations.show_redirect', lambda o: {'org': o['slug']},
-        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization'),
-    'score': fields.Float(
-        description='The internal match score', readonly=True),
-})
 
 refuse_membership_fields = api.model('RefuseMembership', {
     'comment': fields.String(

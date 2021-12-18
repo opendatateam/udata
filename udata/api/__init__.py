@@ -306,6 +306,7 @@ def init_app(app):
     # Load all core APIs
     import udata.core.activity.api  # noqa
     import udata.core.spatial.api  # noqa
+    import udata.core.spatial.apiv2  # noqa
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
@@ -318,7 +319,7 @@ def init_app(app):
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.site.api  # noqa
-    import udata.core.tags.api  # noqa
+    import udata.core.tags.apiv2  # noqa
     import udata.core.topic.api  # noqa
     import udata.core.post.api  # noqa
     import udata.features.transfer.api  # noqa

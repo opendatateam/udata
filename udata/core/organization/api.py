@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import request, url_for, redirect, make_response
 
-from udata import search
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission, current_user
@@ -25,7 +24,6 @@ from .tasks import notify_membership_request, notify_membership_response
 from .api_fields import (
     org_fields,
     org_page_fields,
-    org_suggestion_fields,
     org_role_fields,
     request_fields,
     member_fields,
@@ -359,36 +357,6 @@ class MemberAPI(API):
         delete={'id': 'unfollow_organization'})
 class FollowOrgAPI(FollowAPI):
     model = Organization
-
-
-suggest_parser = api.parser()
-suggest_parser.add_argument(
-    'q', help='The string to autocomplete/suggest', location='args',
-    required=True)
-suggest_parser.add_argument(
-    'size', type=int, help='The amount of suggestion to fetch',
-    location='args', default=10)
-
-
-@ns.route('/suggest/', endpoint='suggest_organizations')
-class SuggestOrganizationsAPI(API):
-    @api.doc('suggest_organizations')
-    @api.expect(suggest_parser)
-    @api.marshal_list_with(org_suggestion_fields)
-    def get(self):
-        '''Suggest organizations'''
-        args = suggest_parser.parse_args()
-        return [
-            {
-                'id': opt['text'],
-                'name': opt['payload']['name'],
-                'score': opt['score'],
-                'slug': opt['payload']['slug'],
-                'acronym': opt['payload']['acronym'],
-                'image_url': opt['payload']['image_url'],
-            }
-            for opt in search.suggest(args['q'], 'org_suggest', args['size'])
-        ]
 
 
 @ns.route('/<org:org>/logo', endpoint='organization_logo')

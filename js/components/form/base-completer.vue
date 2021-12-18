@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import API from 'api';
+import APIV2 from 'apiv2';
 import Vue from 'vue';
 import $ from 'jquery';
 import log from 'logger';
@@ -102,7 +102,7 @@ export default {
         load_suggestions(query, callback) {
             if (!query.length) return callback();
 
-            API[this.$options.ns][this.$options.endpoint]({
+            APIV2[this.$options.ns][this.$options.endpoint]({
                 q: query,
                 size: 10
             }, (data) => {

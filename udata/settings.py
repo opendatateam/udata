@@ -277,10 +277,39 @@ class Defaults(object):
         'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson', 'gpkg',
         # Meteorology
         'grib2',
-        # Misc
-        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf', 'ics'
         # RDF
         'rdf', 'ttl', 'n3',
+        # Misc
+        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf', 'ics', 'other'
+    ]
+
+    ALLOWED_RESOURCES_MIMES = [
+        'text/csv',
+        'application/json',
+        'application/pdf',
+        'application/msword',
+        'application/vnd',
+        'application/vnd.geo+json',
+        'application/zip',
+        'application/x-tar',
+        'application/x-bzip',
+        'application/x-bzip2',
+        'application/x-7z-compressed',
+        'application/x-rar-compressed',
+        'application/epub+zip',
+        'application/rtf',
+        'application/rdf+xml',
+        'application/xml',
+        'application/xhtml+xml',
+        'image/bmp',
+        'image/jpeg',
+        'image/png',
+        'image/svg+xml',
+        'text/html',
+        'text/calendar',
+        'text/plain',
+        'text/xml',
+        'text/turtle'
     ]
 
     # How much time upload chunks are kept before cleanup
@@ -460,7 +489,7 @@ class Defaults(object):
                         'DiscussionsAPI.post',
                         'SourcesAPI.post',
                         'FollowAPI.post']
-    
+
     FIXTURE_DATASET_SLUGS = []
 
 
