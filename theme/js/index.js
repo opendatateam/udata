@@ -7,7 +7,7 @@ import FollowButton from "./components/utils/follow-button";
 import ReadMore from "./components/utils/read-more";
 import RequestMembership from "./components/organization/request-membership";
 import Resources from "./components/dataset/resource/resources.vue";
-import * as dsfr from "@gouvfr/dsfr/dist/js/dsfr.module";
+import * as dsfr from "@gouvfr/dsfr/dist/dsfr/dsfr.module";
 
 import Tabs from "./components/vanilla/tabs";
 import Accordion from "./components/vanilla/accordion";

@@ -16,7 +16,7 @@
         <textarea v-model="comment" class="fr-input" id="textarea"></textarea>
       </div>
       <footer class="fr-grid-row justify-between fr-grid-row--middle">
-        <span class="text-g600 fr-text--sm fr-mb-0">
+        <span class="text-mention-grey fr-text--sm fr-mb-0">
           {{ $t("Reply as") }}
           <Author :author="user" />
         </span>

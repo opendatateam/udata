@@ -13,7 +13,7 @@ A very simple component that display its content up to a maximum height and then
 <template>
   <div ref="container" class="read-more" :class="{expand: expanded}" :style="{height: defaultHeight + 'px'}">
     <slot></slot>
-    <a @click="toggle" v-if="readMoreRequired" class="read-more-link">
+    <a href="#" @click.prevent="toggle" v-if="readMoreRequired" class="read-more-link">
       <template v-if="expanded"> {{ $t("Read less") }}</template>
       <template v-else>{{ $t("Read more") }}&hellip;</template>
     </a>

@@ -5,7 +5,7 @@
       :onClick="displayForm"
     />
     <div v-if="showForm" class="bg-beige">
-      <div class="fr-grid-row fr-grid-row--middle border-bottom border-g400 fr-py-2w fr-px-3w">
+      <div class="fr-grid-row fr-grid-row--middle border-bottom fr-py-2w fr-px-3w">
         <div class="fr-col fr-h6 fr-mb-0">{{ $t("New discussion") }}</div>
         <div>
           <button class="fr-link--close fr-link text-grey-500 fr-mr-0" @click="hideForm">
@@ -41,7 +41,7 @@
             ></textarea>
           </div>
           <footer class="fr-grid-row justify-between fr-grid-row--middle">
-            <span class="text-g600 fr-text--sm fr-mb-0">
+            <span class="text-mention-grey fr-text--sm fr-mb-0">
               {{ $t("Reply as") }}
               <Author :author="user" />
             </span>

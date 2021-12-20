@@ -145,8 +145,7 @@ There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around th
 ```
 */
 
-@import (less) "@gouvfr/dsfr/dist/css/buttons.css";
-
+@import (less) "@gouvfr/dsfr/dist/component/button/button.css";
 .btn {
     display: inline-block;
     appearance: none;
@@ -198,7 +197,7 @@ There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around th
     color: @blue-400;
     border: 1px solid transparent;
     border-color: @blue-400;
-    --bf500: @blue-400;
+    --border-action-high-blue-france: @blue-400;
 
     background: none;
 
@@ -213,7 +212,7 @@ There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around th
             @contrast: 'contrast-@{value}';
             border-color: @@value;
             color: @@value;
-            --bf500: @@value;
+            --border-action-high-blue-france: @@value;
         }
     });
 

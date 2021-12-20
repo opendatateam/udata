@@ -24,9 +24,9 @@ A well formed form (eh) should include one main fieldset with a proper legend.
     </form>
 ```
 */
-@import (less) "@gouvfr/dsfr/dist/css/forms.css";
-@import (less) "@gouvfr/dsfr/dist/css/inputs.css";
-@import (less) "@gouvfr/dsfr/dist/css/selects.css";
+@import (less) "@gouvfr/dsfr/dist/component/form/form.css";
+@import (less) "@gouvfr/dsfr/dist/component/input/input.css";
+@import (less) "@gouvfr/dsfr/dist/component/select/select.css";
 .form-container {
     background-color: @white;
     border: 1px solid @grey-100;
@@ -116,6 +116,6 @@ form.form {
 }
 .fr-select {
     &.bg-beige {
-        --g200: var(--beige);
+        --background-contrast-grey: @beige;
     }
 }
