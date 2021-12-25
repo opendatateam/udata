@@ -5,7 +5,6 @@ from udata.search import (
     ModelSearchAdapter, register,
     ModelTermsFilter, BoolFilter, Filter
 )
-from udata.utils import to_iso_datetime
 
 
 __all__ = ('ReuseSearch', )

@@ -20,6 +20,8 @@ class SearchQuery:
         self.page = int(params.pop('page', 1))
         self.page_size = int(params.pop('page_size', DEFAULT_PAGE_SIZE))
         self._query = params.pop('q', '')
+        self._filters = {}
+        self.extract_filters(params)
 
     def extract_sort(self, params):
         '''Extract and build sort query from parameters'''
@@ -33,6 +35,16 @@ class SearchQuery:
             for s, d in sorts if s in self.adapter.sorts
         ]
 
+    def extract_filters(self, params):
+        for key, value in params.items():
+            if key in self._filters:
+                if not isinstance(self._filters[key], (list, tuple)):
+                    self._filters[key] = [self._filters[key], value]
+                else:
+                    self._filters[key].append(value)
+            else:
+                self._filters[key] = value
+
     def exsearch(self):
         r = requests.get(f'{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}').json()
         results = self.adapter.serialize_results(r.pop('data'))
@@ -40,7 +52,7 @@ class SearchQuery:
 
     def to_url(self, url=None, replace=False, **kwargs):
         '''Serialize the query into an URL'''
-        params = copy.deepcopy(self.filter_values)
+        params = copy.deepcopy(self._filters)
         if self._query:
             params['q'] = self._query
         if self.page_size != DEFAULT_PAGE_SIZE:
