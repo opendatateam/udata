@@ -219,6 +219,5 @@ def init_app(app):
     app.url_map.converters['org'] = OrganizationConverter
     app.url_map.converters['reuse'] = ReuseConverter
     app.url_map.converters['user'] = UserConverter
-    app.url_map.converters['topic'] = TopicConverter
     app.url_map.converters['post'] = PostConverter
     app.url_map.converters['territory'] = TerritoryConverter
