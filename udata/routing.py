@@ -136,10 +136,6 @@ class UserConverter(ModelConverter):
     model = models.User
 
 
-class TopicConverter(ModelConverter):
-    model = models.Topic
-
-
 class PostConverter(ModelConverter):
     model = models.Post
 

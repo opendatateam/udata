@@ -1,7 +1,7 @@
 from udata.core.user.factories import UserFactory
 import pytest
 
-from udata.models import Dataset, Topic, CommunityResource, Transfer
+from udata.models import Dataset, CommunityResource, Transfer
 from udata.core.dataset import tasks
 from udata.core.dataset.factories import DatasetFactory, CommunityResourceFactory
 # Those imports seem mandatory for the csv adapters to be registered.
@@ -21,8 +21,6 @@ def test_purge_datasets():
         Dataset.objects.create(title='keep me'),
     ]
 
-    topic = Topic.objects.create(name='test topic', datasets=datasets)
-
     user = UserFactory()
     transfer = Transfer.objects.create(
         owner=user,
@@ -34,9 +32,6 @@ def test_purge_datasets():
     tasks.purge_datasets()
 
     assert Transfer.objects.filter(id=transfer.id).count() == 0
-
-    topic = Topic.objects(name='test topic').first()
-    assert topic.datasets[0] == datasets[1]
 
 
 def test_purge_datasets_community():
