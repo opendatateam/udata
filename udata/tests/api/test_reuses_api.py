@@ -9,7 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import AdminFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.models import Reuse, Follow, Member, REUSE_TYPES
+from udata.models import Reuse, Follow, Member, REUSE_TOPICS, REUSE_TYPES
 from udata.utils import faker
 
 from udata.tests.helpers import (
@@ -394,3 +394,9 @@ class ReuseReferencesAPITest:
         response = api.get(url_for('api.reuse_types'))
         assert200(response)
         assert len(response.json) == len(REUSE_TYPES)
+
+    def test_reuse_topics_list(self, api):
+        '''It should fetch the reuse topics list from the API'''
+        response = api.get(url_for('api.reuse_topics'))
+        assert200(response)
+        assert len(response.json) == len(REUSE_TOPICS)

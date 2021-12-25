@@ -10,7 +10,7 @@ from udata.models import db, BadgeMixin, WithMetrics
 from udata.utils import hash_url
 from udata.uris import endpoint_for
 
-__all__ = ('Reuse', 'REUSE_TYPES')
+__all__ = ('Reuse', 'REUSE_TYPES', 'REUSE_TOPICS')
 
 
 REUSE_TYPES = {
@@ -22,6 +22,24 @@ REUSE_TYPES = {
     'post': _('Post'),
     'visualization': _('Visualization'),
     'hardware': _('Connected device'),
+}
+
+REUSE_TOPICS = {
+    'health': _('Health'),
+    'transport_and_mobility': _('Transport and mobility '),
+    'housing_and_development': _('Housing and development'),
+    'food_and_agriculture': _('Food and agriculture'),
+    'culture_and_recreation': _('Culture and recreation'),
+    'economy_and_business': _('Economy and business'),
+    'environment_and_energy': _('Environment and energy'),
+    'work_and_training': _('Work and training'),
+    'politics_and_public_life': _('Politics and public life'),
+    'safety_and_security': _('Safety and security'),
+    'education_and_research': _('Education and research'),
+    'society_and_demography': _('Society and demography'),
+    'law_and_justice': _('Law and justice'),
+    'open_data_tools': _('Open data tools'),
+    'others': _('Others'),
 }
 
 
@@ -57,6 +75,7 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     datasets = db.ListField(
         db.ReferenceField('Dataset', reverse_delete_rule=db.PULL))
     tags = db.TagListField()
+    topic = db.StringField(required=True, choices=list(REUSE_TOPICS))
     # badges = db.ListField(db.EmbeddedDocumentField(ReuseBadge))
 
     private = db.BooleanField()
@@ -138,6 +157,10 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     @property
     def type_label(self):
         return REUSE_TYPES[self.type]
+
+    @property
+    def topic_label(self):
+        return REUSE_TOPICS[self.topic]
 
     def clean(self):
         super(Reuse, self).clean()
