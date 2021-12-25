@@ -40,7 +40,3 @@ class ReuseSearch(ModelSearchAdapter):
         return (reuse.deleted is None and
                 len(reuse.datasets) > 0 and
                 not reuse.private)
-
-    @classmethod
-    def serialize_results(cls, results):
-        return {'reuses': results}

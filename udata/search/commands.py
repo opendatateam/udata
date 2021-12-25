@@ -162,7 +162,6 @@ def handle_error(index_name, keep=False, timeout=None):
 @click.option('-n', '--name', default=None, help='Optional index name')
 @click.option('-f', '--force', is_flag=True, help='Do not prompt on deletion')
 @click.option('-k', '--keep', is_flag=True, help='Do not delete indexes')
-
 @click.option('-t', '--timeout', type=float, help='Elasticsearch write timeout in seconds')
 def index(models=None, name=None, force=False, keep=False, timeout=None):
     '''
