@@ -2,7 +2,6 @@ from udata import mail
 from udata.i18n import lazy_gettext as _
 from udata.core import storages
 from udata.models import Follow, Activity, Dataset, Transfer
-from udata.search import reindex
 from udata.tasks import job, task, get_logger
 
 from udata.core.badges.tasks import notify_new_badge

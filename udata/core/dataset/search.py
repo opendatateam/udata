@@ -11,14 +11,9 @@ from udata.models import (
     Dataset, Organization, License, User, GeoZone, RESOURCE_TYPES
 )
 from udata.search import (
-    ModelSearchAdapter, i18n_analyzer, register,
-    lazy_config
+    ModelSearchAdapter, register
 )
 from udata.search.analysis import simple
-from udata.search.fields import (
-    TermsFacet, ModelTermsFacet, RangeFacet, TemporalCoverageFacet,
-    BoolBooster, GaussDecay, BoolFacet, ValueFactor
-)
 from udata.utils import to_iso_datetime
 
 
@@ -27,7 +22,6 @@ __all__ = ('DatasetSearch', )
 
 DEFAULT_SPATIAL_WEIGHT = 1
 DEFAULT_TEMPORAL_WEIGHT = 1
-lazy = lazy_config('dataset')
 
 
 def max_reuses():
@@ -60,16 +54,11 @@ def resource_type_labelizer(value):
 @register
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
-    fuzzy = True
     exclude_fields = ['spatial.geom', 'spatial.zones.geom']
 
     class Meta:
         doc_type = 'Dataset'
 
-    title = String(analyzer=i18n_analyzer, fields={
-        'raw': String(index='not_analyzed')
-    })
-    description = String(analyzer=i18n_analyzer)
     license = String(index='not_analyzed')
     frequency = String(index='not_analyzed')
     organization = String(index='not_analyzed')
@@ -123,46 +112,6 @@ class DatasetSearch(ModelSearchAdapter):
         'followers': 'metrics.followers',
         'views': 'metrics.views',
     }
-
-    facets = {
-        'tag': TermsFacet(field='tags'),
-        'badge': TermsFacet(field='badges', labelizer=dataset_badge_labelizer),
-        'organization': ModelTermsFacet(field='organization',
-                                        model=Organization),
-        'owner': ModelTermsFacet(field='owner', model=User),
-        'license': ModelTermsFacet(field='license', model=License),
-        'geozone': ModelTermsFacet(field='geozones.id', model=GeoZone,
-                                   labelizer=zone_labelizer),
-        'granularity': TermsFacet(field='granularity',
-                                  labelizer=granularity_labelizer),
-        'format': TermsFacet(field='resources.format'),
-        'schema': TermsFacet(field='resources.schema'),
-        'schema_version': TermsFacet(field='resources.schema_version'),
-        'resource_type': TermsFacet(field='resources.type',
-                                    labelizer=resource_type_labelizer),
-        'reuses': RangeFacet(field='metrics.reuses',
-                             ranges=[('none', (None, 1)),
-                                     ('few', (1, 5)),
-                                     ('quite', (5, 10)),
-                                     ('many', (10, None))],
-                             labels={
-                                 'none': _('Never reused'),
-                                 'few': _('Little reused'),
-                                 'quite': _('Quite reused'),
-                                 'many': _('Heavily reused'),
-                             }),
-        'temporal_coverage': TemporalCoverageFacet(field='temporal_coverage'),
-        'featured': BoolFacet(field='featured'),
-    }
-    boosters = [
-        BoolBooster('featured', lazy('featured_boost')),
-        BoolBooster('from_certified', lazy('certified_boost')),
-        ValueFactor('spatial_weight', missing=1),
-        ValueFactor('temporal_weight', missing=1),
-        GaussDecay('metrics.reuses', max_reuses, decay=lazy('reuses_decay')),
-        GaussDecay('metrics.followers', max_followers, max_followers,
-                   decay=lazy('followers_decay')),
-    ]
 
     @classmethod
     def is_indexable(cls, dataset):
