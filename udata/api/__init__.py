@@ -105,7 +105,7 @@ class UDataApi(Api):
             if (
                 not current_user.is_anonymous and
                 not current_user.sysadmin and
-                current_app.config['READ_ONLY_MODE'] and 
+                current_app.config['READ_ONLY_MODE'] and
                 any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST'])
             ):
                 self.abort(423, 'Due to security reasons, the creation of new content is currently disabled.')
@@ -317,7 +317,6 @@ def init_app(app):
     import udata.core.jobs.api  # noqa
     import udata.core.site.api  # noqa
     import udata.core.tags.api  # noqa
-    import udata.core.topic.api  # noqa
     import udata.core.post.api  # noqa
     import udata.features.transfer.api  # noqa
     import udata.features.notifications.api  # noqa

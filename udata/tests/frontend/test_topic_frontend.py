@@ -2,8 +2,6 @@ from udata import search
 from udata.tests import SearchTestMixin, TestCase
 from udata.core.dataset.factories import VisibleDatasetFactory
 from udata.core.dataset.search import DatasetSearch
-from udata.core.topic.factories import TopicFactory
-from udata.core.topic.search import topic_search_for
 
 
 class TopicSearchTest(SearchTestMixin, TestCase):

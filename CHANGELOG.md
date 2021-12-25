@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
+- Removed topics code [#2693](https://github.com/opendatateam/udata/pull/2693)
 
 ## 3.3.0 (2021-12-10)
 

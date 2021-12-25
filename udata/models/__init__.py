@@ -94,7 +94,6 @@ from udata.core.site.models import *  # noqa
 from udata.core.dataset.models import *  # noqa
 from udata.core.reuse.models import *  # noqa
 from udata.core.activity.models import *  # noqa
-from udata.core.topic.models import *  # noqa
 from udata.core.post.models import *  # noqa
 from udata.core.jobs.models import *  # noqa
 from udata.core.tags.models import *  # noqa
