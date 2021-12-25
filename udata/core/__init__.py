@@ -9,7 +9,6 @@ MODULES = (
     'organization',
     'activity',
     'followers',
-    'topic',
     'post',
 )
 

@@ -13,7 +13,7 @@ from udata.core import storages
 from udata.frontend import csv
 from udata.harvest.models import HarvestJob
 from udata.i18n import lazy_gettext as _
-from udata.models import (Follow, Discussion, Activity, Topic,
+from udata.models import (Follow, Discussion, Activity,
                           Organization, Transfer)
 from udata.tasks import job
 
@@ -40,11 +40,6 @@ def purge_datasets(self):
         Discussion.objects(subject=dataset).delete()
         # Remove activity
         Activity.objects(related_to=dataset).delete()
-        # Remove topics' related dataset
-        for topic in Topic.objects(datasets=dataset):
-            datasets = topic.datasets
-            datasets.remove(dataset)
-            topic.update(datasets=datasets)
         # Remove HarvestItem references
         HarvestJob.objects(items__dataset=dataset).update(set__items__S__dataset=None)
         # Remove associated Transfers

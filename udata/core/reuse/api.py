@@ -17,7 +17,7 @@ from udata.core.storages.api import (
 
 from .api_fields import (
     reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    reuse_type_fields, reuse_topic_fields
+    reuse_type_fields
 )
 from .forms import ReuseForm
 from .models import Reuse, REUSE_TYPES, REUSE_TOPICS
@@ -71,8 +71,8 @@ class ReuseAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         '''Update a given reuse'''
-        request_deleted = request.json.get('deleted', True) 
-        if reuse.deleted and request_deleted is not None: 
+        request_deleted = request.json.get('deleted', True)
+        if reuse.deleted and request_deleted is not None:
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         form = api.validate(ReuseForm, reuse)
