@@ -16,15 +16,11 @@
     <div class="row">
         <post-list class="col-xs-12" :posts="posts"></post-list>
     </div>
-    <div class="row">
-        <topic-list class="col-xs-12" :topics="topics"></topic-list>
-    </div>
 </layout>
 </template>
 
 <script>
 import Posts from 'models/posts';
-import Topics from 'models/topics';
 import Reuse from 'models/reuse';
 import Dataset from 'models/dataset';
 import {List} from 'models/base';
@@ -32,7 +28,6 @@ import API from 'api';
 import Layout from 'components/layout.vue';
 import DatasetCardList from 'components/dataset/card-list.vue';
 import ReuseCardList from 'components/reuse/card-list.vue';
-import TopicList from 'components/topic/list.vue';
 import PostList from 'components/post/list.vue';
 
 
@@ -41,7 +36,6 @@ export default {
     data() {
         return {
             posts: new Posts({query: {sort: '-created_at', page_size: 10}, mask: PostList.MASK}),
-            topics: new Topics({query: {sort: '-created', page_size: 10}, mask: TopicList.MASK}),
             home_datasets: new List({ns: 'site', fetch: 'get_home_datasets',
                                      mask: DatasetCardList.MASK, model: Dataset}),
             home_reuses: new List({ns: 'site', fetch: 'get_home_reuses',
@@ -50,7 +44,6 @@ export default {
     },
     components: {
         PostList,
-        TopicList,
         DatasetCardList,
         ReuseCardList,
         Layout
@@ -75,7 +68,6 @@ export default {
         this.home_datasets.fetch();
         this.home_reuses.fetch();
         this.posts.fetch();
-        this.topics.fetch();
     }
 };
 </script>
