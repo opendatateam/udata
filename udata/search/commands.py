@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import current_app
 
 from udata.commands import cli, IS_TTY
-from udata.search import es, adapter_catalog
+from udata.search import adapter_catalog
 
 
 from elasticsearch.helpers import reindex as es_reindex, streaming_bulk

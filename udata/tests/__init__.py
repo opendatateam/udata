@@ -1,12 +1,6 @@
 import unittest
-
 import pytest
-
-from contextlib import contextmanager
-
 from udata import settings
-from udata.search import es
-
 from . import helpers
 
 
@@ -84,25 +78,3 @@ for code in 200, 201, 204, 400, 401, 403, 404, 410, 500:
 @pytest.mark.usefixtures('clean_db')
 class DBTestMixin(object):
     pass
-
-
-class SearchTestMixin(DBTestMixin):
-    '''A mixin allowing to optionally enable indexation and cleanup after'''
-    _used_search = False
-
-    def init_search(self):
-        self._used_search = True
-        self.app.config['AUTO_INDEX'] = True
-        es.initialize()
-        es.cluster.health(wait_for_status='yellow', request_timeout=10)
-
-    @contextmanager
-    def autoindex(self):
-        self.init_search()
-        yield
-        es.indices.refresh(index=es.index_name)
-
-    def tearDown(self):
-        '''Drop indices if needed'''
-        if self._used_search and es.indices.exists(index=es.index_name):
-            es.indices.delete(index=es.index_name)

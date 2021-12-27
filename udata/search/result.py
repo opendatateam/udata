@@ -50,7 +50,6 @@ class SearchResult(Paginable):
 
     def get_objects(self):
         if not self._objects:
-            breakpoint()
             ids = [ObjectId(id) for id in self.get_ids()]
             objects = self.query.model.objects.in_bulk(ids)
             self._objects = [objects.get(id) for id in ids]

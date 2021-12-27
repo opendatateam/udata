@@ -35,7 +35,7 @@ class ModelSearchAdapter:
                             help=help_msg)
         if paginate:
             parser.add_argument('page', type=int, location='args',
-                                default=0, help='The page to display')
+                                default=1, help='The page to display')
             parser.add_argument('page_size', type=int, location='args',
                                 default=20, help='The page size')
         return parser

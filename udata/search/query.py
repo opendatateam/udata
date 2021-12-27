@@ -47,7 +47,6 @@ class SearchQuery:
 
     def exsearch(self):
         r = requests.get(f'{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}').json()
-        print(r)
         return SearchResult(query=self, result=r.pop('data'), **r)
 
     def to_url(self, url=None, replace=False, **kwargs):

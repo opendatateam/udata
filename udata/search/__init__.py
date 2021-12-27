@@ -1,33 +1,9 @@
-import bson
-import datetime
 import logging
-
-from elasticsearch_dsl.serializer import AttrJSONSerializer
-from speaklater import is_lazy_string
 
 
 log = logging.getLogger(__name__)
 
 adapter_catalog = {}
-
-
-class EsJSONSerializer(AttrJSONSerializer):
-    # TODO: find a way to reuse UDataJsonEncoder?
-    def default(self, data):
-        print('IN EsJSONSerializer')
-        if is_lazy_string(data):
-            return str(data)
-        elif isinstance(data, bson.objectid.ObjectId):
-            return str(data)
-        elif isinstance(data, datetime.datetime):
-            return data.isoformat()
-        elif hasattr(data, 'serialize'):
-            return data.serialize()
-        # Serialize Raw data for Document and EmbeddedDocument.
-        elif hasattr(data, '_data'):
-            return data._data
-        else:
-            return super(EsJSONSerializer, self).default(data)
 
 
 # def reindex_model_on_save(sender, document, **kwargs):
@@ -81,4 +57,3 @@ def init_app(app):
     import udata.core.dataset.search  # noqa
     import udata.core.reuse.search  # noqa
     import udata.core.organization.search  # noqa
-    import udata.core.spatial.search  # noqa
