@@ -18,10 +18,6 @@ class ModelSearchAdapter:
         return True
 
     @classmethod
-    def serialize_results(cls, results):
-        raise NotImplementedError()
-
-    @classmethod
     def as_request_parser(cls, paginate=True):
         parser = RequestParser()
         # q parameter

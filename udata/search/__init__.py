@@ -6,8 +6,6 @@ from elasticsearch_dsl.serializer import AttrJSONSerializer
 from speaklater import is_lazy_string
 
 
-from . import analysis
-
 log = logging.getLogger(__name__)
 
 adapter_catalog = {}
@@ -16,6 +14,7 @@ adapter_catalog = {}
 class EsJSONSerializer(AttrJSONSerializer):
     # TODO: find a way to reuse UDataJsonEncoder?
     def default(self, data):
+        print('IN EsJSONSerializer')
         if is_lazy_string(data):
             return str(data)
         elif isinstance(data, bson.objectid.ObjectId):
