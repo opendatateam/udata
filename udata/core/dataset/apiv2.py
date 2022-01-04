@@ -1,6 +1,6 @@
 import logging
 
-from flask import url_for, request, current_app
+from flask import url_for, request, current_app, abort
 from mongoengine.queryset.visitor import Q
 
 from udata import search
@@ -152,7 +152,10 @@ class DatasetSearchAPI(API):
     def get(self):
         '''List or search all datasets'''
         search_parser.parse_args()
-        return search.query(Dataset, **multi_to_dict(request.args))
+        try:
+            return search.query(Dataset, **multi_to_dict(request.args))
+        except ValueError:
+            abort(501, 'Search endpoint not enabled')
 
 
 suggest_parser = apiv2.parser()

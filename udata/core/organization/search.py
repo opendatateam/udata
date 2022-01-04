@@ -9,7 +9,7 @@ __all__ = ('OrganizationSearch', )
 @search.register
 class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
-    search_url = 'http://127.0.0.1:8000/api/v1/organizations/'
+    search_url = 'organizations/'
 
     sorts = {
         'name': 'name.raw',

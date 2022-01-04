@@ -2,7 +2,7 @@ import copy
 import logging
 import requests
 
-from flask import request
+from flask import request, current_app
 from werkzeug.urls import Href
 
 from udata.search.result import SearchResult
@@ -45,8 +45,10 @@ class SearchQuery:
             else:
                 self._filters[key] = value
 
-    def exsearch(self):
-        r = requests.get(f'{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}').json()
+    def execute_search(self):
+        if not current_app.config['SEARCH_SERVICE_API']:
+            raise ValueError('Missing search service url in settings')
+        r = requests.get(f"{current_app.config['SEARCH_SERVICE_API']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}").json()
         return SearchResult(query=self, result=r.pop('data'), **r)
 
     def to_url(self, url=None, replace=False, **kwargs):

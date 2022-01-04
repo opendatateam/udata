@@ -1,4 +1,15 @@
+import json
 import logging
+
+from flask import current_app
+from kafka import KafkaProducer
+from mongoengine.signals import post_save, post_delete
+
+from udata.models import db
+from udata.tasks import task, as_task_param
+
+# producer = KafkaProducer(bootstrap_servers='localhost:29092',
+#                          value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 
 log = logging.getLogger(__name__)
@@ -6,6 +17,41 @@ log = logging.getLogger(__name__)
 adapter_catalog = {}
 
 
+# @task(route='high.search')
+# def reindex(classname, id=None):
+#     model = db.resolve_model(classname)
+#     obj = model.objects.get(pk=id)
+#     adapter_class = adapter_catalog.get(model)
+#     if adapter_class.is_indexable(obj):
+#         log.info('Indexing %s (%s)', model.__name__, obj.id)
+#         try:
+#         # producer.send('save')
+#         except Exception:
+#             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
+#     elif adapter_class.exists(obj.id):
+#         log.info('Unindexing %s (%s)', model.__name__, obj.id)
+#         try:
+#         # producer.send('delete')
+#         except Exception:
+#             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
+#     else:
+#         log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
+#
+#
+# @task(route='high.search')
+# def unindex(classname, id=None):
+#     model = db.resolve_model(classname)
+#     adapter_class = adapter_catalog.get(model)
+#     if adapter_class.exists(id):
+#         log.info('Unindexing %s (%s)', model.__name__, id)
+#         try:
+#         # producer.send('delete')
+#         except Exception:
+#             log.exception('Unable to unindex %s "%s"', model.__name__, id)
+#     else:
+#         log.info('Nothing to do for %s (%s)', model.__name__, id)
+#
+#
 # def reindex_model_on_save(sender, document, **kwargs):
 #     '''(Re/Un)Index Mongo document on post_save'''
 #     if current_app.config.get('AUTO_INDEX'):
@@ -49,7 +95,7 @@ def search_for(model_or_adapter, params):
 
 def query(model, **params):
     search = search_for(model, params)
-    return search.exsearch()
+    return search.execute_search()
 
 
 def init_app(app):

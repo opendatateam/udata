@@ -39,13 +39,11 @@ class FakeFactory(MongoEngineFactory):
 
 @search.register
 class FakeSearch(search.ModelSearchAdapter):
-    class Meta:
-        doc_type = 'FakeSearchable'
-
     model = FakeSearchable
-    facets = {
-        'tag': search.TermsFacet(field='tags'),
-        'other': search.TermsFacet(field='other'),
+    search_url = 'mock://test.com/fakeable/'
+    filters = {
+        'tag': search.Filter(),
+        'other': search.Filter(),
     }
     sorts = {
         'title': 'title.raw',

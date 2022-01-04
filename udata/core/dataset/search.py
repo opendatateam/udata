@@ -18,7 +18,7 @@ DEFAULT_TEMPORAL_WEIGHT = 1
 @register
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
-    search_url = 'http://127.0.0.1:8000/api/v1/datasets/'
+    search_url = 'datasets/'
 
     sorts = {
         'title': 'title.raw',

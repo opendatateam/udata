@@ -13,7 +13,7 @@ __all__ = ('ReuseSearch', )
 @register
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
-    search_url = 'http://127.0.0.1:8000/api/v1/reuses/'
+    search_url = 'reuses/'
 
     sorts = {
         'title': 'title.raw',

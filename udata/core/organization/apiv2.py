@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, abort
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -27,7 +27,10 @@ class OrganizationSearchAPI(API):
     def get(self):
         '''Search all organizations'''
         search_parser.parse_args()
-        return search.query(OrganizationSearch, **multi_to_dict(request.args))
+        try:
+            return search.query(OrganizationSearch, **multi_to_dict(request.args))
+        except ValueError:
+            abort(501, 'Search endpoint not enabled')
 
 
 suggest_parser = apiv2.parser()
