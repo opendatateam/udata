@@ -4,7 +4,7 @@ import sys
 import click
 
 from udata.commands import cli
-from udata.search import adapter_catalog, producer
+from udata.search import adapter_catalog, produce
 
 
 log = logging.getLogger(__name__)
@@ -24,15 +24,16 @@ def iter_adapters():
 
 def iter_qs(qs, adapter):
     '''Safely iterate over a DB QuerySet yielding ES documents'''
+    results = []
     for obj in qs.no_cache().timeout(False):
         if adapter.is_indexable(obj):
             try:
-                doc = adapter.from_model(obj).to_dict(include_meta=True)
-                yield doc
+                results.append(adapter.format_dataset_message(obj))
             except Exception as e:
                 model = adapter.model.__name__
                 log.error('Unable to index %s "%s": %s', model, str(obj.id),
                           str(e), exc_info=True)
+    return results
 
 
 def index_model(adapter):
@@ -47,12 +48,12 @@ def index_model(adapter):
 
     docs = iter_qs(qs, adapter)
 
-    # producer.send('save')
-    # for ok, info in streaming_bulk(es.client, docs, raise_on_error=False,
-    #                                request_timeout=timeout):
-    #     if not ok:
-    #         log.error('Unable to index %s "%s": %s', model.__name__,
-    #                   info['index']['_id'], info['index']['error'])
+    for doc in docs:
+        try:
+            produce(model, doc)
+        except  Exception as e:
+            log.error('Unable to index %s "%s": %s', model, str(doc.id),
+                      str(e), exc_info=True)
 
 
 @grp.command()
