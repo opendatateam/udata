@@ -27,17 +27,26 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(model, document):
+def produce(model, document=None, **kwargs):
     '''Produce message with marshalled document'''
     producer = KafkaProducerSingleton.get_instance()
     if isinstance(model, Dataset):
-        producer.send('dataset', document)
+        if kwargs.get('delete', False):
+            producer.send('dataset')
+        else:
+            producer.send('dataset', document)
         producer.flush()
     if isinstance(model, Organization):
-        producer.send('organization', document)
+        if kwargs.get('delete', False):
+            producer.send('organization')
+        else:
+            producer.send('organization', document)
         producer.flush()
     if isinstance(model, Reuse):
-        producer.send('reuse', document)
+        if kwargs.get('delete', False):
+            producer.send('reuse')
+        else:
+            producer.send('reuse', document)
         producer.flush()
 
 
@@ -55,8 +64,7 @@ def reindex(classname, id=None):
     elif adapter_class.exists(obj.id):
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
-            producer = KafkaProducerSingleton.get_instance()
-            producer.send('delete')
+            produce(model, delete=True)
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
@@ -70,8 +78,7 @@ def unindex(classname, id=None):
     if adapter_class.exists(id):
         log.info('Unindexing %s (%s)', model.__name__, id)
         try:
-            producer = KafkaProducerSingleton.get_instance()
-            producer.send('delete')
+            produce(model, delete=True)
         except Exception:
             log.exception('Unable to unindex %s "%s"', model.__name__, id)
     else:

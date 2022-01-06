@@ -51,7 +51,7 @@ def index_model(adapter):
     for doc in docs:
         try:
             produce(model, doc)
-        except  Exception as e:
+        except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc.id),
                       str(e), exc_info=True)
 
