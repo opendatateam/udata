@@ -28,7 +28,7 @@ def iter_qs(qs, adapter):
     for obj in qs.no_cache().timeout(False):
         if adapter.is_indexable(obj):
             try:
-                results.append(adapter.format_dataset_message(obj))
+                results.append(adapter.serialize(obj))
             except Exception as e:
                 model = adapter.model.__name__
                 log.error('Unable to index %s "%s": %s', model, str(obj.id),

@@ -14,6 +14,12 @@ class ModelSearchAdapter:
     filters = {}
 
     @classmethod
+    def serialize(cls, document):
+        return {
+            'id': str(document.id)
+        }
+
+    @classmethod
     def is_indexable(cls, document):
         return True
 

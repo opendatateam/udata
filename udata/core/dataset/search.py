@@ -6,7 +6,7 @@ from udata.search import (
     ModelTermsFilter, BoolFilter, Filter,
     TemporalCoverageFilter
 )
-
+from udata.utils import to_iso_datetime
 
 __all__ = ('DatasetSearch', )
 
@@ -51,18 +51,22 @@ class DatasetSearch(ModelSearchAdapter):
                 not dataset.private)
 
     @classmethod
-    def format_dataset_message(cls, dataset):
+    def serialize(cls, dataset):
         return {
             'id': str(dataset.id),
             'title': dataset.title,
             'description': dataset.description,
+            'acronym': dataset.acronym or None,
             'url': dataset.display_url,
+            'created_at': to_iso_datetime(dataset.created_at),
             'orga_sp': 1 if dataset.organization and dataset.organization.public_service else 0,
-            'orga_followers': dataset.organization.metrics.get("followers", 0) if dataset.organization else 0,
-            'dataset_views': dataset.metrics.get("views", 0),
-            'dataset_followers': dataset.metrics.get("followers", 0),
-            'dataset_reuses': dataset.metrics.get("reuses", 0),
+            'orga_followers': dataset.organization.metrics.get('followers', 0) if dataset.organization else 0,
+            'dataset_views': dataset.metrics.get('views', 0),
+            'dataset_followers': dataset.metrics.get('followers', 0),
+            'dataset_reuses': dataset.metrics.get('reuses', 0),
             'dataset_featured': 1 if dataset.featured else 0,
+            'resources_count': len(dataset.resources),
+            'concat_title_org': f"{dataset.title} {dataset.acronym if dataset.acronym else ''} {dataset.organization.name if dataset.organization else dataset.owner.fullname}",
             'organization_id': str(dataset.organization.id) if dataset.organization else str(dataset.owner.id),
             'temporal_coverage_start': 0,
             'temporal_coverage_end': 0,

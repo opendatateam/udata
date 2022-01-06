@@ -49,7 +49,7 @@ def reindex(classname, id=None):
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, adapter_class.format_dataset_message(obj))
+            produce(model, adapter_class.serialize(obj))
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     elif adapter_class.exists(obj.id):
