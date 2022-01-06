@@ -15,6 +15,13 @@
   - The previous code in APIv1 was removed.
   - The user suggest was entirely removed, as its existence is now less pertinent because of the full text search.
   - JS API calls in the admin panel code were changes to reach APIv2 suggest endpoints.
+- :warning: Search changes [#2692](https://github.com/opendatateam/udata/pull/2692):
+  - The search feature is not within Udata anymore and queries a distant service.
+  - The search feature is now optional and is enabled by setting the `SEARCH_SERVICE_API_URL` setting.
+  - When search is not enabled, the search endpoints will return a `501 Not Implemented` error.
+  - The ModelAdapter, SearchQuery and SearchResult patterns were kept but heavily refactored.
+  - Udata uses a Kafka producer to send documents to index to the search service.
+  - Udata uses HTTP request to query the search service.
 
 ## 3.2.2 (2021-11-23)
 

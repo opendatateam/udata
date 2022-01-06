@@ -29,7 +29,7 @@ class Defaults(object):
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
     # Search service configuration
-    SEARCH_SERVICE_API = 'http://127.0.0.1:8000/api/v1/'
+    SEARCH_SERVICE_API_URL = 'http://127.0.0.1:8000/api/v1/'
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
