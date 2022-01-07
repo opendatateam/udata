@@ -4,6 +4,7 @@
 
 - Change urls in Participate banner to relevant etalab guides [#53](https://github.com/etalab/udata-front/pull/53)
 - Update DSFR to v1.2.1 [#45](https://github.com/etalab/udata-front/pull/45)
+- :warning: `.btn-tab` is removed, use `.fr-tag` instead [57](https://github.com/etalab/udata-front/pull/57)
 
 ## 1.2.0 (2021-12-10)
 

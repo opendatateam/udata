@@ -117,18 +117,7 @@ Because of technical limitations, this styleguide hardcodes the svg icon. When u
 ```
 
 ## Tab buttons
-On some pages, you'll find secondary buttons looking like little "tabs" that can be toggled thanks to ECMAScript-compatible language such as JavaScript.
-Those tabs are actually smaller versions of `.btn-secondary-200` with no text-decorations, and become `.btn-secondary-400` when active.
-Because developpers are lazy and less code is better code, there's a `.btn-tab` class that will default to those values.
-
-```btn-tab.html
-<nav class="tabs">
-    <a href="#editorial-datasets" class="btn-tab tab hidden-lg active">Featured datasets</a>
-    <a href="#recent-datasets" class="btn-tab tab hidden-lg">Latest datasets</a>
-    <a href="#reference-datasets" class="btn-tab tab hidden-lg">@@Jeux de données de référence</a>
-    <a href="/fr/datasets/" class="btn-tab tab">See more</a>
-</nav>
-```
+These are now removed, see tags instead.
 
 ## From DSFR
 
@@ -297,31 +286,6 @@ There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around th
         &:after {
             right: @spacing-lg;
         }
-    }
-}
-
-//Secondary buttons for pill-shaped "tabs"
-//Defaults to grey-200 and grey-400 for active btns
-//And smaller margins
-.btn-tab {
-    .btn-secondary;
-    .btn-secondary-grey-200;
-
-    padding: @spacing-xs @spacing-sm;
-    font-size: @font-size-sm;
-    font-weight: @font-weight-normal;
-    transition: border ease 0.1s;
-    transition-property: border, color;
-
-    &:active,
-    &:hover,
-    &.active {
-        text-decoration: none;
-    }
-
-    &.active,
-    &:hover {
-        .btn-secondary-grey-400;
     }
 }
 

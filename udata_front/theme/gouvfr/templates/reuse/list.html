@@ -47,12 +47,23 @@
             class="nav-link fs-sm">{{ _('Search in datasets') }}</a>
     </div>
     <div class="row-inline py-lg hidden-lg">
-        <ul class="tabs">
-            <a href="{{ url_for('reuses.list') }}"
-                class="btn-tab tab {% if not reuses.query._filters.type %}active{% endif %}">{{ _('All') }}</a>
+        <ul class="fr-tags-group">
+            <li>
+                <a
+                    href="{{ url_for('reuses.list') }}"
+                    class="fr-tag{% if not reuses.query._filters.type %} active{% endif %}">
+                    {{ _('All') }}
+                </a>
+            </li>
             {% for tab_id, label in reuses_tabs %}
-            <a href="{{ reuses.query.to_url(url, replace=True, **{'type': tab_id}) }}"
-                class="btn-tab tab {% if reuses.query._filters and reuses.query._filters.type and reuses.query._filters.type.type == tab_id %}active{% endif %}">{{ label }}</a>
+                <li>
+                    <a
+                        href="{{ reuses.query.to_url(url, replace=True, **{'type': tab_id}) }}"
+                        class="fr-tag{% if reuses.query._filters and reuses.query._filters.type and reuses.query._filters.type.type == tab_id %} active{% endif %}"
+                    >
+                        {{ label }}
+                    </a>
+                </li>
             {% endfor %}
         </ul>
     </div>

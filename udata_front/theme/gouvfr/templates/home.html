@@ -99,12 +99,16 @@
                 <h2>{{ _('Datasets') }}</h2>
             </div>
             <div class="col-auto">
-                <nav class="tabs">
+                <nav class="tabs fr-tags-group">
                     {% for tab_id, label, _, _ in dataset_tabs %}
-                    <a href="#{{tab_id}}"
-                        class="btn-tab tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                    <a
+                        href="#{{tab_id}}"
+                        class="tab fr-tag {% if loop.first %}active {% endif %}fr-displayed-lg"
+                    >
+                        {{ label }}
+                    </a>
                     {% endfor %}
-                    <a href="{{ url_for('datasets.list') }}" class="btn-tab tab">{{ _('See more') }}</a>
+                    <a href="{{ url_for('datasets.list') }}" class="fr-tag">{{ _('See more') }}</a>
                 </nav>
             </div>
         </div>
@@ -138,13 +142,17 @@
                 <h2>{{ _('Data reuses') }}</h2>
             </div>
             <div class="col-auto">
-                <nav class="tabs">
+                <nav class="tabs fr-tags-group">
                     {% for tab_id, label, _, _ in reuses_tabs %}
-                    <a href="#{{tab_id}}"
-                        class="btn-tab tab {% if loop.first %}active{% endif %} hidden-lg">{{ label }}</a>
+                    <a
+                        href="#{{tab_id}}"
+                        class="tab fr-tag {% if loop.first %}active {% endif %}fr-displayed-lg"
+                    >
+                        {{ label }}
+                    </a>
                     {% endfor %}
                     <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}"
-                        class="btn-tab tab">{{ _('See more') }}</a>
+                        class="fr-tag">{{ _('See more') }}</a>
                 </nav>
             </div>
         </div>

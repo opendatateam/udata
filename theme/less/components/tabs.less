@@ -9,26 +9,17 @@ Tabs allow for easy navigation between categories. You can toggle a `.active` cl
 Warning : `.tab` first immediate child (`.tab > *`) has a `pointer-events: none` property set so that clicks actually register to the tab element and not the children.
 This prevents messy event handling with bubbling prevention, but might cause you trouble in some edge cases.
 
-```btn-tabs.html
-<nav class="tabs">
-    <a class="btn-tab tab active" href="#">Selection Etalab</a>
-    <a class="btn-tab tab" href="#">Dernières réutilisations</a>
-    <a class="btn-tab tab" href="#">Voir plus</div>
+```tabs.html
+<nav class="tabs fr-tags-group">
+    <a class="fr-tag tab active" href="#">Selection Etalab</a>
+    <a class="fr-tag tab" href="#">Dernières réutilisations</a>
+    <a class="fr-tag tab" href="#">Voir plus</div>
 </nav>
 ```
 
 ## Styling
-By default, tabs have no style, just like many of us.
-You can either use `.btn-tab` (check out the buttons documentation page for more informations), or any element you'd like.
-There's also a `.tab-panel` class available that simply provides border-radius, paddings and lower opacity for non-active elements. We recommand you combine this one with `.bg-{color}` classes.
-
-```tab-panel.html
-<nav class="tabs">
-    <a class="tab-panel bg-blue-300 tab active" href="#">Selection Etalab</a>
-    <a class="tab-panel bg-blue-300 tab" href="#">Dernières réutilisations</a>
-    <a class="tab-panel bg-blue-300 tab" href="#">Voir plus</div>
-</nav>
-```
+By default, tabs have no style.
+You can either use `.fr-tag` (check out the tags documentation page for more informations), or any element you'd like.
 
 ## From DSFR
 
@@ -62,34 +53,15 @@ You can use tabs from DSFR. It uses DSFR colors and conventions. It allows you t
 */
 
 .tabs {
-    display: flex;
-
     .tab {
-        + .tab {
-            margin-left: @spacing-sm;
-        }
-
-        //Prevents children from taking the click events.
-        //Might be dangerous, remove if needed
-        >* {
+        // Prevents children from taking the click events.
+        // Might be dangerous, remove if needed
+        > * {
             pointer-events: none;
         }
 
         &.active {
             pointer-events: none;
-        }
-    }
-
-    .tab-panel {
-        border-radius: 4px 4px 0 0;
-        opacity: 0.6;
-        color: white; //Defaults to white for legibility
-        padding: @spacing-xs @spacing-md;
-
-        transition: opacity ease 0.2s;
-
-        &:hover, &.active {
-            opacity: 1;
         }
     }
 }
