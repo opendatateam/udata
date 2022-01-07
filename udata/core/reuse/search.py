@@ -54,6 +54,6 @@ class ReuseSearch(ModelSearchAdapter):
             'reuse_views': reuse.metrics.get('views', 0),
             'reuse_followers': reuse.metrics.get('followers', 0),
             'reuse_datasets': reuse.metrics.get('datasets', 0),
-            'dataset_featured': 1 if reuse.featured else 0,
+            'reuse_featured': 1 if reuse.featured else 0,
             'organization_id': str(reuse.organization.id) if reuse.organization else str(reuse.owner.id)
         }

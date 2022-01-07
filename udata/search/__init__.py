@@ -21,32 +21,33 @@ class KafkaProducerSingleton:
     def get_instance() -> KafkaProducer:
         if KafkaProducerSingleton.__instance is None:
             KafkaProducerSingleton.__instance = KafkaProducer(
-                bootstrap_servers='localhost:29092',
+                bootstrap_servers='localhost:9092',
                 value_serializer=lambda v: json.dumps(v).encode('utf-8')
             )
         return KafkaProducerSingleton.__instance
 
 
-def produce(model, document=None, **kwargs):
+def produce(model, id, document=None, **kwargs):
     '''Produce message with marshalled document'''
     producer = KafkaProducerSingleton.get_instance()
-    if isinstance(model, Dataset):
+    key = id.encode("utf-8")
+    if model == Dataset:
         if kwargs.get('delete', False):
-            producer.send('dataset')
+            producer.send('dataset', key=key)
         else:
-            producer.send('dataset', document)
+            producer.send('dataset', document, key=key)
         producer.flush()
-    if isinstance(model, Organization):
+    if model == Organization:
         if kwargs.get('delete', False):
-            producer.send('organization')
+            producer.send('organization', key=key)
         else:
-            producer.send('organization', document)
+            producer.send('organization', document, key=key)
         producer.flush()
-    if isinstance(model, Reuse):
+    if model == Reuse:
         if kwargs.get('delete', False):
-            producer.send('reuse')
+            producer.send('reuse', key=key)
         else:
-            producer.send('reuse', document)
+            producer.send('reuse', document, key=key)
         producer.flush()
 
 
@@ -58,17 +59,15 @@ def reindex(classname, id=None):
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, adapter_class.serialize(obj))
-        except Exception:
-            log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
-    elif adapter_class.exists(obj.id):
-        log.info('Unindexing %s (%s)', model.__name__, obj.id)
-        try:
-            produce(model, delete=True)
+            produce(model, id, adapter_class.serialize(obj))
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
-        log.info('Nothing to do for %s (%s)', model.__name__, obj.id)
+        log.info('Unindexing %s (%s)', model.__name__, obj.id)
+        try:
+            produce(model, id, delete=True)
+        except Exception:
+            log.exception('Unable to desindex %s "%s"', model.__name__, str(obj.id))
 
 
 @task(route='high.search')
