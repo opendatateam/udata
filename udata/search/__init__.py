@@ -120,14 +120,14 @@ def adapter_for(model_or_adapter):
         return adapter_catalog[model_or_adapter]
 
 
-def search_for(model_or_adapter, params):
+def search_for(model_or_adapter, **params):
     adapter = adapter_for(model_or_adapter)
     search_class = adapter.temp_search()
     return search_class(params)
 
 
 def query(model, **params):
-    search = search_for(model, params)
+    search = search_for(model, **params)
     return search.execute_search()
 
 

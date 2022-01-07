@@ -22,7 +22,7 @@ RANGE_LABELS = {
 
 
 class FakeSearchWithBool(FakeSearch):
-    facets = {
+    filters = {
         'boolean': search.BoolFilter()
     }
 
@@ -59,11 +59,10 @@ class SearchAdaptorTest:
         parser = FakeSearch.as_request_parser()
         assert isinstance(parser, RequestParser)
 
-        # query + facets selector + tag and other facets + sorts + pagination
-        assert len(parser.args) == 7
+        # query + tag and other facets + sorts + pagination
+        assert len(parser.args) == 6
         assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
-        assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'tag', clean_string)
         assertHasArgument(parser, 'other', clean_string)
         assertHasArgument(parser, 'page', int)
@@ -73,11 +72,10 @@ class SearchAdaptorTest:
         parser = FakeSearchWithBool.as_request_parser()
         assert isinstance(parser, RequestParser)
 
-        # query + facets selector + boolean facet + sorts + pagination
-        assert len(parser.args) == 6
+        # query + boolean facet + sorts + pagination
+        assert len(parser.args) == 5
         assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
-        assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'boolean', inputs.boolean)
         assertHasArgument(parser, 'page', int)
         assertHasArgument(parser, 'page_size', int)
@@ -87,11 +85,10 @@ class SearchAdaptorTest:
         filter = FakeSearchWithCoverage.filters['coverage']
         assert isinstance(parser, RequestParser)
 
-        # query + facets selector + range facet + sorts + pagination
-        assert len(parser.args) == 6
+        # query + range facet + sorts + pagination
+        assert len(parser.args) == 5
         assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
-        assertHasArgument(parser, 'facets', str)
         assertHasArgument(parser, 'coverage', filter.validate_parameter)
         assertHasArgument(parser, 'page', int)
         assertHasArgument(parser, 'page_size', int)
