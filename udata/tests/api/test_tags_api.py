@@ -33,7 +33,7 @@ class TagsAPITest:
             assert 'text' in suggestion
             assert suggestion['text'].startswith('test')
 
-    def test_suggest_tags_api_with_unicode(self, api, autoindex):
+    def test_suggest_tags_api_with_unicode(self, api):
         '''It should suggest tags'''
         for i in range(3):
             tags = [faker.word(), faker.word(), 'testé',
@@ -55,7 +55,7 @@ class TagsAPITest:
             assert 'text' in suggestion
             assert suggestion['text'].startswith('teste')
 
-    def test_suggest_tags_api_no_match(self, api, autoindex):
+    def test_suggest_tags_api_no_match(self, api):
         '''It should not provide tag suggestion if no match'''
         for i in range(3):
             tags = ['aaaa', 'aaaa-{0}'.format(i)]
@@ -69,7 +69,7 @@ class TagsAPITest:
         assert200(response)
         assert len(response.json) is 0
 
-    def test_suggest_tags_api_empty(self, api, autoindex):
+    def test_suggest_tags_api_empty(self, api):
         '''It should not provide tag suggestion if no data'''
         response = api.get(url_for('apiv2.suggest_tags'),
                            qs={'q': 'bbbb', 'size': '5'})
