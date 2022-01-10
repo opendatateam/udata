@@ -132,6 +132,12 @@
                                     <dd>
                                         {{ reuse.type_label }}
                                     </dd>
+                                {% if reuse.topic %}
+                                <dt>{{ _('Topic') }}</dt>
+                                    <dd>
+                                        {{ reuse.topic_label }}
+                                    </dd>
+                                {% endif %}
                                 <dt>{{ _('ID') }}</dt>
                                     <dd>
                                         {{reuse.id}}

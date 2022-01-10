@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Change urls in Participate banner to relevant etalab guides [#53](https://github.com/etalab/udata-front/pull/53)
+- Add topic information on reuse metadata and add a filter by topic on reuse search page [#50](https://github.com/etalab/udata-front/pull/50)
 - Update DSFR to v1.2.1 [#45](https://github.com/etalab/udata-front/pull/45)
 - :warning: `.btn-tab` is removed, use `.fr-tag` instead [57](https://github.com/etalab/udata-front/pull/57)
 

@@ -21,15 +21,22 @@
 {% endblock %}
 
 {# TODO : pull this from somewhere else, results.facet doesn't contain the list when you're already in a filtered mode #}
-{% set reuses_tabs = (
-    ('paper', _('Paper')),
-    ('post', _('Post')),
-    ('visualization', _('Visualization')),
-    ('api', _('Api')),
-    ('hardware', _('Hardware')),
-    ('news_article', _('News article')),
-    ('application', _('Application')),
-    ('idea', _('Idea')),
+{% set reuses_topics = (
+    ('health', _('Health')),
+    ('transport_and_mobility', _('Transport and mobility')),
+    ('housing_and_development', _('Housing and development')),
+    ('food_and_agriculture', _('Food and agriculture')),
+    ('culture_and_recreation', _('Culture and recreation')),
+    ('economy_and_business', _('Economy and business')),
+    ('environment_and_energy', _('Environment and energy')),
+    ('work_and_training', _('Work and training')),
+    ('politics_and_public_life', _('Politics and public life')),
+    ('safety_and_security', _('Safety and security')),
+    ('education_and_research', _('Education and research')),
+    ('society_and_demography', _('Society and demography')),
+    ('law_and_justice', _('Law and justice')),
+    ('open_data_tools', _('Open data tools')),
+    ('others', _('Others')),
 ) %}
 
 {% block main_content %}
@@ -51,15 +58,15 @@
             <li>
                 <a
                     href="{{ url_for('reuses.list') }}"
-                    class="fr-tag{% if not reuses.query._filters.type %} active{% endif %}">
+                    class="fr-tag{% if not reuses.query._filters.topic %} active{% endif %}">
                     {{ _('All') }}
                 </a>
             </li>
-            {% for tab_id, label in reuses_tabs %}
+            {% for topic_id, label in reuses_topics %}
                 <li>
                     <a
-                        href="{{ reuses.query.to_url(url, replace=True, **{'type': tab_id}) }}"
-                        class="fr-tag{% if reuses.query._filters and reuses.query._filters.type and reuses.query._filters.type.type == tab_id %} active{% endif %}"
+                        href="{{ reuses.query.to_url(url, replace=True, **{'topic': topic_id}) }}"
+                        class="fr-tag{% if reuses.query._filters and reuses.query._filters.topic and reuses.query._filters.topic.topic == topic_id %} active{% endif %}"
                     >
                         {{ label }}
                     </a>
