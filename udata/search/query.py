@@ -47,9 +47,27 @@ class SearchQuery:
 
     def execute_search(self):
         if not current_app.config['SEARCH_SERVICE_API_URL']:
-            raise ValueError('Missing search service url in settings')
-        r = requests.get(f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}").json()
-        return SearchResult(query=self, result=r.pop('data'), **r)
+            raise NotImplementedError('Missing search service url in settings')
+
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
+        for name, value in self._filters.items():
+            url = url + f'&{name}={value}'
+        r = requests.get(url, timeout=current_app.config['SEARCH_SERVICE_REQUEST_TIMEOUT'])
+
+        if r.status_code >= 400:
+            raise RuntimeError(f'Search service returned code {r.status_code}: {r.text}')
+        result = r.json()
+        result = {
+            'data': [],
+            'next_page': None,
+            'previous_page': None,
+            'page': 1,
+            'page_size': 20,
+            'total_pages': 2,
+            'total': 113
+        }
+
+        return SearchResult(query=self, result=result.pop('data'), **result)
 
     def to_url(self, url=None, replace=False, **kwargs):
         '''Serialize the query into an URL'''

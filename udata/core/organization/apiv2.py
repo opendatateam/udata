@@ -29,8 +29,10 @@ class OrganizationSearchAPI(API):
         search_parser.parse_args()
         try:
             return search.query(OrganizationSearch, **multi_to_dict(request.args))
-        except ValueError:
+        except NotImplementedError:
             abort(501, 'Search endpoint not enabled')
+        except RuntimeError:
+            abort(500, 'Internal search service error')
 
 
 suggest_parser = apiv2.parser()

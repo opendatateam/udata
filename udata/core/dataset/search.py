@@ -6,13 +6,12 @@ from udata.search import (
     ModelTermsFilter, BoolFilter, Filter,
     TemporalCoverageFilter
 )
+from udata.core.spatial.models import (
+    admin_levels, ADMIN_LEVEL_MAX
+)
 from udata.utils import to_iso_datetime
 
 __all__ = ('DatasetSearch', )
-
-
-DEFAULT_SPATIAL_WEIGHT = 1
-DEFAULT_TEMPORAL_WEIGHT = 1
 
 
 @register
@@ -39,7 +38,6 @@ class DatasetSearch(ModelSearchAdapter):
         'granularity': Filter(),
         'format': Filter(),
         'schema': Filter(),
-        'resource_type': Filter(),
         'temporal_coverage': TemporalCoverageFilter(),
         'featured': BoolFilter(),
     }
@@ -52,24 +50,78 @@ class DatasetSearch(ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, dataset):
-        return {
+        organization = None
+        owner = None
+
+        if dataset.organization:
+            org = Organization.objects(id=dataset.organization.id).first()
+            organization = {
+                'id': org.id,
+                'name': org.name,
+                'public_service': 1 if org.public_service else 0,
+                'followers': org.metrics.get('followers', 0)
+            }
+        elif dataset.owner:
+            owner = User.objects(id=dataset.owner.id).first()
+
+        document = {
             'id': str(dataset.id),
             'title': dataset.title,
             'description': dataset.description,
             'acronym': dataset.acronym or None,
             'url': dataset.display_url,
+            'tags': dataset.tags,
+            'license': getattr(dataset.license, 'id', None),
+            'badges': [badge.kind for badge in dataset.badges],
+            'frequency': dataset.frequency,
             'created_at': to_iso_datetime(dataset.created_at),
-            'orga_sp': 1 if dataset.organization and dataset.organization.public_service else 0,
-            'orga_followers': dataset.organization.metrics.get('followers', 0) if dataset.organization else 0,
-            'dataset_views': dataset.metrics.get('views', 0),
-            'dataset_followers': dataset.metrics.get('followers', 0),
-            'dataset_reuses': dataset.metrics.get('reuses', 0),
-            'dataset_featured': 1 if dataset.featured else 0,
+            'views': dataset.metrics.get('views', 0),
+            'followers': dataset.metrics.get('followers', 0),
+            'reuses': dataset.metrics.get('reuses', 0),
+            'featured': 1 if dataset.featured else 0,
             'resources_count': len(dataset.resources),
-            'concat_title_org': f"{dataset.title} {dataset.acronym if dataset.acronym else ''} {dataset.organization.name if dataset.organization else dataset.owner.fullname}",
-            'organization_id': str(dataset.organization.id) if dataset.organization else str(dataset.owner.id),
-            'temporal_coverage_start': 0,
-            'temporal_coverage_end': 0,
+            'organization': organization,
+            'owner': str(owner.id) if owner else None,
             'spatial_granularity': 0,
-            'spatial_zones': 0
+            'spatial_zones': 0,
+            'format': [r.format.lower() for r in dataset.resources if r.format]
         }
+
+        if (dataset.temporal_coverage is not None and
+                dataset.temporal_coverage.start and
+                dataset.temporal_coverage.end):
+            start = dataset.temporal_coverage.start.toordinal()
+            end = dataset.temporal_coverage.end.toordinal()
+            temporal_weight = min(abs(end - start) / 365, cls.from_config('MAX_TEMPORAL_WEIGHT'))
+            document.update({
+                'temporal_coverage_start': start,
+                'temporal_coverage_end': end,
+                'temporal_weight': temporal_weight,
+            })
+
+        if dataset.spatial is not None:
+            # Index precise zone labels and parents zone identifiers
+            # to allow fast filtering.
+            zone_ids = [z.id for z in dataset.spatial.zones]
+            zones = GeoZone.objects(id__in=zone_ids).exclude('geom')
+            parents = set()
+            geozones = []
+            coverage_level = ADMIN_LEVEL_MAX
+            for zone in zones:
+                geozones.append({
+                    'id': zone.id,
+                    'name': zone.name,
+                    'keys': zone.keys_values
+                })
+                parents |= set(zone.parents)
+                coverage_level = min(coverage_level, admin_levels[zone.level])
+
+            geozones.extend([{'id': p} for p in parents])
+
+            spatial_weight = ADMIN_LEVEL_MAX / coverage_level
+            document.update({
+                'geozones': geozones,
+                'granularity': dataset.spatial.granularity,
+                'spatial_weight': spatial_weight,
+            })
+        return document

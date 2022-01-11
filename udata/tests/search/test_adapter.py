@@ -59,7 +59,7 @@ class SearchAdaptorTest:
         parser = FakeSearch.as_request_parser()
         assert isinstance(parser, RequestParser)
 
-        # query + tag and other facets + sorts + pagination
+        # query + tag and other filters + sorts + pagination
         assert len(parser.args) == 6
         assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)
@@ -72,7 +72,7 @@ class SearchAdaptorTest:
         parser = FakeSearchWithBool.as_request_parser()
         assert isinstance(parser, RequestParser)
 
-        # query + boolean facet + sorts + pagination
+        # query + boolean filter + sorts + pagination
         assert len(parser.args) == 5
         assertHasArgument(parser, 'q', str)
         assertHasArgument(parser, 'sort', str)

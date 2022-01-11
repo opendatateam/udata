@@ -24,16 +24,15 @@ def iter_adapters():
 
 def iter_qs(qs, adapter):
     '''Safely iterate over a DB QuerySet yielding ES documents'''
-    results = []
     for obj in qs.no_cache().timeout(False):
         if adapter.is_indexable(obj):
             try:
-                results.append(adapter.serialize(obj))
+                doc = adapter.serialize(obj)
+                yield doc
             except Exception as e:
                 model = adapter.model.__name__
                 log.error('Unable to index %s "%s": %s', model, str(obj.id),
                           str(e), exc_info=True)
-    return results
 
 
 def index_model(adapter):

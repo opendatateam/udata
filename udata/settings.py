@@ -30,6 +30,7 @@ class Defaults(object):
 
     # Search service configuration
     SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
+    SEARCH_SERVICE_REQUEST_TIMEOUT = 20
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'

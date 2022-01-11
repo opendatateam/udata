@@ -15,9 +15,10 @@ class ModelSearchAdapter:
 
     @classmethod
     def serialize(cls, document):
-        return {
-            'id': str(document.id)
-        }
+        """By default use the ``to_dict`` method
+        and exclude ``_id``, ``_cls`` and ``owner`` fields
+        """
+        return document.to_dict(exclude=('_id', '_cls', 'owner'))
 
     @classmethod
     def is_indexable(cls, document):
@@ -54,5 +55,3 @@ class ModelSearchAdapter:
             model = cls.model
 
         return TempSearch
-
-

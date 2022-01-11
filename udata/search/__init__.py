@@ -73,15 +73,11 @@ def reindex(classname, id=None):
 @task(route='high.search')
 def unindex(classname, id=None):
     model = db.resolve_model(classname)
-    adapter_class = adapter_catalog.get(model)
-    if adapter_class.exists(id):
-        log.info('Unindexing %s (%s)', model.__name__, id)
-        try:
-            produce(model, delete=True)
-        except Exception:
-            log.exception('Unable to unindex %s "%s"', model.__name__, id)
-    else:
-        log.info('Nothing to do for %s (%s)', model.__name__, id)
+    log.info('Unindexing %s (%s)', model.__name__, id)
+    try:
+        produce(model, id, delete=True)
+    except Exception:
+        log.exception('Unable to unindex %s "%s"', model.__name__, id)
 
 
 def reindex_model_on_save(sender, document, **kwargs):

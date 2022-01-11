@@ -35,10 +35,12 @@ class OrganizationSearch(search.ModelSearchAdapter):
         return {
             'id': str(organization.id),
             'name': organization.name,
+            'acronym': organization.acronym if organization.acronym else None,
             'description': organization.description,
             'url': organization.url,
+            'badges': [badge.kind for badge in organization.badges],
             'created_at': to_iso_datetime(organization.created_at),
             'orga_sp': 1 if organization.public_service else 0,
-            'orga_followers': organization.metrics.get('followers', 0),
-            'orga_datasets': organization.metrics.get('datasets', 0)
+            'followers': organization.metrics.get('followers', 0),
+            'datasets': organization.metrics.get('datasets', 0)
         }
