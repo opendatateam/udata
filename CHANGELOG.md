@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.1 (2022-01-11)
 
 - Change urls in Participate banner to relevant etalab guides [#53](https://github.com/etalab/udata-front/pull/53)
