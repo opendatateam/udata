@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 3.3.1 (2022-01-11)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
