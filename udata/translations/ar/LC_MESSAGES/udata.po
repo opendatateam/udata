@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2021-08-17 15:38+0200\n"
-"PO-Revision-Date: 2021-08-19 08:39\n"
+"POT-Creation-Date: 2022-01-11 09:51+0100\n"
+"PO-Revision-Date: 2022-01-11 08:53\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -42,7 +42,7 @@ msgstr "تم تغيير كلمة المرور الخاصه بك"
 msgid "Password reset instructions"
 msgstr "إرشادات إعادة تعيين كلمة المرور"
 
-#: udata/settings.py:442
+#: udata/settings.py:441
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -147,6 +147,10 @@ msgstr "قام بتحديث مجموعة بيانات"
 msgid "deleted a dataset"
 msgstr "قام بحذف مجموعة بيانات"
 
+#: udata/core/dataset/forms.py:25
+msgid "Checksum value"
+msgstr ""
+
 #: udata/core/dataset/forms.py:39
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
 msgstr ""
@@ -160,14 +164,10 @@ msgid "Sub-property \"{prop}\" is not allowed value in schema field. Allowed val
 msgstr ""
 
 #: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:128
-#: udata/core/discussions/forms.py:12 udata/core/issues/forms.py:12
-#: udata/core/reuse/forms.py:19 udata/core/site/forms.py:12
-#: udata/templates/mail/discussion_closed.html:26
-#: udata/templates/mail/issue_closed.html:26
+#: udata/core/discussions/forms.py:12 udata/core/reuse/forms.py:19
+#: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
 #: udata/templates/mail/new_discussion.html:25
 #: udata/templates/mail/new_discussion_comment.html:26
-#: udata/templates/mail/new_issue.html:25
-#: udata/templates/mail/new_issue_comment.html:26
 msgid "Title"
 msgstr "عنوان"
 
@@ -240,7 +240,7 @@ msgid "Related dataset"
 msgstr "مجموعة البيانات متعلقة"
 
 #: udata/core/dataset/forms.py:115 udata/core/dataset/forms.py:159
-#: udata/core/reuse/forms.py:37 udata/harvest/forms.py:69
+#: udata/core/reuse/forms.py:38 udata/harvest/forms.py:69
 msgid "Publish as"
 msgstr "نشر بإسم"
 
@@ -280,7 +280,7 @@ msgstr "التغطية الزمنية"
 msgid "The period covered by the data"
 msgstr "الفترة التي تغطيها البيانات."
 
-#: udata/core/dataset/forms.py:150 udata/core/spatial/forms.py:81
+#: udata/core/dataset/forms.py:150 udata/core/spatial/forms.py:83
 msgid "Spatial coverage"
 msgstr "التغطية المكانية"
 
@@ -307,163 +307,163 @@ msgstr "خاص"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "قم بتقييد رؤية البيانات لك أو لمؤسستك فقط."
 
-#: udata/core/dataset/models.py:41
+#: udata/core/dataset/models.py:44
 msgid "Unknown"
 msgstr "غير معروف"
 
-#: udata/core/dataset/models.py:42
+#: udata/core/dataset/models.py:45
 msgid "Punctual"
 msgstr "في وقت محدد"
 
-#: udata/core/dataset/models.py:43
+#: udata/core/dataset/models.py:46
 msgid "Real time"
 msgstr "في الوقت الحالى"
 
-#: udata/core/dataset/models.py:44
+#: udata/core/dataset/models.py:47
 msgid "Hourly"
 msgstr "كل ساعة"
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:48
 msgid "Four times a day"
 msgstr "أربع مرات في اليوم"
 
-#: udata/core/dataset/models.py:46
+#: udata/core/dataset/models.py:49
 msgid "Three times a day"
 msgstr "ثلاث مرات في اليوم"
 
-#: udata/core/dataset/models.py:47
+#: udata/core/dataset/models.py:50
 msgid "Semidaily"
 msgstr "مرتين فى اليوم"
 
-#: udata/core/dataset/models.py:48 udata/harvest/models.py:22
+#: udata/core/dataset/models.py:51 udata/harvest/models.py:22
 msgid "Daily"
 msgstr "يوميا"
 
-#: udata/core/dataset/models.py:49
+#: udata/core/dataset/models.py:52
 msgid "Four times a week"
 msgstr "اربع مرات في الاسبوع"
 
-#: udata/core/dataset/models.py:50
+#: udata/core/dataset/models.py:53
 msgid "Three times a week"
 msgstr "ثلاث مرات في الاسبوع"
 
-#: udata/core/dataset/models.py:51
+#: udata/core/dataset/models.py:54
 msgid "Semiweekly"
 msgstr "مرتين في الأسبوع"
 
-#: udata/core/dataset/models.py:52 udata/harvest/models.py:21
+#: udata/core/dataset/models.py:55 udata/harvest/models.py:21
 msgid "Weekly"
 msgstr "أسبوعيا"
 
-#: udata/core/dataset/models.py:53
+#: udata/core/dataset/models.py:56
 msgid "Biweekly"
 msgstr "كل أسبوعين"
 
-#: udata/core/dataset/models.py:54
+#: udata/core/dataset/models.py:57
 msgid "Three times a month"
 msgstr "ثلاث مرات في الشهر"
 
-#: udata/core/dataset/models.py:55
+#: udata/core/dataset/models.py:58
 msgid "Semimonthly"
 msgstr "مرتين في الشهر"
 
-#: udata/core/dataset/models.py:56 udata/harvest/models.py:20
+#: udata/core/dataset/models.py:59 udata/harvest/models.py:20
 msgid "Monthly"
 msgstr "شهريا"
 
-#: udata/core/dataset/models.py:57
+#: udata/core/dataset/models.py:60
 msgid "Bimonthly"
 msgstr "كل شهرين"
 
-#: udata/core/dataset/models.py:58
+#: udata/core/dataset/models.py:61
 msgid "Quarterly"
 msgstr "ربع سنوي"
 
-#: udata/core/dataset/models.py:59
+#: udata/core/dataset/models.py:62
 msgid "Three times a year"
 msgstr "ثلاث مرات في السنة"
 
-#: udata/core/dataset/models.py:60
+#: udata/core/dataset/models.py:63
 msgid "Biannual"
 msgstr "نصف سنوي"
 
-#: udata/core/dataset/models.py:61
+#: udata/core/dataset/models.py:64
 msgid "Annual"
 msgstr "سنويا"
 
-#: udata/core/dataset/models.py:62
+#: udata/core/dataset/models.py:65
 msgid "Biennial"
 msgstr "كل سنتين"
 
-#: udata/core/dataset/models.py:63
+#: udata/core/dataset/models.py:66
 msgid "Triennial"
 msgstr "كل ثلاث سنوات"
 
-#: udata/core/dataset/models.py:64
+#: udata/core/dataset/models.py:67
 msgid "Quinquennial"
 msgstr "كل خمس سنوات"
 
-#: udata/core/dataset/models.py:65
+#: udata/core/dataset/models.py:68
 msgid "Irregular"
 msgstr "غير منتظم"
 
-#: udata/core/dataset/models.py:88
+#: udata/core/dataset/models.py:90
 msgid "Main file"
 msgstr ""
 
-#: udata/core/dataset/models.py:89
+#: udata/core/dataset/models.py:91
 msgid "Documentation"
 msgstr ""
 
-#: udata/core/dataset/models.py:90
+#: udata/core/dataset/models.py:92
 msgid "Update"
 msgstr ""
 
-#: udata/core/dataset/models.py:91 udata/core/reuse/models.py:18
+#: udata/core/dataset/models.py:93 udata/core/reuse/models.py:17
 msgid "API"
 msgstr "واجهة برمجة تطبيق (API)"
 
-#: udata/core/dataset/models.py:92
+#: udata/core/dataset/models.py:94
 msgid "Code repository"
 msgstr ""
 
-#: udata/core/dataset/models.py:93 udata/core/spatial/models.py:24
+#: udata/core/dataset/models.py:95 udata/core/spatial/models.py:24
 msgid "Other"
 msgstr "آخر"
 
-#: udata/core/dataset/models.py:98
+#: udata/core/dataset/models.py:100
 msgid "Uploaded file"
 msgstr "الملف الذي تم تحميله"
 
-#: udata/core/dataset/models.py:99
+#: udata/core/dataset/models.py:101
 msgid "Remote file"
 msgstr "ملف بعيد"
 
-#: udata/core/dataset/models.py:327 udata/core/dataset/rdf.py:324
+#: udata/core/dataset/models.py:344 udata/core/dataset/rdf.py:331
 msgid "Nameless resource"
 msgstr "مورد مجهول"
 
-#: udata/core/dataset/models.py:383 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:400 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr "تاريخ الإنشاء"
 
-#: udata/core/dataset/models.py:385 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:402 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "تاريخ التعديل الأخير"
 
-#: udata/core/dataset/models.py:401
+#: udata/core/dataset/models.py:418
 msgid "Future date of update"
 msgstr "تاريخ التحديث في المستقبل"
 
-#: udata/core/dataset/models.py:417
+#: udata/core/dataset/models.py:434
 msgid "Pivotal data"
 msgstr "بيانات محورية"
 
-#: udata/core/dataset/models.py:455
+#: udata/core/dataset/models.py:471
 msgid "dataset"
 msgstr "مجموعة البيانات"
 
-#: udata/core/dataset/rdf.py:322
+#: udata/core/dataset/rdf.py:329
 msgid "{format} resource"
 msgstr ""
 
@@ -488,13 +488,12 @@ msgid "You need to update some frequency-based datasets"
 msgstr "يجب تحديث بعض مجموعات البيانات المستندة إلى الترددات"
 
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:21
-#: udata/core/issues/forms.py:13 udata/core/issues/forms.py:18
 #: udata/core/organization/forms.py:53 udata/core/organization/forms.py:57
 #: udata/harvest/forms.py:78
 msgid "Comment"
 msgstr "تعليق"
 
-#: udata/core/discussions/forms.py:15 udata/core/issues/forms.py:14
+#: udata/core/discussions/forms.py:15
 msgid "Subject"
 msgstr "موضوع"
 
@@ -511,20 +510,6 @@ msgstr "%(user)s علق نقاشك"
 #: udata/core/discussions/tasks.py:63
 msgid "A discussion has been closed"
 msgstr "وقع إغلاق نقاش"
-
-#: udata/core/issues/tasks.py:24
-#, python-format
-msgid "Your %(type)s have a new issue"
-msgstr ""
-
-#: udata/core/issues/tasks.py:40
-#, python-format
-msgid "%(user)s commented your issue"
-msgstr "%(user)s علق مسألتك"
-
-#: udata/core/issues/tasks.py:56
-msgid "An issue has been closed"
-msgstr "تم إغلاق إحدى المسائل"
 
 #: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:21
 #: udata/core/post/forms.py:15 udata/core/topic/forms.py:15
@@ -623,55 +608,55 @@ msgstr "استخدامات قليلة"
 msgid "Many reuses"
 msgstr "استخدامات عديدة"
 
-#: udata/core/organization/search.py:79 udata/core/reuse/search.py:87
+#: udata/core/organization/search.py:79 udata/core/reuse/search.py:92
 #: udata/core/user/search.py:52
 msgid "No datasets"
 msgstr "دون مجموعة البيانات"
 
-#: udata/core/organization/search.py:80 udata/core/reuse/search.py:88
+#: udata/core/organization/search.py:80 udata/core/reuse/search.py:93
 #: udata/core/user/search.py:53
 msgid "Few datasets"
 msgstr "مجموعة البيانات قليلة"
 
-#: udata/core/organization/search.py:81 udata/core/reuse/search.py:89
+#: udata/core/organization/search.py:81 udata/core/reuse/search.py:94
 #: udata/core/user/search.py:54
 msgid "Many datasets"
 msgstr "مجموعات البيانات عديدة"
 
-#: udata/core/organization/search.py:88 udata/core/reuse/search.py:96
+#: udata/core/organization/search.py:88 udata/core/reuse/search.py:101
 #: udata/core/user/search.py:61
 msgid "No followers"
 msgstr "دون متابعين"
 
-#: udata/core/organization/search.py:89 udata/core/reuse/search.py:97
+#: udata/core/organization/search.py:89 udata/core/reuse/search.py:102
 #: udata/core/user/search.py:62
 msgid "Few followers"
 msgstr "متابعون قليلون"
 
-#: udata/core/organization/search.py:90 udata/core/reuse/search.py:98
+#: udata/core/organization/search.py:90 udata/core/reuse/search.py:103
 #: udata/core/user/search.py:63
 msgid "Many followers"
 msgstr "متابعون عديدون"
 
-#: udata/core/organization/tasks.py:47
+#: udata/core/organization/tasks.py:50
 msgid "New membership request"
 msgstr "طلب عضوية جديد"
 
-#: udata/core/organization/tasks.py:57 udata/core/organization/tasks.py:70
+#: udata/core/organization/tasks.py:60 udata/core/organization/tasks.py:73
 #, python-format
 msgid "You are now a member of the organization \"%(org)s\""
 msgstr "أنت الآن عضو في المنظمة \"%(org)s\""
 
-#: udata/core/organization/tasks.py:61
+#: udata/core/organization/tasks.py:64
 msgid "Membership refused"
 msgstr "عضوية مرفوضة"
 
-#: udata/core/organization/tasks.py:81
+#: udata/core/organization/tasks.py:84
 #, python-format
 msgid "Your organization \"%(name)s\" has been certified"
 msgstr "وقد تم تصديق منظمة \"%(name)s\""
 
-#: udata/core/organization/tasks.py:101
+#: udata/core/organization/tasks.py:104
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as public service"
 msgstr ""
@@ -732,35 +717,99 @@ msgstr ""
 msgid "Used datasets"
 msgstr "مجموعة البيانات المستعملة"
 
-#: udata/core/reuse/models.py:19
+#: udata/core/reuse/forms.py:35
+msgid "Topic"
+msgstr ""
+
+#: udata/core/reuse/models.py:18
 msgid "Application"
 msgstr "تطبيق"
 
-#: udata/core/reuse/models.py:20
+#: udata/core/reuse/models.py:19
 msgid "Idea"
 msgstr "فكرة"
 
-#: udata/core/reuse/models.py:21
+#: udata/core/reuse/models.py:20
 msgid "News Article"
 msgstr "مقال إخباري"
 
-#: udata/core/reuse/models.py:22
+#: udata/core/reuse/models.py:21
 msgid "Paper"
 msgstr "صحيفة"
 
-#: udata/core/reuse/models.py:23
+#: udata/core/reuse/models.py:22
 msgid "Post"
 msgstr "بريد"
 
-#: udata/core/reuse/models.py:24
+#: udata/core/reuse/models.py:23
 msgid "Visualization"
 msgstr "تصور"
 
-#: udata/core/reuse/models.py:25
+#: udata/core/reuse/models.py:24
 msgid "Connected device"
 msgstr "جهاز متصل"
 
-#: udata/core/reuse/models.py:104
+#: udata/core/reuse/models.py:28
+msgid "Health"
+msgstr ""
+
+#: udata/core/reuse/models.py:29
+msgid "Transport and mobility"
+msgstr ""
+
+#: udata/core/reuse/models.py:30
+msgid "Housing and development"
+msgstr ""
+
+#: udata/core/reuse/models.py:31
+msgid "Food and agriculture"
+msgstr ""
+
+#: udata/core/reuse/models.py:32
+msgid "Culture and recreation"
+msgstr ""
+
+#: udata/core/reuse/models.py:33
+msgid "Economy and business"
+msgstr ""
+
+#: udata/core/reuse/models.py:34
+msgid "Environment and energy"
+msgstr ""
+
+#: udata/core/reuse/models.py:35
+msgid "Work and training"
+msgstr ""
+
+#: udata/core/reuse/models.py:36
+msgid "Politics and public life"
+msgstr ""
+
+#: udata/core/reuse/models.py:37
+msgid "Safety and security"
+msgstr ""
+
+#: udata/core/reuse/models.py:38
+msgid "Education and research"
+msgstr ""
+
+#: udata/core/reuse/models.py:39
+msgid "Society and demography"
+msgstr ""
+
+#: udata/core/reuse/models.py:40
+msgid "Law and justice"
+msgstr ""
+
+#: udata/core/reuse/models.py:41
+msgid "Open data tools"
+msgstr ""
+
+#: udata/core/reuse/models.py:42
+msgid "Others"
+msgstr ""
+
+#: udata/core/reuse/models.py:121
 msgid "reuse"
 msgstr "استخدام"
 
@@ -788,15 +837,15 @@ msgstr ""
 msgid "Not a valid GeoJSON"
 msgstr ""
 
-#: udata/core/spatial/forms.py:82
+#: udata/core/spatial/forms.py:84
 msgid "A list of covered territories"
 msgstr "قائمة المناطق المشمولة"
 
-#: udata/core/spatial/forms.py:84
+#: udata/core/spatial/forms.py:86
 msgid "Spatial granularity"
 msgstr "الدقة المكانية"
 
-#: udata/core/spatial/forms.py:85
+#: udata/core/spatial/forms.py:87
 msgid "The size of the data increment"
 msgstr "حجم زيادة البيانات"
 
@@ -912,7 +961,7 @@ msgstr "حول"
 msgid "Roles"
 msgstr "الأدوار"
 
-#: udata/core/user/models.py:258 udata/tests/api/test_me_api.py:372
+#: udata/core/user/models.py:265 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "حذف الحساب"
 
@@ -1080,42 +1129,46 @@ msgstr ""
 msgid "Add a client"
 msgstr "إضافة زبون"
 
-#: udata/templates/api/oauth_authorize.html:17
+#: udata/templates/api/oauth_authorize.html:23
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
 msgstr ""
 
-#: udata/templates/api/oauth_authorize.html:29
+#: udata/templates/api/oauth_authorize.html:35
 msgid "Details"
 msgstr "تفاصيل"
 
-#: udata/templates/api/oauth_authorize.html:39
+#: udata/templates/api/oauth_authorize.html:45
 msgid "Access your profile"
 msgstr "الدخول إلى ملفك الشخصي"
 
-#: udata/templates/api/oauth_authorize.html:40
+#: udata/templates/api/oauth_authorize.html:46
 msgid "Read your profile, the orgnization you belong to, your publications"
 msgstr "اقرأ ملفك الشخصي، المؤسسة التي تنتمي إليها، منشوراتك"
 
-#: udata/templates/api/oauth_authorize.html:48
+#: udata/templates/api/oauth_authorize.html:54
 msgid "Publish data"
 msgstr "نشر البيانات"
 
-#: udata/templates/api/oauth_authorize.html:49
+#: udata/templates/api/oauth_authorize.html:55
 msgid "Publish datasets, reuses, follow or unfollow"
 msgstr "نشر مجموعات البيانات أو الاستخدام أو المتابعة أو إلغاء المتابعة"
 
-#: udata/templates/api/oauth_authorize.html:59
+#: udata/templates/api/oauth_authorize.html:65
 msgid "Accept"
 msgstr "قبول"
 
-#: udata/templates/api/oauth_authorize.html:61
+#: udata/templates/api/oauth_authorize.html:67
 msgid "Refuse"
 msgstr "رفض"
 
-#: udata/templates/api/oauth_error.html:1
+#: udata/templates/api/oauth_error.html:15
 msgid "OAuth Authentication Error"
 msgstr ""
+
+#: udata/templates/api/oauth_error.html:20 udata/templates/macros/metadata.html:2
+msgid "Home"
+msgstr "الصفحة الرئيسية"
 
 #: udata/templates/comments/dataset_archived.txt:1
 msgid "This dataset has been archived by our administration team.\n\n"
@@ -1127,10 +1180,6 @@ msgstr ""
 #: udata/templates/macros/forms.html:106
 msgid "required fields"
 msgstr ""
-
-#: udata/templates/macros/metadata.html:2
-msgid "Home"
-msgstr "الصفحة الرئيسية"
 
 #: udata/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
@@ -1184,11 +1233,8 @@ msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
 msgstr ""
 
 #: udata/templates/mail/discussion_closed.html:31
-#: udata/templates/mail/issue_closed.html:31
 #: udata/templates/mail/new_discussion.html:30
 #: udata/templates/mail/new_discussion_comment.html:31
-#: udata/templates/mail/new_issue.html:29
-#: udata/templates/mail/new_issue_comment.html:31
 msgid "Message"
 msgstr ""
 
@@ -1214,16 +1260,6 @@ msgstr ""
 
 #: udata/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
-msgstr ""
-
-#: udata/templates/mail/issue_closed.html:6
-#, python-format
-msgid "%(user)s closed an issue on your %(type)s %(subject)s"
-msgstr ""
-
-#: udata/templates/mail/issue_closed.html:40 udata/templates/mail/new_issue.html:36
-#: udata/templates/mail/new_issue_comment.html:39
-msgid "See the issue"
 msgstr ""
 
 #: udata/templates/mail/membership_refused.html:7
@@ -1252,16 +1288,6 @@ msgstr ""
 #: udata/templates/mail/new_discussion_comment.html:6
 #, python-format
 msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
-msgstr ""
-
-#: udata/templates/mail/new_issue.html:6
-#, python-format
-msgid "%(user)s submitted a new issue on your %(type)s %(subject)s"
-msgstr ""
-
-#: udata/templates/mail/new_issue_comment.html:6
-#, python-format
-msgid "%(user)s commented an issue on your %(type)s %(subject)s"
 msgstr ""
 
 #: udata/templates/mail/new_member.html:7
