@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2021-12-14 15:36+0100\n"
-"PO-Revision-Date: 2022-01-11 08:50\n"
+"POT-Creation-Date: 2022-01-11 09:51+0100\n"
+"PO-Revision-Date: 2022-01-11 08:53\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -146,6 +146,10 @@ msgstr "ha actualizado un conjunto de datos"
 #: udata/core/dataset/activities.py:34
 msgid "deleted a dataset"
 msgstr "ha eliminado un conjunto de datos"
+
+#: udata/core/dataset/forms.py:25
+msgid "Checksum value"
+msgstr ""
 
 #: udata/core/dataset/forms.py:39
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
@@ -750,7 +754,7 @@ msgid "Health"
 msgstr ""
 
 #: udata/core/reuse/models.py:29
-msgid "Transport and mobility "
+msgid "Transport and mobility"
 msgstr ""
 
 #: udata/core/reuse/models.py:30
