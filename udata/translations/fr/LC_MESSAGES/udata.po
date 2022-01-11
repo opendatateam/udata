@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-01-11 09:51+0100\n"
-"PO-Revision-Date: 2022-01-11 08:53\n"
+"PO-Revision-Date: 2022-01-11 08:59\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -149,7 +149,7 @@ msgstr "a supprimé un jeu de données"
 
 #: udata/core/dataset/forms.py:25
 msgid "Checksum value"
-msgstr ""
+msgstr "Valeur de la somme de contrôle"
 
 #: udata/core/dataset/forms.py:39
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
@@ -719,7 +719,7 @@ msgstr "Jeux de données utilisés"
 
 #: udata/core/reuse/forms.py:35
 msgid "Topic"
-msgstr ""
+msgstr "Thématique"
 
 #: udata/core/reuse/models.py:18
 msgid "Application"
@@ -751,63 +751,63 @@ msgstr "Objet connecté"
 
 #: udata/core/reuse/models.py:28
 msgid "Health"
-msgstr ""
+msgstr "Santé"
 
 #: udata/core/reuse/models.py:29
 msgid "Transport and mobility"
-msgstr ""
+msgstr "Transports et mobilité"
 
 #: udata/core/reuse/models.py:30
 msgid "Housing and development"
-msgstr ""
+msgstr "Aménagement du territoire et logement"
 
 #: udata/core/reuse/models.py:31
 msgid "Food and agriculture"
-msgstr ""
+msgstr "Alimentation et agriculture"
 
 #: udata/core/reuse/models.py:32
 msgid "Culture and recreation"
-msgstr ""
+msgstr "Culture et loisirs"
 
 #: udata/core/reuse/models.py:33
 msgid "Economy and business"
-msgstr ""
+msgstr "Économie et entreprise"
 
 #: udata/core/reuse/models.py:34
 msgid "Environment and energy"
-msgstr ""
+msgstr "Environnement et énergie"
 
 #: udata/core/reuse/models.py:35
 msgid "Work and training"
-msgstr ""
+msgstr "Emploi et formation"
 
 #: udata/core/reuse/models.py:36
 msgid "Politics and public life"
-msgstr ""
+msgstr "Politique et vie publique"
 
 #: udata/core/reuse/models.py:37
 msgid "Safety and security"
-msgstr ""
+msgstr "Sécurité"
 
 #: udata/core/reuse/models.py:38
 msgid "Education and research"
-msgstr ""
+msgstr "Éducation et recherche"
 
 #: udata/core/reuse/models.py:39
 msgid "Society and demography"
-msgstr ""
+msgstr "Société et démographie"
 
 #: udata/core/reuse/models.py:40
 msgid "Law and justice"
-msgstr ""
+msgstr "Droit et justice"
 
 #: udata/core/reuse/models.py:41
 msgid "Open data tools"
-msgstr ""
+msgstr "Outils open data"
 
 #: udata/core/reuse/models.py:42
 msgid "Others"
-msgstr ""
+msgstr "Autres"
 
 #: udata/core/reuse/models.py:121
 msgid "reuse"
