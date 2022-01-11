@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.1 (2022-01-11)
 
 - Change urls in Participate banner to relevant etalab guides [#53](https://github.com/etalab/udata-front/pull/53)
 - Add topic information on reuse metadata and add a filter by topic on reuse search page [#50](https://github.com/etalab/udata-front/pull/50)
