@@ -26,7 +26,7 @@ REUSE_TYPES = {
 
 REUSE_TOPICS = {
     'health': _('Health'),
-    'transport_and_mobility': _('Transport and mobility '),
+    'transport_and_mobility': _('Transport and mobility'),
     'housing_and_development': _('Housing and development'),
     'food_and_agriculture': _('Food and agriculture'),
     'culture_and_recreation': _('Culture and recreation'),
