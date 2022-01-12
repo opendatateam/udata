@@ -51,9 +51,9 @@
     transform: translateX(-20px);
 }
 
-//Magic sparkles™
-//Special thanks to https://stackoverflow.com/questions/54593203/how-to-make-a-sparkling-button-animation
-//Adapted by yours truly
+// Magic sparkles™
+// Special thanks to https://stackoverflow.com/questions/54593203/how-to-make-a-sparkling-button-animation
+// Adapted by yours truly
 
 .magic {
     position: relative;
@@ -69,7 +69,7 @@
         width: calc(2 * var(--r));
         height: calc(2 * var(--r));
         border-radius: 50%;
-        border: solid @orange-100 var(--r);
+        border: solid @blue-400 var(--r);
         transform: scale(0);
         box-sizing: border-box;
     }
@@ -82,8 +82,8 @@
         height: calc(4 * var(--r));
         left: calc(50% - 2 * var(--r));
         top: calc(50% - 2 * var(--r));
-        --c1: radial-gradient(circle, @orange-200 50%, transparent 60%);
-        --c2: radial-gradient(circle, @orange-100 50%, transparent 60%);
+        --c1: radial-gradient(circle, @blue-400 50%, transparent 60%);
+        --c2: radial-gradient(circle, @blue-400 50%, transparent 60%);
         background: var(--c1), var(--c1), var(--c1), var(--c1), var(--c2),
             var(--c2), var(--c2), var(--c2);
 

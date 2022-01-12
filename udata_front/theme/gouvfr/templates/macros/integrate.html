@@ -6,9 +6,10 @@
 
 {% set script = '<div data-udata-' + basename + '="' ~ obj.id + '"></div><script ' + root + ' src="' + widget_url + '" async defer></script>' %}
 <div class="embed-wrapper">
-    <textarea readonly id="embed-{{obj.id}}" rows="1" onClick="this.select();"
-        id="embed-wrapper">{{ script }}</textarea>
-    <label for="embed-wrapper" class="icon-copy" id="{{obj.id}}-copy" data-clipboard-target="#embed-{{obj.id}}"
-        title="Copy this">{% include theme('svg/copy.svg') %}</label>
+    <textarea readonly id="embed-{{obj.id}}" rows="1" onClick="this.select();">{{ script }}</textarea>
+    <label for="embed-{{obj.id}}" class="icon-copy" id="{{obj.id}}-copy" data-clipboard-target="#embed-{{obj.id}}">
+        <span class="visually-hidden">{{ _('Copy this') }}</span>
+        {% include theme('svg/copy.svg') %}
+    </label>
 </div>
 {% endmacro %}

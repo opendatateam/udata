@@ -36,15 +36,6 @@ Where *sides* is one of:
 For responsive, currently only the `border-{breakpoint}-0` is supported with the usual breakpoints.
 Feel free to change this if it is ever needed.
 
-Colors modifiers are available, limited supply :
-
-* `.border-orange-100`
-
-```border-color.html
-<div class="border-orange-100 border-left p-md">
-</div>
-```
-
 ## Filet
 
 Even though it sounds delicious, it's actually something rather boring: a left round border before the element you wish to ornate.
@@ -52,7 +43,7 @@ It's similar to blockquotes' typical styling and is originally a play on the fac
 the blockquote element to create headings in their content.
 It has since made it officially in the design and is used not only for blockquote but for any kind of content.
 
-Technically this class adds a `::before` pseudo-element that will be colored with blue-350 by default.
+Technically this class adds a `::before` pseudo-element that will be colored with blue-400 by default.
 You can change this behaviour by using the `filet-currentcolor` class that will set the color to the `currentColor`.
 
 ```filet.html
@@ -99,10 +90,6 @@ You can change this behaviour by using the `filet-currentcolor` class that will 
     border-top: @defaultBorder;
 }
 
-.border-orange-100 {
-    border-color: @orange-100;
-}
-
 .border-default-grey {
     border-color: @border-default-grey;
 }
@@ -131,7 +118,7 @@ each(@breakpoints, .(@bk, @_k, @_i) {
         width: 4px;
         height: 100%;
 
-        background-color: @blue-350;
+        background-color: @blue-400;
         border-radius: 2px;
     }
 

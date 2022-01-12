@@ -14,7 +14,7 @@ Vue and simpler -->
       <div class="reuse-info-type fs-xs">
         {{ type_label }}
       </div>
-      <div class="reuse-info-amount fs-xs text-grey-300 mb-xs"></div>
+      <div class="reuse-info-amount fs-xs text-grey-380 mb-xs"></div>
       <div class="reuse-info-title h4">
         {{ title }}
       </div>

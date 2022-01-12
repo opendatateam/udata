@@ -109,7 +109,7 @@
 
 .header-nav {
     position: relative;
-    z-index: 200; //Above the suggest thingy
+    z-index: 200; // Above the suggest thingy
     border-bottom: 1px solid @grey-200;
 
     @media @query-xl {
@@ -127,7 +127,6 @@
 
         form {
             background: @grey-50;
-            border: 1px solid @grey-100;
             border-radius: 2px;
 
             input,
@@ -161,14 +160,14 @@
     }
 }
 
-//Mobile header interactivity (burger menu 😋)
+// Mobile header interactivity (burger menu 😋)
 .mobile-menu-open {
-    overflow: hidden; //Prevent scroll when menu is open
+    overflow: hidden; // Prevent scroll when menu is open
 
     .header-inner {
         width: 100vw;
         position: absolute;
-        padding-bottom: 200px; //Space for the "login-box" (username + links)
+        padding-bottom: 200px; // Space for the "login-box" (username + links)
         min-height: 100%;
     }
 
@@ -178,7 +177,7 @@
         height: 100%;
         overflow: scroll;
 
-        //Hide burger menu & search, show close button
+        // Hide burger menu & search, show close button
         .mobile-menu {
             > a {
                 display: none;
@@ -189,7 +188,7 @@
             }
         }
 
-        //Show menu
+        // Show menu
         .header-nav,
         .login-box {
             transform: translateX(0);

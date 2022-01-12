@@ -23,9 +23,10 @@ Discussions allow users to interact with others.
           <select
           name="sortBy"
           id="sortBy"
+          :aria-label="$t('Sort discussions by')"
           @change="changeSort(currentSort)"
           v-model="currentSort"
-          class="fr-select bg-beige fr-select--no-border"
+          class="fr-select fr-select--no-border"
         >
           <option
             v-for="sort in sorts"
@@ -44,7 +45,7 @@ Discussions allow users to interact with others.
       </template>
       <template v-else>
         <div v-if="threadFromURL">
-          <div class="fr-mt-2w fr-px-3w well well-secondary-green-300">
+          <div class="fr-mt-2w fr-px-3w well well-secondary-success">
             <div class="fr-grid-row fr-grid-row--middle justify-between">
               {{
                 $t("You are seeing a specific discussion about this dataset")

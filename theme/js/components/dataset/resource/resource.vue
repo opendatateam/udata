@@ -17,44 +17,42 @@
                   <span class="fs-sm text-grey-400"> {{ resource.metrics.views || 0 }} {{ $t('downloads') }}</span>
                   <h4>
                       {{ resource.title || $t('Nameless resource') }}
-                      <p class="fs-sm m-0 text-grey-300" v-if="resource.from_community && resource.owner">{{resource.owner}}</p>
+                      <p class="fs-sm m-0 text-grey-380" v-if="resource.from_community && resource.owner">{{resource.owner}}</p>
                   </h4>
-                  <strong class="text-green-300" v-if="available">{{$t('Available')}}</strong>
-                  <strong class="text-red-300" v-else-if="unavailable">{{$t('Unavailable')}}</strong>
+                  <strong class="text-green-400" v-if="available">{{$t('Available')}}</strong>
+                  <strong class="text-default-error" v-else-if="unavailable">{{$t('Unavailable')}}</strong>
               </div>
               <div class="button-bar">
                   <ul>
                       <li class="accordion">
-                        <a
-                          href="#"
+                        <button
                           @click.prevent="expand"
                           role="button"
                           :aria-expanded="expanded"
                           :aria-label="$t('See more details')"
                           :aria-controls="'resource-' + resource.id"
-                          class="accordion-button"
-                          v-html="ChevronIcon"
-                        ></a>
+                          class="accordion-button fr-fi-arrow-right-s-line fr-p-0"
+                        >
+                        </button>
                       </li>
                       <li v-if="resource.preview_url">
-                          <a
-                            href="#"
+                          <button
                             :title="$t('Preview')"
                             @click.prevent="$showModal('preview', {url: resource.preview_url}, true)"
                             v-html="EyeIcon"
+                            class="fr-p-0 rounded-circle"
                           >
-                          </a>
+                          </button>
                       </li>
                       <li>
-                        <a
-                          @click.prevent
-                          href="#"
+                        <button
+                          class="fr-p-0 rounded-circle"
                           :id="resource.id + '-copy'"
                           :title="$t('Copy permalink to clipboard')"
                           :data-clipboard-text="resource.latest"
                           v-html="CopyIcon"
                         >
-                        </a>
+                        </button>
                       </li>
                       <li v-if="resource.format === 'url'">
                         <a
@@ -137,7 +135,6 @@
 
 <script>
 import config from "../../../config";
-import ChevronIcon from "svg/chevron.svg";
 import CopyIcon from "svg/actions/copy.svg";
 import DownloadIcon from "svg/actions/download.svg";
 import EditIcon from "svg/actions/edit.svg";
@@ -183,7 +180,6 @@ export default {
     return {
       adminUrl: `${config.admin_root}dataset/${this.datasetId}/resource/${this.resource.id}`,
       expanded: false,
-      ChevronIcon,
       CopyIcon,
       DownloadIcon,
       EditIcon,

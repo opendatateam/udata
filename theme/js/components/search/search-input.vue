@@ -26,11 +26,13 @@ If the submitUrl prop is passed, it will redirect on Submit.
         :placeholder="placeholder || $t('Search...')"
         data-cy="search-input"
       />
-      <span
+      <a
+        href="#"
         class="close-icon ml-sm self-center"
         @click.prevent="stop"
         v-html="closeIcon"
         v-if="stop"
+        :aria-label="$t('Close')"
       />
     </form>
   </section>

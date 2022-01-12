@@ -5,15 +5,15 @@
     left: 0;
 
     width: 100%;
-    height: calc(100vh - 109px); //Header height
+    min-height: calc(100vh - 109px); // Header height
 
     .container {
         background: white;
         border-radius: 4px;
         width: 100%;
 
-        box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.02),
-            0px 10px 10px rgba(0, 0, 0, 0.04), 0px 4px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 20px 20px rgba(0, 0, 0, 0.02),
+            0 10px 10px rgba(0, 0, 0, 0.04), 0 4px 4px rgba(0, 0, 0, 0.1);
 
         @media @query-md {
             border-radius: 0;
@@ -33,12 +33,9 @@
         }
 
         .close-icon {
-            cursor: pointer;
-
             svg {
                 width: 25px;
                 height: 25px;
-
                 * {
                     fill: @blue-400;
                 }
@@ -62,7 +59,7 @@
     .results {
         min-height: 65vh;
 
-        //Half (reuse | dataset)
+        // Half (reuse | dataset)
         > .col {
             display: flex;
             flex-direction: column;
@@ -72,10 +69,10 @@
             display: flex;
             flex-direction: column;
 
-            //Make the two half the same height
+            // Make the two half the same height
             height: 100%;
 
-            //"See more" link is going to the bottom
+            // "See more" link is going to the bottom
             > a {
                 margin-top: auto;
             }
@@ -87,35 +84,35 @@
     }
 }
 
-//Suggest-box entering/leaving transition
+// Suggest-box entering/leaving transition
 @suggest-transition: ease-out 0.38s;
 
 .suggest-enter-active,
 .suggest-leave-active {
     transition: all @suggest-transition;
-    will-change: transform background;
+    will-change: transform, background;
 }
 
 .suggest-enter-from,
 .suggest-leave-to {
     transform: translate3d(100%, 0, 0);
-    background: fade(@blue-300, 60%);
+    opacity: 0.6;
 }
 
 .suggest-enter-to {
     transform: translate3d(0, 0, 0);
 }
 
-//Suggest rest of the body animation
+// Suggest rest of the body animation
 #app {
-    //Prepare elements for shifting
+    // Prepare elements for shifting
     > *:not(.site-header):not(.banner) {
-        will-change: transform filter opacity;
+        will-change: transform, filter, opacity;
         transition: @suggest-transition;
         transition-property: transform, filter, opacity;
     }
 
-    //Shifting them with the same timing
+    // Shifting them with the same timing
     &.suggesting {
         height: 100vh;
         overflow: hidden;
@@ -127,7 +124,7 @@
         }
 
         .site-header {
-            height: 100vh; //Allow scroll inside the suggest view but prevent rest of the body scroll
+            height: 100vh; // Allow scroll inside the suggest view but prevent rest of the body scroll
             overflow: scroll;
         }
     }

@@ -11,22 +11,17 @@ Convey meaning through color with a handful of color utility classes. Colors are
 ```text-colors.html
 <p class="text-white">text-white</p>
 <p class="text-blue-100">text-blue-100</p>
-<p class="text-blue-200">text-blue-200</p>
 <p class="text-blue-300">text-blue-300</p>
-<p class="text-blue-350">text-blue-350</p>
 <p class="text-blue-400">text-blue-400</p>
 <p class="text-blue-500">text-blue-500</p>
 <p class="text-orange-100">text-orange-100</p>
-<p class="text-yellow-100">text-yellow-100</p>
 <p class="text-grey-50">text-grey-50</p>
 <p class="text-grey-100">text-grey-100</p>
 <p class="text-grey-200">text-grey-200</p>
 <p class="text-grey-300">text-grey-300</p>
 <p class="text-grey-380">text-grey-380</p>
 <p class="text-grey-400">text-grey-400</p>
-<p class="text-green-300">text-green-300</p>
 <p class="text-green-400">text-green-400</p>
-<p class="text-green-500">text-green-500</p>
 ```
 
 ## Link colors
@@ -35,9 +30,7 @@ Includes support for styling links with hover states, too.
 ```typography-2.html
 <p><a href="#" class="text-white">text-white</a></p>
 <p><a href="#" class="text-blue-100">text-blue-100</a></p>
-<p><a href="#" class="text-blue-200">text-blue-200</a></p>
 <p><a href="#" class="text-blue-300">text-blue-300</a></p>
-<p><a href="#" class="text-blue-350">text-blue-350</a></p>
 <p><a href="#" class="text-blue-400">text-blue-400</a></p>
 <p><a href="#" class="text-blue-500">text-blue-500</a></p>
 <p><a href="#" class="text-orange-100">text-orange-100</a></p>
@@ -48,9 +41,7 @@ Includes support for styling links with hover states, too.
 <p><a href="#" class="text-grey-300">text-grey-300</a></p>
 <p><a href="#" class="text-grey-380">text-grey-380</a></p>
 <p><a href="#" class="text-grey-400">text-grey-400</a></p>
-<p><a href="#" class="text-green-300">text-green-300</a></p>
 <p><a href="#" class="text-green-400">text-green-400</a></p>
-<p><a href="#" class="text-green-500">text-green-500</a></p>
 ```
 
 ## Background color
@@ -59,88 +50,70 @@ Similar to the contextual text color classes, easily set the background of an el
 ```bg-colors.html
 <p><span class="pill bg-white"></span>bg-white</p>
 <p><span class="pill bg-blue-100"></span>bg-blue-100</p>
-<p><span class="pill bg-blue-200"></span>bg-blue-200</p>
 <p><span class="pill bg-blue-300"></span>bg-blue-300</p>
-<p><span class="pill bg-blue-350"></span>bg-blue-350</p>
 <p><span class="pill bg-blue-400"></span>bg-blue-400</p>
 <p><span class="pill bg-blue-500"></span>bg-blue-500</p>
 <p><span class="pill bg-orange-100"></span>bg-orange-100</p>
-<p><span class="pill bg-yellow-100"></span>bg-yellow-100</p>
 <p><span class="pill bg-grey-50"></span>bg-grey-50</p>
 <p><span class="pill bg-grey-100"></span>bg-grey-100</p>
 <p><span class="pill bg-grey-200"></span>bg-grey-200</p>
 <p><span class="pill bg-grey-300"></span>bg-grey-300</p>
 <p><span class="pill bg-grey-380"></span>bg-grey-380</p>
 <p><span class="pill bg-grey-400"></span>bg-grey-400</p>
-<p><span class="pill bg-green-300"></span>bg-green-300</p>
 <p><span class="pill bg-green-400"></span>bg-green-400</p>
-<p><span class="pill bg-green-500"></span>bg-green-500</p>
 ```
 
 */
 
-@white: #fff;
-@black: #000;
-@blue-100: #eef9ff;
-@blue-200: #b8e2ff;
-@blue-300: #7db0ef;
-@blue-350: #198cf2;
-@blue-400: #1f70ff;
+@white: var(--grey-1000-50);
+@blue-100: var(--blue-cumulus-975-75);
+@blue-300: var(--blue-cumulus-850-200);
+@blue-400: var(--blue-cumulus-sun-368-moon-732);
+@blue-400-blend: var(--blue-cumulus-sun-368-moon-732-blend);
 @blue-450: #5b70b8;
 @blue-470: #494e77;
 @blue-500: #070d54;
-@orange-100: #ff9827;
-@orange-200: #ff5900;
-@yellow-100: #fff200;
-@grey-50: #f9f9f9;
-@grey-100: #e5e5e5;
-@grey-200: #d7d7d7;
-@grey-300: #7c7c7c;
-@grey-380: #2d2d2d;
-@grey-400: #232323;
-@grey-500: #161616;
-@green-300: #00be7b;
-@green-350: #4ca98d;
-@green-400: #008452;
-@green-500: #023d13;
+@orange-100: var(--orange-terre-battue-main-645);
+@grey-50: var(--grey-975-75);
+@grey-100: var(--grey-950-100);
+@grey-200: var(--grey-850-200);
+@grey-300: var(--grey-625-425);
+@grey-380: var(--grey-425-625);
+@grey-400: var(--grey-200-850);
+@grey-500: var(--grey-50-1000);
+@green-400: var(--green-emeraude-sun-425-moon-753);
 
-@beige: #F9F8F6;
 @background-contrast-grey: var(--background-contrast-grey);
 @border-default-grey: var(--border-default-grey);
 @text-mention-grey: var(--text-mention-grey);
 @text-default-success: var(--text-default-success);
 @border-plain-success: var(--border-plain-success);
 @background-contrast-success: var(--background-contrast-success);
+@text-default-warning: var(--text-default-warning);
+@background-contrast-warning: var(--background-contrast-warning);
+@text-default-error: var(--text-default-error);
 
-@contrast-white: @grey-300;
-@contrast-black: @white;
-@contrast-blue-100: @blue-300;
-@contrast-blue-200: @blue-300;
-@contrast-blue-300: @white;
-@contrast-blue-350: @white;
-@contrast-blue-400: @white;
+@contrast-white: var(--text-default-grey);
+@contrast-blue-100: var(--text-default-grey);
+@contrast-blue-300: var(--text-default-grey);
+@contrast-blue-400: var(--text-inverted-grey);
 @contrast-blue-450: @white;
 @contrast-blue-470: @white;
 @contrast-blue-500: @white;
-@contrast-orange-100: @white;
-@contrast-orange-200: @white;
-@contrast-yellow-100: @grey-400;
-@contrast-grey-50: @grey-300;
-@contrast-grey-100: @grey-300;
-@contrast-grey-200: @white;
-@contrast-grey-300: @white;
-@contrast-grey-380: @white;
-@contrast-grey-400: @white;
-@contrast-grey-500: @white;
-@contrast-green-300: @white;
-@contrast-green-350: @white;
-@contrast-green-400: @white;
-@contrast-green-500: @white;
+@contrast-orange-100: var(--text-title-grey);
+@contrast-grey-50: var(--text-default-grey);
+@contrast-grey-100: var(--text-default-grey);
+@contrast-grey-200: var(--text-default-grey);
+@contrast-grey-300: var(--text-title-grey);
+@contrast-grey-380: var(--text-inverted-grey);
+@contrast-grey-400: var(--grey-850-200);
+@contrast-grey-500: var(--grey-850-200);
+@contrast-green-400: var(--green-emeraude-975-75);
 
-@colors: white, black, blue-100, blue-200, blue-300, blue-350, blue-400,
-    blue-450, blue-470, blue-500, orange-100, orange-200, yellow-100, grey-50,
-    grey-100, grey-200, grey-300, grey-380, grey-400, grey-500, green-300, green-350,
-    green-400, green-500;
+@colors: white, blue-100, blue-300, blue-400,
+    blue-450, blue-470, blue-500, orange-100, grey-50,
+    grey-100, grey-200, grey-300, grey-380, grey-400, grey-500,
+    green-400;
 
 each(@colors, {
     .text-@{value} {
@@ -156,10 +129,22 @@ each(@colors, {
     background-color: @background-contrast-grey;
 }
 
-.bg-beige {
-    background-color: @beige;
+.bg-contrast-warning {
+    background-color: @background-contrast-warning;
 }
 
 .text-mention-grey {
     color: @text-mention-grey !important;
+}
+
+.text-default-error {
+    color: @text-default-error !important;
+}
+
+.text-default-warning {
+    color: @text-default-warning !important;
+}
+
+.text-title-grey {
+    color: var(--text-title-grey) !important;
 }

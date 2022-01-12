@@ -35,10 +35,10 @@ Simply provide the many necessary props :
   <Multiselect
     v-model="value"
     :options="options"
-    :delay="50"
+    :delay="delay"
     :maxHeight="450"
     searchable
-    :placeholder="opened ? '' : placeholder"
+    :placeholder="placeholder"
     :noOptionsText="emptyPlaceholder"
     :noResultsText="emptyPlaceholder"
     mode="multiple"
@@ -50,8 +50,8 @@ Simply provide the many necessary props :
     object
     ref="multiselect"
   >
-    <template v-slot:multiplelabel="{ values }">
-      <div class="suggestor-labels" v-if="!opened">
+    <template #multiplelabel="{ values }">
+      <div class="multiselect-multiple-label" v-if="!opened">
         <div class="multiselect-tag" v-if="values.length >= 1">
           {{ values[0].label }}
         </div>
@@ -61,7 +61,7 @@ Simply provide the many necessary props :
       </div>
       <div v-else />
     </template>
-    <template v-slot:beforelist v-if="value.length">
+    <template #beforelist v-if="value.length">
       <div class="suggestor-search-labels is-opened">
         <div class="multiselect-tag" v-for="v in value">
           <span>{{ v.label }}</span>
@@ -72,10 +72,9 @@ Simply provide the many necessary props :
   </Multiselect>
 </template>
 
+
 <script>
-import config from "../../config";
 import Multiselect from "@vueform/multiselect";
-import "@vueform/multiselect/themes/default.css";
 import i18n from "../../plugins/i18n";
 
 export default {
@@ -96,30 +95,41 @@ export default {
     },
   },
   mounted() {
-    //Little library hacking to add a placeholder to the search input when the selector is open
-    this.$refs.multiselect.$refs.input.placeholder =
+    this.$refs.multiselect.$refs.input.ariaLabel =
       this.searchPlaceholder || this.placeholder;
   },
   async created() {
-    //If we're in "suggest" mode, the options will be the suggest function that will be called on each search change
-    //If not, we call the getInitialOptions fn that will populate the options var
-    if (this.suggestUrl) this.options = this.suggest;
-    else this.options = await this.getInitialOptions();
+    // If we're in "suggest" mode, the options will be the suggest function that will be called on each search change
+    // If not, we call the getInitialOptions fn that will populate the options var
+    if (this.suggestUrl) {
+      this.options = this.suggest;
+      this.delay = 50;
+    } else {
+      this.options = await this.getInitialOptions();
+    }
 
-    //Then we fill the select with existing value if there is any, using the previously made list if needs be
+    // Then we fill the select with existing value if there is any, using the previously made list if needs be
     this.fillInitialValues();
   },
   data() {
     return {
-      value: [], //Current selected value(s) object array `[{label: 'A', value: 'a'}, {label: 'B', value: 'b'}]`
-      opened: false, //Tracks whether the select is open
-      options: null, //Current options list, same structure as `value` above (but contains all possible options). Can be dynamic (async)
+      value: [], // Current selected value(s) object array `[{label: 'A', value: 'a'}, {label: 'B', value: 'b'}]`
+      opened: false, // Tracks whether the select is open
+      options: null, // Current options list, same structure as `value` above (but contains all possible options). Can be dynamic (async)
+      delay: -1, // Disable async loading
     };
   },
   watch: {
-    values: function (value) {
-      //This lib doesn't support `undefined` values and will not reset its state.
-      //This allows to reset the value if the parent component decides to clear the value.
+    opened(value) {
+      if(value) {
+        this.$refs.multiselect.$refs.input.placeholder = this.searchPlaceholder || this.placeholder;
+      } else {
+        this.$refs.multiselect.$refs.input.placeholder = '';
+      }
+    },
+    values (value) {
+      // This lib doesn't support `undefined` values and will not reset its state.
+      // This allows to reset the value if the parent component decides to clear the value.
       if (typeof value === "undefined") this.value = [];
     },
   },
@@ -127,30 +137,34 @@ export default {
     suggest: function (q) {
       let query;
 
-      //For collections with no listing URL, if no `q` is given we can return early because the suggest API will return no results.
+      // For collections with no listing URL, if no `q` is given we can return early because the suggest API will return no results.
       if (!q && !this.listUrl) return Promise.resolve([]);
 
-      //On initial render, q will be undefined. We fetch the collection instead of fetching a suggest result using the listUrl
-      if (!q)
+      // On initial render, q will be undefined. We fetch the collection instead of fetching a suggest result using the listUrl
+      if (!q) {
         query = this.$api.get(this.listUrl).then((resp) => resp.data.data);
-      else
+      } else {
         query = this.$api
           .get(this.suggestUrl, { params: { q } })
           .then((resp) => resp.data);
-
+      }
       return query.then(this.serializer);
     },
     fillInitialValues: function () {
-      //On creation, if values are pre-provided by the parent (from URL or parent state) in `this.values`,
-      //we have to fetch those from the API to fill the select with values + labels in `this.value`
-      //`this.values` can be a single value (String) or an array of values so we need to normalize it
+      // On creation, if values are pre-provided by the parent (from URL or parent state) in `this.values`,
+      // we have to fetch those from the API to fill the select with values + labels in `this.value`
+      // `this.values` can be a single value (String) or an array of values so we need to normalize it
 
       let selected = null;
-      if (typeof this.values === "string") selected = [this.values];
-      else if (Array.isArray(this.values)) selected = this.values;
-      else selected = [];
+      if (typeof this.values === "string") {
+        selected = [this.values];
+      } else if (Array.isArray(this.values)) {
+        selected = this.values;
+      } else {
+        selected = [];
+      }
 
-      //Now for each value, three cases :
+      // Now for each value, three cases :
       // * We have a entityUrl prop that we will call for each value to get the corresponding label
       // * We don't have a entityUrl but we have an option list that we can search into
       // * We have nothing, YOLO let's simply use the value as a label
@@ -158,7 +172,7 @@ export default {
         let label = value;
 
         if (this.entityUrl) {
-          //Fetch it from API
+          // Fetch it from API
           let entity = await this.$api
             .get(this.entityUrl + value)
             .then((resp) => resp.data)
@@ -166,12 +180,12 @@ export default {
 
           if (entity.length >= 1) label = entity[0].label;
         } else if (this.options?.length > 0) {
-          //Find it in the options list
+          // Find it in the options list
           let option = Object.keys(this.options).find(
             (opt) => this.options[opt].value === value
           );
 
-          //If found, populate
+          // If found, populate
           option = this?.options[option];
           if (option) label = option.label;
         }
@@ -187,15 +201,14 @@ export default {
         .then((resp) => resp.data)
         .then(this.serializer);
     },
-    //Tries to guess values and labels. Harder than it looks.
-    serializer: function (data) {
+    // Tries to guess values and labels. Harder than it looks.
+    serializer (data) {
       return data.map((obj) => ({
         label: obj.name || obj.title || obj.text || obj?.properties?.name,
         value: obj.id || obj.text,
       }));
     },
-    onSelect: function (value) {
-      //This is a temporary dirty thing that limits the selected options to 1.
+    onSelect () {
       if (this.value.length === 2) {
         this.deselect(this.value[0]);
         this.$refs.multiselect.close();

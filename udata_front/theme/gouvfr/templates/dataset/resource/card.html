@@ -17,25 +17,40 @@
                 <h4>
                     {{ resource.title or _('Nameless resource') }}
                     {% if resource.from_community and resource.owner %}
-                    <p class="fs-sm m-0 text-grey-300">{{resource.owner}}</p>
+                    <p class="fs-sm m-0 text-grey-380">{{resource.owner}}</p>
                     {% endif %}
                 </h4>
-                <strong class="text-green-300">Disponible</strong>
+                <strong class="text-green-400">Disponible</strong>
             </div>
             <div class="button-bar">
                 <ul>
-                    <li class="accordion"><a href="#resource-{{resource.id}}" role="button" aria-expanded="{{expanded}}"
-                            aria-label="{{_('See more details')}}" aria-controls="resource-{{resource.id}}"
-                            class="accordion-button">{% include theme('svg/chevron.svg') %}</a></li>
-                    <li><a @click.prevent href="#" id="{{resource.id}}-copy"
-                            title="{{ _('Copy permalink to clipboard') }}" data-clipboard-text="{{resource.latest}}"
-                            class="btn-action">{% include theme('svg/actions/copy.svg') %}</a></li>
+                    <li>
+                        <a
+                            href="#resource-{{resource.id}}-header"
+                            title="{{ _('Copy permalink to clipboard') }}"
+                        >
+                            {% include theme('svg/actions/copy.svg') %}
+                        </a>
+                    </li>
                     {% if resource.format == 'url' %}
-                    <li><a href="{{ resource.latest }}" class="btn-action"
-                            aria-label="{{ _('Resource link') }}">{% include theme('svg/actions/link.svg') %}</a></li>
+                    <li>
+                        <a
+                            href="{{ resource.latest }}"
+                            aria-label="{{ _('Resource link') }}"
+                        >
+                            {% include theme('svg/actions/link.svg') %}
+                        </a>
+                    </li>
                     {% else %}
-                    <li><a href="{{ resource.latest }}" class="btn-action" aria-label="{{ _('Download resource') }}"
-                            download>{% include theme('svg/actions/download.svg') %}</a></li>
+                    <li>
+                        <a
+                            href="{{ resource.latest }}"
+                            aria-label="{{ _('Download resource') }}"
+                            download
+                        >
+                            {% include theme('svg/actions/download.svg') %}
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
                 <div class="filetype">
@@ -46,9 +61,12 @@
                 </div>
             </div>
         </header>
-        <section class="card-content accordion-content {% if expanded != 'false' %}active{% endif %}"
+        <section
+            class="card-content accordion-content {% if expanded != 'false' %}active{% endif %}"
             {% if expanded == 'false' %}style="height: 0px" {% endif %}
-            aria-labelledby="resource-{{resource.id}}-header" id="resource-{{resource.id}}">
+            aria-labelledby="resource-{{resource.id}}-header"
+            id="resource-{{resource.id}}"
+        >
             {% if resource.description %}
             <div class="resource-description">
                 {{ resource.description|markdown }}

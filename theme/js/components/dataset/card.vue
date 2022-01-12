@@ -8,9 +8,9 @@
       </div>
     </div>
     <div class="card-data">
-      <h4 class="card-body">
+      <h3 class="card-body h4">
         {{ title }}
-      </h4>
+      </h3>
       <div class="card-footer">
         <ul class="card-features fs-xs"></ul>
       </div>

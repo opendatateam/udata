@@ -29,7 +29,7 @@
                         <strong>L'emploi</strong>
                     </a>
                     <a href="{{ url_for('gouvfr.show_page', slug='donnees-logement-urbanisme') }}"
-                        class="btn-venti bg-green-350">
+                        class="btn-venti bg-green-400">
                         Données relatives au
                         <strong>Logement et à l'Urbanisme</strong>
                     </a>
@@ -72,7 +72,7 @@
             <h3>{% include theme('svg/logotype.svg') %} {{ _('is') }}</h3>
             <div class="row-inline justify-between mt-xl mt-md-md">
                 {% for (label, metric) in metrics %}
-                <div class="filet my-md-xxs {% if metric == 'reuses' %}filet-currentcolor text-green-300{% endif %}">
+                <div class="filet my-md-xxs {% if metric == 'reuses' %}filet-currentcolor text-green-400{% endif %}">
                     <div class="fs-hg f-bold text-grey-400">{{ current_site.metrics[metric] }}</div>
                     <span class="text-grey-400">{{ label }}</span>
                 </div>

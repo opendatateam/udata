@@ -10,16 +10,13 @@ In this case, it's nothing like that. Wells used to be an "inset" effect on prev
 They exist in many colors and two versions, primary with a solid background and secondary with a transparent background :
 
 ```wells.html
-<div class="well well-grey-300">
-    I'm well, thanks. How are you doing ?
-</div>
-<div class="well well-green-300">
+<div class="well well-success">
     I'm well too, but I'm a little green in this field
 </div>
 <div class="well well-secondary-grey-100">
     Oh well...
 </div>
-<div class="well well-secondary-green-300">
+<div class="well well-secondary-success">
     Very well.
 </div>
 ```
@@ -50,7 +47,7 @@ They exist in many colors and two versions, primary with a solid background and 
         vertical-align: baseline;
     }
 
-    &.well-green-300 {
+    &.well-success {
         background: @background-contrast-success;
         color: @text-default-success;
         .fr-link {
@@ -58,9 +55,9 @@ They exist in many colors and two versions, primary with a solid background and 
         }
     }
 
-    &.well-orange-200 {
-        background: fade(@orange-200, 10%);
-        color: @orange-200;
+    &.well-warning {
+        background: @background-contrast-warning;
+        color: @text-default-warning;
     }
 
     &.well-grey-100 {
@@ -68,8 +65,8 @@ They exist in many colors and two versions, primary with a solid background and 
         color: @contrast-grey-100;
     }
 
-    &.well-secondary-green-300 {
-        .well-green-300;
+    &.well-secondary-success {
+        .well-success;
 
         border: 1px solid @border-plain-success;
     }

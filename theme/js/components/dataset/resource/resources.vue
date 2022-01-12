@@ -5,7 +5,7 @@
         <Loader class="mt-md" />
       </div>
       <div v-else>
-        <resource
+        <Resource
           v-for="resource in resources"
           :id="'resource-' + resource.id"
           :dataset-id="datasetId"
@@ -13,7 +13,7 @@
           :type-label="typeLabel"
           :can-edit="canEdit"
         />
-        <pagination
+        <Pagination
           class="fr-mt-3w"
           v-if="totalResults > pageSize"
           :page="currentPage"

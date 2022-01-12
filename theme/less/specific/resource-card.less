@@ -1,9 +1,9 @@
 .resource-card {
-    border-top: 1px solid @grey-100;
-    border-bottom: 1px solid @grey-100;
+    border-top: 1px solid @grey-200;
+    border-bottom: 1px solid @grey-200;
 
     &:nth-of-type(2n + 1) {
-        background: @grey-50;
+        background: @background-contrast-grey;
     }
 
     @left-padding: 100px; //Spacing for buttons
@@ -76,7 +76,7 @@
                             height: 15px;
 
                             * {
-                                fill: @grey-300;
+                                fill: @grey-380;
                             }
                         }
 
@@ -95,7 +95,7 @@
             em {
                 font-weight: @font-weight-bold;
                 font-style: initial;
-                color: @grey-300;
+                color: @grey-380;
             }
         }
     }
@@ -119,7 +119,7 @@
     .description-list dt {
         padding: @spacing-sm @spacing-sm;
         padding-left: @left-padding;
-        border-bottom: 1px solid @grey-100;
+        border-bottom: 1px solid @grey-200;
 
         @media @query-md {
             padding-left: @spacing-sm;

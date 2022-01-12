@@ -10,10 +10,12 @@ A simple request membership prompt.
 -->
 
 <template>
-    <li class="my-md">
-        <a @click.prevent="JoinOrga"
-      class="nav-link">{{ $t('Ask to join the organization as a producer') }}</a>
-    </li>
+  <button
+    @click.prevent="JoinOrga"
+    class="nav-link nav-link--no-icon text-decoration-none fr-link fr-link--icon-left fr-fi-arrow-right-s-line"
+  >
+    <span class="text-decoration-underline">{{ $t('Ask to join the organization as a producer') }}</span>
+  </button>
 </template>
 
 <script>

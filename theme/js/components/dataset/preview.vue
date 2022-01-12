@@ -5,7 +5,7 @@
     </div>
 
     <footer class="modal-footer">
-      <a href="#" class="btn-primary" @click.prevent="close()"> X </a>
+      <button class="btn-primary" @click.prevent="close()"> X </button>
     </footer>
   </vue-final-modal>
 </template>

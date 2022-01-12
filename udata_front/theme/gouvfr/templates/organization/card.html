@@ -18,7 +18,7 @@
             <p>{{ organization.description|mdstrip(180) }}</p>
         </div>
         <div class="card-footer">
-            <ul class="card-features text-grey-300 fs-xs">
+            <ul class="card-features text-grey-380 fs-xs">
                 {% if organization.metrics.datasets %}
                 <li>{{ organization.metrics.datasets or 0 }} {{ _('datasets') }}</li>
                 {% endif %}
@@ -27,8 +27,8 @@
                 {% endif %}
                 <li>
                     <div>
-                        <span class="text-orange-100">{% include theme('svg/actions/star.svg') %}</span>
-                        <span class="badge orange-100 ml-xxs py-xxxs px-xs">
+                        <span class="text-blue-400">{% include theme('svg/actions/star.svg') %}</span>
+                        <span class="badge blue-400 ml-xxs py-xxxs px-xs">
                             {{ organization.metrics.followers or 0 }}
                         </span>
                         <span class="visually-hidden">{{ _('favourites') }}</span>

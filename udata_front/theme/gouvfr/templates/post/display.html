@@ -23,7 +23,7 @@
 <div class="container py-md">
     <h1 class="m-0">{{ post.name }}</h1>
     {% if post.published %}
-    <p class="text-grey-300 fs-xs">
+    <p class="text-grey-380 fs-xs">
         {{ _('Published on %(date)s',date=post.published|dateformat(format='long')) }}
     </p>
     {% else %}
@@ -104,11 +104,11 @@
     <div class="row justify-between">
         <div class="col-3 col-md-12 text-align-center-md">
             {% if previous_post %}
-            <a href="{{ previous_post.display_url }}" title="{{ _('Previous post') }}" class="btn btn-secondary">
-                <span class="text-blue-400 mr-sm">
-                    {% include theme('svg/chevron-left.svg') %}
-                </span>
-                <span>{{ _('Previous post') }}</span>
+            <a
+                href="{{ previous_post.display_url }}"
+                class="btn-secondary btn--flex fr-btn fr-btn--secondary fr-fi-arrow-left-s-line fr-btn--icon-left"
+            >
+                {{ _('Previous post') }}
             </a>
             {% endif %}
         </div>
@@ -119,11 +119,11 @@
         </div>
         <div class="col-3 col-md-12 text-align-right text-align-center-md">
             {% if next_post %}
-            <a href="{{ next_post.display_url }}" title="{{ _('Next post') }}" class="btn btn-secondary">
-                <span>{{ _('Next post') }}</span>
-                <span class="text-blue-400 ml-sm">
-                    {% include theme('svg/chevron.svg') %}
-                </span>
+            <a
+                href="{{ next_post.display_url }}"
+                class="btn-secondary btn--flex fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
+            >
+                {{ _('Next post') }}
             </a>
             {% endif %}
         </div>

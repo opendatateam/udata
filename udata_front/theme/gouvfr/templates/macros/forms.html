@@ -24,7 +24,7 @@
     {{ f() }}
     {% endif %}
     {% for error in f.errors %}
-    <label for="{{ f.id }}" class="form-field-error mt-xs text-orange-200">{{ error }}</label>
+    <label for="{{ f.id }}" class="form-field-error mt-xs text-default-error">{{ error }}</label>
     {% endfor %}
 </div>
 {% endif %}

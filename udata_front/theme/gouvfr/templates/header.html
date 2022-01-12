@@ -93,7 +93,13 @@
                     <div class="col-3 hidden-xl search-box vuejs" role="search">
                         <form action="/datasets" class="w-100 row-inline justify-between"
                             @focus.capture.prevent="$bus.emit('suggest.startSearch')" tabindex="0">
-                            <input type="text" @keypress.prevent name="q" placeholder="{{ _('Search for data') }}" />
+                            <input
+                                type="text"
+                                @keypress.prevent
+                                name="q"
+                                placeholder="{{ _('Search for data') }}"
+                                aria-label="{{ _('Search for data') }}"
+                            />
                             <button type="submit" aria-label="{{ _('Search for data') }}">
                                 {% include theme('svg/search.svg') %}
                             </button>

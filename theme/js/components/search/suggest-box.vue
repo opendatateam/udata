@@ -21,7 +21,7 @@ The search is composed with multiple components :
 ## Progressive enhancement
 
 We're doing progressive enhancement on this component.
-This mean that users without Javascript will see a standard search input box that will redirect themto the `/search?q=query` endpoint.
+This mean that users without Javascript will see a standard search input box that will redirect them to the `/search?q=query` endpoint.
 
 In order to achieve this, the Jinja HTML template includes our Vue `<suggest>` element in the header, which is teleported to the `#app` component.
 When the user starts to type, our Javascript will shift the whole page excepting the header to the left, and let the suggest box appear from the right.
@@ -40,7 +40,7 @@ For non-JS users, the home search box is a standard input that will still work n
     >
       <section>
         <div class="suggest-copy text-align-center my-xl">
-          <h4 class="text-white">
+          <h4>
             {{ $t("Search for data, reuses, contributions...") }}
           </h4>
         </div>
@@ -113,16 +113,16 @@ export default {
   methods: {
     start() {
       this.active = true;
-      const el = this.$root.$el.parentNode;
+      const el = document.querySelector('#app');
       if (el) el.classList.add("suggesting");
     },
     stop() {
       this.active = false;
-      const el = this.$root.$el.parentNode;
+      const el = document.querySelector('#app');
       if (el) el.classList.remove("suggesting");
     },
     onChange(queryString) {
-      //Deactivates the input if the user presses return while no query string is in
+      // Deactivates the input if the user presses return while no query string is in
       if (this.queryString === "" && queryString === "") return this.stop();
 
       this.loading = true;

@@ -15,3 +15,4 @@ examples:
     - theme/less/examples.css
   js:
     - udata_front/theme/gouvfr/static/js/index.js
+  htmlTag: '<html data-fr-scheme="light" data-fr-theme="light">'

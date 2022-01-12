@@ -1,15 +1,15 @@
 .suggestor {
-    .multiselect-input {
-        padding: @spacing-xxs 40px @spacing-xxs @spacing-xxs;
+    --ms-tag-py: @spacing-xs;
+    --ms-py: @spacing-sm;
+    .multiselect-placeholder, .multiselect-no-options, .multiselect-no-results {
+        color: @grey-380;
+    }
+    .multiselect-search {
+        min-height: calc(var(--ms-font-size, 1rem)*var(--ms-line-height, 1.375) + var(--ms-py, .5rem)*2);
         border-color: @grey-200;
     }
 
-    //Loader spinner
-    .multiselect-spinner {
-        top: 5px;
-    }
-
-    //Labels when the dropdown is closed (with the "+n" label when more than two options are selected)
+    // Labels when the dropdown is closed (with the "+n" label when more than two options are selected)
     .suggestor-labels {
         display: flex;
         justify-content: space-between;
@@ -31,12 +31,15 @@
         }
     }
 
-    //Generic tags class, overwrite the lib defaults
+    // Generic tags class, overwrite the lib defaults
     .multiselect-tag {
         margin: 0;
         margin-right: @spacing-xxs;
-        padding: @spacing-xs;
+        padding: var(--ms-tag-py);
         background-color: @blue-300;
+        color: @blue-500;
+        line-height: 1.35;
+
         border-radius: 2px;
 
         display: block;
@@ -50,7 +53,7 @@
         }
     }
 
-    //Tags already selected that appear in the dropdown, fully expanded
+    // Tags already selected that appear in the dropdown, fully expanded
     .suggestor-search-labels {
         display: flex;
         flex-wrap: wrap;
@@ -71,14 +74,13 @@
         }
     }
 
-    //Unselected option
+    // Unselected option
     .multiselect-option {
         border-radius: 2px;
         padding: 0;
-        min-height: 0;
         color: @blue-500;
 
-        margin: @spacing-xs;
+        margin: @spacing-xxs;
 
         span {
             background: @blue-100;
@@ -92,10 +94,14 @@
 
         &.is-pointed {
             background: none;
+            span {
+                background: @blue-300;
+                color: @contrast-blue-300;
+            }
         }
     }
 
-    //When dropdown is closed, search should take no width
+    // When dropdown is closed, search should take no width
     &.is-multiple .multiselect-search {
         width: 0;
     }
@@ -105,11 +111,11 @@
 
         input {
             padding: @spacing-xs;
-            padding-left: 10px; //Same as placeholder
+            padding-left: 10px; // Same as placeholder
         }
     }
 
-    //Makes the already selected options disappear
+    // Makes the already selected options disappear
     .multiselect-option.is-selected {
         display: none;
     }

@@ -40,9 +40,9 @@ They're also available for each responsive breakpoint with `.col-{breakpoint}` c
 ```grid-auto.html
 <div class="container">
     <div class="row">
-        <div class="col bg-blue-200">3 blocks</div>
-        <div class="col bg-blue-200">3 blocks</div>
-        <div class="col bg-blue-200">3 blocks</div>
+        <div class="col bg-blue-300">3 blocks</div>
+        <div class="col bg-blue-300">3 blocks</div>
+        <div class="col bg-blue-300">3 blocks</div>
     </div>
     <div class="row">
         <div class="col bg-blue-300">6 blocks</div>
@@ -61,9 +61,9 @@ You can also specify a block width by using `.col-{n}` classes, *with n ∈ [1..
 ```grid-width.html
 <div class="container">
     <div class="row">
-        <div class="col-4 bg-blue-200">col-4</div>
-        <div class="col-3 bg-blue-200">col-3</div>
-        <div class="col-5 bg-blue-200">col-5</div>
+        <div class="col-4 bg-blue-300">col-4</div>
+        <div class="col-3 bg-blue-300">col-3</div>
+        <div class="col-5 bg-blue-300">col-5</div>
     </div>
     <div class="row">
         <div class="col bg-blue-300">auto</div>
@@ -84,9 +84,9 @@ For example, if you want a layout with 3 blocks of 4 columns on desktop and stac
 ```grid-responsive.html
 <div class="container">
     <div class="row">
-        <div class="col-4 col-sm-12 bg-blue-200">col-4 col-sm-12</div>
-        <div class="col-4 col-sm-12 bg-blue-200">col-4 col-sm-12</div>
-        <div class="col-4 col-sm-12 bg-blue-200">col-4 col-sm-12</div>
+        <div class="col-4 col-sm-12 bg-blue-300">col-4 col-sm-12</div>
+        <div class="col-4 col-sm-12 bg-blue-300">col-4 col-sm-12</div>
+        <div class="col-4 col-sm-12 bg-blue-300">col-4 col-sm-12</div>
     </div>
 </div>
 ```
@@ -99,7 +99,7 @@ Please note that special cancelling classes `.offset-{ø|sm|md|lg|xl}-0` exist, 
 ```grid-offset.html
 <div class="container">
     <div class="row">
-        <div class="col-6 col-sm-12 offset-sm-0 offset-6 bg-blue-200">col-6 offset-md-6 col-sm-12 offset-sm-0</div>
+        <div class="col-6 col-sm-12 offset-sm-0 offset-6 bg-blue-300">col-6 offset-md-6 col-sm-12 offset-sm-0</div>
     </div>
 </div>
 ```
@@ -112,9 +112,9 @@ When you need to alter the alignment of one item you can use `.self-stretch`, `.
 ```grid-valign.html
 <div class="container">
     <div class="row align-items-center">
-        <div class="col-6 bg-blue-200"><div style="min-height: 200px">Huge block</div></div>
-        <div class="col-3 bg-blue-200">Smoll centered block</div>
-        <div class="col-3 bg-blue-200 self-end">Smoll block at the bottom</div>
+        <div class="col-6 bg-blue-300"><div style="min-height: 200px">Huge block</div></div>
+        <div class="col-3 bg-blue-300">Smoll centered block</div>
+        <div class="col-3 bg-blue-300 self-end">Smoll block at the bottom</div>
     </div>
 </div>
 ```
@@ -125,9 +125,9 @@ Sometimes you also need to specify an horizontal alignment for some items in a r
 ```grid-halign.html
 <div class="container-fluid">
     <div class="row justify-between">
-        <div class="col-3 bg-blue-200">Evenly spaced blocks</div>
-        <div class="col-3 bg-blue-200">Evenly spaced blocks</div>
-        <div class="col-3 bg-blue-200 self-end">Evenly spaced blocks</div>
+        <div class="col-3 bg-blue-300">Evenly spaced blocks</div>
+        <div class="col-3 bg-blue-300">Evenly spaced blocks</div>
+        <div class="col-3 bg-blue-300 self-end">Evenly spaced blocks</div>
     </div>
 </div>
 ```
@@ -139,9 +139,9 @@ Sometimes you need to occupy the available space fully, you can use `.container-
 ```grid-fluid.html
 <div class="container-fluid">
     <div class="row">
-        <div class="col bg-blue-200">3 blocks</div>
-        <div class="col bg-blue-200">3 blocks</div>
-        <div class="col bg-blue-200">3 blocks</div>
+        <div class="col bg-blue-300">3 blocks</div>
+        <div class="col bg-blue-300">3 blocks</div>
+        <div class="col bg-blue-300">3 blocks</div>
     </div>
 </div>
 ```
@@ -162,9 +162,9 @@ in which case you'll have one column on each side and the main content will span
 ```hagrid-side.html
 <div class="hagrid">
     <div class="row">
-        <div class="col-1 bg-blue-200">1 col</div>
+        <div class="col-1 bg-blue-300">1 col</div>
         <div class="col-10 bg-blue-300">10 cols (standard grid width !)</div>
-        <div class="col-1 bg-blue-200">1 col</div>
+        <div class="col-1 bg-blue-300">1 col</div>
     </div>
 </div>
 ```
@@ -172,7 +172,7 @@ in which case you'll have one column on each side and the main content will span
 ```hagrid-full.html
 <div class="hagrid">
     <div class="row">
-        <div class="col-12 bg-blue-200">12 cols are bigger than the standard grid and allow extra wide content</div>
+        <div class="col-12 bg-blue-300">12 cols are bigger than the standard grid and allow extra wide content</div>
     </div>
 </div>
 ```

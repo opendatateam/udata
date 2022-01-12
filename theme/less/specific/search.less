@@ -1,13 +1,13 @@
 // Big searchy boy
 
 .container.search {
-    overflow: visible; //This is only for the fancy® box-shadow™ that our designer desperately wanted. Please excuse him.
+    overflow: visible; // This is only for the fancy® box-shadow™ that our designer desperately wanted. Please excuse him.
     position: relative;
 
     .search-bar {
         @media @query-md {
             position: sticky;
-            top: 72px; //header height
+            top: 72px; // header height
             z-index: 1;
             background: white;
 
@@ -24,7 +24,7 @@
         flex-grow: 1;
     }
 
-    //Nice filter icons gets filled blue when active
+    // Nice filter icons gets filled blue when active
     .filter-icon {
         cursor: pointer;
         * {
@@ -46,13 +46,13 @@
     }
 
     .search-results {
-        min-height: 450px; //This allow the different filter dropdowns to have enough space while loading
+        min-height: 450px; // This allow the different filter dropdowns to have enough space while loading
     }
 
     .filters-wrapper {
-        //Infamous fancy® box-shadow
-        box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.02),
-            0px 10px 10px rgba(0, 0, 0, 0.04), 0px 4px 4px rgba(0, 0, 0, 0.1);
+        // Infamous fancy® box-shadow
+        box-shadow: 0 20px 20px rgba(0, 0, 0, 0.02),
+            0 10px 10px rgba(0, 0, 0, 0.04), 0 4px 4px rgba(0, 0, 0, 0.1);
         border-radius: 4px;
 
         .btn-secondary {
@@ -60,7 +60,7 @@
         }
     }
 
-    //On mobile, filters get their own space but we're reusing the same markup so some trickery is needed
+    // On mobile, filters get their own space but we're reusing the same markup so some trickery is needed
     @media @query-md {
         h1 {
             font-size: @font-size-lg;
@@ -72,7 +72,7 @@
             z-index: 10;
             min-height: 100vh;
             left: 0;
-            top: 125px; //Header + search bar height + margin. Should be just after the search border.
+            top: 125px; // Header + search bar height + margin. Should be just after the search border.
             width: 100%;
 
             transform: translateX(100%);

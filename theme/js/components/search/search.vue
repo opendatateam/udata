@@ -1,34 +1,34 @@
 <template>
   <div class="row-inline justify-between align-items-center search-bar">
     <search-input
-      class="my-md my-md-xs fs-xl"
+      class="fr-my-1w fr-my-md-2w fr-text--lead fr-mb-0"
       :onChange="handleSearchChange"
       :value="queryString"
       :placeholder="$t('Search for data...')"
       ref="input"
     />
     <div
-      class="filter-icon hidden visible-md w-auto mx-xs"
+      class="filter-icon fr-hidden-md w-auto fr-mx-3v"
       :class="{ isFiltered, active: extendedForm }"
       v-html="filterIcon"
       @click="extendedForm = !extendedForm"
     ></div>
   </div>
-  <div class="row-inline mt-sm justify-between align-items-center">
-    <h1 class="m-0 h2">
+  <div class="row-inline fr-mt-3v justify-between align-items-center">
+    <h1 class="fr-m-0 fr-h4">
       {{ $t("Datasets") }}<sup>{{ totalResults || 0 }}</sup>
     </h1>
-    <a :href="reuseUrl" title="" class="nav-link fs-sm mt-lg-sm hidden-md">
+    <a :href="reuseUrl" title="" class="nav-link fr-text--sm fr-mb-0 fr-displayed-md fr-mt-3v">
       {{ $t("Search reuses") }}
     </a>
   </div>
-  <section class="search-filters p-md-md" :class="{ active: extendedForm }">
-    <h4 class="mt-md mt-md-0 mb-xs mb-md-md fs-sm">
+  <section class="search-filters fr-p-2w fr-p-md-0" :class="{ active: extendedForm }">
+    <h2 class="fr-mt-md-2w fr-mb-2w fr-mb-md-1w fr-text--sm">
       {{ $t("Search filters") }}
-    </h4>
-    <div class="filters-wrapper p-sm p-md-0">
-      <div class="row justify-between align-items-center">
-        <div class="col-3 col-lg-6 col-md-12">
+    </h2>
+    <div class="filters-wrapper fr-p-md-3v">
+      <div class="fr-grid-row fr-grid-row--gutters justify-between align-items-center">
+        <div class="fr-col-12 fr-col-md-6 fr-col-lg-3">
           <Suggestor
             :placeholder="$t('Organizations')"
             :searchPlaceholder="$t('Search an organization...')"
@@ -39,7 +39,7 @@
             :onChange="handleSuggestorChange('organization')"
           />
         </div>
-        <div class="col-3 col-lg-6 col-md-12 mt-md-md">
+        <div class="fr-col-12 fr-col-md-6 fr-col-lg-3">
           <Suggestor
             :placeholder="$t('Tags')"
             :searchPlaceholder="$t('Search a tag...')"
@@ -48,7 +48,7 @@
             :onChange="handleSuggestorChange('tag')"
           />
         </div>
-        <div class="col-3 col-lg-5 col-md-12 mt-lg-md">
+        <div class="fr-col-12 fr-col-md-5 fr-col-lg-3">
           <Suggestor
             :placeholder="$t('Licenses')"
             :searchPlaceholder="$t('Search a license...')"
@@ -57,7 +57,7 @@
             :onChange="handleSuggestorChange('license')"
           />
         </div>
-        <div class="col-2 col-lg-5 col-md-12 mt-lg-md">
+        <div class="fr-col-12 fr-col-md-5 fr-col-lg-2">
           <Suggestor
             :placeholder="$t('Formats')"
             :searchPlaceholder="$t('Search a format...')"
@@ -67,30 +67,30 @@
           />
         </div>
         <div
-          class="col-1 col-lg-2 hidden-md text-align-center mt-lg-md text-align-right-lg"
+          class="fr-col-2 fr-col-lg-1 fr-displayed-md text-align-center text-align-right-lg"
         >
-          <a
-            class="btn-secondary btn-secondary-grey-200 px-md"
+          <button
+            class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-200 text-grey-380 fr-px-2w"
             @click="extendedForm = !extendedForm"
             data-cy="extend-form"
           >
             <span v-if="!extendedForm">…</span>
             <span v-else>X</span>
-          </a>
+          </button>
         </div>
       </div>
       <div
         v-if="extendedForm"
         data-cy="extended-form"
-        class="row mt-sm align-items-center"
+        class="fr-grid-row fr-grid-row--gutters fr-mt-3v align-items-center"
       >
-        <div class="col-5 col-lg-6 col-md-12 row-inline">
+        <div class="fr-col-12 fr-col-md-6 fr-col-lg-5 row-inline">
           <Rangepicker
             :value="facets.temporal_coverage"
             :onChange="handleSuggestorChange('temporal_coverage')"
           />
         </div>
-        <div class="col-3 col-md-12 mt-md-md">
+        <div class="fr-col-12 fr-col-md-3">
           <Suggestor
             :placeholder="$t('Geographic area')"
             :searchPlaceholder="$t('Search a geographic area...')"
@@ -100,7 +100,7 @@
             :onChange="handleSuggestorChange('geozone')"
           />
         </div>
-        <div class="col-3 col-md-12 mt-md-md">
+        <div class="fr-col-12 fr-col-md-3">
           <Suggestor
             :placeholder="$t('Territorial granularity')"
             :searchPlaceholder="$t('Search a granularity...')"
@@ -111,17 +111,16 @@
         </div>
       </div>
     </div>
-    <div class="my-xl text-align-center hidden visible-md">
-      <a
-        class="btn-secondary btn-secondary-grey-400"
+    <div class="fr-my-9v text-align-center fr-hidden-md">
+      <button
+        class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-400"
         @click="extendedForm = !extendedForm"
-        >{{ $t("Submit") }}</a
-      >
+        >{{ $t("Submit") }}</button>
     </div>
   </section>
-  <section class="bg-blue-100 p-sm mt-lg text-black">
+  <section class="bg-blue-100 fr-p-3v fr-mt-3w text-black">
     <span class="row-inline">
-      <span class="fr-fi-question-line mr-xs" aria-hidden="true"></span>
+      <span class="fr-fi-question-line fr-mr-1w" aria-hidden="true"></span>
       <i18n-t keypath="Come try out our" tag="span">
         <template #dataset_search>
           <a :href="rechercherBetaPath">{{ $t('new dataset search') }}</a>
@@ -129,27 +128,30 @@
       </i18n-t>
     </span>
   </section>
-  <section class="search-results mt-lg mt-md-md">
+  <section class="search-results fr-mt-1w fr-mt-md-3w">
     <transition mode="out-in">
       <div v-if="loading">
         <Loader />
       </div>
       <ul v-else-if="results.length">
-        <a
+        <li
           v-for="result in results"
           :key="result.id"
-          :href="result.page"
-          class="unstyled w-100"
         >
-          <Dataset v-bind="result" />
-        </a>
+          <a
+            :href="result.page"
+            class="unstyled w-10 block"
+          >
+            <Dataset v-bind="result" />
+          </a>
+        </li>
         <Pagination
           v-if="totalResults > pageSize"
           :page="currentPage"
           :page-size="pageSize"
           :total-results="totalResults"
           :change-page="changePage"
-          class="mt-md"
+          class="fr-mt-2w"
         />
       </ul>
       <div v-else>

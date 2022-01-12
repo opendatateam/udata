@@ -7,27 +7,27 @@
         <div class="hagrid">
             <div class="row">
                 <div class="col-3 col-lg-12">
-                    <h4>{{ _('The Open Data') }}</h4>
+                    <h3 class="h4">{{ _('The Open Data') }}</h3>
                     <ul class="fs-sm">
                         {% for item in nav.gouvfr_opendata %}
                         <li class="fs-sm">
-                            <a class="unstyled" href="{{ item.url }}" title="{{ item.label }}">{{ item.label }}</a>
+                            <a class="unstyled" href="{{ item.url }}">{{ item.label }}</a>
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
                 <div class="col-3 col-lg-12 mt-lg-lg">
-                    <h4>{{ _('Support') }}</h4>
+                    <h3 class="h4">{{ _('Support') }}</h3>
                     <ul class="fs-sm">
                         {% for item in nav.gouvfr_support %}
                         <li class="fs-sm">
-                            <a class="unstyled" href="{{ item.url }}" title="{{ item.label }}">{{ item.label }}</a>
+                            <a class="unstyled" href="{{ item.url }}">{{ item.label }}</a>
                         </li>
                         {% endfor %}
                     </ul>
                 </div>
                 <div class="col-3 col-lg-12 mt-lg-lg">
-                    <h4>Réseaux sociaux</h4>
+                    <h3 class="h4">{{ _('Social networks') }}</h3>
                     <ul class="socials my-lg row-inline">
                         <li>
                             <a href="https://twitter.com/datagouvfr" title="Twitter">
@@ -78,7 +78,7 @@
                                 class="f-bold unstyled w-100">numerique.gouv.fr</a>
                         </li>
                     </ul>
-                    <ul class="engines mt-md fs-xs text-grey-300">
+                    <ul class="engines mt-md fs-xs text-grey-380">
                         <li>
                             <a href="https://github.com/opendatateam/udata/" title="{{ _('Open-source engine') }}"
                                 class="unstyled">udata</a>
@@ -108,7 +108,7 @@
                 <ul class="col-6 col-lg-12 row-inline self-end network">
                     {% for item in nav.gouvfr_network %}
                     <li class="mr-lg mt-md f-bold">
-                        <a class="unstyled" href="{{ item.url }}" title="{{ item.label }}">{{ item.label }}</a>
+                        <a class="unstyled" href="{{ item.url }}">{{ item.label }}</a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -133,7 +133,7 @@
             </div>
         </div>
     </footer>
-    <footer class="footer-legals hagrid py-lg text-grey-300 fs-sm">
+    <footer class="footer-legals hagrid py-lg text-grey-380 fs-sm">
         <div class="row align-items-center">
             <ul class="col-auto col-lg-12 row-inline legal-nav text-align-center-lg">
                 {% for item in nav.gouvfr_footer %}

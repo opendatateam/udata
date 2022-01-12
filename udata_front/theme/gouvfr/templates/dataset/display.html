@@ -64,7 +64,7 @@
     {% endif %}
     {# FIXME: remove when geo.data.gouv.fr is shutdown #}
     {% if 'geop:dataset_id' in dataset.extras %}
-    <div class="well well-orange-200 py-sm mb-lg">
+    <div class="well well-warning py-sm mb-lg">
         ⚠️ {{ _("This dataset is handled by the <a href='{geo_link}'>geo.data.gouv.fr</a> platform.
         This platform is not actively maintained and as a result, you may find some bogus data or metadata.
         More information about <a href='{blog_link}'>the shutdown of geo.data.gouv.fr is available here.</a>").format(
@@ -255,10 +255,19 @@
                             {{integrate_btn(dataset)}}
                             <h2 class="subtitle fr-mt-3w">{{ _('Permalink') }}</h2>
                             <div class="embed-wrapper">
-                                <input readonly id="permalink" onClick="this.select();"
-                                       value="{{ dataset.external_url }}" />
-                                <label for="permalink" class="icon-copy" id="permalink-copy"
-                                       data-clipboard-target="#permalink" title="Copy this">
+                                <input
+                                    readonly
+                                    id="permalink"
+                                    onClick="this.select();"
+                                    value="{{ dataset.external_url }}"
+                                />
+                                <label
+                                    for="permalink"
+                                    class="icon-copy"
+                                    id="permalink-copy"
+                                    data-clipboard-target="#permalink"
+                                >
+                                    <span class="visually-hidden">{{ _('Copy this') }}</span>
                                     {% include theme('svg/copy.svg') %}
                                 </label>
                             </div>
@@ -302,7 +311,7 @@
         </div>
     </div>
 </section>
-<section class="bg-beige fr-py-5w">
+<section class="bg-contrast-grey fr-py-5w">
     <div class="container vuejs">
         <h2 id="description" class="fr-h2 fr-mb-0">{{ _('Description') }}</h2>
         <read-more>
@@ -324,7 +333,7 @@
             {% set resources_per_page = config.RESOURCES_DEFAULT_PAGE_SIZE %}
             {% for (type, type_label), resources in grouped_resources.items() %}
                 {% if nb_groups > 1 %}
-                    <h4 class="fs-lg mt-xl">{{ type_label }} <sup>{{resources|length }}</sup></h4>
+                    <h3 class="fr-h6 fr-mb-3v fr-mt-9v">{{ type_label }} <sup>{{resources|length }}</sup></h3>
                 {% endif %}
                 <dataset-resources dataset-id="{{ dataset.id }}" type="{{ type }}" type-label="{{ type_label }}" :can-edit="{{ can_edit.can()|tojson|safe }}">
                     {% set max_resources_to_show = resources_per_page if not show_all_resources else resources|length %}
@@ -353,7 +362,7 @@
         <h2 id="community-resources" class="fr-h2">{{ _('Community resources') }}
             <sup>{{ dataset.community_resources|length }}</sup></h2>
         <div class="row fr-mb-3w">
-            <div class="col-6 col-md-12 text-grey-300">
+            <div class="col-6 col-md-12 text-grey-380">
                 <p>{{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}
                 </p>
             </div>
@@ -376,7 +385,7 @@
         {% block reuses_section %}
         <h2 id="community-reuses" class="fr-h2">{{ _('Reuses') }} <sup>{{ reuses|length }}</sup></h2>
         <div class="row fr-mb-3w">
-            <div class="col-6 col-md-12 text-grey-300">
+            <div class="col-6 col-md-12 text-grey-380">
                 {% trans %}You reused these data and published an article, a computer graphics, or an application?
                 It's time to let you know!
                 Reference your work in just a few clicks and increase your visibility.{% endtrans %}

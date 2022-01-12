@@ -86,12 +86,19 @@ a {
 
 .nav-link {
     position: relative;
-    margin-left: 0.75em;
     color: @grey-400;
     font-weight: @font-weight-bold;
     text-decoration: underline;
-    text-decoration-color: @grey-200;
     text-underline-position: under;
+    font-size: 1rem;
+    &:not([disabled]):not(:disabled):hover, &:not([disabled]):not(:disabled):hover .text-decoration-underline {
+        text-decoration-color: initial;
+        --blend-size: 0%;
+    }
+
+    &, & .text-decoration-underline {
+        text-decoration-color: @grey-200;
+    }
 
     &.text-decoration-none {
         &:hover {
@@ -99,13 +106,16 @@ a {
         }
     }
 
-    &:not(.nav-link--no-icon)::before {
-        position: absolute;
-        left: -0.75em;
-        width: 0.5em;
-        height: 100%;
-        text-decoration: none;
-        content: "\203A";
+    &:not(.nav-link--no-icon) {
+        margin-left: 0.75em;
+        &::before {
+            position: absolute;
+            left: -0.75em;
+            width: 0.5em;
+            height: 100%;
+            text-decoration: none;
+            content: "\203A";
+        }
     }
 }
 

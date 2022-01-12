@@ -26,7 +26,7 @@ Vue. -->
     </div>
     <div class="card-data">
       <h4 class="card-title">{{ title }}</h4>
-      <div class="card-description text-grey-300 mt-xs">
+      <div class="card-description text-grey-380 mt-xs">
         {{ $filters.excerpt(description) }}
       </div>
     </div>

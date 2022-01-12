@@ -69,7 +69,7 @@
         </div>
     </div>
 </header>
-<section class="bg-beige fr-py-5w fr-mt-6w fr-mb-9v">
+<section class="bg-contrast-grey fr-py-5w fr-mt-6w fr-mb-9v">
     <div class="container vuejs">
         <h2 id="description" class="fr-h2 fr-mb-0">{{ _('Description') }}</h2>
         <read-more>
@@ -122,7 +122,7 @@
     <div class="row">
         <div class="col-6 col-md-12">
             <h3>{{ _('Technical details') }}</h3>
-            <dl class="text-grey-300 fs-sm">
+            <dl class="text-grey-380 fs-sm">
                 <div>
                     <dt class="f-light">ID</dt>
                     <dd class="f-bold fr-m-0">{{ org.id }}</dd>
@@ -137,32 +137,39 @@
                 </div>
             </dl>
         </div>
-        <div class="col-6 col-md-12  my-md-lg">
+        <div class="col-6 col-md-12 my-md-lg">
             <h3>{{ _('Actions') }}</h3>
-            <ul class="nav-list">
+            <ul class="nav-list fr-ml-n3v">
                 {% if can_edit and not read_only_mode %}
-                <li class="my-md">
-                    <a class="nav-link"
-                        href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">{{ _('Modify information') }}</a>
+                <li class="fr-my-2w">
+                    <a
+                        class="nav-link nav-link--no-icon text-decoration-none fr-link fr-link--icon-left fr-fi-arrow-right-s-line"
+                        href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}"
+                    >
+                        <span class="text-decoration-underline">{{ _('Modify information') }}</span>
+                    </a>
                 </li>
                 {% endif %}
-                <li class="my-md">
-                    <a href="{{ url_for('organizations.datasets_csv', org=org) }}"
-                        class="nav-link">{{ _('Download list of datasets as csv file') }}</a>
+                <li class="fr-my-2w">
+                    <a
+                        href="{{ url_for('organizations.datasets_csv', org=org) }}"
+                        class="nav-link nav-link--no-icon text-decoration-none fr-link fr-link--icon-left fr-fi-arrow-right-s-line"
+                    >
+                        <span class="text-decoration-underline">{{ _('Download list of datasets as csv file') }}</span>
+                    </a>
                 </li>
 
                 {% set member = org.member(current_user) %}
                 {% if not member %}
                     {% set pending_request = org.pending_request(current_user) %}
                     {% if not pending_request and not read_only_mode %}
-                    <li class="my-md vuejs">
+                    <li class="fr-my-2w vuejs">
                         <request-membership orga='{{org.id}}'>
                         </request-membership>
                     </li>
                     {% elif pending_request %}
-                    <li class="my-md">
-                        <span
-                            class="f-light f-italic">{{ _('Pending request to join this organization') }}</span>
+                    <li class="fr-my-2w">
+                        <span class="f-light f-italic">{{ _('Pending request to join this organization') }}</span>
                     </li>
                     {% endif %}
                 {% endif %}

@@ -17,8 +17,8 @@ Nothing to see here ! Well actually it's a small component that says this.
         <span v-if="queryString">{{ `"${queryString}"` }}</span>
       </p>
       <p v-if="copyAfter">{{ copyAfter }}</p>
-      <a class="nav-link mt-md" @click="onClick" v-if="onClick">{{ cta }}</a>
-      <a class="nav-link mt-md" :href="link" v-else>{{ cta }}</a>
+      <button class="nav-link" @click="onClick" v-if="onClick">{{ cta }}</button>
+      <a class="nav-link" :href="link" v-else>{{ cta }}</a>
     </div>
   </div>
 </template>
