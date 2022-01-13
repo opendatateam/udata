@@ -59,13 +59,13 @@ def reindex(classname, id=None):
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, id, adapter_class.serialize(obj))
+            produce(model, str(obj.id), adapter_class.serialize(obj))
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, id, delete=True)
+            produce(model, str(obj.id), delete=True)
         except Exception:
             log.exception('Unable to desindex %s "%s"', model.__name__, str(obj.id))
 

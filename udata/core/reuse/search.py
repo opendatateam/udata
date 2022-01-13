@@ -54,7 +54,7 @@ class ReuseSearch(ModelSearchAdapter):
         if reuse.organization:
             org = Organization.objects(id=reuse.organization.id).first()
             organization = {
-                'id': org.id,
+                'id': str(org.id),
                 'name': org.name,
                 'public_service': 1 if org.public_service else 0,
                 'followers': org.metrics.get('followers', 0)
