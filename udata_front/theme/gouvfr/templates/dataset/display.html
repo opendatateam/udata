@@ -81,7 +81,7 @@
             </h1>
             <p class="fr-mb-0">
                 {% if not external_source %}
-                {{ _('Updated on %(date)s', date=dataset.last_update|dateformat(format='long')) }}
+                {{ _('Updated on %(date)s', date=dataset.last_modified|dateformat(format='long')) }}
                     {% if dataset.license %}
                     &mdash;
                     {%  endif %}
@@ -106,7 +106,7 @@
         <div class="well well-grey-100 col fr-py-3v">
             {% trans
                     date=dataset.created_at|dateformat(format='long'),
-                    update=dataset.last_update|dateformat(format='long'),
+                    update=dataset.last_modified|dateformat(format='long'),
                     author=dataset.owner.fullname
                 %}This dataset has been published on the initiative and under the responsibility of
             {{author}}<br />Published on {{date}} and updated on {{update}}{% endtrans %}

@@ -121,7 +121,7 @@
                   </div>
                   <div>
                       <dt>{{ $t('Modified on') }}</dt>
-                      <dd>{{$filters.formatDate(resource.modified)}}</dd>
+                      <dd>{{$filters.formatDate(resource.last_modified)}}</dd>
                   </div>
                   <div>
                       <dt>{{ $t('Published on') }}</dt>
