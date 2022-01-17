@@ -44,11 +44,6 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, reuse):
-        """By default use the ``to_dict`` method
-        and exclude ``_id``, ``_cls`` and ``owner`` fields.
-        """
-        datasets = Dataset.objects(id__in=[r.id for r in reuse.datasets])
-        datasets = list(datasets.only('id', 'title').no_dereference())
         organization = None
         owner = None
         if reuse.organization:
@@ -77,9 +72,5 @@ class ReuseSearch(ModelSearchAdapter):
             'type': reuse.type,
             'topic': reuse.topic,
             'tags': reuse.tags,
-            'badges': [badge.kind for badge in reuse.badges],
-            'dataset': [{
-                'id': str(d.id),
-                'title': d.title
-            } for d in datasets]
+            'badges': [badge.kind for badge in reuse.badges]
         }

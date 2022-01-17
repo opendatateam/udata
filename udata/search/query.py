@@ -53,19 +53,8 @@ class SearchQuery:
         for name, value in self._filters.items():
             url = url + f'&{name}={value}'
         r = requests.get(url, timeout=current_app.config['SEARCH_SERVICE_REQUEST_TIMEOUT'])
-
-        if r.status_code >= 400:
-            raise RuntimeError(f'Search service returned code {r.status_code}: {r.text}')
+        r.raise_for_status()
         result = r.json()
-        result = {
-            'data': [],
-            'next_page': None,
-            'previous_page': None,
-            'page': 1,
-            'page_size': 20,
-            'total_pages': 2,
-            'total': 113
-        }
 
         return SearchResult(query=self, result=result.pop('data'), **result)
 
