@@ -29,7 +29,6 @@ class ReuseSearch(ModelSearchAdapter):
         'tag': Filter(),
         'organization': ModelTermsFilter(model=Organization),
         'owner': ModelTermsFilter(model=User),
-        'dataset': ModelTermsFilter(model=Dataset),
         'type': Filter(),
         'badge': Filter(),
         'featured': BoolFilter(),
