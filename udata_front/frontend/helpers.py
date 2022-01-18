@@ -429,3 +429,11 @@ def embedded_json_ld(jsonld):
     See: https://w3c.github.io/json-ld-syntax/#restrictions-for-contents-of-json-ld-script-elements
     '''
     return Markup(json.dumps(json_ld_script_preprocessor(jsonld), ensure_ascii=False))
+
+
+@front.app_template_filter()
+def visibles(value):
+    '''Return visible elements'''
+    if not isinstance(value, list):
+        raise ValueError('visibles only accept list as parameter')
+    return list(filter(lambda elt: elt.is_visible, value))

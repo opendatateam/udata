@@ -19,6 +19,8 @@
 
 {% set read_only_mode = config['READ_ONLY_MODE'] %}
 
+{% set visible_datasets = reuse.datasets|visibles %}
+
 {% block extra_head %}
 <link rel="canonical" href="{{ url_for('reuses.show', reuse=reuse) }}" />
 <link rel="alternate" type="application/json+oembed" href="{{ url_for('api.oembed', url=reuse.external_url) }}"
@@ -205,7 +207,7 @@
                     </li>
                     <li>
                         <a class="fr-summary__link" href="#used-datasets">
-                            {{ _('Used datasets') }} <sup class="sup">{{reuse.datasets | length}}</sup>
+                            {{ _('Used datasets') }} <sup class="sup">{{visible_datasets | length}}</sup>
                         </a>
                     </li>
                     <li>
@@ -235,11 +237,11 @@
         <div class="row-inline">
             <h2 id="used-datasets" class="fr-h2">
                 {{ _('Used datasets') }}
-                <sup>{{ reuse.datasets|length }}</sup>
+                <sup>{{ visible_datasets|length }}</sup>
             </h2>
         </div>
     <ul class="row">
-        {% for dataset in reuse.datasets %}
+        {% for dataset in visible_datasets %}
         <li class="col-md-12 col-6">
             {% include theme('dataset/card.html') %}
         </li>

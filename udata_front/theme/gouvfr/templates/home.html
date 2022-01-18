@@ -84,9 +84,10 @@
 
 
 {# Datasets section #}
-{% set nb_datasets = current_site.settings.home_datasets|length %}
+{% set visible_datasets = current_site.settings.home_datasets|visibles %}
+{% set nb_datasets = visible_datasets|length %}
 {% set dataset_tabs = (
-    ('editorial-datasets', _('Featured datasets'), current_site.settings.home_datasets, {}),
+    ('editorial-datasets', _('Featured datasets'), visible_datasets, {}),
     ('recent-datasets', _('Latest datasets'), recent_datasets[:nb_datasets], {'sort': '-created'}),
     ('reference-datasets', _('Reference datasets'), spd_datasets, {}),
 ) %}
@@ -128,9 +129,10 @@
 {# End datasets section #}
 
 {# Reuses section #}
-{% set nb_reuses = current_site.settings.home_reuses|length %}
+{% set visible_reuses = current_site.settings.home_reuses|visibles %}
+{% set nb_reuses = visible_reuses|length %}
 {% set reuses_tabs = (
-    ('best-reuses', _('Featured reuses'), current_site.settings.home_reuses, {}),
+    ('best-reuses', _('Featured reuses'), visible_reuses, {}),
     ('latest-reuses', _('Latest reuses'), recent_reuses[:nb_reuses], {'sort': '-created'}),
 ) %}
 
