@@ -191,6 +191,10 @@
                         <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
                             <h2 class="subtitle">{{ _('Temporality') }}</h2>
                             <dl class="metadata">
+                                {% if dataset.temporal_coverage %}
+                                <dt>{{ _('Temporal coverage') }}</dt>
+                                <dd>{{ dataset.temporal_coverage|daterange(details=True) }}</dd>
+                                {% endif %}
                                 {% if dataset.frequency %}
                                 <dt>{{ _('Frequency') }}</dt>
                                 <dd>{{ dataset.frequency_label }}</dd>
