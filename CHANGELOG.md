@@ -15,6 +15,7 @@
   - The previous code in APIv1 was removed.
   - The user suggest was entirely removed, as its existence is now less pertinent because of the full text search.
   - JS API calls in the admin panel code were changes to reach APIv2 suggest endpoints.
+- Add a `q` argument to the paginated datasets resources endpoint, to search through resources titles. [#2695](https://github.com/opendatateam/udata/pull/2695)
 
 ## 3.2.2 (2021-11-23)
 
