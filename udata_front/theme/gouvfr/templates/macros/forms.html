@@ -7,24 +7,24 @@
 {% elif f.type == 'SubmitField' %}
 <button type="submit" class="btn btn-primary form-submit">{{ submit }}</button>
 {% elif f.type == 'BooleanField' %}
-<div class="field field-checkbox">
+<div class="fr-checkbox-group">
     {{ f() }}
-    <label for="{{ f.id }}">
-        {{ f.label.text }}
+    <label class="fr-label" for="{{ f.id }}">
+        {{ f.label.text }}
     </label>
 </div>
 {% else %}
-<div class="field">
-    <label for="{{ f.id }}" class="{% if f.flags.required %}required{% endif %}">
-        {{ f.label.text }}
+<div class="fr-input-group field {% if f.errors %}fr-input-group--error{% endif %}">
+    <label for="{{ f.id }}" class="fr-label {% if f.flags.required %}required{% endif %}">
+        <span>{{ f.label.text }}</span>
     </label>
     {% if f.id == "email" %}
-    <input id="{{ f.id }}" name="{{ f.id }}" type="email" {% if f.flags.required %}required{% endif %}></input>
+    <input id="{{ f.id }}" name="{{ f.id }}" type="email" {% if f.flags.required %}required{% endif %}/>
     {% else %}
     {{ f() }}
     {% endif %}
     {% for error in f.errors %}
-    <label for="{{ f.id }}" class="form-field-error mt-xs text-default-error">{{ error }}</label>
+    <p class="fr-error-text fr-mt-1v">{{ error }}</p>
     {% endfor %}
 </div>
 {% endif %}

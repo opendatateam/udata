@@ -4,23 +4,22 @@
 {% set read_only_mode = config.READ_ONLY_MODE %}
 
 {% block content %}
-<section class="py-xl py-lg-lg bg-grey-50">
-    <div class="container">
-        <div class="row">
-            <div class="col-6 text-align-center offset-3 form-container col-md-12 offset-md-0">
+<section class="fr-py-9v py-lg-lg bg-grey-50">
+    <div class="fr-container">
+        <div class="fr-grid-row">
+            <div class="text-align-center form-container fr-col-12 fr-col-md-6 fr-col-offset-md-3">
                 <form class="form" method="post" action="{{ url_for('security.login') }}">
-                    <fieldset>
-                        <legend class="h2 mb-xl">{{ _('Log in') }}</legend>
+                    <h1 class="fr-h4 fr-mb-0">{{ _('Log in') }}</h1>
                         {{ forms.render_fields(login_user_form, submit=_('Log in')) }}
-                        <div class="mt-lg">
-                            <p class="fs-sm mb-sm">
+                        <div class="fr-mt-3w">
+                            <p class="fr-text--sm fr-mb-3v">
                                 {{ _('Forgot your password?') }}
                                 <a href="{{ url_for('security.forgot_password', next=next_url) }}">
                                     {{ _('Recover your password') }}
                                 </a>
                             </p>
                             {% if config.SECURITY_CONFIRMABLE %}
-                            <p class="fs-sm mb-sm">
+                            <p class="fr-text--sm fr-mb-3v">
                                 {{ _('Confirmation instructions not received?') }}
                                 <a href="{{ url_for('security.send_confirmation') }}">
                                     {{ _('Send the instructions again') }}
@@ -28,18 +27,17 @@
                             </p>
                             {% endif %}
                         </div>
-                    </fieldset>
                 </form>
             </div>
         </div>
-        <div class="row">
+        <div class="fr-grid-row">
             {% if not read_only_mode %}
-            <div class="col-6 offset-3 form-container text-align-center mt-lg col-md-12 offset-md-0">
-                <h3 class="fs-sm mb-sm">
+            <div class="text-align-center form-container fr-mt-3w fr-col-12 fr-col-md-6 fr-col-offset-md-3">
+                <h2 class="fr-text--sm fr-mb-3v">
                     {{ _('Don\'t have an account?')}}
-                </h3>
+                </h2>
                 <a title="{{ _('Sign up') }}" href="{{ url_for('security.register', next=next_url) }}"
-                    class="btn fr-btn btn-primary btn-block btn-lg">
+                    class="fr-btn btn-primary">
                     {{ _('Create an account') }}
                 </a>
             </div>
