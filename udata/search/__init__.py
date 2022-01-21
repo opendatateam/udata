@@ -21,7 +21,7 @@ class KafkaProducerSingleton:
     def get_instance() -> KafkaProducer:
         if KafkaProducerSingleton.__instance is None:
             KafkaProducerSingleton.__instance = KafkaProducer(
-                bootstrap_servers='localhost:9092',
+                bootstrap_servers=current_app.config.get('KAFKA_URI'),
                 value_serializer=lambda v: json.dumps(v).encode('utf-8')
             )
         return KafkaProducerSingleton.__instance

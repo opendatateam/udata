@@ -42,8 +42,6 @@ def index_model(adapter):
     qs = model.objects
     if hasattr(model.objects, 'visible'):
         qs = qs.visible()
-    if adapter.exclude_fields:
-        qs = qs.exclude(*adapter.exclude_fields)
 
     docs = iter_qs(qs, adapter)
 
@@ -51,7 +49,7 @@ def index_model(adapter):
         try:
             produce(model, doc)
         except Exception as e:
-            log.error('Unable to index %s "%s": %s', model, str(doc.id),
+            log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)
 
 

@@ -82,8 +82,6 @@ class DatasetSearch(ModelSearchAdapter):
             'resources_count': len(dataset.resources),
             'organization': organization,
             'owner': str(owner.id) if owner else None,
-            'spatial_granularity': 0,
-            'spatial_zones': 0,
             'format': [r.format.lower() for r in dataset.resources if r.format]
         }
 
@@ -92,11 +90,9 @@ class DatasetSearch(ModelSearchAdapter):
                 dataset.temporal_coverage.end):
             start = dataset.temporal_coverage.start.toordinal()
             end = dataset.temporal_coverage.end.toordinal()
-            temporal_weight = min(abs(end - start) / 365, cls.from_config('MAX_TEMPORAL_WEIGHT'))
             document.update({
                 'temporal_coverage_start': start,
                 'temporal_coverage_end': end,
-                'temporal_weight': temporal_weight,
             })
 
         if dataset.spatial is not None:
@@ -117,11 +113,8 @@ class DatasetSearch(ModelSearchAdapter):
                 coverage_level = min(coverage_level, admin_levels[zone.level])
 
             geozones.extend([{'id': p} for p in parents])
-
-            spatial_weight = ADMIN_LEVEL_MAX / coverage_level
             document.update({
                 'geozones': geozones,
                 'granularity': dataset.spatial.granularity,
-                'spatial_weight': spatial_weight,
             })
         return document
