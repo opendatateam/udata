@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.2 (2022-01-21)
 
 - Fix latest modification date for dataset and resources on dataset page [#62](https://github.com/etalab/udata-front/pull/62)
 - Fix hidden datasets shown on Home and Reuses [#67](https://github.com/etalab/udata-front/pull/67)
