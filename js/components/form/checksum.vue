@@ -22,7 +22,7 @@
         :name="typeFieldName"
         :placeholder="placeholder"
         :required="required"
-        :value="algo"
+        :value="finalType"
         :readonly="field.readonly || false"></input>
     <input type="text" class="form-control"
         :id="field.id"
@@ -30,7 +30,8 @@
         :placeholder="placeholder"
         :required="required"
         :value="value ? value.value : ''"
-        :readonly="field.readonly || false"></input>
+        :readonly="field.readonly || false"
+        v-model="checksumValue"></input>
 </div>
 </template>
 
@@ -44,6 +45,7 @@ export default {
     data() {
         return {
             specs: API.definitions.Checksum.properties,
+            checksumValue: '',
         };
     },
     computed: {
@@ -53,6 +55,10 @@ export default {
             } else {
                 return this.specs.type.default;
             }
+        },
+        finalType() {
+            // we don't want to set a type if no value is set
+            return this.checksumValue ? this.currentType : '';
         },
         typeFieldName() {
             return `${this.field.id}.type`;

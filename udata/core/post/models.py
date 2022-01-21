@@ -62,3 +62,7 @@ class Post(db.Datetimed, db.Document):
     @property
     def external_url(self):
         return self.url_for(_external=True)
+
+    def count_discussions(self):
+        # There are no metrics on Post to store discussions count
+        pass
