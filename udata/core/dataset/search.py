@@ -88,8 +88,8 @@ class DatasetSearch(ModelSearchAdapter):
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
                 dataset.temporal_coverage.end):
-            start = dataset.temporal_coverage.start.toordinal()
-            end = dataset.temporal_coverage.end.toordinal()
+            start = to_iso_datetime(dataset.temporal_coverage.start)
+            end = to_iso_datetime(dataset.temporal_coverage.end)
             document.update({
                 'temporal_coverage_start': start,
                 'temporal_coverage_end': end,
