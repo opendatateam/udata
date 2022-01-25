@@ -27,24 +27,24 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(model, id, document=None, **kwargs):
+def produce(model, id, document=None, delete=False):
     '''Produce message with marshalled document'''
     producer = KafkaProducerSingleton.get_instance()
     key = id.encode("utf-8")
     if model == Dataset:
-        if kwargs.get('delete', False):
+        if delete:
             producer.send('dataset', key=key)
         else:
             producer.send('dataset', document, key=key)
         producer.flush()
     if model == Organization:
-        if kwargs.get('delete', False):
+        if delete:
             producer.send('organization', key=key)
         else:
             producer.send('organization', document, key=key)
         producer.flush()
     if model == Reuse:
-        if kwargs.get('delete', False):
+        if delete:
             producer.send('reuse', key=key)
         else:
             producer.send('reuse', document, key=key)
