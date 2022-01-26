@@ -4,14 +4,10 @@
 import config from "../config";
 
 /**
- * Build the authentication URL given the current page and an optional message.
+ * Build the authentication URL given the current page.
  */
-export function get_auth_url(message) {
-  const params = { next: window.location.href };
-
-  if (message) {
-    params.message = message;
-  }
+export function get_auth_url() {
+  const params = { login_required: true, next: window.location.href };
 
   return (
     config.auth_url +
@@ -37,13 +33,12 @@ export default function install(app) {
    * The current function execution is stopped by
    * raising a AuthenticationRequired error.
    *
-   * @param  {String} message The contextual message to display on login screen
-   * @throws  {Error} When the user is not authentified
+   * @throws  {Error} When the user is not authenticated
    */
-  app.config.globalProperties.$auth = function (message) {
+  app.config.globalProperties.$auth = function () {
     if (!this.$user) {
-      window.location = get_auth_url(message);
-      throw new Error(message); // This avoid calling function to continue its execution
+      window.location = get_auth_url();
+      throw new Error('Auth required'); // This avoid calling function to continue its execution
     }
   };
 }

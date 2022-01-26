@@ -62,7 +62,7 @@ export default {
   },
   methods: {
     toggleFollow: function () {
-      this.$auth(this.$t("You must be connected to add a favourite."));
+      this.$auth();
 
       this.loading = true;
 

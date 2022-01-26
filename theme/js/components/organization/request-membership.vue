@@ -32,7 +32,7 @@ data() {
   methods: {
     JoinOrga: function () {
 
-      this.$auth(this.$t("You must be connected to join an organization"));
+      this.$auth();
 
       this.comment = prompt(this.$t('You can add some details here for your membership request'));
 

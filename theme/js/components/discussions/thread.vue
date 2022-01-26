@@ -128,9 +128,7 @@ export default {
         });
     },
     displayForm() {
-      this.$auth(
-        this.$t("You must be logged in to start a discussion.")
-      );
+      this.$auth();
       this.showForm = true;
     },
   }
