@@ -145,7 +145,7 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
     // Fancier version for search results, with an hover section for details
     // Disclaimer : the search-result component is weird in styling and uses a lot of fixed pixel values. Please beware if you make any changes in it, you might break responsive.
     &.dataset-search-result {
-        padding: 0 @spacing-xs; //Unfortunately, we need some sweet borders
+        padding: 0 @spacing-xs; // Unfortunately, we need some sweet borders
 
         border-top: 1px solid @grey-100;
 
@@ -175,8 +175,6 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
         .card-hover {
             flex-basis: 260px;
             flex-shrink: 0;
-
-            visibility: hidden;
             align-self: stretch;
 
             display: flex;
@@ -207,14 +205,6 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
             }
         }
 
-        &:hover {
-            background: @blue-100;
-
-            .card-hover {
-                visibility: visible;
-            }
-        }
-
         .card-footer {
             align-self: stretch;
             border-left: 1px solid @grey-100;
@@ -241,7 +231,7 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
                 border-left: none;
 
                 padding: @spacing-xs;
-                padding-left: 112px; //Logo width + little margin
+                padding-left: 112px; // Logo width + little margin
 
                 flex-direction: row;
                 justify-content: space-between;
@@ -250,6 +240,22 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
 
         &:after {
             display: none;
+        }
+    }
+}
+
+a {
+    &, &:focus:not(:focus-visible) {
+        .dataset-search-result .card-hover {
+            visibility: hidden;
+        }
+    }
+    &:hover, &:focus, &:focus-visible {
+        .dataset-search-result {
+            background: @blue-100;
+            .card-hover {
+                visibility: visible;
+            }
         }
     }
 }
