@@ -247,6 +247,16 @@ each(@breakpoints, .(@bk, @_k, @_i) {
     flex-wrap: nowrap;
 }
 
+.wrap {
+    flex-wrap: wrap;
+}
+
+@media @query-md {
+        .wrap-md {
+            .wrap;
+        }
+    }
+
 .flex-direction-column {
     flex-direction: column;
 }
