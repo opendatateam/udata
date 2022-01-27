@@ -23,6 +23,7 @@ from datetime import datetime
 
 from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
+from mongoengine.queryset.visitor import Q
 
 from udata.auth import admin_permission
 from udata.api import api, API, errors
@@ -42,6 +43,7 @@ from .api_fields import (
     community_resource_page_fields,
     dataset_fields,
     dataset_page_fields,
+    dataset_suggestion_fields,
     frequency_fields,
     license_fields,
     resource_fields,
@@ -533,6 +535,59 @@ class CommunityResourceAPI(API):
         delete={'id': 'unfollow_dataset'})
 class DatasetFollowersAPI(FollowAPI):
     model = Dataset
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    'q', help='The string to autocomplete/suggest', location='args',
+    required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_datasets')
+class DatasetSuggestAPI(API):
+    @api.doc('suggest_datasets')
+    @api.expect(suggest_parser)
+    @api.marshal_with(dataset_suggestion_fields)
+    def get(self):
+        '''Datasets suggest endpoint using mongoDB contains'''
+        args = suggest_parser.parse_args()
+        datasets_query = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = datasets_query.filter(Q(title__icontains=args['q']) | Q(acronym__icontains=args['q']))
+        return [
+            {
+                'id': dataset.id,
+                'title': dataset.title,
+                'acronym': dataset.acronym,
+                'slug': dataset.slug,
+                'image_url': dataset.image_url,
+            }
+            for dataset in datasets.order_by(DEFAULT_SORTING).limit(args['size'])
+        ]
+
+
+@ns.route('/suggest/formats/', endpoint='suggest_formats')
+class FormatsSuggestAPI(API):
+    @api.doc('suggest_formats')
+    @api.expect(suggest_parser)
+    def get(self):
+        '''Suggest file formats'''
+        args = suggest_parser.parse_args()
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_EXTENSIONS'] if args['q'] in i]
+        return sorted(results, key=lambda o: len(o['text']))
+
+
+@ns.route('/suggest/mime/', endpoint='suggest_mime')
+class MimesSuggestAPI(API):
+    @api.doc('suggest_mime')
+    @api.expect(suggest_parser)
+    def get(self):
+        '''Suggest mime types'''
+        args = suggest_parser.parse_args()
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_MIMES'] if args['q'] in i]
+        return sorted(results, key=lambda o: len(o['text']))
 
 
 @ns.route('/licenses/', endpoint='licenses')
