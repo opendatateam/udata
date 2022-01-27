@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.3 (2022-01-27)
 
 - Fix modals not working [#71](https://github.com/etalab/udata-front/pull/71)
 - Fix auth messages not shown from query parameter [#68](https://github.com/etalab/udata-front/pull/68)
