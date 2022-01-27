@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.3 (2022-01-27)
 
 - Fix modals not working [#71](https://github.com/etalab/udata-front/pull/71)
