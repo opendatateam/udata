@@ -70,5 +70,5 @@ def index(models=None):
             sys.exit(-1)
 
     for adapter in iter_adapters():
-        if not models or adapter.doc_type().lower() in models:
+        if not models or adapter.model.__name__.lower() in models:
             index_model(adapter)
