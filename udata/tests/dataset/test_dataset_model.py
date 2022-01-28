@@ -382,6 +382,12 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_exact_match_by_title_with_mismatch_slug(self):
+        license = LicenseFactory(title="Licence Ouverte v2", slug="licence-2")
+        found = License.guess(license.title)
+        assert isinstance(found, License)
+        assert license.id == found.id
+
     def test_exact_match_by_title_with_spaces(self):
         license = LicenseFactory()
         found = License.guess(' {0} '.format(license.title))
