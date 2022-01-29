@@ -102,3 +102,19 @@ org_role_fields = api.model('OrganizationRole', {
     'id': fields.String(description='The role identifier'),
     'label': fields.String(description='The role label')
 })
+
+
+org_suggestion_fields = api.model('OrganizationSuggestion', {
+    'id': fields.String(
+        description='The organization identifier', readonly=True),
+    'name': fields.String(description='The organization name', readonly=True),
+    'acronym': fields.String(
+        description='The organization acronym', readonly=True),
+    'slug': fields.String(
+        description='The organization permalink string', readonly=True),
+    'image_url': fields.String(
+        description='The organization logo URL', readonly=True),
+    'page': fields.UrlFor(
+        'organizations.show_redirect', lambda o: {'org': o['slug']},
+        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization')
+})

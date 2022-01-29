@@ -11,6 +11,7 @@ from .api_fields import (
     level_fields,
     granularity_fields,
     feature_collection_fields,
+    zone_suggestion_fields
 )
 from .models import GeoZone, GeoLevel, spatial_granularities
 
@@ -20,8 +21,45 @@ GEOM_TYPES = (
     'MultiPolygon'
 )
 
+DEFAULT_SORTING = '-created_at'
+
 
 ns = api.namespace('spatial', 'Spatial references')
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    'q', type=str, help='The string to autocomplete/suggest',
+    location='args', required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
+
+
+def payload_name(name):
+    '''localize name'''
+    return _(name)  # Avoid dict quotes in gettext
+
+
+@ns.route('/zones/suggest/', endpoint='suggest_zones')
+class SuggestZonesAPI(API):
+    @api.marshal_list_with(zone_suggestion_fields)
+    @api.expect(suggest_parser)
+    @api.doc('suggest_zones')
+    def get(self):
+        '''Geospatial zones suggest endpoint using mongoDB contains'''
+        args = suggest_parser.parse_args()
+        geozones = GeoZone.objects(Q(name__icontains=args['q']) | Q(code__icontains=args['q']))
+        return [
+            {
+                'id': geozone.id,
+                'name': payload_name(geozone.name),
+                'code': geozone.code,
+                'level': geozone.level,
+                'keys': geozone.keys
+            }
+            for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size']) if geozone.is_current
+        ]
 
 
 dataset_parser = api.parser()

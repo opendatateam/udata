@@ -17,6 +17,7 @@ from udata.core.storages.api import (
 from .api_fields import (
     reuse_fields, reuse_page_fields,
     reuse_type_fields,
+    reuse_suggestion_fields
 )
 from .forms import ReuseForm
 from .models import Reuse, REUSE_TYPES
@@ -189,6 +190,35 @@ class ReuseFeaturedAPI(API):
         delete={'id': 'unfollow_reuse'})
 class FollowReuseAPI(FollowAPI):
     model = Reuse
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    'q', help='The string to autocomplete/suggest', location='args',
+    required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_reuses')
+class ReusesSuggestAPI(API):
+    @api.doc('suggest_reuses')
+    @api.expect(suggest_parser)
+    @api.marshal_list_with(reuse_suggestion_fields)
+    def get(self):
+        '''Reuses suggest endpoint using mongoDB contains'''
+        args = suggest_parser.parse_args()
+        reuses = Reuse.objects(deleted=None, private__ne=True, title__icontains=args['q'])
+        return [
+            {
+                'id': reuse.id,
+                'title': reuse.title,
+                'slug': reuse.slug,
+                'image_url': reuse.image_url,
+            }
+            for reuse in reuses.order_by(DEFAULT_SORTING).limit(args['size'])
+        ]
 
 
 @ns.route('/<reuse:reuse>/image', endpoint='reuse_image')
