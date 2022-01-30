@@ -93,6 +93,7 @@ reuse_suggestion_fields = api.model('ReuseSuggestion', {
     'page': fields.UrlFor(
         'reuses.show_redirect', lambda o: {'reuse': o['slug']},
         description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse')
+})
 
   
 reuse_topic_fields = api.model('ReuseTopic', {
