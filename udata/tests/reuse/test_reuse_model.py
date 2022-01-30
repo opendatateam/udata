@@ -91,3 +91,13 @@ class ReuseModelTest(TestCase, DBTestMixin):
         dataset_tasks.update_datasets_reuses_metrics()
         dataset.reload()
         assert dataset.get_metrics()['reuses'] == 0
+
+    def test_reuse_type(self):
+        reuse = ReuseFactory(type='api')
+        self.assertEqual(reuse.type, 'api')
+        self.assertEqual(reuse.type_label, 'API')
+
+    def test_reuse_topic(self):
+        reuse = ReuseFactory(topic='health')
+        self.assertEqual(reuse.topic, 'health')
+        self.assertEqual(reuse.topic_label, 'Health')
