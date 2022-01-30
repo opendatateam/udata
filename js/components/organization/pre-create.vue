@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import APIV2 from 'apiv2';
+import API from 'api';
 import log from 'logger';
 import Organization from 'models/organization';
 import placeholders from 'helpers/placeholders';
@@ -74,7 +74,7 @@ export default {
     },
     watch: {
         search_query(query) {
-            APIV2.organizations.suggest_organizations({
+            API.organizations.suggest_organizations({
                 q: query,
                 size: 9
             }, (data) => {
