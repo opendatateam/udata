@@ -1,4 +1,5 @@
 from flask import current_app, abort
+from mongoengine.queryset.visitor import Q
 
 from flask_restplus import inputs
 
