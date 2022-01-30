@@ -15,6 +15,10 @@
                 <span class="fa fa-file fa-fw"></span>
                 {{ reuse | reusetype }}
             </li>
+            <li v-tooltip :title="_('Topic')">
+                <span class="fa fa-file fa-fw"></span>
+                {{ reuse | reusetopic }}
+            </li>
             <li v-tooltip :title="_('Number of datasets used')">
                 <span class="fa fa-cubes fa-fw"></span>
                 {{ reuse.datasets ? reuse.datasets.length : 0 }}
@@ -32,6 +36,7 @@
 <script>
 import Reuse from 'models/reuse';
 import reuse_types from 'models/reuse_types';
+import reuse_topics from 'models/reuse_topics';
 import placeholders from 'helpers/placeholders';
 import moment from 'moment';
 import config from 'config';
@@ -96,6 +101,11 @@ export default {
         reusetype(reuse) {
             if (reuse && reuse.type) {
                 return reuse_types.by_id(reuse.type).label;
+            }
+        },
+        reusetopic(reuse) {
+            if (reuse && reuse.topic) {
+                return reuse_topics.by_id(reuse.topic).label;
             }
         }
     },

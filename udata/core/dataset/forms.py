@@ -22,7 +22,7 @@ class ChecksumForm(ModelForm):
     model_class = Checksum
     choices = list(zip(CHECKSUM_TYPES, CHECKSUM_TYPES))
     type = fields.SelectField(choices=choices, default='sha1')
-    value = fields.StringField()
+    value = fields.StringField(_('Checksum value'), [validators.DataRequired()])
 
 
 def normalize_format(data):
