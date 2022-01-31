@@ -20,6 +20,18 @@
   - The ModelAdapter, SearchQuery and SearchResult patterns were kept but heavily refactored.
   - Udata uses a Kafka producer to send documents to index to the search service.
   - Udata uses HTTP request to query the search service.
+
+## 3.3.1 (2022-01-11)
+
+- Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
+- :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
+
+## 3.3.0 (2021-12-10)
+
+- :warning: Removed `Issues` code and logic. The corresponding MongoDB collection should be deleted when upgrading Udata. [#2681](https://github.com/opendatateam/udata/pull/2681)
+- Fix transfer ownership from org to user [#2678](https://github.com/opendatateam/udata/pull/2678)
+- Fix discussion creation on posts [#2687](https://github.com/opendatateam/udata/pull/2687)
+
 ## 3.3.1 (2022-01-11)
 
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
