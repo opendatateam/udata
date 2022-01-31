@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-01-11 09:51+0100\n"
-"PO-Revision-Date: 2022-01-11 08:53\n"
+"PO-Revision-Date: 2022-01-31 21:36\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -89,7 +89,7 @@ msgstr ""
 
 #: udata/auth/password_validation.py:13
 msgid "Password must be at least {pass_length} characters long"
-msgstr ""
+msgstr "Лозинка мора бити најмање {pass_length} карактера"
 
 #: udata/auth/password_validation.py:18
 msgid "Password must contain lowercases"
@@ -229,7 +229,7 @@ msgstr "Датум објављивања ресурса"
 
 #: udata/core/dataset/forms.py:98
 msgid "Schema"
-msgstr ""
+msgstr "Шема"
 
 #: udata/core/dataset/forms.py:101
 msgid "The schema slug the resource adheres to"
@@ -719,7 +719,7 @@ msgstr "Коришћени скупови података"
 
 #: udata/core/reuse/forms.py:35
 msgid "Topic"
-msgstr ""
+msgstr "Тема"
 
 #: udata/core/reuse/models.py:18
 msgid "Application"
@@ -751,7 +751,7 @@ msgstr "Повезани уређај"
 
 #: udata/core/reuse/models.py:28
 msgid "Health"
-msgstr ""
+msgstr "Здравље"
 
 #: udata/core/reuse/models.py:29
 msgid "Transport and mobility"
@@ -787,7 +787,7 @@ msgstr ""
 
 #: udata/core/reuse/models.py:37
 msgid "Safety and security"
-msgstr ""
+msgstr "Сигурност и заштита"
 
 #: udata/core/reuse/models.py:38
 msgid "Education and research"
@@ -807,7 +807,7 @@ msgstr ""
 
 #: udata/core/reuse/models.py:42
 msgid "Others"
-msgstr ""
+msgstr "Остало"
 
 #: udata/core/reuse/models.py:121
 msgid "reuse"
@@ -947,7 +947,7 @@ msgstr "прати пример употребе"
 
 #: udata/core/user/forms.py:18
 msgid "Email"
-msgstr ""
+msgstr "Имејл"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
