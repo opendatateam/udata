@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
 
 ## 3.3.1 (2022-01-11)
 
