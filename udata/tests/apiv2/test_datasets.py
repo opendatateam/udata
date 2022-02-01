@@ -121,13 +121,13 @@ class DatasetResourceAPIV2Test(APITestCase):
 
     def test_get_with_query_string(self):
         '''Should fetch resources according to query string from the API'''
-        nb_resources__of_specific_type = 20
+        nb_resources_with_specific_title = 20
         resources = [ResourceFactory() for _ in range(40)]
-        for i in range(nb_resources__of_specific_type):
+        for i in range(nb_resources_with_specific_title):
             resources += [ResourceFactory(title='primary-{0}'.format(i)) if i % 2 else ResourceFactory(title='secondary-{0}'.format(i))]
         dataset = DatasetFactory(resources=resources)
 
-        # Try without resource type filter
+        # Try without query string filter
         response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
@@ -138,8 +138,19 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
-        # Try with resource type filter
+        # Try with query string filter
         response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='primary'))
+        self.assert200(response)
+        data = response.json
+        assert len(data['data']) == 10
+        assert data['total'] == 10
+        assert data['page'] == 1
+        assert data['page_size'] == DEFAULT_PAGE_SIZE
+        assert data['next_page'] is None
+        assert data['previous_page'] is None
+
+        # Try with query string filter to check case-insensitivity 
+        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='PriMarY'))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == 10

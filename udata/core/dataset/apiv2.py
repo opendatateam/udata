@@ -253,7 +253,7 @@ class ResourcesAPI(API):
         res = dataset.resources
 
         if args['type']:
-            res = [elem for elem in res if elem['type'] == args['type']]
+            res = [elem for elem in res if elem['type'] == args['type'].lower()]
             next_page += f"&type={args['type']}"
             previous_page += f"&type={args['type']}"
 
