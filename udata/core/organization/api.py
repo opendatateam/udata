@@ -28,6 +28,7 @@ from .api_fields import (
     request_fields,
     member_fields,
     refuse_membership_fields,
+    org_suggestion_fields
 )
 
 from udata.core.dataset.api import DatasetApiParser
@@ -357,6 +358,36 @@ class MemberAPI(API):
         delete={'id': 'unfollow_organization'})
 class FollowOrgAPI(FollowAPI):
     model = Organization
+
+
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    'q', help='The string to autocomplete/suggest', location='args',
+    required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_organizations')
+class OrganizationSuggestAPI(API):
+    @api.doc('suggest_organizations')
+    @api.expect(suggest_parser)
+    @api.marshal_list_with(org_suggestion_fields)
+    def get(self):
+        '''Organizations suggest endpoint using mongoDB contains'''
+        args = suggest_parser.parse_args()
+        orgs = Organization.objects(deleted=None, name__icontains=args['q'])
+        return [
+            {
+                'id': org.id,
+                'name': org.name,
+                'acronym': org.acronym,
+                'slug': org.slug,
+                'image_url': org.image_url,
+            }
+            for org in orgs.order_by(DEFAULT_SORTING).limit(args['size'])
+        ]
 
 
 @ns.route('/<org:org>/logo', endpoint='organization_logo')

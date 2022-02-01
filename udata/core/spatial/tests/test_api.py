@@ -101,7 +101,7 @@ class SpatialApiTest(APITestCase):
                            is_current=True)
 
         response = self.get(
-            url_for('apiv2.suggest_zones'), qs={'q': 'test', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -123,7 +123,7 @@ class SpatialApiTest(APITestCase):
                            is_current=True)
 
         response = self.get(
-            url_for('apiv2.suggest_zones'), qs={'q': 'test', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -145,7 +145,7 @@ class SpatialApiTest(APITestCase):
                            is_current=True)
 
         response = self.get(
-            url_for('apiv2.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -157,7 +157,7 @@ class SpatialApiTest(APITestCase):
                            is_current=True)
 
         response = self.get(
-            url_for('apiv2.suggest_zones'), qs={'q': 'testé', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -175,7 +175,7 @@ class SpatialApiTest(APITestCase):
         '''It should not provide zones suggestion if no data is present'''
         self.init_search()
         response = self.get(
-            url_for('apiv2.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
@@ -186,7 +186,7 @@ class SpatialApiTest(APITestCase):
                            is_current=i % 2)
 
         response = self.get(
-            url_for('apiv2.suggest_zones'), qs={'q': 'test', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)

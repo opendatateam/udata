@@ -1,7 +1,6 @@
 import logging
 
-from flask import url_for, request, current_app
-from mongoengine.queryset.visitor import Q
+from flask import url_for, request
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -153,73 +152,6 @@ class DatasetSearchAPI(API):
         '''List or search all datasets'''
         search_parser.parse_args()
         return search.query(Dataset, **multi_to_dict(request.args))
-
-
-suggest_parser = apiv2.parser()
-suggest_parser.add_argument(
-    'q', help='The string to autocomplete/suggest', location='args',
-    required=True)
-suggest_parser.add_argument(
-    'size', type=int, help='The amount of suggestion to fetch',
-    location='args', default=10)
-
-
-dataset_suggestion_fields = apiv2.model('DatasetSuggestion', {
-    'id': fields.String(description='The dataset identifier'),
-    'title': fields.String(description='The dataset title'),
-    'acronym': fields.String(description='An optional dataset acronym'),
-    'slug': fields.String(
-        description='The dataset permalink string'),
-    'image_url': fields.String(
-        description='The dataset (organization) logo URL'),
-    'page': fields.UrlFor(
-        'datasets.show_redirect', lambda d: {'dataset': d['slug']},
-        description='The web page URL for this dataset', fallback_endpoint='api.dataset')
-})
-
-
-@ns.route('/suggest/', endpoint='suggest_datasets')
-class DatasetSuggestAPI(API):
-    @apiv2.doc('suggest_datasets')
-    @apiv2.expect(suggest_parser)
-    @apiv2.marshal_with(dataset_suggestion_fields)
-    def get(self):
-        '''Datasets suggest endpoint using mongoDB contains'''
-        args = suggest_parser.parse_args()
-        datasets_query = Dataset.objects(archived=None, deleted=None, private=False)
-        datasets = datasets_query.filter(Q(title__icontains=args['q']) | Q(acronym__icontains=args['q']))
-        return [
-            {
-                'id': dataset.id,
-                'title': dataset.title,
-                'acronym': dataset.acronym,
-                'slug': dataset.slug,
-                'image_url': dataset.image_url,
-            }
-            for dataset in datasets.order_by(DEFAULT_SORTING).limit(args['size'])
-        ]
-
-
-@ns.route('/suggest/formats/', endpoint='suggest_formats')
-class FormatsSuggestAPI(API):
-    @apiv2.doc('suggest_formats')
-    @apiv2.expect(suggest_parser)
-    def get(self):
-        '''Suggest file formats'''
-        args = suggest_parser.parse_args()
-        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_EXTENSIONS'] if args['q'] in i]
-        return sorted(results, key=lambda o: len(o['text']))
-
-
-@ns.route('/suggest/mime/', endpoint='suggest_mime')
-class MimesSuggestAPI(API):
-    @apiv2.doc('suggest_mime')
-    @apiv2.expect(suggest_parser)
-    def get(self):
-        '''Suggest mime types'''
-        args = suggest_parser.parse_args()
-        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_MIMES'] if args['q'] in i]
-        return sorted(results, key=lambda o: len(o['text']))
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
