@@ -7,6 +7,7 @@
 <script>
 import Reuse from 'models/reuse';
 import reuse_types from 'models/reuse_types';
+import reuse_topics from 'models/reuse_topics';
 import VerticalForm from 'components/form/vertical-form.vue';
 
 export default {
@@ -33,6 +34,14 @@ export default {
                     label: this._('Type'),
                     widget: 'select-input',
                     values: reuse_types,
+                    map(item) {
+                        return {value: item.id, text: item.label};
+                    }
+                }, {
+                    id: 'topic',
+                    label: this._('Topic'),
+                    widget: 'select-input',
+                    values: reuse_topics,
                     map(item) {
                         return {value: item.id, text: item.label};
                     }

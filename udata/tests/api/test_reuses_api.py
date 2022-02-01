@@ -9,7 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import AdminFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
-from udata.models import Reuse, Follow, Member, REUSE_TYPES
+from udata.models import Reuse, Follow, Member, REUSE_TOPICS, REUSE_TYPES
 from udata.utils import faker
 
 from udata.tests.helpers import (
@@ -263,7 +263,7 @@ class ReuseAPITest:
                 title='test-{0}'.format(i) if i % 2 else faker.word(),
                 visible=True)
 
-        response = api.get(url_for('apiv2.suggest_reuses'),
+        response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'tes', 'size': '5'})
         assert200(response)
 
@@ -284,7 +284,7 @@ class ReuseAPITest:
                 title='testé-{0}'.format(i) if i % 2 else faker.word(),
                 visible=True)
 
-        response = api.get(url_for('apiv2.suggest_reuses'),
+        response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'testé', 'size': '5'})
         assert200(response)
 
@@ -302,7 +302,7 @@ class ReuseAPITest:
         '''It should not provide reuse suggestion if no match'''
         ReuseFactory.create_batch(3, visible=True)
 
-        response = api.get(url_for('apiv2.suggest_reuses'),
+        response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) == 0
@@ -310,7 +310,7 @@ class ReuseAPITest:
     def test_suggest_reuses_api_empty(self, api):
         '''It should not provide reuse suggestion if no data'''
         # self.init_search()
-        response = api.get(url_for('apiv2.suggest_reuses'),
+        response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) == 0
@@ -388,3 +388,9 @@ class ReuseReferencesAPITest:
         response = api.get(url_for('api.reuse_types'))
         assert200(response)
         assert len(response.json) == len(REUSE_TYPES)
+
+    def test_reuse_topics_list(self, api):
+        '''It should fetch the reuse topics list from the API'''
+        response = api.get(url_for('api.reuse_topics'))
+        assert200(response)
+        assert len(response.json) == len(REUSE_TOPICS)
