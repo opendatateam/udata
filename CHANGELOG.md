@@ -8,12 +8,9 @@
   - Those endpoints use MongoDB full text search when `q` argument is used.
   - A new API parser was implemented to replace the search one.
   - The previous ElasticSearch endpoints were moved to APIv2 with the following url pattern: `/{object}/search` (ex: `/datasets/search`).
-- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685):
+- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685) and [#2696](https://github.com/opendatateam/udata/pull/2696):
   - Current suggest implementation moved from an Elasticsearch index to a MongoDB query using the term `contains`.
-  - The new code is part of APIv2.
-  - The previous code in APIv1 was removed.
   - The user suggest was entirely removed, as its existence is now less pertinent because of the full text search.
-  - JS API calls in the admin panel code were changes to reach APIv2 suggest endpoints.
 - :warning: Search changes [#2692](https://github.com/opendatateam/udata/pull/2692):
   - The search feature is not within Udata anymore and queries a distant service.
   - The search feature is now optional and is enabled by setting the `SEARCH_SERVICE_API_URL` setting.
@@ -21,28 +18,6 @@
   - The ModelAdapter, SearchQuery and SearchResult patterns were kept but heavily refactored.
   - Udata uses a Kafka producer to send documents to index to the search service.
   - Udata uses HTTP request to query the search service.
-
-## 3.3.1 (2022-01-11)
-
-- Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
-- :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
-
-## 3.3.0 (2021-12-10)
-
-- :warning: Removed `Issues` code and logic. The corresponding MongoDB collection should be deleted when upgrading Udata. [#2681](https://github.com/opendatateam/udata/pull/2681)
-- Fix transfer ownership from org to user [#2678](https://github.com/opendatateam/udata/pull/2678)
-- Fix discussion creation on posts [#2687](https://github.com/opendatateam/udata/pull/2687)
-
-## 3.3.1 (2022-01-11)
-
-- Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
-- :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
-
-## 3.3.0 (2021-12-10)
-
-- :warning: Removed `Issues` code and logic. The corresponding MongoDB collection should be deleted when upgrading Udata. [#2681](https://github.com/opendatateam/udata/pull/2681)
-- Fix transfer ownership from org to user [#2678](https://github.com/opendatateam/udata/pull/2678)
-- Fix discussion creation on posts [#2687](https://github.com/opendatateam/udata/pull/2687)
 
 ## 3.3.1 (2022-01-11)
 

@@ -193,6 +193,20 @@ dataset_page_fields = api.model('DatasetPage', fields.pager(dataset_fields),
                                 mask='data{{{0}}},*'.format(DEFAULT_MASK))
 
 
+dataset_suggestion_fields = api.model('DatasetSuggestion', {
+    'id': fields.String(description='The dataset identifier'),
+    'title': fields.String(description='The dataset title'),
+    'acronym': fields.String(description='An optional dataset acronym'),
+    'slug': fields.String(
+        description='The dataset permalink string'),
+    'image_url': fields.String(
+        description='The dataset (organization) logo URL'),
+    'page': fields.UrlFor(
+        'datasets.show_redirect', lambda d: {'dataset': d['slug']},
+        description='The web page URL for this dataset', fallback_endpoint='api.dataset')
+})
+
+
 resource_type_fields = api.model('ResourceType', {
     'id': fields.String(description='The resource type identifier'),
     'label': fields.String(description='The resource type display name')

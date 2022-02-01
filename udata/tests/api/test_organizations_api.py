@@ -490,7 +490,7 @@ class MembershipAPITest:
             OrganizationFactory(
                 name='test-{0}'.format(i) if i % 2 else faker.word())
 
-        response = api.get(url_for('apiv2.suggest_organizations'),
+        response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'tes', 'size': '5'})
         assert200(response)
 
@@ -511,7 +511,7 @@ class MembershipAPITest:
             OrganizationFactory(
                 name='testé-{0}'.format(i) if i % 2 else faker.word())
 
-        response = api.get(url_for('apiv2.suggest_organizations'),
+        response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'testé', 'size': '5'})
         assert200(response)
 
@@ -531,7 +531,7 @@ class MembershipAPITest:
             OrganizationFactory(
                 name='mon testé-{0}'.format(i) if i % 2 else faker.word())
 
-        response = api.get(url_for('apiv2.suggest_organizations'),
+        response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'mon testé', 'size': '5'})
         assert200(response)
 
@@ -552,7 +552,7 @@ class MembershipAPITest:
                 name='Ministère de l\'intérieur {0}'.format(i)
                 if i % 2 else faker.word())
 
-        response = api.get(url_for('apiv2.suggest_organizations'),
+        response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'Ministère', 'size': '5'})
         assert200(response)
 
@@ -570,14 +570,14 @@ class MembershipAPITest:
         '''It should not provide organization suggestion if no match'''
         OrganizationFactory.create_batch(3)
 
-        response = api.get(url_for('apiv2.suggest_organizations'),
+        response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) is 0
 
     def test_suggest_organizations_api_empty(self, api):
         '''It should not provide organization suggestion if no data'''
-        response = api.get(url_for('apiv2.suggest_organizations'),
+        response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) is 0
@@ -586,7 +586,7 @@ class MembershipAPITest:
         '''It should suggest organizations and not deduplicate homonyms'''
         OrganizationFactory.create_batch(2, name='homonym')
 
-        response = api.get(url_for('apiv2.suggest_organizations'),
+        response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'homonym', 'size': '5'})
         assert200(response)
 

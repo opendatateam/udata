@@ -945,7 +945,7 @@ class DatasetResourceAPITest(APITestCase):
             for f in (faker.word(), faker.word(), 'kml', 'kml-1')
         ])
 
-        response = self.get(url_for('apiv2.suggest_formats'),
+        response = self.get(url_for('api.suggest_formats'),
                             qs={'q': 'km', 'size': '5'})
         self.assert200(response)
 
@@ -962,14 +962,14 @@ class DatasetResourceAPITest(APITestCase):
             ResourceFactory(format=faker.word()) for _ in range(3)
         ])
 
-        response = self.get(url_for('apiv2.suggest_formats'),
+        response = self.get(url_for('api.suggest_formats'),
                             qs={'q': 'test', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_format_api_empty(self):
         '''It should not provide format suggestion if no data'''
-        response = self.get(url_for('apiv2.suggest_formats'),
+        response = self.get(url_for('api.suggest_formats'),
                             qs={'q': 'test', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -985,7 +985,7 @@ class DatasetResourceAPITest(APITestCase):
             )
         ])
 
-        response = self.get(url_for('apiv2.suggest_mime'),
+        response = self.get(url_for('api.suggest_mime'),
                             qs={'q': 'js', 'size': '5'})
         self.assert200(response)
         self.assertLessEqual(len(response.json), 5)
@@ -997,7 +997,7 @@ class DatasetResourceAPITest(APITestCase):
         '''It should suggest mime types'''
         DatasetFactory(resources=[ResourceFactory(mime='application/xhtml+xml')])
 
-        response = self.get(url_for('apiv2.suggest_mime'),
+        response = self.get(url_for('api.suggest_mime'),
                             qs={'q': 'xml', 'size': '5'})
         self.assert200(response)
 
@@ -1009,14 +1009,14 @@ class DatasetResourceAPITest(APITestCase):
             ResourceFactory(mime=faker.word()) for _ in range(3)
         ])
 
-        response = self.get(url_for('apiv2.suggest_mime'),
+        response = self.get(url_for('api.suggest_mime'),
                             qs={'q': 'test', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_mime_api_empty(self):
         '''It should not provide mime suggestion if no data'''
-        response = self.get(url_for('apiv2.suggest_mime'),
+        response = self.get(url_for('api.suggest_mime'),
                             qs={'q': 'test', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
@@ -1028,7 +1028,7 @@ class DatasetResourceAPITest(APITestCase):
                 title='test-{0}'.format(i) if i % 2 else faker.word(),
                 visible=True)
 
-        response = self.get(url_for('apiv2.suggest_datasets'),
+        response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
 
@@ -1050,7 +1050,7 @@ class DatasetResourceAPITest(APITestCase):
                 acronym='test-{0}'.format(i) if i % 2 else None,
                 visible=True)
 
-        response = self.get(url_for('apiv2.suggest_datasets'),
+        response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'tes', 'size': '5'})
         self.assert200(response)
 
@@ -1072,7 +1072,7 @@ class DatasetResourceAPITest(APITestCase):
                 title='testé-{0}'.format(i) if i % 2 else faker.word(),
                 resources=[ResourceFactory()])
 
-        response = self.get(url_for('apiv2.suggest_datasets'),
+        response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'testé', 'size': '5'})
         self.assert200(response)
 
@@ -1091,14 +1091,14 @@ class DatasetResourceAPITest(APITestCase):
         for i in range(3):
             DatasetFactory(resources=[ResourceFactory()])
 
-        response = self.get(url_for('apiv2.suggest_datasets'),
+        response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
 
     def test_suggest_datasets_api_empty(self):
         '''It should not provide dataset suggestion if no data'''
-        response = self.get(url_for('apiv2.suggest_datasets'),
+        response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
         self.assertEqual(len(response.json), 0)
