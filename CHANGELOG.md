@@ -19,7 +19,7 @@
   - Those endpoints use MongoDB full text search when `q` argument is used.
   - A new API parser was implemented to replace the search one.
   - The previous ElasticSearch endpoints were moved to APIv2 with the following url pattern: `/{object}/search` (ex: `/datasets/search`).
-- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685):
+- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685) and [#2696](https://github.com/opendatateam/udata/pull/2696):
   - Current suggest implementation moved from an Elasticsearch index to a MongoDB query using the term `contains`.
   - The user suggest was entirely removed, as its existence is now less pertinent because of the full text search.
 
