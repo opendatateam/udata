@@ -1,4 +1,4 @@
-from flask import request, abort
+from flask import request
 
 from udata import search
 from udata.api import apiv2, API

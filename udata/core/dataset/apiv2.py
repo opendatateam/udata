@@ -1,7 +1,6 @@
 import logging
 
-from flask import url_for, request, current_app, abort
-from mongoengine.queryset.visitor import Q
+from flask import url_for, request, abort
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -148,7 +147,7 @@ class DatasetSearchAPI(API):
     '''Datasets collection search endpoint'''
     @apiv2.doc('search_datasets')
     @apiv2.expect(search_parser)
-    @apiv2.marshal_with(dataset_page_fields)
+    @apiv2.marshal_with(dataset_fields)
     def get(self):
         '''List or search all datasets'''
         search_parser.parse_args()
