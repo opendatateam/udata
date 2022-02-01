@@ -185,12 +185,12 @@ class ResourcesAPI(API):
         res = dataset.resources
 
         if args['type']:
-            res = [elem for elem in res if elem['type'] == args['type'].lower()]
+            res = [elem for elem in res if elem['type'] == args['type']]
             next_page += f"&type={args['type']}"
             previous_page += f"&type={args['type']}"
 
         if args['q']:
-            res = [elem for elem in res if args['q'] in elem['title']]
+            res = [elem for elem in res if args['q'].lower() in elem['title'].lower()]
             next_page += f"&q={args['q']}"
             previous_page += f"&q={args['q']}"
 

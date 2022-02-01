@@ -149,7 +149,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['next_page'] is None
         assert data['previous_page'] is None
 
-        # Try with query string filter to check case-insensitivity 
+        # Try with query string filter to check case-insensitivity
         response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='PriMarY'))
         self.assert200(response)
         data = response.json
