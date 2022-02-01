@@ -2,7 +2,6 @@ import Sifter from 'sifter';
 import Vue from 'vue';
 
 import API from 'api';
-import APIV2 from 'apiv2';
 import i18n from 'i18n';
 import config from 'config';
 import mask from './mask';
