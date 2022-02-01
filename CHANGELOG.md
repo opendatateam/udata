@@ -2,8 +2,13 @@
 
 ## Current (in progress)
 
-- Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
+- Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
 - Removed topics code [#2693](https://github.com/opendatateam/udata/pull/2693)
+
+## 3.3.1 (2022-01-11)
+
+- Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
+- :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
 
 ## 3.3.0 (2021-12-10)
 

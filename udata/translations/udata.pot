@@ -1,15 +1,15 @@
 # English translations for udata.
-# Copyright (C) 2021 Open Data Team
+# Copyright (C) 2022 Open Data Team
 # This file is distributed under the same license as the udata project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2021.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 3.2.3.dev0\n"
+"Project-Id-Version: udata 3.3.1.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2021-12-14 15:36+0100\n"
-"PO-Revision-Date: 2021-12-14 15:36+0100\n"
+"POT-Creation-Date: 2022-01-11 09:51+0100\n"
+"PO-Revision-Date: 2022-01-11 09:51+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -148,6 +148,10 @@ msgstr ""
 
 #: udata/core/dataset/activities.py:34
 msgid "deleted a dataset"
+msgstr ""
+
+#: udata/core/dataset/forms.py:25
+msgid "Checksum value"
 msgstr ""
 
 #: udata/core/dataset/forms.py:39
@@ -755,7 +759,7 @@ msgid "Health"
 msgstr ""
 
 #: udata/core/reuse/models.py:29
-msgid "Transport and mobility "
+msgid "Transport and mobility"
 msgstr ""
 
 #: udata/core/reuse/models.py:30
