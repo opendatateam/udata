@@ -202,6 +202,15 @@ class License(db.Document):
                 license = candidates[0]
 
         if license is None:
+            # Try to match `title` with a low Damerau-Levenshtein distance
+            computed = ((l, rdlevenshtein(l.title, text)) for l in cls.objects)
+            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            # If there is more that one match, we cannot determinate
+            # which one is closer to safely choose between candidates
+            if len(candidates) == 1:
+                license = candidates[0]
+
+        if license is None:
             # Try to single match `alternate_titles` with a low Damerau-Levenshtein distance
             computed = (
                 (l, rdlevenshtein(cls.slug.slugify(t), slug))
