@@ -203,23 +203,6 @@ router.map({
             require(['./views/post-edit.vue'], resolve);
         }
     },
-    '/topic/new/': {
-        component(resolve) {
-            require(['./views/topic-wizard.vue'], resolve);
-        }
-    },
-    '/topic/:oid/': {
-        name: 'topic',
-        component(resolve) {
-            require(['./views/topic.vue'], resolve);
-        }
-    },
-    '/topic/:oid/edit/': {
-        name: 'topic-edit',
-        component(resolve) {
-            require(['./views/topic-edit.vue'], resolve);
-        },
-    },
     '/editorial/': {
         name: 'editorial',
         component(resolve) {
