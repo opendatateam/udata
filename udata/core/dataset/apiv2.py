@@ -8,7 +8,6 @@ from udata.utils import multi_to_dict
 
 from .api_fields import (
     badge_fields,
-    dataset_page_fields,
     org_ref_fields,
     resource_fields,
     spatial_coverage_fields,
@@ -22,16 +21,6 @@ from .models import (
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
-
-apiv2.inherit('DatasetPage', dataset_page_fields)
-apiv2.inherit('Badge', badge_fields)
-apiv2.inherit('OrganizationReference', org_ref_fields)
-apiv2.inherit('UserReference', user_ref_fields)
-apiv2.inherit('Resource', resource_fields)
-apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
-apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
-apiv2.inherit('GeoJSON', geojson)
-apiv2.inherit('Checksum', checksum_fields)
 
 DEFAULT_PAGE_SIZE = 50
 DEFAULT_SORTING = '-created_at'
@@ -140,6 +129,17 @@ resource_page_fields = apiv2.model('ResourcePage', {
     'page_size': fields.Integer(),
     'total': fields.Integer()
 })
+
+
+apiv2.inherit('DatasetPage', dataset_fields)
+apiv2.inherit('Badge', badge_fields)
+apiv2.inherit('OrganizationReference', org_ref_fields)
+apiv2.inherit('UserReference', user_ref_fields)
+apiv2.inherit('Resource', resource_fields)
+apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
+apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
+apiv2.inherit('GeoJSON', geojson)
+apiv2.inherit('Checksum', checksum_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')
