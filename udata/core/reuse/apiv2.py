@@ -17,7 +17,7 @@ search_parser = ReuseSearch.as_request_parser()
 DEFAULT_SORTING = '-created_at'
 
 
-@ns.route('/search', endpoint='reuse_search')
+@ns.route('/search/', endpoint='reuse_search')
 class ReuseSearchAPI(API):
     '''Reuses collection search endpoint'''
     @apiv2.doc('search_reuses')
