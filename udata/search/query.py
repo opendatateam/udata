@@ -16,24 +16,12 @@ class SearchQuery:
     model = None
 
     def __init__(self, params):
-        self.extract_sort(params)
         self.page = int(params.pop('page', 1))
         self.page_size = int(params.pop('page_size', DEFAULT_PAGE_SIZE))
         self._query = params.pop('q', '')
+        self.sort = params.pop('sort', None)
         self._filters = {}
         self.extract_filters(params)
-
-    def extract_sort(self, params):
-        '''Extract and build sort query from parameters'''
-        sorts = params.pop('sort', [])
-        sorts = [sorts] if isinstance(sorts, str) else sorts
-        sorts = [(s[1:], 'desc')
-                 if s.startswith('-') else (s, 'asc')
-                 for s in sorts]
-        self.sorts = [
-            {self.adapter.sorts[s]: d}
-            for s, d in sorts if s in self.adapter.sorts
-        ]
 
     def extract_filters(self, params):
         for key, value in params.items():
@@ -50,6 +38,8 @@ class SearchQuery:
             raise NotImplementedError('Missing search service url in settings')
 
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
+        if self.sort:
+            url = url + f'&sort={self.sort}'
         for name, value in self._filters.items():
             url = url + f'&{name}={value}'
         r = requests.get(url, timeout=current_app.config['SEARCH_SERVICE_REQUEST_TIMEOUT'])
