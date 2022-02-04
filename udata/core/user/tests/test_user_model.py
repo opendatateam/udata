@@ -5,7 +5,7 @@ from udata.core.discussions.factories import (
 )
 from udata.core.followers.models import Follow
 from udata.core.user.factories import UserFactory
-from udata.core.user.models import User
+from udata.core.user.models import Discussion, User
 from udata.core.organization.factories import OrganizationFactory
 
 pytestmark = pytest.mark.usefixtures('clean_db')
@@ -19,8 +19,11 @@ class UserModelTest:
         user = UserFactory()
         other_user = UserFactory()
         org = OrganizationFactory(editors=[user])
-        discussion = DiscussionFactory(user=user, subject=org, discussion=[
-            MessageDiscussionFactory(posted_by=user)
+        discussion_only_user = DiscussionFactory(user=user, subject=org, discussion=[
+            MessageDiscussionFactory(posted_by=user), MessageDiscussionFactory(posted_by=user)
+        ])
+        discussion_with_other = DiscussionFactory(user=other_user, subject=org, discussion=[
+            MessageDiscussionFactory(posted_by=other_user), MessageDiscussionFactory(posted_by=user)
         ])
         user_follow_org = Follow.objects.create(follower=user, following=org)
         user_followed = Follow.objects.create(follower=other_user, following=user)
@@ -30,8 +33,9 @@ class UserModelTest:
         org.reload()
         assert len(org.members) == 0
 
-        discussion.reload()
-        assert discussion.discussion[0].content == 'DELETED'
+        assert Discussion.objects(id=discussion_only_user.id).first() is None
+        discussion_with_other.reload()
+        assert discussion_with_other.discussion[1].content == 'DELETED'
 
         assert Follow.objects(id=user_follow_org.id).first() is None
         assert Follow.objects(id=user_followed.id).first() is None
