@@ -4,6 +4,7 @@
 
 - Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
 - Add a `q` argument to the paginated datasets resources endpoint, to search through resources titles. [#2701](https://github.com/opendatateam/udata/pull/2701)
+- Delete discussion with deleted user as only participant [#2702](https://github.com/opendatateam/udata/pull/2702)
 
 ## 3.3.1 (2022-01-11)
 
