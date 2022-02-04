@@ -5,7 +5,6 @@ from bson.objectid import ObjectId
 
 from flask_restplus import inputs
 
-from udata.i18n import lazy_gettext as _
 from udata.utils import clean_string
 
 log = logging.getLogger(__name__)
@@ -68,7 +67,7 @@ class TemporalCoverageFilter(Filter):
     def as_request_parser_kwargs(cls):
         return {
             'type': cls.validate_parameter,
-            'help': _('A date range expressed as start-end '
-                      'where both dates are in iso format '
-                      '(ie. YYYY-MM-DD-YYYY-MM-DD)')
+            'help': 'A date range expressed as start-end '
+                    'where both dates are in iso format '
+                    '(ie. YYYY-MM-DD-YYYY-MM-DD)'
         }
