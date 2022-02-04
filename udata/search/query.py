@@ -55,6 +55,8 @@ class SearchQuery:
             params['q'] = self._query
         if self.page_size != DEFAULT_PAGE_SIZE:
             params['page_size'] = self.page_size
+        if self.sort:
+            params['sort'] = self.sort
         if kwargs:
             for key, value in kwargs.items():
                 if not replace and key in params:
