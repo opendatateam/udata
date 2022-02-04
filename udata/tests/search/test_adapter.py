@@ -2,10 +2,15 @@ import pytest
 
 from flask_restplus import inputs
 from flask_restplus.reqparse import RequestParser
+from unittest.mock import Mock
 
 from udata import search
 from udata.i18n import gettext as _
 from udata.utils import clean_string
+from udata.search import KafkaProducerSingleton, reindex, as_task_param
+from udata.core.dataset.search import DatasetSearch
+from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
+from udata.tests.api import APITestCase
 
 from . import FakeSearch
 
@@ -92,3 +97,26 @@ class SearchAdaptorTest:
         assertHasArgument(parser, 'coverage', filter.validate_parameter)
         assertHasArgument(parser, 'page', int)
         assertHasArgument(parser, 'page_size', int)
+
+
+class IndexingLifecycleTest(APITestCase):
+
+    def test_should_not_index_object_on_update_if_not_indexable(self):
+        kafka_mock = Mock()
+        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+
+        reindex.run(*as_task_param(fake_data))
+        producer = KafkaProducerSingleton.get_instance()
+
+        producer.send.assert_called_with('dataset', key=b'61fd30cb29ea95c7bc0e1211')
+
+    def test_should_index_object_on_update_if_indexable(self):
+        kafka_mock = Mock()
+        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+
+        reindex.run(*as_task_param(fake_data))
+        producer = KafkaProducerSingleton.get_instance()
+
+        producer.send.assert_called_with('dataset', DatasetSearch.serialize(fake_data), key=b'61fd30cb29ea95c7bc0e1211')
