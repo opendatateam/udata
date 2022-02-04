@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
+- Add a `q` argument to the paginated datasets resources endpoint, to search through resources titles. [#2701](https://github.com/opendatateam/udata/pull/2701)
 
 ## 3.3.1 (2022-01-11)
 
