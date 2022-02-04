@@ -101,7 +101,7 @@ class SearchAdaptorTest:
 
 class IndexingLifecycleTest(APITestCase):
 
-    def test_should_not_index_object_on_update_if_not_indexable(self):
+    def test_producer_should_send_a_message_without_value_if_not_indexable(self):
         kafka_mock = Mock()
         KafkaProducerSingleton.get_instance = lambda: kafka_mock
         fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
