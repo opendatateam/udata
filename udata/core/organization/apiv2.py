@@ -17,7 +17,7 @@ search_parser = OrganizationSearch.as_request_parser()
 DEFAULT_SORTING = '-created_at'
 
 
-@ns.route('/search', endpoint='organization_search')
+@ns.route('/search/', endpoint='organization_search')
 class OrganizationSearchAPI(API):
     '''Organizations collection search endpoint'''
     @apiv2.doc('search_organizations')

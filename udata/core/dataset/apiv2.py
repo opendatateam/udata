@@ -1,6 +1,6 @@
 import logging
 
-from flask import url_for, request
+from flask import url_for, request, abort
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -8,7 +8,6 @@ from udata.utils import multi_to_dict
 
 from .api_fields import (
     badge_fields,
-    dataset_page_fields,
     org_ref_fields,
     resource_fields,
     spatial_coverage_fields,
@@ -22,16 +21,6 @@ from .models import (
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
-
-apiv2.inherit('DatasetPage', dataset_page_fields)
-apiv2.inherit('Badge', badge_fields)
-apiv2.inherit('OrganizationReference', org_ref_fields)
-apiv2.inherit('UserReference', user_ref_fields)
-apiv2.inherit('Resource', resource_fields)
-apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
-apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
-apiv2.inherit('GeoJSON', geojson)
-apiv2.inherit('Checksum', checksum_fields)
 
 DEFAULT_PAGE_SIZE = 50
 DEFAULT_SORTING = '-created_at'
@@ -141,6 +130,21 @@ resource_page_fields = apiv2.model('ResourcePage', {
     'total': fields.Integer()
 })
 
+dataset_page_fields = apiv2.model(
+    'DatasetPage',
+    fields.pager(dataset_fields),
+    mask='data{{{0}}},*'.format(DEFAULT_MASK_APIV2)
+)
+
+apiv2.inherit('Badge', badge_fields)
+apiv2.inherit('OrganizationReference', org_ref_fields)
+apiv2.inherit('UserReference', user_ref_fields)
+apiv2.inherit('Resource', resource_fields)
+apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
+apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
+apiv2.inherit('GeoJSON', geojson)
+apiv2.inherit('Checksum', checksum_fields)
+
 
 @ns.route('/search/', endpoint='dataset_search')
 class DatasetSearchAPI(API):
@@ -151,7 +155,12 @@ class DatasetSearchAPI(API):
     def get(self):
         '''List or search all datasets'''
         search_parser.parse_args()
-        return search.query(Dataset, **multi_to_dict(request.args))
+        try:
+            return search.query(Dataset, **multi_to_dict(request.args))
+        except NotImplementedError:
+            abort(501, 'Search endpoint not enabled')
+        except RuntimeError:
+            abort(500, 'Internal search service error')
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)

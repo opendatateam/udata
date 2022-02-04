@@ -173,7 +173,6 @@ class SpatialApiTest(APITestCase):
 
     def test_suggest_zones_empty(self):
         '''It should not provide zones suggestion if no data is present'''
-        self.init_search()
         response = self.get(
             url_for('api.suggest_zones'), qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
@@ -222,12 +221,11 @@ class SpatialApiTest(APITestCase):
 
     def test_zone_datasets(self):
         paca, bdr, arles = create_geozones_fixtures()
-        with self.autoindex():
-            organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+        organization = OrganizationFactory()
+        for _ in range(3):
+            VisibleDatasetFactory(
+                organization=organization,
+                spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(url_for('api.zone_datasets', id=paca.id))
         self.assert200(response)
@@ -235,12 +233,11 @@ class SpatialApiTest(APITestCase):
 
     def test_zone_datasets_with_size(self):
         paca, bdr, arles = create_geozones_fixtures()
-        with self.autoindex():
-            organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+        organization = OrganizationFactory()
+        for _ in range(3):
+            VisibleDatasetFactory(
+                organization=organization,
+                spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(url_for('api.zone_datasets', id=paca.id),
                             qs={'size': 2})
@@ -249,12 +246,11 @@ class SpatialApiTest(APITestCase):
 
     def test_zone_datasets_with_dynamic(self):
         paca, bdr, arles = create_geozones_fixtures()
-        with self.autoindex():
-            organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+        organization = OrganizationFactory()
+        for _ in range(3):
+            VisibleDatasetFactory(
+                organization=organization,
+                spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(
             url_for('api.zone_datasets', id=paca.id), qs={'dynamic': 1})
@@ -264,12 +260,11 @@ class SpatialApiTest(APITestCase):
 
     def test_zone_datasets_with_dynamic_and_size(self):
         paca, bdr, arles = create_geozones_fixtures()
-        with self.autoindex():
-            organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+        organization = OrganizationFactory()
+        for _ in range(3):
+            VisibleDatasetFactory(
+                organization=organization,
+                spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(
             url_for('api.zone_datasets', id=paca.id),
@@ -343,12 +338,11 @@ class SpatialTerritoriesApiTest(APITestCase):
 
     def test_zone_datasets_with_dynamic_and_setting(self):
         paca, bdr, arles = create_geozones_fixtures()
-        with self.autoindex():
-            organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+        organization = OrganizationFactory()
+        for _ in range(3):
+            VisibleDatasetFactory(
+                organization=organization,
+                spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(
             url_for('api.zone_datasets', id=paca.id), qs={'dynamic': 1})
@@ -358,12 +352,11 @@ class SpatialTerritoriesApiTest(APITestCase):
 
     def test_zone_datasets_with_dynamic_and_setting_and_size(self):
         paca, bdr, arles = create_geozones_fixtures()
-        with self.autoindex():
-            organization = OrganizationFactory()
-            for _ in range(3):
-                VisibleDatasetFactory(
-                    organization=organization,
-                    spatial=SpatialCoverageFactory(zones=[paca.id]))
+        organization = OrganizationFactory()
+        for _ in range(3):
+            VisibleDatasetFactory(
+                organization=organization,
+                spatial=SpatialCoverageFactory(zones=[paca.id]))
 
         response = self.get(
             url_for('api.zone_datasets', id=paca.id), qs={
