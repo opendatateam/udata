@@ -2,43 +2,43 @@
 Vue and simpler -->
 
 <template>
-  <article class="reuse-card">
+  <article class="reuse-card text-align-center fr-text--sm fr-mb-0">
     <Placeholder
-      class="reuse-image mb-sm"
-      :alt="title"
-      backgroundImage
+      class="reuse-image fr-mb-3v fr-responsive-img"
+      alt=""
       :src="image_url"
       type="reuse"
     />
-    <div class="reuse-info">
-      <div class="reuse-info-type fs-xs">
-        {{ type_label }}
-      </div>
-      <div class="reuse-info-amount fs-xs text-grey-380 mb-xs"></div>
-      <div class="reuse-info-title h4">
-        {{ title }}
-      </div>
+    <div>
+      {{ type_label }}
+    </div>
+    <div>
+      {{ title }}
+      <span class="badge grey-300 fr-ml-1w" v-if="private">{{ $t('Private') }}</span>
     </div>
   </article>
 </template>
 
 <script>
 import Placeholder from "../utils/placeholder";
-import icon from "svg/actions/star.svg";
 
 export default {
-  created() {
-    this.icon = icon;
-  },
   props: {
     title: String,
     image_url: String,
     type_label: String,
     metrics: Object,
-    datasets: Number,
+    datasets: {
+      type: Number,
+      default: 0,
+    },
+    private: {
+      type: Boolean,
+      default: false,
+    },
   },
   components: {
     Placeholder,
-  },
+  }
 };
 </script>

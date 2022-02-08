@@ -41,19 +41,19 @@
 
 {% block main_content %}
 <section class="container">
-    <div class="pt-sm search-input">
-        <form method="GET" class="row-inline fs-lg">
+    <div class="fr-pt-3v search-input">
+        <form method="GET" class="fr-grid-row fr-text--lead fr-mb-0">
             <span class="icon active">{% include theme("svg/search.svg") %}</span>
             <input type="text" name="q" value="{{reuses.query._query}}" aria-label="{{ _('Search...') }}"
                 placeholder="{{ _('Search...') }}" />
         </form>
     </div>
-    <div class="row-inline pt-xl justify-between align-items-center">
+    <div class="fr-grid-row fr-pt-9v justify-between align-items-center fr-grid-row--middle">
         <h1 class="m-0 h2">{{ _('Reuses')}} <sup>{{reuses.total}}</sup></h1>
         <a href="{{ url_for('datasets.list') }}" title="{{ _('Search in datasets') }}"
             class="nav-link fs-sm">{{ _('Search in datasets') }}</a>
     </div>
-    <div class="row-inline py-lg hidden-lg">
+    <div class="fr-grid-row fr-py-3w fr-displayed-lg">
         <ul class="fr-tags-group">
             <li>
                 <a
@@ -74,12 +74,10 @@
             {% endfor %}
         </ul>
     </div>
-    <ul class="search-results row mt-lg-md">
+    <ul class="search-results fr-grid-row fr-grid-row--gutters mt-lg-md">
         {% for reuse in reuses %}
-        <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
-            <a href="{{ url_for('reuses.show', reuse=reuse) }}"
-                title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
-            </a>
+        <li class="fr-col-lg-3 fr-col-md-4 fr-col-sm-6 fr-col-12 my-sm-sm fr-mb-3v">
+            {% include theme('reuse/card.html') %}
         </li>
         {% endfor %}
     </ul>

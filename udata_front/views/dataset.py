@@ -78,18 +78,23 @@ class ProtectedDatasetView(DatasetView):
 @blueprint.route('/<dataset:dataset>/', endpoint='show')
 class DatasetDetailView(DatasetView, DetailView):
     template_name = 'dataset/display.html'
+    page_size = 4
 
     def dispatch_request(self, *args, **kwargs):
         return super(DatasetDetailView, self).dispatch_request(*args, **kwargs)
 
     def get_context(self):
         context = super(DatasetDetailView, self).get_context()
+        params_reuses_page = request.args.get('reuses_page', 1, type=int)
+        reuses = Reuse.objects(datasets=self.dataset).visible()
+
         if not DatasetEditPermission(self.dataset).can():
             if self.dataset.private:
                 abort(404)
             elif self.dataset.deleted:
                 abort(410)
-        context['reuses'] = Reuse.objects(datasets=self.dataset).visible()
+        context['reuses'] = reuses.paginate(params_reuses_page, self.page_size)
+        context['total_reuses'] = len(reuses)
         context['can_edit'] = DatasetEditPermission(self.dataset)
         context['can_edit_resource'] = ResourceEditPermission
 

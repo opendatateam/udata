@@ -62,7 +62,7 @@ class ProtectedOrgView(OrgView):
 @blueprint.route('/<org:org>/', endpoint='show')
 class OrganizationDetailView(OrgView, DetailView):
     template_name = 'organization/display.html'
-    page_size = 10
+    page_size = 4
 
     def get_context(self):
         context = super(OrganizationDetailView, self).get_context()

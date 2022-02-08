@@ -34,7 +34,7 @@ For non-JS users, the home search box is a standard input that will still work n
     <div
       v-if="active"
       @keyup.esc="stop()"
-      class="suggest-wrapper bg-blue-300"
+      class="suggest-wrapper bg-blue-300 fr-pb-4w"
       tabindex="0"
       ref="el"
     >
@@ -44,7 +44,7 @@ For non-JS users, the home search box is a standard input that will still work n
             {{ $t("Search for data, reuses, contributions...") }}
           </h4>
         </div>
-        <div class="container">
+        <div class="fr-container">
           <div class="search-input-wrapper container-fluid">
             <search-input
               ref="searchInput"

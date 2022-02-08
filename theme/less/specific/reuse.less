@@ -1,36 +1,14 @@
-//Home section
-.reuse {
-    .tab-content {
-        min-width: @breakpoint-lg;
-    }
-}
-
-.reuse-cards {
-    @media @query-xl {
-        overflow-x: scroll;
-
-        .row {
-            flex-wrap: nowrap;
-
-            //Prevent reuse cards from being too small
-            > div,
-            > li {
-                min-width: 250px;
-            }
-        }
-    }
-}
-
-//Generic reuse cards
+// Generic reuse cards
 .reuse-card {
+    width: 100%;
+    max-width: 300px;
     .reuse-image {
         border-radius: @spacing-md;
-        max-width: 100%;
-        width: 100%;
-        min-height: 320px;
-
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center center;
+        height: 480px;
+        object-fit: cover;
+        object-position: center center;
+        // aspect-ratio: 3 / 5;
+        // We can use an aspect-ratio instead of a fixed height when we update our list of supported browsers
+        // This will not work on IE 11 and is only working on 82% of browsers on 01/2022
     }
 }

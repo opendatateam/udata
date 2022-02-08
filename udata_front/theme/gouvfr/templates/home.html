@@ -159,13 +159,12 @@
             </div>
         </div>
     </div>
-    <div class="hagrid reuse-cards">
+    <div class="hagrid">
         {% for tab_id, label, reuses, kwargs in reuses_tabs  %}
-        <div class="tab-content  {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-            <div class="row pt-xl pt-md-md">
+        <div class="tab-content {% if loop.first %}active{% endif %}" id="{{tab_id}}">
+            <div class="fr-grid-row fr-grid-row--gutters pt-xl pt-md-md">
                 {% for reuse in reuses %}
-                {% set features = ['preview'] %}
-                <div class="col-3 col-md-7 mb-md text-align-center">
+                <div class="mb-md fr-col-lg-3 fr-col-sm-6 fr-col-12">
                     {% include theme('reuse/card.html') %}
                 </div>
                 {% endfor %}

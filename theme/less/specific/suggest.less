@@ -7,17 +7,15 @@
     width: 100%;
     min-height: calc(100vh - 109px); // Header height
 
-    .container {
+    .fr-container {
         background: white;
         border-radius: 4px;
-        width: 100%;
 
         box-shadow: 0 20px 20px rgba(0, 0, 0, 0.02),
             0 10px 10px rgba(0, 0, 0, 0.04), 0 4px 4px rgba(0, 0, 0, 0.1);
 
         @media @query-md {
             border-radius: 0;
-            padding: 0;
         }
     }
 
@@ -68,9 +66,7 @@
         .cards-container {
             display: flex;
             flex-direction: column;
-
-            // Make the two half the same height
-            height: 100%;
+            flex: 1;
 
             // "See more" link is going to the bottom
             > a {

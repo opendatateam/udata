@@ -12,8 +12,8 @@ Used by the suggest feature to display typeahead-style results when you type you
 -->
 
 <template>
-  <div class="row p-md results">
-    <div class="p-md col col-md-12">
+  <div class="fr-grid-row fr-grid-row--gutters fr-py-2w results">
+    <div class="fr-col col-md-12 fr-grid-row flex-direction-column">
       <a
         class="unstyled row-inline justify-between see-all"
         :href="datasetUrl"
@@ -24,7 +24,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         </h2>
         <span v-html="arrow" />
       </a>
-      <p class="text-grey-380 m-0">
+      <p class="text-grey-380 fr-m-0">
         {{
           $t(
             "Datasets are collections of data, i.e. structured information, easily readable by a machine."
@@ -40,21 +40,21 @@ Used by the suggest feature to display typeahead-style results when you type you
           :queryString="queryString"
           :link="datasetUrl"
         />
-        <div class="my-md cards-container reuse-cards" v-else>
+        <div class="fr-my-2w cards-container" v-else>
           <ul>
             <li v-for="dataset in results.datasets">
-              <a :href="dataset.page" :title="dataset.title" class="unstyled">
+              <a :href="dataset.page" :title="dataset.title" class="unstyled block">
                 <Dataset v-bind="dataset" />
               </a>
             </li>
           </ul>
-          <a class="nav-link pt-md" :href="datasetUrl">{{
+          <a class="nav-link fr-pt-2w" :href="datasetUrl">{{
             $t("Search in datasets")
           }}</a>
         </div>
       </transition>
     </div>
-    <div class="p-md col col-md-12">
+    <div class="fr-col col-md-12">
       <a
         class="unstyled row-inline justify-between see-all"
         :href="reuseUrl"
@@ -65,7 +65,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         </h2>
         <span v-html="arrow" />
       </a>
-      <p class="text-grey-380 m-0">
+      <p class="text-grey-380 fr-m-0">
         {{
           $t(
             "Reuses refer to the use of data for an other purpose than the one they were produced for."
@@ -73,7 +73,7 @@ Used by the suggest feature to display typeahead-style results when you type you
         }}
       </p>
       <transition mode="out-in">
-        <reuse-loader class="my-md" v-if="loading" />
+        <reuse-loader class="fr-my-2w" v-if="loading" />
         <Empty
           v-else-if="!results.reuses.length > 0"
           :cta="$t('See the reuses')"
@@ -81,15 +81,15 @@ Used by the suggest feature to display typeahead-style results when you type you
           :queryString="queryString"
           :link="reuseUrl"
         />
-        <div class="my-md cards-container" v-else>
+        <div class="fr-my-2w cards-container" v-else>
           <ul class="row">
-            <li v-for="reuse in results.reuses" class="col text-align-center">
-              <a :href="reuse.page" :title="reuse.title" class="unstyled">
+            <li v-for="reuse in results.reuses" class="col-6">
+              <a :href="reuse.page" :title="reuse.title" class="unstyled block">
                 <Reuse v-bind="reuse" />
               </a>
             </li>
           </ul>
-          <a class="nav-link pt-md" :href="reuseUrl">{{
+          <a class="nav-link fr-pt-2w" :href="reuseUrl">{{
             $t("Search reuses")
           }}</a>
         </div>

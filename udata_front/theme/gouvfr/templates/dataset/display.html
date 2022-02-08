@@ -1,6 +1,7 @@
 {% extends theme('layouts/1-column.html') %}
 {% from theme('macros/follow.html') import follow_btn with context %}
 {% from theme('macros/integrate.html') import integrate_btn with context %}
+{% from theme('macros/paginator.html') import paginator with context %}
 {% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 
 ## FIXME: remove inspire:indentifier robots condition when geo.data.gouv.fr is shutdown
@@ -302,7 +303,7 @@
                     </li>
                     <li>
                         <a class="fr-summary__link" href="#community-reuses">
-                            {{ _('Reuses') }}  <sup class="sup">{{ reuses|length }}</sup>
+                            {{ _('Reuses') }}  <sup class="sup">{{ total_reuses }}</sup>
                         </a>
                     </li>
                     <li>
@@ -378,7 +379,7 @@
             {% include theme('dataset/resource/card.html') %}
             {% endfor %}
             {% if not read_only_mode %}
-            <a class="btn-action fr-my-3w"
+            <a class="btn-action fr-mt-3w"
                 href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
                 {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
             </a>
@@ -387,34 +388,29 @@
         {% endif %}
 
         {% block reuses_section %}
-        <h2 id="community-reuses" class="fr-h2">{{ _('Reuses') }} <sup>{{ reuses|length }}</sup></h2>
-        <div class="row fr-mb-3w">
-            <div class="col-6 col-md-12 text-grey-380">
-                {% trans %}You reused these data and published an article, a computer graphics, or an application?
-                It's time to let you know!
-                Reference your work in just a few clicks and increase your visibility.{% endtrans %}
-            </div>
+        <div class="fr-grid-row fr-mt-12w">
+            <h2 id="community-reuses" class="fr-h2 fr-col">{{ _('Reuses') }} <sup>{{ total_reuses }}</sup></h2>
+            {% if not read_only_mode %}
+                <div class="fr-col-12 fr-col-sm-6 fr-col-md-5 fr-col-lg-4 text-align-right">
+                    <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 fr-fi-add-line fr-btn--icon-left"
+                        href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}">
+                        {{ _('Add a reuse') }}
+                    </a>
+                </div>
+            {% endif %}
         </div>
-        <div class="row mt-xl fr-pt-2w fr-pt-md-0 reuse-cards">
+        <p class="fr-my-0">{{ _('Explore the reuses of this dataset.') }}</p>
+        <p class="fr-mt-0 fr-mb-3w">{{ _('Did you use this data ? Reference your work and increase your visibility.') }}</p>
+        <div class="fr-pt-2w fr-pt-md-0 fr-grid-row fr-grid-row--gutters fr-mb-2w">
             {% for reuse in reuses %}
-            {% set features = ['preview'] %}
-            <div class="col-3 col-md-6">
+            <div class="fr-mb-3v fr-col-lg-3 fr-col-sm-6 fr-col-12">
                 {% include theme('reuse/card.html') %}
             </div>
             {% endfor %}
         </div>
-        {% if not read_only_mode %}
-        <div class="row">
-            <div class="col-12">
-                <a class="btn-action my-xl"
-                    href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}">
-                    {% include theme("svg/actions/add.svg") %}{{ _('Add a reuse') }}
-                </a>
-            </div>
-        </div>
-        {% endif %}
+        {{ paginator(reuses, arg_name='reuses_page', url='#community-reuses') }}
         {% endblock %}
-        <div class="vuejs">
+        <div class="vuejs fr-mt-7w">
             <discussion-threads
                 ref="discussions"
                 subject-id="{{ dataset.id }}"

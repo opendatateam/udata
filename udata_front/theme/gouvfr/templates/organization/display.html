@@ -92,15 +92,13 @@
 {% if reuses and reuses|length > 0 %}
 <section id="organization-reuses" class="fr-py-9v container">
     <h2>{{ _('Reuses') }}<sup>{{ total_reuses }}</sup></h2>
-    <ul class="row">
-            {% for reuse in reuses %}
-            <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
-                <a href="{{ url_for('reuses.show', reuse=reuse) }}"
-                    title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
+    <ul class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+        {% for reuse in reuses %}
+        <li class="fr-mb-3v fr-col-lg-3 fr-col-sm-6 fr-col-12">
+            {% include theme('reuse/card.html') %}
+        </li>
+        {% endfor %}
+    </ul>
     {{ paginator(reuses, arg_name='reuses_page', url='#organization-reuses') }}
 </section>
 {% endif %}
