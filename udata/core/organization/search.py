@@ -42,5 +42,6 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'created_at': to_iso_datetime(organization.created_at),
             'orga_sp': 1 if organization.public_service else 0,
             'followers': organization.metrics.get('followers', 0),
-            'datasets': organization.metrics.get('datasets', 0)
+            'datasets': organization.metrics.get('datasets', 0),
+            'extras': organization.extras
         }

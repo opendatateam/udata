@@ -18,6 +18,7 @@
   - The ModelAdapter, SearchQuery and SearchResult patterns were kept but heavily refactored.
   - Udata uses a Kafka producer to send documents to index to the search service.
   - Udata uses HTTP request to query the search service.
+- Add the `extras` field of Dataset, Reuse and Organization into their corresponding `ModelSearchAdapter` serialize method.
 
 ## 3.3.1 (2022-01-11)
 

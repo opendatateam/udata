@@ -82,7 +82,8 @@ class DatasetSearch(ModelSearchAdapter):
             'resources_count': len(dataset.resources),
             'organization': organization,
             'owner': str(owner.id) if owner else None,
-            'format': [r.format.lower() for r in dataset.resources if r.format]
+            'format': [r.format.lower() for r in dataset.resources if r.format],
+            'extras': dataset.extras
         }
 
         if (dataset.temporal_coverage is not None and

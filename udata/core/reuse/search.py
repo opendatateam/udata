@@ -71,5 +71,6 @@ class ReuseSearch(ModelSearchAdapter):
             'type': reuse.type,
             'topic': reuse.topic,
             'tags': reuse.tags,
-            'badges': [badge.kind for badge in reuse.badges]
+            'badges': [badge.kind for badge in reuse.badges],
+            'extras': reuse.extras
         }
