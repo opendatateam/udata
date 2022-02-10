@@ -86,6 +86,18 @@ class DatasetSearch(ModelSearchAdapter):
             'extras': dataset.extras
         }
 
+        serialized_resources = []
+        for resource in dataset.resources:
+            serialized_resources.append({
+                'id': resource.id,
+                'url': resource.url,
+                'format': resource.format,
+                'title': resource.title,
+                'schema': resource.schema,
+                'latest': resource.latest
+            })
+        document.update({'resources': serialized_resources})
+
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
                 dataset.temporal_coverage.end):
