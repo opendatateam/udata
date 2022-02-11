@@ -109,7 +109,12 @@ class IndexingLifecycleTest(APITestCase):
         reindex.run(*as_task_param(fake_data))
         producer = KafkaProducerSingleton.get_instance()
 
-        producer.send.assert_called_with('dataset', key=b'61fd30cb29ea95c7bc0e1211')
+        expected_value = {
+            'service': 'udata',
+            'data': DatasetSearch.serialize(fake_data),
+            'message_type': 'unindex'
+        }
+        producer.send.assert_called_with('dataset', value=expected_value, key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_producer_should_send_a_message_with_payload_if_indexable(self):
         kafka_mock = Mock()
@@ -119,4 +124,9 @@ class IndexingLifecycleTest(APITestCase):
         reindex.run(*as_task_param(fake_data))
         producer = KafkaProducerSingleton.get_instance()
 
-        producer.send.assert_called_with('dataset', DatasetSearch.serialize(fake_data), key=b'61fd30cb29ea95c7bc0e1211')
+        expected_value = {
+            'service': 'udata',
+            'data': DatasetSearch.serialize(fake_data),
+            'message_type': 'index'
+        }
+        producer.send.assert_called_with('dataset', value=expected_value, key=b'61fd30cb29ea95c7bc0e1211')

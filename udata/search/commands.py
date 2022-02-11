@@ -4,7 +4,7 @@ import sys
 import click
 
 from udata.commands import cli
-from udata.search import adapter_catalog, produce
+from udata.search import adapter_catalog, produce, KafkaMessageType
 
 
 log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def index_model(adapter):
 
     for doc in docs:
         try:
-            produce(model, doc['id'], doc)
+            produce(model, doc['id'], KafkaMessageType.REINDEX, doc)
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)
