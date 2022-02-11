@@ -95,6 +95,12 @@ class DatasetSearch(ModelSearchAdapter):
                 'title': resource.title,
                 'schema': resource.schema,
                 'latest': resource.latest
+                'description': resource.description,
+                'filetype': resource.filetype,
+                'type': resource.type,
+                'created_at': resource.created_at,
+                'modified': resource.modified,
+                'published': resource.published
             })
         document.update({'resources': serialized_resources})
 
