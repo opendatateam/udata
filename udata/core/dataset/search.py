@@ -94,7 +94,7 @@ class DatasetSearch(ModelSearchAdapter):
                 'format': resource.format,
                 'title': resource.title,
                 'schema': resource.schema,
-                'latest': resource.latest
+                'latest': resource.latest,
                 'description': resource.description,
                 'filetype': resource.filetype,
                 'type': resource.type,
