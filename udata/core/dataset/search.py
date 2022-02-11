@@ -98,9 +98,10 @@ class DatasetSearch(ModelSearchAdapter):
                 'description': resource.description,
                 'filetype': resource.filetype,
                 'type': resource.type,
-                'created_at': resource.created_at,
-                'modified': resource.modified,
-                'published': resource.published
+                'created_at': to_iso_datetime(resource.created_at),
+                'modified': to_iso_datetime(resource.modified),
+                'published': to_iso_datetime(resource.published),
+                'extras': resource.extras
             })
         document.update({'resources': serialized_resources})
 
