@@ -5,7 +5,7 @@
 {% elif f.type in ('CSRFTokenField', 'HiddenField') %}
 {{ f() }}
 {% elif f.type == 'SubmitField' %}
-<button type="submit" class="btn btn-primary form-submit">{{ submit }}</button>
+<button type="submit" class="fr-btn">{{ submit }}</button>
 {% elif f.type == 'BooleanField' %}
 <div class="fr-checkbox-group">
     {{ f() }}

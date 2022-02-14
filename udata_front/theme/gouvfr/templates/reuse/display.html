@@ -41,7 +41,7 @@
 <section class="reuse-container">
     <header class="reuse-header container">
         {% if reuse.private %}
-        <span class="big tag" title="{{ _('This reuse is private and will not be visible by other users') }}">
+        <span class="fr-tag" title="{{ _('This reuse is private and will not be visible by other users') }}">
             {{ _('Private') }}
         </span>
         {% endif %}
@@ -63,8 +63,18 @@
             <div class="col-auto fr-mt-1v row-inline align-items-end flex-direction-column">
                 {{ follow_btn(reuse) }}
                 {% if can_edit %}
-                <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
-                        href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}">{{ _('Modify reuse') }}</a>
+                    <a
+                        class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
+                        href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}"
+                    >
+                        {{ _('Modify reuse') }}
+                    </a>
+                    <a
+                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-hidden-sm"
+                    href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}"
+                >
+                    {{ _('Modify reuse') }}
+                </a>
                 {% endif %}
             </div>
         </div>
@@ -73,8 +83,11 @@
     <section class="reuse-image hagrid text-align-center">
         <img src="{{ reuse.image|placeholder('reuse') }}" class="mw-100" alt="" />
         <div>
-            <a href="{{ reuse.url }}" rel="nofollow"
-            class="btn-secondary btn-secondary-blue-400 fr-fi-eye-line fr-btn--icon-left fr-mt-4w">
+            <a
+                href="{{ reuse.url }}"
+                rel="nofollow"
+                class="fr-btn fr-btn--secondary fr-fi-eye-line fr-btn--icon-left fr-mt-4w"
+            >
                 {{ _('See the reuse') }}
             </a>
         </div>
@@ -118,9 +131,9 @@
                 <div id="tab-metadata-panel" class="fr-tabs__panel" role="tabpanel"
                         aria-labelledby="tab-metadata" tabindex="0">
                     {% if reuse.tags %}
-                    <ul class="tags fr-mb-3v">
+                    <ul class="fr-tags-group fr-mb-3v">
                         {% for tag in reuse.tags %}
-                        <li>
+                        <li class="fr-tag">
                             {{ tag|truncate(35, True) }}
                         </li>
                         {% endfor %}
@@ -160,11 +173,11 @@
                     <div class="fr-grid-row fr-grid-row--gutters">
                         <div class="fr-col-12 fr-col-sm-6 vuejs">
                             <h2 class="subtitle">{{ _('Participate') }}</h2>
-                            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 btn-with-arrow"
+                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-arrow-right-s-line fr-btn--icon-right"
                                 href="{{ url_for('admin.index', path='reuse/new/') }}">
                                 {{ _('Add a reuse') }}
                             </a>
-                            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 btn-with-arrow fr-mt-3v"
+                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-arrow-right-s-line fr-btn--icon-right fr-mt-3v"
                                 href="#"
                                 @click.prevent="$bus.emit('discussions.startThread')">
                                 {{ _('Contact the reuser') }}

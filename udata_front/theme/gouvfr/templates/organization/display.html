@@ -63,8 +63,18 @@
         <div class="col-auto fr-mt-1v row-inline align-items-end flex-direction-column">
             {{ follow_btn(org) }}
             {% if can_edit %}
-            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
-                    href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}">{{ _('Modify organization') }}</a>
+                <a
+                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
+                    href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}"
+                >
+                    {{ _('Modify organization') }}
+                </a>
+                <a
+                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-hidden-sm"
+                    href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}"
+                >
+                    {{ _('Modify organization') }}
+                </a>
             {% endif %}
         </div>
     </div>

@@ -50,7 +50,7 @@
     <footer class="fr-py-2w fr-px-3w">
       <template v-if="!closed && !readOnlyEnabled">
         <button
-          class="btn--flex btn-secondary btn-secondary-grey-500 fr-btn fr-btn--secondary fr-btn--icon-right fr-fi-arrow-right-s-line"
+          class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--icon-right fr-fi-arrow-right-s-line"
           v-if="!showForm"
           @click.stop="displayForm"
         >

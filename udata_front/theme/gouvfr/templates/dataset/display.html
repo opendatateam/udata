@@ -46,12 +46,12 @@
 <section
     class="content container fr-mb-6w overflow-visible {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
     {% if dataset.private %}
-    <span class="big tag"
+    <span class="fr-tag"
         title="{{ _('This dataset is private and will not be visible by other users') }}">{{ _('Private') }}
     </span>
     {% endif %}
     {% if dataset.deleted %}
-    <span class="big tag"
+    <span class="fr-tag"
         title="{{ _('This dataset has been deleted. This will be permanent in the next 24 hours') }}">{{ _('Deleted') }}
     </span>
     {% endif %}
@@ -59,7 +59,7 @@
     {% set title = _('This dataset has been archived automatically because it has been deleted from the remote platform.')
         if dataset.extras.get('harvest:archived') == 'not-on-remote' else
         _('This dataset has been archived.') %}
-    <span class="big tag" title="{{ title }}">
+    <span class="fr-tag" title="{{ title }}">
         {{ _('Archived') }}
     </span>
     {% endif %}
@@ -97,8 +97,18 @@
         <div class="col-auto fr-mt-1v row-inline align-items-end flex-direction-column">
             {{ follow_btn(dataset) }}
             {% if can_edit %}
-            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
-                    href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}">{{ _('Modify dataset') }}</a>
+                <a
+                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
+                    href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}"
+                >
+                    {{ _('Modify dataset') }}
+                </a>
+                <a
+                class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-hidden-sm"
+                href="{{ url_for('admin.index', path='dataset/{id}/'.format(id=dataset.id)) }}"
+            >
+                {{ _('Modify dataset') }}
+            </a>
             {% endif %}
         </div>
     </div>
@@ -156,11 +166,14 @@
                 <div id="tab-metadata-panel" class="fr-tabs__panel" role="tabpanel"
                      aria-labelledby="tab-metadata" tabindex="0">
                     {% if dataset.tags %}
-                    <ul class="tags fr-mb-3v">
+                    <ul class="fr-tags-group fr-mb-3v">
                         {% for tag in dataset.tags %}
                         <li>
-                            <a href="{{ url_for('datasets.list', tag=tag) }}"
-                                title="{{ tag }}">
+                            <a
+                                href="{{ url_for('datasets.list', tag=tag) }}"
+                                title="{{ tag }}"
+                                class="fr-tag"
+                            >
                                 {{ tag|truncate(35, True) }}
                             </a>
                         </li>
@@ -245,11 +258,11 @@
                     <div class="fr-grid-row fr-grid-row--gutters">
                         <div class="fr-col-12 fr-col-sm-6 vuejs">
                             <h2 class="subtitle">{{ _('Participate') }}</h2>
-                            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 btn-with-arrow"
+                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-arrow-right-s-line fr-btn--icon-right"
                                 href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}">
                                 {{ _('Add a reuse') }}
                             </a>
-                            <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 btn-with-arrow fr-mt-3v"
+                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-arrow-right-s-line fr-btn--icon-right fr-mt-3v"
                                href="#"
                                @click.prevent="$bus.emit('discussions.startThread')">
                                 {{ _('Contact the producer') }}
@@ -348,7 +361,7 @@
                         {% endwith %}
                     {% endfor %}
                     {% if resources|length > resources_per_page and not show_all_resources %}
-                        <a class="btn btn-secondary accordion-button trigger-once fr-mt-2w" href="?resources=all">
+                        <a class="fr-btn fr-btn--secondary fr-mt-2w" href="?resources=all">
                             {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
                         </a>
                     {% endif %}

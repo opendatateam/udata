@@ -35,7 +35,7 @@
         <div class="tags col-sm-7 col-md-8 col-xs-12">
             {% for tag in topic.tags %}
             <a href="{{ url_for('search.index', tag=tag) }}"
-                class="btn btn-primary btn-grey btn-xs"
+                class="fr-btn btn-grey btn-xs"
                 title="{{ tag }}">
                 {{ tag|truncate(14, True) }}
             </a>

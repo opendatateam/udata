@@ -48,7 +48,7 @@
             <input
               type="submit"
               :value="$t('Submit')"
-              class="btn-secondary btn-secondary-grey-500 fr-btn fr-btn--secondary"
+              class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500"
             />
           </footer>
         </form>

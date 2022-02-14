@@ -34,8 +34,12 @@
                         <strong>Logement et à l'Urbanisme</strong>
                     </a>
                     <div class="row justify-center mt-md">
-                        <a href="{{ url_for('gouvfr.show_page', slug='donnees-cles-par-sujet') }}"
-                            class="btn-secondary btn-with-arrow">{{ _('All featured topics') }}</a>
+                        <a
+                            href="{{ url_for('gouvfr.show_page', slug='donnees-cles-par-sujet') }}"
+                            class="fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
+                        >
+                            {{ _('All featured topics') }}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -47,7 +51,12 @@
                     {% include theme('post/search-result.html') %}
                 </a>
                 <div class="row justify-center">
-                    <a href="{{ url_for('posts.list') }}" class="btn-secondary btn-with-arrow">{{ _('All news') }}</a>
+                    <a
+                        href="{{ url_for('posts.list') }}"
+                        class="fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
+                    >
+                        {{ _('All news') }}
+                    </a>
                 </div>
                 {% endif %}
             </div>

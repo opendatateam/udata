@@ -4,22 +4,17 @@
 
 {% block content %}
 <section class="error">
-    <div class="hagrid py-xl">
-
-        <div class="jumbotron">
-            <h1>
-                {{ _('Error %(code)s', code=error.code) }}
-                <small>{{ title }}</small>
-            </h1>
-            {% block details %}<p class="lead">{{ error.description }}</p>{% endblock %}
-            <p class="text-center">
-                <a class="btn btn-primary btn-lg" role="button" href="{{ url_for('site.home') }}">
-                    <span class="fa fa-home"></span>
-                    {{ _('Home') }}
-                </a>
-            </p>
-        </div>
-
+    <div class="fr-container py-xl">
+        <h1>
+            {{ _('Error %(code)s', code=error.code) }}
+            <small>{{ title }}</small>
+        </h1>
+        {% block details %}<p class="fr-text--lead">{{ error.description }}</p>{% endblock %}
+        <p>
+            <a class="fr-btn" href="{{ url_for('site.home') }}">
+                {{ _('Home') }}
+            </a>
+        </p>
     </div>
 </section>
 {% endblock %}

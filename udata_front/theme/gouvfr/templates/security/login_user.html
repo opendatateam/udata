@@ -36,8 +36,10 @@
                 <h2 class="fr-text--sm fr-mb-3v">
                     {{ _('Don\'t have an account?')}}
                 </h2>
-                <a title="{{ _('Sign up') }}" href="{{ url_for('security.register', next=next_url) }}"
-                    class="fr-btn btn-primary">
+                <a
+                   href="{{ url_for('security.register', next=next_url) }}"
+                   class="fr-btn"
+                >
                     {{ _('Create an account') }}
                 </a>
             </div>

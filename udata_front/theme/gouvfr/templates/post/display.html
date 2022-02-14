@@ -20,19 +20,19 @@
 
 
 {% block main_content %}
-<div class="container py-md">
-    <h1 class="m-0">{{ post.name }}</h1>
+<div class="container fr-py-2w">
+    <h1 class="fr-m-0">{{ post.name }}</h1>
     {% if post.published %}
-    <p class="text-grey-380 fs-xs">
+    <p class="text-grey-380 fr-text--xs fr-mb-1w">
         {{ _('Published on %(date)s',date=post.published|dateformat(format='long')) }}
     </p>
     {% else %}
-    <div class="well well-grey-100 py-sm my-lg">
+    <div class="well well-grey-100 fr-py-3v fr-my-3w">
         {{ _('This post is a draft and will not be visible by other users') }}
     </div>
     {% endif %}
     {% if post.deleted %}
-    <div class="well well-grey-100 py-sm my-lg">
+    <div class="well well-grey-100 fr-py-3v fr-my-3w">
         {{ _('This post has been deleted. This will be permanent in the next 24 hours') }}
     </div>
     {% endif %}
@@ -44,22 +44,22 @@
 </div>
 
 {% if post.image %}
-<div class="hagrid mb-md">
-    <div class="col">
+<div class="hagrid fr-mb-2w">
+    <div class="fr-col">
         <img src="{{ post.image }}" alt="" class="w-100" />
     </div>
 </div>
 {% endif %}
 
-<div class="container markdown pb-lg" v-pre>
+<div class="container markdown fr-pb-3w" v-pre>
     <div>{{ post.content|markdown }}</div>
 </div>
 
 {% if post.datasets %}
-<div class="container mt-md">
+<div class="container fr-mt-2w">
     <h2>{{ _('Datasets') }} <sup>{{ post.datasets|length }}</sup></h2>
-    <div class="row">
-        <div class="col-12">
+    <div class="fr-grid-row">
+        <div class="fr-col-12">
             {% for dataset in post.datasets %}
             <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
                 class="unstyled w-100">{% include theme('dataset/search-result.html') %}
@@ -71,13 +71,16 @@
 {% endif %}
 
 {% if post.reuses %}
-<div class="container mt-md">
+<div class="container fr-mt-2w">
     <h2>{{ _('Reuses') }} <sup>{{ post.reuses|length }}</sup></h2>
-    <ul class="row">
+    <ul class="fr-grid-row fr-grid-row--gutters">
         {% for reuse in post.reuses %}
-        <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
-            <a href="{{ url_for('reuses.show', reuse=reuse) }}"
-                title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
+        <li class="fr-col-lg-3 fr-col-sm-6 fr-col-12 my-sm-sm text-align-center">
+            <a
+                href="{{ url_for('reuses.show', reuse=reuse) }}"
+                title="{{ reuse.title }}"
+            >
+                {% include theme('reuse/card.html') %}
             </a>
         </li>
         {% endfor %}
@@ -86,13 +89,17 @@
 {% endif %}
 
 {% if sysadmin %}
-<div class="container mt-hg">
-    <div class="col-6 col-md-12">
-        <h2 class="fs-xxl">{{ _('Actions') }}</h2>
+<div class="container fr-mt-7w">
+    <div class="fr-col-12 fr-col-md-6">
+        <h2 class="fr-h2">{{ _('Actions') }}</h2>
         <ul class="nav-list">
-            <li class="my-md">
-                <a class="nav-link"
-                    href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}">{{ _('Edit') }}</a>
+            <li class="fr-my-2w">
+                <a
+                    class="nav-link"
+                    href="{{ url_for('admin.index', path='post/{id}/'.format(id=post.id)) }}"
+                >
+                    {{ _('Edit') }}
+                </a>
             </li>
         </ul>
     </div>
@@ -100,28 +107,28 @@
 {% endif %}
 
 {% if previous_post or next_post %}
-<section class="container my-hg py-lg border-top">
-    <div class="row justify-between">
-        <div class="col-3 col-md-12 text-align-center-md">
+<section class="container fr-my-7w fr-py-3w border-top">
+    <div class="fr-grid-row fr-grid-row--gutters justify-between">
+        <div class="fr-col-12 fr-col-md-3 text-align-center-md">
             {% if previous_post %}
             <a
                 href="{{ previous_post.display_url }}"
-                class="btn-secondary btn--flex fr-btn fr-btn--secondary fr-fi-arrow-left-s-line fr-btn--icon-left"
+                class="fr-btn fr-btn--secondary fr-fi-arrow-left-s-line fr-btn--icon-left"
             >
                 {{ _('Previous post') }}
             </a>
             {% endif %}
         </div>
-        <div class="col-6 col-md-12 my-md-md text-align-center">
-            <a href="{{ url_for('posts.list') }}" class="btn btn-secondary">
+        <div class="fr-col-12 fr-col-md-6 fr-my-md-2w text-align-center">
+            <a href="{{ url_for('posts.list') }}" class="fr-btn fr-btn--secondary">
                 {{ _('All posts') }}
             </a>
         </div>
-        <div class="col-3 col-md-12 text-align-right text-align-center-md">
+        <div class="fr-col-12 fr-col-md-3 text-align-right text-align-center-md">
             {% if next_post %}
             <a
                 href="{{ next_post.display_url }}"
-                class="btn-secondary btn--flex fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
+                class="fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
             >
                 {{ _('Next post') }}
             </a>
@@ -132,7 +139,7 @@
 {% endif %}
 
 {% if config['POST_DISCUSSIONS_ENABLED'] %}
-<section class="community_container discussions-section py-hg">
+<section class="community_container discussions-section fr-py-7w">
     <div class="container vuejs">
         <discussion-threads ref="discussions" subject-id="{{ post.id }}"
             subject-class="{{ post.__class__.__name__ }}" />

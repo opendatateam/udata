@@ -70,7 +70,7 @@
           class="fr-col-2 fr-col-lg-1 fr-displayed-md text-align-center text-align-right-lg"
         >
           <button
-            class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-200 text-grey-380 fr-px-2w"
+            class="fr-btn fr-btn--secondary fr-btn--secondary-grey-200 text-grey-380 fr-px-2w"
             @click="extendedForm = !extendedForm"
             data-cy="extend-form"
           >
@@ -113,7 +113,7 @@
     </div>
     <div class="fr-my-9v text-align-center fr-hidden-md">
       <button
-        class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-400"
+        class="fr-btn fr-btn--secondary fr-btn--secondary-grey-400"
         @click="extendedForm = !extendedForm"
         >{{ $t("Submit") }}</button>
     </div>

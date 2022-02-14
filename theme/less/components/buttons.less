@@ -5,67 +5,48 @@ category: Components
 ---
 
 ## Primary buttons
-The `.btn` classes are designed to be used with the `<button>` element.
-
+The `.fr-btn` classes are designed to be used with the `<button>` element.
 However, you can also use these classes on `<a>` or `<input>` elements (though some browsers may apply a slightly different rendering).
-When using button classes on `<a>` elements that are used to trigger in-page functionality (like collapsing content), rather than linking to new pages or sections within the current page, these links should be given a `role="button"` to appropriately convey their purpose to assistive technologies such as screen readers.
 
-Primary buttons exist for every color in this UI-kit. Please refer to the [colors page](/#colors) to see available text and background colors.
+When using button classes on elements that are used to trigger in-page functionality (like collapsing content), use a `<button>`.
 
-*Some of them are unusable due to the low contrast they offer.*
+`.fr-btn` exists only in @blue-400.
 
 ```buttons-primary.html
-<p><a href="#" role="button" class="btn-primary">Default button</a></p>
+<p><button class="fr-btn">Default button</button></p>
 ```
 
 ## Secondary buttons
-As for primary buttons, secondary buttons exist in every color available.
+Secondary buttons exist in every color available.
 
 ```buttons-secondary.html
-<p><a href="#" role="button" class="btn-secondary">Default button</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-white">btn-secondary-white</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-100">btn-secondary-blue-100</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-300">btn-secondary-blue-300</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-400">btn-secondary-blue-400</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-blue-500">btn-secondary-blue-500</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-orange-100">btn-secondary-orange-100</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-50">btn-secondary-grey-50</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-100">btn-secondary-grey-100</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-200">btn-secondary-grey-200</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-300">btn-secondary-grey-300</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-380">btn-secondary-grey-380</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-400">btn-secondary-grey-400</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-grey-500">btn-secondary-grey-500</a></p>
-<p><a href="#" role="button" class="btn-secondary btn-secondary-green-400">btn-secondary-green-400</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary">Default button</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-white">fr-btn--secondary-white</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-blue-100">fr-btn--secondary-blue-100</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-blue-300">fr-btn--secondary-blue-300</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-blue-400">fr-btn--secondary-blue-400</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-blue-500">fr-btn--secondary-blue-500</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-grey-50">fr-btn--secondary-grey-50</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-grey-100">fr-btn--secondary-grey-100</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-grey-200">fr-btn--secondary-grey-200</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-grey-300">fr-btn--secondary-grey-300</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-grey-380">fr-btn--secondary-grey-380</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-grey-400">fr-btn--secondary-grey-400</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500">fr-btn--secondary-grey-500</a></p>
+<p><a href="#" role="button" class="fr-btn fr-btn--secondary fr-btn--secondary-green-400">fr-btn--secondary-green-400</a></p>
 ```
 
-## Arrows
+## Buttons with icons
+You can use icons from DSFR. You can find the list on [DSFR documentation](https://gouvfr.atlassian.net/wiki/spaces/DB/pages/222331396/Ic+nes+-+Icons) with their classes.
+There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around the icon.
 
-Secondary buttons can come with arrows after the content to denote links.
-Simply add the `btn-with-arrow` class to your secondary button and all the magic will be done for you.
-
-
-```button-arrow.html
-<a href="#" class="btn-secondary btn-with-arrow">Toutes les actualités</a>
-```
-
-## Active state
-Buttons will appear pressed (with a lighter background, darker border, and inset shadow) when active. There’s no need to add a class to `<button>s` as they use a pseudo-class. However, you can still force the same active appearance with `.active` (and include the `aria-pressed="true"` attribute) should you need to replicate the state programmatically.
-
-```buttons-active.html
-<p><a href="#" role="button" class="btn-primary active">Primary button</a></p>
-<p><a href="#" role="button" class="btn-secondary active">Secondary button</a></p>
-```
-
-## Disabled state
-Make buttons look inactive by adding the disabled boolean attribute to any `<button>` element.
-
-`<a>`s don’t support the disabled attribute, so you must add the `.disabled` class to make it visually appear disabled.
-Disabled buttons should include the `aria-disabled="true"` attribute to indicate the state of the element to assistive technologies.
-
-```buttons-disabled.html
-<p><a href="#" role="button" class="btn-primary disabled">Primary button</a></p>
-<p><a href="#" role="button" class="btn-secondary disabled">Secondary button</a></p>
+```button-icons-dsfr.html
+<a
+    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--icon-left fr-fi-edit-line"
+    href="#"
+>
+    Modify information
+</a>
 ```
 
 ## *Venti* buttons
@@ -96,123 +77,34 @@ Because of technical limitations, this styleguide hardcodes the svg icon. When u
 
 ## Tab buttons
 These are now removed, see tags instead.
-
-## From DSFR
-
-You can use icons from DSFR. You can find the list on [DSFR documentation](https://gouvfr.atlassian.net/wiki/spaces/DB/pages/222331396/Ic+nes+-+Icons) with their classes.
-There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around the icon.
-
-```button-icons-dsfr.html
-<a
-    class="btn-secondary btn-secondary-grey-500 fr-btn--icon-left fr-fi-edit-line"
-    href="#"
->
-    Modify information
-</a>
-```
 */
 
 @import (less) "@gouvfr/dsfr/dist/component/button/button.css";
-.btn {
-    display: inline-block;
-    appearance: none;
-    padding: @spacing-xs 1.25rem;
+
+// Data.gouv customization
+.fr-btn {
     font-size: @font-size-sm;
-    line-height: @line-height-sm;
-    letter-spacing: 0.025em;
-    text-decoration: none;
+    --background-action-high-blue-france: @blue-400;
+    --background-action-high-blue-france-blend: @blue-400-blend;
     border-radius: 3em;
-    border: none;
-    cursor: pointer;
-
-    &:disabled,
-    &.disabled {
-        opacity: 0.6;
-        pointer-events: none;
+    &:hover {
+        text-decoration: none;
     }
 }
 
-
-.btn-primary {
-    .btn;
-    color: @white;
-    background-color: @blue-400;
-    &:active,
-    &:hover,
-    &.active {
-        --blend: @blue-400-blend;
-    }
-}
-
-.btn-secondary {
-    .btn;
-
-    color: @blue-400;
-    border: 1px solid transparent;
-    border-color: @blue-400;
+.fr-btn--secondary {
+    --text-action-high-blue-france: @blue-400;
     --border-action-high-blue-france: @blue-400;
-
-    background: none;
-
-    &:active,
-    &:hover,
-    &.active {
-        text-decoration: underline;
-    }
-
-    each(@colors, {
-        &.btn-secondary-@{value} {
-            @contrast: 'contrast-@{value}';
-            border-color: @@value;
-            color: @@value;
-            --border-action-high-blue-france: @@value;
-        }
-    });
-
-    &.fr-btn--secondary {
-        :root:not([data-fr-theme="dark"]) & {
-            --color-hover: transparent;
-        }
-        border: none;
-    }
-
-    // inline-flex is DSFR default and is required for right icons to work
-    &.btn--flex {
-        display: inline-flex;
-    }
-
-    &.fr-btn--sm {
-        .fr-btn--sm;
-    }
-
-    &.btn-with-arrow {
-        &:after {
-            content: " ";
-            position: relative;
-            display: inline-block;
-            vertical-align: middle;
-
-            margin-left: 8px;
-            left: 0;
-
-            width: 6px;
-            height: @line-height-sm;
-
-            background-color: currentColor;
-            mask-image: url(@icon-chevron);
-            mask-repeat: no-repeat;
-            mask-position: center center;
-
-            transition: left ease 0.2s;
-        }
-
-        &:hover {
-            &:after {
-                left: @spacing-xxs;
-            }
-        }
-    }
 }
+
+each(@colors, {
+    .fr-btn--secondary-@{value} {
+        @contrast: 'contrast-@{value}';
+        border-color: @@value;
+        color: @@value;
+        --border-action-high-blue-france: @@value;
+    }
+});
 
 // Bottoni molto grandi 🤏
 .btn-venti {
