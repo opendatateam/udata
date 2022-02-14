@@ -39,6 +39,9 @@ resources_parser.add_argument(
 resources_parser.add_argument(
     'type', type=str, location='args',
     help='The type of resources to fetch')
+resources_parser.add_argument(
+    'q', type=str, location='args',
+    help='query string to search through resources titles')
 
 common_doc = {
     'params': {'dataset': 'The dataset ID or slug'}
@@ -149,12 +152,17 @@ class ResourcesAPI(API):
         page_size = args['page_size']
         next_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}"
         previous_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}"
+        res = dataset.resources
+
         if args['type']:
-            res = [elem for elem in dataset.resources if elem['type'] == args['type']]
+            res = [elem for elem in res if elem['type'] == args['type']]
             next_page += f"&type={args['type']}"
             previous_page += f"&type={args['type']}"
-        else:
-            res = dataset.resources
+
+        if args['q']:
+            res = [elem for elem in res if args['q'].lower() in elem['title'].lower()]
+            next_page += f"&q={args['q']}"
+            previous_page += f"&q={args['q']}"
 
         if page > 1:
             offset = page_size * (page - 1)
