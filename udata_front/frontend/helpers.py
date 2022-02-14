@@ -9,14 +9,18 @@ from urllib.parse import urlsplit, urlunsplit
 
 from babel.numbers import format_decimal
 from flask import g, url_for, request, current_app, json
+from flask_restplus import marshal
 from jinja2 import Markup, contextfilter
 from werkzeug import url_decode, url_encode
 
 from . import front
 
 from udata import assets
+from udata.core.dataset.api_fields import dataset_fields
+from udata.core.dataset.models import Dataset
 from udata.models import db
 from udata.i18n import format_date, _, pgettext, get_current_locale
+from udata.search.result import SearchResult
 from udata.utils import camel_to_lodash
 from udata_front.theme import theme_static_with_version
 
@@ -118,9 +122,9 @@ def in_url(*args, **kwargs):
     scheme, netloc, path, query, fragments = urlsplit(request.url)
     params = url_decode(query)
     return (
-        all(arg in params for arg in args) and
-        all(key in params and params[key] == value
-            for key, value in kwargs.items())
+            all(arg in params for arg in args) and
+            all(key in params and params[key] == value
+                for key, value in kwargs.items())
     )
 
 
@@ -390,6 +394,22 @@ def to_json(data):
     return json.dumps(data)
 
 
+def is_results_of_type(search_results, result_type):
+    return isinstance(search_results, SearchResult) and all(
+        isinstance(dataset, result_type) for dataset in search_results)
+
+
+@front.app_template_filter()
+def to_api_format(data):
+    if is_results_of_type(data, Dataset):
+        return [to_dataset_api_format(d) for d in data]
+    return list(data)
+
+
+def to_dataset_api_format(dataset):
+    return marshal(dataset, dataset_fields)
+
+
 @front.app_template_filter()
 @front.app_template_global()
 def format_number(number):
@@ -411,7 +431,7 @@ def filesize(value):
 def json_ld_script_preprocessor(o):
     if isinstance(o, dict):
         return {k: json_ld_script_preprocessor(v) for k, v in o.items()}
-    elif isinstance(o,  (list, tuple)):
+    elif isinstance(o, (list, tuple)):
         return [json_ld_script_preprocessor(v) for v in o]
     elif isinstance(o, str):
         return html.escape(o).replace('&#x27;', '&apos;')

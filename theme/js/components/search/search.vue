@@ -16,7 +16,7 @@
   </div>
   <div class="row-inline fr-mt-3v justify-between align-items-center">
     <h1 class="fr-m-0 fr-h4">
-      {{ $t("Datasets") }}<sup>{{ totalResults || 0 }}</sup>
+      {{ $t("Datasets") }}<sup>{{ totalResults }}</sup>
     </h1>
     <a :href="reuseUrl" title="" class="nav-link fr-text--sm fr-mb-0 fr-displayed-md fr-mt-3v">
       {{ $t("Search reuses") }}
@@ -128,9 +128,9 @@
       </i18n-t>
     </span>
   </section>
-  <section class="search-results fr-mt-1w fr-mt-md-3w">
+  <section class="search-results fr-mt-1w fr-mt-md-3w" ref="results" v-bind="$attrs">
     <transition mode="out-in">
-      <div v-if="loading">
+      <div v-if="loading || (disableFirstSearch && !results.length)">
         <Loader />
       </div>
       <ul v-else-if="results.length">
@@ -148,9 +148,9 @@
         <Pagination
           v-if="totalResults > pageSize"
           :page="currentPage"
-          :page-size="pageSize"
-          :total-results="totalResults"
-          :change-page="changePage"
+          :pageSize="pageSize"
+          :totalResults="totalResults"
+          :changePage="changePage"
           class="fr-mt-2w"
         />
       </ul>
@@ -179,7 +179,7 @@ import Dataset from "../dataset/search-result";
 import Loader from "../dataset/loader";
 import Empty from "./empty";
 import Pagination from "../pagination/pagination";
-import { generateCancelToken } from "../../plugins/api";
+import {generateCancelToken} from "../../plugins/api";
 import filterIcon from "svg/filter.svg";
 import axios from "axios";
 import queryString from "query-string";
@@ -194,9 +194,13 @@ export default {
     Loader,
     Pagination,
   },
+  props: {
+    disableFirstSearch: {
+      type: Boolean,
+      default: false,
+    },
+  },
   created() {
-    this.filterIcon = filterIcon;
-
     // Update search params from URL on page load for deep linking
     const url = new URL(window.location);
     let searchParams = queryString.parse(url.search);
@@ -210,7 +214,15 @@ export default {
     }
     // set all other search params as facets
     this.facets = searchParams;
-    this.search();
+    if(!this.disableFirstSearch) {
+      this.search();
+    }
+  },
+  mounted() {
+    if(this.disableFirstSearch) {
+      this.results = JSON.parse(this.$refs.results.dataset.results);
+      this.totalResults = JSON.parse(this.$refs.results.dataset.totalResults);
+    }
   },
   watch: {
     paramUrl: {
@@ -218,8 +230,7 @@ export default {
       handler(val) {
         // Update URL to match current search params value for deep linking
         let url = new URL(window.location);
-        const searchParams = queryString.stringify(val, { skipNull: true });
-        url.search = searchParams;
+        url.search = queryString.stringify(val, {skipNull: true});
         history.pushState(null, "", url);
       },
     },
@@ -236,6 +247,7 @@ export default {
       queryString: "",
       facets: {},
       rechercherBetaPath: "https://rechercher.etalab.studio/",
+      filterIcon,
     };
   },
   computed: {

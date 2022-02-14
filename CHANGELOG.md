@@ -10,6 +10,7 @@
   - `.btn`, `.btn-secondary` and `.btn-secondary` are removed. Use DSFR and `.fr-btn--secondary-{color}` instead.
   - `.tags` and `.tag` are removed. Use DSFR ones instead.
   - `.dropdown` is removed. Use DSFR select instead.
+- Fix duplicate request on dataset search [#70](https://github.com/etalab/udata-front/pull/70)
 
 ## 1.2.3 (2022-01-27)
 

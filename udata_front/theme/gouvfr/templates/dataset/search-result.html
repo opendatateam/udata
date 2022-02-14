@@ -3,8 +3,11 @@
 <article class="dataset-card dataset-search-result py-xs">
     {% if dataset.organization %}
     <div class="card-logo">
-        <img alt="{{ dataset.organization.name|placeholder_alt(dataset.organization.logo) }}"
-            src="{{ dataset.organization.logo(80)|placeholder('organization') }}"/>
+        <img
+            alt="{{ dataset.organization.name|placeholder_alt(dataset.organization.logo) }}"
+            src="{{ dataset.organization.logo(80)|placeholder('organization') }}"
+            loading="lazy"
+        />
         <div class="logo-badge">
             {% if dataset.private %}
             {% include theme('svg/private.svg') %}
@@ -15,12 +18,17 @@
     </div>
     {% elif dataset.owner %}
     <div class="card-logo">
-        <img alt="{{ dataset.owner.fullname|placeholder_alt(dataset.owner.avatar)}}" src="{{ dataset.owner.avatar(70)|placeholder('user') }}" width="70"
-            height="70"/>
+        <img
+            alt="{{ dataset.owner.fullname|placeholder_alt(dataset.owner.avatar)}}"
+            src="{{ dataset.owner.avatar(70)|placeholder('user') }}"
+            width="70"
+            height="70"
+            loading="lazy"
+        />
     </div>
     {% else %}
     <div class="card-logo">
-        <img src="{{ ''|placeholder('organization') }}" alt=""/>
+        <img src="{{ ''|placeholder('organization') }}" alt="" loading="lazy" />
     </div>
     {% endif %}
     <div class="card-data">

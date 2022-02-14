@@ -23,8 +23,16 @@
 {% set bundle = 'search' %}
 
 {% block main_content %}
-<section class="container search py-lg vuejs">
-    <Search>
+<section
+    class="container search py-lg vuejs"
+>
+    <Search
+        :disable-first-search="true"
+        data-total-results="{{datasets.total}}"
+        data-results="{{ datasets|to_api_format|to_json }}"
+    >
+    </Search>
+    <noscript>
         <div class="pt-sm search-input">
             <form method="GET" class="row-inline fs-lg">
                 <span class="icon active">{% include theme("svg/search.svg") %}</span>
@@ -46,6 +54,6 @@
             {% endfor %}
         </ul>
         {{ paginator(datasets) }}
-    </Search>
+    </noscript>
 </section>
 {% endblock %}

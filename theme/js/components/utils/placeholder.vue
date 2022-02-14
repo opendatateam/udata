@@ -18,7 +18,7 @@ Sometimes you don't need an image but a `<div>` with a background-image property
     v-bind="$attrs"
     :style="{ backgroundImage: `url('${path}')` }"
   />
-  <img :src="path" :alt="alternativeTextForDefinedImageOnly" v-bind="$attrs" v-else />
+  <img loading="lazy" :src="path" :alt="alternativeTextForDefinedImageOnly" v-bind="$attrs" v-else />
 </template>
 
 <script>
