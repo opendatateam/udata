@@ -3,6 +3,7 @@
 {% from theme('macros/integrate.html') import integrate_btn with context %}
 {% from theme('macros/paginator.html') import paginator with context %}
 {% from theme('macros/breadcrumb.html') import breadcrumb with context %}
+{% from theme('macros/banner_info.html') import banner_info %}
 
 ## FIXME: remove inspire:indentifier robots condition when geo.data.gouv.fr is shutdown
 {% set meta = {
@@ -70,11 +71,11 @@
         This platform is not actively maintained and as a result, you may find some bogus data or metadata.
         More information about <a href='{blog_link}'>the shutdown of geo.data.gouv.fr is available here.</a>").format(
             geo_link='https://geo.data.gouv.fr',
-            blog_link='https://www.data.gouv.fr/fr/posts/extinction-de-geo-data-gouv-fr/',
+            blog_link='https://www.data.gouv.fr/fr/posts/extinction-de-geo-data-gouv-fr/'
         )}}
     </div>
     {% endif %}
-    <div class="row fr-mb-4w">
+    <div class="row fr-mb-2w">
         <div class="col">
             <h1 class="fr-mb-0 fr-h1">
                 {{ dataset.title }}
@@ -112,6 +113,13 @@
             {% endif %}
         </div>
     </div>
+    {% if external_source %}
+        {{ banner_info(
+            "fr-fi-external-link-line",
+            _("This dataset come from an external portal.&nbsp;<a href='{external_source}'>View the original source.</a>")
+            .format(external_source=external_source)
+        )}}
+    {% endif %}
     {% if dataset.owner %}
     <div class="row">
         <div class="well well-grey-100 col fr-py-3v">
