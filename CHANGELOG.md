@@ -12,6 +12,7 @@
   - `.dropdown` is removed. Use DSFR select instead.
 - Fix duplicate request on dataset search [#70](https://github.com/etalab/udata-front/pull/70)
 - Add banner for harvested dataset [#73](https://github.com/etalab/udata-front/pull/73)
+- Change github footer link to the tickets repository [#80](https://github.com/etalab/udata-front/pull/80)
 
 ## 1.2.3 (2022-01-27)
 
