@@ -112,7 +112,10 @@ class IndexingLifecycleTest(APITestCase):
         expected_value = {
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
-            'message_type': 'unindex'
+            'meta': {
+                'message_type': 'unindex',
+                'index': 'dataset'
+            }
         }
         producer.send.assert_called_with('dataset', value=expected_value, key=b'61fd30cb29ea95c7bc0e1211')
 
@@ -127,6 +130,9 @@ class IndexingLifecycleTest(APITestCase):
         expected_value = {
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
-            'message_type': 'index'
+            'meta': {
+                'message_type': 'index',
+                'index': 'dataset'
+            }
         }
         producer.send.assert_called_with('dataset', value=expected_value, key=b'61fd30cb29ea95c7bc0e1211')
