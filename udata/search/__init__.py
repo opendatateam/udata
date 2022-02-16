@@ -34,15 +34,10 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(model, id, message_type, document=None):
+def produce(model, id, message_type, document=None, index=None):
     '''Produce message with marshalled document'''
     producer = KafkaProducerSingleton.get_instance()
     key = id.encode("utf-8")
-    value = {
-        'service': 'udata',
-        'data': document,
-        'message_type': message_type.value
-    }
     if model == Dataset:
         topic = 'dataset'
     if model == Organization:
@@ -51,6 +46,17 @@ def produce(model, id, message_type, document=None):
         topic = 'reuse'
     if not topic:
         return
+
+    if not index:
+        index = topic
+    value = {
+        'service': 'udata',
+        'data': document,
+        'meta': {
+            'message_type': message_type.value,
+            'index': index
+        }
+    }
 
     producer.send(topic, value=value, key=key)
     producer.flush()
