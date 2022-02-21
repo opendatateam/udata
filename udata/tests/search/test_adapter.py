@@ -1,3 +1,4 @@
+import datetime
 import pytest
 
 from flask_restplus import inputs
@@ -8,6 +9,7 @@ from udata import search
 from udata.i18n import gettext as _
 from udata.utils import clean_string
 from udata.search import KafkaProducerSingleton, reindex, as_task_param
+from udata.search.commands import index_model
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
 from udata.tests.api import APITestCase
@@ -117,7 +119,8 @@ class IndexingLifecycleTest(APITestCase):
                 'index': 'dataset'
             }
         }
-        producer.send.assert_called_with('dataset', value=expected_value, key=b'61fd30cb29ea95c7bc0e1211')
+        producer.send.assert_called_with('dataset', value=expected_value,
+                                         key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_producer_should_send_a_message_with_payload_if_indexable(self):
         kafka_mock = Mock()
@@ -135,4 +138,69 @@ class IndexingLifecycleTest(APITestCase):
                 'index': 'dataset'
             }
         }
-        producer.send.assert_called_with('dataset', value=expected_value, key=b'61fd30cb29ea95c7bc0e1211')
+        producer.send.assert_called_with('dataset', value=expected_value,
+                                         key=b'61fd30cb29ea95c7bc0e1211')
+
+    def test_index_model(self):
+        kafka_mock = Mock()
+        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+
+        producer = KafkaProducerSingleton.get_instance()
+
+        index_model(DatasetSearch, index_suffix_name=None, reindex=False, from_datetime=None)
+
+        expected_value = {
+            'service': 'udata',
+            'data': DatasetSearch.serialize(fake_data),
+            'meta': {
+                'message_type': 'index',
+                'index': 'dataset'
+            }
+        }
+        producer.send.assert_called_with('dataset', value=expected_value,
+                                         key=b'61fd30cb29ea95c7bc0e1211')
+
+    def test_reindex_model(self):
+        kafka_mock = Mock()
+        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
+
+        producer = KafkaProducerSingleton.get_instance()
+
+        index_model(DatasetSearch, index_suffix_name='-2022-02-20', reindex=True, from_datetime=None)
+
+        expected_value = {
+            'service': 'udata',
+            'data': DatasetSearch.serialize(fake_data),
+            'meta': {
+                'message_type': 'reindex',
+                'index': 'dataset-2022-02-20'
+            }
+        }
+        producer.send.assert_called_with('dataset', value=expected_value,
+                                         key=b'61fd30cb29ea95c7bc0e1211')
+
+    def test_index_model_from_datetime(self):
+        kafka_mock = Mock()
+        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211', last_modified=datetime.datetime(2020, 1, 1))
+        fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1212', last_modified = datetime.datetime(2022, 1, 1))
+
+        producer = KafkaProducerSingleton.get_instance()
+
+        index_model(DatasetSearch, from_datetime=datetime.datetime(2023, 1, 1))
+        producer.send.assert_not_called()
+
+        index_model(DatasetSearch, from_datetime=datetime.datetime(2021, 1, 1))
+
+        expected_value = {
+            'service': 'udata',
+            'data': DatasetSearch.serialize(fake_data),
+            'meta': {
+                'message_type': 'index',
+                'index': 'dataset'
+            }
+        }
+        producer.send.assert_called_with('dataset', value=expected_value,
+                                         key=b'61fd30cb29ea95c7bc0e1212')

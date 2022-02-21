@@ -32,7 +32,7 @@ def iter_adapters():
 
 
 def iter_qs(qs, adapter):
-    '''Safely iterate over a DB QuerySet yielding ES documents'''
+    '''Safely iterate over a DB QuerySet yielding a tuple (indexability, serialized documents)'''
     for obj in qs.no_cache().timeout(False):
         indexable = adapter.is_indexable(obj)
         try:
@@ -41,11 +41,11 @@ def iter_qs(qs, adapter):
         except Exception as e:
             model = adapter.model.__name__
             log.error('Unable to index %s "%s": %s', model, str(obj.id),
-                        str(e), exc_info=True)
+                      str(e), exc_info=True)
 
 
 def index_model(adapter, index_suffix_name=None, reindex=False, from_datetime=None):
-    ''' Indel all objects given a model'''
+    '''Index or unindex all objects given a model'''
     model = adapter.model
     log.info('Indexing %s objects', model.__name__)
     qs = model.objects
@@ -99,7 +99,7 @@ def index(models=None, reindex=True, from_datetime=None):
     Models to reindex can optionally be specified as arguments.
     If not, all models are reindexed.
 
-    If reindex is true, indexation will be made on a new index.
+    If reindex is true, indexation will be made on a new index and unindexable documents ignored.
 
     If from_datetime is specified, only models modified since this datetime will be indexed.
     '''
