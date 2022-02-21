@@ -22,7 +22,7 @@ TIMESTAMP_FORMAT = '%Y-%m-%d-%H-%M'
 
 def default_index_suffix_name(now):
     '''Build a time based index suffix name'''
-    return '-' + now.strftime(TIMESTAMP_FORMAT)
+    return now.strftime(TIMESTAMP_FORMAT)
 
 
 def iter_adapters():
@@ -44,7 +44,7 @@ def iter_qs(qs, adapter):
                       str(e), exc_info=True)
 
 
-def index_model(adapter, index_suffix_name=None, reindex=False, from_datetime=None):
+def index_model(adapter, start, reindex=False, from_datetime=None):
     '''Index or unindex all objects given a model'''
     model = adapter.model
     log.info('Indexing %s objects', model.__name__)
@@ -52,8 +52,8 @@ def index_model(adapter, index_suffix_name=None, reindex=False, from_datetime=No
     if from_datetime:
         qs = qs.filter(last_modified__gte=from_datetime)
     index_name = adapter.model.__name__.lower()
-    if index_suffix_name:
-        index_name += index_suffix_name
+    if reindex:
+        index_name += '-' + default_index_suffix_name(start)
 
     docs = iter_qs(qs, adapter)
     for indexable, doc in docs:
@@ -68,11 +68,12 @@ def index_model(adapter, index_suffix_name=None, reindex=False, from_datetime=No
                       str(e), exc_info=True)
 
 
-def finalize_reindex(models, index_suffix_name, start):
+def finalize_reindex(models, start):
+    models_str = " " + " ".join(models) if models else ""
     log.warning(
         f'In order to use the newly created index, you should set the alias '
         f'on the search service. Ex on `udata-search-service`, run:\n'
-        f'`flask set-alias {index_suffix_name.lstrip("-")}`'
+        f'`flask set-alias {default_index_suffix_name(start)}{models_str}`'
     )
 
     modified_since_reindex = 0
@@ -84,7 +85,7 @@ def finalize_reindex(models, index_suffix_name, start):
         f'{modified_since_reindex} documents have been modified since reindexation start. '
         f'After having set the appropriate alias, you can index last changes since the '
         f'beginning of the indexation. Example, you can run:\n'
-        f'`time udata search index -r false -f {index_suffix_name.lstrip("-")}`'
+        f'`time udata search index -r false -f {default_index_suffix_name(start)}`'
     )
 
 
@@ -105,7 +106,6 @@ def index(models=None, reindex=True, from_datetime=None):
     '''
 
     start = datetime.now()
-    index_suffix_name = default_index_suffix_name(start)
     if from_datetime:
         from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
 
@@ -118,7 +118,7 @@ def index(models=None, reindex=True, from_datetime=None):
 
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            index_model(adapter, index_suffix_name, reindex, from_datetime)
+            index_model(adapter, start, reindex, from_datetime)
 
     if reindex:
-        finalize_reindex(models, index_suffix_name, start)
+        finalize_reindex(models, start)
