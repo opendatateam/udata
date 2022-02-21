@@ -148,7 +148,7 @@ class IndexingLifecycleTest(APITestCase):
 
         producer = KafkaProducerSingleton.get_instance()
 
-        index_model(DatasetSearch, index_suffix_name=None, reindex=False, from_datetime=None)
+        index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
 
         expected_value = {
             'service': 'udata',
@@ -168,14 +168,14 @@ class IndexingLifecycleTest(APITestCase):
 
         producer = KafkaProducerSingleton.get_instance()
 
-        index_model(DatasetSearch, index_suffix_name='-2022-02-20', reindex=True, from_datetime=None)
+        index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
 
         expected_value = {
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'reindex',
-                'index': 'dataset-2022-02-20'
+                'index': 'dataset-2022-02-20-20-02'
             }
         }
         producer.send.assert_called_with('dataset', value=expected_value,
@@ -189,10 +189,10 @@ class IndexingLifecycleTest(APITestCase):
 
         producer = KafkaProducerSingleton.get_instance()
 
-        index_model(DatasetSearch, from_datetime=datetime.datetime(2023, 1, 1))
+        index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
         producer.send.assert_not_called()
 
-        index_model(DatasetSearch, from_datetime=datetime.datetime(2021, 1, 1))
+        index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
 
         expected_value = {
             'service': 'udata',
