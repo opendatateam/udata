@@ -109,8 +109,6 @@
   "Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ": "Les schémas de données permettent de décrire des modèles de données : quels sont les différents champs, comment sont représentées les données, quelles sont les valeurs possibles. Découvrez comment les schémas améliorent la qualité des données et quels sont les cas d'usages possibles sur ",
   "Available": "Disponible",
   "Unavailable": "Indisponible",
-  "Come try out our": "Venez tester notre {dataset_search}.",
-  "new dataset search": "nouvelle recherche de jeux de données",
   "Close": "Fermer",
   "Copy permalink": "Copier le lien vers la discussion",
   "Discussions": "Discussions",
