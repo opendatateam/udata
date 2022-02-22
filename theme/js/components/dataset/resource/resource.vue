@@ -38,7 +38,7 @@
                       <li v-if="resource.preview_url">
                           <button
                             :title="$t('Preview')"
-                            @click.prevent="$showModal('preview', {url: resource.preview_url}, true)"
+                            @click.prevent="$showModal('preview', {url: resource.preview_url, title: resource.title}, true)"
                             v-html="EyeIcon"
                             class="fr-p-0 rounded-circle"
                           >

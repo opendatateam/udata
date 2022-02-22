@@ -14,6 +14,7 @@
 - Add banner for harvested dataset [#73](https://github.com/etalab/udata-front/pull/73)
 - Change github footer link to the tickets repository [#80](https://github.com/etalab/udata-front/pull/80)
 - Remove banner for the new search beta on datasets search page [#83](https://github.com/etalab/udata-front/pull/83)
+- Fix RGAA criterion 7.3 [#82](https://github.com/etalab/udata-front/pull/82)
 
 ## 1.2.3 (2022-01-27)
 
