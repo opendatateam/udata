@@ -76,6 +76,11 @@
                     {{ _('Modify reuse') }}
                 </a>
                 {% endif %}
+                {% if sysadmin %}
+                <div class="fr-mt-0 vuejs">
+                    <featured-button subject-id="{{ reuse.id }}" subject-type="reuse" :featured="{{ reuse.featured|tojson|safe }}"></featured-button>
+                </div>
+                {% endif %}
             </div>
         </div>
     </header>

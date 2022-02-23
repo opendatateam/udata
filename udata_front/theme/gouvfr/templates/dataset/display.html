@@ -111,6 +111,11 @@
                 {{ _('Modify dataset') }}
             </a>
             {% endif %}
+            {% if sysadmin %}
+            <div class="fr-mt-0 vuejs">
+                <featured-button subject-id="{{ dataset.id }}" subject-type="dataset" :featured="{{ dataset.featured|tojson|safe }}"></featured-button>
+            </div>
+            {% endif %}
         </div>
     </div>
     {% if external_source %}

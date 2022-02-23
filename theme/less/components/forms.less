@@ -23,6 +23,7 @@ We can use fieldset if needed to group inputs of the same kind.
 @import (less) "@gouvfr/dsfr/dist/component/checkbox/checkbox.css";
 @import (less) "@gouvfr/dsfr/dist/component/input/input.css";
 @import (less) "@gouvfr/dsfr/dist/component/select/select.css";
+@import (less) "@gouvfr/dsfr/dist/component/toggle/toggle.css";
 .form-container {
     background-color: @white;
     border: 1px solid @grey-100;
@@ -81,4 +82,26 @@ form.form {
 
 .fr-checkbox-group input[type="checkbox"]:checked + label::before {
     --background-active-blue-france: @blue-400;
+}
+
+.fr-toggle {
+    --border-action-high-blue-france: @blue-400;
+    >input[type="checkbox"] {
+        z-index: 200;
+        &:checked {
+            --background-active-blue-france: @blue-400;
+            --background-active-blue-france-blend: @blue-400-blend;
+        }
+    }
+
+    >label::before,
+    >label::after {
+        --text-active-blue-france: @blue-400;
+    }
+
+    @media @query-sm {
+        >label::before {
+            display: none;
+        }
+    }
 }

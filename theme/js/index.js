@@ -3,6 +3,7 @@ import { createApp } from "vue";
 import Threads from "./components/discussions/threads.vue";
 import Suggest from "./components/search/suggest-box";
 import Search from "./components/search/search";
+import FeaturedButton from './components/utils/featured';
 import FollowButton from "./components/utils/follow-button";
 import ReadMore from "./components/utils/read-more";
 import RequestMembership from "./components/organization/request-membership";
@@ -48,6 +49,7 @@ const configAndMountApp = (el) => {
   app.component("suggest", Suggest);
   app.component("search", Search);
   app.component("follow-button", FollowButton);
+  app.component("featured-button", FeaturedButton);
   app.component("read-more", ReadMore);
   app.component("request-membership", RequestMembership);
   app.component("dataset-resources", Resources);

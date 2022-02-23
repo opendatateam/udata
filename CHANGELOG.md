@@ -4,6 +4,7 @@
 
 - Remove topics code [#59](https://github.com/etalab/udata-front/pull/59)
 - Fix `<read-more>` component height when it contains `<img>` [65](https://github.com/etalab/udata-front/pull/65)
+- Add featured button component back for sysadmin [#79](https://github.com/etalab/udata-front/pull/79)
 - Update reuse style [#52](https://github.com/etalab/udata-front/pull/52) [#81](https://github.com/etalab/udata-front/pull/81)
 - Add banner to broken user page [#76](https://github.com/etalab/udata-front/pull/76)
 - :warning: Button changes [#75](https://github.com/etalab/udata-front/pull/75)

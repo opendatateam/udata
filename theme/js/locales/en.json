@@ -115,5 +115,7 @@
   "Error getting search results.": "Error getting search results.",
   "Sort discussions by": "Sort discussions by",
   "Private": "Private",
+  "Unfeature this content": "Unfeature this content",
+  "Feature this content": "Feature this content",
   "Preview of resource X": "Preview of resource {title}"
 }
