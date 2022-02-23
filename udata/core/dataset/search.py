@@ -89,7 +89,7 @@ class DatasetSearch(ModelSearchAdapter):
         serialized_resources = []
         for resource in dataset.resources:
             serialized_resources.append({
-                'id': resource.id,
+                'id': str(resource.id),
                 'url': resource.url,
                 'format': resource.format,
                 'title': resource.title,
