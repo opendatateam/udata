@@ -19,8 +19,8 @@
     {% elif dataset.owner %}
     <div class="card-logo">
         <img
-            alt="{{ dataset.owner.fullname|placeholder_alt(dataset.owner.avatar)}}"
-            src="{{ dataset.owner.avatar(70)|placeholder('user') }}"
+            alt="{{ dataset.owner.fullname }}"
+            src="{{ dataset.owner|avatar_url(70) }}"
             width="70"
             height="70"
             loading="lazy"

@@ -56,7 +56,14 @@
                     <div class="col login-box row-inline justify-end align-items-center">
                         {% if current_user.is_authenticated %}
                         <div class="row-inline align-items-center">
-                            <img src="{{ current_user|avatar_url(24) }}" alt="" class="mr-xs rounded-circle" />
+                            <img
+                                src="{{ current_user|avatar_url(24) }}"
+                                width="24"
+                                height="24"
+                                loading="lazy"
+                                alt=""
+                                class="mr-xs rounded-circle"
+                            />
                             <span>{{ current_user.fullname }} </span>
                         </div>
                         <a href="{{ url_for('admin.index') }}"

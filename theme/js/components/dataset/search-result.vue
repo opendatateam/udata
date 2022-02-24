@@ -15,11 +15,7 @@ Vue. -->
       </div>
     </div>
     <div class="card-logo" v-else-if="owner">
-      <Placeholder
-        type="dataset"
-        :src="owner.logo_thumbnail"
-        :alt="owner.fullname"
-      />
+      <Avatar :user="owner" :size="100" />
     </div>
     <div class="card-logo" v-else>
       <Placeholder type="dataset" />
@@ -71,6 +67,7 @@ import certified from "svg/certified.svg";
 import lock from "svg/private.svg";
 import useOrganizationCertified from "../../composables/useOrganizationCertified";
 import useGeoZone from "../../composables/useGeoZone";
+import Avatar from "../discussions/avatar";
 
 export default {
   props: {
@@ -86,6 +83,7 @@ export default {
     private: Boolean,
   },
   components: {
+    Avatar,
     Placeholder,
   },
   setup(props) {

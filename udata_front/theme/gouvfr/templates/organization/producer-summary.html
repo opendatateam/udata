@@ -12,7 +12,7 @@
         </div>
         {% elif producer_type == 'owner' %}
         <div class="logo">
-            <img class="fr-responsive-img" src="{{ organization.avatar|placeholder('user') }}" alt=""/>
+            <img class="fr-responsive-img" src="{{ organization|avatar_url(150) }}" alt=""/>
         </div>
         {% else %}
         <div class="logo">

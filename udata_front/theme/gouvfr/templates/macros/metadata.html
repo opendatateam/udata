@@ -44,7 +44,7 @@
     data-first_name="{{ current_user.first_name }}"
     data-last_name="{{ current_user.last_name }}"
     data-roles="{{ current_user.roles|join(',') }}"
-    data-avatar="{{ current_user.avatar }}"
+    data-avatar="{{ current_user|avatar_url(150) }}"
 />
 {% endif %}
 

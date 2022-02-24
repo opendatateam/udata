@@ -181,7 +181,7 @@
             </a>
         {% elif item.owner %}
             <a href="{{ item.owner.external_url }}" data-tooltip="{{ _('Uploader') }}">
-                <img src="{{ item.owner.avatar(70, external=True)|placeholder('user', external=True) }}"
+                <img src="{{ item.owner|avatar_url(70, external=True) }}"
                      alt="{{ item.owner.fullname }}"
                      height="70" width="70">
             </a>

@@ -1,25 +1,25 @@
 <template>
   <div class="avatar">
-    <img :src="avatar_url" alt="" />
+    <img :src="avatarUrl" loading="lazy" alt="" />
   </div>
 </template>
 
 <script>
-import config from "../../config";
+import useUserAvatar from "../../composables/useUserAvatar";
 
 export default {
   props: {
     user: Object,
-  },
-  computed: {
-    avatar_url: function () {
-      return this.user.avatar || this.identicon(this.user.id);
+    size: {
+      type: Number,
+      default: 40,
     },
   },
-  methods: {
-    identicon: function (id, size = 40) {
-      return `${config.api_root}avatars/${id}/${size}`;
-    },
+  setup(props) {
+    const avatarUrl = useUserAvatar(props.user, props.size);
+    return {
+      avatarUrl
+    }
   },
 };
 </script>

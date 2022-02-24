@@ -6,7 +6,7 @@ category: Interactions
 
 # Placeholder
 
-A very simple component that takes a `type` (dataset, reuse, post...) and an optionnal `src`. If `src` is defined, it simply displays the image (and all props passed are passed to the image).
+A very simple component that takes a `type` (dataset, reuse, post...) and an optional `src`. If `src` is defined, it simply displays the image (and all props passed are passed to the image).
 However, if `src` is undefined, it falls back to a placeholder. Don't forget to pass the `alt` prop !
 Sometimes you don't need an image but a `<div>` with a background-image property. Simply pass the `backgroundImage` prop and you will get a nice div.
 
@@ -23,10 +23,9 @@ Sometimes you don't need an image but a `<div>` with a background-image property
 
 <script>
 import config from "../../config";
-const static = config.theme_static;
 
 export const placeholderUrl = (src, type) =>
-  src ? src : `${static}img/placeholders/${type}.png`;
+  src ? src : `${config.theme_static}img/placeholders/${type}.png`;
 
 export default {
   props: {
