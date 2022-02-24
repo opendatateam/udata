@@ -1,3 +1,4 @@
+import datetime
 from udata.models import (
     Dataset, Organization, User, GeoZone, License
 )
@@ -83,13 +84,17 @@ class DatasetSearch(ModelSearchAdapter):
             'organization': organization,
             'owner': str(owner.id) if owner else None,
             'format': [r.format.lower() for r in dataset.resources if r.format],
-            'schema': [r.schema.get('name') for r in dataset.resources if r.schema],
-            'extras': dataset.extras
+            'schema': [r.schema.get('name') for r in dataset.resources if r.schema]
         }
+        extras = dataset.extras.copy()
+        for key, value in extras:
+            if isinstance(value, datetime.datetime):
+                value = to_iso_datetime(value)
+        document.update({'extras': extras})
 
         serialized_resources = []
         for resource in dataset.resources:
-            serialized_resources.append({
+            resource_dict = {
                 'id': str(resource.id),
                 'url': resource.url,
                 'format': resource.format,
@@ -101,9 +106,14 @@ class DatasetSearch(ModelSearchAdapter):
                 'type': resource.type,
                 'created_at': to_iso_datetime(resource.created_at),
                 'modified': to_iso_datetime(resource.modified),
-                'published': to_iso_datetime(resource.published),
-                'extras': resource.extras
-            })
+                'published': to_iso_datetime(resource.published)
+            }
+            extras = resource.extras.copy()
+            for key, value in extras:
+                if isinstance(value, datetime.datetime):
+                    value = to_iso_datetime(value)
+            resource_dict.update({'extras': extras})
+            serialized_resources.append(resource_dict)
         document.update({'resources': serialized_resources})
 
         if (dataset.temporal_coverage is not None and

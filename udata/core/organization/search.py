@@ -1,3 +1,4 @@
+import datetime
 from udata import search
 from udata.models import Organization
 from udata.search.fields import Filter
@@ -32,6 +33,10 @@ class OrganizationSearch(search.ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, organization):
+        extras = organization.extras.copy()
+        for key, value in extras:
+            if isinstance(value, datetime.datetime):
+                value = to_iso_datetime(value)
         return {
             'id': str(organization.id),
             'name': organization.name,
@@ -43,5 +48,5 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'orga_sp': 1 if organization.public_service else 0,
             'followers': organization.metrics.get('followers', 0),
             'datasets': organization.metrics.get('datasets', 0),
-            'extras': organization.extras
+            'extras': extras
         }
