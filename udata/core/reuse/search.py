@@ -18,12 +18,10 @@ class ReuseSearch(ModelSearchAdapter):
     search_url = 'reuses/'
 
     sorts = {
-        'title': 'title.raw',
         'created': 'created',
-        'last_modified': 'last_modified',
         'datasets': 'metrics.datasets',
         'followers': 'metrics.followers',
-        'views': 'metrics.views',
+        'views': 'metrics.views'
     }
 
     filters = {
