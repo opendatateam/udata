@@ -14,13 +14,11 @@ class OrganizationSearch(search.ModelSearchAdapter):
     search_url = 'organizations/'
 
     sorts = {
-        'name': 'name.raw',
         'reuses': 'metrics.reuses',
         'datasets': 'metrics.datasets',
         'followers': 'metrics.followers',
         'views': 'metrics.views',
-        'created': 'created',
-        'last_modified': 'last_modified',
+        'created': 'created'
     }
 
     filters = {
@@ -48,5 +46,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
             'orga_sp': 1 if organization.public_service else 0,
             'followers': organization.metrics.get('followers', 0),
             'datasets': organization.metrics.get('datasets', 0),
+            'reuses': organization.metrics.get('reuses', 0),
+            'views': organization.metrics.get('views', 0),
             'extras': extras
         }
