@@ -88,8 +88,7 @@ class DatasetSearch(ModelSearchAdapter):
         }
         extras = dataset.extras.copy()
         for key, value in extras:
-            if isinstance(value, datetime.datetime):
-                value = to_iso_datetime(value)
+            extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
         document.update({'extras': extras})
 
         serialized_resources = []
@@ -110,8 +109,7 @@ class DatasetSearch(ModelSearchAdapter):
             }
             extras = resource.extras.copy()
             for key, value in extras:
-                if isinstance(value, datetime.datetime):
-                    value = to_iso_datetime(value)
+                extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
             resource_dict.update({'extras': extras})
             serialized_resources.append(resource_dict)
         document.update({'resources': serialized_resources})

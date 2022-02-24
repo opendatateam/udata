@@ -1,6 +1,6 @@
 import datetime
 from udata.models import (
-    Reuse, Organization, Dataset, User
+    Reuse, Organization, User
 )
 from udata.search import (
     ModelSearchAdapter, register,
@@ -59,8 +59,7 @@ class ReuseSearch(ModelSearchAdapter):
 
         extras = reuse.extras.copy()
         for key, value in extras:
-            if isinstance(value, datetime.datetime):
-                value = to_iso_datetime(value)
+            extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
 
         return {
             'id': str(reuse.id),
