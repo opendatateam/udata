@@ -55,8 +55,8 @@ class ReuseSearch(ModelSearchAdapter):
         elif reuse.owner:
             owner = User.objects(id=reuse.owner.id).first()
 
-        extras = reuse.extras.copy()
-        for key, value in extras:
+        extras = {}
+        for key, value in reuse.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
 
         return {

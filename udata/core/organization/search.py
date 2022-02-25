@@ -31,8 +31,8 @@ class OrganizationSearch(search.ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, organization):
-        extras = organization.extras.copy()
-        for key, value in extras:
+        extras = {}
+        for key, value in organization.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
         return {
             'id': str(organization.id),
