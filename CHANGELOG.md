@@ -12,7 +12,7 @@
   - `.btn`, `.btn-secondary` and `.btn-secondary` are removed. Use DSFR and `.fr-btn--secondary-{color}` instead.
   - `.tags` and `.tag` are removed. Use DSFR ones instead.
   - `.dropdown` is removed. Use DSFR select instead.
-- Fix duplicate request on dataset search [#70](https://github.com/etalab/udata-front/pull/70)
+- Fix duplicate request on dataset search [#70](https://github.com/etalab/udata-front/pull/70) [86](https://github.com/etalab/udata-front/pull/86)
 - Add banner for harvested dataset [#73](https://github.com/etalab/udata-front/pull/73)
 - Change github footer link to the tickets repository [#80](https://github.com/etalab/udata-front/pull/80)
 - Remove banner for the new search beta on datasets search page [#83](https://github.com/etalab/udata-front/pull/83)
