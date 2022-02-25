@@ -1,10 +1,11 @@
+from datetime import datetime
 import logging
 import sys
 
 import click
 
 from udata.commands import cli
-from udata.search import adapter_catalog, produce
+from udata.search import adapter_catalog, produce, KafkaMessageType
 
 
 log = logging.getLogger(__name__)
@@ -16,6 +17,14 @@ def grp():
     pass
 
 
+TIMESTAMP_FORMAT = '%Y-%m-%d-%H-%M'
+
+
+def default_index_suffix_name(now):
+    '''Build a time based index suffix name'''
+    return now.strftime(TIMESTAMP_FORMAT)
+
+
 def iter_adapters():
     '''Iter over adapter in predictable way'''
     adapters = adapter_catalog.values()
@@ -23,45 +32,83 @@ def iter_adapters():
 
 
 def iter_qs(qs, adapter):
-    '''Safely iterate over a DB QuerySet yielding ES documents'''
+    '''Safely iterate over a DB QuerySet yielding a tuple (indexability, serialized documents)'''
     for obj in qs.no_cache().timeout(False):
-        if adapter.is_indexable(obj):
-            try:
-                doc = adapter.serialize(obj)
-                yield doc
-            except Exception as e:
-                model = adapter.model.__name__
-                log.error('Unable to index %s "%s": %s', model, str(obj.id),
-                          str(e), exc_info=True)
+        indexable = adapter.is_indexable(obj)
+        try:
+            doc = adapter.serialize(obj)
+            yield indexable, doc
+        except Exception as e:
+            model = adapter.model.__name__
+            log.error('Unable to index %s "%s": %s', model, str(obj.id),
+                      str(e), exc_info=True)
 
 
-def index_model(adapter):
-    ''' Indel all objects given a model'''
+def index_model(adapter, start, reindex=False, from_datetime=None):
+    '''Index or unindex all objects given a model'''
     model = adapter.model
     log.info('Indexing %s objects', model.__name__)
     qs = model.objects
-    if hasattr(model.objects, 'visible'):
-        qs = qs.visible()
+    if from_datetime:
+        qs = qs.filter(last_modified__gte=from_datetime)
+    index_name = adapter.model.__name__.lower()
+    if reindex:
+        index_name += '-' + default_index_suffix_name(start)
 
     docs = iter_qs(qs, adapter)
-
-    for doc in docs:
+    for indexable, doc in docs:
         try:
-            produce(model, doc['id'], doc)
+            if indexable:
+                message_type = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
+                produce(model, doc['id'], message_type, doc, index=index_name)
+            if not indexable and not reindex:
+                produce(model, doc['id'], KafkaMessageType.UNINDEX, doc, index=index_name)
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)
 
 
+def finalize_reindex(models, start):
+    models_str = " " + " ".join(models) if models else ""
+    log.warning(
+        f'In order to use the newly created index, you should set the alias '
+        f'on the search service. Ex on `udata-search-service`, run:\n'
+        f'`flask set-alias {default_index_suffix_name(start)}{models_str}`'
+    )
+
+    modified_since_reindex = 0
+    for adapter in iter_adapters():
+        if not models or adapter.model.__name__.lower() in models:
+            modified_since_reindex += adapter.model.objects(last_modified__gte=start).count()
+
+    log.warning(
+        f'{modified_since_reindex} documents have been modified since reindexation start. '
+        f'After having set the appropriate alias, you can index last changes since the '
+        f'beginning of the indexation. Example, you can run:\n'
+        f'`time udata search index -r false -f {default_index_suffix_name(start)}`'
+    )
+
+
 @grp.command()
 @click.argument('models', nargs=-1, metavar='[<model> ...]')
-def index(models=None):
+@click.option('-r', '--reindex', default=True, type=bool)
+@click.option('-f', '--from_datetime', type=str)
+def index(models=None, reindex=True, from_datetime=None):
     '''
     Initialize or rebuild the search index
 
     Models to reindex can optionally be specified as arguments.
     If not, all models are reindexed.
+
+    If reindex is true, indexation will be made on a new index and unindexable documents ignored.
+
+    If from_datetime is specified, only models modified since this datetime will be indexed.
     '''
+
+    start = datetime.now()
+    if from_datetime:
+        from_datetime = datetime.strptime(from_datetime, TIMESTAMP_FORMAT)
+
     doc_types_names = [m.__name__.lower() for m in adapter_catalog.keys()]
     models = [model.lower().rstrip('s') for model in (models or [])]
     for model in models:
@@ -71,4 +118,7 @@ def index(models=None):
 
     for adapter in iter_adapters():
         if not models or adapter.model.__name__.lower() in models:
-            index_model(adapter)
+            index_model(adapter, start, reindex, from_datetime)
+
+    if reindex:
+        finalize_reindex(models, start)
