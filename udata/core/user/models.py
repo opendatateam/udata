@@ -256,6 +256,11 @@ class User(WithMetrics, UserMixin, db.Document):
                                     if member.user != self]
             organization.save()
         for discussion in Discussion.objects(discussion__posted_by=self):
+            # Remove all discussions with current user as only participant
+            if all(message.posted_by == self for message in discussion.discussion):
+                discussion.delete()
+                continue
+
             for message in discussion.discussion:
                 if message.posted_by == self:
                     message.content = 'DELETED'
