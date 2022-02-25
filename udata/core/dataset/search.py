@@ -85,7 +85,7 @@ class DatasetSearch(ModelSearchAdapter):
             'schema': [r.schema.get('name') for r in dataset.resources if r.schema]
         }
         extras = dataset.extras.copy()
-        for key, value in extras:
+        for key, value in extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
         document.update({'extras': extras})
 
