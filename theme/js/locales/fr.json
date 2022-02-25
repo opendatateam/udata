@@ -114,8 +114,8 @@
   "Discussions": "Discussions",
   "Error getting search results.": "Erreur lors de l'obtention des résultats de la recherche.",
   "Sort discussions by": "Trier les discussions par",
-  "Private": "",
-  "Unfeature this content": "",
-  "Feature this content": "",
+  "Private": "Privé",
+  "Unfeature this content": "Ne plus mettre en avant ce contenu",
+  "Feature this content": "Mettre ce contenu en avant",
   "Preview of resource X": "Prévisualisation de la ressource {title}"
 }
