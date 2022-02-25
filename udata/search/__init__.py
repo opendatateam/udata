@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 import logging
 
@@ -14,6 +15,12 @@ log = logging.getLogger(__name__)
 adapter_catalog = {}
 
 
+class KafkaMessageType(Enum):
+    INDEX = 'index'
+    REINDEX = 'reindex'
+    UNINDEX = 'unindex'
+
+
 class KafkaProducerSingleton:
     __instance = None
 
@@ -27,55 +34,60 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(model, id, document=None, delete=False):
+def produce(model, id, message_type, document=None, index=None):
     '''Produce message with marshalled document'''
     producer = KafkaProducerSingleton.get_instance()
     key = id.encode("utf-8")
     if model == Dataset:
-        if delete:
-            producer.send('dataset', key=key)
-        else:
-            producer.send('dataset', document, key=key)
-        producer.flush()
+        topic = 'dataset'
     if model == Organization:
-        if delete:
-            producer.send('organization', key=key)
-        else:
-            producer.send('organization', document, key=key)
-        producer.flush()
+        topic = 'organization'
     if model == Reuse:
-        if delete:
-            producer.send('reuse', key=key)
-        else:
-            producer.send('reuse', document, key=key)
-        producer.flush()
+        topic = 'reuse'
+    if not topic:
+        return
+
+    if not index:
+        index = topic
+    value = {
+        'service': 'udata',
+        'data': document,
+        'meta': {
+            'message_type': message_type.value,
+            'index': index
+        }
+    }
+
+    producer.send(topic, value=value, key=key)
+    producer.flush()
 
 
 @task(route='high.search')
-def reindex(classname, id=None):
+def reindex(classname, id):
     model = db.resolve_model(classname)
     obj = model.objects.get(pk=id)
     adapter_class = adapter_catalog.get(model)
+    document = adapter_class.serialize(obj)
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, str(obj.id), adapter_class.serialize(obj))
+            produce(model, str(obj.id), KafkaMessageType.INDEX, document)
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, str(obj.id), delete=True)
+            produce(model, str(obj.id), KafkaMessageType.UNINDEX, document)
         except Exception:
             log.exception('Unable to desindex %s "%s"', model.__name__, str(obj.id))
 
 
 @task(route='high.search')
-def unindex(classname, id=None):
+def unindex(classname, id):
     model = db.resolve_model(classname)
     log.info('Unindexing %s (%s)', model.__name__, id)
     try:
-        produce(model, id, delete=True)
+        produce(model, id, message=KafkaMessageType.UNINDEX)
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 
