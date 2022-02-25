@@ -30,7 +30,7 @@ function getHeight(elt) {
     parseFloat(style.getPropertyValue('margin-bottom'));
 }
 
-const DEFAULT_HEIGHT = 284
+const DEFAULT_HEIGHT = 284;
 
 export default {
   name: "read-more",
@@ -72,8 +72,8 @@ export default {
       let contentHeight = Array.from(this.$refs.container.children)
       .map(getHeight)
       .reduce((total, height) => total + height, 0)
-      this.readMoreRequired = contentHeight > getHeight(this.$refs.container);
       this.containerHeight = DEFAULT_HEIGHT;
+      this.readMoreRequired = contentHeight > this.containerHeight;
       if(!this.readMoreRequired) {
         this.containerHeight = contentHeight;
       }
