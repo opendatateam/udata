@@ -96,7 +96,7 @@ def capture_mails():
     mail_sent.disconnect(on_mail_sent)
 
 
-REDIRECT_CODES = (301, 302, 303, 305, 307)
+REDIRECT_CODES = (301, 302, 303, 305, 307, 308)
 REDIRECT_MSG = 'HTTP Status {} expected but got {{}}'.format(
     ', '.join(str(code) for code in REDIRECT_CODES)
 )
