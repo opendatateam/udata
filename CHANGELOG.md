@@ -7,6 +7,7 @@
 - Delete discussion with deleted user as only participant [#2702](https://github.com/opendatateam/udata/pull/2702)
 - Fix error on post creation when adding related reuse [#2704](https://github.com/opendatateam/udata/pull/2704)
 - Redirect in endpoints routing now returns 308 instead of 302 in order to keep the method and body. [#2706](https://github.com/opendatateam/udata/pull/2706)
+- Delete badges from datasets fixtures. [2709](https://github.com/opendatateam/udata/pull/2709)
 
 ## 3.3.1 (2022-01-11)
 

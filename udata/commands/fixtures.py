@@ -46,6 +46,7 @@ def generate_fixtures_file(data_source):
             del json_dataset['page']
             del json_dataset['last_update']
             del json_dataset['license']
+            del json_dataset['badges']
             del json_dataset['spatial']
             json_resources = json_dataset.pop('resources')
             for res in json_resources:
