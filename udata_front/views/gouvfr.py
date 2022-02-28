@@ -43,6 +43,12 @@ def redirect_organizations(org):
     return redirect(url_for('organizations.show', org=org))
 
 
+@blueprint.route('/group/<topic>/')
+def redirect_topics(topic):
+    '''Route legacy CKAN topics'''
+    return redirect(url_for('topics.display', topic=topic))
+
+
 def get_pages_gh_urls(slug):
     repo = current_app.config.get('PAGES_GH_REPO_NAME')
     if not repo:

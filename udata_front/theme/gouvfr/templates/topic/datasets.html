@@ -1,0 +1,46 @@
+{% extends theme("topic/display_base.html") %}
+
+{% from theme('macros/paginator.html') import paginator with context %}
+
+{% set meta = {
+    'title': _('%(topic)s datasets', topic=topic.name),
+    'description': _("%(site)s %(topic)s related datasets", site=config['SITE_TITLE'], topic=topic.name),
+    'keywords': [_('search'), _('datasets'), _('topic')] + topic.tags,
+    'robots': 'noindex',
+} %}
+
+{% block breadcrumb %}
+    <li>
+        <a href="{{ url_for('topics.display', topic=topic) }}">
+        {{ topic.name }}
+        </a>
+    </li>
+    <li class="active">
+        {{ _('Datasets') }}
+        <small>{{ _('%(start)s to %(end)s on %(total)s',
+            start=datasets.page_start,
+            end=datasets.page_end,
+            total=datasets.total) }}</small>
+    </li>
+{% endblock %}
+
+{% block main_content %}
+<section class="default">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-lg-9 smaller">
+
+                <ul class="search-results">
+                    {% for dataset in datasets %}
+                    {% include theme('dataset/search-result.html') %}
+                    {% endfor %}
+                </ul>
+
+                <div class="clearfix"></div>
+                {{ paginator(datasets) }}
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

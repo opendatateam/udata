@@ -1,0 +1,25 @@
+{% extends theme("base.html") %}
+{% from theme('macros/breadcrumb.html') import breadcrumb with context %}
+
+{% set meta = {
+    'title': topic.name,
+    'description': topic.description|mdstrip(60)|forceescape,
+    'keywords': [_('topic')] + topic.tags,
+} %}
+
+{% set bundle = 'topic' %}
+
+{% set body_class = 'topic-display' %}
+
+{% block subnav %}
+{% cache cache_duration, 'topic-subnav', topic.id|string, g.lang_code %}
+{% include theme('topic/subnav.html') %}
+{% endcache %}
+{% endblock %}
+
+{% block content %}
+
+{{ breadcrumb(self, toolbar_class='search-toolbar') }}
+{% block main_content %}{% endblock %}
+{% block related %}{% endblock %}
+{% endblock %}

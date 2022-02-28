@@ -453,6 +453,10 @@ class LegacyUrlsTest:
         response = client.get('/en/organization/')
         assert_redirects(response, url_for('organizations.list'))
 
+    def test_redirect_topics(self, client):
+        response = client.get('/en/group/societe/')
+        assert_redirects(response, url_for('topics.display', topic='societe'))
+
 
 class SpecificUrlsTest:
     settings = GouvFrSettings
