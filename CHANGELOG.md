@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
 - Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
 - :warning: API changes [#2669](https://github.com/opendatateam/udata/pull/2669):
   - List endpoints for organizations, datasets, reuses and users are now querying MongoDB instead of ElasticSearch.
@@ -19,6 +20,11 @@
   - Udata uses a Kafka producer to send documents to index to the search service.
   - Udata uses HTTP request to query the search service.
 - Add the `extras` field of Dataset, Reuse and Organization into their corresponding `ModelSearchAdapter` serialize method. [#2703](https://github.com/opendatateam/udata/pull/2703)
+- Add a `q` argument to the paginated datasets resources endpoint, to search through resources titles. [#2701](https://github.com/opendatateam/udata/pull/2701)
+- Delete discussion with deleted user as only participant [#2702](https://github.com/opendatateam/udata/pull/2702)
+- Fix error on post creation when adding related reuse [#2704](https://github.com/opendatateam/udata/pull/2704)
+- Redirect in endpoints routing now returns 308 instead of 302 in order to keep the method and body. [#2706](https://github.com/opendatateam/udata/pull/2706)
+- Delete badges from datasets fixtures. [2709](https://github.com/opendatateam/udata/pull/2709)
 
 ## 3.3.1 (2022-01-11)
 

@@ -209,7 +209,7 @@ def lazy_raise_or_redirect():
             new_args = request.view_args
             new_args[name] = value.arg
             new_url = url_for(request.endpoint, **new_args)
-            return redirect(new_url)
+            return redirect(new_url, code=308)
 
 
 def init_app(app):

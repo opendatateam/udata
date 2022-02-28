@@ -53,7 +53,7 @@ post_fields = api.model('Post', {
     'page': fields.UrlFor(
         'posts.show', lambda o: {'post': o},
         description='The post page URL', readonly=True, fallback_endpoint='api.post'),
-}, mask='*,datasets{title,acronym,uri,page},reuses{title,image,image_thumbnail,uri,page}')
+}, mask='*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}')
 
 post_page_fields = api.model('PostPage', fields.pager(post_fields))
 
