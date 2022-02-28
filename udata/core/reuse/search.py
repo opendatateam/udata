@@ -1,3 +1,4 @@
+import datetime
 from udata.models import (
     Reuse, Organization, User
 )
@@ -54,6 +55,10 @@ class ReuseSearch(ModelSearchAdapter):
         elif reuse.owner:
             owner = User.objects(id=reuse.owner.id).first()
 
+        extras = {}
+        for key, value in reuse.extras.items():
+            extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
+
         return {
             'id': str(reuse.id),
             'title': reuse.title,
@@ -69,5 +74,6 @@ class ReuseSearch(ModelSearchAdapter):
             'type': reuse.type,
             'topic': reuse.topic,
             'tags': reuse.tags,
-            'badges': [badge.kind for badge in reuse.badges]
+            'badges': [badge.kind for badge in reuse.badges],
+            'extras': extras
         }
