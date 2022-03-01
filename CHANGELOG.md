@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 1.2.4 (2022-03-01)
 
 - **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
