@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 3.3.2 (2022-03-01)
 
 - **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
 - Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
