@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 1.2.4 (2022-03-01)
 
 - **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
 - Fix `<read-more>` component height when it contains `<img>` [65](https://github.com/etalab/udata-front/pull/65) [85](https://github.com/etalab/udata-front/pull/85)
