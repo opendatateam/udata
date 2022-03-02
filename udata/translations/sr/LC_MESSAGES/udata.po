@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-01-11 09:51+0100\n"
-"PO-Revision-Date: 2022-03-02 21:11\n"
+"PO-Revision-Date: 2022-03-02 21:29\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: sr\n"
 "Language-Team: Serbian (Cyrillic)\n"
@@ -157,11 +157,11 @@ msgstr "Име шеме \"{schema}\" није дозвољена вреднос�
 
 #: udata/core/dataset/forms.py:50
 msgid "Version \"{version}\" is not an allowed value. Allowed values: {values}"
-msgstr ""
+msgstr "Верзија \"{version}\" није дозвољена. Дозвољене верзије: {values}"
 
 #: udata/core/dataset/forms.py:58
 msgid "Sub-property \"{prop}\" is not allowed value in schema field. Allowed values is : {properties}"
-msgstr ""
+msgstr "Податрибут \"{prop}\" није дозвољен у шеми. Allowed values is : {properties}"
 
 #: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:128
 #: udata/core/discussions/forms.py:12 udata/core/reuse/forms.py:19
@@ -233,7 +233,7 @@ msgstr "Шема"
 
 #: udata/core/dataset/forms.py:101
 msgid "The schema slug the resource adheres to"
-msgstr ""
+msgstr "Ресурс припада токену шеме"
 
 #: udata/core/dataset/forms.py:113
 msgid "Related dataset"
@@ -755,35 +755,35 @@ msgstr "Здравље"
 
 #: udata/core/reuse/models.py:29
 msgid "Transport and mobility"
-msgstr ""
+msgstr "Транспорт и мобилност"
 
 #: udata/core/reuse/models.py:30
 msgid "Housing and development"
-msgstr ""
+msgstr "Становање и развој"
 
 #: udata/core/reuse/models.py:31
 msgid "Food and agriculture"
-msgstr ""
+msgstr "Храна и пољопривреда"
 
 #: udata/core/reuse/models.py:32
 msgid "Culture and recreation"
-msgstr ""
+msgstr "Култура и рекреација"
 
 #: udata/core/reuse/models.py:33
 msgid "Economy and business"
-msgstr ""
+msgstr "Економија и бизнис"
 
 #: udata/core/reuse/models.py:34
 msgid "Environment and energy"
-msgstr ""
+msgstr "Животна средина и енергија"
 
 #: udata/core/reuse/models.py:35
 msgid "Work and training"
-msgstr ""
+msgstr "Рад и тренинг"
 
 #: udata/core/reuse/models.py:36
 msgid "Politics and public life"
-msgstr ""
+msgstr "Политика и јавни живот"
 
 #: udata/core/reuse/models.py:37
 msgid "Safety and security"
@@ -791,19 +791,19 @@ msgstr "Сигурност и заштита"
 
 #: udata/core/reuse/models.py:38
 msgid "Education and research"
-msgstr ""
+msgstr "Образовање и истраживање"
 
 #: udata/core/reuse/models.py:39
 msgid "Society and demography"
-msgstr ""
+msgstr "Друштво и демографија"
 
 #: udata/core/reuse/models.py:40
 msgid "Law and justice"
-msgstr ""
+msgstr "Закон и право"
 
 #: udata/core/reuse/models.py:41
 msgid "Open data tools"
-msgstr ""
+msgstr "Алати отворених података"
 
 #: udata/core/reuse/models.py:42
 msgid "Others"
@@ -1209,12 +1209,12 @@ msgstr "%(user)s је индентификовао вашу организаци
 
 #: udata/templates/mail/base.html:45
 msgid "on your browser."
-msgstr ""
+msgstr "на вашем претраживачу."
 
 #: udata/templates/mail/base.html:48
 #, python-format
 msgid "View this email %(link)s"
-msgstr ""
+msgstr "Видети од овог мејла %(link)s"
 
 #: udata/templates/mail/base.html:76
 #, python-format
