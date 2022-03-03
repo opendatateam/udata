@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 3.3.2 (2022-03-01)
+
 - **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
 - Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
 - Add a `q` argument to the paginated datasets resources endpoint, to search through resources titles. [#2701](https://github.com/opendatateam/udata/pull/2701)
