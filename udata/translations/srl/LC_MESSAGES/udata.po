@@ -1,0 +1,1454 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: udata\n"
+"Report-Msgid-Bugs-To: i18n@opendata.team\n"
+"POT-Creation-Date: 2022-03-05 09:51+0100\n"
+"PO-Revision-Date: 2022-03-05 11:58\n"
+"Last-Translator: Open Data Team <i18n@opendata.team>\n"
+"Language: srl\n"
+"Language-Team: Serbian (Latin)\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.8.0\n"
+"X-Crowdin-Project: udata\n"
+"X-Crowdin-Project-ID: 291291\n"
+"X-Crowdin-Language: srl\n"
+"X-Crowdin-File: /master/udata/translations/udata.pot\n"
+"X-Crowdin-File-ID: 6\n"
+
+#: udata/settings.py:101
+msgid "Welcome"
+msgstr "Dobro došli"
+
+#: udata/settings.py:102
+msgid "Please confirm your email"
+msgstr "Molimo, potvrdite Vaš e-mail "
+
+#: udata/settings.py:103
+msgid "Login instructions"
+msgstr "Instrukcije za pristup"
+
+#: udata/settings.py:104
+msgid "Your password has been reset"
+msgstr "Vaša lozinka je resetovana"
+
+#: udata/settings.py:105
+msgid "Your password has been changed"
+msgstr "Vaša lozinka je promenjena"
+
+#: udata/settings.py:107
+msgid "Password reset instructions"
+msgstr "Instrukcije za resetovanje lozinke"
+
+#: udata/settings.py:441
+msgid "This dataset has been archived"
+msgstr "Ovaj skup podataka je arhiviran"
+
+#: udata/api/errors.py:4
+msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
+msgstr "Greška u validaciji: podatke trenutno nije moguće ažurirati. Obavešteni smo o grešci i otklonićemo je čim to bude moguće."
+
+#: udata/api/oauth2.py:53
+msgid "Bearer Token"
+msgstr "Token nosioca"
+
+#: udata/api/oauth2.py:57
+msgid "Default scope"
+msgstr "Podrazumevani opseg"
+
+#: udata/api/oauth2.py:58
+msgid "System administrator rights"
+msgstr "Prava administratora sistema"
+
+#: udata/auth/forms.py:13 udata/core/user/forms.py:14
+msgid "First name"
+msgstr "Ime"
+
+#: udata/auth/forms.py:13
+msgid "First name is required"
+msgstr "Ime je obavezno"
+
+#: udata/auth/forms.py:14 udata/auth/forms.py:17 udata/core/user/forms.py:15
+#: udata/core/user/forms.py:17
+msgid "URLs not allowed in this field"
+msgstr "URL putanje nisu dozvolјene u ovom polјu"
+
+#: udata/auth/forms.py:16 udata/core/user/forms.py:16
+msgid "Last name"
+msgstr "Prezime"
+
+#: udata/auth/forms.py:16
+msgid "Last name is required"
+msgstr "Prezime je obavezno"
+
+#: udata/auth/forms.py:33
+msgid "Password must be changed for security reasons"
+msgstr "Lozinka mora biti promenjena iz sigurosnih razloga"
+
+#: udata/auth/password_validation.py:13
+msgid "Password must be at least {pass_length} characters long"
+msgstr "Lozinka mora biti najmanje {pass_length} karaktera"
+
+#: udata/auth/password_validation.py:18
+msgid "Password must contain lowercases"
+msgstr "Lozinka mora da ima mala slova"
+
+#: udata/auth/password_validation.py:22
+msgid "Password must contain digits"
+msgstr "Lozinka mora da ima brojeve"
+
+#: udata/auth/password_validation.py:26
+msgid "Password must contain uppercases"
+msgstr "Lozinka mora da ima velika slova"
+
+#: udata/auth/password_validation.py:30
+msgid "Password must contain symbols"
+msgstr "Lozinka mora da ima simbole"
+
+#: udata/commands/init.py:29
+msgid "Do you want to create a superadmin user?"
+msgstr "Da li želite da kreirate admnistratorski nalog?"
+
+#: udata/commands/init.py:34
+msgid "Do you want to import some data-related license?"
+msgstr "Da li želite da uvezete licance za podatke?"
+
+#: udata/commands/init.py:38
+msgid "Do you want to import some spatial zones (countries)?"
+msgstr "Da li želite da uvezete \"spatial\" zone (države)?"
+
+#: udata/commands/init.py:42
+msgid "Do you want to create some sample data?"
+msgstr "Da li želite da kreirate nešto podataka za uzorak?"
+
+#: udata/commands/init.py:46
+msgid "Your udata instance is ready!"
+msgstr "Vaša platforma ja spremna!"
+
+#: udata/core/badges/forms.py:14
+msgid "Kind"
+msgstr "Vrsta"
+
+#: udata/core/badges/forms.py:16
+msgid "Kind of badge (certified, etc)"
+msgstr "Vrsta bedža (sertifikovano itd.)"
+
+#: udata/core/dataset/activities.py:21
+msgid "created a dataset"
+msgstr "skup podataka je napravlјen"
+
+#: udata/core/dataset/activities.py:27
+msgid "updated a dataset"
+msgstr "skup podataka je ažuriran"
+
+#: udata/core/dataset/activities.py:34
+msgid "deleted a dataset"
+msgstr "skup podataka je izbrisan"
+
+#: udata/core/dataset/forms.py:25
+msgid "Checksum value"
+msgstr "Čeksuma"
+
+#: udata/core/dataset/forms.py:39
+msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
+msgstr "Ime šeme \"{schema}\" nije dozvolјena vrednost. Dozvolјene vrednosti: {values}"
+
+#: udata/core/dataset/forms.py:50
+msgid "Version \"{version}\" is not an allowed value. Allowed values: {values}"
+msgstr "Verzija \"{version}\" nije dozvolјena. Dozvolјene verzije: {values}"
+
+#: udata/core/dataset/forms.py:58
+msgid "Sub-property \"{prop}\" is not allowed value in schema field. Allowed values is : {properties}"
+msgstr "Podatribut \"{prop}\" nije dozvolјen u šemi. Allowed values is : {properties}"
+
+#: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:128
+#: udata/core/discussions/forms.py:12 udata/core/reuse/forms.py:19
+#: udata/core/site/forms.py:12 udata/templates/mail/discussion_closed.html:26
+#: udata/templates/mail/new_discussion.html:25
+#: udata/templates/mail/new_discussion_comment.html:26
+msgid "Title"
+msgstr "Naslov"
+
+#: udata/core/dataset/forms.py:69 udata/core/dataset/forms.py:132
+#: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:25
+#: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:17
+#: udata/harvest/forms.py:62
+msgid "Description"
+msgstr "Opis"
+
+#: udata/core/dataset/forms.py:71
+msgid "File type"
+msgstr "Tip podatka"
+
+#: udata/core/dataset/forms.py:73
+msgid "Whether the resource is an uploaded file, a remote file or an API"
+msgstr "Da li je resurs otpremlјena datoteka, udalјena datoteka ili API"
+
+#: udata/core/dataset/forms.py:76 udata/core/reuse/forms.py:24
+msgid "Type"
+msgstr "Tip"
+
+#: udata/core/dataset/forms.py:78
+msgid "Resource type (documentation, API...)"
+msgstr "Tip resursa (dokumentacija, API...)"
+
+#: udata/core/dataset/forms.py:80 udata/core/reuse/forms.py:26
+#: udata/harvest/forms.py:64
+msgid "URL"
+msgstr "URL"
+
+#: udata/core/dataset/forms.py:82
+msgid "Format"
+msgstr "Format"
+
+#: udata/core/dataset/forms.py:87
+msgid "Mime type"
+msgstr "MIME tip"
+
+#: udata/core/dataset/forms.py:88
+msgid "The mime type associated to the extension. (ex: text/plain)"
+msgstr "MIME tip povezan sa ekstenzijom (npr: text/plain)"
+
+#: udata/core/dataset/forms.py:91
+msgid "Size"
+msgstr "Veličina"
+
+#: udata/core/dataset/forms.py:92
+msgid "The file size in bytes"
+msgstr "Veličina datoteke u bajtovima"
+
+#: udata/core/dataset/forms.py:94
+msgid "Publication date"
+msgstr "Datum objavlјivanja"
+
+#: udata/core/dataset/forms.py:95
+msgid "The publication date of the resource"
+msgstr "Datum objavlјivanja resursa"
+
+#: udata/core/dataset/forms.py:98
+msgid "Schema"
+msgstr "Šema"
+
+#: udata/core/dataset/forms.py:101
+msgid "The schema slug the resource adheres to"
+msgstr "Resurs pripada tokenu šeme"
+
+#: udata/core/dataset/forms.py:113
+msgid "Related dataset"
+msgstr "Povezani skup podataka"
+
+#: udata/core/dataset/forms.py:115 udata/core/dataset/forms.py:159
+#: udata/core/reuse/forms.py:38 udata/harvest/forms.py:69
+msgid "Publish as"
+msgstr "Objavlјeno kao"
+
+#: udata/core/dataset/forms.py:129 udata/core/organization/forms.py:23
+msgid "Acronym"
+msgstr "Akronim"
+
+#: udata/core/dataset/forms.py:130
+msgid "An optional acronym"
+msgstr "Opcioni akronim"
+
+#: udata/core/dataset/forms.py:133
+msgid "The details about the dataset (collection process, specifics...)."
+msgstr "Detalјi o skupu podataka (proces prikuplјanja, specifikacija…)."
+
+#: udata/core/dataset/forms.py:136
+msgid "License"
+msgstr "Licenca"
+
+#: udata/core/dataset/forms.py:138
+msgid "Update frequency"
+msgstr "Frekvencija ažuriranja"
+
+#: udata/core/dataset/forms.py:142
+msgid "The frequency at which data are updated."
+msgstr "Frekvencija kojom se podaci ažuriraju."
+
+#: udata/core/dataset/forms.py:143
+msgid "Expected frequency date"
+msgstr "Datum očekivane frekvencije"
+
+#: udata/core/dataset/forms.py:147
+msgid "Temporal coverage"
+msgstr "Vremenska pokrivenost"
+
+#: udata/core/dataset/forms.py:148
+msgid "The period covered by the data"
+msgstr "Period pokriven podacima"
+
+#: udata/core/dataset/forms.py:150 udata/core/spatial/forms.py:83
+msgid "Spatial coverage"
+msgstr "Prostorna pokrivenost"
+
+#: udata/core/dataset/forms.py:151
+msgid "The geographical area covered by the data."
+msgstr "Geografska oblast pokrivena podacima."
+
+#: udata/core/dataset/forms.py:152 udata/core/post/forms.py:26
+#: udata/core/reuse/forms.py:29 udata/core/site/forms.py:13
+#: udata/core/topic/forms.py:22
+msgid "Tags"
+msgstr "Oznake"
+
+#: udata/core/dataset/forms.py:152 udata/core/reuse/forms.py:29
+msgid "Some taxonomy keywords"
+msgstr "Neke klјučne reči u taksonomiji"
+
+#: udata/core/dataset/forms.py:154 udata/core/reuse/forms.py:32
+#: udata/core/topic/forms.py:23
+msgid "Private"
+msgstr "Privatno"
+
+#: udata/core/dataset/forms.py:155 udata/core/reuse/forms.py:33
+msgid "Restrict the dataset visibility to you or your organization only."
+msgstr "Ograničite vidlјivost skupa podataka samo na sebe ili svoju organizaciju."
+
+#: udata/core/dataset/models.py:44
+msgid "Unknown"
+msgstr "Nepoznato"
+
+#: udata/core/dataset/models.py:45
+msgid "Punctual"
+msgstr "Tačno"
+
+#: udata/core/dataset/models.py:46
+msgid "Real time"
+msgstr "U realnom vremenu"
+
+#: udata/core/dataset/models.py:47
+msgid "Hourly"
+msgstr "Svaki sat"
+
+#: udata/core/dataset/models.py:48
+msgid "Four times a day"
+msgstr "Četri puta dnevno"
+
+#: udata/core/dataset/models.py:49
+msgid "Three times a day"
+msgstr "Tri puta dnevno"
+
+#: udata/core/dataset/models.py:50
+msgid "Semidaily"
+msgstr "Dva puta dnevno"
+
+#: udata/core/dataset/models.py:51 udata/harvest/models.py:22
+msgid "Daily"
+msgstr "Dnevno"
+
+#: udata/core/dataset/models.py:52
+msgid "Four times a week"
+msgstr "Četri puta nedelјno"
+
+#: udata/core/dataset/models.py:53
+msgid "Three times a week"
+msgstr "Tri puta nedelјno"
+
+#: udata/core/dataset/models.py:54
+msgid "Semiweekly"
+msgstr "Dva puta nedelјno"
+
+#: udata/core/dataset/models.py:55 udata/harvest/models.py:21
+msgid "Weekly"
+msgstr "Sedmično"
+
+#: udata/core/dataset/models.py:56
+msgid "Biweekly"
+msgstr "Dva puta nedelјno"
+
+#: udata/core/dataset/models.py:57
+msgid "Three times a month"
+msgstr "Tri puta mesečno"
+
+#: udata/core/dataset/models.py:58
+msgid "Semimonthly"
+msgstr "Dva puta mesečno"
+
+#: udata/core/dataset/models.py:59 udata/harvest/models.py:20
+msgid "Monthly"
+msgstr "Mesečno"
+
+#: udata/core/dataset/models.py:60
+msgid "Bimonthly"
+msgstr "Svaka dva meseca"
+
+#: udata/core/dataset/models.py:61
+msgid "Quarterly"
+msgstr "Kvartalno"
+
+#: udata/core/dataset/models.py:62
+msgid "Three times a year"
+msgstr "Tri puta godišnje"
+
+#: udata/core/dataset/models.py:63
+msgid "Biannual"
+msgstr "Dvaput godišnje"
+
+#: udata/core/dataset/models.py:64
+msgid "Annual"
+msgstr "Godišnje"
+
+#: udata/core/dataset/models.py:65
+msgid "Biennial"
+msgstr "Svake druge godine"
+
+#: udata/core/dataset/models.py:66
+msgid "Triennial"
+msgstr "Svake tri godine"
+
+#: udata/core/dataset/models.py:67
+msgid "Quinquennial"
+msgstr "Svakih pet godina"
+
+#: udata/core/dataset/models.py:68
+msgid "Irregular"
+msgstr "Nepravilan"
+
+#: udata/core/dataset/models.py:90
+msgid "Main file"
+msgstr "Glavna datoteka"
+
+#: udata/core/dataset/models.py:91
+msgid "Documentation"
+msgstr "Dokumentacija"
+
+#: udata/core/dataset/models.py:92
+msgid "Update"
+msgstr "Ažuriranje"
+
+#: udata/core/dataset/models.py:93 udata/core/reuse/models.py:17
+msgid "API"
+msgstr "API"
+
+#: udata/core/dataset/models.py:94
+msgid "Code repository"
+msgstr "Skladište koda"
+
+#: udata/core/dataset/models.py:95 udata/core/spatial/models.py:24
+msgid "Other"
+msgstr "Drugo"
+
+#: udata/core/dataset/models.py:100
+msgid "Uploaded file"
+msgstr "Otpremlјena datoteka"
+
+#: udata/core/dataset/models.py:101
+msgid "Remote file"
+msgstr "Udalјena datoteka"
+
+#: udata/core/dataset/models.py:344 udata/core/dataset/rdf.py:331
+msgid "Nameless resource"
+msgstr "Resurs bez imena"
+
+#: udata/core/dataset/models.py:400 udata/models/datetime_fields.py:59
+msgid "Creation date"
+msgstr "Datum kreiranja"
+
+#: udata/core/dataset/models.py:402 udata/models/datetime_fields.py:61
+msgid "Last modification date"
+msgstr "Datum poslednje izmene"
+
+#: udata/core/dataset/models.py:418
+msgid "Future date of update"
+msgstr "Budući datum ažuriranja"
+
+#: udata/core/dataset/models.py:434
+msgid "Pivotal data"
+msgstr "Klјučni podaci"
+
+#: udata/core/dataset/models.py:471
+msgid "dataset"
+msgstr "skup podataka"
+
+#: udata/core/dataset/rdf.py:329
+msgid "{format} resource"
+msgstr "{format} resurs"
+
+#: udata/core/dataset/search.py:149 udata/tests/search/test_adapter.py:18
+msgid "Never reused"
+msgstr "Nikada korišćeno"
+
+#: udata/core/dataset/search.py:150 udata/tests/search/test_adapter.py:19
+msgid "Little reused"
+msgstr "Malo koršćeno"
+
+#: udata/core/dataset/search.py:151 udata/tests/search/test_adapter.py:20
+msgid "Quite reused"
+msgstr "Često korišćeno"
+
+#: udata/core/dataset/search.py:152 udata/tests/search/test_adapter.py:21
+msgid "Heavily reused"
+msgstr "Popularno"
+
+#: udata/core/dataset/tasks.py:91
+msgid "You need to update some frequency-based datasets"
+msgstr "Potrebno je da ažurirate neke skupove podataka zasnovane na frekvenciji"
+
+#: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:21
+#: udata/core/organization/forms.py:53 udata/core/organization/forms.py:57
+#: udata/harvest/forms.py:78
+msgid "Comment"
+msgstr "Komentar"
+
+#: udata/core/discussions/forms.py:15
+msgid "Subject"
+msgstr "Tema"
+
+#: udata/core/discussions/tasks.py:28
+#, python-format
+msgid "Your %(type)s have a new discussion"
+msgstr "Vaši %(type)s imaju novu diskusiju"
+
+#: udata/core/discussions/tasks.py:45
+#, python-format
+msgid "%(user)s commented your discussion"
+msgstr "Korisnik %(user)s je komentarisao vašu diskusiju"
+
+#: udata/core/discussions/tasks.py:63
+msgid "A discussion has been closed"
+msgstr "Diskusija je zatvorena"
+
+#: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:21
+#: udata/core/post/forms.py:15 udata/core/topic/forms.py:15
+#: udata/harvest/forms.py:60 udata/templates/api/admin.html:10
+msgid "Name"
+msgstr "Ime"
+
+#: udata/core/jobs/forms.py:29
+msgid "Tasks"
+msgstr "Zadaci"
+
+#: udata/core/jobs/forms.py:30
+msgid "Enabled"
+msgstr "Omogućeno"
+
+#: udata/core/jobs/models.py:18
+msgid "every {0.period_singular}"
+msgstr "svaki {0.period_singular}"
+
+#: udata/core/jobs/models.py:19
+msgid "every {0.every} {0.period}"
+msgstr "svaki {0.every} {0.period}"
+
+#: udata/core/organization/activities.py:21
+msgid "created an organization"
+msgstr "organizacija je napravlјena"
+
+#: udata/core/organization/activities.py:28
+msgid "updated an organization"
+msgstr "organizacija je ažurirana"
+
+#: udata/core/organization/forms.py:23
+msgid "Shorter organization name"
+msgstr "Skraćeno ime organizacije"
+
+#: udata/core/organization/forms.py:26
+msgid "The details about your organization"
+msgstr "Detalјi o vašoj organizaciji"
+
+#: udata/core/organization/forms.py:28 udata/core/user/forms.py:20
+msgid "Website"
+msgstr "Veb-sajt"
+
+#: udata/core/organization/forms.py:28
+msgid "The organization website URL"
+msgstr "URL veb-sajta organizacije"
+
+#: udata/core/organization/forms.py:29
+msgid "Logo"
+msgstr "Logotip"
+
+#: udata/core/organization/forms.py:64
+msgid "Role"
+msgstr "Uloga"
+
+#: udata/core/organization/models.py:24
+msgid "Administrator"
+msgstr "Administrator"
+
+#: udata/core/organization/models.py:25
+msgid "Editor"
+msgstr "Urednik"
+
+#: udata/core/organization/models.py:31 udata/features/transfer/models.py:14
+#: udata/harvest/models.py:26 udata/harvest/models.py:36 udata/harvest/models.py:74
+msgid "Pending"
+msgstr "Na čekanju"
+
+#: udata/core/organization/models.py:32 udata/features/transfer/models.py:15
+#: udata/harvest/models.py:75
+msgid "Accepted"
+msgstr "Prihvaćeno"
+
+#: udata/core/organization/models.py:33 udata/features/transfer/models.py:16
+#: udata/harvest/models.py:76
+msgid "Refused"
+msgstr "Odbijeno"
+
+#: udata/core/organization/models.py:130
+msgid "Public Service"
+msgstr "Javni servis"
+
+#: udata/core/organization/models.py:131
+msgid "Certified"
+msgstr "Sertifikovano"
+
+#: udata/core/organization/search.py:68
+msgid "No reuses"
+msgstr "Bez upotrebe"
+
+#: udata/core/organization/search.py:69
+msgid "Few reuses"
+msgstr "Malo upotrebe"
+
+#: udata/core/organization/search.py:70
+msgid "Many reuses"
+msgstr "Mnogo upotrebe"
+
+#: udata/core/organization/search.py:79 udata/core/reuse/search.py:92
+#: udata/core/user/search.py:52
+msgid "No datasets"
+msgstr "Bez skupova podataka"
+
+#: udata/core/organization/search.py:80 udata/core/reuse/search.py:93
+#: udata/core/user/search.py:53
+msgid "Few datasets"
+msgstr "Malo skupova podataka"
+
+#: udata/core/organization/search.py:81 udata/core/reuse/search.py:94
+#: udata/core/user/search.py:54
+msgid "Many datasets"
+msgstr "Mnogo skupova podataka"
+
+#: udata/core/organization/search.py:88 udata/core/reuse/search.py:101
+#: udata/core/user/search.py:61
+msgid "No followers"
+msgstr "Bez pratilaca"
+
+#: udata/core/organization/search.py:89 udata/core/reuse/search.py:102
+#: udata/core/user/search.py:62
+msgid "Few followers"
+msgstr "Malo pratilaca"
+
+#: udata/core/organization/search.py:90 udata/core/reuse/search.py:103
+#: udata/core/user/search.py:63
+msgid "Many followers"
+msgstr "Mnogo pratilaca"
+
+#: udata/core/organization/tasks.py:50
+msgid "New membership request"
+msgstr "Novi zahtev za članstvo"
+
+#: udata/core/organization/tasks.py:60 udata/core/organization/tasks.py:73
+#, python-format
+msgid "You are now a member of the organization \"%(org)s\""
+msgstr "Sada ste član organizacije \"%(org)s\""
+
+#: udata/core/organization/tasks.py:64
+msgid "Membership refused"
+msgstr "Članstvo je odbijeno"
+
+#: udata/core/organization/tasks.py:84
+#, python-format
+msgid "Your organization \"%(name)s\" has been certified"
+msgstr "Vaša organizacija\"%(name)s\" je sertifikovana"
+
+#: udata/core/organization/tasks.py:104
+#, python-format
+msgid "Your organization \"%(name)s\" has been identified as public service"
+msgstr "Vaša organizacija \"%(name)s\" je indentifikovana kao javni servis"
+
+#: udata/core/post/forms.py:16
+msgid "Headline"
+msgstr "Naslov"
+
+#: udata/core/post/forms.py:17
+msgid "Content"
+msgstr "Sadržaj"
+
+#: udata/core/post/forms.py:19 udata/core/topic/forms.py:19
+msgid "Associated datasets"
+msgstr "Povezani skupovi podataka"
+
+#: udata/core/post/forms.py:20 udata/core/topic/forms.py:20
+msgid "Associated reuses"
+msgstr "Povezani primeri upotrebe"
+
+#: udata/core/post/forms.py:22 udata/core/reuse/forms.py:28
+msgid "Image"
+msgstr "Slika"
+
+#: udata/core/post/forms.py:23
+msgid "Image credits"
+msgstr "Akreditacija slike"
+
+#: udata/core/post/forms.py:24
+msgid "Credit URL"
+msgstr "URL akreditacije"
+
+#: udata/core/post/models.py:50
+msgid "post"
+msgstr "Objava"
+
+#: udata/core/reuse/activities.py:22
+msgid "created a reuse"
+msgstr "napravlјen je primer upotrebe"
+
+#: udata/core/reuse/activities.py:28
+msgid "updated a reuse"
+msgstr "primer upotrebe je ažuriran"
+
+#: udata/core/reuse/activities.py:35
+msgid "deleted a reuse"
+msgstr "primer upotrebe je izbrisan"
+
+#: udata/core/reuse/forms.py:13
+msgid "This URL is already registered"
+msgstr "Ovaj URL je već registrovan"
+
+#: udata/core/reuse/forms.py:22
+msgid "The details about the reuse (build process, specifics, self-critics...)."
+msgstr "Detalјi o primeru upotrebe (proces kreiranja, specifikacije, samokritika…)."
+
+#: udata/core/reuse/forms.py:30
+msgid "Used datasets"
+msgstr "Korišćeni skupovi podataka"
+
+#: udata/core/reuse/forms.py:35
+msgid "Topic"
+msgstr "Tema"
+
+#: udata/core/reuse/models.py:18
+msgid "Application"
+msgstr "Aplikacija"
+
+#: udata/core/reuse/models.py:19
+msgid "Idea"
+msgstr "Ideja"
+
+#: udata/core/reuse/models.py:20
+msgid "News Article"
+msgstr "Članak vesti"
+
+#: udata/core/reuse/models.py:21
+msgid "Paper"
+msgstr "Rad"
+
+#: udata/core/reuse/models.py:22
+msgid "Post"
+msgstr "Objava"
+
+#: udata/core/reuse/models.py:23
+msgid "Visualization"
+msgstr "Vizuelizacija"
+
+#: udata/core/reuse/models.py:24
+msgid "Connected device"
+msgstr "Povezani uređaj"
+
+#: udata/core/reuse/models.py:28
+msgid "Health"
+msgstr "Zdravlјe"
+
+#: udata/core/reuse/models.py:29
+msgid "Transport and mobility"
+msgstr "Transport i mobilnost"
+
+#: udata/core/reuse/models.py:30
+msgid "Housing and development"
+msgstr "Stanovanje i razvoj"
+
+#: udata/core/reuse/models.py:31
+msgid "Food and agriculture"
+msgstr "Hrana i polјoprivreda"
+
+#: udata/core/reuse/models.py:32
+msgid "Culture and recreation"
+msgstr "Kultura i rekreacija"
+
+#: udata/core/reuse/models.py:33
+msgid "Economy and business"
+msgstr "Ekonomija i biznis"
+
+#: udata/core/reuse/models.py:34
+msgid "Environment and energy"
+msgstr "Životna sredina i energija"
+
+#: udata/core/reuse/models.py:35
+msgid "Work and training"
+msgstr "Rad i trening"
+
+#: udata/core/reuse/models.py:36
+msgid "Politics and public life"
+msgstr "Politika i javni život"
+
+#: udata/core/reuse/models.py:37
+msgid "Safety and security"
+msgstr "Sigurnost i zaštita"
+
+#: udata/core/reuse/models.py:38
+msgid "Education and research"
+msgstr "Obrazovanje i istraživanje"
+
+#: udata/core/reuse/models.py:39
+msgid "Society and demography"
+msgstr "Društvo i demografija"
+
+#: udata/core/reuse/models.py:40
+msgid "Law and justice"
+msgstr "Zakon i pravo"
+
+#: udata/core/reuse/models.py:41
+msgid "Open data tools"
+msgstr "Alati otvorenih podataka"
+
+#: udata/core/reuse/models.py:42
+msgid "Others"
+msgstr "Ostalo"
+
+#: udata/core/reuse/models.py:121
+msgid "reuse"
+msgstr "primer upotrebe"
+
+#: udata/core/reuse/tasks.py:45
+msgid "New reuse"
+msgstr "Novi primer upotrebe"
+
+#: udata/core/site/forms.py:13
+msgid "Some SEO keywords"
+msgstr "Neke SEO klјučne reči"
+
+#: udata/core/site/forms.py:15
+msgid "Feed size"
+msgstr "Veličina fida"
+
+#: udata/core/site/forms.py:15
+msgid "Number of elements in feeds"
+msgstr "Broj elemenata u fidovima"
+
+#: udata/core/spatial/forms.py:48
+msgid "Unknown geoid(s): {identifiers}"
+msgstr "Nepoznati geoid(s): {identifiers}"
+
+#: udata/core/spatial/forms.py:67
+msgid "Not a valid GeoJSON"
+msgstr "GeoJSON nije važeći"
+
+#: udata/core/spatial/forms.py:84
+msgid "A list of covered territories"
+msgstr "Lista obuhvaćenih teritorija"
+
+#: udata/core/spatial/forms.py:86
+msgid "Spatial granularity"
+msgstr "Prostorna granularnost"
+
+#: udata/core/spatial/forms.py:87
+msgid "The size of the data increment"
+msgstr "Veličina inkrementa podataka"
+
+#: udata/core/spatial/models.py:23
+msgid "POI"
+msgstr "POI"
+
+#: udata/core/spatial/translations.py:5
+msgid "French region"
+msgstr "Francuska oblast"
+
+#: udata/core/spatial/translations.py:6
+msgid "French intermunicipal (EPCI)"
+msgstr "Međuopštinska saradnja u Francuskoj (EPCI)"
+
+#: udata/core/spatial/translations.py:7
+msgid "French county"
+msgstr "Francuski okrug"
+
+#: udata/core/spatial/translations.py:8
+msgid "French district"
+msgstr "Francuski distrikt"
+
+#: udata/core/spatial/translations.py:9
+msgid "French town"
+msgstr "Francuski grad"
+
+#: udata/core/spatial/translations.py:10
+msgid "French canton"
+msgstr "Francuski kanton"
+
+#: udata/core/spatial/translations.py:11
+msgid "Iris (Insee districts)"
+msgstr "Iris (Insee distrikti)"
+
+#: udata/core/spatial/translations.py:12
+msgid "Country"
+msgstr "Zemlјa"
+
+#: udata/core/spatial/translations.py:13
+msgid "World"
+msgstr "Svet"
+
+#: udata/core/spatial/translations.py:14
+msgid "Country group"
+msgstr "Grupa zemalјa"
+
+#: udata/core/spatial/translations.py:15
+msgid "Country subset"
+msgstr "Podskup zemalјa"
+
+#: udata/core/spatial/translations.py:16
+msgid "European Union"
+msgstr "Evropska unija"
+
+#: udata/core/spatial/translations.py:17
+msgid "Metropolitan France"
+msgstr "Metropolitanska Francuska"
+
+#: udata/core/spatial/translations.py:18
+msgid "Overseas France"
+msgstr "Francuske prekomorske teritorije"
+
+#: udata/core/spatial/translations.py:19
+msgid "French overseas collectivities"
+msgstr "Francuske prekomorske teritorije"
+
+#: udata/core/spatial/translations.py:20
+msgid "French arrondissement"
+msgstr "Francuski arondisman"
+
+#: udata/core/topic/forms.py:24
+msgid "Featured"
+msgstr "Istaknuto"
+
+#: udata/core/user/activities.py:32 udata/core/user/activities.py:64
+msgid "followed an organization"
+msgstr "prati organizaciju"
+
+#: udata/core/user/activities.py:37
+msgid "followed a user"
+msgstr "prati korisnika"
+
+#: udata/core/user/activities.py:44
+msgid "discussed a dataset"
+msgstr "diskutuje o skupu podataka"
+
+#: udata/core/user/activities.py:49
+msgid "discussed a reuse"
+msgstr "diskutuje o primeru upotrebe"
+
+#: udata/core/user/activities.py:54
+msgid "followed a dataset"
+msgstr "prati skup podataka"
+
+#: udata/core/user/activities.py:59
+msgid "followed a reuse"
+msgstr "prati primer upotrebe"
+
+#: udata/core/user/forms.py:18
+msgid "Email"
+msgstr "Imejl"
+
+#: udata/core/user/forms.py:19
+msgid "Avatar"
+msgstr "Avatar"
+
+#: udata/core/user/forms.py:21
+msgid "About"
+msgstr "Osnovni podaci"
+
+#: udata/core/user/forms.py:25
+msgid "Roles"
+msgstr "Uloge"
+
+#: udata/core/user/models.py:265 udata/tests/api/test_me_api.py:313
+msgid "Account deletion"
+msgstr "Brisanje naloga"
+
+#: udata/core/user/permissions.py:6
+msgid "System administrator"
+msgstr "Administrator sistema"
+
+#: udata/core/user/permissions.py:7
+msgid "Site editorialist"
+msgstr "Kolumnista na sajtu"
+
+#: udata/core/user/permissions.py:8
+msgid "Site moderator"
+msgstr "Moderator sajta"
+
+#: udata/core/user/tasks.py:15
+msgid "Test mail"
+msgstr "Probna poruka"
+
+#: udata/forms/fields.py:99
+msgid "The role {role} does not exist"
+msgstr "Uloga {role} ne postoji"
+
+#: udata/forms/fields.py:116
+msgid "Not a valid UUID"
+msgstr "UUID nije važeći"
+
+#: udata/forms/fields.py:141
+msgid "Invalid URL"
+msgstr "Nepravilan URL"
+
+#: udata/forms/fields.py:337
+#, python-format
+msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
+msgstr "Oznaka \"%(tag)s\" mora da bude dužine između %(min)d i %(max)d znakova."
+
+#: udata/forms/fields.py:377 udata/forms/fields.py:429
+msgid "{0} does not exists"
+msgstr "{0} ne postoji"
+
+#: udata/forms/fields.py:416
+msgid "Expect both class and identifier"
+msgstr "Očekuj klasu i identifikator"
+
+#: udata/forms/fields.py:462
+msgid "Model for {0} not found"
+msgstr "Model za {0} nije pronađen"
+
+#: udata/forms/fields.py:497
+msgid "Unknown identifiers: {identifiers}"
+msgstr "Nepoznati identifikatori: {identifiers}"
+
+#: udata/forms/fields.py:632
+msgid "Unable to parse date range"
+msgstr "Nije moguće raščlaniti opseg datuma"
+
+#: udata/forms/fields.py:659 udata/forms/fields.py:682
+msgid "You must be authenticated"
+msgstr "Morate potvrditi svoj identitet"
+
+#: udata/forms/fields.py:662
+msgid "You can only set yourself as owner"
+msgstr "Samo sebe možete da označite kao vlasnika"
+
+#: udata/forms/fields.py:685
+msgid "Permission denied for this organization"
+msgstr "Dozvola ja ovu organizaciju je odbijena"
+
+#: udata/forms/validators.py:59
+#, python-format
+msgid "This field requires \"%(name)s\" to be set"
+msgstr "Ovo polјe zahteva da se podese \"%(name)s\""
+
+#: udata/frontend/markdown.py:30
+msgid "Source"
+msgstr "Izvor"
+
+#: udata/harvest/forms.py:63
+msgid "Some optional details about this harvester"
+msgstr "Detalјi harvestera"
+
+#: udata/harvest/forms.py:65
+msgid "Backend"
+msgstr "Pozadinska komponenta"
+
+#: udata/harvest/models.py:19
+msgid "Manual"
+msgstr "Ručno"
+
+#: udata/harvest/models.py:27
+msgid "Initializing"
+msgstr "Inicijalizacija"
+
+#: udata/harvest/models.py:28
+msgid "Initialized"
+msgstr "Pokrenuto"
+
+#: udata/harvest/models.py:29
+msgid "Processing"
+msgstr "Obrada"
+
+#: udata/harvest/models.py:30 udata/harvest/models.py:38
+msgid "Done"
+msgstr "Gotovo"
+
+#: udata/harvest/models.py:31
+msgid "Done with errors"
+msgstr "Gotovo sa greškama"
+
+#: udata/harvest/models.py:32 udata/harvest/models.py:39
+msgid "Failed"
+msgstr "Nije uspelo"
+
+#: udata/harvest/models.py:37
+msgid "Started"
+msgstr "Započeto"
+
+#: udata/harvest/models.py:40
+msgid "Skipped"
+msgstr "Preskočeno"
+
+#: udata/harvest/models.py:41
+msgid "Archived"
+msgstr "Arhivirano"
+
+#: udata/search/fields.py:35
+msgid "OR"
+msgstr "I"
+
+#: udata/search/fields.py:116 udata/tests/search/test_facets.py:98
+#: udata/tests/search/test_facets.py:101
+msgid "yes"
+msgstr "da"
+
+#: udata/search/fields.py:116 udata/tests/search/test_facets.py:99
+#: udata/tests/search/test_facets.py:102
+msgid "no"
+msgstr "ne"
+
+#: udata/search/fields.py:288
+msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
+msgstr "Opseg datuma u obliku početak-kraj, sa oba datuma u ISO formatu (tj. YYYY-MM-DD-YYYY-MM-DD)"
+
+#: udata/templates/admin.html:7
+msgid "Admin"
+msgstr "Administrator"
+
+#: udata/templates/api/admin.html:11
+msgid "Maintainer"
+msgstr "Održava"
+
+#: udata/templates/api/admin.html:31
+msgid "Edit"
+msgstr "Izmeni"
+
+#: udata/templates/api/admin.html:34
+msgid "Delete"
+msgstr "Izbriši"
+
+#: udata/templates/api/admin.html:42
+msgid "No OAuth clients"
+msgstr "Nema OAuth klijenata"
+
+#: udata/templates/api/admin.html:53
+msgid "Add a client"
+msgstr "Dodajte klijenta"
+
+#: udata/templates/api/oauth_authorize.html:23
+#, python-format
+msgid "%(app)s want to access your %(site)s account."
+msgstr "%(app)s želi da pristupi nalogu vašeg sajta %(site)s."
+
+#: udata/templates/api/oauth_authorize.html:35
+msgid "Details"
+msgstr "Detalјi"
+
+#: udata/templates/api/oauth_authorize.html:45
+msgid "Access your profile"
+msgstr "Pristupite svom profilu"
+
+#: udata/templates/api/oauth_authorize.html:46
+msgid "Read your profile, the orgnization you belong to, your publications"
+msgstr "Pročitajte detalјe profila, organizaciju kojoj pripadate i svoje publikacije"
+
+#: udata/templates/api/oauth_authorize.html:54
+msgid "Publish data"
+msgstr "Objavlјivanje podataka"
+
+#: udata/templates/api/oauth_authorize.html:55
+msgid "Publish datasets, reuses, follow or unfollow"
+msgstr "Objavite skupove podataka, primere upotrebe, pratite ili opozovite praćenje"
+
+#: udata/templates/api/oauth_authorize.html:65
+msgid "Accept"
+msgstr "Prihvati"
+
+#: udata/templates/api/oauth_authorize.html:67
+msgid "Refuse"
+msgstr "Odbij"
+
+#: udata/templates/api/oauth_error.html:15
+msgid "OAuth Authentication Error"
+msgstr "Greška u OAuth potvrdi identiteta"
+
+#: udata/templates/api/oauth_error.html:20 udata/templates/macros/metadata.html:2
+msgid "Home"
+msgstr "Početak"
+
+#: udata/templates/comments/dataset_archived.txt:1
+msgid "This dataset has been archived by our administration team.\n\n"
+"An archived dataset is considered out of date by a combination of factors.\n"
+"It does not appear in the search results and has a special layout warning the site's users.\n\n"
+"If you think this is a mistake, you can contact the site administrator."
+msgstr "Ovaj skup podataka su arhivirali naši administratori.\n\n"
+"Arivirani skup podataka se smatrao zastarelim iz više razloga.\n"
+"Ne pojavlјuje se u rezultatima pretrage i ima upozorenje upućeno korisnicima sajta.\n\n"
+"Ako smatrate da je ovo greška kontaktirajte administratora portala."
+
+#: udata/templates/macros/forms.html:106
+msgid "required fields"
+msgstr "obavezna polјa"
+
+#: udata/templates/macros/metadata.html:3
+msgid "Share, improve and reuse public data"
+msgstr "Delјenje, unapređivanje i primeri upotrebe javnih podataka"
+
+#: udata/templates/mail/account_deleted.html:4
+msgid "Your account has now been deleted"
+msgstr "Vaš nalog je obrisan"
+
+#: udata/templates/mail/badge_added_certified.html:6
+#, python-format
+msgid "%(user)s has certified your organization \"%(name)s\""
+msgstr "%(user)s je sertifikovao vašu organizaciju \"%(name)s\""
+
+#: udata/templates/mail/badge_added_certified.html:27
+#: udata/templates/mail/badge_added_public_service.html:27
+msgid "See the badge"
+msgstr "Pogledajte bedž"
+
+#: udata/templates/mail/badge_added_public_service.html:6
+#, python-format
+msgid "%(user)s has identified your organization \"%(name)s\" as public service"
+msgstr "%(user)s je indentifikovao vašu organizaciju \"%(name)s\" kao javni servis"
+
+#: udata/templates/mail/base.html:45
+msgid "on your browser."
+msgstr "na vašem pretraživaču."
+
+#: udata/templates/mail/base.html:48
+#, python-format
+msgid "View this email %(link)s"
+msgstr "Videti od ovog mejla %(link)s"
+
+#: udata/templates/mail/base.html:76
+#, python-format
+msgid "Hi %(user)s"
+msgstr "Zdravo, %(user)s"
+
+#: udata/templates/mail/base.html:87
+msgid "See you soon on the platform"
+msgstr "Vidimo se uskoro na portalu"
+
+#: udata/templates/mail/base.html:88
+#, python-format
+msgid "The %(site)s team"
+msgstr "%(site)s - administrator"
+
+#: udata/templates/mail/discussion_closed.html:6
+#, python-format
+msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
+msgstr "Korisnik %(user)s je zatvorio diskusiju na temu %(type)s %(subject)s"
+
+#: udata/templates/mail/discussion_closed.html:31
+#: udata/templates/mail/new_discussion.html:30
+#: udata/templates/mail/new_discussion_comment.html:31
+msgid "Message"
+msgstr "Poruka"
+
+#: udata/templates/mail/discussion_closed.html:40
+#: udata/templates/mail/new_discussion.html:38
+#: udata/templates/mail/new_discussion_comment.html:39
+msgid "See the discussion"
+msgstr "Pogledajte diskusiju"
+
+#: udata/templates/mail/frequency_reminder.html:6
+msgid "Some of your datasets need to be updated according to the frequency you set:"
+msgstr "Neke od vaših skupova podataka treba ažurirati u skladu sa frekvencijom koju ste podesili:"
+
+#: udata/templates/mail/frequency_reminder.html:12
+#, python-format
+msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
+msgstr "Skup podataka \"%(dataset_title)s\" poslednji put je ažuriran %(published_date)s."
+
+#: udata/templates/mail/frequency_reminder.html:17
+#, python-format
+msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
+msgstr "Uzimajući u obzir podešenu frekvenciju (%(dataset_frequency)s), ažuriranje je trebalo obaviti pre %(due_update_days)s dan(a)."
+
+#: udata/templates/mail/frequency_reminder.html:25
+msgid "Update the dataset and associated resources"
+msgstr "Ažuriranje skupa podataka i povezanih resursa"
+
+#: udata/templates/mail/membership_refused.html:7
+#, python-format
+msgid "Your membership for the organization \"%(org)s\" has been refused"
+msgstr "Vaše članstvo u organizaciji \"%(org)s\" nije prihvaćeno"
+
+#: udata/templates/mail/membership_refused.html:18
+msgid "Refusal reason"
+msgstr "Razlog odbijanja"
+
+#: udata/templates/mail/membership_request.html:8
+#, python-format
+msgid "As an administrator of \"%(org)s\" you are being informed than a new membership request from %(user)s is pending for validation"
+msgstr "Kao administrator \"%(org)s\", obavešteni ste da novi zahtev za članstvom korisnika %(user)s čeka na potvrdu"
+
+#: udata/templates/mail/membership_request.html:40
+msgid "See the request"
+msgstr "Pogledajte zahtev"
+
+#: udata/templates/mail/new_discussion.html:6
+#, python-format
+msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
+msgstr "Korisnik %(user)s je prosledio novu diskusiju na temu %(type)s %(subject)s"
+
+#: udata/templates/mail/new_discussion_comment.html:6
+#, python-format
+msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
+msgstr "Korisnik %(user)s je komentarisao diskusiju na temu %(type)s %(subject)s"
+
+#: udata/templates/mail/new_member.html:7
+#, python-format
+msgid "Congratulations, you are now a member of the organization \"%(org)s\""
+msgstr "Čestitamo, postali ste član organizacije \"%(org)s\""
+
+#: udata/templates/mail/new_member.html:21
+msgid "See the organization page"
+msgstr "Pogledajte stranicu organizacije"
+
+#: udata/templates/mail/new_reuse.html:7
+#, python-format
+msgid "A new reuse of your dataset %(dataset)s has been published"
+msgstr "Objavlјen je novi primer upotrebe skupa podataka %(dataset)s"
+
+#: udata/templates/mail/new_reuse.html:31
+msgid "See the reuse"
+msgstr "Pogledajte primer upotrebe"
+
+#: udata/templates/mail/new_reuse.html:37
+msgid "See on the dataset page"
+msgstr "Pogledajte na stranici skupa podataka"
+
+#: udata/templates/mail/test.html:4
+msgid "This is a test mail"
+msgstr "Ovo je probna poruka"
+
+#: udata/templates/mail/test.html:5
+msgid "If you read this, your mail configuration is working"
+msgstr "Ako ste ovo pročitali, vaša konfiguracija pošte funkcioniše"
+
+#: udata/templates/mail/security/change_notice.html:6
+msgid "Your password has been changed."
+msgstr "Vaša lozinka je promenjena."
+
+#: udata/templates/mail/security/change_notice.html:10
+msgid "If you did not change your password, click below to reset it."
+msgstr "Ako Vi niste promenili lozinku resetujte je na link dole."
+
+#: udata/templates/mail/security/change_notice.html:15
+msgid "Reset password"
+msgstr "Resetuj lozinku"
+
+#: udata/templates/mail/security/confirmation_instructions.html:6
+msgid "Please confirm your email through the link below:"
+msgstr "Molimo Vas potvrdite e-mail na link dole:"
+
+#: udata/templates/mail/security/confirmation_instructions.html:14
+msgid "Confirm my account"
+msgstr "Potvrdi moj nalog"
+
+#: udata/templates/mail/security/login_instructions.html:6
+msgid "You can log into your account through the link below:"
+msgstr "Možete se ulogovati na Vaš nalog linkom dole:"
+
+#: udata/templates/mail/security/login_instructions.html:13
+msgid "Login now"
+msgstr "Uloguj se"
+
+#: udata/templates/mail/security/reset_instructions.html:7
+#, python-format
+msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
+msgstr "Neko je zatražio resetovanje lozinke za vaš nalog na sajtu %(site)s. Ako to niste vi, zanemarite ovu poruku"
+
+#: udata/templates/mail/security/reset_instructions.html:10
+msgid "To reset your password, please confirm your request through the link below:"
+msgstr "Da biste resetovali lozinku, potvrdite zahtev pomoću sledeće veze:"
+
+#: udata/templates/mail/security/reset_instructions.html:18
+msgid "Reset my password"
+msgstr "Resetuj moju lozinku"
+
+#: udata/templates/mail/security/reset_notice.html:7
+#, python-format
+msgid "Your password for %(site)s has been reset."
+msgstr "Vaša lozinka za sajt %(site)s je resetovana."
+
+#: udata/templates/mail/security/welcome.html:7
+#, python-format
+msgid "Welcome to %(site)s!"
+msgstr "Dobro došli na %(site)s!"
+
+#: udata/templates/mail/security/welcome.html:10
+msgid "To activate your account, please confirm your email address through the link below:"
+msgstr "Da biste aktivirali svoj nalog, potvrdite svoju e-adresu pomoću sledeće veze:"
+
+#: udata/templates/mail/security/welcome.html:18
+msgid "Confirm now"
+msgstr "Potvrdi"
+
+#: udata/templates/security/change_password.html:12
+#: udata/templates/security/change_password.html:19
+msgid "Change Password"
+msgstr "Promeni lozinku"
+
+#: udata/templates/security/forgot_password.html:12
+#: udata/templates/security/forgot_password.html:18
+#: udata/templates/security/reset_password.html:13
+#: udata/templates/security/reset_password.html:19
+msgid "Reset Password"
+msgstr "Resetovanje lozinke"
+
+#: udata/templates/security/forgot_password.html:13
+msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgstr "Zaboravili ste lozinku? Unesite e-adresu u nastavku, a mi ćemo vam poslati uputstva za postavlјanje nove."
+
+#: udata/templates/security/login_user.html:14
+msgid "Sign In"
+msgstr "Prijavite se"
+
+#: udata/templates/security/login_user.html:18
+msgid "Sign in"
+msgstr "Prijavite se"
+
+#: udata/templates/security/login_user.html:22
+msgid "Forgot your password?"
+msgstr "Zaboravili ste lozinku?"
+
+#: udata/templates/security/login_user.html:24
+msgid "Recover your password"
+msgstr "Resetujte lozinku"
+
+#: udata/templates/security/login_user.html:29
+msgid "Confirmation instructions not received?"
+msgstr "Niste primili mejl sa instrukcijama?"
+
+#: udata/templates/security/login_user.html:31
+msgid "Send the instructions again"
+msgstr "Pošalјi instrukcije ponovo"
+
+#: udata/templates/security/login_user.html:42
+#: udata/templates/security/register_user.html:29
+msgid "Sign up"
+msgstr "Registrujte se"
+
+#: udata/templates/security/login_user.html:45
+msgid "Register"
+msgstr "Registracija"
+
+#: udata/templates/security/login_user.html:49
+msgid "Create an account"
+msgstr "Napravite nalog"
+
+#: udata/templates/security/register_user.html:12
+msgid "Sign Up"
+msgstr "Registrujte se"
+
+#: udata/templates/security/register_user.html:21
+#, python-format
+msgid "I have read and accept <a href=\"%(url)s\"> the terms and conditions of the service.</a>"
+msgstr "Pročitao sam i prihvatio <a href=\"%(url)s\">sve uslove korišćenja.</a>"
+
+#: udata/templates/security/send_confirmation.html:12
+msgid "Resend confirmation instructions"
+msgstr "Ponovo pošalјi instrukcije"
+
+#: udata/templates/security/send_confirmation.html:18
+msgid "Submit"
+msgstr "Sačuvaj"
+
