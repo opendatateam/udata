@@ -73,7 +73,7 @@ def finalize_reindex(models, start):
     log.warning(
         f'In order to use the newly created index, you should set the alias '
         f'on the search service. Ex on `udata-search-service`, run:\n'
-        f'`flask set-alias {default_index_suffix_name(start)}{models_str}`'
+        f'`udata-search-service set-alias {default_index_suffix_name(start)}{models_str}`'
     )
 
     modified_since_reindex = 0
@@ -85,13 +85,13 @@ def finalize_reindex(models, start):
         f'{modified_since_reindex} documents have been modified since reindexation start. '
         f'After having set the appropriate alias, you can index last changes since the '
         f'beginning of the indexation. Example, you can run:\n'
-        f'`time udata search index -r false -f {default_index_suffix_name(start)}`'
+        f'`udata search index -f {default_index_suffix_name(start)}`'
     )
 
 
 @grp.command()
 @click.argument('models', nargs=-1, metavar='[<model> ...]')
-@click.option('-r', '--reindex', default=True, type=bool)
+@click.option('-r', '--reindex', default=False, type=bool)
 @click.option('-f', '--from_datetime', type=str)
 def index(models=None, reindex=True, from_datetime=None):
     '''

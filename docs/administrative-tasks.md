@@ -159,28 +159,32 @@ $ udata job unschedule my-job arg key=value
 Sometimes, you need to reindex data (in case of model breaking changes, workers defect...).
 You can use the `udata search index` command to do so.
 
-**Warning**: After reindexation execution, you'll need to change the alias on the search service to use the new index.
+By default, this command indexes all documents to the existing indices.
 
-This command supports reindexation of all models without arguments or particular model with model names as arguments:
+This command supports indexation of all models without arguments or particular model with model names as arguments:
 
 ```shell
-# Reindex everything
+# Index everything
 udata search index
-# Only reindex reuses and organizations
+# Only index reuses and organizations
 udata search index reuses organizations
 ```
 
+
+
+It's possible to reindex from scratch, indexing documents to a new index.
+```shell
+time udata search index --reindex true
+```
 The target index name will be time-based, ex: dataset-2022-02-20-20-02.
 
-It's possible to index documents to existing index instead of targeting a new index.
-```shell
-time udata search index --reindex false
-```
+**Warning**: After full reindexation execution, you'll need to change the alias on the search service to use the new index.
+
 
 It's possible to index or reindex only last modified documents.
 
 ```shell
-time udata search index --reindex false -f 2022-02-20-20-02
+time udata search index-f 2022-02-20-20-02
 ```
 
 ## Workers
