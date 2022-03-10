@@ -26,9 +26,9 @@ long_description = '\n'.join((
 install_requires = pip('install.pip')
 
 setup(
-    name='govrs',
-    version=__import__('govrs').__version__,
-    description=__import__('govrs').__description__,
+    name='udata',
+    version=__import__('udata').__version__,
+    description=__import__('udata').__description__,
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='http://data.gov.rs',
