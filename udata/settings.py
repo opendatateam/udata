@@ -21,7 +21,7 @@ class Defaults(object):
         'sr': 'Српски',
         'srl': 'Srpski',
     }
-    DEFAULT_LANGUAGE = 'en'
+    DEFAULT_LANGUAGE = 'sr'
     SECRET_KEY = 'Default uData secret key'
     CONTACT_EMAIL = 'contact@example.org'
     TERRITORIES_EMAIL = 'territories@example.org'
@@ -125,7 +125,7 @@ class Defaults(object):
     AUTO_INDEX = True
 
     SITE_ID = 'default'
-    SITE_TITLE = 'uData'
+    SITE_TITLE = 'Отворени подаци'
     SITE_KEYWORDS = ['opendata', 'udata']
     SITE_AUTHOR_URL = None
     SITE_AUTHOR = 'Udata'
