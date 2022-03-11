@@ -169,7 +169,7 @@ msgstr "Le mainteneur officiel de la licence"
 
 #: udata/core/dataset/api_fields.py:25
 msgid "The license official URL"
-msgstr "L'URL officiel de la licence"
+msgstr "L'URL officielle de la licence"
 
 #: udata/core/dataset/api_fields.py:26
 msgid "Some arbitry flags"
@@ -197,7 +197,7 @@ msgstr "L'ID unique de la ressource"
 
 #: udata/core/dataset/api_fields.py:46
 msgid "The resource markdown description"
-msgstr "La description markdown de la ressource "
+msgstr "La description markdown de la ressource"
 
 #: udata/core/dataset/api_fields.py:48
 msgid "Whether the resource is an uploaded file"
@@ -347,7 +347,7 @@ msgstr "Est-ce que le jeu de donnée est réservé au propriétaire ou à l'orga
 
 #: udata/core/dataset/api_fields.py:152
 msgid "The dataset badges"
-msgstr "les badges du jeu de données"
+msgstr "Les badges du jeu de données"
 
 #: udata/core/dataset/api_fields.py:155
 msgid "The dataset resources"
@@ -383,7 +383,7 @@ msgstr "La licence du jeu de données"
 
 #: udata/core/dataset/api_fields.py:184
 msgid "The dataset API URI"
-msgstr "l'URI de l'API du jeu de données"
+msgstr "L'URI de l'API du jeu de données"
 
 #: udata/core/dataset/api_fields.py:187
 msgid "The dataset page URL"
@@ -423,7 +423,7 @@ msgstr "Le nom affiché du schéma"
 
 #: udata/core/dataset/api_fields.py:220
 msgid "The available versions of the schema"
-msgstr "Les versions disponibles du schema"
+msgstr "Les versions disponibles du schéma"
 
 #: udata/core/dataset/forms.py:25
 msgid "Checksum value"
