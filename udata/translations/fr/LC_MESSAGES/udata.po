@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-01-11 09:51+0100\n"
+"POT-Creation-Date: 2022-03-10 15:00+0100\n"
 "PO-Revision-Date: 2022-01-11 08:59\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
@@ -147,6 +147,284 @@ msgstr "a mis à jour un jeu de données"
 msgid "deleted a dataset"
 msgstr "a supprimé un jeu de données"
 
+#: udata/core/dataset/api_fields.py:15
+msgid "The hashing algorithm used to compute the checksum"
+msgstr "L'algorithme de hashage utilisé pour calculer le checksum"
+
+#: udata/core/dataset/api_fields.py:17
+msgid "The resulting checksum/hash"
+msgstr "Le checksum/hash résultant"
+
+#: udata/core/dataset/api_fields.py:22
+msgid "The license identifier"
+msgstr "L'identifiant de licence"
+
+#: udata/core/dataset/api_fields.py:23 udata/core/dataset/api_fields.py:44
+msgid "The resource title"
+msgstr "Le titre de la ressource"
+
+#: udata/core/dataset/api_fields.py:24
+msgid "The license official maintainer"
+msgstr "Le mainteneur officiel de la licence"
+
+#: udata/core/dataset/api_fields.py:25
+msgid "The license official URL"
+msgstr "L'URL officiel de la licence"
+
+#: udata/core/dataset/api_fields.py:26
+msgid "Some arbitry flags"
+msgstr "Quelques flags arbitraires"
+
+#: udata/core/dataset/api_fields.py:29
+msgid "Same alternative known URLs (improve rematch)"
+msgstr "Mêmes URLs alternatives connues (améliore la correspondance)"
+
+#: udata/core/dataset/api_fields.py:33
+msgid "Same alternative known titles (improve rematch)"
+msgstr "Mêmes titres alternatifs connus (améliore la correspondance)"
+
+#: udata/core/dataset/api_fields.py:38
+msgid "The frequency identifier"
+msgstr "L'identifiant de la fréquence"
+
+#: udata/core/dataset/api_fields.py:39
+msgid "The frequency display name"
+msgstr "Le nom affiché de la fréquence"
+
+#: udata/core/dataset/api_fields.py:43
+msgid "The resource unique ID"
+msgstr "L'ID unique de la ressource"
+
+#: udata/core/dataset/api_fields.py:46
+msgid "The resource markdown description"
+msgstr "La description markdown de la ressource "
+
+#: udata/core/dataset/api_fields.py:48
+msgid "Whether the resource is an uploaded file"
+msgstr "Est-ce que la ressource est un fichier uploadé"
+
+#: udata/core/dataset/api_fields.py:49
+msgid "a remote file or an API"
+msgstr "un fichier distant ou une API"
+
+#: udata/core/dataset/api_fields.py:52 udata/core/dataset/forms.py:78
+msgid "Resource type (documentation, API...)"
+msgstr "Type de ressource (documentation, API...)"
+
+#: udata/core/dataset/api_fields.py:54
+msgid "The resource format"
+msgstr "Le format de la ressource"
+
+#: udata/core/dataset/api_fields.py:55
+msgid "The resource URL"
+msgstr "L'URL de la ressource"
+
+#: udata/core/dataset/api_fields.py:56
+msgid "The permanent URL redirecting to the latest version of the resource. When the resource data is updated, the URL will change, the latest URL won't."
+msgstr "L'URL permanente redirigeant vers la dernière version de la ressource. Lorsque la donnée de la ressource est mise à jour, l'URL change, mais pas la dernière URL."
+
+#: udata/core/dataset/api_fields.py:63
+msgid "A checksum to validate file validity"
+msgstr "Un checksum pour valider la validité du fichier"
+
+#: udata/core/dataset/api_fields.py:64
+msgid "The resource file size in bytes"
+msgstr "La taille du fichier de ressource en bytes"
+
+#: udata/core/dataset/api_fields.py:65
+msgid "The resource mime type"
+msgstr "Le mime type de la ressource"
+
+#: udata/core/dataset/api_fields.py:67
+msgid "The resource creation date"
+msgstr "La date de création de la ressource"
+
+#: udata/core/dataset/api_fields.py:69
+msgid "The resource publication date"
+msgstr "La date de publication de la ressource"
+
+#: udata/core/dataset/api_fields.py:72
+msgid "The resource last modification date"
+msgstr "La date de dernière modification de la ressource"
+
+#: udata/core/dataset/api_fields.py:74
+msgid "The resource metrics"
+msgstr "Les métriques de la ressource"
+
+#: udata/core/dataset/api_fields.py:75 udata/core/dataset/api_fields.py:166
+msgid "Extra attributes as key-value pairs"
+msgstr "Champs supplémentaires sous forme de paires clés-valeurs"
+
+#: udata/core/dataset/api_fields.py:76
+msgid "An optional preview URL to be loaded as a standalone page (ie. iframe or new page)"
+msgstr "Une URL de prévisualisation optionnelle à charger en tant que page séparée (par exemple, une iframe ou une nouvelle page)."
+
+#: udata/core/dataset/api_fields.py:80
+msgid "Reference to the associated schema"
+msgstr "Référence au schéma associé"
+
+#: udata/core/dataset/api_fields.py:85
+msgid "Whether the upload succeeded or not."
+msgstr "Si l'upload a été effectué avec succès ou pas"
+
+#: udata/core/dataset/api_fields.py:89
+msgid "Resource ID"
+msgstr "ID de la ressource"
+
+#: udata/core/dataset/api_fields.py:92
+msgid "The temporal coverage start date"
+msgstr "La date de début de la couverture temporelle"
+
+#: udata/core/dataset/api_fields.py:94
+msgid "The temporal coverage end date"
+msgstr "La date de fin de la couverture temporelle"
+
+#: udata/core/dataset/api_fields.py:99 udata/core/dataset/api_fields.py:135
+#: udata/core/dataset/api_fields.py:199
+msgid "The dataset title"
+msgstr "Le titre du jeu de données"
+
+#: udata/core/dataset/api_fields.py:100 udata/core/dataset/api_fields.py:136
+#: udata/core/dataset/api_fields.py:200
+msgid "An optional dataset acronym"
+msgstr "Un acronyme du jeu de données optionnel"
+
+#: udata/core/dataset/api_fields.py:104
+msgid "The API URI for this dataset"
+msgstr "L'URI de l'API pour ce jeu de données"
+
+#: udata/core/dataset/api_fields.py:107 udata/core/dataset/api_fields.py:207
+msgid "The web page URL for this dataset"
+msgstr "L'URL de la page web pour ce jeu de données"
+
+#: udata/core/dataset/api_fields.py:113
+msgid "Reference to the associated dataset"
+msgstr "Référence au jeu de données associé"
+
+#: udata/core/dataset/api_fields.py:116 udata/core/dataset/api_fields.py:170
+msgid "The producer organization"
+msgstr "L'organisation productrice"
+
+#: udata/core/dataset/api_fields.py:119 udata/core/dataset/api_fields.py:172
+msgid "The user information"
+msgstr "L'information de l'utilisateur"
+
+#: udata/core/dataset/api_fields.py:134 udata/core/dataset/api_fields.py:198
+msgid "The dataset identifier"
+msgstr "L'identifiant du jeu de données"
+
+#: udata/core/dataset/api_fields.py:138 udata/core/dataset/api_fields.py:202
+msgid "The dataset permalink string"
+msgstr "Le permalien du jeu de données"
+
+#: udata/core/dataset/api_fields.py:140
+msgid "The dataset description in markdown"
+msgstr "La description du jeu de données en markdown"
+
+#: udata/core/dataset/api_fields.py:142
+msgid "The dataset creation date"
+msgstr "La date de création du jeu de données"
+
+#: udata/core/dataset/api_fields.py:144
+msgid "The dataset last modification date"
+msgstr "La date de dernière modification du jeu de données"
+
+#: udata/core/dataset/api_fields.py:145
+msgid "The deletion date if deleted"
+msgstr "La date de suppression si supprimé"
+
+#: udata/core/dataset/api_fields.py:146
+msgid "The archival date if archived"
+msgstr "La date d'archivage si archivé"
+
+#: udata/core/dataset/api_fields.py:147
+msgid "Is the dataset featured"
+msgstr "Est-ce que le jeu de donnée est valorisé"
+
+#: udata/core/dataset/api_fields.py:149
+msgid "Is the dataset private to the owner or the organization"
+msgstr "Est-ce que le jeu de donnée est réservé au propriétaire ou à l'organisation"
+
+#: udata/core/dataset/api_fields.py:152
+msgid "The dataset badges"
+msgstr "les badges du jeu de données"
+
+#: udata/core/dataset/api_fields.py:155
+msgid "The dataset resources"
+msgstr "Les ressources du jeu de données"
+
+#: udata/core/dataset/api_fields.py:159
+msgid "The dataset community submitted resources"
+msgstr "Les ressources soumises par la communauté du jeu de données"
+
+#: udata/core/dataset/api_fields.py:161
+msgid "The update frequency"
+msgstr "La fréquence de mise à jour"
+
+#: udata/core/dataset/api_fields.py:164
+msgid "Next expected update date, you will be notified once that date is reached."
+msgstr "Prochaine date de mise à jour attendue, vous serez informé lorsque cette date sera atteinte."
+
+#: udata/core/dataset/api_fields.py:167
+msgid "The dataset metrics"
+msgstr "Les métriques du jeu de données"
+
+#: udata/core/dataset/api_fields.py:175
+msgid "The temporal coverage"
+msgstr "La couverture temporelle"
+
+#: udata/core/dataset/api_fields.py:178
+msgid "The spatial coverage"
+msgstr "La couverture spatiale"
+
+#: udata/core/dataset/api_fields.py:181
+msgid "The dataset license"
+msgstr "La licence du jeu de données"
+
+#: udata/core/dataset/api_fields.py:184
+msgid "The dataset API URI"
+msgstr "l'URI de l'API du jeu de données"
+
+#: udata/core/dataset/api_fields.py:187
+msgid "The dataset page URL"
+msgstr "L'URL de la page du jeu de données"
+
+#: udata/core/dataset/api_fields.py:188
+msgid "The dataset quality"
+msgstr "La qualité du jeu de données"
+
+#: udata/core/dataset/api_fields.py:190
+msgid "The resources last modification date"
+msgstr "La date de dernière modification des ressources"
+
+#: udata/core/dataset/api_fields.py:204
+msgid "The dataset (organization) logo URL"
+msgstr "L'URL du logo du jeu de donnée (ou de l'organisation)"
+
+#: udata/core/dataset/api_fields.py:208
+msgid "The internal match score"
+msgstr "Le score de matching interne"
+
+#: udata/core/dataset/api_fields.py:212
+msgid "The resource type identifier"
+msgstr "L'identifiant du type de ressource"
+
+#: udata/core/dataset/api_fields.py:213
+msgid "The resource type display name"
+msgstr "Le nom affiché du type de ressource"
+
+#: udata/core/dataset/api_fields.py:218
+msgid "The schema identifier"
+msgstr "L'identifiant du schéma"
+
+#: udata/core/dataset/api_fields.py:219
+msgid "The schema display name"
+msgstr "Le nom affiché du schéma"
+
+#: udata/core/dataset/api_fields.py:220
+msgid "The available versions of the schema"
+msgstr "Les versions disponibles du schema"
+
 #: udata/core/dataset/forms.py:25
 msgid "Checksum value"
 msgstr "Valeur de la somme de contrôle"
@@ -189,10 +467,6 @@ msgstr "Est-ce que la ressource est un fichier uploadé, un fichier distant ou u
 #: udata/core/dataset/forms.py:76 udata/core/reuse/forms.py:24
 msgid "Type"
 msgstr "Type"
-
-#: udata/core/dataset/forms.py:78
-msgid "Resource type (documentation, API...)"
-msgstr "Type de ressource (documentation, API...)"
 
 #: udata/core/dataset/forms.py:80 udata/core/reuse/forms.py:26
 #: udata/harvest/forms.py:64
@@ -439,27 +713,27 @@ msgstr "Fichier uploadé"
 msgid "Remote file"
 msgstr "Fichier distant"
 
-#: udata/core/dataset/models.py:344 udata/core/dataset/rdf.py:331
+#: udata/core/dataset/models.py:353 udata/core/dataset/rdf.py:331
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:400 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:409 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataset/models.py:402 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:411 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "Date de dernière modification"
 
-#: udata/core/dataset/models.py:418
+#: udata/core/dataset/models.py:427
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:434
+#: udata/core/dataset/models.py:443
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:471
+#: udata/core/dataset/models.py:480
 msgid "dataset"
 msgstr "jeu de données"
 
@@ -961,7 +1235,7 @@ msgstr "À propos"
 msgid "Roles"
 msgstr "Rôles"
 
-#: udata/core/user/models.py:265 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:270 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -1451,4 +1725,3 @@ msgstr "Renvoyer les instructions de confirmation"
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
 msgstr "Soumettre"
-

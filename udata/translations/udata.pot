@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: udata 3.3.1.dev0\n"
+"Project-Id-Version: udata 3.3.3.dev0\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-01-11 09:51+0100\n"
-"PO-Revision-Date: 2022-01-11 09:51+0100\n"
+"POT-Creation-Date: 2022-03-10 15:48+0100\n"
+"PO-Revision-Date: 2022-03-10 15:48+0100\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: en\n"
 "Language-Team: Open Data Team <i18n@opendata.team>\n"
@@ -150,6 +150,288 @@ msgstr ""
 msgid "deleted a dataset"
 msgstr ""
 
+#: udata/core/dataset/api_fields.py:15
+msgid "The hashing algorithm used to compute the checksum"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:17
+msgid "The resulting checksum/hash"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:22
+msgid "The license identifier"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:23 udata/core/dataset/api_fields.py:44
+msgid "The resource title"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:24
+msgid "The license official maintainer"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:25
+msgid "The license official URL"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:26
+msgid "Some arbitry flags"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:29
+msgid "Same alternative known URLs (improve rematch)"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:33
+msgid "Same alternative known titles (improve rematch)"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:38
+msgid "The frequency identifier"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:39
+msgid "The frequency display name"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:43
+msgid "The resource unique ID"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:46
+msgid "The resource markdown description"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:48
+msgid "Whether the resource is an uploaded file"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:49
+msgid "a remote file or an API"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:52 udata/core/dataset/forms.py:78
+msgid "Resource type (documentation, API...)"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:54
+msgid "The resource format"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:55
+msgid "The resource URL"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:56
+msgid ""
+"The permanent URL redirecting to the latest version of the resource. When the"
+" resource data is updated, the URL will change, the latest URL won't."
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:63
+msgid "A checksum to validate file validity"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:64
+msgid "The resource file size in bytes"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:65
+msgid "The resource mime type"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:67
+msgid "The resource creation date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:69
+msgid "The resource publication date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:72
+msgid "The resource last modification date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:74
+msgid "The resource metrics"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:75 udata/core/dataset/api_fields.py:166
+msgid "Extra attributes as key-value pairs"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:76
+msgid ""
+"An optional preview URL to be loaded as a standalone page (ie. iframe or new "
+"page)"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:80
+msgid "Reference to the associated schema"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:85
+msgid "Whether the upload succeeded or not."
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:89
+msgid "Resource ID"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:92
+msgid "The temporal coverage start date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:94
+msgid "The temporal coverage end date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:99 udata/core/dataset/api_fields.py:135
+#: udata/core/dataset/api_fields.py:199
+msgid "The dataset title"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:100 udata/core/dataset/api_fields.py:136
+#: udata/core/dataset/api_fields.py:200
+msgid "An optional dataset acronym"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:104
+msgid "The API URI for this dataset"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:107 udata/core/dataset/api_fields.py:207
+msgid "The web page URL for this dataset"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:113
+msgid "Reference to the associated dataset"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:116 udata/core/dataset/api_fields.py:170
+msgid "The producer organization"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:119 udata/core/dataset/api_fields.py:172
+msgid "The user information"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:134 udata/core/dataset/api_fields.py:198
+msgid "The dataset identifier"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:138 udata/core/dataset/api_fields.py:202
+msgid "The dataset permalink string"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:140
+msgid "The dataset description in markdown"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:142
+msgid "The dataset creation date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:144
+msgid "The dataset last modification date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:145
+msgid "The deletion date if deleted"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:146
+msgid "The archival date if archived"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:147
+msgid "Is the dataset featured"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:149
+msgid "Is the dataset private to the owner or the organization"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:152
+msgid "The dataset badges"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:155
+msgid "The dataset resources"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:159
+msgid "The dataset community submitted resources"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:161
+msgid "The update frequency"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:164
+msgid "Next expected update date, you will be notified once that date is reached."
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:167
+msgid "The dataset metrics"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:175
+msgid "The temporal coverage"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:178
+msgid "The spatial coverage"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:181
+msgid "The dataset license"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:184
+msgid "The dataset API URI"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:187
+msgid "The dataset page URL"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:188
+msgid "The dataset quality"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:190
+msgid "The resources last modification date"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:204
+msgid "The dataset (organization) logo URL"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:208
+msgid "The internal match score"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:212
+msgid "The resource type identifier"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:213
+msgid "The resource type display name"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:218
+msgid "The schema identifier"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:219
+msgid "The schema display name"
+msgstr ""
+
+#: udata/core/dataset/api_fields.py:220
+msgid "The available versions of the schema"
+msgstr ""
+
 #: udata/core/dataset/forms.py:25
 msgid "Checksum value"
 msgstr ""
@@ -193,10 +475,6 @@ msgstr ""
 
 #: udata/core/dataset/forms.py:76 udata/core/reuse/forms.py:24
 msgid "Type"
-msgstr ""
-
-#: udata/core/dataset/forms.py:78
-msgid "Resource type (documentation, API...)"
 msgstr ""
 
 #: udata/core/dataset/forms.py:80 udata/core/reuse/forms.py:26
@@ -444,27 +722,27 @@ msgstr ""
 msgid "Remote file"
 msgstr ""
 
-#: udata/core/dataset/models.py:344 udata/core/dataset/rdf.py:331
+#: udata/core/dataset/models.py:353 udata/core/dataset/rdf.py:331
 msgid "Nameless resource"
 msgstr ""
 
-#: udata/core/dataset/models.py:400 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:409 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr ""
 
-#: udata/core/dataset/models.py:402 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:411 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr ""
 
-#: udata/core/dataset/models.py:418
+#: udata/core/dataset/models.py:427
 msgid "Future date of update"
 msgstr ""
 
-#: udata/core/dataset/models.py:434
+#: udata/core/dataset/models.py:443
 msgid "Pivotal data"
 msgstr ""
 
-#: udata/core/dataset/models.py:471
+#: udata/core/dataset/models.py:480
 msgid "dataset"
 msgstr ""
 
@@ -966,7 +1244,7 @@ msgstr ""
 msgid "Roles"
 msgstr ""
 
-#: udata/core/user/models.py:265 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:270 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr ""
 
