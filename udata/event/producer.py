@@ -17,7 +17,7 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(model, id, message_type, document=None, index=None):
+def produce(model, id, message_type, document=None, **kwargs):
     '''Produce message with marshalled document'''
     producer = KafkaProducerSingleton.get_instance()
     key = id.encode("utf-8")
@@ -30,16 +30,16 @@ def produce(model, id, message_type, document=None, index=None):
     if not topic:
         return
 
-    if not index:
-        index = topic
+    if not 'index' in kwargs:
+        kwargs['index'] = topic
     value = {
         'service': 'udata',
         'data': document,
         'meta': {
-            'message_type': message_type.value,
-            'index': index
+            'message_type': message_type.value
         }
     }
+    value['meta'].update(kwargs)
 
     producer.send(topic, value=value, key=key)
     producer.flush()
