@@ -24,6 +24,7 @@
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/3/resources/1"/>
         <dct:license>Licence Ouverte Version 2.0</dct:license>
+        <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>

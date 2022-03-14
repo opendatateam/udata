@@ -122,6 +122,7 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
+        assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/1'
 
         assert len(dataset.resources) == 1
 
@@ -229,6 +230,7 @@ class DcatBackendTest:
         extras = {'extras__dct:identifier': '3'}
         dataset = Dataset.objects.get(**extras)
         assert dataset.license.id == 'lov2'
+        assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/3'
         assert dataset.created_at.date() == date(2016, 12, 14)
         assert dataset.last_modified.date() == date(2016, 12, 14)
 

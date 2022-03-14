@@ -421,6 +421,14 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     if isinstance(d.identifier, URIRef):
         dataset.extras['uri'] = d.identifier.toPython()
 
+    landing_page = url_from_rdf(d, DCAT.landingPage)
+    if landing_page:
+        try:
+            uris.validate(landing_page)
+            dataset.extras['remote_url'] = landing_page
+        except uris.ValidationError:
+            pass
+
     dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
     licenses = set()
