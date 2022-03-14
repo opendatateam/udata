@@ -5,7 +5,7 @@ import pytest
 
 from datetime import date
 
-from udata.models import Dataset, License
+from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import LicenseFactory
 
@@ -239,6 +239,7 @@ class DcatBackendTest:
         actions.run(source.slug)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
+        assert dataset.frequency == 'daily'
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)

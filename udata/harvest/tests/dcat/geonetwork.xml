@@ -44,7 +44,7 @@
       <dct:updated xmlns:dct="http://purl.org/dc/terms/">2021-05-05</dct:updated>
       <dct:publisher xmlns:dct="http://purl.org/dc/terms/"
                      rdf:resource="https://sig.oreme.org/geonetwork/srv/resources/organizations/UMR%20HydroSciences%20Montpellier%20%28HSM%29"/>
-      <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">continual</dct:accrualPeriodicity>
+      <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
       <dct:language xmlns:dct="http://purl.org/dc/terms/">eng</dct:language>
       <dct:license xmlns:dct="http://purl.org/dc/terms/">copyright</dct:license>
       <dct:license xmlns:dct="http://purl.org/dc/terms/">license</dct:license>

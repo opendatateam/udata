@@ -22,7 +22,7 @@ from udata.rdf import (
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
 
-from .models import Dataset, Resource, Checksum, License
+from .models import Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES
 
 log = logging.getLogger(__name__)
 
@@ -299,6 +299,9 @@ def frequency_from_rdf(term):
             term = URIRef(uris.validate(term))
         except uris.ValidationError:
             pass
+    if isinstance(term, Literal):
+        if term.toPython() in UPDATE_FREQUENCIES:
+            return term.toPython()
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
