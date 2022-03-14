@@ -17,21 +17,15 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(model, id, message_type, document=None, **kwargs):
-    '''Produce message with marshalled document'''
+def produce(id, message_type, document=None, **kwargs):
+    '''
+    Produce message with marshalled document.
+    kwargs is meant to contain non generic values
+    for the meta fields of the message.
+    '''
     producer = KafkaProducerSingleton.get_instance()
     key = id.encode("utf-8")
-    if model == Dataset:
-        topic = 'dataset'
-    if model == Organization:
-        topic = 'organization'
-    if model == Reuse:
-        topic = 'reuse'
-    if not topic:
-        return
 
-    if not 'index' in kwargs:
-        kwargs['index'] = topic
     value = {
         'service': 'udata',
         'data': document,
