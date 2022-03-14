@@ -403,6 +403,8 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     dataset.title = rdf_value(d, DCT.title)
     dataset.description = sanitize_html(d.value(DCT.description))
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
+    dataset.created_at = rdf_value(d, DCT.issued, dataset.created_at)
+    dataset.last_modified = rdf_value(d, DCT.modified, dataset.last_modified)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:

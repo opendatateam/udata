@@ -229,6 +229,8 @@ class DcatBackendTest:
         extras = {'extras__dct:identifier': '3'}
         dataset = Dataset.objects.get(**extras)
         assert dataset.license.id == 'lov2'
+        assert dataset.created_at.date() == date(2016, 12, 14)
+        assert dataset.last_modified.date() == date(2016, 12, 14)
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
@@ -239,6 +241,8 @@ class DcatBackendTest:
         actions.run(source.slug)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
+        assert dataset.created_at.date() == date(2004, 11, 3)
+        assert dataset.last_modified.date() == date(2021, 5, 5)
         assert dataset.frequency == 'daily'
 
     def test_unsupported_mime_type(self, rmock):
