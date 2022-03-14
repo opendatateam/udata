@@ -17,7 +17,7 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(id, message_type, document=None, **kwargs):
+def produce(topic, id, message_type, document=None, **kwargs):
     '''
     Produce message with marshalled document.
     kwargs is meant to contain non generic values

@@ -26,7 +26,7 @@ def search_produce(model, id, message_type, document=None, index=None):
     if not index:
         index = topic
 
-    produce(id, KafkaMessageType.INDEX, document, index=index)
+    produce(topic, id, message_type, document, index=index)
 
 
 @task(route='high.search')
