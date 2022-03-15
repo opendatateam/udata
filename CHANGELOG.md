@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add a transport banner hook [#94](https://github.com/etalab/udata-front/pull/94)
 
 ## 1.2.4 (2022-03-01)
 

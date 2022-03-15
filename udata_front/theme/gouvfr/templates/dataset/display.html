@@ -125,6 +125,7 @@
             .format(external_source=external_source)
         )}}
     {% endif %}
+    {{ hook('dataset.display.transport-banner') }}
     {% if dataset.owner %}
     <div class="row">
         <div class="well well-grey-100 col fr-py-3v">
