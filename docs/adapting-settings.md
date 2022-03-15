@@ -190,18 +190,6 @@ The id of a dataset that should be created before running the `export-csv` job a
 
 ## Search configuration
 
-### SEARCH_AUTOCOMPLETE_ENABLED
-
-**default**: `True`
-
-Enables the search autocomplete on frontend if set to `True`, disables otherwise.
-
-### SEARCH_AUTOCOMPLETE_DEBOUNCE
-
-**default**: `200`
-
-The search autocomplete debounce delay on frontend, in milliseconds.
-
 ### SEARCH_DATASET_FIELDS
 
 **default**:

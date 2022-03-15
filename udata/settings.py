@@ -430,11 +430,6 @@ class Defaults(object):
         'about'
     )
 
-    # Autocomplete parameters
-    #########################
-    SEARCH_AUTOCOMPLETE_ENABLED = True
-    SEARCH_AUTOCOMPLETE_DEBOUNCE = 200  # in ms
-
     # Archive parameters
     ####################
     ARCHIVE_COMMENT_USER_ID = None
@@ -460,7 +455,7 @@ class Defaults(object):
                         'DiscussionsAPI.post',
                         'SourcesAPI.post',
                         'FollowAPI.post']
-    
+
     FIXTURE_DATASET_SLUGS = []
 
 
