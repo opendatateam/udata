@@ -116,7 +116,6 @@ $ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
 [mongodb]: https://www.mongodb.org/
 [elasticsearch]: https://www.elastic.co/products/elasticsearch
 [redis]: http://redis.io/
-[gitter]: https://gitter.im/opendatateam/udata
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
 [analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu

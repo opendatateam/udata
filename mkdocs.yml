@@ -3,17 +3,18 @@ site_description: uData Open Data Portal Documentation
 site_author: Etalab
 repo_url: https://github.com/etalab/udata
 
-theme: readthedocs
-theme_dir: 'docs/custom_theme'
+theme:
+    name: readthedocs
+    theme_dir: 'docs/custom_theme'
+    titles_only: True
+    collapse_navigation: True
 
-pages:
+nav:
     - Home: index.md
-    - Deploying:
-        - System dependencies: system-dependencies.md
-        - Installation: installation.md
-        - Docker deployment: docker-deployment.md
+    - User Guide:
+        - Quick start: quickstart.md
+        - Getting started: getting-started.md
         - Adapting settings: adapting-settings.md
-    - Running:
         - Administrative tasks: administrative-tasks.md
         - Harvesting: harvesting.md
         - RDF support: rdf.md
@@ -24,6 +25,10 @@ pages:
         - Adding translations: adding-translations.md
         - Creating a custom theme: creating-theme.md
         - Building the documentation: building-documentation.md
+    - Deploying:
+        - System dependencies: system-dependencies.md
+        - Installation: installation.md
+        - Docker deployment: docker-deployment.md
     - Contributing:
         - Guide: contributing-guide.md
         - Governance: governance.md

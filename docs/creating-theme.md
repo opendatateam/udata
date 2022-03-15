@@ -333,7 +333,6 @@ Here a list of known themes for udata:
 
 ## Help
 
-You can ask for help on the [udata gitter channel][gitter-chan].
 Please report any difficulty you encounter with a dedicated [Github issue][github-new-issue].
 
 [Flask-Themes2]: http://flask-themes2.readthedocs.io/en/latest/
@@ -342,7 +341,6 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 [cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-theme
 [Babel]: http://babel.pocoo.org/
 [PyPI]: https://pypi.org/
-[gitter-chan]: https://gitter.im/opendatateam/udata
 [front-hooks]: https://github.com/etalab/udata-front/blob/master/udata_front/theme/__init__.py
 [Poedit]: https://poedit.net/
 [front-project]: https://github.com/etalab/udata-front/
