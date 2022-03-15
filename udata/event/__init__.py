@@ -1,5 +1,4 @@
 from enum import Enum
-from .producer import produce, KafkaProducerSingleton
 
 
 class KafkaMessageType(Enum):
