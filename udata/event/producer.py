@@ -1,7 +1,6 @@
 import json
 from flask import current_app
 from kafka import KafkaProducer
-from udata.models import Dataset, Organization, Reuse
 
 
 class KafkaProducerSingleton:
