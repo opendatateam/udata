@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 adapter_catalog = {}
 
 
-def search_produce(model, id, message_type, document=None, index=None):
+def send_index_event(model, id, message_type, document=None, index=None):
     if model == Dataset:
         topic = 'dataset'
     if model == Organization:
@@ -39,13 +39,13 @@ def reindex(classname, id):
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
         try:
-            search_produce(model, str(obj.id), KafkaMessageType.INDEX, document)
+            send_index_event(model, str(obj.id), KafkaMessageType.INDEX, document)
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
-            search_produce(model, str(obj.id), KafkaMessageType.UNINDEX, document)
+            send_index_event(model, str(obj.id), KafkaMessageType.UNINDEX, document)
         except Exception:
             log.exception('Unable to desindex %s "%s"', model.__name__, str(obj.id))
 
@@ -55,7 +55,7 @@ def unindex(classname, id):
     model = db.resolve_model(classname)
     log.info('Unindexing %s (%s)', model.__name__, id)
     try:
-        search_produce(model, id, message=KafkaMessageType.UNINDEX)
+        send_index_event(model, id, message_type=KafkaMessageType.UNINDEX)
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 
