@@ -5,7 +5,8 @@ from mongoengine.signals import post_save, post_delete
 
 from udata.models import db, Dataset, Organization, Reuse
 from udata.tasks import task, as_task_param
-from udata.event import KafkaMessageType, produce
+from udata.event import KafkaMessageType
+from udata.event.producer import produce
 
 
 log = logging.getLogger(__name__)
