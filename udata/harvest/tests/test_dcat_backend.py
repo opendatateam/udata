@@ -233,6 +233,7 @@ class DcatBackendTest:
         assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/3'
         assert dataset.created_at.date() == date(2016, 12, 14)
         assert dataset.last_modified.date() == date(2016, 12, 14)
+        assert dataset.frequency == 'daily'
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
@@ -244,8 +245,23 @@ class DcatBackendTest:
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
         assert dataset.created_at.date() == date(2004, 11, 3)
-        assert dataset.last_modified.date() == date(2021, 5, 5)
-        assert dataset.frequency == 'daily'
+
+    def test_sigoreme_xml_catalog(self, rmock):
+        LicenseFactory(id='fr-lo', title='Licence ouverte / Open Licence')
+        url = mock_dcat(rmock, 'sig.oreme.rdf')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+        actions.run(source.slug)
+        dataset = Dataset.objects.filter(organization=org).first()
+
+        assert dataset is not None
+        assert dataset.frequency == 'irregular'
+        assert 'gravi' in dataset.tags  # support dcat:keyword
+        assert 'geodesy' in dataset.tags  # support dcat:theme
+        assert dataset.license.id == 'fr-lo'
+        assert len(dataset.resources) == 1
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)

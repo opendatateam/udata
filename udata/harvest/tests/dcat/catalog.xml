@@ -25,6 +25,7 @@
         <dcat:distribution rdf:resource="http://data.test.org/datasets/3/resources/1"/>
         <dct:license>Licence Ouverte Version 2.0</dct:license>
         <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
+        <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
