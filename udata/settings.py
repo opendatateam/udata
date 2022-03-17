@@ -392,6 +392,11 @@ class Defaults(object):
                          'reuse', 'tag')
     EXPORT_CSV_DATASET_ID = None
 
+    # Autocomplete parameters
+    #########################
+    SEARCH_AUTOCOMPLETE_ENABLED = True
+    SEARCH_AUTOCOMPLETE_DEBOUNCE = 200  # in ms
+
     # Archive parameters
     ####################
     ARCHIVE_COMMENT_USER_ID = None
