@@ -1,13 +1,12 @@
-from enum import Enum
-import json
 import logging
 
 from flask import current_app
-from kafka import KafkaProducer
 from mongoengine.signals import post_save, post_delete
 
 from udata.models import db, Dataset, Organization, Reuse
 from udata.tasks import task, as_task_param
+from udata.event import KafkaMessageType
+from udata.event.producer import produce
 
 
 log = logging.getLogger(__name__)
@@ -15,29 +14,7 @@ log = logging.getLogger(__name__)
 adapter_catalog = {}
 
 
-class KafkaMessageType(Enum):
-    INDEX = 'index'
-    REINDEX = 'reindex'
-    UNINDEX = 'unindex'
-
-
-class KafkaProducerSingleton:
-    __instance = None
-
-    @staticmethod
-    def get_instance() -> KafkaProducer:
-        if KafkaProducerSingleton.__instance is None:
-            KafkaProducerSingleton.__instance = KafkaProducer(
-                bootstrap_servers=current_app.config.get('KAFKA_URI'),
-                value_serializer=lambda v: json.dumps(v).encode('utf-8')
-            )
-        return KafkaProducerSingleton.__instance
-
-
-def produce(model, id, message_type, document=None, index=None):
-    '''Produce message with marshalled document'''
-    producer = KafkaProducerSingleton.get_instance()
-    key = id.encode("utf-8")
+def send_index_event(model, id, message_type, document=None, index=None):
     if model == Dataset:
         topic = 'dataset'
     if model == Organization:
@@ -49,17 +26,8 @@ def produce(model, id, message_type, document=None, index=None):
 
     if not index:
         index = topic
-    value = {
-        'service': 'udata',
-        'data': document,
-        'meta': {
-            'message_type': message_type.value,
-            'index': index
-        }
-    }
 
-    producer.send(topic, value=value, key=key)
-    producer.flush()
+    produce(topic, id, message_type, document, index=index)
 
 
 @task(route='high.search')
@@ -71,13 +39,13 @@ def reindex(classname, id):
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, str(obj.id), KafkaMessageType.INDEX, document)
+            send_index_event(model, str(obj.id), KafkaMessageType.INDEX, document)
         except Exception:
             log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
         try:
-            produce(model, str(obj.id), KafkaMessageType.UNINDEX, document)
+            send_index_event(model, str(obj.id), KafkaMessageType.UNINDEX, document)
         except Exception:
             log.exception('Unable to desindex %s "%s"', model.__name__, str(obj.id))
 
@@ -87,7 +55,7 @@ def unindex(classname, id):
     model = db.resolve_model(classname)
     log.info('Unindexing %s (%s)', model.__name__, id)
     try:
-        produce(model, id, message=KafkaMessageType.UNINDEX)
+        send_index_event(model, id, message_type=KafkaMessageType.UNINDEX)
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 

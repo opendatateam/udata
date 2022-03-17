@@ -8,7 +8,8 @@ from unittest.mock import Mock
 from udata import search
 from udata.i18n import gettext as _
 from udata.utils import clean_string
-from udata.search import KafkaProducerSingleton, reindex, as_task_param
+from udata.event import KafkaProducerSingleton
+from udata.search import reindex, as_task_param
 from udata.search.commands import index_model
 from udata.core.dataset.search import DatasetSearch
 from udata.core.dataset.factories import DatasetFactory, VisibleDatasetFactory
