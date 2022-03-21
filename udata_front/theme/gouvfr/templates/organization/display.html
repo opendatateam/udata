@@ -93,10 +93,20 @@
     <h2>{{ _('Datasets') }}<sup>{{ total_datasets }}</sup></h2>
     {% for dataset in datasets %}
         <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
-            class="unstyled w-100">{% include theme('dataset/search-result.html') %}
+            class="unstyled block w-100">{% include theme('dataset/search-result.html') %}
         </a>
     {% endfor %}
-    {{ paginator(datasets, arg_name='datasets_page', url='#organization-datasets') }}
+    <div class="fr-my-2w">
+        {{ paginator(datasets, arg_name='datasets_page', url='#organization-datasets') }}
+    </div>
+    <div class="text-align-center">
+        <a
+            href="{{ url_for('datasets.list', organization=org.id) }}"
+            class="fr-btn fr-btn--secondary fr-fi-eye-line fr-btn--icon-left"
+        >
+            {{ _('See %(count)s datasets', count=total_datasets ) }}
+        </a>
+    </div>
 </section>
 {% endif %}
 {% if reuses and reuses|length > 0 %}

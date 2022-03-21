@@ -117,5 +117,6 @@
   "Private": "Privé",
   "Unfeature this content": "Ne plus mettre en avant ce contenu",
   "Feature this content": "Mettre ce contenu en avant",
-  "Preview of resource X": "Prévisualisation de la ressource {title}"
+  "Preview of resource X": "Prévisualisation de la ressource {title}",
+  "An error occurred while featuring this subject.": ""
 }
