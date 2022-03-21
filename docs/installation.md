@@ -117,7 +117,7 @@ Let's start with the uwsgi configuration file:
 master= true
 
 ; Python / Environment configuration
-plugin = python
+plugin = python3
 home = /srv/udata
 chdir = %(home)
 virtualenv = %(home)
