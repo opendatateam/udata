@@ -361,7 +361,9 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             dataset.resources.append(resource)
     resource.title = title_from_rdf(distrib, url)
     resource.url = url
-    resource.description = sanitize_html(distrib.value(DCT.description))
+    # Support dct:abstract if dct:description is missing (sometimes used instead)
+    description = distrib.value(DCT.description) or distrib.value(DCT.abstract)
+    resource.description = sanitize_html(description)
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
     resource.mime = rdf_value(distrib, DCAT.mediaType)
     fmt = rdf_value(distrib, DCT.format)
@@ -401,7 +403,9 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     d = graph.resource(node)
 
     dataset.title = rdf_value(d, DCT.title)
-    dataset.description = sanitize_html(d.value(DCT.description))
+    # Support dct:abstract if dct:description is missing (sometimes used instead)
+    description = d.value(DCT.description) or d.value(DCT.abstract)
+    dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
     dataset.created_at = rdf_value(d, DCT.issued, dataset.created_at)
     dataset.last_modified = rdf_value(d, DCT.modified, dataset.last_modified)

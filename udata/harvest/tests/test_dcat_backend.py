@@ -234,6 +234,12 @@ class DcatBackendTest:
         assert dataset.created_at.date() == date(2016, 12, 14)
         assert dataset.last_modified.date() == date(2016, 12, 14)
         assert dataset.frequency == 'daily'
+        assert dataset.description == 'Dataset 3 description'
+
+        extras = {'extras__dct:identifier': '1'}
+        dataset = Dataset.objects.get(**extras)
+        # test abstract description support
+        assert dataset.description == 'Dataset 1 description'
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
@@ -262,6 +268,7 @@ class DcatBackendTest:
         assert 'geodesy' in dataset.tags  # support dcat:theme
         assert dataset.license.id == 'fr-lo'
         assert len(dataset.resources) == 1
+        assert dataset.description.startswith('Data from the \'National network')
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)
