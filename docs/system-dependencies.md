@@ -2,7 +2,7 @@
 
 ## Python requirements
 
-udata requires [Python][] 3.6, its development tools and some libraries to be installed (with their headers).
+udata requires [Python][] 3.7, its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:
 
