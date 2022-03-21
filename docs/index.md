@@ -14,7 +14,7 @@ See [getting started](getting-started.md)
 
 ## I want to deploy an instance on production servers
 
-See [System dependencies](system-dependencies.md).
+See [system dependencies](system-dependencies.md).
 
 ## I found a bug or I want to propose an improvement
 
