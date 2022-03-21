@@ -5,11 +5,12 @@
 - Add a transport banner hook [#94](https://github.com/etalab/udata-front/pull/94)
 - Add button on organization page to see all of its datasets [#93](https://github.com/etalab/udata-front/pull/93)
 - Format home page numbers [#90](https://github.com/etalab/udata-front/pull/90)
+- Let browsers decide what cursor to use [#89](https://github.com/etalab/udata-front/pull/89)
 
 ## 1.2.4 (2022-03-01)
 
 - **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
-- Fix `<read-more>` component height when it contains `<img>` [65](https://github.com/etalab/udata-front/pull/65) [85](https://github.com/etalab/udata-front/pull/85)
+- Fix `<read-more>` component height when it contains `<img>` [#65](https://github.com/etalab/udata-front/pull/65) [#85](https://github.com/etalab/udata-front/pull/85)
 - Add featured button component back for sysadmin [#79](https://github.com/etalab/udata-front/pull/79)
 - Update reuse style [#52](https://github.com/etalab/udata-front/pull/52) [#81](https://github.com/etalab/udata-front/pull/81)
 - Add banner to broken user page [#76](https://github.com/etalab/udata-front/pull/76)
