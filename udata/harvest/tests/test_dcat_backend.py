@@ -251,6 +251,7 @@ class DcatBackendTest:
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
         assert dataset.created_at.date() == date(2004, 11, 3)
+        assert dataset.description.startswith('Data of type chemistry')
 
     def test_sigoreme_xml_catalog(self, rmock):
         LicenseFactory(id='fr-lo', title='Licence ouverte / Open Licence')

@@ -361,9 +361,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             dataset.resources.append(resource)
     resource.title = title_from_rdf(distrib, url)
     resource.url = url
-    # Support dct:abstract if dct:description is missing (sometimes used instead)
-    description = distrib.value(DCT.description) or distrib.value(DCT.abstract)
-    resource.description = sanitize_html(description)
+    resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
     resource.mime = rdf_value(distrib, DCAT.mediaType)
     fmt = rdf_value(distrib, DCT.format)
