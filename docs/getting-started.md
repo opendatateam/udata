@@ -20,8 +20,6 @@ We’ll use [docker-compose](https://docs.docker.com/compose/) to manage externa
     On ARM architecture such as Mac M1, you’ll have to use a native elasticsearch because there is no docker image available. You can download it from the [official website](https://www.elastic.co/fr/downloads/past-releases/elasticsearch-2-4-6).
     You’ll have to launch the binary `./bin/elasticsearch` in addition to the docker-compose command.
 
-</aside>
-
 # Setup udata
 
 udata requires a directory to contain the project, its plugins and all associated content.
@@ -80,7 +78,7 @@ udata uses pip to install its dependencies. You can create a
 activate it and install the requirements with the following commands.
 
 ```bash
-python3 -m virtualenv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements/develop.pip
 pip install -e .
@@ -155,15 +153,11 @@ This define `dev.local:7000` as the URL for your local setup. You’ll have to e
 
 ## Running the project for the first time
 
-You need to initialize some data before being able to use udata.
+You need to initialize some data before being able to use udata. The following command
+will initalize database, indexes, create fixtures, etc.
 
 ```bash
-# Initialize database, indexes...
-# You must reply "n" to "Do you want to import some spatial zones (countries)?"
 udata init
-
-# Compile translations
-inv i18nc
 ```
 
 You can then start udata server with the `serve` subcommand.
