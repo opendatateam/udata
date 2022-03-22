@@ -119,11 +119,11 @@ udata uses a config file called `udata.cfg` and a custom directory as base for i
 
 ```bash
 $UDATA_WORKSPACE
-├── **fs**
+├── fs
 └── udata
     ├── ...
     ├── setup.py
- 	└── **udata.cfg**
+ 	└── udata.cfg
 ```
 
 A sample content of `udata.cfg` for local development is shown below.
@@ -190,11 +190,11 @@ With a valid udata environment, you can start the udata-front installation.
 
 ```bash
 $UDATA_WORKSPACE
-├── **fs**
+├── fs
 ├── udata
 │   ├── ...
 │   ├── setup.py
-│	└── **udata.cfg**
+│	└── udata.cfg
 └── udata-front
     ├── ...
     └── setup.py
