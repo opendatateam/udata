@@ -24,6 +24,8 @@
         <dcat:keyword>Tag 1</dcat:keyword>
         <dcat:distribution rdf:resource="http://data.test.org/datasets/3/resources/1"/>
         <dct:license>Licence Ouverte Version 2.0</dct:license>
+        <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
+        <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
@@ -33,7 +35,7 @@
         <dcat:contactPoint rdf:resource="http://data.test.org/contacts/1"/>
         <dcat:landingPage>http://data.test.org/datasets/1</dcat:landingPage>
         <dcat:keyword>Tag 3</dcat:keyword>
-        <dcterms:description>Dataset 1 description</dcterms:description>
+        <dcterms:abstract>Dataset 1 description</dcterms:abstract>
         <dcterms:title>Dataset 1</dcterms:title>
         <dcterms:temporal rdf:resource="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1"/>
         <dcat:theme>Theme 1</dcat:theme>
