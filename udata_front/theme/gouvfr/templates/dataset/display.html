@@ -4,6 +4,7 @@
 {% from theme('macros/paginator.html') import paginator with context %}
 {% from theme('macros/breadcrumb.html') import breadcrumb with context %}
 {% from theme('macros/banner_info.html') import banner_info %}
+{% from theme('macros/banner_warning.html') import banner_warning %}
 
 ## FIXME: remove inspire:indentifier robots condition when geo.data.gouv.fr is shutdown
 {% set meta = {
@@ -197,53 +198,61 @@
                     <div class="fr-grid-row fr-grid-row--gutters">
                         <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
                             <h2 class="subtitle">{{ _('Informations') }}</h2>
-                            <dl class="metadata">
+                            <dl class="fr-my-1w">
                                 {% if dataset.license %}
-                                <dt>{{ _('License') }}</dt>
-                                 <dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('License') }}</dt>
+                                 <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
                                      {% if dataset.license.url %}<a href="{{ dataset.license.url }}">{% endif %}
                                      {{ dataset.license.title }}
                                      {% if dataset.license.url %}</a>{% endif %}
                                  </dd>
                                 {% endif %}
-                                <dt>{{ _('ID') }}</dt>
-                                 <dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('ID') }}</dt>
+                                 <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
                                      {{dataset.id}}
                                  </dd>
                                 {% if external_source %}
-                                <dt>{{ _('Remote source') }}</dt>
-                                <dd><a rel="nofollow" href="{{ external_source }}">{{ _('Remote source') }}</a></dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Remote source') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
+                                    <a rel="nofollow" href="{{ external_source }}">{{ _('Remote source') }}</a>
+                                </dd>
                                 {% endif%}
                             </dl>
                         </div>
                         <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
                             <h2 class="subtitle">{{ _('Temporality') }}</h2>
-                            <dl class="metadata">
+                            <dl class="fr-my-1w">
                                 {% if dataset.temporal_coverage %}
-                                <dt>{{ _('Temporal coverage') }}</dt>
-                                <dd>{{ dataset.temporal_coverage|daterange(details=True) }}</dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Temporal coverage') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
+                                    {{ dataset.temporal_coverage|daterange(details=True) }}
+                                </dd>
                                 {% endif %}
                                 {% if dataset.frequency %}
-                                <dt>{{ _('Frequency') }}</dt>
-                                <dd>{{ dataset.frequency_label }}</dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Frequency') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">{{ dataset.frequency_label }}</dd>
                                 {% endif %}
-                                <dt>{{ _('Creation date') }}</dt>
-                                <dd>{{ dataset.created_at|dateformat(format='long') }}</dd>
-                                <dt>{{ _('Latest resource update') }}</dt>
-                                <dd>{{ dataset.last_update|dateformat(format='long') }}</dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Creation date') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
+                                    {{ dataset.created_at|dateformat(format='long') }}
+                                </dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Latest resource update') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
+                                    {{ dataset.last_update|dateformat(format='long') }}
+                                </dd>
                             </dl>
                         </div>
                         {% if dataset.spatial %}
                         <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
                             <h2 class="subtitle">{{ _('Geographic dimensions') }}</h2>
-                            <dl class="metadata">
+                            <dl class="fr-my-1w">
                                 {% if dataset.spatial.granularity %}
-                                <dt>{{ _('Territorial coverage granularity') }}</dt>
-                                <dd>{{ dataset.spatial.granularity_label }}</dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Territorial coverage granularity') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">{{ dataset.spatial.granularity_label }}</dd>
                                 {% endif %}
                                 {% if dataset.spatial.zones %}
-                                <dt>{{ _('Territorial coverage') }}</dt>
-                                <dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Territorial coverage') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
                                     {% for zone in dataset.spatial.zones %}
                                     {{zone.name}}{% if not loop.last %},{% endif %}
                                     {% endfor %}
@@ -256,11 +265,11 @@
                     {% if dataset.extras %}
                         <details>
                             <summary class="subtitle fr-mb-0">{{ _('Extras') }}</summary>
-                            <dl class="metadata fr-my-0 fr-grid-row fr-grid-row--gutters">
+                            <dl class="fr-my-0 fr-grid-row fr-grid-row--gutters">
                                 {% for extra_name, extra_value in dataset.extras.items() %}
                                 <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
-                                    <dt>{{ extra_name }}</dt>
-                                    <dd>{{ extra_value }}</dd>
+                                    <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ extra_name }}</dt>
+                                    <dd class="fr-text--sm fr-ml-0 fr-mb-2w">{{ extra_value }}</dd>
                                 </div>
                                 {% endfor %}
                             </dl>
@@ -319,7 +328,7 @@
                     </li>
                     <li>
                         <a class="fr-summary__link" href="#resources">
-                            {{ _('Resources') }} <sup class="sup">{{dataset.resources | length}}</sup>
+                            {{ _('Files') }} <sup class="sup">{{dataset.resources | length}}</sup>
                         </a>
                     </li>
                     <li>
@@ -353,33 +362,41 @@
 </section>
 <section class="ressources fr-py-10w">
     <div class="container">
-        <h2 id="resources" class="fr-h2">{{ _('Resources') }} <sup>{{dataset.resources | length}}</sup></h2>
-        {% if dataset.community_resources|length or 1 %}
-        <a class="nav-link" href="#community-resources">{{ _('See also: community resources') }}</a>
-        {% endif %}
-
+        {% set count_resources = dataset.resources | length %}
+        <h2 id="resources" class="fr-h2">{{ _('Files') }} <sup class="resources-count">{{count_resources}}</sup></h2>
         <div class="ressources-files fr-my-4w vuejs">
+            <modals-container></modals-container>
+            {% if count_resources > config.RESOURCES_MIN_COUNT_TO_SHOW_SEARCH %}
+                <search-bar event-name="resources.search"></search-bar>
+            {% endif %}
             {% set show_all_resources = request.args.get('resources') == 'all' %}
             {% set grouped_resources = dataset.resources|group_resources_by_type %}
             {% set nb_groups = grouped_resources.keys()|length %}
+            {% set has_multiple_groups = nb_groups > 1 %}
             {% set resources_per_page = config.RESOURCES_DEFAULT_PAGE_SIZE %}
             {% for (type, type_label), resources in grouped_resources.items() %}
-                {% if nb_groups > 1 %}
-                    <h3 class="fr-h6 fr-mb-3v fr-mt-9v">{{ type_label }} <sup>{{resources|length }}</sup></h3>
-                {% endif %}
-                <dataset-resources dataset-id="{{ dataset.id }}" type="{{ type }}" type-label="{{ type_label }}" :can-edit="{{ can_edit.can()|tojson|safe }}">
+                <dataset-resources
+                    dataset-id="{{ dataset.id }}"
+                    type="{{ type }}"
+                    type-label="{{ type_label }}"
+                    :can-edit="{{ can_edit.can()|tojson|safe }}"
+                    :show-total="{{ has_multiple_groups|tojson|safe }}"
+                >
+                </dataset-resources>
+                <noscript>
+                    <h3 class="fr-mt-4w fr-mb-1w fr-text--sm fr-text--bold text-transform-uppercase">
+                        {{ type_label }} {% if has_multiple_groups %}<sup>{{resources|length }}</sup>{% endif %}
+                    </h3>
                     {% set max_resources_to_show = resources_per_page if not show_all_resources else resources|length %}
                     {% for resource in resources[:max_resources_to_show] %}
-                        {% with expanded = "true" %}
-                        {% include theme('dataset/resource/card.html') %}
-                        {% endwith %}
+                    {% include theme('dataset/resource/card.html') %}
                     {% endfor %}
                     {% if resources|length > resources_per_page and not show_all_resources %}
                         <a class="fr-btn fr-btn--secondary fr-mt-2w" href="?resources=all">
                             {{ _('See the %(nb)d resources of type %(type)s', nb=resources|length, type=type_label) }}
                         </a>
                     {% endif %}
-                </dataset-resources>
+                </noscript>
             {% else %}
                 <p class="text-center">{{ _('No resources') }}</p>
             {% endfor %}
@@ -391,35 +408,57 @@
 {% block community %}
 <section class="community_container fr-pb-7w" id="community">
     <div class="container">
-        <h2 id="community-resources" class="fr-h2">{{ _('Community resources') }}
-            <sup>{{ dataset.community_resources|length }}</sup></h2>
-        <div class="row fr-mb-3w">
-            <div class="col-6 col-md-12 text-grey-380">
-                <p>{{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}
-                </p>
-            </div>
-        </div>
-
-        {% if not read_only_mode %}
-        <div class="resource-list">
-            {% for resource in dataset.community_resources %}
-            {% include theme('dataset/resource/card.html') %}
-            {% endfor %}
+        <div class="fr-grid-row">
+            <h2 id="community-resources" class="fr-h2 fr-col fr-mb-5v">{{ _('Community resources') }}
+                <sup>{{ dataset.community_resources|length }}</sup>
+            </h2>
             {% if not read_only_mode %}
-            <a class="btn-action fr-mt-3w"
-                href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
-                {% include theme("svg/actions/add.svg") %}{{ _('Add a community resource') }}
-            </a>
+                <div class="fr-col-12 fr-col-sm-6 fr-col-md-5 fr-col-lg-4 text-align-right">
+                    <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-add-line fr-btn--icon-left"
+                        href="{{ url_for('admin.index', path='community-resource/new/', **{'dataset_id': dataset.id}) }}">
+                        {{ _('Publish a resource') }}
+                    </a>
+                </div>
             {% endif %}
         </div>
+
+        <div class="row fr-mb-4w">
+            <p class="col-6 col-md-12">
+                {{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}
+            </p>
+        </div>
+        {% if dataset.community_resources|length %}
+            <h3 class="fr-mb-3v fr-text--sm fr-text--bold text-transform-uppercase">
+            {{ _('Data') }}
+        </h3>
+        {{ banner_warning(
+            "fr-fi-alert-line",
+            _("These resources are published by the community and the producer isn't responsible for them.")
+        )}}
         {% endif %}
+        <div class="resource-list vuejs">
+            <modals-container></modals-container>
+            <dataset-resources
+                dataset-id="{{ dataset.id }}"
+                type="community"
+                type-label="{{ _('Community resources') }}"
+                :can-edit-resources='{{ dataset.community_resources|permissions|tojson|safe }}'
+                :show-title="false"
+            >
+            </dataset-resources>
+            <noscript>
+                {% for resource in dataset.community_resources %}
+                {% include theme('dataset/resource/card.html') %}
+                {% endfor %}
+            </noscript>
+        </div>
 
         {% block reuses_section %}
         <div class="fr-grid-row fr-mt-12w">
             <h2 id="community-reuses" class="fr-h2 fr-col">{{ _('Reuses') }} <sup>{{ total_reuses }}</sup></h2>
             {% if not read_only_mode %}
                 <div class="fr-col-12 fr-col-sm-6 fr-col-md-5 fr-col-lg-4 text-align-right">
-                    <a class="fr-btn fr-btn--secondary btn-secondary btn-secondary-grey-500 fr-fi-add-line fr-btn--icon-left"
+                    <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-add-line fr-btn--icon-left"
                         href="{{ url_for('admin.index', path='reuse/new/', **{'dataset_id': dataset.id}) }}">
                         {{ _('Add a reuse') }}
                     </a>

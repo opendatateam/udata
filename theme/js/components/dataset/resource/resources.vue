@@ -1,5 +1,8 @@
 <template>
-  <section class="resources-wrapper" ref="top" key="top">
+  <h3 v-if="showTitle" class="fr-mt-4w fr-mb-1w fr-text--sm fr-text--bold text-transform-uppercase" ref="top">
+      {{ typeLabel }} <sup v-if="showTotal">{{ totalResults }}</sup>
+  </h3>
+  <section class="resources-wrapper" key="top">
     <transition mode="out-in">
       <div v-if="loading" key="loader">
         <Loader class="mt-md" />
@@ -11,11 +14,15 @@
           :dataset-id="datasetId"
           :resource="resource"
           :type-label="typeLabel"
-          :can-edit="canEdit"
+          :can-edit="getCanEdit(resource)"
+          :is-community-resource="isCommunityResources"
         />
+        <p v-if="!totalResults">
+          {{$t('No resources match your search.')}}
+        </p>
         <Pagination
           class="fr-mt-3w"
-          v-if="totalResults > pageSize"
+          v-else-if="totalResults > pageSize"
           :page="currentPage"
           :page-size="pageSize"
           :total-results="totalResults"
@@ -27,10 +34,20 @@
 </template>
 
 <script>
+import {useI18n} from 'vue-i18n'
+import {onMounted, ref, watch} from 'vue';
 import Loader from "../loader.vue";
 import Pagination from "../../pagination/pagination.vue";
 import Resource from "./resource.vue";
 import config from "../../../config";
+import {useToast} from "../../../composables/useToast";
+import {fetchDatasetCommunityResources, fetchDatasetResources} from "../../../api/resources";
+import {
+  bus,
+  RESOURCES_SEARCH,
+  RESOURCES_SEARCH_RESULTS_TOTAL,
+  RESOURCES_SEARCH_RESULTS_UPDATED
+} from "../../../plugins/eventbus";
 
 export default {
   name: "resources",
@@ -39,23 +56,26 @@ export default {
     Pagination,
     Resource,
   },
-  data() {
-    return {
-      resources: [],
-      currentPage: 1,
-      pageSize: config.resources_default_page_size,
-      totalResults: 0,
-      loading: true,
-    };
-  },
   props: {
     canEdit: {
       type: Boolean,
-      required: true
+      default: false
+    },
+    canEditResources: {
+      type: Object,
+      default() { return {}}
     },
     datasetId: {
       type: String,
       required: true,
+    },
+    showTitle: {
+      type: Boolean,
+      default: true,
+    },
+    showTotal: {
+      type: Boolean,
+      default: true,
     },
     type: {
       type: String,
@@ -66,47 +86,88 @@ export default {
       required: true,
     },
   },
-  mounted() {
-    this.loadPage(this.currentPage);
-  },
-  methods: {
-    changePage(index, scroll = true) {
-      this.currentPage = index;
-      this.loadPage(index, scroll);
-    },
-    loadPage(page = 1, scroll = false) {
-      this.loading = true;
+  setup(props) {
+    const { t } = useI18n();
+    const toast = useToast();
+    const currentPage = ref(1);
+    const resources = ref([]);
+    const pageSize = config.resources_default_page_size;
+    const totalResults = ref(0);
+    const loading = ref(true);
+    const top = ref(null);
+    const search = ref('');
+    const isCommunityResources = ref(props.type === "community");
+    const DONT_SCROLL = false;
 
-      // We can pass the second function parameter "scroll" to true if we want to scroll to the top of the resources section
-      // This is useful for pagination buttons
-      if (this.$refs.top && scroll)
-        this.$refs.top.scrollIntoView({ behavior: "smooth" });
+    // We can pass the second function parameter "scroll" to true if we want to scroll to the top of the resources section
+    // This is useful for pagination buttons
+    const loadPage = (page = 1, scroll = false) => {
+      loading.value = true;
+      if (scroll && top.value) {
+        top.value.scrollIntoView({ behavior: "smooth" });
+      }
+      let fetchData;
+      if(isCommunityResources.value) {
+        fetchData = fetchDatasetCommunityResources(props.datasetId, page, pageSize);
+      } else {
+        fetchData = fetchDatasetResources(props.datasetId, props.type, page, pageSize, search.value);
+      }
 
-      return this.$apiv2
-        .get("/datasets/" + this.datasetId + "/resources/", {
-          params: {
-            page,
-            type: this.type,
-            page_size: this.pageSize,
-          },
-        })
-        .then((resp) => resp.data)
+      return fetchData
         .then((data) => {
           if (data.data) {
-            this.resources = data.data;
-            this.totalResults = data.total;
+            resources.value = data.data;
+            totalResults.value = data.total;
           }
         })
         .catch(() => {
-          this.$toast.error(
-            this.$t("An error occurred while fetching resources")
+          toast.error(
+            t("An error occurred while fetching resources")
           );
-          this.resources = [];
+          resources.value = [];
         })
         .finally(() => {
-          this.loading = false;
+          loading.value = false;
         });
-    },
+    };
+
+    const changePage = (index, scroll = true) => {
+      currentPage.value = index;
+      loadPage(index, scroll);
+    };
+
+    const getCanEdit = (resource) => {
+      if(props.canEdit) {
+        return props.canEdit;
+      }
+      return props.canEditResources[resource.id];
+    }
+
+    onMounted(() => loadPage(currentPage.value));
+
+    if(!isCommunityResources.value) {
+      bus.on(RESOURCES_SEARCH, value => {
+        search.value = value;
+        changePage(1, DONT_SCROLL);
+      });
+      watch(totalResults, (count) => bus.emit(RESOURCES_SEARCH_RESULTS_UPDATED, {type: props.type, count}));
+      bus.on(RESOURCES_SEARCH_RESULTS_TOTAL, (total) => {
+        const els = document.querySelectorAll(".resources-count");
+        if (els) els.forEach((el) => (el.innerHTML = total));
+      });
+    }
+
+    return {
+      currentPage,
+      loading,
+      changePage,
+      pageSize,
+      resources,
+      totalResults,
+      getCanEdit,
+      isCommunityResources,
+      top,
+    }
   }
 }
 </script>

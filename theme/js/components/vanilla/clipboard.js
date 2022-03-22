@@ -1,7 +1,7 @@
 /*
 ---
 name: Clipboard
-category: Interactions
+category: 5 - Interactions
 ---
 
 # Interaction

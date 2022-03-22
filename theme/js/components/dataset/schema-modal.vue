@@ -5,7 +5,7 @@
       <p>
         <span>{{$t('This resource is associated to the schema ')}}<b>{{ resourceSchema.name }}</b></span>
         <span v-if="resourceSchema.version">, version {{ resourceSchema.version }},</span>
-       <span> {{$t('this means that the producer reports that it adheres to the specification.')}}</span>
+       <span>{{$t(' this means that the producer reports that it adheres to the specification.')}}</span>
       </p>
 
       <h3>{{$t('Documentation')}}</h3>

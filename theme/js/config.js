@@ -21,7 +21,7 @@ function _meta(name) {
 
 /**
  * A simple helper to parse JSON from a <meta/> tag
- * @return {[type]} [description]
+ * @return {any} meta content as json or false on error
  */
 function _jsonMeta(name) {
   const data = _meta(name);
@@ -174,6 +174,16 @@ export const markdown = _jsonMeta("markdown-config");
  * Whether the 'read only mode' feature is enabled or not.
  */
  export const read_only_enabled = _jsonMeta('read-only-enabled');
+
+ /**
+ * Whether the 'autocomplete' feature is enabled or not.
+ */
+export const search_autocomplete_enabled = _jsonMeta("search-autocomplete-enabled");
+
+ /**
+ * Debounce value for autocomplete.
+ */
+export const search_autocomplete_debounce = _jsonMeta("search-autocomplete-debounce");
 
 // New generic `js-config-*` variables : simply add them to `metadata.html` with a meta name="js-config-something", content="yourValue" and import this file.
 // Everything is exported in the `values` variable as key: value pairs

@@ -47,15 +47,15 @@ Vue. -->
     <ul class="card-footer">
       <li>
         <strong>{{ resources.length || 0 }}</strong>
-        {{ $tc("resources", resources.length || 0) }}
+        {{ $t("resources", resources.length || 0) }}
       </li>
       <li>
         <strong>{{ metrics.reuses || 0 }}</strong>
-        {{ $tc("reuses", metrics.reuses || 0) }}
+        {{ $t("reuses", metrics.reuses || 0) }}
       </li>
       <li>
         <strong>{{ metrics.followers || 0 }}</strong>
-        {{ $tc("favourites", metrics.followers || 0) }}
+        {{ $t("favourites", metrics.followers || 0) }}
       </li>
     </ul>
   </article>

@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import {DISCUSSIONS_START_THREAD} from "../../plugins/eventbus";
+
 export default {
   props: {
     onClick: {
@@ -16,7 +18,7 @@ export default {
   },
   methods: {
     click() {
-      return this.onClick? this.onClick() : this.$bus.emit('discussions.startThread');
+      return this.onClick? this.onClick() : this.$bus.emit(DISCUSSIONS_START_THREAD);
     }
   }
 }

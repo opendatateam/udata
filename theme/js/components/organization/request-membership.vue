@@ -1,7 +1,7 @@
 <!--
 ---
 name: RequestMembership
-category: Interactions
+category: 5 - Interactions
 ---
 
 # Request Membership

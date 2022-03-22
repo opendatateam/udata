@@ -417,17 +417,6 @@ def format_number(number):
     return format_decimal(number, locale=g.lang_code) if number else number
 
 
-@front.app_template_filter()
-def filesize(value):
-    '''Display a human readable filesize'''
-    suffix = 'o'
-    for unit in '', 'K', 'M', 'G', 'T', 'P', 'E', 'Z':
-        if abs(value) < 1024.0:
-            return "%3.1f%s%s" % (value, unit, suffix)
-        value /= 1024.0
-    return "%.1f%s%s" % (value, 'Y', suffix)
-
-
 def json_ld_script_preprocessor(o):
     if isinstance(o, dict):
         return {k: json_ld_script_preprocessor(v) for k, v in o.items()}

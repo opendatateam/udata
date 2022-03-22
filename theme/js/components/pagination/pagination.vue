@@ -1,7 +1,7 @@
 <!--
 ---
 name: Pagination
-category: Interactions
+category: 5 - Interactions
 ---
 
 # Pagination

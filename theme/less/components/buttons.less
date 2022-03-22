@@ -1,7 +1,7 @@
 /*
 ---
 name: Buttons
-category: Components
+category: 3 - Components
 ---
 
 ## Primary buttons
@@ -65,14 +65,6 @@ Use the `bg-{color}` classes to style the background accordingly.
     class="btn-venti my-md bg-blue-450">
     Données relatives à la <strong>COVID-19</strong>
 </a>
-```
-
-## Action buttons
-Action buttons combine an icon with an optional call to action to provide maximum usability.
-Because of technical limitations, this styleguide hardcodes the svg icon. When using it in the uData ecosystem, please use something like this : `{% include('svg/myIcon.svg') %}`.
-
-```buttons-action.html
-<p><a href="#" role="button" class="btn-action"><?xml version="1.0" encoding="UTF-8"?><svg id="SVGDoc" width="37" height="37.5" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 74 75"><defs></defs><desc>Generated with Avocode.</desc><g><g><title>&lt;Path&gt;</title><path d="M74.0327,37.2026c0,20.435 -16.565,37 -37,37c-20.435,0 -37,-16.565 -37,-37c0,-20.434 16.565,-37 37,-37c20.435,0 37,16.566 37,37z" fill="#008452" fill-opacity="1"></path></g><g><title>&lt;Rectangle&gt;</title><path d="M40.182,49.011v0h-6.298v0v-23.617v0h6.298v0z" fill="#f9f9f9" fill-opacity="1"></path></g><g><title>&lt;Rectangle&gt;</title><path d="M25.224,34.054v0h23.617v0v6.298v0h-23.617v0z" fill="#f9f9f9" fill-opacity="1"></path></g></g></svg>Ajouter une ressource communautaire</a></p>
 ```
 
 ## Tab buttons
@@ -141,28 +133,6 @@ each(@colors, {
     &:hover {
         &:after {
             right: @spacing-lg;
-        }
-    }
-}
-
-.btn-action {
-    display: inline-block;
-    color: inherit;
-    text-decoration: underline;
-    text-decoration-color: @grey-200;
-    text-underline-position: under;
-
-    svg {
-        transition: transform ease 0.15s;
-        border-radius: 50%;
-
-        margin-right: @spacing-md;
-    }
-
-    &:hover {
-        svg {
-            box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.05);
-            transform: scale(1.05);
         }
     }
 }

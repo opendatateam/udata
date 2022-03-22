@@ -1,7 +1,7 @@
 <!--
 ---
 name: Discussions
-category: Interactions
+category: 5 - Interactions
 ---
 
 # Discussions
@@ -102,6 +102,7 @@ import Thread from "./thread.vue";
 import Loader from "./loader.vue";
 import CloseIcon from "svg/close.svg";
 import ThreadsCreateButton from "./threads-create-button";
+import {DISCUSSIONS_START_THREAD} from "../../plugins/eventbus";
 
 const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
 
@@ -156,7 +157,7 @@ export default {
   },
   mounted() {
     // Listen to bus events
-    this.$bus.on("discussions.startThread", () => this.startThread());
+    this.$bus.on(DISCUSSIONS_START_THREAD, () => this.startThread());
 
     // Check if URL contains a thread
     const hash = window.location.hash.substring(1);

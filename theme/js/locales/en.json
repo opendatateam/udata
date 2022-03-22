@@ -75,7 +75,7 @@
   "Previous page": "Previous page",
   "Next page": "Next page",
   "Last page": "Last page",
-  "downloads": "downloads",
+  "X downloads": "{count} downloads",
   "Nameless resource": "Nameless resource",
   "See more details": "See more details",
   "Preview": "Preview",
@@ -94,7 +94,7 @@
   "See schema": "See schema",
   "Associated schema": "Associated schema",
   "This resource is associated to the schema ": "This resource is associated to the schema ",
-  "this means that the producer reports that it adheres to the specification.": "this means that the producer reports that it adheres to the specification.",
+  " this means that the producer reports that it adheres to the specification.": " this means that the producer reports that it adheres to the specification.",
   "Documentation": "Documentation",
   "You can view the schema documentation, discover some context and recommendations for data producers.": "You can view the schema documentation, discover some context and recommendations for data producers.",
   "Read documentation": "Read documentation",
@@ -107,7 +107,6 @@
   "See dataset linked to this schema": "See dataset linked to this schema",
   "About schemas": "About schemas",
   "Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ": "Data schemas allow to describe data models : what are the fields, how is data represented, what are the possible values. Discover how schemas improve data quality and use cases on ",
-  "Available": "Available",
   "Unavailable": "Unavailable",
   "Close": "Close",
   "Copy permalink": "Copy permalink",
@@ -118,5 +117,11 @@
   "Unfeature this content": "Unfeature this content",
   "Feature this content": "Feature this content",
   "Preview of resource X": "Preview of resource {title}",
-  "An error occurred while featuring this subject.": ""
+  "An error occurred while featuring this subject.": "",
+  "From": "From",
+  "Updated on X": "Updated on {date}",
+  "An error occurred while fetching schemas": "An error occurred while fetching schemas",
+  "Search resources": "Search resources",
+  "Search": "Search",
+  "No resources match your search.": "No resources match your search."
 }

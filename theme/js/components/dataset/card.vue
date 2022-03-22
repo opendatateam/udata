@@ -1,7 +1,7 @@
 <template>
   <article class="dataset-card compact">
     <div class="card-logo">
-      <Placeholder type="reuse" :src="image_url" :alt="title" />
+      <Placeholder type="reuse" :src="image_url" alt="" />
     </div>
     <div class="card-data">
       <h3 class="card-body h4">

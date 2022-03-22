@@ -1,5 +1,5 @@
 .accordion-button {
-    //Prevent click events bubbling
+    // Prevent click events bubbling
     * {
         pointer-events: none;
     }
@@ -8,6 +8,23 @@
         &[aria-expanded="true"] {
             display: none;
         }
+    }
+
+    display: inline-block;
+    transform: rotate(90deg);
+    transition: transform ease 0.3s; // Warning : if you change the timing here, change it in accordion.js as well
+
+    svg {
+        width: 15px;
+        height: 15px;
+
+        * {
+            fill: @grey-380;
+        }
+    }
+
+    &[aria-expanded="true"] {
+        transform: rotate(-90deg);
     }
 }
 

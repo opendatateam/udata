@@ -1,7 +1,7 @@
 /*
 ---
 name: Typography
-category: Content
+category: 2 - Content
 ---
 
 ## Base Font
@@ -272,6 +272,12 @@ each(@font-sizes, {
 
 .white-space-pre-wrap {
     white-space: pre-wrap;
+}
+
+.text-overflow-ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 each(@breakpoints, .(@bk, @_k, @_i) {

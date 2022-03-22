@@ -1,7 +1,7 @@
 /*
 ---
 name: Accordion
-category: Interactions
+category: 5 - Interactions
 ---
 
 # Interaction
@@ -12,7 +12,7 @@ The button needs to have :
 - `aria-controls` and `href` set to a valid `#id` on the page
 - `aria-label` to explain what the button does if there's not enough text in the button itself (like an icon)
 - `aria-expanded` set to either `true` (if the accordion is visible by default) or `false`
--  An optionnal `.trigger-once` class that will make the button disappear once the content it controls is expanded
+-  An optional `.trigger-once` class that will make the button disappear once the content it controls is expanded
 
 The accordion panel needs to have :
 

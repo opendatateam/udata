@@ -5,8 +5,8 @@ theme:
   css:
     - theme/less/theme.css
   sidebar:
-    background: "#b8e2ff"
-    textColor: "#070d54"
+    background: "#dae6fd"
+    textColor: "#383838"
 excludeDir:
   - stylemark
 examples:

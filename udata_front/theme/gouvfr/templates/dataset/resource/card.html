@@ -1,113 +1,142 @@
 {% set resource_format = resource.format|trim|lower %}
-{% set expanded = expanded or "false" %}
-<article
-    class="card resource-card {% if resource.from_community %}resource-card-community{% endif %}">
-    <div class="card-body">
-        <header class="card-header" id="resource-{{resource.id}}-header">
-            <div class="edit-button">
-                {% if can_edit %}
-                <a href="{{ url_for('admin.index', path='dataset/{id}/resource/{resource_id}'.format(id=dataset.id, resource_id=resource.id)) }}"
-                    aria-label="{{ _('Edit button') }}">
-                    {% include theme('svg/actions/edit.svg') %}
-                </a>
-                {% endif %}
+{% set available = resource.extras['check:status']
+    and resource.extras['check:status'] >= 200 and resource.extras['check:status'] < 400 %}
+{% set unavailable = resource.extras['check:status'] and resource.extras['check:status'] >= 400 %}
+{% set last_update = resource.published if resource.published > resource.modified else resource.modified %}
+<article class="border-bottom">
+    <header
+        class="fr-py-2w fr-grid-row fr-grid-row--gutters fr-grid-row--middle no-wrap wrap-md justify-between"
+        id="resource-{{resource.id}}-header"
+    >
+        <div class="fr-col-auto fr-grid-row fr-grid-row--top no-wrap">
+            <div class="fr-col-auto fr-mx-2w fr-fi-svg fr-fi--sm">
+                {% include theme(resource_image(resource)) %}
             </div>
-            <div class="header-text">
-                <span class="fs-sm text-grey-400"> {{ resource.metrics.views or 0 }} {{ _('downloads') }}</span>
-                <h4>
+            <div class="fr-col-auto">
+                <h4
+                    class="fr-mb-1v"
+                    id="resource-{{resource.id}}-title"
+                >
                     {{ resource.title or _('Nameless resource') }}
-                    {% if resource.from_community and resource.owner %}
-                    <p class="fs-sm m-0 text-grey-380">{{resource.owner}}</p>
-                    {% endif %}
                 </h4>
-                <strong class="text-green-400">Disponible</strong>
-            </div>
-            <div class="button-bar">
-                <ul>
-                    <li>
-                        <a
-                            href="#resource-{{resource.id}}-header"
-                            title="{{ _('Copy permalink to clipboard') }}"
-                        >
-                            {% include theme('svg/actions/copy.svg') %}
-                        </a>
-                    </li>
-                    {% if resource.format == 'url' %}
-                    <li>
-                        <a
-                            href="{{ resource.latest }}"
-                            aria-label="{{ _('Resource link') }}"
-                        >
-                            {% include theme('svg/actions/link.svg') %}
-                        </a>
-                    </li>
-                    {% else %}
-                    <li>
-                        <a
-                            href="{{ resource.latest }}"
-                            aria-label="{{ _('Download resource') }}"
-                            download
-                        >
-                            {% include theme('svg/actions/download.svg') %}
-                        </a>
-                    </li>
+                <div class="fr-text--sm fr-mb-0 text-grey-380">
+                    {% if resource.owner %}
+                        {{ _('From %(owner)s', owner=resource.owner) }} —
+                    {% elif resource.organization %}
+                        {{ _("From <a href='%(link)s'>%(owner)s</a>", link=resource|owner_url, owner=resource.organization) }} —
                     {% endif %}
-                </ul>
-                <div class="filetype">
-                    <strong>{{ resource_format }}</strong>
+                    {{_('Updated on %(date)s', date=last_update|dateformat(format='long'))}} —
+                    {{ resource_format }}
                     {% if resource.filesize %}
-                    <em>({{ resource.filesize | filesize }})</em>
+                        ({{ resource.filesize | filesize }})
                     {% endif %}
+                    —
+                    {{ resource.metrics.views or 0 }} {{ _('downloads') }}
                 </div>
             </div>
-        </header>
-        <section
-            class="card-content accordion-content {% if expanded != 'false' %}active{% endif %}"
-            {% if expanded == 'false' %}style="height: 0px" {% endif %}
-            aria-labelledby="resource-{{resource.id}}-header"
-            id="resource-{{resource.id}}"
-        >
-            {% if resource.description %}
-            <div class="resource-description">
-                {{ resource.description|markdown }}
-            </div>
-            {% endif %}
-            <dl class="description-list">
-                <div>
-                    <dt>{{ _('URL') }}</dt>
-                    <dd><a href="{{resource.url}}">{{resource.url}}</a></dd>
-                </div>
-                <div>
-                    <dt>{{ _('Permalink') }}</dt>
-                    <dd><a href="{{resource.json_ld.url}}">{{resource.json_ld.url}}</a></dd>
-                </div>
-                <div>
-                    <dt>{{ _('Type') }}</dt>
-                    <dd>{{type_label}}</dd>
-                </div>
-                <div>
-                    <dt>{{ _('MIME Type') }}</dt>
-                    <dd>{{resource.mime}}</dd>
-                </div>
-                {% if resource.checksum %}
-                <div>
-                    <dt>{{resource.checksum.type}}</dt>
-                    <dd>{{resource.checksum.value}}</dd>
-                </div>
+        </div>
+        <div class="fr-col-auto">
+            <ul class="fr-grid-row fr-grid-row--middle no-wrap wrap-md">
+                {% if unavailable %}
+                <li class="text-default-error fr-mr-5w" v-if="unavailable">
+                    {{ _('Unavailable') }}
+                </li>
                 {% endif %}
-                <div>
-                    <dt>{{ _('Created on') }}</dt>
-                    <dd>{{resource.created_at|dateformat(format='long')}}</dd>
+                {% if can_edit %}
+                    <li class="fr-col-auto fr-mr-3v">
+                        <a
+                            href="{{ url_for('admin.index', path='dataset/{id}/resource/{resource_id}'.format(id=dataset.id, resource_id=resource.id)) }}"
+                            title="{{ _('Edit resource') }}"
+                            class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--sm fr-fi-svg"
+                        >
+                            {% include theme('svg/edit.svg') %}
+                        </a>
+                    </li>
+                {% endif %}
+                {% if resource.format == 'url' %}
+                    <li class="fr-col-auto">
+                        <a
+                            href="{{ resource.latest }}"
+                            title="{{ _('Resource link') }}"
+                            rel="nofollow"
+                            target="_blank"
+                            class="fr-btn fr-btn--sm fr-fi-external-link-line"
+                        ></a>
+                    </li>
+                {% else %}
+                    <li class="fr-col-auto">
+                        <a
+                            href="{{ resource.latest }}"
+                            title="{{ _('Download resource') }}"
+                            download
+                            class="fr-btn fr-btn--sm fr-fi-download-line"
+                        ></a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </header>
+    <section
+        class="accordion-content active fr-pt-5v fr-pb-4w fr-pl-6w"
+        aria-labelledby="resource-{{resource.id}}-title"
+        id="resource-{{resource.id}}"
+    >
+        {% if resource.description %}
+        <div class="fr-mt-0 markdown">
+            {{ resource.description|markdown }}
+        </div>
+        {% endif %}
+        <dl>
+            <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+                <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{ _('URL') }}</dt>
+                <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10 text-overflow-ellipsis">
+                    <a href="{{resource.url}}">{{resource.url}}</a>
+                </dd>
+            </div>
+            <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+                <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{ _('Permalink') }}</dt>
+                <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10 text-overflow-ellipsis">
+                    <a href="{{resource.json_ld.url}}">{{resource.json_ld.url}}</a>
+                </dd>
+            </div>
+            <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+                <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{ _('Type') }}</dt>
+                <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10">
+                    {{type_label}}
+                </dd>
+            </div>
+            <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+                <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{ _('MIME Type') }}</dt>
+                <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10">
+                    {{resource.mime}}
+                </dd>
+            </div>
+            {% if resource.checksum %}
+                <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+                    <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{resource.checksum.type}}</dt>
+                    <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10">
+                        {{resource.checksum.value}}
+                    </dd>
                 </div>
-                <div>
-                    <dt>{{ _('Modified on') }}</dt>
-                    <dd>{{resource.modified|dateformat(format='long')}}</dd>
-                </div>
-                <div>
-                    <dt>{{ _('Published on') }}</dt>
-                    <dd>{{resource.published|dateformat(format='long')}}</dd>
-                </div>
-            </dl>
-        </section>
-    </div>
+            {% endif %}
+            <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+                <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{ _('Created on') }}</dt>
+                <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10">
+                    {{resource.created_at|dateformat(format='long')}}
+                </dd>
+            </div>
+            <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+                <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{ _('Modified on') }}</dt>
+                <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10">
+                    {{resource.modified|dateformat(format='long')}}
+                </dd>
+            </div>
+            <div class="fr-grid-row fr-grid-row--gutters">
+                <dt class="fr-col-4 fr-col-md-3 fr-col-lg-2">{{ _('Published on') }}</dt>
+                <dd class="fr-ml-0 fr-col-8 fr-col-md-9 fr-col-lg-10">
+                    {{resource.published|dateformat(format='long')}}
+                </dd>
+            </div>
+        </dl>
+    </section>
 </article>
