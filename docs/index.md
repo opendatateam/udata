@@ -10,11 +10,11 @@ See [quickstart](quickstart.md)
 
 ## I’m a regular developer of the platform
 
-See [getting started](getting-started.md)
+Start with [getting started](getting-started.md).
 
 ## I want to deploy an instance on production servers
 
-See [system dependencies](system-dependencies.md).
+See [system dependencies](system-dependencies.md) and [installation](installation.md).
 
 ## I found a bug or I want to propose an improvement
 
