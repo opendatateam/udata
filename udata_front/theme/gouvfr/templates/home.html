@@ -104,22 +104,31 @@
 <section class="datasets pb-hg pt-md bg-grey-50">
     <div class="hagrid overflow-visible">
         {# Dataset tabs #}
-        <div class="row justify-between">
-            <div class="col-auto">
+        <div class="fr-grid-row fr-grid-row--gutters justify-between">
+            <div class="fr-col-auto">
                 <h2>{{ _('Datasets') }}</h2>
             </div>
-            <div class="col-auto">
-                <nav class="tabs fr-tags-group">
-                    {% for tab_id, label, _, _ in dataset_tabs %}
+            <div class="fr-col-auto fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-auto">
+                    <nav class="tabs fr-tags-group fr-displayed-lg">
+                        {% for tab_id, label, _, _ in dataset_tabs %}
+                        <a
+                            href="#{{tab_id}}"
+                            class="tab fr-tag {% if loop.first %}active {% endif %}"
+                        >
+                            {{ label }}
+                        </a>
+                        {% endfor %}
+                    </nav>
+                </div>
+                <div class="fr-col-auto">
                     <a
-                        href="#{{tab_id}}"
-                        class="tab fr-tag {% if loop.first %}active {% endif %}fr-displayed-lg"
+                        href="{{ url_for('datasets.list') }}"
+                        class="fr-link fr-fi-arrow-right-line fr-link--icon-right"
                     >
-                        {{ label }}
+                        {{ _('See more') }}
                     </a>
-                    {% endfor %}
-                    <a href="{{ url_for('datasets.list') }}" class="fr-tag">{{ _('See more') }}</a>
-                </nav>
+                </div>
             </div>
         </div>
         {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
@@ -148,23 +157,32 @@
 {# Reuse section #}
 <section class="reuse py-hg py-md-lg">
     <div class="hagrid">
-        <div class="row justify-between">
-            <div class="col-auto">
+        <div class="fr-grid-row fr-grid-row--gutters justify-between">
+            <div class="fr-col-auto">
                 <h2>{{ _('Data reuses') }}</h2>
             </div>
-            <div class="col-auto">
-                <nav class="tabs fr-tags-group">
-                    {% for tab_id, label, _, _ in reuses_tabs %}
+            <div class="fr-col-auto fr-grid-row fr-grid-row--gutters">
+                <div class="fr-col-auto">
+                    <nav class="tabs fr-tags-group fr-displayed-lg">
+                        {% for tab_id, label, _, _ in reuses_tabs %}
+                        <a
+                            href="#{{tab_id}}"
+                            class="tab fr-tag {% if loop.first %}active {% endif %}"
+                        >
+                            {{ label }}
+                        </a>
+                        {% endfor %}
+                    </nav>
+                </div>
+                <div class="fr-col-auto">
                     <a
-                        href="#{{tab_id}}"
-                        class="tab fr-tag {% if loop.first %}active {% endif %}fr-displayed-lg"
-                    >
-                        {{ label }}
-                    </a>
-                    {% endfor %}
-                    <a href="{{ url_for('reuses.list', sort='-created') }}" title="{{ _('Latest reuses') }}"
-                        class="fr-tag">{{ _('See more') }}</a>
-                </nav>
+                    href="{{ url_for('reuses.list', sort='-created') }}"
+                    title="{{ _('Latest reuses') }}"
+                    class="fr-link fr-fi-arrow-right-line fr-link--icon-right"
+                >
+                    {{ _('See more') }}
+                </a>
+                </div>
             </div>
         </div>
     </div>
