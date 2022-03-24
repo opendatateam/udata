@@ -184,7 +184,7 @@ The target index name will be time-based, ex: dataset-2022-02-20-20-02.
 It's possible to index or reindex only last modified documents.
 
 ```shell
-time udata search index-f 2022-02-20-20-02
+time udata search index -f 2022-02-20-20-02
 ```
 
 ## Workers
