@@ -79,6 +79,11 @@ class DatasetApiParser(ModelApiParser):
         'views': 'metrics.views',
     }
 
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('reuse', type=str, location='args')
+
+
 log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
@@ -124,6 +129,8 @@ class DatasetListAPI(API):
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         if args['q']:
             datasets = datasets.search_text(args['q'])
+        if args['reuse']:
+            datasets = datasets.objects(id__in=[dat.id for dat in Reuse.get(args['reuse']).datasets])
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 

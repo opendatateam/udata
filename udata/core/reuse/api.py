@@ -38,6 +38,10 @@ class ReuseApiParser(ModelApiParser):
         'views': 'metrics.views',
     }
 
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('dataset', type=str, location='args')
+
 
 ns = api.namespace('reuses', 'Reuse related operations')
 
@@ -58,6 +62,8 @@ class ReuseListAPI(API):
         reuses = Reuse.objects(deleted=None, private__ne=True)
         if args['q']:
             reuses = reuses.search_text(args['q'])
+        if args['dataset']:
+            reuses = reuses.filter(datasets=args['dataset'])
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return reuses.order_by(sort).paginate(args['page'], args['page_size'])
 
