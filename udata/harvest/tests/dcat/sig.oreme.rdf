@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <dcat:Catalog xmlns:dcat="http://www.w3.org/ns/dcat#"
+                 rdf:about="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//catalogs/de2e89e6-cf5f-4807-9099-bd00a5e9795a">
+      <dct:title xmlns:dct="http://purl.org/dc/terms/" xml:lang="en">OSU OREME catalogue</dct:title>
+      <dct:description xmlns:dct="http://purl.org/dc/terms/"/>
+      <rdfs:label xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xml:lang="en">OSU OREME catalogue (OSU OREME)
+      </rdfs:label>
+      <foaf:homepage xmlns:foaf="http://xmlns.com/foaf/0.1/">https://sig.oreme.org:/geonetwork/srv/</foaf:homepage>
+      <void:openSearchDescription xmlns:void="http://www.w3.org/TR/void/">https://sig.oreme.org:/geonetwork/srv/eng/portal.opensearch</void:openSearchDescription>
+      <void:uriLookupEndpoint xmlns:void="http://www.w3.org/TR/void/">https://sig.oreme.org:/geonetwork/srv/eng/rdf.search?any=</void:uriLookupEndpoint>
+      <dct:publisher xmlns:dct="http://purl.org/dc/terms/"
+                     rdf:resource="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//organizations/OSU%20OREME"/>
+      <dct:language xmlns:dct="http://purl.org/dc/terms/">eng</dct:language>
+      <dcat:dataset rdf:resource="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//0437a976-cff1-4fa6-807a-c23006df2f8f"/>
+      <dcat:record rdf:resource="https://sig.oreme.org/geonetwork/records/0437a976-cff1-4fa6-807a-c23006df2f8f"/>
+   </dcat:Catalog>
+   <foaf:Organization xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                      rdf:about="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//organizations/OSU%20OREME">
+      <foaf:name>OSU OREME</foaf:name>
+   </foaf:Organization>
+   <dcat:CatalogRecord xmlns:dcat="http://www.w3.org/ns/dcat#"
+                       rdf:about="https://sig.oreme.org/geonetwork/records/0437a976-cff1-4fa6-807a-c23006df2f8f">
+      <foaf:primaryTopic xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                         rdf:resource="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//0437a976-cff1-4fa6-807a-c23006df2f8f"/>
+      <dct:conformsTo xmlns:dct="http://purl.org/dc/terms/"
+                      rdf:resource="https://www.iso.org/standard/32557.html"/>
+      <dct:issued xmlns:dct="http://purl.org/dc/terms/">2022-02-14</dct:issued>
+      <dct:modified xmlns:dct="http://purl.org/dc/terms/">2022-02-14</dct:modified>
+   </dcat:CatalogRecord>
+   <dcat:Dataset xmlns:dcat="http://www.w3.org/ns/dcat#"
+                 rdf:about="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f">
+      <dct:identifier xmlns:dct="http://purl.org/dc/terms/">0437a976-cff1-4fa6-807a-c23006df2f8f</dct:identifier>
+      <dct:title xmlns:dct="http://purl.org/dc/terms/">National network of repeated absolute gravimetry (GRAVI) : Observation Service of the Montpellier Research Observatory of Environment (OSU OREME)</dct:title>
+      <dct:abstract xmlns:dct="http://purl.org/dc/terms/">Data from the 'National network of repeated absolute gravimetry' (GRAVI): Network of absolute gravimetric sites repeated over time. This observatory is part of the Montpellier Research Observatory of Environment (OSU OREME, oreme.org). It is labelized in the framework of SNO RESIF-Gravimétrie.</dct:abstract>
+      <dct:description xmlns:dct="http://purl.org/dc/terms/">Data from the 'National network of repeated absolute gravimetry' (GRAVI): Network of absolute gravimetric sites repeated over time. This observatory is part of the Montpellier Research Observatory of Environment (OSU OREME, oreme.org). It is labelized in the framework of SNO RESIF-Gravimétrie.</dct:description>
+      <dcat:keyword>GRAVI</dcat:keyword>
+      <dcat:keyword>solid earth dynamics</dcat:keyword>
+      <dcat:keyword>SNO RESIF-Gravimétrie</dcat:keyword>
+      <dcat:theme>Environmental monitoring facilities</dcat:theme>
+      <dcat:theme>geodesy</dcat:theme>
+      <dcat:theme>geodesy</dcat:theme>
+      <foaf:thumbnail xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                      rdf:resource="https://data.oreme.org/assets/images/gravi-medium.jpg"/>
+      <dct:updated xmlns:dct="http://purl.org/dc/terms/">2022-02-14</dct:updated>
+      <dct:publisher xmlns:dct="http://purl.org/dc/terms/"
+                     rdf:resource="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//organizations/UMR%20G%C3%A9osciences%20Montpellier%20%28GM%29"/>
+      <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">http://purl.org/cld/freq/irregular</dct:accrualPeriodicity>
+      <dct:language xmlns:dct="http://purl.org/dc/terms/">eng</dct:language>
+      <dct:license xmlns:dct="http://purl.org/dc/terms/">Licence ouverte / Open Licence</dct:license>
+      <dcat:distribution rdf:resource="https://sig.oreme.org/geonetwork/records/0437a976-cff1-4fa6-807a-c23006df2f8f#WWW%3ALINK-1.0-http--link-See%20website"/>
+      <dcat:dataQuality/>
+   </dcat:Dataset>
+   <dcat:CatalogRecord xmlns:dcat="http://www.w3.org/ns/dcat#"
+                       rdf:about="https://sig.oreme.org/geonetwork/records/374bfd7f-657e-4338-92e0-cb8d58f57330">
+      <foaf:primaryTopic xmlns:foaf="http://xmlns.com/foaf/0.1/"
+                         rdf:resource="https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//10.15148%2F42c9bb4e-ed9b-4373-82ee-e096fdc809ca"/>
+      <dct:conformsTo xmlns:dct="http://purl.org/dc/terms/"
+                      rdf:resource="https://www.iso.org/standard/32557.html"/>
+      <dct:issued xmlns:dct="http://purl.org/dc/terms/">2022-02-14</dct:issued>
+      <dct:modified xmlns:dct="http://purl.org/dc/terms/">2022-02-14</dct:modified>
+   </dcat:CatalogRecord>
+   <dcat:Distribution xmlns:dcat="http://www.w3.org/ns/dcat#"
+                      rdf:about="https://sig.oreme.org/geonetwork/records/0437a976-cff1-4fa6-807a-c23006df2f8f#WWW%3ALINK-1.0-http--link-See%20website">
+      <dcat:accessURL>https://oreme.org/observation/gravi</dcat:accessURL>
+      <dct:title xmlns:dct="http://purl.org/dc/terms/">See website</dct:title>
+      <dct:format xmlns:dct="http://purl.org/dc/terms/">WWW:LINK-1.0-http--link</dct:format>
+   </dcat:Distribution>
+</rdf:RDF>

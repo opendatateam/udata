@@ -22,7 +22,7 @@ from udata.rdf import (
 from udata.utils import get_by, safe_unicode
 from udata.uris import endpoint_for
 
-from .models import Dataset, Resource, Checksum, License
+from .models import Dataset, Resource, Checksum, License, UPDATE_FREQUENCIES
 
 log = logging.getLogger(__name__)
 
@@ -299,6 +299,9 @@ def frequency_from_rdf(term):
             term = URIRef(uris.validate(term))
         except uris.ValidationError:
             pass
+    if isinstance(term, Literal):
+        if term.toPython() in UPDATE_FREQUENCIES:
+            return term.toPython()
     if isinstance(term, RdfResource):
         term = term.identifier
     if isinstance(term, URIRef):
@@ -398,8 +401,12 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     d = graph.resource(node)
 
     dataset.title = rdf_value(d, DCT.title)
-    dataset.description = sanitize_html(d.value(DCT.description))
+    # Support dct:abstract if dct:description is missing (sometimes used instead)
+    description = d.value(DCT.description) or d.value(DCT.abstract)
+    dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
+    dataset.created_at = rdf_value(d, DCT.issued, dataset.created_at)
+    dataset.last_modified = rdf_value(d, DCT.modified, dataset.last_modified)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
@@ -415,6 +422,14 @@ def dataset_from_rdf(graph, dataset=None, node=None):
 
     if isinstance(d.identifier, URIRef):
         dataset.extras['uri'] = d.identifier.toPython()
+
+    landing_page = url_from_rdf(d, DCAT.landingPage)
+    if landing_page:
+        try:
+            uris.validate(landing_page)
+            dataset.extras['remote_url'] = landing_page
+        except uris.ValidationError:
+            pass
 
     dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
