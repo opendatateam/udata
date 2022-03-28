@@ -124,11 +124,11 @@ class Defaults(object):
 
     AUTO_INDEX = True
 
-    SITE_ID = 'default'
+    SITE_ID = 'data.gov.rs'
     SITE_TITLE = 'Отворени подаци'
     SITE_KEYWORDS = ['opendata', 'udata']
     SITE_AUTHOR_URL = None
-    SITE_AUTHOR = 'Udata'
+    SITE_AUTHOR = 'ITE'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
     SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
 
