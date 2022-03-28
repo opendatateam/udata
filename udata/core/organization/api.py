@@ -83,7 +83,7 @@ class OrganizationListAPI(API):
         '''List or search all organizations'''
         args = organization_parser.parse()
         organizations = Organization.objects(deleted=None)
-        organizations = self.parse_filters(organizations, args)
+        organizations = organization_parser.parse_filters(organizations, args)
 
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return organizations.order_by(sort).paginate(args['page'], args['page_size'])

@@ -78,7 +78,7 @@ class ReuseListAPI(API):
     def get(self):
         args = reuse_parser.parse()
         reuses = Reuse.objects(deleted=None, private__ne=True)
-        reuses = self.parse_filters(reuses, args)
+        reuses = reuse_parser.parse_filters(reuses, args)
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return reuses.order_by(sort).paginate(args['page'], args['page_size'])
 
