@@ -82,6 +82,11 @@ class DatasetApiParser(ModelApiParser):
     def __init__(self):
         super().__init__()
         self.parser.add_argument('reuse', type=str, location='args')
+        self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('organization', type=str, location='args')
+        self.parser.add_argument('owner', type=str, location='args')
+        self.parser.add_argument('schema', type=str, location='args')
+        self.parser.add_argument('schema_version', type=str, location='args')
 
 
 log = logging.getLogger(__name__)
@@ -130,7 +135,18 @@ class DatasetListAPI(API):
         if args['q']:
             datasets = datasets.search_text(args['q'])
         if args['reuse']:
-            datasets = datasets.objects(id__in=[dat.id for dat in Reuse.get(args['reuse']).datasets])
+            datasets = datasets.filter(id__in=[dat.id for dat in Reuse.get(args['reuse']).datasets])
+        if args['tag']:
+            datasets = datasets.filter(tags=args['tag'])
+        if args['organization']:
+            datasets = datasets.filter(organization=args['organization'])
+        if args['owner']:
+            datasets = datasets.filter(owner=args['owner'])
+        if args['schema']:
+            datasets = datasets.filter(resources__schema__name=args['schema'])
+        if args['schema_version']:
+            datasets = datasets.filter(resources__schema__version=args['schema_version'])
+
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
