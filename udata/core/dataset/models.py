@@ -203,7 +203,7 @@ class License(db.Document):
 
         if license is None:
             # Try to match `title` with a low Damerau-Levenshtein distance
-            computed = ((l, rdlevenshtein(l.title, text)) for l in cls.objects)
+            computed = ((l, rdlevenshtein(l.title.lower(), text)) for l in cls.objects)
             candidates = [l for l, d in computed if d <= MAX_DISTANCE]
             # If there is more that one match, we cannot determinate
             # which one is closer to safely choose between candidates

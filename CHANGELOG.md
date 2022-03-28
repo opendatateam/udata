@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Extend dcat properties support (frequency litteral, creation and modification date, landing page and abstract description) [#2715](https://github.com/opendatateam/udata/pull/2715)
 
 ## 3.3.2 (2022-03-01)
 
