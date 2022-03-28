@@ -90,6 +90,53 @@ class DatasetAPITest(APITestCase):
         self.assertEqual(len(response.json['data']), 3)
         self.assertEqual(response.json['data'][0]['id'], str(to_follow.id))
 
+    def test_dataset_api_list_with_filters(self):
+        '''Should filters datasets results based on query filters'''
+        owner = UserFactory()
+        org = OrganizationFactory()
+
+        [VisibleDatasetFactory() for i in range(2)]
+
+        tag_dataset = VisibleDatasetFactory(tags=['my-tag', 'other'])
+        owner_dataset = VisibleDatasetFactory(owner=owner)
+        org_dataset = VisibleDatasetFactory(organization=org)
+        schema_dataset = VisibleDatasetFactory(resources=[
+            ResourceFactory(schema={'name': 'my-schema', 'version': '1.0.0'})
+        ])
+        schema_version2_dataset = VisibleDatasetFactory(resources=[
+            ResourceFactory(schema={'name': 'other-schema', 'version': '2.0.0'})
+        ])
+
+        # filter on tag
+        response = self.get(url_for('api.datasets', tag='my-tag'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(tag_dataset.id))
+
+        # filter on owner
+        response = self.get(url_for('api.datasets', owner=owner.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(owner_dataset.id))
+
+        # filter on organization
+        response = self.get(url_for('api.datasets', organization=org.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(org_dataset.id))
+
+        # filter on schema
+        response = self.get(url_for('api.datasets', schema='my-schema'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(schema_dataset.id))
+
+        # filter on schema version
+        response = self.get(url_for('api.datasets', schema_version='2.0.0'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(schema_version2_dataset.id))
+
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
         resources = [ResourceFactory() for _ in range(2)]

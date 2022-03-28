@@ -81,7 +81,6 @@ class DatasetApiParser(ModelApiParser):
 
     def __init__(self):
         super().__init__()
-        self.parser.add_argument('reuse', type=str, location='args')
         self.parser.add_argument('tag', type=str, location='args')
         self.parser.add_argument('organization', type=str, location='args')
         self.parser.add_argument('owner', type=str, location='args')
@@ -134,8 +133,6 @@ class DatasetListAPI(API):
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         if args['q']:
             datasets = datasets.search_text(args['q'])
-        if args['reuse']:
-            datasets = datasets.filter(id__in=[dat.id for dat in Reuse.get(args['reuse']).datasets])
         if args['tag']:
             datasets = datasets.filter(tags=args['tag'])
         if args['organization']:
@@ -450,7 +447,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
-         # ensure API client does not override url on self-hosted resources
+        # ensure API client does not override url on self-hosted resources
         if resource.filetype == 'file':
             form._fields.get('url').data = resource.url
         form.populate_obj(resource)
@@ -661,6 +658,7 @@ class ResourceTypesAPI(API):
         '''List all resource types'''
         return [{'id': id, 'label': label}
                 for id, label in RESOURCE_TYPES.items()]
+
 
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):
