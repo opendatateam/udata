@@ -1,3 +1,7 @@
+@import (less) "@gouvfr/dsfr/dist/component/logo/logo.css";
+@import (less) "@gouvfr/dsfr/dist/component/navigation/navigation.css";
+@import (less) "@gouvfr/dsfr/dist/component/header/header.css";
+
 .banner {
     overflow: visible;
     a {
@@ -9,198 +13,36 @@
     }
 }
 
-.header-brand {
-    border-bottom: 1px solid @grey-200;
-
-    .header-logo {
-        svg {
-            height: 85px;
-            fill: unset;
-        }
-
-        a {
-            text-decoration: none;
-        }
-    }
-
-    .mobile-menu {
-        svg {
-            width: 25px;
-            height: 25px;
-        }
-
-        .mobile-menu-close {
-            svg {
-                width: 8px;
-                height: 8px;
-
-                * {
-                    fill: currentColor;
-                }
-            }
-        }
-    }
-
-    .header-service {
-        @media @query-xl {
-            margin: @spacing-md auto 0 auto !important;
-            padding-top: @spacing-sm;
-            border-top: 1px solid @grey-200;
-        }
-    }
-
-    .login-box {
-        > * + * {
-            &:before {
-                content: " ";
-                display: inline-block;
-                vertical-align: middle;
-                width: 1px;
-                height: 12px;
-
-                margin: 0 @spacing-xs;
-
-                background-color: @grey-200;
-
-                @media @query-xl {
-                    display: none;
-                }
-            }
-        }
-
-        svg {
-            margin-right: @spacing-xxs;
-            vertical-align: middle;
-
-            * {
-                fill: currentColor;
-            }
-        }
-
-        @media @query-xl {
-            transform: translateX(-100%);
-            transition: transform ease 0.2s;
-
-            display: block;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            opacity: 0;
-
-            z-index: 210;
-
-            padding: @spacing-md 0;
-
-            > a {
-                display: block;
-            }
-
-            > * {
-                padding: @spacing-sm;
-
-                + * {
-                    .border-top;
-                }
-            }
-        }
-    }
+.fr-nav__link:hover {
+    text-decoration: none;
 }
 
-.header-nav {
-    position: relative;
-    z-index: 200; // Above the suggest thingy
-    border-bottom: 1px solid @grey-200;
-
-    @media @query-xl {
-        transform: translateX(-100%);
-        transition: transform ease 0.2s;
-        position: absolute;
-        background: white;
-        width: 100%;
-
-        opacity: 0;
-    }
-
-    .search-box {
-        cursor: pointer;
-
-        form {
-            background: @grey-50;
-            border-radius: 2px;
-
-            input,
-            button {
-                padding: @spacing-xs @spacing-sm;
-                margin: 0;
-                appearance: none;
-                background: none;
-                border: 0;
-            }
-
-            input {
-                flex-grow: 1;
-            }
-        }
-
-        svg {
-            width: 20px;
-            height: 20px;
-        }
-    }
+nav.fr-nav li::before {
+    content: none;
 }
 
-.site-header {
-    // Sticky on mobile
-    @media @query-xl {
-        position: sticky;
-        background: white;
-        z-index: 2001;
-        top: 0;
-    }
+.fr-header__navbar .fr-btn {
+    --text-action-high-blue-france: @blue-400;
 }
 
-// Mobile header interactivity (burger menu 😋)
-.mobile-menu-open {
-    overflow: hidden; // Prevent scroll when menu is open
+.fr-nav__link[aria-current], .fr-nav__btn[aria-current] {
+    --text-active-blue-france: @blue-400;
+}
 
-    .header-inner {
-        width: 100vw;
-        position: absolute;
-        padding-bottom: 200px; // Space for the "login-box" (username + links)
-        min-height: 100%;
+.fr-nav__link[aria-current]::before, .fr-nav__btn[aria-current]::before {
+    --background-active-blue-france: @blue-400;
+    --background-active-blue-france-blend: @blue-400-blend;
+}
+
+.fr-collapse.autocomplete {
+    width: 100%;
+    & > * {
+        width: auto;
     }
-
-    .site-header {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-
-        // Hide burger menu & search, show close button
-        .mobile-menu {
-            > a {
-                display: none;
-            }
-
-            .mobile-menu-close {
-                display: block !important;
-            }
-        }
-
-        // Show menu
-        .header-nav,
-        .login-box {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .header-nav {
-            position: unset;
-        }
-
-        .login-box {
-            position: absolute;
-        }
+    [aria-selected=true] {
+        color: @blue-400;
+    }
+    [aria-selected=true] svg path {
+        fill: @blue-400;
     }
 }

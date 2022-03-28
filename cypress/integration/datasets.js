@@ -9,7 +9,7 @@ describe("Testing datasets page", () => {
   });
 
   it("Allows you to expand the search options", () => {
-    cy.get('a[data-cy="extend-form"]')
+    cy.get('[data-cy="extend-form"]')
       .click()
       .get('[data-cy="extended-form"]')
       .should("be.visible");

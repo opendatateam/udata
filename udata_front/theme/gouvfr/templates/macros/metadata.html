@@ -27,6 +27,7 @@
 <meta name="schema-validata-url" content="{{ config.SCHEMA_GOUVFR_VALIDATA_URL }}" />
 <meta name="github" content="{{ config.SITE_GITHUB_URL }}" />
 <meta name="js-config-dataset-url" content="{{ url_for('datasets.list') }}" />
+<meta name="js-config-organization-url" content="{{ url_for('organizations.list') }}" />
 <meta name="js-config-reuse-url" content="{{ url_for('reuses.list') }}" />
 {{ i18n_alternate_links() }}
 {% if config.SENTRY_PUBLIC_DSN %}

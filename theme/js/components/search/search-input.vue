@@ -1,7 +1,7 @@
 <!--
 ---
 name: Input
-category: Suggest
+category: Search
 ---
 
 # Search input

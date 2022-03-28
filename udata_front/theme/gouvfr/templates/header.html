@@ -1,3 +1,5 @@
+{% from theme('macros/banner_warning.html') import banner_warning %}
+
 {% set banner_activated = config['BANNER_ACTIVATED'] %}
 {% set read_only_mode = config['READ_ONLY_MODE'] %}
 {% set next_url = url_for(request.endpoint, **request.view_args) if not request.routing_exception else url_for('site.home') %}
@@ -13,110 +15,164 @@
 {% endblock %}
 {% endif %}
 
-<section class="site-header" ref="header" role="banner">
-    <div class="header-inner">
-        <!--[if lte IE 8]>
-        <div class="iewarning">
-            {{ _('Internet Explorer 8 and below are not anymore supported. Please upgrade or change your browser to access the website.') }}
-            <a href="http://browsehappy.com/">{{ _('More information →')}}</a>
-        </div>
-    <![endif]-->
-        <header class="header-brand py-sm">
-            <div class="hagrid">
-                <div class="row align-items-center">
-                    <div class="col-auto header-logo">
-                        <a href="{{ url_for('site.home') }}" title="{{ _('Go back to home page') }}">
-                            {% include theme('svg/marianne.svg') %}
-                        </a>
+<header role="banner" class="fr-header">
+    <div class="fr-header__body">
+        <div class="fr-container">
+            <!--[if lte IE 8]>
+                {{ banner_warning(
+                "fr-fi-alert-line",
+                 _('Internet Explorer 8 and below are not anymore supported.
+                 Please upgrade or change your browser to access the website.
+                 <a class="fr-link" href="http://browsehappy.com/">More information →</a>'))}}
+             <![endif]-->
+            <div class="fr-header__body-row">
+                <div class="fr-header__brand fr-enlarge-link">
+                    <div class="fr-header__brand-top">
+                        <div class="fr-header__logo">
+                            <p class="fr-logo">
+                                République
+                                <br>Française
+                            </p>
+                        </div>
+                        <div class="fr-header__navbar">
+                            <button
+                                class="fr-btn--search fr-btn"
+                                data-fr-opened="false"
+                                aria-controls="modal-search"
+                                title="{{ _('Search for data') }}"
+                            >
+                                {{ _('Search for data') }}
+                            </button>
+                            <button
+                                class="fr-btn--menu fr-btn"
+                                data-fr-opened="false"
+                                aria-controls="modal-mobile-menu"
+                                aria-haspopup="menu"
+                                title="{{ _('Open menu') }}"
+                                id="fr-btn-menu-mobile"
+                            >
+                                {{ _('Open menu') }}
+                            </button>
+                        </div>
                     </div>
-                    <nav
-                            class="col hidden visible-xl mobile-menu row-inline justify-end self-start vuejs"
-                            role="navigation"
-                            aria-label="{{ _('Mobile navigation menu') }}"
-                    >
-                        <a href="/datasets" title="{{ _('Search for data') }}" class="mr-md"
-                            @click.capture.prevent="$bus.emit('suggest.startSearch')" role="search">
-                            {% include theme('svg/search.svg') %}
-                        </a>
-                        <a href="#" @click.capture.prevent="addBodyClass('mobile-menu-open')"
-                            title="{{ _('Open menu') }}">
-                            {% include theme('svg/burger-menu.svg') %}
-                        </a>
-                        <a href="#" @click.capture.prevent="removeBodyClass('mobile-menu-open')"
-                            title="{{ _('Close menu') }}" class="mobile-menu-close hidden">
-                            {{ _('Close') }}
-                            {% include theme('svg/close.svg') %}
-                        </a>
-                    </nav>
-                    <div class="col-auto ml-lg ml-xl-0 col-xl-12 header-service">
+                    <div class="fr-header__service">
                         <a href="{{ url_for('site.home') }}" title="{{ _('Go back to home page') }}">
                             {% include theme('svg/logotype.svg') %}
                         </a>
                     </div>
-                    <div class="col login-box row-inline justify-end align-items-center">
-                        {% if current_user.is_authenticated %}
-                        <div class="row-inline align-items-center">
-                            <img
-                                src="{{ current_user|avatar_url(24) }}"
-                                width="24"
-                                height="24"
-                                loading="lazy"
-                                alt=""
-                                class="mr-xs rounded-circle"
-                            />
-                            <span>{{ current_user.fullname }} </span>
+                </div>
+                <div class="fr-header__tools">
+                    <div class="fr-header__tools-links">
+                        <ul class="fr-links-group">
+                            {% if current_user.is_authenticated %}
+                                <li>
+                                    <div class="fr-link fr-grid-row text-grey-500">
+                                        <img
+                                            src="{{ current_user|avatar_url(24) }}"
+                                            width="24"
+                                            height="24"
+                                            loading="lazy"
+                                            alt=""
+                                            class="fr-mr-1w rounded-circle"
+                                        />
+                                        {{ current_user.fullname }}
+                                    </div>
+                                </li>
+                                <li>
+                                    <a
+                                        href="{{ url_for('admin.index') }}"
+                                        class="fr-link"
+                                    >
+                                        <span class="fr-mr-1w fr-grid-row">
+                                            {% include theme('svg/administration.svg') %}
+                                        </span>
+                                        {{ _('Administration') }}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href="{{ url_for('security.logout') }}"
+                                        class="fr-link fr-fi-logout-box-r-line"
+                                    >
+                                        {{ _('Logout') }}
+                                    </a>
+                                </li>
+                            {% else %}
+                                <a
+                                    href="{{ url_for('security.login', next=next_url) }}"
+                                    title="{{ _('Log in') }}"
+                                    class="fr-link fr-fi-lock-line"
+                                >
+                                    {{ _('Log in') }}
+                                </a>
+                                {% if not read_only_mode %}
+                                    <a
+                                        href="{{ url_for('security.register', next=next_url) }}"
+                                        title="{{ _('Sign up') }}"
+                                         class="fr-link fr-fi-account-line"
+                                    >
+                                        {{ _("Sign up") }}
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="fr-header__search fr-modal" id="modal-search">
+                        <div class="fr-container fr-container-lg--fluid relative">
+                            <button class="fr-link--close fr-link" aria-controls="modal-search">{{ _('Close') }}</button>
+                            <form action="/datasets">
+                                <div class="fr-search-bar vuejs" id="search" role="search">
+                                    <label class="fr-label" for="search-input" id="search-label">
+                                        {{  _('Search for data') }}
+                                    </label>
+                                    <menu-search></menu-search>
+                                    <noscript class="fr-col fr-grid-row">
+                                        <input
+                                            class="fr-input fr-col"
+                                            placeholder="{{  _('Search for data') }}"
+                                            type="search"
+                                            id="search-input"
+                                            name="q"
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="fr-btn"
+                                            title="{{  _('Search for data') }}"
+                                        >
+                                            {{  _('Search for data') }}
+                                        </button>
+                                    </noscript>
+                                </div>
+                            </form>
                         </div>
-                        <a href="{{ url_for('admin.index') }}"
-                            title="{{ _('Administration') }}">{% include theme('svg/administration.svg') %}{{ _('Administration') }}
-                        </a>
-                        <a href="{{ url_for('security.logout') }}"
-                            title="{{ _('Logout') }}">{% include theme('svg/login.svg') %}{{ _('Logout') }}
-                        </a>
-                        {% else %}
-                        <a href="{{ url_for('security.login', next=next_url) }}"
-                            title="{{ _('Log in') }}">{% include theme('svg/login.svg') %}{{ _('Log in') }}
-                        </a>
-                        {% if not read_only_mode %}
-                        <a href="{{ url_for('security.register', next=next_url) }}"
-                            title="{{ _('Sign up') }}">{% include theme('svg/register.svg') %}{{ _("Sign up") }}
-                        </a>
-                        {% endif %}
-                        {% endif %}
                     </div>
                 </div>
             </div>
-        </header>
-        <nav class="header-nav">
-            <div class="hagrid">
-                <div class="row justify-between align-items-center">
-                    <nav class="nav-tabs col" role="navigation" aria-label="{{ _('Main navigation menu') }}">
-                        {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] if request.url_rule or None %}
-                        {% for item in current_theme.menu %}
-                        {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
-                        {% set active = request.url_rule.endpoint != "site.home" and (link_endpoint == current_endpoint) %}
-                        <a class="tab {% if active %}active{% endif %}" href="{{item.url}}">{{ item.label }}</a>
-                        {% endfor %}
-                    </nav>
-                    <div class="col-3 hidden-xl search-box vuejs" role="search">
-                        <form action="/datasets" class="w-100 row-inline justify-between"
-                            @focus.capture.prevent="$bus.emit('suggest.startSearch')" tabindex="0">
-                            <input
-                                type="text"
-                                @keypress.prevent
-                                name="q"
-                                placeholder="{{ _('Search for data') }}"
-                                aria-label="{{ _('Search for data') }}"
-                            />
-                            <button type="submit" aria-label="{{ _('Search for data') }}">
-                                {% include theme('svg/search.svg') %}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </nav>
-        <div class="vuejs">
-            <suggest ref="suggest" />
         </div>
     </div>
-</section>
+    <div class="fr-header__menu fr-modal" id="modal-mobile-menu" aria-labelledby="fr-btn-menu-mobile">
+        <div class="fr-container">
+            <button class="fr-link--close fr-link" aria-controls="modal-mobile-menu">{{ _('Close') }}</button>
+            <div class="fr-header__menu-links"></div>
+            <nav class="fr-nav" id="navigation" role="navigation" aria-label="{{ _('Main Menu') }}">
+                <ul class="fr-nav__list">
+                    {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] if request.url_rule or None %}
+                    {% for item in current_theme.menu %}
+                        {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
+                        {% set active = request.url_rule.endpoint != "site.home" and (link_endpoint == current_endpoint) %}
+                        <li class="fr-nav__item">
+                            <a
+                                class="fr-nav__link"
+                                href="{{item.url}}"
+                                {% if active %}aria-current="page" {% endif %}
+                                target="_self"
+                            >
+                                {{ item.label }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>

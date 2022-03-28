@@ -1,7 +1,8 @@
 import { createApp } from "vue";
+import * as dsfr from "@gouvfr/dsfr/dist/dsfr/dsfr.module";
 
 import Threads from "./components/discussions/threads.vue";
-import Suggest from "./components/search/suggest-box";
+import MenuSearch from "./components/search/menu-search";
 import Search from "./components/search/search";
 import FeaturedButton from './components/utils/featured';
 import FollowButton from "./components/utils/follow-button";
@@ -9,7 +10,6 @@ import ReadMore from "./components/utils/read-more";
 import RequestMembership from "./components/organization/request-membership";
 import Resources from "./components/dataset/resource/resources.vue";
 import SearchBar from "./components/utils/search-bar.vue";
-import * as dsfr from "@gouvfr/dsfr/dist/dsfr/dsfr.module";
 
 import Tabs from "./components/vanilla/tabs";
 import Accordion from "./components/vanilla/accordion";
@@ -56,7 +56,7 @@ const configAndMountApp = (el) => {
   app.use(Toaster).provide('toast', app.config.globalProperties.$toast);
 
   app.component("discussion-threads", Threads);
-  app.component("suggest", Suggest);
+  app.component("menu-search", MenuSearch);
   app.component("search", Search);
   app.component("follow-button", FollowButton);
   app.component("featured-button", FeaturedButton);
