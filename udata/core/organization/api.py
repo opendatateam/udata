@@ -57,8 +57,8 @@ class OrgApiParser(ModelApiParser):
         'last_modified': 'last_modified',
     }
 
-    @classmethod
-    def parse_filters(cls, organizations, args):
+    @staticmethod
+    def parse_filters(organizations, args):
         if args.get('q'):
             organizations = organizations.search_text(args['q'])
         return organizations

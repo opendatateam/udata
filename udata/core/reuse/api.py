@@ -45,8 +45,8 @@ class ReuseApiParser(ModelApiParser):
         self.parser.add_argument('organization', type=str, location='args')
         self.parser.add_argument('owner', type=str, location='args')
 
-    @classmethod
-    def parse_filters(cls, reuses, args):
+    @staticmethod
+    def parse_filters(reuses, args):
         if args.get('q'):
             reuses = reuses.search_text(args['q'])
         if args.get('dataset'):

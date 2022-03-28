@@ -87,8 +87,8 @@ class DatasetApiParser(ModelApiParser):
         self.parser.add_argument('schema', type=str, location='args')
         self.parser.add_argument('schema_version', type=str, location='args')
 
-    @classmethod
-    def parse_filters(cls, datasets, args):
+    @staticmethod
+    def parse_filters(datasets, args):
         if args.get('q'):
             datasets = datasets.search_text(args['q'])
         if args.get('tag'):
