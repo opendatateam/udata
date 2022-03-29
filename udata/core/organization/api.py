@@ -57,6 +57,12 @@ class OrgApiParser(ModelApiParser):
         'last_modified': 'last_modified',
     }
 
+    @staticmethod
+    def parse_filters(organizations, args):
+        if args.get('q'):
+            organizations = organizations.search_text(args['q'])
+        return organizations
+
 
 ns = api.namespace('organizations', 'Organization related operations')
 
@@ -77,11 +83,10 @@ class OrganizationListAPI(API):
         '''List or search all organizations'''
         args = organization_parser.parse()
         organizations = Organization.objects(deleted=None)
-        if args['q']:
-            organizations = organizations.search_text(args['q'])
+        organizations = organization_parser.parse_filters(organizations, args)
+
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return organizations.order_by(sort).paginate(args['page'], args['page_size'])
-
 
     @api.secure
     @api.doc('create_organization', responses={400: 'Validation error'})

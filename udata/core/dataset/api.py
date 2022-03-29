@@ -79,6 +79,31 @@ class DatasetApiParser(ModelApiParser):
         'views': 'metrics.views',
     }
 
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('organization', type=str, location='args')
+        self.parser.add_argument('owner', type=str, location='args')
+        self.parser.add_argument('schema', type=str, location='args')
+        self.parser.add_argument('schema_version', type=str, location='args')
+
+    @staticmethod
+    def parse_filters(datasets, args):
+        if args.get('q'):
+            datasets = datasets.search_text(args['q'])
+        if args.get('tag'):
+            datasets = datasets.filter(tags=args['tag'])
+        if args.get('organization'):
+            datasets = datasets.filter(organization=args['organization'])
+        if args.get('owner'):
+            datasets = datasets.filter(owner=args['owner'])
+        if args.get('schema'):
+            datasets = datasets.filter(resources__schema__name=args['schema'])
+        if args.get('schema_version'):
+            datasets = datasets.filter(resources__schema__version=args['schema_version'])
+        return datasets
+
+
 log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
@@ -122,8 +147,8 @@ class DatasetListAPI(API):
         '''List or search all datasets'''
         args = dataset_parser.parse()
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
-        if args['q']:
-            datasets = datasets.search_text(args['q'])
+        datasets = dataset_parser.parse_filters(datasets, args)
+
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
@@ -427,7 +452,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
-         # ensure API client does not override url on self-hosted resources
+        # ensure API client does not override url on self-hosted resources
         if resource.filetype == 'file':
             form._fields.get('url').data = resource.url
         form.populate_obj(resource)
@@ -638,6 +663,7 @@ class ResourceTypesAPI(API):
         '''List all resource types'''
         return [{'id': id, 'label': label}
                 for id, label in RESOURCE_TYPES.items()]
+
 
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):

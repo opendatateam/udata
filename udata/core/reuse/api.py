@@ -38,6 +38,28 @@ class ReuseApiParser(ModelApiParser):
         'views': 'metrics.views',
     }
 
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('dataset', type=str, location='args')
+        self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('organization', type=str, location='args')
+        self.parser.add_argument('owner', type=str, location='args')
+
+    @staticmethod
+    def parse_filters(reuses, args):
+        if args.get('q'):
+            reuses = reuses.search_text(args['q'])
+        if args.get('dataset'):
+            reuses = reuses.filter(datasets=args['dataset'])
+
+        if args.get('tag'):
+            reuses = reuses.filter(tags=args['tag'])
+        if args.get('organization'):
+            reuses = reuses.filter(organization=args['organization'])
+        if args.get('owner'):
+            reuses = reuses.filter(owner=args['owner'])
+        return reuses
+
 
 ns = api.namespace('reuses', 'Reuse related operations')
 
@@ -56,11 +78,9 @@ class ReuseListAPI(API):
     def get(self):
         args = reuse_parser.parse()
         reuses = Reuse.objects(deleted=None, private__ne=True)
-        if args['q']:
-            reuses = reuses.search_text(args['q'])
+        reuses = reuse_parser.parse_filters(reuses, args)
         sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         return reuses.order_by(sort).paginate(args['page'], args['page_size'])
-
 
     @api.secure
     @api.doc('create_reuse')
