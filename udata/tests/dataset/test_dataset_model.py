@@ -72,7 +72,7 @@ class DatasetModelTest:
         user = UserFactory()
         resource = ResourceFactory()
         dataset = DatasetFactory(owner=user, resources=[resource])
-        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+        expected_signals = (Dataset.on_resource_updated,)
 
         resource.description = 'New description'
 
