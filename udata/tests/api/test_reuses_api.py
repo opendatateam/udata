@@ -9,6 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import AdminFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
 from udata.models import Reuse, Follow, Member, REUSE_TOPICS, REUSE_TYPES
 from udata.utils import faker
 
@@ -32,6 +33,35 @@ class ReuseAPITest:
         response = api.get(url_for('api.reuses'))
         assert200(response)
         assert len(response.json['data']) == len(reuses)
+
+    def test_reuse_api_list_with_filters(self, api):
+        '''Should filters reuses results based on query filters'''
+        owner = UserFactory()
+        org = OrganizationFactory()
+
+        [ReuseFactory() for i in range(2)]
+
+        tag_reuse = ReuseFactory(tags=['my-tag', 'other'])
+        owner_reuse = ReuseFactory(owner=owner)
+        org_reuse = ReuseFactory(organization=org)
+
+        # filter on tag
+        response = api.get(url_for('api.reuses', tag='my-tag'))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(tag_reuse.id)
+
+        # filter on owner
+        response = api.get(url_for('api.reuses', owner=owner.id))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(owner_reuse.id)
+
+        # filter on organization
+        response = api.get(url_for('api.reuses', organization=org.id))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(org_reuse.id)
 
     def test_reuse_api_get(self, api):
         '''It should fetch a reuse from the API'''
