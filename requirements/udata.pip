@@ -292,7 +292,7 @@ typing-extensions==3.10.0.0
     # via
     #   importlib-metadata
     #   udata
-git+https://github.com/opendatateam/udata.git
+udata==3.3.3
     # via -r requirements/udata.in
 ujson==1.35
     # via udata
