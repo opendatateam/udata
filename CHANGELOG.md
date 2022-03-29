@@ -30,22 +30,6 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 
 - **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
 - Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
-- :warning: API changes [#2669](https://github.com/opendatateam/udata/pull/2669):
-  - List endpoints for organizations, datasets, reuses and users are now querying MongoDB instead of ElasticSearch.
-  - Those endpoints use MongoDB full text search when `q` argument is used.
-  - A new API parser was implemented to replace the search one.
-  - The previous ElasticSearch endpoints were moved to APIv2 with the following url pattern: `/{object}/search` (ex: `/datasets/search`).
-- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685) and [#2696](https://github.com/opendatateam/udata/pull/2696):
-  - Current suggest implementation moved from an Elasticsearch index to a MongoDB query using the term `contains`.
-  - The user suggest was entirely removed, as its existence is now less pertinent because of the full text search.
-- :warning: Search changes [#2692](https://github.com/opendatateam/udata/pull/2692):
-  - The search feature is not within Udata anymore and queries a distant service.
-  - The search feature is now optional and is enabled by setting the `SEARCH_SERVICE_API_URL` setting.
-  - When search is not enabled, the search endpoints will return a `501 Not Implemented` error.
-  - The ModelAdapter, SearchQuery and SearchResult patterns were kept but heavily refactored.
-  - Udata uses a Kafka producer to send documents to index to the search service.
-  - Udata uses HTTP request to query the search service.
-- Add the `extras` field of Dataset, Reuse and Organization into their corresponding `ModelSearchAdapter` serialize method. [#2703](https://github.com/opendatateam/udata/pull/2703)
 - Add a `q` argument to the paginated datasets resources endpoint, to search through resources titles. [#2701](https://github.com/opendatateam/udata/pull/2701)
 - Delete discussion with deleted user as only participant [#2702](https://github.com/opendatateam/udata/pull/2702)
 - Fix error on post creation when adding related reuse [#2704](https://github.com/opendatateam/udata/pull/2704)
@@ -62,14 +46,6 @@ Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
 - :warning: Removed `Issues` code and logic. The corresponding MongoDB collection should be deleted when upgrading Udata. [#2681](https://github.com/opendatateam/udata/pull/2681)
 - Fix transfer ownership from org to user [#2678](https://github.com/opendatateam/udata/pull/2678)
 - Fix discussion creation on posts [#2687](https://github.com/opendatateam/udata/pull/2687)
-- :warning: API changes [#2669](https://github.com/opendatateam/udata/pull/2669):
-  - List endpoints for organizations, datasets, reuses and users are now querying MongoDB instead of ElasticSearch.
-  - Those endpoints use MongoDB full text search when `q` argument is used.
-  - A new API parser was implemented to replace the search one.
-  - The previous ElasticSearch endpoints were moved to APIv2 with the following url pattern: `/{object}/search` (ex: `/datasets/search`).
-- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685) and [#2696](https://github.com/opendatateam/udata/pull/2696):
-  - Current suggest implementation moved from an Elasticsearch index to a MongoDB query using the term `contains`.
-  - The user suggest was entirely removed, as its existence is now less pertinent because of the full text search.
 
 ## 3.2.2 (2021-11-23)
 
