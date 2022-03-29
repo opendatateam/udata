@@ -41,77 +41,106 @@ class DatasetAPITest(APITestCase):
 
     def test_dataset_api_list(self):
         '''It should fetch a dataset list from the API'''
-        with self.autoindex():
-            datasets = [VisibleDatasetFactory() for i in range(2)]
+        datasets = [VisibleDatasetFactory() for i in range(2)]
 
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
 
-    def test_dataset_api_search(self):
-        '''It should search datasets from the API'''
-        with self.autoindex():
-            [VisibleDatasetFactory() for i in range(2)]
-            dataset = VisibleDatasetFactory(title="some spécial chars")
+    def test_dataset_api_full_text_search(self):
+        '''Should proceed to full text search on datasets'''
+        [VisibleDatasetFactory() for i in range(2)]
+        VisibleDatasetFactory(title="some spécial integer")
+        VisibleDatasetFactory(title="some spécial float")
+        dataset = VisibleDatasetFactory(title="some spécial chars")
 
-        response = self.get(url_for('api.datasets', q='spécial'))
+        # with accent
+        response = self.get(url_for('api.datasets', q='some spécial chars'))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(len(response.json['data']), 3)
         self.assertEqual(response.json['data'][0]['id'], str(dataset.id))
 
-    def test_dataset_api_list_filtered_by_org(self):
-        '''It should fetch a dataset list for a given org'''
-        self.login()
-        with self.autoindex():
-            member = Member(user=self.user, role='editor')
-            org = OrganizationFactory(members=[member])
-            VisibleDatasetFactory()
-            dataset_org = VisibleDatasetFactory(organization=org)
+        # with accent
+        response = self.get(url_for('api.datasets', q='spécial'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 3)
 
-        response = self.get(url_for('api.datasets'),
-                            qs={'organization': str(org.id)})
+        # without accent
+        response = self.get(url_for('api.datasets', q='special'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 3)
+
+    def test_dataset_api_sorting(self):
+        '''Should sort datasets results from the API'''
+        user = self.login()
+        [VisibleDatasetFactory() for i in range(2)]
+
+        to_follow = VisibleDatasetFactory(title="dataset to follow")
+
+        response = self.post(url_for('api.dataset_followers', id=to_follow.id))
+        self.assert201(response)
+
+        to_follow.count_followers()
+        self.assertEqual(to_follow.get_metrics()['followers'], 1)
+
+        # without accent
+        response = self.get(url_for('api.datasets', sort='-followers'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(response.json['data'][0]['id'], str(to_follow.id))
+
+    def test_dataset_api_list_with_filters(self):
+        '''Should filters datasets results based on query filters'''
+        owner = UserFactory()
+        org = OrganizationFactory()
+
+        [VisibleDatasetFactory() for i in range(2)]
+
+        tag_dataset = VisibleDatasetFactory(tags=['my-tag', 'other'])
+        owner_dataset = VisibleDatasetFactory(owner=owner)
+        org_dataset = VisibleDatasetFactory(organization=org)
+        schema_dataset = VisibleDatasetFactory(resources=[
+            ResourceFactory(schema={'name': 'my-schema', 'version': '1.0.0'})
+        ])
+        schema_version2_dataset = VisibleDatasetFactory(resources=[
+            ResourceFactory(schema={'name': 'other-schema', 'version': '2.0.0'})
+        ])
+
+        # filter on tag
+        response = self.get(url_for('api.datasets', tag='my-tag'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
-        self.assertEqual(response.json['data'][0]['id'], str(dataset_org.id))
+        self.assertEqual(response.json['data'][0]['id'], str(tag_dataset.id))
 
-    def test_dataset_api_list_filtered_by_org_with_or(self):
-        '''It should fetch a dataset list for two given orgs'''
-        self.login()
-        with self.autoindex():
-            member = Member(user=self.user, role='editor')
-            org1 = OrganizationFactory(members=[member])
-            org2 = OrganizationFactory(members=[member])
-            VisibleDatasetFactory()
-            dataset_org1 = VisibleDatasetFactory(organization=org1)
-            dataset_org2 = VisibleDatasetFactory(organization=org2)
-
-        response = self.get(
-            url_for('api.datasets'),
-            qs={'organization': '{0}|{1}'.format(org1.id, org2.id)})
+        # filter on owner
+        response = self.get(url_for('api.datasets', owner=owner.id))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), 2)
-        returned_ids = [item['id'] for item in response.json['data']]
-        self.assertIn(str(dataset_org1.id), returned_ids)
-        self.assertIn(str(dataset_org2.id), returned_ids)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(owner_dataset.id))
 
-    def test_dataset_api_list_with_facets(self):
-        '''It should fetch a dataset list from the API with facets'''
-        with self.autoindex():
-            for i in range(2):
-                VisibleDatasetFactory(tags=['tag-{0}'.format(i)])
-
-        response = self.get(url_for('api.datasets', **{'facets': 'tag'}))
+        # filter on organization
+        response = self.get(url_for('api.datasets', organization=org.id))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), 2)
-        self.assertIn('facets', response.json)
-        self.assertIn('tag', response.json['facets'])
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(org_dataset.id))
+
+        # filter on schema
+        response = self.get(url_for('api.datasets', schema='my-schema'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(schema_dataset.id))
+
+        # filter on schema version
+        response = self.get(url_for('api.datasets', schema_version='2.0.0'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(schema_version2_dataset.id))
 
     def test_dataset_api_get(self):
         '''It should fetch a dataset from the API'''
-        with self.autoindex():
-            resources = [ResourceFactory() for _ in range(2)]
-            dataset = DatasetFactory(resources=resources)
+        resources = [ResourceFactory() for _ in range(2)]
+        dataset = DatasetFactory(resources=resources)
 
         response = self.get(url_for('api.dataset', dataset=dataset))
         self.assert200(response)
@@ -439,9 +468,8 @@ class DatasetAPITest(APITestCase):
     def test_dataset_api_delete(self):
         '''It should delete a dataset from the API'''
         user = self.login()
-        with self.autoindex():
-            dataset = VisibleDatasetFactory(owner=user)
-            response = self.delete(url_for('api.dataset', dataset=dataset))
+        dataset = VisibleDatasetFactory(owner=user)
+        response = self.delete(url_for('api.dataset', dataset=dataset))
 
         self.assertStatus(response, 204)
         self.assertEqual(Dataset.objects.count(), 1)
@@ -649,11 +677,10 @@ class DatasetResourceAPITest(APITestCase):
     def test_create_with_file(self):
         '''It should create a resource from the API with a file'''
         user = self.login()
-        with self.autoindex():
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(organization=org)
+        org = OrganizationFactory(members=[
+            Member(user=user, role='admin')
+        ])
+        dataset = DatasetFactory(organization=org)
         response = self.post(
             url_for('api.upload_new_dataset_resource', dataset=dataset),
             {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
@@ -670,11 +697,10 @@ class DatasetResourceAPITest(APITestCase):
     def test_create_with_file_chunks(self):
         '''It should create a resource from the API with a chunked file'''
         user = self.login()
-        with self.autoindex():
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(organization=org)
+        org = OrganizationFactory(members=[
+            Member(user=user, role='admin')
+        ])
+        dataset = DatasetFactory(organization=org)
 
         uuid = str(uuid4())
         parts = 4
@@ -842,12 +868,11 @@ class DatasetResourceAPITest(APITestCase):
     def test_update_with_file(self):
         '''It should update a resource from the API with a file'''
         user = self.login()
-        with self.autoindex():
-            resource = ResourceFactory()
-            org = OrganizationFactory(members=[
-                Member(user=user, role='admin')
-            ])
-            dataset = DatasetFactory(resources=[resource], organization=org)
+        resource = ResourceFactory()
+        org = OrganizationFactory(members=[
+            Member(user=user, role='admin')
+        ])
+        dataset = DatasetFactory(resources=[resource], organization=org)
         response = self.post(
             url_for('api.upload_dataset_resource',
                     dataset=dataset, rid=resource.id),
@@ -962,32 +987,27 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_suggest_formats_api(self):
         '''It should suggest formats'''
-        with self.autoindex():
-            DatasetFactory(resources=[
-                ResourceFactory(format=f)
-                for f in (faker.word(), faker.word(), 'test', 'test-1')
-            ])
+        DatasetFactory(resources=[
+            ResourceFactory(format=f)
+            for f in (faker.word(), faker.word(), 'kml', 'kml-1')
+        ])
 
         response = self.get(url_for('api.suggest_formats'),
-                            qs={'q': 'test', 'size': '5'})
+                            qs={'q': 'km', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
         self.assertGreater(len(response.json), 1)
-        # Shortest match first.
-        self.assertEqual(response.json[0]['text'], 'test')
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)
-            self.assertIn('score', suggestion)
-            self.assertTrue(suggestion['text'].startswith('test'))
+            self.assertTrue(suggestion['text'].startswith('km'))
 
     def test_suggest_format_api_no_match(self):
         '''It should not provide format suggestion if no match'''
-        with self.autoindex():
-            DatasetFactory(resources=[
-                ResourceFactory(format=faker.word()) for _ in range(3)
-            ])
+        DatasetFactory(resources=[
+            ResourceFactory(format=faker.word()) for _ in range(3)
+        ])
 
         response = self.get(url_for('api.suggest_formats'),
                             qs={'q': 'test', 'size': '5'})
@@ -996,7 +1016,6 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_suggest_format_api_empty(self):
         '''It should not provide format suggestion if no data'''
-        self.init_search()
         response = self.get(url_for('api.suggest_formats'),
                             qs={'q': 'test', 'size': '5'})
         self.assert200(response)
@@ -1004,48 +1023,38 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_suggest_mime_api(self):
         '''It should suggest mime types'''
-        with self.autoindex():
-            DatasetFactory(resources=[
-                ResourceFactory(mime=f) for f in (
-                    faker.mime_type(category=None),
-                    faker.mime_type(category=None),
-                    'application/test',
-                    'application/test-1'
-                )
-            ])
+        DatasetFactory(resources=[
+            ResourceFactory(mime=f) for f in (
+                faker.mime_type(category=None),
+                faker.mime_type(category=None),
+                'application/json',
+                'application/json-1'
+            )
+        ])
 
         response = self.get(url_for('api.suggest_mime'),
-                            qs={'q': 'test', 'size': '5'})
+                            qs={'q': 'js', 'size': '5'})
         self.assert200(response)
-
         self.assertLessEqual(len(response.json), 5)
-        self.assertGreater(len(response.json), 1)
-        # Shortest match first.
-        self.assertEqual(response.json[0]['text'], 'application/test')
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)
-            self.assertIn('score', suggestion)
-            self.assertTrue(suggestion['text'].startswith('application/test'))
 
     def test_suggest_mime_api_plus(self):
         '''It should suggest mime types'''
-        with self.autoindex():
-            DatasetFactory(resources=[ResourceFactory(mime='application/test+suffix')])
+        DatasetFactory(resources=[ResourceFactory(mime='application/xhtml+xml')])
 
         response = self.get(url_for('api.suggest_mime'),
-                            qs={'q': 'suff', 'size': '5'})
+                            qs={'q': 'xml', 'size': '5'})
         self.assert200(response)
 
-        self.assertEqual(len(response.json), 1)
-        self.assertEqual(response.json[0]['text'], 'application/test+suffix')
+        self.assertEqual(len(response.json), 5)
 
     def test_suggest_mime_api_no_match(self):
         '''It should not provide format suggestion if no match'''
-        with self.autoindex():
-            DatasetFactory(resources=[
-                ResourceFactory(mime=faker.word()) for _ in range(3)
-            ])
+        DatasetFactory(resources=[
+            ResourceFactory(mime=faker.word()) for _ in range(3)
+        ])
 
         response = self.get(url_for('api.suggest_mime'),
                             qs={'q': 'test', 'size': '5'})
@@ -1054,7 +1063,6 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_suggest_mime_api_empty(self):
         '''It should not provide mime suggestion if no data'''
-        self.init_search()
         response = self.get(url_for('api.suggest_mime'),
                             qs={'q': 'test', 'size': '5'})
         self.assert200(response)
@@ -1062,11 +1070,10 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_suggest_datasets_api(self):
         '''It should suggest datasets'''
-        with self.autoindex():
-            for i in range(4):
-                DatasetFactory(
-                    title='test-{0}'.format(i) if i % 2 else faker.word(),
-                    visible=True)
+        for i in range(4):
+            DatasetFactory(
+                title='test-{0}'.format(i) if i % 2 else faker.word(),
+                visible=True)
 
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'tes', 'size': '5'})
@@ -1074,24 +1081,21 @@ class DatasetResourceAPITest(APITestCase):
 
         self.assertLessEqual(len(response.json), 5)
         self.assertGreater(len(response.json), 1)
-
         for suggestion in response.json:
             self.assertIn('id', suggestion)
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
-            self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
 
     def test_suggest_datasets_acronym_api(self):
         '''It should suggest datasets from their acronyms'''
-        with self.autoindex():
-            for i in range(4):
-                DatasetFactory(
-                    # Ensure title does not contains 'tes'
-                    title=faker.unique_string(),
-                    acronym='test-{0}'.format(i) if i % 2 else None,
-                    visible=True)
+        for i in range(4):
+            DatasetFactory(
+                # Ensure title does not contains 'tes'
+                title=faker.unique_string(),
+                acronym='test-{0}'.format(i) if i % 2 else None,
+                visible=True)
 
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'tes', 'size': '5'})
@@ -1104,18 +1108,16 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('id', suggestion)
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
-            self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertNotIn('tes', suggestion['title'])
             self.assertTrue(suggestion['acronym'].startswith('test'))
 
     def test_suggest_datasets_api_unicode(self):
         '''It should suggest datasets with special characters'''
-        with self.autoindex():
-            for i in range(4):
-                DatasetFactory(
-                    title='testé-{0}'.format(i) if i % 2 else faker.word(),
-                    resources=[ResourceFactory()])
+        for i in range(4):
+            DatasetFactory(
+                title='testé-{0}'.format(i) if i % 2 else faker.word(),
+                resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'testé', 'size': '5'})
@@ -1128,15 +1130,13 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('id', suggestion)
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
-            self.assertIn('score', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
 
     def test_suggest_datasets_api_no_match(self):
         '''It should not provide dataset suggestion if no match'''
-        with self.autoindex():
-            for i in range(3):
-                DatasetFactory(resources=[ResourceFactory()])
+        for i in range(3):
+            DatasetFactory(resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'xxxxxx', 'size': '5'})
@@ -1145,7 +1145,6 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_suggest_datasets_api_empty(self):
         '''It should not provide dataset suggestion if no data'''
-        self.init_search()
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'xxxxxx', 'size': '5'})
         self.assert200(response)
@@ -1181,9 +1180,8 @@ class DatasetArchivedAPITest(APITestCase):
 
     def test_dataset_api_search_archived(self):
         '''It should search datasets from the API, excluding archived ones'''
-        with self.autoindex():
-            VisibleDatasetFactory(archived=None)
-            dataset = VisibleDatasetFactory(archived=datetime.now())
+        VisibleDatasetFactory(archived=None)
+        dataset = VisibleDatasetFactory(archived=datetime.now())
 
         response = self.get(url_for('api.datasets', q=''))
         self.assert200(response)
@@ -1203,8 +1201,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_get(self):
         '''It should fetch a community resource from the API'''
-        with self.autoindex():
-            community_resource = CommunityResourceFactory()
+        community_resource = CommunityResourceFactory()
 
         response = self.get(url_for('api.community_resource',
                                     community=community_resource))
@@ -1214,8 +1211,7 @@ class CommunityResourceAPITest(APITestCase):
 
     def test_community_resource_api_get_from_string_id(self):
         '''It should fetch a community resource from the API'''
-        with self.autoindex():
-            community_resource = CommunityResourceFactory()
+        community_resource = CommunityResourceFactory()
 
         response = self.get(url_for('api.community_resource',
                                     community=str(community_resource.id)))

@@ -91,6 +91,19 @@ org_fields = api.model('Organization', {
 
 org_page_fields = api.model('OrganizationPage', fields.pager(org_fields))
 
+
+refuse_membership_fields = api.model('RefuseMembership', {
+    'comment': fields.String(
+        description='The refusal comment.'),
+})
+
+
+org_role_fields = api.model('OrganizationRole', {
+    'id': fields.String(description='The role identifier'),
+    'label': fields.String(description='The role label')
+})
+
+
 org_suggestion_fields = api.model('OrganizationSuggestion', {
     'id': fields.String(
         description='The organization identifier', readonly=True),
@@ -103,18 +116,5 @@ org_suggestion_fields = api.model('OrganizationSuggestion', {
         description='The organization logo URL', readonly=True),
     'page': fields.UrlFor(
         'organizations.show_redirect', lambda o: {'org': o['slug']},
-        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization'),
-    'score': fields.Float(
-        description='The internal match score', readonly=True),
-})
-
-refuse_membership_fields = api.model('RefuseMembership', {
-    'comment': fields.String(
-        description='The refusal comment.'),
-})
-
-
-org_role_fields = api.model('OrganizationRole', {
-    'id': fields.String(description='The role identifier'),
-    'label': fields.String(description='The role label')
+        description='The organization web page URL', readonly=True, fallback_endpoint='api.organization')
 })

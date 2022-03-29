@@ -1,8 +1,10 @@
 import logging
 
-from flask import url_for
+from flask import url_for, request, abort
 
+from udata import search
 from udata.api import apiv2, API, fields
+from udata.utils import multi_to_dict
 
 from .api_fields import (
     badge_fields,
@@ -11,13 +13,17 @@ from .api_fields import (
     spatial_coverage_fields,
     temporal_coverage_fields,
     user_ref_fields,
+    checksum_fields
 )
+from udata.core.spatial.api_fields import geojson
 from .models import (
-    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
 )
 from .permissions import DatasetEditPermission
+from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
+DEFAULT_SORTING = '-created_at'
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK_APIV2 = ','.join((
@@ -30,6 +36,7 @@ DEFAULT_MASK_APIV2 = ','.join((
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace('datasets', 'Dataset related operations')
+search_parser = DatasetSearch.as_request_parser()
 resources_parser = apiv2.parser()
 resources_parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
@@ -125,6 +132,38 @@ resource_page_fields = apiv2.model('ResourcePage', {
     'page_size': fields.Integer(),
     'total': fields.Integer()
 })
+
+dataset_page_fields = apiv2.model(
+    'DatasetPage',
+    fields.pager(dataset_fields),
+    mask='data{{{0}}},*'.format(DEFAULT_MASK_APIV2)
+)
+
+apiv2.inherit('Badge', badge_fields)
+apiv2.inherit('OrganizationReference', org_ref_fields)
+apiv2.inherit('UserReference', user_ref_fields)
+apiv2.inherit('Resource', resource_fields)
+apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
+apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
+apiv2.inherit('GeoJSON', geojson)
+apiv2.inherit('Checksum', checksum_fields)
+
+
+@ns.route('/search/', endpoint='dataset_search')
+class DatasetSearchAPI(API):
+    '''Datasets collection search endpoint'''
+    @apiv2.doc('search_datasets')
+    @apiv2.expect(search_parser)
+    @apiv2.marshal_with(dataset_page_fields)
+    def get(self):
+        '''List or search all datasets'''
+        search_parser.parse_args()
+        try:
+            return search.query(Dataset, **multi_to_dict(request.args))
+        except NotImplementedError:
+            abort(501, 'Search endpoint not enabled')
+        except RuntimeError:
+            abort(500, 'Internal search service error')
 
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)

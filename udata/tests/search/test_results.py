@@ -1,72 +1,59 @@
-import pytest
+from udata.tests.api import APITestCase
+from udata.search.result import SearchResult
+from udata.core.dataset.factories import VisibleDatasetFactory
+from udata.core.dataset.search import DatasetSearch
+from udata.models import Dataset
 
-from udata import search
 
-from . import response_factory, FakeSearch
+class ResultTest(APITestCase):
+    def test_results_get_objects(self):
+        data = []
+        for _ in range(3):
+            random_dataset = VisibleDatasetFactory()
+            data.append(DatasetSearch.serialize(random_dataset))
 
+        search_class = DatasetSearch.temp_search()
+        search_query = search_class(params={})
+        service_result = {
+            "data": data,
+            "next_page": None,
+            "page": 1,
+            "previous_page": None,
+            "page_size": 20,
+            "total_pages": 1,
+            "total": 3
+        }
+        search_results = SearchResult(query=search_query, result=service_result.pop('data'), **service_result)
 
-@pytest.mark.usefixtures('app')
-class SearchResultTest:
-    def factory(self, response=None, **kwargs):
-        '''
-        Build a fake SearchResult.
-        '''
-        response = response or response_factory()
-        query = search.search_for(FakeSearch, **kwargs)
-        return search.SearchResult(query, response)
+        assert len(search_results.get_objects()) == 3
 
-    def test_properties(self):
-        '''Search result should map some properties for easy access'''
-        response = response_factory(nb=10, total=42)
-        max_score = response['hits']['max_score']
-        result = self.factory(response)
+    def test_results_should_not_fail_on_missing_objects(self):
+        data = []
+        for _ in range(3):
+            random_dataset = VisibleDatasetFactory()
+            data.append(DatasetSearch.serialize(random_dataset))
 
-        assert result.total == 42
-        assert result.max_score == max_score
+        to_delete_random_dataset = VisibleDatasetFactory()
+        data.append(DatasetSearch.serialize(to_delete_random_dataset))
 
-        ids = result.get_ids()
-        assert len(ids) == 10
+        search_class = DatasetSearch.temp_search()
+        search_query = search_class(params={})
+        service_result = {
+            "data": data,
+            "next_page": None,
+            "page": 1,
+            "previous_page": None,
+            "page_size": 20,
+            "total_pages": 1,
+            "total": 3
+        }
+        search_results = SearchResult(query=search_query, result=service_result.pop('data'), **service_result)
 
-    def test_no_failures(self):
-        '''Search result should not fail on missing properties'''
-        response = response_factory()
-        del response['hits']['total']
-        del response['hits']['max_score']
-        del response['hits']['hits']
-        result = self.factory(response)
+        to_delete_random_dataset.delete()
+        assert len(search_results.get_objects()) == 3
 
-        assert result.total == 0
-        assert result.max_score == 0
+        # Missing object should be filtered out
+        objects = search_results.objects
+        for o in objects:
+            assert isinstance(o, Dataset)
 
-        ids = result.get_ids()
-        assert len(ids) == 0
-
-    def test_pagination(self):
-        '''Search results should be paginated'''
-        response = response_factory(nb=3, total=11)
-        result = self.factory(response, page=2, page_size=3)
-
-        assert result.page == 2
-        assert result.page_size == 3
-        assert result.pages == 4
-
-    def test_pagination_empty(self):
-        '''Search results should be paginated even if empty'''
-        response = response_factory()
-        del response['hits']['total']
-        del response['hits']['max_score']
-        del response['hits']['hits']
-        result = self.factory(response, page=2, page_size=3)
-
-        assert result.page == 1
-        assert result.page_size == 3
-        assert result.pages == 0
-
-    def test_no_pagination_in_query(self):
-        '''Search results should be paginated even if not asked'''
-        response = response_factory(nb=1, total=1)
-        result = self.factory(response)
-
-        assert result.page == 1
-        assert result.page_size == search.DEFAULT_PAGE_SIZE
-        assert result.pages == 1

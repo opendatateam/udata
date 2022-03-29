@@ -1,7 +1,7 @@
-from udata import search
 from udata.api import api, API
 
 from udata.tags import normalize  # TODO: merge this into this package
+from udata.models import Tag
 
 DEFAULT_SIZE = 8
 
@@ -24,5 +24,5 @@ class SuggestTagsAPI(API):
         '''Suggest tags'''
         args = parser.parse_args()
         q = normalize(args['q'])
-        result = search.suggest(q, 'tag_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
+        results = [{'text': i.name} for i in Tag.objects(name__icontains=q)]
+        return sorted(results, key=lambda o: len(o['text']))

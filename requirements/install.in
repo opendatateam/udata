@@ -34,6 +34,7 @@ html2text==2019.9.26
 itsdangerous==1.1.0
 Jinja2==2.10.3
 jsonschema==3.2.0
+kafka-python==2.0.2
 kombu[redis]==4.4.0
 lxml==4.4.2
 mistune==0.8.4

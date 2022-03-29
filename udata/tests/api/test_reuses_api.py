@@ -9,6 +9,7 @@ from udata.core.dataset.factories import DatasetFactory
 from udata.core.user.factories import AdminFactory
 from udata.core.reuse.factories import ReuseFactory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.user.factories import UserFactory
 from udata.models import Reuse, Follow, Member, REUSE_TOPICS, REUSE_TYPES
 from udata.utils import faker
 
@@ -25,14 +26,42 @@ pytestmark = [
 class ReuseAPITest:
     modules = []
 
-    def test_reuse_api_list(self, api, autoindex):
+    def test_reuse_api_list(self, api):
         '''It should fetch a reuse list from the API'''
-        with autoindex:
-            reuses = ReuseFactory.create_batch(3, visible=True)
+        reuses = ReuseFactory.create_batch(3, visible=True)
 
         response = api.get(url_for('api.reuses'))
         assert200(response)
         assert len(response.json['data']) == len(reuses)
+
+    def test_reuse_api_list_with_filters(self, api):
+        '''Should filters reuses results based on query filters'''
+        owner = UserFactory()
+        org = OrganizationFactory()
+
+        [ReuseFactory() for i in range(2)]
+
+        tag_reuse = ReuseFactory(tags=['my-tag', 'other'])
+        owner_reuse = ReuseFactory(owner=owner)
+        org_reuse = ReuseFactory(organization=org)
+
+        # filter on tag
+        response = api.get(url_for('api.reuses', tag='my-tag'))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(tag_reuse.id)
+
+        # filter on owner
+        response = api.get(url_for('api.reuses', owner=owner.id))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(owner_reuse.id)
+
+        # filter on organization
+        response = api.get(url_for('api.reuses', organization=org.id))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(org_reuse.id)
 
     def test_reuse_api_get(self, api):
         '''It should fetch a reuse from the API'''
@@ -257,13 +286,12 @@ class ReuseAPITest:
         assert Follow.objects.following(user).count() == 0
         assert Follow.objects.followers(user).count() == 0
 
-    def test_suggest_reuses_api(self, api, autoindex):
+    def test_suggest_reuses_api(self, api):
         '''It should suggest reuses'''
-        with autoindex:
-            for i in range(4):
-                ReuseFactory(
-                    title='test-{0}'.format(i) if i % 2 else faker.word(),
-                    visible=True)
+        for i in range(4):
+            ReuseFactory(
+                title='test-{0}'.format(i) if i % 2 else faker.word(),
+                visible=True)
 
         response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'tes', 'size': '5'})
@@ -276,17 +304,15 @@ class ReuseAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'title' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
             assert suggestion['title'].startswith('test')
 
-    def test_suggest_reuses_api_unicode(self, api, autoindex):
+    def test_suggest_reuses_api_unicode(self, api):
         '''It should suggest reuses with special characters'''
-        with autoindex:
-            for i in range(4):
-                ReuseFactory(
-                    title='testé-{0}'.format(i) if i % 2 else faker.word(),
-                    visible=True)
+        for i in range(4):
+            ReuseFactory(
+                title='testé-{0}'.format(i) if i % 2 else faker.word(),
+                visible=True)
 
         response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'testé', 'size': '5'})
@@ -299,21 +325,19 @@ class ReuseAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'title' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
             assert suggestion['title'].startswith('test')
 
-    def test_suggest_reuses_api_no_match(self, api, autoindex):
+    def test_suggest_reuses_api_no_match(self, api):
         '''It should not provide reuse suggestion if no match'''
-        with autoindex:
-            ReuseFactory.create_batch(3, visible=True)
+        ReuseFactory.create_batch(3, visible=True)
 
         response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) == 0
 
-    def test_suggest_reuses_api_empty(self, api, autoindex):
+    def test_suggest_reuses_api_empty(self, api):
         '''It should not provide reuse suggestion if no data'''
         # self.init_search()
         response = api.get(url_for('api.suggest_reuses'),

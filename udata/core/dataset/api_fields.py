@@ -203,9 +203,9 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
         description='The dataset (organization) logo URL'),
     'page': fields.UrlFor(
         'datasets.show_redirect', lambda d: {'dataset': d['slug']},
-        description='The web page URL for this dataset', fallback_endpoint='api.dataset'),
-    'score': fields.Float(description='The internal match score'),
+        description='The web page URL for this dataset', fallback_endpoint='api.dataset')
 })
+
 
 resource_type_fields = api.model('ResourceType', {
     'id': fields.String(description='The resource type identifier'),

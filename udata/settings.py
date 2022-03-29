@@ -28,14 +28,10 @@ class Defaults(object):
     MONGODB_HOST = 'mongodb://localhost:27017/udata'
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
-    # Elasticsearch configuration
-    ELASTICSEARCH_URL = 'localhost:9200'
-    ELASTICSEARCH_INDEX_BASENAME = 'udata'
-    ELASTICSEARCH_REFRESH_INTERVAL = '1s'
-    # ES Query/default timeout.
-    ELASTICSEARCH_TIMEOUT = 10  # Same default as elasticsearch library
-    # ES index timeout (should be longer)
-    ELASTICSEARCH_INDEX_TIMEOUT = 20
+    # Search service configuration
+    SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
+    SEARCH_SERVICE_REQUEST_TIMEOUT = 20
+    KAFKA_URI = 'localhost:9092'
 
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
@@ -231,9 +227,6 @@ class Defaults(object):
     # The number of days since last harvesting date when a missing dataset is archived
     HARVEST_AUTOARCHIVE_GRACE_DAYS = 7
 
-    # Lists levels that shouldn't be indexed
-    SPATIAL_SEARCH_EXCLUDE_LEVELS = tuple()
-
     ACTIVATE_TERRITORIES = False
     # The order is important to compute parents/children, smaller first.
     HANDLED_LEVELS = tuple()
@@ -277,10 +270,39 @@ class Defaults(object):
         'shp', 'kml', 'kmz', 'gpx', 'shx', 'ovr', 'geojson', 'gpkg',
         # Meteorology
         'grib2',
-        # Misc
-        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf', 'ics'
         # RDF
         'rdf', 'ttl', 'n3',
+        # Misc
+        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf', 'ics', 'other'
+    ]
+
+    ALLOWED_RESOURCES_MIMES = [
+        'text/csv',
+        'application/json',
+        'application/pdf',
+        'application/msword',
+        'application/vnd',
+        'application/vnd.geo+json',
+        'application/zip',
+        'application/x-tar',
+        'application/x-bzip',
+        'application/x-bzip2',
+        'application/x-7z-compressed',
+        'application/x-rar-compressed',
+        'application/epub+zip',
+        'application/rtf',
+        'application/rdf+xml',
+        'application/xml',
+        'application/xhtml+xml',
+        'image/bmp',
+        'image/jpeg',
+        'image/png',
+        'image/svg+xml',
+        'text/html',
+        'text/calendar',
+        'text/plain',
+        'text/xml',
+        'text/turtle'
     ]
 
     # How much time upload chunks are kept before cleanup
@@ -370,66 +392,6 @@ class Defaults(object):
                          'reuse', 'tag')
     EXPORT_CSV_DATASET_ID = None
 
-    # Search parameters
-    ###################
-    # Overrides dataset search fields and their ponderation
-    SEARCH_DATASET_FIELDS = (
-        'geozones.keys^9',
-        'geozones.name^9',
-        'acronym^7',
-        'title^6',
-        'tags.i18n^3',
-        'description',
-    )
-    # After this number of years, scoring is kept constant instead of increasing.
-    # Index time parameter:
-    #   reindeixing dataset is required for this parameter to be effective
-    SEARCH_DATASET_MAX_TEMPORAL_WEIGHT = 5
-    # How much weight featured items get in completion
-    # Index time parameter:
-    #   reindeixing dataset is required for this parameter to be effective
-    SEARCH_DATASET_FEATURED_WEIGHT = 3
-    # Boost given to the featured datasets
-    SEARCH_DATASET_FEATURED_BOOST = 1.5
-    # Boost given to the datasets from certified organization
-    SEARCH_DATASET_CERTIFIED_BOOST = 1.2
-    # Decay factor for reuses count on datasets
-    SEARCH_DATASET_REUSES_DECAY = 0.1
-    # Decay factor for followers count on datasets
-    SEARCH_DATASET_FOLLOWERS_DECAY = 0.1
-    # Overrides reuse search fields and their ponderation
-    SEARCH_REUSE_FIELDS = (
-        'title^4',
-        'description^2',
-        'datasets.title',
-    )
-    # Boost given to the featured reuses
-    SEARCH_REUSE_FEATURED_BOOST = 1.1
-    # Decay factor for reused datasets count on reuses
-    SEARCH_REUSE_DATASETS_DECAY = 0.8
-    # Decay factor for followers count on reuses
-    SEARCH_REUSE_FOLLOWERS_DECAY = 0.8
-    # Overrides organization search fields and their ponderation
-    SEARCH_ORGANIZATION_FIELDS = (
-        'name^6',
-        'acronym^6',
-        'description',
-    )
-    # Decay factor for datasets count on organizations
-    SEARCH_ORGANIZATION_DATASETS_DECAY = 0.9
-    # Decay factor for reuses count on organizations
-    SEARCH_ORGANIZATION_REUSES_DECAY = 0.9
-    # Decay factor for followers count on organizations
-    SEARCH_ORGANIZATION_FOLLOWERS_DECAY = 0.8
-    # Overrides geozone search fields and their ponderation
-    SEARCH_GEOZONE_FIELDS = tuple()
-    # Overrides user search fields and their ponderation
-    SEARCH_USER_FIELDS = (
-        'last_name^6',
-        'first_name^5',
-        'about'
-    )
-
     # Autocomplete parameters
     #########################
     SEARCH_AUTOCOMPLETE_ENABLED = True
@@ -460,7 +422,7 @@ class Defaults(object):
                         'DiscussionsAPI.post',
                         'SourcesAPI.post',
                         'FollowAPI.post']
-    
+
     FIXTURE_DATASET_SLUGS = []
 
 
@@ -489,11 +451,6 @@ class Testing(object):
     URLS_ALLOW_LOCAL = True  # Test server URL is local.test
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
-    # FakeSearch fields have to be declared here
-    SEARCH_FAKESEARCHABLE_FIELDS = (
-        'title^2',
-        'description',
-    )
     FS_IMAGES_OPTIMIZE = True
 
 

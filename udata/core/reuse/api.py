@@ -2,11 +2,10 @@ from datetime import datetime
 
 from flask import request
 
-from udata import search
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.auth import admin_permission
 from udata.models import Dataset
-from udata.utils import multi_to_dict
 
 from udata.core.badges import api as badges_api
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -16,30 +15,72 @@ from udata.core.storages.api import (
 )
 
 from .api_fields import (
-    reuse_fields, reuse_page_fields, reuse_suggestion_fields,
-    reuse_type_fields, reuse_topic_fields
+    reuse_fields, reuse_page_fields,
+    reuse_type_fields,
+    reuse_suggestion_fields,
+    reuse_topic_fields
 )
 from .forms import ReuseForm
 from .models import Reuse, REUSE_TYPES, REUSE_TOPICS
 from .permissions import ReuseEditPermission
-from .search import ReuseSearch
+
+
+DEFAULT_SORTING = '-created_at'
+
+
+class ReuseApiParser(ModelApiParser):
+    sorts = {
+        'title': 'title',
+        'created': 'created_at',
+        'last_modified': 'last_modified',
+        'datasets': 'metrics.datasets',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('dataset', type=str, location='args')
+        self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('organization', type=str, location='args')
+        self.parser.add_argument('owner', type=str, location='args')
+
+    @staticmethod
+    def parse_filters(reuses, args):
+        if args.get('q'):
+            reuses = reuses.search_text(args['q'])
+        if args.get('dataset'):
+            reuses = reuses.filter(datasets=args['dataset'])
+
+        if args.get('tag'):
+            reuses = reuses.filter(tags=args['tag'])
+        if args.get('organization'):
+            reuses = reuses.filter(organization=args['organization'])
+        if args.get('owner'):
+            reuses = reuses.filter(owner=args['owner'])
+        return reuses
+
 
 ns = api.namespace('reuses', 'Reuse related operations')
 
 common_doc = {
     'params': {'reuse': 'The reuse ID or slug'}
 }
-search_parser = ReuseSearch.as_request_parser()
+
+reuse_parser = ReuseApiParser()
 
 
 @ns.route('/', endpoint='reuses')
 class ReuseListAPI(API):
     @api.doc('list_reuses')
-    @api.expect(search_parser)
+    @api.expect(reuse_parser.parser)
     @api.marshal_with(reuse_page_fields)
     def get(self):
-        search_parser.parse_args()
-        return search.query(ReuseSearch, **multi_to_dict(request.args))
+        args = reuse_parser.parse()
+        reuses = Reuse.objects(deleted=None, private__ne=True)
+        reuses = reuse_parser.parse_filters(reuses, args)
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return reuses.order_by(sort).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_reuse')
@@ -71,8 +112,8 @@ class ReuseAPI(API):
     @api.response(400, errors.VALIDATION_ERROR)
     def put(self, reuse):
         '''Update a given reuse'''
-        request_deleted = request.json.get('deleted', True) 
-        if reuse.deleted and request_deleted is not None: 
+        request_deleted = request.json.get('deleted', True)
+        if reuse.deleted and request_deleted is not None:
             api.abort(410, 'This reuse has been deleted')
         ReuseEditPermission(reuse).test()
         form = api.validate(ReuseForm, reuse)
@@ -182,22 +223,22 @@ suggest_parser.add_argument(
 
 
 @ns.route('/suggest/', endpoint='suggest_reuses')
-class SuggestReusesAPI(API):
+class ReusesSuggestAPI(API):
     @api.doc('suggest_reuses')
     @api.expect(suggest_parser)
     @api.marshal_list_with(reuse_suggestion_fields)
     def get(self):
-        '''Suggest reuses'''
+        '''Reuses suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
+        reuses = Reuse.objects(deleted=None, private__ne=True, title__icontains=args['q'])
         return [
             {
-                'id': opt['text'],
-                'title': opt['payload']['title'],
-                'score': opt['score'],
-                'slug': opt['payload']['slug'],
-                'image_url': opt['payload']['image_url'],
+                'id': reuse.id,
+                'title': reuse.title,
+                'slug': reuse.slug,
+                'image_url': reuse.image_url,
             }
-            for opt in search.suggest(args['q'], 'reuse_suggest', args['size'])
+            for reuse in reuses.order_by(DEFAULT_SORTING).limit(args['size'])
         ]
 
 

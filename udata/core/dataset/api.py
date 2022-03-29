@@ -23,17 +23,18 @@ from datetime import datetime
 
 from flask import request, current_app, abort, redirect, url_for, make_response
 from flask_security import current_user
+from mongoengine.queryset.visitor import Q
 
-from udata import search
 from udata.auth import admin_permission
 from udata.api import api, API, errors
+from udata.api.parsers import ModelApiParser
 from udata.core import storages
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
-from udata.utils import get_by, multi_to_dict
+from udata.utils import get_by
 from udata.rdf import (
-    RDF_MIME_TYPES, RDF_EXTENSIONS,
+    RDF_EXTENSIONS,
     negociate_content, graph_response
 )
 
@@ -59,16 +60,56 @@ from .permissions import DatasetEditPermission, ResourceEditPermission
 from .forms import (
     ResourceForm, DatasetForm, CommunityResourceForm, ResourcesListForm
 )
-from .search import DatasetSearch
 from .exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
 )
 from .rdf import dataset_to_rdf
 
+
+DEFAULT_SORTING = '-created_at'
+
+
+class DatasetApiParser(ModelApiParser):
+    sorts = {
+        'title': 'title',
+        'created': 'created_at',
+        'last_modified': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('organization', type=str, location='args')
+        self.parser.add_argument('owner', type=str, location='args')
+        self.parser.add_argument('schema', type=str, location='args')
+        self.parser.add_argument('schema_version', type=str, location='args')
+
+    @staticmethod
+    def parse_filters(datasets, args):
+        if args.get('q'):
+            datasets = datasets.search_text(args['q'])
+        if args.get('tag'):
+            datasets = datasets.filter(tags=args['tag'])
+        if args.get('organization'):
+            datasets = datasets.filter(organization=args['organization'])
+        if args.get('owner'):
+            datasets = datasets.filter(owner=args['owner'])
+        if args.get('schema'):
+            datasets = datasets.filter(resources__schema__name=args['schema'])
+        if args.get('schema_version'):
+            datasets = datasets.filter(resources__schema__version=args['schema_version'])
+        return datasets
+
+
 log = logging.getLogger(__name__)
 
 ns = api.namespace('datasets', 'Dataset related operations')
-search_parser = DatasetSearch.as_request_parser()
+
+dataset_parser = DatasetApiParser()
+
 community_parser = api.parser()
 community_parser.add_argument(
     'sort', type=str, default='-created', location='args',
@@ -100,12 +141,16 @@ common_doc = {
 class DatasetListAPI(API):
     '''Datasets collection endpoint'''
     @api.doc('list_datasets')
-    @api.expect(search_parser)
+    @api.expect(dataset_parser.parser)
     @api.marshal_with(dataset_page_fields)
     def get(self):
         '''List or search all datasets'''
-        search_parser.parse_args()
-        return search.query(Dataset, **multi_to_dict(request.args))
+        args = dataset_parser.parse()
+        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = dataset_parser.parse_filters(datasets, args)
+
+        sort = args['sort'] or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        return datasets.order_by(sort).paginate(args['page'], args['page_size'])
 
     @api.secure
     @api.doc('create_dataset', responses={400: 'Validation error'})
@@ -407,7 +452,7 @@ class ResourceAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         form = api.validate(ResourceForm, resource)
-         # ensure API client does not override url on self-hosted resources
+        # ensure API client does not override url on self-hosted resources
         if resource.filetype == 'file':
             form._fields.get('url').data = resource.url
         form.populate_obj(resource)
@@ -527,47 +572,47 @@ suggest_parser.add_argument(
 
 
 @ns.route('/suggest/', endpoint='suggest_datasets')
-class SuggestDatasetsAPI(API):
+class DatasetSuggestAPI(API):
     @api.doc('suggest_datasets')
     @api.expect(suggest_parser)
-    @api.marshal_list_with(dataset_suggestion_fields)
+    @api.marshal_with(dataset_suggestion_fields)
     def get(self):
-        '''Suggest datasets'''
+        '''Datasets suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
+        datasets_query = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = datasets_query.filter(Q(title__icontains=args['q']) | Q(acronym__icontains=args['q']))
         return [
             {
-                'id': opt['payload']['id'],
-                'title': opt['text'],
-                'acronym': opt['payload'].get('acronym'),
-                'score': opt['score'],
-                'slug': opt['payload']['slug'],
-                'image_url': opt['payload']['image_url'],
+                'id': dataset.id,
+                'title': dataset.title,
+                'acronym': dataset.acronym,
+                'slug': dataset.slug,
+                'image_url': dataset.image_url,
             }
-            for opt in search.suggest(args['q'], 'dataset_suggest',
-                                      args['size'])
+            for dataset in datasets.order_by(DEFAULT_SORTING).limit(args['size'])
         ]
 
 
 @ns.route('/suggest/formats/', endpoint='suggest_formats')
-class SuggestFormatsAPI(API):
+class FormatsSuggestAPI(API):
     @api.doc('suggest_formats')
     @api.expect(suggest_parser)
     def get(self):
         '''Suggest file formats'''
         args = suggest_parser.parse_args()
-        result = search.suggest(args['q'], 'format_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_EXTENSIONS'] if args['q'] in i]
+        return sorted(results, key=lambda o: len(o['text']))
 
 
 @ns.route('/suggest/mime/', endpoint='suggest_mime')
-class SuggestFormatsAPI(API):
+class MimesSuggestAPI(API):
     @api.doc('suggest_mime')
     @api.expect(suggest_parser)
     def get(self):
         '''Suggest mime types'''
         args = suggest_parser.parse_args()
-        result = search.suggest(args['q'], 'mime_suggest', args['size'])
-        return sorted(result, key=lambda o: len(o['text']))
+        results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_MIMES'] if args['q'] in i]
+        return sorted(results, key=lambda o: len(o['text']))
 
 
 @ns.route('/licenses/', endpoint='licenses')
@@ -618,6 +663,7 @@ class ResourceTypesAPI(API):
         '''List all resource types'''
         return [{'id': id, 'label': label}
                 for id, label in RESOURCE_TYPES.items()]
+
 
 @ns.route('/schemas/', endpoint='schemas')
 class SchemasAPI(API):

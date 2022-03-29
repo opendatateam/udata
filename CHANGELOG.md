@@ -2,11 +2,29 @@
 
 ## Current (in progress)
 
-- Nothing yet
+### Breaking change
+
+Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
+- :warning: Search changes [#2692](https://github.com/opendatateam/udata/pull/2692):
+  - The search feature is not within udata anymore and queries a distant service.
+  - The search feature is now optional and is enabled by setting the `SEARCH_SERVICE_API_URL` setting.
+  - When search is not enabled, the search endpoints will return a `501 Not Implemented` error.
+  - The ModelAdapter, SearchQuery and SearchResult patterns were kept but heavily refactored.
+  - udata uses a Kafka producer to send documents to index to the search service.
+  - udata uses HTTP request to query the search service.
+- :warning: API changes [#2669](https://github.com/opendatateam/udata/pull/2669):
+  - List endpoints for organizations, datasets, reuses and users are now querying MongoDB instead of ElasticSearch.
+  - Those endpoints use MongoDB full text search when `q` argument is used. Some unused filters on this route were dropped.
+  - A new API parser was implemented to replace the search one.
+  - The previous ElasticSearch endpoints were moved to APIv2 with the following url pattern: `/{object}/search` (ex: `/datasets/search`).
+- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685) and [#2696](https://github.com/opendatateam/udata/pull/2696):
+  - Current suggest implementation moved from an Elasticsearch index to a MongoDB query using the term `contains`.
+  - The user suggest was entirely removed, as its existence is now less relevant because of the full text search.
 
 ## 3.3.3 (2022-03-29)
 
 - Extend dcat properties support (frequency litteral, creation and modification date, landing page and abstract description) [#2715](https://github.com/opendatateam/udata/pull/2715)
+
 
 ## 3.3.2 (2022-03-01)
 

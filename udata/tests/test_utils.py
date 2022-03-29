@@ -147,6 +147,9 @@ class ToIsoTest:
     def test_to_iso_datetime_before_1900(self):
         assert to_iso_datetime(date(1884, 2, 29)) == '1884-02-29T00:00:00'
 
+    def test_to_iso_datetime_before_1000(self):
+        assert to_iso_datetime(date(908, 2, 29)) == '0908-02-29T00:00:00'
+
     def test_to_iso_emtpy(self):
         assert to_iso(None) is None
 

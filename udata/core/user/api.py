@@ -1,8 +1,7 @@
-from flask import request
 from flask_security import current_user, logout_user
 
-from udata import search
 from udata.api import api, API
+from udata.api.parsers import ModelApiParser
 from udata.core import storages
 from udata.auth import admin_permission
 from udata.models import CommunityResource, Dataset, Reuse, User
@@ -18,7 +17,6 @@ from udata.core.storages.api import (
     uploaded_image_fields, image_parser, parse_uploaded_image
 )
 from udata.core.user.models import Role
-from udata.utils import multi_to_dict
 
 from .api_fields import (
     apikey_fields,
@@ -26,15 +24,31 @@ from .api_fields import (
     me_metrics_fields,
     user_fields,
     user_page_fields,
-    user_suggestion_fields,
     user_role_fields,
 )
 from .forms import UserProfileForm, UserProfileAdminForm
-from .search import UserSearch
+
+
+DEFAULT_SORTING = '-created_at'
+
+
+class UserApiParser(ModelApiParser):
+    sorts = {
+        'last_name': 'last_name',
+        'first_name': 'first_name',
+        'datasets': 'metrics.datasets',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+        'created': 'created_at',
+    }
+
 
 ns = api.namespace('users', 'User related operations')
 me = api.namespace('me', 'Connected user related operations')
-search_parser = UserSearch.as_request_parser()
+
+user_parser = UserApiParser()
+
 filter_parser = api.parser()
 filter_parser.add_argument(
     'q', type=str, help='The string to filter items',
@@ -209,15 +223,24 @@ class UserListAPI(API):
     model = User
     fields = user_fields
     form = UserProfileForm
-    search_adapter = UserSearch
 
     @api.doc('list_users')
-    @api.expect(search_parser)
+    @api.expect(user_parser.parser)
     @api.marshal_with(user_page_fields)
     def get(self):
         '''List all users'''
-        search_parser.parse_args()
-        return search.query(UserSearch, **multi_to_dict(request.args))
+        args = user_parser.parse()
+        users = User.objects(deleted=None)
+        if args['q']:
+            search_users = users.search_text(args['q'])
+            if args['sort']:
+                return search_users.order_by(args['sort']).paginate(args['page'], args['page_size'])
+            else:
+                return search_users.order_by('$text_score').paginate(args['page'], args['page_size'])
+        if args['sort']:
+            return users.order_by(args['sort']).paginate(args['page'], args['page_size'])
+        return users.order_by(DEFAULT_SORTING).paginate(args['page'], args['page_size'])
+
 
     @api.secure(admin_permission)
     @api.doc('create_user')
@@ -306,36 +329,6 @@ class FollowUserAPI(FollowAPI):
         if id == str(current_user.id):
             api.abort(403, "You can't follow yourself")
         return super(FollowUserAPI, self).post(id)
-
-
-suggest_parser = api.parser()
-suggest_parser.add_argument(
-    'q', help='The string to autocomplete/suggest', location='args',
-    required=True)
-suggest_parser.add_argument(
-    'size', type=int, help='The amount of suggestion to fetch',
-    location='args', default=10)
-
-
-@ns.route('/suggest/', endpoint='suggest_users')
-class SuggestUsersAPI(API):
-    @api.doc('suggest_users')
-    @api.expect(suggest_parser)
-    @api.marshal_list_with(user_suggestion_fields)
-    def get(self):
-        '''Suggest users'''
-        args = suggest_parser.parse_args()
-        return [
-            {
-                'id': opt['text'],
-                'first_name': opt['payload']['first_name'],
-                'last_name': opt['payload']['last_name'],
-                'avatar_url': opt['payload']['avatar_url'],
-                'slug': opt['payload']['slug'],
-                'score': opt['score'],
-            }
-            for opt in search.suggest(args['q'], 'user_suggest', args['size'])
-        ]
 
 
 @ns.route('/roles/', endpoint='user_roles')

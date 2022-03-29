@@ -1,9 +1,9 @@
 from flask import current_app, abort
+from mongoengine.queryset.visitor import Q
 
 from flask_restplus import inputs
 
 from udata.api import api, API
-from udata import search
 from udata.i18n import _
 from udata.models import Dataset, TERRITORY_DATASETS
 from udata.core.dataset.api_fields import dataset_ref_fields
@@ -11,8 +11,8 @@ from udata.core.dataset.api_fields import dataset_ref_fields
 from .api_fields import (
     level_fields,
     granularity_fields,
-    zone_suggestion_fields,
     feature_collection_fields,
+    zone_suggestion_fields
 )
 from .models import GeoZone, GeoLevel, spatial_granularities
 
@@ -22,8 +22,11 @@ GEOM_TYPES = (
     'MultiPolygon'
 )
 
+DEFAULT_SORTING = '-created_at'
+
 
 ns = api.namespace('spatial', 'Spatial references')
+
 
 suggest_parser = api.parser()
 suggest_parser.add_argument(
@@ -33,18 +36,9 @@ suggest_parser.add_argument(
     'size', type=int, help='The amount of suggestion to fetch',
     location='args', default=10)
 
-dataset_parser = api.parser()
-dataset_parser.add_argument(
-    'dynamic', type=inputs.boolean, help='Append dynamic datasets',
-    location='args', required=False)
-dataset_parser.add_argument(
-    'size', type=int, help='The amount of datasets to fetch',
-    location='args', default=25)
 
-
-def payload_name(payload):
-    '''extract payload name and localize it'''
-    name = payload['name']
+def payload_name(name):
+    '''localize name'''
     return _(name)  # Avoid dict quotes in gettext
 
 
@@ -54,20 +48,28 @@ class SuggestZonesAPI(API):
     @api.expect(suggest_parser)
     @api.doc('suggest_zones')
     def get(self):
-        '''Suggest geospatial zones'''
+        '''Geospatial zones suggest endpoint using mongoDB contains'''
         args = suggest_parser.parse_args()
+        geozones = GeoZone.objects(Q(name__icontains=args['q']) | Q(code__icontains=args['q']))
         return [
             {
-                'id': opt['text'],
-                'name': payload_name(opt['payload']),
-                'code': opt['payload']['code'],
-                'level': opt['payload']['level'],
-                'keys': opt['payload']['keys'],
-                'score': opt['score'],
+                'id': geozone.id,
+                'name': payload_name(geozone.name),
+                'code': geozone.code,
+                'level': geozone.level,
+                'keys': geozone.keys
             }
-            for opt in search.suggest(
-                args['q'], 'zone_suggest', args['size'])
+            for geozone in geozones.order_by(DEFAULT_SORTING).limit(args['size']) if geozone.is_current
         ]
+
+
+dataset_parser = api.parser()
+dataset_parser.add_argument(
+    'dynamic', type=inputs.boolean, help='Append dynamic datasets',
+    location='args', required=False)
+dataset_parser.add_argument(
+    'size', type=int, help='The amount of datasets to fetch',
+    location='args', default=25)
 
 
 @ns.route('/zones/<pathlist:ids>/', endpoint='zones')
