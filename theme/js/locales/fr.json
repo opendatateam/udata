@@ -112,7 +112,7 @@
   "Search resources": "Rechercher dans les ressources",
   "Search": "Recherche",
   "No resources match your search.": "Aucun résultat pour votre recherche.",
-  "Search X in Y": "Rechercher «{query}» dans {type}",
+  "Search X in Y": "Rechercher «{query}» dans les {type}",
   "datasets": "jeux de données",
   "organizations": "organisations",
   "Start typing to search in X": "Commencez à taper pour rechercher parmi les {type}"
