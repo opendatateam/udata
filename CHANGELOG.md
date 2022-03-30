@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 4.0.0 (2022-03-30)
 
 ### Breaking change
 
