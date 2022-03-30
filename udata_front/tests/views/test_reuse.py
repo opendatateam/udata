@@ -16,37 +16,6 @@ class ReuseBlueprintTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = ['admin']
 
-    def test_render_list(self):
-        '''It should render the reuse list page'''
-        with self.autoindex():
-            reuses = [
-                ReuseFactory(datasets=[DatasetFactory()]) for i in range(3)]
-
-        response = self.get(url_for('reuses.list'))
-
-        self.assert200(response)
-        rendered_reuses = self.get_context_variable('reuses')
-        self.assertEqual(rendered_reuses.total, len(reuses))
-
-    def test_render_list_with_query(self):
-        '''It should render the reuse list page with a query'''
-        with self.autoindex():
-            [ReuseFactory(
-                title='Reuse {0}'.format(i), datasets=[DatasetFactory()])
-             for i in range(3)]
-
-        response = self.get(url_for('reuses.list'), qs={'q': '2'})
-
-        self.assert200(response)
-        rendered_reuses = self.get_context_variable('reuses')
-        self.assertEqual(rendered_reuses.total, 1)
-
-    def test_render_list_empty(self):
-        '''It should render the reuse list page even if empty'''
-        self.init_search()
-        response = self.get(url_for('reuses.list'))
-        self.assert200(response)
-
     def test_render_display(self):
         '''It should render the reuse page'''
         reuse = ReuseFactory(owner=UserFactory(),

@@ -94,13 +94,8 @@ class SearchView(Templated, BaseView):
     search_adapter = None
 
     def get_queryset(self):
-        adapter = search.adapter_for(self.search_adapter or self.model)
-        parser = adapter.as_request_parser()
-        params = not_none_dict(parser.parse_args())
-        params['facets'] = True
-        adapter = self.search_adapter or self.model
-        result = search.query(adapter, **params)
-        return result
+        parser = self.search_adapter.as_request_parser()
+        return search.query(self.search_adapter, **not_none_dict(parser.parse_args()))
 
     def get_context(self):
         context = super(SearchView, self).get_context()

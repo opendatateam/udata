@@ -3,7 +3,6 @@ import itertools
 from flask import g, abort, redirect, url_for, request
 from flask_security import current_user
 
-from udata import search
 from udata.frontend import csv
 from udata_front.views.base import DetailView, SearchView
 from udata.i18n import I18nBlueprint
@@ -19,6 +18,7 @@ from udata.core.dataset.csv import (
 from udata.core.organization.permissions import (
     EditOrganizationPermission, OrganizationPrivatePermission
 )
+from udata.core.organization.search import OrganizationSearch
 
 
 blueprint = I18nBlueprint('organizations', __name__,
@@ -36,6 +36,7 @@ class OrganizationListView(SearchView):
     model = Organization
     context_name = 'organizations'
     template_name = 'organization/list.html'
+    search_adapter = OrganizationSearch
 
 
 class OrgView(object):
@@ -110,7 +111,7 @@ def organization_dashboard(org):
 
 @blueprint.route('/<org:org>/datasets.csv')
 def datasets_csv(org):
-    datasets = search.iter(Dataset, organization=str(org.id))
+    datasets = Dataset.objects(organization=str(org.id)).visible()
     adapter = DatasetCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-datasets'.format(org.slug))
 
@@ -127,7 +128,7 @@ def discussions_csv(org):
 
 @blueprint.route('/<org:org>/datasets-resources.csv')
 def datasets_resources_csv(org):
-    datasets = search.iter(Dataset, organization=str(org.id))
+    datasets = Dataset.objects(organization=str(org.id)).visible()
     adapter = ResourcesCsvAdapter(datasets)
     return csv.stream(adapter, '{0}-datasets-resources'.format(org.slug))
 

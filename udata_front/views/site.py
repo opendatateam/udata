@@ -5,14 +5,16 @@ from flask import request, redirect, url_for, current_app, abort
 from mongoengine.errors import DoesNotExist
 from werkzeug.contrib.atom import AtomFeed
 
-from udata import search
 from udata.app import cache
 from udata.core.activity.models import Activity
+from udata.core.dataset.api import DatasetApiParser
 from udata.core.dataset.csv import ResourcesCsvAdapter
 from udata.core.dataset.models import Dataset
+from udata.core.organization.api import OrgApiParser
 from udata.core.organization.csv import OrganizationCsvAdapter
 from udata.core.organization.models import Organization
 from udata.core.post.models import Post
+from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.core.reuse.models import Reuse
 from udata.frontend import csv
@@ -117,7 +119,7 @@ def datasets_csv():
     if not params and 'dataset' in exported_models:
         return redirect(get_export_url('dataset'))
     params['facets'] = False
-    datasets = search.iter(Dataset, **params)
+    datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
     adapter = csv.get_adapter(Dataset)
     return csv.stream(adapter(datasets), 'datasets')
 
@@ -130,7 +132,7 @@ def resources_csv():
     if not params and 'resource' in exported_models:
         return redirect(get_export_url('resource'))
     params['facets'] = False
-    datasets = search.iter(Dataset, **params)
+    datasets = DatasetApiParser.parse_filters(Dataset.objects.visible(), params)
     return csv.stream(ResourcesCsvAdapter(datasets), 'resources')
 
 
@@ -142,7 +144,7 @@ def organizations_csv():
     if not params and 'organization' in exported_models:
         return redirect(get_export_url('organization'))
     params['facets'] = False
-    organizations = search.iter(Organization, **params)
+    organizations = OrgApiParser.parse_filters(Organization.objects.visible(), params)
     return csv.stream(OrganizationCsvAdapter(organizations), 'organizations')
 
 
@@ -154,7 +156,7 @@ def reuses_csv():
     if not params and 'reuse' in exported_models:
         return redirect(get_export_url('reuse'))
     params['facets'] = False
-    reuses = search.iter(Reuse, **params)
+    reuses = ReuseApiParser.parse_filters(Reuse.objects.visible(), params)
     return csv.stream(ReuseCsvAdapter(reuses), 'reuses')
 
 

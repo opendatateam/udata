@@ -163,9 +163,7 @@ idna==2.10
     #   udata
     #   urlextract
 importlib-metadata==4.6.3
-    # via
-    #   jsonschema
-    #   udata
+    # via jsonschema
 isodate==0.6.0
     # via
     #   rdflib
@@ -184,6 +182,8 @@ jsonschema==3.2.0
     # via
     #   flask-restplus
     #   udata
+kafka-python==2.0.2
+    # via udata
 kombu[redis]==4.4.0
     # via
     #   celery
@@ -289,10 +289,8 @@ text-unidecode==1.3
 tlds==2021080800
     # via udata
 typing-extensions==3.10.0.0
-    # via
-    #   importlib-metadata
-    #   udata
-udata==3.3.3
+    # via importlib-metadata
+git+https://github.com/opendatateam/udata.git
     # via -r requirements/udata.in
 ujson==1.35
     # via udata
@@ -338,9 +336,7 @@ wtforms-json==0.3.3
 xmltodict==0.12.0
     # via udata
 zipp==3.5.0
-    # via
-    #   importlib-metadata
-    #   udata
+    # via importlib-metadata
 zxcvbn==4.4.28
     # via udata
 

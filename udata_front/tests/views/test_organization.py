@@ -32,23 +32,6 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
     settings = GouvFrSettings
     modules = ['admin']
 
-    def test_render_list(self):
-        '''It should render the organization list page'''
-        with self.autoindex():
-            organizations = [OrganizationFactory() for i in range(3)]
-
-        response = self.get(url_for('organizations.list'))
-
-        self.assert200(response)
-        rendered_organizations = self.get_context_variable('organizations')
-        self.assertEqual(len(rendered_organizations), len(organizations))
-
-    def test_render_list_empty(self):
-        '''It should render the organization list page event if empty'''
-        self.init_search()
-        response = self.get(url_for('organizations.list'))
-        self.assert200(response)
-
     def test_render_display(self):
         '''It should render the organization page'''
         organization = OrganizationFactory(description='* Title 1\n* Title 2', )
@@ -268,13 +251,10 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
                       response.data)
 
     def test_datasets_csv(self):
-        with self.autoindex():
-            org = OrganizationFactory()
-            datasets = [
-                DatasetFactory(organization=org, resources=[ResourceFactory()])
-                for _ in range(3)]
-            not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
-            hidden_dataset = DatasetFactory()
+        org = OrganizationFactory()
+        [
+            DatasetFactory(organization=org, resources=[ResourceFactory()])
+            for _ in range(3)]
 
         response = self.get(url_for('organizations.datasets_csv', org=org))
 
@@ -295,26 +275,16 @@ class OrganizationBlueprintTest(GouvfrFrontTestCase):
         self.assertIn('tags', header)
         self.assertIn('metric.reuses', header)
 
-        rows = list(reader)
-        ids = [row[0] for row in rows]
-
-        self.assertEqual(len(rows), len(datasets))
-        for dataset in datasets:
-            self.assertIn(str(dataset.id), ids)
-        self.assertNotIn(str(hidden_dataset.id), ids)
-        self.assertNotIn(str(not_org_dataset.id), ids)
-
     def test_resources_csv(self):
-        with self.autoindex():
-            org = OrganizationFactory()
-            datasets = [
-                DatasetFactory(
-                    organization=org,
-                    resources=[ResourceFactory(), ResourceFactory()])
-                for _ in range(3)
-            ]
-            not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
-            hidden_dataset = DatasetFactory()
+        org = OrganizationFactory()
+        datasets = [
+            DatasetFactory(
+                organization=org,
+                resources=[ResourceFactory(), ResourceFactory()])
+            for _ in range(3)
+        ]
+        not_org_dataset = DatasetFactory(resources=[ResourceFactory()])
+        hidden_dataset = DatasetFactory()
 
         response = self.get(
             url_for('organizations.datasets_resources_csv', org=org))

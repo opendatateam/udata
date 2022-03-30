@@ -10,6 +10,7 @@ from udata_front.theme import render as render_template
 
 from udata.core.reuse.models import Reuse
 from udata.core.reuse.permissions import ReuseEditPermission
+from udata.core.reuse.search import ReuseSearch
 
 blueprint = I18nBlueprint('reuses', __name__, url_prefix='/reuses')
 
@@ -48,6 +49,7 @@ class ReuseListView(SearchView):
     model = Reuse
     context_name = 'reuses'
     template_name = 'reuse/list.html'
+    search_adapter = ReuseSearch
 
 
 navbar = nav.Bar('edit_reuse', [

@@ -301,8 +301,8 @@ export default {
 
       this.currentRequest = generateCancelToken();
 
-      this.$api
-        .get("/datasets/", {
+      this.$apiv2
+        .get("/datasets/search/", {
           cancelToken: this.currentRequest.token,
           params: {
             q: this.queryString,
