@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.0.0 (2022-03-30)
 
 ### Breaking change
 - :warning: Use refactored search endpoints from udata [#60](https://github.com/etalab/udata-front/pull/60)
