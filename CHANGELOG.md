@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 4.0.0 (2022-03-30)
+
 ### Breaking change
 
 Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
