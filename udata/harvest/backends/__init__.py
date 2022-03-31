@@ -15,3 +15,4 @@ def get_all(app):
 
 
 from .base import BaseBackend, HarvestFilter, HarvestFeature  # flake8: noqa
+from . import statistika, rgz

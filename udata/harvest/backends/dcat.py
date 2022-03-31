@@ -43,7 +43,7 @@ def extract_graph(source, target, node, specs):
 
 
 class DcatBackend(BaseBackend):
-    display_name = 'DCAT'
+    display_name = 'DCATold2'
 
     def initialize(self):
         '''List all datasets for a given ...'''

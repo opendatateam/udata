@@ -44,8 +44,8 @@ setup(
         ],
        'udata.harvesters': [
             'statistika = udata.harvesters.statistika:StatistikaBackend',
-            'statistika2021 = govrs.harvesters.statistika2021:Statistika2021Backend',
-            'sdg = govrs.harvesters.sdg:SDGBackend',
+            'statistika2021 = udata.harvesters.statistika2021:Statistika2021Backend',
+            'sdg = udata.harvesters.sdg:SDGBackend',
             'rgz = udata.harvesters.rgz:RGZBackend',
         ],
         'udata.avatars': [
