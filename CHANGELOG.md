@@ -2,8 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
-
+- Removed `post_save` signal emition within `add_resource` and `update_resource` methods. [#2720](https://github.com/opendatateam/udata/pull/2720)
 ## 4.0.0 (2022-03-30)
 
 ### Breaking change
