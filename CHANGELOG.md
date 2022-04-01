@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add support for HTML static pages and more DSFR components [#96](https://github.com/etalab/udata-front/pull/96)
 
 ## 2.0.0 (2022-03-30)
 

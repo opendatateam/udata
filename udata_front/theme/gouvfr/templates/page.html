@@ -11,8 +11,12 @@
 {% set body_class = 'post-display' %}
 
 {% block main_content %}
-<div class="container markdown py-lg" v-pre>
-    <div>{{ page.content|markdown }}</div>
+<div class="container py-lg" v-pre>
+    {% if extension == 'md' %}
+        <div>{{ page.content|markdown }}</div>
+    {% else %}
+        <div>{{ page.content|safe }}</div>
+    {% endif %}
 </div>
 
 {% if datasets %}

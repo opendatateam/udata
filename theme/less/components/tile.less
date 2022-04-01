@@ -1,0 +1,27 @@
+/*
+---
+name: Tile
+category: 3 - Components
+---
+
+You can use tiles from DSFR. You can find documented usage on [DSFR documentation](https://gouvfr.atlassian.net/wiki/spaces/DB/pages/222331438/Tuile+-+Tile) with their classes.
+
+
+```tile.html
+<div class="fr-tile fr-enlarge-link">
+    <div class="fr-tile__body">
+        <h4 class="fr-tile__title">
+            <a class="fr-tile__link" href>Titre M bold</a>
+        </h4>
+        <p class="fr-tile__desc">Lorem [...] elit ut.</p>
+    </div>
+</div>
+```
+*/
+
+@import (less) "@gouvfr/dsfr/dist/component/tile/tile.css";
+
+// Data.gouv customization
+.fr-tile {
+    --border-plain-blue-france: @blue-400;
+}

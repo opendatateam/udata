@@ -1,0 +1,25 @@
+/*
+---
+name: Highlight
+category: 3 - Components
+---
+
+You can use highlights from DSFR. You can find documented usage on [DSFR documentation](https://gouvfr.atlassian.net/wiki/spaces/DB/pages/223019199/Mise+en+exergue+-+Highlight) with their classes.
+
+
+```highlight.html
+<div class="fr-highlight">
+    <p>Les parents d’enfants de 11 à 14 ans n’ont aucune démarche à accomplir : 
+       les CAF versent automatiquement l’ARS aux familles déjà allocataires qui 
+        remplissent les conditions.
+    </p>
+</div>
+```
+*/
+
+@import (less) "@gouvfr/dsfr/dist/component/highlight/highlight.css";
+
+// Data.gouv customization
+.fr-highlight {
+    --border-default-blue-france: @blue-400;
+}

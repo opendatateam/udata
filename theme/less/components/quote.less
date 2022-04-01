@@ -1,0 +1,38 @@
+/*
+---
+name: Quote
+category: 3 - Components
+---
+
+You can use quotes from DSFR. You can find documented usage on [DSFR documentation](https://gouvfr.atlassian.net/wiki/spaces/DB/pages/771358744/Citation+-+Quote) with their classes.
+
+
+```quote.html
+<figure class="fr-quote fr-quote--column">
+    <blockquote cite="[À MODIFIER | https://lien-vers-la-source.fr || supprimer l'attribut si pas d'url pour la source]">
+        <p>« Lorem [...] elit ut. »</p>
+    </blockquote>
+    <figcaption>
+        <p class="fr-quote__author">Auteur</p>
+        <ul class="fr-quote__source">
+            <li>
+                <cite>Ouvrage</cite>
+            </li>
+            <li>Détail 1</li>
+            <li>Détail 2</li>
+            <li>Détail 3</li>
+            <li>
+              <a target="_blank" href="[À MODIFIER | Lien vers la sources ou des infos complémentaires]" rel="noopener" >Détail 4</a>
+            </li>
+        </ul>
+    </figcaption>
+</figure> 
+```
+*/
+
+@import (less) "@gouvfr/dsfr/dist/component/quote/quote.css";
+
+// Data.gouv customization
+.fr-quote::before {
+    --artwork-minor-blue-france: @blue-400;
+}

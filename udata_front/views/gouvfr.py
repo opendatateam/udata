@@ -54,9 +54,16 @@ def get_pages_gh_urls(slug):
     if not repo:
         abort(404)
     branch = current_app.config.get('PAGES_REPO_BRANCH', 'master')
-    raw_url = f'https://raw.githubusercontent.com/{repo}/{branch}/pages/{slug}.md'
-    gh_url = f'https://github.com/{repo}/blob/{branch}/pages/{slug}.md'
+    raw_url = f'https://raw.githubusercontent.com/{repo}/{branch}/pages/{slug}'
+    gh_url = f'https://github.com/{repo}/blob/{branch}/pages/{slug}'
+
     return raw_url, gh_url
+
+
+def detect_pages_extension(raw_url):
+    if requests.head(f'{raw_url}.md').status_code == 200:
+        return 'md'
+    return 'html'
 
 
 @cache.memoize(PAGE_CACHE_DURATION)
@@ -70,6 +77,11 @@ def get_page_content(slug):
     cache_key = f'pages-content-{slug}'
     raw_url, gh_url = get_pages_gh_urls(slug)
     try:
+        extension = detect_pages_extension(raw_url)
+
+        raw_url = f'{raw_url}.{extension}'
+        gh_url = f'{gh_url}.{extension}'
+
         response = requests.get(raw_url, timeout=5)
         # do not cache 404 and forward status code
         if response.status_code == 404:
@@ -85,7 +97,7 @@ def get_page_content(slug):
     if not content:
         log.error(f'No content found inc. from cache for page {slug}')
         abort(503)
-    return content, gh_url
+    return content, gh_url, extension
 
 
 def get_object(model, id_or_slug):
@@ -101,7 +113,7 @@ def get_object(model, id_or_slug):
 
 @blueprint.route('/pages/<path:slug>/')
 def show_page(slug):
-    content, gh_url = get_page_content(slug)
+    content, gh_url, extension = get_page_content(slug)
     page = frontmatter.loads(content)
     reuses = [get_object(Reuse, r) for r in page.get('reuses') or []]
     datasets = [get_object(Dataset, d) for d in page.get('datasets') or []]
@@ -109,7 +121,7 @@ def show_page(slug):
     datasets = [d for d in datasets if d is not None]
     return theme.render(
         'page.html',
-        page=page, reuses=reuses, datasets=datasets, gh_url=gh_url
+        page=page, reuses=reuses, datasets=datasets, gh_url=gh_url, extension=extension
     )
 
 
