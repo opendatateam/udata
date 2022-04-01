@@ -341,7 +341,7 @@ Here a list of known themes for udata:
     Don't hesitate to submit a pull-request to add your theme to this list.
 
 ## Help
-
+You can ask for help on the [udata Github discussions][github-discussions].
 Please report any difficulty you encounter with a dedicated [Github issue][github-new-issue].
 
 [Flask-Themes2]: http://flask-themes2.readthedocs.io/en/latest/
@@ -352,3 +352,4 @@ Please report any difficulty you encounter with a dedicated [Github issue][githu
 [front-hooks]: https://github.com/etalab/udata-front/blob/master/udata_front/theme/__init__.py
 [Poedit]: https://poedit.net/
 [front-project]: https://github.com/etalab/udata-front/
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721

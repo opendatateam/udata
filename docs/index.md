@@ -15,6 +15,7 @@ Start with [getting started](getting-started.md).
 ## I want to deploy an instance on production servers
 
 See [system dependencies](system-dependencies.md) and [installation](installation.md).
+We can help you to set up your infrastructure, you can contact the team via [a Github issue][github-new-issue] or via [a Github discussion][github-discussions].
 
 ## I found a bug or I want to propose an improvement
 
@@ -24,7 +25,5 @@ For a contribution as an enthusiastic citizen, check out our [contributing guide
 
 For any question, feel free to send an email to [data.gouv@data.gouv.fr](mailto:data.gouv@data.gouv.fr).
 
-[data-gouv-fr]: https://www.data.gouv.fr/
-[data-gouv-lu-repository]: https://github.com/opendatalu/gouvlu
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
-[docker images]: https://github.com/opendatateam/docker-udata
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721
