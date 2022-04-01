@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Refactor and update changelog with latest udata updates [#2717](https://github.com/opendatateam/udata/pull/2717)
 
 ## 4.0.0 (2022-03-30)
 
