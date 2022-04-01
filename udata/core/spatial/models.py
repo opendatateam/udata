@@ -334,3 +334,11 @@ class SpatialCoverage(db.EmbeddedDocument):
     def handled_zones(self):
         """Return only zones with a dedicated page."""
         return [zone for zone in self.zones if zone.handled_level]
+
+    def clean(self):
+        if 'geom' in self._get_changed_fields():
+            if self.zones:
+                raise db.ValidationError('The spatial coverage already has a Geozone')
+        if 'zones' in self._get_changed_fields():
+            if self.geom:
+                raise db.ValidationError('The spatial coverage already has a Geometry')

@@ -1,124 +1,38 @@
-from elasticsearch_dsl import Boolean, Completion, Date,  Object, String
-
-from udata.i18n import lazy_gettext as _
-from udata.core.site.models import current_site
+import datetime
 from udata.models import (
-    Reuse, Organization, Dataset, User, REUSE_TYPES, REUSE_TOPICS
+    Reuse, Organization, User
 )
 from udata.search import (
-    BoolBooster, GaussDecay, ModelSearchAdapter,
-    i18n_analyzer, register, lazy_config,
-    RangeFacet, TermsFacet, ModelTermsFacet, BoolFacet
+    ModelSearchAdapter, register,
+    ModelTermsFilter, BoolFilter, Filter
 )
-from udata.search.analysis import simple
 from udata.utils import to_iso_datetime
 
 
 __all__ = ('ReuseSearch', )
-lazy = lazy_config('reuse')
-
-
-def max_datasets():
-    return max(current_site.get_metrics()['max_reuse_datasets'], 5)
-
-
-def max_followers():
-    return max(current_site.get_metrics()['max_reuse_followers'], 10)
-
-
-def reuse_type_labelizer(value):
-    return REUSE_TYPES[value]
-
-
-def reuse_topic_labelizer(value):
-    return REUSE_TOPICS[value]
-
-
-def reuse_badge_labelizer(kind):
-    return Reuse.__badges__.get(kind, '')
 
 
 @register
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
-    fuzzy = True
+    search_url = 'reuses/'
 
-    class Meta:
-        doc_type = 'Reuse'
-
-    title = String(analyzer=i18n_analyzer, fields={
-        'raw': String(index='not_analyzed')
-    })
-    description = String(analyzer=i18n_analyzer)
-    url = String(index='not_analyzed')
-    organization = String(index='not_analyzed')
-    owner = String(index='not_analyzed')
-    type = String(index='not_analyzed')
-    tags = String(index='not_analyzed', fields={
-        'i18n': String(index='not_analyzed')
-    })
-    badges = String(index='not_analyzed')
-    topic = String(index='not_analyzed')
-    tag_suggest = Completion(analyzer=simple,
-                             search_analyzer=simple,
-                             payloads=False)
-    datasets = Object(
-        properties={
-            'id': String(index='not_analyzed'),
-            'title': String(),
-        }
-    )
-    created = Date(format='date_hour_minute_second')
-    last_modified = Date(format='date_hour_minute_second')
-    metrics = Reuse.__search_metrics__
-    featured = Boolean()
-    reuse_suggest = Completion(analyzer=simple,
-                               search_analyzer=simple,
-                               payloads=True)
-    extras = Object()
-
-    facets = {
-        'tag': TermsFacet(field='tags'),
-        'organization': ModelTermsFacet(field='organization',
-                                        model=Organization),
-        'owner': ModelTermsFacet(field='owner', model=User),
-        'dataset': ModelTermsFacet(field='dataset.id', model=Dataset),
-        'type': TermsFacet(field='type', labelizer=reuse_type_labelizer),
-        'datasets': RangeFacet(field='metrics.datasets',
-                               ranges=[('none', (None, 1)),
-                                       ('few', (1, 5)),
-                                       ('many', (5, None))],
-                               labels={
-                                    'none': _('No datasets'),
-                                    'few': _('Few datasets'),
-                                    'many': _('Many datasets'),
-                               }),
-        'followers': RangeFacet(field='metrics.followers',
-                                ranges=[('none', (None, 1)),
-                                        ('few', (1, 5)),
-                                        ('many', (5, None))],
-                                labels={
-                                     'none': _('No followers'),
-                                     'few': _('Few followers'),
-                                     'many': _('Many followers'),
-                                }),
-        'badge': TermsFacet(field='badges', labelizer=reuse_badge_labelizer),
-        'featured': BoolFacet(field='featured'),
-        'topic': TermsFacet(field='topic', labelizer=reuse_topic_labelizer),
-    }
     sorts = {
-        'title': 'title.raw',
         'created': 'created',
-        'last_modified': 'last_modified',
         'datasets': 'metrics.datasets',
         'followers': 'metrics.followers',
-        'views': 'metrics.views',
+        'views': 'metrics.views'
     }
-    boosters = [
-        BoolBooster('featured', lazy('featured_boost')),
-        GaussDecay('metrics.datasets', max_datasets, decay=lazy('datasets_decay')),
-        GaussDecay('metrics.followers', max_followers, decay=lazy('followers_decay')),
-    ]
+
+    filters = {
+        'tag': Filter(),
+        'organization': ModelTermsFilter(model=Organization),
+        'owner': ModelTermsFilter(model=User),
+        'type': Filter(),
+        'badge': Filter(),
+        'featured': BoolFilter(),
+        'topic': Filter(),
+    }
 
     @classmethod
     def is_indexable(cls, reuse):
@@ -128,45 +42,38 @@ class ReuseSearch(ModelSearchAdapter):
 
     @classmethod
     def serialize(cls, reuse):
-        """By default use the ``to_dict`` method
-
-        and exclude ``_id``, ``_cls`` and ``owner`` fields.
-        """
-        datasets = Dataset.objects(id__in=[r.id for r in reuse.datasets])
-        datasets = list(datasets.only('id', 'title').no_dereference())
         organization = None
         owner = None
         if reuse.organization:
-            organization = Organization.objects(id=reuse.organization.id).first()
+            org = Organization.objects(id=reuse.organization.id).first()
+            organization = {
+                'id': str(org.id),
+                'name': org.name,
+                'public_service': 1 if org.public_service else 0,
+                'followers': org.metrics.get('followers', 0)
+            }
         elif reuse.owner:
             owner = User.objects(id=reuse.owner.id).first()
+
+        extras = {}
+        for key, value in reuse.extras.items():
+            extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
+
         return {
+            'id': str(reuse.id),
             'title': reuse.title,
             'description': reuse.description,
             'url': reuse.url,
-            'organization': str(organization.id) if organization else None,
+            'created_at': to_iso_datetime(reuse.created_at),
+            'views': reuse.metrics.get('views', 0),
+            'followers': reuse.metrics.get('followers', 0),
+            'datasets': reuse.metrics.get('datasets', 0),
+            'featured': 1 if reuse.featured else 0,
+            'organization': organization,
             'owner': str(owner.id) if owner else None,
             'type': reuse.type,
             'topic': reuse.topic,
             'tags': reuse.tags,
-            'tag_suggest': reuse.tags,
             'badges': [badge.kind for badge in reuse.badges],
-            'created': to_iso_datetime(reuse.created_at),
-            'last_modified': to_iso_datetime(reuse.last_modified),
-            'dataset': [{
-                'id': str(d.id),
-                'title': d.title
-            } for d in datasets],
-            'metrics': reuse.metrics,
-            'featured': reuse.featured,
-            'extras': reuse.extras,
-            'reuse_suggest': {
-                'input': cls.completer_tokenize(reuse.title) + [reuse.id],
-                'output': str(reuse.id),
-                'payload': {
-                    'title': reuse.title,
-                    'slug': reuse.slug,
-                    'image_url': reuse.image(500, external=True),
-                },
-            },
+            'extras': extras
         }

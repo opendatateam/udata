@@ -2,10 +2,10 @@ import json
 import re
 import pytest
 
-from udata.tests import TestCase, WebTestMixin, SearchTestMixin
+from udata.tests import TestCase, WebTestMixin, DBTestMixin
 
 
-class FrontTestCase(WebTestMixin, SearchTestMixin, TestCase):
+class FrontTestCase(WebTestMixin, DBTestMixin, TestCase):
     modules = []
 
     def get_json_ld(self, response):

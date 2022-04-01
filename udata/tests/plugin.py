@@ -13,7 +13,6 @@ from udata import settings
 from udata.app import create_app
 from udata.core.user.factories import UserFactory
 from udata.models import db
-from udata.search import es
 
 from .helpers import assert200, assert_command_ok
 
@@ -189,42 +188,6 @@ class ApiClient(object):
 def api(client):
     api_client = ApiClient(client)
     return api_client
-
-
-class AutoIndex(object):
-    '''
-    Allows to write both::
-        with autoindex():
-            pass
-    and::
-        with autoindex:
-            pass
-    '''
-    def __enter__(self):
-        pass
-
-    def __exit__(self, type, value, traceback):
-        es.indices.refresh(index=es.index_name)
-
-    def __call__(self):
-        return self
-
-
-def _clean_es():
-    if es.indices.exists(index=es.index_name):
-        es.indices.delete(index=es.index_name)
-
-
-@pytest.fixture
-def autoindex(app, clean_db):
-    app.config['AUTO_INDEX'] = True
-    _clean_es()
-    es.initialize()
-    es.cluster.health(wait_for_status='yellow', request_timeout=10)
-
-    yield AutoIndex()
-
-    _clean_es()
 
 
 @pytest.fixture(name='cli')

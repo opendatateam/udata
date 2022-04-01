@@ -5,7 +5,7 @@ import pytest
 
 from datetime import date
 
-from udata.models import Dataset, License
+from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import LicenseFactory
 
@@ -122,6 +122,7 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
+        assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/1'
 
         assert len(dataset.resources) == 1
 
@@ -229,6 +230,16 @@ class DcatBackendTest:
         extras = {'extras__dct:identifier': '3'}
         dataset = Dataset.objects.get(**extras)
         assert dataset.license.id == 'lov2'
+        assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/3'
+        assert dataset.created_at.date() == date(2016, 12, 14)
+        assert dataset.last_modified.date() == date(2016, 12, 14)
+        assert dataset.frequency == 'daily'
+        assert dataset.description == 'Dataset 3 description'
+
+        extras = {'extras__dct:identifier': '1'}
+        dataset = Dataset.objects.get(**extras)
+        # test abstract description support
+        assert dataset.description == 'Dataset 1 description'
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
@@ -239,6 +250,26 @@ class DcatBackendTest:
         actions.run(source.slug)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
+        assert dataset.created_at.date() == date(2004, 11, 3)
+        assert dataset.description.startswith('Data of type chemistry')
+
+    def test_sigoreme_xml_catalog(self, rmock):
+        LicenseFactory(id='fr-lo', title='Licence ouverte / Open Licence')
+        url = mock_dcat(rmock, 'sig.oreme.rdf')
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='dcat',
+                                      url=url,
+                                      organization=org)
+        actions.run(source.slug)
+        dataset = Dataset.objects.filter(organization=org).first()
+
+        assert dataset is not None
+        assert dataset.frequency == 'irregular'
+        assert 'gravi' in dataset.tags  # support dcat:keyword
+        assert 'geodesy' in dataset.tags  # support dcat:theme
+        assert dataset.license.id == 'fr-lo'
+        assert len(dataset.resources) == 1
+        assert dataset.description.startswith('Data from the \'National network')
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)

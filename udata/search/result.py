@@ -1,11 +1,6 @@
-import copy
 import logging
 
 from bson.objectid import ObjectId
-from flask import request
-from werkzeug.urls import Href
-
-from elasticsearch_dsl.result import Response
 
 from udata.utils import Paginable
 
@@ -13,40 +8,25 @@ from udata.utils import Paginable
 log = logging.getLogger(__name__)
 
 
-class SearchResult(Paginable, Response):
+class SearchResult(Paginable):
     '''An ElasticSearch result wrapper for easy property access'''
-    def __init__(self, query, result, *args, **kwargs):
-        super(SearchResult, self).__init__(result, *args, **kwargs)
+    def __init__(self, query, result, **kwargs):
         self.query = query
+        self.result = result
         self._objects = None
-        self._facets = None
+        self._page = kwargs.pop('page')
+        self._page_size = kwargs.pop('page_size')
+        self._total_pages = kwargs.pop('total_pages')
+        self._total = kwargs.pop('total')
 
     @property
     def query_string(self):
         return self.query._query
 
     @property
-    def facets(self):
-        if self._facets is None:
-            self._facets = {}
-            for name, facet in self.query.facets.items():
-                self._facets[name] = facet.get_values(
-                    self.get_aggregation(name),
-                    self.query.filter_values.get(name, ())
-                )
-        return self._facets
-
-    @property
     def total(self):
         try:
-            return self.hits.total
-        except (KeyError, AttributeError):
-            return 0
-
-    @property
-    def max_score(self):
-        try:
-            return self.hits.max_score
+            return self._total
         except (KeyError, AttributeError):
             return 0
 
@@ -56,7 +36,7 @@ class SearchResult(Paginable, Response):
 
     @property
     def page_size(self):
-        return self.query.page_size
+        return self._page_size
 
     @property
     def class_name(self):
@@ -64,7 +44,7 @@ class SearchResult(Paginable, Response):
 
     def get_ids(self):
         try:
-            return [hit['_id'] for hit in self.hits.hits]
+            return [elem['id'] for elem in self.result]
         except KeyError:
             return []
 
@@ -87,31 +67,7 @@ class SearchResult(Paginable, Response):
             yield obj
 
     def __len__(self):
-        return len(self.hits.hits)
+        return len(self.result)
 
     def __getitem__(self, index):
         return self.get_objects()[index]
-
-    def get_aggregation(self, name):
-        '''
-        Fetch an aggregation result given its name
-
-        As there is no way at this point know the aggregation type
-        (ie. bucket, pipeline or metric)
-        we guess it from the response attributes.
-        Only bucket and metric types are handled
-        '''
-        agg = self.aggregations[name]
-        if 'buckets' in agg:
-            return agg['buckets']
-        else:
-            return agg
-
-    def label_func(self, name):
-        if name not in self.query.facets:
-            return None
-        return self.query.facets[name].labelize
-
-    def labelize(self, name, value):
-        func = self.label_func(name)
-        return func(value) if func else value

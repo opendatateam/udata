@@ -4,20 +4,17 @@ from udata.api.oauth2 import OAuth2Client
 from udata.core import storages
 from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.user.factories import AdminFactory
-from udata.core.dataset.search import DatasetSearch
 from udata.core.organization import tasks
 from udata.models import Dataset, Organization, Transfer
 from udata.tests.api import APITestCase
-from udata.search import es
 from udata.tests.helpers import create_test_image
 
 
 class OrganizationTasksTest(APITestCase):
     def test_purge_organizations(self):
-        with self.autoindex():
-            org = Organization.objects.create(name='delete me', description='XXX')
-            resources = [ResourceFactory() for _ in range(2)]
-            dataset = DatasetFactory(resources=resources, organization=org)
+        org = Organization.objects.create(name='delete me', description='XXX')
+        resources = [ResourceFactory() for _ in range(2)]
+        dataset = DatasetFactory(resources=resources, organization=org)
 
         # Upload organization's logo
         file = create_test_image()
@@ -69,8 +66,3 @@ class OrganizationTasksTest(APITestCase):
 
         organization = Organization.objects(name='delete me').first()
         self.assertIsNone(organization)
-
-        indexed_dataset = DatasetSearch.get(id=dataset.id,
-                                            using=es.client,
-                                            index=es.index_name)
-        self.assertIsNone(indexed_dataset.organization)

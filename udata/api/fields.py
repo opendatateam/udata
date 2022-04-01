@@ -87,7 +87,6 @@ def pager(page_fields):
                          required=True, min=0),
         'next_page': NextPageUrl(description='The next page URL if exists'),
         'previous_page': PreviousPageUrl(
-            description='The previous page URL if exists'),
-        'facets': Raw(description='Search facets results if any'),
+            description='The previous page URL if exists')
     }
     return pager_fields
