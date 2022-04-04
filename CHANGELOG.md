@@ -4,6 +4,7 @@
 
 - Add support for HTML static pages and more DSFR components [#96](https://github.com/etalab/udata-front/pull/96)
 - Fix mobile bugs after header changes [#99](https://github.com/etalab/udata-front/pull/99)
+- Fix organizationCertified error when organization is null [#98](https://github.com/etalab/udata-front/pull/98)
 
 ## 2.0.0 (2022-03-30)
 
