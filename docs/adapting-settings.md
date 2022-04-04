@@ -849,7 +849,6 @@ Here a sample configuration file:
 
 ```python
 DEBUG = True
-
 SEND_MAIL = False
 
 SECRET_KEY = 'A unique secret key'
@@ -857,10 +856,9 @@ SECRET_KEY = 'A unique secret key'
 SERVER_NAME = 'www.data.dev'
 
 DEFAULT_LANGUAGE = 'fr'
-PLUGINS =  'front piwik youckan'.split()
-
+PLUGINS = ['front', 'piwik']
 SITE_ID = 'www.data.dev'
-SITE_TITLE = 'Data.dev'
+SITE_TITLE = 'data.dev'
 SITE_URL = 'www.data.dev'
 
 DEBUG_TOOLBAR = True

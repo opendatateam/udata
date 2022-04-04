@@ -1,29 +1,35 @@
-site_name: uData Documentation
-site_description: uData Open Data Portal Documentation
+site_name: udata Documentation
+site_description: udata Open Data Portal Documentation
 site_author: Etalab
 repo_url: https://github.com/etalab/udata
 
-theme: readthedocs
-theme_dir: 'docs/custom_theme'
+theme:
+    name: readthedocs
+    theme_dir: 'docs/custom_theme'
+    titles_only: True
+    collapse_navigation: True
 
-pages:
+nav:
     - Home: index.md
+    - User Guide:
+        - Quick start: quickstart.md
+        - Getting started: getting-started.md
+        - Adapting settings: adapting-settings.md
+        - Administrative tasks: administrative-tasks.md
+        - Using plugins: plugins.md
+        - Harvesting: harvesting.md
+        - RDF support: rdf.md
+    - Developping:
+        - Advanced development environment: development-environment.md
+        - Testing your code: testing-code.md
+        - Extending udata: extending.md
+        - Adding translations: adding-translations.md
+        - Creating a custom theme: creating-theme.md
+        - Building the documentation: building-documentation.md
     - Deploying:
         - System dependencies: system-dependencies.md
         - Installation: installation.md
         - Docker deployment: docker-deployment.md
-        - Adapting settings: adapting-settings.md
-    - Running:
-        - Administrative tasks: administrative-tasks.md
-        - Harvesting: harvesting.md
-        - RDF support: rdf.md
-    - Developping:
-        - Development environment: development-environment.md
-        - Testing your code: testing-code.md
-        - Extending uData: extending.md
-        - Adding translations: adding-translations.md
-        - Creating a custom theme: creating-theme.md
-        - Building the documentation: building-documentation.md
     - Contributing:
         - Guide: contributing-guide.md
         - Governance: governance.md

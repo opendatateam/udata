@@ -1,61 +1,10 @@
-# Development environment
+# Advanced development environment
 
 ## System requirements
 
 See [System dependencies](system-dependencies.md) for base system requirements.
 
-An alternative way to use middlewares (ie. ElasticSearch, Redis, MongoDB) is provided
-for getting started easily so it's not mandatory to install those natively.
-See [Middlewares](#middlewares) for details.
-
-## Retrieving the sources
-
-You also will need [Git][] to fetch sources and publish your contributions.
-If you use a Debian-like distribution with `apt-get`, the package is named `git-core`.
-If you prefer [Homebrew][] (OSX), the package is named `git`.
-
-The sources of the project are on [Github][]:
-
-```shell
-$ git clone https://github.com/opendatateam/udata.git
-```
-
-(or clone your own fork if you plan to [contribute](contributing-guide.md))
-
-## Middlewares
-
-We will use [docker-compose][] to manage all that.
-[Install Docker-Compose for your system][docker-compose-install]
-then start the services:
-
-```shell
-$ cd udata
-$ docker-compose up
-```
-
-On the very first run it will download and install Docker images which takes a while depending of your connection.
-
-!!! warning
-    Test your _docker-compose_ is running successfully entering `curl http://localhost:9200`.
-    It should output a JSON search response.
-    If you have no output at all for too long,
-    check the [IPv6 possible issue](https://github.com/docker/docker/issues/2174#issuecomment-35697655).
-
-## Python and virtual environment
-
-### Basic installation
-
-It is recommended to work within a virtualenv to ensure proper dependencies isolation.
-If you're not familiar with that concept, read [Python Virtual Environments - a Primer][].
-
-Alright, now you can type these commands knowing what you are doing:
-
-```shell
-$ python3 -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements/develop.pip
-$ pip install -e .
-```
+See [getting-started](getting-started.md) for installation instructions.
 
 ### Dependency management
 
@@ -106,47 +55,6 @@ brew install libjpeg
 pip install -r requirements/develop.pip
 ```
 
-## NodeJS and modules
-
-NodeJS is required to build or run the frontend. Please check the .nvmrc at the root of the repository to check the exact version of NodeJS you need.
-you should consider [installing NVM][nvm-install] which uses the existing `.nvmrc`.
-
-```shell
-$ nvm install
-$ nvm use
-```
-
-Then install JavaScript dependencies:
-
-```shell
-$ npm install
-```
-
-Once it's done, you should be able to run the build command for JS and CSS:
-
-```shell
-$ inv assets-build
-$ inv widgets-build
-```
-
-!!! note
-    The **watcher commands** `inv assets-watch` and `inv widgets-watch` will recompile on each save, and only the relevant parts.
-
-## Running the project for the first time
-
-You need to initialize some data before being able to use udata:
-
-```shell
-# Initialize database, indexes...
-$ udata init
-
-# Optionally fetch and load some licenses from another udata instance
-$ udata licenses https://www.data.gouv.fr/api/1/datasets/licenses
-
-# Compile translations
-$ inv i18nc
-```
-
 You should be to start using and contributing to udata.
 
 ## Running the project
@@ -164,14 +72,6 @@ $ inv assets-watch  # Continously watch and build assets
 $ inv widgets-watch # Continously watch and build widgets
 $ inv oembed-watch # Continously watch and build oembed
 ```
-
-When you have the development server running,
-you can open your browser to <http://localhost:7000>.
-Everything should be up and running!
-
-!!! note "Tell us what you think"
-    You are always welcome to tell us about your experience _installing udata_.
-    Get in touch with us by raising a [new issue][] on [GitHub][].
 
 ## Common tasks
 
