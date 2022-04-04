@@ -17,9 +17,8 @@ You can either set your own [independent plugin theme](#independent-plugin-theme
 It means you are independent in your techno and don't rely on the
 [udata-front][front-project] architecture.
 
-You can also add your theme in [udata-front theme folder](#udata-front-based-theme).
-You don't need to have a separate plugin, but you will need to manage your fork
-and it may get further in the time.
+You can also add your theme in [udata-front theme folder](#udata-front-based-theme) *(not recommended)*.
+You don't need to have a separate plugin, but you will need to maintain your fork in sync with udata-front.
 
 ### Independent plugin theme
 
@@ -69,7 +68,7 @@ There can also be three directories:
 - `translations` containing the overriden translated strings (optional).
 
 
-### udata-front based theme
+### udata-front based theme (not recommended)
 
 If you want to use udata-front as a base and add your theme in the corresponding
 directory, you can follow this layout:
