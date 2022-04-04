@@ -3,31 +3,31 @@
 The project as been developed from start with the goal to make it generic and reusable.
 The theme engine is based on [Flask-Themes2][] so reading its documentation might help.
 
-To create your custom theme, the easiest way is to start from the
-[dedicated cookiecutter template][cookiecutter-template]:
+The difficulty of creating a new theme will depend on what you want to do:
 
-```bash
-pip install cookiecutter
-cookiecutter gh:opendatateam/cookiecutter-udata-theme
-```
-This will create a new theme skeleton on which you can start hacking.
-
-As udata is Bootstrap-based (only the style part),
-the difficulty will depend on what you want to do:
-
-- customize some style and colors ⇨ very easy
+- start from gouvfr and modify some style and colors ⇨ easy
 - customize the layouts or how some part of udata is rendered ⇨ easy
 - switch to another style framework ⇨ hard
 
 ## Project layout
 
-A theme has the following layout.
+You have different options for your theme layout.
+
+You can either set your own [independent plugin theme](#independent-plugin-theme).
+It means you are independent in your techno and don't rely on the
+[udata-front][front-project] architecture.
+
+You can also add your theme in [udata-front theme folder](#udata-front-based-theme) *(not recommended)*.
+You don't need to have a separate plugin, but you will need to maintain your fork in sync with udata-front.
+
+### Independent plugin theme
+
+If you want to make your own independent plugin, you can follow this layout:
 
 ```
 ├── my_theme
 │   ├── static
-│   │   ├── theme.css
-│   │   ├── admin.css
+│   │   ├── index.css
 │   │   └── img
 │   │       ├── flags
 │   │       └── placeholders
@@ -53,7 +53,7 @@ At the root level, you will have some basic python project files:
 - a `CHANGELOG.md` to let people know the last changes in your theme
 - a `MANIFEST.in` which specify which files should be included in your theme package
 - a `setup.py` exposing the package metadata (including the theme presence)
-- a `setup.cfg` configuring translations commands
+- a `setup.cfg` configuring setup commands (you can start from the one in `udata-front`)
 - a `babel.cfg` configuring translations extractor
 
 In the package directory (`my_theme` in this example), you need to have two files:
@@ -64,11 +64,43 @@ In the package directory (`my_theme` in this example), you need to have two file
 There can also be three directories:
 
 - `static` containing static assets (images, styles, extra scripts...)
-- `templates` containing the overriden templates (optional).
+- `templates` containing the templates. You will need all the templates used in udata_front views
 - `translations` containing the overriden translated strings (optional).
 
+
+### udata-front based theme (not recommended)
+
+If you want to use udata-front as a base and add your theme in the corresponding
+directory, you can follow this layout:
+
+```
+udata_front
+├── theme
+│   ├── my_theme
+│   │   ├── static
+│   │   │   ├── index.css
+│   │   │   ├── img
+│   │   │   │   ├── flags
+│   │   │   │   └── placeholders
+│   │   ├── templates
+│   │   │   └── *.html
+│   │   ├── translations
+│   │   │   ├── xx/LC_MESSAGES
+│   │   │   │   └── my-theme.po
+│   │   │   └── my-theme.pot
+│   │   ├── info.json
+│   │   └── __init__.py
+│   └── gouvfr
+│       └── ...
+└── ...
+```
+
+Using this layout, you won't need to create files at the root level (`setup.py`, `babel.cfg`, etc.)
+You will stil need the same files as the ones describe in the theme directory in
+[independent plugin theme](#independent-plugin-theme).
+
 !!! note
-    This is a proposal layout for a standalone theme.
+    These are proposal layout for standalone themes.
     As long as the theme package has the proper layout (`info.json`, `__init__.py`...),
     it can be wherever you want if you properly expose it in your `setup.py` file.
 
@@ -114,51 +146,27 @@ Any other attribute can have any value, this is only metadata.
 
 ## Static assets
 
-The `static` should contain at least 2 files:
-
-- `theme.css` which is loaded automatically on every page
-- `admin.css` which is loaded automatically on on the admin page
-
-Some images are required and used everywhere in the application:
-
-- `img/flags` contains the language switcher flags in the form `{language code}.png` (ex. `en.png`).
-- `img/placeholders` contains default images for:
-    - users without avatar (`user.png`)
-    - organizations without logo (`organization.png`)
-    - reuses without image (`reuse.png`)
-    - territory without logo or flag (`territory.png`)
+The `static` should contain an `index.css` file.
 
 Then you are free to add any static assets required by your theme.
 
-## Overriding templates
+## Writing templates
 
-You can override or extend any default Jinja template.
-You only need to put the templates with the same name into the `templates` folder.
-
-To extend a template and change some details, just extend the base template and override the block you want to change:
-
-```html+jinja
-{% extends "raw.html" %}
-
-{% block theme_css %}
-{{ super() }}
-<link href="{{ theme_static('theme.css') }}" rel="stylesheet">
-{% endblock %}
-
-{% block raw_head %}
-{{ super() }}
-<link rel="shortcut icon" href="{{ theme_static('img/favicon.png') }}">
-{% endblock %}
-```
+We recommend starting from existing templates in `gouvfr` theme, copying them and iterating on those.
+You can also start from scratch and implement the templates called in `udata_front` views.
 
 You can reference static assets from your theme with the `theme_static` global function.
+Take a look at [Jinja documentation][] for more information on writing jinja templates.
 
-!!! note
-    Don't forget to call `{{ super() }}` to includes the original block.
-    See the [Jinja documentation][] for advanced usage.
+## Usage in udata
 
-You can also rewrite entirely the template, but don't forget you need to have the proper blocks
-for template inheritance and use the proper context variables.
+You can update your udata configuration file (probably `udata.cfg`) to add your new theme:
+```
+PLUGINS = ['front', 'my-theme']
+THEME = 'my-theme'
+```
+
+When serving udata (`inv serve`), you should see your new theme live.
 
 ## Assets manifest
 
@@ -332,17 +340,15 @@ Here a list of known themes for udata:
     Don't hesitate to submit a pull-request to add your theme to this list.
 
 ## Help
-
-You can ask for help on the [udata gitter channel][gitter-chan].
+You can ask for help on the [udata Github discussions][github-discussions].
 Please report any difficulty you encounter with a dedicated [Github issue][github-new-issue].
 
 [Flask-Themes2]: http://flask-themes2.readthedocs.io/en/latest/
-[Jinja documentation]: jinja.pocoo.org/docs/
+[Jinja documentation]: https://jinja.pocoo.org/docs/
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
-[cookiecutter-template]: https://github.com/opendatateam/cookiecutter-udata-theme
 [Babel]: http://babel.pocoo.org/
 [PyPI]: https://pypi.org/
-[gitter-chan]: https://gitter.im/opendatateam/udata
 [front-hooks]: https://github.com/etalab/udata-front/blob/master/udata_front/theme/__init__.py
 [Poedit]: https://poedit.net/
 [front-project]: https://github.com/etalab/udata-front/
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721

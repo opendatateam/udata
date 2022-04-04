@@ -2,7 +2,7 @@
 
 ## Python requirements
 
-udata requires [Python][] 3.6, its development tools and some libraries to be installed (with their headers).
+udata requires [Python][] 3.7, its development tools and some libraries to be installed (with their headers).
 Most of them might already be installed as they are common development dependencies.
 The full dependencies list is:
 
@@ -56,7 +56,7 @@ The project depends on [MongoDB][] 3.6+, [ElasticSearch][] 2.4 and [Redis][]
 Elasticsearch requires the [Analysis ICU][analysis-icu] plugin for your specific version.
 
 The installation process is very specific to your operating system
-and will depend on your configuration, join us on [Gitter][] if you have any issue.
+and will depend on your configuration, join us via [a Github issue][github-new-issue] or via [a Github discussion][github-discussions] if you have any issue.
 
 ### Redis
 
@@ -116,9 +116,10 @@ $ /usr/local/Cellar/elasticsearch/2.4.1/libexec/bin/plugin install analysis-icu
 [mongodb]: https://www.mongodb.org/
 [elasticsearch]: https://www.elastic.co/products/elasticsearch
 [redis]: http://redis.io/
-[gitter]: https://gitter.im/opendatateam/udata
 [homebrew]: http://brew.sh/
 [python]: https://www.python.org/
 [analysis-icu]: https://github.com/elastic/elasticsearch-analysis-icu
 [mongo-install-instructions]: https://docs.mongodb.com/v3.6/tutorial/install-mongodb-on-debian/#install-mongodb-community-edition
 [elastic-install-instructions]: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/setup-repositories.html#_apt
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721
+[github-new-issue]: https://github.com/opendatateam/udata/issues/new

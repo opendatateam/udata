@@ -6,10 +6,10 @@ The project has been initiated by the [French government team][etalab] and is no
 
 Bugs are [reported directly on Github][github-new-issue] following the proposed template.
 
-## Discussion
+## Discussions
 
-For daily chat, development discussions and so on we idle on [Gitter][gitter].
+We’re trying to develop this project in the open as much as possible. We created a dedicated [Github discussions][github-discussions] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
 
 [etalab]: https://github.com/etalab
 [github-new-issue]: https://github.com/opendatateam/udata/issues/new
-[gitter]: https://gitter.im/opendatateam/udata
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721

@@ -63,9 +63,7 @@ and will magicaly close the issue as soon as the commit is merged.
 
 ## Discussing strategies
 
-We’re trying to develop this project in the open as much as possible. We have a dedicated [Gitter channel][gitter] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
-
-We also [vote for new features](http://udata.readthedocs.io/en/stable/governance/) in order to include the whole community in the process.
+We’re trying to develop this project in the open as much as possible. We created a dedicated [Github discussions][github-discussions] where we discuss each new strategic change and invite the community to give a valuable feedback. You’re encouraged to join and participate.
 
 ## Code guides
 
@@ -98,4 +96,4 @@ We try to stay as close as possible to [CommonMark][] but use default [extension
 [code-guide]: http://codeguide.co/
 [commonmark]: http://commonmark.org/
 [extensions-mkdocs]: http://www.mkdocs.org/user-guide/writing-your-docs/
-[gitter]: https://gitter.im/opendatateam/udata
+[github-discussions]: https://github.com/opendatateam/udata/discussions/2721
