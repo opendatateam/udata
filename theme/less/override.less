@@ -3,10 +3,22 @@ body {
     overflow-x: hidden;
 }
 
+// Sanitize.css overrides
 // This is the default for browsers and it's the value used in the DSFR
 html {
     cursor: auto;
 }
+
+[type="search"] {
+    -webkit-appearance: none;
+}
+
+html {
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+// end of Sanitize.css overrides
 
 ul {
     list-style-type: none;

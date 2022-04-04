@@ -1,8 +1,12 @@
 .hero {
-    //On the home page, the post block is a little bit taller and with no padding on its body
+    // On the home page, the post block is a little bit taller and with no padding on its body
     .hero-post {
         .hero-image {
             min-height: 325px;
+            @supports (aspect-ratio: 16/9) {
+                aspect-ratio: 16/9;
+                min-height: auto;
+            }
         }
     }
 

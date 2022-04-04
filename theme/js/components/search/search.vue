@@ -1,14 +1,14 @@
 <template>
-  <div class="row-inline justify-between align-items-center search-bar">
+  <div class="fr-grid-row fr-grid-row--gutters justify-between align-items-center search-bar">
     <search-input
-      class="fr-my-1w fr-my-md-2w fr-text--lead fr-mb-0"
+      class="fr-col fr-my-1w fr-my-md-2w fr-text--lead fr-mb-0"
       :onChange="handleSearchChange"
       :value="queryString"
       :placeholder="$t('Search for data...')"
       ref="input"
     />
     <div
-      class="filter-icon fr-hidden-md w-auto fr-mx-3v"
+      class="fr-col-auto filter-icon fr-hidden-md w-auto"
       :class="{ isFiltered, active: extendedForm }"
       v-html="filterIcon"
       @click="extendedForm = !extendedForm"

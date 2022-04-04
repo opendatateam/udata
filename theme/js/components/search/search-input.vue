@@ -12,10 +12,10 @@ If the submitUrl prop is passed, it will redirect on Submit.
 -->
 
 <template>
-  <section class="search-input">
-    <form :action="submitUrl" @submit="onSubmit" class="row-inline">
-      <span class="icon" :class="{ active: queryString }" v-html="icon" />
+  <section class="search-input fr-grid-row">
+      <span class="icon" :class="{ active: queryString }" v-html="icon"></span>
       <input
+        class="fr-col w-100 fr-ml-3v"
         type="text"
         name="q"
         :value="queryString"
@@ -26,26 +26,15 @@ If the submitUrl prop is passed, it will redirect on Submit.
         :placeholder="placeholder || $t('Search...')"
         data-cy="search-input"
       />
-      <a
-        href="#"
-        class="close-icon ml-sm self-center"
-        @click.prevent="stop"
-        v-html="closeIcon"
-        v-if="stop"
-        :aria-label="$t('Close')"
-      />
-    </form>
   </section>
 </template>
 
 <script>
 import Icon from "svg/search.svg";
-import CloseIcon from "svg/close.svg";
 
 export default {
   created() {
     this.icon = Icon;
-    this.closeIcon = CloseIcon;
     this.queryString = this.value;
   },
   watch: {
@@ -59,10 +48,8 @@ export default {
   },
   props: {
     onChange: Function,
-    stop: Function,
     value: String,
     placeholder: String,
-    submitUrl: String,
   },
   data() {
     return {
@@ -80,10 +67,7 @@ export default {
       this.$refs.input.focus({
         preventScroll: true,
       });
-    },
-    onSubmit(event) {
-      if (!this.submitUrl) event.preventDefault();
-    },
+    }
   },
 };
 </script>

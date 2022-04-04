@@ -19,7 +19,11 @@ You have to inject the image as a backgroundImage CSS property, which can be don
 */
 
 .hero-image {
-    min-height: 200px;
     background-position: center center;
     background-size: cover;
+    min-height: 200px;
+    @supports (aspect-ratio: 16/9) {
+        aspect-ratio: 16/9;
+        min-height: auto;
+    }
 }
