@@ -17,6 +17,8 @@ from udata.core.post.models import Post
 from udata.core.reuse.api import ReuseApiParser
 from udata.core.reuse.csv import ReuseCsvAdapter
 from udata.core.reuse.models import Reuse
+from udata.harvest.csv import HarvestSourceCsvAdapter
+from udata.harvest.models import HarvestSource
 from udata.frontend import csv
 from udata_front.views.base import DetailView
 from udata.i18n import I18nBlueprint, lazy_gettext as _
@@ -158,6 +160,18 @@ def reuses_csv():
     params['facets'] = False
     reuses = ReuseApiParser.parse_filters(Reuse.objects.visible(), params)
     return csv.stream(ReuseCsvAdapter(reuses), 'reuses')
+
+
+@blueprint.route('/harvests.csv')
+def harvests_csv():
+    # redirect to EXPORT_CSV dataset if feature is enabled
+    exported_models = current_app.config.get('EXPORT_CSV_MODELS', [])
+    if 'harvest' in exported_models:
+        return redirect(get_export_url('harvest'))
+    adapter = HarvestSourceCsvAdapter(
+        HarvestSource.objects.filter(deleted=None).order_by('created_at')
+    )
+    return csv.stream(adapter, 'harvest')
 
 
 class SiteView(object):

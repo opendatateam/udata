@@ -13,6 +13,7 @@ from udata.core.dataset.factories import DatasetFactory, ResourceFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.site.models import current_site
 from udata.core.reuse.factories import ReuseFactory
+from udata.harvest.models import HarvestSource
 from udata_front.tests import GouvFrSettings
 from udata_front.tests.frontend import GouvfrFrontTestCase
 
@@ -395,6 +396,61 @@ class SiteViewsTest(GouvfrFrontTestCase):
         for reuse in reuses:
             self.assertNotIn(str(reuse.id), ids)
         self.assertNotIn(str(hidden_reuse.id), ids)
+
+    def test_harvest_csv(self):
+        self.app.config['EXPORT_CSV_MODELS'] = []
+        organization = OrganizationFactory()
+        harvests = [HarvestSource.objects.create(
+            name='harvest',
+            url=f'https://example.com/{i}',
+            organization=organization
+            )
+                  for i in range(5)]
+        hidden_harvest = HarvestSource.objects.create(
+            url='https://example.com/deleted',
+            deleted=datetime.now()
+        )
+
+        response = self.get(url_for('site.harvests_csv'))
+
+        self.assert200(response)
+        self.assertEqual(response.mimetype, 'text/csv')
+        self.assertEqual(response.charset, 'utf-8')
+
+        csvfile = StringIO(response.data.decode('utf8'))
+        reader = csv.get_reader(csvfile)
+        header = next(reader)
+
+        self.assertEqual(header[0], 'id')
+        self.assertIn('name', header)
+        self.assertIn('url', header)
+        self.assertIn('organization', header)
+        self.assertIn('organization_id', header)
+        self.assertIn('backend', header)
+        self.assertIn('created_at', header)
+        self.assertIn('validation', header)
+
+        rows = list(reader)
+        ids = [row[0] for row in rows]
+
+        self.assertEqual(len(rows), len(harvests))
+        for harvest in harvests:
+            self.assertIn(str(harvest.id), ids)
+        self.assertNotIn(str(hidden_harvest.id), ids)
+
+    @pytest.mark.usefixtures('instance_path')
+    def test_harvest_csv_w_export_csv_feature(self):
+        # no export generated, 404
+        response = self.get(url_for('site.harvests_csv'))
+        self.assert404(response)
+
+        # generate the export
+        d = DatasetFactory()
+        self.app.config['EXPORT_CSV_DATASET_ID'] = d.id
+        dataset_tasks.export_csv()
+        response = self.get(url_for('site.harvests_csv'))
+        self.assertStatus(response, 302)
+        self.assertIn('export-harvest-', response.location)
 
     def test_map_view(self):
         response = self.get(url_for('site.map'))
