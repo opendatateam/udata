@@ -486,10 +486,14 @@ class MembershipAPITest:
 
     def test_suggest_organizations_api(self, api):
         '''It should suggest organizations'''
-        for i in range(4):
+        for i in range(3):
             OrganizationFactory(
-                name='test-{0}'.format(i) if i % 2 else faker.word())
-
+                name='test-{0}'.format(i) if i % 2 else faker.word(),
+                metrics={"followers": i})
+        max_follower_organization = OrganizationFactory(
+            name='test-4',
+            metrics={"followers": 10}
+        )
         response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'tes', 'size': '5'})
         assert200(response)
@@ -504,6 +508,7 @@ class MembershipAPITest:
             assert 'image_url' in suggestion
             assert 'acronym' in suggestion
             assert suggestion['name'].startswith('test')
+            assert response.json[0]['id'] == str(max_follower_organization.id)
 
     def test_suggest_organizations_with_special_chars(self, api):
         '''It should suggest organizations with special caracters'''
