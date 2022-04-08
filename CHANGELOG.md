@@ -4,6 +4,7 @@
 
 - Refactor and update docs with latest udata updates [#2717](https://github.com/opendatateam/udata/pull/2717)
 - Add harvest csv adapter for a catalog of harvesters [#2722](https://github.com/opendatateam/udata/pull/2722)
+- Use -followers as default suggest sort on datasets, reuses and orgas [#2727](https://github.com/opendatateam/udata/pull/2727)
 
 ## 4.0.0 (2022-03-30)
 
