@@ -312,7 +312,7 @@ class ReuseAPITest:
             assert 'title' in suggestion
             assert 'image_url' in suggestion
             assert suggestion['title'].startswith('test')
-        self.assertEqual(response.json[0]['id'], str(max_follower_reuse.id))
+        assert response.json[0]['id'] == str(max_follower_reuse.id)
 
     def test_suggest_reuses_api_unicode(self, api):
         '''It should suggest reuses with special characters'''
