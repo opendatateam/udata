@@ -10,6 +10,7 @@ from udata.core.dataset.csv import DatasetCsvAdapter, ResourcesCsvAdapter  # noq
 from udata.core.organization.csv import OrganizationCsvAdapter  # noqa
 from udata.core.reuse.csv import ReuseCsvAdapter  # noqa
 from udata.core.tags.csv import TagCsvAdapter  # noqa
+from udata.harvest.csv import HarvestSourceCsvAdapter  # noqa
 
 
 pytestmark = pytest.mark.usefixtures('clean_db')

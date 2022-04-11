@@ -389,7 +389,7 @@ class Defaults(object):
     # Export CSVs of model objects as resources of a dataset
     ########################################################
     EXPORT_CSV_MODELS = ('dataset', 'resource', 'discussion', 'organization',
-                         'reuse', 'tag')
+                         'reuse', 'tag', 'harvest')
     EXPORT_CSV_DATASET_ID = None
 
     # Autocomplete parameters
