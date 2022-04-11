@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 4.0.1 (2022-04-11)
 
 - Refactor and update docs with latest udata updates [#2717](https://github.com/opendatateam/udata/pull/2717)
 - Add harvest csv adapter for a catalog of harvesters [#2722](https://github.com/opendatateam/udata/pull/2722)
