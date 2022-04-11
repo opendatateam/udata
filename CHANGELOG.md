@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
 
 ## 4.0.1 (2022-04-11)
 
