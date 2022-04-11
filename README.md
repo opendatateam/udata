@@ -14,4 +14,4 @@ for publishing udata's roadmap and for building consensus around it.
 It is collectively taken care of by members of the
 [OpenDataTeam](https://github.com/opendatateam).
 
-[readthedocs-url]: https://udata.readthedocs.io/en/v4.0.1/
+[readthedocs-url]: https://udata.readthedocs.io/en/latest/

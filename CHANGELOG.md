@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 4.0.1 (2022-04-11)
 
 - Removed `post_save` signal within `add_resource` and `update_resource` methods. [#2720](https://github.com/opendatateam/udata/pull/2720)
