@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add harvest catalog view [#100](https://github.com/etalab/udata-front/pull/100)
+- Add elections on home venti button [#101](https://github.com/etalab/udata-front/pull/101)
 
 ## 2.0.1 (2022-04-05)
 
