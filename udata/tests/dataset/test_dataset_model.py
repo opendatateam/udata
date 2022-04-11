@@ -32,8 +32,7 @@ class DatasetModelTest:
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory()
-        expected_signals = (post_save, Dataset.after_save, Dataset.on_update,
-                            Dataset.on_resource_added)
+        expected_signals = (Dataset.on_resource_added,)
 
         with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory())
@@ -49,7 +48,7 @@ class DatasetModelTest:
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
         resource = ResourceFactory(checksum=None)
-        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+        expected_signals = (Dataset.on_resource_added,)
 
         with assert_emit(*expected_signals):
             dataset.add_resource(ResourceFactory(checksum=None))
@@ -73,7 +72,7 @@ class DatasetModelTest:
         user = UserFactory()
         resource = ResourceFactory()
         dataset = DatasetFactory(owner=user, resources=[resource])
-        expected_signals = post_save, Dataset.after_save, Dataset.on_update
+        expected_signals = (Dataset.on_resource_updated,)
 
         resource.description = 'New description'
 
