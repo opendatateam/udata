@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.0.2 (2022-04-11)
 
 - Add harvest catalog view [#100](https://github.com/etalab/udata-front/pull/100)
