@@ -44,6 +44,7 @@ from udata.core.storages.api import (
 
 
 DEFAULT_SORTING = '-created_at'
+SUGGEST_SORTING = '-metrics.followers'
 
 
 class OrgApiParser(ModelApiParser):
@@ -391,7 +392,7 @@ class OrganizationSuggestAPI(API):
                 'slug': org.slug,
                 'image_url': org.image_url,
             }
-            for org in orgs.order_by(DEFAULT_SORTING).limit(args['size'])
+            for org in orgs.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
 
 

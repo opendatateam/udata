@@ -67,6 +67,7 @@ from .rdf import dataset_to_rdf
 
 
 DEFAULT_SORTING = '-created_at'
+SUGGEST_SORTING = '-metrics.followers'
 
 
 class DatasetApiParser(ModelApiParser):
@@ -589,7 +590,7 @@ class DatasetSuggestAPI(API):
                 'slug': dataset.slug,
                 'image_url': dataset.image_url,
             }
-            for dataset in datasets.order_by(DEFAULT_SORTING).limit(args['size'])
+            for dataset in datasets.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
 
 

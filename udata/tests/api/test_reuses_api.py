@@ -288,10 +288,16 @@ class ReuseAPITest:
 
     def test_suggest_reuses_api(self, api):
         '''It should suggest reuses'''
-        for i in range(4):
+        for i in range(3):
             ReuseFactory(
                 title='test-{0}'.format(i) if i % 2 else faker.word(),
-                visible=True)
+                visible=True,
+                metrics={"followers": i})
+        max_follower_reuse = ReuseFactory(
+            title='test-4',
+            visible=True,
+            metrics={"followers": 10}
+        )
 
         response = api.get(url_for('api.suggest_reuses'),
                            qs={'q': 'tes', 'size': '5'})
@@ -306,6 +312,7 @@ class ReuseAPITest:
             assert 'title' in suggestion
             assert 'image_url' in suggestion
             assert suggestion['title'].startswith('test')
+        assert response.json[0]['id'] == str(max_follower_reuse.id)
 
     def test_suggest_reuses_api_unicode(self, api):
         '''It should suggest reuses with special characters'''
