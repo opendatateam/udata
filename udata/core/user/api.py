@@ -1,4 +1,5 @@
 from flask_security import current_user, logout_user
+from slugify import slugify
 
 from udata.api import api, API
 from udata.api.parsers import ModelApiParser
@@ -25,6 +26,7 @@ from .api_fields import (
     user_fields,
     user_page_fields,
     user_role_fields,
+    user_suggestion_fields
 )
 from .forms import UserProfileForm, UserProfileAdminForm
 
@@ -330,6 +332,38 @@ class FollowUserAPI(FollowAPI):
             api.abort(403, "You can't follow yourself")
         return super(FollowUserAPI, self).post(id)
 
+
+suggest_parser = api.parser()
+suggest_parser.add_argument(
+    'q', help='The string to autocomplete/suggest', location='args',
+    required=True)
+suggest_parser.add_argument(
+    'size', type=int, help='The amount of suggestion to fetch',
+    location='args', default=10)
+
+
+@ns.route('/suggest/', endpoint='suggest_users')
+class SuggestUsersAPI(API):
+    @api.doc('suggest_users')
+    @api.expect(suggest_parser)
+    @api.marshal_list_with(user_suggestion_fields)
+    def get(self):
+        '''Suggest users'''
+        args = suggest_parser.parse_args()
+        users = User.objects(
+            deleted=None,
+            slug__icontains=slugify(args['q'], separator='-', to_lower=True)
+        )
+        return [
+            {
+                'id': user.id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'avatar_url': user.avatar_url,
+                'slug': user.slug,
+            }
+            for user in users.order_by(DEFAULT_SORTING).limit(args['size'])
+        ]
 
 @ns.route('/roles/', endpoint='user_roles')
 class UserRolesAPI(API):
