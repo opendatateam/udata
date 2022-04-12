@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
+
+## 4.0.1 (2022-04-11)
+
 - Removed `post_save` signal within `add_resource` and `update_resource` methods. [#2720](https://github.com/opendatateam/udata/pull/2720)
 - Refactor and update changelog with latest udata updates [#2717](https://github.com/opendatateam/udata/pull/2717)
 - Add harvest csv adapter for a catalog of harvesters [#2722](https://github.com/opendatateam/udata/pull/2722)

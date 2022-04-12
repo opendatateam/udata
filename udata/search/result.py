@@ -16,7 +16,6 @@ class SearchResult(Paginable):
         self._objects = None
         self._page = kwargs.pop('page')
         self._page_size = kwargs.pop('page_size')
-        self._total_pages = kwargs.pop('total_pages')
         self._total = kwargs.pop('total')
 
     @property
