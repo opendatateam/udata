@@ -26,6 +26,7 @@ from .permissions import ReuseEditPermission
 
 
 DEFAULT_SORTING = '-created_at'
+SUGGEST_SORTING = '-metrics.followers'
 
 
 class ReuseApiParser(ModelApiParser):
@@ -238,7 +239,7 @@ class ReusesSuggestAPI(API):
                 'slug': reuse.slug,
                 'image_url': reuse.image_url,
             }
-            for reuse in reuses.order_by(DEFAULT_SORTING).limit(args['size'])
+            for reuse in reuses.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
 
 

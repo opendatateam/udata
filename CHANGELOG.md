@@ -2,10 +2,15 @@
 
 ## Current (in progress)
 
-- Removed `post_save` signal within `add_resource` and `update_resource` methods. [#2720](https://github.com/opendatateam/udata/pull/2720)
-- Refactor and update changelog with latest udata updates [#2717](https://github.com/opendatateam/udata/pull/2717)
-- Add harvest csv adapter for a catalog of harvesters [#2722](https://github.com/opendatateam/udata/pull/2722)
+- Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
+- Use -followers as default suggest sort on datasets, reuses and orgas [#2727](https://github.com/opendatateam/udata/pull/2727)
 - Reintroduce user suggest with mongo contains [#2725](https://github.com/opendatateam/udata/pull/2725)
+
+## 4.0.1 (2022-04-11)
+
+- Removed `post_save` signal within `add_resource` and `update_resource` methods. [#2720](https://github.com/opendatateam/udata/pull/2720)
+- Refactor and update documentation with latest udata updates [#2717](https://github.com/opendatateam/udata/pull/2717)
+- Add harvest csv adapter for a catalog of harvesters [#2722](https://github.com/opendatateam/udata/pull/2722)
 
 ## 4.0.0 (2022-03-30)
 

@@ -1070,10 +1070,16 @@ class DatasetResourceAPITest(APITestCase):
 
     def test_suggest_datasets_api(self):
         '''It should suggest datasets'''
-        for i in range(4):
+        for i in range(3):
             DatasetFactory(
                 title='test-{0}'.format(i) if i % 2 else faker.word(),
-                visible=True)
+                visible=True,
+                metrics={"followers": i})
+        max_follower_dataset = DatasetFactory(
+            title='test-4',
+            visible=True,
+            metrics={"followers": 10}
+        )
 
         response = self.get(url_for('api.suggest_datasets'),
                             qs={'q': 'tes', 'size': '5'})
@@ -1087,6 +1093,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertTrue(suggestion['title'].startswith('test'))
+        self.assertEqual(response.json[0]['id'], str(max_follower_dataset.id))
 
     def test_suggest_datasets_acronym_api(self):
         '''It should suggest datasets from their acronyms'''
