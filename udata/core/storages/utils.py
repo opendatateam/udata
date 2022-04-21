@@ -3,6 +3,7 @@ import mimetypes
 import os
 import zlib
 
+from flask import current_app
 from slugify import Slugify
 
 CHUNK_SIZE = 2 ** 16
@@ -51,7 +52,17 @@ def extension(filename):
         filename, ext = os.path.splitext(filename)
         if ext.startswith('.'):
             ext = ext[1:]
+
+        if extension and ext not in current_app.config['ALLOWED_RESOURCES_EXTENSIONS']:
+            # We don't want to add this extension if one has already been detected
+            # and this one is not in the allowed resources extensions list.
+            break
+
         extension = ext if not extension else ext + '.' + extension
+
+        if ext not in current_app.config['ALLOWED_ARCHIVED_EXTENSIONS']:
+            # We don't want to continue the loop if this ext is not an allowed archived extension
+            break
 
     return extension
 

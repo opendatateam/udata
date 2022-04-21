@@ -255,15 +255,19 @@ class Defaults(object):
     FS_IMAGES_OPTIMIZE = True
 
     # Default resources extensions whitelist
-    ALLOWED_RESOURCES_EXTENSIONS = [
+
+    ALLOWED_ARCHIVED_EXTENSIONS = [
+        # Archives
+        'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2'
+    ]
+
+    ALLOWED_RESOURCES_EXTENSIONS = ALLOWED_ARCHIVED_EXTENSIONS + [
         # Base
         'csv', 'txt', 'json', 'pdf', 'xml', 'rtf', 'xsd',
         # OpenOffice
         'ods', 'odt', 'odp', 'odg',
         # Microsoft Office
         'xls', 'xlsx', 'doc', 'docx', 'pps', 'ppt',
-        # Archives
-        'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2',
         # Images
         'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz', 'jp2',
         # Geo
