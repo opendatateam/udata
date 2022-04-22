@@ -15,12 +15,15 @@ def migrate(db):
     datasets = Dataset.objects().no_cache().timeout(False)
     count = 0
     for dataset in datasets:
+        save_dataset = False
         for resource in [res for res in dataset.resources if res.fs_filename]:
             detected_format = extension(resource.fs_filename)
             if detected_format != resource.format:
+                save_dataset = True
                 resource.format = detected_format
                 count += 1
-                resource.save()
+        if save_dataset:
+            dataset.save(signal_kwargs={'ignores': ['post_save']})
 
     log.info(f'Modified {count} resource objects')
     log.info('Done')
