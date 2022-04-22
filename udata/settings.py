@@ -256,12 +256,12 @@ class Defaults(object):
 
     # Default resources extensions whitelist
 
-    ALLOWED_ARCHIVED_EXTENSIONS = [
+    ALLOWED_ARCHIVE_EXTENSIONS = [
         # Archives
         'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2'
     ]
 
-    ALLOWED_RESOURCES_EXTENSIONS = ALLOWED_ARCHIVED_EXTENSIONS + [
+    ALLOWED_RESOURCES_EXTENSIONS = ALLOWED_ARCHIVE_EXTENSIONS + [
         # Base
         'csv', 'txt', 'json', 'pdf', 'xml', 'rtf', 'xsd',
         # OpenOffice

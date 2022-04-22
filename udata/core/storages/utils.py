@@ -44,7 +44,18 @@ def mime(url):
 
 
 def extension(filename):
-    '''Properly extract the extension from filename'''
+    '''
+    Properly extract the extension from filename.
+    We keep the last extension except for archive extensions, where we check
+    previous extensions as well.
+    If it is in ALLOWED_RESOURCES_EXTENSIONS, we add it to the extension.
+
+    Some examples of extension detection:
+    - test.unknown -> unkonwn.
+    - test.2022.zip -> zip.
+    - test.2022.csv.tar.gz -> csv.tar.gz.
+    - test.geojson.csv -> csv.
+    '''
     filename = os.path.basename(filename)
     extension = None
 
@@ -60,7 +71,7 @@ def extension(filename):
 
         extension = ext if not extension else ext + '.' + extension
 
-        if ext not in current_app.config['ALLOWED_ARCHIVED_EXTENSIONS']:
+        if ext not in current_app.config['ALLOWED_ARCHIVE_EXTENSIONS']:
             # We don't want to continue the loop if this ext is not an allowed archived extension
             break
 
