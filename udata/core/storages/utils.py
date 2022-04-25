@@ -51,10 +51,10 @@ def extension(filename):
     If it is in ALLOWED_RESOURCES_EXTENSIONS, we add it to the extension.
 
     Some examples of extension detection:
-    - test.unknown -> unkonwn.
-    - test.2022.zip -> zip.
-    - test.2022.csv.tar.gz -> csv.tar.gz.
-    - test.geojson.csv -> csv.
+    - test.unknown -> unknown
+    - test.2022.zip -> zip
+    - test.2022.csv.tar.gz -> csv.tar.gz
+    - test.geojson.csv -> csv
     '''
     filename = os.path.basename(filename)
     extension = None
