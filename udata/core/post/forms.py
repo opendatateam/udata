@@ -24,3 +24,7 @@ class PostForm(ModelForm):
     credit_url = fields.URLField(_('Credit URL'))
 
     tags = fields.TagField(_('Tags'))
+
+    body_type = fields.StringField(
+        _('HTML body type'),
+        description=_('Specify that your body type is HTML instead of markdown default '))

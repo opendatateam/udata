@@ -31,6 +31,9 @@ export default {
                     id: 'tags',
                     label: this._('Tags'),
                     widget: 'tag-completer'
+                }, {
+                    id: 'body_type',
+                    label: this._('HTML Body Type')
                 }]
         };
     },
