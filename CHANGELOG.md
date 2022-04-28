@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix RGAA criterion 1.1 [#104](https://github.com/etalab/udata-front/pull/104)
 
 ## 2.0.2 (2022-04-11)
 
