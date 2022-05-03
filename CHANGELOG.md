@@ -5,6 +5,7 @@
 - Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
 - Use -followers as default suggest sort on datasets, reuses and orgas [#2727](https://github.com/opendatateam/udata/pull/2727)
 - Reintroduce user suggest with mongo contains [#2725](https://github.com/opendatateam/udata/pull/2725)
+- Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 
 ## 4.0.1 (2022-04-11)
 
