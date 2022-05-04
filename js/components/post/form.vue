@@ -34,7 +34,7 @@ export default {
                     widget: 'tag-completer'
                 }, {
                     id: 'body_type',
-                    label: this._('HTML Body Type'),
+                    label: this._('Body Type'),
                     widget: 'select-input',
                     values: post_types,
                     map: function(item) {
