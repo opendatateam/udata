@@ -17,7 +17,7 @@ from .api_fields import (
 )
 from udata.core.spatial.api_fields import geojson
 from .models import (
-    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, get_resource
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
@@ -217,3 +217,12 @@ class ResourcesAPI(API):
             'previous_page': previous_page if page > 1 else None,
             'total': len(res),
         }
+
+
+@ns.route('/resources/<uuid:rid>/', endpoint='resource')
+class ResourceAPI(API):
+    @apiv2.doc('get_resource')
+    @apiv2.marshal_with(resource_fields)
+    def get(self, rid):
+        return get_resource(rid)
+
