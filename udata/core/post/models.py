@@ -46,7 +46,7 @@ class Post(db.Datetimed, db.Document):
     published = db.DateTimeField()
 
     body_type = db.StringField(
-        choices=list(BODY_TYPES), default='markdown', required=False)  # should we?
+        choices=list(BODY_TYPES), default='markdown', required=False)
 
     meta = {
         'ordering': ['-created_at'],
