@@ -18,6 +18,8 @@ from udata.core.dataset.models import ResourceMixin
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
+from udata.core.spatial.factories import SpatialCoverageFactory
+from udata.tests.features.territories import create_geozones_fixtures
 from udata.models import (
     CommunityResource, Dataset, Follow, Member, UPDATE_FREQUENCIES,
     LEGACY_FREQUENCIES, RESOURCE_TYPES, db
@@ -98,8 +100,20 @@ class DatasetAPITest(APITestCase):
         [VisibleDatasetFactory() for i in range(2)]
 
         tag_dataset = VisibleDatasetFactory(tags=['my-tag', 'other'])
+        license_dataset = VisibleDatasetFactory(license=LicenseFactory(id='cc-by'))
+        format_dataset = DatasetFactory(resources=[ResourceFactory(format='my-format')])
+        featured_dataset = VisibleDatasetFactory(featured=True)
+
+        paca, _, _ = create_geozones_fixtures()
+        geozone_dataset = VisibleDatasetFactory(spatial=SpatialCoverageFactory(zones=[paca.id]))
+        granularity_dataset = VisibleDatasetFactory(spatial=SpatialCoverageFactory(granularity='country'))
+
+        temporal_coverage = db.DateRange(start='2022-05-03', end='2022-05-04')
+        temporal_coverage_dataset = DatasetFactory(temporal_coverage=temporal_coverage)
+
         owner_dataset = VisibleDatasetFactory(owner=owner)
         org_dataset = VisibleDatasetFactory(organization=org)
+
         schema_dataset = VisibleDatasetFactory(resources=[
             ResourceFactory(schema={'name': 'my-schema', 'version': '1.0.0'})
         ])
@@ -112,6 +126,42 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(tag_dataset.id))
+
+        # filter on format
+        response = self.get(url_for('api.datasets', format='my-format'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(format_dataset.id))
+
+        # filter on featured
+        response = self.get(url_for('api.datasets', featured='true'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(featured_dataset.id))
+
+        # filter on license
+        response = self.get(url_for('api.datasets', license='cc-by'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(license_dataset.id))
+
+        # filter on geozone
+        response = self.get(url_for('api.datasets', geozone=paca.id))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(geozone_dataset.id))
+
+        # filter on granularity
+        response = self.get(url_for('api.datasets', granularity='country'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(granularity_dataset.id))
+
+        # filter on temporal_coverage
+        response = self.get(url_for('api.datasets', temporal_coverage='2022-05-03-2022-05-04'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 1)
+        self.assertEqual(response.json['data'][0]['id'], str(temporal_coverage_dataset.id))
 
         # filter on owner
         response = self.get(url_for('api.datasets', owner=owner.id))
