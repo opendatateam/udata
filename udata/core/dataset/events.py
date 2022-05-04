@@ -29,10 +29,10 @@ def serialize_resource_for_event(resource):
 @Dataset.on_resource_added.connect
 def publish_add_resource_message(document, **kwargs):
     resource = serialize_resource_for_event(get_by(document.resources, 'id', kwargs['resource_id']))
-    produce('resource:created', document.id, 'resource_created', resource=resource)
+    produce(topic='resource:created', key=document.id, message_type='resource_created', resource=resource)
 
 
 @Dataset.on_resource_updated.connect
 def publish_update_resource_message(document, **kwargs):
     resource = serialize_resource_for_event(get_by(document.resources, 'id', kwargs['resource_id']))
-    produce('resource:modified', document.id, 'resource_modified', resource=resource)
+    produce(topic='resource:modified', key=document.id, message_type='resource_modified', resource=resource)
