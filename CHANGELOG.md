@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 4.0.2 (2022-05-04)
 
 - Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
