@@ -46,7 +46,7 @@ post_fields = api.model('Post', {
         description='The post last modification date', readonly=True),
     'published': fields.ISODateTime(
         description='The post publication date', readonly=True),
-    'body_type': fields.String(description='HTML or markdown body type', default='markdown'),
+
     'uri': fields.UrlFor(
         'api.post', lambda o: {'post': o},
         description='The post API URI', readonly=True),
