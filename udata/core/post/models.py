@@ -14,7 +14,7 @@ IMAGE_SIZES = [400, 100, 50]
 
 BODY_TYPES = OrderedDict([
     ('markdown', _('Markdown')),
-    ('html', _('Html')),
+    ('html', _('HTML')),
 ])
 
 
