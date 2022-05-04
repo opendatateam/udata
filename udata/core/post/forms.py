@@ -27,4 +27,4 @@ class PostForm(ModelForm):
 
     body_type = fields.StringField(
         _('body type'),
-        description=_('Specify that your body type is HTML instead of markdown default '))
+        description=_('Specify your body type (HTML or markdown)'))
