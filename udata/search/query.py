@@ -34,6 +34,8 @@ class SearchQuery:
                 self._filters[key] = value
 
     def execute_search(self):
+        # If SEARCH_SERVICE_API_URL is set, the remote search service will be queried.
+        # Otherwise mongo search will be used instead.
         if current_app.config['SEARCH_SERVICE_API_URL']:
             url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
             if self.sort:

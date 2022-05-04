@@ -5,6 +5,9 @@
 - Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
 - Use -followers as default suggest sort on datasets, reuses and orgas [#2727](https://github.com/opendatateam/udata/pull/2727)
 - Reintroduce user suggest with mongo contains [#2725](https://github.com/opendatateam/udata/pull/2725)
+- New configuration variable : `SEARCH_SERVICE_API_URL` [#2728](https://github.com/opendatateam/udata/pull/2728)
+  - If set, the remote search service will be queried.
+  - Otherwise mongo search will be used instead.
 
 ## 4.0.1 (2022-04-11)
 
