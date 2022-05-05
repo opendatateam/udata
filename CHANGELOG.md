@@ -2,14 +2,13 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Publish kafka message when resource is created or modified [#2733](https://github.com/opendatateam/udata/pull/2733)
 
 ## 4.0.2 (2022-05-04)
 
 - Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
 - Use -followers as default suggest sort on datasets, reuses and orgas [#2727](https://github.com/opendatateam/udata/pull/2727)
 - Reintroduce user suggest with mongo contains [#2725](https://github.com/opendatateam/udata/pull/2725)
-- Publish kafka message when resource is created or modified [#2733](https://github.com/opendatateam/udata/pull/2733)
 
 ## 4.0.1 (2022-04-11)
 
