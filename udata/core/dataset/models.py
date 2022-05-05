@@ -682,7 +682,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             }
         })
         self.reload()
-        self.on_resource_added.send(document=self, resource_id=resource.id)
+        self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         '''Perform an atomic update for an existing resource'''
@@ -692,7 +692,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         }
         self.update(**data)
         self.reload()
-        self.on_resource_updated.send(document=self, resource_id=resource.id)
+        self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
         # Deletes resource's file from file storage

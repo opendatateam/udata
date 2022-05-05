@@ -1,6 +1,7 @@
 import datetime
 from udata.utils import to_iso_datetime, get_by
-from udata.core.dataset.models import Dataset
+from udata.models import Dataset
+from udata.event import KafkaMessageType
 from udata.event.producer import produce
 
 
@@ -11,7 +12,6 @@ def serialize_resource_for_event(resource):
         'format': resource.format,
         'title': resource.title,
         'schema': resource.schema,
-        'latest': resource.latest,
         'description': resource.description,
         'filetype': resource.filetype,
         'type': resource.type,
@@ -27,12 +27,12 @@ def serialize_resource_for_event(resource):
 
 
 @Dataset.on_resource_added.connect
-def publish_add_resource_message(document, **kwargs):
+def publish_add_resource_message(sender, document, **kwargs):
     resource = serialize_resource_for_event(get_by(document.resources, 'id', kwargs['resource_id']))
-    produce(topic='resource:created', key=document.id, message_type='resource_created', resource=resource)
+    produce(topic='resource:created', id=str(document.id), message_type=KafkaMessageType.RESOURCE_CREATED, document=resource)
 
 
 @Dataset.on_resource_updated.connect
-def publish_update_resource_message(document, **kwargs):
+def publish_update_resource_message(sender, document, **kwargs):
     resource = serialize_resource_for_event(get_by(document.resources, 'id', kwargs['resource_id']))
-    produce(topic='resource:modified', key=document.id, message_type='resource_modified', resource=resource)
+    produce(topic='resource:modified', id=str(document.id), message_type=KafkaMessageType.RESOURCE_MODIFIED, document=resource)
