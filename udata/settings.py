@@ -424,6 +424,7 @@ class Defaults(object):
                         'FollowAPI.post']
 
     FIXTURE_DATASET_SLUGS = []
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Testing(object):
@@ -452,6 +453,7 @@ class Testing(object):
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
+    PUBLISH_ON_RESOURCE_EVENTS = True
 
 
 class Debug(Defaults):

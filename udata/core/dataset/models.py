@@ -682,7 +682,9 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             }
         })
         self.reload()
+        print('BEFORE SEND')
         self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
+        print('AFTER SEND')
 
     def update_resource(self, resource):
         '''Perform an atomic update for an existing resource'''

@@ -1,7 +1,9 @@
 import datetime
+from flask import current_app
 from udata.utils import to_iso_datetime, get_by
 from udata.models import Dataset
 from udata.event import KafkaMessageType
+from udata.tasks import task
 from udata.event.producer import produce
 
 
@@ -26,13 +28,19 @@ def serialize_resource_for_event(resource):
     return resource_dict
 
 
+@task(route='high.search')
+def publish(document, resource_id, topic, message_type):
+    resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
+    produce(topic=topic, id=str(document.id), message_type=message_type, document=resource)
+
+
 @Dataset.on_resource_added.connect
 def publish_add_resource_message(sender, document, **kwargs):
-    resource = serialize_resource_for_event(get_by(document.resources, 'id', kwargs['resource_id']))
-    produce(topic='resource:created', id=str(document.id), message_type=KafkaMessageType.RESOURCE_CREATED, document=resource)
+    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
+        publish.delay(document, kwargs['resource_id'], 'resource:created', KafkaMessageType.RESOURCE_CREATED)
 
 
 @Dataset.on_resource_updated.connect
 def publish_update_resource_message(sender, document, **kwargs):
-    resource = serialize_resource_for_event(get_by(document.resources, 'id', kwargs['resource_id']))
-    produce(topic='resource:modified', id=str(document.id), message_type=KafkaMessageType.RESOURCE_MODIFIED, document=resource)
+    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
+        publish.delay(document, kwargs['resource_id'], 'resource:modified', KafkaMessageType.RESOURCE_MODIFIED)
