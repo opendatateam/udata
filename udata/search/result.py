@@ -44,7 +44,7 @@ class SearchResult(Paginable):
     def get_ids(self):
         try:
             return [elem['id'] for elem in self.result]
-        except KeyError:
+        except (KeyError, TypeError):
             return []
 
     def get_objects(self):

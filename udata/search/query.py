@@ -48,6 +48,7 @@ class SearchQuery:
             return SearchResult(query=self, result=result.pop('data'), **result)
         else:
             query_args = {'q': self._query, 'page': self.page, 'page_size': self.page_size, 'sort': self.sort}
+            query_args.update(self._filters)
             result, total = self.adapter.mongo_search(query_args)
             return SearchResult(query=self, mongo_objects=result, total=total, **query_args)
 
