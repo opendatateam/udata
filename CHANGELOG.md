@@ -2,6 +2,7 @@
 
 ## Current (in progress)
 
+- Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 - Publish kafka message when resource is created or modified [#2733](https://github.com/opendatateam/udata/pull/2733)
 
 ## 4.0.2 (2022-05-04)
