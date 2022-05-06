@@ -343,13 +343,13 @@ Overrides user search fields and their ponderation.
 
 ### MAP_TILES_URL
 
-**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'`
+**default**: `'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'`
 
 Tiles URL for SD displays
 
 ### MAP_TILES_URL_HIDPI
 
-**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'`
+**default**: `'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'`
 
 Tiles URL for HD/HiDPI displays
 
@@ -363,7 +363,7 @@ Tiles URL for HD/HiDPI displays
         '&copy;'
         '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
         '/'
-        '<a href="https://cartodb.com/attributions">CartoDB</a>'
+        '<a href="https://carto.com/about-carto/">CARTO</a>'
     )
 }
 ```
