@@ -453,7 +453,7 @@ class Testing(object):
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
-    PUBLISH_ON_RESOURCE_EVENTS = True
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Debug(Defaults):

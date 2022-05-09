@@ -28,7 +28,7 @@ def serialize_resource_for_event(resource):
     return resource_dict
 
 
-@task(route='high.search')
+@task(route='high.resource')
 def publish(document, resource_id, topic, message_type):
     resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
     produce(topic=topic, id=str(document.id), message_type=message_type, document=resource)
@@ -37,10 +37,10 @@ def publish(document, resource_id, topic, message_type):
 @Dataset.on_resource_added.connect
 def publish_add_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], 'resource:created', KafkaMessageType.RESOURCE_CREATED)
+        publish.delay(document, kwargs['resource_id'], 'resource.created', KafkaMessageType.RESOURCE_CREATED)
 
 
 @Dataset.on_resource_updated.connect
 def publish_update_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], 'resource:modified', KafkaMessageType.RESOURCE_MODIFIED)
+        publish.delay(document, kwargs['resource_id'], 'resource.modified', KafkaMessageType.RESOURCE_MODIFIED)

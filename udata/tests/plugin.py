@@ -134,6 +134,12 @@ def raw_db(app, clean_db):
     drop_db(app)
 
 
+@pytest.fixture
+def enable_resource_event(app):
+    '''Enable resource event'''
+    app.config['PUBLISH_ON_RESOURCE_EVENTS'] = True
+
+
 class ApiClient(object):
     def __init__(self, client):
         self.client = client

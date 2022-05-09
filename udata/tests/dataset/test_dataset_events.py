@@ -9,6 +9,7 @@ from udata.core.dataset.factories import ResourceFactory, DatasetFactory
 
 
 @pytest.mark.usefixtures('clean_db')
+@pytest.mark.usefixtures('enable_resource_event')
 class DatasetEventsTest:
 
     def test_publish_message_resource_created(self):
@@ -31,7 +32,7 @@ class DatasetEventsTest:
                 'message_type': 'resource_created'
             }
         }
-        producer.send.assert_called_with('resource:created', value=expected_value,
+        producer.send.assert_called_with('resource.created', value=expected_value,
                                          key=str(dataset.id).encode("utf-8"))
 
     def test_publish_message_resource_modified(self):
@@ -56,5 +57,5 @@ class DatasetEventsTest:
                 'message_type': 'resource_modified'
             }
         }
-        producer.send.assert_called_with('resource:modified', value=expected_value,
+        producer.send.assert_called_with('resource.modified', value=expected_value,
                                          key=str(dataset.id).encode("utf-8"))
