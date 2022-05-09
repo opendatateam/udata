@@ -30,7 +30,7 @@ class DatasetAPIV2Test(APITestCase):
 class DatasetResourceAPIV2Test(APITestCase):
 
     def test_get_specific(self):
-        '''Should fetch 1 page of resources from the API'''
+        '''Should fetch serialized resource from the API based on rid'''
         resources = [ResourceFactory() for _ in range(7)]
         specific_resource = ResourceFactory(id='817204ac-2202-8b4a-98e7-4284d154d10c', title='my-resource')
         resources.append(specific_resource)
