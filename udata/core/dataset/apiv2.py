@@ -139,6 +139,11 @@ dataset_page_fields = apiv2.model(
     mask='data{{{0}}},*'.format(DEFAULT_MASK_APIV2)
 )
 
+specific_resource_fields = apiv2.model('SpecificResource', {
+    'resource': fields.Nested(resource_fields, description='The dataset resources'),
+    'dataset_id': fields.String()
+})
+
 apiv2.inherit('Badge', badge_fields)
 apiv2.inherit('OrganizationReference', org_ref_fields)
 apiv2.inherit('UserReference', user_ref_fields)
@@ -222,7 +227,7 @@ class ResourcesAPI(API):
 @ns.route('/resources/<uuid:rid>/', endpoint='resource')
 class ResourceAPI(API):
     @apiv2.doc('get_resource')
-    @apiv2.marshal_with(resource_fields)
+    @apiv2.marshal_with(specific_resource_fields)
     def get(self, rid):
         resource, dataset_id = get_resource(rid)
         return {

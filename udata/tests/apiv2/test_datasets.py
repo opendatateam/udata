@@ -34,12 +34,13 @@ class DatasetResourceAPIV2Test(APITestCase):
         resources = [ResourceFactory() for _ in range(7)]
         specific_resource = ResourceFactory(id='817204ac-2202-8b4a-98e7-4284d154d10c', title='my-resource')
         resources.append(specific_resource)
-        DatasetFactory(resources=resources)
+        dataset = DatasetFactory(resources=resources)
         response = self.get(url_for('apiv2.resource', rid=specific_resource.id))
         self.assert200(response)
         data = response.json
-        assert data['id'] == str(specific_resource.id)
-        assert data['title'] == specific_resource.title
+        assert data['dataset_id'] == str(dataset.id)
+        assert data['resource']['id'] == str(specific_resource.id)
+        assert data['resource']['title'] == specific_resource.title
 
     def test_get(self):
         '''Should fetch 1 page of resources from the API'''
