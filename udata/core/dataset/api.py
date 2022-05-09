@@ -291,7 +291,7 @@ class ResourceRedirectAPI(API):
         '''
         Redirect to the latest version of a resource given its identifier.
         '''
-        resource = get_resource(id)
+        resource, _ = get_resource(id)
         return redirect(resource.url.strip()) if resource else abort(404)
 
 

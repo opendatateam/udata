@@ -224,5 +224,9 @@ class ResourceAPI(API):
     @apiv2.doc('get_resource')
     @apiv2.marshal_with(resource_fields)
     def get(self, rid):
-        return get_resource(rid)
+        resource, dataset_id = get_resource(rid)
+        return {
+            'resource': resource,
+            'dataset_id': dataset_id
+        }
 
