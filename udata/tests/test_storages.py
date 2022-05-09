@@ -57,16 +57,24 @@ class StorageUtilsTest:
         assert utils.mime('test.txt') == 'text/plain'
         assert utils.mime('test') is None
 
-    def test_extension_default(self):
+    def test_extension_default(self, app):
         assert utils.extension('test.txt') == 'txt'
         assert utils.extension('prefix/test.txt') == 'txt'
         assert utils.extension('prefix.with.dot/test.txt') == 'txt'
 
-    def test_extension_compound(self):
+    def test_extension_compound(self, app):
         assert utils.extension('test.tar.gz') == 'tar.gz'
         assert utils.extension('prefix.with.dot/test.tar.gz') == 'tar.gz'
 
-    def test_no_extension(self):
+    def test_extension_compound_with_allowed_extension(self, app):
+        assert utils.extension('test.2022.csv.tar.gz') == 'csv.tar.gz'
+        assert utils.extension('prefix.with.dot/test.2022.csv.tar.gz') == 'csv.tar.gz'
+
+    def test_extension_compound_without_allowed_extension(self, app):
+        assert utils.extension('test.2022.tar.gz') == 'tar.gz'
+        assert utils.extension('prefix.with.dot/test.2022.tar.gz') == 'tar.gz'
+
+    def test_no_extension(self, app):
         assert utils.extension('test') is None
         assert utils.extension('prefix/test') is None
 

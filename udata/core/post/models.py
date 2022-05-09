@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from flask import url_for
 
 from udata.core.storages import images, default_image_basename
@@ -9,6 +11,11 @@ __all__ = ('Post', )
 
 
 IMAGE_SIZES = [400, 100, 50]
+
+BODY_TYPES = OrderedDict([
+    ('markdown', _('Markdown')),
+    ('html', _('HTML')),
+])
 
 
 class PostQuerySet(db.BaseQuerySet):
@@ -37,6 +44,9 @@ class Post(db.Datetimed, db.Document):
 
     owner = db.ReferenceField('User')
     published = db.DateTimeField()
+
+    body_type = db.StringField(
+        choices=list(BODY_TYPES), default='markdown', required=False)
 
     meta = {
         'ordering': ['-created_at'],
