@@ -21,6 +21,8 @@ def produce(topic, id, message_type, document=None, **kwargs):
     Produce message with marshalled document.
     kwargs is meant to contain non generic values
     for the meta fields of the message.
+
+    UDATA_INSTANCE_NAME is used as prefix for topic
     '''
     producer = KafkaProducerSingleton.get_instance()
     key = id.encode("utf-8")
@@ -33,6 +35,8 @@ def produce(topic, id, message_type, document=None, **kwargs):
         }
     }
     value['meta'].update(kwargs)
+
+    topic = current_app.config['UDATA_INSTANCE_NAME'] + '.' + topic
 
     producer.send(topic, value=value, key=key)
     producer.flush()
