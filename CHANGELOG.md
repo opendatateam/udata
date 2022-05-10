@@ -5,7 +5,7 @@
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
 - Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
-- Publish kafka message when resource is created or modified [#2733](https://github.com/opendatateam/udata/pull/2733)
+- Publish kafka message when resource is created, modified or deleted [#2733](https://github.com/opendatateam/udata/pull/2733)
 
 ## 4.0.2 (2022-05-04)
 
