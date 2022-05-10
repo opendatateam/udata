@@ -31,10 +31,10 @@ def serialize_resource_for_event(resource):
 @task(route='high.resource')
 def publish(document, resource_id, topic, message_type):
     if message_type == KafkaMessageType.RESOURCE_DELETED:
-        produce(topic=topic, id=str(resource_id), message_type=message_type, document=None)
+        resource = None
     else:
         resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
-        produce(topic=topic, id=str(resource_id), message_type=message_type, document=resource)
+    produce(topic=topic.value, id=str(resource_id), message_type=message_type, document=resource)
 
 
 @Dataset.on_resource_added.connect
