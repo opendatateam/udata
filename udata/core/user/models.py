@@ -8,7 +8,6 @@ from flask import current_app
 from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
-from elasticsearch_dsl import Integer, Object
 
 from werkzeug import cached_property
 
@@ -93,13 +92,6 @@ class User(WithMetrics, UserMixin, db.Document):
         'indexes': ['$slug', '-created_at', 'slug', 'apikey'],
         'ordering': ['-created_at']
     }
-
-    __search_metrics__ = Object(properties={
-        'datasets': Integer(),
-        'reuses': Integer(),
-        'followers': Integer(),
-        'views': Integer()
-    })
 
     __metrics_keys__ = [
         'datasets',
