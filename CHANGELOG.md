@@ -3,6 +3,8 @@
 ## Current (in progress)
 
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
+- Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
+- Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
 - Add endpoint to directly get specific resource by rid [#2732](https://github.com/opendatateam/udata/pull/2732).
 
 ## 4.0.2 (2022-05-04)
