@@ -457,7 +457,7 @@ class ResourceAPI(ResourceMixin, API):
         if resource.filetype == 'file':
             form._fields.get('url').data = resource.url
         form.populate_obj(resource)
-        resource.modified = datetime.now()
+        dataset.update_resource(resource)
         dataset.last_modified = datetime.now()
         dataset.save()
         return resource

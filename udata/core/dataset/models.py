@@ -478,6 +478,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     on_archive = signal('Dataset.on_archive')
     on_resource_added = signal('Dataset.on_resource_added')
     on_resource_updated = signal('Dataset.on_resource_updated')
+    on_resource_removed = signal('Dataset.on_resource_removed')
 
     verbose_name = _('dataset')
 
@@ -700,6 +701,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             storages.resources.delete(resource.fs_filename)
 
         self.resources.remove(resource)
+        self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
     def community_resources(self):
