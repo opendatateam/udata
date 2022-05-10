@@ -255,15 +255,19 @@ class Defaults(object):
     FS_IMAGES_OPTIMIZE = True
 
     # Default resources extensions whitelist
-    ALLOWED_RESOURCES_EXTENSIONS = [
+
+    ALLOWED_ARCHIVE_EXTENSIONS = [
+        # Archives
+        'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2'
+    ]
+
+    ALLOWED_RESOURCES_EXTENSIONS = ALLOWED_ARCHIVE_EXTENSIONS + [
         # Base
         'csv', 'txt', 'json', 'pdf', 'xml', 'rtf', 'xsd',
         # OpenOffice
         'ods', 'odt', 'odp', 'odg',
         # Microsoft Office
         'xls', 'xlsx', 'doc', 'docx', 'pps', 'ppt',
-        # Archives
-        'tar', 'gz', 'tgz', 'rar', 'zip', '7z', 'xz', 'bz2',
         # Images
         'jpeg', 'jpg', 'jpe', 'gif', 'png', 'dwg', 'svg', 'tiff', 'ecw', 'svgz', 'jp2',
         # Geo
@@ -273,7 +277,8 @@ class Defaults(object):
         # RDF
         'rdf', 'ttl', 'n3',
         # Misc
-        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf', 'ics', 'other'
+        'dbf', 'prj', 'sql', 'sqlite', 'db', 'epub', 'sbn', 'sbx', 'cpg', 'lyr', 'owl', 'dxf',
+        'ics', 'other'
     ]
 
     ALLOWED_RESOURCES_MIMES = [
@@ -362,7 +367,7 @@ class Defaults(object):
     # Tiles URL for SD displays
     MAP_TILES_URL = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'
     # Tiles URL for HD/HiDPI displays
-    MAP_TILES_URL_HIDPI = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'
+    MAP_TILES_URL_HIDPI = 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'  # noqa
     # Leaflet tiles config, see https://leafletjs.com/reference-0.7.7.html#tilelayer
     MAP_TILES_CONFIG = {
         'subdomains': 'abcd',

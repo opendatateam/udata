@@ -89,29 +89,6 @@ class DatasetSearch(ModelSearchAdapter):
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
         document.update({'extras': extras})
 
-        serialized_resources = []
-        for resource in dataset.resources:
-            resource_dict = {
-                'id': str(resource.id),
-                'url': resource.url,
-                'format': resource.format,
-                'title': resource.title,
-                'schema': resource.schema,
-                'latest': resource.latest,
-                'description': resource.description,
-                'filetype': resource.filetype,
-                'type': resource.type,
-                'created_at': to_iso_datetime(resource.created_at),
-                'modified': to_iso_datetime(resource.modified),
-                'published': to_iso_datetime(resource.published)
-            }
-            extras = {}
-            for key, value in resource.extras.items():
-                extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
-            resource_dict.update({'extras': extras})
-            serialized_resources.append(resource_dict)
-        document.update({'resources': serialized_resources})
-
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
                 dataset.temporal_coverage.end):
