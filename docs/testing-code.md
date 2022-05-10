@@ -5,15 +5,13 @@ unit tests for the frontend and integration tests.
 
 ## Test middlewares
 
-If you need to use an alternative Mongo or Elasticsearch instance during tests,
-you can provides the alternate urls in you `udata.cfg`
-with `MONGODB_HOST_TEST` and `ELASTICSEARCH_URL_TEST`.
+If you need to use an alternative Mongo instance during tests, you can provide
+the alternate urls in you `udata.cfg` with `MONGODB_HOST_TEST`.
 
 **E.g.**: To make use of the tmpfs based middleware provided by docker-compose, use:
 
 ```python
 MONGODB_HOST_TEST = 'mongodb://localhost:27018/udata'
-ELASTICSEARCH_URL_TEST = 'localhost:9201'
 ```
 
 And then start docker-compose with the extra file:
@@ -22,8 +20,8 @@ And then start docker-compose with the extra file:
 $ docker-compose -f docker-compose.yml -f docker-compose.test.yml up
 ```
 
-This will start 2 extra services, an Elasticsearch and a MongoDB,
-both tmpfs based and your tests will make use of it and run faster.
+This will start a MongoDB extra service, tmpfs based and your tests will
+make use of it and run faster.
 
 
 ## Backend unit tests
