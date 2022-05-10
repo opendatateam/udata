@@ -51,8 +51,12 @@
 </div>
 {% endif %}
 
-<div class="container markdown fr-pb-3w" v-pre>
+<div class="container fr-pb-3w" v-pre>
+{% if post.body_type and post.body_type == 'html' %}
+    <div>{{ post.content|safe }}</div>
+{% else %}
     <div>{{ post.content|markdown }}</div>
+{%endif%}
 </div>
 
 {% if post.datasets %}
