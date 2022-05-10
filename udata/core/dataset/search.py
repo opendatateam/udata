@@ -53,7 +53,7 @@ class DatasetSearch(ModelSearchAdapter):
         datasets = Dataset.objects(archived=None, deleted=None, private=False)
         datasets = DatasetApiParser.parse_filters(datasets, args)
 
-        sort = cls.sorts.get(args['sort']) or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        sort = cls.parse_sort(args['sort']) or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
         offset = (args['page'] - 1) * args['page_size']
         return datasets.order_by(sort).skip(offset).limit(args['page_size']), datasets.count()
 
