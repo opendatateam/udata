@@ -5,6 +5,7 @@
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
 - Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
+- Fix size argument in suggests endpoint and corresponding tests [#2739](https://github.com/opendatateam/udata/pull/2739)
 
 ## 4.0.2 (2022-05-04)
 
