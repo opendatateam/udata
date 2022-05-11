@@ -24,5 +24,5 @@ class SuggestTagsAPI(API):
         '''Suggest tags'''
         args = parser.parse_args()
         q = normalize(args['q'])
-        results = [{'text': i.name} for i in Tag.objects(name__icontains=q)]
+        results = [{'text': i.name} for i in Tag.objects(name__icontains=q).limit(args['size'])]
         return sorted(results, key=lambda o: len(o['text']))
