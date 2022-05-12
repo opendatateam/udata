@@ -311,7 +311,7 @@ class ReuseAPITest:
             assert 'slug' in suggestion
             assert 'title' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['title'].startswith('test')
+            assert 'test' in suggestion['title']
         assert response.json[0]['id'] == str(max_follower_reuse.id)
 
     def test_suggest_reuses_api_unicode(self, api):
@@ -333,7 +333,7 @@ class ReuseAPITest:
             assert 'slug' in suggestion
             assert 'title' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['title'].startswith('test')
+            assert 'test' in suggestion['title']
 
     def test_suggest_reuses_api_no_match(self, api):
         '''It should not provide reuse suggestion if no match'''
