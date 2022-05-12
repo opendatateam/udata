@@ -17,6 +17,10 @@ def serialize_resource_for_event(resource):
         'description': resource.description,
         'filetype': resource.filetype,
         'type': resource.type,
+        'mime': resource.mime,
+        'filesize': resource.filesize,
+        'checksum_type': resource.checksum.type,
+        'checksum_value': resource.checksum.value,
         'created_at': to_iso_datetime(resource.created_at),
         'modified': to_iso_datetime(resource.modified),
         'published': to_iso_datetime(resource.published)
@@ -34,7 +38,7 @@ def publish(document, resource_id, topic, message_type):
         resource = None
     else:
         resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
-    produce(topic=topic.value, id=str(resource_id), message_type=message_type, document=resource)
+    produce(topic=topic.value, id=str(resource_id), message_type=message_type, document=resource, dataset_id=str(document.id))
 
 
 @Dataset.on_resource_added.connect
