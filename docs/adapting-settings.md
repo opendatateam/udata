@@ -200,144 +200,29 @@ Enables the search autocomplete on frontend if set to `True`, disables otherwise
 
 **default**: `200`
 
-The search autocomplete debounce delay on frontend, in milliseconds.
+### SEARCH_SERVICE_API_URL
 
-### SEARCH_DATASET_FIELDS
+**default**: None
 
-**default**:
+The independent search service api url to use if available.
+If not specified, mongo full text search is used.
+
+Ex:
 ```python
-(
-    'geozones.keys^9',
-    'geozones.name^9',
-    'acronym^7',
-    'title^6',
-    'tags.i18n^3',
-    'description',
-)
-```
-Overrides dataset search fields and their ponderation.
-
-### SEARCH_DATASET_MAX_TEMPORAL_WEIGHT
-
-**default**: `5`
-
-After this number of years, scoring is kept constant instead of increasing.
-
-**Warning** Index time parameter: reindexing dataset is required for this parameter to be effective.
-
-### SEARCH_DATASET_FEATURED_WEIGHT
-
-**default**: `3`
-
-How much weight featured items get
-
-**Warning** Index time parameter: reindexing dataset is required for this parameter to be effective.
-
-### SEARCH_DATASET_FEATURED_BOOST
-
-**default**: `1.5`
-
-Boost given to the featured datasets.
-
-### SEARCH_DATASET_CERTIFIED_BOOST
-
-**default**: `1.2`
-
-Boost given to the datasets from certified organization.
-
-### SEARCH_DATASET_REUSES_DECAY
-
-**default**: `0.1`
-
-[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for reuses count on datasets.
-
-### SEARCH_DATASET_FOLLOWERS_DECAY
-
-**default**: `0.1`
-
-[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for followers count on datasets.
-
-### SEARCH_REUSE_FIELDS
-
-**default**:
-```python
-(
-    'title^4',
-    'description^2',
-    'datasets.title',
-)
+SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
 ```
 
-Overrides reuse search fields and their ponderation.
+See [udata-search-service][udata-search-service] for more information on using a search service.
+You'll need a Kakfa broker for the search service to work. See `KAFKA_URI`.
 
-### SEARCH_REUSE_FEATURED_BOOST
+## Kafka configuration
 
-**default**: `1.1`
+### KAFKA_URI
 
-Boost given to the featured reuses.
+**default**: None
 
-### SEARCH_REUSE_DATASETS_DECAY
-
-**default**: `0.8`
-
-[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for reused datasets count on reuses.
-
-### SEARCH_REUSE_FOLLOWERS_DECAY
-
-**default**: `0.8`
-
-[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for followers count on reuses.
-
-### SEARCH_ORGANIZATION_FIELDS
-
-**default**:
-```python
-(
-    'name^6',
-    'acronym^6',
-    'description',
-)
-```
-
-Overrides organization search fields and their ponderation.
-
-### SEARCH_ORGANIZATION_DATASETS_DECAY
-
-**default**: `0.9`
-
-[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for datasets count on organizations.
-
-### SEARCH_ORGANIZATION_REUSES_DECAY
-
-**default**: `0.9`
-
-[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for reuses count on organizations.
-
-### SEARCH_ORGANIZATION_FOLLOWERS_DECAY
-
-**default**: `0.8`
-
-[Decay factor](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-function-score-query.html#function-decay) factor for followers count on organizations.
-
-### SEARCH_GEOZONE_FIELDS
-
-**default**: `None`
-
-Overrides geozone search fields and their ponderation.
-
-### SEARCH_USER_FIELDS
-
-**default**:
-
-```python
-(
-    'last_name^6',
-    'first_name^5',
-    'about'
-)
-```
-
-Overrides user search fields and their ponderation.
+Optionnal Kafka URI to use. If specified, messages can be consumed and produced in udata workers.
+It is required for an independent search service.
 
 ## Map widget configuration
 
@@ -482,62 +367,6 @@ The maximum time in minutes between two consecutive checks of a resource's url.
 **default**: 100
 
 The number of unavailable checks after which the resource is considered lastingly unavailable and won't be checked as often.
-
-## ElasticSearch configuration
-
-### ELASTICSEARCH_URL
-
-**default**: `'localhost:9200'`
-
-The elasticsearch server url used for search indexing.
-
-```python
-ELASTICSEARCH_URL = 'elasticserver:9200'
-```
-
-RFC-1738 formatted URLs are also supported:
-
-```python
-ELASTICSEARCH_URL = 'http://<user>:<password>@<host>:<port>'
-```
-
-### ELASTICSEARCH_URL_TEST
-
-**default**: same as `ELASTICSEARCH_URL`
-
-An optional alternative elasticsearch server url that may be used for testing.
-
-### ELASTICSEARCH_INDEX_BASENAME
-
-**default**: `'udata'`
-
-The base name used to produce elasticsearch index names and alias.
-The default `udata` value will produce:
-- a `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
-- a `udata` alias on `udata-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
-- a temporary `udata-test` index during each test requiring it
-
-```python
-ELASTICSEARCH_INDEX_BASENAME = 'myindex'
-```
-The above example will produce:
-- a `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` index on initialization
-- a `myindex` alias on `myindex-{yyyy}-{mm}-{dd}-{HH}-{MM}` on initialization
-- a temporary `myindex-test` index during each test requiring it
-
-### ELASTICSEARCH_TIMEOUT
-
-**default**: `10`
-
-The timeout (in seconds) used by search queries and as default for any operation except indexing.
-
-
-### ELASTICSEARCH_INDEX_TIMEOUT
-
-**default**: `20`
-
-The timeout (in seconds) used by indexing/write operations (should be longer than the default timeout as indexing can be quite resources intensive and response time can be longer).
-
 
 ## Mongoengine/Flask-Mongoengine options
 
@@ -873,3 +702,4 @@ FS_ROOT = '/srv/http/www.data.dev/fs'
 [flask-mail-doc]: https://pythonhosted.org/flask-mail/
 [flask-mongoengine-doc]: https://flask-mongoengine.readthedocs.org/
 [authlib-doc]: https://docs.authlib.org/en/latest/flask/2/authorization-server.html#server
+[udata-search-service]: https://github.com/opendatateam/udata-search-service
