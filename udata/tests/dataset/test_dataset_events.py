@@ -11,6 +11,7 @@ from udata.event.values import KafkaMessageType, KafkaTopic
 
 @pytest.mark.usefixtures('clean_db')
 @pytest.mark.usefixtures('enable_resource_event')
+@pytest.mark.usefixtures('enable_kafka')
 class DatasetEventsTest:
 
     def test_publish_message_resource_created(self):
@@ -30,7 +31,8 @@ class DatasetEventsTest:
             'service': 'udata',
             'data': serialize_resource_for_event(resource),
             'meta': {
-                'message_type': KafkaMessageType.RESOURCE_CREATED.value
+                'message_type': KafkaMessageType.RESOURCE_CREATED.value,
+                'dataset_id': str(dataset.id)
             }
         }
         producer.send.assert_called_with(KafkaTopic.RESOURCE_CREATED.value, value=expected_value,
@@ -55,7 +57,8 @@ class DatasetEventsTest:
             'service': 'udata',
             'data': serialize_resource_for_event(resource),
             'meta': {
-                'message_type': KafkaMessageType.RESOURCE_MODIFIED.value
+                'message_type': KafkaMessageType.RESOURCE_MODIFIED.value,
+                'dataset_id': str(dataset.id)
             }
         }
         producer.send.assert_called_with(KafkaTopic.RESOURCE_MODIFIED.value, value=expected_value,
@@ -78,7 +81,8 @@ class DatasetEventsTest:
             'service': 'udata',
             'data': None,
             'meta': {
-                'message_type': KafkaMessageType.RESOURCE_DELETED.value
+                'message_type': KafkaMessageType.RESOURCE_DELETED.value,
+                'dataset_id': str(dataset.id)
             }
         }
         producer.send.assert_called_with(KafkaTopic.RESOURCE_DELETED.value, value=expected_value,
