@@ -458,7 +458,7 @@ class ResourceAPI(ResourceMixin, API):
             form._fields.get('url').data = resource.url
         # populate_obj populates existing resource object with the content of the form.
         # update_resource saves the updated resource dict to the database
-        # the dataset.save method would be enough on its own but is required as we update the last_modified date.
+        # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
         resource.modified = datetime.now()
         dataset.update_resource(resource)
