@@ -102,6 +102,7 @@ class SearchAdaptorTest:
         assertHasArgument(parser, 'page_size', int)
 
 
+@pytest.mark.usefixtures('enable_kafka')
 class IndexingLifecycleTest(APITestCase):
 
     def test_producer_should_send_a_message_without_payload_if_not_indexable(self):

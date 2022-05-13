@@ -24,19 +24,20 @@ def produce(topic, id, message_type, document=None, **kwargs):
 
     UDATA_INSTANCE_NAME is used as prefix for topic
     '''
-    producer = KafkaProducerSingleton.get_instance()
-    key = id.encode("utf-8")
+    if current_app.config.get('KAFKA_URI'):
+        producer = KafkaProducerSingleton.get_instance()
+        key = id.encode("utf-8")
 
-    value = {
-        'service': 'udata',
-        'data': document,
-        'meta': {
-            'message_type': message_type.value
+        value = {
+            'service': 'udata',
+            'data': document,
+            'meta': {
+                'message_type': message_type.value
+            }
         }
-    }
-    value['meta'].update(kwargs)
+        value['meta'].update(kwargs)
 
-    topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{topic}"
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{topic}"
 
-    producer.send(topic, value=value, key=key)
-    producer.flush()
+        producer.send(topic, value=value, key=key)
+        producer.flush()

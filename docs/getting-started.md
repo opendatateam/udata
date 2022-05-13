@@ -14,11 +14,7 @@ We’ll use the following repositories:
 
 udata requires several libraries to be installed to work. You can see them on the udata documentation link below.
 
-We’ll use [docker-compose](https://docs.docker.com/compose/) to manage external services so you don’t have to install native mongodb, elasticsearch and redis.
-
-!!! warning
-    On ARM architecture such as Mac M1, you’ll have to use a native elasticsearch because there is no docker image available. You can download it from the [official website](https://www.elastic.co/fr/downloads/past-releases/elasticsearch-2-4-6).
-    You’ll have to launch the binary `./bin/elasticsearch` in addition to the docker-compose command.
+We’ll use [docker-compose](https://docs.docker.com/compose/) to manage external services so you don’t have to install native mongodb and redis.
 
 # Setup udata
 
@@ -59,12 +55,6 @@ You can start your local development environment with docker-compose.
 ```bash
 cd udata
 docker-compose up
-```
-
-In a new shell, you can then try to interact with your local elasticsearch with the following query. It should output a JSON search response.
-
-```bash
-curl http://localhost:9200
 ```
 
 !!! warning
@@ -278,7 +268,8 @@ Finally, you can see other administrative tasks in [administrative-tasks](admini
 
 # Going further
 
-Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [creating a custom theme](creating-theme.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md) and so on.
+Once the project is up and running, it’s time to customize it! Take a look at our advanced documentation on [adapting settings](adapting-settings.md), [creating a custom theme](creating-theme.md), [extending udata](extending.md), [testing your code](testing-code.md), [adding translation](adding-translations.md), [setting up a search service][udata-search-service] and so on.
 
 [github]: https://github.com/opendatateam/udata
 [new issue]: https://github.com/opendatateam/udata/issues/new
+[udata-search-service]: https://github.com/opendatateam/udata-search-service

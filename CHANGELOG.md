@@ -6,6 +6,7 @@
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
 - Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
 - Add prefix based on udata instance name for kafka topics [#2736](https://github.com/opendatateam/udata/pull/2736)
+- Clean documentation and code with respect to independent search service [#2738](https://github.com/opendatateam/udata/pull/2738)
 
 ## 4.0.2 (2022-05-04)
 
