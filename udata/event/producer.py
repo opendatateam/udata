@@ -36,7 +36,7 @@ def produce(topic, id, message_type, document=None, **kwargs):
     }
     value['meta'].update(kwargs)
 
-    topic = current_app.config['UDATA_INSTANCE_NAME'] + '.' + topic
+    topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{topic}"
 
     producer.send(topic, value=value, key=key)
     producer.flush()
