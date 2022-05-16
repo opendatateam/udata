@@ -135,7 +135,7 @@ def raw_db(app, clean_db):
 
 
 @pytest.fixture
-def enable_test_suggest_tags_api_with_unicode(app):
+def enable_kafka(app):
     '''Enable resource event'''
     app.config['KAFKA_URI'] = 'localhost:9092'
 
