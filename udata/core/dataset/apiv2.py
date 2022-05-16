@@ -4,7 +4,7 @@ from flask import url_for, request, abort
 
 from udata import search
 from udata.api import apiv2, API, fields
-from udata.utils import multi_to_dict
+from udata.utils import multi_to_dict, get_by
 
 from .api_fields import (
     badge_fields,
@@ -17,7 +17,7 @@ from .api_fields import (
 )
 from udata.core.spatial.api_fields import geojson
 from .models import (
-    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, get_resource
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
@@ -229,9 +229,15 @@ class ResourceAPI(API):
     @apiv2.doc('get_resource')
     @apiv2.marshal_with(specific_resource_fields)
     def get(self, rid):
-        resource, dataset_id = get_resource(rid)
+        dataset = Dataset.objects(resources__id=rid).first()
+        if dataset:
+            resource = get_by(dataset.resources, 'id', rid)
+        else:
+            resource = CommunityResource.objects(id=id).first()
+        if not resource:
+            apiv2.abort(404, 'Resource does not exist')
         return {
             'resource': resource,
-            'dataset_id': dataset_id
+            'dataset_id': dataset.id if dataset else None
         }
 
