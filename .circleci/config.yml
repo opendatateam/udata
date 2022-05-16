@@ -69,7 +69,6 @@ jobs:
       - image: udata/circleci:2-alpine
       - image: circleci/mongo:3.6-stretch-ram
       - image: redis:alpine
-      - image: udata/elasticsearch:2.4.5
     environment:
        BASH_ENV: /root/.bashrc
     steps:

@@ -74,12 +74,6 @@ dnspython==2.1.0
     # via
     #   email-validator
     #   udata
-elasticsearch==2.4.1
-    # via
-    #   elasticsearch-dsl
-    #   udata
-elasticsearch-dsl==2.2.0
-    # via udata
 email-validator==1.1.3
     # via
     #   flask-security-too
@@ -234,7 +228,6 @@ pyrsistent==0.18.0
     #   udata
 python-dateutil==2.8.1
     # via
-    #   elasticsearch-dsl
     #   faker
     #   flask-fs
     #   udata
@@ -265,7 +258,6 @@ six==1.16.0
     #   bcrypt
     #   bleach
     #   cryptography
-    #   elasticsearch-dsl
     #   faker
     #   flask-cors
     #   flask-fs
@@ -290,7 +282,7 @@ tlds==2021080800
     # via udata
 typing-extensions==3.10.0.0
     # via importlib-metadata
-git+https://github.com/opendatateam/udata.git
+udata @ git+https://github.com/opendatateam/udata.git
     # via -r requirements/udata.in
 ujson==1.35
     # via udata
@@ -308,7 +300,6 @@ urlextract==0.14.0
     # via udata
 urllib3==1.25.11
     # via
-    #   elasticsearch
     #   requests
     #   udata
 vine==1.3.0
