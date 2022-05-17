@@ -22,17 +22,18 @@ def produce(topic, id, message_type, document=None, **kwargs):
     kwargs is meant to contain non generic values
     for the meta fields of the message.
     '''
-    producer = KafkaProducerSingleton.get_instance()
-    key = id.encode("utf-8")
+    if current_app.config.get('KAFKA_URI'):
+        producer = KafkaProducerSingleton.get_instance()
+        key = id.encode("utf-8")
 
-    value = {
-        'service': 'udata',
-        'data': document,
-        'meta': {
-            'message_type': message_type.value
+        value = {
+            'service': 'udata',
+            'data': document,
+            'meta': {
+                'message_type': message_type.value
+            }
         }
-    }
-    value['meta'].update(kwargs)
+        value['meta'].update(kwargs)
 
-    producer.send(topic, value=value, key=key)
-    producer.flush()
+        producer.send(topic, value=value, key=key)
+        producer.flush()

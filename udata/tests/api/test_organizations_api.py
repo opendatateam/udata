@@ -507,7 +507,7 @@ class MembershipAPITest:
             assert 'name' in suggestion
             assert 'image_url' in suggestion
             assert 'acronym' in suggestion
-            assert suggestion['name'].startswith('test')
+            assert 'tes' in suggestion['name']
             assert response.json[0]['id'] == str(max_follower_organization.id)
 
     def test_suggest_organizations_with_special_chars(self, api):
@@ -528,7 +528,7 @@ class MembershipAPITest:
             assert 'slug' in suggestion
             assert 'name' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['name'].startswith('testé')
+            assert 'testé' in suggestion['name']
 
     def test_suggest_organizations_with_multiple_words(self, api):
         '''It should suggest organizations with words'''
@@ -548,7 +548,7 @@ class MembershipAPITest:
             assert 'slug' in suggestion
             assert 'name' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['name'].startswith('mon testé')
+            assert 'mon testé' in suggestion['name']
 
     def test_suggest_organizations_with_apostrophe(self, api):
         '''It should suggest organizations with words'''
@@ -569,7 +569,7 @@ class MembershipAPITest:
             assert 'slug' in suggestion
             assert 'name' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['name'].startswith('Ministère')
+            assert 'Ministère' in suggestion['name']
 
     def test_suggest_organizations_api_no_match(self, api):
         '''It should not provide organization suggestion if no match'''

@@ -11,7 +11,6 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
-from elasticsearch_dsl import Integer, Object
 import requests
 
 from udata.app import cache
@@ -442,12 +441,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     __badges__ = {
         PIVOTAL_DATA: _('Pivotal data'),
     }
-
-    __search_metrics__ = Object(properties={
-        'reuses': Integer(),
-        'followers': Integer(),
-        'views': Integer(),
-    })
 
     __metrics_keys__ = [
         'discussions',
