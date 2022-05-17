@@ -19,8 +19,8 @@ def serialize_resource_for_event(resource):
         'type': resource.type,
         'mime': resource.mime,
         'filesize': resource.filesize,
-        'checksum_type': resource.checksum.type,
-        'checksum_value': resource.checksum.value,
+        'checksum_type': resource.checksum.type if resource.checksum else None,
+        'checksum_value': resource.checksum.value if resource.checksum else None,
         'created_at': to_iso_datetime(resource.created_at),
         'modified': to_iso_datetime(resource.modified),
         'published': to_iso_datetime(resource.published)

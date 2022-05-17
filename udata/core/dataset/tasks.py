@@ -52,10 +52,7 @@ def purge_datasets(self):
         # Remove each dataset's resource's file
         storage = storages.resources
         for resource in dataset.resources:
-            if resource.fs_filename is not None:
-                storage.delete(resource.fs_filename)
-            dataset.resources.remove(resource)
-            Dataset.on_resource_removed.send(Dataset, document=dataset, resource_id=resource.id)
+            dataset.remove_resource(resource)
         # Remove each dataset related community resource and it's file
         community_resources = CommunityResource.objects(dataset=dataset)
         for community_resource in community_resources:
