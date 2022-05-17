@@ -31,7 +31,7 @@ class TagsAPITest:
 
         for suggestion in response.json:
             assert 'text' in suggestion
-            assert suggestion['text'].startswith('test')
+            assert 'tes' in suggestion['text']
 
     def test_suggest_tags_api_with_unicode(self, api):
         '''It should suggest tags'''
@@ -53,7 +53,7 @@ class TagsAPITest:
 
         for suggestion in response.json:
             assert 'text' in suggestion
-            assert suggestion['text'].startswith('teste')
+            assert 'teste' in suggestion['text']
 
     def test_suggest_tags_api_no_match(self, api):
         '''It should not provide tag suggestion if no match'''

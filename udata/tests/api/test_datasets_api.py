@@ -1001,7 +1001,7 @@ class DatasetResourceAPITest(APITestCase):
 
         for suggestion in response.json:
             self.assertIn('text', suggestion)
-            self.assertTrue(suggestion['text'].startswith('km'))
+            self.assertIn('km', suggestion['text'])
 
     def test_suggest_format_api_no_match(self):
         '''It should not provide format suggestion if no match'''
@@ -1092,7 +1092,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertTrue(suggestion['title'].startswith('test'))
+            self.assertIn('test', suggestion['title'])
         self.assertEqual(response.json[0]['id'], str(max_follower_dataset.id))
 
     def test_suggest_datasets_acronym_api(self):
@@ -1117,7 +1117,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertNotIn('tes', suggestion['title'])
-            self.assertTrue(suggestion['acronym'].startswith('test'))
+            self.assertIn('test', suggestion['acronym'])
 
     def test_suggest_datasets_api_unicode(self):
         '''It should suggest datasets with special characters'''
@@ -1138,7 +1138,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertTrue(suggestion['title'].startswith('test'))
+            self.assertIn('test', suggestion['title'])
 
     def test_suggest_datasets_api_no_match(self):
         '''It should not provide dataset suggestion if no match'''

@@ -113,7 +113,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('level', suggestion)
             self.assertIn('keys', suggestion)
             self.assertIsInstance(suggestion['keys'], dict)
-            self.assertTrue(suggestion['name'].startswith('test'))
+            self.assertIn('test', suggestion['name'])
 
     def test_suggest_zones_on_code(self):
         '''It should suggest zones based on its code'''
@@ -135,7 +135,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('level', suggestion)
             self.assertIn('keys', suggestion)
             self.assertIsInstance(suggestion['keys'], dict)
-            self.assertTrue(suggestion['code'].startswith('test'))
+            self.assertIn('test', suggestion['code'])
 
     def test_suggest_zones_no_match(self):
         '''It should not provide zones suggestions if no match'''
@@ -169,7 +169,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('level', suggestion)
             self.assertIn('keys', suggestion)
             self.assertIsInstance(suggestion['keys'], dict)
-            self.assertTrue(suggestion['name'].startswith('testé'))
+            self.assertIn('testé', suggestion['name'])
 
     def test_suggest_zones_empty(self):
         '''It should not provide zones suggestion if no data is present'''
