@@ -456,8 +456,12 @@ class ResourceAPI(ResourceMixin, API):
         # ensure API client does not override url on self-hosted resources
         if resource.filetype == 'file':
             form._fields.get('url').data = resource.url
+        # populate_obj populates existing resource object with the content of the form.
+        # update_resource saves the updated resource dict to the database
+        # the additional dataset.save is required as we update the last_modified date.
         form.populate_obj(resource)
         resource.modified = datetime.now()
+        dataset.update_resource(resource)
         dataset.last_modified = datetime.now()
         dataset.save()
         return resource
@@ -602,6 +606,7 @@ class FormatsSuggestAPI(API):
         '''Suggest file formats'''
         args = suggest_parser.parse_args()
         results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_EXTENSIONS'] if args['q'] in i]
+        results = results[:args['size']]
         return sorted(results, key=lambda o: len(o['text']))
 
 
@@ -613,6 +618,7 @@ class MimesSuggestAPI(API):
         '''Suggest mime types'''
         args = suggest_parser.parse_args()
         results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_MIMES'] if args['q'] in i]
+        results = results[:args['size']]
         return sorted(results, key=lambda o: len(o['text']))
 
 

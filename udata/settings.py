@@ -433,6 +433,7 @@ class Defaults(object):
                         'FollowAPI.post']
 
     FIXTURE_DATASET_SLUGS = []
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Testing(object):

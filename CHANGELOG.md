@@ -5,8 +5,10 @@
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
 - Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
-- Add prefix based on udata instance name for kafka topics [#2736](https://github.com/opendatateam/udata/pull/2736)
+- Publish kafka message when resource is created, modified or deleted [#2733](https://github.com/opendatateam/udata/pull/2733)
 - Clean documentation and code with respect to independent search service [#2738](https://github.com/opendatateam/udata/pull/2738)
+- Fix size argument in suggests endpoint and corresponding tests [#2739](https://github.com/opendatateam/udata/pull/2739)
+- Add prefix based on udata instance name for kafka topics [#2736](https://github.com/opendatateam/udata/pull/2736)
 
 ## 4.0.2 (2022-05-04)
 
