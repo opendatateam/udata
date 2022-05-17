@@ -134,6 +134,12 @@ def raw_db(app, clean_db):
     drop_db(app)
 
 
+@pytest.fixture
+def enable_kafka(app):
+    '''Enable resource event'''
+    app.config['KAFKA_URI'] = 'localhost:9092'
+
+
 class ApiClient(object):
     def __init__(self, client):
         self.client = client
