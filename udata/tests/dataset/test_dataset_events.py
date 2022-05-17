@@ -1,6 +1,7 @@
+from flask import current_app
 import pytest
-
 from unittest.mock import Mock
+
 from udata.models import Dataset
 from udata.tests.helpers import assert_emit
 from udata.event import KafkaProducerSingleton
@@ -35,7 +36,8 @@ class DatasetEventsTest:
                 'dataset_id': str(dataset.id)
             }
         }
-        producer.send.assert_called_with(KafkaTopic.RESOURCE_CREATED.value, value=expected_value,
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{KafkaTopic.RESOURCE_CREATED.value}"
+        producer.send.assert_called_with(topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
     def test_publish_message_resource_modified(self):
@@ -61,7 +63,8 @@ class DatasetEventsTest:
                 'dataset_id': str(dataset.id)
             }
         }
-        producer.send.assert_called_with(KafkaTopic.RESOURCE_MODIFIED.value, value=expected_value,
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{KafkaTopic.RESOURCE_MODIFIED.value}"
+        producer.send.assert_called_with(topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
     def test_publish_message_resource_removed(self):
@@ -85,5 +88,6 @@ class DatasetEventsTest:
                 'dataset_id': str(dataset.id)
             }
         }
-        producer.send.assert_called_with(KafkaTopic.RESOURCE_DELETED.value, value=expected_value,
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{KafkaTopic.RESOURCE_DELETED.value}"
+        producer.send.assert_called_with(topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
