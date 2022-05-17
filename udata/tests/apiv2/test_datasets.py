@@ -5,7 +5,7 @@ from udata.tests.api import APITestCase
 
 from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
-    DatasetFactory, ResourceFactory)
+    DatasetFactory, ResourceFactory, CommunityResourceFactory)
 
 
 class DatasetAPIV2Test(APITestCase):
@@ -41,6 +41,15 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['dataset_id'] == str(dataset.id)
         assert data['resource']['id'] == str(specific_resource.id)
         assert data['resource']['title'] == specific_resource.title
+        response = self.get(url_for('apiv2.resource', rid='111111ac-1111-1b1a-11e1-1111d111d11c'))
+        self.assert404(response)
+        com_resource = CommunityResourceFactory()
+        response = self.get(url_for('apiv2.resource', rid=com_resource.id))
+        self.assert200(response)
+        data = response.json
+        assert data['dataset_id'] is None
+        assert data['resource']['id'] == str(com_resource.id)
+        assert data['resource']['title'] == com_resource.title
 
     def test_get(self):
         '''Should fetch 1 page of resources from the API'''

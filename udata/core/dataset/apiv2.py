@@ -233,11 +233,10 @@ class ResourceAPI(API):
         if dataset:
             resource = get_by(dataset.resources, 'id', rid)
         else:
-            resource = CommunityResource.objects(id=id).first()
+            resource = CommunityResource.objects(id=rid).first()
         if not resource:
             apiv2.abort(404, 'Resource does not exist')
         return {
             'resource': resource,
             'dataset_id': dataset.id if dataset else None
         }
-
