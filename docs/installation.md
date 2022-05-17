@@ -377,8 +377,6 @@ SECRET_KEY = 'put-some-unique-and-secret-key-here-for-security'
 
 MONGODB_HOST = 'mongodb://localhost:27017/udata'
 
-ELASTICSEARCH_URL = 'localhost:9200'
-
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_TASK_RESULT_EXPIRES = 86400

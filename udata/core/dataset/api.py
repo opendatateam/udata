@@ -602,6 +602,7 @@ class FormatsSuggestAPI(API):
         '''Suggest file formats'''
         args = suggest_parser.parse_args()
         results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_EXTENSIONS'] if args['q'] in i]
+        results = results[:args['size']]
         return sorted(results, key=lambda o: len(o['text']))
 
 
@@ -613,6 +614,7 @@ class MimesSuggestAPI(API):
         '''Suggest mime types'''
         args = suggest_parser.parse_args()
         results = [{'text': i} for i in current_app.config['ALLOWED_RESOURCES_MIMES'] if args['q'] in i]
+        results = results[:args['size']]
         return sorted(results, key=lambda o: len(o['text']))
 
 
