@@ -121,7 +121,7 @@ class IndexingLifecycleTest(APITestCase):
                 'index': 'dataset'
             }
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset'
+        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.unindex'
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
@@ -141,7 +141,7 @@ class IndexingLifecycleTest(APITestCase):
                 'index': 'dataset'
             }
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset'
+        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
@@ -162,7 +162,7 @@ class IndexingLifecycleTest(APITestCase):
                 'index': 'dataset'
             }
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset'
+        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
@@ -183,7 +183,7 @@ class IndexingLifecycleTest(APITestCase):
                 'index': 'dataset-2022-02-20-20-02'
             }
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset'
+        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.reindex'
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
@@ -208,6 +208,6 @@ class IndexingLifecycleTest(APITestCase):
                 'index': 'dataset'
             }
         }
-        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset'
+        topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1212')
