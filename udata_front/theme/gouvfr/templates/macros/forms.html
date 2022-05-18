@@ -16,7 +16,7 @@
 {% else %}
 <div class="fr-input-group field {% if f.errors %}fr-input-group--error{% endif %}">
     <label for="{{ f.id }}" class="fr-label {% if f.flags.required %}required{% endif %}">
-        <span>{{ f.label.text }}</span>
+        {{ f.label.text }}
     </label>
     {% if f.id == "email" %}
     <input id="{{ f.id }}" name="{{ f.id }}" type="email" {% if f.flags.required %}required{% endif %}/>

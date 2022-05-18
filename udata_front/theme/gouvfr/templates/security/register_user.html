@@ -8,10 +8,13 @@
             <div class="form-container fr-col-12 fr-col-md-6 fr-col-offset-md-3">
                 <form class="form" method="post" action="{{ url_for('security.register') }}">
                     <h1 class="fr-h4 fr-mb-0 text-align-center">{{ _('Sign up') }}</h1>
-                        <p class="fr-mt-2w fr-mb-3w f-light fr-text--sm">
+                        <p class="fr-mt-2w fr-mb-1w f-light fr-text--sm">
                             <a href="{{config.GUIDES_USER_ACCOUNT_URL}}" target="_blank">
                                 {{ _('Why create an account?') }}
                             </a>
+                        </p>
+                        <p class="fr-mt-2w fr-mb-1w fr-text--xs text-align-left">
+                            {{ _("Fields preceded by a star (<span class='required-field-star'>*</span>) are required.") }}
                         </p>
                         {{ forms.render_fields(register_user_form, exclude=[register_user_form.submit]) }}
                         {% block extra_tos %}

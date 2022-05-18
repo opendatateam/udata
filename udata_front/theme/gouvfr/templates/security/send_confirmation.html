@@ -7,7 +7,10 @@
         <div class="fr-grid-row">
             <div class="text-align-center form-container fr-col-12 fr-col-md-6 fr-col-offset-md-3">
                 <form class="form" method="post" action="{{ url_for('security.send_confirmation') }}">
-                    <h1 class="fr-h4 fr-mb-9v">{{ _('Resend confirmation instructions') }}</h1>
+                    <h1 class="fr-h4 fr-mb-3w">{{ _('Resend confirmation instructions') }}</h1>
+                    <p class="fr-my-1w fr-text--xs text-align-left">
+                        {{ _("Fields preceded by a star (<span class='required-field-star'>*</span>) are required.") }}
+                    </p>
                     {{ forms.render_fields(send_confirmation_form, submit=_('Submit')) }}
                 </form>
             </div>

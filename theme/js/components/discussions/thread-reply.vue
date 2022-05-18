@@ -8,12 +8,21 @@
         </button>
       </div>
     </div>
-    <form @submit.prevent="submit">
+    <form class="form fr-p-0" @submit.prevent="submit">
+      <i18n-t
+        keypath="Fields preceded by a star ({markup}) are required."
+        tag="p"
+        class="fr-mt-0 fr-mb-1w fr-text--xs"
+      >
+        <template #markup>
+          <span class="required-field-star">*</span>
+        </template>
+      </i18n-t>
       <div class="fr-input-group">
-        <label class="fr-label" for="textarea">
+        <label class="fr-label required" for="textarea">
           {{$t('Comment')}}
         </label>
-        <textarea v-model="comment" class="fr-input" id="textarea"></textarea>
+        <textarea v-model="comment" required class="fr-input" id="textarea"></textarea>
       </div>
       <footer class="fr-grid-row justify-between fr-grid-row--middle">
         <span class="text-mention-grey fr-text--sm fr-mb-0">

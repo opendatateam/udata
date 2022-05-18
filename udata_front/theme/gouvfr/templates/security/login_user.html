@@ -10,6 +10,9 @@
             <div class="text-align-center form-container fr-col-12 fr-col-md-6 fr-col-offset-md-3">
                 <form class="form" method="post" action="{{ url_for('security.login') }}">
                     <h1 class="fr-h4 fr-mb-0">{{ _('Log in') }}</h1>
+                        <p class="fr-mt-2w fr-mb-1w fr-text--xs text-align-left">
+                            {{ _("Fields preceded by a star (<span class='required-field-star'>*</span>) are required.") }}
+                        </p>
                         {{ forms.render_fields(login_user_form, submit=_('Log in')) }}
                         <div class="fr-mt-3w">
                             <p class="fr-text--sm fr-mb-3v">

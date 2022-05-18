@@ -13,10 +13,19 @@
           </button>
         </div>
       </div>
-      <div class="thread-comment fr-py-3w fr-px-3w">
-        <form @submit.prevent="submit">
+      <div class="thread-comment fr-pb-3w fr-px-3w">
+        <form class="form fr-p-0" @submit.prevent="submit">
+          <i18n-t
+            keypath="Fields preceded by a star ({markup}) are required."
+            tag="p"
+            class="fr-mt-0 fr-mb-1w fr-text--xs"
+          >
+            <template #markup>
+              <span class="required-field-star">*</span>
+            </template>
+          </i18n-t>
           <div class="fr-input-group">
-            <label for="thread-title" class="fr-label">
+            <label for="thread-title" class="fr-label required">
               {{ $t("Title") }}
             </label>
             <input
@@ -29,7 +38,7 @@
           />
           </div>
           <div class="fr-input-group">
-            <label for="thread-comment" class="fr-label">
+            <label for="thread-comment" class="fr-label required">
               {{ $t("Message") }}
             </label>
             <textarea
