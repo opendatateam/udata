@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
+- Use mongo search if `SEARCH_SERVICE_API_URL` variable is not set [#2728](https://github.com/opendatateam/udata/pull/2728)
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
 - Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
 - Publish kafka message when resource is created, modified or deleted [#2733](https://github.com/opendatateam/udata/pull/2733)

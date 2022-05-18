@@ -39,17 +39,38 @@ class ReuseAPITest:
         owner = UserFactory()
         org = OrganizationFactory()
 
-        [ReuseFactory() for i in range(2)]
+        [ReuseFactory(topic='health', type='api') for i in range(2)]
 
-        tag_reuse = ReuseFactory(tags=['my-tag', 'other'])
-        owner_reuse = ReuseFactory(owner=owner)
-        org_reuse = ReuseFactory(organization=org)
+        tag_reuse = ReuseFactory(tags=['my-tag', 'other'], topic='health', type='api')
+        owner_reuse = ReuseFactory(owner=owner, topic='health', type='api')
+        org_reuse = ReuseFactory(organization=org, topic='health', type='api')
+        featured_reuse = ReuseFactory(featured=True, topic='health', type='api')
+        topic_reuse = ReuseFactory(topic='transport_and_mobility', type='api')
+        type_reuse = ReuseFactory(topic='health', type='application')
 
         # filter on tag
         response = api.get(url_for('api.reuses', tag='my-tag'))
         assert200(response)
         assert len(response.json['data']) == 1
         assert response.json['data'][0]['id'] == str(tag_reuse.id)
+
+        # filter on featured
+        response = api.get(url_for('api.reuses', featured='true'))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(featured_reuse.id)
+
+        # filter on topic
+        response = api.get(url_for('api.reuses', topic=topic_reuse.topic))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(topic_reuse.id)
+
+        # filter on type
+        response = api.get(url_for('api.reuses', type=type_reuse.type))
+        assert200(response)
+        assert len(response.json['data']) == 1
+        assert response.json['data'][0]['id'] == str(type_reuse.id)
 
         # filter on owner
         response = api.get(url_for('api.reuses', owner=owner.id))

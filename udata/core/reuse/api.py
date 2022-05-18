@@ -45,6 +45,9 @@ class ReuseApiParser(ModelApiParser):
         self.parser.add_argument('tag', type=str, location='args')
         self.parser.add_argument('organization', type=str, location='args')
         self.parser.add_argument('owner', type=str, location='args')
+        self.parser.add_argument('type', type=str, location='args')
+        self.parser.add_argument('topic', type=str, location='args')
+        self.parser.add_argument('featured', type=bool, location='args')
 
     @staticmethod
     def parse_filters(reuses, args):
@@ -52,7 +55,12 @@ class ReuseApiParser(ModelApiParser):
             reuses = reuses.search_text(args['q'])
         if args.get('dataset'):
             reuses = reuses.filter(datasets=args['dataset'])
-
+        if args.get('featured'):
+            reuses = reuses.filter(featured=args['featured'])
+        if args.get('topic'):
+            reuses = reuses.filter(topic=args['topic'])
+        if args.get('type'):
+            reuses = reuses.filter(type=args['type'])
         if args.get('tag'):
             reuses = reuses.filter(tags=args['tag'])
         if args.get('organization'):

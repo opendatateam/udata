@@ -2,6 +2,7 @@ import datetime
 from udata import search
 from udata.models import Organization
 from udata.search.fields import Filter
+from udata.core.organization.api import OrgApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
 
 
@@ -28,6 +29,15 @@ class OrganizationSearch(search.ModelSearchAdapter):
     @classmethod
     def is_indexable(cls, org):
         return org.deleted is None
+
+    @classmethod
+    def mongo_search(cls, args):
+        orgs = Organization.objects(deleted=None)
+        orgs = OrgApiParser.parse_filters(orgs, args)
+
+        sort = cls.parse_sort(args['sort']) or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        offset = (args['page'] - 1) * args['page_size']
+        return orgs.order_by(sort).skip(offset).limit(args['page_size']), orgs.count()
 
     @classmethod
     def serialize(cls, organization):

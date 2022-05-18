@@ -83,8 +83,14 @@ class DatasetApiParser(ModelApiParser):
     def __init__(self):
         super().__init__()
         self.parser.add_argument('tag', type=str, location='args')
+        self.parser.add_argument('license', type=str, location='args')
+        self.parser.add_argument('featured', type=bool, location='args')
+        self.parser.add_argument('geozone', type=str, location='args')
+        self.parser.add_argument('granularity', type=str, location='args')
+        self.parser.add_argument('temporal_coverage', type=str, location='args')
         self.parser.add_argument('organization', type=str, location='args')
         self.parser.add_argument('owner', type=str, location='args')
+        self.parser.add_argument('format', type=str, location='args')
         self.parser.add_argument('schema', type=str, location='args')
         self.parser.add_argument('schema_version', type=str, location='args')
 
@@ -94,10 +100,22 @@ class DatasetApiParser(ModelApiParser):
             datasets = datasets.search_text(args['q'])
         if args.get('tag'):
             datasets = datasets.filter(tags=args['tag'])
+        if args.get('license'):
+            datasets = datasets.filter(license__in=License.objects.filter(id=args['license']))
+        if args.get('geozone'):
+            datasets = datasets.filter(spatial__zones=args['geozone'])
+        if args.get('granularity'):
+            datasets = datasets.filter(spatial__granularity=args['granularity'])
+        if args.get('temporal_coverage'):
+            datasets = datasets.filter(temporal_coverage__start__gte=args['temporal_coverage'][:9], temporal_coverage__start__lte=args['temporal_coverage'][11:])
+        if args.get('featured'):
+            datasets = datasets.filter(featured=args['featured'])
         if args.get('organization'):
             datasets = datasets.filter(organization=args['organization'])
         if args.get('owner'):
             datasets = datasets.filter(owner=args['owner'])
+        if args.get('format'):
+            datasets = datasets.filter(resources__format=args['format'])
         if args.get('schema'):
             datasets = datasets.filter(resources__schema__name=args['schema'])
         if args.get('schema_version'):
