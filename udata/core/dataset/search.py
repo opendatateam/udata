@@ -10,6 +10,7 @@ from udata.search import (
 from udata.core.spatial.models import (
     admin_levels, ADMIN_LEVEL_MAX
 )
+from udata.core.dataset.api import DatasetApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
 
 __all__ = ('DatasetSearch', )
@@ -46,6 +47,15 @@ class DatasetSearch(ModelSearchAdapter):
         return (dataset.deleted is None and dataset.archived is None and
                 len(dataset.resources) > 0 and
                 not dataset.private)
+
+    @classmethod
+    def mongo_search(cls, args):
+        datasets = Dataset.objects(archived=None, deleted=None, private=False)
+        datasets = DatasetApiParser.parse_filters(datasets, args)
+
+        sort = cls.parse_sort(args['sort']) or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        offset = (args['page'] - 1) * args['page_size']
+        return datasets.order_by(sort).skip(offset).limit(args['page_size']), datasets.count()
 
     @classmethod
     def serialize(cls, dataset):

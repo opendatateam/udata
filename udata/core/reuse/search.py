@@ -6,6 +6,7 @@ from udata.search import (
     ModelSearchAdapter, register,
     ModelTermsFilter, BoolFilter, Filter
 )
+from udata.core.reuse.api import ReuseApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
 
 
@@ -39,6 +40,15 @@ class ReuseSearch(ModelSearchAdapter):
         return (reuse.deleted is None and
                 len(reuse.datasets) > 0 and
                 not reuse.private)
+
+    @classmethod
+    def mongo_search(cls, args):
+        reuses = Reuse.objects(deleted=None, private__ne=True)
+        reuses = ReuseApiParser.parse_filters(reuses, args)
+
+        sort = cls.parse_sort(args['sort']) or ('$text_score' if args['q'] else None) or DEFAULT_SORTING
+        offset = (args['page'] - 1) * args['page_size']
+        return reuses.order_by(sort).skip(offset).limit(args['page_size']), reuses.count()
 
     @classmethod
     def serialize(cls, reuse):

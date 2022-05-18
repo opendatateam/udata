@@ -29,7 +29,7 @@ class Defaults(object):
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
     # Search service configuration
-    SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
+    SEARCH_SERVICE_API_URL = None
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
 
     # Kafka configuration
