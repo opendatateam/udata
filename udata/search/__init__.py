@@ -14,22 +14,6 @@ log = logging.getLogger(__name__)
 adapter_catalog = {}
 
 
-def send_index_event(model, id, message_type, document=None, index=None):
-    if model == Dataset:
-        topic = 'dataset'
-    if model == Organization:
-        topic = 'organization'
-    if model == Reuse:
-        topic = 'reuse'
-    if not topic:
-        return
-
-    if not index:
-        index = topic
-
-    produce(topic, id, message_type, document, index=index)
-
-
 @task(route='high.search')
 def reindex(classname, id):
     model = db.resolve_model(classname)
@@ -38,16 +22,16 @@ def reindex(classname, id):
     document = adapter_class.serialize(obj)
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
-        try:
-            send_index_event(model, str(obj.id), KafkaMessageType.INDEX, document)
-        except Exception:
-            log.exception('Unable to index %s "%s"', model.__name__, str(obj.id))
+        action = KafkaMessageType.INDEX
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
-        try:
-            send_index_event(model, str(obj.id), KafkaMessageType.UNINDEX, document)
-        except Exception:
-            log.exception('Unable to desindex %s "%s"', model.__name__, str(obj.id))
+        action = KafkaMessageType.UNINDEX
+    try:
+        message_type = f'{classname.lower()}.{action.value}'
+        produce(id=str(obj.id), message_type=message_type, document=document,
+                index=classname.lower())
+    except Exception:
+        log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
 
 
 @task(route='high.search')
@@ -55,7 +39,9 @@ def unindex(classname, id):
     model = db.resolve_model(classname)
     log.info('Unindexing %s (%s)', model.__name__, id)
     try:
-        send_index_event(model, id, message_type=KafkaMessageType.UNINDEX)
+        action = KafkaMessageType.UNINDEX
+        message_type = f'{classname.lower()}.{action.value}'
+        produce(id=id, message_type=message_type, index=classname.lower())
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 

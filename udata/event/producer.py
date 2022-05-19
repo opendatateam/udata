@@ -16,11 +16,13 @@ class KafkaProducerSingleton:
         return KafkaProducerSingleton.__instance
 
 
-def produce(topic, id, message_type, document=None, **kwargs):
+def produce(id, message_type, document=None, **kwargs):
     '''
     Produce message with marshalled document.
     kwargs is meant to contain non generic values
     for the meta fields of the message.
+
+    UDATA_INSTANCE_NAME is used as prefix for topic
     '''
     if current_app.config.get('KAFKA_URI'):
         producer = KafkaProducerSingleton.get_instance()
@@ -30,10 +32,12 @@ def produce(topic, id, message_type, document=None, **kwargs):
             'service': 'udata',
             'data': document,
             'meta': {
-                'message_type': message_type.value
+                'message_type': message_type
             }
         }
         value['meta'].update(kwargs)
+
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
 
         producer.send(topic, value=value, key=key)
         producer.flush()
