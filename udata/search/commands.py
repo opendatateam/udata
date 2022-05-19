@@ -60,13 +60,13 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     for indexable, doc in docs:
         try:
             if indexable:
-                message_type = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
+                action = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
             elif not indexable and not reindex:
-                message_type = KafkaMessageType.UNINDEX
+                action = KafkaMessageType.UNINDEX
             else:
                 continue
-            topic = f'{adapter.model.__name__.lower()}.{message_type.value}'
-            produce(topic, doc['id'], message_type, doc, index=index_name)
+            message_type = f'{adapter.model.__name__.lower()}.{action.value}'
+            produce(doc['id'], message_type, doc, index=index_name)
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)

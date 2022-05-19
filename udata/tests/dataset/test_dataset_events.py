@@ -7,7 +7,7 @@ from udata.tests.helpers import assert_emit
 from udata.event import KafkaProducerSingleton
 from udata.core.dataset.events import serialize_resource_for_event
 from udata.core.dataset.factories import ResourceFactory, DatasetFactory
-from udata.event.values import KafkaMessageType, KafkaTopic
+from udata.event.values import KafkaMessageType
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -27,16 +27,17 @@ class DatasetEventsTest:
             dataset.add_resource(resource)
 
         producer = KafkaProducerSingleton.get_instance()
+        message_type = f'resource.{KafkaMessageType.CREATED.value}'
 
         expected_value = {
             'service': 'udata',
             'data': serialize_resource_for_event(resource),
             'meta': {
-                'message_type': KafkaMessageType.RESOURCE_CREATED.value,
+                'message_type': message_type,
                 'dataset_id': str(dataset.id)
             }
         }
-        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{KafkaTopic.RESOURCE_CREATED.value}"
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
@@ -54,16 +55,17 @@ class DatasetEventsTest:
             dataset.update_resource(resource)
 
         producer = KafkaProducerSingleton.get_instance()
+        message_type = f'resource.{KafkaMessageType.MODIFIED.value}'
 
         expected_value = {
             'service': 'udata',
             'data': serialize_resource_for_event(resource),
             'meta': {
-                'message_type': KafkaMessageType.RESOURCE_MODIFIED.value,
+                'message_type': message_type,
                 'dataset_id': str(dataset.id)
             }
         }
-        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{KafkaTopic.RESOURCE_MODIFIED.value}"
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
@@ -79,15 +81,16 @@ class DatasetEventsTest:
             dataset.remove_resource(resource)
 
         producer = KafkaProducerSingleton.get_instance()
+        message_type = f'resource.{KafkaMessageType.DELETED.value}'
 
         expected_value = {
             'service': 'udata',
             'data': None,
             'meta': {
-                'message_type': KafkaMessageType.RESOURCE_DELETED.value,
+                'message_type': message_type,
                 'dataset_id': str(dataset.id)
             }
         }
-        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{KafkaTopic.RESOURCE_DELETED.value}"
+        topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
         producer.send.assert_called_with(topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))

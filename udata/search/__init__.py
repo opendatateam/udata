@@ -22,13 +22,14 @@ def reindex(classname, id):
     document = adapter_class.serialize(obj)
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
-        message_type = KafkaMessageType.INDEX
+        action = KafkaMessageType.INDEX
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
-        message_type = KafkaMessageType.UNINDEX
+        action = KafkaMessageType.UNINDEX
     try:
-        topic = f'{classname.lower()}.{message_type.value}'
-        produce(topic, str(obj.id), message_type, document, index=classname.lower())
+        message_type = f'{classname.lower()}.{action.value}'
+        produce(id=str(obj.id), message_type=message_type, document=document,
+                index=classname.lower())
     except Exception:
         log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
 
@@ -38,9 +39,9 @@ def unindex(classname, id):
     model = db.resolve_model(classname)
     log.info('Unindexing %s (%s)', model.__name__, id)
     try:
-        message_type = KafkaMessageType.UNINDEX
-        topic = f'{classname.lower()}.{message_type.value}'
-        produce(topic, id, message_type, index=classname.lower())
+        action = KafkaMessageType.UNINDEX
+        message_type = f'{classname.lower()}.{action.value}'
+        produce(id=id, message_type=message_type, index=classname.lower())
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 

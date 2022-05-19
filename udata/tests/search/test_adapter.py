@@ -117,7 +117,7 @@ class IndexingLifecycleTest(APITestCase):
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
             'meta': {
-                'message_type': 'unindex',
+                'message_type': 'dataset.unindex',
                 'index': 'dataset'
             }
         }
@@ -137,7 +137,7 @@ class IndexingLifecycleTest(APITestCase):
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
             'meta': {
-                'message_type': 'index',
+                'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
@@ -158,7 +158,7 @@ class IndexingLifecycleTest(APITestCase):
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
             'meta': {
-                'message_type': 'index',
+                'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
@@ -179,7 +179,7 @@ class IndexingLifecycleTest(APITestCase):
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
             'meta': {
-                'message_type': 'reindex',
+                'message_type': 'dataset.reindex',
                 'index': 'dataset-2022-02-20-20-02'
             }
         }
@@ -204,7 +204,7 @@ class IndexingLifecycleTest(APITestCase):
             'service': 'udata',
             'data': DatasetSearch.serialize(fake_data),
             'meta': {
-                'message_type': 'index',
+                'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
