@@ -1,6 +1,7 @@
 import logging
 
 from flask import url_for, request, abort
+from flask_restplus import marshal
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -227,7 +228,6 @@ class ResourcesAPI(API):
 @ns.route('/resources/<uuid:rid>/', endpoint='resource')
 class ResourceAPI(API):
     @apiv2.doc('get_resource')
-    @apiv2.marshal_with(specific_resource_fields)
     def get(self, rid):
         dataset = Dataset.objects(resources__id=rid).first()
         if dataset:
@@ -236,7 +236,10 @@ class ResourceAPI(API):
             resource = CommunityResource.objects(id=rid).first()
         if not resource:
             apiv2.abort(404, 'Resource does not exist')
-        return {
+
+        # Manually marshalling to make sure resource.dataset is in the scope.
+        # See discussions in https://github.com/opendatateam/udata/pull/2732/files
+        return marshal({
             'resource': resource,
             'dataset_id': dataset.id if dataset else None
-        }
+        }, specific_resource_fields)
