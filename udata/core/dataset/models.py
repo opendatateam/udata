@@ -396,7 +396,13 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 
     @property
     def dataset(self):
-        return self._instance
+        try:
+            self._instance.id  # try to access attr from parent instance
+            return self._instance
+        except ReferenceError:  # weakly-referenced object no longer exists
+            log.warning('Weakly referenced object for resource.dataset no longer exists, '
+                        'using a poor performance query instead.')
+            return Dataset.objects(resources__id=self.id).first()
 
     def save(self, *args, **kwargs):
         if not self.dataset:

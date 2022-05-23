@@ -4,7 +4,7 @@ from udata.utils import to_iso_datetime, get_by
 from udata.models import Dataset
 from udata.tasks import task
 from udata.event.producer import produce
-from udata.event.values import KafkaMessageType, KafkaTopic
+from udata.event.values import KafkaMessageType
 
 
 def serialize_resource_for_event(resource):
@@ -33,27 +33,28 @@ def serialize_resource_for_event(resource):
 
 
 @task(route='high.resource')
-def publish(document, resource_id, topic, message_type):
-    if message_type == KafkaMessageType.RESOURCE_DELETED:
+def publish(document, resource_id, action):
+    if action == KafkaMessageType.DELETED:
         resource = None
     else:
         resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
-    produce(topic=topic.value, id=str(resource_id), message_type=message_type, document=resource, dataset_id=str(document.id))
+    message_type = f'resource.{action.value}'
+    produce(id=str(resource_id), message_type=message_type, document=resource, dataset_id=str(document.id))
 
 
 @Dataset.on_resource_added.connect
 def publish_added_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], KafkaTopic.RESOURCE_CREATED, KafkaMessageType.RESOURCE_CREATED)
+        publish.delay(document, kwargs['resource_id'], KafkaMessageType.CREATED)
 
 
 @Dataset.on_resource_updated.connect
 def publish_updated_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], KafkaTopic.RESOURCE_MODIFIED, KafkaMessageType.RESOURCE_MODIFIED)
+        publish.delay(document, kwargs['resource_id'], KafkaMessageType.MODIFIED)
 
 
 @Dataset.on_resource_removed.connect
 def publish_removed_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], KafkaTopic.RESOURCE_DELETED, KafkaMessageType.RESOURCE_DELETED)
+        publish.delay(document, kwargs['resource_id'], KafkaMessageType.DELETED)
