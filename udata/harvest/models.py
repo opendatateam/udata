@@ -11,9 +11,34 @@ from udata.i18n import lazy_gettext as _
 Dataset.extras.register('harvest:source_id', db.StringField)
 Dataset.extras.register('harvest:remote_id', db.StringField)
 Dataset.extras.register('harvest:domain', db.StringField)
-Dataset.extras.register('harvest:last_update', db.DateTimeField)
 Dataset.extras.register('remote_url', db.URLField)
 
+
+### Nested Extra Field with Embedded Register:
+class HarvestExtras(db.EmbeddedDocument):
+    source_id = db.StringField()
+    remote_id = db.StringField()
+    domain = db.StringField()
+    remote_url = db.URLField()
+
+    def __str__(self):
+        return self.source_id
+
+
+Dataset.nested_extras.register('harvest', HarvestExtras)
+
+### Nested Extra Field with Extra Field Register
+# harvest_extras = db.ExtrasField()
+# harvest_extras.register('source_id', db.StringField)
+Dataset.extras_extras.register('harvest', db.ExtrasField)
+
+
+#KESAKO?
+Dataset.extras.register('harvest:last_update', db.DateTimeField)
+
+
+Dataset.protected_extras.register('harvest:created_at', db.DateTimeField)
+Dataset.protected_extras.register('harvest:last_modified', db.DateTimeField)
 
 HARVEST_FREQUENCIES = OrderedDict((
     ('manual', _('Manual')),

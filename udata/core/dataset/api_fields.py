@@ -65,13 +65,15 @@ resource_fields = api.model('Resource', {
     'created_at': fields.ISODateTime(
         readonly=True, description='The resource creation date'),
     'published': fields.ISODateTime(
-        description='The resource publication date'),
+        description='The resource publication date', readonly=True),
     'last_modified': fields.ISODateTime(
         attribute='modified', readonly=True,
         description='The resource last modification date'),
     'metrics': fields.Raw(
         description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
+    'protected_extras': fields.Raw(description='Protected extra resource attributes as key-value pairs',
+                                   readonly=True),
     'preview_url': fields.String(description='An optional preview URL to be '
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
@@ -124,9 +126,10 @@ community_resource_page_fields = api.model(
 #: Default mask to make it lightweight by default
 DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
-    'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras',
-    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived'
+    'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'metrics',
+    'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'uri', 'page', 'last_update', 'archived',
+    'nested_extras', 'extras_extras'
 ))
 
 dataset_fields = api.model('Dataset', {
@@ -163,6 +166,12 @@ dataset_fields = api.model('Dataset', {
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
+    'protected_extras': fields.Raw(description='Protected extra attributes as key-value pairs',
+                                   readonly=True),
+    'nested_extras': fields.Raw(description='Nested extra attributes as key-value pairs',
+                                readonly=True),
+    'extras_extras': fields.Raw(description='Extras extra attributes as key-value pairs',
+                                readonly=True),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,

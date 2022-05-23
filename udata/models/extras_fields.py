@@ -18,7 +18,7 @@ class ExtrasField(DictField):
 
     def register(self, key, dbtype):
         '''Register a DB type to add constraint on a given extra key'''
-        if not issubclass(dbtype, (BaseField, EmbeddedDocument)):
+        if not issubclass(dbtype, (BaseField, EmbeddedDocument, DictField)):
             msg = 'ExtrasField can only register MongoEngine fields'
             raise TypeError(msg)
         self.registered[key] = dbtype

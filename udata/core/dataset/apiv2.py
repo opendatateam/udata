@@ -95,6 +95,8 @@ dataset_fields = apiv2.model('Dataset', {
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
+    'protected_extras': fields.Raw(description='Protected extra resource attributes as key-value pairs',
+                                   readonly=True),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,

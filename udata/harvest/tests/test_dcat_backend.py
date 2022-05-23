@@ -231,8 +231,8 @@ class DcatBackendTest:
         dataset = Dataset.objects.get(**extras)
         assert dataset.license.id == 'lov2'
         assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/3'
-        assert dataset.created_at.date() == date(2016, 12, 14)
-        assert dataset.last_modified.date() == date(2016, 12, 14)
+        assert dataset.protected_extras['harvest:created_at'].date() == date(2016, 12, 14)
+        assert dataset.protected_extras['harvest:last_modified'].date() == date(2016, 12, 14)
         assert dataset.frequency == 'daily'
         assert dataset.description == 'Dataset 3 description'
 
@@ -250,7 +250,7 @@ class DcatBackendTest:
         actions.run(source.slug)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
-        assert dataset.created_at.date() == date(2004, 11, 3)
+        assert dataset.protected_extras['harvest:created_at'].date() == date(2004, 11, 3)
         assert dataset.description.startswith('Data of type chemistry')
 
     def test_sigoreme_xml_catalog(self, rmock):

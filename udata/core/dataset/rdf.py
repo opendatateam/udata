@@ -4,7 +4,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import logging
 
-from datetime import date
+from datetime import date, datetime
 from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -376,8 +376,16 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
 
-    resource.published = rdf_value(distrib, DCT.issued, resource.published)
-    resource.modified = rdf_value(distrib, DCT.modified, resource.modified)
+    dct_issued = rdf_value(distrib, DCT.issued)
+    if dct_issued:
+        if isinstance(dct_issued, date):
+            dct_issued = datetime.combine(dct_issued, datetime.min.time())
+        resource.protected_extras['harvest:created_at'] = dct_issued
+    dct_modified = rdf_value(distrib, DCT.modified)
+    if dct_modified:
+        if isinstance(dct_modified, date):
+            dct_modified = datetime.combine(dct_modified, datetime.min.time())
+        resource.protected_extras['harvest:modified'] = dct_modified
 
     identifier = rdf_value(distrib, DCT.identifier)
     if identifier:
@@ -405,8 +413,17 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.created_at = rdf_value(d, DCT.issued, dataset.created_at)
-    dataset.last_modified = rdf_value(d, DCT.modified, dataset.last_modified)
+
+    dct_issued = rdf_value(d, DCT.issued)
+    if dct_issued:
+        if isinstance(dct_issued, date):
+            dct_issued = datetime.combine(dct_issued, datetime.min.time())
+        dataset.protected_extras['harvest:created_at'] = dct_issued
+    dct_modified = rdf_value(d, DCT.modified)
+    if dct_modified:
+        if isinstance(dct_modified, date):
+            dct_modified = datetime.combine(dct_modified, datetime.min.time())
+        dataset.protected_extras['harvest:last_modified'] = dct_modified
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:

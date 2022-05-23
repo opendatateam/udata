@@ -265,10 +265,12 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
     extras = db.ExtrasField()
+    protected_extras = db.ExtrasField()  # protected extras, admin only
     schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
+    # Why can't it be computed instead?
     published = db.DateTimeField(default=datetime.now, required=True)
     deleted = db.DateTimeField()
 
@@ -334,6 +336,18 @@ class ResourceMixin(object):
         return True
 
     @property
+    def created_at_public(self):
+        return self.protected_extras['harvest:created_at'] or self.created_at
+
+    @property
+    def modified_public(self):
+        return self.protected_extras['harvest:modified'] or self.modified
+
+    # @property
+    # def published(self):
+    #     return self.created_at_public()
+
+    @property
     def latest(self):
         '''
         Permanent link to the latest version of this resource.
@@ -380,6 +394,10 @@ class ResourceMixin(object):
             result['description'] = mdstrip(self.description)
 
         return result
+
+
+ResourceMixin.protected_extras.register('harvest:created_at', db.DateTimeField)
+ResourceMixin.protected_extras.register('harvest:modified', db.DateTimeField)
 
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
@@ -429,6 +447,10 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
+
+    protected_extras = db.ExtrasField()  # protected extras, admin only
+    nested_extras = db.ExtrasField()  # protected extras, admin only
+    extras_extras = db.ExtrasField()
 
     featured = db.BooleanField(required=True, default=False)
 
@@ -544,6 +566,14 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if not remote_resources:
             return []
         return [resource.check_availability() for resource in remote_resources]
+
+    @property
+    def created_at_public(self):
+        return self.extras['harvest:created_at'] or self.created_at
+
+    @property
+    def last_modified_public(self):
+        return self.extras['harvest:last_modified'] or self.last_modified
 
     @property
     def last_update(self):
