@@ -5,7 +5,8 @@ import sys
 import click
 
 from udata.commands import cli
-from udata.search import adapter_catalog, send_index_event, KafkaMessageType
+from udata.event.producer import produce
+from udata.search import adapter_catalog, KafkaMessageType
 
 
 log = logging.getLogger(__name__)
@@ -59,10 +60,13 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     for indexable, doc in docs:
         try:
             if indexable:
-                message_type = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
-                send_index_event(model, doc['id'], message_type, doc, index=index_name)
-            if not indexable and not reindex:
-                send_index_event(model, doc['id'], KafkaMessageType.UNINDEX, doc, index=index_name)
+                action = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
+            elif not indexable and not reindex:
+                action = KafkaMessageType.UNINDEX
+            else:
+                continue
+            message_type = f'{adapter.model.__name__.lower()}.{action.value}'
+            produce(doc['id'], message_type, doc, index=index_name)
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)

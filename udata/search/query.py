@@ -2,7 +2,7 @@ import copy
 import logging
 import requests
 
-from flask import request, current_app
+from flask import request, current_app, url_for
 from werkzeug.urls import Href
 
 from udata.search.result import SearchResult
@@ -34,19 +34,23 @@ class SearchQuery:
                 self._filters[key] = value
 
     def execute_search(self):
-        if not current_app.config['SEARCH_SERVICE_API_URL']:
-            raise NotImplementedError('Missing search service url in settings')
-
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
-        if self.sort:
-            url = url + f'&sort={self.sort}'
-        for name, value in self._filters.items():
-            url = url + f'&{name}={value}'
-        r = requests.get(url, timeout=current_app.config['SEARCH_SERVICE_REQUEST_TIMEOUT'])
-        r.raise_for_status()
-        result = r.json()
-
-        return SearchResult(query=self, result=result.pop('data'), **result)
+        # If SEARCH_SERVICE_API_URL is set, the remote search service will be queried.
+        # Otherwise mongo search will be used instead.
+        if current_app.config['SEARCH_SERVICE_API_URL']:
+            url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{self.adapter.search_url}?q={self._query}&page={self.page}&page_size={self.page_size}"
+            if self.sort:
+                url = url + f'&sort={self.sort}'
+            for name, value in self._filters.items():
+                url = url + f'&{name}={value}'
+            r = requests.get(url, timeout=current_app.config['SEARCH_SERVICE_REQUEST_TIMEOUT'])
+            r.raise_for_status()
+            result = r.json()
+            return SearchResult(query=self, result=result.pop('data'), **result)
+        else:
+            query_args = {'q': self._query, 'page': self.page, 'page_size': self.page_size, 'sort': self.sort}
+            query_args.update(self._filters)
+            result, total = self.adapter.mongo_search(query_args)
+            return SearchResult(query=self, mongo_objects=result, total=total, **query_args)
 
     def to_url(self, url=None, replace=False, **kwargs):
         '''Serialize the query into an URL'''

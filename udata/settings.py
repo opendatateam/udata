@@ -29,7 +29,7 @@ class Defaults(object):
     MONGODB_CONNECT = False  # Lazy connexion for Fork-safe usage
 
     # Search service configuration
-    SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
+    SEARCH_SERVICE_API_URL = None
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
 
     # Kafka configuration
@@ -128,6 +128,8 @@ class Defaults(object):
     SITE_AUTHOR = 'Udata'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
     SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
+
+    UDATA_INSTANCE_NAME = 'udata'
 
     PLUGINS = []
     THEME = None
@@ -431,6 +433,7 @@ class Defaults(object):
                         'FollowAPI.post']
 
     FIXTURE_DATASET_SLUGS = []
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Testing(object):

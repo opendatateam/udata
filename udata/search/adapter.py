@@ -48,6 +48,18 @@ class ModelSearchAdapter:
         return parser
 
     @classmethod
+    def parse_sort(cls, sort):
+        if sort:
+            if sort.startswith('-'):
+                # Keyerror because of the '-' character in front of the argument.
+                # It is removed to find the value in dict and added back.
+                arg_sort = sort[1:]
+                sort = '-' + cls.sorts[arg_sort]
+            else:
+                sort = cls.sorts[sort]
+        return sort
+
+    @classmethod
     def temp_search(cls):
 
         class TempSearch(SearchQuery):
