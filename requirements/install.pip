@@ -153,7 +153,9 @@ jsonschema==3.2.0
     #   -r requirements/install.in
     #   flask-restplus
 kafka-python==2.0.2
-    # via -r requirements/install.in
+    # via
+    #   -r requirements/install.in
+    #   udata-event-service
 kombu[redis]==4.4.0
     # via
     #   -r requirements/install.in
@@ -238,6 +240,8 @@ stringdist==1.0.9
 text-unidecode==1.3
     # via faker
 tlds==2021080800
+    # via -r requirements/install.in
+udata_event_service==0.0.7
     # via -r requirements/install.in
 ujson==1.35
     # via -r requirements/install.in
