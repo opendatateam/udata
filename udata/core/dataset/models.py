@@ -217,9 +217,9 @@ class License(db.Document):
                 for t in l.alternate_titles
             )
             candidates = [l for l, d in computed if d <= MAX_DISTANCE]
-            # If there is more that one match, we cannot determinate
+            # If there is more that one license matching, we cannot determinate
             # which one is closer to safely choose between candidates
-            if len(candidates) == 1:
+            if len(set(candidates)) == 1:
                 license = candidates[0]
         return license
 
