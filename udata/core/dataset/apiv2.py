@@ -1,10 +1,11 @@
 import logging
 
 from flask import url_for, request, abort
+from flask_restplus import marshal
 
 from udata import search
 from udata.api import apiv2, API, fields
-from udata.utils import multi_to_dict
+from udata.utils import multi_to_dict, get_by
 
 from .api_fields import (
     badge_fields,
@@ -17,7 +18,7 @@ from .api_fields import (
 )
 from udata.core.spatial.api_fields import geojson
 from .models import (
-    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
@@ -139,6 +140,11 @@ dataset_page_fields = apiv2.model(
     mask='data{{{0}}},*'.format(DEFAULT_MASK_APIV2)
 )
 
+specific_resource_fields = apiv2.model('SpecificResource', {
+    'resource': fields.Nested(resource_fields, description='The dataset resources'),
+    'dataset_id': fields.String()
+})
+
 apiv2.inherit('Badge', badge_fields)
 apiv2.inherit('OrganizationReference', org_ref_fields)
 apiv2.inherit('UserReference', user_ref_fields)
@@ -217,3 +223,23 @@ class ResourcesAPI(API):
             'previous_page': previous_page if page > 1 else None,
             'total': len(res),
         }
+
+
+@ns.route('/resources/<uuid:rid>/', endpoint='resource')
+class ResourceAPI(API):
+    @apiv2.doc('get_resource')
+    def get(self, rid):
+        dataset = Dataset.objects(resources__id=rid).first()
+        if dataset:
+            resource = get_by(dataset.resources, 'id', rid)
+        else:
+            resource = CommunityResource.objects(id=rid).first()
+        if not resource:
+            apiv2.abort(404, 'Resource does not exist')
+
+        # Manually marshalling to make sure resource.dataset is in the scope.
+        # See discussions in https://github.com/opendatateam/udata/pull/2732/files
+        return marshal({
+            'resource': resource,
+            'dataset_id': dataset.id if dataset else None
+        }, specific_resource_fields)
