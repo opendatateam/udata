@@ -2,18 +2,19 @@ import { createApp } from "vue";
 import * as dsfr from "@gouvfr/dsfr/dist/dsfr/dsfr.module";
 
 import Threads from "./components/discussions/threads.vue";
-import MenuSearch from "./components/search/menu-search";
-import Search from "./components/search/search";
-import FeaturedButton from './components/utils/featured';
-import FollowButton from "./components/utils/follow-button";
-import ReadMore from "./components/utils/read-more";
-import RequestMembership from "./components/organization/request-membership";
+import MenuSearch from "./components/search/menu-search.vue";
+import Search from "./components/search/search.vue";
+import FeaturedButton from './components/utils/featured.vue';
+import FollowButton from "./components/utils/follow-button.vue";
+import ReadMore from "./components/utils/read-more.vue";
+import RequestMembership from "./components/organization/request-membership.vue";
 import Resources from "./components/dataset/resource/resources.vue";
 import SearchBar from "./components/utils/search-bar.vue";
 
 import Tabs from "./components/vanilla/tabs";
 import Accordion from "./components/vanilla/accordion";
 import Clipboard from "./components/vanilla/clipboard";
+import SortSearch from "./components/vanilla/sort-search";
 
 import VueFinalModal from "vue-final-modal";
 import Toaster from "@meforma/vue-toaster";

@@ -143,22 +143,22 @@
                 </ul>
                 <div class="fr-col-6 fr-col-sm-4 fr-col-md-3 fr-col-lg-2 fr-ml-auto fr-mr-1v">
                     <select
-                            aria-label="{{ _('Language selector') }}"
-                            class="fr-select"
-                            onchange="location = location.href.replace(new RegExp('\/\\w{2}\/'), '/' + this.value + '/', regex=true)"
-                        >
-                            {% for code, name in config['LANGUAGES'].items() %}
-                                {% if g.lang_code == code %}
-                                <option value={{code}} selected>
-                                    {{name}}
-                                </option>
-                                {% else %}
-                                <option value={{code}}>
-                                    {{name}}
-                                </option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
+                        aria-label="{{ _('Language selector') }}"
+                        class="fr-select"
+                        onchange="location = location.href.replace(new RegExp('\/\\w{2}\/'), '/' + this.value + '/', regex=true)"
+                    >
+                        {% for code, name in config['LANGUAGES'].items() %}
+                            {% if g.lang_code == code %}
+                            <option value={{code}} selected>
+                                {{name}}
+                            </option>
+                            {% else %}
+                            <option value={{code}}>
+                                {{name}}
+                            </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
         </footer>

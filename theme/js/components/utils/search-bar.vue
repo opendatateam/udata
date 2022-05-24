@@ -19,11 +19,11 @@
 </template>
 
 <script>
-import {reactive, watch, onUnmounted} from 'vue';
+import {reactive, watch, onUnmounted, defineComponent} from 'vue';
 import {bus} from "../../plugins/eventbus";
 import useDebouncedRef from "../../composables/useDebouncedRef";
 import {search_autocomplete_debounce, search_autocomplete_enabled} from "../../config";
-export default {
+export default defineComponent({
   props: {
     eventName: {
       type: String,
@@ -57,5 +57,5 @@ export default {
       searchValue,
     }
   }
-}
+});
 </script>

@@ -1,83 +1,19 @@
 // Big searchy boy
 
-.container.search {
-    overflow: visible; // This is only for the fancy® box-shadow™ that our designer desperately wanted. Please excuse him.
-    position: relative;
-
-    .search-bar {
-        @media @query-md {
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            background: white;
-            border-bottom: 1px solid @grey-200;
-        }
-    }
-
-    // Nice filter icons gets filled blue when active
-    .filter-icon {
-        cursor: pointer;
-        * {
-            transition: fill ease 0.3s;
-        }
-
-        &.active,
-        &.isFiltered {
-            .fillColor {
-                fill: @blue-400;
-            }
-            path {
-                fill: white;
-            }
-            * {
-                stroke: white;
-            }
-        }
-    }
-
+.fr-container--search {
     .search-results {
         min-height: 450px; // This allow the different filter dropdowns to have enough space while loading
     }
-
-    .filters-wrapper {
-        // Infamous fancy® box-shadow
-        box-shadow: 0 20px 20px rgba(0, 0, 0, 0.02),
-            0 10px 10px rgba(0, 0, 0, 0.04), 0 4px 4px rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-
-        .fr-btn--secondary {
-            border-radius: 3px;
-        }
+    .fr-sidemenu__title {
+        font-size: 1rem;
     }
-
-    // On mobile, filters get their own space but we're reusing the same markup so some trickery is needed
-    @media @query-md {
-        h1 {
-            font-size: @font-size-lg;
+    @media @dsfr-query-md {
+        .fr-sidemenu__inner {
+            padding-left: 0;
         }
-
-        .search-filters {
-            position: fixed;
-            background: white;
-            z-index: 10;
-            min-height: 100vh;
-            left: 0;
-            top: 125px; // Header + search bar height + margin. Should be just after the search border.
-            width: 100%;
-
-            transform: translateX(100%);
-
-            transition: all ease 0.25s;
-
-            padding: @spacing-md;
-
-            .filters-wrapper {
-                box-shadow: none;
-            }
-
-            &.active {
-                transform: translateX(0);
-            }
+        .fr-sidemenu__inner > .fr-collapse {
+            padding-left: 0;
+            padding-right: 0;
         }
     }
 }

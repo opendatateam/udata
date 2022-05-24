@@ -3,27 +3,3 @@
 .fr-input {
     --border-action-high-blue-france: @blue-400;
 }
-
-.search-input {
-    .icon {
-        svg {
-            width: 24px;
-            height: 24px;
-
-            * {
-                transition: stroke ease 0.2s;
-            }
-        }
-
-        &.active svg * {
-            stroke: @blue-400;
-        }
-    }
-
-    input[type="text"] {
-        padding: @spacing-xxs @spacing-xs;
-        font-size: inherit;
-        border: none;
-        appearance: none;
-    }
-}

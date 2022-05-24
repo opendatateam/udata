@@ -1,10 +1,10 @@
-import {computed} from "vue";
+import {computed, ComputedRef, Ref} from "vue";
 import config from "../config";
 
 /**
  *
  * @param {Ref<string>} q
- * @returns {{datasetUrl, organizationUrl, reuseUrl}}
+ * @returns {{datasetUrl: ComputedRef<string>, organizationUrl: ComputedRef<string>, reuseUrl: ComputedRef<string>}}
  */
 export default function useSearchUrl(q) {
   const datasetUrl = computed(() => `${config.values.datasetUrl}?q=${q.value}`);

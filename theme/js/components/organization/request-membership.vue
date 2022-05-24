@@ -19,8 +19,9 @@ A simple request membership prompt.
 </template>
 
 <script>
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   props: {
     orga: String,
   },
@@ -47,5 +48,5 @@ data() {
         });
       }
   }
-};
+});
 </script>

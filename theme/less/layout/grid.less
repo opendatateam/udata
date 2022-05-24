@@ -79,6 +79,11 @@ You can also specify a block width by using `.col-{n}` classes, *with n ∈ [1..
 ### Responsive classes
 
 The grid provides 4 breakpoints : `sm`, `md`, `lg` and `xl`. You can use the corresponding `.col-{sm|md|lg|xl}-{n}` (*with n ∈ [1...12]*) to easily make responsive layouts.
+
+**Be aware that these responsive classes and utilities work in the opposite flow as all design systems.**
+`col-sm-12` makes a full-width column for screens below `sm` breakpoints and not above.
+Use DSFR grid and responsive utilities instead : https://gouvfr.atlassian.net/wiki/spaces/DB/pages/222331372/Grille+et+points+de+rupture+-+Grid+and+breakpoints
+
 For example, if you want a layout with 3 blocks of 4 columns on desktop and stack them on medium widths :
 
 ```grid-responsive.html
@@ -212,8 +217,9 @@ in which case you'll have one column on each side and the main content will span
     position: relative;
 }
 
+@max-width: (12 * @breakpoint-xl / 10);
 .hagrid {
-    max-width: (12 * @breakpoint-xl)/10;
+    max-width: @max-width;
     margin: auto;
     overflow: hidden;
 

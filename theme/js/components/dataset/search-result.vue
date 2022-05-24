@@ -26,24 +26,6 @@ Vue. -->
         {{ $filters.excerpt(description) }}
       </div>
     </div>
-    <dl class="card-hover">
-      <div v-if="temporal_coverage">
-        <dt>{{ $t("Temporal coverage") }}</dt>
-        <dd>{{ temporal_coverage.start + " - " + temporal_coverage.end }}</dd>
-      </div>
-      <div v-if="frequency">
-        <dt>{{ $t("Frequency") }}</dt>
-        <dd>{{ frequency }}</dd>
-      </div>
-      <div v-if="geoZone">
-        <dt>{{ $t("Spatial coverage") }}</dt>
-        <dd>{{ geoZone.join(", ") }}</dd>
-      </div>
-      <div v-if="spatial?.granularity">
-        <dt>{{ $t("Territorial coverage granularity") }}</dt>
-        <dd>{{ spatial.granularity }}</dd>
-      </div>
-    </dl>
     <ul class="card-footer">
       <li>
         <strong>{{ resources.total || 0 }}</strong>

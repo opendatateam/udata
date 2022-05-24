@@ -34,7 +34,7 @@ function _jsonMeta(name) {
 export let user;
 const userEl = document.querySelector("meta[name=current-user]");
 
-if (userEl) {
+if (userEl instanceof HTMLElement) {
   user = {
     id: userEl.getAttribute("content"),
     slug: userEl.dataset.slug,
@@ -122,7 +122,7 @@ export const schema_validata_url = _meta("schema-validata-url");
 const sentryEl = document.querySelector("meta[name=sentry]");
 export const sentry = {};
 
-if (sentryEl) {
+if (sentryEl instanceof HTMLElement) {
   sentry.dsn = sentryEl.getAttribute("content");
   sentry.release = sentryEl.dataset.release || undefined;
   sentry.tags = JSON.parse(decodeURIComponent(sentryEl.dataset.tags || "{}"));

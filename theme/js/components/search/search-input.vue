@@ -12,27 +12,30 @@ If the submitUrl prop is passed, it will redirect on Submit.
 -->
 
 <template>
-  <section class="search-input fr-grid-row">
-      <span class="icon" :class="{ active: queryString }" v-html="icon"></span>
-      <input
-        class="fr-col w-100 fr-ml-3v"
-        type="text"
-        name="q"
-        :value="queryString"
-        @input="_onChange"
-        @keydown.delete="onDelete"
-        ref="input"
-        :aria-label="placeholder || $t('Search...')"
-        :placeholder="placeholder || $t('Search...')"
-        data-cy="search-input"
-      />
+  <section class="fr-search-bar fr-search-bar--lg w-100">
+    <input
+      type="search"
+      name="q"
+      :value="queryString"
+      @input="_onChange"
+      @keydown.delete="onDelete"
+      ref="input"
+      class="fr-input"
+      :aria-label="placeholder || $t('Search...')"
+      :placeholder="placeholder || $t('Search...')"
+      data-cy="search-input"
+    />
+    <button class="fr-btn" :title="$t('Search')" type="submit">
+      {{ $t('Search') }}
+    </button>
   </section>
 </template>
 
 <script>
 import Icon from "svg/search.svg";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   created() {
     this.icon = Icon;
     this.queryString = this.value;
@@ -69,5 +72,5 @@ export default {
       });
     }
   },
-};
+});
 </script>

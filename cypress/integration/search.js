@@ -45,13 +45,13 @@ describe("Testing search bar", () => {
       });
   });
   it("Click on first option should change to datasets page", () => {
-    const typed = "some string";
+    const typed = "somestring";
     cy.get('@input')
       .type(typed)
       .invoke('attr', 'aria-activedescendant').then(val => {
         cy.get("#" + val).click().then(() => {
-          cy.location('href').should('include', 'datasets');
-          cy.location('href').should('include', encodeURIComponent(typed));
+          cy.url().should('include', 'datasets');
+          cy.url().should('include', typed);
         });
       });
   });

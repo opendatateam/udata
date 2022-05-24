@@ -62,8 +62,8 @@ You should also add a `<modals-container></modals-container>` element that will 
 ```
 */
 
-import Preview from "../components/dataset/preview";
-import Schema from "../components/dataset/schema-modal";
+import Preview from "../components/dataset/preview.vue";
+import Schema from "../components/dataset/schema-modal.vue";
 
 const modals = { preview: Preview, schema: Schema };
 

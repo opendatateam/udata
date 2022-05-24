@@ -21,6 +21,7 @@ A very simple component that display its content up to a maximum height and then
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { easing, tween, styler } from "popmotion";
 
 function getHeight(elt) {
@@ -32,7 +33,7 @@ function getHeight(elt) {
 
 const DEFAULT_HEIGHT = 284;
 
-export default {
+export default defineComponent({
   name: "read-more",
   data() {
     return {
@@ -79,5 +80,5 @@ export default {
       }
     }
   }
-}
+});
 </script>

@@ -6,8 +6,8 @@
 </template>
 
 <script>
-
-export default {
+import {defineComponent} from "vue";
+export default defineComponent({
     name: "featured-button",
     props: {
         subjectId: String,
@@ -29,5 +29,5 @@ export default {
 
         }
     },
-}
+});
 </script>

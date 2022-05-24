@@ -35,7 +35,7 @@
 
 <script>
 import {useI18n} from 'vue-i18n'
-import {onMounted, ref, watch} from 'vue';
+import {onMounted, ref, watch, defineComponent} from 'vue';
 import Loader from "../loader.vue";
 import Pagination from "../../pagination/pagination.vue";
 import Resource from "./resource.vue";
@@ -49,7 +49,7 @@ import {
   RESOURCES_SEARCH_RESULTS_UPDATED
 } from "../../../plugins/eventbus";
 
-export default {
+export default defineComponent({
   name: "resources",
   components: {
     Loader,
@@ -63,7 +63,7 @@ export default {
     },
     canEditResources: {
       type: Object,
-      default() { return {}}
+      default:() => {{}}
     },
     datasetId: {
       type: String,
@@ -169,5 +169,5 @@ export default {
       top,
     }
   }
-}
+});
 </script>

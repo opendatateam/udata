@@ -93,6 +93,7 @@ Discussions allow users to interact with others.
 </template>
 
 <script>
+import {defineComponent} from "vue";
 import config from "../../config";
 import i18n from "../../plugins/i18n";
 
@@ -100,8 +101,7 @@ import Pagination from "../pagination/pagination.vue";
 import CreateThread from "./threads-create.vue";
 import Thread from "./thread.vue";
 import Loader from "./loader.vue";
-import CloseIcon from "svg/close.svg";
-import ThreadsCreateButton from "./threads-create-button";
+import ThreadsCreateButton from "./threads-create-button.vue";
 import {DISCUSSIONS_START_THREAD} from "../../plugins/eventbus";
 
 const URL_REGEX = /discussion-([a-f0-9]{24})-?([0-9]+)?$/i;
@@ -116,7 +116,7 @@ const sorts = [
 
 const defaultTitle = i18n.global.t("Discussions");
 
-export default {
+export default defineComponent({
   components: {
     ThreadsCreateButton,
     "create-thread": CreateThread,
@@ -134,7 +134,6 @@ export default {
       loading: true,
       currentSort: sorts[0],
       sorts,
-      CloseIcon,
       readOnlyEnabled: config.read_only_enabled,
     };
   },
@@ -280,5 +279,5 @@ export default {
       this.loadPage(this.page);
     },
   },
-};
+});
 </script>

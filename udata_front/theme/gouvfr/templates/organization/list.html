@@ -1,5 +1,6 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
+{% from theme('macros/sort_search.html') import sort_search %}
 
 {% set toolbar_class='search-toolbar' %}
 
@@ -22,18 +23,42 @@
 </li>
 {% endblock %}
 
+{% set sorts = [
+    {"label": _('Newest'),"value": "created", "order": "desc"},
+    {"label": _('Oldest'),"value": "created", "order": "asc"},
+    {"label": _('Followers'),"value": "followers", "order": "desc"},
+    {"label": _('Reuses'), "value": "reuses", "order": "desc"}
+] %}
+
 {% block main_content %}
-<section class="container">
-    <div class="pt-sm search-input">
-        <form method="GET" class="row-inline fs-lg">
-            <span class="icon active">{% include theme("svg/search.svg") %}</span>
-            <input type="text" name="q" value="{{organizations.query._query}}" aria-label="{{ _('Search...') }}"
-                placeholder="{{ _('Search...') }}" />
+<section class="fr-container fr-py-2w">
+    <h1 class="fr-mb-1w">{{_('Organizations')}}</h1>
+    <div>{{_('Search among %(count)s organizations on %(site)s', count=current_site.metrics['organizations']|format_number, site=current_site.title)}}</div>
+    <div class="fr-pt-3v">
+        <form method="GET" class="fr-griw-row">
+            <div class="fr-search-bar fr-search-bar--lg w-100" role="search">
+                <label class="fr-label" for="search-organizations">
+                    {{ _('Search...') }}
+                </label>
+                <input
+                    name="q"
+                    class="fr-input"
+                    placeholder="{{ _('Search...') }}"
+                    type="search"
+                    id="search-organizations"
+                    value="{{organizations.query._query}}"
+                />
+                <button class="fr-btn" title="{{_('Search')}}" type="submit">
+                    {{ _('Search') }}
+                </button>
+            </div>
+            <div class="w-100 fr-grid-row fr-grid-row--middle fr-mt-5v justify-between">
+                <p class="fr-col-auto fr-my-0">{{ _('%(result)s results', result=organizations.total) }}</p>
+                {{sort_search(organizations, sorts)}}
+            </div>
         </form>
     </div>
-    <div class="row-inline pt-xl justify-between align-items-center">
-        <h1 class="m-0 h2">{{ _('Organizations')}} <sup>{{organizations.total}}</sup></h1>
-    </div>
+    {% if organizations %}
     <ul class="search-results mt-lg">
         {% for organization in organizations %}
         <li>
@@ -44,5 +69,6 @@
         {% endfor %}
     </ul>
     {{ paginator(organizations) }}
+    {% endif %}
 </section>
 {% endblock %}

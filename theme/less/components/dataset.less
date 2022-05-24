@@ -69,14 +69,6 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
         <div class="card-description text-grey-380 mt-xs"> Quiaé aliasé exé. Architectoé laudantiumé corporisé
             consequaturé laboriosamé esté. Teneturé incidunté voluptatemé minimaé fugité inventoreé fugiaté. </div>
     </div>
-    <dl class="card-hover">
-        <div>
-            <dt>Frequency</dt>
-            <dd>Unknown</dd>
-            <dt>Other stuff</dt>
-            <dd>Any value</dd>
-        </div>
-    </dl>
     <ul class="card-footer">
         <li><strong>131</strong> ressources</li>
         <li><strong>22</strong> réutilisations </li>
@@ -147,7 +139,7 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
     &.dataset-search-result {
         padding: 0 @spacing-xs; // Unfortunately, we need some sweet borders
 
-        border-top: 1px solid @grey-100;
+        border-bottom: 1px solid @grey-100;
 
         > * {
             padding: @spacing-md 0;
@@ -169,39 +161,6 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
 
             @media @query-lg {
                 padding-top: @spacing-md;
-            }
-        }
-
-        .card-hover {
-            flex-basis: 260px;
-            flex-shrink: 0;
-            align-self: stretch;
-
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            padding: @spacing-md @spacing-xxs;
-
-            border-left: 1px solid @grey-100;
-
-            > div {
-                flex-basis: 50%;
-                flex-grow: 1;
-                text-align: right;
-
-                margin-bottom: @spacing-sm;
-                padding: 0 @spacing-xs;
-
-                color: @grey-380;
-                font-size: @font-size-xs;
-
-                dd {
-                    font-weight: @font-weight-bold;
-                }
-            }
-
-            @media @query-lg {
-                display: none;
             }
         }
 
@@ -245,17 +204,9 @@ Disclaimer : the search-result component is weird in styling and uses a lot of f
 }
 
 a {
-    &, &:focus:not(:focus-visible) {
-        .dataset-search-result .card-hover {
-            visibility: hidden;
-        }
-    }
     &:hover, &:focus, &:focus-visible {
         .dataset-search-result {
             background: @blue-100;
-            .card-hover {
-                visibility: visible;
-            }
         }
     }
 }

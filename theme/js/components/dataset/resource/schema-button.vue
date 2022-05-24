@@ -6,11 +6,11 @@
 </template>
 
 <script>
-import {inject} from 'vue';
+import {inject, defineComponent} from 'vue';
 import useSchema from "../../../composables/useSchema";
 import triangle from "svg/triangle.svg";
 
-export default {
+export default defineComponent({
   props: {
     resource: {
       type: Object,
@@ -35,5 +35,5 @@ export default {
       triangle,
     }
   },
-}
+});
 </script>

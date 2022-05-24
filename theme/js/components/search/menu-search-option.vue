@@ -24,7 +24,8 @@
 </template>
 
 <script>
-export default {
+import {defineComponent} from "vue";
+export default defineComponent({
   props: {
     icon: {
       type: String,
@@ -43,7 +44,7 @@ export default {
       required: true,
     },
   }
-}
+});
 </script>
 
 <style scoped>

@@ -8,9 +8,10 @@
 </template>
 
 <script>
+import {defineComponent} from "vue";
 import {DISCUSSIONS_START_THREAD} from "../../plugins/eventbus";
 
-export default {
+export default defineComponent({
   props: {
     onClick: {
       type: Function,
@@ -21,5 +22,5 @@ export default {
       return this.onClick? this.onClick() : this.$bus.emit(DISCUSSIONS_START_THREAD);
     }
   }
-}
+});
 </script>

@@ -5,7 +5,9 @@ import markdown from "../markdown";
 import "dayjs/locale/fr";
 import "dayjs/locale/en";
 import "dayjs/locale/es";
+import LocalizedFormat from 'dayjs/plugin/localizedFormat'
 
+dayjs.extend(LocalizedFormat);
 dayjs.locale(config.lang);
 
 const truncate = (val, length = 300) => {
@@ -15,7 +17,7 @@ const truncate = (val, length = 300) => {
 
 const excerpt = (val, length = 300) => {
   if (typeof val !== "string") return;
-  return RemoveMarkdown(truncate(val, length));
+  return truncate(RemoveMarkdown(val), length);
 };
 
 const filesize = (val) => {
@@ -30,7 +32,7 @@ const filesize = (val) => {
     return `${val.toFixed(1)}Y${suffix}`
 }
 
-const formatDate = (date, format = 'D MMMM YYYY') => {
+const formatDate = (date, format = 'LL') => {
   return dayjs(date).format(format);
 }
 

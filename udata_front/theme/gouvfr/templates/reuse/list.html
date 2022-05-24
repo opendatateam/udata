@@ -1,5 +1,6 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
+{% from theme('macros/sort_search.html') import sort_search %}
 
 {% set meta = {
     'title': _('Reuses'),
@@ -39,42 +40,70 @@
     ('others', _('Others')),
 ) %}
 
+{% set sorts = [
+    {"label": _('Newest'),"value": "created", "order": "desc"},
+    {"label": _('Oldest'),"value": "created", "order": "asc"},
+    {"label": _('Followers'),"value": "followers", "order": "desc"}
+] %}
+
 {% block main_content %}
-<section class="container">
-    <div class="fr-pt-3v search-input">
-        <form method="GET" class="fr-grid-row fr-text--lead fr-mb-0">
-            <span class="icon active">{% include theme("svg/search.svg") %}</span>
-            <input type="text" name="q" value="{{reuses.query._query}}" aria-label="{{ _('Search...') }}"
-                placeholder="{{ _('Search...') }}" />
+<section class="fr-container fr-py-2w">
+    <h1 class="fr-mb-1w">{{_('Reuses')}}</h1>
+    <div class="fr-grid-row fr-grid-row--middle justify-between">
+        <div>{{_('Search among %(count)s reuses on %(site)s', count=current_site.metrics['reuses']|format_number, site=current_site.title)}}</div>
+        <a
+            href="{{ url_for('datasets.list', q=reuses.query._query) }}"
+            class="fr-link fr-text--sm fr-m-0">
+            {{ _('Search in datasets') }}
+        </a>
+    </div>
+    <div class="fr-pt-3v">
+        <form method="GET" class="fr-grid-row">
+            <div class="fr-search-bar fr-search-bar--lg w-100 fr-mb-5v" role="search">
+                <label class="fr-label" for="search-reuses">
+                    {{ _('Search...') }}
+                </label>
+                <input
+                    name="q"
+                    class="fr-input"
+                    placeholder="{{ _('Search...') }}"
+                    type="search"
+                    id="search-reuses"
+                    value="{{reuses.query._query}}"
+                />
+                <button class="fr-btn" title="{{_('Search')}}" type="submit">
+                    {{ _('Search') }}
+                </button>
+            </div>
+            <div class="fr-grid-row fr-mb-1v fr-displayed-lg">
+                <ul class="fr-tags-group">
+                    <li>
+                        <a
+                            href="{{ url_for('reuses.list') }}"
+                            class="fr-tag{% if not reuses.query._filters.topic %} active{% endif %}">
+                            {{ _('All') }}
+                        </a>
+                    </li>
+                    {% for topic_id, label in reuses_topics %}
+                        <li>
+                            <a
+                                href="{{ reuses.query.to_url(url, replace=True, **{'topic': topic_id}) }}"
+                                class="fr-tag{% if reuses.query._filters and reuses.query._filters.topic and reuses.query._filters.topic == topic_id %} active{% endif %}"
+                            >
+                                {{ label }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="w-100 fr-grid-row  fr-grid-row--middle justify-between">
+                <p class="fr-col-auto fr-my-0">{{ _('%(result)s results', result=reuses.total) }}</p>
+                {{sort_search(reuses, sorts)}}
+            </div>
         </form>
     </div>
-    <div class="fr-grid-row fr-pt-9v justify-between align-items-center fr-grid-row--middle">
-        <h1 class="m-0 h2">{{ _('Reuses')}} <sup>{{reuses.total}}</sup></h1>
-        <a href="{{ url_for('datasets.list') }}" title="{{ _('Search in datasets') }}"
-            class="nav-link fs-sm">{{ _('Search in datasets') }}</a>
-    </div>
-    <div class="fr-grid-row fr-py-3w fr-displayed-lg">
-        <ul class="fr-tags-group">
-            <li>
-                <a
-                    href="{{ url_for('reuses.list') }}"
-                    class="fr-tag{% if not reuses.query._filters.topic %} active{% endif %}">
-                    {{ _('All') }}
-                </a>
-            </li>
-            {% for topic_id, label in reuses_topics %}
-                <li>
-                    <a
-                        href="{{ reuses.query.to_url(url, replace=True, **{'topic': topic_id}) }}"
-                        class="fr-tag{% if reuses.query._filters and reuses.query._filters.topic and reuses.query._filters.topic.topic == topic_id %} active{% endif %}"
-                    >
-                        {{ label }}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <ul class="search-results fr-grid-row fr-grid-row--gutters mt-lg-md">
+    {%if reuses %}
+    <ul class="search-results fr-grid-row fr-grid-row--gutters fr-mt-2w">
         {% for reuse in reuses %}
         <li class="fr-col-lg-3 fr-col-md-4 fr-col-sm-6 fr-col-12 my-sm-sm fr-mb-3v">
             {% include theme('reuse/card.html') %}
@@ -82,5 +111,6 @@
         {% endfor %}
     </ul>
     {{ paginator(reuses) }}
+    {% endif %}
 </section>
 {% endblock %}

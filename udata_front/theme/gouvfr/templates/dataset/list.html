@@ -1,17 +1,14 @@
 {% extends theme("layouts/1-column.html") %}
 {% from theme('macros/paginator.html') import paginator with context %}
+{% from theme('macros/sort_search.html') import sort_search %}
 
 {% set toolbar_class='search-toolbar' %}
 
-{# {% block breadcrumb %}
+{% block breadcrumb %}
 <li class="active">
     {{ _('Datasets') }}
-    <small>{{ _('%(start)s to %(end)s on %(total)s',
-            start=datasets.page_start,
-            end=datasets.page_end,
-            total=datasets.total) }}</small>
 </li>
-{% endblock %} #}
+{% endblock %}
 
 {% set meta = {
     'title': _('Datasets'),
@@ -22,29 +19,62 @@
 
 {% set bundle = 'search' %}
 
+{% set sorts = [
+    {"label": _('Newest'),"value": "created", "order": "desc"},
+    {"label": _('Oldest'),"value": "created", "order": "asc"},
+    {"label": _('Followers'),"value": "followers", "order": "desc"},
+    {"label": _('Reuses'), "value": "reuses", "order": "desc"}
+] %}
+
 {% block main_content %}
 <section
-    class="container search py-lg vuejs"
+    class="fr-container fr-container--search fr-py-2w vuejs"
 >
+    <h1 class="fr-mb-1w">{{_('Datasets')}}</h1>
+    <div class="fr-grid-row fr-grid-row--middle justify-between">
+        <div>{{_('Search among %(count)s datasets on %(site)s',count=current_site.metrics['datasets']|format_number, site=current_site.title)}}</div>
+        <a
+            href="{{ url_for('reuses.list', q=datasets.query._query) }}"
+            data-q
+            class="fr-link fr-text--sm fr-m-0"
+        >
+            {{ _('Search reuses') }}
+        </a>
+    </div>    
     <Search
         :disable-first-search="true"
         data-total-results="{{datasets.total}}"
-        data-results="{{ datasets|to_api_format|to_json }}"
+        data-results="{{datasets|to_api_format|to_json}}"
+        :sorts="{{sorts|to_json}}"
     >
     </Search>
     <noscript>
-        <div class="pt-sm search-input">
-            <form method="GET" class="row-inline fs-lg">
-                <span class="icon active">{% include theme("svg/search.svg") %}</span>
-                <input type="text" name="q" value="{{datasets.query._query}}" aria-label="{{ _('Search...') }}"
-                    placeholder="{{ _('Search...') }}" />
+        <div class="pt-sm">
+            <form method="GET" class="fr-grid-row">
+                <div class="fr-search-bar w-100" role="search">
+                    <label class="fr-label" for="search-datasets">
+                        {{ _('Search...') }}
+                    </label>
+                    <input
+                        name="q"
+                        class="fr-input"
+                        placeholder="{{ _('Search...') }}"
+                        type="search"
+                        id="search-datasets"
+                        value="{{datasets.query._query}}"
+                    />
+                    <button class="fr-btn" title="{{_('Search')}}" type="submit">
+                        {{ _('Search') }}
+                    </button>
+                </div>
+                <div class="w-100 fr-grid-row  fr-grid-row--middle fr-pt-5v justify-between">
+                    <p class="fr-col-auto fr-my-0">{{ _('%(result)s results', result=datasets.total) }}</p>
+                    {{sort_search(datasets, sorts)}}
+                </div>
             </form>
         </div>
-        <div class="row-inline pt-xl pt-lg-lg justify-between align-items-center">
-            <h1 class="m-0 h2">{{ _('Datasets')}} <sup>{{datasets.total}}</sup></h1>
-            <a href="{{ url_for('reuses.list') }}" title="" class="nav-link fs-sm mt-lg-sm">{{ _('Search reuses') }}</a>
-        </div>
-        <ul class="search-results mt-lg">
+        {% if datasets %}
+        <ul class="search-results fr-mt-3v">
             {% for dataset in datasets %}
             <li>
                 <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
@@ -54,6 +84,7 @@
             {% endfor %}
         </ul>
         {{ paginator(datasets) }}
+        {% endif %}
     </noscript>
 </section>
 {% endblock %}

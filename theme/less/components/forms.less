@@ -22,7 +22,7 @@ We can use fieldset if needed to group inputs of the same kind.
 @import (less) "@gouvfr/dsfr/dist/component/form/form.css";
 @import (less) "@gouvfr/dsfr/dist/component/checkbox/checkbox.css";
 @import (less) "@gouvfr/dsfr/dist/component/input/input.css";
-@import (less) "@gouvfr/dsfr/dist/component/select/select.css";
+@import (inline) "@gouvfr/dsfr/dist/component/select/select.css";
 @import (less) "@gouvfr/dsfr/dist/component/toggle/toggle.css";
 .form-container {
     background-color: @white;
@@ -72,8 +72,16 @@ form.form {
     }
 }
 
+.fr-select {
+    --border-plain-grey: @blue-400;
+}
+
 .fr-select--no-border {
     box-shadow: none;
+}
+
+.fr-select--width-auto {
+    width: auto;
 }
 
 .fr-checkbox-group input[type="checkbox"]:checked + label::before {

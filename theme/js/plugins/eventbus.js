@@ -47,13 +47,25 @@ Type | Parameter | Emitted
 
 */
 
-import mitt from "mitt";
+import mitt, {Emitter as EmitterMitt} from "mitt";
 
 export const DISCUSSIONS_START_THREAD = "discussions.startThread";
 export const RESOURCES_SEARCH = "resources.search";
 export const RESOURCES_SEARCH_RESULTS_UPDATED = "resources.search.results.updated";
 export const RESOURCES_SEARCH_RESULTS_TOTAL = "resources.search.results.total";
 
+
+/**
+ * @typedef {DISCUSSIONS_START_THREAD | RESOURCES_SEARCH | RESOURCES_SEARCH_RESULTS_UPDATED | RESOURCES_SEARCH_RESULTS_TOTAL} UdataEventType
+ */
+
+/**
+ * @typedef {Record<UdataEventType, unknown>} Events
+ */
+
+/**
+ * @type {EmitterMitt<Events>} Emitter of
+ */
 export const bus = mitt();
 
 export const install = (app) => {

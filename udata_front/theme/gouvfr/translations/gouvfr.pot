@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-front 2.0.3.dev0\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2022-05-10 09:26+0200\n"
-"PO-Revision-Date: 2022-05-10 09:26+0200\n"
+"POT-Creation-Date: 2022-05-24 15:03+0200\n"
+"PO-Revision-Date: 2022-05-24 15:03+0200\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
 "Language: en\n"
 "Language-Team: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
@@ -55,15 +55,17 @@ msgstr ""
 #: udata_front/theme/gouvfr/__init__.py:47
 #: udata_front/theme/gouvfr/templates/dataset/display.html:342
 #: udata_front/theme/gouvfr/templates/dataset/display.html:458
+#: udata_front/theme/gouvfr/templates/dataset/list.html:26
 #: udata_front/theme/gouvfr/templates/home.html:70
 #: udata_front/theme/gouvfr/templates/organization/display.html:56
 #: udata_front/theme/gouvfr/templates/organization/display.html:114
+#: udata_front/theme/gouvfr/templates/organization/list.html:30
 #: udata_front/theme/gouvfr/templates/page.html:39
-#: udata_front/theme/gouvfr/templates/post/display.html:75
+#: udata_front/theme/gouvfr/templates/post/display.html:79
 #: udata_front/theme/gouvfr/templates/reuse/display.html:31
-#: udata_front/theme/gouvfr/templates/reuse/list.html:5
-#: udata_front/theme/gouvfr/templates/reuse/list.html:15
-#: udata_front/theme/gouvfr/templates/reuse/list.html:52
+#: udata_front/theme/gouvfr/templates/reuse/list.html:6
+#: udata_front/theme/gouvfr/templates/reuse/list.html:16
+#: udata_front/theme/gouvfr/templates/reuse/list.html:51
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:22
 #: udata_front/theme/gouvfr/templates/topic/browse.html:15
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:19
@@ -76,8 +78,8 @@ msgstr ""
 #: udata_front/theme/gouvfr/__init__.py:48
 #: udata_front/theme/gouvfr/templates/home.html:72
 #: udata_front/theme/gouvfr/templates/organization/display.html:20
-#: udata_front/theme/gouvfr/templates/organization/list.html:7
-#: udata_front/theme/gouvfr/templates/organization/list.html:17
+#: udata_front/theme/gouvfr/templates/organization/list.html:8
+#: udata_front/theme/gouvfr/templates/organization/list.html:18
 #: udata_front/theme/gouvfr/templates/organization/list.html:35
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:24
 #: udata_front/theme/gouvfr/templates/user/base.html:97
@@ -180,7 +182,6 @@ msgid "Embed"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:226
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:46
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:209
 msgid "Temporal coverage"
 msgstr ""
@@ -198,7 +199,6 @@ msgid "Territory"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:232
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:54
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:232
 msgid "Frequency"
 msgstr ""
@@ -353,14 +353,15 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:35
 #: udata_front/theme/gouvfr/templates/dataset/followers.html:4
-#: udata_front/theme/gouvfr/templates/dataset/list.html:17
-#: udata_front/theme/gouvfr/templates/dataset/list.html:44
+#: udata_front/theme/gouvfr/templates/dataset/list.html:9
+#: udata_front/theme/gouvfr/templates/dataset/list.html:14
+#: udata_front/theme/gouvfr/templates/dataset/list.html:33
 #: udata_front/theme/gouvfr/templates/home.html:68
 #: udata_front/theme/gouvfr/templates/home.html:109
 #: udata_front/theme/gouvfr/templates/organization/display.html:49
 #: udata_front/theme/gouvfr/templates/organization/display.html:93
 #: udata_front/theme/gouvfr/templates/page.html:24
-#: udata_front/theme/gouvfr/templates/post/display.html:60
+#: udata_front/theme/gouvfr/templates/post/display.html:64
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:20
 #: udata_front/theme/gouvfr/templates/topic/browse.html:9
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:19
@@ -448,7 +449,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/dataset/display.html:165
 #: udata_front/theme/gouvfr/templates/organization/display.html:159
 #: udata_front/theme/gouvfr/templates/page.html:54
-#: udata_front/theme/gouvfr/templates/post/display.html:94
+#: udata_front/theme/gouvfr/templates/post/display.html:98
 #: udata_front/theme/gouvfr/templates/reuse/display.html:120
 msgid "Actions"
 msgstr ""
@@ -516,7 +517,7 @@ msgid "Maintainer"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:31
-#: udata_front/theme/gouvfr/templates/post/display.html:101
+#: udata_front/theme/gouvfr/templates/post/display.html:105
 #: udata_front/theme/gouvfr/templates/user/base.html:23
 msgid "Edit"
 msgstr ""
@@ -579,15 +580,15 @@ msgid "Due to security reasons, the creation of new content is currently disable
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/card.html:33
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:77
+#: udata_front/theme/gouvfr/templates/dataset/search-result.html:43
 msgid "resources"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/card.html:34
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:79
+#: udata_front/theme/gouvfr/templates/dataset/search-result.html:45
 #: udata_front/theme/gouvfr/templates/organization/card.html:26
 #: udata_front/theme/gouvfr/templates/organization/producer-summary.html:44
-#: udata_front/theme/gouvfr/templates/reuse/list.html:7
+#: udata_front/theme/gouvfr/templates/reuse/list.html:8
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:8
 msgid "reuses"
 msgstr ""
@@ -721,7 +722,6 @@ msgid "Geographic dimensions"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:250
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:69
 msgid "Territorial coverage granularity"
 msgstr ""
 
@@ -827,6 +827,9 @@ msgid "Discussion between the owner and the community about this dataset."
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/followers.html:6
+#: udata_front/theme/gouvfr/templates/dataset/list.html:25
+#: udata_front/theme/gouvfr/templates/organization/list.html:29
+#: udata_front/theme/gouvfr/templates/reuse/list.html:46
 #: udata_front/theme/gouvfr/templates/user/followers.html:7
 msgid "Followers"
 msgstr ""
@@ -841,21 +844,21 @@ msgid_plural "%(num)d followers"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata_front/theme/gouvfr/templates/dataset/list.html:18
+#: udata_front/theme/gouvfr/templates/dataset/list.html:15
 #, python-format
 msgid "%(site)s dataset search"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/list.html:19
-#: udata_front/theme/gouvfr/templates/organization/list.html:9
-#: udata_front/theme/gouvfr/templates/reuse/list.html:7
+#: udata_front/theme/gouvfr/templates/dataset/list.html:16
+#: udata_front/theme/gouvfr/templates/organization/list.html:10
+#: udata_front/theme/gouvfr/templates/reuse/list.html:8
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:8
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:8
 #: udata_front/theme/gouvfr/templates/user/list.html:9
 msgid "search"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/list.html:19
+#: udata_front/theme/gouvfr/templates/dataset/list.html:16
 #: udata_front/theme/gouvfr/templates/organization/card.html:23
 #: udata_front/theme/gouvfr/templates/organization/producer-summary.html:38
 #: udata_front/theme/gouvfr/templates/reuse/card.html:18
@@ -863,24 +866,55 @@ msgstr ""
 msgid "datasets"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/list.html:39
-#: udata_front/theme/gouvfr/templates/dataset/list.html:40
-#: udata_front/theme/gouvfr/templates/organization/list.html:30
-#: udata_front/theme/gouvfr/templates/organization/list.html:31
-#: udata_front/theme/gouvfr/templates/reuse/list.html:47
-#: udata_front/theme/gouvfr/templates/reuse/list.html:48
-msgid "Search..."
+#: udata_front/theme/gouvfr/templates/dataset/list.html:23
+#: udata_front/theme/gouvfr/templates/organization/list.html:27
+#: udata_front/theme/gouvfr/templates/reuse/list.html:44
+msgid "Newest"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/list.html:45
+#: udata_front/theme/gouvfr/templates/dataset/list.html:24
+#: udata_front/theme/gouvfr/templates/organization/list.html:28
+#: udata_front/theme/gouvfr/templates/reuse/list.html:45
+msgid "Oldest"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/list.html:35
+#, python-format
+msgid "Search among %(count)s datasets on %(site)s"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/list.html:41
 msgid "Search reuses"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:62
-msgid "Spatial coverage"
+#: udata_front/theme/gouvfr/templates/dataset/list.html:56
+#: udata_front/theme/gouvfr/templates/dataset/list.html:61
+#: udata_front/theme/gouvfr/templates/organization/list.html:41
+#: udata_front/theme/gouvfr/templates/organization/list.html:46
+#: udata_front/theme/gouvfr/templates/reuse/list.html:64
+#: udata_front/theme/gouvfr/templates/reuse/list.html:69
+msgid "Search..."
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:82
+#: udata_front/theme/gouvfr/templates/dataset/list.html:66
+#: udata_front/theme/gouvfr/templates/dataset/list.html:67
+#: udata_front/theme/gouvfr/templates/macros/search.html:224
+#: udata_front/theme/gouvfr/templates/organization/list.html:51
+#: udata_front/theme/gouvfr/templates/organization/list.html:52
+#: udata_front/theme/gouvfr/templates/post/subnav.html:13
+#: udata_front/theme/gouvfr/templates/reuse/list.html:74
+#: udata_front/theme/gouvfr/templates/reuse/list.html:75
+msgid "Search"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/list.html:71
+#: udata_front/theme/gouvfr/templates/organization/list.html:56
+#: udata_front/theme/gouvfr/templates/reuse/list.html:100
+#, python-format
+msgid "%(result)s results"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/search-result.html:48
 #: udata_front/theme/gouvfr/templates/organization/card.html:34
 msgid "favourites"
 msgstr ""
@@ -1037,6 +1071,7 @@ msgid "Sort by"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:21
+#: udata_front/theme/gouvfr/templates/macros/sort_search.html:19
 msgid "Relevance"
 msgstr ""
 
@@ -1066,9 +1101,8 @@ msgstr ""
 msgid "No result found"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/macros/search.html:224
-#: udata_front/theme/gouvfr/templates/post/subnav.html:13
-msgid "Search"
+#: udata_front/theme/gouvfr/templates/macros/sort_search.html:9
+msgid "Sort by:"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/macros/uploader.html:8
@@ -1351,23 +1385,28 @@ msgstr ""
 msgid "Pending request to join this organization"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/list.html:8
+#: udata_front/theme/gouvfr/templates/organization/list.html:9
 #, python-format
 msgid "%(site)s organization search"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/list.html:9
+#: udata_front/theme/gouvfr/templates/organization/list.html:10
 msgid "organizations"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/list.html:18
+#: udata_front/theme/gouvfr/templates/organization/list.html:19
 #: udata_front/theme/gouvfr/templates/post/list.html:16
-#: udata_front/theme/gouvfr/templates/reuse/list.html:16
+#: udata_front/theme/gouvfr/templates/reuse/list.html:17
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:20
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:20
 #: udata_front/theme/gouvfr/templates/user/list.html:18
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/organization/list.html:36
+#, python-format
+msgid "Search among %(count)s organizations on %(site)s"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:22
@@ -1428,15 +1467,15 @@ msgstr ""
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/post/display.html:118
+#: udata_front/theme/gouvfr/templates/post/display.html:122
 msgid "Previous post"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/post/display.html:124
+#: udata_front/theme/gouvfr/templates/post/display.html:128
 msgid "All posts"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/post/display.html:133
+#: udata_front/theme/gouvfr/templates/post/display.html:137
 msgid "Next post"
 msgstr ""
 
@@ -1543,77 +1582,81 @@ msgstr ""
 msgid "Discover more reuses."
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:6
+#: udata_front/theme/gouvfr/templates/reuse/list.html:7
 #, python-format
 msgid "%(site)s reuse search"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:25
+#: udata_front/theme/gouvfr/templates/reuse/list.html:26
 msgid "Health"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:26
+#: udata_front/theme/gouvfr/templates/reuse/list.html:27
 msgid "Transport and mobility"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:27
+#: udata_front/theme/gouvfr/templates/reuse/list.html:28
 msgid "Housing and development"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:28
+#: udata_front/theme/gouvfr/templates/reuse/list.html:29
 msgid "Food and agriculture"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:29
+#: udata_front/theme/gouvfr/templates/reuse/list.html:30
 msgid "Culture and recreation"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:30
+#: udata_front/theme/gouvfr/templates/reuse/list.html:31
 msgid "Economy and business"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:31
+#: udata_front/theme/gouvfr/templates/reuse/list.html:32
 msgid "Environment and energy"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:32
+#: udata_front/theme/gouvfr/templates/reuse/list.html:33
 msgid "Work and training"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:33
+#: udata_front/theme/gouvfr/templates/reuse/list.html:34
 msgid "Politics and public life"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:34
+#: udata_front/theme/gouvfr/templates/reuse/list.html:35
 msgid "Safety and security"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:35
+#: udata_front/theme/gouvfr/templates/reuse/list.html:36
 msgid "Education and research"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:36
+#: udata_front/theme/gouvfr/templates/reuse/list.html:37
 msgid "Society and demography"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:37
+#: udata_front/theme/gouvfr/templates/reuse/list.html:38
 msgid "Law and justice"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:38
+#: udata_front/theme/gouvfr/templates/reuse/list.html:39
 msgid "Open data tools"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:39
+#: udata_front/theme/gouvfr/templates/reuse/list.html:40
 msgid "Others"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:53
-#: udata_front/theme/gouvfr/templates/reuse/list.html:54
+#, python-format
+msgid "Search among %(count)s reuses on %(site)s"
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/reuse/list.html:57
 msgid "Search in datasets"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/list.html:62
+#: udata_front/theme/gouvfr/templates/reuse/list.html:84
 msgid "All"
 msgstr ""
 
@@ -1630,18 +1673,6 @@ msgid ""
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/security/change_password.html:15
-msgid ""
-"Fields preceded by a star <span class='required-field-star'>*</span> are "
-"required."
-msgstr ""
-
-#: udata_front/theme/gouvfr/templates/security/forgot_password.html:10
-#: udata_front/theme/gouvfr/templates/security/forgot_password.html:17
-#: udata_front/theme/gouvfr/templates/security/reset_password.html:11
-#: udata_front/theme/gouvfr/templates/security/reset_password.html:15
-msgid "Reset Password"
-msgstr ""
-
 #: udata_front/theme/gouvfr/templates/security/forgot_password.html:15
 #: udata_front/theme/gouvfr/templates/security/login_user.html:14
 #: udata_front/theme/gouvfr/templates/security/register_user.html:17
@@ -1650,6 +1681,13 @@ msgstr ""
 msgid ""
 "Fields preceded by a star (<span class='required-field-star'>*</span>) are "
 "required."
+msgstr ""
+
+#: udata_front/theme/gouvfr/templates/security/forgot_password.html:10
+#: udata_front/theme/gouvfr/templates/security/forgot_password.html:17
+#: udata_front/theme/gouvfr/templates/security/reset_password.html:11
+#: udata_front/theme/gouvfr/templates/security/reset_password.html:15
+msgid "Reset Password"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/security/login_user.html:19

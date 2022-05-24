@@ -446,3 +446,8 @@ def visibles(value):
     if not isinstance(value, list):
         raise ValueError('visibles only accept list as parameter')
     return list(filter(lambda elt: elt.is_visible, value))
+
+
+@front.app_template_global()
+def selected(current_value, value):
+    return 'selected' if current_value == value else ''

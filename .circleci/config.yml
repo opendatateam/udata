@@ -17,8 +17,8 @@ jobs:
           command: export BASE_BRANCH=$(base_branch)
       - restore_cache:
           keys:
-          - py-cache-v15-{{ arch }}-{{ .Branch }}
-          - py-cache-v15-{{ arch }}-{{ .Environment.BASE_BRANCH }}
+          - py-cache-v16-{{ arch }}-{{ .Branch }}
+          - py-cache-v16-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Create venv and install pip-tools
           command: |
@@ -86,7 +86,7 @@ jobs:
                         -r requirements/develop.pip
             pip install -e .
       - save_cache:
-          key: py-cache-v15-{{ arch }}-{{ .Branch }}
+          key: py-cache-v16-{{ arch }}-{{ .Branch }}
           paths:
           - venv
       - run:

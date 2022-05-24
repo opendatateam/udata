@@ -96,7 +96,7 @@ export default defineComponent({
      */
 
     /**
-     * @type MenuOption[]
+     * @type {MenuOption[]}
      */
     const options = reactive([
       {

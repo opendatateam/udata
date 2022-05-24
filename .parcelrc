@@ -1,7 +1,6 @@
 {
   "extends": ["@parcel/config-default"],
   "transformers": {
-    "*.less": ["parcel-transformer-more"],
     "*.svg": ["@parcel/transformer-inline-string"]
   },
   "reporters": ["...", "parcel-reporter-copystatic", "parcel-reporter-stylemark"]

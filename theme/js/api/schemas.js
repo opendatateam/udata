@@ -15,13 +15,16 @@ import config from "../config";
  * @type {object}
  *  @property {string} name - The schema name.
  *  @property {string} schema_type - The schema type.
- *  @property {string} name - The schema name.
  *  @property {Array<SchemaVersion>} versions - The schema versions.
  */
 
 let catalog = null;
 let catalogRequest = null;
 
+/**
+ * Get Schema Catalog
+ * @returns {Promise<Array<Schema>>}
+ */
 export default function getCatalog() {
   if (catalogRequest) {
     return catalogRequest;

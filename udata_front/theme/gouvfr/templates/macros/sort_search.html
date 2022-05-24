@@ -1,0 +1,30 @@
+{% macro sort_search(result, sorts) %}
+{% if sorts %}
+    {% if in_url('sort') %}
+        {% set current_sort = request.args.sort %}
+    {% endif %}
+{% endif %}
+<div class="fr-col-auto fr-grid-row fr-grid-row--middle">
+    <label for="sort-search" class="fr-col-auto fr-text--sm fr-m-0 fr-mr-1w">
+        {{_('Sort by:')}}
+    </label>
+    <div class="fr-col">
+        <select
+            id="sort-search"
+            class="fr-select"
+            data-select-sort
+            name="sort"
+        >
+            <option value="" {{selected(current_sort, Nil)}} disabled>
+                {{_('Relevance')}}
+            </option>
+            {% for field in sorts %}
+                {% set sort = field.value if field.order == 'asc' else '-'+field.value %}
+                <option value='{{sort}}' {{selected(current_sort, sort)}}>
+                    {{field.label}}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+{% endmacro %}

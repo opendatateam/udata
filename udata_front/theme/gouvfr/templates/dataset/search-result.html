@@ -38,40 +38,6 @@
             {{ dataset.description|mdstrip(300) }}
         </div>
     </div>
-
-    <dl class="card-hover">
-        {# Temporal coverage #}
-        {% if dataset.temporal_coverage %}
-        <div>
-            <dt>{{ _('Temporal coverage') }}</dt>
-            <dd>{{ dataset.temporal_coverage|daterange }}</dd>
-        </div>
-        {% endif %}
-
-        {# Periodicity #}
-        {% if dataset.frequency %}
-        <div>
-            <dt>{{ _('Frequency') }}</dt>
-            <dd>{{ dataset.frequency_label }}</dd>
-        </div>
-        {% endif %}
-
-        {# Spatial coverage #}
-        {% if dataset.spatial.zones %}
-        <div>
-            <dt>{{ _('Spatial coverage') }}</dt>
-            <dd>{{ dataset.spatial.top_label }}</dd>
-        </div>
-        {% endif %}
-
-        {% if dataset.spatial.granularity %}
-        <div>
-            <dt>{{ _('Territorial coverage granularity') }}</dt>
-            <dd>{{ dataset.spatial.granularity_label }}</dd>
-        </div>
-        {% endif %}
-
-    </dl>
     <ul class="card-footer">
         <li>
             <strong>{{ dataset.resources|length or 0 }}</strong> {{ _('resources') }}</li>
