@@ -185,6 +185,7 @@ MODULES_WITH_COMMANDS = [
     'harvest',
     'linkchecker',
     'search',
+    'event'
 ]
 
 
