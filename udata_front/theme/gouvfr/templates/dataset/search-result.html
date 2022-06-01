@@ -1,6 +1,6 @@
 {% cache cache_duration, 'dataset-search-result', dataset.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
-<article class="dataset-card dataset-search-result py-xs">
+<article class="dataset-card dataset-search-result fr-py-1w">
     {% if dataset.organization %}
     <div class="card-logo">
         <img
@@ -33,8 +33,8 @@
     {% endif %}
     <div class="card-data">
         <h4 class="card-title">{{ dataset.full_title }}
-            {% if dataset.private %}<span class="badge grey-300 ml-xs">{{ _('Private') }}</span>{% endif %}</h4>
-        <div class="card-description text-grey-380 mt-xs">
+            {% if dataset.private %}<span class="badge grey-300 fr-ml-1w">{{ _('Private') }}</span>{% endif %}</h4>
+        <div class="card-description text-grey-380 fr-mt-1w">
             {{ dataset.description|mdstrip(300) }}
         </div>
     </div>

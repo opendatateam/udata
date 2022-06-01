@@ -2,7 +2,7 @@
 Vue. -->
 
 <template>
-  <article class="dataset-card dataset-search-result py-xs">
+  <article class="dataset-card dataset-search-result fr-py-1w">
     <div class="card-logo" v-if="organization">
       <Placeholder
         type="dataset"
@@ -22,7 +22,7 @@ Vue. -->
     </div>
     <div class="card-data">
       <h4 class="card-title">{{ title }}</h4>
-      <div class="card-description text-grey-380 mt-xs">
+      <div class="card-description text-grey-380 fr-mt-1w">
         {{ $filters.excerpt(description) }}
       </div>
     </div>
@@ -45,8 +45,8 @@ Vue. -->
 
 <script>
 import Placeholder from "../utils/placeholder";
-import certified from "svg/certified.svg";
-import lock from "svg/private.svg";
+import certified from "bundle-text:svg/certified.svg";
+import lock from "bundle-text:svg/private.svg";
 import useOrganizationCertified from "../../composables/useOrganizationCertified";
 import useGeoZone from "../../composables/useGeoZone";
 import Avatar from "../discussions/avatar";

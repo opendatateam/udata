@@ -47,4 +47,5 @@ export const filters = {
 // Expose all filters to the app
 export default function install(app) {
   app.config.globalProperties.$filters = filters;
+  app.provide('$filters', app.config.globalProperties.$filters);
 }

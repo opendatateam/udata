@@ -42,7 +42,7 @@
                 </h1>
             </div>
             <div class="fr-mt-1w">
-                <ul class="row-inline align-items-center f-bold">
+                <ul class="fr-grid-row fr-grid-row--middle fr-text--bold">
                     {% if total_datasets > 0 %}
                     <li>
                         <a href="#organization-datasets">
@@ -64,13 +64,13 @@
             {{ follow_btn(org) }}
             {% if can_edit %}
                 <a
-                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
+                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-icon-edit-line fr-btn--icon-left fr-hidden fr-unhidden-sm"
                     href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}"
                 >
                     {{ _('Modify organization') }}
                 </a>
                 <a
-                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-hidden-sm"
+                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-icon-edit-line fr-hidden-sm"
                     href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}"
                 >
                     {{ _('Modify organization') }}
@@ -92,8 +92,12 @@
 <section id="organization-datasets" class="fr-py-9v container">
     <h2>{{ _('Datasets') }}<sup>{{ total_datasets }}</sup></h2>
     {% for dataset in datasets %}
-        <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
-            class="unstyled block w-100">{% include theme('dataset/search-result.html') %}
+        <a
+            href="{{ url_for('datasets.show', dataset=dataset) }}"
+            title="{{ dataset.title }}"
+            class="fr-raw-link unstyled block w-100"
+        >
+        {% include theme('dataset/search-result.html') %}
         </a>
     {% endfor %}
     <div class="fr-my-2w">
@@ -102,7 +106,7 @@
     <div class="text-align-center">
         <a
             href="{{ url_for('datasets.list', organization=org.id) }}"
-            class="fr-btn fr-btn--secondary fr-fi-eye-line fr-btn--icon-left"
+            class="fr-btn fr-btn--secondary fr-icon-eye-line fr-btn--icon-left"
         >
             {{ _('See %(count)s datasets', count=total_datasets ) }}
         </a>
@@ -129,7 +133,7 @@
         {% set user = member.user %}
         {% set role = member.role %}
         <div
-            class="col-4 col-md-12 pl-md-0 border-md-0 pb-sm {% if not loop.index0 % 3 == 0 %}border-left pl-lg{% endif %}"
+            class="col-4 col-md-12 fr-pl-0 border-md-0 fr-pb-3v {% if not loop.index0 % 3 == 0 %}border-left fr-pl-md-3w{% endif %}"
         >
             {% include theme('user/card.html') %}
         </div>
@@ -145,7 +149,7 @@
                     <dt class="f-light">ID</dt>
                     <dd class="f-bold fr-m-0">{{ org.id }}</dd>
                 </div>
-                <div class="my-sm">
+                <div class="fr-my-3v">
                     <dt class="f-light">{{ _('Creation date') }}</dt>
                     <dd class="f-bold fr-m-0">{{ org.created_at|dateformat(format='long') }}</dd>
                 </div>
@@ -155,13 +159,13 @@
                 </div>
             </dl>
         </div>
-        <div class="col-6 col-md-12 my-md-lg">
+        <div class="col-6 col-md-12 fr-my-3w fr-my-md-0">
             <h3>{{ _('Actions') }}</h3>
             <ul class="nav-list fr-ml-n3v">
                 {% if can_edit and not read_only_mode %}
                 <li class="fr-my-2w">
                     <a
-                        class="nav-link nav-link--no-icon text-decoration-none fr-link fr-link--icon-left fr-fi-arrow-right-s-line"
+                        class="nav-link nav-link--no-icon fr-raw-link text-decoration-none fr-link fr-link--icon-left fr-icon-arrow-right-s-line"
                         href="{{ url_for('admin.index', path='organization/{id}/'.format(id=org.id)) }}"
                     >
                         <span class="text-decoration-underline">{{ _('Modify information') }}</span>
@@ -171,7 +175,7 @@
                 <li class="fr-my-2w">
                     <a
                         href="{{ url_for('organizations.datasets_csv', org=org) }}"
-                        class="nav-link nav-link--no-icon text-decoration-none fr-link fr-link--icon-left fr-fi-arrow-right-s-line"
+                        class="nav-link nav-link--no-icon fr-raw-link text-decoration-none fr-link fr-link--icon-left fr-icon-arrow-right-s-line"
                     >
                         <span class="text-decoration-underline">{{ _('Download list of datasets as csv file') }}</span>
                     </a>

@@ -1,0 +1,14 @@
+diff --git a/node_modules/@meforma/vue-toaster/src/Toaster.vue b/node_modules/@meforma/vue-toaster/src/Toaster.vue
+index 30da42c..8888ef5 100644
+--- a/node_modules/@meforma/vue-toaster/src/Toaster.vue
++++ b/node_modules/@meforma/vue-toaster/src/Toaster.vue
+@@ -195,9 +195,3 @@ export default {
+   }
+ }
+ </script>
+-<style lang="stylus">
+-@import './themes/default/index.styl'
+-.v--default-css
+-  @import './themes/default/colors.styl'
+-  @import './themes/default/toast.styl'
+-</style>

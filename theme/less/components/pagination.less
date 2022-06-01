@@ -37,22 +37,22 @@ It's located in `templates/macros/paginator.html` and can be used easily.
             </a>
         </li>
         <li>
-            <a class="fr-pagination__link fr-displayed-lg" href="#" title="Page 3">
+            <a class="fr-pagination__link fr-hidden fr-unhidden-lg" href="#" title="Page 3">
                 3
             </a>
         </li>
         <li>
-            <a class="fr-pagination__link fr-displayed-lg">
+            <a class="fr-pagination__link fr-hidden fr-unhidden-lg">
                 …
             </a>
         </li>
         <li>
-            <a class="fr-pagination__link fr-displayed-lg" href="#" title="Page 130">
+            <a class="fr-pagination__link fr-hidden fr-unhidden-lg" href="#" title="Page 130">
                 130
             </a>
         </li>
         <li>
-            <a class="fr-pagination__link fr-displayed-lg" href="#" title="Page 131">
+            <a class="fr-pagination__link fr-hidden fr-unhidden-lg" href="#" title="Page 131">
                 131
             </a>
         </li>
@@ -85,9 +85,6 @@ It's located in `templates/macros/paginator.html` and can be used easily.
         &:not([href]) {
             cursor: not-allowed;
         }
-    }
-    a:hover {
-        text-decoration: none;
     }
     li::before {
         content: none;

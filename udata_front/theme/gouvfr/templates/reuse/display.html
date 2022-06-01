@@ -46,7 +46,7 @@
         </span>
         {% endif %}
         {% if reuse.deleted %}
-        <div class="well-grey-100 well mb-sm">
+        <div class="well-grey-100 well fr-mb-3v">
             {{ _('This reuse has been deleted. This will be permanent in the next 24 hours') }}
         </div>
         {% endif %}
@@ -64,13 +64,13 @@
                 {{ follow_btn(reuse) }}
                 {% if can_edit %}
                     <a
-                        class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-btn--icon-left fr-displayed-sm"
+                        class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-icon-edit-line fr-btn--icon-left fr-hidden fr-unhidden-sm"
                         href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}"
                     >
                         {{ _('Modify reuse') }}
                     </a>
                     <a
-                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-fi-edit-line fr-hidden-sm"
+                    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-mt-2w fr-icon-edit-line fr-hidden-sm"
                     href="{{ url_for('admin.index', path='reuse/{id}/'.format(id=reuse.id)) }}"
                 >
                     {{ _('Modify reuse') }}
@@ -91,7 +91,7 @@
             <a
                 href="{{ reuse.url }}"
                 rel="nofollow"
-                class="fr-btn fr-btn--secondary fr-fi-eye-line fr-btn--icon-left fr-mt-4w"
+                class="fr-btn fr-btn--secondary fr-icon-eye-line fr-btn--icon-left fr-mt-4w"
             >
                 {{ _('See the reuse') }}
             </a>
@@ -145,30 +145,30 @@
                     </ul>
                     {% endif %}
                     <div class="fr-grid-row fr-grid-row--gutters">
-                        <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
+                        <div class="fr-col-12 fr-col-sm-6">
                             <h2 class="subtitle">{{ _('Informations') }}</h2>
-                            <dl class="metadata">
-                                <dt>{{ _('Type') }}</dt>
-                                    <dd>
+                            <dl class="fr-my-1w">
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Type') }}</dt>
+                                    <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
                                         {{ reuse.type_label }}
                                     </dd>
                                 {% if reuse.topic %}
-                                <dt>{{ _('Topic') }}</dt>
-                                    <dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Topic') }}</dt>
+                                    <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
                                         {{ reuse.topic_label }}
                                     </dd>
                                 {% endif %}
-                                <dt>{{ _('ID') }}</dt>
-                                    <dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('ID') }}</dt>
+                                    <dd class="fr-text--sm fr-ml-0 fr-mb-2w">
                                         {{reuse.id}}
                                     </dd>
                             </dl>
                         </div>
-                        <div class="fr-col-12 fr-col-sm-4 fr-col-md-6 fr-col-lg-4">
+                        <div class="fr-col-12 fr-col-sm-6">
                             <h2 class="subtitle">{{ _('Publication') }}</h2>
                             <dl class="metadata">
-                                <dt>{{ _('Creation date') }}</dt>
-                                <dd>{{ reuse.created_at|dateformat(format='long') }}</dd>
+                                <dt class="fr-text--sm fr-mb-0 text-mention-grey">{{ _('Creation date') }}</dt>
+                                <dd class="fr-text--sm fr-ml-0 fr-mb-2w">{{ reuse.created_at|dateformat(format='long') }}</dd>
                             </dl>
                         </div>
                     </div>
@@ -178,11 +178,11 @@
                     <div class="fr-grid-row fr-grid-row--gutters">
                         <div class="fr-col-12 fr-col-sm-6 vuejs">
                             <h2 class="subtitle">{{ _('Participate') }}</h2>
-                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-arrow-right-s-line fr-btn--icon-right"
+                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-icon-arrow-right-s-line fr-btn--icon-right"
                                 href="{{ url_for('admin.index', path='reuse/new/') }}">
                                 {{ _('Add a reuse') }}
                             </a>
-                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-arrow-right-s-line fr-btn--icon-right fr-mt-3v"
+                            <a class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-icon-arrow-right-s-line fr-btn--icon-right fr-mt-3v"
                                 href="#"
                                 @click.prevent="$bus.emit('discussions.startThread')">
                                 {{ _('Contact the reuser') }}
@@ -251,7 +251,7 @@
             </read-more>
         </div>
     </section>
-    <section class="reuse-sources container overflow-visible my-lg">
+    <section class="reuse-sources container overflow-visible fr-my-3w">
         <div class="row-inline">
             <h2 id="used-datasets" class="fr-h2">
                 {{ _('Used datasets') }}

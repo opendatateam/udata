@@ -118,20 +118,23 @@ jobs:
       - run:
           name: Get the base reference branch
           command: export BASE_BRANCH=$(base_branch)
+      - run:
+          name: patch-package hash
+          command: md5sum patches/* > patches.hash
       - restore_cache:
           keys:
-            - js-cache-{{ arch }}-{{ checksum "js.deps" }}
-            - js-cache-{{ arch }}-{{ .Branch }}
+            - js-cache-{{ arch }}-{{ checksum "js.deps" }}-{{ checksum "patches.hash" }}
+            - js-cache-{{ arch }}-{{ .Branch }}-{{ checksum "patches.hash" }}
             - js-cache-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install NodeJS and dependencies
           command: nvm install && npm install
       - save_cache:
-          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}
+          key: js-cache-{{ arch }}-{{ checksum "js.deps" }}-{{ checksum "patches.hash" }}
           paths:
           - node_modules
       - save_cache:
-          key: js-cache-{{ arch }}-{{ .Branch }}
+          key: js-cache-{{ arch }}-{{ .Branch }}-{{ checksum "patches.hash" }}
           paths:
           - node_modules
       - run:

@@ -11,7 +11,7 @@
 {% set body_class = 'post-display' %}
 
 {% block main_content %}
-<div class="container py-lg" v-pre>
+<div class="container fr-py-3w" v-pre>
     {% if extension == 'md' %}
         <div>{{ page.content|markdown }}</div>
     {% else %}
@@ -20,7 +20,7 @@
 </div>
 
 {% if datasets %}
-<div class="container mt-md">
+<div class="container fr-mt-2w">
     <h2>{{ _('Datasets') }} <sup>{{ datasets|length }}</sup></h2>
     <div class="row">
         <div class="col-12">
@@ -35,25 +35,23 @@
 {% endif %}
 
 {% if reuses %}
-<div class="container mt-md">
+<div class="container fr-mt-2w">
     <h2>{{ _('Reuses') }} <sup>{{ reuses|length }}</sup></h2>
-    <ul class="row">
+    <ul class="fr-grid-row fr-grid-row--gutters text-align-center">
         {% for reuse in reuses %}
-        <li class="col-3 col-lg-6 col-sm-12 my-sm-sm text-align-center">
-            <a href="{{ url_for('reuses.show', reuse=reuse) }}"
-                title="{{ reuse.title }}">{% include theme('reuse/card.html') %}
-            </a>
+        <li class="fr-col-lg-3 fr-col-md-4 fr-col-sm-6 fr-col-12 fr-mb-3v">
+            {% include theme('reuse/card.html') %}
         </li>
         {% endfor %}
     </ul>
 </div>
 {% endif %}
 
-<div class="container my-hg">
+<div class="container fr-my-7w">
     <div class="col-6 col-md-12">
         <h2 class="fs-xxl">{{ _('Actions') }}</h2>
         <ul class="nav-list">
-            <li class="my-md">
+            <li class="fr-my-2w">
                 <a class="nav-link" href="{{ gh_url }}">{{ _('Suggest a modification') }}</a>
             </li>
         </ul>

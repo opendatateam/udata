@@ -5,57 +5,50 @@ category: 5 - Interactions
 ---
 
 # Interaction
-Inspired by Bootstrap, tabs leverage the power of JavaScript® to enable quick tabs & tab-content interactivity.
-The is a two parts systems : tabs, with individual pill-shaped (or any element you'd like) buttons, and tab-content, that the buttons will show.
-Only one tab-content can be shown at a time, and toggling a new tab-content will make the previous active tab no longer visible.
-You only need to specify an `id` in the `href` attribute of the button, then add this `id` to the tab-content.
+Tabs are a two parts system : tabs, with a tag shape (or any style you'd like) buttons, and tabpanel, that the buttons will show.
+Only one tabpanel can be shown at a time, and toggling a new tabpanel will make the previous active tabpanel no longer visible.
+You only need to specify an `id` in the `aria-controls` attribute of the button, then add this `id` to the tabpanel.
 
-Tip : don't forget to add an "active" class to the default-active button and tab content.
-Tip : if the href is invalid (no div with specified `id`), the tabs will kinda crash. Don't do that.
+Tip : don't forget to add both `aria-pressed="true"` and `aria-selected="true"`attributes to the default-active tab and `fr-unhidden` to the tabpanel.
+Tip : if the `aria-controls` is invalid (no div with specified `id`), the tabs will kinda crash. Don't do that.
 
 ```tabs-interactive.html
-<nav class="tabs">
-    <a href="#tab-content-1" class="tab active">Jeux de données</a>
-    <a href="#tab-content-2" class="tab">Réutilisations</a>
+<nav data-tabs>
+    <button class="fr-tag" aria-controls="tab-content-1" role="tab" aria-pressed="true" aria-selected="true">Jeux de données</button>
+    <button class="fr-tag" aria-controls="tab-content-2" role="tab">Réutilisations</button>
 </nav>
 <ul>
-  <li class="tab-content active" id="tab-content-1">Tab content 1 (jeux de données)</li>
-  <li class="tab-content" id="tab-content-2">Tab content 2 (reuse)</li>
+  <li class="fr-hidden fr-unhidden" role="tabpanel"id="tab-content-1">Tab content 1 (jeux de données)</li>
+  <li class="fr-hidden" id="tab-content-2">Tab content 2 (reuse)</li>
 </ul>
 ```
 */
 
 export default (() => {
   document.addEventListener("DOMContentLoaded", () => {
-    const tabs = document.querySelectorAll(".tabs");
-
-    // For each .tabs container
+    const tabs = document.querySelectorAll("[data-tabs]");
     tabs.forEach((tab) => {
-      // Tabs buttons = pills button
-      const tabsButtons = tab.querySelectorAll(".tab[href^='#']");
-
+      const tabsButtons = tab.querySelectorAll("[role=tab]");
       tabsButtons.forEach((tabButton) => {
         tabButton.addEventListener("click", (el) => {
           el.preventDefault();
 
-          // Find the previously active pill button
           const previouslyActive = Array.from(tabsButtons).find((tab) =>
-            tab.classList.contains("active")
+            tab.getAttribute("aria-selected") === "true"
           );
-
-          // Remove the "active" class from the previously active tabPane and pill button
           if (previouslyActive) {
-            previouslyActive.classList.remove("active");
+            previouslyActive.setAttribute("aria-selected", "false");
+            previouslyActive.setAttribute("aria-pressed", "false");
             document
-              .querySelector(previouslyActive.getAttribute("href"))
-              .classList.remove("active");
+              .getElementById(previouslyActive.getAttribute("aria-controls"))
+              .classList.remove("fr-unhidden");
           }
 
-          // Add active to new pill and tab pane
-          el.target.classList.add("active");
+          el.target.setAttribute("aria-selected", "true");
+          el.target.setAttribute("aria-pressed", "true");
           document
-            .querySelector(el.target.getAttribute("href"))
-            .classList.add("active");
+            .getElementById(el.target.getAttribute("aria-controls"))
+            .classList.add("fr-unhidden");
         });
       });
     });

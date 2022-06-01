@@ -4,11 +4,11 @@ name: Icons
 category: 3 - Components
 ---
 
-`.fr-fi-svg` is a special class allowing you to use a SVG icon instead of DSFR `.fr-fi` icons.
+`.fr-icon-svg` is a special class allowing you to use a SVG icon instead of DSFR `.fr-icon` icons.
 
 ## Icons sizes
 
-This is a port of DSFR `.fr-fi--*` for SVG sizing. DSFR ones only works with `::before` and `::after`.
+This is a port of DSFR `.fr-icon--*` for SVG sizing. DSFR ones only works with `::before` and `::after`.
 
 */
 
@@ -16,16 +16,19 @@ This is a port of DSFR `.fr-fi--*` for SVG sizing. DSFR ones only works with `::
 @icon-chevron: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNiIgaGVpZ2h0PSIxMSIgdmlld0JveD0iMCAwIDYgMTEiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0wLjM5ODQzOCAwLjM2NzE4OEwwLjIzNDM3NSAwLjUzMTI1QzAuMTE3MTg4IDAuNjQ4NDM4IDAuMTE3MTg4IDAuODEyNSAwLjIzNDM3NSAwLjkyOTY4OEw0LjgwNDY5IDUuNUwwLjIzNDM3NSAxMC4wOTM4QzAuMTE3MTg4IDEwLjIxMDkgMC4xMTcxODggMTAuMzc1IDAuMjM0Mzc1IDEwLjQ5MjJMMC4zOTg0MzggMTAuNjU2MkMwLjUxNTYyNSAxMC43NzM0IDAuNjc5Njg4IDEwLjc3MzQgMC43OTY4NzUgMTAuNjU2Mkw1Ljc0MjE5IDUuNzEwOTRDNS44NTkzOCA1LjU5Mzc1IDUuODU5MzggNS40Mjk2OSA1Ljc0MjE5IDUuMzEyNUwwLjc5Njg3NSAwLjM2NzE4OEMwLjY3OTY4OCAwLjI1IDAuNTE1NjI1IDAuMjUgMC4zOTg0MzggMC4zNjcxODhaIiBmaWxsPSJibGFjayIvPgo8L3N2Zz4K";
 @icon-arrow: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9ImFycm93LXJpZ2h0LWxpbmUiPgo8cGF0aCBpZD0iJiMyNDA7JiMxNTk7JiMxNDI7JiMxNjg7IENvdWxldXIgaWMmIzE5NTsmIzE4MDtuZSIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNi4xNzIgMTFMMTAuODA4IDUuNjM2MDVMMTIuMjIyIDQuMjIyMDVMMjAgMTJMMTIuMjIyIDE5Ljc3OEwxMC44MDggMTguMzY0TDE2LjE3MiAxM0g0VjExSDE2LjE3MloiIGZpbGw9IndoaXRlIi8+CjwvZz4KPC9zdmc+Cg==";
 
-.fr-fi-svg {
+.fr-icon-svg {
+    &::before {
+        content: none;
+    }
     svg {
         width: 1.5rem;
         height: 1.5rem;
     }
-    &.fr-fi--sm svg {
+    &.fr-icon--sm svg {
         width: 1rem;
         height: 1rem;
     }
-    &.fr-fi--lg svg {
+    &.fr-icon--lg svg {
         width: 2rem;
         height: 2rem;
     }

@@ -8,7 +8,7 @@
     {% set messages = messages + [_('You must be connected to do this action.')] %}
 {% endif %}
 {% if messages %}
-    <div class="container py-lg">
+    <div class="container fr-py-3w">
         {% for message in messages %}
         <div class="well well-secondary-grey-100">
             {{ message }}

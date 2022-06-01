@@ -9,7 +9,7 @@
         id="resource-{{resource.id}}-header"
     >
         <div class="fr-col-auto fr-grid-row fr-grid-row--top no-wrap">
-            <div class="fr-col-auto fr-mx-2w fr-fi-svg fr-fi--sm">
+            <div class="fr-col-auto fr-mx-2w fr-icon-svg fr-icon--sm">
                 {% include theme(resource_image(resource)) %}
             </div>
             <div class="fr-col-auto">
@@ -47,7 +47,7 @@
                         <a
                             href="{{ url_for('admin.index', path='dataset/{id}/resource/{resource_id}'.format(id=dataset.id, resource_id=resource.id)) }}"
                             title="{{ _('Edit resource') }}"
-                            class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--sm fr-fi-svg"
+                            class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--sm fr-icon-svg"
                         >
                             {% include theme('svg/edit.svg') %}
                         </a>
@@ -60,7 +60,7 @@
                             title="{{ _('Resource link') }}"
                             rel="nofollow"
                             target="_blank"
-                            class="fr-btn fr-btn--sm fr-fi-external-link-line"
+                            class="fr-btn fr-btn--sm fr-icon-external-link-line"
                         ></a>
                     </li>
                 {% else %}
@@ -69,7 +69,7 @@
                             href="{{ resource.latest }}"
                             title="{{ _('Download resource') }}"
                             download
-                            class="fr-btn fr-btn--sm fr-fi-download-line"
+                            class="fr-btn fr-btn--sm fr-icon-download-line"
                         ></a>
                     </li>
                 {% endif %}

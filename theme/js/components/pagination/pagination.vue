@@ -76,7 +76,7 @@ export default {
           :aria-current="page === 1 ? 'page' : null"
           :href="page === 1 ? null : '#'"
           class="fr-pagination__link"
-          :class="{'fr-displayed-sm': page > 1}"
+          :class="{'fr-hidden fr-unhidden-sm': page > 1}"
           :title="$t('Page', {nb: 1})"
           @click.prevent="_onClick(1)"
         >
@@ -86,7 +86,7 @@ export default {
       <li v-for="index in visiblePages">
         <a
           class="fr-pagination__link"
-          :class="{'fr-displayed-lg': index < page - 1 || index > page + 1}"
+          :class="{'fr-hidden fr-unhidden-lg': index < page - 1 || index > page + 1}"
           :aria-current="page === index ? 'page' : null"
           :href="page === index ? null : '#'"
           :title="$t('Page', {nb: index})"
@@ -95,7 +95,7 @@ export default {
           >
           {{ index }}
         </a>
-        <a class="fr-pagination__link fr-displayed-lg" v-else>
+        <a class="fr-pagination__link fr-hidden fr-unhidden-lg" v-else>
           …
         </a>
       </li>

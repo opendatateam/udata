@@ -35,7 +35,7 @@
         <li>
             <a
                 href="{{ url_rewrite(url, **{arg_name: 1}) }}"
-                class="fr-pagination__link fr-displayed-sm"
+                class="fr-pagination__link fr-hidden fr-unhidden-sm"
                 rel="nofollow"
                 title="{% trans %}Page 1{% endtrans %}"
             >
@@ -44,7 +44,7 @@
         </li>
             {% if more_pages_out_of_start_range %}
             <li>
-                <a class="fr-pagination__link fr-displayed-lg">
+                <a class="fr-pagination__link fr-hidden fr-unhidden-lg">
                     …
                 </a>
             </li>
@@ -54,7 +54,7 @@
         <li>
             <a
                 href="{{ url_rewrite(url, **{arg_name: num_page}) }}"
-                class="fr-pagination__link {{ 'fr-displayed-sm' if not num_page == p.page and
+                class="fr-pagination__link {{ 'fr-hidden fr-unhidden-sm' if not num_page == p.page and
                     (loop.first or
                         loop.last or
                         (first_page_out_of_range and loop.index == 2) or
@@ -71,7 +71,7 @@
         {% if last_page_out_of_range %}
             {% if more_pages_out_of_end_range %}
             <li>
-                <a class="fr-pagination__link fr-displayed-lg">
+                <a class="fr-pagination__link fr-hidden fr-unhidden-lg">
                     …
                 </a>
             </li>

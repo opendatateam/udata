@@ -1,6 +1,10 @@
-.footer-links {
-    border-top: 5px solid @blue-500;
+@import (less) "@gouvfr/dsfr/dist/component/footer/footer.css";
 
+.fr-footer__top-link {
+    &:extend(a.unstyled);
+}
+
+.fr-footer__top {
     .etalab-logo svg {
         width: 130px;
     }

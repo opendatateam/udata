@@ -2,14 +2,14 @@
   <a
     :href="adminUrl"
     :title="$t('Edit resource')"
-    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--sm fr-fi-svg"
+    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--sm fr-icon-svg"
     v-html="edit"
     >
   </a>
 </template>
 
 <script>
-import edit from "svg/edit.svg";
+import edit from "bundle-text:svg/edit.svg";
 import config from "../../../config";
 
 export default {

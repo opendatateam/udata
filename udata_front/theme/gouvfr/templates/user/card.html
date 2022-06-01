@@ -1,11 +1,11 @@
 {% cache cache_duration, 'user-card', user.id|string, g.lang_code %}
 
 <div class="w-100">
-    <div class="row-inline no-wrap align-items-center">
+    <div class="fr-grid-row no-wrap fr-grid-row--middle">
         <img src="{{ user|avatar_url(100) }}" alt="" class="rounded-circle" />
-        <div class="pl-md">
+        <div class="fr-pl-2w">
             <strong class="w-100">{{ user.fullname }}</strong>
-            {% if role %}<div><span class="badge mt-xxs">{{ role }}</span></div>{% endif %}
+            {% if role %}<div><span class="fr-badge fr-mt-1v">{{ role }}</span></div>{% endif %}
         </div>
     </div>
 </div>

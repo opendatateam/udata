@@ -1,6 +1,6 @@
 <template>
   <button
-    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-fi-add-line fr-btn--icon-left"
+    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-icon-add-line fr-btn--icon-left"
     @click.prevent="click"
   >
     {{ $t('Start a new discussion') }}

@@ -10,7 +10,7 @@
           :id="id + '-copy'"
           :href="discussionUrl(id, true)"
           :data-clipboard-text="discussionExternalUrl(id)"
-          class="fr-link fr-link--icon-right fr-fi-links-fill unstyled"
+          class="fr-link fr-link--icon-right fr-icon-links-fill unstyled"
         >
           {{$t('Copy permalink')}}
         </a>
@@ -50,7 +50,7 @@
     <footer class="fr-py-2w fr-px-3w">
       <template v-if="!closed && !readOnlyEnabled">
         <button
-          class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--icon-right fr-fi-arrow-right-s-line"
+          class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--icon-right fr-icon-arrow-right-s-line"
           v-if="!showForm"
           @click.stop="displayForm"
         >
@@ -65,7 +65,7 @@
       </template>
       <div v-if="closed" class="text-grey-380">
         {{ $t("The discussion was closed by") }} &#32;
-        <strong class="px-xxs"><Author :author="closed_by" /></strong>
+        <strong class="fr-px-1v"><Author :author="closed_by" /></strong>
         {{ $t("on") }} {{ $filters.formatDate(closed) }}
       </div>
     </footer>

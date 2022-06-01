@@ -49,7 +49,7 @@
     >
     </Search>
     <noscript>
-        <div class="pt-sm">
+        <div class="fr-pt-3v">
             <form method="GET" class="fr-grid-row">
                 <div class="fr-search-bar w-100" role="search">
                     <label class="fr-label" for="search-datasets">
@@ -67,7 +67,7 @@
                         {{ _('Search') }}
                     </button>
                 </div>
-                <div class="w-100 fr-grid-row  fr-grid-row--middle fr-pt-5v justify-between">
+                <div class="w-100 fr-grid-row fr-grid-row--middle fr-pt-5v justify-between">
                     <p class="fr-col-auto fr-my-0">{{ _('%(result)s results', result=datasets.total) }}</p>
                     {{sort_search(datasets, sorts)}}
                 </div>
@@ -77,8 +77,12 @@
         <ul class="search-results fr-mt-3v">
             {% for dataset in datasets %}
             <li>
-                <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
-                    class="unstyled w-100">{% include theme('dataset/search-result.html') %}
+                <a
+                    href="{{ url_for('datasets.show', dataset=dataset) }}"
+                    title="{{ dataset.title }}"
+                    class="fr-raw-link unstyled w-100"
+                >
+                    {% include theme('dataset/search-result.html') %}
                 </a>
             </li>
             {% endfor %}

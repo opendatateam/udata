@@ -5,17 +5,17 @@
   <section class="resources-wrapper" key="top">
     <transition mode="out-in">
       <div v-if="loading" key="loader">
-        <Loader class="mt-md" />
+        <Loader class="fr-mt-2w" />
       </div>
       <div v-else>
         <Resource
           v-for="resource in resources"
           :id="'resource-' + resource.id"
-          :dataset-id="datasetId"
+          :datasetId="datasetId"
+          :isCommunityResource="isCommunityResources"
           :resource="resource"
-          :type-label="typeLabel"
-          :can-edit="getCanEdit(resource)"
-          :is-community-resource="isCommunityResources"
+          :canEdit="getCanEdit(resource)"
+          :typeLabel="typeLabel"
         />
         <p v-if="!totalResults">
           {{$t('No resources match your search.')}}
@@ -63,7 +63,7 @@ export default defineComponent({
     },
     canEditResources: {
       type: Object,
-      default:() => {{}}
+      default:() => ({})
     },
     datasetId: {
       type: String,

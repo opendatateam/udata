@@ -35,7 +35,7 @@ The `url` prop is the API URL.
 <script>
 import {defineComponent} from "vue";
 import config from "../../config";
-import icon from "svg/actions/star.svg";
+import icon from "bundle-text:svg/actions/star.svg";
 
 export default defineComponent({
   props: {

@@ -1,6 +1,6 @@
 <template>
   <vue-final-modal class="modal-wrapper">
-    <div class="modal-body markdown">
+    <div class="modal-body markdown fr-p-5v fr-mb-11v text-grey-500">
       <h2>{{$t('Associated schema')}}</h2>
       <p>
         <span>{{$t('This resource is associated to the schema ')}}<b>{{ resourceSchema.name }}</b></span>
@@ -18,7 +18,7 @@
           :href="documentationUrl"
           rel="noopener noreferrer"
           target="_blank"
-          class="fr-btn fr-btn--sm fr-fi-information-line fr-btn--icon-left"
+          class="fr-btn fr-btn--sm fr-icon-information-line fr-btn--icon-left"
         >
           {{$t('Read documentation')}}
         </a>
@@ -39,7 +39,7 @@
             :href="validationUrl"
             rel="noopener noreferrer"
             target="_blank"
-            class="fr-btn fr-btn--sm fr-fi-checkbox-circle-line fr-btn--icon-left">
+            class="fr-btn fr-btn--sm fr-icon-checkbox-circle-line fr-btn--icon-left">
             {{$t('Validate resource')}}
           </a>
         </div>
@@ -55,12 +55,12 @@
           :href="datasetSchemaUrl"
           rel="noopener noreferrer"
           target="_blank"
-          class="fr-btn fr-btn--sm fr-fi-file-line fr-btn--icon-left">
+          class="fr-btn fr-btn--sm fr-icon-file-line fr-btn--icon-left">
           {{$t('See dataset linked to this schema')}}
         </a>
       </div>
 
-      <hr>
+      <hr class="fr-mt-3w">
 
       <h3>{{$t('About schemas')}}</h3>
       <p>
@@ -69,7 +69,7 @@
     </div>
 
     <footer class="modal-footer">
-      <button class="fr-btn fr-fi-close-line" @click.prevent="close()" :title="$t('Close')">{{$t('Close')}}</button>
+      <button class="fr-btn fr-icon-close-line" @click.prevent="close()" :title="$t('Close')">{{$t('Close')}}</button>
     </footer>
   </vue-final-modal>
 </template>
@@ -93,14 +93,3 @@ export default {
   },
 };
 </script>
-
-<style lang="less" scoped>
-  .modal-body {
-    color: #000000;
-    padding: 20px;
-    margin-bottom: 45px;
-  }
-  hr {
-    margin-top: 25px;
-  }
-</style>

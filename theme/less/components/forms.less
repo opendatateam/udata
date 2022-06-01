@@ -10,7 +10,7 @@ We can use fieldset if needed to group inputs of the same kind.
 
 ```form.html
     <form class="form">
-         <div class="field">
+            <div class="field">
                 <label for="field" class="required">
                     Label
                 </label>
@@ -59,7 +59,8 @@ form.form {
     input[type="email"],
     input[type="password"] {
         display: block;
-        padding: @spacing-xxs @spacing-xs;
+        .fr-py-1v;
+        .fr-px-1w;
 
         font-size: @font-size-base;
         font-family: @font-family-base;
@@ -94,7 +95,8 @@ form.form {
         z-index: 200;
         &:checked {
             --background-active-blue-france: @blue-400;
-            --background-active-blue-france-blend: @blue-400-blend;
+            --background-active-blue-france-hover: @blue-400-hover;
+            --background-active-blue-france-active: @blue-400-active;
         }
     }
 

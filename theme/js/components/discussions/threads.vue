@@ -41,7 +41,7 @@ Discussions allow users to interact with others.
     </div>
     <transition mode="out-in">
       <template v-if="loading" key="loader">
-        <Loader class="mt-md" />
+        <Loader class="fr-mt-2w" />
       </template>
       <template v-else>
         <div v-if="threadFromURL">
@@ -57,7 +57,7 @@ Discussions allow users to interact with others.
           </div>
           <thread v-bind="threadFromURL"></thread>
           <button
-            class="nav-link nav-link--no-icon text-decoration-none fr-link fr-mt-9v fr-link--icon-left fr-fi-arrow-right-s-line"
+            class="nav-link nav-link--no-icon text-decoration-none fr-link fr-mt-9v fr-link--icon-left fr-icon-arrow-right-s-line"
             @click.prevent="viewAllDiscussions"
           >
             <span class="text-decoration-underline">{{ $t("See all discussions about this dataset") }}</span>

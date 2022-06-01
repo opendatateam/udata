@@ -1,0 +1,133 @@
+.fadeOut {
+    animation-name: fadeOut;
+}
+
+.fadeInDown {
+    animation-name: fadeInDown;
+}
+
+.fadeInUp {
+    animation-name: fadeInUp;
+}
+
+.fade-enter-active {
+    transition: opacity .3s ease-in;
+}
+
+.fade-leave-active {
+    transition: opacity .15s ease-out;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: .5;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: .5;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.c-toast-container {
+    z-index: 9999;
+    pointer-events: none;
+    padding: 2em;
+    display: flex;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+}
+
+.c-toast-container--top {
+    flex-direction: column;
+}
+
+.c-toast-container--bottom {
+    flex-direction: column-reverse;
+}
+
+@media @query-md {
+    .c-toast-container {
+        padding: 0;
+        position: fixed !important;
+    }
+}
+
+.c-toast--top,
+.c-toast--bottom {
+    align-self: center;
+}
+
+.c-toast--top-right,
+.c-toast--bottom-right {
+    align-self: flex-end;
+}
+
+.c-toast--top-left,
+.c-toast--bottom-left {
+    align-self: flex-start;
+}
+
+.v--default-css .c-toast--success {
+    background-color: #28a745;
+}
+
+.v--default-css .c-toast--info {
+    background-color: #17a2b8;
+}
+
+.v--default-css .c-toast--warning {
+    background-color: #ffc107;
+}
+
+.v--default-css .c-toast--error {
+    background-color: #dc3545;
+}
+
+.v--default-css .c-toast--default {
+    background-color: #343a40;
+}
+
+.v--default-css .c-toast {
+    pointer-events: auto;
+    color: #fff;
+    min-height: 3em;
+    cursor: pointer;
+    word-break: break-word;
+    border-radius: .5em;
+    align-items: center;
+    margin: .5em 0;
+    padding: .5em 2em;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    animation-duration: .15s;
+    display: grid;
+}

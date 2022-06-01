@@ -79,13 +79,8 @@
     <h2>{{ _('Reuses') }} <sup>{{ post.reuses|length }}</sup></h2>
     <ul class="fr-grid-row fr-grid-row--gutters">
         {% for reuse in post.reuses %}
-        <li class="fr-col-lg-3 fr-col-sm-6 fr-col-12 my-sm-sm text-align-center">
-            <a
-                href="{{ url_for('reuses.show', reuse=reuse) }}"
-                title="{{ reuse.title }}"
-            >
-                {% include theme('reuse/card.html') %}
-            </a>
+        <li class="fr-col-lg-3 fr-col-md-4 fr-col-sm-6 fr-col-12 fr-mb-3v">
+            {% include theme('reuse/card.html') %}
         </li>
         {% endfor %}
     </ul>
@@ -117,7 +112,7 @@
             {% if previous_post %}
             <a
                 href="{{ previous_post.display_url }}"
-                class="fr-btn fr-btn--secondary fr-fi-arrow-left-s-line fr-btn--icon-left"
+                class="fr-btn fr-btn--secondary fr-icon-arrow-left-s-line fr-btn--icon-left"
             >
                 {{ _('Previous post') }}
             </a>
@@ -132,7 +127,7 @@
             {% if next_post %}
             <a
                 href="{{ next_post.display_url }}"
-                class="fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
+                class="fr-btn fr-btn--secondary fr-icon-arrow-right-s-line fr-btn--icon-right"
             >
                 {{ _('Next post') }}
             </a>

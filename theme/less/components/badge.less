@@ -8,35 +8,10 @@ Merriam-Webster defines a badge as an emblem awarded for a particular accomplish
 Since we consider moderating and publishing data on this website an amazing feat, we decided to award badges for all the people involved.
 Additionally, it also allows regular-non-awarded people to quickly identify public servants and administrators.
 
-Available colors : `grey-400` (default), `blue-400`, `grey-300`
-
 ```badge.html
-<span class="badge">Admin</span>
-<span class="badge">Owner</span>
+<span class="fr-badge">Admin</span>
+<span class="fr-badge">Owner</span>
 ```
 */
 
-.badge {
-    display: inline-block;
-    vertical-align: middle;
-
-    border-radius: 2px;
-    font-size: @font-size-xs;
-    font-weight: @font-weight-bold;
-
-    background-color: @grey-400;
-    color: @contrast-grey-400;
-    padding: @spacing-xxs @spacing-xs;
-
-    text-transform: uppercase;
-
-     &.blue-400 {
-        background-color: @blue-400;
-        color: @contrast-blue-400;
-    }
-
-    &.grey-300 {
-        background-color: @grey-300;
-        color: @contrast-grey-300;
-    }
-}
+@import (less) "@gouvfr/dsfr/dist/component/badge/badge.css";

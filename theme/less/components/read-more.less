@@ -5,14 +5,25 @@
 
 a.read-more-link {
     --gradient-color: var(--background-default-grey);
-    --blend-size: 100%;
-    --blend-full-size: 100%;
     position: absolute;
     bottom: 0;
     width: 100%;
     padding-top: 80px;
     background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--gradient-color) 70%, var(--gradient-color));
     cursor: pointer;
+    --active-tint: transparent;
+    --hover-tint: transparent;
+    &, &:hover {
+        background-size: 100%;
+    }
+    // This is a redo of DSFR link style with text-decoration instead of their background-image implementation
+    // We must do it because we already use the background-image for our read-more effect
+    text-decoration: underline;
+    text-underline-offset: 0.125em;
+    text-decoration-thickness: 0.0625em;
+    &:hover {
+        text-decoration-thickness: 0.125em;
+    }
 }
 
 .bg-contrast-grey .read-more-link {

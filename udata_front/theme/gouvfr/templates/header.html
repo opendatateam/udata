@@ -20,11 +20,11 @@
         <div class="fr-container">
             <!--[if lte IE 8]>
                 {{ banner_warning(
-                "fr-fi-alert-line",
-                 _('Internet Explorer 8 and below are not anymore supported.
-                 Please upgrade or change your browser to access the website.
-                 <a class="fr-link" href="http://browsehappy.com/">More information →</a>'))}}
-             <![endif]-->
+                "fr-icon-alert-line",
+                _('Internet Explorer 8 and below are not anymore supported.
+                Please upgrade or change your browser to access the website.
+                <a class="fr-link" href="http://browsehappy.com/">More information →</a>'))}}
+            <![endif]-->
             <div class="fr-header__body-row">
                 <div class="fr-header__brand fr-enlarge-link">
                     <div class="fr-header__brand-top">
@@ -66,7 +66,7 @@
                         <ul class="fr-links-group">
                             {% if current_user.is_authenticated %}
                                 <li>
-                                    <div class="fr-link fr-grid-row text-grey-500">
+                                    <div class="fr-link fr-icon-svg fr-icon--sm fr-grid-row text-grey-500">
                                         <img
                                             src="{{ current_user|avatar_url(24) }}"
                                             width="24"
@@ -81,7 +81,7 @@
                                 <li>
                                     <a
                                         href="{{ url_for('admin.index') }}"
-                                        class="fr-link"
+                                        class="fr-link fr-icon-svg fr-icon--sm"
                                     >
                                         <span class="fr-mr-1w fr-grid-row">
                                             {% include theme('svg/administration.svg') %}
@@ -92,34 +92,38 @@
                                 <li>
                                     <a
                                         href="{{ url_for('security.logout') }}"
-                                        class="fr-link fr-fi-logout-box-r-line"
+                                        class="fr-link fr-icon-logout-box-r-line"
                                     >
                                         {{ _('Logout') }}
                                     </a>
                                 </li>
                             {% else %}
-                                <a
-                                    href="{{ url_for('security.login', next=next_url) }}"
-                                    title="{{ _('Log in') }}"
-                                    class="fr-link fr-fi-lock-line"
-                                >
-                                    {{ _('Log in') }}
-                                </a>
+                                <li>
+                                    <a
+                                        href="{{ url_for('security.login', next=next_url) }}"
+                                        title="{{ _('Log in') }}"
+                                        class="fr-link fr-icon-lock-line"
+                                    >
+                                        {{ _('Log in') }}
+                                    </a>
+                                </li>
                                 {% if not read_only_mode %}
+                                <li>
                                     <a
                                         href="{{ url_for('security.register', next=next_url) }}"
                                         title="{{ _('Sign up') }}"
-                                         class="fr-link fr-fi-account-line"
+                                        class="fr-link fr-icon-account-line"
                                     >
                                         {{ _("Sign up") }}
                                     </a>
+                                </li>
                                 {% endif %}
                             {% endif %}
                         </ul>
                     </div>
                     <div class="fr-header__search fr-modal" id="modal-search">
                         <div class="fr-container fr-container-lg--fluid relative">
-                            <button class="fr-link--close fr-link" aria-controls="modal-search">{{ _('Close') }}</button>
+                            <button class="fr-btn--close fr-btn" aria-controls="modal-search">{{ _('Close') }}</button>
                             <form action="/datasets">
                                 <div class="fr-search-bar vuejs" id="search" role="search">
                                     <label class="fr-label" for="search-input" id="search-label">
@@ -152,7 +156,7 @@
     </div>
     <div class="fr-header__menu fr-modal" id="modal-mobile-menu" aria-labelledby="fr-btn-menu-mobile">
         <div class="fr-container">
-            <button class="fr-link--close fr-link" aria-controls="modal-mobile-menu">{{ _('Close') }}</button>
+            <button class="fr-btn--close fr-btn" aria-controls="modal-mobile-menu">{{ _('Close') }}</button>
             <div class="fr-header__menu-links"></div>
             <nav class="fr-nav" id="navigation" role="navigation" aria-label="{{ _('Main Menu') }}">
                 <ul class="fr-nav__list">

@@ -13,6 +13,7 @@
         keypath="Fields preceded by a star ({markup}) are required."
         tag="p"
         class="fr-mt-0 fr-mb-1w fr-text--xs"
+        scope="global"
       >
         <template #markup>
           <span class="required-field-star">*</span>
@@ -41,7 +42,7 @@
 
 <script>
 import config from "../../config";
-import Author from "./author";
+import Author from "./author.vue";
 
 const log = console.log;
 

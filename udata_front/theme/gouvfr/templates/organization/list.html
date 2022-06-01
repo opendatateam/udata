@@ -62,8 +62,12 @@
     <ul class="search-results mt-lg">
         {% for organization in organizations %}
         <li>
-            <a href="{{ url_for('organizations.show', org=organization) }}" title="{{ organization.title }}"
-                class="unstyled w-100">{% include theme('organization/search-result.html') %}
+            <a
+                href="{{ url_for('organizations.show', org=organization) }}"
+                title="{{ organization.title }}"
+                class="fr-raw-link unstyled w-100"
+            >
+                {% include theme('organization/search-result.html') %}
             </a>
         </li>
         {% endfor %}

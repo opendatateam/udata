@@ -1,6 +1,6 @@
 {% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
 <a
-    class="unstyled w-100 fr-grid-row fr-grid-row--center"
+    class="fr-raw-link unstyled w-100 fr-grid-row fr-grid-row--center"
     href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}"
     title="{{ reuse.title }}"
 >

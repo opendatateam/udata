@@ -11,15 +11,15 @@ There is also `.fr-tags-group` to group multiple tags together like a row.
 
 ```dsfr-tags.html
 <nav class="fr-tags-group">
-    <a href="#editorial-datasets" class="fr-tag">
+    <button class="fr-tag">
         Données mises en avant
-    </a>
-    <a href="#recent-datasets" class="fr-tag">
+    </button>
+    <button class="fr-tag">
         Dernières données
-    </a>
-    <a href="#reference-datasets" class="fr-tag active">
+    </button>
+    <button aria-pressed="true" class="fr-tag">
         Données de référence
-    </a>
+    </button>
     <a href="/fr/datasets/" class="fr-tag">Voir plus</a>
 </nav>
 ```
@@ -27,17 +27,18 @@ There is also `.fr-tags-group` to group multiple tags together like a row.
 
 @import (less) "@gouvfr/dsfr/dist/component/tag/tag.css";
 
-a.fr-tag {
-    &:hover {
-        text-decoration: none;
-    }
+a.fr-tag, button.fr-tag {
+    --text-action-high-blue-france: var(--text-default-info);
+    --background-action-low-blue-france: var(--background-contrast-info);
+    --background-action-low-blue-france-hover: var(--background-contrast-info-hover);
+    --background-action-low-blue-france-active: var(--background-contrast-info-active);
+    --background-action-high-blue-france-hover: @blue-400-hover;
+    --background-action-high-blue-france-active: @blue-400-active;
 
-    color: var(--text-default-info);
-    --blend: var(--background-contrast-info-blend);
-    background-color: var(--background-contrast-info);
-
-    &.active {
-        background-color: @blue-400;
-        color: @white;
+    &[aria-pressed="true"] {
+        --background-action-high-blue-france: @blue-400;
+        &::after {
+            --text-action-high-blue-france: @blue-400;
+        }
     }
 }

@@ -4,11 +4,11 @@ Nothing to see here ! Well actually it's a small component that says this.
 
 <template>
   <div
-    class="search-empty bg-grey-50 p-lg my-md pb-hg"
+    class="search-empty bg-grey-50 fr-p-3w fr-my-2w fr-pb-7w"
     :class="{ 'row-inline': wide }"
   >
-    <div :class="{ 'pr-lg': wide }" v-html="Empty" />
-    <div :class="{ 'mt-lg': !wide }">
+    <div :class="{ 'fr-pr-3w': wide }" v-html="Empty" />
+    <div :class="{ 'fr-mt-3w': !wide }">
       <h4>
         {{ $t("There are no results for your search") }}
       </h4>
@@ -24,7 +24,7 @@ Nothing to see here ! Well actually it's a small component that says this.
 </template>
 
 <script>
-import Empty from "svg/search/empty.svg";
+import Empty from "bundle-text:svg/search/empty.svg";
 
 export default {
   props: {

@@ -23,7 +23,12 @@
     <div class="col-10 col-md-12 fr-mt-2w fr-mt-md-0">
         <h2 class="h3 fr-mb-1v">
             {% if producer_type == 'organization' %}
-            <a href="{{ url_for("organizations.show", org=organization, _external=True) }}">{{ organization.name }}</a>
+            <a
+                href="{{ url_for("organizations.show", org=organization, _external=True) }}"
+                class="fr-raw-link"
+            >
+                {{ organization.name }}
+            </a>
             {% else %}
             {{ organization.fullname }}
             {% endif %}
@@ -34,13 +39,11 @@
         <div class="row">
             {% if organization.metrics.datasets %}
             <div class="col-auto">
-                <!-- TODO: add href to organization page when we redesign it -->
                 {{ organization.metrics.datasets }} {{ _('datasets') }}
             </div>
             {% endif %}
             {% if organization.metrics.reuses %}
             <div class="col-auto">
-                    <!-- TODO: add href to organization page when we redesign it -->
                     {{ organization.metrics.reuses }} {{ _('reuses') }}
             </div>
             {% endif %}

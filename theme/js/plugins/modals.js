@@ -21,7 +21,7 @@ Note that you can define variables in the `props` part of the Vue template defin
     </div>
 
     <footer class="modal-footer">
-      <button class="fr-btn fr-fi-close-line" @click.prevent="$emit('close')"> {{$t('Close')}} </button>
+      <button class="fr-btn fr-icon-close-line" @click.prevent="$emit('close')"> {{$t('Close')}} </button>
     </footer>
   </div>
 </template>

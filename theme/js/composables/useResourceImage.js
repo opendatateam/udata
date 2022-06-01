@@ -1,12 +1,12 @@
-import code from 'svg/resources/code.svg';
-import archive from 'svg/resources/archive.svg';
-import documentation from 'svg/resources/documentation.svg';
-import file from 'svg/resources/file.svg';
-import link from 'svg/resources/link.svg';
-import table from 'svg/resources/table.svg';
+import code from 'bundle-text:svg/resources/code.svg';
+import archive from 'bundle-text:svg/resources/archive.svg';
+import documentation from 'bundle-text:svg/resources/documentation.svg';
+import file from 'bundle-text:svg/resources/file.svg';
+import link from 'bundle-text:svg/resources/link.svg';
+import table from 'bundle-text:svg/resources/table.svg';
 /***
  *
- * @param {ResourceModel} resource
+ * @param {import("../api/resources").ResourceModel} resource
  */
 export default function useResourceImage(resource) {
   switch (resource.format?.trim()?.toLowerCase()) {

@@ -1,10 +1,10 @@
 {% cache cache_duration, 'post-search-result', post.id|string, g.lang_code %}
-<article class="search-result post-result mb-lg">
+<article class="search-result post-result fr-mb-3w">
     {% set image = post.image|placeholder('post') %}
     <div class="hero-image w-100 rounded-xxs" style="background-image: url('{{image}}')"></div>
-    <div class="result-body p-md">
-        <h3 class="result-title m-0">{{ post.name }}</h3>
-        <p class="fs-sm text-grey-380 my-sm">
+    <div class="result-body fr-p-2w">
+        <h3 class="result-title fr-m-0">{{ post.name }}</h3>
+        <p class="fs-sm text-grey-380 fr-my-3v">
             {{ _('Published on') }}
             {{ post.published|dateformat(format='long') }}
         </p>

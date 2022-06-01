@@ -80,7 +80,9 @@
                     <li>
                         <a
                             href="{{ url_for('reuses.list') }}"
-                            class="fr-tag{% if not reuses.query._filters.topic %} active{% endif %}">
+                            class="fr-tag"
+                            {% if  not reuses.query._filters.topic %}aria-pressed="true"{% endif %}
+                        >
                             {{ _('All') }}
                         </a>
                     </li>
@@ -88,7 +90,8 @@
                         <li>
                             <a
                                 href="{{ reuses.query.to_url(url, replace=True, **{'topic': topic_id}) }}"
-                                class="fr-tag{% if reuses.query._filters and reuses.query._filters.topic and reuses.query._filters.topic == topic_id %} active{% endif %}"
+                                class="fr-tag"
+                                {% if reuses.query._filters and reuses.query._filters.topic and reuses.query._filters.topic == topic_id %}aria-pressed="true"{% endif %}
                             >
                                 {{ label }}
                             </a>
@@ -105,7 +108,7 @@
     {%if reuses %}
     <ul class="search-results fr-grid-row fr-grid-row--gutters fr-mt-2w">
         {% for reuse in reuses %}
-        <li class="fr-col-lg-3 fr-col-md-4 fr-col-sm-6 fr-col-12 my-sm-sm fr-mb-3v">
+        <li class="fr-col-lg-3 fr-col-md-4 fr-col-sm-6 fr-col-12 fr-mb-3v">
             {% include theme('reuse/card.html') %}
         </li>
         {% endfor %}

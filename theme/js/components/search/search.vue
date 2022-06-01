@@ -90,7 +90,7 @@
                 </div>
                 <div class="fr-col-12 fr-mb-3w">
                   <button
-                    class="fr-btn fr-btn--secondary fr-fi-close-circle-line fr-btn--icon-left"
+                    class="fr-btn fr-btn--secondary fr-icon-close-circle-line fr-btn--icon-left"
                     @click="resetFilters"
                     v-if="isFiltered"
                   >
@@ -135,7 +135,7 @@
           </div>
           <ul v-else-if="results.length" class="fr-mt-1w border-default-grey border-top">
             <li v-for="result in results" :key="result.id">
-              <a :href="result.page" class="unstyled w-10 block">
+              <a :href="result.page" class="unstyled fr-raw-link w-10 block">
                 <Dataset v-bind="result" />
               </a>
             </li>

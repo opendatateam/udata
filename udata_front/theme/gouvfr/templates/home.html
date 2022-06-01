@@ -11,20 +11,20 @@
 {% block content %}
 {% cache cache_duration, 'home', g.lang_code %}
 
-<section class="hero py-xl py-lg-lg">
+<section class="hero fr-py-3w fr-py-md-9v">
     <div class="hagrid">
-        <div class="row">
-            <div class="col-5 col-lg-12">
-                <h1 class="mt-0 mb-md-md">{{ _('Open platform for French public data') }}</h1>
-                <div class="mt-md mt-lg-sm">
+        <div class="fr-grid-row fr-grid-row--gutters">
+            <div class="fr-col-12 fr-col-lg-5">
+                <h1 class="fr-mt-0 fr-mb-2w">{{ _('Open platform for French public data') }}</h1>
+                <div>
                     <h4>{{ _('Featured topics') }}</h4>
                     <a href="{{ url_for('gouvfr.show_page', slug='donnees-des-elections') }}"
-                        class="btn-venti my-md bg-blue-400">
+                        class="btn-venti fr-my-2w bg-blue-400">
                         Données relatives aux
                         <strong>Élections</strong>
                     </a>
                     <a href="{{ url_for('gouvfr.show_page', slug='donnees-geographiques') }}"
-                        class="btn-venti my-md bg-blue-450">
+                        class="btn-venti fr-my-2w bg-blue-450">
                         Données à composante
                         <strong>Géographique</strong>
                     </a>
@@ -33,17 +33,17 @@
                         Données relatives au
                         <strong>Logement et à l'Urbanisme</strong>
                     </a>
-                    <div class="row justify-center mt-md">
+                    <div class="row justify-center fr-mt-2w">
                         <a
                             href="{{ url_for('gouvfr.show_page', slug='donnees-cles-par-sujet') }}"
-                            class="fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
+                            class="fr-btn fr-btn--secondary fr-icon-arrow-right-s-line fr-btn--icon-right"
                         >
                             {{ _('All featured topics') }}
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col-6 offset-1 offset-lg-0 col-lg-12 mt-lg-md">
+            <div class="fr-col-12 fr-col-offset-lg-1 fr-col-lg-6">
                 <h4>{{ _('News') }}</h4>
                 {% if last_post %}
                 {% set post = last_post %}
@@ -53,7 +53,7 @@
                 <div class="row justify-center">
                     <a
                         href="{{ url_for('posts.list') }}"
-                        class="fr-btn fr-btn--secondary fr-fi-arrow-right-s-line fr-btn--icon-right"
+                        class="fr-btn fr-btn--secondary fr-icon-arrow-right-s-line fr-btn--icon-right"
                     >
                         {{ _('All news') }}
                     </a>
@@ -76,12 +76,12 @@
 
 {# Metrics Section #}
 <section class="metrics-bar">
-    <div class="hagrid py-hg py-md-md">
-        <div class="bar p-xl">
+    <div class="hagrid fr-py-md-7w fr-py-2w">
+        <div class="bar fr-p-9v">
             <h3>{% include theme('svg/logotype.svg') %} {{ _('is') }}</h3>
-            <div class="row-inline justify-between mt-xl mt-md-md">
+            <div class="row-inline justify-between fr-mt-md-9v fr-mt-2w">
                 {% for (label, metric) in metrics %}
-                <div class="filet my-md-xxs">
+                <div class="filet fr-my-1v fr-my-md-0">
                     <div class="fs-hg f-bold text-grey-400">{{ current_site.metrics[metric]|format_number }}</div>
                     <span class="text-grey-400">{{ label }}</span>
                 </div>
@@ -101,7 +101,7 @@
     ('reference-datasets', _('Reference datasets'), spd_datasets, {}),
 ) %}
 
-<section class="datasets pb-hg pt-md bg-grey-50">
+<section class="datasets fr-pb-7w fr-pt-2w bg-grey-50">
     <div class="hagrid overflow-visible">
         {# Dataset tabs #}
         <div class="fr-grid-row fr-grid-row--gutters justify-between">
@@ -110,21 +110,28 @@
             </div>
             <div class="fr-col-auto fr-grid-row fr-grid-row--gutters">
                 <div class="fr-col-auto">
-                    <nav class="tabs fr-tags-group fr-displayed-lg">
+                    <nav class="fr-tags-group fr-hidden fr-unhidden-lg" data-tabs role="tablist">
                         {% for tab_id, label, _, _ in dataset_tabs %}
-                        <a
-                            href="#{{tab_id}}"
-                            class="tab fr-tag {% if loop.first %}active {% endif %}"
+                        <button
+                            role="tab"
+                            aria-controls="{{tab_id}}"
+                            class="fr-tag"
+                            {% if loop.first %}
+                                aria-pressed="true"
+                                aria-selected="true"
+                            {% else %}
+                                aria-pressed="false"
+                            {% endif %}
                         >
                             {{ label }}
-                        </a>
+                        </button>
                         {% endfor %}
                     </nav>
                 </div>
                 <div class="fr-col-auto">
                     <a
                         href="{{ url_for('datasets.list') }}"
-                        class="fr-link fr-fi-arrow-right-line fr-link--icon-right"
+                        class="fr-link fr-icon-arrow-right-s-line fr-link--icon-right"
                     >
                         {{ _('See more') }}
                     </a>
@@ -132,8 +139,8 @@
             </div>
         </div>
         {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
-        <div class="tab-content {% if loop.first %}active{% endif %}" id={{tab_id}}>
-            <div class="row pt-xl pt-md-md">
+        <div class="fr-hidden {% if loop.first %}fr-unhidden{% endif %}" role="tabpanel" id={{tab_id}}>
+            <div class="row fr-pt-md-9v fr-pt-2w">
                 {% for dataset in datasets %}
                 <div class="col-lg-12 col-4">{% include theme('dataset/card.html') %}
                 </div>
@@ -155,22 +162,29 @@
 ) %}
 
 {# Reuse section #}
-<section class="reuse py-hg py-md-lg">
-    <div class="hagrid">
+<section class="reuse fr-py-3w fr-py-md-7w">
+    <div class="hagrid overflow-visible">
         <div class="fr-grid-row fr-grid-row--gutters justify-between">
             <div class="fr-col-auto">
                 <h2>{{ _('Data reuses') }}</h2>
             </div>
             <div class="fr-col-auto fr-grid-row fr-grid-row--gutters">
                 <div class="fr-col-auto">
-                    <nav class="tabs fr-tags-group fr-displayed-lg">
+                    <nav class="fr-tags-group fr-hidden fr-unhidden-lg" data-tabs role="tablist">
                         {% for tab_id, label, _, _ in reuses_tabs %}
-                        <a
-                            href="#{{tab_id}}"
-                            class="tab fr-tag {% if loop.first %}active {% endif %}"
+                        <button
+                            role="tab"
+                            aria-controls="{{tab_id}}"
+                            class="fr-tag"
+                            {% if loop.first %}
+                                aria-pressed="true"
+                                aria-selected="true"
+                            {% else %}
+                                aria-pressed="false"
+                            {% endif %}
                         >
                             {{ label }}
-                        </a>
+                        </button>
                         {% endfor %}
                     </nav>
                 </div>
@@ -178,7 +192,7 @@
                     <a
                     href="{{ url_for('reuses.list', sort='-created') }}"
                     title="{{ _('Latest reuses') }}"
-                    class="fr-link fr-fi-arrow-right-line fr-link--icon-right"
+                    class="fr-link fr-icon-arrow-right-s-line fr-link--icon-right"
                 >
                     {{ _('See more') }}
                 </a>
@@ -188,10 +202,10 @@
     </div>
     <div class="hagrid">
         {% for tab_id, label, reuses, kwargs in reuses_tabs  %}
-        <div class="tab-content {% if loop.first %}active{% endif %}" id="{{tab_id}}">
-            <div class="fr-grid-row fr-grid-row--gutters pt-xl pt-md-md">
+        <div class="fr-hidden {% if loop.first %}fr-unhidden{% endif %}" role="tabpanel" id="{{tab_id}}">
+            <div class="fr-grid-row fr-grid-row--gutters fr-pt-2w fr-pt-md-9v">
                 {% for reuse in reuses %}
-                <div class="mb-md fr-col-lg-3 fr-col-sm-6 fr-col-12">
+                <div class="fr-mb-2w fr-mb-md-0 fr-col-lg-3 fr-col-sm-6 fr-col-12">
                     {% include theme('reuse/card.html') %}
                 </div>
                 {% endfor %}

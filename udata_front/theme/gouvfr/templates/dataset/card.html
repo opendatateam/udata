@@ -1,7 +1,11 @@
 {% cache cache_duration, 'dataset-card', dataset.id|string, g.lang_code %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
 
-<a href="{{ url_for('datasets.show', dataset=dataset, _external=True) }}" title="{{ dataset.title }}" class="unstyled w-100 mb-xxs">
+<a
+    href="{{ url_for('datasets.show', dataset=dataset, _external=True) }}"
+    title="{{ dataset.title }}"
+    class="fr-raw-link unstyled w-100 fr-mb-1v"
+>
     <article class="dataset-card">
         {% if dataset.organization %}
         <div class="card-logo">

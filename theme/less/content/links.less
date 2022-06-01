@@ -47,8 +47,8 @@ You can use links from DSFR. It uses DSFR colors and conventions. It allows you 
 
 ```dsfr-links.html
 <a class="fr-link" href="#">lien simple</a>
-<a class="fr-link fr-fi-arrow-right-line fr-link--icon-right" href="#">lien simple avec icône à droite</a>
-<a class="fr-link fr-fi-arrow-right-line fr-link--icon-left" href="#">lien simple avec icône à gauche</a>
+<a class="fr-link fr-icon-arrow-right-s-line fr-link--icon-right" href="#">lien simple avec icône à droite</a>
+<a class="fr-link fr-icon-arrow-right-s-line fr-link--icon-left" href="#">lien simple avec icône à gauche</a>
 ```
 
 */
@@ -56,12 +56,7 @@ You can use links from DSFR. It uses DSFR colors and conventions. It allows you 
 
 a {
     color: @blue-400;
-    text-decoration: none;
     cursor: pointer;
-
-    &:hover {
-        text-decoration: underline;
-    }
 
     &:focus {
         outline: 5px auto -webkit-focus-ring-color;
@@ -85,6 +80,7 @@ a {
 }
 
 .nav-link {
+    .fr-raw-link;
     position: relative;
     color: @grey-400;
     font-weight: @font-weight-bold;
@@ -93,7 +89,7 @@ a {
     font-size: 1rem;
     &:not([disabled]):not(:disabled):hover, &:not([disabled]):not(:disabled):hover .text-decoration-underline {
         text-decoration-color: initial;
-        --blend-size: 0%;
+        --hover-tint: transparent;
     }
 
     &, & .text-decoration-underline {
@@ -132,18 +128,8 @@ a {
 
 .fr-link {
     --text-action-high-blue-france: @blue-400;
-    &:hover {
-        text-decoration: none;
-    }
 }
 
 .fr-link.rounded-0 {
     .rounded-0;
-}
-
-.fr-link {
-    --text-action-high-blue-france: @blue-400;
-    &:hover {
-        text-decoration: none;
-    }
 }

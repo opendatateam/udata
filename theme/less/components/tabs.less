@@ -4,7 +4,7 @@ name: Tabs
 category: 3 - Components
 ---
 
-Tabs allow for easy navigation between categories. You can toggle a `.active` class to make them appear selected.
+Tabs allow for easy navigation between categories.
 
 Warning : `.tab` first immediate child (`.tab > *`) has a `pointer-events: none` property set so that clicks actually register to the tab element and not the children.
 This prevents messy event handling with bubbling prevention, but might cause you trouble in some edge cases.
@@ -29,17 +29,17 @@ You can use tabs from DSFR. It uses DSFR colors and conventions. It allows you t
 <div class="fr-tabs">
     <ul class="fr-tabs__list" role="tablist" aria-label="[A modifier | nom du système d'onglet]">
         <li role="presentation">
-            <button id="tabpanel-404" class="fr-tabs__tab fr-fi-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="0" role="tab" aria-selected="true" aria-controls="tabpanel-404-panel">Label Tab 1</button>
+            <button id="tabpanel-404" class="fr-tabs__tab fr-icon-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="0" role="tab" aria-selected="true" aria-controls="tabpanel-404-panel">Label Tab 1</button>
         </li>
         <li role="presentation">
-            <button id="tabpanel-405" class="fr-tabs__tab fr-fi-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-405-panel">Label Tab 2</button>
+            <button id="tabpanel-405" class="fr-tabs__tab fr-icon-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-405-panel">Label Tab 2</button>
         </li>
         <li role="presentation">
-            <button id="tabpanel-406" class="fr-tabs__tab fr-fi-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-406-panel">Label Tab 2</button>
+            <button id="tabpanel-406" class="fr-tabs__tab fr-icon-checkbox-circle-line fr-tabs__tab--icon-left" tabindex="-1" role="tab" aria-selected="false" aria-controls="tabpanel-406-panel">Label Tab 2</button>
         </li>
     </ul>
     <div id="tabpanel-404-panel" class="fr-tabs__panel fr-tabs__panel--selected" role="tabpanel" aria-labelledby="tabpanel-404" tabindex="0">
-       <p>Contenu 1</p>
+        <p>Contenu 1</p>
     </div>
     <div id="tabpanel-405-panel" class="fr-tabs__panel" role="tabpanel" aria-labelledby="tabpanel-405" tabindex="0">
         <p>Contenu 2</p>
@@ -52,8 +52,8 @@ You can use tabs from DSFR. It uses DSFR colors and conventions. It allows you t
 
 */
 
-.tabs {
-    .tab {
+[data-tabs] {
+    [role=tab] {
         // Prevents children from taking the click events.
         // Might be dangerous, remove if needed
         > * {
@@ -66,14 +66,6 @@ You can use tabs from DSFR. It uses DSFR colors and conventions. It allows you t
     }
 }
 
-.tab-content {
-    display: none;
-
-    &.active {
-        display: inherit;
-    }
-}
-
 // tabs from dsfr
 @import (less) "@gouvfr/dsfr/dist/component/tab/tab.css";
 
@@ -81,6 +73,7 @@ You can use tabs from DSFR. It uses DSFR colors and conventions. It allows you t
     --text-active-blue-france: @blue-400;
     --border-active-blue-france: @blue-400;
     --background-action-low-blue-france: @background-alt-blue-cumulus;
-    --background-action-low-blue-france-blend: var(--background-alt-blue-cumulus-blend);
+    --background-action-low-blue-france-hover: @background-alt-blue-cumulus-hover;
+    --background-action-low-blue-france-active: @background-alt-blue-cumulus-active;
     z-index: 1;
 }

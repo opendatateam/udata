@@ -42,7 +42,7 @@ There are `.fr-btn--icon-left` and `fr-btn--icon-right` to add spacing around th
 
 ```button-icons-dsfr.html
 <a
-    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--icon-left fr-fi-edit-line"
+    class="fr-btn fr-btn--secondary fr-btn--secondary-grey-500 fr-btn--icon-left fr-icon-edit-line"
     href="#"
 >
     Modify information
@@ -62,7 +62,7 @@ Use the `bg-{color}` classes to style the background accordingly.
     <strong>Référence</strong>
 </a>
 <a href="{{ url_for('gouvfr.show_page', slug='donnees-coronavirus') }}"
-    class="btn-venti my-md bg-blue-450">
+    class="btn-venti fr-my-2w bg-blue-450">
     Données relatives à la <strong>COVID-19</strong>
 </a>
 ```
@@ -77,14 +77,21 @@ These are now removed, see tags instead.
 .fr-btn {
     font-size: @font-size-sm;
     --background-action-high-blue-france: @blue-400;
-    --background-action-high-blue-france-blend: @blue-400-blend;
+    --background-action-high-blue-france-hover: @blue-400-hover;
+    --background-action-high-blue-france-active: @blue-400-active;
     border-radius: 3em;
-    &:hover {
-        text-decoration: none;
-    }
 }
 
-.fr-btn--secondary {
+.fr-header__menu-links .fr-btn {
+    border-radius: 0;
+    --text-action-high-blue-france: @blue-400;
+}
+
+.fr-btn--close {
+    --text-action-high-blue-france: @blue-400;
+}
+
+.fr-btn--secondary, .fr-btn--tertiary {
     --text-action-high-blue-france: @blue-400;
     --border-action-high-blue-france: @blue-400;
 }
@@ -98,8 +105,14 @@ each(@colors, {
     }
 });
 
+.fr-btn--secondary-white {
+    --hover: #f6f6f633;
+    --active: #ededed33;
+}
+
 // Bottoni molto grandi 🤏
 .btn-venti {
+    .fr-raw-link;
     position: relative;
     display: block;
     padding: @spacing-lg @spacing-md;
@@ -108,7 +121,7 @@ each(@colors, {
 
     strong {
         display: block;
-        margin-top: @spacing-xxs;
+        .fr-mt-1v;
         font-size: @font-size-xl;
     }
 

@@ -74,9 +74,9 @@ import {ref, defineComponent,reactive, onMounted, onUnmounted} from "vue";
 import { useI18n } from 'vue-i18n'
 import { useCollapse } from "../../composables/useCollapse";
 import MenuSearchOption from "./menu-search-option.vue";
-import datasetIcon from "svg/search/dataset.svg";
-import reuseIcon from "svg/search/reuse.svg";
-import organizationIcon from "svg/search/organization.svg";
+import datasetIcon from "bundle-text:svg/search/dataset.svg";
+import reuseIcon from "bundle-text:svg/search/reuse.svg";
+import organizationIcon from "bundle-text:svg/search/organization.svg";
 import useSearchUrl from "../../composables/useSearchUrl";
 import useActiveDescendant from "../../composables/useActiveDescendant";
 

@@ -13,15 +13,7 @@
     }
 }
 
-.fr-nav__link:hover {
-    text-decoration: none;
-}
-
-nav.fr-nav li::before {
-    content: none;
-}
-
-.fr-header__navbar .fr-btn {
+.fr-header__tools-links .fr-btn, .fr-header__navbar .fr-btn {
     --text-action-high-blue-france: @blue-400;
 }
 
@@ -31,7 +23,8 @@ nav.fr-nav li::before {
 
 .fr-nav__link[aria-current]::before, .fr-nav__btn[aria-current]::before {
     --background-active-blue-france: @blue-400;
-    --background-active-blue-france-blend: @blue-400-blend;
+    --background-active-blue-france-hover: @blue-400-hover;
+    --background-active-blue-france-active: @blue-400-active;
 }
 
 .fr-collapse.autocomplete {

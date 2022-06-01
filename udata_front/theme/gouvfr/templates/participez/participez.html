@@ -1,8 +1,8 @@
 <div class="bg-blue-400">
-    <div class="hagrid py-hg">
-        <div class="row align-items-center text-align-center-sm">
-            <div class="col-6 col-sm-12 text-white filet filet-currentcolor">
-                <h2 class="h1 mb-md">{{ _('Participate') }}</h2>
+    <div class="hagrid fr-py-7w">
+        <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--middle text-align-center-sm">
+            <div class="fr-col-12 fr-col-sm-6 text-white filet filet-currentcolor">
+                <h2 class="fr-h2 text-white fr-mb-2w">{{ _('Participate') }}</h2>
                 <ul class="nav-list">
                     <li><a href="{{ config.GUIDES_ORGANIZATION_URL }}"
                             class="nav-link text-white text-decoration-none">{{ _('Create or find your organization') }}</a>
@@ -13,13 +13,23 @@
                 </ul>
             </div>
             {% if not read_only_mode %}
-            <div class="col-3 col-sm-12 py-sm-xs mt-sm-sm">
-                <a href="{{ config.GUIDES_DATASET_URL }}" role="button"
-                    class="fr-btn fr-btn--secondary fr-btn--secondary-white fr-fi-arrow-right-s-line fr-btn--icon-right">{{ _('Publish a dataset') }}</a>
-            </div>
-            <div class="col-3 col-sm-12 py-sm-xs">
-                <a href="{{ config.GUIDES_REUSE_URL }}" role="button"
-                    class="fr-btn fr-btn--secondary fr-btn--secondary-white fr-fi-arrow-right-s-line fr-btn--icon-right">{{ _('Publish a reuse') }}</a>
+            <div class="fr-col-12 fr-col-sm-6 fr-grid-row fr-grid-row--gutters fr-grid-row--middle">
+                <div class="fr-col-12 fr-col-lg-6">
+                    <a
+                        href="{{ config.GUIDES_DATASET_URL }}"
+                        class="fr-btn fr-btn--secondary fr-btn--secondary-white fr-icon-arrow-right-s-line fr-btn--icon-right"
+                    >
+                        {{ _('Publish a dataset') }}
+                    </a>
+                </div>
+                <div class="fr-col-12 fr-col-lg-6">
+                    <a
+                        href="{{ config.GUIDES_REUSE_URL }}"
+                        class="fr-btn fr-btn--secondary fr-btn--secondary-white fr-icon-arrow-right-s-line fr-btn--icon-right"
+                    >
+                        {{ _('Publish a reuse') }}
+                    </a>
+                </div>
             </div>
             {% endif %}
         </div>
