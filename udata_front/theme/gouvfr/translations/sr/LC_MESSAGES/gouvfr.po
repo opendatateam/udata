@@ -3,53 +3,53 @@ msgstr ""
 "Project-Id-Version: udata-front\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
 "POT-Creation-Date: 2022-05-24 15:03+0200\n"
-"PO-Revision-Date: 2022-05-24 13:33\n"
+"PO-Revision-Date: 2022-05-25 09:43\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
-"Language: es\n"
-"Language-Team: Spanish\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: sr\n"
+"Language-Team: Serbian (Latin)\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 "X-Crowdin-Project: udata-front\n"
 "X-Crowdin-Project-ID: 474458\n"
-"X-Crowdin-Language: es-ES\n"
+"X-Crowdin-Language: sr-CS\n"
 "X-Crowdin-File: /master/udata_front/theme/gouvfr/translations/gouvfr.pot\n"
 "X-Crowdin-File-ID: 17\n"
 
 #: udata_front/models.py:16 udata_front/theme/gouvfr/__init__.py:58
 msgid "Reference Data"
-msgstr ""
+msgstr "Reference"
 
 #: udata_front/models.py:17
 msgid "Transport"
-msgstr ""
+msgstr "Transport"
 
 #: udata_front/frontend/helpers.py:194
 msgid "Anonymous user"
-msgstr ""
+msgstr "Anonimni korisnik"
 
 #: udata_front/frontend/helpers.py:298
 msgctxt "month-format"
 msgid "yyyy/MM"
-msgstr ""
+msgstr "MM.yyyy."
 
 #: udata_front/frontend/helpers.py:302
 msgctxt "day-format"
 msgid "yyyy/MM/dd"
-msgstr ""
+msgstr "dd.MM.yyyy."
 
 #: udata_front/frontend/helpers.py:321
 #, python-format
 msgid "%(start)s to %(end)s"
-msgstr ""
+msgstr "%(start)s do %(end)s"
 
 #: udata_front/theme/gouvfr/__init__.py:46
 #: udata_front/theme/gouvfr/templates/dataset/display.html:432
 #: udata_front/views/site.py:193
 msgid "Data"
-msgstr "Datos"
+msgstr "Podaci"
 
 #: udata_front/theme/gouvfr/__init__.py:47
 #: udata_front/theme/gouvfr/templates/dataset/display.html:342
@@ -72,7 +72,7 @@ msgstr "Datos"
 #: udata_front/theme/gouvfr/templates/user/reuses.html:8
 #: udata_front/views/site.py:202
 msgid "Reuses"
-msgstr "Reutilizaciones"
+msgstr "Primeri upotrebe"
 
 #: udata_front/theme/gouvfr/__init__.py:48
 #: udata_front/theme/gouvfr/templates/home.html:72
@@ -85,188 +85,188 @@ msgstr "Reutilizaciones"
 #: udata_front/theme/gouvfr/templates/user/following.html:17
 #: udata_front/views/site.py:217
 msgid "Organizations"
-msgstr "Organizaciones"
+msgstr "Organizacije"
 
 #: udata_front/theme/gouvfr/__init__.py:49 udata_front/theme/gouvfr/__init__.py:57
 #: udata_front/theme/gouvfr/templates/home.html:47
 #: udata_front/theme/gouvfr/templates/post/display.html:17
 msgid "News"
-msgstr ""
+msgstr "Vesti"
 
 #: udata_front/theme/gouvfr/__init__.py:50
 msgid "About"
-msgstr ""
+msgstr "Osnovni podaci"
 
 #: udata_front/theme/gouvfr/__init__.py:51 udata_front/theme/gouvfr/__init__.py:81
 msgid "Contact us"
-msgstr ""
+msgstr "Kontaktirajte nas"
 
 #: udata_front/theme/gouvfr/__init__.py:59
 #: udata_front/theme/gouvfr/templates/home.html:20
 msgid "Featured topics"
-msgstr ""
+msgstr "Istaknute teme"
 
 #: udata_front/theme/gouvfr/__init__.py:60
 msgid "Portal for European data"
-msgstr ""
+msgstr "Portal evropskih podataka"
 
 #: udata_front/theme/gouvfr/__init__.py:72
 msgid "Data catalog"
-msgstr ""
+msgstr "Katalog podataka"
 
 #: udata_front/theme/gouvfr/__init__.py:78
 msgid "Platform's documentation"
-msgstr ""
+msgstr "Dokumentacija platforme"
 
 #: udata_front/theme/gouvfr/__init__.py:79
 msgid "Portal's API"
-msgstr ""
+msgstr "API portala"
 
 #: udata_front/theme/gouvfr/__init__.py:80
 msgid "Open data guides"
-msgstr ""
+msgstr "Uputstva za otvorene podatke"
 
 #: udata_front/theme/gouvfr/__init__.py:87
 msgid "Licences"
-msgstr ""
+msgstr "Licence"
 
 #: udata_front/theme/gouvfr/__init__.py:88
 msgid "Terms of use"
-msgstr "Términos de uso"
+msgstr "Uslovi korišćenja"
 
 #: udata_front/theme/gouvfr/__init__.py:89
 msgid "Tracking and privacy"
-msgstr ""
+msgstr "Praćenje i privatnost"
 
 #: udata_front/theme/gouvfr/__init__.py:90
 msgid "Accessibility"
-msgstr ""
+msgstr "Pristupačnost"
 
 #: udata_front/theme/gouvfr/templates/base.html:8
 msgid "You must be connected to do this action."
-msgstr ""
+msgstr "Morate biti povezani za ovu akciju."
 
 #: udata_front/theme/gouvfr/templates/carousel.html:6
 msgid "Best reuse cases"
-msgstr "Los mejores casos de reutilización "
+msgstr "Najbolјi primeri upotrebe"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:169
 msgid "Download from "
-msgstr ""
+msgstr "Preuzmite sa "
 
 #: udata_front/theme/gouvfr/templates/api/card.html:14
 #: udata_front/theme/gouvfr/templates/dataset/display.html:150
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:177
 msgid "Producer"
-msgstr ""
+msgstr "Izvor"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:183
 msgid "Uploader"
-msgstr ""
+msgstr "Objavio"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:205
 msgid "Add to your own website"
-msgstr ""
+msgstr "Dodajte na svoj sajt"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:206
 #: udata_front/theme/gouvfr/templates/header.html:122
 #: udata_front/theme/gouvfr/templates/header.html:155
 msgid "Close"
-msgstr ""
+msgstr "Zatvorite"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:295
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:206
 #: udata_front/theme/gouvfr/templates/reuse/display.html:192
 msgid "Embed"
-msgstr ""
+msgstr "Integracija"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:226
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:209
 msgid "Temporal coverage"
-msgstr ""
+msgstr "Vremenski opseg"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:213
 msgid "to"
-msgstr ""
+msgstr "do"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:221
 msgid "Granularity"
-msgstr ""
+msgstr "Granularnost"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:225
 msgid "Territory"
-msgstr ""
+msgstr "Teritorija"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:232
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:232
 msgid "Frequency"
-msgstr ""
+msgstr "Učestalost"
 
 #: udata_front/theme/gouvfr/templates/embed-dataset.html:237
 #: udata_front/theme/gouvfr/templates/territories/commune.html:25
 #: udata_front/theme/gouvfr/templates/territories/departement.html:22
 #: udata_front/theme/gouvfr/templates/territories/region.html:21
 msgid "License:"
-msgstr ""
+msgstr "Licenca"
 
 #: udata_front/theme/gouvfr/templates/footer.html:10
 msgid "The Open Data"
-msgstr "Los datos abiertos"
+msgstr "Otvoreni podaci"
 
 #: udata_front/theme/gouvfr/templates/footer.html:20
 msgid "Support"
-msgstr ""
+msgstr "Podrška"
 
 #: udata_front/theme/gouvfr/templates/footer.html:30
 msgid "Social networks"
-msgstr ""
+msgstr "Društvene mreže"
 
 #: udata_front/theme/gouvfr/templates/footer.html:52
 msgid "RSS feed"
-msgstr ""
+msgstr "RSS Fid"
 
 #: udata_front/theme/gouvfr/templates/footer.html:61
 #: udata_front/theme/gouvfr/templates/footer.html:64
 msgid "Newsletter"
-msgstr ""
+msgstr "Bilten"
 
 #: udata_front/theme/gouvfr/templates/footer.html:69
 msgid "Unless otherwise stated, all content of this site is availabe under <a href='{lo_url}'>Open Licence 2.0</a>"
-msgstr ""
+msgstr "Ukoliko nije drugačije navedeno, sav sadržaj sajta je dostupan pod <a href='{lo_url}'>Open Licence 2.0</a>"
 
 #: udata_front/theme/gouvfr/templates/footer.html:76
 msgid "Go to Etalab’s blog"
-msgstr ""
+msgstr "Etalab blog"
 
 #: udata_front/theme/gouvfr/templates/footer.html:81
 msgid "A DINUM department"
-msgstr ""
+msgstr "DINUM odsek"
 
 #: udata_front/theme/gouvfr/templates/footer.html:85
 msgid "DINUM website"
-msgstr ""
+msgstr "DINUM sajt"
 
 #: udata_front/theme/gouvfr/templates/footer.html:96
 msgid "Open-source engine"
-msgstr ""
+msgstr "Tehnologija otvorenog koda"
 
 #: udata_front/theme/gouvfr/templates/footer.html:103
 #: udata_front/theme/gouvfr/templates/footer.html:118
 msgid "Deployed version"
-msgstr ""
+msgstr "Postavlјena verzija"
 
 #: udata_front/theme/gouvfr/templates/footer.html:112
 msgid "Data.gouv.fr extension"
-msgstr ""
+msgstr "Francuska ekstenzija"
 
 #: udata_front/theme/gouvfr/templates/footer.html:133
 #: udata_front/theme/gouvfr/templates/header.html:59
 msgid "Go back to home page"
-msgstr ""
+msgstr "Povratak na početnu stranu"
 
 #: udata_front/theme/gouvfr/templates/footer.html:146
 msgid "Language selector"
-msgstr ""
+msgstr "Odabir jezika"
 
 #: udata_front/theme/gouvfr/templates/header.html:24
 msgid "Internet Explorer 8 and below are not anymore supported.\n"
@@ -281,20 +281,20 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/header.html:140
 #: udata_front/theme/gouvfr/templates/header.html:142
 msgid "Search for data"
-msgstr ""
+msgstr "Pretraga podataka"
 
 #: udata_front/theme/gouvfr/templates/header.html:51
 #: udata_front/theme/gouvfr/templates/header.html:54
 msgid "Open menu"
-msgstr ""
+msgstr "Otvori meni"
 
 #: udata_front/theme/gouvfr/templates/header.html:89
 msgid "Administration"
-msgstr "Administración"
+msgstr "Administracija"
 
 #: udata_front/theme/gouvfr/templates/header.html:97
 msgid "Logout"
-msgstr "Cerrar sesión"
+msgstr "Odjava"
 
 #: udata_front/theme/gouvfr/templates/header.html:103
 #: udata_front/theme/gouvfr/templates/header.html:106
@@ -302,14 +302,14 @@ msgstr "Cerrar sesión"
 #: udata_front/theme/gouvfr/templates/security/login_user.html:16
 #: udata_front/theme/gouvfr/templates/territories/territory.html:41
 msgid "Log in"
-msgstr ""
+msgstr "Prijava"
 
 #: udata_front/theme/gouvfr/templates/header.html:111
 #: udata_front/theme/gouvfr/templates/header.html:114
 #: udata_front/theme/gouvfr/templates/security/register_user.html:10
 #: udata_front/theme/gouvfr/templates/security/register_user.html:29
 msgid "Sign up"
-msgstr ""
+msgstr "Registracija"
 
 #: udata_front/theme/gouvfr/templates/header.html:157
 msgid "Main Menu"
@@ -322,28 +322,28 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/macros/breadcrumb.html:17
 #: udata_front/theme/gouvfr/templates/macros/metadata.html:2
 msgid "Home"
-msgstr ""
+msgstr "Početna"
 
 #: udata_front/theme/gouvfr/templates/home.html:5
 #, python-format
 msgid "%(site)s home"
-msgstr ""
+msgstr "%(site)s početna"
 
 #: udata_front/theme/gouvfr/templates/home.html:6
 msgid "home"
-msgstr ""
+msgstr "početna"
 
 #: udata_front/theme/gouvfr/templates/home.html:18
 msgid "Open platform for French public data"
-msgstr ""
+msgstr "Otvorena platforma za javne podatke"
 
 #: udata_front/theme/gouvfr/templates/home.html:41
 msgid "All featured topics"
-msgstr ""
+msgstr "Sve istaknute teme"
 
 #: udata_front/theme/gouvfr/templates/home.html:58
 msgid "All news"
-msgstr ""
+msgstr "Sve vesti"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:35
 #: udata_front/theme/gouvfr/templates/dataset/followers.html:4
@@ -363,13 +363,13 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/user/following.html:15
 #: udata_front/views/site.py:196
 msgid "Datasets"
-msgstr "Conjunto de datos"
+msgstr "Skupovi podataka"
 
 #: udata_front/theme/gouvfr/templates/home.html:69
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:21
 #: udata_front/views/site.py:208
 msgid "Resources"
-msgstr ""
+msgstr "Resursi"
 
 #: udata_front/theme/gouvfr/templates/home.html:71
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:23
@@ -379,66 +379,66 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/user/list.html:17
 #: udata_front/views/site.py:223
 msgid "Users"
-msgstr "Usuarios"
+msgstr "Korisnici"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:347
 #: udata_front/theme/gouvfr/templates/home.html:73
 #: udata_front/theme/gouvfr/templates/reuse/display.html:233
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:25
 msgid "Discussions"
-msgstr ""
+msgstr "Diskusije"
 
 #: udata_front/theme/gouvfr/templates/home.html:81
 msgid "is"
-msgstr ""
+msgstr "je"
 
 #: udata_front/theme/gouvfr/templates/home.html:99
 #: udata_front/theme/gouvfr/templates/topic/display.html:31
 msgid "Featured datasets"
-msgstr "Conjuntos de datos destacados"
+msgstr "Istaknuti skupovi podataka"
 
 #: udata_front/theme/gouvfr/templates/home.html:100
 #: udata_front/theme/gouvfr/templates/topic/display.html:32
 msgid "Latest datasets"
-msgstr "Ultimos conjuntos de datos "
+msgstr "Poslednji skupovi podataka"
 
 #: udata_front/theme/gouvfr/templates/home.html:101
 msgid "Reference datasets"
-msgstr ""
+msgstr "Referentni skupovi podataka"
 
 #: udata_front/theme/gouvfr/templates/home.html:129
 #: udata_front/theme/gouvfr/templates/home.html:183
 #: udata_front/theme/gouvfr/templates/topic/display.html:68
 msgid "See more"
-msgstr "Ver más"
+msgstr "Vidi još"
 
 #: udata_front/theme/gouvfr/templates/home.html:153
 msgid "Featured reuses"
-msgstr ""
+msgstr "Istaknuti primeri upotrebe"
 
 #: udata_front/theme/gouvfr/templates/home.html:154
 #: udata_front/theme/gouvfr/templates/home.html:180
 #: udata_front/theme/gouvfr/templates/topic/display.html:13
 msgid "Latest reuses"
-msgstr "Ultimas reutilizaciones"
+msgstr "Poslednji primeri upotrebe"
 
 #: udata_front/theme/gouvfr/templates/home.html:162
 msgid "Data reuses"
-msgstr ""
+msgstr "Primeri upotrebe podataka"
 
 #: udata_front/theme/gouvfr/templates/metrics.html:4
 #: udata_front/theme/gouvfr/templates/metrics.html:10
 msgid "Metrics"
-msgstr ""
+msgstr "Metrike"
 
 #: udata_front/theme/gouvfr/templates/metrics.html:5
 msgid "Site metrics"
-msgstr ""
+msgstr "Metrike sajta"
 
 #: udata_front/theme/gouvfr/templates/metrics.html:6
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:6
 msgid "metrics"
-msgstr ""
+msgstr "metrike"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:165
 #: udata_front/theme/gouvfr/templates/organization/display.html:159
@@ -446,137 +446,137 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/post/display.html:98
 #: udata_front/theme/gouvfr/templates/reuse/display.html:120
 msgid "Actions"
-msgstr ""
+msgstr "Akcije"
 
 #: udata_front/theme/gouvfr/templates/page.html:57
 msgid "Suggest a modification"
-msgstr ""
+msgstr "Predložite promenu"
 
 #. This is a call to action.
 #: udata_front/theme/gouvfr/templates/participez/participez.html:18
 #: udata_front/theme/gouvfr/templates/publish-action-modal.html:11
 msgid "Publish a dataset"
-msgstr ""
+msgstr "Objavite skup podataka"
 
 #. This is a call to action details.
 #: udata_front/theme/gouvfr/templates/publish-action-modal.html:15
 msgid "Contribute and add a new dataset to this site catalog."
-msgstr ""
+msgstr "Doprinesite i dodajte novi skup podataka u katalog sajta."
 
 #. This is a call to action.
 #: udata_front/theme/gouvfr/templates/participez/participez.html:22
 #: udata_front/theme/gouvfr/templates/publish-action-modal.html:25
 msgid "Publish a reuse"
-msgstr ""
+msgstr "Objavite primer upotrebe"
 
 #. This is a call to action details.
 #: udata_front/theme/gouvfr/templates/publish-action-modal.html:29
 msgid "Contribute and add a new reuse to this site catalog."
-msgstr ""
+msgstr "Doprinesite i dodajte novi primer upotrebe u katalog sajta."
 
 #. This is a call to action.
 #: udata_front/theme/gouvfr/templates/participez/participez.html:8
 #: udata_front/theme/gouvfr/templates/publish-action-modal.html:39
 msgid "Create or find your organization"
-msgstr ""
+msgstr "Kreirajte ili pronađite vašu organizaciju"
 
 #. This is a call to action details.
 #: udata_front/theme/gouvfr/templates/publish-action-modal.html:43
 msgid "You can create a new organization or find yours."
-msgstr ""
+msgstr "Možete kreirati novu organizaciju ili pronaći vašu."
 
 #: udata_front/theme/gouvfr/templates/raw.html:20
 msgid "Recent datasets"
-msgstr ""
+msgstr "Nedavni skupovi podataka"
 
 #: udata_front/theme/gouvfr/templates/raw.html:23
 msgid "Recent reuses"
-msgstr ""
+msgstr "Nedavni primeri upotrebe"
 
 #: udata_front/theme/gouvfr/templates/terms.html:4
 #: udata_front/theme/gouvfr/templates/terms.html:5
 msgid "Terms"
-msgstr ""
+msgstr "Uslovi"
 
 #: udata_front/theme/gouvfr/templates/terms.html:7
 msgid "terms"
-msgstr ""
+msgstr "uslovi"
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:10
 msgid "Name"
-msgstr ""
+msgstr "Ime"
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:11
 msgid "Maintainer"
-msgstr ""
+msgstr "Održavalac"
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:31
 #: udata_front/theme/gouvfr/templates/post/display.html:105
 #: udata_front/theme/gouvfr/templates/user/base.html:23
 msgid "Edit"
-msgstr ""
+msgstr "Izmena"
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:34
 msgid "Delete"
-msgstr ""
+msgstr "Brisanje"
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:42
 msgid "No OAuth clients"
-msgstr ""
+msgstr "Nema OAuth klijenata"
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:53
 msgid "Add a client"
-msgstr ""
+msgstr "Dodajte klijenta"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:3
 msgid "External application authorization"
-msgstr ""
+msgstr "Eksterna autorizacija aplikacije"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:28
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
-msgstr ""
+msgstr "%(app)s žele pristup vašem %(site)s nalogu."
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:38
 msgid "This site request the following rights:"
-msgstr ""
+msgstr "Ovaj sajt zahteva sledeća prava:"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:40
 msgid "Access your profile"
-msgstr ""
+msgstr "Pristup vašem profilu"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:41
 msgid "Read your profile, the orgnization you belong to, your publications"
-msgstr ""
+msgstr "Pročitajte vaš profil, organizaciju kojoj pripadate, vaše objave"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:42
 msgid "Publish data"
-msgstr ""
+msgstr "Objavite podatke"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:43
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr ""
+msgstr "Objavite setove podataka, primera upotrebe, zaprati ili prestani praćenje"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:54
 msgid "Refuse"
-msgstr ""
+msgstr "Odbijte"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_authorize.html:61
 msgid "Accept"
-msgstr ""
+msgstr "Prihvati"
 
 #: udata_front/theme/gouvfr/templates/api/oauth_error.html:6
 msgid "OAuth Authentication Error"
-msgstr ""
+msgstr "OAuth greška autentikacije"
 
 #: udata_front/theme/gouvfr/templates/banners/read-only.html:5
 msgid "Due to security reasons, the creation of new content is currently disabled."
-msgstr ""
+msgstr "Zbog sigurosnih razloga, kreiranje novog sadržaja je privremeno onemogućeno."
 
 #: udata_front/theme/gouvfr/templates/dataset/card.html:33
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:43
 msgid "resources"
-msgstr ""
+msgstr "resurs(a)"
 
 #: udata_front/theme/gouvfr/templates/dataset/card.html:34
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:45
@@ -585,48 +585,48 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/reuse/list.html:8
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:8
 msgid "reuses"
-msgstr ""
+msgstr "primera upotrebe"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:14
 msgid "dataset"
-msgstr ""
+msgstr "skup podataka"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:20
 #: udata_front/theme/gouvfr/templates/reuse/display.html:18
 #, python-format
 msgid "Explore with %(certifier)s"
-msgstr "Explore con %(certifier)s"
+msgstr "Istraži sa %(certifier)s"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:52
 msgid "This dataset is private and will not be visible by other users"
-msgstr ""
+msgstr "Ovaj skupo podataka je privatan i neće biti vidlјiv od drugih korisnika"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:52
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:36
 #: udata_front/theme/gouvfr/templates/reuse/card.html:22
 #: udata_front/theme/gouvfr/templates/reuse/display.html:45
 msgid "Private"
-msgstr ""
+msgstr "Privatno"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:57
 msgid "This dataset has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
+msgstr "Ovaj skup podataka je obrisan. Ovo će biti trajno u narednih 24 časa"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:57
 msgid "Deleted"
-msgstr ""
+msgstr "Obrisano"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:61
 msgid "This dataset has been archived automatically because it has been deleted from the remote platform."
-msgstr ""
+msgstr "Ovaj skup podataka je automatski arhiviran jer je obrisan sa udalјene platforme."
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:63
 msgid "This dataset has been archived."
-msgstr ""
+msgstr "Ovaj skup podataka je arhiviran."
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:65
 msgid "Archived"
-msgstr ""
+msgstr "Arhivirano"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:71
 msgid "This dataset is handled by the <a href='{geo_link}'>geo.data.gouv.fr</a> platform.\n"
@@ -638,117 +638,118 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:28
 #, python-format
 msgid "Updated on %(date)s"
-msgstr ""
+msgstr "Osveženo %(date)s"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:106
 #: udata_front/theme/gouvfr/templates/dataset/display.html:112
 msgid "Modify dataset"
-msgstr ""
+msgstr "Izmeni skup podataka"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:125
 msgid "This dataset come from an external portal.&nbsp;<a href='{external_source}'>View the original source.</a>"
-msgstr ""
+msgstr "Ovaj skup podataka dolazi sa spolјnjeg portala.&nbsp;<a href='{external_source}'>Vidi originali izvor.</a>"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:133
 #, python-format
 msgid "This dataset has been published on the initiative and under the responsibility of\n"
 "            %(author)s<br />Published on %(date)s and updated on %(update)s"
-msgstr ""
+msgstr "Ovaj skup podataka je objavlјen inicijativom i pod odgovornosti od \n"
+"            %(author)s<br />Objavlјeno %(date)s i promenjeno %(update)s"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:145
 msgid "Dataset informations"
-msgstr ""
+msgstr "Informacije o skupu podataka"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:152
 msgid "Author"
-msgstr ""
+msgstr "Autor"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:159
 #: udata_front/theme/gouvfr/templates/reuse/display.html:114
 msgid "Metadata"
-msgstr ""
+msgstr "Metapodaci"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:200
 #: udata_front/theme/gouvfr/templates/reuse/display.html:149
 msgid "Informations"
-msgstr ""
+msgstr "Informacije"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:203
 msgid "License"
-msgstr ""
+msgstr "Licenca"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:210
 #: udata_front/theme/gouvfr/templates/reuse/display.html:161
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:215
 #: udata_front/theme/gouvfr/templates/dataset/display.html:217
 msgid "Remote source"
-msgstr ""
+msgstr "Udalјeni izvor"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:223
 msgid "Temporality"
-msgstr ""
+msgstr "Temporalnost"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:235
 #: udata_front/theme/gouvfr/templates/organization/display.html:149
 #: udata_front/theme/gouvfr/templates/reuse/display.html:170
 msgid "Creation date"
-msgstr ""
+msgstr "Datum kreiranja"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:239
 msgid "Latest resource update"
-msgstr ""
+msgstr "Poslednja promena resursa"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:247
 msgid "Geographic dimensions"
-msgstr ""
+msgstr "Geografske dimenzije"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:250
 msgid "Territorial coverage granularity"
-msgstr ""
+msgstr "Prostorna granularnost"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:254
 msgid "Territorial coverage"
-msgstr ""
+msgstr "Teritorijalna pokrivenost"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:267
 msgid "Extras"
-msgstr ""
+msgstr "Dodaci"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:283
 #: udata_front/theme/gouvfr/templates/participez/participez.html:5
 #: udata_front/theme/gouvfr/templates/reuse/display.html:180
 msgid "Participate"
-msgstr ""
+msgstr "Učestvujte"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:286
 #: udata_front/theme/gouvfr/templates/dataset/display.html:463
 #: udata_front/theme/gouvfr/templates/reuse/display.html:183
 msgid "Add a reuse"
-msgstr ""
+msgstr "Dodajte primer upotrebe"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:291
 msgid "Contact the producer"
-msgstr ""
+msgstr "Kontakt"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:297
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:97
 #: udata_front/theme/gouvfr/templates/reuse/display.html:194
 msgid "Permalink"
-msgstr ""
+msgstr "Trajni link"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:311
 #: udata_front/theme/gouvfr/templates/macros/integrate.html:11
 #: udata_front/theme/gouvfr/templates/reuse/display.html:208
 msgid "Copy this"
-msgstr ""
+msgstr "Kopiraj ovo"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:322
 #: udata_front/theme/gouvfr/templates/reuse/display.html:219
 msgid "Summary"
-msgstr ""
+msgstr "Sažetak"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:326
 #: udata_front/theme/gouvfr/templates/dataset/display.html:357
@@ -756,7 +757,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/reuse/display.html:223
 #: udata_front/theme/gouvfr/templates/reuse/display.html:248
 msgid "Description"
-msgstr ""
+msgstr "Opis"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:331
 #: udata_front/theme/gouvfr/templates/dataset/display.html:366
@@ -767,16 +768,16 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/dataset/display.html:412
 #: udata_front/theme/gouvfr/templates/dataset/display.html:444
 msgid "Community resources"
-msgstr ""
+msgstr "Resursi zajednice"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:396
 #, python-format
 msgid "See the %(nb)d resources of type %(type)s"
-msgstr ""
+msgstr "Videti %(nb)d resurse tipa %(type)s"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:401
 msgid "No resources"
-msgstr ""
+msgstr "Nema resursa"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:419
 msgid "Publish a resource"
@@ -784,7 +785,7 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:427
 msgid "You have built a more comprehensive database than those presented here? This is the time to share it!"
-msgstr ""
+msgstr "Imate ste obimniju bazu podataka od ovih ovde prikazanih? Sada je vreme da ih podelite!"
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:436
 msgid "These resources are published by the community and the producer isn't responsible for them."
@@ -792,19 +793,19 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:468
 msgid "Explore the reuses of this dataset."
-msgstr ""
+msgstr "Istražite primere upotrebe ovog seta podataka."
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:469
 msgid "Did you use this data ? Reference your work and increase your visibility."
-msgstr ""
+msgstr "Da li ste koristili ove podatke? Referencirajte vaš rad i povećajte svoju vidlјivost."
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:486
 msgid "Discussion between the organization and the community about this dataset."
-msgstr ""
+msgstr "Diskusija između organizacije i zajednice oko ovog skupa podataka."
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:488
 msgid "Discussion between the owner and the community about this dataset."
-msgstr ""
+msgstr "Diskusija između vlasnika i zajednice oko ovog skupa podataka."
 
 #: udata_front/theme/gouvfr/templates/dataset/followers.html:6
 #: udata_front/theme/gouvfr/templates/dataset/list.html:25
@@ -812,7 +813,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/reuse/list.html:46
 #: udata_front/theme/gouvfr/templates/user/followers.html:7
 msgid "Followers"
-msgstr ""
+msgstr "Pratioci"
 
 #: udata_front/theme/gouvfr/templates/dataset/followers.html:13
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:33
@@ -821,13 +822,14 @@ msgstr ""
 #, python-format
 msgid "%(num)d follower"
 msgid_plural "%(num)d followers"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d pratilac"
+msgstr[1] "%(num)d pratilaca"
+msgstr[2] "%(num)d pratilaca"
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:15
 #, python-format
 msgid "%(site)s dataset search"
-msgstr ""
+msgstr "%(site)s pretraga skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:16
 #: udata_front/theme/gouvfr/templates/organization/list.html:10
@@ -836,7 +838,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:8
 #: udata_front/theme/gouvfr/templates/user/list.html:9
 msgid "search"
-msgstr ""
+msgstr "pretraga"
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:16
 #: udata_front/theme/gouvfr/templates/organization/card.html:23
@@ -844,7 +846,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/reuse/card.html:18
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:8
 msgid "datasets"
-msgstr ""
+msgstr "skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:23
 #: udata_front/theme/gouvfr/templates/organization/list.html:27
@@ -865,7 +867,7 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:41
 msgid "Search reuses"
-msgstr ""
+msgstr "Pretraga primera upotebe"
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:56
 #: udata_front/theme/gouvfr/templates/dataset/list.html:61
@@ -874,7 +876,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/reuse/list.html:64
 #: udata_front/theme/gouvfr/templates/reuse/list.html:69
 msgid "Search..."
-msgstr ""
+msgstr "Pretraga..."
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:66
 #: udata_front/theme/gouvfr/templates/dataset/list.html:67
@@ -885,7 +887,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/reuse/list.html:74
 #: udata_front/theme/gouvfr/templates/reuse/list.html:75
 msgid "Search"
-msgstr "Buscar"
+msgstr "Pretraga"
 
 #: udata_front/theme/gouvfr/templates/dataset/list.html:71
 #: udata_front/theme/gouvfr/templates/organization/list.html:56
@@ -897,11 +899,11 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:48
 #: udata_front/theme/gouvfr/templates/organization/card.html:34
 msgid "favourites"
-msgstr ""
+msgstr "omilјeni"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:20
 msgid "Nameless resource"
-msgstr ""
+msgstr "Neimenovani resurs"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:24
 #, python-format
@@ -915,7 +917,7 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:34
 msgid "downloads"
-msgstr ""
+msgstr "preuzimanja"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:42
 msgid "Unavailable"
@@ -927,156 +929,156 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:60
 msgid "Resource link"
-msgstr ""
+msgstr "Veza resursa"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:70
 msgid "Download resource"
-msgstr ""
+msgstr "Preuzmite resurs"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:91
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:103
 #: udata_front/theme/gouvfr/templates/reuse/card_old.html:27
 #: udata_front/theme/gouvfr/templates/reuse/display.html:151
 msgid "Type"
-msgstr ""
+msgstr "Tip"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:109
 msgid "MIME Type"
-msgstr ""
+msgstr "MIME tip"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:123
 msgid "Created on"
-msgstr ""
+msgstr "Kreirano"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:129
 msgid "Modified on"
-msgstr ""
+msgstr "Promenjeno"
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:135
 #: udata_front/theme/gouvfr/templates/post/search-result.html:8
 msgid "Published on"
-msgstr ""
+msgstr "Objavlјeno"
 
 #: udata_front/theme/gouvfr/templates/errors/400.html:3
 msgid "Bad request"
-msgstr ""
+msgstr "Pogrešan zahtev"
 
 #: udata_front/theme/gouvfr/templates/errors/400.html:8
 #: udata_front/theme/gouvfr/templates/errors/500.html:8
 msgid "The error identifier is {id}"
-msgstr ""
+msgstr "Identifikator greške je {id}"
 
 #: udata_front/theme/gouvfr/templates/errors/403.html:3
 msgid "Forbidden"
-msgstr ""
+msgstr "Zabranjeno"
 
 #: udata_front/theme/gouvfr/templates/errors/403.html:6
 msgid "You are not allowed to display this page."
-msgstr ""
+msgstr "Nije vam dozvolјen prikaz ove stranice."
 
 #: udata_front/theme/gouvfr/templates/errors/404.html:3
 #: udata_front/theme/gouvfr/templates/errors/410.html:3
 msgid "Page Not Found"
-msgstr ""
+msgstr "Strana nije nađena"
 
 #: udata_front/theme/gouvfr/templates/errors/404.html:6
 msgid "The page you're looking for could not be found."
-msgstr ""
+msgstr "Strana koju tražite ne može biti nađena"
 
 #: udata_front/theme/gouvfr/templates/errors/410.html:6
 msgid "The page you're looking has been deleted."
-msgstr ""
+msgstr "Strana koju tražite je obrisana"
 
 #: udata_front/theme/gouvfr/templates/errors/500.html:3
 msgid "Internal server error"
-msgstr ""
+msgstr "Unutrašnja greška na serveru"
 
 #: udata_front/theme/gouvfr/templates/errors/500.html:6
 msgid "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application."
-msgstr ""
+msgstr "Serveru se dogodila unutrašnja greška i nije uspeo da odgovori na vaš zahtev. Ili je server preopterećen ili postoji neka greška u aplikaciji."
 
 #: udata_front/theme/gouvfr/templates/errors/base.html:9
 #, python-format
 msgid "Error %(code)s"
-msgstr ""
+msgstr "Greška %(code)s"
 
 #: udata_front/theme/gouvfr/templates/follow/follower-card.html:6
 #, python-format
 msgid "Following since %(date)s"
-msgstr ""
+msgstr "Prati od %(date)s"
 
 #: udata_front/theme/gouvfr/templates/macros/certified.html:4
 #, python-format
 msgid "The identity of this public service is certified by %(certifier)s"
-msgstr ""
+msgstr "Identitet ovog javnog servisa je sertifikovan od strane %(certifier)s"
 
 #: udata_front/theme/gouvfr/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
-msgstr "Comparta, mejore y reutilice datos públicos"
+msgstr "Podelite, pobolјšajte i koristite podatke"
 
 #: udata_front/theme/gouvfr/templates/macros/paginator.html:20
 msgid "First page"
-msgstr ""
+msgstr "Prva strana"
 
 #: udata_front/theme/gouvfr/templates/macros/paginator.html:31
 msgid "Previous page"
-msgstr ""
+msgstr "Prethodna strana"
 
 #: udata_front/theme/gouvfr/templates/macros/paginator.html:40
 msgid "Page 1"
-msgstr ""
+msgstr "Strana 1"
 
 #: udata_front/theme/gouvfr/templates/macros/paginator.html:64
 #: udata_front/theme/gouvfr/templates/macros/paginator.html:84
 #, python-format
 msgid "Page %(num)s"
-msgstr ""
+msgstr "Strana %(num)s"
 
 #: udata_front/theme/gouvfr/templates/macros/paginator.html:98
 msgid "Next page"
-msgstr ""
+msgstr "Sledeća strana"
 
 #: udata_front/theme/gouvfr/templates/macros/paginator.html:109
 msgid "Last page"
-msgstr ""
+msgstr "Poslednja strana"
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:17
 msgid "Sort by"
-msgstr ""
+msgstr "Raspored prema"
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:21
 #: udata_front/theme/gouvfr/templates/macros/sort_search.html:19
 msgid "Relevance"
-msgstr ""
+msgstr "Relevantnost"
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:43
 msgid "Ascending"
-msgstr ""
+msgstr "Rastuće"
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:43
 msgid "Descending"
-msgstr ""
+msgstr "Opadajuće"
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:53
 msgid "Export"
-msgstr ""
+msgstr "Izvoz"
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:122
 #: udata_front/theme/gouvfr/templates/macros/search.html:160
 msgid "More results…"
-msgstr ""
+msgstr "Još rezultata..."
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:201
 #, python-format
 msgid "Results %(start)s to %(end)s on %(total)s found"
-msgstr ""
+msgstr "Rezultati od %(start)s do %(end)s od ukupno %(total)s pronađenih"
 
 #: udata_front/theme/gouvfr/templates/macros/search.html:216
 msgid "No result found"
-msgstr ""
+msgstr "Nema rezultata"
 
 #: udata_front/theme/gouvfr/templates/macros/sort_search.html:9
 msgid "Sort by:"
@@ -1084,244 +1086,244 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/macros/uploader.html:8
 msgid "Drag a file here"
-msgstr ""
+msgstr "Prevucite fajl ovde"
 
 #: udata_front/theme/gouvfr/templates/macros/uploader.html:11
 msgid "or"
-msgstr ""
+msgstr "ili"
 
 #: udata_front/theme/gouvfr/templates/macros/uploader.html:15
 msgid "Select a file from your computer"
-msgstr ""
+msgstr "Odaberite fajl sa vašeg računara"
 
 #: udata_front/theme/gouvfr/templates/mail/account_deleted.html:4
 msgid "Your account has now been deleted"
-msgstr ""
+msgstr "Vaš nalog je sada obrisan"
 
 #: udata_front/theme/gouvfr/templates/mail/badge_added_certified.html:6
 #, python-format
 msgid "%(user)s has certified your organization \"%(name)s\""
-msgstr ""
+msgstr "%(user)s je sertifikovao vašu organizaciju \"%(name)s\""
 
 #: udata_front/theme/gouvfr/templates/mail/badge_added_certified.html:27
 #: udata_front/theme/gouvfr/templates/mail/badge_added_public_service.html:27
 msgid "See the badge"
-msgstr ""
+msgstr "Vidite bedž"
 
 #: udata_front/theme/gouvfr/templates/mail/badge_added_public_service.html:6
 #, python-format
 msgid "%(user)s has identified your organization \"%(name)s\" as public service"
-msgstr ""
+msgstr "%(user)s je identifikovao vašu organizaciju \"%(name)s\" kao javnu servis"
 
 #: udata_front/theme/gouvfr/templates/mail/base.html:45
 msgid "on your browser."
-msgstr "en su navegador. "
+msgstr "na vašem pretraživaču."
 
 #: udata_front/theme/gouvfr/templates/mail/base.html:48
 #, python-format
 msgid "View this email %(link)s"
-msgstr "Ver este correo %(link)s "
+msgstr "Vidite ovaj mejl %(link)s"
 
 #: udata_front/theme/gouvfr/templates/mail/base.html:81
 #, python-format
 msgid "Hi %(user)s"
-msgstr "Hola %(user)s"
+msgstr "Zdravo %(user)s"
 
 #: udata_front/theme/gouvfr/templates/mail/base.html:92
 msgid "See you soon on the platform"
-msgstr "Hasts pronto en la plataforma "
+msgstr "Vidimo se uskoro na platformi"
 
 #: udata_front/theme/gouvfr/templates/mail/base.html:93
 #, python-format
 msgid "The %(site)s team"
-msgstr "El equipo de %(site)s"
+msgstr "%(site)s tim"
 
 #: udata_front/theme/gouvfr/templates/mail/discussion_closed.html:6
 #, python-format
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s je zatvorio diskusiju na vaš %(type)s %(subject)s"
 
 #: udata_front/theme/gouvfr/templates/mail/discussion_closed.html:26
 #: udata_front/theme/gouvfr/templates/mail/new_discussion.html:25
 #: udata_front/theme/gouvfr/templates/mail/new_discussion_comment.html:26
 msgid "Title"
-msgstr "Título"
+msgstr "Naslov"
 
 #: udata_front/theme/gouvfr/templates/mail/discussion_closed.html:31
 #: udata_front/theme/gouvfr/templates/mail/new_discussion.html:30
 #: udata_front/theme/gouvfr/templates/mail/new_discussion_comment.html:31
 msgid "Message"
-msgstr ""
+msgstr "Poruka"
 
 #: udata_front/theme/gouvfr/templates/mail/discussion_closed.html:40
 #: udata_front/theme/gouvfr/templates/mail/new_discussion.html:38
 #: udata_front/theme/gouvfr/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"
-msgstr ""
+msgstr "Vidite diskusiju"
 
 #: udata_front/theme/gouvfr/templates/mail/frequency_reminder.html:6
 msgid "Some of your datasets need to be updated according to the frequency you set:"
-msgstr ""
+msgstr "Neki od vaših skupova podataka treba da budu obnovlјeni prema učestalosti koju postavite:"
 
 #: udata_front/theme/gouvfr/templates/mail/frequency_reminder.html:12
 #, python-format
 msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
-msgstr ""
+msgstr "Skup podataka \"%(dataset_title)s\" je imao poslednju obnovu %(published_date)s."
 
 #: udata_front/theme/gouvfr/templates/mail/frequency_reminder.html:17
 #, python-format
 msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
-msgstr ""
+msgstr "Uzevši u obzir zadatu učestalost (%(dataset_frequency)s) obnavlјanje kasni %(due_update_days)s dana."
 
 #: udata_front/theme/gouvfr/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
-msgstr ""
+msgstr "Obnovite skup podataka i pridružene resurse"
 
 #: udata_front/theme/gouvfr/templates/mail/membership_refused.html:7
 #, python-format
 msgid "Your membership for the organization \"%(org)s\" has been refused"
-msgstr ""
+msgstr "Vaše članstvo za organizaciju \"%(org)s\" je odbijeno"
 
 #: udata_front/theme/gouvfr/templates/mail/membership_refused.html:18
 msgid "Refusal reason"
-msgstr ""
+msgstr "Razlog odbijanja"
 
 #: udata_front/theme/gouvfr/templates/mail/membership_request.html:8
 #, python-format
 msgid "As an administrator of \"%(org)s\" you are being informed than a new membership request from %(user)s is pending for validation"
-msgstr ""
+msgstr "Kao administrator od \"%(org)s\" informisani ste da novi zahtev za članstvo od korisnika %(user)s čeka na validaciju"
 
 #: udata_front/theme/gouvfr/templates/mail/membership_request.html:40
 msgid "See the request"
-msgstr ""
+msgstr "Vidite zahtev"
 
 #: udata_front/theme/gouvfr/templates/mail/new_discussion.html:6
 #, python-format
 msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s je postavio novu diskusiju na vaš %(type)s %(subject)s"
 
 #: udata_front/theme/gouvfr/templates/mail/new_discussion_comment.html:6
 #, python-format
 msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
-msgstr ""
+msgstr "%(user)s je komentarisao diskusiju na vaš %(type)s %(subject)s"
 
 #: udata_front/theme/gouvfr/templates/mail/new_follower.html:8
 #, python-format
 msgid "%(user)s followed you"
-msgstr ""
+msgstr "%(user)s vas sada prati"
 
 #: udata_front/theme/gouvfr/templates/mail/new_follower.html:33
 #: udata_front/theme/gouvfr/templates/mail/new_follower_org.html:40
 msgid "See his profile"
-msgstr ""
+msgstr "Vidite profil"
 
 #: udata_front/theme/gouvfr/templates/mail/new_follower_org.html:8
 #, python-format
 msgid "%(user)s followed your organization %(org)s"
-msgstr ""
+msgstr "%(user)s sada prati vašu organizaciju %(org)s"
 
 #: udata_front/theme/gouvfr/templates/mail/new_member.html:7
 #, python-format
 msgid "Congratulations, you are now a member of the organization \"%(org)s\""
-msgstr ""
+msgstr "Čestitamo, sada ste član organizacije \"%(org)s\""
 
 #: udata_front/theme/gouvfr/templates/mail/new_member.html:21
 msgid "See the organization page"
-msgstr ""
+msgstr "Vidite stranu organizacije"
 
 #: udata_front/theme/gouvfr/templates/mail/new_reuse.html:7
 #, python-format
 msgid "A new reuse of your dataset %(dataset)s has been published"
-msgstr ""
+msgstr "Novi primer upotrebe vašeg ckupa podataka %(dataset)s je objavlјena"
 
 #: udata_front/theme/gouvfr/templates/mail/new_reuse.html:31
 #: udata_front/theme/gouvfr/templates/reuse/display.html:96
 msgid "See the reuse"
-msgstr ""
+msgstr "Vidite primer upotrebe"
 
 #: udata_front/theme/gouvfr/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
-msgstr ""
+msgstr "Vidite na strani skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/mail/test.html:4
 msgid "This is a test mail"
-msgstr ""
+msgstr "Ovo je testni mejl"
 
 #: udata_front/theme/gouvfr/templates/mail/test.html:5
 msgid "If you read this, your mail configuration is working"
-msgstr ""
+msgstr "Ako ovo čitate, vaša mejl konfiguracija radi."
 
 #: udata_front/theme/gouvfr/templates/mail/security/change_notice.html:6
 msgid "Your password has been changed."
-msgstr ""
+msgstr "Vaša lozinka je promenjena."
 
 #: udata_front/theme/gouvfr/templates/mail/security/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
-msgstr ""
+msgstr "Ako vi niste promenili lozinku, kliknite ispod da je resetujete."
 
 #: udata_front/theme/gouvfr/templates/mail/security/change_notice.html:15
 msgid "Reset password"
-msgstr ""
+msgstr "Reset lozinke"
 
 #: udata_front/theme/gouvfr/templates/mail/security/confirmation_instructions.html:6
 msgid "Please confirm your email through the link below:"
-msgstr ""
+msgstr "Molimo potvrdite vašu mejl adresu putem veze ispod:"
 
 #: udata_front/theme/gouvfr/templates/mail/security/confirmation_instructions.html:14
 msgid "Confirm my account"
-msgstr ""
+msgstr "Potvrdi moj nalog"
 
 #: udata_front/theme/gouvfr/templates/mail/security/login_instructions.html:6
 msgid "You can log into your account through the link below:"
-msgstr ""
+msgstr "Možete se prijaviti na ovaj nalog putem veze ispod:"
 
 #: udata_front/theme/gouvfr/templates/mail/security/login_instructions.html:13
 msgid "Login now"
-msgstr ""
+msgstr "Prijavite se sada"
 
 #: udata_front/theme/gouvfr/templates/mail/security/reset_instructions.html:7
 #, python-format
 msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
-msgstr ""
+msgstr "Neko je zahtevao reset lozinke za vaš %(site)s nalog. Ako vi niste, molimo ignorišite ovaj mejl."
 
 #: udata_front/theme/gouvfr/templates/mail/security/reset_instructions.html:10
 msgid "To reset your password, please confirm your request through the link below:"
-msgstr ""
+msgstr "Za reset lozinke, molimo potvrdite vaš zahtev putem veze ispod:"
 
 #: udata_front/theme/gouvfr/templates/mail/security/reset_instructions.html:18
 msgid "Reset my password"
-msgstr ""
+msgstr "Resetuj mi lozinku"
 
 #: udata_front/theme/gouvfr/templates/mail/security/reset_notice.html:7
 #, python-format
 msgid "Your password for %(site)s has been reset."
-msgstr ""
+msgstr "Vaša lozinka za %(site)s je resetovana."
 
 #: udata_front/theme/gouvfr/templates/mail/security/welcome.html:7
 #, python-format
 msgid "Welcome to %(site)s!"
-msgstr ""
+msgstr "Dobrodošli na %(site)s!"
 
 #: udata_front/theme/gouvfr/templates/mail/security/welcome.html:10
 msgid "To activate your account, please confirm your email address through the link below:"
-msgstr ""
+msgstr "Da aktivirate nalog, molimo potvrdite vašu mejl adresu putem veze ispod:"
 
 #: udata_front/theme/gouvfr/templates/mail/security/welcome.html:18
 msgid "Confirm now"
-msgstr ""
+msgstr "Potvrdite sada"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:12
 msgid "organization"
-msgstr ""
+msgstr "organizacija"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:28
 msgid "This organization has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
+msgstr "Ova organizacija je obrisana. Ovo će biti trajno u narednih 24 časa"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:70
 #: udata_front/theme/gouvfr/templates/organization/display.html:76
 msgid "Modify organization"
-msgstr ""
+msgstr "Promenite organizaciju"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:107
 #, python-format
@@ -1330,36 +1332,36 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:126
 msgid "Members"
-msgstr ""
+msgstr "Članovi"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:142
 msgid "Technical details"
-msgstr ""
+msgstr "Tehnički detalјi"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:153
 msgid "Modification date"
-msgstr ""
+msgstr "Datum promene"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:167
 msgid "Modify information"
-msgstr ""
+msgstr "Promenite informacije"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:176
 msgid "Download list of datasets as csv file"
-msgstr ""
+msgstr "Preuzeti listu skupova podataka kao csv fajl"
 
 #: udata_front/theme/gouvfr/templates/organization/display.html:190
 msgid "Pending request to join this organization"
-msgstr ""
+msgstr "Otvoreni zahtevi za pristup ovoj organizaciji"
 
 #: udata_front/theme/gouvfr/templates/organization/list.html:9
 #, python-format
 msgid "%(site)s organization search"
-msgstr ""
+msgstr "%(site)s pretraga organizacije"
 
 #: udata_front/theme/gouvfr/templates/organization/list.html:10
 msgid "organizations"
-msgstr ""
+msgstr "organizacije"
 
 #: udata_front/theme/gouvfr/templates/organization/list.html:19
 #: udata_front/theme/gouvfr/templates/post/list.html:16
@@ -1369,7 +1371,7 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/user/list.html:18
 #, python-format
 msgid "%(start)s to %(end)s on %(total)s"
-msgstr ""
+msgstr "%(start)s do %(end)s od %(total)s"
 
 #: udata_front/theme/gouvfr/templates/organization/list.html:36
 #, python-format
@@ -1378,241 +1380,244 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:22
 msgid "Number of datasets"
-msgstr ""
+msgstr "Broj skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:23
 #: udata_front/theme/gouvfr/templates/user/base.html:84
 #, python-format
 msgid "%(num)d dataset"
 msgid_plural "%(num)d datasets"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d skup podataka"
+msgstr[1] "%(num)d skupova podataka"
+msgstr[2] "%(num)d skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:27
 msgid "Number of reuses by the organization"
-msgstr ""
+msgstr "Broj primera upotrebe organizacije"
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:28
 #: udata_front/theme/gouvfr/templates/user/base.html:90
 #, python-format
 msgid "%(num)d reuse"
 msgid_plural "%(num)d reuses"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d primer upotrebe"
+msgstr[1] "%(num)d primera upotrebe"
+msgstr[2] "%(num)d primera upotrebe"
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:32
 msgid "Number of followers"
-msgstr ""
+msgstr "Broj pratilaca"
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:36
 msgid "Number of members"
-msgstr ""
+msgstr "Broj članova"
 
 #: udata_front/theme/gouvfr/templates/organization/search-result.html:37
 #, python-format
 msgid "%(num)d members"
 msgid_plural "%(num)d members"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d član"
+msgstr[1] "%(num)d članova"
+msgstr[2] "%(num)d članova"
 
 #: udata_front/theme/gouvfr/templates/participez/participez.html:11
 msgid "Go to documentation"
-msgstr ""
+msgstr "Idite na dokumentaciju"
 
 #: udata_front/theme/gouvfr/templates/post/display.html:27
 #: udata_front/theme/gouvfr/templates/reuse/card_old.html:41
 #: udata_front/theme/gouvfr/templates/reuse/display.html:60
 #, python-format
 msgid "Published on %(date)s"
-msgstr ""
+msgstr "Objavlјeno %(date)s"
 
 #: udata_front/theme/gouvfr/templates/post/display.html:31
 msgid "This post is a draft and will not be visible by other users"
-msgstr ""
+msgstr "Ova objava je u pripremi i neće biti vidlјiva drugima"
 
 #: udata_front/theme/gouvfr/templates/post/display.html:36
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
+msgstr "Ova objava je obrisana. Ovo će biti trajno u narednih 24 časa"
 
 #: udata_front/theme/gouvfr/templates/post/display.html:122
 msgid "Previous post"
-msgstr ""
+msgstr "Prethodna objava"
 
 #: udata_front/theme/gouvfr/templates/post/display.html:128
 msgid "All posts"
-msgstr ""
+msgstr "Sve objave"
 
 #: udata_front/theme/gouvfr/templates/post/display.html:137
 msgid "Next post"
-msgstr ""
+msgstr "Sledeća objava"
 
 #: udata_front/theme/gouvfr/templates/post/list.html:5
 #: udata_front/theme/gouvfr/templates/post/list.html:15
 #: udata_front/theme/gouvfr/templates/post/list.html:25
 msgid "Posts"
-msgstr ""
+msgstr "Blog"
 
 #: udata_front/theme/gouvfr/templates/post/list.html:6
 #, python-format
 msgid "%(site)s posts"
-msgstr ""
+msgstr "%(site)s objave"
 
 #: udata_front/theme/gouvfr/templates/post/list.html:7
 msgid "posts"
-msgstr ""
+msgstr "objave"
 
 #: udata_front/theme/gouvfr/templates/post/list.html:29
 msgid "To stay up-to-date, you can subscribe to"
-msgstr ""
+msgstr "Da bi bili blagovremno informisani, pretplatite se"
 
 #: udata_front/theme/gouvfr/templates/post/list.html:30
 msgid "Subscribe"
-msgstr ""
+msgstr "Pretplatite se"
 
 #: udata_front/theme/gouvfr/templates/post/list.html:32
 msgid "our newsletter."
-msgstr ""
+msgstr "naš bilten"
 
 #: udata_front/theme/gouvfr/templates/post/subnav.html:39
 msgid "Read more"
-msgstr ""
+msgstr "Pročitajte više"
 
 #: udata_front/theme/gouvfr/templates/reuse/card_old.html:31
 msgid "Number of datasets used"
-msgstr ""
+msgstr "Broj korišćenih skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/reuse/card_old.html:36
 msgid "Stars"
-msgstr ""
+msgstr "Zvezde"
 
 #: udata_front/theme/gouvfr/templates/reuse/card_old.html:48
 #, python-format
 msgid "Created by %(user)s"
-msgstr ""
+msgstr "Kreirao korisnik %(user)s"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:10
 msgid "reuse"
-msgstr ""
+msgstr "primer upotebe"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:44
 msgid "This reuse is private and will not be visible by other users"
-msgstr ""
+msgstr "Ovaj primer upotrebe je privatan i neće biti vidlјiv ostalim korisnicima"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:50
 msgid "This reuse has been deleted. This will be permanent in the next 24 hours"
-msgstr ""
+msgstr "Ovaj primer upotrebe je obrisan. Ovo će biti trajno u narednih 24 časa"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:70
 #: udata_front/theme/gouvfr/templates/reuse/display.html:76
 msgid "Modify reuse"
-msgstr ""
+msgstr "Izmenite primer upotrebe"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:104
 msgid "Reuse informations"
-msgstr ""
+msgstr "Informacije primera upotrebe"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:108
 msgid "Reuser"
-msgstr ""
+msgstr "Korisnik podataka"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:156
 msgid "Topic"
-msgstr ""
+msgstr "Tema"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:168
 msgid "Publication"
-msgstr ""
+msgstr "Publikacija"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:188
 msgid "Contact the reuser"
-msgstr ""
+msgstr "Kontaktirajte korisnika podataka"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:228
 #: udata_front/theme/gouvfr/templates/reuse/display.html:257
 msgid "Used datasets"
-msgstr ""
+msgstr "Korišćeni skupovi podataka"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:238
 #: udata_front/theme/gouvfr/templates/reuse/display.html:282
 msgid "More reuses"
-msgstr ""
+msgstr "Još primera upotrebe"
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:274
 msgid "Discussion between the organization and the community about this reuse."
-msgstr ""
+msgstr "Diskusija između organizacije i zajednice oko ovog primera upotrebe."
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:276
 msgid "Discussion between the owner and the community about this reuse."
-msgstr ""
+msgstr "Diskusija između vlasnika i zajednice oko ovog primera upotrebe."
 
 #: udata_front/theme/gouvfr/templates/reuse/display.html:283
 msgid "Discover more reuses."
-msgstr ""
+msgstr "Otkrite još primera upotrebe."
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:7
 #, python-format
 msgid "%(site)s reuse search"
-msgstr ""
+msgstr "%(site)s pretraga primera upotrebe"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:26
 msgid "Health"
-msgstr ""
+msgstr "Zdravlјe"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:27
 msgid "Transport and mobility"
-msgstr ""
+msgstr "Transport i mobilnost"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:28
 msgid "Housing and development"
-msgstr ""
+msgstr "Stanovanje i razvoj"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:29
 msgid "Food and agriculture"
-msgstr ""
+msgstr "Hrana i polјoprivreda"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:30
 msgid "Culture and recreation"
-msgstr ""
+msgstr "Kultura i rekreacija"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:31
 msgid "Economy and business"
-msgstr ""
+msgstr "Ekonomija i biznis"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:32
 msgid "Environment and energy"
-msgstr ""
+msgstr "Životna sredina i energija"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:33
 msgid "Work and training"
-msgstr ""
+msgstr "Rad i trening"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:34
 msgid "Politics and public life"
-msgstr ""
+msgstr "Politika i javni život"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:35
 msgid "Safety and security"
-msgstr ""
+msgstr "Sigurnost i zaštita"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:36
 msgid "Education and research"
-msgstr ""
+msgstr "Obrazovanje i istraživanje"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:37
 msgid "Society and demography"
-msgstr ""
+msgstr "Društvo i demografija"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:38
 msgid "Law and justice"
-msgstr ""
+msgstr "Zakon i pravo"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:39
 msgid "Open data tools"
-msgstr ""
+msgstr "Alati otvorenih podataka"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:40
 msgid "Others"
-msgstr ""
+msgstr "Ostali"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:53
 #, python-format
@@ -1621,21 +1626,21 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:57
 msgid "Search in datasets"
-msgstr ""
+msgstr "Pretraga skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/reuse/list.html:84
 msgid "All"
-msgstr ""
+msgstr "Sve"
 
 #: udata_front/theme/gouvfr/templates/security/change_password.html:10
 #: udata_front/theme/gouvfr/templates/security/change_password.html:17
 msgid "Change Password"
-msgstr ""
+msgstr "Promenite lozinku"
 
 #: udata_front/theme/gouvfr/templates/security/change_password.html:12
 #: udata_front/theme/gouvfr/templates/security/forgot_password.html:12
 msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr ""
+msgstr "Zaboravili ste lozinku? Unesite vašu lozinku ispod, i mi ćemo poslati mejlom instrukcije za postavku nove."
 
 #: udata_front/theme/gouvfr/templates/security/change_password.html:15
 #: udata_front/theme/gouvfr/templates/security/forgot_password.html:15
@@ -1651,361 +1656,366 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/security/reset_password.html:11
 #: udata_front/theme/gouvfr/templates/security/reset_password.html:15
 msgid "Reset Password"
-msgstr ""
+msgstr "Reset lozinke"
 
 #: udata_front/theme/gouvfr/templates/security/login_user.html:19
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Zaboravili ste lozinku?"
 
 #: udata_front/theme/gouvfr/templates/security/login_user.html:21
 msgid "Recover your password"
-msgstr ""
+msgstr "Oporavak vaše lozinke"
 
 #: udata_front/theme/gouvfr/templates/security/login_user.html:26
 msgid "Confirmation instructions not received?"
-msgstr ""
+msgstr "Potvrda da instrukcije nisu primlјene?"
 
 #: udata_front/theme/gouvfr/templates/security/login_user.html:28
 msgid "Send the instructions again"
-msgstr ""
+msgstr "Pošalјite ponovo instrukcije"
 
 #: udata_front/theme/gouvfr/templates/security/login_user.html:40
 msgid "Don't have an account?"
-msgstr ""
+msgstr "Nemate nalog?"
 
 #: udata_front/theme/gouvfr/templates/security/login_user.html:46
 msgid "Create an account"
-msgstr ""
+msgstr "Napravite nalog"
 
 #: udata_front/theme/gouvfr/templates/security/register_user.html:13
 msgid "Why create an account?"
-msgstr ""
+msgstr "Zašto napraviti nalog?"
 
 #: udata_front/theme/gouvfr/templates/security/register_user.html:25
 #, python-format
 msgid "I have read and accept <a href=\"%(url)s\"> the terms and conditions of the service.</a>"
-msgstr ""
+msgstr "Pročitao sam i prihvatio <a href=\"%(url)s\"> pravila i uslove usluge.</a>"
 
 #: udata_front/theme/gouvfr/templates/security/send_confirmation.html:10
 msgid "Resend confirmation instructions"
-msgstr ""
+msgstr "Ponovo pošalјi instrukcije potvrde"
 
 #: udata_front/theme/gouvfr/templates/security/send_confirmation.html:14
 msgid "Submit"
-msgstr ""
+msgstr "Podnesi"
 
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:4
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:14
 msgid "Dashboard"
-msgstr "Tablero de mando"
+msgstr "Pregled"
 
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:5
 msgid "Site metrics and activity"
-msgstr ""
+msgstr "Metrike i aktivnost sajta"
 
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:6
 msgid "activity"
-msgstr ""
+msgstr "aktivnost"
 
 #: udata_front/theme/gouvfr/templates/site/dashboard.html:47
 msgid "Community activity"
-msgstr ""
+msgstr "Aktivnost zajednice"
 
 #: udata_front/theme/gouvfr/templates/site/map.html:5
 #: udata_front/theme/gouvfr/templates/site/map.html:13
 msgid "Coverage map"
-msgstr ""
+msgstr "Mapa pokrivenosti"
 
 #: udata_front/theme/gouvfr/templates/site/map.html:6
 msgid "Display datasets on a map"
-msgstr ""
+msgstr "Prikaži skup podataka na mapi"
 
 #: udata_front/theme/gouvfr/templates/site/map.html:7
 msgid "coverage"
-msgstr ""
+msgstr "pokrivenost"
 
 #: udata_front/theme/gouvfr/templates/site/map.html:7
 msgid "map"
-msgstr ""
+msgstr "mapa"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:5
 #, python-format
 msgid "Datasets related to the town of %(name)s with INSEE code %(code)s and postal code %(postal)s"
-msgstr ""
+msgstr "Skupovi podataka povezani sa gradom %(name)s sa INSEE kodom %(code)s ipoštanskim kodom %(postal)s"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:12
 #: udata_front/theme/gouvfr/templates/territories/departement.html:12
 #: udata_front/theme/gouvfr/templates/territories/region.html:12
 msgid "Region:"
-msgstr ""
+msgstr "Region:"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:15
 #: udata_front/theme/gouvfr/templates/territories/departement.html:13
 msgid "County:"
-msgstr ""
+msgstr "Okrug:"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:16
 msgid "Town:"
-msgstr ""
+msgstr "Grad:"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:24
 #: udata_front/theme/gouvfr/templates/territories/departement.html:21
 #: udata_front/theme/gouvfr/templates/territories/region.html:20
 msgid "Source:"
-msgstr ""
+msgstr "Izvor:"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:31
 #: udata_front/theme/gouvfr/templates/territories/departement.html:28
 #: udata_front/theme/gouvfr/templates/territories/region.html:27
 msgid "Submit your logo through:"
-msgstr ""
+msgstr "Dostavi svoj logo putem:"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:32
 #: udata_front/theme/gouvfr/templates/territories/departement.html:29
 #: udata_front/theme/gouvfr/templates/territories/region.html:28
 msgid "we only expose logos under an open license"
-msgstr ""
+msgstr " samo otvaramo logoe pod otvorenom licencom"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:42
 #: udata_front/theme/gouvfr/templates/territories/departement.html:39
 #: udata_front/theme/gouvfr/templates/territories/region.html:38
 #: udata_front/theme/gouvfr/templates/territories/search-result.html:13
 msgid "INSEE code:"
-msgstr ""
+msgstr "INSEE kod:"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:48
 #: udata_front/theme/gouvfr/templates/territories/region.html:44
 #: udata_front/theme/gouvfr/templates/territories/search-result.html:15
 msgid "Postal code:"
-msgstr ""
+msgstr "Poštanski kod:"
 
 #: udata_front/theme/gouvfr/templates/territories/commune.html:55
 #: udata_front/theme/gouvfr/templates/territories/departement.html:45
 #: udata_front/theme/gouvfr/templates/territories/region.html:51
 msgid "Population:"
-msgstr ""
+msgstr "Populacija:"
 
 #: udata_front/theme/gouvfr/templates/territories/departement.html:5
 #, python-format
 msgid "Datasets related to the county of %(name)s with INSEE code %(code)s"
-msgstr ""
+msgstr "Skupovi podataka povezani sa okrugom %(name)s sa INSEE kodom %(code)s"
 
 #: udata_front/theme/gouvfr/templates/territories/departement.html:50
 msgid "Main towns:"
-msgstr ""
+msgstr "Glavni gradovi:"
 
 #: udata_front/theme/gouvfr/templates/territories/home.html:5
 #: udata_front/theme/gouvfr/templates/territories/home.html:6
 msgid "French regions"
-msgstr ""
+msgstr "Regioni"
 
 #: udata_front/theme/gouvfr/templates/territories/home.html:14
 #: udata_front/theme/gouvfr/templates/territories/territory.html:17
 msgid "This page is no longer maintained. We are working on new territories features."
-msgstr ""
+msgstr "Ova strana se više ne održava. Radimo na novim sadržajima za teritorije."
 
 #: udata_front/theme/gouvfr/templates/territories/home.html:18
 msgid "Click to navigate to the given region:"
-msgstr ""
+msgstr "Klik za navigaciju na region:"
 
 #: udata_front/theme/gouvfr/templates/territories/home.html:20
 msgid "Or sorted alphabetically:"
-msgstr ""
+msgstr "Ili poređano prema alfabetu:"
 
 #: udata_front/theme/gouvfr/templates/territories/region.html:5
 #, python-format
 msgid "Datasets related to the region of %(name)s with INSEE code %(code)s"
-msgstr ""
+msgstr "Skupovi podataka koji su povezani sa regionom %(name)s sa INSEE kodom %(code)s"
 
 #: udata_front/theme/gouvfr/templates/territories/region.html:57
 msgid "Previously:"
-msgstr ""
+msgstr "Prethodno:"
 
 #: udata_front/theme/gouvfr/templates/territories/region.html:64
 msgid "Counties:"
-msgstr ""
+msgstr "Okruzi:"
 
 #: udata_front/theme/gouvfr/templates/territories/search-result.html:22
 msgid "Administrative level"
-msgstr ""
+msgstr "Administrativni nivo"
 
 #: udata_front/theme/gouvfr/templates/territories/search-result.html:30
 msgid "Population"
-msgstr ""
+msgstr "Populacija"
 
 #: udata_front/theme/gouvfr/templates/territories/territory.html:22
 msgid "This territory has been replaced by:"
-msgstr ""
+msgstr "Ova teritorija je zamenjena sa:"
 
 #: udata_front/theme/gouvfr/templates/territories/territory.html:24
 msgid "since"
-msgstr ""
+msgstr "od"
 
 #: udata_front/theme/gouvfr/templates/territories/territory.html:37
 #, python-format
 msgid "If you want your datasets to appear in that list, the geographical zone associated must be the exact same one of that territory (%(code)s)."
-msgstr ""
+msgstr "Ukoliko želite da se vaš skup podataka pojavi na toj listi, dodelјena geografska zona mora biti ista kao od teritorije(%(code)s)."
 
 #: udata_front/theme/gouvfr/templates/territories/territory.html:39
 msgid "You want to add your own datasets to that list?"
-msgstr ""
+msgstr "Želite da dodate vaš skup podataka na ovu listu?"
 
 #: udata_front/theme/gouvfr/templates/territories/territory.html:40
 msgid "Log in / Sign up"
-msgstr ""
+msgstr "Prijava/Registracija"
 
 #: udata_front/theme/gouvfr/templates/territories/territory.html:42
 msgid "and create resources for that territory."
-msgstr ""
+msgstr "i kreirati resurs za tu teritoriju."
 
 #: udata_front/theme/gouvfr/templates/topic/browse.html:34
 #: udata_front/theme/gouvfr/templates/topic/browse.html:54
 #, python-format
 msgid "See the %(total)s results"
-msgstr ""
+msgstr "Vidite %(total)s rezultata"
 
 #: udata_front/theme/gouvfr/templates/topic/browse.html:39
 #: udata_front/theme/gouvfr/templates/topic/browse.html:59
 msgid "No results found"
-msgstr ""
+msgstr "Nije pronađen nijedan rezultat"
 
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:6
 #, python-format
 msgid "%(topic)s datasets"
-msgstr ""
+msgstr "%(topic)s setovi podataka"
 
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:7
 #, python-format
 msgid "%(site)s %(topic)s related datasets"
-msgstr ""
+msgstr "%(site)s %(topic)s povezani setovi podataka"
 
 #: udata_front/theme/gouvfr/templates/topic/datasets.html:8
 #: udata_front/theme/gouvfr/templates/topic/display_base.html:7
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:8
 msgid "topic"
-msgstr ""
+msgstr "tema"
 
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:6
 #, python-format
 msgid "%(topic)s reuses"
-msgstr ""
+msgstr "%(topic)s ponovne upotrebe"
 
 #: udata_front/theme/gouvfr/templates/topic/reuses.html:7
 #, python-format
 msgid "%(site)s %(topic)s related reuses"
-msgstr ""
+msgstr "%(site)s %(topic)s povezane ponovne upotrebe"
 
 #: udata_front/theme/gouvfr/templates/user/activity.html:5
 #: udata_front/theme/gouvfr/templates/user/base.html:67
 msgid "Activity"
-msgstr ""
+msgstr "Aktivnost"
 
 #: udata_front/theme/gouvfr/templates/user/base.html:8
 #, python-format
 msgid "%(site)s %(username)s profile"
-msgstr ""
+msgstr "%(site)s %(username)s profil"
 
 #: udata_front/theme/gouvfr/templates/user/base.html:9
 msgid "user"
-msgstr ""
+msgstr "korisnik"
 
 #: udata_front/theme/gouvfr/templates/user/base.html:9
 msgid "profile"
-msgstr ""
+msgstr "profil"
 
 #: udata_front/theme/gouvfr/templates/user/base.html:38
 msgid "Work in progress"
-msgstr ""
+msgstr "Rad u toku"
 
 #: udata_front/theme/gouvfr/templates/user/base.html:39
 msgid "The user page is currently being renovated to improve user experience."
-msgstr ""
+msgstr "Korisnikova strana se trenutno renovira radi pobolјšanja korisničkog iskustva."
 
 #: udata_front/theme/gouvfr/templates/user/base.html:78
 #, python-format
 msgid "%(num)d followed"
 msgid_plural "%(num)d followed"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(num)d prati"
+msgstr[1] "%(num)d prati"
+msgstr[2] "%(num)d prati"
 
 #: udata_front/theme/gouvfr/templates/user/base.html:108
 msgid "User's admin profile"
-msgstr ""
+msgstr "Korisnikov admin profil"
 
 #: udata_front/theme/gouvfr/templates/user/datasets.html:36
 #, python-format
 msgid "%(user)s has not yet published any dataset"
-msgstr ""
+msgstr "%(user)s nije još uvek objavio nijedan skup podataka"
 
 #: udata_front/theme/gouvfr/templates/user/followers.html:31
 #, python-format
 msgid "%(user)s has no follower"
-msgstr ""
+msgstr "%(user)s nema pratilaca"
 
 #: udata_front/theme/gouvfr/templates/user/following.html:7
 msgid "Following"
-msgstr ""
+msgstr "Prati"
 
 #: udata_front/theme/gouvfr/templates/user/following.html:41
 #, python-format
 msgid "Follow %(num)d dataset"
 msgid_plural "Follow %(num)d datasets"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Prati %(num)d skup podataka"
+msgstr[1] "Prati %(num)d skupova podataka"
+msgstr[2] "Prati %(num)d skupova podataka"
 
 #: udata_front/theme/gouvfr/templates/user/following.html:61
 #, python-format
 msgid "Follow %(num)d reuse"
 msgid_plural "Follow %(num)d reuses"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Prati %(num)d primer upotrebe"
+msgstr[1] "Prati %(num)d primera upotrebe"
+msgstr[2] "Prati %(num)d primera upotrebe"
 
 #: udata_front/theme/gouvfr/templates/user/following.html:81
 #, python-format
 msgid "Follow %(num)d organization"
 msgid_plural "Follow %(num)d organizations"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Prati %(num)d organizaciju"
+msgstr[1] "Prati %(num)d organizacije"
+msgstr[2] "Prati %(num)d organizacije"
 
 #: udata_front/theme/gouvfr/templates/user/following.html:101
 #, python-format
 msgid "Follow %(num)d user"
 msgid_plural "Follow %(num)d users"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Prati %(num)d korisnika"
+msgstr[1] "Prati %(num)d korisnika"
+msgstr[2] "Prati %(num)d korisnika"
 
 #: udata_front/theme/gouvfr/templates/user/following.html:127
 #, python-format
 msgid "%(user)s is not following anyone"
-msgstr ""
+msgstr "%(user)s ne prati nikog"
 
 #: udata_front/theme/gouvfr/templates/user/list.html:8
 #, python-format
 msgid "%(site)s user search"
-msgstr ""
+msgstr "%(site)s pretraga korisnika"
 
 #: udata_front/theme/gouvfr/templates/user/list.html:9
 msgid "users"
-msgstr ""
+msgstr "korisnici"
 
 #: udata_front/theme/gouvfr/templates/user/reuses.html:35
 #, python-format
 msgid "%(user)s has not yet published any reuse"
-msgstr ""
+msgstr "%(user)s još nije objavio nijedan primer upotrebe"
 
 #: udata_front/views/dataset.py:23
 msgid "Last datasets"
-msgstr ""
+msgstr "Poslednji skupovi podataka"
 
 #: udata_front/views/reuse.py:20
 msgid "Last reuses"
-msgstr ""
+msgstr "Poslednji primeri upotrebe"
 
 #: udata_front/views/reuse.py:56
 msgid "Transfer"
-msgstr ""
+msgstr "Prenos"
 
 #: udata_front/views/site.py:214
 msgid "Community"
-msgstr ""
+msgstr "Zajedica"
 
