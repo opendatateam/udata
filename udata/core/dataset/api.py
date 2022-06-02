@@ -102,7 +102,7 @@ class DatasetApiParser(ModelApiParser):
             # This allows the search_text method to tokenise with an AND
             # between tokens whereas an OR is used without it.
             phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
-            datasets = datasets.search_text(phrase_query)
+            datasets = datasets.search_text(phrase_query, language=current_app.config['DEFAULT_LANGUAGE'])
         if args.get('tag'):
             datasets = datasets.filter(tags=args['tag'])
         if args.get('license'):
