@@ -48,7 +48,7 @@ def publish(document, resource_id, action):
         service='udata',
         key_id=str(resource_id),
         document=resource,
-        meta={'message_type': message_type}
+        meta={'message_type': message_type, 'dataset_id': str(document.id)}
     )
 
 
