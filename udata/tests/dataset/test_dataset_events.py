@@ -30,7 +30,7 @@ class DatasetEventsTest:
 
         expected_value = {
             'service': 'udata',
-            'data': serialize_resource_for_event(resource),
+            'value': serialize_resource_for_event(resource),
             'meta': {
                 'message_type': message_type,
                 'dataset_id': str(dataset.id)
@@ -57,7 +57,7 @@ class DatasetEventsTest:
 
         expected_value = {
             'service': 'udata',
-            'data': serialize_resource_for_event(resource),
+            'value': serialize_resource_for_event(resource),
             'meta': {
                 'message_type': message_type,
                 'dataset_id': str(dataset.id)
@@ -82,7 +82,7 @@ class DatasetEventsTest:
 
         expected_value = {
             'service': 'udata',
-            'data': None,
+            'value': None,
             'meta': {
                 'message_type': message_type,
                 'dataset_id': str(dataset.id)
