@@ -6,6 +6,7 @@
 - Use mongo search if `SEARCH_SERVICE_API_URL` variable is not set [#2728](https://github.com/opendatateam/udata/pull/2728)
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
 - Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
+- Add endpoint to directly get specific resource by rid [#2732](https://github.com/opendatateam/udata/pull/2732).
 - Publish kafka message when resource is created, modified or deleted [#2733](https://github.com/opendatateam/udata/pull/2733)
 - Clean documentation and code with respect to independent search service [#2738](https://github.com/opendatateam/udata/pull/2738)
 - Fix size argument in suggests endpoint and corresponding tests [#2739](https://github.com/opendatateam/udata/pull/2739)

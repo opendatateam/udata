@@ -443,6 +443,18 @@ class LicenseModelTest:
         assert isinstance(found, License)
         assert license.id == found.id
 
+    def test_match_by_alternate_title_with_multiple_candidates_from_one_licence(self):
+        license = LicenseFactory(alternate_titles=['Licence Ouverte v2', 'Licence Ouverte v2.0'])
+        found = License.guess('Licence Ouverte v2.0')
+        assert isinstance(found, License)
+        assert license.id == found.id
+
+    def test_no_with_multiple_alternate_titles_from_different_licences(self):
+        LicenseFactory(alternate_titles=['Licence Ouverte v2'])
+        LicenseFactory(alternate_titles=['Licence Ouverte v2.0'])
+        found = License.guess('Licence Ouverte v2.0')
+        assert found is None
+
     def test_prioritize_title_over_alternate_title(self):
         title = faker.sentence()
         license = LicenseFactory(title=title)
