@@ -37,7 +37,7 @@ class DatasetEventsTest:
             }
         }
         topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
     def test_publish_message_resource_modified(self):
@@ -64,7 +64,7 @@ class DatasetEventsTest:
             }
         }
         topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
     def test_publish_message_resource_removed(self):
@@ -89,5 +89,5 @@ class DatasetEventsTest:
             }
         }
         topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
