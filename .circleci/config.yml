@@ -47,7 +47,7 @@ jobs:
           name: Commit any change in compiled *.pip
           command: |
             echo "here is the git diff after dependencies update:"
-            git diff
+            git --no-pager diff
             if [[ $CIRCLE_TAG ]]; then
               echo "This a tag build, do not push changes"
             else
