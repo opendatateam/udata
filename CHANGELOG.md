@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 2.0.3 (2022-06-03)
 
 - Update search pages [#95](https://github.com/etalab/udata-front/pull/95)
