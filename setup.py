@@ -43,10 +43,10 @@ setup(
             'udata = udata.commands:cli',
         ],
        'udata.harvesters': [
-            'statistika = udata.harvesters.statistika:StatistikaBackend',
-            'statistika2021 = udata.harvesters.statistika2021:Statistika2021Backend',
-            'sdg = udata.harvesters.sdg:SDGBackend',
-            'rgz = udata.harvesters.rgz:RGZBackend',
+            'statistika = udata.harvest.backends.statistika:StatistikaBackend',
+            'statistika2021 = udata.harvest.backends.statistika2021:Statistika2021Backend',
+            'sdg = udata.harvest.backends.sdg:SDGBackend',
+            'rgz = udata.harvest.backends.rgz:RGZBackend',
         ],
         'udata.avatars': [
             'internal = udata.features.identicon.backends:internal',
