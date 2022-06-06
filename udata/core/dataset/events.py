@@ -9,7 +9,6 @@ from udata.event.producer import get_topic
 from udata.event.values import KafkaMessageType
 
 
-
 def serialize_resource_for_event(resource):
     resource_dict = {
         'id': str(resource.id),
