@@ -97,7 +97,12 @@ class DatasetApiParser(ModelApiParser):
     @staticmethod
     def parse_filters(datasets, args):
         if args.get('q'):
-            datasets = datasets.search_text(args['q'])
+            # Following code splits the 'q' argument by spaces to surround
+            # every word in it with quotes before rebuild it.
+            # This allows the search_text method to tokenise with an AND
+            # between tokens whereas an OR is used without it.
+            phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
+            datasets = datasets.search_text(phrase_query)
         if args.get('tag'):
             datasets = datasets.filter(tags=args['tag'])
         if args.get('license'):
