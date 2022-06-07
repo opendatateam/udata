@@ -1,4 +1,3 @@
-import os
 import json
 from flask import current_app
 from kafka import KafkaProducer
