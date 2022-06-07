@@ -4,9 +4,6 @@ from flask import current_app
 from kafka import KafkaProducer
 
 
-KAFKA_API_VERSION = os.environ.get('KAFKA_API_VERSION', '2.5.0')
-
-
 class KafkaProducerSingleton:
     __instance = None
 
@@ -15,8 +12,7 @@ class KafkaProducerSingleton:
         if KafkaProducerSingleton.__instance is None:
             KafkaProducerSingleton.__instance = KafkaProducer(
                 bootstrap_servers=current_app.config.get('KAFKA_URI'),
-                value_serializer=lambda v: json.dumps(v).encode('utf-8'),
-                api_version=tuple([int(value) for value in KAFKA_API_VERSION.split('.')])
+                value_serializer=lambda v: json.dumps(v).encode('utf-8')
             )
         return KafkaProducerSingleton.__instance
 
