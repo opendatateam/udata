@@ -87,7 +87,8 @@ footer_links = [
     nav.Item(_('Licences'), 'gouvfr.show_page', args={'slug': 'legal/licences'}),
     nav.Item(_('Terms of use'), 'site.terms'),
     nav.Item(_('Tracking and privacy'), 'gouvfr.suivi'),
-    nav.Item(_('Accessibility'), 'gouvfr.show_page', args={'slug': 'legal/accessibility'}),
+    nav.Item(_('Accessibility: partially compliant'),
+             'gouvfr.show_page', args={'slug': 'legal/accessibility'}),
 ]
 
 nav.Bar('gouvfr_footer', footer_links)

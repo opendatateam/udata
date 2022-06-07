@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add accessibility compliance status in footer [#114](https://github.com/etalab/udata-front/pull/114)
 
 ## 2.0.3 (2022-06-03)
 
