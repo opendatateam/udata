@@ -31,7 +31,7 @@ DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date', 'extras',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived'
+    'uri', 'page', 'last_update', 'archived', 'quality'
 ))
 
 log = logging.getLogger(__name__)

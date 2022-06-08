@@ -435,6 +435,11 @@ class Defaults(object):
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
 
+    # Datasets quality settings
+    ###########################################################################
+    DATASET_DESCRIPTION_LENGTH = 100
+    DATASET_TAGS_COUNT = 3
+
 
 class Testing(object):
     '''Sane values for testing. Should be applied as override'''

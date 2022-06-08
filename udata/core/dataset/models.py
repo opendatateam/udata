@@ -603,49 +603,65 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             * description length
             * and so on
         """
-        from udata.models import Discussion  # noqa: Prevent circular imports
         result = {}
         if not self.id:
             # Quality is only relevant on saved Datasets
             return result
-        if self.frequency != 'unknown':
-            result['frequency'] = self.frequency
+
+        result['license'] = True if self.license else False
+        result['temporal_coverage'] = True if self.temporal_coverage else False
+        result['spatial'] = True if self.spatial else False
+
+        result['update_frequency'] = True if self.frequency != 'unknown' else False
         if self.next_update:
-            result['update_in'] = -(self.next_update - datetime.now()).days
-        if self.tags:
-            result['tags_count'] = len(self.tags)
-        if self.description:
-            result['description_length'] = len(self.description)
+            result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days < 0 else False
+
+        result['tags_count'] = True if len(self.tags) > current_app.config.get('DATASET_TAGS_COUNT') else False
+        result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('DATASET_DESCRIPTION_LENGTH') else False
+
         if self.resources:
             result['has_resources'] = True
             result['has_only_closed_or_no_formats'] = all(
                 resource.closed_or_no_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
                 self.check_availability())
-        discussions = Discussion.objects(subject=self)
-        if discussions:
-            result['discussions'] = len(discussions)
-            result['has_untreated_discussions'] = not all(
-                discussion.person_involved(self.owner)
-                for discussion in discussions)
+            resource_doc = False
+            resource_desc = True
+            for resource in self.resources:
+                if resource.type == 'documentation':
+                    resource_doc = True
+                    break
+            for resource in self.resources:
+                if not resource.description:
+                    resource_desc = False
+                    break
+            result['resources_documentation'] = True if (resource_doc is True or resource_desc is True) else False
+
         result['score'] = self.compute_quality_score(result)
         return result
 
     def compute_quality_score(self, quality):
         """Compute the score related to the quality of that dataset."""
         score = 0
-        UNIT = 2
+        UNIT = 1
+        if quality['license']:
+            score += UNIT
+        if quality['temporal_coverage']:
+            score += UNIT
+        if quality['spatial']:
+            score += UNIT
+        if quality['update_frequency']:
+            score += UNIT
         if 'update_in' in quality:
-            # TODO: should be related to frequency.
             if quality['update_in'] < 0:
                 score += UNIT
             else:
                 score -= UNIT
         if 'tags_count' in quality:
-            if quality['tags_count'] > 3:
+            if quality['tags_count'] > current_app.config.get('DATASET_TAGS_COUNT'):
                 score += UNIT
         if 'description_length' in quality:
-            if quality['description_length'] > 100:
+            if quality['description_length'] > current_app.config.get('DATASET_DESCRIPTION_LENGTH'):
                 score += UNIT
         if 'has_resources' in quality:
             if quality['has_only_closed_or_no_formats']:
@@ -656,10 +672,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                 score -= UNIT
             else:
                 score += UNIT
-        if 'discussions' in quality:
-            if quality['has_untreated_discussions']:
-                score -= UNIT
-            else:
+            if quality['resources_documentation']:
                 score += UNIT
         if score < 0:
             return 0
