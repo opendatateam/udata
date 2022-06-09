@@ -99,7 +99,11 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     meta = {
         'indexes': ['$title',
-                    '-created_at',
+                    'created_at',
+                    'last_modified',
+                    'metrics.datasets',
+                    'metrics.followers',
+                    'metrics.views',
                     'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
