@@ -616,25 +616,22 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if self.next_update:
             result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days < 0 else False
 
-        result['tags_count'] = True if len(self.tags) > current_app.config.get('DATASET_TAGS_COUNT') else False
-        result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('DATASET_DESCRIPTION_LENGTH') else False
+        result['tags_count'] = True if len(self.tags) > current_app.config.get('QUALITY_TAGS_COUNT') else False
+        result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH') else False
 
         if self.resources:
             result['has_resources'] = True
             result['has_only_closed_or_no_formats'] = all(
                 resource.closed_or_no_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
-                self.check_availability())
+                self.check_availability())  # ?
             resource_doc = False
             resource_desc = True
             for resource in self.resources:
                 if resource.type == 'documentation':
                     resource_doc = True
-                    break
-            for resource in self.resources:
                 if not resource.description:
                     resource_desc = False
-                    break
             result['resources_documentation'] = True if (resource_doc is True or resource_desc is True) else False
 
         result['score'] = self.compute_quality_score(result)
@@ -652,25 +649,17 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             score += UNIT
         if quality['update_frequency']:
             score += UNIT
-        if 'update_in' in quality:
-            if quality['update_in'] < 0:
+        if 'update_fulfilled_in_time' in quality:
+            if quality['update_fulfilled_in_time'] < 0:
                 score += UNIT
-            else:
-                score -= UNIT
-        if 'tags_count' in quality:
-            if quality['tags_count'] > current_app.config.get('DATASET_TAGS_COUNT'):
-                score += UNIT
-        if 'description_length' in quality:
-            if quality['description_length'] > current_app.config.get('DATASET_DESCRIPTION_LENGTH'):
-                score += UNIT
+        if quality['tags_count']:
+            score += UNIT
+        if quality['dataset_description_quality']:
+            score += UNIT
         if 'has_resources' in quality:
-            if quality['has_only_closed_or_no_formats']:
-                score -= UNIT
-            else:
+            if not quality['has_only_closed_or_no_formats']:
                 score += UNIT
-            if quality['has_unavailable_resources']:
-                score -= UNIT
-            else:
+            if not quality['has_unavailable_resources']:
                 score += UNIT
             if quality['resources_documentation']:
                 score += UNIT
