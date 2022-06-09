@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 4.1.0 (2022-06-09)
 
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
