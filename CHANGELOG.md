@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 4.1.0 (2022-06-09)
 
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 - Use mongo search if `SEARCH_SERVICE_API_URL` variable is not set [#2728](https://github.com/opendatateam/udata/pull/2728)
