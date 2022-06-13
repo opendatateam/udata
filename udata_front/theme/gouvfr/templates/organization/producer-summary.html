@@ -1,8 +1,8 @@
 {% set read_only_mode = config['READ_ONLY_MODE'] %}
 {% set description = organization.description or organization.about %}
 {% from theme('macros/certified.html') import badge_if_certified with context %}
-<div class="producer-summary row">
-    <div class="col-2 col-md-12">
+<div class="producer-summary fr-grid-row fr-grid-row--gutters">
+    <div class="fr-col-md-2 fr-col-12">
         {% if producer_type == 'organization' %}
         <div class="logo">
             <img class="fr-responsive-img" src="{{ organization.logo|placeholder('organization') }}" alt=""/>
@@ -20,7 +20,7 @@
         </div>
         {% endif %}
     </div>
-    <div class="col-10 col-md-12 fr-mt-2w fr-mt-md-0">
+    <div class="fr-col-md-10 fr-col-12 fr-mt-2w fr-mt-md-0">
         <h2 class="h3 fr-mb-1v">
             {% if producer_type == 'organization' %}
             <a
@@ -36,14 +36,14 @@
         {% if description %}
         <p class="fr-mt-0 fr-mb-5v">{{ description|mdstrip(300) }}</p>
         {% endif %}
-        <div class="row">
+        <div class="fr-grid-row fr-grid-row--gutters">
             {% if organization.metrics.datasets %}
-            <div class="col-auto">
+            <div class="fr-col-auto">
                 {{ organization.metrics.datasets }} {{ _('datasets') }}
             </div>
             {% endif %}
             {% if organization.metrics.reuses %}
-            <div class="col-auto">
+            <div class="fr-col-auto">
                     {{ organization.metrics.reuses }} {{ _('reuses') }}
             </div>
             {% endif %}

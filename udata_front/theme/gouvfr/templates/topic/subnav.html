@@ -1,14 +1,14 @@
 {% from theme('macros/search.html') import site_search with context %}
 <nav class="navbar navbar-static-top navbar-subnav subnav-large subnav-topic {% if topic.color %}topic-{{topic.color}}{% endif %}">
     <div class="cover-topic"></div>
-    <div class="container">
+    <div class="fr-container">
 
         <div class="side-bgs">
             <div class="bg"></div>
             <div class="bg collapse sidebg-collapse"></div>
         </div>
 
-        <div class="search_sidebar col-sm-5 col-md-4 col-xs-12" role="search">
+        <div class="search_sidebar fr-col-sm-5 fr-col-md-4 fr-col-12" role="search">
 
             <nav class="sidebar panel">
                 {{ site_search(size='lg') }}
@@ -27,12 +27,12 @@
 
         </div>
 
-        <div class="topic-excerpt col-sm-7 col-md-8 col-xs-12">
+        <div class="topic-excerpt fr-col-sm-7 fr-col-md-8 fr-col-12">
             <h3>{{ topic.name }}</h3>
             {{ topic.description|markdown }}
         </div>
 
-        <div class="tags col-sm-7 col-md-8 col-xs-12">
+        <div class="tags fr-col-sm-7 fr-col-md-8 fr-col-12">
             {% for tag in topic.tags %}
             <a href="{{ url_for('search.index', tag=tag) }}"
                 class="fr-btn btn-grey btn-xs"

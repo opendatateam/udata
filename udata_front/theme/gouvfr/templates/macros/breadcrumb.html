@@ -5,13 +5,13 @@
 {% if tpl.breadcrumb and tpl.breadcrumb() or tpl.breadcrumb_bar and tpl.breadcrumb_bar() %}
 <section class="breadcrumb-bar fr-py-2w {{ breadcrum_class }}">
     <div class="fr-container">
-        <div class="row">
+        <div class="fr-grid-row">
             {% if tpl.breadcrumb_bar and tpl.breadcrumb_bar() %}
-            <div class="left-bar col-md-12 col-lg-9">
+            <div class="left-bar fr-col-12 col-lg-9">
                 {{ tpl.breadcrumb_bar() }}
             </div>
             {% elif tpl.breadcrumb and tpl.breadcrumb() %}
-            <ol class="breadcrumbs col-md-12 col-lg-9">
+            <ol class="breadcrumbs fr-col-12 col-lg-9">
                 <li>
                     <a href="{{ url_for('site.home') }}" title="{{ _('Home') }}">
                         {{ _('Home') }}
@@ -20,7 +20,7 @@
                 {{ tpl.breadcrumb() }}
             </ol>
             {% endif %}
-            <div class="col-md-4 col-lg-3 toolbar">
+            <div class="fr-col-12 fr-col-md-4 col-lg-3 toolbar">
                 {% if tpl.toolbar_container and tpl.toolbar_container() %}
                     {{ tpl.toolbar_container() }}
                 {% elif tpl.toolbar and tpl.toolbar() %}

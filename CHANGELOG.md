@@ -8,6 +8,7 @@
 
 - Add accessibility compliance status in footer [#114](https://github.com/etalab/udata-front/pull/114)
 - Fix SVG display issue [#116](https://github.com/etalab/udata-front/pull/116)
+- Use DSFR container and remove custom ones [#111](https://github.com/etalab/udata-front/pull/111)
 
 ## 2.0.3 (2022-06-03)
 

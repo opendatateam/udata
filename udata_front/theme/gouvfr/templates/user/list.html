@@ -23,12 +23,12 @@
 {% endblock %}
 
 {% block main_content %}
-<div class="row">
-    <div class="col-lg-8">
+<div class="fr-grid-row">
+    <div class="fr-col-lg-8">
 
-        <ul class="search-results row">
+        <ul class="search-results fr-grid-row">
             {% for user in users %}
-            <li class="col-xs-12">
+            <li class="fr-col-12">
             {% include theme('user/card.html') %}
             </li>
             {% endfor %}

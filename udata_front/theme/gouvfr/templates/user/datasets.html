@@ -16,11 +16,11 @@
 
 {% if datasets %}
 
-	<div class="row">
-	    <div class="col-sm-12">
+	<div class="fr-grid-row">
+	    <div class="fr-col-sm-12">
 	        <ul class="card-list card-list--columned">
 	            {% for dataset in datasets %}
-	            <li class="col-sm-6">
+	            <li class="fr-col-sm-6">
 	            {% include theme('dataset/card.html') %}
 	            </li>
 	            {% endfor %}
@@ -30,8 +30,8 @@
 
 {% else %}
 
-	<div class="row">
-	    <div class="col-xs-12">
+	<div class="fr-grid-row">
+	    <div class="fr-col-12">
             <p class="text-center lead">
             {{ _('%(user)s has not yet published any dataset', user=user.fullname) }}
             </p>

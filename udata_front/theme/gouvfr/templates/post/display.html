@@ -20,7 +20,7 @@
 
 
 {% block main_content %}
-<div class="container fr-py-2w">
+<div class="fr-container fr-py-2w">
     <h1 class="fr-m-0">{{ post.name }}</h1>
     {% if post.published %}
     <p class="text-grey-380 fr-text--xs fr-mb-1w">
@@ -44,14 +44,14 @@
 </div>
 
 {% if post.image %}
-<div class="hagrid fr-mb-2w">
+<div class="fr-container fr-mb-2w">
     <div class="fr-col">
         <img src="{{ post.image }}" alt="" class="w-100" />
     </div>
 </div>
 {% endif %}
 
-<div class="container fr-pb-3w" v-pre>
+<div class="fr-container fr-pb-3w" v-pre>
 {% if post.body_type and post.body_type == 'html' %}
     <div>{{ post.content|safe }}</div>
 {% else %}
@@ -60,7 +60,7 @@
 </div>
 
 {% if post.datasets %}
-<div class="container fr-mt-2w">
+<div class="fr-container fr-mt-2w">
     <h2>{{ _('Datasets') }} <sup>{{ post.datasets|length }}</sup></h2>
     <div class="fr-grid-row">
         <div class="fr-col-12">
@@ -75,7 +75,7 @@
 {% endif %}
 
 {% if post.reuses %}
-<div class="container fr-mt-2w">
+<div class="fr-container fr-mt-2w">
     <h2>{{ _('Reuses') }} <sup>{{ post.reuses|length }}</sup></h2>
     <ul class="fr-grid-row fr-grid-row--gutters">
         {% for reuse in post.reuses %}
@@ -88,7 +88,7 @@
 {% endif %}
 
 {% if sysadmin %}
-<div class="container fr-mt-7w">
+<div class="fr-container fr-mt-7w">
     <div class="fr-col-12 fr-col-md-6">
         <h2 class="fr-h2">{{ _('Actions') }}</h2>
         <ul class="nav-list">
@@ -106,7 +106,7 @@
 {% endif %}
 
 {% if previous_post or next_post %}
-<section class="container fr-my-7w fr-py-3w border-top">
+<section class="fr-container fr-my-7w fr-py-3w border-top">
     <div class="fr-grid-row fr-grid-row--gutters justify-between">
         <div class="fr-col-12 fr-col-md-3 text-align-center-md">
             {% if previous_post %}
@@ -139,7 +139,7 @@
 
 {% if config['POST_DISCUSSIONS_ENABLED'] %}
 <section class="community_container discussions-section fr-py-7w">
-    <div class="container vuejs">
+    <div class="fr-container vuejs">
         <discussion-threads ref="discussions" subject-id="{{ post.id }}"
             subject-class="{{ post.__class__.__name__ }}" />
     </div>

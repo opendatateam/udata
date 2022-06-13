@@ -12,7 +12,7 @@
 {% cache cache_duration, 'home', g.lang_code %}
 
 <section class="hero fr-py-3w fr-py-md-9v">
-    <div class="hagrid">
+    <div class="fr-container">
         <div class="fr-grid-row fr-grid-row--gutters">
             <div class="fr-col-12 fr-col-lg-5">
                 <h1 class="fr-mt-0 fr-mb-2w">{{ _('Open platform for French public data') }}</h1>
@@ -33,7 +33,7 @@
                         Données relatives au
                         <strong>Logement et à l'Urbanisme</strong>
                     </a>
-                    <div class="row justify-center fr-mt-2w">
+                    <div class="fr-grid-row justify-center fr-mt-2w">
                         <a
                             href="{{ url_for('gouvfr.show_page', slug='donnees-cles-par-sujet') }}"
                             class="fr-btn fr-btn--secondary fr-icon-arrow-right-s-line fr-btn--icon-right"
@@ -50,7 +50,7 @@
                 <a href="{{ post.display_url }}" title="{{ post.name }}" class="unstyled w-100 hero-post">
                     {% include theme('post/search-result.html') %}
                 </a>
-                <div class="row justify-center">
+                <div class="fr-grid-row justify-center">
                     <a
                         href="{{ url_for('posts.list') }}"
                         class="fr-btn fr-btn--secondary fr-icon-arrow-right-s-line fr-btn--icon-right"
@@ -76,10 +76,10 @@
 
 {# Metrics Section #}
 <section class="metrics-bar">
-    <div class="hagrid fr-py-md-7w fr-py-2w">
+    <div class="fr-container fr-py-md-7w fr-py-2w">
         <div class="bar fr-p-9v">
             <h3>{% include theme('svg/logotype.svg') %} {{ _('is') }}</h3>
-            <div class="row-inline justify-between fr-mt-md-9v fr-mt-2w">
+            <div class="fr-grid-row justify-between fr-mt-md-9v fr-mt-2w">
                 {% for (label, metric) in metrics %}
                 <div class="filet fr-my-1v fr-my-md-0">
                     <div class="fs-hg f-bold text-grey-400">{{ current_site.metrics[metric]|format_number }}</div>
@@ -102,7 +102,7 @@
 ) %}
 
 <section class="datasets fr-pb-7w fr-pt-2w bg-grey-50">
-    <div class="hagrid overflow-visible">
+    <div class="fr-container">
         {# Dataset tabs #}
         <div class="fr-grid-row fr-grid-row--gutters justify-between">
             <div class="fr-col-auto">
@@ -140,9 +140,9 @@
         </div>
         {% for tab_id, label, datasets, kwargs in dataset_tabs  %}
         <div class="fr-hidden {% if loop.first %}fr-unhidden{% endif %}" role="tabpanel" id={{tab_id}}>
-            <div class="row fr-pt-md-9v fr-pt-2w">
+            <div class="fr-grid-row fr-pt-md-9v fr-pt-2w">
                 {% for dataset in datasets %}
-                <div class="col-lg-12 col-4">{% include theme('dataset/card.html') %}
+                <div class="fr-col-12 fr-col-lg-4">{% include theme('dataset/card.html') %}
                 </div>
                 {% endfor %}
             </div>
@@ -163,7 +163,7 @@
 
 {# Reuse section #}
 <section class="reuse fr-py-3w fr-py-md-7w">
-    <div class="hagrid overflow-visible">
+    <div class="fr-container">
         <div class="fr-grid-row fr-grid-row--gutters justify-between">
             <div class="fr-col-auto">
                 <h2>{{ _('Data reuses') }}</h2>
@@ -200,7 +200,7 @@
             </div>
         </div>
     </div>
-    <div class="hagrid">
+    <div class="fr-container">
         {% for tab_id, label, reuses, kwargs in reuses_tabs  %}
         <div class="fr-hidden {% if loop.first %}fr-unhidden{% endif %}" role="tabpanel" id="{{tab_id}}">
             <div class="fr-grid-row fr-grid-row--gutters fr-pt-2w fr-pt-md-9v">

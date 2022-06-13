@@ -10,10 +10,10 @@
 {% block user_content %}
 {% if followers|length > 0 %}
     <h3>{{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}</h3>
-    <div class="row">
+    <div class="fr-grid-row">
         <ul class="card-list card-list--columned">
             {% for follow in followers %}
-            <li class="col-md-4">
+            <li class="fr-col-md-4">
                 {% include theme('follow/follower-card.html') %}
             </li>
             {% endfor %}
@@ -22,8 +22,8 @@
 
 {% else %}
 
-<div class="row">
-    <div class="col-xs-12">
+<div class="fr-grid-row">
+    <div class="fr-col-12">
 
     </div>
 </div>

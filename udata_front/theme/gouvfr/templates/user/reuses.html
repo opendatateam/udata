@@ -17,11 +17,11 @@
 
 {% if reuses %}
 
-	<div class="row">
-	    <div class="col-sm-12">
+	<div class="fr-grid-row">
+	    <div class="fr-col-sm-12">
 	        <ul class="card-list card-list--columned">
 	            {% for reuse in reuses %}
-	            <li class="col-sm-6">{% include theme('reuse/card.html') %}</li>
+	            <li class="fr-col-sm-6">{% include theme('reuse/card.html') %}</li>
 	            {% endfor %}
 	        </ul>
 	    </div>
@@ -29,8 +29,8 @@
 
 {% else %}
 
-	<div class="row">
-	    <div class="col-xs-12">
+	<div class="fr-grid-row">
+	    <div class="fr-col-12">
             <p class="text-center lead">
             {{ _('%(user)s has not yet published any reuse', user=user.fullname) }}
             </p>

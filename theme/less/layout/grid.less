@@ -5,24 +5,18 @@ category: 1 - Layout
 ---
 
 ## Grid system
-It's a grid. You know how grids work. Even if you don't, you'll understand in no time.
 
-12 columns of almost endless possibilities at your fingertips.
+Use DSFR grid `.fr-grid-row`.
 
 **It's very easy !**
 
 ### Containers
 
-`.container` class is a 1100px-wide centered container.
+`.fr-container` class is a 78rem-wide (1248px) centered container.
 
 ### Rows
 
-`.row` is used to denote a new row. Pretty easy.
-
-#### Inline-row
-
-`.row-inline` can be used to create an inline "row" without margin. It simply sets a `display: flex` and `flex-wrap: wrap`.
-It's also available for each responsive breakpoint with `.row-inline-{breakpoint}` classes.
+Use `.fr-grid-row` from DSFR.
 
 ### Utilities
 
@@ -30,96 +24,18 @@ It's also available for each responsive breakpoint with `.row-inline-{breakpoint
 `.mw-100` applies `max-width: 100%` to any element.
 `.no-wrap` applies `flex-wrap: nowrap`.
 
-`.overflow-hidden` and `.overflow-visible` can be used to trigger the corresponding overflow classes for special edge cases where you need a container that can or cannot overflow.
-
-### Auto layout
-
-By default, `.col` classes allow for an easy auto-layout : they all take an equal space within the row.
-They're also available for each responsive breakpoint with `.col-{breakpoint}` classes.
-
-```grid-auto.html
-<div class="container">
-    <div class="row">
-        <div class="col bg-blue-300">3 blocks</div>
-        <div class="col bg-blue-300">3 blocks</div>
-        <div class="col bg-blue-300">3 blocks</div>
-    </div>
-    <div class="row">
-        <div class="col bg-blue-300">6 blocks</div>
-        <div class="col bg-blue-300">6 blocks</div>
-        <div class="col bg-blue-300">6 blocks</div>
-        <div class="col bg-blue-300">6 blocks</div>
-        <div class="col bg-blue-300">6 blocks</div>
-        <div class="col bg-blue-300">6 blocks</div>
-    </div>
-</div>
-```
-
-### Specified width
-
-You can also specify a block width by using `.col-{n}` classes, *with n ∈ [1...12]*. You can also mix & match by specifing only one or two colomn widths and letting the others in auto mode :
-```grid-width.html
-<div class="container">
-    <div class="row">
-        <div class="col-4 bg-blue-300">col-4</div>
-        <div class="col-3 bg-blue-300">col-3</div>
-        <div class="col-5 bg-blue-300">col-5</div>
-    </div>
-    <div class="row">
-        <div class="col bg-blue-300">auto</div>
-        <div class="col bg-blue-300">auto</div>
-        <div class="col-4 bg-blue-300">col-4</div>
-        <div class="col bg-blue-300">auto</div>
-        <div class="col bg-blue-300">auto</div>
-        <div class="col bg-blue-300">auto</div>
-    </div>
-</div>
-```
-
-### Responsive classes
-
-The grid provides 4 breakpoints : `sm`, `md`, `lg` and `xl`. You can use the corresponding `.col-{sm|md|lg|xl}-{n}` (*with n ∈ [1...12]*) to easily make responsive layouts.
-
-**Be aware that these responsive classes and utilities work in the opposite flow as all design systems.**
-`col-sm-12` makes a full-width column for screens below `sm` breakpoints and not above.
-Use DSFR grid and responsive utilities instead : https://gouvfr.atlassian.net/wiki/spaces/DB/pages/222331372/Grille+et+points+de+rupture+-+Grid+and+breakpoints
-
-For example, if you want a layout with 3 blocks of 4 columns on desktop and stack them on medium widths :
-
-```grid-responsive.html
-<div class="container">
-    <div class="row">
-        <div class="col-4 col-sm-12 bg-blue-300">col-4 col-sm-12</div>
-        <div class="col-4 col-sm-12 bg-blue-300">col-4 col-sm-12</div>
-        <div class="col-4 col-sm-12 bg-blue-300">col-4 col-sm-12</div>
-    </div>
-</div>
-```
-
-### Offsets
-
-You can offset a block to the right by using `.offset-{sm|md|lg|xl}-{n}` (*with n ∈ [0...12]*) depending on the screen resolution you're targeting.
-Please note that special cancelling classes `.offset-{ø|sm|md|lg|xl}-0` exist, allowing you to reset offset on specific resolutions. This allows for offsetting a block on desktop and not on mobile for example.
-
-```grid-offset.html
-<div class="container">
-    <div class="row">
-        <div class="col-6 col-sm-12 offset-sm-0 offset-6 bg-blue-300">col-6 offset-md-6 col-sm-12 offset-sm-0</div>
-    </div>
-</div>
-```
 
 ### Vertical alignement
 
-By default, blocks on the same row will take up an equal height. You can opt for a different behaviour by using the `.align-items-start`, `.align-items-center` and `.align-items-end` classes on the `.row` div.
+By default, blocks on the same row will take up an equal height. You can opt for a different behaviour by using the `.fr-grid-row--top`, `.fr-grid-row--middle` and `.fr-grid-row--bottom` classes on the `.fr-grid-row` div.
 When you need to alter the alignment of one item you can use `.self-stretch`, `.self-start`, `.self-end`, and `.self-center`,
 
 ```grid-valign.html
-<div class="container">
-    <div class="row align-items-center">
-        <div class="col-6 bg-blue-300"><div style="min-height: 200px">Huge block</div></div>
-        <div class="col-3 bg-blue-300">Smoll centered block</div>
-        <div class="col-3 bg-blue-300 self-end">Smoll block at the bottom</div>
+<div class="fr-container">
+    <div class="fr-grid-row fr-grid-row--middle">
+        <div class="fr-col-6 bg-blue-300"><div style="min-height: 200px">Huge block</div></div>
+        <div class="fr-col-3 bg-blue-300">Smoll centered block</div>
+        <div class="fr-col-3 bg-blue-300 self-end">Smoll block at the bottom</div>
     </div>
 </div>
 ```
@@ -128,56 +44,25 @@ When you need to alter the alignment of one item you can use `.self-stretch`, `.
 Sometimes you also need to specify an horizontal alignment for some items in a row, you can use `.justify-start`, `.justify-end`, `.justify-center`, `.justify-between`, `.justify-around`, and `.justify-evenly`
 
 ```grid-halign.html
-<div class="container-fluid">
-    <div class="row justify-between">
-        <div class="col-3 bg-blue-300">Evenly spaced blocks</div>
-        <div class="col-3 bg-blue-300">Evenly spaced blocks</div>
-        <div class="col-3 bg-blue-300 self-end">Evenly spaced blocks</div>
+<div class="fr-container--fluid">
+    <div class="fr-grid-row justify-between">
+        <div class="fr-col-3 bg-blue-300">Evenly spaced blocks</div>
+        <div class="fr-col-3 bg-blue-300">Evenly spaced blocks</div>
+        <div class="fr-col-3 bg-blue-300 self-end">Evenly spaced blocks</div>
     </div>
 </div>
 ```
 
 ### Fluid grids
 
-Sometimes you need to occupy the available space fully, you can use `.container-fluid` to still have a grid available to you when needed.
+Sometimes you need to occupy the available space fully, you can use `.fr-container--fluid` to still have a grid available to you when needed.
 
 ```grid-fluid.html
-<div class="container-fluid">
-    <div class="row">
-        <div class="col bg-blue-300">3 blocks</div>
-        <div class="col bg-blue-300">3 blocks</div>
-        <div class="col bg-blue-300">3 blocks</div>
-    </div>
-</div>
-```
-
-## Hagrid
-
-Hagrid usually refers to a half-giant character in the Harry Potter universe. Because of his large size, small children are very scared of him, as they should be.
-He's also very careless in his attitude and tends to expose children of the school to various dangers.
-
-Our version of `.hagrid` follows the same principles : it's huge (1320px) and dangerous.
-
-This is an extra-width version of the 12 columns-grid, but made such that 10 columns of the Hagrid correspond to 12 columns of the normal grid.
-This allows you to have a full 12-column width content that extend past the normal grid while maintening aligment with the normal grid when needed.
-
-Two main use-cases : to make content bigger than the rest (in which case you'll use the 12 columns within one div), or to place content to the side of the existing grid,
-in which case you'll have one column on each side and the main content will span 10 columns, aligning perfectly with the standard grid.
-
-```hagrid-side.html
-<div class="hagrid">
-    <div class="row">
-        <div class="col-1 bg-blue-300">1 col</div>
-        <div class="col-10 bg-blue-300">10 cols (standard grid width !)</div>
-        <div class="col-1 bg-blue-300">1 col</div>
-    </div>
-</div>
-```
-
-```hagrid-full.html
-<div class="hagrid">
-    <div class="row">
-        <div class="col-12 bg-blue-300">12 cols are bigger than the standard grid and allow extra wide content</div>
+<div class="fr-container--fluid">
+    <div class="fr-grid-row">
+        <div class="fr-col bg-blue-300">3 blocks</div>
+        <div class="fr-col bg-blue-300">3 blocks</div>
+        <div class="fr-col bg-blue-300">3 blocks</div>
     </div>
 </div>
 ```
@@ -187,28 +72,6 @@ in which case you'll have one column on each side and the main content will span
 @columns: 12;
 @gutter: 10px;
 
-.container-fluid {
-    width: 100%;
-}
-
-.container {
-    max-width: @breakpoint-xl;
-    margin: auto;
-    overflow: hidden;
-
-    @media @query-hg {
-        padding: 0 @spacing-md;
-    }
-}
-
-.overflow-hidden {
-    overflow: hidden !important;
-}
-
-.overflow-visible {
-    overflow: visible !important;
-}
-
 .block {
     display: block;
 }
@@ -217,37 +80,11 @@ in which case you'll have one column on each side and the main content will span
     position: relative;
 }
 
-@max-width: (12 * @breakpoint-xl / 10);
-.hagrid {
-    max-width: @max-width;
-    margin: auto;
-    overflow: hidden;
-
-    @media @query-hhg {
-        padding: 0 @spacing-md;
-    }
-}
-
 .row {
     display: flex;
     flex-wrap: wrap;
     margin: 0 -@gutter;
 }
-
-.row-inline {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-each(@breakpoints, .(@bk, @_k, @_i) {
-    @var: 'query-@{bk}';
-
-    @media @@var {
-        .row-inline-@{bk} {
-            .row-inline;
-        }
-    }
-});
 
 .no-wrap {
     flex-wrap: nowrap;
@@ -265,19 +102,6 @@ each(@breakpoints, .(@bk, @_k, @_i) {
 
 .flex-direction-column {
     flex-direction: column;
-}
-
-// Row vertical alignments
-.align-items-start {
-    align-items: flex-start;
-}
-
-.align-items-center {
-    align-items: center;
-}
-
-.align-items-end {
-    align-items: flex-end;
 }
 
 // Horizontal alignment
@@ -321,71 +145,6 @@ each(@breakpoints, .(@bk, @_k, @_i) {
 .self-end {
     align-self: flex-end;
 }
-
-// Auto columns
-.col {
-    flex-basis: 0;
-    flex-grow: 1;
-    margin: 0 @gutter;
-}
-
-// Generic class
-[class^="col-"] {
-    flex-grow: 0;
-    margin: 0 @gutter;
-}
-
-// col-{n} generator
-.col(@i) {
-    @width: ((100% / @columns) * @i);
-
-    flex-basis: calc(@width - 2 * @gutter);
-    width: calc(@width - 2 * @gutter);
-}
-
-// offset-{n} generator
-.offset(@i) {
-    @width: ((100% / @columns) * @i);
-
-    margin-left: calc(@width + @gutter);
-}
-
-// Generating col-{n} classes
-each(range(@columns), {
-    .col-@{index} {
-        .col(@index);
-    }
-
-    .offset-@{index} {
-        .offset(@index);
-    }
-});
-
-// Generating responsive classes col-{sm|md|lg|xl}-{n}
-// And offset classes offset-{sm|md|lg|xl}-{n}
-each(@breakpoints, .(@bk, @_k, @_i) {
-    @var: 'query-@{bk}';
-
-    @media @@var {
-        each(range(@columns), {
-            .col-@{bk}-@{index} {
-                .col(@index);
-            }
-
-            .offset-@{bk}-@{index} {
-                .offset(@index);
-            }
-        });
-
-        .offset-@{bk}-0 {
-            margin-left: @gutter;
-        }
-
-        .col-@{bk} {
-            .col;
-        }
-    }
-});
 
 .w-100 {
     width: 100%;

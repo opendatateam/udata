@@ -22,21 +22,23 @@
 {% endblock %}
 
 {% block main_content %}
-<header class="container">
+<header class="fr-container">
     {% if org.deleted %}
     <div class="well-grey-100 well fr-mb-3v">
         {{ _('This organization has been deleted. This will be permanent in the next 24 hours') }}
     </div>
     {% endif %}
-    <div class="row align-items-start">
-        <div class="col-auto logo logo--80">
-            <img src="{{org.logo(80)|placeholder('organization') }}" alt="" />
-            <div class="logo-badge logo-badge--bottom-right">
-                {{ badge_if_certified(org) }}
+    <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--top">
+        <div class="fr-col-auto">
+            <div class="logo logo--80">
+                <img src="{{org.logo(80)|placeholder('organization') }}" alt="" />
+                <div class="logo-badge logo-badge--bottom-right">
+                    {{ badge_if_certified(org) }}
+                </div>
             </div>
         </div>
-        <div class="col">
-            <div class="row-inline no-wrap align-items-center">
+        <div class="fr-col">
+            <div class="fr-grid-row no-wrap fr-grid-row--middle">
                 <h1 class="fr-my-0 fr-h1">
                     {{ org.name }}
                 </h1>
@@ -60,7 +62,7 @@
                 </ul>
             </div>
         </div>
-        <div class="col-auto fr-mt-1v row-inline align-items-end flex-direction-column">
+        <div class="fr-col-auto fr-mt-1v fr-grid-row fr-grid-row--bottom flex-direction-column">
             {{ follow_btn(org) }}
             {% if can_edit %}
                 <a
@@ -80,7 +82,7 @@
     </div>
 </header>
 <section class="bg-contrast-grey fr-py-5w fr-mt-6w fr-mb-9v">
-    <div class="container vuejs">
+    <div class="fr-container vuejs">
         <h2 id="description" class="fr-h2 fr-mb-0">{{ _('Description') }}</h2>
         <read-more>
             {{ org.description|markdown }}
@@ -89,7 +91,7 @@
 </section>
 {# TODO: proper <select> also needed in discussions and footer, then sort from URL param #}
 {% if datasets and datasets|length > 0 %}
-<section id="organization-datasets" class="fr-py-9v container">
+<section id="organization-datasets" class="fr-py-9v fr-container">
     <h2>{{ _('Datasets') }}<sup>{{ total_datasets }}</sup></h2>
     {% for dataset in datasets %}
         <a
@@ -114,7 +116,7 @@
 </section>
 {% endif %}
 {% if reuses and reuses|length > 0 %}
-<section id="organization-reuses" class="fr-py-9v container">
+<section id="organization-reuses" class="fr-py-9v fr-container">
     <h2>{{ _('Reuses') }}<sup>{{ total_reuses }}</sup></h2>
     <ul class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
         {% for reuse in reuses %}
@@ -126,23 +128,23 @@
     {{ paginator(reuses, arg_name='reuses_page', url='#organization-reuses') }}
 </section>
 {% endif %}
-<section class="fr-py-9v container">
+<section class="fr-py-9v fr-container">
     <h2>{{ _('Members') }}<sup>{{ org.members|length or 0 }}</sup></h2>
-    <div class="row">
+    <div class="fr-grid-row">
         {% for member in org.members %}
         {% set user = member.user %}
         {% set role = member.role %}
         <div
-            class="col-4 col-md-12 fr-pl-0 border-md-0 fr-pb-3v {% if not loop.index0 % 3 == 0 %}border-left fr-pl-md-3w{% endif %}"
+            class="fr-col-md-4 fr-col-12 fr-pl-0 border-md-0 fr-pb-3v {% if not loop.index0 % 3 == 0 %}border-left fr-pl-md-3w{% endif %}"
         >
             {% include theme('user/card.html') %}
         </div>
         {% endfor %}
     </div>
 </section>
-<section class="fr-py-9v container">
-    <div class="row">
-        <div class="col-6 col-md-12">
+<section class="fr-py-9v fr-container">
+    <div class="fr-grid-row fr-grid-row--gutters">
+        <div class="fr-col-md-6 fr-col-12">
             <h3>{{ _('Technical details') }}</h3>
             <dl class="text-grey-380 fs-sm">
                 <div>
@@ -159,7 +161,7 @@
                 </div>
             </dl>
         </div>
-        <div class="col-6 col-md-12 fr-my-3w fr-my-md-0">
+        <div class="fr-col-md-6 fr-col-12 fr-my-3w fr-my-md-0">
             <h3>{{ _('Actions') }}</h3>
             <ul class="nav-list fr-ml-n3v">
                 {% if can_edit and not read_only_mode %}

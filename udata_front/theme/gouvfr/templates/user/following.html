@@ -18,7 +18,7 @@
     ('users', _('Users'), followed_users),
 ) %}
 
-<div class="row">
+<div class="fr-grid-row">
     <ul class="nav nav-pills" data-tabs="tabs">
         {% for tab_id, label, content in tabs %}
         {% if content %}
@@ -31,7 +31,7 @@
 </div>
 
 {% set activated = False %}
-<div class="row">
+<div class="fr-grid-row">
     <div class="tab-content">
 
         {% if followed_datasets %}
@@ -46,7 +46,7 @@
             </h3>
             <ul class="card-list card-list--columned">
                 {% for dataset in followed_datasets %}
-                <li class="col-sm-6">
+                <li class="fr-col-sm-6">
                     {% include theme('dataset/card.html') %}
                 </li>
                 {% endfor %}
@@ -66,7 +66,7 @@
             </h3>
             <ul class="card-list card-list--columned">
                 {% for reuse in followed_reuses %}
-                <li class="col-sm-6">
+                <li class="fr-col-sm-6">
                     {% include theme('reuse/card.html') %}
                 </li>
                 {% endfor %}
@@ -86,7 +86,7 @@
             </h3>
             <ul class="card-list card-list--columned">
                 {% for organization in followed_organizations %}
-                <li class="col-sm-6">
+                <li class="fr-col-sm-6">
                     {% include theme('organization/card.html') %}
                 </li>
                 {% endfor %}
@@ -106,7 +106,7 @@
             </h3>
             <ul class="card-list card-list--columned">
             {% for user in followed_users %}
-                <li class="col-sm-6">
+                <li class="fr-col-sm-6">
                     {% include theme('user/card.html') %}
                 </li>
             {% endfor %}
@@ -118,8 +118,8 @@
 
 {% else %}
 
-<div class="row">
-    <div class="col-xs-12">
+<div class="fr-grid-row">
+    <div class="fr-col-12">
 
     </div>
 </div>

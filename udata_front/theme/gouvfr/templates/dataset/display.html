@@ -46,7 +46,7 @@
 ) }}
 
 <section
-    class="content container fr-mb-6w overflow-visible {% if not dataset.organization.public_service %}non{% endif %}certified {% if dataset.archived %}archived{% endif %}">
+    class="content fr-container fr-mb-6w">
     {% if dataset.private %}
     <span class="fr-tag"
         title="{{ _('This dataset is private and will not be visible by other users') }}">{{ _('Private') }}
@@ -67,7 +67,7 @@
     {% endif %}
     {# FIXME: remove when geo.data.gouv.fr is shutdown #}
     {% if 'geop:dataset_id' in dataset.extras %}
-    <div class="well well-warning fr-py-3v fr-mb-3w">
+    <div class="well well-warning fr-py-3v fr-my-3w">
         ⚠️ {{ _("This dataset is handled by the <a href='{geo_link}'>geo.data.gouv.fr</a> platform.
         This platform is not actively maintained and as a result, you may find some bogus data or metadata.
         More information about <a href='{blog_link}'>the shutdown of geo.data.gouv.fr is available here.</a>").format(
@@ -76,8 +76,8 @@
         )}}
     </div>
     {% endif %}
-    <div class="row fr-mb-2w">
-        <div class="col">
+    <div class="fr-grid-row fr-grid-row--gutters fr-mb-2w">
+        <div class="fr-col">
             <h1 class="fr-mb-0 fr-h1">
                 {{ dataset.title }}
                 {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
@@ -96,7 +96,7 @@
                 {% endif %}
             </p>
         </div>
-        <div class="col-auto fr-mt-1v row-inline align-items-end flex-direction-column">
+        <div class="fr-col-auto fr-mt-1v fr-grid-row fr-grid-row--bottom flex-direction-column">
             {{ follow_btn(dataset) }}
             {% if can_edit %}
                 <a
@@ -128,8 +128,8 @@
     {% endif %}
     {{ hook('dataset.display.transport-banner') }}
     {% if dataset.owner %}
-    <div class="row">
-        <div class="well well-grey-100 col fr-py-3v">
+    <div class="fr-grid-row">
+        <div class="well well-grey-100 fr-col fr-py-3v">
             {% trans
                     date=dataset.created_at|dateformat(format='long'),
                     update=dataset.last_modified|dateformat(format='long'),
@@ -365,7 +365,7 @@
     </div>
 </section>
 <section class="bg-contrast-grey fr-py-5w">
-    <div class="container vuejs">
+    <div class="fr-container vuejs">
         <h2 id="description" class="fr-h2 fr-mb-0">{{ _('Description') }}</h2>
         <read-more>
             {{ dataset.description|markdown }}
@@ -373,7 +373,7 @@
     </div>
 </section>
 <section class="ressources fr-py-10w">
-    <div class="container">
+    <div class="fr-container">
         {% set count_resources = dataset.resources | length %}
         <h2 id="resources" class="fr-h2">{{ _('Files') }} <sup class="resources-count">{{count_resources}}</sup></h2>
         <div class="ressources-files fr-my-4w vuejs">
@@ -419,7 +419,7 @@
 </section>
 {% block community %}
 <section class="community_container fr-pb-7w" id="community">
-    <div class="container">
+    <div class="fr-container">
         <div class="fr-grid-row">
             <h2 id="community-resources" class="fr-h2 fr-col fr-mb-5v">{{ _('Community resources') }}
                 <sup>{{ dataset.community_resources|length }}</sup>
@@ -434,8 +434,8 @@
             {% endif %}
         </div>
 
-        <div class="row fr-mb-4w">
-            <p class="col-6 col-md-12">
+        <div class="fr-grid-row fr-mb-4w">
+            <p class="fr-col-md-6 fr-col-12">
                 {{ _('You have built a more comprehensive database than those presented here? This is the time to share it!') }}
             </p>
         </div>

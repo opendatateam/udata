@@ -38,8 +38,8 @@
         <p class="fr-alert__title">{{ _('Work in progress') }}</p>
         <p>{{ _('The user page is currently being renovated to improve user experience.') }}</p>
     </div>
-    <div class="fr-my-2w row">
-        <div class="col-md-3">
+    <div class="fr-my-2w fr-grid-row fr-grid-row--gutters">
+        <div class="fr-col-md-3">
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="text-center">
@@ -111,7 +111,7 @@
             </div>
 
         </div>
-        <div class="col-md-9">{% block user_content %}{% endblock %}</div>
+        <div class="fr-col-md-9">{% block user_content %}{% endblock %}</div>
     </div>
 </div>
 {% endblock %}

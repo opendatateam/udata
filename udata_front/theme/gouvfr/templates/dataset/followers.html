@@ -13,9 +13,9 @@
         {{ ngettext('%(num)d follower', '%(num)d followers', followers|length) }}
     </small>
 </h2>
-<div class="row">
+<div class="fr-grid-row fr-grid-row--gutters">
     {% for follow in followers %}
-    <div class="col-md-4">
+    <div class="fr-col-12 fr-col-md-4">
         {% include theme('follow/follower-card.html') %}
     </div>
     {% endfor %}

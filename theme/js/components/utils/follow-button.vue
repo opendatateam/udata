@@ -22,7 +22,7 @@ The `url` prop is the API URL.
   >
     <span
         v-html="icon"
-        class="magic row-inline"
+        class="magic fr-grid-row"
         :class="{ active: animating }"
         :style="{ color: _following ? 'inherit' : 'transparent' }"
       ></span>

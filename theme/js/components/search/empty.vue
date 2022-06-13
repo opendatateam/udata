@@ -5,7 +5,7 @@ Nothing to see here ! Well actually it's a small component that says this.
 <template>
   <div
     class="search-empty bg-grey-50 fr-p-3w fr-my-2w fr-pb-7w"
-    :class="{ 'row-inline': wide }"
+    :class="{ 'fr-grid-row': wide }"
   >
     <div :class="{ 'fr-pr-3w': wide }" v-html="Empty" />
     <div :class="{ 'fr-mt-3w': !wide }">

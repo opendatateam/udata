@@ -6,12 +6,12 @@
 {{ breadcrumb(self) }}
 
 <section class="{{ section_class }}">
-    <div class="container {{ container_class }}">
-        <div class="row">
-            <div class="col-lg-8">
+    <div class="fr-container {{ container_class }}">
+        <div class="fr-grid-row">
+            <div class="fr-col-lg-8">
                 {% block main_content %}{% endblock %}
             </div>
-            <aside class="col-lg-4">
+            <aside class="fr-col-lg-4">
                 {% block sidebar %}{% endblock %}
             </aside>
         </div>

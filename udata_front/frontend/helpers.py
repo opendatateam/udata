@@ -65,11 +65,11 @@ def form_grid(specs):
         return None
     label_sizes, control_sizes, offset_sizes = [], [], []
     for spec in specs.split(','):
-        label_sizes.append('col-{0}'.format(spec))
+        label_sizes.append('fr-col-{0}'.format(spec))
         size, col = spec.split('-')
-        offset_sizes.append('col-{0}-offset-{1}'.format(size, col))
+        offset_sizes.append('fr-col-offset-{0}-{1}'.format(size, col))
         col = 12 - int(col)
-        control_sizes.append('col-{0}-{1}'.format(size, col))
+        control_sizes.append('fr-col-{0}-{1}'.format(size, col))
     return {
         'label': ' '.join(label_sizes),
         'control': ' '.join(control_sizes),

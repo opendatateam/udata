@@ -1,15 +1,10 @@
 /* Special styling for grid blocks */
-.container [class^="col"],
-.container-fluid [class^="col"] {
+.fr-container [class^="fr-col"],
+.fr-container--fluid [class^="fr-col"] {
     padding: 30px;
     color: white;
     font-weight: bold;
     text-align: center;
-}
-
-.container .row + .row,
-.container-fluid .row + .row {
-    margin-top: 50px;
 }
 
 /* Styles for displaying color chips */

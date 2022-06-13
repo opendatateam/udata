@@ -25,12 +25,12 @@
     (_('Discussions'), 'discussions', 'comments', 'teal'),
 ] %}
 <section class="default">
-    <div class="container">
-        <div class="row">
+    <div class="fr-container">
+        <div class="fr-grid-row">
             {# Load spinner until JS is ready #}
-            <div v-if="false" class="col-xs-12 text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
+            <div v-if="false" class="fr-col-12 text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
             {% for (label, metric, icon, color) in boxes %}
-            <small-box class="col-lg-4 col-md-4 col-xs-6"
+            <small-box class="fr-col-lg-4 fr-col-md-4 fr-col-6"
                 value="{{current_site.metrics[metric]}}" label="{{label}}" color="{{color}}"
                 icon="{{icon}}">
             </small-box>
@@ -41,16 +41,16 @@
 
 <section class="community">
     <header>
-        <div class="container">
+        <div class="fr-container">
             <div class="cover-communaute"></div>
             <div class="page-header">
                 <h2>{{ _('Community activity') }}</h2>
             </div>
         </div>
     </header>
-    <div class="container">
-        <div class="row">
-            <activity-timeline class="col-sm-12">
+    <div class="fr-container">
+        <div class="fr-grid-row">
+            <activity-timeline class="fr-col-sm-12">
                 {# Load spinner until JS is ready #}
                 <div class="text-center"><span class="fa fa-4x fa-cog fa-spin"></span></div>
             </activity-timeline>

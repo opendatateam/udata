@@ -12,11 +12,11 @@
 {% set body_class="territory" %}
 
 {% block main_content %}
-<div class="hagrid">
+<div class="fr-container">
     <div class="well well-grey-100 fr-my-2w">
         {{ _("This page is no longer maintained. We are working on new territories features.") }}
     </div>
-    <div class="row">
+    <div class="fr-grid-row">
         {% if present_territory %}
         <h2 class="territory-announcement bg-danger">
             {{ _('This territory has been replaced by:') }}
@@ -28,8 +28,8 @@
     </div>
 
     {% if not territory_datasets %}
-    <div class="row">
-        <div class="col-sm-12">
+    <div class="fr-grid-row">
+        <div class="fr-col-sm-12">
             <div class="dataset-item--cta bg-primary">
                 <div class="format-label pull-left">+</div>
                 <p>
@@ -47,19 +47,19 @@
     </div>
     {% endif %}
 
-    <div class="row dataset-list">
+    <div class="fr-grid-row dataset-list">
         {% if territory_datasets %}
         {% for dataset in territory_datasets %}
-        <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
+        <div data-udata-dataset-id="{{ dataset.id }}" class="fr-col-sm-4"></div>
         {% endfor %}
         {% endif %}
 
         {% for dataset in base_datasets %}
-        <div data-udata-territory-id="{{ dataset.slug }}" class="col-sm-4"></div>
+        <div data-udata-territory-id="{{ dataset.slug }}" class="fr-col-sm-4"></div>
         {% endfor %}
 
         {% for dataset in other_datasets %}
-        <div data-udata-dataset-id="{{ dataset.id }}" class="col-sm-4"></div>
+        <div data-udata-dataset-id="{{ dataset.id }}" class="fr-col-sm-4"></div>
         {% endfor %}
     </div>
 </div>

@@ -11,8 +11,8 @@
     <a href="{{ url_for('territories.home') }}">France</a> →
     {{ _('Region:') }} <a href="{{ territory.url }}">{{ territory.name }}</a>
 </p>
-<div class="col-sm-8 col-xs-12">
-    <div class="col-xs-3">
+<div class="fr-col-sm-8 fr-col-12">
+    <div class="fr-col-3">
         <img src="{{ logo }}" alt="{{ territory.name }}" class="scalable" />
         {% if territory.logo_url() %}
         <div class="text-center">
@@ -31,7 +31,7 @@
         {% endif %}
     </div>
 
-    <div class="col-xs-9 tab-links">
+    <div class="fr-col-9 tab-links">
         <h1>{{ territory.name }}</h1>
         <p>
             <strong>
@@ -69,7 +69,7 @@
     </div>
 </div>
 
-<aside class="col-sm-4 col-xs-12">
+<aside class="fr-col-sm-4 fr-col-12">
     <div class="panel panel-default">
     </div>
 </aside>
