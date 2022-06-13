@@ -70,9 +70,8 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
 theme.menu(gouvfr_menu)
 
 opendata_links = [
-    nav.Item(_('News'), 'posts.list'),
-    nav.Item(_('Reference Data'), 'gouvfr.show_page', args={'slug': 'spd/reference'}),
     nav.Item(_('Featured topics'), 'gouvfr.show_page', args={'slug': 'donnees-cles-par-sujet'}),
+    nav.Item(_('Reference Data'), 'gouvfr.show_page', args={'slug': 'spd/reference'}),
     nav.Item(_('Portal for European data'), None, url='https://data.europa.eu'),
 ]
 
@@ -86,6 +85,7 @@ if export_dataset_id:
         export_url = url_for('datasets.show', dataset=export_dataset,
                              _external=True)
         opendata_links.append(nav.Item(_('Data catalog'), None, url=export_url))
+opendata_links.append(nav.Item(_('Release notes'), 'gouvfr.show_page', args={'slug': 'nouveautes'}))
 
 nav.Bar('gouvfr_opendata', opendata_links)
 
