@@ -1,0 +1,337 @@
+{% extends theme("base.html") %}
+
+{% set meta = {
+    'title': _('API Documentation'),
+    'description': _('%(site)s dynamic API documentation', site=config['SITE_TITLE']),
+    'keywords': ['API', 'documentation', 'swagger'],
+} %}
+
+{% set bundle = 'apidoc' %}
+{% set main_org = organizations | first %}
+
+{% block extra_head %}
+<meta name="swagger-specs" content="{{ specs_url }}" />
+{% endblock %}
+
+
+{% block content %}
+<section class="default">
+    <div class="container">
+        <div class="page-header">
+            <h1>{{ meta.title }}</h1>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{{ _("This page describe this website's free and open RESTful API's behavior") }}</p>
+            </div>
+        </div>
+
+
+        <div class="page-header">
+            <h2>{{ _('Authentication') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>
+                    {{ _('In order to be able to execute write operations,') }}
+                    {% if current_user.is_authenticated %}
+                        {{ _(
+                            'you first need to obtain an %(apikey)s in your profile settings.',
+                            apikey='<a href="%s#apikey">%s</a>'|format(
+                                url_for('admin.index', path='me/'),
+                                _('API Key')
+                        )|safe) }}
+                    {% else %}
+                        {{ _('you first need to authenticate and obtain an API Key in your profile settings.') }}
+                    {% endif %}
+                </p>
+                <p>{{ _('This key should be provided on each call in the <code>X-API-KEY</code> HTTP header.') }}</p>
+            </div>
+        </div>
+
+
+        <div class="page-header">
+            <h2>{{ _('Authorizations') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{{ _('API calls are subject to the same permissions than the web interface.') }}</p>
+                <p>{{ _('By example, you need to be part of the organization to modify one of its datasets.') }}</p>
+            </div>
+        </div>
+
+
+        <div class="page-header">
+            <h2>{{ _('Pagination') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{% trans %}Some method are paginated and always follow the same pattern.
+                The object list is wrapped in a <code>Page</code> object.
+                {% endtrans %}</p>
+
+                <p>{% trans %}You don't have to compute yourself the previous and next pages
+                because the URLs are available in the response under the
+                <code>previous_page</code> and <code>next_page</code> attributes.
+                They will be set to <code>null</code> if there is no previous and/or next page.{% endtrans %}</p>
+
+                <p><u>{{ _('Example') }}</u>:
+                <pre><code class="json">{
+    "data": [{...}, {...}],
+    "page": 1,
+    "page_size": 20,
+    "total": {{ organizations|count }},
+    "next_page": "https://{{config.SERVER_NAME}}/api/endpoint/?page=2",
+    "previous_page": null
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h2>{{ _('Examples') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>{% trans %}All examples use the <a href="http://httpie.org">httpie</a> and <a href="http://stedolan.github.io/jq/">jq</a> utilities for readability purpose. You don't need to use these tools in your code though, they're just helpers to better understand the API.
+                {% endtrans %}</p>
+
+                <h3>{% trans %}Verifying that httpie is working{% endtrans %}</h3>
+
+                <p>{% trans %}Once httpie is installed, you can verify that it works as expected by typing that command in your shell:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http 'https://{{config.SERVER_NAME}}/api/1/organizations/?page_size=1'</code></pre>
+
+                <p>{% trans %}It should return something in this vein:
+                {% endtrans %}</p>
+
+<pre><code class="json">
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+... LOTS OF HEADERS ...
+
+{
+    "data": [
+        {
+
+            ... LOTS OF DATA ...
+
+            "name": "{{ main_org.name }}",
+            "page": "https://{{config.SERVER_NAME}}/organizations/{{ main_org.slug }}/",
+            "slug": "{{ main_org.slug }}",
+            "uri": "https://{{config.SERVER_NAME}}/api/1/organizations/{{ main_org.id }}/",
+            "url": "{{ main_org.url }}"
+        }
+    ],
+    "next_page": "https://{{config.SERVER_NAME}}/api/1/organizations/?page=2&page_size=1",
+    "page": 1,
+    "page_size": 1,
+    "previous_page": null,
+    "total": "{{ organizations|count }}"
+}
+</code></pre>
+
+                <p>{% trans %}This is very verbose and we don't need all that information yet. That's why we use jq.
+                {% endtrans %}</p>
+
+                <h3>{% trans %}Verifying that jq is working{% endtrans %}</h3>
+
+                <p>{% trans %}Once jq is installed, you can verify that it works as expected by typing that command in your shell:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http 'https://{{config.SERVER_NAME}}/api/1/organizations/?page_size=1' | jq '.data[].name'</code></pre>
+
+                <p>{% trans %}It should return something in this vein:
+                {% endtrans %}</p>
+
+                <pre><code class="json">"{{ main_org.name }}"</code></pre>
+
+                <p>{% trans %}That's definitely better! Now that we're sure that it works as expected, let's shorten a bit the command line:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ export API="https://{{config.SERVER_NAME}}/api/1/"</code></pre>
+
+                <p>{% trans %}The previous command is now equivalent to the more readable (don't forget the quotes):
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/?page_size=1' | jq '.data[].name'</code></pre>
+
+                <p>{% trans %}That's a good start, now let's dig into the API itself. We don't know it yet but we already fetched our first organization.
+                {% endtrans %}</p>
+
+
+                <h3>{% trans %}Browsing and retrieving data{% endtrans %}</h3>
+
+                <p>{% trans %}You can retrieve a list of organization (filtered or not) or a unique organization. When you reach an endpoint, the default page size is 20. Let's fetch the first 20 organization from the API:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/' | jq '.data[].name'</code></pre>
+
+<pre><code class="json">
+{% for org in organizations[0:20] %}"{{ org.name }}"
+{% endfor %}
+</code></pre>
+
+                <p>{% trans %}That list is great to have but what if we want to walk through returned organizations? Let's fetch the first 5 organizations URIs:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/?page_size=5' | jq '.data[].uri'</code></pre>
+
+<pre><code class="json">
+{% for org in organizations[0:5] %}"https://{{config.SERVER_NAME}}/api/1/organizations/{{ org.id }}/"
+{% endfor %}
+</code></pre>
+
+                <p>{% trans %}Now we'll be able to retrieve a unique organization thanks to the returned URI:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/{{main_org.id}}/' | jq '.'</code></pre>
+
+                <p>{% trans %}That's a lot of data to compute. Let's refine these data, if we want only metrics:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/{{main_org.id}}/' | jq '.metrics'</code></pre>
+
+<pre><code class="json">
+{
+ {% for metric, value in main_org.metrics.iteritems() %}"{{ metric }}": {{ value }},
+ {% endfor %}
+}
+</code></pre>
+
+                <p>{% trans %}Or maybe just the name of the members of that organization:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http $API'organizations/{{main_org.id}}/' | jq '.members[].user.last_name'</code></pre>
+
+<pre><code class="json">
+{% for member in main_org.members|list %}"{{member.user.last_name}}"
+{% endfor %}
+</code></pre>
+
+                <p>{% trans %}It's really up-to-you to retrieve the data that matters to your project. Do not hesitate to go through the <a href="http://stedolan.github.io/jq/tutorial/">jq's tutorial</a> and <a href="http://stedolan.github.io/jq/manual/">manual</a> if you want to browse the API through the command-line in depth.
+                {% endtrans %}</p>
+
+
+                <h3>{% trans %}Modifying and deleting data{% endtrans %}</h3>
+
+                <p>{% trans %}Warning, you're entering a danger zone. Data modifications or deletions with the API are definitive and we don't provide any sandbox to test those prior executing (for now). Be aware of these responsibilities prior to use your great powers.
+                {% endtrans %}</p>
+
+                <p>{% trans %}If you try to modify a resource without an authentication token, a 401 will be returned:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http PUT $API'organizations/organization-uri-x/'</code></pre>
+
+<pre><code class="json">
+HTTP/1.1 401 UNAUTHORIZED
+... LOTS OF HEADERS ...
+
+{
+    "message": "Unauthorized",
+    "status": 401
+}
+</code></pre>
+
+                <p>{% trans %}You need to specify your API Key (see above) and use the <code>X-API-KEY</code> HTTP header. If you try to modify a resource that you're not in control of, a 400 will be returned instead:
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http PUT $API'organizations/organization-uri-x/' X-API-KEY:your.api.key.here</code></pre>
+
+<pre><code class="json">
+HTTP/1.1 401 UNAUTHORIZED
+... LOTS OF HEADERS ...
+
+{
+    "message": "Invalid API Key",
+    "status": 401
+}
+</code></pre>
+
+                <p>{% trans %}This is the message you will end up with if you specified the wrong API Key. There is another potential error message that you can encounter:
+                {% endtrans %}</p>
+
+<pre><code class="json">
+HTTP/1.1 403 FORBIDDEN
+... LOTS OF HEADERS ...
+
+{
+    "message": "You do not have the permission to modify that object.",
+    "status": 403
+}
+</code></pre>
+
+                <p>{% trans %}It occurs if you try to access a resource that you cannot edit with your credentials. If your Key is valid you should have something like this:
+                {% endtrans %}</p>
+
+
+<pre><code class="json">
+HTTP/1.1 200 OK
+... LOTS OF HEADERS ...
+
+{
+    ...
+}
+</code></pre>
+
+                <p>{% trans %}But it didn't change anything! This is perfectly normal, we forgot to specify the right data to send to the server.
+                {% endtrans %}</p>
+
+                <pre><code class="json">$ http PUT $API'organizations/organization-uri-x/' X-API-KEY:your.api.key.here name="Lorem ipsum" description="The quick brown fox jumps over the lazy dog." | jq '{name: .name, description: .description}'</code></pre>
+
+<pre><code class="json">
+{
+  "name": "Lorem ipsum",
+  "description": "The quick brown fox jumps over the lazy dog."
+}
+</code></pre>
+
+                <p>{% trans %}The resource has been modified with your new values. Finally, you can delete a resource with the appropriated HTTP verb (beware, no rollback is possible using the API at the moment):
+                {% endtrans %}</p>
+
+
+                <pre><code class="json">$ http DELETE $API'organizations/organization-uri-x/' X-API-KEY:your.api.key.here</code></pre>
+
+<pre><code class="json">
+HTTP/1.0 204 NO CONTENT
+... LOTS OF HEADERS ...
+
+</code></pre>
+
+                <p>{% trans %}Once you did it, you can verify that it's effective issuing a GET against the previous URI:
+                {% endtrans %}</p>
+
+
+                <pre><code class="json">$ http GET $API'organizations/organization-uri-x/'</code></pre>
+
+<pre><code class="json">
+HTTP/1.0 410 GONE
+... LOTS OF HEADERS ...
+
+{
+    "message": "Organization has been deleted",
+    "status": 410
+}
+
+</code></pre>
+
+                <p>{% trans %}Please consult the reference documentation below for further interactions with the API or ask us for questions related to it!
+                {% endtrans %}</p>
+
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h2>{{ _('Reference') }}</h2>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 swagger-doc">
+                <div class="swagger-section">
+                    <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+                    <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
