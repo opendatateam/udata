@@ -19,6 +19,7 @@
 - Fix RGAA criterion 11.10 [#102](https://github.com/etalab/udata-front/pull/102)
 - Update DSFR to 1.5.1 [#107](https://github.com/etalab/udata-front/pull/107)
   -  :warning: SVG in JS must use `bundle-text:` prefix now
+- Add new menu items [#113](https://github.com/etalab/udata-front/pull/113)
 
 ## 2.0.2 (2022-04-11)
 

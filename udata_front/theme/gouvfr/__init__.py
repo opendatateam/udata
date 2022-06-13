@@ -47,7 +47,23 @@ gouvfr_menu = nav.Bar('gouvfr_menu', [
     nav.Item(_('Reuses'), 'reuses.list'),
     nav.Item(_('Organizations'), 'organizations.list'),
     nav.Item(_('News'), 'posts.list'),
-    nav.Item(_('About'), 'gouvfr.show_page', args={'slug': 'about/ressources'}),
+    nav.Item(_('Getting started on data.gouv.fr'), None, items=[
+        nav.Item(
+            _('What is data.gouv.fr?'),
+            'gouvfr.show_page',
+            args={'slug': 'about/ressources'}
+        ),
+        nav.Item(
+            _('How to publish data ?'),
+            'gouvfr.show_page',
+            args={'slug': 'onboarding/producteurs'}
+        ),
+        nav.Item(
+            _('How to use data ?'),
+            'gouvfr.show_page',
+            args={'slug': 'onboarding/reutilisateurs'}
+        ),
+    ]),
     nav.Item(_('Contact us'), None, url='https://support.data.gouv.fr/'),
 ])
 

@@ -160,11 +160,31 @@
             <div class="fr-header__menu-links"></div>
             <nav class="fr-nav" id="navigation" role="navigation" aria-label="{{ _('Main Menu') }}">
                 <ul class="fr-nav__list">
-                    {% set current_endpoint = request.url_rule.endpoint.split('.')[:1] if request.url_rule or None %}
                     {% for item in current_theme.menu %}
-                        {% set link_endpoint = item.endpoint and item.endpoint.split('.')[:1] %}
-                        {% set active = request.url_rule.endpoint != "site.home" and (link_endpoint == current_endpoint) %}
+                        {% set active = is_current_endpoint(request, item) %}
                         <li class="fr-nav__item">
+                            {% if item.items %}
+                            {% set id = item.label %}
+                            {% set active = is_parent_of_current_endpoint(request, item.items) %}
+                            <button class="fr-nav__btn" aria-expanded="false" aria-controls="{{ id }}" {% if active %}aria-current="true"{% endif %}>{{item.label}}</button>
+                            <div class="fr-collapse fr-menu" id="{{ id }}">
+                                <ul class="fr-menu__list">
+                                    {% for subitem in item.items %}
+                                    {% set active = is_current_page(request, subitem) %}
+                                    <li>
+                                        <a
+                                            class="fr-nav__link"
+                                            href="{{subitem.url}}"
+                                            {% if active %}aria-current="page"{% endif %}
+                                            target="_self"
+                                        >
+                                            {{ subitem.label }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% else %}
                             <a
                                 class="fr-nav__link"
                                 href="{{item.url}}"
@@ -173,6 +193,7 @@
                             >
                                 {{ item.label }}
                             </a>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>

@@ -42,7 +42,7 @@ def init_app(app):
     nav.init_app(app)
     theme.init_app(app)
 
-    from . import helpers, error_handlers, resource_helpers  # noqa
+    from . import helpers, error_handlers, menu_helpers, resource_helpers  # noqa
 
     for view in VIEWS:
         _load_views(app, 'udata_front.views.{}'.format(view))
