@@ -1,11 +1,14 @@
 import inspect
+import html
 import logging
+import json
 
 from importlib import import_module
 from jinja2 import Markup, contextfunction
 
 from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
+from udata.core.site.models import current_site
 
 from .markdown import UdataCleaner, init_app as init_markdown
 
@@ -16,6 +19,55 @@ log = logging.getLogger(__name__)
 hook = I18nBlueprint('hook', __name__)
 
 _template_hooks = {}
+
+
+@hook.app_context_processor
+def inject_site():
+    return dict(current_site=current_site)
+
+
+@hook.app_template_global()
+def manifest(app, filename, **kwargs):
+    return assets.from_manifest(app, filename, **kwargs)
+
+
+@hook.app_template_global()
+def in_manifest(filename, app='udata'):
+    '''A Jinja test to check an asset existance in manifests'''
+    return assets.exists_in_manifest(app, filename)
+
+
+@hook.app_template_filter()
+@hook.app_template_global()
+def to_json(data):
+    '''Convert data to JSON, you may have to use |safe after it.'''
+    if not data:
+        return Markup('')
+    return json.dumps(data)
+
+
+def json_ld_script_preprocessor(o):
+    if isinstance(o, dict):
+        return {k: json_ld_script_preprocessor(v) for k, v in o.items()}
+    elif isinstance(o, (list, tuple)):
+        return [json_ld_script_preprocessor(v) for v in o]
+    elif isinstance(o, str):
+        return html.escape(o).replace('&#x27;', '&apos;')
+    else:
+        return o
+
+
+@hook.app_template_filter()
+def embedded_json_ld(jsonld):
+    '''
+    Sanitize JSON-LD for <script> tag inclusion.
+
+    JSON-LD accepts any string but there is a special case
+    for script tag inclusion.
+    See: https://w3c.github.io/json-ld-syntax/#restrictions-for-contents-of-json-ld-script-elements
+    '''
+    return Markup(json.dumps(json_ld_script_preprocessor(jsonld), ensure_ascii=False))
+
 
 def _wrapper(func, name=None, when=None):
     name = name or func.__name__

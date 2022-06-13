@@ -10,12 +10,7 @@
             'robots': 'noindex',
         }) }}
         <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport' />
-        {% if 'common.css' is in_manifest %}
-        <link href="{{ manifest('udata', 'common.css') }}" rel="stylesheet" />
-        {% endif %}
         <link href="{{ manifest('udata', 'admin.css') }}" rel="stylesheet" />
-        {% block theme_css %}{% endblock %}
-        {% block extra_head %}{% endblock %}
         {% endblock raw_head %}
     </head>
     <body class="skin-blue fixed sidebar-mini">
