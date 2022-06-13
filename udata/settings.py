@@ -18,9 +18,10 @@ class Defaults(object):
         'fr': 'Français',
         'es': 'Español',
         'pt': 'Português',
-        'sr': 'Српски',
+        'sr': 'Српски - ћир',
+        'sl': 'Srpski - lat'
     }
-    DEFAULT_LANGUAGE = 'en'
+    DEFAULT_LANGUAGE = 'sr'
     SECRET_KEY = 'Default uData secret key'
     CONTACT_EMAIL = 'contact@example.org'
     TERRITORIES_EMAIL = 'territories@example.org'
@@ -121,11 +122,11 @@ class Defaults(object):
 
     AUTO_INDEX = True
 
-    SITE_ID = 'default'
-    SITE_TITLE = 'uData'
+    SITE_ID = 'data.gov.rs'
+    SITE_TITLE = 'Отворени подаци'
     SITE_KEYWORDS = ['opendata', 'udata']
     SITE_AUTHOR_URL = None
-    SITE_AUTHOR = 'Udata'
+    SITE_AUTHOR = 'ITE'
     SITE_GITHUB_URL = 'https://github.com/etalab/udata'
     SITE_TERMS_LOCATION = pkg_resources.resource_filename(__name__, 'terms.md')
 

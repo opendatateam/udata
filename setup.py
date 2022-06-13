@@ -31,9 +31,9 @@ setup(
     description=__import__('udata').__description__,
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/opendatateam/udata',
-    author='Opendata Team',
-    author_email='opendatateam@data.gouv.fr',
+    url='http://data.gov.rs',
+    author='UNDP',
+    author_email='pypi@data.gov.rs',
     packages=find_packages(),
     include_package_data=True,
     python_requires='>=3.7',
@@ -42,8 +42,11 @@ setup(
         'console_scripts': [
             'udata = udata.commands:cli',
         ],
-        'udata.harvesters': [
-            'dcat = udata.harvest.backends.dcat:DcatBackend',
+       'udata.harvesters': [
+            'statistika = udata.harvest.backends.statistika:StatistikaBackend',
+            'statistika2021 = udata.harvest.backends.statistika2021:Statistika2021Backend',
+            'sdg = udata.harvest.backends.sdg:SDGBackend',
+            'rgz = udata.harvest.backends.rgz:RGZBackend',
         ],
         'udata.avatars': [
             'internal = udata.features.identicon.backends:internal',
@@ -54,8 +57,9 @@ setup(
             'udata = udata.tests.plugin',
         ],
     },
-    license='GNU AGPLv3+',
-    keywords='udata opendata portal data',
+    license='LGPL',
+    zip_safe=False,
+    keywords='govrs opendata portal',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
@@ -67,7 +71,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        ('License :: OSI Approved :: GNU Affero General Public License v3'
-         ' or later (AGPLv3+)'),
+        ('License :: OSI Approved :: GNU Library or Lesser General Public '
+         'License (LGPL)'),
     ],
 )

@@ -1,0 +1,70 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Django",
+            "type": "python",
+            "request": "launch",
+            "program": "udata",
+            "args": [
+                "job",
+                "run",
+                "harvest",
+                "607fd4a07de2724b5d850dd8"
+            ],
+            "django": false,
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Module",
+            "type": "python",
+            "request": "launch",
+            "module":  "udata", 
+            //"harvest"
+            "args": [
+                "job",
+                "run",
+                "harvest",
+                "607fd4a07de2724b5d850dd8"
+            ],
+        },
+        {
+            "name": "Python: Flask",
+            "type": "python",
+            "request": "launch",
+            "module": "udata",
+            "env": {
+                "FLASK_APP": "UDataApp",
+                "FLASK_ENV": "development"
+            },
+            "args": [
+                "job",
+                "run",
+                "harvest",
+                "607fd4a07de2724b5d850dd8"
+            ],
+            "jinja": true,
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Attach",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 7000
+            }
+        },
+        {
+            "name": "Python: Attach using Process Id",
+            "type": "python",
+            "request": "attach",
+            "processId": 882,
+            "logToFile": true,
+            "justMyCode": true
+        }
+    ]
+}

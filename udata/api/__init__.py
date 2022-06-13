@@ -15,7 +15,7 @@ from flask_cors import CORS
 
 from udata import tracking, entrypoints
 from udata.app import csrf
-from udata.i18n import get_locale
+from udata.i18n import I18nBlueprint,get_locale
 from udata.auth import (
     current_user, login_user, Permission, RoleNeed, PermissionDenied
 )
@@ -30,6 +30,7 @@ log = logging.getLogger(__name__)
 
 apiv1_blueprint = Blueprint('api', __name__, url_prefix='/api/1')
 apiv2_blueprint = Blueprint('apiv2', __name__, url_prefix='/api/2')
+apidoc = I18nBlueprint('apidoc', __name__)
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
