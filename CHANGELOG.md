@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Add new menu items [#113](https://github.com/etalab/udata-front/pull/113)
+- Add new menu items and change edito pages slug [#113](https://github.com/etalab/udata-front/pull/113) [#120](https://github.com/etalab/udata-front/pull/120)
 - Replace news by release notes in footer [#117](https://github.com/etalab/udata-front/pull/117)
 - Use DSFR container and remove custom ones [#111](https://github.com/etalab/udata-front/pull/111)
 
