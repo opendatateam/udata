@@ -30,14 +30,14 @@ class DatasetEventsTest:
 
         expected_value = {
             'service': 'udata',
-            'data': serialize_resource_for_event(resource),
+            'value': serialize_resource_for_event(resource),
             'meta': {
                 'message_type': message_type,
                 'dataset_id': str(dataset.id)
             }
         }
         topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
     def test_publish_message_resource_modified(self):
@@ -57,14 +57,14 @@ class DatasetEventsTest:
 
         expected_value = {
             'service': 'udata',
-            'data': serialize_resource_for_event(resource),
+            'value': serialize_resource_for_event(resource),
             'meta': {
                 'message_type': message_type,
                 'dataset_id': str(dataset.id)
             }
         }
         topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))
 
     def test_publish_message_resource_removed(self):
@@ -82,12 +82,12 @@ class DatasetEventsTest:
 
         expected_value = {
             'service': 'udata',
-            'data': None,
+            'value': None,
             'meta': {
                 'message_type': message_type,
                 'dataset_id': str(dataset.id)
             }
         }
         topic = f"{current_app.config['UDATA_INSTANCE_NAME']}.{message_type}"
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=str(resource.id).encode("utf-8"))

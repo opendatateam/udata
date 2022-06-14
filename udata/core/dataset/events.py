@@ -9,7 +9,6 @@ from udata.event.producer import get_topic
 from udata.event.values import KafkaMessageType
 
 
-
 def serialize_resource_for_event(resource):
     resource_dict = {
         'id': str(resource.id),
@@ -48,7 +47,7 @@ def publish(document, resource_id, action):
         service='udata',
         key_id=str(resource_id),
         document=resource,
-        meta={'message_type': message_type}
+        meta={'message_type': message_type, 'dataset_id': str(document.id)}
     )
 
 

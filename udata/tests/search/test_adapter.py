@@ -114,14 +114,14 @@ class IndexingLifecycleTest(APITestCase):
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.unindex',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.unindex'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_producer_should_send_a_message_with_payload_if_indexable(self):
@@ -133,14 +133,14 @@ class IndexingLifecycleTest(APITestCase):
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_index_model(self):
@@ -153,14 +153,14 @@ class IndexingLifecycleTest(APITestCase):
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_reindex_model(self):
@@ -173,14 +173,14 @@ class IndexingLifecycleTest(APITestCase):
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.reindex',
                 'index': 'dataset-2022-02-20-20-02'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.reindex'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_index_model_from_datetime(self):
@@ -197,12 +197,12 @@ class IndexingLifecycleTest(APITestCase):
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1212')
