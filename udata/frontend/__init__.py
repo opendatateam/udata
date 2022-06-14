@@ -139,6 +139,14 @@ VIEWS = ['core.storages', 'core.tags', 'admin']
 def init_app(app, views=None):
     views = views or VIEWS
 
+    # This piece of code checks wether or not a
+    # front end is present in the plugins list.
+    # If not, it adds a home views on the `/` route
+    # to prevent 404 error when requesting the site's
+    # home page and redirects to the admin home page.
+    if 'front' not in app.config.get('PLUGINS'):
+        views.append('core.site')
+
     init_markdown(app)
 
     for view in views:
