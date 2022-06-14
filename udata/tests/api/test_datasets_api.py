@@ -49,7 +49,6 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
         self.assertFalse('quality' in response.json['data'][0])
-        assert False
 
     def test_dataset_api_full_text_search(self):
         '''Should proceed to full text search on datasets'''
