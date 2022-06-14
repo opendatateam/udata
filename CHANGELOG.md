@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Udata does now work as standalone [#2747](https://github.com/opendatateam/udata/pull/2747)
 
 ## 4.1.0 (2022-06-09)
 
@@ -16,7 +16,6 @@
 - Fix size argument in suggests endpoint and corresponding tests [#2739](https://github.com/opendatateam/udata/pull/2739)
 - Add udata instance name prefix and action suffix for kafka topics [#2736](https://github.com/opendatateam/udata/pull/2736)
 - Fix tokenisation by building an `AND` query (see comments in code) for mongo text search and pagination [#2740](https://github.com/opendatateam/udata/pull/2740)
-- Udata does now work as standalone [#2747](https://github.com/opendatateam/udata/pull/2747)
 
 ## 4.0.2 (2022-05-04)
 
