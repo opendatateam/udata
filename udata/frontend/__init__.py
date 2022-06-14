@@ -8,7 +8,6 @@ from jinja2 import Markup, contextfunction
 
 from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
-from udata.core.site.models import current_site
 
 from .markdown import UdataCleaner, init_app as init_markdown
 
@@ -19,11 +18,6 @@ log = logging.getLogger(__name__)
 hook = I18nBlueprint('hook', __name__)
 
 _template_hooks = {}
-
-
-@hook.app_context_processor
-def inject_site():
-    return dict(current_site=current_site)
 
 
 @hook.app_template_global()

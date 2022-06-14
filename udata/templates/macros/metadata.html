@@ -5,9 +5,9 @@
 {% set keywords = meta.keywords or [] %}
 {% set meta_type = meta.type or 'website' %}
 <meta charset="utf-8" />
-<title>{{ title }} - {{ current_site.title }}</title>
+<title>{{ title }}</title>
 <meta property="og:type" content="{{ meta_type }}" />
-<meta property="og:title" content="{{ title }} - {{ current_site.title }}" />
+<meta property="og:title" content="{{ title }}" />
 <link rel="author" href="{{ config.SITE_AUTHOR_URL }}" />
 <meta name="description" content="{{ description }}" />
 {% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow" />
@@ -15,7 +15,6 @@
 {% endif %}
 <meta property="og:description" content="{{ description }}" />
 <meta property="og:image" content="{{ image }}" />
-<meta name="keywords" content="{{ ', '.join(current_site.keywords + keywords) }}" />
 <meta name="api-root" content="{{ url_for('api.root') }}" />
 <meta name="admin-root" content="{{ url_for('admin.index') }}" />
 <meta name="api-specs" content="{{ url_for('api.specs', _external=True) }}"/>
