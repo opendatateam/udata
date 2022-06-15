@@ -4,7 +4,13 @@ from flask import current_app
 
 from udata_event_service.consumer import consume_kafka
 
-from udata.core.dataset.event import consume_message_resource_analysis
+from udata.core.dataset.event import (
+    consume_message_resource_analysed,
+    consume_message_resource_stored,
+    consume_message_resource_checked
+)
+from .producer import get_topic
+
 log = logging.getLogger(__name__)
 
 
@@ -34,7 +40,10 @@ class EventConsumerSingleton():
             log.debug(f'Consume message {key}')
             message_type = data['meta']['message_type']
             function = self.registered.get(message_type)
-            function(key, data)
+            if function:
+                function(key, data)
+            else:
+                log.warn(f'no consumer for the message type {message_type} on this topic')
 
         except Exception as e:  # Catch and deal with exceptions accordingly
             log.error(f'Error when consuming message {key}: {e}')
@@ -55,7 +64,17 @@ class EventConsumerSingleton():
 # TODO: where to register?
 event_consumer = EventConsumerSingleton.get_instance()
 event_consumer.register(
-    topics=['resource.analysis'],
-    message_types=['resource.analysis'],
-    function=consume_message_resource_analysis
+    topics=['udata.resource.analysed'],
+    message_types=['resource.analysed'],
+    function=consume_message_resource_analysed
+)
+event_consumer.register(
+    topics=['udata.resource.stored'],
+    message_types=['resource.stored'],
+    function=consume_message_resource_stored
+)
+event_consumer.register(
+    topics=['udata.resource.checked'],
+    message_types=['event-update', 'initialization', 'regular-update'],
+    function=consume_message_resource_checked
 )
