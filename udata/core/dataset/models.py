@@ -77,8 +77,8 @@ LEGACY_FREQUENCIES = {
 DEFAULT_FREQUENCY = 'unknown'
 
 DEFAULT_LICENSE = {
-    'id': 'notspecified',
-    'title': "License Not Specified",
+    'id': 'lov2',
+    'title': f"{_('Open Licence')} / Open Licence version 2.0",
     'flags': ["generic"],
     'maintainer': None,
     'url': None,
