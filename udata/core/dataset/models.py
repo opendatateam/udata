@@ -628,7 +628,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['has_only_closed_or_no_formats'] = all(
                 resource.closed_or_no_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
-                self.check_availability())  # ?
+                self.check_availability())
             resource_doc = False
             resource_desc = True
             for resource in self.resources:
