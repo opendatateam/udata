@@ -47,7 +47,7 @@
     </qa-section>
 
     <qa-section :title="_('Documentation')" v-if="quality.has_resources"
-        :condition="!quality.resources_documentation"
+        :condition="quality.resources_documentation"
         :ok="_('Your resources seem to be documented. That is great!')"
         :ko="_('Some of your resources do not have a description. Try to fix by providing one for each resource or by uploading a documentation resource.')">
         <p>{{ _('The documentation of your resources is crucial for reusers.') }}</p>
