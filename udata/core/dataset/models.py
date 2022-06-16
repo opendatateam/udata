@@ -458,7 +458,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     meta = {
         'indexes': [
             '$title',
-            '-created_at',
+            'created_at',
+            'last_modified',
+            'metrics.reuses',
+            'metrics.followers',
+            'metrics.views',
             'slug',
             'resources.id',
             'resources.urlhash',
