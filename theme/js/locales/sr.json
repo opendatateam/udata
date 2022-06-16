@@ -103,7 +103,7 @@
   "organizations": "organizations",
   "Start typing to search in X": "Start typing to search in {type}",
   "Fields preceded by a star ({markup}) are required.": "Fields preceded by a star ({markup}) are required.",
-  "X Results": "{count} Results | {count} Result | {count} Results",
+  "{count} results": "{count} results | {count} result | {count} results",
   "Use tab (or arrow down) to move between suggestions": "Use tab (or arrow down) to move between suggestions",
   "{x} available suggestion": "{x} available suggestion",
   "Delete {t}": "Delete {t}",

@@ -103,7 +103,7 @@
   "organizations": "organisations",
   "Start typing to search in X": "Commencez à taper pour rechercher parmi les {type}",
   "Fields preceded by a star ({markup}) are required.": "Les champs précédés d'une étoile ({markup}) sont obligatoires.",
-  "X Results": "{count} Résultats | {count} Résultat | {count} Résultats",
+  "{count} results": "{count} résultats | {count} résultat | {count} résultats",
   "Use tab (or arrow down) to move between suggestions": "Utiliser la tabulation (ou la flèche du bas) pour vous déplacer entre les suggestions",
   "{x} available suggestion": "{x} suggestions disponibles",
   "Delete {t}": "Supprimer {t}",

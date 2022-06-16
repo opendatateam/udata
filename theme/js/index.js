@@ -54,7 +54,10 @@ const configAndMountApp = (el) => {
   app.use(i18n);
   app.use(bodyClass);
   app.use(filters);
-  app.use(Toaster).provide('toast', app.config.globalProperties.$toast);
+  app.use(Toaster, {
+    duration: false,
+    dismissible: true,
+  }).provide('toast', app.config.globalProperties.$toast);
 
   app.component("discussion-threads", Threads);
   app.component("menu-search", MenuSearch);

@@ -104,8 +104,8 @@
       </div>
       <section class="fr-col-12 fr-col-md-8 fr-col-lg-9 fr-mt-2w fr-mt-md-0 search-results" ref="resultsRef" v-bind="$attrs">
         <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--middle justify-between fr-pb-1w">
-          <p class="fr-col-auto fr-my-0" v-if="totalResults">
-            {{ $t("X Results", totalResults) }}
+          <p class="fr-col-auto fr-my-0" v-if="totalResults" role="status">
+            {{ $t("{count} results", totalResults) }}
           </p>
           <div class="fr-col-auto fr-grid-row fr-grid-row--middle">
             <label for="sort-search" class="fr-col-auto fr-text--sm fr-m-0 fr-mr-1w">

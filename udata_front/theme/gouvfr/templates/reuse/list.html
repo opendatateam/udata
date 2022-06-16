@@ -100,7 +100,7 @@
                 </ul>
             </div>
             <div class="w-100 fr-grid-row  fr-grid-row--middle justify-between">
-                <p class="fr-col-auto fr-my-0">{{ _('%(result)s results', result=reuses.total) }}</p>
+                <p class="fr-col-auto fr-my-0" role="status">{{ _('%(result)s results', result=reuses.total) }}</p>
                 {{sort_search(reuses, sorts)}}
             </div>
         </form>

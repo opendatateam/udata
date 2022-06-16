@@ -97,24 +97,17 @@
     align-self: flex-start;
 }
 
-.v--default-css .c-toast--success {
-    background-color: #28a745;
-}
-
-.v--default-css .c-toast--info {
-    background-color: #17a2b8;
-}
-
-.v--default-css .c-toast--warning {
-    background-color: #ffc107;
-}
-
+/*
+Other classes are supported by our toast library but not used for now :
+- .c-toast--success
+- .c-toast--info
+- .c-toast--warning
+- .c-toast--default
+*/
 .v--default-css .c-toast--error {
-    background-color: #dc3545;
-}
-
-.v--default-css .c-toast--default {
-    background-color: #343a40;
+    --background-action-high-blue-france: @background-action-high-error;
+    --background-action-high-blue-france-hover: @background-action-high-error-hover;
+    --background-action-high-blue-france-active: @background-action-high-error-active;
 }
 
 .v--default-css .c-toast {
@@ -129,5 +122,12 @@
     padding: .5em 2em;
     font-family: Avenir, Helvetica, Arial, sans-serif;
     animation-duration: .15s;
-    display: grid;
+    display: flex;
+    &::before {
+        &:extend(.fr-btn--icon-right[class^="fr-icon-"]::before);
+        &:extend(.fr-icon-close-circle-line::before);
+        &:extend([class^="fr-icon-"]::before);
+    }
+    &:extend(.fr-btn);
+    &:extend(.fr-btn--icon-right[class^="fr-icon-"]);
 }

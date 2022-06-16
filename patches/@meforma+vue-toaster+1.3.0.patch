@@ -1,8 +1,48 @@
 diff --git a/node_modules/@meforma/vue-toaster/src/Toaster.vue b/node_modules/@meforma/vue-toaster/src/Toaster.vue
-index 30da42c..8888ef5 100644
+index 30da42c..86f4ed8 100644
 --- a/node_modules/@meforma/vue-toaster/src/Toaster.vue
 +++ b/node_modules/@meforma/vue-toaster/src/Toaster.vue
-@@ -195,9 +195,3 @@ export default {
+@@ -3,15 +3,16 @@
+     :enter-active-class="transition.enter"
+     :leave-active-class="transition.leave"
+   >
+-    <div
++    <component
++      :is="tag"
+       v-show="isActive"
+       :class="['c-toast', `c-toast--${type}`, `c-toast--${position}`]"
+       @mouseover="toggleTimer(true)"
+       @mouseleave="toggleTimer(false)"
+       @click="click"
+       role="alert"
+-      v-html="message"
+-    />
++      ref="toast"
++    >{{message}}</component>
+   </transition>
+ </template>
+ 
+@@ -78,7 +79,8 @@ export default {
+       parentTop: null,
+       parentBottom: null,
+       isHovered: false,
+-      timer: null
++      timer: null,
++      tag: this.dismissible ? 'button' : 'div'
+     }
+   },
+   beforeMount() {
+@@ -140,8 +142,7 @@ export default {
+         this.queueTimer = setTimeout(this.showNotice, 250)
+         return
+       }
+-
+-      this.correctParent.insertAdjacentElement('afterbegin', this.$el)
++      this.correctParent.insertAdjacentElement('afterbegin', this.$refs.toast)
+       this.isActive = true
+ 
+       this.timer =
+@@ -195,9 +196,3 @@ export default {
    }
  }
  </script>
