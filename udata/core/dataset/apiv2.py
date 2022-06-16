@@ -1,6 +1,6 @@
 import logging
 
-from flask import url_for, request, abort
+from flask import url_for, request, abort, current_app
 from flask_restplus import marshal
 
 from udata import search
@@ -18,7 +18,7 @@ from .api_fields import (
 )
 from udata.core.spatial.api_fields import geojson
 from .models import (
-    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, CommunityResource
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
@@ -109,7 +109,7 @@ dataset_fields = apiv2.model('Dataset', {
         spatial_coverage_fields, allow_null=True,
         description='The spatial coverage'),
     'license': fields.String(attribute='license.id',
-                             default=DEFAULT_LICENSE['id'],
+                             default=current_app.config.get('DEFAULT_LICENSE')['id'],
                              description='The dataset license'),
     'uri': fields.UrlFor(
         'api.dataset', lambda o: {'dataset': o},

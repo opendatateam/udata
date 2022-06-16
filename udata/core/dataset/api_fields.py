@@ -1,3 +1,4 @@
+from flask import current_app
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -6,7 +7,7 @@ from udata.core.user.api_fields import user_ref_fields
 
 from .models import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
-    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE, RESOURCE_TYPES
+    CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, RESOURCE_TYPES
 )
 
 checksum_fields = api.model('Checksum', {
@@ -176,7 +177,7 @@ dataset_fields = api.model('Dataset', {
         spatial_coverage_fields, allow_null=True,
         description='The spatial coverage'),
     'license': fields.String(attribute='license.id',
-                             default=DEFAULT_LICENSE['id'],
+                             default=current_app.config.get('DEFAULT_LICENSE')['id'],
                              description='The dataset license'),
     'uri': fields.UrlFor(
         'api.dataset', lambda o: {'dataset': o},

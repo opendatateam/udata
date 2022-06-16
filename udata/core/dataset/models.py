@@ -30,7 +30,7 @@ from .exceptions import (
 __all__ = (
     'License', 'Resource', 'Dataset', 'Checksum', 'CommunityResource',
     'UPDATE_FREQUENCIES', 'LEGACY_FREQUENCIES', 'RESOURCE_FILETYPES',
-    'PIVOTAL_DATA', 'DEFAULT_LICENSE', 'RESOURCE_TYPES',
+    'PIVOTAL_DATA', 'RESOURCE_TYPES',
     'ResourceSchema'
 )
 
@@ -75,15 +75,6 @@ LEGACY_FREQUENCIES = {
 }
 
 DEFAULT_FREQUENCY = 'unknown'
-
-DEFAULT_LICENSE = {
-    'id': 'lov2',
-    'title': f"{_('Open Licence')} / Open Licence version 2.0",
-    'flags': ["generic"],
-    'maintainer': None,
-    'url': None,
-    'active': True,
-}
 
 RESOURCE_TYPES = OrderedDict([
     ('main', _('Main file')),
@@ -225,7 +216,7 @@ class License(db.Document):
 
     @classmethod
     def default(cls):
-        return cls.objects(id=DEFAULT_LICENSE['id']).first()
+        return cls.objects(id=current_app.config.get('DEFAULT_LICENSE')['id']).first()
 
 
 class DatasetQuerySet(db.OwnedQuerySet):

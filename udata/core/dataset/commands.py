@@ -4,9 +4,10 @@ import logging
 import requests
 
 from bson import ObjectId
+from flask import current_app
 
 from udata.commands import cli, success, exit_with_error
-from udata.models import License, DEFAULT_LICENSE, Dataset
+from udata.models import License, Dataset
 from .tasks import send_frequency_reminder
 from . import actions
 
@@ -56,11 +57,12 @@ def licenses(source=DEFAULT_LICENSE_FILE):
             alternate_titles=json_license.get('alternate_titles', []),
         )
         log.info('Added license "%s"', license.title)
+    default_license = current_app.config.get('DEFAULT_LICENSE')['id']
     try:
-        License.objects.get(id=DEFAULT_LICENSE['id'])
+        License.objects.get(id=default_license['id'])
     except License.DoesNotExist:
-        License.objects.create(**DEFAULT_LICENSE)
-        log.info('Added license "%s"', DEFAULT_LICENSE['title'])
+        License.objects.create(**default_license)
+        log.info('Added license "%s"', default_license['title'])
     success('Done')
 
 

@@ -21,6 +21,16 @@ class Defaults(object):
         'sr': 'Српски',
     }
     DEFAULT_LANGUAGE = 'en'
+
+    DEFAULT_LICENSE = {
+        'id': 'notspecified',
+        'title': "License Not Specified",
+        'flags': ["generic"],
+        'maintainer': None,
+        'url': None,
+        'active': True,
+    }
+
     SECRET_KEY = 'Default uData secret key'
     CONTACT_EMAIL = 'contact@example.org'
     TERRITORIES_EMAIL = 'territories@example.org'
