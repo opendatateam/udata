@@ -636,7 +636,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                     resource_doc = True
                 if not resource.description:
                     resource_desc = False
-            result['resources_documentation'] = True if (resource_doc is True or resource_desc is True) else False
+            result['resources_documentation'] = resource_doc or resource_desc
 
         result['score'] = self.compute_quality_score(result)
         return result
