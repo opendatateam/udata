@@ -33,8 +33,9 @@ export default {
                 }, {
                     id: 'license',
                     label: this._('License'),
-                    widget: 'select-input',
+                    widget: 'select-input-group',
                     values: licenses,
+                    groups: {'admin': ['lov2', 'odc-odbl'], 'other': ['cc-by', 'cc-by-sa', 'cc-zero', 'odc-by', 'odc-pddl']},
                     map(item) {
                         return {value: item.id, text: item.title};
                     }
