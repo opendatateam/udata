@@ -62,18 +62,6 @@
     'styles': config.MD_ALLOWED_STYLES,
 }|tojson|urlencode }}" />
 
-<meta name="map-config" content="{{ {
-    'init': {
-        'center': config.MAP_INITIAL_CENTER,
-        'zoom': config.MAP_INITIAL_ZOOM,
-        'level': config.MAP_INITIAL_LEVEL,
-    },
-    'tiles': {
-        'url': config.MAP_TILES_URL,
-        'hidpi': config.MAP_TILES_URL_HIDPI,
-        'config': config.MAP_TILES_CONFIG,
-    }
-}|to_json|urlencode }}" />
 <meta name="tags-config" content="{{ {
     'MIN_LENGTH': config.TAG_MIN_LENGTH,
     'MAX_LENGTH': config.TAG_MAX_LENGTH,

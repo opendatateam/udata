@@ -452,10 +452,6 @@ class SiteViewsTest(GouvfrFrontTestCase):
         self.assertStatus(response, 302)
         self.assertIn('export-harvest-', response.location)
 
-    def test_map_view(self):
-        response = self.get(url_for('site.map'))
-        self.assert200(response)
-
     def test_terms_view(self):
         response = self.client.get(url_for('site.terms'))
         self.assert200(response)

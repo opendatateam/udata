@@ -149,11 +149,6 @@ export const hidpi =
     ).matches);
 
 /**
- * Map configuration
- */
-export const map = _jsonMeta("map-config");
-
-/**
  * Tags constraints
  */
 export const tags = _jsonMeta("tags-config");
@@ -224,7 +219,6 @@ export default {
   is_territory_enabled,
   is_delete_me_enabled,
   hidpi,
-  map,
   tags,
   values,
   resources_default_page_size,

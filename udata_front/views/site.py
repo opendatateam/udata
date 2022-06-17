@@ -95,11 +95,6 @@ def home():
     return theme.render('home.html', **context)
 
 
-@blueprint.route('/map/')
-def map():
-    return theme.render('site/map.html')
-
-
 def get_export_url(model):
     did = current_app.config['EXPORT_CSV_DATASET_ID']
     dataset = Dataset.objects.get_or_404(id=did)
