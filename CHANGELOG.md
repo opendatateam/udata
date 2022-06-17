@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add kafka event consumer in udata [#2745](https://github.com/opendatateam/udata/pull/2745)
 
 ## 4.1.0 (2022-06-09)
 
