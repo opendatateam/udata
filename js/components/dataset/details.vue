@@ -17,12 +17,19 @@
         </strong>
         {{ dataset | frequency_label }}
     </div>
-    <div v-if="dataset.tags | length" class="label-list">
+    <div v-if="dataset.spatial && dataset.spatial.granularity" class="label-list">
+        <strong>
+            <span class="fa fa-clock-o fa-fw"></span>
+            {{ _('Territorial coverage granularity') }}:
+        </strong>
+        {{ dataset | granularity_label }}
+    </div>
+    <div v-if="spatialCoverage | length" class="label-list">
         <strong>
             <span class="fa fa-fw fa-tags"></span>
-            {{ _('Tags') }}:
+            {{ _('Territorial coverage') }}:
         </strong>
-        <span v-for="tag in dataset.tags" class="label label-default">{{tag}}</span>
+        <span v-for="zone in spatialCoverage" class="label label-default">{{zone}}</span>
     </div>
     <div v-if="dataset.badges | length" class="label-list">
         <strong>
@@ -43,7 +50,7 @@ import badges from 'models/badges';
 export default {
     name: 'dataset-details',
     mixins: [DatasetFilters],
-    props: ['dataset'],
+    props: ['dataset', 'spatialCoverage'],
     data() {
         return {
             badges: badges.dataset
