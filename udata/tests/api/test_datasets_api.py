@@ -60,7 +60,7 @@ class DatasetAPITest(APITestCase):
         # with accent
         response = self.get(url_for('api.datasets', q='some spécial chars'))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(dataset.id))
 
         # with accent

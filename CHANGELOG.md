@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 4.1.0 (2022-06-09)
+
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 - Use mongo search if `SEARCH_SERVICE_API_URL` variable is not set [#2728](https://github.com/opendatateam/udata/pull/2728)
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
@@ -11,6 +15,7 @@
 - Clean documentation and code with respect to independent search service [#2738](https://github.com/opendatateam/udata/pull/2738)
 - Fix size argument in suggests endpoint and corresponding tests [#2739](https://github.com/opendatateam/udata/pull/2739)
 - Add udata instance name prefix and action suffix for kafka topics [#2736](https://github.com/opendatateam/udata/pull/2736)
+- Fix tokenisation by building an `AND` query (see comments in code) for mongo text search and pagination [#2740](https://github.com/opendatateam/udata/pull/2740)
 
 ## 4.0.2 (2022-05-04)
 
