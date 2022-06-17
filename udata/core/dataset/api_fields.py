@@ -1,3 +1,5 @@
+from flask import url_for
+
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -72,8 +74,11 @@ resource_fields = api.model('Resource', {
     'metrics': fields.Raw(
         description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
-    'protected_extras': fields.Raw(description='Protected extra resource attributes as key-value pairs',
-                                   readonly=True),
+    'protected_extras': fields.Raw(attribute=lambda o: {
+        'rel': 'subsection',
+        'href': url_for('apiv2.resource_protected_extras', dataset=o.dataset.id, rid=o.id, _external=True),
+        'type': 'GET',
+    }, description='Link to the resource protected extras'),
     'preview_url': fields.String(description='An optional preview URL to be '
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
@@ -129,7 +134,7 @@ DEFAULT_MASK = ','.join((
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'metrics',
     'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
     'uri', 'page', 'last_update', 'archived',
-    'nested_extras', 'extras_extras'
+    'protected_extras'
 ))
 
 dataset_fields = api.model('Dataset', {
@@ -166,8 +171,11 @@ dataset_fields = api.model('Dataset', {
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-    'protected_extras': fields.Raw(description='Protected extra attributes as key-value pairs',
-                                   readonly=True),
+    'protected_extras': fields.Raw(attribute=lambda o: {
+        'rel': 'subsection',
+        'href': url_for('apiv2.protected_extras', dataset=o.id, _external=True),
+        'type': 'GET',
+    }, description='Link to the dataset protected extras'),
     'nested_extras': fields.Raw(description='Nested extra attributes as key-value pairs',
                                 readonly=True),
     'extras_extras': fields.Raw(description='Extras extra attributes as key-value pairs',
