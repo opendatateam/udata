@@ -184,7 +184,6 @@ export default {
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
-    map,
     tags,
     dataset_max_resources_uncollapsed,
     is_search_autocomplete_enabled,

@@ -11,24 +11,6 @@
     <div class="row">
         <div class="col-xs-12 col-md-6">
             <dataset-details :dataset="dataset"></dataset-details>
-            <map-widget :title="_('Spatial coverage')" :geojson="geojson" :footer="map_footer">
-                <ul>
-                    <li v-show="dataset.spatial && dataset.spatial.granularity">
-                        <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                            :title="_('Territorial coverage granularity')">
-                            <span class="fa fa-bullseye fa-fw"></span>
-                            {{ dataset | granularity_label }}
-                        </a>
-                    </li>
-                    <li v-show="territories_labels">
-                        <a class="btn btn-xs" v-tooltip tooltip-placement="top"
-                            :title="_('Territorial coverage')">
-                            <span class="fa fa-map-marker fa-fw"></span>
-                            {{ territories_labels }}
-                        </a>
-                    </li>
-                </ul>
-            </map-widget>
         </div>
         <quality-widget :quality="dataset.quality" class="col-xs-12 col-md-6"></quality-widget>
     </div>
@@ -69,7 +51,6 @@ import DatasetFilters from 'components/dataset/filters';
 import DiscussionList from 'components/discussions/list.vue';
 import FollowerList from 'components/follow/list.vue';
 import Layout from 'components/layout.vue';
-import MapWidget from 'components/widgets/map.vue';
 import QualityWidget from 'components/dataset/quality.vue';
 import ResourceList from 'components/dataset/resource/list.vue';
 import ReuseList from 'components/reuse/list.vue';
@@ -85,7 +66,6 @@ export default {
         DiscussionList,
         FollowerList,
         Layout,
-        MapWidget,
         QualityWidget,
         ResourceList,
         ReuseList,
@@ -182,14 +162,6 @@ export default {
                 color: 'purple',
                 target: '#trafic'
             }];
-        },
-        territories_labels() {
-            if (this.geojson && this.geojson.features) {
-                return this.geojson.features.map(feature => feature.properties.name).join(', ');
-            }
-        },
-        map_footer() {
-            return (this.dataset.spatial && this.dataset.spatial.granularity || this.territories_labels) !== undefined;
         },
         can_edit() {
             return this.$root.me.can_edit(this.dataset);
