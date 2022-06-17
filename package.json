@@ -103,8 +103,6 @@
     "jquery-jcrop": "^0.9.13",
     "jquery-validation": "^1.17.0",
     "jquery.browser": "0.1.0",
-    "leaflet": "^0.7.7",
-    "leaflet-spin": "^1.1.0",
     "markdown-it": "10.0.0",
     "moment": "^2.14.1",
     "raven-js": "^3.24.2",

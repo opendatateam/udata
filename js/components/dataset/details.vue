@@ -19,17 +19,24 @@
     </div>
     <div v-if="dataset.spatial && dataset.spatial.granularity" class="label-list">
         <strong>
-            <span class="fa fa-clock-o fa-fw"></span>
+            <span class="fa fa-fw fa-bullseye"></span>
             {{ _('Territorial coverage granularity') }}:
         </strong>
         {{ dataset | granularity_label }}
     </div>
     <div v-if="spatialCoverage | length" class="label-list">
         <strong>
-            <span class="fa fa-fw fa-tags"></span>
+            <span class="fa fa-fw fa-bullseye"></span>
             {{ _('Territorial coverage') }}:
         </strong>
         <span v-for="zone in spatialCoverage" class="label label-default">{{zone}}</span>
+    </div>
+    <div v-if="dataset.tags | length" class="label-list">
+        <strong>
+            <span class="fa fa-fw fa-tags"></span>
+            {{ _('Tags') }}:
+        </strong>
+        <span v-for="tag in dataset.tags" class="label label-default">{{tag}}</span>
     </div>
     <div v-if="dataset.badges | length" class="label-list">
         <strong>

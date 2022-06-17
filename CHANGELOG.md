@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove map related stuff [#2749](https://github.com/opendatateam/udata/pull/2749)
 
 ## 4.1.0 (2022-06-09)
 
