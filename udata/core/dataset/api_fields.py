@@ -133,8 +133,7 @@ DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'metrics',
     'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived',
-    'protected_extras'
+    'uri', 'page', 'last_update', 'archived', 'protected_extras'
 ))
 
 dataset_fields = api.model('Dataset', {
@@ -176,10 +175,6 @@ dataset_fields = api.model('Dataset', {
         'href': url_for('apiv2.protected_extras', dataset=o.id, _external=True),
         'type': 'GET',
     }, description='Link to the dataset protected extras'),
-    'nested_extras': fields.Raw(description='Nested extra attributes as key-value pairs',
-                                readonly=True),
-    'extras_extras': fields.Raw(description='Extras extra attributes as key-value pairs',
-                                readonly=True),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,

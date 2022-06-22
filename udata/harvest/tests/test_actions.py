@@ -430,15 +430,17 @@ class HarvestActionsTest:
         assert result.errors == 0
         for index, dataset in enumerate(datasets):
             dataset.reload()
-            assert dataset.extras['harvest:domain'] == 'test.org'
-            assert dataset.extras['harvest:remote_id'] == str(index)
+            assert dataset.protected_extras['harvest']['domain'] == 'test.org'
+            assert dataset.protected_extras['harvest']['remote_id'] == str(index)
 
     def test_attach_does_not_duplicate(self):
         attached_datasets = []
         for i in range(2):
             dataset = DatasetFactory.build()
-            dataset.extras['harvest:domain'] = 'test.org'
-            dataset.extras['harvest:remote_id'] = str(i)
+            dataset.protected_extras['harvest'] = {
+                'domain': 'test.org',
+                'remote_id': str(i)
+            }
             dataset.last_modified = datetime.now()
             dataset.save()
             attached_datasets.append(dataset)
@@ -462,14 +464,14 @@ class HarvestActionsTest:
             result = actions.attach('test.org', csvfile.name)
 
         dbcount = Dataset.objects(**{
-            'extras__harvest:remote_id__exists': True
+            'protected_extras__harvest__remote_id__exists': True
         }).count()
         assert result.success == len(datasets)
         assert dbcount == result.success
         for index, dataset in enumerate(datasets):
             dataset.reload()
-            assert dataset.extras['harvest:domain'] == 'test.org'
-            assert dataset.extras['harvest:remote_id'] == str(index)
+            assert dataset.protected_extras['harvest']['domain'] == 'test.org'
+            assert dataset.protected_extras['harvest']['remote_id'] == str(index)
 
     def test_attach_skip_not_found(self):
         datasets = DatasetFactory.create_batch(3)
@@ -527,9 +529,10 @@ class ExecutionTestMixin(MockBackendsMixin):
             dataset = item.dataset
             assert Dataset.objects(id=dataset.id).first() is not None
             assert dataset.organization == org
-            assert 'harvest:remote_id' in dataset.extras
-            assert 'harvest:last_update' in dataset.extras
-            assert 'harvest:source_id' in dataset.extras
+            assert 'harvest' in dataset.protected_extras
+            assert 'remote_id' in dataset.protected_extras['harvest']
+            assert 'last_update' in dataset.protected_extras['harvest']
+            assert 'source_id' in dataset.protected_extras['harvest']
 
         assert len(HarvestJob.objects) == 1
         assert len(Dataset.objects) == COUNT
@@ -653,9 +656,10 @@ class HarvestPreviewTest(MockBackendsMixin):
 
             dataset = item.dataset
             assert dataset.organization == org
-            assert 'harvest:remote_id' in dataset.extras
-            assert 'harvest:last_update' in dataset.extras
-            assert 'harvest:source_id' in dataset.extras
+            assert 'harvest' in dataset.protected_extras
+            assert 'remote_id' in dataset.protected_extras['harvest']
+            assert 'last_update' in dataset.protected_extras['harvest']
+            assert 'source_id' in dataset.protected_extras['harvest']
 
         assert len(HarvestJob.objects) == 0
         assert len(Dataset.objects) == 0
@@ -753,9 +757,10 @@ class HarvestPreviewTest(MockBackendsMixin):
 
             dataset = item.dataset
             assert dataset.organization == org
-            assert 'harvest:remote_id' in dataset.extras
-            assert 'harvest:last_update' in dataset.extras
-            assert 'harvest:source_id' in dataset.extras
+            assert 'harvest' in dataset.protected_extras
+            assert 'remote_id' in dataset.protected_extras['harvest']
+            assert 'last_update' in dataset.protected_extras['harvest']
+            assert 'source_id' in dataset.protected_extras['harvest']
 
         assert len(HarvestJob.objects) == 0
         assert len(Dataset.objects) == 0

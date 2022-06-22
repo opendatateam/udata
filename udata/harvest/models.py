@@ -4,41 +4,33 @@ from urllib.parse import urlparse
 
 from werkzeug import cached_property
 
-from udata.models import db, Dataset
+from udata.models import db
+from udata.core.dataset.models import Dataset, ResourceMixin
 from udata.i18n import lazy_gettext as _
 
-# Register harvest extras
-Dataset.extras.register('harvest:source_id', db.StringField)
-Dataset.extras.register('harvest:remote_id', db.StringField)
-Dataset.extras.register('harvest:domain', db.StringField)
-Dataset.extras.register('remote_url', db.URLField)
 
-
-### Nested Extra Field with Embedded Register:
+# Register Protected Extra Field with Embedded Documents
+# TODO: how to register additionnal extras (used in plugins for example)
 class HarvestExtras(db.EmbeddedDocument):
     source_id = db.StringField()
     remote_id = db.StringField()
     domain = db.StringField()
     remote_url = db.URLField()
-
-    def __str__(self):
-        return self.source_id
-
-
-Dataset.nested_extras.register('harvest', HarvestExtras)
-
-### Nested Extra Field with Extra Field Register
-# harvest_extras = db.ExtrasField()
-# harvest_extras.register('source_id', db.StringField)
-Dataset.extras_extras.register('harvest', db.ExtrasField)
+    last_update = db.DateTimeField()
+    created_at = db.DateTimeField()
+    last_modified = db.DateTimeField()
+    archived_at = db.DateTimeField()
+    archived = db.StringField()
 
 
-#KESAKO?
-Dataset.extras.register('harvest:last_update', db.DateTimeField)
+class ResourceHarvestExtras(db.EmbeddedDocument):
+    created_at = db.DateTimeField()
+    modified = db.DateTimeField()
 
 
-Dataset.protected_extras.register('harvest:created_at', db.DateTimeField)
-Dataset.protected_extras.register('harvest:last_modified', db.DateTimeField)
+Dataset.protected_extras.register('harvest', HarvestExtras)
+ResourceMixin.protected_extras.register('harvest', ResourceHarvestExtras)
+
 
 HARVEST_FREQUENCIES = OrderedDict((
     ('manual', _('Manual')),

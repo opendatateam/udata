@@ -278,15 +278,17 @@ def attach(domain, filename):
 
             # Detach previously attached dataset
             Dataset.objects(**{
-                'extras__harvest:domain': domain,
-                'extras__harvest:remote_id': row['remote']
+                'protected_extras__harvest__domain': domain,
+                'protected_extras__harvest__remote_id': row['remote']
             }).update(**{
-                'unset__extras__harvest:domain': True,
-                'unset__extras__harvest:remote_id': True
+                'unset__protected_extras__harvest__domain': True,
+                'unset__protected_extras__harvest__remote_id': True
             })
 
-            dataset.extras['harvest:domain'] = domain
-            dataset.extras['harvest:remote_id'] = row['remote']
+            if not dataset.protected_extras.get('harvest'):
+                dataset.protected_extras['harvest'] = {}
+            dataset.protected_extras['harvest']['domain'] = domain
+            dataset.protected_extras['harvest']['remote_id'] = row['remote']
             dataset.last_modified = datetime.now()
             dataset.save()
             count += 1

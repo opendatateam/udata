@@ -164,7 +164,7 @@ class DatasetToRdfTest:
         assert pot.value(SCHEMA.endDate).toPython() == end
 
     def test_from_external_repository(self):
-        dataset = DatasetFactory(extras={
+        dataset = DatasetFactory(protected_extras={
             'dct:identifier': 'an-identifier',
             'uri': 'https://somewhere.org/dataset',
         })
@@ -289,11 +289,11 @@ class RdfToDatasetTest:
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
 
-        extras = dataset.extras
-        assert 'dct:identifier' in extras
-        assert extras['dct:identifier'] == id
-        assert 'uri' in extras
-        assert extras['uri'] == uri
+        protected_extras = dataset.protected_extras
+        assert 'dct:identifier' in protected_extras
+        assert protected_extras['dct:identifier'] == id
+        assert 'uri' in protected_extras
+        assert protected_extras['uri'] == uri
 
     def test_html_description(self):
         node = BNode()

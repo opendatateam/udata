@@ -29,6 +29,7 @@ def serialize_resource_for_event(resource):
     for key, value in resource.extras.items():
         extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
     resource_dict.update({'extras': extras})
+    # TODO: Add protected_extras
     return resource_dict
 
 

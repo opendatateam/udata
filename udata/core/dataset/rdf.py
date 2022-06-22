@@ -70,8 +70,8 @@ EU_RDF_REQUENCIES = {
 }
 
 
-Dataset.extras.register('uri', db.StringField)
-Dataset.extras.register('dct:identifier', db.StringField)
+Dataset.protected_extras.register('uri', db.StringField)
+Dataset.protected_extras.register('dct:identifier', db.StringField)
 
 
 class HTMLDetector(HTMLParser):
@@ -164,16 +164,16 @@ def dataset_to_rdf(dataset, graph=None):
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if 'uri' in dataset.extras:
-        id = URIRef(dataset.extras['uri'])
+    if 'uri' in dataset.protected_extras:
+        id = URIRef(dataset.protected_extras['uri'])
     elif dataset.id:
         id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
                     dataset=dataset.id, _external=True))
     else:
         id = BNode()
     # Expose upstream identifier if present
-    if 'dct:identifier' in dataset.extras:
-        identifier = dataset.extras['dct:identifier']
+    if 'dct:identifier' in dataset.protected_extras:
+        identifier = dataset.protected_extras['dct:identifier']
     else:
         identifier = dataset.id
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -364,6 +364,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
     resource.mime = rdf_value(distrib, DCAT.mediaType)
+    if not resource.protected_extras.get('harvest'):
+        resource.protected_extras['harvest'] = {}
     fmt = rdf_value(distrib, DCT.format)
     if fmt:
         resource.format = fmt.lower()
@@ -380,19 +382,19 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     if dct_issued:
         if isinstance(dct_issued, date):
             dct_issued = datetime.combine(dct_issued, datetime.min.time())
-        resource.protected_extras['harvest:created_at'] = dct_issued
+        resource.protected_extras['harvest']['created_at'] = dct_issued
     dct_modified = rdf_value(distrib, DCT.modified)
     if dct_modified:
         if isinstance(dct_modified, date):
             dct_modified = datetime.combine(dct_modified, datetime.min.time())
-        resource.protected_extras['harvest:modified'] = dct_modified
+        resource.protected_extras['harvest']['modified'] = dct_modified
 
     identifier = rdf_value(distrib, DCT.identifier)
     if identifier:
-        resource.extras['dct:identifier'] = identifier
+        resource.protected_extras['dct:identifier'] = identifier
 
     if isinstance(distrib.identifier, URIRef):
-        resource.extras['uri'] = distrib.identifier.toPython()
+        resource.protected_extras['uri'] = distrib.identifier.toPython()
 
     return resource
 
@@ -413,17 +415,19 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
+    if not dataset.protected_extras.get('harvest'):
+        dataset.protected_extras['harvest'] = {}
 
     dct_issued = rdf_value(d, DCT.issued)
     if dct_issued:
         if isinstance(dct_issued, date):
             dct_issued = datetime.combine(dct_issued, datetime.min.time())
-        dataset.protected_extras['harvest:created_at'] = dct_issued
+        dataset.protected_extras['harvest']['created_at'] = dct_issued
     dct_modified = rdf_value(d, DCT.modified)
     if dct_modified:
         if isinstance(dct_modified, date):
             dct_modified = datetime.combine(dct_modified, datetime.min.time())
-        dataset.protected_extras['harvest:last_modified'] = dct_modified
+        dataset.protected_extras['harvest']['last_modified'] = dct_modified
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
@@ -435,16 +439,16 @@ def dataset_from_rdf(graph, dataset=None, node=None):
 
     identifier = rdf_value(d, DCT.identifier)
     if identifier:
-        dataset.extras['dct:identifier'] = identifier
+        dataset.protected_extras['dct:identifier'] = identifier
 
     if isinstance(d.identifier, URIRef):
-        dataset.extras['uri'] = d.identifier.toPython()
+        dataset.protected_extras['uri'] = d.identifier.toPython()
 
     landing_page = url_from_rdf(d, DCAT.landingPage)
     if landing_page:
         try:
             uris.validate(landing_page)
-            dataset.extras['remote_url'] = landing_page
+            dataset.protected_extras['remote_url'] = landing_page
         except uris.ValidationError:
             pass
 

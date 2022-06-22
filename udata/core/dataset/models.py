@@ -396,9 +396,6 @@ class ResourceMixin(object):
         return result
 
 
-ResourceMixin.protected_extras.register('harvest:created_at', db.DateTimeField)
-ResourceMixin.protected_extras.register('harvest:modified', db.DateTimeField)
-
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
     '''
@@ -449,8 +446,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     extras = db.ExtrasField()
 
     protected_extras = db.ExtrasField()  # protected extras, admin only
-    nested_extras = db.ExtrasField()  # protected extras, admin only
-    extras_extras = db.ExtrasField()
 
     featured = db.BooleanField(required=True, default=False)
 
