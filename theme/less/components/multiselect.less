@@ -20,9 +20,14 @@
                 display: none;
             }
         }
-        .select-a11y-button__clear::before {
-            &:extend(.fr-icon-close-circle-line::before);
-            &:extend([class^="fr-icon-"]::before);
+        .select-a11y-button__clear {
+            &:extend(.fr-icon-close-circle-line);
+            &:extend([class^="fr-icon-"]);
+            margin: 2px;
+            &::before {
+                &:extend(.fr-icon-close-circle-line::before);
+                &:extend([class^="fr-icon-"]::before);
+            }
         }
         .select-a11y__overlay {
             background: @white;

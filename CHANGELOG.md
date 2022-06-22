@@ -4,6 +4,7 @@
 
 - Fix RGAA criterion 7.5 [#118](https://github.com/etalab/udata-front/pull/118)
 - Remove map related stuff [#124](https://github.com/etalab/udata-front/pull/124)
+- Fix clear button now shown on multiselect [#125](https://github.com/etalab/udata-front/pull/125)
 
 ## 2.0.5 (2022-06-14)
 
