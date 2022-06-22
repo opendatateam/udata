@@ -18,7 +18,7 @@
 
 {% block breadcrumb %}
 <li><a href="{{ url_for('organizations.list') }}">{{ _('Organizations') }}</a></li>
-<li class="active">{{ org.name }}</li>
+<li class="active" aria-current="page">{{ org.name }}</li>
 {% endblock %}
 
 {% block main_content %}

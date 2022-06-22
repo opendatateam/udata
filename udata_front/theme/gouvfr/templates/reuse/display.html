@@ -29,7 +29,7 @@
 
 {% block breadcrumb %}
 <li><a href="{{ url_for('reuses.list') }}">{{ _('Reuses') }}</a></li>
-<li class="active">{{ reuse.title }}</li>
+<li class="active" aria-current="page">{{ reuse.title }}</li>
 {% endblock %}
 
 {% block content %}

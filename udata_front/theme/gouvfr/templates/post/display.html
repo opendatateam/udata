@@ -15,7 +15,7 @@
 
 {% block breadcrumb %}
 <li><a href="{{ url_for('posts.list') }}">{{ _('News') }}</a></li>
-<li class="active">{{ post.name }}</li>
+<li class="active" aria-current="page">{{ post.name }}</li>
 {% endblock %}
 
 

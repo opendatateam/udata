@@ -13,7 +13,7 @@
 {% set bundle = 'search' %}
 
 {% block breadcrumb %}
-    <li class="active">
+    <li class="active" aria-current="page">
         {{ _('Users') }}
         <small>{{ _('%(start)s to %(end)s on %(total)s',
             start=users.page_start,

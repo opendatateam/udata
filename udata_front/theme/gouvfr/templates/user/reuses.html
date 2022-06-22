@@ -3,7 +3,7 @@
 
 {% block breadcrumb %}
     {{ super() }}
-    <li class="active">
+    <li class="active" aria-current="page">
         <a href="{{ url_for('users.reuses', user=user) }}">
         {{ _('Reuses') }}
         </a>

@@ -3,7 +3,7 @@
 {% block breadcrumb %}
     <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
     <li><a href="{{ url_for('datasets.show', dataset=dataset) }}">{{ dataset.name|truncate(120) }}</a></li>
-    <li class="active">{{ _('Followers') }}</li>
+    <li class="active" aria-current="page">{{ _('Followers') }}</li>
 {% endblock %}
 
 {% block main_content %}

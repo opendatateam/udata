@@ -33,7 +33,7 @@
 {% block breadcrumb %}
 {% cache cache_duration, 'dataset-breadcrumb', dataset.id|string, g.lang_code %}
 <li><a href="{{ url_for('datasets.list') }}">{{ _('Datasets') }}</a></li>
-<li class="active">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
+<li class="active" aria-current="page">{{ dataset.acronym or dataset.title|truncate(128) }}</li>
 {% endcache %}
 {% endblock %}
 
