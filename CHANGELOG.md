@@ -6,6 +6,7 @@
 - Remove map related stuff [#124](https://github.com/etalab/udata-front/pull/124)
 - Fix clear button now shown on multiselect [#125](https://github.com/etalab/udata-front/pull/125)
 - Add aria-current to breadcumbs [#121](https://github.com/etalab/udata-front/pull/121)
+- Add missing default og:image [#127](https://github.com/etalab/udata-front/pull/127)
 
 ## 2.0.5 (2022-06-14)
 
