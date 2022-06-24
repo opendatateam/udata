@@ -14,7 +14,8 @@ def consume_message_resource_analysed(key, value):
     if resource:
         # TODO: add extra logic here
         for entry in value['value']:
-            resource.extras[f'analysis:{entry}'] = value['value'][entry]
+            if value['value'][entry]:
+                resource.extras[f'analysis:{entry}'] = value['value'][entry]
         resource.save()
     else:
         log.warn(f'No resource found for key {key}')
@@ -43,8 +44,10 @@ def consume_message_resource_checked(key, value):
     log.info("Consuming message checked")
     resource = get_resource(UUID(key))
     if resource:
-        resource.extras['checked:status'] = value['value']['status']
-        resource.extras['checked:check_date'] = value['meta']['check_date']
+        if value['value']['status']:
+            resource.extras['checked:status'] = value['value']['status']
+        if value['meta']['check_date']:
+            resource.extras['checked:check_date'] = value['meta']['check_date']
         resource.save()
     else:
         log.warn(f'No resource found for key {key}')
