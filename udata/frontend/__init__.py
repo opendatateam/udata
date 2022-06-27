@@ -25,12 +25,6 @@ def manifest(app, filename, **kwargs):
     return assets.from_manifest(app, filename, **kwargs)
 
 
-@hook.app_template_global()
-def in_manifest(filename, app='udata'):
-    '''A Jinja test to check an asset existance in manifests'''
-    return assets.exists_in_manifest(app, filename)
-
-
 @hook.app_template_filter()
 @hook.app_template_global()
 def to_json(data):
@@ -38,29 +32,6 @@ def to_json(data):
     if not data:
         return Markup('')
     return json.dumps(data)
-
-
-def json_ld_script_preprocessor(o):
-    if isinstance(o, dict):
-        return {k: json_ld_script_preprocessor(v) for k, v in o.items()}
-    elif isinstance(o, (list, tuple)):
-        return [json_ld_script_preprocessor(v) for v in o]
-    elif isinstance(o, str):
-        return html.escape(o).replace('&#x27;', '&apos;')
-    else:
-        return o
-
-
-@hook.app_template_filter()
-def embedded_json_ld(jsonld):
-    '''
-    Sanitize JSON-LD for <script> tag inclusion.
-
-    JSON-LD accepts any string but there is a special case
-    for script tag inclusion.
-    See: https://w3c.github.io/json-ld-syntax/#restrictions-for-contents-of-json-ld-script-elements
-    '''
-    return Markup(json.dumps(json_ld_script_preprocessor(jsonld), ensure_ascii=False))
 
 
 def _wrapper(func, name=None, when=None):

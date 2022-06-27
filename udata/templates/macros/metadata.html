@@ -71,8 +71,4 @@
 }|tojson|urlencode }}" />
 <meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
 
-{% if json_ld %}
-<script id="json_ld" type="application/ld+json">{{ json_ld|embedded_json_ld }}</script>
-{% endif %}
-
 {% endmacro %}
