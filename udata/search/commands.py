@@ -1,11 +1,13 @@
 from datetime import datetime
+from flask import current_app
 import logging
 import sys
 
 import click
+from udata_event_service.producer import produce
 
 from udata.commands import cli
-from udata.event.producer import produce
+from udata.event.producer import get_topic
 from udata.search import adapter_catalog, KafkaMessageType
 
 
@@ -66,7 +68,14 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
             else:
                 continue
             message_type = f'{adapter.model.__name__.lower()}.{action.value}'
-            produce(doc['id'], message_type, doc, index=index_name)
+            produce(
+                kafka_uri=current_app.config.get('KAFKA_URI'),
+                topic=get_topic(message_type),
+                service='udata',
+                key_id=doc['id'],
+                document=doc,
+                meta={'message_type': message_type, 'index': index_name}
+            )
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)

@@ -32,7 +32,6 @@ html2text==2019.9.26
 itsdangerous==1.1.0
 Jinja2==2.10.3
 jsonschema==3.2.0
-kafka-python==2.0.2
 kombu[redis]==4.4.0
 lxml==4.4.2
 mistune==0.8.4
@@ -50,6 +49,7 @@ requests==2.24.0
 simplejson==3.17.0
 StringDist==1.0.9
 tlds
+udata_event_service==0.0.8
 ujson==1.35
 urlextract==0.14.0
 unicodecsv==0.14.1

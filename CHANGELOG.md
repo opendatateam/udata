@@ -2,7 +2,8 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Remove map related stuff [#2749](https://github.com/opendatateam/udata/pull/2749)
+- Add library udata_event_service to produce Kafka messages [#2743](https://github.com/opendatateam/udata/pull/2743)
 
 ## 4.1.0 (2022-06-09)
 
