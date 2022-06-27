@@ -14,7 +14,9 @@ def get_current_endpoint(request: Request):
 def is_current_endpoint(request: Request, item: Item) -> bool:
     current_endpoint = get_current_endpoint(request)
     item_endpoint = item.endpoint and item.endpoint.split('.')[:1]
-    return request.url_rule.endpoint != "site.home" and (item_endpoint == current_endpoint)
+    return request.url_rule and \
+        request.url_rule.endpoint != "site.home" and \
+        (item_endpoint == current_endpoint)
 
 
 @front.app_template_global()
