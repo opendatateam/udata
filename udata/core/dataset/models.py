@@ -612,30 +612,28 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             # Quality is only relevant on saved Datasets
             return result
 
-        result['license'] = True if self.license else False
         result['temporal_coverage'] = True if self.temporal_coverage else False
         result['spatial'] = True if self.spatial else False
 
-        result['update_frequency'] = True if self.frequency != 'unknown' else False
+        result['update_frequency'] = True if self.frequency in ['unknown', 'irregular', 'punctual'] else False
         if self.next_update:
             result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days < 0 else False
 
-        result['tags_count'] = True if len(self.tags) > current_app.config.get('QUALITY_TAGS_COUNT') else False
         result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH') else False
 
         if self.resources:
             result['has_resources'] = True
-            result['has_only_closed_or_no_formats'] = all(
+            result['has_open_format'] = not all(
                 resource.closed_or_no_format for resource in self.resources)
             result['has_unavailable_resources'] = not all(
                 self.check_availability())
             resource_doc = False
-            resource_desc = True
+            resource_desc = False
             for resource in self.resources:
                 if resource.type == 'documentation':
                     resource_doc = True
-                if not resource.description:
-                    resource_desc = False
+                if resource.description:
+                    resource_desc = True
             result['resources_documentation'] = resource_doc or resource_desc
 
         result['score'] = self.compute_quality_score(result)
@@ -645,8 +643,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         """Compute the score related to the quality of that dataset."""
         score = 0
         UNIT = 1
-        if quality['license']:
-            score += UNIT
         if quality['temporal_coverage']:
             score += UNIT
         if quality['spatial']:
@@ -654,14 +650,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if quality['update_frequency']:
             score += UNIT
         if 'update_fulfilled_in_time' in quality:
-            if quality['update_fulfilled_in_time'] < 0:
+            if quality['update_fulfilled_in_time']:
                 score += UNIT
-        if quality['tags_count']:
-            score += UNIT
         if quality['dataset_description_quality']:
             score += UNIT
         if 'has_resources' in quality:
-            if not quality['has_only_closed_or_no_formats']:
+            if quality['has_open_format']:
                 score += UNIT
             if not quality['has_unavailable_resources']:
                 score += UNIT
