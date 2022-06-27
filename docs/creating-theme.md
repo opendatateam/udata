@@ -51,7 +51,6 @@ At the root level, you will have some basic python project files:
 
 - a `README.md` presenting the theme and how to use it
 - a `CHANGELOG.md` to let people know the last changes in your theme
-- a `MANIFEST.in` which specify which files should be included in your theme package
 - a `setup.py` exposing the package metadata (including the theme presence)
 - a `setup.cfg` configuring setup commands (you can start from the one in `udata-front`)
 - a `babel.cfg` configuring translations extractor
@@ -167,46 +166,6 @@ THEME = 'my-theme'
 ```
 
 When serving udata (`inv serve`), you should see your new theme live.
-
-## Assets manifest
-
-Theme can optionally provide an asset manifest for long-term caching.
-The manifest is simply a JSON file mapping human-readable names (ie. `theme.css`) to their real path (ie. `/_theme/my-theme/theme.83c45954dd3da90126b5f13d10b547b5.css`).
-
-The theme assets manifest need to be named `manifest.json` at the theme root directory (sibling `info.json`).
-If present, `udata` will automatically detect it and allows you to use the `manifest` jinja global helper and the `in_manifest` jinja test.
-
-```html+jinja
-{% extends "raw.html" %}
-
-{% block theme_css %}
-{{ super() }}
-<link href="{{ manifest('theme', 'theme.css') }}" rel="stylesheet">
-{# Only render tag if asset is present in the manifest #}
-{% if 'my.css' is in_manifest('theme') %}
-<link href="{{ manifest('theme', 'my.css') }}" rel="stylesheet">
-{% endif %}
-{% endblock %}
-```
-
-!!! note
-    The theme manifest is registered with the `theme` key.<br/>
-    You need to use `manfest('theme', <filename>)` and `in_manifest('theme')`
-
-Here a sample theme manifest:
-
-```json
-{
-  "admin.css": "/_themes/gouvfr/admin.10cd3b26d19962df0e6b78cbdcadfe88.css",
-  "admin.js": "/_themes/gouvfr/admin.97515dac30750ec5d315.js",
-  "img/favicon.png": "/_themes/gouvfr/img/favicon.png",
-  "...": "",
-  "oembed.css": "/_themes/gouvfr/oembed.66142920652697e6e1717060154fe3a2.css",
-  "oembed.js": "/_themes/gouvfr/oembed.97515dac30750ec5d315.js",
-  "theme.css": "/_themes/gouvfr/theme.d9adbf77694f2b00063ddc34b61bf8fe.css",
-  "theme.js": "/_themes/gouvfr/theme.97515dac30750ec5d315.js"
-}
-```
 
 ## Hooks
 

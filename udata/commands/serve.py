@@ -8,7 +8,6 @@ from flask.cli import pass_script_info, DispatchingApp
 
 from werkzeug.serving import run_simple
 
-from udata import assets
 from udata.commands import cli
 
 
@@ -66,8 +65,6 @@ def serve(info, host, port, reload, debugger, eager_loading, with_threads):
     settings = os.environ.get('UDATA_SETTINGS',
                               os.path.join(os.getcwd(), 'udata.cfg'))
     extra_files = [settings]
-    if reload:
-        extra_files.extend(assets.manifests_paths())
 
     run_simple(host, port, app, use_reloader=reload,
                use_debugger=debugger, threaded=with_threads,

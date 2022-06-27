@@ -1,12 +1,11 @@
 import inspect
-import html
 import logging
 import json
 
 from importlib import import_module
 from jinja2 import Markup, contextfunction
 
-from udata import assets, entrypoints
+from udata import entrypoints
 from udata.i18n import I18nBlueprint
 
 from .markdown import UdataCleaner, init_app as init_markdown
@@ -18,11 +17,6 @@ log = logging.getLogger(__name__)
 hook = I18nBlueprint('hook', __name__)
 
 _template_hooks = {}
-
-
-@hook.app_template_global()
-def manifest(app, filename, **kwargs):
-    return assets.from_manifest(app, filename, **kwargs)
 
 
 @hook.app_template_filter()
@@ -126,10 +120,3 @@ def init_app(app, views=None):
     for module in entrypoints.get_enabled('udata.front', app).values():
         front_module = module if inspect.ismodule(module) else import_module(module)
         front_module.init_app(app)
-
-    # Load core manifest
-    with app.app_context():
-        assets.register_manifest('udata')
-        for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
-            if assets.has_manifest(dist.project_name):
-                assets.register_manifest(dist.project_name)
