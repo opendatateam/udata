@@ -8,7 +8,7 @@ from unittest.mock import Mock
 from udata import search
 from udata.i18n import gettext as _
 from udata.utils import clean_string
-from udata.event import KafkaProducerSingleton
+from udata_event_service.producer import KafkaProducerSingleton
 from udata.search import reindex, as_task_param
 from udata.search.commands import index_model
 from udata.core.dataset.search import DatasetSearch
@@ -106,94 +106,89 @@ class SearchAdaptorTest:
 class IndexingLifecycleTest(APITestCase):
 
     def test_producer_should_send_a_message_without_payload_if_not_indexable(self):
-        kafka_mock = Mock()
-        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        KafkaProducerSingleton.get_instance = Mock()
         fake_data = DatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
         reindex.run(*as_task_param(fake_data))
-        producer = KafkaProducerSingleton.get_instance()
+        producer = KafkaProducerSingleton.get_instance(None)
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.unindex',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.unindex'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_producer_should_send_a_message_with_payload_if_indexable(self):
-        kafka_mock = Mock()
-        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        KafkaProducerSingleton.get_instance = Mock()
         fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
         reindex.run(*as_task_param(fake_data))
-        producer = KafkaProducerSingleton.get_instance()
+        producer = KafkaProducerSingleton.get_instance(None)
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_index_model(self):
-        kafka_mock = Mock()
-        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        KafkaProducerSingleton.get_instance = Mock()
         fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
-        producer = KafkaProducerSingleton.get_instance()
+        producer = KafkaProducerSingleton.get_instance(None)
 
         index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_reindex_model(self):
-        kafka_mock = Mock()
-        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        KafkaProducerSingleton.get_instance = Mock()
         fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211')
 
-        producer = KafkaProducerSingleton.get_instance()
+        producer = KafkaProducerSingleton.get_instance(None)
 
         index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.reindex',
                 'index': 'dataset-2022-02-20-20-02'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.reindex'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1211')
 
     def test_index_model_from_datetime(self):
-        kafka_mock = Mock()
-        KafkaProducerSingleton.get_instance = lambda: kafka_mock
+        KafkaProducerSingleton.get_instance = Mock()
         VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1211', last_modified=datetime.datetime(2020, 1, 1))
         fake_data = VisibleDatasetFactory(id='61fd30cb29ea95c7bc0e1212', last_modified = datetime.datetime(2022, 1, 1))
 
-        producer = KafkaProducerSingleton.get_instance()
+        producer = KafkaProducerSingleton.get_instance(None)
 
         index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2023, 1, 1))
         producer.send.assert_not_called()
@@ -202,12 +197,12 @@ class IndexingLifecycleTest(APITestCase):
 
         expected_value = {
             'service': 'udata',
-            'data': DatasetSearch.serialize(fake_data),
+            'value': DatasetSearch.serialize(fake_data),
             'meta': {
                 'message_type': 'dataset.index',
                 'index': 'dataset'
             }
         }
         topic = self.app.config['UDATA_INSTANCE_NAME'] + '.dataset.index'
-        producer.send.assert_called_with(topic, value=expected_value,
+        producer.send.assert_called_with(topic=topic, value=expected_value,
                                          key=b'61fd30cb29ea95c7bc0e1212')

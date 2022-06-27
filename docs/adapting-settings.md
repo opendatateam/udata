@@ -224,56 +224,6 @@ You'll need a Kakfa broker for the search service to work. See `KAFKA_URI`.
 Optionnal Kafka URI to use. If specified, messages can be consumed and produced in udata workers.
 It is required for an independent search service.
 
-## Map widget configuration
-
-### MAP_TILES_URL
-
-**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'`
-
-Tiles URL for SD displays
-
-### MAP_TILES_URL_HIDPI
-
-**default**: `'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}@2x.png'`
-
-Tiles URL for HD/HiDPI displays
-
-### MAP_TILES_CONFIG
-
-**default**:
-```python
-{
-    'subdomains': 'abcd',
-    'attribution': (
-        '&copy;'
-        '<a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
-        '/'
-        '<a href="https://cartodb.com/attributions">CartoDB</a>'
-    )
-}
-```
-
-Tiles configuration object given as Leaflet tile layer parameter,
-see https://leafletjs.com/reference-0.7.7.html#tilelayer
-
-### MAP_INITIAL_CENTER
-
-**default**: `[42, 2.4]`
-
-Initial map center position coordinates
-
-### MAP_INITIAL_ZOOM
-
-**default**: `4`
-
-Initial map zoom level
-
-### MAP_INITIAL_LEVEL
-
-**default**: `0`
-
-Initial map territory level
-
 ## Spatial configuration
 
 ### SPATIAL_SEARCH_EXCLUDE_LEVELS

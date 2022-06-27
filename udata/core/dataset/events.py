@@ -1,9 +1,11 @@
 import datetime
 from flask import current_app
+from udata_event_service.producer import produce
+
 from udata.utils import to_iso_datetime, get_by
 from udata.models import Dataset
 from udata.tasks import task
-from udata.event.producer import produce
+from udata.event.producer import get_topic
 from udata.event.values import KafkaMessageType
 
 
@@ -39,7 +41,14 @@ def publish(document, resource_id, action):
     else:
         resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
     message_type = f'resource.{action.value}'
-    produce(id=str(resource_id), message_type=message_type, document=resource, dataset_id=str(document.id))
+    produce(
+        kafka_uri=current_app.config.get('KAFKA_URI'),
+        topic=get_topic(message_type),
+        service='udata',
+        key_id=str(resource_id),
+        document=resource,
+        meta={'message_type': message_type, 'dataset_id': str(document.id)}
+    )
 
 
 @Dataset.on_resource_added.connect
