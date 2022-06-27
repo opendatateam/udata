@@ -2,12 +2,12 @@ import logging
 
 from flask import current_app
 from mongoengine.signals import post_save, post_delete
+from udata_event_service.producer import produce
 
 from udata.models import db, Dataset, Organization, Reuse
 from udata.tasks import task, as_task_param
 from udata.event.values import KafkaMessageType
-from udata.event.producer import produce
-
+from udata.event.producer import get_topic
 
 log = logging.getLogger(__name__)
 
@@ -28,8 +28,14 @@ def reindex(classname, id):
         action = KafkaMessageType.UNINDEX
     try:
         message_type = f'{classname.lower()}.{action.value}'
-        produce(id=str(obj.id), message_type=message_type, document=document,
-                index=classname.lower())
+        produce(
+            kafka_uri=current_app.config.get('KAFKA_URI'),
+            topic=get_topic(message_type),
+            service='udata',
+            key_id=str(obj.id),
+            document=document,
+            meta={'message_type': message_type, 'index': classname.lower()}
+        )
     except Exception:
         log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
 
@@ -41,7 +47,13 @@ def unindex(classname, id):
     try:
         action = KafkaMessageType.UNINDEX
         message_type = f'{classname.lower()}.{action.value}'
-        produce(id=id, message_type=message_type, index=classname.lower())
+        produce(
+            kafka_uri=current_app.config.get('KAFKA_URI'),
+            topic=get_topic(message_type),
+            service='udata',
+            key_id=id,
+            meta={'message_type': message_type, 'index': classname.lower()}
+        )
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 

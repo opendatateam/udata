@@ -135,11 +135,6 @@ export const hidpi = (window.devicePixelRatio > 1 || (
 );
 
 /**
- * Map configuration
- */
-export const map = _jsonMeta('map-config');
-
-/**
  * Tags constraints
  */
 export const tags = _jsonMeta('tags-config');
@@ -189,7 +184,6 @@ export default {
     is_territory_enabled,
     is_delete_me_enabled,
     hidpi,
-    map,
     tags,
     dataset_max_resources_uncollapsed,
     is_search_autocomplete_enabled,
