@@ -266,6 +266,7 @@ class ResourceMixin(object):
     fs_filename = db.StringField()
     extras = db.ExtrasField()
     protected_extras = db.ExtrasField()  # protected extras, admin only
+    _extras = db.ExtrasField()  # protected extras, admin only
     schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
@@ -446,6 +447,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     extras = db.ExtrasField()
 
     protected_extras = db.ExtrasField()  # protected extras, admin only
+    _extras = db.ExtrasField()  # protected extras, admin only
 
     featured = db.BooleanField(required=True, default=False)
 

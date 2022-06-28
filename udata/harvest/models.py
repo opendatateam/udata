@@ -9,29 +9,6 @@ from udata.core.dataset.models import Dataset, ResourceMixin
 from udata.i18n import lazy_gettext as _
 
 
-# Register Protected Extra Field with Embedded Documents
-# TODO: how to register additionnal extras (used in plugins for example)
-class HarvestExtras(db.EmbeddedDocument):
-    source_id = db.StringField()
-    remote_id = db.StringField()
-    domain = db.StringField()
-    remote_url = db.URLField()
-    last_update = db.DateTimeField()
-    created_at = db.DateTimeField()
-    last_modified = db.DateTimeField()
-    archived_at = db.DateTimeField()
-    archived = db.StringField()
-
-
-class ResourceHarvestExtras(db.EmbeddedDocument):
-    created_at = db.DateTimeField()
-    modified = db.DateTimeField()
-
-
-Dataset.protected_extras.register('harvest', HarvestExtras)
-ResourceMixin.protected_extras.register('harvest', ResourceHarvestExtras)
-
-
 HARVEST_FREQUENCIES = OrderedDict((
     ('manual', _('Manual')),
     ('monthly', _('Monthly')),

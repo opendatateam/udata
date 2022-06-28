@@ -14,6 +14,7 @@ from rdflib.namespace import RDF
 
 from udata import i18n, uris
 from udata.frontend.markdown import parse_html
+from udata.harvest.extras import HarvestExtrasFactory
 from udata.models import db
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
@@ -364,8 +365,6 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     resource.description = sanitize_html(distrib.value(DCT.description))
     resource.filesize = rdf_value(distrib, DCAT.bytesSize)
     resource.mime = rdf_value(distrib, DCAT.mediaType)
-    if not resource.protected_extras.get('harvest'):
-        resource.protected_extras['harvest'] = {}
     fmt = rdf_value(distrib, DCT.format)
     if fmt:
         resource.format = fmt.lower()
@@ -378,23 +377,17 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
 
-    dct_issued = rdf_value(distrib, DCT.issued)
-    if dct_issued:
-        if isinstance(dct_issued, date):
-            dct_issued = datetime.combine(dct_issued, datetime.min.time())
-        resource.protected_extras['harvest']['created_at'] = dct_issued
-    dct_modified = rdf_value(distrib, DCT.modified)
-    if dct_modified:
-        if isinstance(dct_modified, date):
-            dct_modified = datetime.combine(dct_modified, datetime.min.time())
-        resource.protected_extras['harvest']['modified'] = dct_modified
-
     identifier = rdf_value(distrib, DCT.identifier)
-    if identifier:
-        resource.protected_extras['dct:identifier'] = identifier
 
     if isinstance(distrib.identifier, URIRef):
-        resource.protected_extras['uri'] = distrib.identifier.toPython()
+        uri = distrib.identifier.toPython()
+
+    resource.protected_extras['harvest'] = HarvestExtrasFactory.set_extras(
+        resource.protected_extras,
+        rdf=distrib,
+        dct_identifier=identifier,
+        uri=uri
+    )
 
     return resource
 
@@ -415,19 +408,6 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    if not dataset.protected_extras.get('harvest'):
-        dataset.protected_extras['harvest'] = {}
-
-    dct_issued = rdf_value(d, DCT.issued)
-    if dct_issued:
-        if isinstance(dct_issued, date):
-            dct_issued = datetime.combine(dct_issued, datetime.min.time())
-        dataset.protected_extras['harvest']['created_at'] = dct_issued
-    dct_modified = rdf_value(d, DCT.modified)
-    if dct_modified:
-        if isinstance(dct_modified, date):
-            dct_modified = datetime.combine(dct_modified, datetime.min.time())
-        dataset.protected_extras['harvest']['last_modified'] = dct_modified
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
@@ -436,21 +416,6 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
     tags += [theme.toPython() for theme in d.objects(DCAT.theme) if not isinstance(theme, RdfResource)]
     dataset.tags = list(set(tags))
-
-    identifier = rdf_value(d, DCT.identifier)
-    if identifier:
-        dataset.protected_extras['dct:identifier'] = identifier
-
-    if isinstance(d.identifier, URIRef):
-        dataset.protected_extras['uri'] = d.identifier.toPython()
-
-    landing_page = url_from_rdf(d, DCAT.landingPage)
-    if landing_page:
-        try:
-            uris.validate(landing_page)
-            dataset.protected_extras['remote_url'] = landing_page
-        except uris.ValidationError:
-            pass
 
     dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
@@ -467,5 +432,15 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     default_license = dataset.license or License.default()
     dataset_license = rdf_value(d, DCT.license)
     dataset.license = License.guess(dataset_license, *licenses, default=default_license)
+
+    identifier = rdf_value(d, DCT.identifier)
+    uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
+
+    dataset.protected_extras['harvest'] = HarvestExtrasFactory.set_extras(
+        dataset.protected_extras,
+        rdf=d,
+        dct_identifier=identifier,
+        uri=uri
+    )
 
     return dataset

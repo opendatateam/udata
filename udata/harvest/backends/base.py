@@ -14,6 +14,7 @@ from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import HarvestItem, HarvestJob, HarvestError
+from ..extras import HarvestExtrasFactory
 from ..signals import before_harvest_job, after_harvest_job
 
 log = logging.getLogger(__name__)
@@ -185,18 +186,18 @@ class BaseBackend(object):
 
         try:
             dataset = self.process(item)
-            if not dataset.protected_extras.get('harvest'):
-                dataset.protected_extras['harvest'] = {}
-            dataset.protected_extras['harvest']['source_id'] = str(self.source.id)
-            dataset.protected_extras['harvest']['remote_id'] = item.remote_id
-            dataset.protected_extras['harvest']['domain'] = self.source.domain
-            dataset.protected_extras['harvest']['last_update'] = datetime.now().isoformat()
+
+            extras = HarvestExtrasFactory.set_extras(
+                domain=self.source.domain,
+                remote_id=item.remote_id,
+                source_id=self.source_id,
+                last_update=datetime.now().isoformat()
+            )
+            dataset.protected_extras = extras
 
             # unset archived status if needed
-            if dataset.protected_extras.get('harvest', {}).get('archived_at'):
-                dataset.protected_extras['harvest'].pop('archived_at')
-                dataset.protected_extras['harvest'].pop('archived')
-                dataset.archived = None
+            HarvestExtrasFactory.unset_extras(archived_at=True, archived=True)
+            dataset.archived = None
 
             # TODO permissions checking
             if not dataset.organization and not dataset.owner:
@@ -255,8 +256,12 @@ class BaseBackend(object):
                 log.debug('Archiving dataset %s', dataset.id)
                 archival_date = datetime.now()
                 dataset.archived = archival_date
-                dataset.protected_extras['harvest']['archived'] = 'not-on-remote'
-                dataset.protected_extras['harvest']['archived_at'] = archival_date
+
+                dataset.protected_extras['harvest'] = HarvestExtrasFactory.set_extras(
+                    dataset.protected_extras,
+                    archived='not-on-remote',
+                    archived_at=archival_date
+                )
                 if self.dryrun:
                     dataset.validate()
                 else:
@@ -264,7 +269,7 @@ class BaseBackend(object):
 
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            item = self.add_item(dataset.protected_extras['harvest']['remote_id'])
+            item = self.add_item(dataset.protected_extras['harvest'].remote_id)
             item.dataset = dataset
             item.status = 'archived'
 

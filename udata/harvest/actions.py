@@ -15,6 +15,7 @@ from .models import (
     HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
     VALIDATION_ACCEPTED, VALIDATION_REFUSED
 )
+from .extras import HarvestExtrasFactory
 from .tasks import harvest
 
 log = logging.getLogger(__name__)
@@ -285,10 +286,9 @@ def attach(domain, filename):
                 'unset__protected_extras__harvest__remote_id': True
             })
 
-            if not dataset.protected_extras.get('harvest'):
-                dataset.protected_extras['harvest'] = {}
-            dataset.protected_extras['harvest']['domain'] = domain
-            dataset.protected_extras['harvest']['remote_id'] = row['remote']
+            extras = HarvestExtrasFactory(domain=domain, remote_id=row['remote'])
+            dataset.protected_extras = extras
+
             dataset.last_modified = datetime.now()
             dataset.save()
             count += 1
