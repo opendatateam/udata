@@ -15,6 +15,7 @@
 {% endif %}
 <meta property="og:description" content="{{ description }}" />
 <meta property="og:image" content="{{ image }}" />
+<meta name="static-root" content="{{ static('', _burst=False) }}" />
 <meta name="api-root" content="{{ url_for('api.root') }}" />
 <meta name="admin-root" content="{{ url_for('admin.index') }}" />
 <meta name="api-specs" content="{{ url_for('api.specs', _external=True) }}"/>
