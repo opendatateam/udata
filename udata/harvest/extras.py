@@ -1,6 +1,6 @@
 from udata.models import db
 
-from udata.core.dataset.models import Dataset, ResourceMixin
+from udata.core.dataset.models import Dataset
 # from udata.core.dataset.rdf import (
 #     dct_issued_from_rdf, dct_modified_from_rdf, landing_page_from_rdf
 # )
@@ -9,111 +9,59 @@ from udata.core.dataset.models import Dataset, ResourceMixin
 # TODO: how to register additionnal extras (used in plugins for example)
 
 
-def dct_modified_from_rdf(rdf):
-    dct_modified = rdf_value(rdf, DCT.modified)
-    if dct_modified:
-        if isinstance(dct_modified, date):
-            dct_modified = datetime.combine(dct_modified, datetime.min.time())
-        return dct_modified
+Dataset.harvest.register('source_id', db.StringField)
+Dataset.harvest.register('remote_id', db.StringField)
+Dataset.harvest.register('domain', db.StringField)
+Dataset.harvest.register('last_update', db.DateTimeField)
+Dataset.harvest.register('remote_url', db.URLField)
 
-
-def dct_issued_from_rdf(rdf):
-    dct_issued = rdf_value(rdf, DCT.issued)
-    if dct_issued:
-        if isinstance(dct_issued, date):
-            dct_issued = datetime.combine(dct_issued, datetime.min.time())
-        return dct_issued
-
-
-def landing_page_from_rdf(rdf):
-    landing_page = url_from_rdf(rdf, DCAT.landingPage)
-    if landing_page:
-        try:
-            uris.validate(landing_page)
-            return landing_page
-        except uris.ValidationError:
-            pass
-
-
-class HarvestExtras(db.EmbeddedDocument):
-    source_id = db.StringField()
-    remote_id = db.StringField()
-    domain = db.StringField()
-    remote_url = db.URLField()
-    last_update = db.DateTimeField()
-    created_at = db.DateTimeField()
-    last_modified = db.DateTimeField()
-    archived_at = db.DateTimeField()
-    archived = db.StringField()
-
-
-class ResourceHarvestExtras(db.EmbeddedDocument):
-    created_at = db.DateTimeField()
-    modified = db.DateTimeField()
-
-
-Dataset.protected_extras.register('harvest', HarvestExtras)
-ResourceMixin.protected_extras.register('harvest', ResourceHarvestExtras)
+Dataset.harvest.register('uri', db.StringField)
+Dataset.harvest.register('dct:identifier', db.StringField)
 
 
 class HarvestExtrasFactory():
     @staticmethod
-    def set_extras(protected_extras=None, rdf=None, domain=None, remote_id=None, source_id=None,
-                   last_update=None, archived_at=None, archived=None, dct_identifier=None,
-                   uri=None):
+    def set_extras(harvest=None, created_at=None, last_modified=None, domain=None, remote_id=None,
+                   source_id=None, landing_page=None, last_update=None, archived_at=None,
+                   archived=None, dct_identifier=None, uri=None):
 
         # Should we set values or just create the corresponding object?
-        # TODO: rename accordingly
+        # TODO: rename accordingly and protect existing extras
 
-        if 'harvest' not in protected_extras:
-            protected_extras['harvest'] = HarvestExtras()
-        harvest_extras = protected_extras['harvest'].copy()
+        if not harvest:
+            harvest = {}
 
-        if rdf:
-            created_at = dct_issued_from_rdf(rdf)
-            if created_at:
-                harvest_extras.created_at = created_at
-
-            last_modified = dct_modified_from_rdf(rdf)
-            if last_modified:
-                harvest_extras.last_modified = last_modified
-
-            landing_page = landing_page_from_rdf(rdf)
-            if landing_page:
-                harvest_extras.remote_url = landing_page
-
+        if created_at:
+            harvest['created_at'] = created_at
+        if last_modified:
+            harvest['last_modified'] = last_modified
+        if landing_page:
+            harvest['remote_url'] = landing_page
         if domain:
-            harvest_extras.domain = domain
-
+            harvest['domain'] = domain
         if remote_id:
-            harvest_extras.remote_id = remote_id
-
+            harvest['remote_id'] = remote_id
         if source_id:
-            harvest_extras.source_id = source_id
-
+            harvest['source_id'] = source_id
         if last_update:
-            harvest_extras.last_update = last_update
-
+            harvest['last_update'] = last_update
         if archived_at:
-            harvest_extras.archived_at = archived_at
-
+            harvest['archived_at'] = archived_at
         if archived:
-            harvest_extras.archived = archived
-
+            harvest['archived'] = archived
         if dct_identifier:
-            harvest_extras.dct_identifier = dct_identifier
-
+            harvest['dct:identifier'] = dct_identifier
         if uri:
-            harvest_extras.uri = uri
+            harvest['uri'] = uri
 
-        harvest_extras.validate()
-        return harvest_extras
+        # harvest.validate()
+        return harvest
 
     @staticmethod
-    def unset_extras(protected_extras, archived_at=False, archived=False):
-        if 'harvest' not in protected_extras:
+    def unset_extras(harvest, archived_at=False, archived=False):
+        if 'harvest' not in harvest:
             return
-        harvest_extras = protected_extras['harvest'].copy()
+        harvest_extras = harvest['harvest'].copy()
 
         if archived_at:
             harvest_extras.archived_at = None
@@ -122,9 +70,3 @@ class HarvestExtrasFactory():
             harvest_extras.archived = None
 
         return harvest_extras
-
-
-# protected_extras = FactoryExtras(read_only_protected_extras, parse_distrib, moissonneur, distrib, )
-# dataset.protected_extras = protected_extras
-# dataset.save()
-

@@ -267,6 +267,7 @@ class ResourceMixin(object):
     extras = db.ExtrasField()
     protected_extras = db.ExtrasField()  # protected extras, admin only
     _extras = db.ExtrasField()  # protected extras, admin only
+    harvest = db.ExtrasField()  # harvest extras
     schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
@@ -338,11 +339,11 @@ class ResourceMixin(object):
 
     @property
     def created_at_public(self):
-        return self.protected_extras['harvest:created_at'] or self.created_at
+        return self.harvest.get('created_at') or self.created_at
 
     @property
     def modified_public(self):
-        return self.protected_extras['harvest:modified'] or self.modified
+        return self.harvest.get('modified') or self.modified
 
     # @property
     # def published(self):
@@ -448,6 +449,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     protected_extras = db.ExtrasField()  # protected extras, admin only
     _extras = db.ExtrasField()  # protected extras, admin only
+    harvest = db.ExtrasField()  # harvest extras
 
     featured = db.BooleanField(required=True, default=False)
 

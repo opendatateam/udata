@@ -190,13 +190,13 @@ class BaseBackend(object):
             extras = HarvestExtrasFactory.set_extras(
                 domain=self.source.domain,
                 remote_id=item.remote_id,
-                source_id=self.source_id,
+                source_id=str(self.source.id),
                 last_update=datetime.now().isoformat()
             )
-            dataset.protected_extras = extras
+            dataset.harvest = extras
 
             # unset archived status if needed
-            HarvestExtrasFactory.unset_extras(archived_at=True, archived=True)
+            HarvestExtrasFactory.unset_extras(dataset.harvest, archived_at=True, archived=True)
             dataset.archived = None
 
             # TODO permissions checking
@@ -245,20 +245,20 @@ class BaseBackend(object):
         limit_date = date.today() - timedelta(days=limit_days)
         remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
         q = {
-            'protected_extras__harvest__source_id': str(self.source.id),
-            'protected_extras__harvest__remote_id__nin': remote_ids,
-            'protected_extras__harvest__last_update__lt': limit_date.isoformat()
+            'harvest__source_id': str(self.source.id),
+            'harvest__remote_id__nin': remote_ids,
+            'harvest__last_update__lt': limit_date.isoformat()
         }
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
-            if not dataset.protected_extras.get('harvest', {}).get('archived_at'):
+            if not dataset.harvest.get('archived_at'):
                 log.debug('Archiving dataset %s', dataset.id)
                 archival_date = datetime.now()
                 dataset.archived = archival_date
 
-                dataset.protected_extras['harvest'] = HarvestExtrasFactory.set_extras(
-                    dataset.protected_extras,
+                dataset.harvest = HarvestExtrasFactory.set_extras(
+                    dataset.harvest,
                     archived='not-on-remote',
                     archived_at=archival_date
                 )
@@ -269,7 +269,7 @@ class BaseBackend(object):
 
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            item = self.add_item(dataset.protected_extras['harvest'].remote_id)
+            item = self.add_item(dataset.harvest['remote_id'])
             item.dataset = dataset
             item.status = 'archived'
 
@@ -303,10 +303,10 @@ class BaseBackend(object):
         We first try to match `source_id` to be source domain independent
         '''
         dataset = Dataset.objects(__raw__={
-            'protected_extras.harvest.remote_id': remote_id,
+            'harvest.remote_id': remote_id,
             '$or': [
-                {'protected_extras.harvest.domain': self.source.domain},
-                {'protected_extras.harvest.source_id': str(self.source.id)},
+                {'harvest.domain': self.source.domain},
+                {'harvest.source_id': str(self.source.id)},
             ],
         }).first()
         return dataset or Dataset()

@@ -71,10 +71,6 @@ EU_RDF_REQUENCIES = {
 }
 
 
-Dataset.protected_extras.register('uri', db.StringField)
-Dataset.protected_extras.register('dct:identifier', db.StringField)
-
-
 class HTMLDetector(HTMLParser):
     def __init__(self, *args, **kwargs):
         HTMLParser.__init__(self, *args, **kwargs)
@@ -165,16 +161,16 @@ def dataset_to_rdf(dataset, graph=None):
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if 'uri' in dataset.protected_extras:
-        id = URIRef(dataset.protected_extras['uri'])
+    if 'uri' in dataset.harvest:
+        id = URIRef(dataset.harvest['uri'])
     elif dataset.id:
         id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
                     dataset=dataset.id, _external=True))
     else:
         id = BNode()
     # Expose upstream identifier if present
-    if 'dct:identifier' in dataset.protected_extras:
-        identifier = dataset.protected_extras['dct:identifier']
+    if 'dct:identifier' in dataset.harvest:
+        identifier = dataset.harvest['dct:identifier']
     else:
         identifier = dataset.id
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -335,6 +331,32 @@ def title_from_rdf(rdf, url):
             return i18n._('Nameless resource')
 
 
+def dct_modified_from_rdf(rdf):
+    dct_modified = rdf_value(rdf, DCT.modified)
+    if dct_modified:
+        if isinstance(dct_modified, date):
+            dct_modified = datetime.combine(dct_modified, datetime.min.time())
+        return dct_modified
+
+
+def dct_issued_from_rdf(rdf):
+    dct_issued = rdf_value(rdf, DCT.issued)
+    if dct_issued:
+        if isinstance(dct_issued, date):
+            dct_issued = datetime.combine(dct_issued, datetime.min.time())
+        return dct_issued
+
+
+def landing_page_from_rdf(rdf):
+    landing_page = url_from_rdf(rdf, DCAT.landingPage)
+    if landing_page:
+        try:
+            uris.validate(landing_page)
+            return landing_page
+        except uris.ValidationError:
+            pass
+
+
 def resource_from_rdf(graph_or_distrib, dataset=None):
     '''
     Map a Resource domain model to a DCAT/RDF graph
@@ -382,9 +404,13 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     if isinstance(distrib.identifier, URIRef):
         uri = distrib.identifier.toPython()
 
-    resource.protected_extras['harvest'] = HarvestExtrasFactory.set_extras(
-        resource.protected_extras,
-        rdf=distrib,
+    created_at = dct_issued_from_rdf(distrib)
+    last_modified = dct_modified_from_rdf(distrib)
+
+    resource.harvest = HarvestExtrasFactory.set_extras(
+        resource.harvest,
+        created_at=created_at,
+        last_modified=last_modified,
         dct_identifier=identifier,
         uri=uri
     )
@@ -435,10 +461,15 @@ def dataset_from_rdf(graph, dataset=None, node=None):
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
+    landing_page = landing_page_from_rdf(d)
+    created_at = dct_issued_from_rdf(d)
+    last_modified = dct_modified_from_rdf(d)
 
-    dataset.protected_extras['harvest'] = HarvestExtrasFactory.set_extras(
-        dataset.protected_extras,
-        rdf=d,
+    dataset.harvest = HarvestExtrasFactory.set_extras(
+        dataset.harvest,
+        created_at=created_at,
+        last_modified=last_modified,
+        landing_page=landing_page,
         dct_identifier=identifier,
         uri=uri
     )
