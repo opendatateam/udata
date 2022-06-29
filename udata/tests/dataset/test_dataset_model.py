@@ -138,7 +138,6 @@ class DatasetModelTest:
             'temporal_coverage': False,
             'spatial': False,
             'update_frequency': False,
-            'tags_count': False,
             'dataset_description_quality': False,
             'score': 0
         }
@@ -147,16 +146,7 @@ class DatasetModelTest:
         dataset = DatasetFactory(description='', frequency='weekly')
         assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['update_frequency'] is True
-        assert dataset.quality['score'] == 1
-
-    def test_quality_tags_count(self):
-        tags_count = current_app.config.get('QUALITY_TAGS_COUNT')
-        dataset = DatasetFactory(description='', tags=[faker.word() for _ in range(0, (tags_count - 1))])
-        assert dataset.quality['tags_count'] is False
-        assert dataset.quality['score'] == 0
-        dataset = DatasetFactory(description='', tags=[faker.word() for _ in range(0, (tags_count + 1))])
-        assert dataset.quality['tags_count'] is True
-        assert dataset.quality['score'] == 1
+        assert dataset.quality['score'] == 2
 
     def test_quality_description_length(self):
         dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
@@ -166,24 +156,24 @@ class DatasetModelTest:
         assert dataset.quality['dataset_description_quality'] is True
         assert dataset.quality['score'] == 1
 
-    def test_quality_has_only_closed_formats(self):
+    def test_quality_has_open_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
-        assert dataset.quality['has_only_closed_or_no_formats']
+        assert not dataset.quality['has_open_format']
         assert dataset.quality['score'] == 2
 
     def test_quality_has_opened_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
-        assert not dataset.quality['has_only_closed_or_no_formats']
+        assert dataset.quality['has_open_format']
         assert dataset.quality['score'] == 3
 
     def test_quality_has_undefined_and_closed_format(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format=None))
         dataset.add_resource(ResourceFactory(format='xls'))
-        assert dataset.quality['has_only_closed_or_no_formats']
+        assert not dataset.quality['has_open_format']
         assert dataset.quality['score'] == 2
 
     def test_quality_all(self):
@@ -191,17 +181,16 @@ class DatasetModelTest:
         dataset = DatasetFactory(owner=user, frequency='weekly',
                                  tags=['foo', 'bar'], description='a' * 42)
         dataset.add_resource(ResourceFactory(format='pdf'))
-        assert dataset.quality['score'] == 3
+        assert dataset.quality['score'] == 4
         assert sorted(dataset.quality.keys()) == [
             'dataset_description_quality',
-            'has_only_closed_or_no_formats',
+            'has_open_format',
             'has_resources',
             'has_unavailable_resources',
             'license',
             'resources_documentation',
             'score',
             'spatial',
-            'tags_count',
             'temporal_coverage',
             'update_frequency',
             'update_fulfilled_in_time'

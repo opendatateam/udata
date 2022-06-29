@@ -612,10 +612,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             # Quality is only relevant on saved Datasets
             return result
 
+        result['license'] = True if self.license else False
         result['temporal_coverage'] = True if self.temporal_coverage else False
         result['spatial'] = True if self.spatial else False
 
-        result['update_frequency'] = True if self.frequency in ['unknown', 'irregular', 'punctual'] else False
+        result['update_frequency'] = False if self.frequency in ['unknown', 'irregular', 'punctual'] else True
         if self.next_update:
             result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days < 0 else False
 
@@ -643,6 +644,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         """Compute the score related to the quality of that dataset."""
         score = 0
         UNIT = 1
+        if quality['license']:
+            score += UNIT
         if quality['temporal_coverage']:
             score += UNIT
         if quality['spatial']:
