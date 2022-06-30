@@ -38,15 +38,6 @@ def static_global(filename, _burst=True, **kwargs):
     return assets.cdn_for('static', filename=filename, **kwargs)
 
 
-@hook.app_template_filter()
-@hook.app_template_global()
-def to_json(data):
-    '''Convert data to JSON, you may have to use |safe after it.'''
-    if not data:
-        return Markup('')
-    return json.dumps(data)
-
-
 def _wrapper(func, name=None, when=None):
     name = name or func.__name__
     if name not in _template_hooks:
