@@ -626,8 +626,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             result['has_resources'] = True
             result['has_open_format'] = not all(
                 resource.closed_or_no_format for resource in self.resources)
-            result['has_unavailable_resources'] = not all(
-                self.check_availability())
+            result['all_resources_available'] = all(self.check_availability())
             resource_doc = False
             resource_desc = False
             for resource in self.resources:
@@ -660,7 +659,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if 'has_resources' in quality:
             if quality['has_open_format']:
                 score += UNIT
-            if not quality['has_unavailable_resources']:
+            if quality['all_resources_available']:
                 score += UNIT
             if quality['resources_documentation']:
                 score += UNIT

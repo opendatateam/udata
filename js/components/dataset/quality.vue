@@ -12,15 +12,8 @@
         <p>{{ _('Try to be as descriptive as you can for your resources (how you use it yourself, which edge cases you solved, what data is missing and so on).') }}</p>
     </qa-section>
 
-    <qa-section :title="_('Tags')"
-        :condition="quality.tags_count"
-        :ok="_('That is great!')"
-        :ko="_('Why not add some more?')">
-        <p>{{ _('Tags helps your reusers to find your resources, that is very important to make your dataset popular.') }} </p>
-    </qa-section>
-
     <qa-section :title="_('Open formats')"
-        :condition="!quality.has_only_closed_or_no_formats"
+        :condition="quality.has_open_format"
         :ok="_('You currently have some open formats!')"
         :ko="_('You only have closed formats or no format defined. Can you fill the format info or export some resources in an open format?')">
         <p>{{ _('The open data community enjoy using files in open formats that can be manipulated easily through open software and tools. Make sure you publish your data at least in formats different from XLS, DOC and PDF.') }}</p>
@@ -33,14 +26,14 @@
     </qa-section>
 
     <qa-section :title="_('Up-to-date')"
-        :condition="quality.update_fulfilled_in_time"
+        :condition="quality.update_frequency && quality.update_fulfilled_in_time"
         :ok="_('That is great!')"
         :ko="_('The data does not seem to be up-to-date according to the chosen update frequency.')">
         <p>{{ _('Proposing up-to-date and incremental data makes it possible for reusers to establish datavisualisations on the long term.') }}</p>
     </qa-section>
 
     <qa-section :title="_('Availability')" v-if="quality.has_resources"
-        :condition="!quality.has_unavailable_resources"
+        :condition="quality.all_resources_available"
         :ok="_('All your resources seem to be directly available. That is great!')"
         :ko="_('Some of your resources may have broken links or temporary unavailability. Try to fix it as fast as you can (see the list below).')">
         <p>{{ _('The availability of your distant resources (if any) is crucial for reusers. They trust you for the reliability of these data both in terms of reachability and ease of access.') }}</p>

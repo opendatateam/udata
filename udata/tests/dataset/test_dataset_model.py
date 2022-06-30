@@ -186,7 +186,7 @@ class DatasetModelTest:
             'dataset_description_quality',
             'has_open_format',
             'has_resources',
-            'has_unavailable_resources',
+            'all_resources_available',
             'license',
             'resources_documentation',
             'score',
