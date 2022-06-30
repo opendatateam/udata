@@ -183,10 +183,10 @@ class DatasetModelTest:
         dataset.add_resource(ResourceFactory(format='pdf'))
         assert dataset.quality['score'] == 4
         assert sorted(dataset.quality.keys()) == [
+            'all_resources_available',
             'dataset_description_quality',
             'has_open_format',
             'has_resources',
-            'all_resources_available',
             'license',
             'resources_documentation',
             'score',
