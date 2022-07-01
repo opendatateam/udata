@@ -14,7 +14,12 @@ def consume_message_resource_analysed(key, value):
     if resource:
         # TODO: add extra logic here
         for entry in value['value']:
-            if value['value'][entry]:
+            if entry == 'location' and isinstance(value['value'][entry], dict):
+                resource.extras['analysis:location'] = '/'.join([
+                    value['value']['location']['url'].strip('/'),
+                    value['value']['location']['bucket'],
+                    value['value']['location']['key']])
+            elif value['value'][entry]:
                 resource.extras[f'analysis:{entry}'] = value['value'][entry]
         resource.save()
     else:
@@ -29,7 +34,7 @@ def consume_message_resource_stored(key, value):
     resource = get_resource(UUID(key))
     if resource:
         resource.extras['stored:location'] = '/'.join([
-            value['value']['location']['netloc'],
+            value['value']['location']['netloc'].strip('/'),
             value['value']['location']['bucket'],
             value['value']['location']['key']])
         resource.save()
