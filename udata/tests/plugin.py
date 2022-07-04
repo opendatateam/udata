@@ -146,6 +146,11 @@ def enable_kafka(app):
     app.config['KAFKA_URI'] = 'localhost:9092'
 
 
+@pytest.fixture
+def quality_unit(app):
+    return app.config.get('QUALITY_MAX_SCORE') / app.config.get('QUALITY_CHECKS_NUMBER')
+
+
 class ApiClient(object):
     def __init__(self, client):
         self.client = client

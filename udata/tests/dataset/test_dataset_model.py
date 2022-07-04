@@ -142,46 +142,46 @@ class DatasetModelTest:
             'score': 0
         }
 
-    def test_quality_next_update(self):
+    def test_quality_next_update(self, quality_unit):
         dataset = DatasetFactory(description='', frequency='weekly')
         assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['update_frequency'] is True
-        assert dataset.quality['score'] == 2
+        assert dataset.quality['score'] == quality_unit * 2
 
-    def test_quality_description_length(self):
+    def test_quality_description_length(self, quality_unit):
         dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
         assert dataset.quality['dataset_description_quality'] is False
         assert dataset.quality['score'] == 0
         dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') + 1))
         assert dataset.quality['dataset_description_quality'] is True
-        assert dataset.quality['score'] == 1
+        assert dataset.quality['score'] == quality_unit
 
-    def test_quality_has_open_formats(self):
+    def test_quality_has_open_formats(self, quality_unit):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         assert not dataset.quality['has_open_format']
-        assert dataset.quality['score'] == 2
+        assert dataset.quality['score'] == quality_unit * 2
 
-    def test_quality_has_opened_formats(self):
+    def test_quality_has_opened_formats(self, quality_unit):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
         assert dataset.quality['has_open_format']
-        assert dataset.quality['score'] == 3
+        assert dataset.quality['score'] == quality_unit * 3
 
-    def test_quality_has_undefined_and_closed_format(self):
+    def test_quality_has_undefined_and_closed_format(self, quality_unit):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format=None))
         dataset.add_resource(ResourceFactory(format='xls'))
         assert not dataset.quality['has_open_format']
-        assert dataset.quality['score'] == 2
+        assert dataset.quality['score'] == quality_unit * 2
 
-    def test_quality_all(self):
+    def test_quality_all(self, quality_unit):
         user = UserFactory()
         dataset = DatasetFactory(owner=user, frequency='weekly',
                                  tags=['foo', 'bar'], description='a' * 42)
         dataset.add_resource(ResourceFactory(format='pdf'))
-        assert dataset.quality['score'] == 4
+        assert dataset.quality['score'] == quality_unit * 4
         assert sorted(dataset.quality.keys()) == [
             'all_resources_available',
             'dataset_description_quality',
