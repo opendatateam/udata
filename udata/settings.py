@@ -416,7 +416,7 @@ class Defaults(object):
     # Datasets quality settings
     ###########################################################################
     QUALITY_DESCRIPTION_LENGTH = 100
-    QUALITY_TAGS_COUNT = 3
+    QUALITY_MAX_SCORE = 10
 
 
 class Testing(object):

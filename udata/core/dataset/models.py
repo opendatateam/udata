@@ -642,7 +642,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     def compute_quality_score(self, quality):
         """Compute the score related to the quality of that dataset."""
         score = 0
-        UNIT = 1
+        UNIT = current_app.config.get('QUALITY_MAX_SCORE') / 9
         if quality['license']:
             score += UNIT
         if quality['temporal_coverage']:
@@ -663,8 +663,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                 score += UNIT
             if quality['resources_documentation']:
                 score += UNIT
-        if score < 0:
-            return 0
         return score
 
     @classmethod

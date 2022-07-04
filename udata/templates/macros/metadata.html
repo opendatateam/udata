@@ -62,6 +62,7 @@
     'MAX_LENGTH': config.TAG_MAX_LENGTH,
 }|tojson|urlencode }}" />
 <meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
+<meta name="quality-max-score" content="{{ config.QUALITY_MAX_SCORE }}">
 
 {% if json_ld %}
 <script id="json_ld" type="application/ld+json">{{ json_ld|embedded_json_ld }}</script>

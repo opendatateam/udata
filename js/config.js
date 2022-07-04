@@ -165,6 +165,8 @@ export const search_autocomplete_debounce = _jsonMeta('search-autocomplete-debou
  */
 export const read_only_enabled = _jsonMeta('read-only-enabled');
 
+export const quality_max_score = _jsonMeta('quality-max-score');
+
 
 export default {
     user,
@@ -190,4 +192,5 @@ export default {
     search_autocomplete_debounce,
     markdown,
     read_only_enabled,
+    quality_max_score,
 };
