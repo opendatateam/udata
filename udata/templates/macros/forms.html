@@ -1,6 +1,5 @@
 {% macro render(form, exclude=None) %}
 {% set excluded = exclude or [] %}
-<fieldset>
 {% for f in form %}
     {% if f in excluded %}
     {% elif f.type in ('CSRFTokenField', 'HiddenField') %}
@@ -9,24 +8,15 @@
         {{ field(f) }}
     {% endif %}
 {% endfor %}
-</fieldset>
 {% endmacro %}
 
 {% macro field(f, sizes='sm-2,md-3') %}
-<fieldset>
-    {% if f.subfield %}
-      {% for subfield in f %}
-      {{ field(subfield, sizes) }}
-      {% endfor %}
-    {% endif %}
-</fieldset>
-{% set cols = form_grid(sizes) %}
 <div class="form-group{% if f.errors %} has-error{% endif %}">
     <label for="{{ f.id }}"
-        class="{{ cols.label }} control-label{% if f.flags.required %} required{% endif %}">
-        {{ f.label.text }}
+        class="control-label{% if f.flags.required %} required{% endif %}">
+        {{ f.label.text }}
     </label>
-    <div class="field-wrapper {{ cols.control }}">
+    <div class="field-wrapper">
         {% if f.type == 'RadioField' %}
         {{ radio(f) }}
         {% elif f.type == 'BooleanField' %}
@@ -93,18 +83,5 @@
         {{ field() }}
         {{ _(label) }}
     </label>
-</div>
-{% endmacro %}
-
-
-{% macro required_disclaimer(sizes='sm-2') %}
-{% set cols = form_grid(sizes) %}
-<div class="form-group">
-    <div class="{{ cols.offset }} {{ cols.control }}">
-        <p class="form-control-static">
-            <span class="red">*</span>
-            <i>{{ _('required fields') }}</i>
-        </p>
-    </div>
 </div>
 {% endmacro %}
