@@ -1,13 +1,13 @@
 {% macro metadata(meta) %}
 {% set title = meta.title or _('Home') %}
 {% set description = meta.description or _('Share, improve and reuse public data') %}
-{% set image = meta.image or theme_static('img/logo-social.png', external=True) %}
+{% set image = meta.image %}
 {% set keywords = meta.keywords or [] %}
 {% set meta_type = meta.type or 'website' %}
 <meta charset="utf-8" />
-<title>{{ title }} - {{ current_site.title }}</title>
+<title>{{ title }}</title>
 <meta property="og:type" content="{{ meta_type }}" />
-<meta property="og:title" content="{{ title }} - {{ current_site.title }}" />
+<meta property="og:title" content="{{ title }}" />
 <link rel="author" href="{{ config.SITE_AUTHOR_URL }}" />
 <meta name="description" content="{{ description }}" />
 {% if config.DISALLOW_INDEXING %}<meta name="robots" content="noindex,nofollow" />
@@ -15,8 +15,6 @@
 {% endif %}
 <meta property="og:description" content="{{ description }}" />
 <meta property="og:image" content="{{ image }}" />
-<meta name="keywords" content="{{ ', '.join(current_site.keywords + keywords) }}" />
-<meta name="theme-static-root" content="{{ theme_static('') }}" />
 <meta name="static-root" content="{{ static('', _burst=False) }}" />
 <meta name="api-root" content="{{ url_for('api.root') }}" />
 <meta name="admin-root" content="{{ url_for('admin.index') }}" />
@@ -24,7 +22,6 @@
 <meta name="apiv2-specs" content="{{ url_for('apiv2.specs', _external=True) }}"/>
 <meta name="auth-url" content="{{ url_for('security.login') }}" />
 <meta name="github" content="{{ config.SITE_GITHUB_URL }}" />
-{{ i18n_alternate_links() }}
 {% if config.SENTRY_PUBLIC_DSN %}
 <meta name="sentry" content="{{config.SENTRY_PUBLIC_DSN}}"
     data-release="{{config.SENTRY_RELEASE}}"
@@ -62,9 +59,5 @@
     'MAX_LENGTH': config.TAG_MAX_LENGTH,
 }|tojson|urlencode }}" />
 <meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
-
-{% if json_ld %}
-<script id="json_ld" type="application/ld+json">{{ json_ld|embedded_json_ld }}</script>
-{% endif %}
 
 {% endmacro %}
