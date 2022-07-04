@@ -128,9 +128,9 @@
   "Spatial granularity": "Spatial granularity",
   "Finest level of geographic detail covered by data.": "Finest level of geographic detail covered by data.",
   "Ex. 2022 presidential election": "Ex. 2022 presidential election",
-  "Private": "",
-  "Updated on {date}": "",
-  "{n} reuses": "",
-  "{n} favorites": "",
-  "The identity of this public service is certified by {certifier}": ""
+  "Private": "Private",
+  "Updated on {date}": "Updated on {date}",
+  "{n} favorites": "{n} favorites | {n} favorite | {n} favorites",
+  "The identity of this public service is certified by {certifier}": "The identity of this public service is certified by {certifier}",
+  "{n} reuses": "{n} reuses | {n} reuse | {n} reuses"
 }
