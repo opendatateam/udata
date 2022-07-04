@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata-front\n"
 "Report-Msgid-Bugs-To: data.gouv@data.gouv.fr\n"
-"POT-Creation-Date: 2022-06-22 10:05+0200\n"
-"PO-Revision-Date: 2022-07-04 07:58\n"
+"POT-Creation-Date: 2022-07-04 11:36+0200\n"
+"PO-Revision-Date: 2022-07-04 09:42\n"
 "Last-Translator: Data.gouv.fr Team <data.gouv@data.gouv.fr>\n"
 "Language: es\n"
 "Language-Team: Spanish\n"
@@ -57,10 +57,10 @@ msgstr "Datos"
 #: udata_front/theme/gouvfr/templates/dataset/list.html:26
 #: udata_front/theme/gouvfr/templates/home.html:70
 #: udata_front/theme/gouvfr/templates/organization/display.html:58
-#: udata_front/theme/gouvfr/templates/organization/display.html:120
+#: udata_front/theme/gouvfr/templates/organization/display.html:114
 #: udata_front/theme/gouvfr/templates/organization/list.html:30
-#: udata_front/theme/gouvfr/templates/page.html:39
-#: udata_front/theme/gouvfr/templates/post/display.html:79
+#: udata_front/theme/gouvfr/templates/page.html:37
+#: udata_front/theme/gouvfr/templates/post/display.html:77
 #: udata_front/theme/gouvfr/templates/reuse/display.html:31
 #: udata_front/theme/gouvfr/templates/reuse/list.html:6
 #: udata_front/theme/gouvfr/templates/reuse/list.html:16
@@ -456,14 +456,14 @@ msgid "metrics"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:165
-#: udata_front/theme/gouvfr/templates/organization/display.html:165
-#: udata_front/theme/gouvfr/templates/page.html:52
-#: udata_front/theme/gouvfr/templates/post/display.html:93
+#: udata_front/theme/gouvfr/templates/organization/display.html:159
+#: udata_front/theme/gouvfr/templates/page.html:50
+#: udata_front/theme/gouvfr/templates/post/display.html:91
 #: udata_front/theme/gouvfr/templates/reuse/display.html:121
 msgid "Actions"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/page.html:55
+#: udata_front/theme/gouvfr/templates/page.html:53
 msgid "Suggest a modification"
 msgstr ""
 
@@ -526,7 +526,7 @@ msgid "Maintainer"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/api/admin.html:31
-#: udata_front/theme/gouvfr/templates/post/display.html:100
+#: udata_front/theme/gouvfr/templates/post/display.html:98
 #: udata_front/theme/gouvfr/templates/user/base.html:23
 msgid "Edit"
 msgstr ""
@@ -648,7 +648,7 @@ msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:87
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:28
-#: udata_front/theme/gouvfr/templates/dataset/search-result.html:58
+#: udata_front/theme/gouvfr/templates/dataset/search-result.html:59
 #, python-format
 msgid "Updated on %(date)s"
 msgstr ""
@@ -705,7 +705,7 @@ msgid "Temporality"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/dataset/display.html:245
-#: udata_front/theme/gouvfr/templates/organization/display.html:155
+#: udata_front/theme/gouvfr/templates/organization/display.html:149
 #: udata_front/theme/gouvfr/templates/reuse/display.html:171
 msgid "Creation date"
 msgstr ""
@@ -907,6 +907,20 @@ msgstr ""
 #: udata_front/theme/gouvfr/templates/dataset/search-result.html:44
 msgid "From"
 msgstr ""
+
+#: udata_front/theme/gouvfr/templates/dataset/search-result.html:81
+#, python-format
+msgid "<strong class=\"fr-mr-1v\">%(num)d</strong> reuse"
+msgid_plural "<strong class=\"fr-mr-1v\">%(num)d</strong> reuses"
+msgstr[0] ""
+msgstr[1] ""
+
+#: udata_front/theme/gouvfr/templates/dataset/search-result.html:86
+#, python-format
+msgid "<strong class=\"fr-mr-1v\">%(num)d</strong> favorite"
+msgid_plural "<strong class=\"fr-mr-1v\">%(num)d</strong> favorites"
+msgstr[0] ""
+msgstr[1] ""
 
 #: udata_front/theme/gouvfr/templates/dataset/resource/card.html:20
 msgid "Nameless resource"
@@ -1318,14 +1332,14 @@ msgstr ""
 msgid "Confirm now"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/card.html:18
+#: udata_front/theme/gouvfr/templates/organization/card.html:22
 #, python-format
 msgid "Dataset: <strong class=\"fr-ml-1v\">%(num)d</strong>"
 msgid_plural "Datasets: <strong class=\"fr-ml-1v\">%(num)d</strong>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: udata_front/theme/gouvfr/templates/organization/card.html:21
+#: udata_front/theme/gouvfr/templates/organization/card.html:30
 #, python-format
 msgid "Reuse: <strong class=\"fr-ml-1v\">%(num)d</strong>"
 msgid_plural "Reuses: <strong class=\"fr-ml-1v\">%(num)d</strong>"
@@ -1345,32 +1359,32 @@ msgstr ""
 msgid "Modify organization"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/display.html:113
+#: udata_front/theme/gouvfr/templates/organization/display.html:107
 #, python-format
 msgid "See %(count)s datasets"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/display.html:132
+#: udata_front/theme/gouvfr/templates/organization/display.html:126
 msgid "Members"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/display.html:148
+#: udata_front/theme/gouvfr/templates/organization/display.html:142
 msgid "Technical details"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/display.html:159
+#: udata_front/theme/gouvfr/templates/organization/display.html:153
 msgid "Modification date"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/display.html:173
+#: udata_front/theme/gouvfr/templates/organization/display.html:167
 msgid "Modify information"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/display.html:182
+#: udata_front/theme/gouvfr/templates/organization/display.html:176
 msgid "Download list of datasets as csv file"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/organization/display.html:196
+#: udata_front/theme/gouvfr/templates/organization/display.html:190
 msgid "Pending request to join this organization"
 msgstr ""
 
@@ -1403,7 +1417,7 @@ msgid "Go to documentation"
 msgstr ""
 
 #: udata_front/theme/gouvfr/templates/post/display.html:27
-#: udata_front/theme/gouvfr/templates/reuse/card.html:30
+#: udata_front/theme/gouvfr/templates/reuse/card.html:18
 #: udata_front/theme/gouvfr/templates/reuse/display.html:60
 #, python-format
 msgid "Published on %(date)s"
@@ -1417,15 +1431,15 @@ msgstr ""
 msgid "This post has been deleted. This will be permanent in the next 24 hours"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/post/display.html:117
+#: udata_front/theme/gouvfr/templates/post/display.html:115
 msgid "Previous post"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/post/display.html:123
+#: udata_front/theme/gouvfr/templates/post/display.html:121
 msgid "All posts"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/post/display.html:132
+#: udata_front/theme/gouvfr/templates/post/display.html:130
 msgid "Next post"
 msgstr ""
 
@@ -1460,7 +1474,7 @@ msgstr ""
 msgid "Read more"
 msgstr ""
 
-#: udata_front/theme/gouvfr/templates/reuse/card.html:16
+#: udata_front/theme/gouvfr/templates/reuse/card.html:20
 msgid " by "
 msgstr ""
 
@@ -1972,7 +1986,7 @@ msgstr ""
 msgid "Last reuses"
 msgstr ""
 
-#: udata_front/views/reuse.py:56
+#: udata_front/views/reuse.py:57
 msgid "Transfer"
 msgstr ""
 
