@@ -65,9 +65,7 @@
     <div class="fr-grid-row">
         <div class="fr-col-12">
             {% for dataset in post.datasets %}
-            <a href="{{ url_for('datasets.show', dataset=dataset) }}" title="{{ dataset.title }}"
-                class="unstyled w-100">{% include theme('dataset/search-result.html') %}
-            </a>
+                {% include theme('dataset/search-result.html') %}
             {% endfor %}
         </div>
     </div>

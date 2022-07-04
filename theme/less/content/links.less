@@ -133,3 +133,16 @@ a {
 .fr-link.rounded-0 {
     .rounded-0;
 }
+
+.not-enlarged {
+    .relative;
+}
+
+.fr-enlarge-link .not-enlarged a {
+    &:hover {
+        background-image: var(--underline-img), var(--underline-img) !important;
+    }
+    &::before {
+        background: none;
+    }
+}

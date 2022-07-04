@@ -63,3 +63,13 @@ each(@breakpoints, .(@bk, @_k, @_i) {
         }
     }
 });
+
+each(@dsfr-breakpoints, .(@bk, @_k, @_i) {
+    @var: 'dsfr-query-@{bk}';
+
+    @media @@var {
+        .inline-@{bk} {
+            display: inline!important;
+        }
+    }
+});

@@ -76,8 +76,9 @@
 
 <script>
 import config from "../../config";
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   name: "Schema",
   props: {
     resourceSchema: Object,
@@ -91,5 +92,5 @@ export default {
       return `${config.values.datasetUrl}?schema=${this.resourceSchema.name}`;
     }
   },
-};
+});
 </script>

@@ -47,9 +47,9 @@
                 <h4>{{ _('News') }}</h4>
                 {% if last_post %}
                 {% set post = last_post %}
-                <a href="{{ post.display_url }}" title="{{ post.name }}" class="unstyled w-100 hero-post">
+                <div class="fr-grid-row justify-center fr-mb-2w">
                     {% include theme('post/search-result.html') %}
-                </a>
+                </div>
                 <div class="fr-grid-row justify-center">
                     <a
                         href="{{ url_for('posts.list') }}"
@@ -205,7 +205,7 @@
         <div class="fr-hidden {% if loop.first %}fr-unhidden{% endif %}" role="tabpanel" id="{{tab_id}}">
             <div class="fr-grid-row fr-grid-row--gutters fr-pt-2w fr-pt-md-9v">
                 {% for reuse in reuses %}
-                <div class="fr-mb-2w fr-mb-md-0 fr-col-lg-3 fr-col-sm-6 fr-col-12">
+                <div class="fr-col-md-4 fr-col-sm-6 fr-col-12 fr-mb-3v">
                     {% include theme('reuse/card.html') %}
                 </div>
                 {% endfor %}

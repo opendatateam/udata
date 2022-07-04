@@ -1,4 +1,4 @@
-import {ref} from 'vue';
+import {ref, Ref, ComputedRef, unref} from 'vue';
 
 /**
  * A resource, dataset, reuse or any other object owned by an organization or a user.
@@ -10,10 +10,11 @@ import {ref} from 'vue';
 
 /**
  *
- * @param {Owned} [owned] - The resource, dataset or reuse owned by an organization or a user.
+ * @param {Owned|ComputedRef<Owned>} owned - The resource, dataset or reuse owned by an organization or a user.
  * @return {Ref<string>}
  */
 export default function useOwnerName(owned) {
+  owned = unref(owned);
   const owner = ref('');
   if(!owned) {
     return owner;

@@ -1,5 +1,4 @@
 {
-  "resources": "resources",
   "reuses": "reuses",
   "favourites": "favourites",
   "Admin": "Admin",
@@ -128,5 +127,10 @@
   "All coverages": "All coverages",
   "Spatial granularity": "Spatial granularity",
   "Finest level of geographic detail covered by data.": "Finest level of geographic detail covered by data.",
-  "Ex. 2022 presidential election": "Ex. 2022 presidential election"
+  "Ex. 2022 presidential election": "Ex. 2022 presidential election",
+  "Private": "",
+  "Updated on {date}": "",
+  "{n} reuses": "",
+  "{n} favorites": "",
+  "The identity of this public service is certified by {certifier}": ""
 }

@@ -1,7 +1,7 @@
 import {api, apiv2} from "../plugins/api";
 
 /**
- * @typedef {Owned} ResourceModel
+ * @typedef {import("../composables/useOwnerName").Owned} ResourceModel
  * @property {Object} created_at
  * @property {Object} description
  * @property {Object} extras

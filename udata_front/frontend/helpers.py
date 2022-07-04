@@ -240,6 +240,11 @@ def owner_name_acronym(obj):
 
 
 @front.app_template_global()
+def external_source(dataset):
+    return dataset.extras['remote_url'] if 'remote_url' in dataset.extras else None
+
+
+@front.app_template_global()
 @front.app_template_filter()
 def isodate(value, format='short'):
     dt = date(*map(int, value.split('-')))

@@ -1,5 +1,5 @@
 import {useI18n} from 'vue-i18n'
-import {ref, Ref, computed} from "vue";
+import {ref, Ref, computed, ComputedRef} from "vue";
 import getCatalog from "../api/schemas";
 import config from "../config";
 import {useToast} from "./useToast";
@@ -7,6 +7,7 @@ import {useToast} from "./useToast";
 /**
  *
  * @param {import("../api/resources").ResourceModel} resource
+ * @returns {{documentationUrl: ComputedRef<string>, authorizeValidation: ComputedRef<boolean>, validationUrl: ComputedRef<?string>, loading: Ref<boolean>}}
  */
 export default function useSchema(resource) {
   const { t } = useI18n();
@@ -23,6 +24,7 @@ export default function useSchema(resource) {
       );
     }).finally(() => loading.value = false);
 
+  /** @type {ComputedRef<import("../api/schemas").Schema | undefined>} */
   const schema = computed(() => schemas.value.find(schema => schema.name === resource.schema.name));
 
   const authorizeValidation = computed(() => !!schema.value && schema.value.schema_type === 'tableschema');

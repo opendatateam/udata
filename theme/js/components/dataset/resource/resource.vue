@@ -169,7 +169,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    /** @type import("../../../api/resources").ResourceModel */
     resource: {
       type: Object,
       required: true,

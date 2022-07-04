@@ -1,41 +1,36 @@
 {% cache cache_duration, 'org-card', organization.id|string, g.lang_code %}
-{% from theme('macros/certified.html') import badge_if_certified with context %}
-
-{# This is very similar to the dataset card and not very used so we're recycling the dataset-card class for a quick win #}
-<a class="card organization-card dataset-card unstyled" title="{{organization.name}}"
-    href="{{ url_for('organizations.show', org=organization, _external=True) }}">
-    <div class="card-logo">
-        <img src="{{ organization.logo(100, external=True)|placeholder('organization', external=True) }}" alt="" />
-        <div class="logo-badge">
-            {{ badge_if_certified(organization) }}
+{% from theme('macros/organization_name_with_certificate.html') import organization_name_with_certificate %}
+<article class="fr-tile fr-tile--left fr-enlarge-link">
+    <div class="fr-tile__body">
+        <div class="fr-grid-row fr-grid-row--middle fr-mb-3w">
+            <div class="fr-tile__img fr-col-auto fr-m-0">
+                <div class="logo">
+                    <img src="{{ organization.logo(70)|placeholder('organization') }}" class="fr-responsive-img" alt="">
+                </div>
+            </div>
+            <h4 class="fr-tile__title fr-col fr-ml-1w">
+                <a class="fr-tile__link inline" href="{{ url_for('organizations.show', org=organization) }}">{{ organization_name_with_certificate(organization) }}</a>
+            </h4>
         </div>
+        <p class="fr-tile__desc fr-mb-3w">{{ organization.description|mdstrip(150) }}</p>
+        <ul class="fr-tags-group fr-mt-auto">
+            <li class="not-enlarged">
+                <a
+                        href="{{ url_for('datasets.list', organization=organization.id) }}"
+                        class="fr-tag"
+                    >
+                    {{ ngettext('Dataset: <strong class="fr-ml-1v">%(num)d</strong>', 'Datasets: <strong class="fr-ml-1v">%(num)d</strong>', organization.metrics.datasets or 0) }}
+                </a>
+            </li>
+            <li class="not-enlarged">
+                <a
+                        href="{{ url_for('organizations.show', org=organization, _anchor='organization-reuses') }}"
+                        class="fr-tag"
+                    >
+                    {{ ngettext('Reuse: <strong class="fr-ml-1v">%(num)d</strong>', 'Reuses: <strong class="fr-ml-1v">%(num)d</strong>', organization.metrics.reuses or 0) }}
+                </a>
+            </li>
+        </ul>
     </div>
-    <div class="card-data">
-        <h4 class="card-body">
-            {{ organization.name }}
-        </h4>
-        <div class="card-description">
-            <p>{{ organization.description|mdstrip(180) }}</p>
-        </div>
-        <div class="card-footer">
-            <ul class="card-features text-grey-380 fs-xs">
-                {% if organization.metrics.datasets %}
-                <li>{{ organization.metrics.datasets or 0 }} {{ _('datasets') }}</li>
-                {% endif %}
-                {% if organization.metrics.reuses %}
-                <li>{{ organization.metrics.reuses or 0 }} {{ _('reuses') }}</li>
-                {% endif %}
-                <li>
-                    <div>
-                        <span class="text-blue-400">{% include theme('svg/actions/star.svg') %}</span>
-                        <span class="badge blue-400 fr-ml-1v fr-py-0,5v fr-px-1w">
-                            {{ organization.metrics.followers or 0 }}
-                        </span>
-                        <span class="visually-hidden">{{ _('favourites') }}</span>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
-</a>
+</article>
 {% endcache %}

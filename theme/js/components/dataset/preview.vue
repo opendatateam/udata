@@ -11,12 +11,14 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   name: "Preview",
   props: {
     url: String,
     close: Function,
     title: String,
   },
-};
+});
 </script>

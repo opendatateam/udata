@@ -1,16 +1,26 @@
 {% cache cache_duration, 'post-search-result', post.id|string, g.lang_code %}
-<article class="search-result post-result fr-mb-3w">
-    {% set image = post.image|placeholder('post') %}
-    <div class="hero-image w-100 rounded-xxs" style="background-image: url('{{image}}')"></div>
-    <div class="result-body fr-p-2w">
-        <h3 class="result-title fr-m-0">{{ post.name }}</h3>
-        <p class="fs-sm text-grey-380 fr-my-3v">
-            {{ _('Published on') }}
-            {{ post.published|dateformat(format='long') }}
-        </p>
-        <div class="result-description f-italic">
-            {{ post.headline|mdstrip(300) }}
+<div class="fr-card fr-card--no-icon fr-card--no-border fr-enlarge-link">
+    <div class="fr-card__body">
+        <div class="fr-card__content">
+            <h3 class="fr-card__title">
+                <a href="{{ post.display_url }}">
+                    {{ post.name }}
+                </a>
+            </h3>
+            <div class="fr-card__desc fr-my-3v">
+                <p class="fr-card__detail fr-m-0">
+                    {{ _('Published on') }}
+                    {{ post.published|dateformat(format='long') }}
+                </p>
+            </div>
+            <p class="fr-card__desc f-italic fr-m-0">{{ post.headline|mdstrip(300) }}</p>
         </div>
     </div>
-</article>
+    <div class="fr-card__header">
+        <div class="fr-card__img">
+            {% set image = post.image|placeholder('post') %}
+            <img class="fr-responsive-img" src="{{image}}" alt="" />
+        </div>
+    </div>
+</div>
 {% endcache %}

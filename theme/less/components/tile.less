@@ -25,3 +25,15 @@ You can use tiles from DSFR. You can find documented usage on [DSFR documentatio
 .fr-tile {
     --border-plain-blue-france: @blue-400;
 }
+
+.fr-tile__link {
+    color: inherit;
+}
+
+.fr-tile--left {
+    .fr-tile__body {
+        justify-content: start;
+        align-items: flex-start;
+        text-align: start;
+    }
+}

@@ -1,52 +1,92 @@
 {% cache cache_duration, 'dataset-search-result', dataset.id|string, g.lang_code %}
-{% from theme('macros/certified.html') import badge_if_certified with context %}
-<article class="dataset-card dataset-search-result fr-py-1w">
-    {% if dataset.organization %}
-    <div class="card-logo">
-        <img
-            alt="{{ dataset.organization.name|placeholder_alt(dataset.organization.logo) }}"
-            src="{{ dataset.organization.logo(80)|placeholder('organization') }}"
-            loading="lazy"
-        />
-        <div class="logo-badge">
-            {% if dataset.private %}
-            {% include theme('svg/private.svg') %}
+{% from theme('macros/organization_name_with_certificate.html') import organization_name_with_certificate %}
+<article class="fr-pt-5v fr-pb-6v fr-px-1w border-bottom border-default-grey fr-enlarge-link">
+    <div class="fr-grid-row fr-grid-row--gutters fr-grid-row--top">
+        <div class="fr-col-auto">
+            <div class="logo">
+            {% if dataset.organization %}
+            <img
+                alt="{{ dataset.organization.name|placeholder_alt(dataset.organization.logo) }}"
+                src="{{ dataset.organization.logo(60)|placeholder('organization') }}"
+                width="60"
+                height="60"
+                loading="lazy"
+            />
+            {% elif dataset.owner %}
+            <img
+                alt="{{ dataset.owner.fullname }}"
+                src="{{ dataset.owner|avatar_url(60) }}"
+                width="60"
+                height="60"
+                loading="lazy"
+            />
             {% else %}
-            {{ badge_if_certified(dataset.organization) }}
+            <img
+                alt=""
+                src="{{ ''|placeholder('organization') }}"
+                width="60"
+                height="60"
+                loading="lazy"
+            />
             {% endif %}
+            </div>
         </div>
-    </div>
-    {% elif dataset.owner %}
-    <div class="card-logo">
-        <img
-            alt="{{ dataset.owner.fullname }}"
-            src="{{ dataset.owner|avatar_url(70) }}"
-            width="70"
-            height="70"
-            loading="lazy"
-        />
-    </div>
-    {% else %}
-    <div class="card-logo">
-        <img src="{{ ''|placeholder('organization') }}" alt="" loading="lazy" />
-    </div>
-    {% endif %}
-    <div class="card-data">
-        <h4 class="card-title">{{ dataset.full_title }}
-            {% if dataset.private %}<span class="badge grey-300 fr-ml-1w">{{ _('Private') }}</span>{% endif %}</h4>
-        <div class="card-description text-grey-380 fr-mt-1w">
-            {{ dataset.description|mdstrip(300) }}
+        <div class="fr-col">
+            <h4 class="fr-mb-1v">
+                <a href="{{ url_for('datasets.show', dataset=dataset) }}" class="text-grey-500">
+                    {{ dataset.full_title }}
+                    {% if dataset.acronym %}<small>{{ dataset.acronym }}</small>{% endif %}
+                </a>
+                {% if dataset.private %}<span class="badge grey-300 fr-ml-1w">{{ _('Private') }}</span>{% endif %}
+            </h4>
+            {% if dataset.organization or dataset.owner %}
+            <p class="fr-m-0 not-enlarged">
+                {{ _('From') }}
+                {% if dataset.organization %}
+                <a href="{{ url_for('organizations.show', org=dataset.organization) }}">
+                    {{organization_name_with_certificate(dataset.organization)}}
+                </a>
+                {% elif dataset.owner %}
+                {{owner_name(dataset)}}
+                {% endif %}
+            </p>
+            {% endif %}
+            <p class="fr-mt-1w fr-mb-2w fr-hidden fr-unhidden-sm">
+                {{ dataset.description|mdstrip(300) }}
+            </p>
+            <p class="fr-mb-0 text-mention-grey">
+                {% if not external_source(dataset) %}
+                {{ _('Updated on %(date)s', date=dataset.last_modified|dateformat(format='long')) }}
+                    {% if dataset.license %}
+                    <span class="fr-hidden inline-sm">
+                        &mdash;
+                    </span>
+                    {%  endif %}
+                {% endif %}
+                {% if dataset.license %}
+                <span class="fr-hidden inline-sm">
+                    {% if dataset.license.url %}
+                    <span class="not-enlarged">
+                    <a href="{{ dataset.license.url }}" class="text-decoration-underline text-decoration-underline--dsfr text-mention-grey">
+                        {% endif %}
+                    {{ dataset.license.title }}
+                    {% if dataset.license.url %}</a></span>{% endif %}
+                </span>
+                {% endif %}
+            </p>
         </div>
+        <ul class="fr-hidden fr-unhidden-sm fr-col-auto fr-tags-group flex-direction-column fr-grid-row--bottom self-center">
+            <li>
+                <span class="fr-tag">
+                    {{ ngettext('<strong class="fr-mr-1v">%(num)d</strong> reuse', '<strong class="fr-mr-1v">%(num)d</strong> reuses', dataset.metrics.reuses or 0) }}
+                </span>
+            </li>
+            <li>
+                <span class="fr-tag">
+                    {{ ngettext('<strong class="fr-mr-1v">%(num)d</strong> favorite', '<strong class="fr-mr-1v">%(num)d</strong> favorites', dataset.metrics.followers or 0) }}
+                </span>
+            </li>
+        </ul>
     </div>
-    <ul class="card-footer">
-        <li>
-            <strong>{{ dataset.resources|length or 0 }}</strong> {{ _('resources') }}</li>
-        <li>
-            <strong>{{ dataset.metrics.reuses or 0 }}</strong> {{ _('reuses') }}
-        </li>
-        <li>
-            <strong>{{ dataset.metrics.followers or 0 }}</strong> {{ _('favourites') }}
-        </li>
-    </ul>
 </article>
 {% endcache %}

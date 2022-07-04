@@ -76,6 +76,10 @@ Sometimes you need to occupy the available space fully, you can use `.fr-contain
     display: block;
 }
 
+.inline {
+    display: inline !important;
+}
+
 .relative {
     position: relative;
 }
@@ -95,13 +99,17 @@ Sometimes you need to occupy the available space fully, you can use `.fr-contain
 }
 
 @media @query-md {
-        .wrap-md {
-            .wrap;
-        }
+    .wrap-md {
+        .wrap;
     }
+}
 
 .flex-direction-column {
-    flex-direction: column;
+    flex-direction: column !important;
+}
+
+.flex-direction-row {
+    flex-direction: row !important;
 }
 
 // Horizontal alignment

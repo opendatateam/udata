@@ -58,17 +58,11 @@
             </div>
         </form>
     </div>
-    {% if organizations %}
-    <ul class="search-results mt-lg">
+    {% if organizations %}    
+    <ul class="search-results fr-my-3w fr-grid-row fr-grid-row--gutters">
         {% for organization in organizations %}
-        <li>
-            <a
-                href="{{ url_for('organizations.show', org=organization) }}"
-                title="{{ organization.title }}"
-                class="fr-raw-link unstyled w-100"
-            >
-                {% include theme('organization/search-result.html') %}
-            </a>
+        <li class="fr-col-12 fr-col-sm-6 fr-col-lg-4">
+            {% include theme('organization/card.html') %}
         </li>
         {% endfor %}
     </ul>

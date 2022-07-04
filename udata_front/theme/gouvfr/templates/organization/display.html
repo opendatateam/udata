@@ -94,13 +94,7 @@
 <section id="organization-datasets" class="fr-py-9v fr-container">
     <h2>{{ _('Datasets') }}<sup>{{ total_datasets }}</sup></h2>
     {% for dataset in datasets %}
-        <a
-            href="{{ url_for('datasets.show', dataset=dataset) }}"
-            title="{{ dataset.title }}"
-            class="fr-raw-link unstyled block w-100"
-        >
         {% include theme('dataset/search-result.html') %}
-        </a>
     {% endfor %}
     <div class="fr-my-2w">
         {{ paginator(datasets, arg_name='datasets_page', url='#organization-datasets') }}

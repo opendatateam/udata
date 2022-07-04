@@ -1,27 +1,45 @@
+{% from theme('macros/organization_name_with_certificate.html') import organization_name_with_certificate %}
 {% cache cache_duration, 'reuse-card', reuse.id|string, g.lang_code %}
-<a
-    class="fr-raw-link unstyled w-100 fr-grid-row fr-grid-row--center"
-    href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}"
-    title="{{ reuse.title }}"
->
-    <article class="reuse-card text-align-center fr-text--sm fr-my-0">
-        <img
-            class="reuse-image fr-mb-3v fr-responsive-img"
-            src="{{ reuse.image|placeholder('reuse', external=True) }}"
-            loading="lazy"
-            alt=""
-        />
-        <div>
-            {{ reuse.type_label }}
+<article class="fr-card fr-card--no-icon fr-enlarge-link">
+    <div class="fr-card__body">
+        <div class="fr-card__content fr-p-2w">
+            <h4 class="fr-card__title fr-text--md fr-mt-1w">
+                <a
+                    href="{{ url_for('reuses.show', reuse=reuse, _external=True) }}"
+                >
+                {{ reuse.title|mdstrip(55) }}
+                {% if reuse.private %}<span class="fr-badge fr-ml-1w">{{ _('Private') }}</span>{% endif %}
+                </a>
+            </h4>
+            <p class="fr-card__detail fr-m-0">
+                {{ reuse.type_label }}
+            </p>
+            <p class="fr-card__desc fr-mt-1w text-mention-grey not-enlarged">
+                {{ _('Published on %(date)s', date=reuse.created_at|dateformat(format='long')) }}
+                {% if reuse.organization or reuse.owner %}
+                    {{ _(' by ') }}
+                    {% if reuse.organization %}
+                    <a
+                        href="{{ url_for('organizations.show', org=reuse.organization) }}"
+                    >
+                        {{organization_name_with_certificate(reuse.organization)}}
+                    </a>
+                    {% elif reuse.owner %}
+                    {{owner_name(reuse)}}
+                    {% endif %}
+                {% endif %}
+            </p>
         </div>
-        <div class="text-grey-300">
-            {{ reuse.datasets|length or 0 }} {{ _('datasets') }}
+    </div>
+    <div class="fr-card__header">
+        <div class="fr-card__img">
+            <img
+                class="fr-responsive-img"
+                src="{{ reuse.image|placeholder('reuse', external=True) }}"
+                loading="lazy"
+                alt=""
+            />
         </div>
-        <div>
-            {{ reuse.title }}
-            {% if reuse.private %}<span class="badge grey-300 fr-ml-1w">{{ _('Private') }}</span>{% endif %}
-        </div>
-    </article>
-</a>
-
+    </div>
+</article>
 {% endcache %}

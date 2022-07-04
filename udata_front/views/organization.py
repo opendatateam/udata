@@ -37,6 +37,7 @@ class OrganizationListView(SearchView):
     context_name = 'organizations'
     template_name = 'organization/list.html'
     search_adapter = OrganizationSearch
+    page_size = 21
 
 
 class OrgView(object):

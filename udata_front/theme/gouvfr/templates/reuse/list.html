@@ -47,7 +47,7 @@
 ] %}
 
 {% block main_content %}
-<section class="fr-container fr-py-2w">
+<section class="fr-container">
     <h1 class="fr-mb-1w">{{_('Reuses')}}</h1>
     <div class="fr-grid-row fr-grid-row--middle justify-between">
         <div>{{_('Search among %(count)s reuses on %(site)s', count=current_site.metrics['reuses']|format_number, site=current_site.title)}}</div>
@@ -108,7 +108,7 @@
     {%if reuses %}
     <ul class="search-results fr-grid-row fr-grid-row--gutters fr-mt-2w">
         {% for reuse in reuses %}
-        <li class="fr-col-lg-3 fr-col-md-4 fr-col-sm-6 fr-col-12 fr-mb-3v">
+        <li class="fr-col-md-4 fr-col-sm-6 fr-col-12 fr-mb-3v">
             {% include theme('reuse/card.html') %}
         </li>
         {% endfor %}

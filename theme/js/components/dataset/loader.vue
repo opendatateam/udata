@@ -16,11 +16,12 @@
 </template>
 
 <script>
+import { defineComponent } from "vue";
 import { ContentLoader } from "vue-content-loader";
 
-export default {
+export default defineComponent({
   components: {
     ContentLoader,
   },
-};
+});
 </script>

@@ -38,9 +38,7 @@
     <div class="fr-grid-row fr-grid-row--gutters">
         {% for post in posts %}
         <div class="fr-col-12 fr-col-md-6 fr-col-lg-4">
-            <a href="{{ post.display_url }}" title="{{ post.name }}" class="unstyled w-100">
-                {% include theme('post/search-result.html') %}
-            </a>
+            {% include theme('post/search-result.html') %}
         </div>
         {% endfor %}
     </div>

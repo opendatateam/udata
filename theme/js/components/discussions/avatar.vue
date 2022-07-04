@@ -1,6 +1,12 @@
 <template>
   <div class="avatar">
-    <img :src="avatarUrl" loading="lazy" alt="" />
+    <img
+      :src="avatarUrl"
+      :width="size"
+      :height="size"
+      loading="lazy"
+      alt=""
+    />
   </div>
 </template>
 

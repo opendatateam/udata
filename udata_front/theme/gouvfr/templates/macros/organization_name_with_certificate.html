@@ -1,0 +1,4 @@
+{% from theme('macros/certified.html') import badge_if_certified %}
+{% macro organization_name_with_certificate(org) %}
+{{org.name}}{{badge_if_certified(org)}}
+{% endmacro %}
