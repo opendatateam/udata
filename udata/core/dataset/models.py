@@ -639,10 +639,24 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         result['score'] = self.compute_quality_score(result)
         return result
 
+    @staticmethod
+    def normalize_score(score):
+        """
+        Normalize score by dividing it by the quality max score.
+        Make sure to update QUALITY_MAX_SCORE accordingly if the max score changes.
+        """
+        QUALITY_MAX_SCORE = 9
+        return score / QUALITY_MAX_SCORE
+
     def compute_quality_score(self, quality):
-        """Compute the score related to the quality of that dataset."""
+        """
+        Compute the score related to the quality of that dataset.
+        The score is normalized between 0 and 1.
+
+        Make sure to update normalize_score if the max score changes.
+        """
         score = 0
-        UNIT = current_app.config.get('QUALITY_MAX_SCORE') / current_app.config.get('QUALITY_CHECKS_NUMBER')
+        UNIT = 1
         if quality['license']:
             score += UNIT
         if quality['temporal_coverage']:
@@ -663,7 +677,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
                 score += UNIT
             if quality['resources_documentation']:
                 score += UNIT
-        return score
+        return self.normalize_score(score)
 
     @classmethod
     def get(cls, id_or_slug):
