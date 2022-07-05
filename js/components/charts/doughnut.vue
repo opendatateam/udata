@@ -21,7 +21,7 @@ export default {
             const data = {
                 datasets: [{
                     backgroundColor: [ "#3C8DBC", "#F5F5F5" ],
-                    data: [ this.score, config.quality_max_score - this.score ],
+                    data: [ this.score, 1 - this.score ],
                 }],
             };
 
