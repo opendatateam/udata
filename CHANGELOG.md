@@ -8,8 +8,8 @@
 - Add aria-current to breadcumbs [#121](https://github.com/etalab/udata-front/pull/121)
 - Add missing default og:image [#127](https://github.com/etalab/udata-front/pull/127)
 - Fix 500 on favicon in admin [#126](https://github.com/etalab/udata-front/pull/126)
-- Update search results [#110](https://github.com/etalab/udata-front/pull/110)
-- Fix test error with long reuse title [#133](https://github.com/etalab/udata-front/pull/133) 
+- Update search results [#110](https://github.com/etalab/udata-front/pull/110) [#134](https://github.com/etalab/udata-front/pull/134)
+- Fix test error with long reuse title [#133](https://github.com/etalab/udata-front/pull/133)
 
 ## 2.0.5 (2022-06-14)
 
