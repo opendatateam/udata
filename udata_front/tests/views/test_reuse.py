@@ -10,6 +10,7 @@ from udata.core.user.factories import UserFactory
 from udata.core.organization.factories import OrganizationFactory
 from udata_front.tests import GouvFrSettings
 from udata_front.tests.frontend import GouvfrFrontTestCase
+from udata.frontend.markdown import mdstrip
 
 
 class ReuseBlueprintTest(GouvfrFrontTestCase):
@@ -125,3 +126,18 @@ class ReuseBlueprintTest(GouvfrFrontTestCase):
         self.assertEqual(author.name, org.name)
         self.assertEqual(author.href,
                          self.full_url('organizations.show', org=org.id))
+
+    def test_render_list(self):
+        '''It should render the reuse list'''
+        reuses = [
+            ReuseFactory(owner=UserFactory(), title="Small title"),
+            ReuseFactory(
+                owner=UserFactory(),
+                title="A really long title that should be handled in front and test"
+            )
+        ]
+        url = url_for('reuses.list', reuses=reuses)
+        response = self.get(url)
+        self.assert200(response)
+        for reuse in reuses:
+            assert mdstrip(reuse.title, 55).encode('utf-8') in response.data

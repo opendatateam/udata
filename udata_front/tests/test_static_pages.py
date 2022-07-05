@@ -116,7 +116,7 @@ reuses:
         response = client.get(url_for('gouvfr.show_page', slug='test'))
         assert response.status_code == 200
         assert str(dataset.title).encode('utf-8') in response.data
-        assert str(reuse.title).encode('utf-8') in response.data
+        assert str(url_for('reuses.show', reuse=reuse)).encode('utf-8') in response.data
 
     def test_page_subdir(self, client, rmock):
         raw_url, _ = get_pages_gh_urls('subdir/test')
