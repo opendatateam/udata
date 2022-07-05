@@ -2,8 +2,8 @@
 
 ## Current (in progress)
 
+- Quality score computation refactoring and now returning it in list datasets endpoint. Update was made in admin too. [#2746](https://github.com/opendatateam/udata/pull/2746)
 - :warning: Manifest logic was removed and udata does now work as standalone [#2747](https://github.com/opendatateam/udata/pull/2747)
-
 - Remove map related stuff [#2749](https://github.com/opendatateam/udata/pull/2749)
 - Add library udata_event_service to produce Kafka messages [#2743](https://github.com/opendatateam/udata/pull/2743)
 
