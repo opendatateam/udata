@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 import requests
-
+from flask import current_app
 from mongoengine import post_save
 
 from udata.app import cache
@@ -14,9 +14,6 @@ from udata.core.dataset.factories import (
 )
 from udata.core.dataset.exceptions import (
     SchemasCatalogNotFoundException, SchemasCacheUnavailableException
-)
-from udata.core.discussions.factories import (
-    MessageDiscussionFactory, DiscussionFactory
 )
 from udata.core.user.factories import UserFactory
 from udata.utils import faker
@@ -136,94 +133,67 @@ class DatasetModelTest:
 
     def test_quality_default(self):
         dataset = DatasetFactory(description='')
-        assert dataset.quality == {'score': 0}
+        assert dataset.quality == {
+            'license': False,
+            'temporal_coverage': False,
+            'spatial': False,
+            'update_frequency': False,
+            'dataset_description_quality': False,
+            'score': 0
+        }
 
     def test_quality_next_update(self):
         dataset = DatasetFactory(description='', frequency='weekly')
-        assert -6 == dataset.quality['update_in']
-        assert dataset.quality['frequency'] == 'weekly'
-        assert dataset.quality['score'] == 2
-
-    def test_quality_tags_count(self):
-        dataset = DatasetFactory(description='', tags=['foo', 'bar'])
-        assert dataset.quality['tags_count'] == 2
-        assert dataset.quality['score'] == 0
-        dataset = DatasetFactory(description='',
-                                 tags=['foo', 'bar', 'baz', 'quux'])
-        assert dataset.quality['score'] == 2
+        assert dataset.quality['update_fulfilled_in_time'] is True
+        assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_description_length(self):
-        dataset = DatasetFactory(description='a' * 42)
-        assert dataset.quality['description_length'] == 42
+        dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') - 1))
+        assert dataset.quality['dataset_description_quality'] is False
         assert dataset.quality['score'] == 0
-        dataset = DatasetFactory(description='a' * 420)
-        assert dataset.quality['score'] == 2
+        dataset = DatasetFactory(description='a' * (current_app.config.get('QUALITY_DESCRIPTION_LENGTH') + 1))
+        assert dataset.quality['dataset_description_quality'] is True
+        assert dataset.quality['score'] == Dataset.normalize_score(1)
 
-    def test_quality_has_only_closed_formats(self):
+    def test_quality_has_open_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
-        assert dataset.quality['has_only_closed_or_no_formats']
-        assert dataset.quality['score'] == 0
+        assert not dataset.quality['has_open_format']
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_has_opened_formats(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format='pdf'))
         dataset.add_resource(ResourceFactory(format='csv'))
-        assert not dataset.quality['has_only_closed_or_no_formats']
-        assert dataset.quality['score'] == 4
+        assert dataset.quality['has_open_format']
+        assert dataset.quality['score'] == Dataset.normalize_score(3)
 
     def test_quality_has_undefined_and_closed_format(self):
         dataset = DatasetFactory(description='', )
         dataset.add_resource(ResourceFactory(format=None))
         dataset.add_resource(ResourceFactory(format='xls'))
-        assert dataset.quality['has_only_closed_or_no_formats']
-        assert dataset.quality['score'] == 0
-
-    def test_quality_has_untreated_discussions(self):
-        user = UserFactory()
-        visitor = UserFactory()
-        dataset = DatasetFactory(description='', owner=user)
-        messages = MessageDiscussionFactory.build_batch(2, posted_by=visitor)
-        DiscussionFactory(subject=dataset, user=visitor, discussion=messages)
-        assert dataset.quality['discussions'] == 1
-        assert dataset.quality['has_untreated_discussions']
-        assert dataset.quality['score'] == 0
-
-    def test_quality_has_treated_discussions(self):
-        user = UserFactory()
-        visitor = UserFactory()
-        dataset = DatasetFactory(description='', owner=user)
-        DiscussionFactory(
-            subject=dataset, user=visitor,
-            discussion=[
-                MessageDiscussionFactory(posted_by=user)
-            ] + MessageDiscussionFactory.build_batch(2, posted_by=visitor)
-        )
-        assert dataset.quality['discussions'] == 1
-        assert not dataset.quality['has_untreated_discussions']
-        assert dataset.quality['score'] == 2
+        assert not dataset.quality['has_open_format']
+        assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_all(self):
         user = UserFactory()
-        visitor = UserFactory()
         dataset = DatasetFactory(owner=user, frequency='weekly',
                                  tags=['foo', 'bar'], description='a' * 42)
         dataset.add_resource(ResourceFactory(format='pdf'))
-        DiscussionFactory(
-            subject=dataset, user=visitor,
-            discussion=[MessageDiscussionFactory(posted_by=visitor)])
-        assert dataset.quality['score'] == 0
+        assert dataset.quality['score'] == Dataset.normalize_score(4)
         assert sorted(dataset.quality.keys()) == [
-            'description_length',
-            'discussions',
-            'frequency',
-            'has_only_closed_or_no_formats',
+            'all_resources_available',
+            'dataset_description_quality',
+            'has_open_format',
             'has_resources',
-            'has_unavailable_resources',
-            'has_untreated_discussions',
+            'license',
+            'resources_documentation',
             'score',
-            'tags_count',
-            'update_in'
+            'spatial',
+            'temporal_coverage',
+            'update_frequency',
+            'update_fulfilled_in_time'
         ]
 
     def test_tags_normalized(self):
