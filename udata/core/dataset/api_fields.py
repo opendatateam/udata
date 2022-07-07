@@ -131,9 +131,9 @@ community_resource_page_fields = api.model(
 #: Default mask to make it lightweight by default
 DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
-    'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'metrics',
-    'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'protected_extras'
+    'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras',
+    'protected_extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial',
+    'license', 'uri', 'page', 'last_update', 'archived', 'quality'
 ))
 
 dataset_fields = api.model('Dataset', {

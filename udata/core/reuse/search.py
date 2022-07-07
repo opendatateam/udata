@@ -19,7 +19,7 @@ class ReuseSearch(ModelSearchAdapter):
     search_url = 'reuses/'
 
     sorts = {
-        'created': 'created',
+        'created': 'created_at',
         'datasets': 'metrics.datasets',
         'followers': 'metrics.followers',
         'views': 'metrics.views'

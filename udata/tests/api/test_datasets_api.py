@@ -48,7 +48,7 @@ class DatasetAPITest(APITestCase):
         response = self.get(url_for('api.datasets'))
         self.assert200(response)
         self.assertEqual(len(response.json['data']), len(datasets))
-        self.assertFalse('quality' in response.json['data'][0])
+        self.assertTrue('quality' in response.json['data'][0])
 
     def test_dataset_api_full_text_search(self):
         '''Should proceed to full text search on datasets'''
@@ -60,7 +60,7 @@ class DatasetAPITest(APITestCase):
         # with accent
         response = self.get(url_for('api.datasets', q='some spécial chars'))
         self.assert200(response)
-        self.assertEqual(len(response.json['data']), 3)
+        self.assertEqual(len(response.json['data']), 1)
         self.assertEqual(response.json['data'][0]['id'], str(dataset.id))
 
         # with accent
@@ -196,7 +196,7 @@ class DatasetAPITest(APITestCase):
         self.assert200(response)
         data = json.loads(response.data)
         self.assertEqual(len(data['resources']), len(resources))
-        self.assertFalse('quality' in data)
+        self.assertTrue('quality' in data)
 
     def test_dataset_api_get_deleted(self):
         '''It should not fetch a deleted dataset from the API and raise 410'''

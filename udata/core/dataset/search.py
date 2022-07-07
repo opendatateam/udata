@@ -22,7 +22,7 @@ class DatasetSearch(ModelSearchAdapter):
     search_url = 'datasets/'
 
     sorts = {
-        'created': 'created',
+        'created': 'created_at',
         'reuses': 'metrics.reuses',
         'followers': 'metrics.followers',
         'views': 'metrics.views',

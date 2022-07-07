@@ -2,7 +2,6 @@ const path = require('path');
 const webpack = require('webpack');
 
 const node_path = path.join(__dirname, 'node_modules');
-const ManifestPlugin = require('webpack-manifest-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const css_loader = ExtractTextPlugin.extract('vue-style?sourceMap', 'css?sourceMap');
@@ -18,7 +17,7 @@ module.exports = {
     output: {
         path: path.join(__dirname, 'udata', 'static'),
         publicPath: public_path,
-        filename: '[name].[hash].js',
+        filename: '[name].js',
         chunkFilename: 'chunks/[id].[chunkhash].js'
     },
     resolve: {
@@ -77,13 +76,7 @@ module.exports = {
             jQuery: 'jquery',  // Required by bootstrap.js
             'window.jQuery': 'jquery',  // Required by swagger.js jquery client
         }),
-        new ManifestPlugin({
-            fileName: path.join(__dirname, 'udata', 'manifest.json'),
-            // Filter out chunks and source maps
-            filter: ({name, isInitial, isChunk}) => !name.endsWith('.map') && (isInitial || !isChunk),
-            publicPath: public_path,
-        }),
-        new ExtractTextPlugin('[name].[contenthash].css'),
+        new ExtractTextPlugin('[name].css'),
         // Only include needed translations
         new webpack.ContextReplacementPlugin(/moment\/locale$/, new RegExp('^' + languages.join('|') + '$')),
         new webpack.ContextReplacementPlugin(/locales$/, new RegExp(languages.join('|'))),

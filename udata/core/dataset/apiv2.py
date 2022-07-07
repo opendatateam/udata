@@ -1,10 +1,11 @@
 import logging
 
 from flask import url_for, request, abort
+from flask_restplus import marshal
 
 from udata import search
 from udata.api import apiv2, API, fields
-from udata.utils import multi_to_dict
+from udata.utils import multi_to_dict, get_by
 
 from .api_fields import (
     badge_fields,
@@ -18,7 +19,7 @@ from .api_fields import (
 from udata.core.dataset.api import ResourceMixin
 from udata.core.spatial.api_fields import geojson
 from .models import (
-    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
 )
 from .permissions import DatasetEditPermission
 from .search import DatasetSearch
@@ -31,7 +32,7 @@ DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date', 'extras',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'protected_extras'
+    'uri', 'page', 'last_update', 'archived', 'quality'
 ))
 
 log = logging.getLogger(__name__)
@@ -145,6 +146,11 @@ dataset_page_fields = apiv2.model(
     mask='data{{{0}}},*'.format(DEFAULT_MASK_APIV2)
 )
 
+specific_resource_fields = apiv2.model('SpecificResource', {
+    'resource': fields.Nested(resource_fields, description='The dataset resources'),
+    'dataset_id': fields.String()
+})
+
 apiv2.inherit('Badge', badge_fields)
 apiv2.inherit('OrganizationReference', org_ref_fields)
 apiv2.inherit('UserReference', user_ref_fields)
@@ -243,3 +249,21 @@ class ResourceProtectedExtrasAPI(ResourceMixin, API):
         '''Get the given resource protected_extras'''
         resource = self.get_resource_or_404(dataset, rid)
         return resource.protected_extras
+@ns.route('/resources/<uuid:rid>/', endpoint='resource')
+class ResourceAPI(API):
+    @apiv2.doc('get_resource')
+    def get(self, rid):
+        dataset = Dataset.objects(resources__id=rid).first()
+        if dataset:
+            resource = get_by(dataset.resources, 'id', rid)
+        else:
+            resource = CommunityResource.objects(id=rid).first()
+        if not resource:
+            apiv2.abort(404, 'Resource does not exist')
+
+        # Manually marshalling to make sure resource.dataset is in the scope.
+        # See discussions in https://github.com/opendatateam/udata/pull/2732/files
+        return marshal({
+            'resource': resource,
+            'dataset_id': dataset.id if dataset else None
+        }, specific_resource_fields)

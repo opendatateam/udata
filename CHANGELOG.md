@@ -2,14 +2,23 @@
 
 ## Current (in progress)
 
+- Quality score computation refactoring and now returning it in list datasets endpoint. Update was made in admin too. [#2746](https://github.com/opendatateam/udata/pull/2746)
+- :warning: Manifest logic was removed and udata does now work as standalone [#2747](https://github.com/opendatateam/udata/pull/2747)
+- Remove map related stuff [#2749](https://github.com/opendatateam/udata/pull/2749)
+- Add library udata_event_service to produce Kafka messages [#2743](https://github.com/opendatateam/udata/pull/2743)
+
+## 4.1.0 (2022-06-09)
+
 - Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
 - Use mongo search if `SEARCH_SERVICE_API_URL` variable is not set [#2728](https://github.com/opendatateam/udata/pull/2728)
 - Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
 - Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
+- Add endpoint to directly get specific resource by rid [#2732](https://github.com/opendatateam/udata/pull/2732).
 - Publish kafka message when resource is created, modified or deleted [#2733](https://github.com/opendatateam/udata/pull/2733)
 - Clean documentation and code with respect to independent search service [#2738](https://github.com/opendatateam/udata/pull/2738)
 - Fix size argument in suggests endpoint and corresponding tests [#2739](https://github.com/opendatateam/udata/pull/2739)
 - Add udata instance name prefix and action suffix for kafka topics [#2736](https://github.com/opendatateam/udata/pull/2736)
+- Fix tokenisation by building an `AND` query (see comments in code) for mongo text search and pagination [#2740](https://github.com/opendatateam/udata/pull/2740)
 
 ## 4.0.2 (2022-05-04)
 
