@@ -54,7 +54,6 @@ class ConfigurableTheme(Theme):
     context_processors = None
     defaults = None
     admin_form = None
-    manifest = None
     _menu = None
     _configured = False
 
@@ -69,11 +68,6 @@ class ConfigurableTheme(Theme):
         if 'gouvfr' not in self.variants:
             self.variants.insert(0, 'gouvfr')
         self.context_processors = {}
-
-        # Check JSON manifest
-        manifest = os.path.join(path, 'manifest.json')
-        if os.path.exists(manifest):
-            self.manifest = manifest
 
     @property
     def site(self):
@@ -164,11 +158,6 @@ def init_app(app):
 
     # Override the default theme_static
     app.jinja_env.globals['theme_static'] = theme_static_with_version
-
-    # Load manifest if necessary
-    if theme.manifest:
-        with app.app_context():
-            assets.register_manifest('theme', theme.manifest)
 
     # Hook into flask security to user themed auth pages
     app.config.setdefault('SECURITY_RENDER', 'udata_front.theme:render')

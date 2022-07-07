@@ -1,10 +1,8 @@
 import calendar
 import html
 import logging
-import pkg_resources
 
 from datetime import date, datetime
-from time import time
 from urllib.parse import urlsplit, urlunsplit
 
 from babel.numbers import format_decimal
@@ -15,7 +13,6 @@ from werkzeug import url_decode, url_encode
 
 from . import front
 
-from udata import assets
 from udata.core.dataset.apiv2 import dataset_fields
 from udata.core.dataset.models import Dataset
 from udata.models import db
@@ -28,35 +25,8 @@ log = logging.getLogger(__name__)
 
 
 @front.app_template_global()
-def package_version(name):
-    return pkg_resources.get_distribution(name).version
-
-
-@front.app_template_global()
 def now():
     return datetime.now()
-
-
-@front.app_template_global(name='static')
-def static_global(filename, _burst=True, **kwargs):
-    if current_app.config['DEBUG'] or current_app.config['TESTING']:
-        burst = time()
-    else:
-        burst = package_version('udata')
-    if _burst:
-        kwargs['_'] = burst
-    return assets.cdn_for('static', filename=filename, **kwargs)
-
-
-@front.app_template_global()
-def manifest(app, filename, **kwargs):
-    return assets.from_manifest(app, filename, **kwargs)
-
-
-@front.app_template_test()
-def in_manifest(filename, app='udata'):
-    '''A Jinja test to check an asset existance in manifests'''
-    return assets.exists_in_manifest(app, filename)
 
 
 @front.app_template_global(name='form_grid')

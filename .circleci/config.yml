@@ -147,7 +147,6 @@ jobs:
           root: .
           paths:
             - udata_front/theme/gouvfr/static
-            - udata_front/theme/manifest.json
 
   dist:
     docker:
