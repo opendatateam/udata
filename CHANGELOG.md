@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 4.1.1 (2022-07-08)
 
 - Quality score computation refactoring and now returning it in list datasets endpoint. Update was made in admin too. [#2746](https://github.com/opendatateam/udata/pull/2746)
