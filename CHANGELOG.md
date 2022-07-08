@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 4.1.1 (2022-07-08)
 
 - Quality score computation refactoring and now returning it in list datasets endpoint. Update was made in admin too. [#2746](https://github.com/opendatateam/udata/pull/2746)
 - :warning: Manifest logic was removed and udata does now work as standalone [#2747](https://github.com/opendatateam/udata/pull/2747)
