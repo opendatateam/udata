@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 2.0.6 (2022-07-08)
 
 - Fix RGAA criterion 7.5 [#118](https://github.com/etalab/udata-front/pull/118)
 - Remove map related stuff [#124](https://github.com/etalab/udata-front/pull/124)
