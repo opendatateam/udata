@@ -2,7 +2,7 @@ from collections import OrderedDict
 from datetime import datetime
 from urllib.parse import urlparse
 
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _

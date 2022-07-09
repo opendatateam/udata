@@ -3,13 +3,13 @@ from datetime import datetime
 from itertools import chain
 from time import time
 
+from authlib.jose import JsonWebSignature
 from blinker import Signal
 from flask import current_app
 from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
-from itsdangerous import JSONWebSignatureSerializer
 
-from werkzeug import cached_property
+from werkzeug.utils import cached_property
 
 from udata import mail
 from udata.uris import endpoint_for
@@ -172,11 +172,14 @@ class User(WithMetrics, UserMixin, db.Document):
         return self.metrics.get('followers', 0)
 
     def generate_api_key(self):
-        s = JSONWebSignatureSerializer(current_app.config['SECRET_KEY'])
-        byte_str = s.dumps({
+        jws = JsonWebSignature()
+        protected = {'alg': 'HS256'}
+        payload = {
             'user': str(self.id),
             'time': time(),
-        })
+        }
+        secret = current_app.config['SECRET_KEY']
+        byte_str = jws.serialize_compact(protected, payload, secret)
         self.apikey = byte_str.decode()
 
     def clear_api_key(self):

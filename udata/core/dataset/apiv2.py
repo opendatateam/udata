@@ -43,7 +43,7 @@ from webargs import fields, validate
 
 user_args = {
     "q": fields.Str(),
-    "sort": fields.Str(validate=lambda p: len(p) >= 6),
+    "sort": fields.Str(),
     "page": fields.Int(missing=1),
     "page_size": fields.Int(missing=20)
 }
@@ -171,7 +171,7 @@ user_args = {
 @ns.route('/search/', endpoint='dataset_search', methods=['GET'])
 def get_dataset_search():
     '''List or search all datasets'''
-    search_parser.parse_args()
+    # search_parser.parse_args()
     try:
         return search.query(Dataset, **multi_to_dict(request.args))
     except NotImplementedError:

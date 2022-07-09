@@ -1,4 +1,3 @@
-import importlib
 import logging
 import warnings
 
@@ -10,7 +9,7 @@ from mongoengine.base import TopLevelDocumentMetaclass, get_document
 from mongoengine.errors import ValidationError
 from mongoengine.signals import pre_save, post_save
 
-from flask_fs.mongo import FileField, ImageField
+from flask_storage.mongo import FileField, ImageField
 
 from udata import entrypoints
 from udata.errors import ConfigError

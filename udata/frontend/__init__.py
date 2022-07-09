@@ -1,11 +1,11 @@
 import inspect
 import logging
-import json
 import pkg_resources
 
 from time import time
 from importlib import import_module
-from jinja2 import Markup, contextfunction
+from jinja2.utils import markupsafe
+from jinja2 import pass_context
 from flask import current_app
 
 from udata import assets, entrypoints
@@ -67,7 +67,7 @@ class HookRenderer:
         self.kwargs = kwargs
 
     def __html__(self):
-        return Markup(''.join(
+        return markupsafe.Markup(''.join(
             f(self.ctx, *self.args, **self.kwargs)
             for f, w in self.funcs
             if w is None or w(self.ctx)
@@ -76,10 +76,10 @@ class HookRenderer:
     def __iter__(self):
         for func, when in self.funcs:
             if when is None or when(self.ctx):
-                yield Markup(func(self.ctx, *self.args, **self.kwargs))
+                yield markupsafe.Markup(func(self.ctx, *self.args, **self.kwargs))
 
 
-@contextfunction
+@pass_context
 def render_template_hook(ctx, name, *args, **kwargs):
     if not has_template_hook(name):
         return ''
@@ -94,7 +94,7 @@ def inject_hooks():
     }
 
 
-class SafeMarkup(Markup):
+class SafeMarkup(markupsafe.Markup):
     '''Markup object bypasses Jinja's escaping. This override allows to sanitize the resulting html.'''
     def __new__(cls, base, *args, **kwargs):
         cleaner = UdataCleaner()
