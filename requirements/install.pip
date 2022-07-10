@@ -40,6 +40,8 @@ botocore==1.27.26
     # via
     #   boto3
     #   s3transfer
+cachelib==0.9.0
+    # via flask-caching
 celery==4.3.0
     # via
     #   -r requirements/install.in
@@ -95,7 +97,7 @@ flask==2.1.2
     #   flask-wtf
 flask-babelex==0.9.4
     # via -r requirements/install.in
-flask-caching==1.8.0
+flask-caching==2.0.0
     # via -r requirements/install.in
 flask-cdn==1.5.3
     # via -r requirements/install.in

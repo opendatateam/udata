@@ -2,8 +2,8 @@ import copy
 import logging
 import requests
 
-from flask import request, current_app, url_for
-from werkzeug.urls import Href
+from flask import request, current_app
+# from werkzeug.urls import Href
 
 from udata.search.result import SearchResult
 
@@ -52,25 +52,25 @@ class SearchQuery:
             result, total = self.adapter.mongo_search(query_args)
             return SearchResult(query=self, mongo_objects=result, total=total, **query_args)
 
-    def to_url(self, url=None, replace=False, **kwargs):
-        '''Serialize the query into an URL'''
-        params = copy.deepcopy(self._filters)
-        if self._query:
-            params['q'] = self._query
-        if self.page_size != DEFAULT_PAGE_SIZE:
-            params['page_size'] = self.page_size
-        if self.sort:
-            params['sort'] = self.sort
-        if kwargs:
-            for key, value in kwargs.items():
-                if not replace and key in params:
-                    if not isinstance(params[key], (list, tuple)):
-                        params[key] = [params[key], value]
-                    else:
-                        params[key].append(value)
-                else:
-                    params[key] = value
-        else:
-            params['page'] = self.page
-        href = Href(url or request.base_url)
-        return href(params)
+    # def to_url(self, url=None, replace=False, **kwargs):
+    #     '''Serialize the query into an URL'''
+    #     params = copy.deepcopy(self._filters)
+    #     if self._query:
+    #         params['q'] = self._query
+    #     if self.page_size != DEFAULT_PAGE_SIZE:
+    #         params['page_size'] = self.page_size
+    #     if self.sort:
+    #         params['sort'] = self.sort
+    #     if kwargs:
+    #         for key, value in kwargs.items():
+    #             if not replace and key in params:
+    #                 if not isinstance(params[key], (list, tuple)):
+    #                     params[key] = [params[key], value]
+    #                 else:
+    #                     params[key].append(value)
+    #             else:
+    #                 params[key] = value
+    #     else:
+    #         params['page'] = self.page
+    #     href = Href(url or request.base_url)
+    #     return href(params)
