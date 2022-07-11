@@ -56,7 +56,7 @@ class User(WithMetrics, UserMixin, db.Document):
     about = db.StringField()
 
     prefered_language = db.StringField()
-    fs_uniquifier = db.StringField()
+    fs_uniquifier = db.StringField(required=True)
 
     apikey = db.StringField()
 

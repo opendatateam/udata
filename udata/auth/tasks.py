@@ -5,7 +5,7 @@ from udata.tasks import task
 
 @task
 def sendmail(subject, email, template, **context):
-    user = datastore.get_user(email)
+    user = datastore.find_user(email=email)
     context['user'] = user
     tpl = 'security/{0}'.format(template)
     mail.send(subject, user, tpl, **context)

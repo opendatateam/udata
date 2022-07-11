@@ -309,7 +309,7 @@ def init_app(app):
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
-    from udata.core.dataset.apiv2 import ns# noqa
+    # from udata.core.dataset.apiv2 import ns# noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
     import udata.core.reuse.apiv2  # noqa
@@ -331,8 +331,8 @@ def init_app(app):
         api_module = module if inspect.ismodule(module) else import_module(module)
 
     # api.init_app(app)
-    apiv2_blueprint.register_blueprint(ns)
     app.register_blueprint(apiv1_blueprint)
+    # apiv2_blueprint.register_blueprint(ns)
     app.register_blueprint(apiv2_blueprint)
 
     oauth2.init_app(app)

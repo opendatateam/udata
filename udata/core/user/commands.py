@@ -74,7 +74,7 @@ def delete():
 @click.argument('email')
 def set_admin(email):
     '''Set an user as administrator'''
-    user = datastore.get_user(email)
+    user = datastore.find_user(email=email)
     log.info('Adding admin role to user %s (%s)', user.fullname, user.email)
     role = datastore.find_or_create_role('admin')
     datastore.add_role_to_user(user, role)
@@ -84,7 +84,7 @@ def set_admin(email):
 @grp.command()
 @click.argument('email')
 def password(email):
-    user = datastore.get_user(email)
+    user = datastore.find_user(email=email)
     password = click.prompt('Enter new password', hide_input=True)
     user.password = encrypt_password(password)
     user.save()

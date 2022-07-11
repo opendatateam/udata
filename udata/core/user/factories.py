@@ -1,4 +1,5 @@
 import factory
+import uuid
 
 from flask_security.utils import hash_password
 
@@ -15,6 +16,7 @@ class UserFactory(ModelFactory):
     last_name = factory.Faker('last_name')
     email = factory.Faker('email')
     active = True
+    fs_uniquifier = uuid.uuid4().hex
 
     @classmethod
     def _adjust_kwargs(cls, **kwargs):
