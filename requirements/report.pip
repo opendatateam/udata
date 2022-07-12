@@ -19,7 +19,7 @@ appdirs==1.4.4
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   urlextract
-attrs==21.2.0
+attrs==21.4.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -71,7 +71,7 @@ boto3==1.24.24
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-storage
-botocore==1.27.26
+botocore==1.27.27
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -93,12 +93,12 @@ celerybeat-mongo==0.2.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-certifi==2021.5.30
+certifi==2022.6.15
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   requests
-cffi==1.14.6
+cffi==1.15.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -126,12 +126,12 @@ cryptography==37.0.4
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   authlib
-dnspython==2.1.0
+dnspython==2.2.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   email-validator
-email-validator==1.1.3
+email-validator==1.2.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -287,7 +287,7 @@ iniconfig==1.1.1
     # via
     #   -c requirements/test.pip
     #   pytest
-isodate==0.6.0
+isodate==0.6.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -335,11 +335,16 @@ lxml==4.4.2
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-markupsafe==2.0.1
+markupsafe==2.1.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   jinja2
+marshmallow==3.17.0
+    # via
+    #   -c requirements/install.pip
+    #   -c requirements/test.pip
+    #   -r requirements/install.in
 mccabe==0.6.1
     # via flake8
 mistune==0.8.4
@@ -368,9 +373,11 @@ netaddr==0.7.19
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-packaging==21.0
+packaging==21.3
     # via
+    #   -c requirements/install.pip
     #   -c requirements/test.pip
+    #   marshmallow
     #   pytest
     #   pytest-sugar
 passlib==1.7.4
@@ -385,17 +392,17 @@ pillow==9.2.0
     #   -r requirements/install.in
     #   flask-storage
     #   pydenticon
-pluggy==0.13.1
+pluggy==1.0.0
     # via
     #   -c requirements/test.pip
     #   pytest
-py==1.10.0
+py==1.11.0
     # via
     #   -c requirements/test.pip
     #   pytest
 pycodestyle==2.5.0
     # via flake8
-pycparser==2.20
+pycparser==2.21
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -414,13 +421,13 @@ pymongo==3.10.1
     #   -r requirements/install.in
     #   celerybeat-mongo
     #   mongoengine
-pyparsing==2.4.7
+pyparsing==3.0.9
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   packaging
     #   rdflib
-pyrsistent==0.18.0
+pyrsistent==0.18.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -478,7 +485,7 @@ redis==3.3.11
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   kombu
-regex==2021.8.3
+regex==2022.7.9
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -539,7 +546,7 @@ text-unidecode==1.3
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   faker
-tlds==2021080800
+tlds==2022070701
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -568,7 +575,7 @@ unidecode==0.4.21
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   awesome-slugify
-uritools==3.0.2
+uritools==4.0.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
