@@ -7,7 +7,7 @@
 amqp==2.6.1
     # via kombu
 aniso8601==9.0.1
-    # via flask-restplus
+    # via flask-restplus-udata
 appdirs==1.4.4
     # via urlextract
 attrs==21.2.0
@@ -89,7 +89,7 @@ flask==2.1.2
     #   flask-mongoengine
     #   flask-navigation
     #   flask-principal
-    #   flask-restplus
+    #   flask-restplus-udata
     #   flask-security-too
     #   flask-sitemap
     #   flask-storage
@@ -119,7 +119,7 @@ flask-navigation==0.2.0
     # via -r requirements/install.in
 flask-principal==0.4.0
     # via flask-security-too
-flask-restplus==0.13.0
+flask-restplus-udata==0.17.0
     # via -r requirements/install.in
 flask-security-too==4.1.4
     # via -r requirements/install.in
@@ -165,7 +165,7 @@ jmespath==1.0.1
 jsonschema==3.2.0
     # via
     #   -r requirements/install.in
-    #   flask-restplus
+    #   flask-restplus-udata
 kafka-python==2.0.2
     # via udata-event-service
 kombu[redis]==4.4.0
@@ -217,7 +217,7 @@ pytz==2019.3
     #   -r requirements/install.in
     #   babel
     #   celery
-    #   flask-restplus
+    #   flask-restplus-udata
 rdflib==6.0.0
     # via -r requirements/install.in
 redis==3.3.11
@@ -241,7 +241,7 @@ six==1.16.0
     #   faker
     #   flask-cors
     #   flask-mongoengine
-    #   flask-restplus
+    #   flask-restplus-udata
     #   isodate
     #   jsonschema
     #   python-dateutil
