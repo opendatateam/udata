@@ -4,7 +4,7 @@ import os
 import click
 
 from flask import json, current_app
-from flask_restplus import schemas
+from flask_restplus_udata import schemas
 
 from udata.api import api
 from udata.commands import cli, success, exit_with_error

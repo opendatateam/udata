@@ -1,4 +1,3 @@
-import itertools
 import inspect
 import logging
 import urllib.parse
@@ -10,7 +9,7 @@ from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
 from flask_storage import UnauthorizedFileType
-from flask_restplus import Api, Resource
+from flask_restplus_udata import Api, Resource
 from flask_cors import CORS
 
 from udata import tracking, entrypoints

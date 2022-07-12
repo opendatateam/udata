@@ -11,7 +11,7 @@ amqp==2.6.1
 aniso8601==9.0.1
     # via
     #   -c requirements/install.pip
-    #   flask-restplus
+    #   flask-restplus-udata
 appdirs==1.4.4
     # via
     #   -c requirements/install.pip
@@ -132,7 +132,7 @@ flask==2.1.2
     #   flask-mongoengine
     #   flask-navigation
     #   flask-principal
-    #   flask-restplus
+    #   flask-restplus-udata
     #   flask-security-too
     #   flask-sitemap
     #   flask-storage
@@ -181,7 +181,7 @@ flask-principal==0.4.0
     # via
     #   -c requirements/install.pip
     #   flask-security-too
-flask-restplus==0.13.0
+flask-restplus-udata==0.17.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -255,7 +255,7 @@ jsonschema==3.2.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-    #   flask-restplus
+    #   flask-restplus-udata
 kafka-python==2.0.2
     # via
     #   -c requirements/install.pip
@@ -361,7 +361,7 @@ pytz==2019.3
     #   -r requirements/install.in
     #   babel
     #   celery
-    #   flask-restplus
+    #   flask-restplus-udata
 rdflib==6.0.0
     # via
     #   -c requirements/install.pip
@@ -399,7 +399,7 @@ six==1.16.0
     #   faker
     #   flask-cors
     #   flask-mongoengine
-    #   flask-restplus
+    #   flask-restplus-udata
     #   httpretty
     #   isodate
     #   jsonschema

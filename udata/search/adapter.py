@@ -1,5 +1,5 @@
 import logging
-from flask_restplus.reqparse import RequestParser
+from flask_restplus_udata.reqparse import RequestParser
 from udata.search.query import SearchQuery
 
 
