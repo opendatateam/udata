@@ -1,10 +1,8 @@
 import logging
 import os
-import time
 
 import click
 
-from werkzeug.security import gen_salt
 from flask import json, current_app
 from flask_restplus import schemas
 
