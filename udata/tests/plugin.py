@@ -4,7 +4,7 @@ import shlex
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
-from flask import json, template_rendered, url_for
+from flask import json, template_rendered, url_for, current_app
 from flask.testing import FlaskClient
 from lxml import etree
 from werkzeug.urls import url_encode
@@ -43,13 +43,17 @@ class TestClient(FlaskClient):
     def login(self, user=None):
         user = user or UserFactory()
         with self.session_transaction() as session:
-            session['user_id'] = str(user.id)
+            user_id = getattr(user, current_app.login_manager.id_attribute)()
+            session['_user_id'] = user_id
             session['_fresh'] = True
+            session['_id'] = current_app.login_manager._session_identifier_generator()
+            print("IN LOGIN", session)
+        print("IN LOGIN", user)
         return user
 
     def logout(self):
         with self.session_transaction() as session:
-            del session['user_id']
+            del session['_user_id']
             del session['_fresh']
 
 
@@ -234,7 +238,8 @@ def instance_path(app, tmpdir):
         app.config.pop(key.format('ROOT'), None)
 
     storages.init_app(app)
-    app.register_blueprint(blueprint)
+    if not blueprint.name in app.blueprints.keys():
+        app.register_blueprint(blueprint)
 
     return tmpdir
 

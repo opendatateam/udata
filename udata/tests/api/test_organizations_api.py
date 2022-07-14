@@ -205,7 +205,9 @@ class MembershipAPITest:
         member = Member(user=user, role='admin')
         organization = OrganizationFactory(
             members=[member], requests=[membership_request])
-
+        from flask import session
+        print("BEFORE REQUEST : ", session)
+        print("IN TEST USER", user)
         api_url = url_for(
             'api.accept_membership',
             org=organization,

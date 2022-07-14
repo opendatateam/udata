@@ -270,6 +270,10 @@ class MembershipAcceptAPI(MembershipAPI):
     @api.marshal_with(member_fields)
     def post(self, org, id):
         '''Accept user membership to a given organization.'''
+        print("IN ENDPOINT CURRENT USER", current_user)
+        print("IN ENDPOINT MEMBER", org.members[0].user)
+        from flask import session
+        print("IN ENDPOINT : ", session)
         EditOrganizationPermission(org).test()
         membership_request = self.get_or_404(org, id)
 

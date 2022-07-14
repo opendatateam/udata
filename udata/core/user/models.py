@@ -1,3 +1,4 @@
+import json
 from copy import copy
 from datetime import datetime
 from itertools import chain
@@ -180,7 +181,7 @@ class User(WithMetrics, UserMixin, db.Document):
             'time': time(),
         }
         secret = current_app.config['SECRET_KEY']
-        byte_str = jws.serialize_compact(protected, payload, secret)
+        byte_str = jws.serialize_compact(protected, json.dumps(payload), secret)
         self.apikey = byte_str.decode()
 
     def clear_api_key(self):

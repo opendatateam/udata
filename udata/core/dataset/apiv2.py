@@ -23,16 +23,7 @@ DEFAULT_SORTING = '-created_at'
 
 
 log = logging.getLogger(__name__)
-ns = Blueprint('datasets', __name__, url_prefix='/datasets')
-
-
-class UrlFor(fields.Field):
-
-    def _serialize(self, value, attr, obj, **kwargs):
-        print(obj)
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        print(data)
+ns = Blueprint('datasets', __name__)
 
 
 class BadgeSchema(Schema):

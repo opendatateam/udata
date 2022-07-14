@@ -101,6 +101,9 @@ class UDataApi(Api):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
+            from flask import session
+            print("IN WRAPPER : ", session)
+            print('IN WRAPPER : ', current_user)
             if (
                 not current_user.is_anonymous and
                 not current_user.sysadmin and
@@ -331,7 +334,7 @@ def init_app(app):
 
     # api.init_app(app)
     app.register_blueprint(apiv1_blueprint)
-    apiv2_blueprint.register_blueprint(ns)
+    app.register_blueprint(ns, url_prefix='/api/2/datasets')
     app.register_blueprint(apiv2_blueprint)
 
     oauth2.init_app(app)

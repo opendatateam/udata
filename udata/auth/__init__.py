@@ -29,7 +29,7 @@ class UDataSecurity(Security):
 class Permission(BasePermission):
     def __init__(self, *needs):
         '''Let administrator bypass all permissions'''
-        super(Permission, self).__init__(RoleNeed('admin'), *needs)
+        super().__init__(RoleNeed('admin'), *needs)
 
 
 admin_permission = Permission()
@@ -42,13 +42,13 @@ def init_app(app):
     from .password_validation import password_validator
     from udata.models import datastore
     state = UDataSecurity(app, datastore,
-                              register_blueprint=False,
-                              login_form=ExtendedLoginForm,
-                              confirm_register_form=ExtendedRegisterForm,
-                              register_form=ExtendedRegisterForm,
-                              reset_password_form=ExtendedResetPasswordForm,
-                              send_mail=sendmail_proxy
-                            )
+                          register_blueprint=False,
+                          login_form=ExtendedLoginForm,
+                          confirm_register_form=ExtendedRegisterForm,
+                          register_form=ExtendedRegisterForm,
+                          reset_password_form=ExtendedResetPasswordForm,
+                          send_mail=sendmail_proxy
+                        )
     state.password_util_cls(password_validator)
 
     security_bp = create_security_blueprint(state, 'security_blueprint')

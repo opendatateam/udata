@@ -81,8 +81,8 @@ class PostsAPITest:
     def test_post_api_delete(self, api):
         '''It should delete a post from the API'''
         post = PostFactory()
-        with api.user(AdminFactory()):
-            response = api.delete(url_for('api.post', post=post))
+        api.login(AdminFactory())
+        response = api.delete(url_for('api.post', post=post))
         assert204(response)
         assert Post.objects.count() == 0
 
