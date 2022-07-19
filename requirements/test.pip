@@ -256,6 +256,7 @@ marshmallow==3.17.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+    #   webargs
 mistune==0.8.4
     # via
     #   -c requirements/install.pip
@@ -284,6 +285,7 @@ packaging==21.3
     #   marshmallow
     #   pytest
     #   pytest-sugar
+    #   webargs
 passlib==1.7.4
     # via
     #   -c requirements/install.pip
@@ -450,6 +452,10 @@ voluptuous==0.11.7
     #   -r requirements/install.in
 wcwidth==0.2.5
     # via pytest
+webargs==8.2.0
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
 webencodings==0.5.1
     # via
     #   -c requirements/install.pip
