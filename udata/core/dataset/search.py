@@ -1,11 +1,15 @@
 import datetime
 from webargs import fields
 from udata.models import (
-    Dataset, Organization, User, GeoZone, License
+    Dataset, Organization, User, GeoZone
 )
 from udata.search import (
     ModelSearchAdapter, register,
-    temporal_coverage_filter_validation, model_filter_validation
+    temporal_coverage_filter_validation,
+    license_model_filter_validation,
+    geozone_model_filter_validation,
+    org_model_filter_validation,
+    user_model_filter_validation
 )
 from udata.core.spatial.models import (
     admin_levels, ADMIN_LEVEL_MAX
@@ -31,10 +35,10 @@ class DatasetSearch(ModelSearchAdapter):
     filters = {
         'tag': fields.Str(),
         'badge': fields.Str(),
-        'organization': fields.Str(validate=model_filter_validation(model=Organization)),
-        'owner': fields.Str(validate=model_filter_validation(model=User)),
-        'license': fields.Str(validate=model_filter_validation(model=License)),
-        'geozone': fields.Str(validate=model_filter_validation(model=GeoZone)),
+        'organization': fields.Str(validate=org_model_filter_validation),
+        'owner': fields.Str(validate=user_model_filter_validation),
+        'license': fields.Str(validate=license_model_filter_validation),
+        'geozone': fields.Str(validate=geozone_model_filter_validation),
         'granularity': fields.Str(),
         'format': fields.Str(),
         'schema': fields.Str(),

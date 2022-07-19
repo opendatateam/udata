@@ -4,10 +4,16 @@ import re
 from bson.objectid import ObjectId
 from webargs import ValidationError
 
+from udata.models import Organization, User, License, GeoZone
+
 log = logging.getLogger(__name__)
 
 __all__ = (
-    'model_filter_validation', 'temporal_coverage_filter_validation'
+    'org_model_filter_validation',
+    'user_model_filter_validation',
+    'license_model_filter_validation',
+    'geozone_model_filter_validation',
+    'temporal_coverage_filter_validation'
 )
 
 
@@ -18,7 +24,7 @@ RE_TIME_COVERAGE = re.compile(r'\d{4}-\d{2}-\d{2}-\d{4}-\d{2}-\d{2}')
 OR_SEPARATOR = '|'
 
 
-def model_filter_validation(val, model, field_name='id'):
+def model_filter_validation(val, model, field_name):
     if isinstance(val, ObjectId):
         return val
     try:
@@ -28,6 +34,22 @@ def model_filter_validation(val, model, field_name='id'):
         ]
     except Exception:
         raise ValidationError('"{0}" is not valid identifier'.format(val))
+
+
+def org_model_filter_validation(val):
+    return model_filter_validation(val, Organization, 'id')
+
+
+def user_model_filter_validation(val):
+    return model_filter_validation(val, User, 'id')
+
+
+def license_model_filter_validation(val):
+    return model_filter_validation(val, License, 'id')
+
+
+def geozone_model_filter_validation(val):
+    return model_filter_validation(val, GeoZone, 'id')
 
 
 def temporal_coverage_filter_validation(val):

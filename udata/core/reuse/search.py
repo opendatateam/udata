@@ -5,7 +5,8 @@ from udata.models import (
 )
 from udata.search import (
     ModelSearchAdapter, register,
-    model_filter_validation
+    org_model_filter_validation,
+    user_model_filter_validation
 )
 from udata.core.reuse.api import ReuseApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
@@ -28,8 +29,8 @@ class ReuseSearch(ModelSearchAdapter):
 
     filters = {
         'tag': fields.Str(),
-        'organization': fields.Str(validate=model_filter_validation(model=Organization)),
-        'owner': fields.Str(validate=model_filter_validation(model=User)),
+        'organization': fields.Str(validate=org_model_filter_validation),
+        'owner': fields.Str(validate=user_model_filter_validation),
         'type': fields.Str(),
         'badge': fields.Str(),
         'featured': fields.Bool(),

@@ -1,6 +1,7 @@
 import factory
 
 from factory.mongoengine import MongoEngineFactory
+from webargs import fields
 
 from udata import search
 from udata.models import db
@@ -41,8 +42,8 @@ class FakeSearch(search.ModelSearchAdapter):
     model = FakeSearchable
     search_url = 'mock://test.com/fakeable/'
     filters = {
-        'tag': search.Filter(),
-        'other': search.Filter(),
+        'tag': fields.Str(),
+        'other': fields.Str(),
     }
     sorts = {
         'title': 'title.raw',
