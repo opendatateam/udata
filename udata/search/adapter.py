@@ -1,5 +1,5 @@
 import logging
-from flask_restplus.reqparse import RequestParser
+from webargs import fields, validate
 from udata.search.query import SearchQuery
 
 
@@ -26,26 +26,26 @@ class ModelSearchAdapter:
 
     @classmethod
     def as_request_parser(cls, paginate=True):
-        parser = RequestParser()
-        # q parameter
-        parser.add_argument('q', type=str, location='args',
-                            help='The search query')
+        search_arguments = {
+            "q": fields.Str(),
+            'page': fields.Int(load_default=1),
+            'page_size': fields.Int(load_default=20)
+        }
         # Add filters arguments
-        for name, type in cls.filters.items():
-            kwargs = type.as_request_parser_kwargs()
-            parser.add_argument(name, location='args', **kwargs)
+        for name, filter_type in cls.filters.items():
+            search_arguments.update({name: filter_type})
+
         # Sort arguments
         keys = list(cls.sorts)
         choices = keys + ['-' + k for k in keys]
-        help_msg = 'The field (and direction) on which sorting apply'
-        parser.add_argument('sort', type=str, location='args', choices=choices,
-                            help=help_msg)
+        search_arguments.update({'sort': fields.Str(validate=validate.OneOf(choices))})
+
         if paginate:
-            parser.add_argument('page', type=int, location='args',
-                                default=1, help='The page to display')
-            parser.add_argument('page_size', type=int, location='args',
-                                default=20, help='The page size')
-        return parser
+            search_arguments.update({
+                'page': fields.Int(load_default=1),
+                'page_size': fields.Int(load_default=20)
+            })
+        return search_arguments
 
     @classmethod
     def parse_sort(cls, sort):

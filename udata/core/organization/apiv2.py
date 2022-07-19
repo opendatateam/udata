@@ -1,6 +1,5 @@
 from flask import abort, jsonify
 
-from webargs import fields as arg_field, validate as arg_validate
 from webargs.flaskparser import use_args
 
 from udata import search
@@ -8,39 +7,20 @@ from udata.app import Blueprint
 from udata.api.fields import paginate_schema
 from .models import Organization
 from .apiv2_schemas import OrganizationSchema
+from .search import OrganizationSearch
 
 
 ns = Blueprint('organizations', __name__)
 
 
-SORTS = [
-    'reuses',
-    'datasets',
-    'followers',
-    'views',
-    'created',
-    '-reuses',
-    '-datasets',
-    '-followers',
-    '-views',
-    '-created'
-]
-
-
-organization_search_args = {
-    "q": arg_field.Str(),
-    'badge': arg_field.Str(),
-    'sort': arg_field.Str(validate=arg_validate.OneOf(SORTS)),
-    'page': arg_field.Int(load_default=1),
-    'page_size': arg_field.Int(load_default=20)
-}
+search_arguments = OrganizationSearch.as_request_parser()
 
 
 DEFAULT_SORTING = '-created_at'
 
 
 @ns.route('/search/', endpoint='organization_search', methods=['GET'])
-@use_args(organization_search_args, location="query")
+@use_args(search_arguments, location="query")
 def get_organization_search(args):
     '''Organizations collection search endpoint'''
     try:

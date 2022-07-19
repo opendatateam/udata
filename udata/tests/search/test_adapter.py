@@ -4,6 +4,7 @@ import pytest
 from flask_restplus import inputs
 from flask_restplus.reqparse import RequestParser
 from unittest.mock import Mock
+from webargs import fields
 
 from udata import search
 from udata.i18n import gettext as _
@@ -31,13 +32,13 @@ RANGE_LABELS = {
 
 class FakeSearchWithBool(FakeSearch):
     filters = {
-        'boolean': search.BoolFilter()
+        'boolean': fields.Bool()
     }
 
 
 class FakeSearchWithCoverage(FakeSearch):
     filters = {
-        'coverage': search.TemporalCoverageFilter()
+        'coverage': fields.Str(validate=search.temporal_coverage_filter_validation)
     }
 
 

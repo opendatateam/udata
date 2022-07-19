@@ -1,11 +1,11 @@
 import datetime
+from webargs import fields
 from udata.models import (
     Dataset, Organization, User, GeoZone, License
 )
 from udata.search import (
     ModelSearchAdapter, register,
-    ModelTermsFilter, BoolFilter, Filter,
-    TemporalCoverageFilter
+    temporal_coverage_filter_validation, model_filter_validation
 )
 from udata.core.spatial.models import (
     admin_levels, ADMIN_LEVEL_MAX
@@ -29,17 +29,17 @@ class DatasetSearch(ModelSearchAdapter):
     }
 
     filters = {
-        'tag': Filter(),
-        'badge': Filter(),
-        'organization': ModelTermsFilter(model=Organization),
-        'owner': ModelTermsFilter(model=User),
-        'license': ModelTermsFilter(model=License),
-        'geozone': ModelTermsFilter(model=GeoZone),
-        'granularity': Filter(),
-        'format': Filter(),
-        'schema': Filter(),
-        'temporal_coverage': TemporalCoverageFilter(),
-        'featured': BoolFilter(),
+        'tag': fields.Str(),
+        'badge': fields.Str(),
+        'organization': fields.Str(validate=model_filter_validation(model=Organization)),
+        'owner': fields.Str(validate=model_filter_validation(model=User)),
+        'license': fields.Str(validate=model_filter_validation(model=License)),
+        'geozone': fields.Str(validate=model_filter_validation(model=GeoZone)),
+        'granularity': fields.Str(),
+        'format': fields.Str(),
+        'schema': fields.Str(),
+        'temporal_coverage': fields.Str(validate=temporal_coverage_filter_validation),
+        'featured': fields.Bool(),
     }
 
     @classmethod

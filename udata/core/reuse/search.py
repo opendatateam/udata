@@ -1,10 +1,11 @@
 import datetime
+from webargs import fields
 from udata.models import (
     Reuse, Organization, User
 )
 from udata.search import (
     ModelSearchAdapter, register,
-    ModelTermsFilter, BoolFilter, Filter
+    model_filter_validation
 )
 from udata.core.reuse.api import ReuseApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
@@ -26,13 +27,13 @@ class ReuseSearch(ModelSearchAdapter):
     }
 
     filters = {
-        'tag': Filter(),
-        'organization': ModelTermsFilter(model=Organization),
-        'owner': ModelTermsFilter(model=User),
-        'type': Filter(),
-        'badge': Filter(),
-        'featured': BoolFilter(),
-        'topic': Filter(),
+        'tag': fields.Str(),
+        'organization': fields.Str(validate=model_filter_validation(model=Organization)),
+        'owner': fields.Str(validate=model_filter_validation(model=User)),
+        'type': fields.Str(),
+        'badge': fields.Str(),
+        'featured': fields.Bool(),
+        'topic': fields.Str(),
     }
 
     @classmethod

@@ -1,7 +1,7 @@
 import datetime
+from webargs import fields
 from udata import search
 from udata.models import Organization
-from udata.search.fields import Filter
 from udata.core.organization.api import OrgApiParser, DEFAULT_SORTING
 from udata.utils import to_iso_datetime
 
@@ -23,7 +23,7 @@ class OrganizationSearch(search.ModelSearchAdapter):
     }
 
     filters = {
-        'badge': Filter()
+        'badge': fields.Str()
     }
 
     @classmethod

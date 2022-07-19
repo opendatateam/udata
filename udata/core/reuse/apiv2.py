@@ -1,6 +1,5 @@
 from flask import abort, jsonify
 
-from webargs import fields as arg_field, validate as arg_validate
 from webargs.flaskparser import use_args
 
 from udata import search
@@ -9,42 +8,17 @@ from udata.api.fields import paginate_schema
 
 from .models import Reuse
 from .apiv2_schemas import ReuseSchema
+from .search import ReuseSearch
 
 
 ns = Blueprint('reuses', __name__)
+search_arguments = ReuseSearch.as_request_parser()
 
 DEFAULT_SORTING = '-created_at'
 
 
-SORTS = [
-    'created',
-    'datasets',
-    'followers',
-    'views',
-    '-created',
-    '-datasets',
-    '-followers',
-    '-views'
-]
-
-
-reuse_search_args = {
-    "q": arg_field.Str(),
-    'badge': arg_field.Str(),
-    'tag': arg_field.Str(),
-    'organization': arg_field.Str(),
-    'owner': arg_field.Str(),
-    'featured': arg_field.Bool(),
-    'type': arg_field.Str(),
-    'topic': arg_field.Str(),
-    'sort': arg_field.Str(validate=arg_validate.OneOf(SORTS)),
-    'page': arg_field.Int(load_default=1),
-    'page_size': arg_field.Int(load_default=20)
-}
-
-
 @ns.route('/search/', endpoint='reuse_search', methods=['GET'])
-@use_args(reuse_search_args, location="query")
+@use_args(search_arguments, location="query")
 def get_reuse_search(args):
     '''Reuses collection search endpoint'''
     try:

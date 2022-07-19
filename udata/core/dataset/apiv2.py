@@ -13,6 +13,7 @@ from udata.utils import get_by
 from .models import Dataset, CommunityResource
 from .permissions import DatasetEditPermission
 from .apiv2_schemas import DatasetSchema, ResourceSchema
+from .search import DatasetSearch
 
 
 DEFAULT_SORTING = '-created_at'
@@ -23,17 +24,7 @@ log = logging.getLogger(__name__)
 
 ns = Blueprint('datasets', __name__)
 
-
-SORTS = [
-    'created',
-    'reuses',
-    'followers',
-    'views',
-    '-created',
-    '-reuses',
-    '-followers',
-    '-views'
-]
+search_arguments = DatasetSearch.as_request_parser()
 
 
 resources_parser_args = {
@@ -44,27 +35,8 @@ resources_parser_args = {
 }
 
 
-dataset_search_args = {
-    "q": arg_field.Str(),
-    'tag': arg_field.Str(),
-    'badge': arg_field.Str(),
-    'organization': arg_field.Str(),
-    'owner': arg_field.Str(),
-    'license': arg_field.Str(),
-    'geozone': arg_field.Str(),
-    'granularity': arg_field.Str(),
-    'format': arg_field.Str(),
-    'schema': arg_field.Str(),
-    'temporal_coverage': arg_field.Str(),
-    'featured': arg_field.Bool(),
-    'sort': arg_field.Str(validate=arg_validate.OneOf(SORTS)),
-    'page': arg_field.Int(load_default=1),
-    'page_size': arg_field.Int(load_default=20)
-}
-
-
 @ns.route('/search/', endpoint='dataset_search', methods=['GET'])
-@use_args(dataset_search_args, location="query")
+@use_args(search_arguments, location="query")
 def get_dataset_search(args):
     '''List or search all datasets'''
     try:
