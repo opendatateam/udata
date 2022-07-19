@@ -1,4 +1,3 @@
-import itertools
 import inspect
 import logging
 import urllib.parse
@@ -309,12 +308,15 @@ def init_app(app):
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
-    import udata.core.dataset.apiv2  # noqa
+    # import udata.core.dataset.apiv2  # noqa
+    from udata.core.dataset.apiv2 import ns as dataset_blueprint  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
-    import udata.core.reuse.apiv2  # noqa
+    # import udata.core.reuse.apiv2  # noqa
+    from udata.core.reuse.apiv2 import ns as reuse_blueprint  # noqa
     import udata.core.organization.api  # noqa
-    import udata.core.organization.apiv2  # noqa
+    # import udata.core.organization.apiv2  # noqa
+    from udata.core.organization.apiv2 import ns as org_blueprint  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa
     import udata.core.site.api  # noqa
@@ -333,6 +335,9 @@ def init_app(app):
     # api.init_app(app)
     app.register_blueprint(apiv1_blueprint)
     app.register_blueprint(apiv2_blueprint)
+    app.register_blueprint(dataset_blueprint, url_prefix='/api/2/datasets')
+    app.register_blueprint(org_blueprint, url_prefix='/api/2/organizations')
+    app.register_blueprint(reuse_blueprint, url_prefix='/api/2/reuses')
 
     oauth2.init_app(app)
     cors.init_app(app)

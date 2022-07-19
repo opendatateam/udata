@@ -1,29 +1,57 @@
-from flask import request
+from flask import abort, jsonify
+
+from webargs import fields as arg_field, validate as arg_validate
+from webargs.flaskparser import use_args
 
 from udata import search
-from udata.api import apiv2, API
-from udata.utils import multi_to_dict
+from udata.app import Blueprint
+from udata.api.fields import paginate_schema
 
-from .api_fields import reuse_page_fields, reuse_fields
-from .search import ReuseSearch
+from .models import Reuse
+from .apiv2_schemas import ReuseSchema
 
-apiv2.inherit('ReusePage', reuse_page_fields)
-apiv2.inherit('Reuse', reuse_fields)
 
-ns = apiv2.namespace('reuses', 'Reuse related operations')
-
-search_parser = ReuseSearch.as_request_parser()
+ns = Blueprint('reuses', __name__)
 
 DEFAULT_SORTING = '-created_at'
 
 
-@ns.route('/search/', endpoint='reuse_search')
-class ReuseSearchAPI(API):
+SORTS = [
+    'created',
+    'datasets',
+    'followers',
+    'views',
+    '-created',
+    '-datasets',
+    '-followers',
+    '-views'
+]
+
+
+reuse_search_args = {
+    "q": arg_field.Str(),
+    'badge': arg_field.Str(),
+    'tag': arg_field.Str(),
+    'organization': arg_field.Str(),
+    'owner': arg_field.Str(),
+    'featured': arg_field.Bool(),
+    'type': arg_field.Str(),
+    'topic': arg_field.Str(),
+    'sort': arg_field.Str(validate=arg_validate.OneOf(SORTS)),
+    'page': arg_field.Int(missing=1),
+    'page_size': arg_field.Int(missing=20)
+}
+
+
+@ns.route('/search/', endpoint='reuse_search', methods=['GET'])
+@use_args(reuse_search_args, location="query")
+def get_reuse_search(args):
     '''Reuses collection search endpoint'''
-    @apiv2.doc('search_reuses')
-    @apiv2.expect(search_parser)
-    @apiv2.marshal_with(reuse_page_fields)
-    def get(self):
-        '''Search all reuses'''
-        search_parser.parse_args()
-        return search.query(ReuseSearch, **multi_to_dict(request.args))
+    try:
+        result = search.query(Reuse, **args)
+        schema = paginate_schema(ReuseSchema)
+        return jsonify(schema().dump(result))
+    except NotImplementedError:
+        abort(501, 'Search endpoint not enabled')
+    except RuntimeError:
+        abort(500, 'Internal search service error')

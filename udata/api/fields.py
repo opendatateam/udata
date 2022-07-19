@@ -4,6 +4,7 @@ from dateutil.parser import parse
 
 from flask import request, url_for
 from flask_restplus.fields import *  # noqa
+from marshmallow import Schema, fields as ma_fields
 
 from udata.utils import multi_to_dict
 from udata.uris import endpoint_for
@@ -90,3 +91,55 @@ def pager(page_fields):
             description='The previous page URL if exists')
     }
     return pager_fields
+
+
+class MaURLFor(ma_fields.Field):
+
+    _CHECK_ATTRIBUTE = False
+
+    def __init__(self, endpoint, mapper=None, **kwargs):
+        self.endpoint = endpoint
+        self.fallback_endpoint = kwargs.pop('fallback_endpoint', None)
+        self.mapper = mapper or self.default_mapper
+        ma_fields.Field.__init__(self, **kwargs)
+
+    def default_mapper(self, obj):
+        return {'id': str(obj.id)}
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        return endpoint_for(self.endpoint, self.fallback_endpoint, _external=True, **self.mapper(obj))
+
+
+class MaNextPageUrl(ma_fields.Field):
+    _CHECK_ATTRIBUTE = False
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if not getattr(obj, 'has_next', None):
+            return None
+        args = multi_to_dict(request.args)
+        args.update(request.view_args)
+        args['page'] = obj.page + 1
+        return url_for(request.endpoint, _external=True, **args)
+
+
+class MaPreviousPageUrl(ma_fields.Field):
+    _CHECK_ATTRIBUTE = False
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if not getattr(obj, 'has_prev', None):
+            return None
+        args = multi_to_dict(request.args)
+        args.update(request.view_args)
+        args['page'] = obj.page - 1
+        return url_for(request.endpoint, _external=True, **args)
+
+
+def paginate_schema(schema):
+    class PaginationSchema(Schema):
+        data = ma_fields.List(ma_fields.Nested(schema), attribute="objects")
+        page = ma_fields.Int(required=True, min=1)
+        page_size = ma_fields.Int(required=True, min=0)
+        total = ma_fields.Int(required=True, min=0)
+        next_page = MaNextPageUrl()
+        previous_page = MaPreviousPageUrl()
+    return PaginationSchema
