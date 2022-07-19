@@ -34,6 +34,7 @@ Jinja2==2.10.3
 jsonschema==3.2.0
 kombu[redis]==4.4.0
 lxml==4.4.2
+marshmallow==3.17.0
 mistune==0.8.4
 mongoengine==0.20.0
 msgpack==0.6.2
