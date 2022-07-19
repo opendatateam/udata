@@ -2,7 +2,10 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- APIv2 does no longer user `flask-restplus` [#2755](https://github.com/opendatateam/udata/pull/2755):
+  - Api_fields are replaced by marshmallow schemas
+  - Request validation is done by Webargs, with relies on Marshmallow
+  - Search request parser is now a Webargs dict
 
 ## 4.1.1 (2022-07-08)
 
