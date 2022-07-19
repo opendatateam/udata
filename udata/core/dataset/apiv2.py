@@ -37,8 +37,8 @@ SORTS = [
 
 
 resources_parser_args = {
-    'page': arg_field.Int(missing=1),
-    'page_size': arg_field.Int(missing=20),
+    'page': arg_field.Int(load_default=1),
+    'page_size': arg_field.Int(load_default=50),
     'type': arg_field.Str(),
     'q': arg_field.Str()
 }
@@ -58,8 +58,8 @@ dataset_search_args = {
     'temporal_coverage': arg_field.Str(),
     'featured': arg_field.Bool(),
     'sort': arg_field.Str(validate=arg_validate.OneOf(SORTS)),
-    'page': arg_field.Int(missing=1),
-    'page_size': arg_field.Int(missing=20)
+    'page': arg_field.Int(load_default=1),
+    'page_size': arg_field.Int(load_default=20)
 }
 
 
@@ -92,8 +92,8 @@ def get_resources_paginated(args, dataset):
     # args = parser.parse(resources_parser_args, request)
     page = args['page']
     page_size = args['page_size']
-    next_page = f"{url_for('apiv2.datasets.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}"
-    previous_page = f"{url_for('apiv2.datasets.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}"
+    next_page = f"{url_for('datasets.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}"
+    previous_page = f"{url_for('datasets.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}"
     res = dataset.resources
 
     if args.get('type'):

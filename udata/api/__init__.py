@@ -308,14 +308,11 @@ def init_app(app):
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
     import udata.core.dataset.api  # noqa
-    # import udata.core.dataset.apiv2  # noqa
     from udata.core.dataset.apiv2 import ns as dataset_blueprint  # noqa
     import udata.core.discussions.api  # noqa
     import udata.core.reuse.api  # noqa
-    # import udata.core.reuse.apiv2  # noqa
     from udata.core.reuse.apiv2 import ns as reuse_blueprint  # noqa
     import udata.core.organization.api  # noqa
-    # import udata.core.organization.apiv2  # noqa
     from udata.core.organization.apiv2 import ns as org_blueprint  # noqa
     import udata.core.followers.api  # noqa
     import udata.core.jobs.api  # noqa

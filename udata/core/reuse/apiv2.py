@@ -38,8 +38,8 @@ reuse_search_args = {
     'type': arg_field.Str(),
     'topic': arg_field.Str(),
     'sort': arg_field.Str(validate=arg_validate.OneOf(SORTS)),
-    'page': arg_field.Int(missing=1),
-    'page_size': arg_field.Int(missing=20)
+    'page': arg_field.Int(load_default=1),
+    'page_size': arg_field.Int(load_default=20)
 }
 
 

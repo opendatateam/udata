@@ -31,7 +31,7 @@ class GeoJsonSchema(Schema):
 class SpatialCoverageSchema(Schema):
     geom = fields.Nested(GeoJsonSchema)
     zones = fields.List(fields.Str)
-    granularity = fields.Str(default='other')
+    granularity = fields.Str(dump_default='other')
 
 
 class DatasetSchema(Schema):
@@ -52,7 +52,7 @@ class DatasetSchema(Schema):
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
     resources = fields.Function(lambda obj: {
         'rel': 'subsection',
-        'href': url_for('api.resources', dataset=obj.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
+        'href': url_for('datasets.resources', dataset=obj.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(obj.resources)
         })
@@ -82,19 +82,19 @@ class DatasetSchema(Schema):
 
 
 class ChecksumSchema(Schema):
-    type = fields.Str(default=DEFAULT_CHECKSUM_TYPE, validate=validate.OneOf(CHECKSUM_TYPES))
+    type = fields.Str(dump_default=DEFAULT_CHECKSUM_TYPE, validate=validate.OneOf(CHECKSUM_TYPES))
     value = fields.Str(required=True)
 
 
 class ResourceSchema(Schema):
-    id = fields.Str(readonly=True)
+    id = fields.Str(dump_only=True)
     title = fields.Str(required=True)
     description = fields.Str()
     filetype = fields.Str(required=True, validate=validate.OneOf(RESOURCE_FILETYPES))
     type = fields.Str(required=True, validate=validate.OneOf(RESOURCE_TYPES))
     format = fields.Str(required=True)
     url = fields.Str(required=True)
-    latest = fields.Str(readonly=True)
+    latest = fields.Str(dump_only=True)
     checksum = fields.Nested(ChecksumSchema)
     filesize = fields.Integer()
     mime = fields.Str()

@@ -3,7 +3,7 @@ import pytest
 
 from udata.tests.api import APITestCase
 
-from udata.core.dataset.apiv2 import DEFAULT_PAGE_SIZE
+from udata.core.dataset.apiv2_schemas import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, CommunityResourceFactory)
 
@@ -14,11 +14,11 @@ class DatasetAPIV2Test(APITestCase):
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources)
 
-        response = self.get(url_for('apiv2.dataset', dataset=dataset))
+        response = self.get(url_for('datasets.dataset', dataset=dataset))
         self.assert200(response)
         data = response.json
         assert data['resources']['rel'] == 'subsection'
-        assert data['resources']['href'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['resources']['href'] == url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['resources']['type'] == 'GET'
         assert data['resources']['total'] == len(resources)
         assert data['community_resources']['rel'] == 'subsection'
@@ -35,16 +35,16 @@ class DatasetResourceAPIV2Test(APITestCase):
         specific_resource = ResourceFactory(id='817204ac-2202-8b4a-98e7-4284d154d10c', title='my-resource')
         resources.append(specific_resource)
         dataset = DatasetFactory(resources=resources)
-        response = self.get(url_for('apiv2.resource', rid=specific_resource.id))
+        response = self.get(url_for('datasets.resource', rid=specific_resource.id))
         self.assert200(response)
         data = response.json
         assert data['dataset_id'] == str(dataset.id)
         assert data['resource']['id'] == str(specific_resource.id)
         assert data['resource']['title'] == specific_resource.title
-        response = self.get(url_for('apiv2.resource', rid='111111ac-1111-1b1a-11e1-1111d111d11c'))
+        response = self.get(url_for('datasets.resource', rid='111111ac-1111-1b1a-11e1-1111d111d11c'))
         self.assert404(response)
         com_resource = CommunityResourceFactory()
-        response = self.get(url_for('apiv2.resource', rid=com_resource.id))
+        response = self.get(url_for('datasets.resource', rid=com_resource.id))
         self.assert200(response)
         data = response.json
         assert data['dataset_id'] is None
@@ -55,7 +55,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         '''Should fetch 1 page of resources from the API'''
         resources = [ResourceFactory() for _ in range(7)]
         dataset = DatasetFactory(resources=resources)
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == len(resources)
@@ -69,7 +69,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         '''Should fetch 1 page of resources from the API using its default parameters'''
         resources = [ResourceFactory() for _ in range(7)]
         dataset = DatasetFactory(resources=resources)
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == len(resources)
@@ -83,14 +83,14 @@ class DatasetResourceAPIV2Test(APITestCase):
         '''Should fetch 2 pages of resources from the API'''
         resources = [ResourceFactory() for _ in range(80)]
         dataset = DatasetFactory(resources=resources)
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == len(resources)
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['next_page'] == url_for('datasets.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
         response = self.get(data['next_page'])
@@ -101,7 +101,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['page'] == 2
         assert data['page_size'] == DEFAULT_PAGE_SIZE
         assert data['next_page'] == None
-        assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['previous_page'] == url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
 
     def test_get_specific_type(self):
         '''Should fetch resources of type main from the API'''
@@ -110,25 +110,25 @@ class DatasetResourceAPIV2Test(APITestCase):
         resources += [ResourceFactory(type='main') for _ in range(nb_resources__of_specific_type)]
         dataset = DatasetFactory(resources=resources)
         # Try without resource type filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == len(resources)
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['next_page'] == url_for('datasets.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
         # Try with resource type filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main'))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main'))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == nb_resources__of_specific_type
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
+        assert data['next_page'] == url_for('datasets.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
         assert data['previous_page'] is None
 
         response = self.get(data['next_page'])
@@ -139,7 +139,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['page'] == 2
         assert data['page_size'] == DEFAULT_PAGE_SIZE
         assert data['next_page'] == None
-        assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
+        assert data['previous_page'] == url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
 
     def test_get_with_query_string(self):
         '''Should fetch resources according to query string from the API'''
@@ -150,18 +150,18 @@ class DatasetResourceAPIV2Test(APITestCase):
         dataset = DatasetFactory(resources=resources)
 
         # Try without query string filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == len(resources)
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['next_page'] == url_for('datasets.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
         # Try with query string filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='primary'))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='primary'))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == 10
@@ -172,7 +172,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['previous_page'] is None
 
         # Try with query string filter to check case-insensitivity
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='PriMarY'))
+        response = self.get(url_for('datasets.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='PriMarY'))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == 10
