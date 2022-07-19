@@ -3,6 +3,7 @@ import pytest
 
 from flask_restplus import inputs
 from flask_restplus.reqparse import RequestParser
+from marshmallow import fields
 from unittest.mock import Mock
 from webargs import fields
 
@@ -65,42 +66,39 @@ def assertHasArgument(parser, name, _type, choices=None):
 
 class SearchAdaptorTest:
     def test_as_request_parser_filter(self):
-        parser = FakeSearch.as_request_parser()
-        assert isinstance(parser, RequestParser)
+        search_args = FakeSearch.as_request_parser()
 
         # query + tag and other filters + sorts + pagination
-        assert len(parser.args) == 6
-        assertHasArgument(parser, 'q', str)
-        assertHasArgument(parser, 'sort', str)
-        assertHasArgument(parser, 'tag', clean_string)
-        assertHasArgument(parser, 'other', clean_string)
-        assertHasArgument(parser, 'page', int)
-        assertHasArgument(parser, 'page_size', int)
+        assert len(search_args.keys()) == 6
+        assert type(search_args['q']) == fields.String
+        assert type(search_args['sort']) == fields.String
+        assert type(search_args['tag']) == fields.String
+        assert type(search_args['other']) == fields.String
+        assert type(search_args['page']) == fields.Integer
+        assert type(search_args['page_size']) == fields.Integer
 
     def test_as_request_parser_bool_filter(self):
-        parser = FakeSearchWithBool.as_request_parser()
-        assert isinstance(parser, RequestParser)
+        search_args = FakeSearchWithBool.as_request_parser()
 
         # query + boolean filter + sorts + pagination
-        assert len(parser.args) == 5
-        assertHasArgument(parser, 'q', str)
-        assertHasArgument(parser, 'sort', str)
-        assertHasArgument(parser, 'boolean', inputs.boolean)
-        assertHasArgument(parser, 'page', int)
-        assertHasArgument(parser, 'page_size', int)
+        assert len(search_args.keys()) == 5
+        assert type(search_args['q']) == fields.String
+        assert type(search_args['sort']) == fields.String
+        assert type(search_args['boolean']) == fields.Boolean
+        assert type(search_args['page']) == fields.Integer
+        assert type(search_args['page_size']) == fields.Integer
 
     def test_as_request_parser_temporal_coverage_facet(self):
-        parser = FakeSearchWithCoverage.as_request_parser()
+        search_args = FakeSearchWithCoverage.as_request_parser()
         filter = FakeSearchWithCoverage.filters['coverage']
-        assert isinstance(parser, RequestParser)
 
         # query + range facet + sorts + pagination
-        assert len(parser.args) == 5
-        assertHasArgument(parser, 'q', str)
-        assertHasArgument(parser, 'sort', str)
-        assertHasArgument(parser, 'coverage', filter.validate_parameter)
-        assertHasArgument(parser, 'page', int)
-        assertHasArgument(parser, 'page_size', int)
+        assert len(search_args.keys()) == 5
+        assert type(search_args['q']) == fields.String
+        assert type(search_args['sort']) == fields.String
+        assert type(search_args['coverage']) == fields.Str
+        assert type(search_args['page']) == fields.Integer
+        assert type(search_args['page_size']) == fields.Integer
 
 
 @pytest.mark.usefixtures('enable_kafka')
