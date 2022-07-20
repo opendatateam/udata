@@ -1,4 +1,0 @@
--r install.in
--c install.pip
-
-mkdocs==1.2.3

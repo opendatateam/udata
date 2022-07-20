@@ -4,7 +4,7 @@ version: 2
 jobs:
   python:
     docker:
-      - image: udata/circleci:2-alpine
+      - image: cimg/python:3.7.13
       - image: mongo:3.6
       - image: redis:alpine
     environment:
@@ -12,37 +12,17 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Compute Python dependencies key
-          command: cat requirements/*.pip > python.deps
-      - run:
           name: Get the base reference branch
           command: export BASE_BRANCH=$(base_branch)
-      - restore_cache:
-          keys:
-          - py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
-          - py3-cache-v9-{{ arch }}-{{ .Branch }}
-          - py3-cache-v9-{{ arch }}-{{ .Environment.BASE_BRANCH }}
       - run:
           name: Install python dependencies
           command: |
-            virtualenv venv
-            source venv/bin/activate
-            pip install -r requirements/develop.pip
-            pip install -e .
-      - save_cache:
-          key: py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
-          paths:
-          - venv
-      - save_cache:
-          key: py3-cache-v9-{{ arch }}-{{ .Branch }}
-          paths:
-          - venv
+            poetry install
       - run:
           name: Run tests
           command: |
             mkdir -p reports/python
-            source venv/bin/activate
-            inv test --report --ci
+            poetry run inv test --report --ci
       - store_test_results:
           path: reports/python
       - store_artifacts:
@@ -111,18 +91,8 @@ jobs:
       - run:
           name: Build a distributable package
           command: |
-            source venv/bin/activate
-            # Build a wheel release
-            if [[ $CIRCLE_TAG ]]; then
-                # This is a tagged release
-                inv pydist
-            elif [[ "$CIRCLE_BRANCH" == feature/* ]]; then
-                # This is a feature branch
-                inv pydist -b $CIRCLE_BUILD_NUM+${CIRCLE_BRANCH#*/}
-            else
-                # This is a simple development build
-                inv pydist -b $CIRCLE_BUILD_NUM
-            fi
+            poetry version prerelease
+            poetry build
       - store_artifacts:
           path: dist
       - persist_to_workspace:
@@ -132,16 +102,14 @@ jobs:
 
   publish:
     docker:
-      - image: udata/circleci:2-alpine
+      - image: cimg/python:3.7.13
     steps:
       - attach_workspace:
           at: .
       - deploy:
           name: Publish on PyPI
           command: |
-            source venv/bin/activate
-            pip install twine
-            twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
+            poetry publish --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" --no-interaction
 
 workflows:
   version: 2
