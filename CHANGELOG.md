@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Replace mongo legacy image in CI [#2754](https://github.com/opendatateam/udata/pull/2754)
 
 ## 4.1.1 (2022-07-08)
 
