@@ -116,30 +116,6 @@ udata = 'udata.commands:cli'
 [tool.poetry.plugins."pytest11"]
 "udata" = "udata.tests.plugin"
 
-[tool.pytest.ini_options]
-norecursedirs = [".git", "build", ".tox", "specs", ".cache", "udata/static", "udata/templates", "udata/translations"]
-python_files = ["test_*.py"]
-python_classes = ["*Test"]
-python_functions = ["test_*"]
-# See: https://docs.authlib.org/en/latest/flask/oauth2.html
-env = [
-    "AUTHLIB_INSECURE_TRANSPORT = true"
-]
-mock_use_standalone_module = true
-# See: https://docs.pytest.org/en/latest/warnings.html#deprecationwarning-and-pendingdeprecationwarning
-filterwarnings = [
-    "ignore::DeprecationWarning:mongoengine"
-]
-# See: https://docs.pytest.org/en/latest/example/markers.html#registering-markers
-markers = [
-    "frontend: load the frontend stack",
-    "preview: mock a preview backend",
-    "oauth: inject an OAuth client"
-]
-
-[tool.distutils.bdist_wheel]
-universal = true
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
