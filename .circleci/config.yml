@@ -29,11 +29,6 @@ jobs:
           path: reports/
           destination: reports
 
-      - persist_to_workspace:
-          root: .
-          paths:
-          - venv
-
   assets:
     docker:
       # TODO make an image based on 2-alpine w/ nvm and phantom deps
