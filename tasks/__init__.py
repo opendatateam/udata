@@ -23,7 +23,7 @@ def clean(ctx, node=False, translations=False, all=False):
     header('Clean all build artifacts')
     patterns = [
         'build', 'dist', 'cover', 'docs/_build',
-        '**/*.pyc', '*.egg-info', '.tox', 'udata/static/*'
+        '**/*.pyc', '*.egg-info', 'udata/static/*'
     ]
     if node or all:
         patterns.append('node_modules')
