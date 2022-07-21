@@ -76,7 +76,7 @@ jobs:
 
   dist:
     docker:
-      - image: udata/circleci:2-alpine
+      - image: cimg/python:3.7.13
     environment:
        BASH_ENV: /root/.bashrc
     steps:
