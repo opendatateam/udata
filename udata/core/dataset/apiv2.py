@@ -240,7 +240,7 @@ class ProtectedExtrasAPI(API):
         return dataset.protected_extras
 
 
-@ns.route('/<dataset:dataset>/resources/<uuid:rid>/protected_extras/',
+@ns.route('resources/<uuid:rid>/protected_extras/',
           endpoint='resource_protected_extras')
 class ResourceProtectedExtrasAPI(ResourceMixin, API):
     @apiv2.param('rid', 'The resource unique identifier')
@@ -249,6 +249,8 @@ class ResourceProtectedExtrasAPI(ResourceMixin, API):
         '''Get the given resource protected_extras'''
         resource = self.get_resource_or_404(dataset, rid)
         return resource.protected_extras
+
+
 @ns.route('/resources/<uuid:rid>/', endpoint='resource')
 class ResourceAPI(API):
     @apiv2.doc('get_resource')

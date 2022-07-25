@@ -74,9 +74,10 @@ resource_fields = api.model('Resource', {
     'metrics': fields.Raw(
         description='The resource metrics', readonly=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
+    'harvest': fields.Raw(description='Harvest attributes as key-value pairs'),
     'protected_extras': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
-        'href': url_for('apiv2.resource_protected_extras', dataset=o.dataset.id, rid=o.id, _external=True),
+        'href': url_for('apiv2.resource_protected_extras', rid=o.id, _external=True),
         'type': 'GET',
     }, description='Link to the resource protected extras'),
     'preview_url': fields.String(description='An optional preview URL to be '
@@ -131,7 +132,7 @@ community_resource_page_fields = api.model(
 #: Default mask to make it lightweight by default
 DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
-    'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras',
+    'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
     'protected_extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial',
     'license', 'uri', 'page', 'last_update', 'archived', 'quality'
 ))
@@ -170,6 +171,7 @@ dataset_fields = api.model('Dataset', {
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
+    'harvest': fields.Raw(description='Harvest attributes as key-value pairs'),
     'protected_extras': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
         'href': url_for('apiv2.protected_extras', dataset=o.id, _external=True),
