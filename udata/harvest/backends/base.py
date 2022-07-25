@@ -188,6 +188,7 @@ class BaseBackend(object):
             dataset = self.process(item)
 
             extras = HarvestExtrasFactory.set_extras(
+                dataset.harvest,
                 domain=self.source.domain,
                 remote_id=item.remote_id,
                 source_id=str(self.source.id),
@@ -196,7 +197,7 @@ class BaseBackend(object):
             dataset.harvest = extras
 
             # unset archived status if needed
-            HarvestExtrasFactory.unset_extras(dataset.harvest, archived_at=True, archived=True)
+            dataset.harvest = HarvestExtrasFactory.unset_extras(dataset.harvest, archived_at=True, archived=True)
             dataset.archived = None
 
             # TODO permissions checking

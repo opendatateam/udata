@@ -9,6 +9,9 @@ from udata.core.dataset.models import Dataset
 # TODO: how to register additionnal extras (used in plugins for example)
 
 
+Dataset.harvest.register('created_at', db.DateTimeField)
+Dataset.harvest.register('last_modified', db.DateTimeField)
+Dataset.harvest.register('landing_page', db.URLField)
 Dataset.harvest.register('source_id', db.StringField)
 Dataset.harvest.register('remote_id', db.StringField)
 Dataset.harvest.register('domain', db.StringField)
@@ -59,14 +62,13 @@ class HarvestExtrasFactory():
 
     @staticmethod
     def unset_extras(harvest, archived_at=False, archived=False):
-        if 'harvest' not in harvest:
+        if not harvest:
             return
-        harvest_extras = harvest['harvest'].copy()
 
         if archived_at:
-            harvest_extras.archived_at = None
+            harvest.pop('archived_at', None)
 
         if archived:
-            harvest_extras.archived = None
+            harvest.pop('archived', None)
 
-        return harvest_extras
+        return harvest

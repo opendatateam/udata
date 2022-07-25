@@ -578,11 +578,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def created_at_public(self):
-        return self.extras['harvest:created_at'] or self.created_at
+        return self.harvest.get('created_at') or self.created_at
 
     @property
     def last_modified_public(self):
-        return self.extras['harvest:last_modified'] or self.last_modified
+        return self.harvest.get('last_modified') or self.last_modified
 
     @property
     def last_update(self):

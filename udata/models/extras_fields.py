@@ -1,9 +1,10 @@
 import logging
 
 from datetime import date, datetime
+from dateutil.parser import parse as parse_dt
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import DictField, BaseField
+from mongoengine.fields import DictField, BaseField, DateField, DateTimeField
 
 log = logging.getLogger(__name__)
 
@@ -23,11 +24,11 @@ class ExtrasField(DictField):
             raise TypeError(msg)
         self.registered[key] = dbtype
 
-    def validate(self, value):
-        super(ExtrasField, self).validate(value)
+    def validate(self, values):
+        super(ExtrasField, self).validate(values)
 
         errors = {}
-        for key, value in value.items():
+        for key, value in values.items():
             extra_cls = self.registered.get(key)
 
             if not extra_cls:
@@ -44,6 +45,13 @@ class ExtrasField(DictField):
                      else extra_cls(**value).validate())
                 else:
                     extra_cls().validate(value)
+
+                # Serialize str to date or datetime for temporary fields
+                if issubclass(extra_cls, (DateField, DateTimeField)) and isinstance(value, str):
+                    values[key] = parse_dt(value)
+                    if issubclass(extra_cls, DateField):
+                        values[key] = value.date()
+
             except Exception as e:
                 errors[key] = getattr(e, 'message', str(e))
 
