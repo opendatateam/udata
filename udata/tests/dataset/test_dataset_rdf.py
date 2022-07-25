@@ -164,7 +164,7 @@ class DatasetToRdfTest:
         assert pot.value(SCHEMA.endDate).toPython() == end
 
     def test_from_external_repository(self):
-        dataset = DatasetFactory(protected_extras={
+        dataset = DatasetFactory(harvest={
             'dct:identifier': 'an-identifier',
             'uri': 'https://somewhere.org/dataset',
         })
@@ -289,11 +289,11 @@ class RdfToDatasetTest:
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
 
-        protected_extras = dataset.protected_extras
-        assert 'dct:identifier' in protected_extras
-        assert protected_extras['dct:identifier'] == id
-        assert 'uri' in protected_extras
-        assert protected_extras['uri'] == uri
+        harvest = dataset.harvest
+        assert 'dct:identifier' in harvest
+        assert harvest['dct:identifier'] == id
+        assert 'uri' in harvest
+        assert harvest['uri'] == uri
 
     def test_html_description(self):
         node = BNode()
@@ -415,8 +415,8 @@ class RdfToDatasetTest:
         assert isinstance(resource.checksum, Checksum)
         assert resource.checksum.type == 'sha1'
         assert resource.checksum.value == sha1
-        assert resource.published == issued
-        assert resource.modified == modified
+        assert resource.harvest['created_at'].date() == issued.date()
+        assert resource.harvest['last_modified'].date() == modified.date()
         assert resource.format == 'csv'
 
     def test_download_url_over_access_url(self):

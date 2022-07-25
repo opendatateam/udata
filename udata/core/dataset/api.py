@@ -330,7 +330,7 @@ class ResourcesAPI(API):
         form = api.validate(ResourceForm)
         resource = Resource()
         if form._fields.get('filetype').data != 'remote':
-            return 'This endpoint only supports remote resources', 400
+            api.abort(400, 'This endpoint only supports remote resources')
         form.populate_obj(resource)
         dataset.add_resource(resource)
         dataset.last_modified = datetime.now()
@@ -528,7 +528,7 @@ class CommunityResourcesAPI(API):
         '''Create a new community resource'''
         form = api.validate(CommunityResourceForm)
         if form._fields.get('filetype').data != 'remote':
-            return 'This endpoint only supports remote community resources', 400
+            api.abort(400, 'This endpoint only supports remote community resources')
         resource = CommunityResource()
         form.populate_obj(resource)
         if not resource.dataset:
@@ -571,7 +571,6 @@ class CommunityResourceAPI(API):
 
     @api.secure
     @api.doc('delete_community_resource')
-    @api.marshal_with(community_resource_fields)
     def delete(self, community):
         '''Delete a given community resource'''
         ResourceEditPermission(community).test()

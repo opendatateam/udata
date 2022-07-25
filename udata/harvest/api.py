@@ -153,6 +153,9 @@ preview_dataset_fields = api.clone('DatasetPreview', dataset_fields, {
     'page': fields.UrlFor(
         'datasets.show', lambda o: {'dataset': 'not-available'},
         description='The dataset page URL (fake)', fallback_endpoint='api.dataset'),
+    'protected_extras': fields.UrlFor(
+        'datasets.show', lambda o: {'dataset': 'not-available'},
+        description='The dataset protected_extras endpoint (fake)'),
 })
 
 preview_item_fields = api.clone('HarvestItemPreview', item_fields, {

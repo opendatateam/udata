@@ -61,7 +61,7 @@ class DcatBackendTest:
         job = source.get_last_job()
         assert len(job.items) == 3
 
-        datasets = {d.protected_extras['dct:identifier']: d for d in Dataset.objects}
+        datasets = {d.harvest['dct:identifier']: d for d in Dataset.objects}
 
         assert len(datasets) == 3
 
@@ -69,7 +69,7 @@ class DcatBackendTest:
             d = datasets[i]
             assert d.title == 'Dataset {0}'.format(i)
             assert d.description == 'Dataset {0} description'.format(i)
-            assert d.protected_extras['dct:identifier'] == i
+            assert d.harvest['dct:identifier'] == i
 
         # First dataset
         dataset = datasets['1']
@@ -97,7 +97,7 @@ class DcatBackendTest:
 
         actions.run(source.slug)
 
-        datasets = {d.protected_extras['dct:identifier']: d for d in Dataset.objects}
+        datasets = {d.harvest['dct:identifier']: d for d in Dataset.objects}
 
         assert len(datasets) == 3
         assert len(datasets['1'].resources) == 2
@@ -122,7 +122,7 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
-        assert dataset.protected_extras['remote_url'] == 'http://data.test.org/datasets/1'
+        assert dataset.harvest['remote_url'] == 'http://data.test.org/datasets/1'
 
         assert len(dataset.resources) == 1
 
@@ -144,7 +144,7 @@ class DcatBackendTest:
         actions.run(source.slug)
         actions.run(source.slug)
 
-        datasets = {d.protected_extras['dct:identifier']: d for d in Dataset.objects}
+        datasets = {d.harvest['dct:identifier']: d for d in Dataset.objects}
 
         assert len(datasets) == 3
         assert len(datasets['1'].resources) == 2
@@ -227,17 +227,17 @@ class DcatBackendTest:
         actions.run(source.slug)
 
         # test dct:license support
-        protected_extras = {'protected_extras__dct:identifier': '3'}
-        dataset = Dataset.objects.get(**protected_extras)
+        harvest = {'harvest__dct:identifier': '3'}
+        dataset = Dataset.objects.get(**harvest)
         assert dataset.license.id == 'lov2'
-        assert dataset.protected_extras['remote_url'] == 'http://data.test.org/datasets/3'
-        assert dataset.protected_extras['harvest']['created_at'].date() == date(2016, 12, 14)
-        assert dataset.protected_extras['harvest']['last_modified'].date() == date(2016, 12, 14)
+        assert dataset.harvest['remote_url'] == 'http://data.test.org/datasets/3'
+        assert dataset.harvest['created_at'].date() == date(2016, 12, 14)
+        assert dataset.harvest['last_modified'].date() == date(2016, 12, 14)
         assert dataset.frequency == 'daily'
         assert dataset.description == 'Dataset 3 description'
 
-        protected_extras = {'protected_extras__dct:identifier': '1'}
-        dataset = Dataset.objects.get(**protected_extras)
+        harvest = {'harvest__dct:identifier': '1'}
+        dataset = Dataset.objects.get(**harvest)
         # test abstract description support
         assert dataset.description == 'Dataset 1 description'
 
@@ -250,7 +250,7 @@ class DcatBackendTest:
         actions.run(source.slug)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
-        assert dataset.protected_extras['harvest']['created_at'].date() == date(2004, 11, 3)
+        assert dataset.harvest['created_at'].date() == date(2004, 11, 3)
         assert dataset.description.startswith('Data of type chemistry')
 
     def test_sigoreme_xml_catalog(self, rmock):

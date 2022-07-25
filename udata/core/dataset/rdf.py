@@ -401,8 +401,7 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
 
     identifier = rdf_value(distrib, DCT.identifier)
 
-    if isinstance(distrib.identifier, URIRef):
-        uri = distrib.identifier.toPython()
+    uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
 
     created_at = dct_issued_from_rdf(distrib)
     last_modified = dct_modified_from_rdf(distrib)
