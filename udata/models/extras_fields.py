@@ -46,11 +46,12 @@ class ExtrasField(DictField):
                 else:
                     extra_cls().validate(value)
 
-                # Serialize str to date or datetime for temporary fields
+                # Serialize str to date or datetime isoformat
                 if issubclass(extra_cls, (DateField, DateTimeField)) and isinstance(value, str):
-                    values[key] = parse_dt(value)
                     if issubclass(extra_cls, DateField):
-                        values[key] = value.date()
+                        values[key] = parse_dt(value).date()
+                    else:
+                        values[key] = parse_dt(value)
 
             except Exception as e:
                 errors[key] = getattr(e, 'message', str(e))

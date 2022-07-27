@@ -1,13 +1,15 @@
 import logging
 import os
+from dateutil.parser import parse as parse_dt
 
 import pytest
 
-from datetime import date
+from datetime import date, datetime
 
 from udata.models import Dataset
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.dataset.factories import LicenseFactory
+from udata.tests.helpers import assert_equal_dates
 
 from .factories import HarvestSourceFactory
 from .. import actions
@@ -231,8 +233,8 @@ class DcatBackendTest:
         dataset = Dataset.objects.get(**harvest)
         assert dataset.license.id == 'lov2'
         assert dataset.harvest['remote_url'] == 'http://data.test.org/datasets/3'
-        assert dataset.harvest['created_at'].date() == date(2016, 12, 14)
-        assert dataset.harvest['last_modified'].date() == date(2016, 12, 14)
+        assert_equal_dates(dataset.harvest['created_at'], datetime(2016, 12, 14))
+        assert_equal_dates(dataset.harvest['last_modified'], datetime(2016, 12, 14))
         assert dataset.frequency == 'daily'
         assert dataset.description == 'Dataset 3 description'
 
@@ -250,7 +252,7 @@ class DcatBackendTest:
         actions.run(source.slug)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
-        assert dataset.harvest['created_at'].date() == date(2004, 11, 3)
+        assert_equal_dates(dataset.harvest['created_at'], datetime(2004, 11, 3))
         assert dataset.description.startswith('Data of type chemistry')
 
     def test_sigoreme_xml_catalog(self, rmock):

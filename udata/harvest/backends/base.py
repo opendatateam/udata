@@ -192,7 +192,7 @@ class BaseBackend(object):
                 domain=self.source.domain,
                 remote_id=item.remote_id,
                 source_id=str(self.source.id),
-                last_update=datetime.now().isoformat()
+                last_update=datetime.now()
             )
             dataset.harvest = extras
 
@@ -243,12 +243,12 @@ class BaseBackend(object):
         '''
         log.debug('Running autoarchive')
         limit_days = current_app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
-        limit_date = date.today() - timedelta(days=limit_days)
+        limit_date = datetime.now() - timedelta(days=limit_days)
         remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
         q = {
             'harvest__source_id': str(self.source.id),
             'harvest__remote_id__nin': remote_ids,
-            'harvest__last_update__lt': limit_date.isoformat()
+            'harvest__last_update__lt': limit_date
         }
         local_items_not_on_remote = Dataset.objects.filter(**q)
 

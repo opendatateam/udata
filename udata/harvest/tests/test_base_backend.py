@@ -81,8 +81,7 @@ class BaseBackendTest:
             assert dataset.harvest['source_id'] == str(source.id)
             assert dataset.harvest['domain'] == source.domain
             assert dataset.harvest['remote_id'].startswith('fake-')
-            harvest_last_update = parse(dataset.harvest['last_update'])
-            assert_equal_dates(harvest_last_update, now)
+            assert_equal_dates(dataset.harvest['last_update'], now)
 
     def test_has_feature_defaults(self):
         source = HarvestSourceFactory()
@@ -158,8 +157,7 @@ class BaseBackendTest:
         dataset = Dataset.objects.first()
 
         assert dataset.last_modified == last_modified
-        harvest_last_update = parse(dataset.harvest['last_update'])
-        assert_equal_dates(harvest_last_update, datetime.now())
+        assert_equal_dates(dataset.harvest['last_update'], datetime.now())
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
         last_modified = faker.date_time_between(start_date='-30y', end_date='-1y')
@@ -172,8 +170,7 @@ class BaseBackendTest:
         dataset = Dataset.objects.first()
 
         assert dataset.last_modified == last_modified
-        harvest_last_update = parse(dataset.harvest['last_update'])
-        assert_equal_dates(harvest_last_update, datetime.now())
+        assert_equal_dates(dataset.harvest['last_update'], datetime.now())
 
     def test_autoarchive(self, app):
         nb_datasets = 3
@@ -187,7 +184,7 @@ class BaseBackendTest:
                 'domain': source.domain,
                 'source_id': str(source.id),
                 'remote_id': 'not-on-remote',
-                'last_update': last_update.isoformat(),
+                'last_update': last_update,
         })
 
         # create a dangling dataset that _won't_ be archived because of grace period
@@ -197,7 +194,7 @@ class BaseBackendTest:
                 'domain': source.domain,
                 'source_id': str(source.id),
                 'remote_id': 'not-on-remote-two',
-                'last_update': last_update.isoformat(),
+                'last_update': last_update,
         })
 
         job = backend.harvest()
