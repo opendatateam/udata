@@ -8,6 +8,7 @@ from bson import ObjectId
 from flask import current_app
 
 from udata.auth import current_user
+from udata.core.dataset.models import HarvestMetadata
 from udata.models import User, Organization, PeriodicTask, Dataset
 
 from . import backends, signals
@@ -286,8 +287,10 @@ def attach(domain, filename):
                 'unset__harvest__remote_id': True
             })
 
-            dataset.harvest = HarvestExtrasFactory.set_extras(dataset.harvest, domain=domain,
-                                                              remote_id=row['remote'])
+            if not dataset.harvest:
+                dataset.harvest = HarvestMetadata()
+            dataset.harvest.domain = domain
+            dataset.harvest.remote_id = row['remote']
 
             dataset.last_modified = datetime.now()
             dataset.save()

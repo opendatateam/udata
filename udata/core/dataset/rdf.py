@@ -15,6 +15,7 @@ from rdflib.namespace import RDF
 from udata import i18n, uris
 from udata.frontend.markdown import parse_html
 from udata.harvest.extras import HarvestExtrasFactory
+from udata.core.dataset.models import HarvestMetadata
 from udata.models import db
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
@@ -422,6 +423,8 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     Create or update a dataset from a RDF/DCAT graph
     '''
     dataset = dataset or Dataset()
+    if not dataset.harvest:
+        dataset.harvest = HarvestMetadata()
 
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.Dataset)
@@ -464,13 +467,11 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     created_at = dct_issued_from_rdf(d)
     last_modified = dct_modified_from_rdf(d)
 
-    dataset.harvest = HarvestExtrasFactory.set_extras(
-        dataset.harvest,
-        created_at=created_at,
-        last_modified=last_modified,
-        landing_page=landing_page,
-        dct_identifier=identifier,
-        uri=uri
-    )
+    dataset.harvest.created_at = created_at
+    dataset.harvest.last_modified = last_modified
+    dataset.harvest.landing_page = landing_page
+    dataset.harvest.dct_identifier = identifier
+    dataset.harvest.uri = uri
+    dataset.harvest.save()
 
     return dataset

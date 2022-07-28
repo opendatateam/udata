@@ -9,6 +9,7 @@ import requests
 from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
+from udata.core.dataset.models import HarvestMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
@@ -186,15 +187,13 @@ class BaseBackend(object):
 
         try:
             dataset = self.process(item)
-
-            extras = HarvestExtrasFactory.set_extras(
-                dataset.harvest,
-                domain=self.source.domain,
-                remote_id=item.remote_id,
-                source_id=str(self.source.id),
-                last_update=datetime.now()
-            )
-            dataset.harvest = extras
+            if not dataset.harvest:
+                dataset.harvest = HarvestMetadata()
+            dataset.harvest.domain = self.source.domain,
+            dataset.harvest.remote_id = item.remote_id,
+            dataset.harvest.source_id = str(self.source.id),
+            dataset.harvest.last_update = datetime.now()
+            dataset.harvest.save()
 
             # unset archived status if needed
             dataset.harvest = HarvestExtrasFactory.unset_extras(dataset.harvest, archived_at=True, archived=True)

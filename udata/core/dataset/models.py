@@ -7,8 +7,9 @@ from urllib.parse import urlparse
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
+from mongoengine import DynamicDocument
 from mongoengine.signals import pre_save, post_save
-from mongoengine.fields import DateTimeField
+from mongoengine.fields import BaseField, DateField, DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
 import requests
@@ -125,6 +126,19 @@ def get_json_ld_extra(key, value):
         'name': key,
         'value': value,
     }
+
+
+class HarvestMetadata(DynamicDocument):
+    created_at = db.DateTimeField()
+    last_modified = db.DateTimeField()
+    landing_page = db.URLField()
+    source_id = db.StringField()
+    remote_id = db.StringField()
+    domain = db.StringField()
+    last_update = db.DateTimeField()
+    remote_url = db.URLField()
+    uri = db.StringField()
+    dct_identifier = db.StringField()
 
 
 class License(db.Document):
@@ -455,8 +469,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     protected_extras = db.ExtrasField()  # protected extras, admin only
     _extras = db.ExtrasField()  # protected extras, admin only
-    harvest = db.ExtrasField()  # harvest extras
-
+    harvest = db.ReferenceField('HarvestMetadata')  # harvest extras
     featured = db.BooleanField(required=True, default=False)
 
     deleted = db.DateTimeField()
