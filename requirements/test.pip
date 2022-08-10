@@ -412,7 +412,7 @@ tlds==2021080800
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-udata-event-service==0.0.8
+udata_event_service==0.0.8
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in

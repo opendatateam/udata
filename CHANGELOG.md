@@ -2,6 +2,8 @@
 
 ## Current (in progress)
 
+- Clean up event code [#2751](https://github.com/opendatateam/udata/pull/2751)
+- Replace mongo legacy image in CI [#2754](https://github.com/opendatateam/udata/pull/2754)
 - APIv2 does no longer user `flask-restplus` [#2755](https://github.com/opendatateam/udata/pull/2755):
   - Api_fields are replaced by marshmallow schemas
   - Request validation is done by Webargs, with relies on Marshmallow
