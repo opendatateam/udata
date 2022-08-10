@@ -1,4 +1,5 @@
 apispec==5.2.2
+apispec-webframeworks==0.5.2
 authlib==0.14.3
 awesome-slugify==1.6.5
 Babel==2.8.0

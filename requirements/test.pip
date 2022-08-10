@@ -12,7 +12,12 @@ aniso8601==9.0.1
     # via
     #   -c requirements/install.pip
     #   flask-restplus
-apispec==5.2.2
+apispec[yaml]==5.2.2
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
+    #   apispec-webframeworks
+apispec-webframeworks==0.5.2
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -354,6 +359,10 @@ pytz==2019.3
     #   babel
     #   celery
     #   flask-restplus
+pyyaml==6.0
+    # via
+    #   -c requirements/install.pip
+    #   apispec
 rdflib==6.0.0
     # via
     #   -c requirements/install.pip

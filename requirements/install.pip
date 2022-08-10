@@ -8,7 +8,11 @@ amqp==2.6.1
     # via kombu
 aniso8601==9.0.1
     # via flask-restplus
-apispec==5.2.2
+apispec[yaml]==5.2.2
+    # via
+    #   -r requirements/install.in
+    #   apispec-webframeworks
+apispec-webframeworks==0.5.2
     # via -r requirements/install.in
 appdirs==1.4.4
     # via urlextract
@@ -215,6 +219,8 @@ pytz==2019.3
     #   babel
     #   celery
     #   flask-restplus
+pyyaml==6.0
+    # via apispec
 rdflib==6.0.0
     # via -r requirements/install.in
 redis==3.3.11
