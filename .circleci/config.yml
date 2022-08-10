@@ -14,10 +14,17 @@ jobs:
       - run:
           name: Get the base reference branch
           command: export BASE_BRANCH=$(base_branch)
+      - restore_cache:
+          keys:
+          - py3-cache-v1-{{ arch }}-{{ checksum "poetry.lock" }}
       - run:
           name: Install python dependencies
           command: |
             poetry install
+      - save_cache:
+          key: py3-cache-v1-{{ arch }}-{{ checksum "poetry.lock" }}
+          paths:
+            - poetry config cache-dir
       - run:
           name: Run tests
           command: |
