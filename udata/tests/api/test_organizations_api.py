@@ -495,7 +495,7 @@ class MembershipAPITest:
             metrics={"followers": 10}
         )
         response = api.get(url_for('api.suggest_organizations'),
-                           qs={'q': 'tes', 'size': '5'})
+                           qs={'q': 'test', 'size': '5'})
         assert200(response)
 
         assert len(response.json) <= 5
@@ -507,7 +507,7 @@ class MembershipAPITest:
             assert 'name' in suggestion
             assert 'image_url' in suggestion
             assert 'acronym' in suggestion
-            assert 'tes' in suggestion['name']
+            assert 'test' in suggestion['name']
             assert response.json[0]['id'] == str(max_follower_organization.id)
 
     def test_suggest_organizations_with_special_chars(self, api):
