@@ -24,7 +24,7 @@ jobs:
       - save_cache:
           key: py3-cache-v1-{{ arch }}-{{ checksum "poetry.lock" }}
           paths:
-            - poetry config cache-dir
+            - {{ poetry config cache-dir }}
       - run:
           name: Run tests
           command: |
