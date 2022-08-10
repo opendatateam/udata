@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, validate
 from .models import ORG_ROLES, DEFAULT_ROLE
 
-from udata.api.fields import MaURLFor
+from udata.api.fields import MaURLFor, MaNextPageUrl, MaPreviousPageUrl
 from udata.core.user.apiv2_schemas import UserSchema
 
 
@@ -31,3 +31,12 @@ class OrganizationSchema(Schema):
     # members = fields.Nested(UserSchema, many=True, dump_only=True)
     uri = MaURLFor(endpoint='api.organization', mapper=lambda o: {'org': o}, dump_only=True)
     page = MaURLFor(endpoint='organizations.show', mapper=lambda o: {'org': o}, fallback_endpoint='api.organization', dump_only=True)
+
+
+class OrganizationPaginationSchema(Schema):
+    data = fields.List(fields.Nested(OrganizationSchema), attribute="objects")
+    page = fields.Int(required=True, min=1)
+    page_size = fields.Int(required=True, min=0)
+    total = fields.Int(required=True, min=0)
+    next_page = MaNextPageUrl()
+    previous_page = MaPreviousPageUrl()

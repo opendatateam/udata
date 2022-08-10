@@ -27,9 +27,7 @@ class ModelSearchAdapter:
     @classmethod
     def as_request_parser(cls, paginate=True):
         search_arguments = {
-            "q": fields.Str(),
-            'page': fields.Int(load_default=1),
-            'page_size': fields.Int(load_default=20)
+            "q": fields.Str()
         }
         # Add filters arguments
         for name, filter_type in cls.filters.items():

@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, validate
-from udata.api.fields import MaURLFor
+from udata.api.fields import MaURLFor, MaNextPageUrl, MaPreviousPageUrl
 from udata.core.dataset.apiv2_schemas import DatasetSchema
 from udata.core.user.apiv2_schemas import UserSchema
 from udata.core.organization.apiv2_schemas import OrganizationSchema, BadgeSchema
@@ -29,3 +29,12 @@ class ReuseSchema(Schema):
     image_thumbnail = fields.Url()
     uri = MaURLFor(endpoint='api.reuse', mapper=lambda o: {'reuse': o}, dump_only=True)
     page = MaURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
+
+
+class ReusePaginationSchema(Schema):
+    data = fields.List(fields.Nested(ReuseSchema), attribute="objects")
+    page = fields.Int(required=True, min=1)
+    page_size = fields.Int(required=True, min=0)
+    total = fields.Int(required=True, min=0)
+    next_page = MaNextPageUrl()
+    previous_page = MaPreviousPageUrl()

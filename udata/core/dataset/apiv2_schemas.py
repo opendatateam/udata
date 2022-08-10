@@ -1,7 +1,7 @@
 from flask import url_for
 from marshmallow import Schema, fields, validate
 
-from udata.api.fields import MaURLFor
+from udata.api.fields import MaURLFor, MaNextPageUrl, MaPreviousPageUrl
 from udata.core.organization.apiv2_schemas import OrganizationSchema
 from udata.core.user.apiv2_schemas import UserSchema
 
@@ -46,13 +46,13 @@ class DatasetSchema(Schema):
     last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True)
     deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
     archived = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
-    featured = fields.Boolean()
+    featured = fields.Boolean();
     private = fields.Boolean()
     tags = fields.List(fields.Str)
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
     resources = fields.Function(lambda obj: {
         'rel': 'subsection',
-        'href': url_for('datasets.resources', dataset=obj.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
+        'href': url_for('apiv2.resources', dataset=obj.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(obj.resources)
         })
@@ -105,3 +105,26 @@ class ResourceSchema(Schema):
     extras = fields.Raw()
     preview_url = fields.Str(dump_only=True)
     schema = fields.Raw(dump_only=True)
+
+
+class DatasetPaginationSchema(Schema):
+    data = fields.List(fields.Nested(DatasetSchema), attribute="objects")
+    page = fields.Int(required=True, min=1)
+    page_size = fields.Int(required=True, min=0)
+    total = fields.Int(required=True, min=0)
+    next_page = MaNextPageUrl()
+    previous_page = MaPreviousPageUrl()
+
+
+class ResourcePaginationSchema(Schema):
+    data = fields.List(fields.Nested(ResourceSchema))
+    page = fields.Int(required=True, min=1)
+    page_size = fields.Int(required=True, min=0)
+    total = fields.Int(required=True, min=0)
+    next_page = MaNextPageUrl()
+    previous_page = MaPreviousPageUrl()
+
+
+class SpecificResourceSchema(Schema):
+    resource = fields.Nested(ResourceSchema)
+    dataset_id = fields.Str()

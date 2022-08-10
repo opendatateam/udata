@@ -4,7 +4,7 @@ from dateutil.parser import parse
 
 from flask import request, url_for
 from flask_restplus.fields import *  # noqa
-from marshmallow import Schema, fields as ma_fields
+from marshmallow import fields as ma_fields
 
 from udata.utils import multi_to_dict
 from udata.uris import endpoint_for
@@ -132,14 +132,3 @@ class MaPreviousPageUrl(ma_fields.Field):
         args.update(request.view_args)
         args['page'] = obj.page - 1
         return url_for(request.endpoint, _external=True, **args)
-
-
-def paginate_schema(schema):
-    class PaginationSchema(Schema):
-        data = ma_fields.List(ma_fields.Nested(schema), attribute="objects")
-        page = ma_fields.Int(required=True, min=1)
-        page_size = ma_fields.Int(required=True, min=0)
-        total = ma_fields.Int(required=True, min=0)
-        next_page = MaNextPageUrl()
-        previous_page = MaPreviousPageUrl()
-    return PaginationSchema
