@@ -98,6 +98,7 @@ jobs:
       - run:
           name: Commit prerelease version
           command: |
+            echo $CIRCLE_USERNAME
             if [[ $CIRCLE_USERNAME == "Circle CI" ]]; then
               echo "Build triggered by version bump, do not push changes"
             else
