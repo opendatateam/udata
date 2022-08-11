@@ -98,15 +98,16 @@ jobs:
       - run:
           name: Commit prerelease version
           command: |
-            if [[ $CIRCLE_TAG ]]; then
-              echo "This a tag build, do not push changes"
-            else
+            echo $CIRCLE_USERNAME
+            if [[ $CIRCLE_USERNAME == "Circle CI" ]]; then
               git config --global user.email "robot@data.gouv.fr"
               git config --global user.name "Circle CI"
               ( \
               git commit pyproject.toml -m "[auto] bump prerelease version" \
               && git push origin ${CIRCLE_BRANCH} \
               ) || true
+            else
+              echo "Build triggered by version bump, do not push changes"
             fi
       - store_artifacts:
           path: dist
