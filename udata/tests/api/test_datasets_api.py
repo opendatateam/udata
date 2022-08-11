@@ -1142,7 +1142,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertIn('test', suggestion['title'])
+            self.assertIn('tes', suggestion['title'])
         self.assertEqual(response.json[0]['id'], str(max_follower_dataset.id))
 
     def test_suggest_datasets_acronym_api(self):
