@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "udata"
-version = "4.1.3-alpha.5"
+version = "4.1.3-alpha.7"
 description = "Open data portal"
 readme="README.md"
 authors = ["Opendata Team <opendatateam@data.gouv.fr>"]
