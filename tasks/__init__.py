@@ -153,7 +153,7 @@ def i18n(ctx, update=False):
 
     info('Extract Python strings')
     with ctx.cd(ROOT):
-        ctx.run(f"pybabel extract . --mapping-file={EXTRACT_I18N_MAPPING_FILE} --output-file={EXTRACT_I18N_OUTPUT_FILE} --width={EXTRACT_I18N_WIDTH}")
+        ctx.run(f"pybabel extract . --mapping-file={EXTRACT_I18N_MAPPING_FILE} --output-file={EXTRACT_I18N_OUTPUT_FILE} --add-comments={EXTRACT_I18N_ADD_COMMENTS} --width={EXTRACT_I18N_WIDTH}")
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
@@ -282,4 +282,5 @@ def pydist(ctx, buildno=None):
 
 def perform_dist(ctx, buildno=None):
     header('Building a distribuable package')
-    cmd = ['poetry build']
+    with ctx.cd(ROOT):
+        ctx.run('poetry build', pty=True)
