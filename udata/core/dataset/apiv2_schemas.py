@@ -121,8 +121,8 @@ class ResourcePaginationSchema(Schema):
     page = fields.Int(required=True, min=1)
     page_size = fields.Int(required=True, min=0)
     total = fields.Int(required=True, min=0)
-    next_page = MaNextPageUrl()
-    previous_page = MaPreviousPageUrl()
+    next_page = fields.Str()
+    previous_page = fields.Str()
 
 
 class SpecificResourceSchema(Schema):
