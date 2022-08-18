@@ -1,3 +1,5 @@
+from marshmallow import Schema, fields as ma_fields
+
 from udata.api import api, fields
 
 from .forms import badge_form
@@ -8,6 +10,10 @@ badge_fields = api.model('Badge', {
                                        'specific to each model'),
                           required=True),
 })
+
+
+class BadgeSchema(Schema):
+    kind = ma_fields.Str(required=True)
 
 
 def add(obj):

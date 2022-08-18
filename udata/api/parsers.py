@@ -1,3 +1,4 @@
+from webargs import fields, ValidationError
 from udata.api import api
 
 
@@ -34,3 +35,40 @@ class ModelApiParser:
             else:
                 args['sort'] = self.sorts[args['sort']]
         return args
+
+
+class ModelApiV2Parser:
+    """This class allows to describe and customize the api V2 arguments parser behavior."""
+
+    sorts = {}
+
+    @classmethod
+    def as_request_parser(cls, paginate=True):
+        search_arguments = {
+            "q": fields.Str()
+        }
+
+        # Sort arguments
+        keys = list(cls.sorts)
+        choices = keys + ['-' + k for k in keys]
+
+        def deserialize_sort(value):
+            if value not in choices:
+                raise ValidationError('Incorrect sort value')
+            if value.startswith('-'):
+            # Keyerror because of the '-' character in front of the argument.
+            # It is removed to find the value in dict and added back.
+                arg_sort = value[1:]
+                value = '-' + cls.sorts[arg_sort]
+            else:
+                value = cls.sorts[value]
+            return value
+
+        search_arguments.update({'sort': fields.Function(deserialize=deserialize_sort)})
+
+        if paginate:
+            search_arguments.update({
+                'page': fields.Int(load_default=1),
+                'page_size': fields.Int(load_default=20)
+            })
+        return search_arguments

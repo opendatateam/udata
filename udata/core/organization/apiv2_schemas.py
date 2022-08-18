@@ -1,16 +1,25 @@
 from marshmallow import Schema, fields, validate
 from .models import ORG_ROLES, DEFAULT_ROLE
 
-from udata.api.fields import MaURLFor, MaNextPageUrl, MaPreviousPageUrl
-from udata.core.user.apiv2_schemas import UserSchema
+from udata.core.badges.api import BadgeSchema
+from udata.api.fields import MaURLFor, paginate_schema
 
 
-class BadgeSchema(Schema):
-    kind = fields.Str(required=True)
+class OrganizationRefSchema(Schema):
+    name = fields.Str(required=True)
+    acronym = fields.Str()
+    logo = fields.Url()
+    logo_thumbnail = fields.Url()
+    badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
+    uri = MaURLFor(endpoint='api.organization', mapper=lambda o: {'org': o}, dump_only=True)
+    page = MaURLFor(endpoint='organizations.show', mapper=lambda o: {'org': o}, fallback_endpoint='api.organization', dump_only=True)
+
+
+from udata.core.user.apiv2_schemas import UserRefSchema  # noqa: required
 
 
 class MembersSchema(Schema):
-    user = fields.Nested(UserSchema)
+    user = fields.Nested(UserRefSchema)
     role = fields.Str(validate=validate.OneOf(list(ORG_ROLES)), required=True, dump_default=DEFAULT_ROLE)
 
 
@@ -33,10 +42,4 @@ class OrganizationSchema(Schema):
     page = MaURLFor(endpoint='organizations.show', mapper=lambda o: {'org': o}, fallback_endpoint='api.organization', dump_only=True)
 
 
-class OrganizationPaginationSchema(Schema):
-    data = fields.List(fields.Nested(OrganizationSchema), attribute="objects")
-    page = fields.Int(required=True, min=1)
-    page_size = fields.Int(required=True, min=0)
-    total = fields.Int(required=True, min=0)
-    next_page = MaNextPageUrl()
-    previous_page = MaPreviousPageUrl()
+org_pagination_schema = paginate_schema(OrganizationSchema)

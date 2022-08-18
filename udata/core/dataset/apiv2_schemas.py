@@ -1,9 +1,10 @@
 from flask import url_for
 from marshmallow import Schema, fields, validate
 
-from udata.api.fields import MaURLFor, MaNextPageUrl, MaPreviousPageUrl
-from udata.core.organization.apiv2_schemas import OrganizationSchema
-from udata.core.user.apiv2_schemas import UserSchema
+from udata.api.fields import MaURLFor, paginate_schema
+from udata.core.badges.api import BadgeSchema
+from udata.core.organization.apiv2_schemas import OrganizationRefSchema
+from udata.core.user.apiv2_schemas import UserRefSchema
 
 from .models import (
     UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE,
@@ -11,11 +12,33 @@ from .models import (
 )
 
 
-DEFAULT_PAGE_SIZE = 50
+DEFAULT_PAGE_SIZE = 20
 
 
-class BadgeSchema(Schema):
-    kind = fields.Str(required=True)
+class ChecksumSchema(Schema):
+    type = fields.Str(dump_default=DEFAULT_CHECKSUM_TYPE, validate=validate.OneOf(CHECKSUM_TYPES))
+    value = fields.Str(required=True)
+
+
+class ResourceSchema(Schema):
+    id = fields.Str(dump_only=True)
+    title = fields.Str(required=True)
+    description = fields.Str()
+    filetype = fields.Str(required=True, validate=validate.OneOf(RESOURCE_FILETYPES))
+    type = fields.Str(required=True, validate=validate.OneOf(RESOURCE_TYPES))
+    format = fields.Str(required=True)
+    url = fields.Str(required=True)
+    latest = fields.Str(dump_only=True)
+    checksum = fields.Nested(ChecksumSchema)
+    filesize = fields.Integer()
+    mime = fields.Str()
+    created_at = fields.DateTime(dump_only=True)
+    published = fields.DateTime()
+    last_modified = fields.DateTime(dump_only=True)
+    metrics = fields.Raw(dump_only=True)
+    extras = fields.Raw()
+    preview_url = fields.Str(dump_only=True)
+    schema = fields.Raw(dump_only=True)
 
 
 class TemporalCoverageSchema(Schema):
@@ -32,6 +55,13 @@ class SpatialCoverageSchema(Schema):
     geom = fields.Nested(GeoJsonSchema)
     zones = fields.List(fields.Str)
     granularity = fields.Str(dump_default='other')
+
+
+class DatasetRefSchema(Schema):
+    title = fields.Str(required=True)
+    uri = MaURLFor(endpoint='api.dataset', mapper=lambda o: {'dataset': o}, dump_only=True)
+    page = MaURLFor(endpoint='datasets.show', mapper=lambda o: {'dataset': o}, fallback_endpoint='api.dataset', dump_only=True)
+    acronym = fields.Str()
 
 
 class DatasetSchema(Schema):
@@ -66,8 +96,8 @@ class DatasetSchema(Schema):
     frequency_date = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
     extras = fields.Dict()
     metrics = fields.Function(lambda obj: obj.get_metrics())
-    organization = fields.Nested(OrganizationSchema)
-    owner = fields.Nested(UserSchema)
+    organization = fields.Nested(OrganizationRefSchema)
+    owner = fields.Nested(UserRefSchema)
     temporal_coverage = fields.Nested(TemporalCoverageSchema)
     spatial = fields.Nested(SpatialCoverageSchema)
     license = fields.Method("dataset_license")
@@ -79,41 +109,6 @@ class DatasetSchema(Schema):
             return obj.license.id
         else:
             return DEFAULT_LICENSE['id']
-
-
-class ChecksumSchema(Schema):
-    type = fields.Str(dump_default=DEFAULT_CHECKSUM_TYPE, validate=validate.OneOf(CHECKSUM_TYPES))
-    value = fields.Str(required=True)
-
-
-class ResourceSchema(Schema):
-    id = fields.Str(dump_only=True)
-    title = fields.Str(required=True)
-    description = fields.Str()
-    filetype = fields.Str(required=True, validate=validate.OneOf(RESOURCE_FILETYPES))
-    type = fields.Str(required=True, validate=validate.OneOf(RESOURCE_TYPES))
-    format = fields.Str(required=True)
-    url = fields.Str(required=True)
-    latest = fields.Str(dump_only=True)
-    checksum = fields.Nested(ChecksumSchema)
-    filesize = fields.Integer()
-    mime = fields.Str()
-    created_at = fields.DateTime(dump_only=True)
-    published = fields.DateTime()
-    last_modified = fields.DateTime(dump_only=True)
-    metrics = fields.Raw(dump_only=True)
-    extras = fields.Raw()
-    preview_url = fields.Str(dump_only=True)
-    schema = fields.Raw(dump_only=True)
-
-
-class DatasetPaginationSchema(Schema):
-    data = fields.List(fields.Nested(DatasetSchema), attribute="objects")
-    page = fields.Int(required=True, min=1)
-    page_size = fields.Int(required=True, min=0)
-    total = fields.Int(required=True, min=0)
-    next_page = MaNextPageUrl()
-    previous_page = MaPreviousPageUrl()
 
 
 class ResourcePaginationSchema(Schema):
@@ -128,3 +123,6 @@ class ResourcePaginationSchema(Schema):
 class SpecificResourceSchema(Schema):
     resource = fields.Nested(ResourceSchema)
     dataset_id = fields.Str()
+
+
+dataset_pagination_schema = paginate_schema(DatasetSchema)

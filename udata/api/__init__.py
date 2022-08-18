@@ -6,8 +6,9 @@ from functools import wraps
 from importlib import import_module
 
 from flask import (
-    current_app, g, request, url_for, json, make_response, redirect, Blueprint
+    current_app, g, request, url_for, json, make_response, redirect, Blueprint, abort
 )
+
 from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource
 from flask_cors import CORS
@@ -27,8 +28,6 @@ from .signals import on_api_call
 
 log = logging.getLogger(__name__)
 
-apiv1_blueprint = Blueprint('api', __name__, url_prefix='/api/1')
-apiv2_blueprint = Blueprint('apiv2', __name__, url_prefix='/api/2')
 
 DEFAULT_PAGE_SIZE = 50
 HEADER_API_KEY = 'X-API-KEY'
@@ -64,6 +63,16 @@ PREFLIGHT_HEADERS = (
 )
 
 cors = CORS(allow_headers=PREFLIGHT_HEADERS)
+
+
+#########################
+#                       #
+#      API V1 Part      #
+#                       #
+#########################
+
+
+apiv1_blueprint = Blueprint('api', __name__, url_prefix='/api/1')
 
 
 class UDataApi(Api):
@@ -198,49 +207,6 @@ def output_json(data, code, headers=None):
     return resp
 
 
-@apiv1_blueprint.before_request
-@apiv2_blueprint.before_request
-def set_api_language():
-    if 'lang' in request.args:
-        g.lang_code = request.args['lang']
-    else:
-        g.lang_code = get_locale()
-
-
-def extract_name_from_path(path):
-    """Return a readable name from a URL path.
-
-    Useful to log requests on Piwik with categories tree structure.
-    See: http://piwik.org/faq/how-to/#faq_62
-    """
-    base_path, query_string = path.split('?')
-    infos = base_path.strip('/').split('/')[2:]  # Removes api/version.
-    if base_path == '/api/1/' or base_path == '/api/2/':  # The API root endpoint redirects to swagger doc.
-        return safe_unicode('apidoc')
-    if len(infos) > 1:  # This is an object.
-        name = '{category} / {name}'.format(
-            category=infos[0].title(),
-            name=infos[1].replace('-', ' ').title()
-        )
-    else:  # This is a collection.
-        name = '{category}'.format(category=infos[0].title())
-    return safe_unicode(name)
-
-
-@apiv1_blueprint.after_request
-@apiv2_blueprint.after_request
-def collect_stats(response):
-    action_name = extract_name_from_path(request.full_path)
-    blacklist = current_app.config.get('TRACKING_BLACKLIST', [])
-    if (not current_app.config['TESTING'] and
-            request.endpoint not in blacklist):
-        extras = {
-            'action_name': urllib.parse.quote(action_name),
-        }
-        tracking.send_signal(on_api_call, request, current_user, **extras)
-    return response
-
-
 default_error = api.model('Error', {
     'message': fields.String
 })
@@ -293,12 +259,152 @@ def marshal_page_with(func):
     pass
 
 
+#########################
+#                       #
+#      API V2 Part      #
+#                       #
+#########################
+
+
+apiv2_blueprint = Blueprint('apiv2', __name__, url_prefix='/api/2')
+
+
+class UDataApiV2:
+
+    @classmethod
+    def secure(cls, func):
+        '''Enforce authentication on a given method/verb
+        and optionally check a given permission
+        '''
+        if isinstance(func, str):
+            return cls._apply_permission(Permission(RoleNeed(func)))
+        elif isinstance(func, Permission):
+            return cls._apply_permission(func)
+        else:
+            return cls._apply_secure(func)
+
+    @classmethod
+    def _apply_permission(cls, permission):
+        def wrapper(func):
+            return cls._apply_secure(func, permission)
+        return wrapper
+
+    @classmethod
+    def _apply_secure(cls, func, permission=None):
+        '''Enforce authentication on a given method/verb'''
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if (
+                not current_user.is_anonymous and
+                not current_user.sysadmin and
+                current_app.config['READ_ONLY_MODE'] and
+                any(ext in str(func) for ext in current_app.config['METHOD_BLOCKLIST'])
+            ):
+                abort(423, 'Due to security reasons, the creation of new content is currently disabled.')
+
+            if not current_user.is_authenticated:
+                abort(401)
+
+            if current_user.deleted:
+                abort(401)
+
+            if permission is not None:
+                with permission.require():
+                    return func(*args, **kwargs)
+            else:
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    @classmethod
+    def validate(cls, form_cls, obj=None):
+        '''Validate a form from the request and handle errors'''
+        if 'application/json' not in request.headers.get('Content-Type'):
+            errors = {'Content-Type': 'expecting application/json'}
+            abort(400, errors=errors)
+        form = form_cls.from_json(request.json, obj=obj, instance=obj,
+                                  meta={'csrf': False})
+        if not form.validate():
+            abort(400, errors=form.errors)
+        return form
+
+
+@apiv2_blueprint.before_request
+def authentifyV2():
+    if current_user.is_authenticated:
+        return
+
+    apikey = request.headers.get(HEADER_API_KEY)
+    if apikey:
+        try:
+            user = User.objects.get(apikey=apikey)
+        except User.DoesNotExist:
+            abort(401, 'Invalid API Key')
+
+        if not login_user(user, False):
+            abort(401, 'Inactive user')
+    else:
+        oauth2.check_credentials()
+
+
+#######################################
+#                                     #
+#      All versions API function      #
+#                                     #
+#######################################
+
+
+@apiv1_blueprint.before_request
+@apiv2_blueprint.before_request
+def set_api_language():
+    if 'lang' in request.args:
+        g.lang_code = request.args['lang']
+    else:
+        g.lang_code = get_locale()
+
+
+def extract_name_from_path(path):
+    """Return a readable name from a URL path.
+
+    Useful to log requests on Piwik with categories tree structure.
+    See: http://piwik.org/faq/how-to/#faq_62
+    """
+    base_path, query_string = path.split('?')
+    infos = base_path.strip('/').split('/')[2:]  # Removes api/version.
+    if base_path == '/api/1/' or base_path == '/api/2/':  # The API root endpoint redirects to swagger doc.
+        return safe_unicode('apidoc')
+    if len(infos) > 1:  # This is an object.
+        name = '{category} / {name}'.format(
+            category=infos[0].title(),
+            name=infos[1].replace('-', ' ').title()
+        )
+    else:  # This is a collection.
+        name = '{category}'.format(category=infos[0].title())
+    return safe_unicode(name)
+
+
+@apiv1_blueprint.after_request
+@apiv2_blueprint.after_request
+def collect_stats(response):
+    action_name = extract_name_from_path(request.full_path)
+    blacklist = current_app.config.get('TRACKING_BLACKLIST', [])
+    if (not current_app.config['TESTING'] and
+            request.endpoint not in blacklist):
+        extras = {
+            'action_name': urllib.parse.quote(action_name),
+        }
+        tracking.send_signal(on_api_call, request, current_user, **extras)
+    return response
+
+
 def init_app(app):
     # Load all core APIs
     import udata.core.activity.api  # noqa
     import udata.core.spatial.api  # noqa
     import udata.core.metrics.api  # noqa
     import udata.core.user.api  # noqa
+    import udata.core.user.apiv2  # noqa
     import udata.core.dataset.api  # noqa
     import udata.core.dataset.apiv2 # noqa
     import udata.core.discussions.api  # noqa
@@ -317,7 +423,7 @@ def init_app(app):
     import udata.features.identicon.api  # noqa
     import udata.features.territories.api  # noqa
     import udata.harvest.api  # noqa
-    import udata.api.specs  # noqa
+    from udata.api import specs # noqa
 
     for module in entrypoints.get_enabled('udata.apis', app).values():
         api_module = module if inspect.ismodule(module) else import_module(module)
@@ -328,3 +434,4 @@ def init_app(app):
 
     oauth2.init_app(app)
     cors.init_app(app)
+    specs.init_app(app)

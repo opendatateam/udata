@@ -1,11 +1,11 @@
-from flask import abort, jsonify
+from flask import abort
 
-from webargs.flaskparser import use_args
+from flask_apispec import use_kwargs, marshal_with
 
 from udata import search
 from udata.api import apiv2_blueprint as apiv2
 from .models import Organization
-from .apiv2_schemas import OrganizationPaginationSchema
+from .apiv2_schemas import org_pagination_schema
 from .search import OrganizationSearch
 
 
@@ -16,55 +16,12 @@ DEFAULT_SORTING = '-created_at'
 
 
 @apiv2.route('/organizations/search/', endpoint='organization_search', methods=['GET'])
-@use_args(search_arguments, location="query")
-def get_organization_search(args):
-    """Organizations collection search endpoint.
-    ---
-    get:
-      parameters:
-      - in: query
-        name: q
-        required: true
-        schema:
-          type: string
-      - in: query
-        name: page
-        schema:
-          type: integer
-          default: 1
-      - in: query
-        name: page_size
-        schema:
-          type: integer
-          default: 20
-      - in: query
-        name: sort
-        schema:
-          type: string
-          enum: [created, reuses, datasets, followers, views]
-      - in: query
-        name: badge
-        schema:
-          type: string
-      responses:
-        200:
-          content:
-            application/json:
-              schema: OrganizationPaginationSchema
-        500:
-          content:
-            text/plain:
-              schema:
-                type: string
-        501:
-          content:
-            text/plain:
-              schema:
-                type: string
-    """
+@use_kwargs(search_arguments, location="query")
+@marshal_with(org_pagination_schema())
+def get_organization_search(**kwargs):
+    """Organizations collection search endpoint."""
     try:
-        result = search.query(Organization, **args)
-        return jsonify(OrganizationPaginationSchema().dump(result))
+        return search.query(Organization, **kwargs)
     except NotImplementedError:
         abort(501, 'Search endpoint not enabled')
     except RuntimeError:
