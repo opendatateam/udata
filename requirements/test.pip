@@ -17,6 +17,7 @@ apispec[yaml]==5.2.2
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   apispec-webframeworks
+    #   flask-apispec
 apispec-webframeworks==0.5.2
     # via
     #   -c requirements/install.pip
@@ -119,6 +120,7 @@ flask==1.1.4
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+    #   flask-apispec
     #   flask-babelex
     #   flask-caching
     #   flask-cdn
@@ -136,6 +138,10 @@ flask==1.1.4
     #   flask-themes2
     #   flask-wtf
     #   pytest-flask
+flask-apispec==0.11.4
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
 flask-babelex==0.9.3
     # via
     #   -c requirements/install.pip
@@ -265,6 +271,7 @@ marshmallow==3.17.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+    #   flask-apispec
     #   webargs
 mistune==0.8.4
     # via
@@ -469,6 +476,7 @@ webargs==8.2.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
+    #   flask-apispec
 webencodings==0.5.1
     # via
     #   -c requirements/install.pip
