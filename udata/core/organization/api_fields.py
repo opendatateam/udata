@@ -112,8 +112,7 @@ org_suggestion_fields = api.model('OrganizationSuggestion', {
         description='The organization acronym', readonly=True),
     'slug': fields.String(
         description='The organization permalink string', readonly=True),
-    'image_url': fields.String(
-        description='The organization logo URL', readonly=True),
+    'image_url': fields.ImageField(size=BIGGEST_LOGO_SIZE, description='The organization logo URL', readonly=True),
     'page': fields.UrlFor(
         'organizations.show_redirect', lambda o: {'org': o['slug']},
         description='The organization web page URL', readonly=True, fallback_endpoint='api.organization')

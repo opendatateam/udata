@@ -89,13 +89,13 @@ reuse_suggestion_fields = api.model('ReuseSuggestion', {
     'title': fields.String(description='The reuse title', readonly=True),
     'slug': fields.String(
         description='The reuse permalink string', readonly=True),
-    'image_url': fields.String(description='The reuse thumbnail URL'),
+    'image_url': fields.ImageField(size=BIGGEST_IMAGE_SIZE, description='The reuse thumbnail URL', readonly=True),
     'page': fields.UrlFor(
         'reuses.show_redirect', lambda o: {'reuse': o['slug']},
         description='The reuse page URL', readonly=True, fallback_endpoint='api.reuse')
 })
 
-  
+
 reuse_topic_fields = api.model('ReuseTopic', {
     'id': fields.String(description='The reuse topic identifier'),
     'label': fields.String(description='The reuse topic display name')

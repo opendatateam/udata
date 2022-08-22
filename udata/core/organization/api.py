@@ -395,7 +395,7 @@ class OrganizationSuggestAPI(API):
                 'name': org.name,
                 'acronym': org.acronym,
                 'slug': org.slug,
-                'image_url': org.image_url,
+                'image_url': org.logo,
             }
             for org in orgs.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
