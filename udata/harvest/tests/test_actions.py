@@ -12,6 +12,7 @@ from udata.models import Dataset, PeriodicTask
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.tests.helpers import assert_emit
 from udata.utils import faker, Paginable
 
@@ -430,17 +431,17 @@ class HarvestActionsTest:
         assert result.errors == 0
         for index, dataset in enumerate(datasets):
             dataset.reload()
-            assert dataset.harvest['domain'] == 'test.org'
-            assert dataset.harvest['remote_id'] == str(index)
+            assert dataset.harvest.domain == 'test.org'
+            assert dataset.harvest.remote_id == str(index)
 
     def test_attach_does_not_duplicate(self):
         attached_datasets = []
         for i in range(2):
             dataset = DatasetFactory.build()
-            dataset.harvest = {
-                'domain': 'test.org',
-                'remote_id': str(i)
-            }
+            dataset.harvest = HarvestDatasetMetadata(
+                domain='test.org',
+                remote_id=str(i)
+            )
             dataset.last_modified = datetime.now()
             dataset.save()
             attached_datasets.append(dataset)
@@ -470,8 +471,8 @@ class HarvestActionsTest:
         assert dbcount == result.success
         for index, dataset in enumerate(datasets):
             dataset.reload()
-            assert dataset.harvest['domain'] == 'test.org'
-            assert dataset.harvest['remote_id'] == str(index)
+            assert dataset.harvest.domain == 'test.org'
+            assert dataset.harvest.remote_id == str(index)
 
     def test_attach_skip_not_found(self):
         datasets = DatasetFactory.create_batch(3)

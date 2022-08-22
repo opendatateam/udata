@@ -19,6 +19,34 @@ checksum_fields = api.model('Checksum', {
                            required=True)
 })
 
+dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
+    'backend': fields.String(description='Harvest backend used', allow_null=True),
+    'created_at': fields.ISODateTime(description='The dataset harvested creation date',
+                                     allow_null=True),
+    'last_modified': fields.ISODateTime(description='The dataset harvest last modification date',
+                                        allow_null=True),
+    'source_id': fields.String(description='The harvester id', allow_null=True),
+    'remote_id': fields.String(description='The dataset remote id on the source portal',
+                               allow_null=True),
+    'domain': fields.String(description='The harvested domain', allow_null=True),
+    'last_update': fields.ISODateTime(description='The last harvest date', allow_null=True),
+    'remote_url': fields.String(description='The dataset remote url', allow_null=True),
+    'uri': fields.String(description='The dataset harveted uri', allow_null=True),
+    'dct_identifier': fields.String(
+        description='The dct:identifier property from the harvest dataset',
+        allow_null=True)
+})
+
+resource_harvest_fields = api.model('HarvestResourceMetadata', {
+    'created_at': fields.ISODateTime(description='The resource harvested creation date',
+                                     allow_null=True),
+    'last_modified': fields.ISODateTime(description='The resource harvest last modification date',
+                                        allow_null=True),
+    'uri': fields.String(description='The resource harvest uri', allow_null=True),
+    'dct_identifier': fields.String(
+        description='The dct:identifier property from the harvest resource', allow_null=True)
+})
+
 license_fields = api.model('License', {
     'id': fields.String(description='The license identifier', required=True),
     'title': fields.String(description='The resource title', required=True),
@@ -73,8 +101,11 @@ resource_fields = api.model('Resource', {
         description='The resource last modification date'),
     'metrics': fields.Raw(
         description='The resource metrics', readonly=True),
+    'harvest': fields.Nested(
+        resource_harvest_fields, allow_null=True, readonly=True,
+        description='Harvest attributes extras information',
+        skip_none=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
-    'harvest': fields.Raw(description='Harvest attributes as key-value pairs'),
     'protected_extras': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
         'href': url_for('apiv2.resource_protected_extras', rid=o.id, _external=True),
@@ -170,8 +201,12 @@ dataset_fields = api.model('Dataset', {
     'frequency_date': fields.ISODateTime(
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
+    'harvest': fields.Nested(
+        dataset_harvest_fields, readonly=True, allow_null=True,
+        description='Dataset harvest extras attributes',
+        skip_none=True
+    ),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-    'harvest': fields.Raw(description='Harvest attributes as key-value pairs'),
     'protected_extras': fields.Raw(attribute=lambda o: {
         'rel': 'subsection',
         'href': url_for('apiv2.protected_extras', dataset=o.id, _external=True),

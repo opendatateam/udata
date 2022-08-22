@@ -78,10 +78,10 @@ class BaseBackendTest:
         assert Dataset.objects.count() == nb_datasets
         for dataset in Dataset.objects():
             assert_equal_dates(dataset.last_modified, now)
-            assert dataset.harvest['source_id'] == str(source.id)
-            assert dataset.harvest['domain'] == source.domain
-            assert dataset.harvest['remote_id'].startswith('fake-')
-            assert_equal_dates(dataset.harvest['last_update'], now)
+            assert dataset.harvest.source_id == str(source.id)
+            assert dataset.harvest.domain == source.domain
+            assert dataset.harvest.remote_id.startswith('fake-')
+            assert_equal_dates(dataset.harvest.last_update, now)
 
     def test_has_feature_defaults(self):
         source = HarvestSourceFactory()
@@ -143,9 +143,9 @@ class BaseBackendTest:
         # no new datasets have been created
         assert len(datasets) == nb_datasets
         for dataset in datasets:
-            assert dataset.harvest['source_id'] == str(source.id)
+            assert dataset.harvest.source_id == str(source.id)
             parsed = urlparse(source_url).netloc.split(':')[0]
-            assert parsed == dataset.harvest['domain']
+            assert parsed == dataset.harvest.domain
 
     def test_dont_overwrite_last_modified(self, mocker):
         last_modified = faker.date_time_between(start_date='-30y', end_date='-1y')
@@ -157,7 +157,7 @@ class BaseBackendTest:
         dataset = Dataset.objects.first()
 
         assert dataset.last_modified == last_modified
-        assert_equal_dates(dataset.harvest['last_update'], datetime.now())
+        assert_equal_dates(dataset.harvest.last_update, datetime.now())
 
     def test_dont_overwrite_last_modified_even_if_set_to_same(self, mocker):
         last_modified = faker.date_time_between(start_date='-30y', end_date='-1y')
@@ -170,7 +170,7 @@ class BaseBackendTest:
         dataset = Dataset.objects.first()
 
         assert dataset.last_modified == last_modified
-        assert_equal_dates(dataset.harvest['last_update'], datetime.now())
+        assert_equal_dates(dataset.harvest.last_update, datetime.now())
 
     def test_autoarchive(self, app):
         nb_datasets = 3
@@ -222,8 +222,8 @@ class BaseBackendTest:
         q = {'harvest__remote_id': 'fake-1'}
         dataset = Dataset.objects.get(**q)
         dataset.archived = datetime.now()
-        dataset.harvest['archived'] = 'not-on-remote'
-        dataset.harvest['archived_at'] = datetime.now()
+        dataset.harvest.archived = 'not-on-remote'
+        dataset.harvest.archived_at = datetime.now()
         dataset.save()
         backend.harvest()
         dataset.reload()

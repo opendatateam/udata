@@ -7,9 +7,9 @@ from urllib.parse import urlparse
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
-from mongoengine import DynamicDocument
+from mongoengine import DynamicEmbeddedDocument
 from mongoengine.signals import pre_save, post_save
-from mongoengine.fields import BaseField, DateField, DateTimeField
+from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
 import requests
@@ -128,10 +128,10 @@ def get_json_ld_extra(key, value):
     }
 
 
-class HarvestMetadata(DynamicDocument):
+class HarvestDatasetMetadata(DynamicEmbeddedDocument):
+    backend = db.StringField()
     created_at = db.DateTimeField()
     last_modified = db.DateTimeField()
-    landing_page = db.URLField()
     source_id = db.StringField()
     remote_id = db.StringField()
     domain = db.StringField()
@@ -139,6 +139,15 @@ class HarvestMetadata(DynamicDocument):
     remote_url = db.URLField()
     uri = db.StringField()
     dct_identifier = db.StringField()
+    archived_at = db.DateTimeField()
+    archived = db.StringField()
+
+
+class HarvestResourceMetadata(DynamicEmbeddedDocument):
+    created_at = db.DateTimeField()
+    last_modified = db.DateTimeField()
+    dct_identifier = db.StringField()
+    uri = db.URLField()
 
 
 class License(db.Document):
@@ -281,7 +290,7 @@ class ResourceMixin(object):
     extras = db.ExtrasField()
     protected_extras = db.ExtrasField()  # protected extras, admin only
     _extras = db.ExtrasField()  # protected extras, admin only
-    harvest = db.ExtrasField()  # harvest extras
+    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)  # harvest extras
     schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
@@ -353,11 +362,11 @@ class ResourceMixin(object):
 
     @property
     def created_at_public(self):
-        return self.harvest.get('created_at') or self.created_at
+        return (self.harvest.created_at if self.harvest else False) or self.created_at
 
     @property
     def modified_public(self):
-        return self.harvest.get('modified') or self.modified
+        return (self.harvest.modified if self.harvest else False) or self.modified
 
     # @property
     # def published(self):
@@ -410,7 +419,6 @@ class ResourceMixin(object):
             result['description'] = mdstrip(self.description)
 
         return result
-
 
 
 class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
@@ -469,7 +477,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     protected_extras = db.ExtrasField()  # protected extras, admin only
     _extras = db.ExtrasField()  # protected extras, admin only
-    harvest = db.ReferenceField('HarvestMetadata')  # harvest extras
+    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)  # harvest extras
     featured = db.BooleanField(required=True, default=False)
 
     deleted = db.DateTimeField()
@@ -591,11 +599,11 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def created_at_public(self):
-        return self.harvest.get('created_at') or self.created_at
+        return (self.harvest.created_at if self.harvest else False) or self.created_at
 
     @property
     def last_modified_public(self):
-        return self.harvest.get('last_modified') or self.last_modified
+        return (self.harvest.last_modified if self.harvest else False) or self.last_modified
 
     @property
     def last_update(self):

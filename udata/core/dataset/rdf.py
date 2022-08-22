@@ -14,8 +14,7 @@ from rdflib.namespace import RDF
 
 from udata import i18n, uris
 from udata.frontend.markdown import parse_html
-from udata.harvest.extras import HarvestExtrasFactory
-from udata.core.dataset.models import HarvestMetadata
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
@@ -162,16 +161,16 @@ def dataset_to_rdf(dataset, graph=None):
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if 'uri' in dataset.harvest:
-        id = URIRef(dataset.harvest['uri'])
+    if dataset.harvest and dataset.harvest.uri:
+        id = URIRef(dataset.harvest.uri)
     elif dataset.id:
         id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
                     dataset=dataset.id, _external=True))
     else:
         id = BNode()
     # Expose upstream identifier if present
-    if 'dct:identifier' in dataset.harvest:
-        identifier = dataset.harvest['dct:identifier']
+    if dataset.harvest and dataset.harvest.dct_identifier:
+        identifier = dataset.harvest.dct_identifier
     else:
         identifier = dataset.id
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -401,19 +400,20 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             resource.checksum.type = algorithm
 
     identifier = rdf_value(distrib, DCT.identifier)
-
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
-
     created_at = dct_issued_from_rdf(distrib)
     last_modified = dct_modified_from_rdf(distrib)
 
-    resource.harvest = HarvestExtrasFactory.set_extras(
-        resource.harvest,
-        created_at=created_at,
-        last_modified=last_modified,
-        dct_identifier=identifier,
-        uri=uri
-    )
+    if not resource.harvest:
+        resource.harvest = HarvestResourceMetadata()
+    if created_at:
+        resource.harvest.created_at = created_at
+    if last_modified:
+        resource.harvest.last_modified = last_modified
+    if identifier:
+        resource.harvest.dct_identifier = identifier
+    if uri:
+        resource.harvest.uri = uri
 
     return resource
 
@@ -423,8 +423,6 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     Create or update a dataset from a RDF/DCAT graph
     '''
     dataset = dataset or Dataset()
-    if not dataset.harvest:
-        dataset.harvest = HarvestMetadata()
 
     if node is None:  # Assume first match is the only match
         node = graph.value(predicate=RDF.type, object=DCAT.Dataset)
@@ -467,11 +465,17 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     created_at = dct_issued_from_rdf(d)
     last_modified = dct_modified_from_rdf(d)
 
-    dataset.harvest.created_at = created_at
-    dataset.harvest.last_modified = last_modified
-    dataset.harvest.landing_page = landing_page
-    dataset.harvest.dct_identifier = identifier
-    dataset.harvest.uri = uri
-    dataset.harvest.save()
+    if not dataset.harvest:
+        dataset.harvest = HarvestDatasetMetadata()
+    if identifier:
+        dataset.harvest.dct_identifier = identifier
+    if uri:
+        dataset.harvest.uri = uri
+    if landing_page:
+        dataset.harvest.remote_url = landing_page
+    if created_at:
+        dataset.harvest.created_at = created_at
+    if last_modified:
+        dataset.harvest.last_modified = last_modified
 
     return dataset

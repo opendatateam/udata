@@ -9,13 +9,12 @@ import requests
 from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
-from udata.core.dataset.models import HarvestMetadata
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import HarvestItem, HarvestJob, HarvestError
-from ..extras import HarvestExtrasFactory
 from ..signals import before_harvest_job, after_harvest_job
 
 log = logging.getLogger(__name__)
@@ -188,15 +187,17 @@ class BaseBackend(object):
         try:
             dataset = self.process(item)
             if not dataset.harvest:
-                dataset.harvest = HarvestMetadata()
-            dataset.harvest.domain = self.source.domain,
-            dataset.harvest.remote_id = item.remote_id,
-            dataset.harvest.source_id = str(self.source.id),
+                dataset.harvest = HarvestDatasetMetadata()
+            dataset.harvest.domain = self.source.domain
+            dataset.harvest.remote_id = item.remote_id
+            dataset.harvest.source_id = str(self.source.id)
             dataset.harvest.last_update = datetime.now()
-            dataset.harvest.save()
+            dataset.harvest.backend = self.display_name
 
             # unset archived status if needed
-            dataset.harvest = HarvestExtrasFactory.unset_extras(dataset.harvest, archived_at=True, archived=True)
+            if dataset.harvest:
+                dataset.harvest.archived_at = None
+                dataset.harvest.archived = None
             dataset.archived = None
 
             # TODO permissions checking
@@ -252,16 +253,15 @@ class BaseBackend(object):
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
-            if not dataset.harvest.get('archived_at'):
+            if not dataset.harvest or (dataset.harvest and not dataset.harvest.archived_at):
                 log.debug('Archiving dataset %s', dataset.id)
                 archival_date = datetime.now()
                 dataset.archived = archival_date
 
-                dataset.harvest = HarvestExtrasFactory.set_extras(
-                    dataset.harvest,
-                    archived='not-on-remote',
-                    archived_at=archival_date
-                )
+                if not dataset.harvest:
+                    dataset.harvest = HarvestDatasetMetadata()
+                dataset.harvest.archived = 'not-on-remote'
+                dataset.harvest.archived_at = archival_date
                 if self.dryrun:
                     dataset.validate()
                 else:
@@ -269,7 +269,7 @@ class BaseBackend(object):
 
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            item = self.add_item(dataset.harvest['remote_id'])
+            item = self.add_item(dataset.harvest.remote_id)
             item.dataset = dataset
             item.status = 'archived'
 

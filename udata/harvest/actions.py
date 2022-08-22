@@ -8,7 +8,7 @@ from bson import ObjectId
 from flask import current_app
 
 from udata.auth import current_user
-from udata.core.dataset.models import HarvestMetadata
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import User, Organization, PeriodicTask, Dataset
 
 from . import backends, signals
@@ -16,7 +16,6 @@ from .models import (
     HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
     VALIDATION_ACCEPTED, VALIDATION_REFUSED
 )
-from .extras import HarvestExtrasFactory
 from .tasks import harvest
 
 log = logging.getLogger(__name__)
@@ -288,7 +287,7 @@ def attach(domain, filename):
             })
 
             if not dataset.harvest:
-                dataset.harvest = HarvestMetadata()
+                dataset.harvest = HarvestDatasetMetadata()
             dataset.harvest.domain = domain
             dataset.harvest.remote_id = row['remote']
 
