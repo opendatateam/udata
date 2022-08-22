@@ -1,16 +1,18 @@
 from marshmallow import Schema, fields, validate
-from udata.api.fields import MaURLFor, paginate_schema
+from udata.api.fields import MaURLFor, paginate_schema, MaImageField
 from udata.core.badges.api import BadgeSchema
 from udata.core.dataset.apiv2_schemas import DatasetRefSchema
 from udata.core.user.apiv2_schemas import UserRefSchema
 from udata.core.organization.apiv2_schemas import OrganizationRefSchema
-from .models import REUSE_TYPES, REUSE_TOPICS
+from .models import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
+
+BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
 
 class ReuseRefSchema(Schema):
     title = fields.Str(required=True)
-    image = fields.Url()
-    image_thumbnail = fields.Url()
+    image = MaImageField(dump_only=True)
+    image_thumbnail = MaImageField(dump_only=True, attribute='image', size=BIGGEST_IMAGE_SIZE)
     uri = MaURLFor(endpoint='api.reuse', mapper=lambda o: {'reuse': o}, dump_only=True)
     page = MaURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
 
@@ -34,8 +36,8 @@ class ReuseSchema(Schema):
     owner = fields.Nested(UserRefSchema, dump_only=True)
     organization = fields.Nested(OrganizationRefSchema, dump_only=True)
     datasets = fields.List(fields.Nested(DatasetRefSchema))
-    image = fields.Url()
-    image_thumbnail = fields.Url()
+    image = MaImageField(dump_only=True)
+    image_thumbnail = MaImageField(dump_only=True, attribute='image', size=BIGGEST_IMAGE_SIZE)
     uri = MaURLFor(endpoint='api.reuse', mapper=lambda o: {'reuse': o}, dump_only=True)
     page = MaURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
 

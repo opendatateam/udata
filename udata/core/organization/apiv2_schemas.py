@@ -1,15 +1,17 @@
 from marshmallow import Schema, fields, validate
-from .models import ORG_ROLES, DEFAULT_ROLE
 
 from udata.core.badges.api import BadgeSchema
-from udata.api.fields import MaURLFor, paginate_schema
+from udata.api.fields import MaURLFor, paginate_schema, MaImageField
+from .models import ORG_ROLES, DEFAULT_ROLE, LOGO_SIZES
+
+BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
 
 class OrganizationRefSchema(Schema):
     name = fields.Str(required=True)
     acronym = fields.Str()
-    logo = fields.Url()
-    logo_thumbnail = fields.Url()
+    logo = MaImageField(dump_only=True)
+    logo_thumbnail = MaImageField(dump_only=True, attribute='logo', size=BIGGEST_LOGO_SIZE)
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
     uri = MaURLFor(endpoint='api.organization', mapper=lambda o: {'org': o}, dump_only=True)
     page = MaURLFor(endpoint='organizations.show', mapper=lambda o: {'org': o}, fallback_endpoint='api.organization', dump_only=True)
@@ -34,8 +36,8 @@ class OrganizationSchema(Schema):
     last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True, dump_only=True)
     deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', dump_only=True)
     metrics = fields.Function(lambda obj: obj.get_metrics())
-    logo = fields.Url()
-    logo_thumbnail = fields.Url()
+    logo = MaImageField(dump_only=True)
+    logo_thumbnail = MaImageField(dump_only=True, attribute='logo', size=BIGGEST_LOGO_SIZE)
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
     # members = fields.Nested(UserSchema, many=True, dump_only=True)
     uri = MaURLFor(endpoint='api.organization', mapper=lambda o: {'org': o}, dump_only=True)

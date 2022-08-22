@@ -1,5 +1,9 @@
 from marshmallow import Schema, fields
-from udata.api.fields import MaURLFor, paginate_schema
+from udata.api.fields import MaURLFor, paginate_schema, MaImageField
+
+from .models import AVATAR_SIZES
+
+BIGGEST_AVATAR_SIZE = AVATAR_SIZES[0]
 
 
 class UserRefSchema(Schema):
@@ -8,8 +12,8 @@ class UserRefSchema(Schema):
     slug = fields.String(required=True)
     page = MaURLFor(endpoint='users.show', mapper=lambda u: {'user': u}, fallback_endpoint='api.user', dump_only=True)
     uri = MaURLFor(endpoint='api.user', mapper=lambda u: {'user': u}, dump_only=True)
-    avatar = fields.Url()
-    avatar_thumbnail = fields.Url()
+    avatar = MaImageField(dump_only=True)
+    avatar_thumbnail = MaImageField(dump_only=True, attribute='avatar', size=BIGGEST_AVATAR_SIZE)
 
 
 from udata.core.organization.apiv2_schemas import OrganizationRefSchema  # noqa
@@ -23,8 +27,8 @@ class UserSchema(Schema):
     about = fields.String()
     page = MaURLFor(endpoint='users.show', mapper=lambda u: {'user': u}, fallback_endpoint='api.user', dump_only=True)
     uri = MaURLFor(endpoint='api.user', mapper=lambda u: {'user': u}, dump_only=True)
-    avatar = fields.Url()
-    avatar_thumbnail = fields.Url()
+    avatar = MaImageField(dump_only=True)
+    avatar_thumbnail = MaImageField(dump_only=True, attribute='avatar', size=BIGGEST_AVATAR_SIZE)
     email = fields.Function(lambda o: o.email if current_user_is_admin_or_self() else None, dump_only=True),
     metrics = fields.Function(lambda obj: obj.get_metrics(), dump_only=True),
     active = fields.Boolean(),

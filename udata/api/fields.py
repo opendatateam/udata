@@ -93,6 +93,21 @@ def pager(page_fields):
     return pager_fields
 
 
+class MaImageField(ma_fields.Field):
+    def __init__(self, size=None, original=False, **kwargs):
+        self.original = original
+        self.size = size
+        ma_fields.Field.__init__(self, **kwargs)
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if not value or not value.filename:
+            return
+        if self.size:
+            return value(self.size, external=True)
+        else:
+            return value.fs.url(value.filename, external=True)
+
+
 class MaURLFor(ma_fields.Field):
 
     _CHECK_ATTRIBUTE = False
