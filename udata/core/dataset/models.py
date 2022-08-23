@@ -778,6 +778,17 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         self.metrics['followers'] = Follow.objects(until=None).followers(self).count()
         self.save()
 
+    def archive(self, reason, save=True):
+        log.debug('Archiving dataset %s', self.id)
+        archival_date = datetime.now()
+        self.archived = archival_date
+        self.extras['harvest:archived'] = reason
+        self.extras['harvest:archived_at'] = archival_date
+        if save:
+            self.save()
+        else:
+            self.validate()
+
 
 pre_save.connect(Dataset.pre_save, sender=Dataset)
 post_save.connect(Dataset.post_save, sender=Dataset)

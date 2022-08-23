@@ -383,13 +383,17 @@ class HarvestActionsTest:
         )
         to_keep = HarvestSourceFactory.create_batch(2)
         harvest_job = HarvestJobFactory(source=to_delete[0])
+        dataset_to_archive = DatasetFactory(extras={'harvest:source_id': str(to_delete[0].id)})
 
         result = actions.purge_sources()
+        dataset_to_archive.reload()
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
+        assert 'harvest:archived' in dataset_to_archive.extras
+        assert dataset_to_archive.extras['harvest:archived'] == 'harvester-deleted'
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):

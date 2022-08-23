@@ -140,6 +140,9 @@ def purge_sources():
     for source in sources:
         if source.periodic_task:
             source.periodic_task.delete()
+        datasets = Dataset.objects.filter(**{'extras__harvest:source_id': str(source.id)})
+        for dataset in datasets:
+            dataset.archive(reason='harvester-deleted', save=True)
         source.delete()
     return count
 
