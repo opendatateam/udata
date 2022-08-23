@@ -93,7 +93,7 @@ def pager(page_fields):
     return pager_fields
 
 
-class MaImageField(ma_fields.Field):
+class MarshImageField(ma_fields.Field):
     def __init__(self, size=None, original=False, **kwargs):
         self.original = original
         self.size = size
@@ -108,7 +108,7 @@ class MaImageField(ma_fields.Field):
             return value.fs.url(value.filename, external=True)
 
 
-class MaURLFor(ma_fields.Field):
+class MarshURLFor(ma_fields.Field):
 
     _CHECK_ATTRIBUTE = False
 
@@ -125,7 +125,7 @@ class MaURLFor(ma_fields.Field):
         return endpoint_for(self.endpoint, self.fallback_endpoint, _external=True, **self.mapper(obj))
 
 
-class MaNextPageUrl(ma_fields.Field):
+class MarshNextPageUrl(ma_fields.Field):
     _CHECK_ATTRIBUTE = False
 
     def _serialize(self, value, attr, obj, **kwargs):
@@ -137,7 +137,7 @@ class MaNextPageUrl(ma_fields.Field):
         return url_for(request.endpoint, _external=True, **args)
 
 
-class MaPreviousPageUrl(ma_fields.Field):
+class MarshPreviousPageUrl(ma_fields.Field):
     _CHECK_ATTRIBUTE = False
 
     def _serialize(self, value, attr, obj, **kwargs):
@@ -155,7 +155,7 @@ def paginate_schema(schema):
         page = ma_fields.Int(required=True, min=1)
         page_size = ma_fields.Int(required=True, min=0)
         total = ma_fields.Int(required=True, min=0)
-        next_page = MaNextPageUrl()
-        previous_page = MaPreviousPageUrl()
+        next_page = MarshNextPageUrl()
+        previous_page = MarshPreviousPageUrl()
 
     return PaginationSchema

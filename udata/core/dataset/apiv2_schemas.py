@@ -1,7 +1,7 @@
 from flask import url_for
 from marshmallow import Schema, fields, validate
 
-from udata.api.fields import MaURLFor, paginate_schema
+from udata.api.fields import MarshURLFor, paginate_schema
 from udata.core.badges.api import BadgeSchema
 from udata.core.organization.apiv2_schemas import OrganizationRefSchema
 from udata.core.user.apiv2_schemas import UserRefSchema
@@ -59,16 +59,16 @@ class SpatialCoverageSchema(Schema):
 
 class DatasetRefSchema(Schema):
     title = fields.Str(required=True)
-    uri = MaURLFor(endpoint='api.dataset', mapper=lambda o: {'dataset': o}, dump_only=True)
-    page = MaURLFor(endpoint='datasets.show', mapper=lambda o: {'dataset': o}, fallback_endpoint='api.dataset', dump_only=True)
+    uri = MarshURLFor(endpoint='api.dataset', mapper=lambda o: {'dataset': o}, dump_only=True)
+    page = MarshURLFor(endpoint='datasets.show', mapper=lambda o: {'dataset': o}, fallback_endpoint='api.dataset', dump_only=True)
     acronym = fields.Str()
 
 
 class DatasetSchema(Schema):
     id = fields.Str(dump_only=True)
     title = fields.Str(required=True)
-    uri = MaURLFor(endpoint='api.dataset', mapper=lambda o: {'dataset': o}, dump_only=True)
-    page = MaURLFor(endpoint='datasets.show', mapper=lambda o: {'dataset': o}, fallback_endpoint='api.dataset', dump_only=True)
+    uri = MarshURLFor(endpoint='api.dataset', mapper=lambda o: {'dataset': o}, dump_only=True)
+    page = MarshURLFor(endpoint='datasets.show', mapper=lambda o: {'dataset': o}, fallback_endpoint='api.dataset', dump_only=True)
     acronym = fields.Str()
     slug = fields.Str(required=True, dump_only=True)
     description = fields.Str(required=True)
@@ -76,7 +76,7 @@ class DatasetSchema(Schema):
     last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True)
     deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
     archived = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
-    featured = fields.Boolean();
+    featured = fields.Boolean()
     private = fields.Boolean()
     tags = fields.List(fields.Str)
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)

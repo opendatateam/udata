@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, validate
-from udata.api.fields import MaURLFor, paginate_schema, MaImageField
+from udata.api.fields import MarshURLFor, paginate_schema, MarshImageField
 from udata.core.badges.api import BadgeSchema
 from udata.core.dataset.apiv2_schemas import DatasetRefSchema
 from udata.core.user.apiv2_schemas import UserRefSchema
@@ -11,10 +11,10 @@ BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
 class ReuseRefSchema(Schema):
     title = fields.Str(required=True)
-    image = MaImageField(dump_only=True)
-    image_thumbnail = MaImageField(dump_only=True, attribute='image', size=BIGGEST_IMAGE_SIZE)
-    uri = MaURLFor(endpoint='api.reuse', mapper=lambda o: {'reuse': o}, dump_only=True)
-    page = MaURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
+    image = MarshImageField(dump_only=True)
+    image_thumbnail = MarshImageField(dump_only=True, attribute='image', size=BIGGEST_IMAGE_SIZE)
+    uri = MarshURLFor(endpoint='api.reuse', mapper=lambda o: {'reuse': o}, dump_only=True)
+    page = MarshURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
 
 
 class ReuseSchema(Schema):
@@ -36,10 +36,10 @@ class ReuseSchema(Schema):
     owner = fields.Nested(UserRefSchema, dump_only=True)
     organization = fields.Nested(OrganizationRefSchema, dump_only=True)
     datasets = fields.List(fields.Nested(DatasetRefSchema))
-    image = MaImageField(dump_only=True)
-    image_thumbnail = MaImageField(dump_only=True, attribute='image', size=BIGGEST_IMAGE_SIZE)
-    uri = MaURLFor(endpoint='api.reuse', mapper=lambda o: {'reuse': o}, dump_only=True)
-    page = MaURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
+    image = MarshImageField(dump_only=True)
+    image_thumbnail = MarshImageField(dump_only=True, attribute='image', size=BIGGEST_IMAGE_SIZE)
+    uri = MarshURLFor(endpoint='api.reuse', mapper=lambda o: {'reuse': o}, dump_only=True)
+    page = MarshURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
 
 
 reuse_pagination_schema = paginate_schema(ReuseSchema)
