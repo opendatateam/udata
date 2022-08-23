@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-08-16 07:33\n"
+"PO-Revision-Date: 2022-08-23 14:42\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -20,84 +20,84 @@ msgstr ""
 
 #: udata/settings.py:99
 msgid "Welcome"
-msgstr ""
+msgstr "Benvenutə"
 
 #: udata/settings.py:100
 msgid "Please confirm your email"
-msgstr ""
+msgstr "Per favore conferma la tua email"
 
 #: udata/settings.py:101
 msgid "Login instructions"
-msgstr ""
+msgstr "Istruzioni di accesso"
 
 #: udata/settings.py:102
 msgid "Your password has been reset"
-msgstr ""
+msgstr "La tua password è stata reimpostata"
 
 #: udata/settings.py:103
 msgid "Your password has been changed"
-msgstr ""
+msgstr "La tua password è stata modificata"
 
 #: udata/settings.py:105
 msgid "Password reset instructions"
-msgstr ""
+msgstr "Istruzioni per reimpostare la password"
 
 #: udata/settings.py:390
 msgid "This dataset has been archived"
-msgstr ""
+msgstr "Questo dataset è stato archiviato"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
-msgstr ""
+msgstr "Errore di convalida: i tuoi dati non possono essere aggiornati per il momento, siamo stati informati dell'errore e lo risolveremo il prima possibile."
 
 #: udata/api/oauth2.py:53
 msgid "Bearer Token"
-msgstr ""
+msgstr "Bearer Token"
 
 #: udata/api/oauth2.py:57
 msgid "Default scope"
-msgstr ""
+msgstr "Scope di default"
 
 #: udata/api/oauth2.py:58
 msgid "System administrator rights"
-msgstr ""
+msgstr "Diritti di amministratore di sistema"
 
 #: udata/auth/forms.py:13 udata/core/user/forms.py:14
 msgid "First name"
-msgstr ""
+msgstr "Nome"
 
 #: udata/auth/forms.py:13
 msgid "First name is required"
-msgstr ""
+msgstr "Il nome è obbligatorio"
 
 #: udata/auth/forms.py:14 udata/auth/forms.py:17 udata/core/user/forms.py:15
 #: udata/core/user/forms.py:17
 msgid "URLs not allowed in this field"
-msgstr ""
+msgstr "URL non ammessi in questo campo"
 
 #: udata/auth/forms.py:16 udata/core/user/forms.py:16
 msgid "Last name"
-msgstr ""
+msgstr "Cognome"
 
 #: udata/auth/forms.py:16
 msgid "Last name is required"
-msgstr ""
+msgstr "Il cognome è obbligatorio"
 
 #: udata/auth/forms.py:33
 msgid "Password must be changed for security reasons"
-msgstr ""
+msgstr "La password deve essere cambiata per motivi di sicurezza"
 
 #: udata/auth/password_validation.py:13
 msgid "Password must be at least {pass_length} characters long"
-msgstr ""
+msgstr "La password deve contenere almeno {pass_length} caratteri"
 
 #: udata/auth/password_validation.py:18
 msgid "Password must contain lowercases"
-msgstr ""
+msgstr "La password deve includere delle lettere minuscole"
 
 #: udata/auth/password_validation.py:22
 msgid "Password must contain digits"
-msgstr ""
+msgstr "La password deve includere dei numeri"
 
 #: udata/auth/password_validation.py:26
 msgid "Password must contain uppercases"
