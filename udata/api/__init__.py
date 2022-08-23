@@ -330,6 +330,14 @@ class UDataApiV2:
         return form
 
 
+@apiv2_blueprint.route('/', endpoint='root')
+def apiv2_root():
+    '''
+    Useful to return the api v2 root url
+    '''
+    abort(404)
+
+
 @apiv2_blueprint.before_request
 def authentifyV2():
     if current_user.is_authenticated:
