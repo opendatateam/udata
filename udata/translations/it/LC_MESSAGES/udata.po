@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-08-24 14:17\n"
+"PO-Revision-Date: 2022-08-24 15:29\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -296,140 +296,140 @@ msgstr "Tag"
 
 #: udata/core/dataset/forms.py:152 udata/core/reuse/forms.py:29
 msgid "Some taxonomy keywords"
-msgstr ""
+msgstr "Alcune parole chiave per la tassonomia"
 
 #: udata/core/dataset/forms.py:154 udata/core/reuse/forms.py:32
 #: udata/core/topic/forms.py:23
 msgid "Private"
-msgstr ""
+msgstr "Privato"
 
 #: udata/core/dataset/forms.py:155 udata/core/reuse/forms.py:33
 msgid "Restrict the dataset visibility to you or your organization only."
-msgstr ""
+msgstr "Limita la visibilità del dataset solo a te o alla tua organizzazione."
 
 #: udata/core/dataset/models.py:43
 msgid "Unknown"
-msgstr ""
+msgstr "Sconosciuto"
 
 #: udata/core/dataset/models.py:44
 msgid "Punctual"
-msgstr ""
+msgstr "Puntuale"
 
 #: udata/core/dataset/models.py:45
 msgid "Real time"
-msgstr ""
+msgstr "Tempo reale"
 
 #: udata/core/dataset/models.py:46
 msgid "Hourly"
-msgstr ""
+msgstr "Ogni ora"
 
 #: udata/core/dataset/models.py:47
 msgid "Four times a day"
-msgstr ""
+msgstr "Quattro volte al giorno"
 
 #: udata/core/dataset/models.py:48
 msgid "Three times a day"
-msgstr ""
+msgstr "Tre volte al giorno"
 
 #: udata/core/dataset/models.py:49
 msgid "Semidaily"
-msgstr ""
+msgstr "Due volte al giorno"
 
 #: udata/core/dataset/models.py:50 udata/harvest/models.py:22
 msgid "Daily"
-msgstr ""
+msgstr "Quotidiana"
 
 #: udata/core/dataset/models.py:51
 msgid "Four times a week"
-msgstr ""
+msgstr "Quattro volte alla settimana"
 
 #: udata/core/dataset/models.py:52
 msgid "Three times a week"
-msgstr ""
+msgstr "Tre volte a settimana"
 
 #: udata/core/dataset/models.py:53
 msgid "Semiweekly"
-msgstr ""
+msgstr "Due volte a settimana"
 
 #: udata/core/dataset/models.py:54 udata/harvest/models.py:21
 msgid "Weekly"
-msgstr ""
+msgstr "Settimanale"
 
 #: udata/core/dataset/models.py:55
 msgid "Biweekly"
-msgstr ""
+msgstr "Ogni due settimane"
 
 #: udata/core/dataset/models.py:56
 msgid "Three times a month"
-msgstr ""
+msgstr "Tre volte al mese"
 
 #: udata/core/dataset/models.py:57
 msgid "Semimonthly"
-msgstr ""
+msgstr "Due volte al mese"
 
 #: udata/core/dataset/models.py:58 udata/harvest/models.py:20
 msgid "Monthly"
-msgstr ""
+msgstr "Mensile"
 
 #: udata/core/dataset/models.py:59
 msgid "Bimonthly"
-msgstr ""
+msgstr "Bimestrale"
 
 #: udata/core/dataset/models.py:60
 msgid "Quarterly"
-msgstr ""
+msgstr "Trimestrale"
 
 #: udata/core/dataset/models.py:61
 msgid "Three times a year"
-msgstr ""
+msgstr "Tre volte all'anno"
 
 #: udata/core/dataset/models.py:62
 msgid "Biannual"
-msgstr ""
+msgstr "Semestrale"
 
 #: udata/core/dataset/models.py:63
 msgid "Annual"
-msgstr ""
+msgstr "Annuale"
 
 #: udata/core/dataset/models.py:64
 msgid "Biennial"
-msgstr ""
+msgstr "Biennale"
 
 #: udata/core/dataset/models.py:65
 msgid "Triennial"
-msgstr ""
+msgstr "Triennale"
 
 #: udata/core/dataset/models.py:66
 msgid "Quinquennial"
-msgstr ""
+msgstr "Quinquennale"
 
 #: udata/core/dataset/models.py:67
 msgid "Irregular"
-msgstr ""
+msgstr "Irregolare"
 
 #: udata/core/dataset/models.py:89
 msgid "Main file"
-msgstr ""
+msgstr "File principale"
 
 #: udata/core/dataset/models.py:90
 msgid "Documentation"
-msgstr ""
+msgstr "Documentazione"
 
 #: udata/core/dataset/models.py:91
 msgid "Update"
-msgstr ""
+msgstr "Aggiornamento"
 
 #: udata/core/dataset/models.py:92 udata/core/reuse/models.py:16
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #: udata/core/dataset/models.py:93
 msgid "Code repository"
-msgstr ""
+msgstr "Repository di codice"
 
 #: udata/core/dataset/models.py:94 udata/core/spatial/models.py:24
 msgid "Other"
-msgstr ""
+msgstr "Altro"
 
 #: udata/core/dataset/models.py:99
 msgid "Uploaded file"
@@ -962,19 +962,19 @@ msgstr "{0} non esiste"
 
 #: udata/forms/fields.py:416
 msgid "Expect both class and identifier"
-msgstr ""
+msgstr "Si attende sia una classe che un identificatore"
 
 #: udata/forms/fields.py:462
 msgid "Model for {0} not found"
-msgstr ""
+msgstr "Modello per {0} non trovato"
 
 #: udata/forms/fields.py:497
 msgid "Unknown identifiers: {identifiers}"
-msgstr ""
+msgstr "Identificatori sconosciuti: {identifiers}"
 
 #: udata/forms/fields.py:632
 msgid "Unable to parse date range"
-msgstr ""
+msgstr "Impossibile analizzare l'intervallo di date"
 
 #: udata/forms/fields.py:659 udata/forms/fields.py:682
 msgid "You must be authenticated"
