@@ -99,7 +99,15 @@ jobs:
       - run:
           name: Build a distributable package
           command: |
-            poetry build
+            # Build a wheel release
+            if [[ $CIRCLE_TAG ]]; then
+                # This is a tagged release, version has been handled upstream
+                poetry build
+            else
+                # Relies on a dev version like "1.2.1.dev" by default
+                poetry version $(poetry version -s)$CIRCLE_BUILD_NUM
+                poetry build
+            fi
       - store_artifacts:
           path: dist
       - persist_to_workspace:
