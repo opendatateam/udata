@@ -5,6 +5,7 @@
 - Clean up event code [#2751](https://github.com/opendatateam/udata/pull/2751)
 - Replace mongo legacy image in CI [#2754](https://github.com/opendatateam/udata/pull/2754)
 - Fixes test `test_suggest_datasets_api` by modifying condition [#2759](https://github.com/opendatateam/udata/pull/2759)
+- Fix doc name duplicate on rdf endpoints [#2763](https://github.com/opendatateam/udata/pull/2763)
 
 ## 4.1.1 (2022-07-08)
 
