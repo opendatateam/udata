@@ -149,13 +149,9 @@ class MarshPreviousPageUrl(ma_fields.Field):
         return url_for(request.endpoint, _external=True, **args)
 
 
-def paginate_schema(schema):
-    class PaginationSchema(Schema):
-        data = ma_fields.List(ma_fields.Nested(schema), attribute="objects")
-        page = ma_fields.Int(required=True, min=1)
-        page_size = ma_fields.Int(required=True, min=0)
-        total = ma_fields.Int(required=True, min=0)
-        next_page = MarshNextPageUrl()
-        previous_page = MarshPreviousPageUrl()
-
-    return PaginationSchema
+class PaginationSchema(Schema):
+    page = ma_fields.Int(required=True, min=1)
+    page_size = ma_fields.Int(required=True, min=0)
+    total = ma_fields.Int(required=True, min=0)
+    next_page = MarshNextPageUrl()
+    previous_page = MarshPreviousPageUrl()

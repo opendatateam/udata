@@ -6,7 +6,7 @@ from udata import search
 from udata.api import apiv2_blueprint as apiv2
 
 from .models import Reuse
-from .apiv2_schemas import reuse_pagination_schema
+from .apiv2_schemas import ReusePaginationSchema
 from .search import ReuseSearch
 
 
@@ -17,7 +17,7 @@ DEFAULT_SORTING = '-created_at'
 
 @apiv2.route('/reuses/search/', endpoint='reuse_search', methods=['GET'])
 @use_kwargs(search_arguments, location="query")
-@marshal_with(reuse_pagination_schema())
+@marshal_with(ReusePaginationSchema())
 def get_reuse_search(**kwargs):
     """Reuses collection search endpoint."""
     try:

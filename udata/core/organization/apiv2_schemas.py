@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, validate
 
 from udata.core.badges.api import BadgeSchema
-from udata.api.fields import MarshURLFor, paginate_schema, MarshImageField
+from udata.api.fields import MarshURLFor, MarshImageField, PaginationSchema
 from .models import ORG_ROLES, DEFAULT_ROLE, LOGO_SIZES
 
 BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
@@ -44,4 +44,5 @@ class OrganizationSchema(Schema):
     page = MarshURLFor(endpoint='organizations.show', mapper=lambda o: {'org': o}, fallback_endpoint='api.organization', dump_only=True)
 
 
-org_pagination_schema = paginate_schema(OrganizationSchema)
+class OrganizationPaginationSchema(PaginationSchema):
+    data = fields.List(fields.Nested(OrganizationSchema), attribute="objects")

@@ -5,7 +5,7 @@ from flask_apispec import use_kwargs, marshal_with
 from udata import search
 from udata.api import apiv2_blueprint as apiv2
 from .models import Organization
-from .apiv2_schemas import org_pagination_schema
+from .apiv2_schemas import OrganizationPaginationSchema
 from .search import OrganizationSearch
 
 
@@ -17,7 +17,7 @@ DEFAULT_SORTING = '-created_at'
 
 @apiv2.route('/organizations/search/', endpoint='organization_search', methods=['GET'])
 @use_kwargs(search_arguments, location="query")
-@marshal_with(org_pagination_schema())
+@marshal_with(OrganizationPaginationSchema())
 def get_organization_search(**kwargs):
     """Organizations collection search endpoint."""
     try:

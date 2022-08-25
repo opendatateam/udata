@@ -6,7 +6,7 @@ from udata.app import csrf
 from udata.api import apiv2_blueprint as apiv2, UDataApiV2
 from udata.api.parsers import ModelApiV2Parser
 from .models import User
-from .apiv2_schemas import user_pagination_schema, UserSchema
+from .apiv2_schemas import UserSchema, UserPaginationSchema
 from .forms import UserProfileAdminForm
 
 
@@ -33,7 +33,7 @@ user_parser_args = UserApiParser.as_request_parser()
 
 @apiv2.route('/users/', endpoint='list_users', methods=['GET'])
 @use_kwargs(user_parser_args, location="query")
-@marshal_with(user_pagination_schema())
+@marshal_with(UserPaginationSchema())
 def get_users_list(**kwargs):
     '''List all users'''
     users = User.objects(deleted=None)

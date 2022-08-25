@@ -1,7 +1,7 @@
 from flask import url_for
 from marshmallow import Schema, fields, validate
 
-from udata.api.fields import MarshURLFor, paginate_schema
+from udata.api.fields import MarshURLFor, PaginationSchema
 from udata.core.badges.api import BadgeSchema
 from udata.core.organization.apiv2_schemas import OrganizationRefSchema
 from udata.core.user.apiv2_schemas import UserRefSchema
@@ -125,4 +125,5 @@ class SpecificResourceSchema(Schema):
     dataset_id = fields.Str()
 
 
-dataset_pagination_schema = paginate_schema(DatasetSchema)
+class DatasetPaginationSchema(PaginationSchema):
+    data = fields.List(fields.Nested(DatasetSchema), attribute="objects")

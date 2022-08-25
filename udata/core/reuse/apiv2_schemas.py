@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, validate
-from udata.api.fields import MarshURLFor, paginate_schema, MarshImageField
+from udata.api.fields import MarshURLFor, MarshImageField, PaginationSchema
 from udata.core.badges.api import BadgeSchema
 from udata.core.dataset.apiv2_schemas import DatasetRefSchema
 from udata.core.user.apiv2_schemas import UserRefSchema
@@ -42,4 +42,5 @@ class ReuseSchema(Schema):
     page = MarshURLFor(endpoint='reuses.show', mapper=lambda o: {'reuse': o}, fallback_endpoint='api.reuse', dump_only=True)
 
 
-reuse_pagination_schema = paginate_schema(ReuseSchema)
+class ReusePaginationSchema(PaginationSchema):
+    data = fields.List(fields.Nested(ReuseSchema), attribute="objects")

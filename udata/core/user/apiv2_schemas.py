@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields
-from udata.api.fields import MarshURLFor, paginate_schema, MarshImageField
+from udata.api.fields import MarshURLFor, MarshImageField, PaginationSchema
 from udata.auth.helpers import current_user_is_admin_or_self
 
 from .models import AVATAR_SIZES
@@ -38,4 +38,5 @@ class UserSchema(Schema):
     organizations = fields.Nested(OrganizationRefSchema, many=True, dump_only=True)
 
 
-user_pagination_schema = paginate_schema(UserSchema)
+class UserPaginationSchema(PaginationSchema):
+    data = fields.List(fields.Nested(UserSchema), attribute="objects")

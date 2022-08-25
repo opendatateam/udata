@@ -12,7 +12,7 @@ from udata.api.parsers import ModelApiV2Parser
 from udata.utils import get_by
 from .models import Dataset, CommunityResource
 from .permissions import DatasetEditPermission
-from .apiv2_schemas import DatasetSchema, ResourcePaginationSchema, SpecificResourceSchema, dataset_pagination_schema
+from .apiv2_schemas import DatasetSchema, ResourcePaginationSchema, SpecificResourceSchema, DatasetPaginationSchema
 from .search import DatasetSearch
 
 
@@ -33,7 +33,7 @@ resources_parser_args.update({
 
 @apiv2.route('/datasets/search/', endpoint='dataset_search', methods=['GET'])
 @use_kwargs(search_arguments, location="query")
-@marshal_with(dataset_pagination_schema())
+@marshal_with(DatasetPaginationSchema())
 def get_dataset_search(**kwargs):
     """Datasets search endpoint."""
     try:
