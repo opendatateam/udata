@@ -413,7 +413,7 @@ class RdfToDatasetTest:
         assert resource.checksum.type == 'sha1'
         assert resource.checksum.value == sha1
         assert resource.harvest.created_at.date() == issued.date()
-        assert resource.harvest.last_modified.date() == modified.date()
+        assert resource.harvest.modified_at.date() == modified.date()
         assert resource.format == 'csv'
 
     def test_download_url_over_access_url(self):

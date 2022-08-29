@@ -131,7 +131,7 @@ def get_json_ld_extra(key, value):
 class HarvestDatasetMetadata(DynamicEmbeddedDocument):
     backend = db.StringField()
     created_at = db.DateTimeField()
-    last_modified = db.DateTimeField()
+    modified_at = db.DateTimeField()
     source_id = db.StringField()
     remote_id = db.StringField()
     domain = db.StringField()
@@ -145,7 +145,7 @@ class HarvestDatasetMetadata(DynamicEmbeddedDocument):
 
 class HarvestResourceMetadata(DynamicEmbeddedDocument):
     created_at = db.DateTimeField()
-    last_modified = db.DateTimeField()
+    modified_at = db.DateTimeField()
     dct_identifier = db.StringField()
     uri = db.URLField()
 
@@ -366,7 +366,7 @@ class ResourceMixin(object):
 
     @property
     def modified_public(self):
-        return (self.harvest.modified if self.harvest else False) or self.modified
+        return (self.harvest.modified_at if self.harvest else False) or self.modified
 
     # @property
     # def published(self):
@@ -602,8 +602,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         return (self.harvest.created_at if self.harvest else False) or self.created_at
 
     @property
-    def last_modified_public(self):
-        return (self.harvest.last_modified if self.harvest else False) or self.last_modified
+    def modified_at_public(self):
+        return (self.harvest.modified_at if self.harvest else False) or self.last_modified
 
     @property
     def last_update(self):

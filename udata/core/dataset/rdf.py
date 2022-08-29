@@ -402,14 +402,14 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
     created_at = dct_issued_from_rdf(distrib)
-    last_modified = dct_modified_from_rdf(distrib)
+    modified_at = dct_modified_from_rdf(distrib)
 
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
     if created_at:
         resource.harvest.created_at = created_at
-    if last_modified:
-        resource.harvest.last_modified = last_modified
+    if modified_at:
+        resource.harvest.modified_at = modified_at
     if identifier:
         resource.harvest.dct_identifier = identifier
     if uri:
@@ -463,7 +463,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
     landing_page = landing_page_from_rdf(d)
     created_at = dct_issued_from_rdf(d)
-    last_modified = dct_modified_from_rdf(d)
+    modified_at = dct_modified_from_rdf(d)
 
     if not dataset.harvest:
         dataset.harvest = HarvestDatasetMetadata()
@@ -475,7 +475,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         dataset.harvest.remote_url = landing_page
     if created_at:
         dataset.harvest.created_at = created_at
-    if last_modified:
-        dataset.harvest.last_modified = last_modified
+    if modified_at:
+        dataset.harvest.modified_at = modified_at
 
     return dataset

@@ -233,7 +233,7 @@ class DcatBackendTest:
         assert dataset.license.id == 'lov2'
         assert dataset.harvest.remote_url == 'http://data.test.org/datasets/3'
         assert_equal_dates(dataset.harvest.created_at, datetime(2016, 12, 14))
-        assert_equal_dates(dataset.harvest.last_modified, datetime(2016, 12, 14))
+        assert_equal_dates(dataset.harvest.modified_at, datetime(2016, 12, 14))
         assert dataset.frequency == 'daily'
         assert dataset.description == 'Dataset 3 description'
 
