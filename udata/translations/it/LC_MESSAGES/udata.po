@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-08-24 15:29\n"
+"PO-Revision-Date: 2022-08-31 14:06\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -645,119 +645,119 @@ msgstr "Markdown"
 
 #: udata/core/post/models.py:17
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: udata/core/post/models.py:60
 msgid "post"
-msgstr ""
+msgstr "articolo"
 
 #: udata/core/reuse/activities.py:22
 msgid "created a reuse"
-msgstr ""
+msgstr "ha creato un riuso"
 
 #: udata/core/reuse/activities.py:28
 msgid "updated a reuse"
-msgstr ""
+msgstr "ha aggiornato un riuso"
 
 #: udata/core/reuse/activities.py:35
 msgid "deleted a reuse"
-msgstr ""
+msgstr "ha eliminato un riuso"
 
 #: udata/core/reuse/forms.py:13
 msgid "This URL is already registered"
-msgstr ""
+msgstr "Questo URL è già registrato"
 
 #: udata/core/reuse/forms.py:22
 msgid "The details about the reuse (build process, specifics, self-critics...)."
-msgstr ""
+msgstr "I dettagli sul riuso (processo di costruzione, specifiche, autocritica...)."
 
 #: udata/core/reuse/forms.py:30
 msgid "Used datasets"
-msgstr ""
+msgstr "Dataset utilizzati"
 
 #: udata/core/reuse/forms.py:35
 msgid "Topic"
-msgstr ""
+msgstr "Argomento"
 
 #: udata/core/reuse/models.py:17
 msgid "Application"
-msgstr ""
+msgstr "Applicazione"
 
 #: udata/core/reuse/models.py:18
 msgid "Idea"
-msgstr ""
+msgstr "Idea"
 
 #: udata/core/reuse/models.py:19
 msgid "News Article"
-msgstr ""
+msgstr "Articolo di notizie"
 
 #: udata/core/reuse/models.py:20
 msgid "Paper"
-msgstr ""
+msgstr "Paper"
 
 #: udata/core/reuse/models.py:21
 msgid "Post"
-msgstr ""
+msgstr "Post"
 
 #: udata/core/reuse/models.py:22
 msgid "Visualization"
-msgstr ""
+msgstr "Visualizzazione"
 
 #: udata/core/reuse/models.py:23
 msgid "Connected device"
-msgstr ""
+msgstr "Dispositivo connesso"
 
 #: udata/core/reuse/models.py:27
 msgid "Health"
-msgstr ""
+msgstr "Salute"
 
 #: udata/core/reuse/models.py:28
 msgid "Transport and mobility"
-msgstr ""
+msgstr "Trasporti e mobilità"
 
 #: udata/core/reuse/models.py:29
 msgid "Housing and development"
-msgstr ""
+msgstr "Casa e pianificazione territoriale"
 
 #: udata/core/reuse/models.py:30
 msgid "Food and agriculture"
-msgstr ""
+msgstr "Alimentazione e agricoltura"
 
 #: udata/core/reuse/models.py:31
 msgid "Culture and recreation"
-msgstr ""
+msgstr "Cultura e divertimento"
 
 #: udata/core/reuse/models.py:32
 msgid "Economy and business"
-msgstr ""
+msgstr "Economia e affari"
 
 #: udata/core/reuse/models.py:33
 msgid "Environment and energy"
-msgstr ""
+msgstr "Ambiente ed energia"
 
 #: udata/core/reuse/models.py:34
 msgid "Work and training"
-msgstr ""
+msgstr "Lavoro e formazione"
 
 #: udata/core/reuse/models.py:35
 msgid "Politics and public life"
-msgstr ""
+msgstr "Politica e vita pubblica"
 
 #: udata/core/reuse/models.py:36
 msgid "Safety and security"
-msgstr ""
+msgstr "Sicurezza"
 
 #: udata/core/reuse/models.py:37
 msgid "Education and research"
-msgstr ""
+msgstr "Istruzione e ricerca"
 
 #: udata/core/reuse/models.py:38
 msgid "Society and demography"
-msgstr ""
+msgstr "Società e demografia"
 
 #: udata/core/reuse/models.py:39
 msgid "Law and justice"
-msgstr ""
+msgstr "Diritto e giustizia"
 
 #: udata/core/reuse/models.py:40
 msgid "Open data tools"
