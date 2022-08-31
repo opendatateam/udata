@@ -9,6 +9,7 @@
   - api_fields are replaced by marshmallow schemas
   - Request validation and request parsers are now webargs dicts
   - Api documentation relies on apispec
+- Fix doc name duplicate on rdf endpoints [#2763](https://github.com/opendatateam/udata/pull/2763)
 
 ## 4.1.1 (2022-07-08)
 
