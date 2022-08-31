@@ -12,7 +12,7 @@ from udata.models import Dataset, PeriodicTask
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
-from udata.tests.helpers import assert_emit
+from udata.tests.helpers import assert_emit, assert_equal_dates
 from udata.utils import faker, Paginable
 
 from .factories import (
@@ -394,6 +394,7 @@ class HarvestActionsTest:
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
         assert 'harvest:archived' in dataset_to_archive.extras
         assert dataset_to_archive.extras['harvest:archived'] == 'harvester-deleted'
+        assert_equal_dates(dataset_to_archive.archived, now)
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):
