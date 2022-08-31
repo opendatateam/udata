@@ -1,6 +1,7 @@
 from flask import url_for
 from marshmallow import Schema, fields, validate
 
+from udata.api import BaseReferenceSchema
 from udata.api.fields import MarshURLFor, PaginationSchema
 from udata.core.badges.api import BadgeSchema
 from udata.core.organization.apiv2_schemas import OrganizationRefSchema
@@ -42,8 +43,8 @@ class ResourceSchema(Schema):
 
 
 class TemporalCoverageSchema(Schema):
-    start = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True)
-    end = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True)
+    start = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
+    end = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
 
 
 class GeoJsonSchema(Schema):
@@ -57,7 +58,7 @@ class SpatialCoverageSchema(Schema):
     granularity = fields.Str(dump_default='other')
 
 
-class DatasetRefSchema(Schema):
+class DatasetRefSchema(BaseReferenceSchema):
     title = fields.Str(required=True)
     uri = MarshURLFor(endpoint='api.dataset', mapper=lambda o: {'dataset': o}, dump_only=True)
     page = MarshURLFor(endpoint='datasets.show', mapper=lambda o: {'dataset': o}, fallback_endpoint='api.dataset', dump_only=True)
@@ -72,10 +73,10 @@ class DatasetSchema(Schema):
     acronym = fields.Str()
     slug = fields.Str(required=True, dump_only=True)
     description = fields.Str(required=True)
-    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True)
-    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True)
-    deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
-    archived = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
+    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
+    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
+    deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00')
+    archived = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00')
     featured = fields.Boolean()
     private = fields.Boolean()
     tags = fields.List(fields.Str)
@@ -93,7 +94,7 @@ class DatasetSchema(Schema):
         'total': len(obj.community_resources)
         })
     frequency = fields.Str(required=True, dump_default=DEFAULT_FREQUENCY, validate=validate.OneOf(UPDATE_FREQUENCIES))
-    frequency_date = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00')
+    frequency_date = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00')
     extras = fields.Dict()
     metrics = fields.Function(lambda obj: obj.get_metrics())
     organization = fields.Nested(OrganizationRefSchema)
@@ -102,7 +103,7 @@ class DatasetSchema(Schema):
     spatial = fields.Nested(SpatialCoverageSchema)
     license = fields.Method("dataset_license")
     quality = fields.Dict(dump_only=True)
-    last_update = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True)
+    last_update = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
 
     def dataset_license(self, obj):
         if obj.license:
@@ -120,7 +121,7 @@ class ResourcePaginationSchema(Schema):
     previous_page = fields.Str()
 
 
-class SpecificResourceSchema(Schema):
+class ResourceWithDatasetIdSchema(Schema):
     resource = fields.Nested(ResourceSchema)
     dataset_id = fields.Str()
 

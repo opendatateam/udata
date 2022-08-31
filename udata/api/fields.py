@@ -6,7 +6,7 @@ from flask import request, url_for
 from flask_restplus.fields import *  # noqa
 from marshmallow import Schema, fields as ma_fields
 
-from udata.utils import multi_to_dict
+from udata.utils import multi_to_dict, camel_to_dash
 from udata.uris import endpoint_for
 
 log = logging.getLogger(__name__)
@@ -147,6 +147,20 @@ class MarshPreviousPageUrl(ma_fields.Field):
         args.update(request.view_args)
         args['page'] = obj.page - 1
         return url_for(request.endpoint, _external=True, **args)
+
+
+class MarshClassName(ma_fields.Field):
+    _CHECK_ATTRIBUTE = False
+
+    def __init__(self, dash=False, **kwargs):
+        self.dash = dash
+        ma_fields.Field.__init__(self, **kwargs)
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        classname = obj.__class__.__name__
+        if classname == 'dict':
+            return 'object'
+        return camel_to_dash(classname) if self.dash else classname
 
 
 class PaginationSchema(Schema):

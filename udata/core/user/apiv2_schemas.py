@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields
+from udata.api import BaseReferenceSchema
 from udata.api.fields import MarshURLFor, MarshImageField, PaginationSchema
 from udata.auth.helpers import current_user_is_admin_or_self
 
@@ -7,7 +8,7 @@ from .models import AVATAR_SIZES
 BIGGEST_AVATAR_SIZE = AVATAR_SIZES[0]
 
 
-class UserRefSchema(Schema):
+class UserRefSchema(BaseReferenceSchema):
     first_name = fields.Str(dump_only=True)
     last_name = fields.Str(dump_only=True)
     slug = fields.Str(required=True)
@@ -34,8 +35,9 @@ class UserSchema(Schema):
     metrics = fields.Function(lambda obj: obj.get_metrics(), dump_only=True)
     active = fields.Boolean()
     roles = fields.List(fields.Str())
-    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', dump_only=True)
+    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', dump_only=True)
     organizations = fields.Nested(OrganizationRefSchema, many=True, dump_only=True)
+    website = fields.Str()
 
 
 class UserPaginationSchema(PaginationSchema):

@@ -12,7 +12,7 @@ from udata.api.parsers import ModelApiV2Parser
 from udata.utils import get_by
 from .models import Dataset, CommunityResource
 from .permissions import DatasetEditPermission
-from .apiv2_schemas import DatasetSchema, ResourcePaginationSchema, SpecificResourceSchema, DatasetPaginationSchema
+from .apiv2_schemas import DatasetSchema, ResourcePaginationSchema, ResourceWithDatasetIdSchema, DatasetPaginationSchema
 from .search import DatasetSearch
 
 
@@ -91,7 +91,7 @@ def get_resources_paginated(dataset, **kwargs):
 
 
 @apiv2.route('/datasets/resources/<uuid:rid>/', endpoint='resource', methods=['GET'])
-@marshal_with(SpecificResourceSchema())
+@marshal_with(ResourceWithDatasetIdSchema())
 def get_specific_resource_by_rid(rid):
     """Get a specific resource given its identifier."""
     dataset = Dataset.objects(resources__id=rid).first()

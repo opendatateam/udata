@@ -16,6 +16,10 @@ from uuid import uuid4, UUID
 from xml.sax.saxutils import escape
 
 
+FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
+ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
+
+
 def get_by(lst, field, value):
     '''Find an object in a list given a field value'''
     for row in lst:
@@ -288,3 +292,15 @@ def safe_unicode(string):
     if string is None:
         return None
     return string.decode('utf8') if isinstance(string, bytes) else str(string)
+
+
+def camel_to_dash(value):
+    '''
+    Transform a CamelCase string into a low_dashed one
+
+    :param str value: a CamelCase string to transform
+    :return: the low_dashed string
+    :rtype: str
+    '''
+    first_cap = FIRST_CAP_RE.sub(r'\1_\2', value)
+    return ALL_CAP_RE.sub(r'\1_\2', first_cap).lower()

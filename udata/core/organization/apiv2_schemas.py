@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields, validate
 
+from udata.api import BaseReferenceSchema
 from udata.core.badges.api import BadgeSchema
 from udata.api.fields import MarshURLFor, MarshImageField, PaginationSchema
 from .models import ORG_ROLES, DEFAULT_ROLE, LOGO_SIZES
@@ -7,9 +8,10 @@ from .models import ORG_ROLES, DEFAULT_ROLE, LOGO_SIZES
 BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
 
 
-class OrganizationRefSchema(Schema):
-    name = fields.Str(required=True)
-    acronym = fields.Str()
+class OrganizationRefSchema(BaseReferenceSchema):
+    name = fields.Str(required=True, dump_only=True)
+    slug = fields.Str(required=True, dump_only=True)
+    acronym = fields.Str(dump_only=True)
     logo = MarshImageField(dump_only=True)
     logo_thumbnail = MarshImageField(dump_only=True, attribute='logo', size=BIGGEST_LOGO_SIZE)
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
@@ -32,9 +34,9 @@ class OrganizationSchema(Schema):
     url = fields.Url()
     slug = fields.Str(required=True, dump_only=True)
     description = fields.Str(required=True)
-    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True, dump_only=True)
-    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True, dump_only=True)
-    deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', dump_only=True)
+    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True, dump_only=True)
+    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True, dump_only=True)
+    deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', dump_only=True)
     metrics = fields.Function(lambda obj: obj.get_metrics())
     logo = MarshImageField(dump_only=True)
     logo_thumbnail = MarshImageField(dump_only=True, attribute='logo', size=BIGGEST_LOGO_SIZE)

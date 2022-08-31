@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields, validate
+from udata.api import BaseReferenceSchema
 from udata.api.fields import MarshURLFor, MarshImageField, PaginationSchema
 from udata.core.badges.api import BadgeSchema
 from udata.core.dataset.apiv2_schemas import DatasetRefSchema
@@ -9,7 +10,7 @@ from .models import REUSE_TOPICS, REUSE_TYPES, IMAGE_SIZES
 BIGGEST_IMAGE_SIZE = IMAGE_SIZES[0]
 
 
-class ReuseRefSchema(Schema):
+class ReuseRefSchema(BaseReferenceSchema):
     title = fields.Str(required=True)
     image = MarshImageField(dump_only=True)
     image_thumbnail = MarshImageField(dump_only=True, attribute='image', size=BIGGEST_IMAGE_SIZE)
@@ -29,9 +30,9 @@ class ReuseSchema(Schema):
     private = fields.Boolean()
     tags = fields.List(fields.Str)
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
-    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True, dump_only=True)
-    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', required=True, dump_only=True)
-    deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+03:00', dump_only=True)
+    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True, dump_only=True)
+    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True, dump_only=True)
+    deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', dump_only=True)
     metrics = fields.Function(lambda obj: obj.get_metrics())
     owner = fields.Nested(UserRefSchema, dump_only=True)
     organization = fields.Nested(OrganizationRefSchema, dump_only=True)

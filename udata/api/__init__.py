@@ -12,6 +12,7 @@ from flask import (
 from flask_fs import UnauthorizedFileType
 from flask_restplus import Api, Resource
 from flask_cors import CORS
+from marshmallow import Schema, fields as ma_fields
 
 from udata import tracking, entrypoints
 from udata.app import csrf
@@ -322,11 +323,11 @@ class UDataApiV2:
         '''Validate a form from the request and handle errors'''
         if 'application/json' not in request.headers.get('Content-Type'):
             errors = {'Content-Type': 'expecting application/json'}
-            abort(400, errors=errors)
+            abort(400, errors)
         form = form_cls.from_json(request.json, obj=obj, instance=obj,
                                   meta={'csrf': False})
         if not form.validate():
-            abort(400, errors=form.errors)
+            abort(400, form.errors)
         return form
 
 
@@ -354,6 +355,11 @@ def authentifyV2():
             abort(401, 'Inactive user')
     else:
         oauth2.check_credentials()
+
+
+class BaseReferenceSchema(Schema):
+    id = ma_fields.Str(required=True, dump_only=True)
+    class_name = fields.MarshClassName(required=True, dump_only=True, data_key="class")
 
 
 #######################################
