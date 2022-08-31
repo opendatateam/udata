@@ -12,6 +12,7 @@ from voluptuous import MultipleInvalid, RequiredFieldInvalid
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
+from ..actions import archive_harvested_dataset
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
 from ..models import HarvestItem, HarvestJob, HarvestError
 from ..signals import before_harvest_job, after_harvest_job
@@ -250,7 +251,7 @@ class BaseBackend(object):
 
         for dataset in local_items_not_on_remote:
             if not dataset.extras.get('harvest:archived_at'):
-                dataset.archive(reason='not-on-remote', save=not self.dryrun)
+                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
             item = self.add_item(dataset.extras['harvest:remote_id'])
