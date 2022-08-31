@@ -251,7 +251,7 @@ class BaseBackend(object):
 
         for dataset in local_items_not_on_remote:
             if not dataset.extras.get('harvest:archived_at'):
-                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=dryrun)
+                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
             item = self.add_item(dataset.extras['harvest:remote_id'])
