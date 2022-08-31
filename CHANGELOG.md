@@ -6,9 +6,9 @@
 - Replace mongo legacy image in CI [#2754](https://github.com/opendatateam/udata/pull/2754)
 - Fixes test `test_suggest_datasets_api` by modifying condition [#2759](https://github.com/opendatateam/udata/pull/2759)
 - APIv2 does no longer uses `flask-restplus` but `flask_apispec` [#2755](https://github.com/opendatateam/udata/pull/2755):
-  - Api_fields are replaced by marshmallow schemas
-  - Request validation and request parsers are now Webargs dicts
-  - Api documentation relies on Apispec
+  - api_fields are replaced by marshmallow schemas
+  - Request validation and request parsers are now webargs dicts
+  - Api documentation relies on apispec
 
 ## 4.1.1 (2022-07-08)
 
