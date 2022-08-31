@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-08-31 14:06\n"
+"PO-Revision-Date: 2022-08-31 15:20\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -761,39 +761,39 @@ msgstr "Diritto e giustizia"
 
 #: udata/core/reuse/models.py:40
 msgid "Open data tools"
-msgstr ""
+msgstr "Strumenti open data"
 
 #: udata/core/reuse/models.py:41
 msgid "Others"
-msgstr ""
+msgstr "Altri"
 
 #: udata/core/reuse/models.py:120
 msgid "reuse"
-msgstr ""
+msgstr "riuso"
 
 #: udata/core/reuse/tasks.py:45
 msgid "New reuse"
-msgstr ""
+msgstr "Nuovo riuso"
 
 #: udata/core/site/forms.py:13
 msgid "Some SEO keywords"
-msgstr ""
+msgstr "Alcune parole chiave SEO"
 
 #: udata/core/site/forms.py:15
 msgid "Feed size"
-msgstr ""
+msgstr "Dimensione del feed"
 
 #: udata/core/site/forms.py:15
 msgid "Number of elements in feeds"
-msgstr ""
+msgstr "Numero di elementi nei feed"
 
 #: udata/core/spatial/forms.py:48
 msgid "Unknown geoid(s): {identifiers}"
-msgstr ""
+msgstr "Identificatori GeoID sconosciuti: {identifiers}"
 
 #: udata/core/spatial/forms.py:67
 msgid "Not a valid GeoJSON"
-msgstr ""
+msgstr "GeoJSON non valido"
 
 #: udata/core/spatial/forms.py:84
 msgid "A list of covered territories"
