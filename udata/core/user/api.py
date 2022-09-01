@@ -365,6 +365,7 @@ class SuggestUsersAPI(API):
             for user in users.order_by(DEFAULT_SORTING).limit(args['size'])
         ]
 
+
 @ns.route('/roles/', endpoint='user_roles')
 class UserRolesAPI(API):
     @api.doc('user_roles')
