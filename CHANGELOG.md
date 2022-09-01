@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 4.1.2 (2022-09-01)
 
 - Clean up event code [#2751](https://github.com/opendatateam/udata/pull/2751)
 - Replace mongo legacy image in CI [#2754](https://github.com/opendatateam/udata/pull/2754)
