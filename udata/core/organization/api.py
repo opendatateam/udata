@@ -164,7 +164,7 @@ class OrganizationRdfAPI(API):
 @api.response(404, 'Organization not found')
 @api.response(410, 'Organization has been deleted')
 class OrganizationRdfFormatAPI(API):
-    @api.doc('rdf_organization')
+    @api.doc('rdf_organization_format')
     def get(self, org, format):
         if org.deleted:
             api.abort(410)

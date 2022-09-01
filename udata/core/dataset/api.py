@@ -265,7 +265,7 @@ class DatasetRdfAPI(API):
 @api.response(404, 'Dataset not found')
 @api.response(410, 'Dataset has been deleted')
 class DatasetRdfFormatAPI(API):
-    @api.doc('rdf_dataset')
+    @api.doc('rdf_dataset_format')
     def get(self, dataset, format):
         if not DatasetEditPermission(dataset).can():
             if dataset.private:
