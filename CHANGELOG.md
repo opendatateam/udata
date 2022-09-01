@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 4.1.2 (2022-09-01)
 
 - Clean up event code [#2751](https://github.com/opendatateam/udata/pull/2751)
