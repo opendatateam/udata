@@ -265,7 +265,7 @@ class DatasetRdfAPI(API):
 @api.response(404, 'Dataset not found')
 @api.response(410, 'Dataset has been deleted')
 class DatasetRdfFormatAPI(API):
-    @api.doc('rdf_dataset')
+    @api.doc('rdf_dataset_format')
     def get(self, dataset, format):
         if not DatasetEditPermission(dataset).can():
             if dataset.private:
@@ -615,7 +615,7 @@ class DatasetSuggestAPI(API):
                 'title': dataset.title,
                 'acronym': dataset.acronym,
                 'slug': dataset.slug,
-                'image_url': dataset.image_url,
+                'image_url': dataset.organization.logo if dataset.organization else dataset.owner.avatar if dataset.owner else None
             }
             for dataset in datasets.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
