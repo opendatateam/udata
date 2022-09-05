@@ -164,7 +164,7 @@ class OrganizationRdfAPI(API):
 @api.response(404, 'Organization not found')
 @api.response(410, 'Organization has been deleted')
 class OrganizationRdfFormatAPI(API):
-    @api.doc('rdf_organization')
+    @api.doc('rdf_organization_format')
     def get(self, org, format):
         if org.deleted:
             api.abort(410)
@@ -395,7 +395,7 @@ class OrganizationSuggestAPI(API):
                 'name': org.name,
                 'acronym': org.acronym,
                 'slug': org.slug,
-                'image_url': org.image_url,
+                'image_url': org.logo,
             }
             for org in orgs.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
