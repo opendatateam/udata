@@ -250,7 +250,7 @@ class ReusesSuggestAPI(API):
                 'id': reuse.id,
                 'title': reuse.title,
                 'slug': reuse.slug,
-                'image_url': reuse.image_url,
+                'image_url': reuse.image,
             }
             for reuse in reuses.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
