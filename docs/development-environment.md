@@ -8,23 +8,7 @@ See [getting-started](getting-started.md) for installation instructions.
 
 ### Dependency management
 
-We're using [pip-tools](https://github.com/jazzband/pip-tools/#pip-tools--pip-compile--pip-sync) with [a pre-commit hook](https://github.com/jazzband/pip-tools/#version-control-integration) to help us manage our requirements.
-
-**This is not mandatory unless you're actively contributing to the project.**
-
-```shell
-$ pre-commit install
-```
-
-`pip-tools` uses the `.in` files in `requirements/` as input to generate the `.pip` files we rely on to install `udata`.
-
-If you need to add or modify a dependency, do it in the `.in` files _and commit them_. The pre-commit hook will compile the `.pip` files and warn you.
-
-You can also generate the `.pip` files manually from the `.in` files without commiting them beforehand. For example, if you modified `install.in`:
-
-```shell
-pip-compile requirements/install.in --output-file requirements/install.pip
-```
+We're using [poetry](https://github.com/python-poetry/poetry) to help us manage our requirements.
 
 ### Optmizing performances with Cython
 
