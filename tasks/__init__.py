@@ -171,7 +171,7 @@ def i18n(ctx, update=False):
 
     if update:
         with ctx.cd(ROOT):
-            ctx.run(f"pybabel update --domain{UPDATE_I18N_DOMAIN} --input-file={UPDATE_I18N_INPUT_FILE} --output-dir={UPDATE_I18N_OUTPUT_FILE} --previous")
+            ctx.run(f"pybabel update --domain={UPDATE_I18N_DOMAIN} --input-file={UPDATE_I18N_INPUT_FILE} --output-dir={UPDATE_I18N_OUTPUT_FILE} --previous")
 
     info('Extract JavaScript strings')
     keys = set()
