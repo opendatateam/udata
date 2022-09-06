@@ -8,7 +8,7 @@ tag_format = v{version}
 push = true
 clean = poetry run inv clean
 tests = poetry run inv test
-publish = poetry publish --build -vv -n
+publish = poetry run inv dist
 files =
     README.md
 

@@ -153,7 +153,7 @@ def i18n(ctx, update=False):
 
     info('Extract Python strings')
     with ctx.cd(ROOT):
-        ctx.run(f"pybabel extract . --mapping-file={EXTRACT_I18N_MAPPING_FILE} --output-file={EXTRACT_I18N_OUTPUT_FILE} --add-comments={EXTRACT_I18N_ADD_COMMENTS} --width={EXTRACT_I18N_WIDTH}")
+        ctx.run(f"pybabel extract --keywords=\"{EXTRACT_I18N_KEYWORDS}\" --mapping-file={EXTRACT_I18N_MAPPING_FILE} --output-file={EXTRACT_I18N_OUTPUT_FILE} --add-comments={EXTRACT_I18N_ADD_COMMENTS} --width={EXTRACT_I18N_WIDTH} .")
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
