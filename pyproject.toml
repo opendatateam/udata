@@ -102,7 +102,7 @@ coverage = "4.5.4"
 pytest-cov = "2.6.1"
 
 [tool.poetry.scripts]
-udata = 'udata.commands:cli'
+udata = "udata.commands:cli"
 
 [tool.poetry.plugins."udata.harvesters"]
 "dcat" = "udata.harvest.backends.dcat:DcatBackend"
