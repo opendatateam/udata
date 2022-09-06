@@ -90,7 +90,7 @@ jobs:
 
   dist:
     docker:
-      - image: cimg/python:3.7.13
+      - image: cimg/python:3.7
     environment:
        BASH_ENV: /root/.bashrc
     steps:
