@@ -57,7 +57,7 @@ def update(ctx, migrate=False):
     header(msg)
     info('Updating Python dependencies')
     with ctx.cd(ROOT):
-        ctx.run('pi3 install -e .')
+        ctx.run('pip install -e .')
         ctx.run('pip install -r requirements/develop.pip')
         info('Updating JavaScript dependencies')
         ctx.run('npm install')

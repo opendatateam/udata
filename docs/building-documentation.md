@@ -1,9 +1,10 @@
 # Building the documentation
 
-So meta. First of, activate your virtualenv and install dedicated dependencies:
+So meta. First of, install dedicated dependencies and activate your virtualenv:
 
 ```shell
-$ pip install -r requirements/doc.pip
+$ poetry install
+$ poetry shell
 ```
 
 Then you should be able to build and serve the documentation using the dedicated invoke task:

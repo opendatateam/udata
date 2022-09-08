@@ -10,18 +10,6 @@ See [getting-started](getting-started.md) for installation instructions.
 
 We're using [poetry](https://github.com/python-poetry/poetry) to help us manage our requirements.
 
-### Optmizing performances with Cython
-
-Some dependencies have an optional compilation support for Cython
-resulting in better performances (mostly XML harvesting).
-To enable it, you need to install Cython before all other dependencies:
-
-```shell
-$ pip install Cython
-$ pip install -r requirements/develop.pip
-$ pip install -e .
-```
-
 ### Macos Big Sur caveat
 
 If installing `cryptography` fails:
@@ -30,13 +18,13 @@ If installing `cryptography` fails:
 brew install openssl
 export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
 export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
-pip install -r requirements/develop.pip
+poetry install
 ```
 
 If installing `Pillow` fails:
 ```
 brew install libjpeg
-pip install -r requirements/develop.pip
+poetry install
 ```
 
 You should be to start using and contributing to udata.
