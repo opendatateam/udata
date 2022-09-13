@@ -7,10 +7,12 @@ from webargs import fields
 
 
 from udata import search
-from udata.api import apiv2_blueprint as apiv2
+from udata.app import csrf
+from udata.api import apiv2_blueprint as apiv2, UDataApiV2
 from udata.api.parsers import ModelApiV2Parser
 from udata.utils import get_by
-from .models import Dataset, CommunityResource
+from .forms import DatasetForm
+from .models import Dataset, CommunityResource, License
 from .permissions import DatasetEditPermission
 from .apiv2_schemas import DatasetSchema, ResourcePaginationSchema, ResourceWithDatasetIdSchema, DatasetPaginationSchema
 from .search import DatasetSearch
@@ -22,13 +24,99 @@ DEFAULT_SORTING = '-created_at'
 log = logging.getLogger(__name__)
 
 
+class DatasetApiParser(ModelApiV2Parser):
+    sorts = {
+        'title': 'title',
+        'created': 'created_at',
+        'last_modified': 'last_modified',
+        'reuses': 'metrics.reuses',
+        'followers': 'metrics.followers',
+        'views': 'metrics.views',
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.parser.update({
+            'tag': fields.Str(),
+            'license': fields.Str(),
+            'featured': fields.Bool(),
+            'geozone': fields.Str(),
+            'granularity': fields.Str(),
+            'temporal_coverage': fields.Str(),
+            'organization': fields.Str(),
+            'owner': fields.Str(),
+            'format': fields.Str(),
+            'schema': fields.Str(),
+            'schema_version': fields.Str(),
+        })
+
+    @staticmethod
+    def parse_filters(datasets, args):
+        if args.get('q'):
+            # Following code splits the 'q' argument by spaces to surround
+            # every word in it with quotes before rebuild it.
+            # This allows the search_text method to tokenise with an AND
+            # between tokens whereas an OR is used without it.
+            phrase_query = ' '.join([f'"{elem}"' for elem in args['q'].split(' ')])
+            datasets = datasets.search_text(phrase_query)
+        if args.get('tag'):
+            datasets = datasets.filter(tags=args['tag'])
+        if args.get('license'):
+            datasets = datasets.filter(license__in=License.objects.filter(id=args['license']))
+        if args.get('geozone'):
+            datasets = datasets.filter(spatial__zones=args['geozone'])
+        if args.get('granularity'):
+            datasets = datasets.filter(spatial__granularity=args['granularity'])
+        if args.get('temporal_coverage'):
+            datasets = datasets.filter(temporal_coverage__start__gte=args['temporal_coverage'][:9], temporal_coverage__start__lte=args['temporal_coverage'][11:])
+        if args.get('featured'):
+            datasets = datasets.filter(featured=args['featured'])
+        if args.get('organization'):
+            datasets = datasets.filter(organization=args['organization'])
+        if args.get('owner'):
+            datasets = datasets.filter(owner=args['owner'])
+        if args.get('format'):
+            datasets = datasets.filter(resources__format=args['format'])
+        if args.get('schema'):
+            datasets = datasets.filter(resources__schema__name=args['schema'])
+        if args.get('schema_version'):
+            datasets = datasets.filter(resources__schema__version=args['schema_version'])
+        return datasets
+
+
+dataset_parser = DatasetApiParser()
+dataset_parser_args = dataset_parser.parser
+
 search_arguments = DatasetSearch.as_request_parser()
 
-resources_parser_args = ModelApiV2Parser.as_request_parser()
+resources_parser_args = ModelApiV2Parser().parser
 
 resources_parser_args.update({
     'type': fields.Str()
 })
+
+
+@apiv2.route('/datasets/', endpoint='list_datasets', methods=['GET'])
+@use_kwargs(dataset_parser_args, location="query")
+@marshal_with(DatasetPaginationSchema())
+def get_dataset_list(**kwargs):
+    """List or search all datasets"""
+    datasets = Dataset.objects(archived=None, deleted=None, private=False)
+    datasets = dataset_parser.parse_filters(datasets, kwargs)
+
+    sort = kwargs.get('sort', None) or ('$text_score' if kwargs.get('sort', None) else None) or DEFAULT_SORTING
+    return datasets.order_by(sort).paginate(kwargs['page'], kwargs['page_size'])
+
+
+@apiv2.route('/datasets/', endpoint='create_dataset', methods=['POST'])
+@csrf.exempt
+@UDataApiV2.secure
+@marshal_with(DatasetSchema())
+def post_new_dataset():
+    '''Create a new dataset'''
+    form = UDataApiV2.validate(DatasetForm)
+    dataset = form.save()
+    return dataset, 201
 
 
 @apiv2.route('/datasets/search/', endpoint='dataset_search', methods=['GET'])
@@ -90,7 +178,7 @@ def get_resources_paginated(dataset, **kwargs):
     }
 
 
-@apiv2.route('/datasets/resources/<uuid:rid>/', endpoint='resource', methods=['GET'])
+@apiv2.route('/resources/<uuid:rid>/', endpoint='resource', methods=['GET'])
 @marshal_with(ResourceWithDatasetIdSchema())
 def get_specific_resource_by_rid(rid):
     """Get a specific resource given its identifier."""

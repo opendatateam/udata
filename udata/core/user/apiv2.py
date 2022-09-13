@@ -28,7 +28,7 @@ class UserApiParser(ModelApiV2Parser):
     }
 
 
-user_parser_args = UserApiParser.as_request_parser()
+user_parser_args = UserApiParser().parser
 
 
 @apiv2.route('/users/', endpoint='list_users', methods=['GET'])
