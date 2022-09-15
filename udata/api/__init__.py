@@ -340,7 +340,7 @@ def apiv2_root():
 
 
 @apiv2_blueprint.before_request
-def authentifyV2():
+def authentify_v2():
     if current_user.is_authenticated:
         return
 
