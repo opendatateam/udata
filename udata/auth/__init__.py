@@ -38,22 +38,28 @@ class Permission(BasePermission):
 admin_permission = Permission()
 
 
-def init_app(app):
+def init_security(app, **kwargs):
     from .forms import ExtendedRegisterForm, ExtendedLoginForm, ExtendedResetPasswordForm
     from .tasks import sendmail_proxy
     from .views import create_security_blueprint
     from .password_validation import password_validator
     from udata.models import datastore
+
     state = security.init_app(app, datastore,
                               register_blueprint=False,
-                              login_form=ExtendedLoginForm,
-                              confirm_register_form=ExtendedRegisterForm,
-                              register_form=ExtendedRegisterForm,
-                              reset_password_form=ExtendedResetPasswordForm,
-                              send_mail=sendmail_proxy
-                            )
+                              login_form=kwargs.get('login_form') or ExtendedLoginForm,
+                              confirm_register_form=kwargs.get('confirm_register_form') or ExtendedRegisterForm,
+                              register_form=kwargs.get('register_form') or ExtendedRegisterForm,
+                              reset_password_form=kwargs.get('reset_password_form') or ExtendedResetPasswordForm,
+                              send_mail=sendmail_proxy)
     state.password_validator(password_validator)
 
     security_bp = create_security_blueprint(state, 'security_blueprint')
 
     app.register_blueprint(security_bp)
+
+
+def init_app(app):
+    if 'front' in app.config['PLUGINS']:
+        return
+    init_security(app)
