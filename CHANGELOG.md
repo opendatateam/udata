@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- APIv2 does no longer uses `flask-restplus` but `flask_apispec` [#2755](https://github.com/opendatateam/udata/pull/2755):
+- APIv2 no longer uses `flask-restplus` but `flask_apispec` [#2755](https://github.com/opendatateam/udata/pull/2755):
   - api_fields are replaced by marshmallow schemas
   - Request validation and request parsers are now webargs dicts
   - Api documentation relies on apispec
