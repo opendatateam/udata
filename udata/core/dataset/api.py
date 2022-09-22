@@ -615,7 +615,7 @@ class DatasetSuggestAPI(API):
                 'title': dataset.title,
                 'acronym': dataset.acronym,
                 'slug': dataset.slug,
-                'image_url': dataset.image_url,
+                'image_url': dataset.organization.logo if dataset.organization else dataset.owner.avatar if dataset.owner else None
             }
             for dataset in datasets.order_by(SUGGEST_SORTING).limit(args['size'])
         ]
