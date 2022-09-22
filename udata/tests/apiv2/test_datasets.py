@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from flask import url_for
 
 from udata.tests.api import APITestCase
-
 from udata.core.dataset.apiv2_schemas import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     VisibleDatasetFactory, DatasetFactory, ResourceFactory, CommunityResourceFactory, LicenseFactory)
@@ -14,7 +15,8 @@ from udata.models import (
     LEGACY_FREQUENCIES, RESOURCE_TYPES, db
 )
 from udata.tags import MIN_TAG_LENGTH, MAX_TAG_LENGTH
-from udata.utils import unique_string
+from udata.utils import unique_string, faker
+
 
 SAMPLE_GEOM = {
     "type": "MultiPolygon",
@@ -197,7 +199,6 @@ class DatasetAPIV2Test(APITestCase):
         response = self.post(url_for('apiv2.create_dataset'), data)
         self.assert201(response)
         self.assertEqual(Dataset.objects.count(), 1)
-
         dataset = Dataset.objects.first()
         self.assertEqual(dataset.organization, org)
         self.assertIsNone(dataset.owner)
@@ -327,17 +328,237 @@ class DatasetAPIV2Test(APITestCase):
         resources = [ResourceFactory() for _ in range(2)]
         dataset = DatasetFactory(resources=resources)
 
-        response = self.get(url_for('apiv2.dataset', dataset=dataset))
+        response = self.get(url_for('apiv2.get_dataset', dataset=dataset))
         self.assert200(response)
         data = response.json
         assert data['resources']['rel'] == 'subsection'
-        assert data['resources']['href'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['resources']['href'] == url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['resources']['type'] == 'GET'
         assert data['resources']['total'] == len(resources)
         assert data['community_resources']['rel'] == 'subsection'
         assert data['community_resources']['href'] == url_for('api.community_resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['community_resources']['type'] == 'GET'
         assert data['community_resources']['total'] == 0
+
+    def test_dataset_api_update(self):
+        '''It should update a dataset from the API'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data['description'] = 'new description'
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().description,
+                         'new description')
+
+    def test_dataset_api_update_with_resources(self):
+        '''It should update a dataset from the API with resources parameters'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        initial_length = len(dataset.resources)
+        data = dataset.to_dict()
+        data['resources'].append(ResourceFactory.as_dict())
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(len(dataset.resources), initial_length + 1)
+
+    def test_dataset_api_update_new_resource_with_extras(self):
+        '''It should update a dataset with a new resource with extras'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        data = dataset.to_dict()
+        resource_data = ResourceFactory.as_dict()
+        resource_data['extras'] = {'extra:id': 'id'}
+        data['resources'].append(resource_data)
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        resource = next((
+            r for r in dataset.resources if r.title == resource_data['title']
+        ))
+        self.assertEqual(resource.extras, {'extra:id': 'id'})
+
+    def test_dataset_api_update_existing_resource_with_extras(self):
+        '''It should update a dataset's existing resource with extras'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data['resources'][0]['extras'] = {'extra:id': 'id'}
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        dataset.reload()
+        resource = dataset.resources[0]
+        self.assertEqual(resource.extras, {'extra:id': 'id'})
+
+    def test_dataset_api_update_without_resources(self):
+        '''It should update a dataset from the API without resources'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user,
+                                 resources=ResourceFactory.build_batch(3))
+        initial_length = len(dataset.resources)
+        data = dataset.to_dict()
+        del data['resources']
+        data['description'] = faker.sentence()
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset.reload()
+        self.assertEqual(dataset.description, data['description'])
+        self.assertEqual(len(dataset.resources), initial_length)
+
+    def test_dataset_api_update_with_extras(self):
+        '''It should update a dataset from the API with extras parameters'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user)
+        data = dataset.to_dict()
+        data['extras'] = {
+            'integer': 42,
+            'float': 42.0,
+            'string': 'value',
+        }
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.extras['integer'], 42)
+        self.assertEqual(dataset.extras['float'], 42.0)
+        self.assertEqual(dataset.extras['string'], 'value')
+
+    def test_dataset_api_update_with_no_extras(self):
+        '''It should update a dataset from the API with no extras
+
+        In that case the extras parameters are kept.
+        '''
+        data = DatasetFactory.as_dict()
+        data['extras'] = {
+            'integer': 42,
+            'float': 42.0,
+            'string': 'value',
+        }
+        with self.api_user():
+            response = self.post(url_for('apiv2.create_dataset'), data)
+
+        dataset = Dataset.objects.first()
+        data = dataset.to_dict()
+        del data['extras']
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.extras['integer'], 42)
+        self.assertEqual(dataset.extras['float'], 42.0)
+        self.assertEqual(dataset.extras['string'], 'value')
+
+    def test_dataset_api_update_with_empty_extras(self):
+        '''It should update a dataset from the API with empty extras
+
+        In that case the extras parameters are set to an empty dict.
+        '''
+        data = DatasetFactory.as_dict()
+        data['extras'] = {
+            'integer': 42,
+            'float': 42.0,
+            'string': 'value',
+        }
+        with self.api_user():
+            response = self.post(url_for('apiv2.create_dataset'), data)
+
+        dataset = Dataset.objects.first()
+        data = dataset.to_dict()
+        data['extras'] = {}
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert200(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+
+        dataset = Dataset.objects.first()
+        self.assertEqual(dataset.extras, {})
+
+    def test_dataset_api_update_deleted(self):
+        '''It should not update a deleted dataset from the API and raise 401'''
+        user = self.login()
+        dataset = DatasetFactory(owner=user, deleted=datetime.now())
+        data = dataset.to_dict()
+        data['description'] = 'new description'
+        response = self.put(url_for('apiv2.update_dataset', dataset=dataset), data)
+        self.assert410(response)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertEqual(Dataset.objects.first().description,
+                         dataset.description)
+
+    def test_dataset_api_delete(self):
+        '''It should delete a dataset from the API'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user)
+        response = self.delete(url_for('apiv2.delete_dataset', dataset=dataset))
+
+        self.assertStatus(response, 204)
+        self.assertEqual(Dataset.objects.count(), 1)
+        self.assertIsNotNone(Dataset.objects[0].deleted)
+
+        response = self.get(url_for('apiv2.list_datasets'))
+        self.assert200(response)
+        self.assertEqual(len(response.json['data']), 0)
+
+    def test_dataset_api_delete_deleted(self):
+        '''It should delete a deleted dataset from the API and raise 410'''
+        user = self.login()
+        dataset = VisibleDatasetFactory(owner=user, deleted=datetime.now())
+        response = self.delete(url_for('apiv2.delete_dataset', dataset=dataset))
+
+        self.assert410(response)
+
+    def test_dataset_api_feature(self):
+        '''It should mark the dataset featured on POST'''
+        self.login(AdminFactory())
+        dataset = DatasetFactory(featured=False)
+
+        response = self.post(url_for('apiv2.mark_dataset_featured', dataset=dataset))
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertTrue(dataset.featured)
+
+    def test_dataset_api_feature_already(self):
+        '''It shouldn't do anything to feature an already featured dataset'''
+        self.login(AdminFactory())
+        dataset = DatasetFactory(featured=True)
+
+        response = self.post(url_for('apiv2.mark_dataset_featured', dataset=dataset))
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertTrue(dataset.featured)
+
+    def test_dataset_api_unfeature(self):
+        '''It should unmark the dataset featured on POST'''
+        self.login(AdminFactory())
+        dataset = DatasetFactory(featured=True)
+
+        response = self.delete(url_for('apiv2.unmark_dataset_featured',
+                                       dataset=dataset))
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertFalse(dataset.featured)
+
+    def test_dataset_api_unfeature_already(self):
+        '''It shouldn't do anything to unfeature a not featured dataset'''
+        self.login(AdminFactory())
+        dataset = DatasetFactory(featured=False)
+
+        response = self.delete(url_for('apiv2.unmark_dataset_featured',
+                                       dataset=dataset))
+        self.assert200(response)
+
+        dataset.reload()
+        self.assertFalse(dataset.featured)
 
 
 class DatasetResourceAPIV2Test(APITestCase):
@@ -368,7 +589,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         '''Should fetch 1 page of resources from the API'''
         resources = [ResourceFactory() for _ in range(7)]
         dataset = DatasetFactory(resources=resources)
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == len(resources)
@@ -382,7 +603,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         '''Should fetch 1 page of resources from the API using its default parameters'''
         resources = [ResourceFactory() for _ in range(7)]
         dataset = DatasetFactory(resources=resources)
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == len(resources)
@@ -396,14 +617,14 @@ class DatasetResourceAPIV2Test(APITestCase):
         '''Should fetch 2 pages of resources from the API'''
         resources = [ResourceFactory() for _ in range(40)]
         dataset = DatasetFactory(resources=resources)
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == len(resources)
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['next_page'] == url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
         response = self.get(data['next_page'])
@@ -413,7 +634,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['page'] == 2
         assert data['page_size'] == DEFAULT_PAGE_SIZE
         assert data['next_page'] == None
-        assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['previous_page'] == url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True)
 
     def test_get_specific_type(self):
         '''Should fetch resources of type main from the API'''
@@ -422,25 +643,25 @@ class DatasetResourceAPIV2Test(APITestCase):
         resources += [ResourceFactory(type='main') for _ in range(nb_resources__of_specific_type)]
         dataset = DatasetFactory(resources=resources)
         # Try without resource type filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == len(resources)
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['next_page'] == url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
         # Try with resource type filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main'))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main'))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == nb_resources__of_specific_type
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
+        assert data['next_page'] == url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
         assert data['previous_page'] is None
 
         response = self.get(data['next_page'])
@@ -450,7 +671,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['page'] == 2
         assert data['page_size'] == DEFAULT_PAGE_SIZE
         assert data['next_page'] == None
-        assert data['previous_page'] == url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
+        assert data['previous_page'] == url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, type='main', _external=True)
 
     def test_get_with_query_string(self):
         '''Should fetch resources according to query string from the API'''
@@ -461,18 +682,18 @@ class DatasetResourceAPIV2Test(APITestCase):
         dataset = DatasetFactory(resources=resources)
 
         # Try without query string filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == DEFAULT_PAGE_SIZE
         assert data['total'] == len(resources)
         assert data['page'] == 1
         assert data['page_size'] == DEFAULT_PAGE_SIZE
-        assert data['next_page'] == url_for('apiv2.resources', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
+        assert data['next_page'] == url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=2, page_size=DEFAULT_PAGE_SIZE, _external=True)
         assert data['previous_page'] is None
 
         # Try with query string filter
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='primary'))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='primary'))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == 10
@@ -483,7 +704,7 @@ class DatasetResourceAPIV2Test(APITestCase):
         assert data['previous_page'] is None
 
         # Try with query string filter to check case-insensitivity
-        response = self.get(url_for('apiv2.resources', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='PriMarY'))
+        response = self.get(url_for('apiv2.get_dataset_resources_paginated', dataset=dataset.id, page=1, page_size=DEFAULT_PAGE_SIZE, q='PriMarY'))
         self.assert200(response)
         data = response.json
         assert len(data['data']) == 10
