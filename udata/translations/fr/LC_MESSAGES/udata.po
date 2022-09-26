@@ -1452,3 +1452,34 @@ msgstr "Renvoyer les instructions de confirmation"
 msgid "Submit"
 msgstr "Soumettre"
 
+#: udata/uris.py:53
+msgid "URL invalide : %(reason)s"
+msgstr ""
+
+#: udata/uris.py:103
+msgid "Schéma invalide {0}, schémas autorisés : {1}"
+msgstr ""
+
+#: udata/uris.py:106
+msgid "Les informations d'identification dans l'URL ne sont pas autorisées"
+msgstr ""
+
+#: udata/uris.py:110
+msgid "TLD invalide {0}"
+msgstr ""
+
+#: udata/uris.py:119
+msgid "{0} est une IP multicast"
+msgstr ""
+
+#: udata/uris.py:121
+msgid "{0} est un masque IP"
+msgstr ""
+
+#: udata/uris.py:125
+msgid "est une URL locale"
+msgstr ""
+
+#: udata/uris.py:128
+msgid "est une URL privée"
+msgstr ""

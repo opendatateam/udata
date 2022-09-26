@@ -1426,3 +1426,34 @@ msgstr ""
 msgid "Heavily reused"
 msgstr ""
 
+#: udata/uris.py:53
+msgid "Invalid URL: %(reason)s"
+msgstr ""
+
+#: udata/uris.py:103
+msgid "Invalid scheme {0}, allowed schemes: {1}"
+msgstr ""
+
+#: udata/uris.py:106
+msgid "Credentials in URL are not allowed"
+msgstr ""
+
+#: udata/uris.py:110
+msgid "Invalid TLD {0}"
+msgstr ""
+
+#: udata/uris.py:119
+msgid "{0} is a multicast IP"
+msgstr ""
+
+#: udata/uris.py:121
+msgid "{0} is a mask IP"
+msgstr ""
+
+#: udata/uris.py:125
+msgid "is a local URL"
+msgstr ""
+
+#: udata/uris.py:128
+msgid "is a private URL"
+msgstr ""
