@@ -18,10 +18,12 @@ from udata.rdf import (
     RDF_EXTENSIONS,
     negociate_content, graph_response
 )
-from .forms import DatasetForm
-from .models import Dataset, CommunityResource, License
-from .permissions import DatasetEditPermission
-from .apiv2_schemas import DatasetSchema, ResourcePaginationSchema, ResourceWithDatasetIdSchema, DatasetPaginationSchema
+from .forms import DatasetForm, ResourceForm, ResourcesListForm
+from .models import Dataset, CommunityResource, License, Resource
+from .permissions import DatasetEditPermission, ResourceEditPermission
+from .apiv2_schemas import (
+    DatasetSchema, ResourcePaginationSchema, ResourceWithDatasetIdSchema, DatasetPaginationSchema, ResourceSchema
+)
 from .rdf import dataset_to_rdf
 from .search import DatasetSearch
 
@@ -147,8 +149,8 @@ def post_new_dataset(**kwargs):
     return dataset, 201
 
 
-@apiv2.route('/datasets/badges/', endpoint='get_datasets_badges', methods=['GET'])
-def get_datasets_badges():
+@apiv2.route('/datasets/badges/', endpoint='get_available_dataset_badges', methods=['GET'])
+def get_available_dataset_badges():
     """List all available dataset badges and their labels"""
     return Dataset.__badges__
 
@@ -237,13 +239,21 @@ def get_dataset_rdf_format(dataset):
     return make_response(*graph_response(resource, format))
 
 
-@apiv2.route('/datasets/<dataset:dataset>/badges/', endpoint='post_dataset_badges', methods=['POST'])
+@apiv2.route('/datasets/<dataset:dataset>/badges/', endpoint='add_dataset_badges', methods=['POST'])
 @UDataApiV2.secure(admin_permission)
 @use_kwargs(badges_api.BadgeSchema, location="json")
 @marshal_with(badges_api.BadgeSchema)
-def post_dataset_badges(dataset):
+def post_dataset_badges(dataset, **kwargs):
     """Create a new badge for a given dataset"""
     return badges_api.add(dataset)
+
+
+@apiv2.route('/<dataset:dataset>/badges/<badge_kind>/', endpoint='delete_dataset_badges', methods=['DELETE'])
+@UDataApiV2.secure(admin_permission)
+@marshal_with(badges_api.BadgeSchema)
+def delete_dataset_badges(dataset, badge_kind):
+    """Delete a badge for a given dataset"""
+    return badges_api.remove(dataset, badge_kind)
 
 
 #################################
@@ -287,11 +297,44 @@ def get_resources_paginated(dataset, **kwargs):
     }
 
 
+@apiv2.route('/datasets/<dataset:dataset>/resources/', endpoint='create_dataset_resource', methods=['POST'])
+@UDataApiV2.secure
+@marshal_with(ResourceSchema, code=201)
+def create_dataset_resource(dataset):
+    """Create a new resource for a given dataset"""
+    ResourceEditPermission(dataset).test()
+    form = UDataApiV2.validate(ResourceForm)
+    resource = Resource()
+    if form._fields.get('filetype').data != 'remote':
+        return 'This endpoint only supports remote resources', 400
+    form.populate_obj(resource)
+    dataset.add_resource(resource)
+    dataset.last_modified = datetime.now()
+    dataset.save()
+    return resource, 201
+
+
+@apiv2.route('/datasets/<dataset:dataset>/resources/', endpoint='reorder_dataset_resources', methods=['PUT'])
+@UDataApiV2.secure
+@marshal_with(ResourceSchema, code=200)
+def reorder_dataset_resources(dataset):
+    """Reorder resources"""
+    ResourceEditPermission(dataset).test()
+    data = {'resources': request.json}
+    form = ResourcesListForm.from_json(data, obj=dataset, instance=dataset,
+                                       meta={'csrf': False})
+    if not form.validate():
+        abort(400, errors=form.errors['resources'])
+
+    dataset = form.save()
+    return dataset.resources, 200
+
+
 ################################
 #   Resources Item Endpoints   #
 ################################
 
-@apiv2.route('/resources/<uuid:rid>/', endpoint='resource', methods=['GET'])
+@apiv2.route('/datasets/resources/<uuid:rid>/', endpoint='resource', methods=['GET'])
 @marshal_with(ResourceWithDatasetIdSchema)
 def get_specific_resource_by_rid(rid):
     """Get a specific resource given its identifier."""

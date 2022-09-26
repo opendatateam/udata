@@ -7,6 +7,7 @@ from udata.core.dataset.apiv2_schemas import DEFAULT_PAGE_SIZE
 from udata.core.dataset.factories import (
     VisibleDatasetFactory, DatasetFactory, ResourceFactory, CommunityResourceFactory, LicenseFactory)
 from udata.core.user.factories import UserFactory, AdminFactory
+from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
 from udata.core.spatial.factories import SpatialCoverageFactory
 from udata.tests.features.territories import create_geozones_fixtures
@@ -559,6 +560,81 @@ class DatasetAPIV2Test(APITestCase):
 
         dataset.reload()
         self.assertFalse(dataset.featured)
+
+
+class DatasetBadgeAPIV2Test(APITestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Register at least two badges
+        Dataset.__badges__['test-1'] = 'Test 1'
+        Dataset.__badges__['test-2'] = 'Test 2'
+
+        cls.factory = badge_factory(Dataset)
+
+    def setUp(self):
+        self.login(AdminFactory())
+        self.dataset = DatasetFactory(owner=UserFactory())
+
+    def test_list(self):
+        response = self.get(url_for('apiv2.get_available_dataset_badges'))
+        self.assertStatus(response, 200)
+        self.assertEqual(len(response.json), len(Dataset.__badges__))
+        for kind, label in Dataset.__badges__.items():
+            self.assertIn(kind, response.json)
+            self.assertEqual(response.json[kind], label)
+
+    def test_create(self):
+        data = self.factory.as_dict()
+        print(data)
+        with self.api_user():
+            response = self.post(
+                url_for('apiv2.add_dataset_badges', dataset=self.dataset), data)
+        self.assert201(response)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 1)
+
+    def test_create_same(self):
+        data = self.factory.as_dict()
+        with self.api_user():
+            self.post(
+                url_for('apiv2.add_dataset_badges', dataset=self.dataset), data)
+            response = self.post(
+                url_for('apiv2.add_dataset_badges', dataset=self.dataset), data)
+        self.assertStatus(response, 200)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 1)
+
+    def test_create_2nd(self):
+        # Explicitely setting the kind to avoid collisions given the
+        # small number of choices for kinds.
+        kinds_keys = list(Dataset.__badges__)
+        self.dataset.add_badge(kinds_keys[0])
+        data = self.factory.as_dict()
+        data['kind'] = kinds_keys[1]
+        with self.api_user():
+            response = self.post(
+                url_for('apiv2.add_dataset_badges', dataset=self.dataset), data)
+        self.assert201(response)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 2)
+
+    def test_delete(self):
+        badge = self.factory()
+        self.dataset.add_badge(badge.kind)
+        with self.api_user():
+            response = self.delete(
+                url_for('apiv2.delete_dataset_badges', dataset=self.dataset,
+                        badge_kind=str(badge.kind)))
+        self.assertStatus(response, 204)
+        self.dataset.reload()
+        self.assertEqual(len(self.dataset.badges), 0)
+
+    def test_delete_404(self):
+        with self.api_user():
+            response = self.delete(
+                url_for('apiv2.delete_dataset_badges', dataset=self.dataset,
+                        badge_kind=str(self.factory().kind)))
+        self.assert404(response)
 
 
 class DatasetResourceAPIV2Test(APITestCase):
