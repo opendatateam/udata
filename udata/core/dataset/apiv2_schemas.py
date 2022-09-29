@@ -71,10 +71,10 @@ class DatasetSchema(Schema):
     uri = MarshURLFor(endpoint='api.dataset', mapper=lambda o: {'dataset': o}, dump_only=True)
     page = MarshURLFor(endpoint='datasets.show', mapper=lambda o: {'dataset': o}, fallback_endpoint='api.dataset', dump_only=True)
     acronym = fields.Str()
-    slug = fields.Str(required=True, dump_only=True)
+    slug = fields.Str(dump_only=True)
     description = fields.Str(required=True)
-    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
-    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
+    created_at = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', dump_only=True)
+    last_modified = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', dump_only=True)
     deleted = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00')
     archived = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00')
     featured = fields.Boolean()
@@ -83,27 +83,27 @@ class DatasetSchema(Schema):
     badges = fields.Nested(BadgeSchema, many=True, dump_only=True)
     resources = fields.Function(lambda obj: {
         'rel': 'subsection',
-        'href': url_for('apiv2.resources', dataset=obj.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
+        'href': url_for('apiv2.get_dataset_resources_paginated', dataset=obj.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(obj.resources)
-        })
+        }, dump_only=True)
     community_resources = fields.Function(lambda obj: {
         'rel': 'subsection',
         'href': url_for('api.community_resources', dataset=obj.id, page=1, page_size=DEFAULT_PAGE_SIZE, _external=True),
         'type': 'GET',
         'total': len(obj.community_resources)
-        })
-    frequency = fields.Str(required=True, dump_default=DEFAULT_FREQUENCY, validate=validate.OneOf(UPDATE_FREQUENCIES))
+        }, dump_only=True)
+    frequency = fields.Str(dump_default=DEFAULT_FREQUENCY, validate=validate.OneOf(UPDATE_FREQUENCIES))
     frequency_date = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00')
     extras = fields.Dict()
-    metrics = fields.Function(lambda obj: obj.get_metrics())
+    metrics = fields.Function(lambda obj: obj.get_metrics(), dump_only=True)
     organization = fields.Nested(OrganizationRefSchema)
     owner = fields.Nested(UserRefSchema)
     temporal_coverage = fields.Nested(TemporalCoverageSchema)
     spatial = fields.Nested(SpatialCoverageSchema)
     license = fields.Method("dataset_license")
     quality = fields.Dict(dump_only=True)
-    last_update = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', required=True)
+    last_update = fields.DateTime('%Y-%m-%dT%H:%M:%S+01:00', dump_only=True)
 
     def dataset_license(self, obj):
         if obj.license:
