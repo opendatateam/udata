@@ -12,9 +12,8 @@ from voluptuous import MultipleInvalid, RequiredFieldInvalid
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
-from ..actions import archive_harvested_dataset
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
-from ..models import HarvestItem, HarvestJob, HarvestError
+from ..models import HarvestItem, HarvestJob, HarvestError, archive_harvested_dataset
 from ..signals import before_harvest_job, after_harvest_job
 
 log = logging.getLogger(__name__)

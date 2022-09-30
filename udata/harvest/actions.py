@@ -13,7 +13,7 @@ from udata.models import User, Organization, PeriodicTask, Dataset
 from . import backends, signals
 from .models import (
     HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
-    VALIDATION_ACCEPTED, VALIDATION_REFUSED
+    VALIDATION_ACCEPTED, VALIDATION_REFUSED, archive_harvested_dataset
 )
 from .tasks import harvest
 
@@ -295,19 +295,3 @@ def attach(domain, filename):
             count += 1
 
     return AttachResult(count, errors)
-
-
-def archive_harvested_dataset(dataset, reason, dryrun=False):
-    '''
-    Archive an harvested dataset, setting extras accordingly.
-    If `dryrun` is True, the dataset is not saved but validated only.
-    '''
-    log.debug('Archiving dataset %s', dataset.id)
-    archival_date = datetime.now()
-    dataset.archived = archival_date
-    dataset.extras['harvest:archived'] = reason
-    dataset.extras['harvest:archived_at'] = archival_date
-    if dryrun:
-        dataset.validate()
-    else:
-        dataset.save()
