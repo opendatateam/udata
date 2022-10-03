@@ -1,11 +1,14 @@
 from collections import OrderedDict
 from datetime import datetime
+import logging
 from urllib.parse import urlparse
 
 from werkzeug import cached_property
 
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
+
+log = logging.getLogger(__name__)
 
 # Register harvest extras
 Dataset.extras.register('harvest:source_id', db.StringField)
@@ -173,3 +176,19 @@ class HarvestJob(db.Document):
         ],
         'ordering': ['-created'],
     }
+
+
+def archive_harvested_dataset(dataset, reason, dryrun=False):
+    '''
+    Archive an harvested dataset, setting extras accordingly.
+    If `dryrun` is True, the dataset is not saved but validated only.
+    '''
+    log.debug('Archiving dataset %s', dataset.id)
+    archival_date = datetime.now()
+    dataset.archived = archival_date
+    dataset.extras['harvest:archived'] = reason
+    dataset.extras['harvest:archived_at'] = archival_date
+    if dryrun:
+        dataset.validate()
+    else:
+        dataset.save()

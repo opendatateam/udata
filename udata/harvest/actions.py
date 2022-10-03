@@ -13,7 +13,7 @@ from udata.models import User, Organization, PeriodicTask, Dataset
 from . import backends, signals
 from .models import (
     HarvestSource, HarvestJob, DEFAULT_HARVEST_FREQUENCY,
-    VALIDATION_ACCEPTED, VALIDATION_REFUSED
+    VALIDATION_ACCEPTED, VALIDATION_REFUSED, archive_harvested_dataset
 )
 from .tasks import harvest
 
@@ -140,6 +140,9 @@ def purge_sources():
     for source in sources:
         if source.periodic_task:
             source.periodic_task.delete()
+        datasets = Dataset.objects.filter(**{'extras__harvest:source_id': str(source.id)})
+        for dataset in datasets:
+            archive_harvested_dataset(dataset, reason='harvester-deleted', dryrun=False)
         source.delete()
     return count
 
