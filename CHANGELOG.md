@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
+- Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764)
 
 ## 4.1.2 (2022-09-01)
 
