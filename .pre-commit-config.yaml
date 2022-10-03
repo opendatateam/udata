@@ -7,10 +7,6 @@ repos:
         args: [requirements/install.in, --output-file=requirements/install.pip]
         files: ^requirements/install\.(in|pip)$
       - id: pip-compile
-        name: pip-compile test.in
-        args: [requirements/test.in, --output-file=requirements/test.pip]
-        files: ^requirements/(install|test)\.(in|pip)$
-      - id: pip-compile
         name: pip-compile develop.in
         args: [requirements/develop.in, --output-file=requirements/develop.pip]
         files: ^requirements/(install|test|develop)\.(in|pip)$

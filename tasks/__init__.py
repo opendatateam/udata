@@ -16,6 +16,19 @@ from .helpers import ROOT, info, header, success, cyan
 
 I18N_DOMAIN = 'udata'
 
+EXTRACT_I18N_KEYWORDS = "_ N_:1,2 P_:1c,2 L_ gettext ngettext:1,2 pgettext:1c,2 npgettext:1c,2,3 lazy_gettext lazy_pgettext:1c,2"
+EXTRACT_I18N_MAPPING_FILE = "babel.cfg"
+EXTRACT_I18N_ADD_COMMENTS = "TRANSLATORS:"
+EXTRACT_I18N_OUTPUT_FILE = "udata/translations/udata.pot"
+EXTRACT_I18N_WIDTH = 80
+
+UPDATE_I18N_DOMAIN = "udata"
+UPDATE_I18N_INPUT_FILE = "udata/translations/udata.pot"
+UPDATE_I18N_OUTPUT_FILE = "udata/translations"
+
+COMPILE_I18N_DOMAIN = "udata"
+COMPILE_I18N_DIRECTORY = "udata/translations"
+
 
 @task
 def clean(ctx, node=False, translations=False, all=False):
@@ -23,7 +36,7 @@ def clean(ctx, node=False, translations=False, all=False):
     header('Clean all build artifacts')
     patterns = [
         'build', 'dist', 'cover', 'docs/_build',
-        '**/*.pyc', '*.egg-info', '.tox', 'udata/static/*'
+        '**/*.pyc', '*.egg-info', 'udata/static/*'
     ]
     if node or all:
         patterns.append('node_modules')
@@ -44,7 +57,7 @@ def update(ctx, migrate=False):
     header(msg)
     info('Updating Python dependencies')
     with ctx.cd(ROOT):
-        ctx.run('pi3 install -e .')
+        ctx.run('pip install -e .')
         ctx.run('pip install -r requirements/develop.pip')
         info('Updating JavaScript dependencies')
         ctx.run('npm install')
@@ -140,7 +153,7 @@ def i18n(ctx, update=False):
 
     info('Extract Python strings')
     with ctx.cd(ROOT):
-        ctx.run('python setup.py extract_messages')
+        ctx.run(f"pybabel extract --keywords=\"{EXTRACT_I18N_KEYWORDS}\" --mapping-file={EXTRACT_I18N_MAPPING_FILE} --output-file={EXTRACT_I18N_OUTPUT_FILE} --add-comments={EXTRACT_I18N_ADD_COMMENTS} --width={EXTRACT_I18N_WIDTH} .")
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
@@ -158,7 +171,7 @@ def i18n(ctx, update=False):
 
     if update:
         with ctx.cd(ROOT):
-            ctx.run('python setup.py update_catalog')
+            ctx.run(f"pybabel update --domain={UPDATE_I18N_DOMAIN} --input-file={UPDATE_I18N_INPUT_FILE} --output-dir={UPDATE_I18N_OUTPUT_FILE} --previous")
 
     info('Extract JavaScript strings')
     keys = set()
@@ -207,7 +220,7 @@ def i18nc(ctx):
     '''Compile translations'''
     header('Compiling translations')
     with ctx.cd(ROOT):
-        ctx.run('python setup.py compile_catalog')
+        ctx.run(f"pybabel compile --domain={COMPILE_I18N_DOMAIN} --directory={COMPILE_I18N_DIRECTORY} --statistics")
 
 
 @task
@@ -256,24 +269,19 @@ def oembed_watch(ctx):
 
 
 @task(clean, i18nc, assets_build, widgets_build, oembed_build, default=True)
-def dist(ctx, buildno=None):
+def dist(ctx):
     '''Package for distribution'''
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
 @task(i18nc)
-def pydist(ctx, buildno=None):
+def pydist(ctx):
     '''Perform python packaging (without compiling assets)'''
-    perform_dist(ctx, buildno)
+    perform_dist(ctx)
 
 
-def perform_dist(ctx, buildno=None):
+def perform_dist(ctx):
     header('Building a distribuable package')
-    cmd = ['python setup.py']
-    if buildno:
-        cmd.append('egg_info -b {0}'.format(buildno))
-    cmd.append('bdist_wheel')
     with ctx.cd(ROOT):
-        ctx.run(' '.join(cmd), pty=True)
-        ctx.run('twine check dist/*')
+        ctx.run('make build', pty=True)
     success('Distribution is available in dist directory')
