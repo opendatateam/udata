@@ -106,11 +106,6 @@ resource_fields = api.model('Resource', {
         description='Harvest attributes extras information',
         skip_none=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
-    'protected_extras': fields.Raw(attribute=lambda o: {
-        'rel': 'subsection',
-        'href': url_for('apiv2.resource_protected_extras', rid=o.id, _external=True),
-        'type': 'GET',
-    }, description='Link to the resource protected extras'),
     'preview_url': fields.String(description='An optional preview URL to be '
                                  'loaded as a standalone page (ie. iframe or '
                                  'new page)',
@@ -164,8 +159,8 @@ community_resource_page_fields = api.model(
 DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
-    'protected_extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial',
-    'license', 'uri', 'page', 'last_update', 'archived', 'quality'
+    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license', 'uri', 'page',
+    'last_update', 'archived', 'quality'
 ))
 
 dataset_fields = api.model('Dataset', {
@@ -207,11 +202,6 @@ dataset_fields = api.model('Dataset', {
         skip_none=True
     ),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-    'protected_extras': fields.Raw(attribute=lambda o: {
-        'rel': 'subsection',
-        'href': url_for('apiv2.protected_extras', dataset=o.id, _external=True),
-        'type': 'GET',
-    }, description='Link to the dataset protected extras'),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,

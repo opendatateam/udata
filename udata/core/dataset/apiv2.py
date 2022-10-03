@@ -97,11 +97,6 @@ dataset_fields = apiv2.model('Dataset', {
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
-    'protected_extras': fields.Raw(attribute=lambda o: {
-        'rel': 'subsection',
-        'href': url_for('apiv2.protected_extras', dataset=o.id, _external=True),
-        'type': 'GET',
-        }, description='Link to the dataset protected extras'),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
         org_ref_fields, allow_null=True,
@@ -229,26 +224,6 @@ class ResourcesAPI(API):
             'previous_page': previous_page if page > 1 else None,
             'total': len(res),
         }
-
-
-@ns.route('/<dataset:dataset>/protected_extras/', endpoint='protected_extras')
-class ProtectedExtrasAPI(API):
-    @apiv2.doc('list_protected_extras')
-    def get(self, dataset):
-        '''Get the given dataset protected_extras'''
-
-        return dataset.protected_extras
-
-
-@ns.route('resources/<uuid:rid>/protected_extras/',
-          endpoint='resource_protected_extras')
-class ResourceProtectedExtrasAPI(ResourceMixin, API):
-    @apiv2.param('rid', 'The resource unique identifier')
-    @apiv2.doc('list_resource_protected_extras')
-    def get(self, dataset, rid):
-        '''Get the given resource protected_extras'''
-        resource = self.get_resource_or_404(dataset, rid)
-        return resource.protected_extras
 
 
 @ns.route('/resources/<uuid:rid>/', endpoint='resource')
