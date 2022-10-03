@@ -1,10 +1,9 @@
 import logging
 
 from datetime import date, datetime
-from dateutil.parser import parse as parse_dt
 
 from mongoengine import EmbeddedDocument
-from mongoengine.fields import DictField, BaseField, DateField, DateTimeField
+from mongoengine.fields import DictField, BaseField
 
 log = logging.getLogger(__name__)
 
@@ -45,14 +44,6 @@ class ExtrasField(DictField):
                      else extra_cls(**value).validate())
                 else:
                     extra_cls().validate(value)
-
-                # Serialize str to date or datetime isoformat
-                if issubclass(extra_cls, (DateField, DateTimeField)) and isinstance(value, str):
-                    if issubclass(extra_cls, DateField):
-                        values[key] = parse_dt(value).date()
-                    else:
-                        values[key] = parse_dt(value)
-
             except Exception as e:
                 errors[key] = getattr(e, 'message', str(e))
 
