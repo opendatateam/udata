@@ -43,3 +43,6 @@ robohash = "udata.features.identicon.backends:robohash"
 
 [project.entry-points."pytest11"]
 udata = "udata.tests.plugin"
+
+[tool.setuptools]
+packages = ["udata", "tasks"]
