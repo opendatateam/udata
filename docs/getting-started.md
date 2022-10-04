@@ -214,7 +214,7 @@ Then, you can install pip requirements.
 
 ```bash
 cd udata-front
-pip install -e . -r requirements/develop.pip
+pip install -e . -r requirements/test.pip -r requirements/develop.pip
 ```
 
 The last thing to do is to install udata-front NPM packages.
