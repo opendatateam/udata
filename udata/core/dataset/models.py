@@ -293,7 +293,6 @@ class ResourceMixin(object):
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
     modified = db.DateTimeField(default=datetime.now, required=True)
-    # Why can't it be computed instead?
     published = db.DateTimeField(default=datetime.now, required=True)
     deleted = db.DateTimeField()
 
@@ -357,18 +356,6 @@ class ResourceMixin(object):
             if check_date >= limit_date:
                 return False
         return True
-
-    @property
-    def created_at_public(self):
-        return (self.harvest.created_at if self.harvest else False) or self.created_at
-
-    @property
-    def modified_public(self):
-        return (self.harvest.modified_at if self.harvest else False) or self.modified
-
-    # @property
-    # def published(self):
-    #     return self.created_at_public()
 
     @property
     def latest(self):
@@ -592,14 +579,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         if not remote_resources:
             return []
         return [resource.check_availability() for resource in remote_resources]
-
-    @property
-    def created_at_public(self):
-        return (self.harvest.created_at if self.harvest else False) or self.created_at
-
-    @property
-    def modified_at_public(self):
-        return (self.harvest.modified_at if self.harvest else False) or self.last_modified
 
     @property
     def last_update(self):

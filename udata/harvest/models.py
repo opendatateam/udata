@@ -4,8 +4,7 @@ from urllib.parse import urlparse
 
 from werkzeug import cached_property
 
-from udata.models import db
-from udata.core.dataset.models import Dataset, ResourceMixin
+from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
 
 

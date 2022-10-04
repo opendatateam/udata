@@ -121,8 +121,8 @@ def resource_to_rdf(resource, dataset=None, graph=None):
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset and dataset.id:
         id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset', dataset=dataset.id,
-                            _external=True,
-                            _anchor='resource-{0}'.format(resource.id)))
+                                 _external=True,
+                                 _anchor='resource-{0}'.format(resource.id)))
     else:
         id = BNode(resource.id)
     permalink = endpoint_for('datasets.resource', 'api.resource_redirect', id=resource.id, _external=True)
@@ -331,22 +331,6 @@ def title_from_rdf(rdf, url):
             return i18n._('Nameless resource')
 
 
-def dct_modified_from_rdf(rdf):
-    dct_modified = rdf_value(rdf, DCT.modified)
-    if dct_modified:
-        if isinstance(dct_modified, date):
-            dct_modified = datetime.combine(dct_modified, datetime.min.time())
-        return dct_modified
-
-
-def dct_issued_from_rdf(rdf):
-    dct_issued = rdf_value(rdf, DCT.issued)
-    if dct_issued:
-        if isinstance(dct_issued, date):
-            dct_issued = datetime.combine(dct_issued, datetime.min.time())
-        return dct_issued
-
-
 def landing_page_from_rdf(rdf):
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
     if landing_page:
@@ -401,8 +385,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
-    created_at = dct_issued_from_rdf(distrib)
-    modified_at = dct_modified_from_rdf(distrib)
+    created_at = rdf_value(distrib, DCT.issued)
+    modified_at = rdf_value(distrib, DCT.modified)
 
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
@@ -462,8 +446,8 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
     landing_page = landing_page_from_rdf(d)
-    created_at = dct_issued_from_rdf(d)
-    modified_at = dct_modified_from_rdf(d)
+    created_at = rdf_value(d, DCT.issued)
+    modified_at = rdf_value(d, DCT.modified)
 
     if not dataset.harvest:
         dataset.harvest = HarvestDatasetMetadata()

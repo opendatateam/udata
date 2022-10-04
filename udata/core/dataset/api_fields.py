@@ -1,5 +1,3 @@
-from flask import url_for
-
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
@@ -23,8 +21,8 @@ dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
     'backend': fields.String(description='Harvest backend used', allow_null=True),
     'created_at': fields.ISODateTime(description='The dataset harvested creation date',
                                      allow_null=True),
-    'last_modified': fields.ISODateTime(description='The dataset harvest last modification date',
-                                        allow_null=True),
+    'modified_at': fields.ISODateTime(description='The dataset harvest last modification date',
+                                      allow_null=True),
     'source_id': fields.String(description='The harvester id', allow_null=True),
     'remote_id': fields.String(description='The dataset remote id on the source portal',
                                allow_null=True),
@@ -34,14 +32,18 @@ dataset_harvest_fields = api.model('HarvestDatasetMetadata', {
     'uri': fields.String(description='The dataset harveted uri', allow_null=True),
     'dct_identifier': fields.String(
         description='The dct:identifier property from the harvest dataset',
-        allow_null=True)
+        allow_null=True),
+    'archived_at': fields.ISODateTime(description='The archive date', allow_null=True),
+    'archived': fields.String(
+        description='The reason the dataset has been archived',
+        allow_null=True),
 })
 
 resource_harvest_fields = api.model('HarvestResourceMetadata', {
     'created_at': fields.ISODateTime(description='The resource harvested creation date',
                                      allow_null=True),
-    'last_modified': fields.ISODateTime(description='The resource harvest last modification date',
-                                        allow_null=True),
+    'modified_at': fields.ISODateTime(description='The resource harvest last modification date',
+                                      allow_null=True),
     'uri': fields.String(description='The resource harvest uri', allow_null=True),
     'dct_identifier': fields.String(
         description='The dct:identifier property from the harvest resource', allow_null=True)
@@ -95,7 +97,7 @@ resource_fields = api.model('Resource', {
     'created_at': fields.ISODateTime(
         readonly=True, description='The resource creation date'),
     'published': fields.ISODateTime(
-        description='The resource publication date', readonly=True),
+        description='The resource publication date'),
     'last_modified': fields.ISODateTime(
         attribute='modified', readonly=True,
         description='The resource last modification date'),
@@ -137,7 +139,8 @@ dataset_ref_fields = api.inherit('DatasetReference', base_reference, {
         description='The API URI for this dataset', readonly=True),
     'page': fields.UrlFor(
         'datasets.show', lambda d: {'dataset': d},
-        description='The web page URL for this dataset', readonly=True, fallback_endpoint='api.dataset'),
+        description='The web page URL for this dataset', readonly=True,
+        fallback_endpoint='api.dataset'),
 })
 
 community_resource_fields = api.inherit('CommunityResource', resource_fields, {
@@ -159,8 +162,8 @@ community_resource_page_fields = api.model(
 DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras', 'harvest',
-    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license', 'uri', 'page',
-    'last_update', 'archived', 'quality'
+    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'uri', 'page', 'last_update', 'archived', 'quality'
 ))
 
 dataset_fields = api.model('Dataset', {

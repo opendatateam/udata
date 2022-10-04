@@ -16,7 +16,6 @@ from .api_fields import (
     user_ref_fields,
     checksum_fields
 )
-from udata.core.dataset.api import ResourceMixin
 from udata.core.spatial.api_fields import geojson
 from .models import (
     Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
