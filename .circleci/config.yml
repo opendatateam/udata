@@ -27,8 +27,8 @@ jobs:
           command: |
             virtualenv venv
             source venv/bin/activate
-            make deps
-            make install
+            pip install -r requirements/develop.pip
+            pip install -e .
       - save_cache:
           key: py3-cache-v9-{{ arch }}-{{ checksum "python.deps" }}
           paths:
@@ -40,8 +40,15 @@ jobs:
       - run:
           name: Run tests
           command: |
+            mkdir -p reports/python
             source venv/bin/activate
-            make test
+            inv test --report --ci
+      - store_test_results:
+          path: reports/python
+      - store_artifacts:
+          path: reports/
+          destination: reports
+
       - persist_to_workspace:
           root: .
           paths:
@@ -133,7 +140,8 @@ jobs:
           name: Publish on PyPI
           command: |
             source venv/bin/activate
-            FLIT_USERNAME=${PYPI_USERNAME} FLIT_PASSWORD=${PYPI_PASSWORD} make publish
+            pip install twine
+            twine upload --username "${PYPI_USERNAME}" --password "${PYPI_PASSWORD}" dist/*.whl
 
 workflows:
   version: 2

@@ -16,19 +16,6 @@ from .helpers import ROOT, info, header, success, cyan
 
 I18N_DOMAIN = 'udata'
 
-EXTRACT_I18N_KEYWORDS = "_ N_:1,2 P_:1c,2 L_ gettext ngettext:1,2 pgettext:1c,2 npgettext:1c,2,3 lazy_gettext lazy_pgettext:1c,2"
-EXTRACT_I18N_MAPPING_FILE = "babel.cfg"
-EXTRACT_I18N_ADD_COMMENTS = "TRANSLATORS:"
-EXTRACT_I18N_OUTPUT_FILE = "udata/translations/udata.pot"
-EXTRACT_I18N_WIDTH = 80
-
-UPDATE_I18N_DOMAIN = "udata"
-UPDATE_I18N_INPUT_FILE = "udata/translations/udata.pot"
-UPDATE_I18N_OUTPUT_FILE = "udata/translations"
-
-COMPILE_I18N_DOMAIN = "udata"
-COMPILE_I18N_DIRECTORY = "udata/translations"
-
 
 @task
 def clean(ctx, node=False, translations=False, all=False):
@@ -153,7 +140,7 @@ def i18n(ctx, update=False):
 
     info('Extract Python strings')
     with ctx.cd(ROOT):
-        ctx.run(f"pybabel extract --keywords=\"{EXTRACT_I18N_KEYWORDS}\" --mapping-file={EXTRACT_I18N_MAPPING_FILE} --output-file={EXTRACT_I18N_OUTPUT_FILE} --add-comments={EXTRACT_I18N_ADD_COMMENTS} --width={EXTRACT_I18N_WIDTH} .")
+        ctx.run('python setup.py extract_messages')
 
     # Fix crowdin requiring Language with `2-digit` iso code in potfile
     # to produce 2-digit iso code pofile
@@ -171,7 +158,7 @@ def i18n(ctx, update=False):
 
     if update:
         with ctx.cd(ROOT):
-            ctx.run(f"pybabel update --domain={UPDATE_I18N_DOMAIN} --input-file={UPDATE_I18N_INPUT_FILE} --output-dir={UPDATE_I18N_OUTPUT_FILE} --previous")
+            ctx.run('python setup.py update_catalog')
 
     info('Extract JavaScript strings')
     keys = set()
@@ -220,7 +207,7 @@ def i18nc(ctx):
     '''Compile translations'''
     header('Compiling translations')
     with ctx.cd(ROOT):
-        ctx.run(f"pybabel compile --domain={COMPILE_I18N_DOMAIN} --directory={COMPILE_I18N_DIRECTORY} --statistics")
+        ctx.run('python setup.py compile_catalog')
 
 
 @task
@@ -269,19 +256,24 @@ def oembed_watch(ctx):
 
 
 @task(clean, i18nc, assets_build, widgets_build, oembed_build, default=True)
-def dist(ctx):
+def dist(ctx, buildno=None):
     '''Package for distribution'''
-    perform_dist(ctx)
+    perform_dist(ctx, buildno)
 
 
 @task(i18nc)
-def pydist(ctx):
+def pydist(ctx, buildno=None):
     '''Perform python packaging (without compiling assets)'''
-    perform_dist(ctx)
+    perform_dist(ctx, buildno)
 
 
-def perform_dist(ctx):
+def perform_dist(ctx, buildno=None):
     header('Building a distribuable package')
+    cmd = ['python setup.py']
+    if buildno:
+        cmd.append('egg_info -b {0}'.format(buildno))
+    cmd.append('bdist_wheel')
     with ctx.cd(ROOT):
-        ctx.run('make build', pty=True)
+        ctx.run(' '.join(cmd), pty=True)
+        ctx.run('twine check dist/*')
     success('Distribution is available in dist directory')

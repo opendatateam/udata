@@ -58,6 +58,8 @@ blinker==1.4
     #   flask-navigation
     #   flask-principal
     #   flask-sitemap
+build==0.8.0
+    # via pip-tools
 celery==4.3.0
     # via
     #   -c requirements/install.pip
@@ -100,8 +102,6 @@ dnspython==2.1.0
     # via
     #   -c requirements/install.pip
     #   email-validator
-docutils==0.17.1
-    # via flit
 email-validator==1.1.3
     # via
     #   -c requirements/install.pip
@@ -207,10 +207,6 @@ flask-wtf==0.14.2
     #   -r requirements/install.in
     #   flask-mongoengine
     #   flask-security-too
-flit==3.7.1
-    # via -r requirements/develop.in
-flit-core==3.7.1
-    # via flit
 geojson==2.5.0
     # via
     #   -c requirements/install.pip
@@ -297,6 +293,7 @@ nodeenv==1.6.0
     # via pre-commit
 packaging==21.0
     # via
+    #   build
     #   pytest
     #   pytest-sugar
 passlib==1.7.4
@@ -304,13 +301,13 @@ passlib==1.7.4
     #   -c requirements/install.pip
     #   flask-security-too
 pep517==0.11.0
-    # via pip-tools
+    # via build
 pillow==8.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
     #   pydenticon
-pip-tools==6.2.0
+pip-tools==6.8.0
     # via -r requirements/develop.in
 platformdirs==2.2.0
     # via virtualenv
@@ -390,7 +387,6 @@ requests==2.24.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-    #   flit
     #   requests-mock
 requests-mock==1.7.0
     # via -r requirements/develop.in
@@ -440,11 +436,7 @@ tlds==2021080800
 toml==0.10.2
     # via pre-commit
 tomli==1.2.1
-    # via
-    #   flit
-    #   pep517
-tomli-w==1.0.0
-    # via flit
+    # via build
 udata-event-service==0.0.8
     # via
     #   -c requirements/install.pip
