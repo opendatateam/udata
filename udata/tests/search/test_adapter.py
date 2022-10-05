@@ -1,8 +1,8 @@
 import datetime
 import pytest
 
-from flask_restplus import inputs
-from flask_restplus.reqparse import RequestParser
+from flask_restx import inputs
+from flask_restx.reqparse import RequestParser
 from unittest.mock import Mock
 
 from udata import search

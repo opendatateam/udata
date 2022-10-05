@@ -3,7 +3,7 @@ import logging
 from dateutil.parser import parse
 
 from flask import request, url_for
-from flask_restplus.fields import *  # noqa
+from flask_restx.fields import *  # noqa
 
 from udata.utils import multi_to_dict
 from udata.uris import endpoint_for
