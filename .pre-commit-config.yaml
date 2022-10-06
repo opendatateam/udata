@@ -8,5 +8,5 @@ repos:
         files: ^pyproject.toml$
       - id: pip-compile
         name: pip-compile develop.pip
-        args: [--extra, dev, pyproject.toml, --output-file=requirements/develop.pip]
+        args: [--extra=dev, pyproject.toml, --output-file=requirements/develop.pip]
         files: ^pyproject.toml$
