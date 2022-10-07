@@ -1650,26 +1650,15 @@ class DatasetSchemasAPITest:
             }
         ]
 
-@pytest.fixture
-def api_dynamic_fields():
-    dataset_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
-    resource_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
 
-
-@pytest.fixture
-def api_with_dynamic_fields(api_dynamic_fields, clean_db):
-    # Additionnal fixture that wraps api_dynamic_fields and clean_db to enforce the correct order.
-    # api_dynamic_fields is called first, adding corresponding additionnal api field
-    # then clean_db is called, created the api with the augmented api field.
-    # For more information on fixture order, see the documentation:
-    # https://docs.pytest.org/en/7.1.x/reference/fixtures.html#fixture-instantiation-order
-    pass
-
-
-@pytest.mark.usefixtures('api_with_dynamic_fields')
 @pytest.mark.usefixtures('clean_db')
 class HarvestMetadataAPITest:
+
     modules = []
+
+    # api fields should be updated before app is created
+    dataset_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
+    resource_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
 
     def test_dataset_with_harvest_metadata(self, api):
         date = datetime(2022, 2, 22)
