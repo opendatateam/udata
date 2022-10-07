@@ -31,10 +31,11 @@ def serialize_resource_for_event(resource):
     for key, value in resource.extras.items():
         extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
     resource_dict.update({'extras': extras})
-    harvest = {}
-    for key, value in resource.harvest._data.items():
-        harvest[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
-    resource_dict.update({'harvest': harvest})
+    if resource.harvest:
+        harvest = {}
+        for key, value in resource.harvest._data.items():
+            harvest[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
+        resource_dict.update({'harvest': harvest})
     return resource_dict
 
 
