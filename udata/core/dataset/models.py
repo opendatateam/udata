@@ -288,7 +288,7 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
     extras = db.ExtrasField()
-    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)  # harvest extras
+    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
@@ -459,7 +459,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
-    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)  # harvest extras
+    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
 
     featured = db.BooleanField(required=True, default=False)
 

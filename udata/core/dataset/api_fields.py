@@ -105,7 +105,7 @@ resource_fields = api.model('Resource', {
         description='The resource metrics', readonly=True),
     'harvest': fields.Nested(
         resource_harvest_fields, allow_null=True, readonly=True,
-        description='Harvest attributes extras information',
+        description='Harvest attributes metadata information',
         skip_none=True),
     'extras': fields.Raw(description='Extra attributes as key-value pairs'),
     'preview_url': fields.String(description='An optional preview URL to be '
@@ -201,7 +201,7 @@ dataset_fields = api.model('Dataset', {
                      'once that date is reached.')),
     'harvest': fields.Nested(
         dataset_harvest_fields, readonly=True, allow_null=True,
-        description='Dataset harvest extras attributes',
+        description='Dataset harvest metadata attributes',
         skip_none=True
     ),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
