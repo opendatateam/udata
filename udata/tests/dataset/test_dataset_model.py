@@ -559,3 +559,30 @@ class HarvestMetadataTest:
         dataset = DatasetFactory()
         dataset.harvest = harvest_metadata
         dataset.save()
+
+    def test_harvest_resource_metadata_validate_success(self):
+        resource = ResourceFactory()
+
+        harvest_metadata = HarvestResourceMetadata(
+            created_at=datetime.now(),
+            modified_at=datetime.now(),
+            uri='http://domain.gouv.fr/dataset/uri',
+            dct_identifier='http://domain.gouv.fr/dataset/identifier'
+        )
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+    def test_harvest_resource_metadata_validation_error(self):
+        harvest_metadata = HarvestResourceMetadata(created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        with pytest.raises(db.ValidationError):
+            resource.validate()
+
+    def test_harvest_resource_metadata_no_validation_dynamic(self):
+        # Adding a dynamic field (not defined in HarvestResourceMetadata) does not raise error
+        # at validation time
+        harvest_metadata = HarvestResourceMetadata(dynamic_created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        resource.validate()

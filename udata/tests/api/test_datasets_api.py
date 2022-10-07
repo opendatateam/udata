@@ -1650,8 +1650,25 @@ class DatasetSchemasAPITest:
             }
         ]
 
+@pytest.fixture
+def api_dynamic_fields():
+    dataset_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
+    resource_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
+
+
+@pytest.fixture
+def api_with_dynamic_fields(api_dynamic_fields, clean_db):
+    # Additionnal fixture that wraps api_dynamic_fields and clean_db to enforce the correct order.
+    # api_dynamic_fields is called first, adding corresponding additionnal api field
+    # then clean_db is called, created the api with the augmented api field.
+    # For more information on fixture order, see the documentation:
+    # https://docs.pytest.org/en/7.1.x/reference/fixtures.html#fixture-instantiation-order
+    pass
+
+
+@pytest.mark.usefixtures('api_with_dynamic_fields')
 @pytest.mark.usefixtures('clean_db')
-class HarvestMetadataTest:
+class HarvestMetadataAPITest:
     modules = []
 
     def test_dataset_with_harvest_metadata(self, api):
@@ -1689,9 +1706,9 @@ class HarvestMetadataTest:
             'archived': 'not-on-remote'
         }
 
-    def test_dataset_without_dynamic_harvest_metadata(self, api):
+    def test_dataset_dynamic_harvest_metadata_without_api_field(self, api):
         harvest_metadata = HarvestDatasetMetadata(
-            dynamic_backend='DCAT'
+            dynamic_field_but_no_api_field_defined='DCAT'
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 
@@ -1699,30 +1716,56 @@ class HarvestMetadataTest:
         assert200(response)
         assert response.json['harvest'] == {}
 
-
-@pytest.fixture
-def api_dynamic_field():
-    breakpoint()
-    dataset_harvest_fields['dynamic_backend'] = fields.String(description='', allow_null=True)
-
-
-@pytest.fixture
-def clean_db_after(api_dynamic_field, clean_db):
-    pass
-
-
-@pytest.mark.usefixtures('clean_db_after')
-class HarvestMetadataBisTest:
-    modules = []
-
-    def test_dataset_with_dynamic_harvest_metadata(self, api):
+    def test_dataset_dynamic_harvest_metadata_with_api_field(self, api):
         harvest_metadata = HarvestDatasetMetadata(
-            dynamic_backend='DCAT'
+            dynamic_field='dynamic_value'
         )
         dataset = DatasetFactory(harvest=harvest_metadata)
 
         response = api.get(url_for('api.dataset', dataset=dataset))
         assert200(response)
         assert response.json['harvest'] == {
-            'dynamic_backend': 'DCAT',
+            'dynamic_field': 'dynamic_value',
+        }
+
+    def test_dataset_with_resource_harvest_metadata(self, api):
+        date = datetime(2022, 2, 22)
+
+        harvest_metadata = HarvestResourceMetadata(
+            created_at=date,
+            modified_at=date,
+            dct_identifier='http://domain.gouv.fr/dataset/identifier',
+            uri='http://domain.gouv.fr/dataset/uri',
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {
+            'created_at': date.isoformat(),
+            'modified_at': date.isoformat(),
+            'uri': 'http://domain.gouv.fr/dataset/uri',
+            'dct_identifier': 'http://domain.gouv.fr/dataset/identifier',
+        }
+
+    def test_resource_dynamic_harvest_metadata_without_api_field(self, api):
+        harvest_metadata = HarvestResourceMetadata(
+            dynamic_field_but_no_api_field_defined='dynamic_value'
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {}
+
+    def test_resource_dynamic_harvest_metadata_with_api_field(self, api):
+        harvest_metadata = HarvestResourceMetadata(
+            dynamic_field='dynamic_value'
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {
+            'dynamic_field': 'dynamic_value',
         }
