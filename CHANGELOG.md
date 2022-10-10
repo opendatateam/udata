@@ -4,6 +4,7 @@
 
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764)
+- Use dedicated dynamic harvest metadata for dataset and resources. :warning: a migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. [#2762](https://github.com/opendatateam/udata/pull/2762)
 
 ## 4.1.2 (2022-09-01)
 
