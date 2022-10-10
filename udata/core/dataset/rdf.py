@@ -331,12 +331,23 @@ def title_from_rdf(rdf, url):
             return i18n._('Nameless resource')
 
 
-def landing_page_from_rdf(rdf):
+def remote_url_from_rdf(rdf):
+    '''
+    Return DCAT.landingPage if found and uri validation succeeds.
+    Use RDF identifier as fallback if uri validation succeeds.
+    '''
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
     if landing_page:
         try:
             uris.validate(landing_page)
             return landing_page
+        except uris.ValidationError:
+            pass
+    uri = rdf.identifier.toPython()
+    if uri:
+        try:
+            uris.validate(uri)
+            return uri
         except uris.ValidationError:
             pass
 
@@ -445,7 +456,7 @@ def dataset_from_rdf(graph, dataset=None, node=None):
 
     identifier = rdf_value(d, DCT.identifier)
     uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
-    landing_page = landing_page_from_rdf(d)
+    remote_url = remote_url_from_rdf(d)
     created_at = rdf_value(d, DCT.issued)
     modified_at = rdf_value(d, DCT.modified)
 
@@ -455,8 +466,8 @@ def dataset_from_rdf(graph, dataset=None, node=None):
         dataset.harvest.dct_identifier = identifier
     if uri:
         dataset.harvest.uri = uri
-    if landing_page:
-        dataset.harvest.remote_url = landing_page
+    if remote_url:
+        dataset.harvest.remote_url = remote_url
     if created_at:
         dataset.harvest.created_at = created_at
     if modified_at:
