@@ -2,6 +2,18 @@
 
 ## Current (in progress)
 
+- Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
+- Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764)
+
+## 4.1.2 (2022-09-01)
+
+- Clean up event code [#2751](https://github.com/opendatateam/udata/pull/2751)
+- Replace mongo legacy image in CI [#2754](https://github.com/opendatateam/udata/pull/2754)
+- Fixes test `test_suggest_datasets_api` by modifying condition [#2759](https://github.com/opendatateam/udata/pull/2759)
+- Fix doc name duplicate on rdf endpoints [#2763](https://github.com/opendatateam/udata/pull/2763)
+
+## 4.1.1 (2022-07-08)
+
 - Quality score computation refactoring and now returning it in list datasets endpoint. Update was made in admin too. [#2746](https://github.com/opendatateam/udata/pull/2746)
 - :warning: Manifest logic was removed and udata does now work as standalone [#2747](https://github.com/opendatateam/udata/pull/2747)
 - Remove map related stuff [#2749](https://github.com/opendatateam/udata/pull/2749)

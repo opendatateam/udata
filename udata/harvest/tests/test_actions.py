@@ -13,7 +13,7 @@ from udata.core.organization.factories import OrganizationFactory
 from udata.core.user.factories import UserFactory
 from udata.core.dataset.factories import DatasetFactory
 from udata.core.dataset.models import HarvestDatasetMetadata
-from udata.tests.helpers import assert_emit
+from udata.tests.helpers import assert_emit, assert_equal_dates
 from udata.utils import faker, Paginable
 
 from .factories import (
@@ -384,13 +384,19 @@ class HarvestActionsTest:
         )
         to_keep = HarvestSourceFactory.create_batch(2)
         harvest_job = HarvestJobFactory(source=to_delete[0])
+        dataset_to_archive = DatasetFactory(
+            harvest=HarvestDatasetMetadata(source_id=str(to_delete[0].id))
+        )
 
         result = actions.purge_sources()
+        dataset_to_archive.reload()
 
         assert result == len(to_delete)
         assert len(HarvestSource.objects) == len(to_keep)
         assert PeriodicTask.objects.filter(id=periodic_task.id).count() == 0
         assert HarvestJob.objects(id=harvest_job.id).count() == 0
+        assert dataset_to_archive.harvest.archived == 'harvester-deleted'
+        assert_equal_dates(dataset_to_archive.archived, now)
 
     @pytest.mark.options(HARVEST_JOBS_RETENTION_DAYS=2)
     def test_purge_jobs(self):

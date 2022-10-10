@@ -236,7 +236,7 @@ jsonschema==3.2.0
 kafka-python==2.0.2
     # via
     #   -c requirements/install.pip
-    #   -r requirements/install.in
+    #   udata-event-service
 kombu[redis]==4.4.0
     # via
     #   -c requirements/install.pip
@@ -378,6 +378,10 @@ text-unidecode==1.3
     #   -c requirements/install.pip
     #   faker
 tlds==2021080800
+    # via
+    #   -c requirements/install.pip
+    #   -r requirements/install.in
+udata_event_service==0.0.8
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in

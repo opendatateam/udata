@@ -7,4 +7,4 @@ class KafkaMessageType(Enum):
     UNINDEX = 'unindex'
     CREATED = 'created'
     MODIFIED = 'modified'
-    DELETED = 'removed'
+    DELETED = 'deleted'
