@@ -4,6 +4,7 @@ Ignore other extras set at harvest time, they will be re-created if needed.
 '''
 import logging
 
+from mongoengine.errors import ValidationError
 from udata.models import Dataset
 from udata.core.dataset.models import HarvestDatasetMetadata
 
@@ -27,7 +28,10 @@ def migrate(db):
         dataset.harvest.remote_id = dataset.extras.get('harvest:remote_id')
         dataset.harvest.source_id = dataset.extras.get('harvest:source_id')
         dataset.harvest.domain = dataset.extras.get('harvest:domain')
-        dataset.save()
+        try:
+            dataset.save()
+        except ValidationError as e:
+            log.error(f'Failed to save dataset {dataset.id}: {e}')
 
     log.info(f'Modified {datasets.count()} datasets objects')
     log.info('Done')
