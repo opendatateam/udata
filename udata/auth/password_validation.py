@@ -20,10 +20,6 @@ class UdataPasswordUtil:
 
     def validate(self, password, is_register, **kwargs):
         pnorm = self.normalize(password)
-        print('################################################################')
-        print(password)
-        print(pnorm)
-        print('################################################################')
 
         error_list = []
         pass_length = current_app.config.get('SECURITY_PASSWORD_LENGTH_MIN')

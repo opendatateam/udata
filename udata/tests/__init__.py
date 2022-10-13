@@ -66,7 +66,6 @@ class WebTestMixin(object):
 
     def login(self, user=None):
         self.user = self.client.login(user)
-        print("IN login", self.user)
         return self.user
 
 
