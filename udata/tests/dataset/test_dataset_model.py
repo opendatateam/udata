@@ -7,7 +7,7 @@ from mongoengine import post_save
 
 from udata.app import cache
 from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema
+    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES
 )
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
@@ -142,10 +142,14 @@ class DatasetModelTest:
             'score': 0
         }
 
-    def test_quality_next_update(self):
-        dataset = DatasetFactory(description='', frequency='weekly')
-        assert dataset.quality['update_fulfilled_in_time'] is True
+    @pytest.mark.parametrize('freq', UPDATE_FREQUENCIES)
+    def test_quality_next_update(self, freq):
+        if freq in ['unknown', 'punctual', 'continuous', 'irregular']:
+            # We can't compute update_fulfilled_in_time for these frequencies
+            return
+        dataset = DatasetFactory(description='', frequency=freq)
         assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_description_length(self):
