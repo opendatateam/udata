@@ -582,7 +582,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             delta = timedelta(weeks=4 * 2)
         elif self.frequency == 'quarterly':
             delta = timedelta(weeks=52 / 4)
-        elif self.frequency == 'biannual':
+        elif self.frequency == 'semiannual':
             delta = timedelta(weeks=52 / 2)
         elif self.frequency == 'annual':
             delta = timedelta(weeks=52)
