@@ -4,6 +4,11 @@
 
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764)
+- :warning: Upgrade to `Flask-Security-Too` version 4.0.0 [#2772](https://github.com/opendatateam/udata/pull/2772):
+  - New User model attribute `fs_uniquifier`, migration needed.
+  - The `fs_uniquifier` is used to invalidate existing session in case of password reset.
+  - The user's `fs_uniquifier` is used instead of the `id` for auth mecanism including permissions.
+  - Exhaustive list of changes [here](https://flask-security-too.readthedocs.io/en/stable/changelog.html#version-4-0-0).
 
 ## 4.1.2 (2022-09-01)
 
