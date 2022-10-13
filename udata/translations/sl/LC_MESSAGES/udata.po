@@ -1452,3 +1452,26 @@ msgstr "Ponovo pošalјi instrukcije"
 msgid "Submit"
 msgstr "Sačuvaj"
 
+#: udata_front/theme/govrs/__init__.py:50
+msgid "Documents"
+msgstr "Dokumenta"
+
+#: udata_front/theme/govrs/templates/documents.html:5
+msgid "Documents and instructions"
+msgstr "Dokumenta i uputstva"
+
+#: udata_front/theme/govrs/templates/documents.html:10
+msgid "Law and by laws"
+msgstr "Zakon i podzakonska akta"
+
+#: udata_front/theme/govrs/templates/documents.html:33
+msgid "Instructions"
+msgstr "Uputstva"
+
+#: udata_front/theme/govrs/templates/documents.html:57
+msgid "Documents"
+msgstr "Dokumenta"
+
+#: udata_front/theme/govrs/__init__.py:50
+msgid "Open data"
+msgstr "Otvoreni podaci"
