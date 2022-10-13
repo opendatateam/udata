@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+<head>
+    <!-- If you delete this meta tag, Half Life 3 will never be released. -->
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>{{config.SITE_TITLE}} - {{subject}}</title>
+    <style>
+    /* -------------------------------------------
+            PHONE
+            For clients that support media queries.
+            Nothing fancy.
+    -------------------------------------------- */
+    @media only screen and (max-width: 600px) {
+
+        a[class="btn"] { display:block!important; margin-bottom:10px!important; background-image:none!important; margin-right:0!important;}
+
+        div[class="column"] { width: auto!important; float:none!important;}
+
+        table.social div[class="column"] {
+            width:auto!important;
+        }
+    }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+
+<body bgcolor="#efefef" style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;-webkit-font-smoothing: antialiased;-webkit-text-size-adjust: none;height: 100%;color: #373737;width: 100%!important;background-color: #efefef;">
+
+    <!-- HEADER -->
+    <table class="head-wrap" cellpadding="0" cellspacing="0" style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;width: 100%;">
+        <tr style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+            <td style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;"></td>
+            <td class="header container" style="margin: 0 auto!important;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;display: block!important;max-width: 628px!important;clear: both!important;">
+
+                <div style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+                    <table cellpadding="0" cellspacing="0" style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+                        <tr style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+                            <td align="center" class="head-message" style="margin: 0;padding: 16px;font-family: arial,helvetica,sans-serif;color: #888888;font-size: 11px;">
+                            {% if browser_url %}
+                                {% set link =
+                                    '<a href="'|safe
+                                     + browser_link
+                                     + '&quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;color: #2081c5;text-decoration: none;"> '|safe
+                                     + _('on your browser.')
+                                     + '</a>'|safe
+                                %}
+                                {{ _('View this email %(link)s', link=link) }}
+                            {% else %}
+                            &nbsp;
+                            {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </td>
+            <td style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;"></td>
+        </tr>
+    </table><!-- /HEADER -->
+
+
+    <!-- BODY -->
+    <table class="body-wrap" cellpadding="0" cellspacing="0" style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;width: 100%;">
+
+
+
+        <tr style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+            <td style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;"></td>
+            <td class="container" bgcolor="#FFFFFF" style="margin: 0 auto!important;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;display: block!important;max-width: 628px!important;clear: both!important;">
+
+                <div class="content" style="margin: 0 auto;padding: 35px 47px;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;max-width: 628px;display: block;">
+                    <table style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;width: 100%;">
+                        <tr style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+                            <td style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;">
+                                <h3 style="margin: 0;padding: 0;font-family: &quot;HelveticaNeue-Light&quot;, &quot;Helvetica Neue Light&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, &quot;Lucida Grande&quot;, sans-serif;line-height: 1.1;margin-bottom: 15px;color: #000;font-weight: 500;font-size: 24px;">{{ _('Hi %(user)s', user=user.first_name) }}</h3>
+                            </td>
+                        </tr>
+                        <tr style="margin: 0;padding: 0;">
+                            <td style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;margin-bottom: 20px;font-weight: normal;font-size: 14px;line-height: 1.5;">
+                                {% block body %}{% endblock %}
+                            </td>
+                        </tr>
+
+                        <tr style="margin: 0;padding: 0;">
+                            <td style="margin: 0;padding: 0;">
+                                <p style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;margin-top: 20px;margin-bottom: 20px;font-weight: normal;font-size: 14px;line-height: 1.5;">{{ _('See you soon on the platform') }}<br/>
+                                <i>{{ _('The %(site)s team', site=config.SITE_TITLE) }}</i></p>
+                            </td>
+                        </tr>
+
+                    </table>
+
+                </div></td>
+            </tr>
+        </table>
+    <!-- /content -->
+
+
+<td style="margin: 0;padding: 0;font-family: &quot;Helvetica Neue&quot;, &quot;Helvetica&quot;, Helvetica, Arial, sans-serif;"></td>
+
+<!-- /BODY -->
+
+</body>
+</html>

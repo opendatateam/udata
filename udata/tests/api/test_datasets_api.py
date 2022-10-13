@@ -343,7 +343,6 @@ class DatasetAPITest(APITestCase):
         '''It should create a dataset with resources from the API'''
         data = DatasetFactory.as_dict()
         data['spatial'] = {'geom': SAMPLE_GEOM}
-
         with self.api_user():
             response = self.post(url_for('api.datasets'), data)
         self.assert201(response)
@@ -607,20 +606,18 @@ class DatasetBadgeAPITest(APITestCase):
 
     def test_create(self):
         data = self.factory.as_dict()
-        with self.api_user():
-            response = self.post(
-                url_for('api.dataset_badges', dataset=self.dataset), data)
+        response = self.post(
+            url_for('api.dataset_badges', dataset=self.dataset), data)
         self.assert201(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.badges), 1)
 
     def test_create_same(self):
         data = self.factory.as_dict()
-        with self.api_user():
-            self.post(
-                url_for('api.dataset_badges', dataset=self.dataset), data)
-            response = self.post(
-                url_for('api.dataset_badges', dataset=self.dataset), data)
+        self.post(
+            url_for('api.dataset_badges', dataset=self.dataset), data)
+        response = self.post(
+            url_for('api.dataset_badges', dataset=self.dataset), data)
         self.assertStatus(response, 200)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.badges), 1)
@@ -632,9 +629,8 @@ class DatasetBadgeAPITest(APITestCase):
         self.dataset.add_badge(kinds_keys[0])
         data = self.factory.as_dict()
         data['kind'] = kinds_keys[1]
-        with self.api_user():
-            response = self.post(
-                url_for('api.dataset_badges', dataset=self.dataset), data)
+        response = self.post(
+            url_for('api.dataset_badges', dataset=self.dataset), data)
         self.assert201(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.badges), 2)
@@ -642,19 +638,17 @@ class DatasetBadgeAPITest(APITestCase):
     def test_delete(self):
         badge = self.factory()
         self.dataset.add_badge(badge.kind)
-        with self.api_user():
-            response = self.delete(
-                url_for('api.dataset_badge', dataset=self.dataset,
-                        badge_kind=str(badge.kind)))
+        response = self.delete(
+            url_for('api.dataset_badge', dataset=self.dataset,
+                    badge_kind=str(badge.kind)))
         self.assertStatus(response, 204)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.badges), 0)
 
     def test_delete_404(self):
-        with self.api_user():
-            response = self.delete(
-                url_for('api.dataset_badge', dataset=self.dataset,
-                        badge_kind=str(self.factory().kind)))
+        response = self.delete(
+            url_for('api.dataset_badge', dataset=self.dataset,
+                    badge_kind=str(self.factory().kind)))
         self.assert404(response)
 
 
@@ -681,9 +675,8 @@ class DatasetResourceAPITest(APITestCase):
         data = ResourceFactory.as_dict()
         data['extras'] = {'extra:id': 'id'}
         data['filetype'] = 'remote'
-        with self.api_user():
-            response = self.post(url_for('api.resources',
-                                         dataset=self.dataset), data)
+        response = self.post(url_for('api.resources',
+                                     dataset=self.dataset), data)
         self.assert201(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
@@ -692,9 +685,8 @@ class DatasetResourceAPITest(APITestCase):
     def test_unallowed_create_filetype_file(self):
         data = ResourceFactory.as_dict()
         data['filetype'] = 'file'  # to be explicit
-        with self.api_user():
-            response = self.post(url_for('api.resources',
-                                         dataset=self.dataset), data)
+        response = self.post(url_for('api.resources',
+                                     dataset=self.dataset), data)
         # should fail because the POST endpoint only supports URL setting for remote resources
         self.assert400(response)
 
@@ -703,9 +695,8 @@ class DatasetResourceAPITest(APITestCase):
         data = ResourceFactory.as_dict()
         data['filetype'] = 'remote'
         data['format'] = _format
-        with self.api_user():
-            response = self.post(url_for('api.resources',
-                                         dataset=self.dataset), data)
+        response = self.post(url_for('api.resources',
+                                     dataset=self.dataset), data)
         self.assert201(response)
         self.dataset.reload()
         self.assertEqual(self.dataset.resources[0].format,
@@ -717,9 +708,8 @@ class DatasetResourceAPITest(APITestCase):
 
         data = ResourceFactory.as_dict()
         data['filetype'] = 'remote'
-        with self.api_user():
-            response = self.post(url_for('api.resources',
-                                         dataset=self.dataset), data)
+        response = self.post(url_for('api.resources',
+                                     dataset=self.dataset), data)
         self.assert201(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 2)
@@ -801,9 +791,8 @@ class DatasetResourceAPITest(APITestCase):
         initial_order = [r.id for r in self.dataset.resources]
         expected_order = [{'id': str(id)} for id in reversed(initial_order)]
 
-        with self.api_user():
-            response = self.put(url_for('api.resources', dataset=self.dataset),
-                                expected_order)
+        response = self.put(url_for('api.resources', dataset=self.dataset),
+                            expected_order)
         self.assertStatus(response, 200)
         self.assertEqual([str(r['id']) for r in response.json],
                          [str(r['id']) for r in expected_order])
@@ -826,10 +815,9 @@ class DatasetResourceAPITest(APITestCase):
                 'extra:id': 'id',
             }
         }
-        with self.api_user():
-            response = self.put(url_for('api.resource',
-                                        dataset=self.dataset,
-                                        rid=str(resource.id)), data)
+        response = self.put(url_for('api.resource',
+                                    dataset=self.dataset,
+                                    rid=str(resource.id)), data)
         self.assert200(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
@@ -856,10 +844,9 @@ class DatasetResourceAPITest(APITestCase):
                 'extra:id': 'id',
             }
         }
-        with self.api_user():
-            response = self.put(url_for('api.resource',
-                                        dataset=self.dataset,
-                                        rid=str(resource.id)), data)
+        response = self.put(url_for('api.resource',
+                                    dataset=self.dataset,
+                                    rid=str(resource.id)), data)
         self.assert200(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 1)
@@ -887,9 +874,7 @@ class DatasetResourceAPITest(APITestCase):
             'description': faker.text(),
             'url': faker.url(),
         })
-        with self.api_user():
-            response = self.put(url_for('api.resources', dataset=self.dataset),
-                                data)
+        response = self.put(url_for('api.resources', dataset=self.dataset), data)
         self.assert200(response)
         self.dataset.reload()
         self.assertEqual(len(self.dataset.resources), 3)
@@ -909,10 +894,9 @@ class DatasetResourceAPITest(APITestCase):
             'description': faker.text(),
             'url': faker.url(),
         }
-        with self.api_user():
-            response = self.put(url_for('api.resource',
-                                        dataset=self.dataset,
-                                        rid=str(ResourceFactory().id)), data)
+        response = self.put(url_for('api.resource',
+                                    dataset=self.dataset,
+                                    rid=str(ResourceFactory().id)), data)
         self.assert404(response)
 
     def test_update_with_file(self):
@@ -942,26 +926,26 @@ class DatasetResourceAPITest(APITestCase):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
-        with self.api_user():
-            upload_response = self.post(
-                url_for(
-                    'api.upload_dataset_resource',
-                    dataset=self.dataset,
-                    rid=str(resource.id)
-                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
 
-            data = json.loads(upload_response.data)
-            self.assertEqual(data['title'], 'test.txt')
+        upload_response = self.post(
+            url_for(
+                'api.upload_dataset_resource',
+                dataset=self.dataset,
+                rid=str(resource.id)
+                ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
 
-            upload_response = self.post(
-                url_for(
-                    'api.upload_dataset_resource',
-                    dataset=self.dataset,
-                    rid=str(resource.id)
-                    ), {'file': (BytesIO(b'aaa'), 'test_update.txt')}, json=False)
+        data = json.loads(upload_response.data)
+        self.assertEqual(data['title'], 'test.txt')
 
-            data = json.loads(upload_response.data)
-            self.assertEqual(data['title'], 'test-update.txt')
+        upload_response = self.post(
+            url_for(
+                'api.upload_dataset_resource',
+                dataset=self.dataset,
+                rid=str(resource.id)
+                ), {'file': (BytesIO(b'aaa'), 'test_update.txt')}, json=False)
+
+        data = json.loads(upload_response.data)
+        self.assertEqual(data['title'], 'test-update.txt')
 
         resource_strorage = list(storages.resources.list_files())
         self.assertEqual(len(resource_strorage), 1)
@@ -971,20 +955,19 @@ class DatasetResourceAPITest(APITestCase):
         resource = ResourceFactory()
         self.dataset.resources.append(resource)
         self.dataset.save()
-        with self.api_user():
-            upload_response = self.post(
-                url_for(
-                    'api.upload_dataset_resource',
-                    dataset=self.dataset,
-                    rid=str(resource.id)
-                    ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
+        upload_response = self.post(
+            url_for(
+                'api.upload_dataset_resource',
+                dataset=self.dataset,
+                rid=str(resource.id)
+                ), {'file': (BytesIO(b'aaa'), 'test.txt')}, json=False)
 
-            data = json.loads(upload_response.data)
-            self.assertEqual(data['title'], 'test.txt')
+        data = json.loads(upload_response.data)
+        self.assertEqual(data['title'], 'test.txt')
 
-            response = self.delete(url_for('api.resource',
-                                           dataset=self.dataset,
-                                           rid=str(resource.id)))
+        response = self.delete(url_for('api.resource',
+                                       dataset=self.dataset,
+                                       rid=str(resource.id)))
 
         self.assertStatus(response, 204)
         self.dataset.reload()
@@ -992,10 +975,9 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(list(storages.resources.list_files()), [])
 
     def test_delete_404(self):
-        with self.api_user():
-            response = self.delete(url_for('api.resource',
-                                           dataset=self.dataset,
-                                           rid=str(ResourceFactory().id)))
+        response = self.delete(url_for('api.resource',
+                                       dataset=self.dataset,
+                                       rid=str(ResourceFactory().id)))
         self.assert404(response)
 
     def test_follow_dataset(self):

@@ -1,4 +1,4 @@
-{% extends 'mail/base.txt' %}
+{% extends 'security/email/base.txt' %}
 {% block body %}
 {{ _('Welcome to %(site)s!', site=config.SITE_TITLE) }}
 
