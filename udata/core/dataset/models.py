@@ -574,7 +574,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             delta = timedelta(days=1)
         elif self.frequency == 'weekly':
             delta = timedelta(weeks=1)
-        elif self.frequency == 'fortnighly':
+        elif self.frequency == 'biweekly':
             delta = timedelta(weeks=2)
         elif self.frequency == 'monthly':
             delta = timedelta(weeks=4)
