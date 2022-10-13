@@ -135,7 +135,6 @@ class UDataApi(Api):
             if apikey:
                 try:
                     user = User.objects.get(apikey=apikey)
-                    print(user)
                 except User.DoesNotExist:
                     self.abort(401, 'Invalid API Key')
 
