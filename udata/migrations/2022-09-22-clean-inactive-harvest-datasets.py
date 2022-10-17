@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 def migrate(db):
     log.info('Computing the list of datasets linked to an inactive harvester.')
 
-    active_sources = [str(source.id) for source in HarvestSource.objects(active=True)]
+    active_sources = [str(source.id) for source in HarvestSource.objects()]
     dangling_datasets = Dataset.objects(**{
         'extras__harvest:source_id__exists': True,
         'extras__harvest:source_id__nin': active_sources,
