@@ -40,6 +40,8 @@ blinker==1.4
     #   flask-sitemap
     #   sentry-sdk
     #   udata (pyproject.toml)
+bumpr==0.3.8
+    # via udata (pyproject.toml)
 celery==4.3.0
     # via
     #   celerybeat-mongo
