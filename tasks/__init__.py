@@ -23,7 +23,7 @@ def clean(ctx, node=False, translations=False, all=False):
     header('Clean all build artifacts')
     patterns = [
         'build', 'dist', 'cover', 'docs/_build',
-        '**/*.pyc', '*.egg-info', '.tox', 'udata/static/*'
+        '**/*.pyc', '*.egg-info', 'udata/static/*'
     ]
     if node or all:
         patterns.append('node_modules')
@@ -44,7 +44,7 @@ def update(ctx, migrate=False):
     header(msg)
     info('Updating Python dependencies')
     with ctx.cd(ROOT):
-        ctx.run('pi3 install -e .')
+        ctx.run('pip install -e .')
         ctx.run('pip install -r requirements/develop.pip')
         info('Updating JavaScript dependencies')
         ctx.run('npm install')

@@ -3,7 +3,7 @@
 So meta. First of, activate your virtualenv and install dedicated dependencies:
 
 ```shell
-$ pip install -r requirements/doc.pip
+$ pip install -r requirements/develop.pip
 ```
 
 Then you should be able to build and serve the documentation using the dedicated invoke task:

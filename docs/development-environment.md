@@ -23,19 +23,7 @@ If you need to add or modify a dependency, do it in the `.in` files _and commit 
 You can also generate the `.pip` files manually from the `.in` files without commiting them beforehand. For example, if you modified `install.in`:
 
 ```shell
-pip-compile requirements/install.in --output-file requirements/install.pip
-```
-
-### Optmizing performances with Cython
-
-Some dependencies have an optional compilation support for Cython
-resulting in better performances (mostly XML harvesting).
-To enable it, you need to install Cython before all other dependencies:
-
-```shell
-$ pip install Cython
-$ pip install -r requirements/develop.pip
-$ pip install -e .
+pip-compile pyproject.toml --output-file requirements/install.pip
 ```
 
 ### Macos Big Sur caveat

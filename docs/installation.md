@@ -41,7 +41,6 @@ you log into its account:
 ```shell
 $ python3 -m venv $HOME
 $ . bin/activate
-$ pip install Cython  # Enable optimizations on some packages
 $ pip install --upgrade setuptools  # Make sure setuptools is up to date
 $ pip install udata
 ```

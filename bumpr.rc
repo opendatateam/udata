@@ -1,5 +1,6 @@
 [bumpr]
-file = udata/__init__.py
+file = pyproject.toml
+regex = version\s*=\s*"(?P<version>.+?)"
 vcs = git
 commit = true
 tag = true
