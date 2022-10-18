@@ -10,7 +10,7 @@ from flask import (
     current_app, g, request, url_for, json, make_response, redirect, Blueprint
 )
 from flask_fs import UnauthorizedFileType
-from flask_restplus import Api, Resource
+from flask_restx import Api, Resource
 from flask_cors import CORS
 
 from udata import tracking, entrypoints

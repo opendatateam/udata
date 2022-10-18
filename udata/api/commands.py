@@ -6,7 +6,7 @@ import click
 
 from werkzeug.security import gen_salt
 from flask import json, current_app
-from flask_restplus import schemas
+from flask_restx import schemas
 
 from udata.api import api
 from udata.commands import cli, success, exit_with_error
