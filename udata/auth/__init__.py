@@ -42,11 +42,17 @@ def init_app(app):
     from .forms import ExtendedRegisterForm, ExtendedLoginForm, ExtendedResetPasswordForm
     from .mails import UdataMailUtil
     from .password_validation import UdataPasswordUtil
+    from .views import create_security_blueprint
     from udata.models import datastore
-    security.init_app(app, datastore,
-                      login_form=ExtendedLoginForm,
-                      confirm_register_form=ExtendedRegisterForm,
-                      register_form=ExtendedRegisterForm,
-                      reset_password_form=ExtendedResetPasswordForm,
-                      mail_util_cls=UdataMailUtil,
-                      password_util_cls=UdataPasswordUtil)
+    state = security.init_app(app, datastore,
+                              register_blueprint=False,
+                              login_form=ExtendedLoginForm,
+                              confirm_register_form=ExtendedRegisterForm,
+                              register_form=ExtendedRegisterForm,
+                              reset_password_form=ExtendedResetPasswordForm,
+                              mail_util_cls=UdataMailUtil,
+                              password_util_cls=UdataPasswordUtil)
+
+    security_bp = create_security_blueprint(state, 'security_blueprint')
+
+    app.register_blueprint(security_bp)

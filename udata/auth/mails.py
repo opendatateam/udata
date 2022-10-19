@@ -1,5 +1,5 @@
-import email_validator
 from flask import current_app
+from flask_security import MailUtil
 from udata.tasks import task
 
 
@@ -9,10 +9,10 @@ def sendmail(msg):
     mail.send(msg)
 
 
-class UdataMailUtil:
+class UdataMailUtil(MailUtil):
 
     def __init__(self, app):
-        pass
+        super().__init__(app)
 
     def send_mail(self, template, subject, recipient, sender, body, html, user, **kwargs):
         from flask_mail import Message
@@ -27,13 +27,3 @@ class UdataMailUtil:
         msg.html = html
 
         sendmail.delay(msg)
-
-    def normalize(self, email):
-        validator_args = current_app.config.get('EMAIL_VALIDATOR_ARGS') or {}
-        valid = email_validator.validate_email(email, **validator_args)
-        return valid.email
-
-    def validate(self, email):
-        validator_args = current_app.config.get('EMAIL_VALIDATOR_ARGS') or {}
-        valid = email_validator.validate_email(email, **validator_args)
-        return valid.email
