@@ -1,7 +1,7 @@
 import logging
 
 from flask import url_for, request, abort
-from flask_restplus import marshal
+from flask_restx import marshal
 
 from udata import search
 from udata.api import apiv2, API, fields

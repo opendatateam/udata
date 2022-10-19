@@ -13,7 +13,7 @@ aniso8601==9.0.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
-    #   flask-restplus
+    #   flask-restx
 appdirs==1.4.4
     # via
     #   -c requirements/install.pip
@@ -162,7 +162,7 @@ flask==1.1.4
     #   flask-mongoengine
     #   flask-navigation
     #   flask-principal
-    #   flask-restplus
+    #   flask-restx
     #   flask-security-too
     #   flask-sitemap
     #   flask-themes2
@@ -224,10 +224,9 @@ flask-principal==0.4.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   flask-security-too
-flask-restplus==0.13.0
+flask-restx==0.5.1
     # via
     #   -c requirements/install.pip
-    #   -c requirements/test.pip
     #   -r requirements/install.in
 flask-security-too==4.0.0
     # via
@@ -306,7 +305,7 @@ jsonschema==3.2.0
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-    #   flask-restplus
+    #   flask-restx
 kafka-python==2.0.2
     # via
     #   -c requirements/install.pip
@@ -465,7 +464,7 @@ pytz==2019.3
     #   -r requirements/install.in
     #   babel
     #   celery
-    #   flask-restplus
+    #   flask-restx
 pyyaml==5.4.1
     # via pre-commit
 rdflib==6.0.0
@@ -519,7 +518,7 @@ six==1.16.0
     #   flask-cors
     #   flask-fs
     #   flask-mongoengine
-    #   flask-restplus
+    #   flask-restx
     #   httpretty
     #   isodate
     #   jsonschema
@@ -626,6 +625,7 @@ werkzeug==0.16.1
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   flask
+    #   flask-restx
     #   pytest-flask
 wheel==0.36.2
     # via
