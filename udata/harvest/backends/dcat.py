@@ -4,6 +4,7 @@ import requests
 
 from rdflib import Graph, URIRef, BNode
 from rdflib.namespace import RDF
+import xml.etree.ElementTree as ET
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
@@ -59,7 +60,7 @@ class DcatBackend(BaseBackend):
         # if format can't be guessed from the url
         # we fallback on the declared Content-Type
         if not fmt:
-            response = requests.head(self.source.url)
+            response = requests.head(self.source.url, verify=False)
             mime_type = response.headers.get('Content-Type', '').split(';', 1)[0]
             if not mime_type:
                 msg = 'Unable to detect format from extension or mime type'
@@ -85,6 +86,45 @@ class DcatBackend(BaseBackend):
                     break
 
             graph += subgraph
+
+        for node in graph.subjects(RDF.type, DCAT.Dataset):
+            id = graph.value(node, DCT.identifier)
+            kwargs = {'nid': str(node)}
+            kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
+            self.add_item(id, **kwargs)
+
+        return graph
+
+    def parse_csw_graph(self, url, fmt):
+        graph = Graph(namespace_manager=namespace_manager)
+
+        body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" service="CSW" version="2.0.2" resultType="results" startPosition="{start}" maxRecords="15" outputFormat="application/xml" outputSchema="http://www.w3.org/ns/dcat#">
+            <csw:Query typeNames="csw:Record">
+                <csw:ElementSetName>full</csw:ElementSetName>
+            </csw:Query>
+            </csw:GetRecords>'''
+        headers = {"Content-Type": "application/xml"}
+
+        tree = ET.fromstring(requests.post(url, data=body.format(start=1), headers=headers, verify=False).text)
+
+        with open('./csw.xml', 'w') as f:
+            while tree:
+                if len(tree) < 2:
+                    # Why? Happens on https://data.naturefrance.fr/geonetwork/srv/eng/csw
+                    break
+                for child in tree[1]:  # Iterating on CSW SearchResults
+                    f.write(ET.tostring(child).decode('utf-8') + '\n')
+                    subgraph = Graph(namespace_manager=namespace_manager)
+                    subgraph.parse(data=ET.tostring(child), format=fmt)
+                    graph += subgraph
+
+                if tree[1].attrib['nextRecord'] != '0':
+                    print(tree[1].attrib['nextRecord'])
+                    tree = ET.fromstring(requests.post(
+                        url, data=body.format(start=tree[1].attrib['nextRecord']),
+                        headers=headers, verify=False).text)
+                else:
+                    break
 
         for node in graph.subjects(RDF.type, DCAT.Dataset):
             id = graph.value(node, DCT.identifier)
