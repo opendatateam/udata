@@ -7,6 +7,7 @@
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764) [#2773](https://github.com/opendatateam/udata/pull/2773) [#2777](https://github.com/opendatateam/udata/pull/2777)
 - Fix randomly failing suggest tests [#2775](https://github.com/opendatateam/udata/pull/2775)
 - Fix alt attribute not shown on image [#2776](https://github.com/opendatateam/udata/pull/2776)
+- Add Resource endpoints to reach directly its extras [#2779](https://github.com/opendatateam/udata/pull/2779)
 
 ## 4.1.2 (2022-09-01)
 
