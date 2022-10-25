@@ -501,6 +501,50 @@ class ResourceAPI(ResourceMixin, API):
         return '', 204
 
 
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/extras/', endpoint='resource_extras',
+          doc=common_doc)
+@api.param('rid', 'The resource unique identifier')
+class ResourceExtrasAPI(ResourceMixin, API):
+    @api.doc('get_resource_extras')
+    def get(self, dataset, rid):
+        '''Get a resource extras given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            api.abort(410, 'Dataset has been deleted')
+        resource = self.get_resource_or_404(dataset, rid)
+        return resource.extras
+
+    @api.secure
+    @api.doc('update_resource_extras')
+    def put(self, dataset, rid):
+        '''Update a given resource extras on a given dataset'''
+        data = request.json
+        ResourceEditPermission(dataset).test()
+        resource = self.get_resource_or_404(dataset, rid)
+        try:
+            resource.extras.update(data)
+        except ValueError:
+            api.abort(400, 'Wrong payload format')
+        dataset.update_resource(resource)
+        dataset.save()
+        return resource.extras
+
+    @api.secure
+    @api.doc('delete_resource_extras')
+    def delete(self, dataset, rid):
+        '''Delete a given resource extras key on a given dataset'''
+        data = request.json
+        ResourceEditPermission(dataset).test()
+        resource = self.get_resource_or_404(dataset, rid)
+        try:
+            for key in data.items():
+                del resource[key]
+        except AttributeError:
+            api.abort(400, 'Wrong payload format')
+        dataset.update_resource(resource)
+        dataset.save()
+        return '', 204
+
+
 @ns.route('/community_resources/', endpoint='community_resources')
 class CommunityResourcesAPI(API):
     @api.doc('list_community_resources')
