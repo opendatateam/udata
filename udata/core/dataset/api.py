@@ -536,8 +536,8 @@ class ResourceExtrasAPI(ResourceMixin, API):
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         try:
-            for key in data.items():
-                del resource[key]
+            for key, value in data.items():
+                del resource.extras[key]
         except AttributeError:
             api.abort(400, 'Wrong payload format')
         dataset.update_resource(resource)
