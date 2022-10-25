@@ -1,11 +1,10 @@
 import datetime
+import requests
 from flask import current_app
-from udata_event_service.producer import produce
 
 from udata.utils import to_iso_datetime, get_by
 from udata.models import Dataset
 from udata.tasks import task
-from udata.event.producer import get_topic
 from udata.event.values import KafkaMessageType
 
 
@@ -35,35 +34,35 @@ def serialize_resource_for_event(resource):
 
 
 @task(route='high.resource')
-def publish(document, resource_id, action):
+def publish(url, document, resource_id, action):
     if action == KafkaMessageType.DELETED:
         resource = None
     else:
         resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
     message_type = f'resource.{action.value}'
-    produce(
-        kafka_uri=current_app.config.get('KAFKA_URI'),
-        topic=get_topic(message_type),
-        service='udata',
-        key_id=str(resource_id),
-        document=resource,
-        meta={'message_type': message_type, 'dataset_id': str(document.id)}
-    )
+    payload = {
+        'key': str(resource_id),
+        'document': resource,
+        'meta': {'message_type': message_type, 'dataset_id': str(document.id)}
+    }
+    r = requests.post(url, json=payload)
+    r.raise_for_status()
 
 
 @Dataset.on_resource_added.connect
 def publish_added_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], KafkaMessageType.CREATED)
+        current_app.config.get('RESOURCES_ANALYSER_URI')
+        publish.delay('http://localhost:8000/api/resource/created/', document, kwargs['resource_id'], KafkaMessageType.CREATED)
 
 
 @Dataset.on_resource_updated.connect
 def publish_updated_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], KafkaMessageType.MODIFIED)
+        publish.delay('http://localhost:8000/api/resource/updated/', document, kwargs['resource_id'], KafkaMessageType.MODIFIED)
 
 
 @Dataset.on_resource_removed.connect
 def publish_removed_resource_message(sender, document, **kwargs):
     if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay(document, kwargs['resource_id'], KafkaMessageType.DELETED)
+        publish.delay('http://localhost:8000/api/resource/deleted/', document, kwargs['resource_id'], KafkaMessageType.DELETED)
