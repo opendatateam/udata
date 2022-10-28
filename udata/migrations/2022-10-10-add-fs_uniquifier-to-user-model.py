@@ -4,6 +4,8 @@ Set fs_uniquifier field for every user due to Flask-Security-Too update > v4.0.0
 import logging
 import uuid
 
+from mongoengine.errors import ValidationError
+
 from udata.models import User
 
 
@@ -16,7 +18,9 @@ def migrate(db):
     users = User.objects().no_cache().timeout(False)
     for user in users:
         user.fs_uniquifier = uuid.uuid4().hex
-        user.save()
+        try:
+            user.save()
+        except ValidationError as e:
+            log.error(f'Error on user {user.id}: {e}')
 
     log.info('Completed.')
-
