@@ -582,8 +582,17 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def last_update(self):
+        """
+        Use the more recent date we would have on resources (harvest, published, modified).
+        Default to dataset last_modified if no resource.
+        """
         if self.resources:
-            return max(resource.published for resource in self.resources)
+            dates = []
+            for res in self.resources:
+                dates += [res.modified, res.published]
+                if res.harvest and res.harvest.modified_at:
+                    dates.append(res.harvest.modified_at)
+            return max(dates)
         else:
             return self.last_modified
 
