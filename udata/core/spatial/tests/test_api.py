@@ -96,12 +96,12 @@ class SpatialApiTest(APITestCase):
     def test_suggest_zones_on_name(self):
         '''It should suggest zones based on its name'''
         for i in range(4):
-            GeoZoneFactory(name='test-{0}'.format(i)
+            GeoZoneFactory(name='name-test-{0}'.format(i)
                            if i % 2 else faker.word(),
                            is_current=True)
 
         response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'name-test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -113,17 +113,17 @@ class SpatialApiTest(APITestCase):
             self.assertIn('level', suggestion)
             self.assertIn('keys', suggestion)
             self.assertIsInstance(suggestion['keys'], dict)
-            self.assertIn('test', suggestion['name'])
+            self.assertIn('name-test', suggestion['name'])
 
     def test_suggest_zones_on_code(self):
         '''It should suggest zones based on its code'''
         for i in range(4):
-            GeoZoneFactory(code='test-{0}'.format(i)
+            GeoZoneFactory(code='code-test-{0}'.format(i)
                            if i % 2 else faker.word(),
                            is_current=True)
 
         response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'test', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'code-test', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -135,7 +135,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('level', suggestion)
             self.assertIn('keys', suggestion)
             self.assertIsInstance(suggestion['keys'], dict)
-            self.assertIn('test', suggestion['code'])
+            self.assertIn('code-test', suggestion['code'])
 
     def test_suggest_zones_no_match(self):
         '''It should not provide zones suggestions if no match'''
@@ -152,12 +152,12 @@ class SpatialApiTest(APITestCase):
     def test_suggest_zones_unicode(self):
         '''It should suggest zones based on its name'''
         for i in range(4):
-            GeoZoneFactory(name='testé-{0}'.format(i)
+            GeoZoneFactory(name='name-testé-{0}'.format(i)
                            if i % 2 else faker.word(),
                            is_current=True)
 
         response = self.get(
-            url_for('api.suggest_zones'), qs={'q': 'testé', 'size': '5'})
+            url_for('api.suggest_zones'), qs={'q': 'name-testé', 'size': '5'})
         self.assert200(response)
 
         self.assertEqual(len(response.json), 2)
@@ -169,7 +169,7 @@ class SpatialApiTest(APITestCase):
             self.assertIn('level', suggestion)
             self.assertIn('keys', suggestion)
             self.assertIsInstance(suggestion['keys'], dict)
-            self.assertIn('testé', suggestion['name'])
+            self.assertIn('name-testé', suggestion['name'])
 
     def test_suggest_zones_empty(self):
         '''It should not provide zones suggestion if no data is present'''
