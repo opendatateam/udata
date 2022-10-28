@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-07-05 11:01\n"
+"PO-Revision-Date: 2022-10-28 13:09\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -633,19 +633,19 @@ msgstr "URL des crédits"
 
 #: udata/core/post/forms.py:29
 msgid "body type"
-msgstr ""
+msgstr "type du contenu"
 
 #: udata/core/post/forms.py:30
 msgid "Specify your body type (HTML or markdown)"
-msgstr ""
+msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
 
 #: udata/core/post/models.py:16
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: udata/core/post/models.py:17
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: udata/core/post/models.py:60
 msgid "post"
