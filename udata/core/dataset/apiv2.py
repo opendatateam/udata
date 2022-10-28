@@ -1,8 +1,11 @@
 import logging
 
-from flask import url_for
+from flask import url_for, request, abort
+from flask_restx import marshal
 
+from udata import search
 from udata.api import apiv2, API, fields
+from udata.utils import multi_to_dict, get_by
 
 from .api_fields import (
     badge_fields,
@@ -11,25 +14,30 @@ from .api_fields import (
     spatial_coverage_fields,
     temporal_coverage_fields,
     user_ref_fields,
+    checksum_fields
 )
+from udata.core.spatial.api_fields import geojson
 from .models import (
-    UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE
+    Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
 )
 from .permissions import DatasetEditPermission
+from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
+DEFAULT_SORTING = '-created_at'
 
 #: Default mask to make it lightweight by default
 DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date', 'extras',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived'
+    'uri', 'page', 'last_update', 'archived', 'quality'
 ))
 
 log = logging.getLogger(__name__)
 
 ns = apiv2.namespace('datasets', 'Dataset related operations')
+search_parser = DatasetSearch.as_request_parser()
 resources_parser = apiv2.parser()
 resources_parser.add_argument(
     'page', type=int, default=1, location='args', help='The page to fetch')
@@ -39,6 +47,9 @@ resources_parser.add_argument(
 resources_parser.add_argument(
     'type', type=str, location='args',
     help='The type of resources to fetch')
+resources_parser.add_argument(
+    'q', type=str, location='args',
+    help='query string to search through resources titles')
 
 common_doc = {
     'params': {'dataset': 'The dataset ID or slug'}
@@ -123,6 +134,43 @@ resource_page_fields = apiv2.model('ResourcePage', {
     'total': fields.Integer()
 })
 
+dataset_page_fields = apiv2.model(
+    'DatasetPage',
+    fields.pager(dataset_fields),
+    mask='data{{{0}}},*'.format(DEFAULT_MASK_APIV2)
+)
+
+specific_resource_fields = apiv2.model('SpecificResource', {
+    'resource': fields.Nested(resource_fields, description='The dataset resources'),
+    'dataset_id': fields.String()
+})
+
+apiv2.inherit('Badge', badge_fields)
+apiv2.inherit('OrganizationReference', org_ref_fields)
+apiv2.inherit('UserReference', user_ref_fields)
+apiv2.inherit('Resource', resource_fields)
+apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
+apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
+apiv2.inherit('GeoJSON', geojson)
+apiv2.inherit('Checksum', checksum_fields)
+
+
+@ns.route('/search/', endpoint='dataset_search')
+class DatasetSearchAPI(API):
+    '''Datasets collection search endpoint'''
+    @apiv2.doc('search_datasets')
+    @apiv2.expect(search_parser)
+    @apiv2.marshal_with(dataset_page_fields)
+    def get(self):
+        '''List or search all datasets'''
+        search_parser.parse_args()
+        try:
+            return search.query(Dataset, **multi_to_dict(request.args))
+        except NotImplementedError:
+            abort(501, 'Search endpoint not enabled')
+        except RuntimeError:
+            abort(500, 'Internal search service error')
+
 
 @ns.route('/<dataset:dataset>/', endpoint='dataset', doc=common_doc)
 @apiv2.response(404, 'Dataset not found')
@@ -149,12 +197,17 @@ class ResourcesAPI(API):
         page_size = args['page_size']
         next_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page + 1}&page_size={page_size}"
         previous_page = f"{url_for('apiv2.resources', dataset=dataset.id, _external=True)}?page={page - 1}&page_size={page_size}"
+        res = dataset.resources
+
         if args['type']:
-            res = [elem for elem in dataset.resources if elem['type'] == args['type']]
+            res = [elem for elem in res if elem['type'] == args['type']]
             next_page += f"&type={args['type']}"
             previous_page += f"&type={args['type']}"
-        else:
-            res = dataset.resources
+
+        if args['q']:
+            res = [elem for elem in res if args['q'].lower() in elem['title'].lower()]
+            next_page += f"&q={args['q']}"
+            previous_page += f"&q={args['q']}"
 
         if page > 1:
             offset = page_size * (page - 1)
@@ -170,3 +223,23 @@ class ResourcesAPI(API):
             'previous_page': previous_page if page > 1 else None,
             'total': len(res),
         }
+
+
+@ns.route('/resources/<uuid:rid>/', endpoint='resource')
+class ResourceAPI(API):
+    @apiv2.doc('get_resource')
+    def get(self, rid):
+        dataset = Dataset.objects(resources__id=rid).first()
+        if dataset:
+            resource = get_by(dataset.resources, 'id', rid)
+        else:
+            resource = CommunityResource.objects(id=rid).first()
+        if not resource:
+            apiv2.abort(404, 'Resource does not exist')
+
+        # Manually marshalling to make sure resource.dataset is in the scope.
+        # See discussions in https://github.com/opendatateam/udata/pull/2732/files
+        return marshal({
+            'resource': resource,
+            'dataset_id': dataset.id if dataset else None
+        }, specific_resource_fields)

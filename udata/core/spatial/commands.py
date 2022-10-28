@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from textwrap import dedent
 from urllib.request import urlretrieve
+import requests
 
 import click
 import msgpack
@@ -141,7 +142,10 @@ def load(filename=DEFAULT_GEOZONES_FILE, drop=False):
     prefix = 'geozones-{0}'.format(ts)
     if filename.startswith('http'):
         log.info('Downloading GeoZones bundle: %s', filename)
-        filename, _ = urlretrieve(filename, tmp.path(GEOZONE_FILENAME))
+        # Use tmp.open to make sure that the directory exists in FS
+        with tmp.open(GEOZONE_FILENAME, 'wb') as newfile:
+            newfile.write(requests.get(filename).content)
+            filename = tmp.path(GEOZONE_FILENAME)
 
     log.info('Extracting GeoZones bundle')
     with handle_error(prefix):

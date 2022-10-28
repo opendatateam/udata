@@ -5,7 +5,6 @@ from blinker import Signal
 from flask import url_for
 from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
-from elasticsearch_dsl import Integer, Object
 
 from udata.core.storages import avatars, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -118,7 +117,16 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
     deleted = db.DateTimeField()
 
     meta = {
-        'indexes': ['-created_at', 'slug'],
+        'indexes': [
+            '$name',
+            'created_at',
+            'slug',
+            'metrics.reuses',
+            'metrics.datasets',
+            'metrics.followers',
+            'metrics.views',
+            'last_modified'
+        ],
         'ordering': ['-created_at'],
         'queryset_class': OrganizationQuerySet,
     }
@@ -130,13 +138,6 @@ class Organization(WithMetrics, BadgeMixin, db.Datetimed, db.Document):
         PUBLIC_SERVICE: _('Public Service'),
         CERTIFIED: _('Certified'),
     }
-
-    __search_metrics__ = Object(properties={
-        'datasets': Integer(),
-        'reuses': Integer(),
-        'followers': Integer(),
-        'views': Integer(),
-    })
 
     __metrics_keys__ = [
         'datasets',

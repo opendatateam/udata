@@ -1,0 +1,21 @@
+{% extends theme('raw.html') %}
+
+{% block body %}
+{% set messages = get_flashed_messages() %}
+{% set login_required = request.args.get('login_required') %}
+{% if login_required %}
+    {% set messages = messages + [_('You must be connected to do this action.')] %}
+{% endif %}
+{% if messages %}
+    <div class="container py-lg">
+        {% for message in messages %}
+        <div class="well well-secondary-grey-100">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+<main>
+    {% block content %}{% endblock %}
+</main>
+{% endblock %}

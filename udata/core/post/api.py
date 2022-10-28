@@ -46,14 +46,14 @@ post_fields = api.model('Post', {
         description='The post last modification date', readonly=True),
     'published': fields.ISODateTime(
         description='The post publication date', readonly=True),
-
+    'body_type': fields.String(description='HTML or markdown body type', default='markdown'),
     'uri': fields.UrlFor(
         'api.post', lambda o: {'post': o},
         description='The post API URI', readonly=True),
     'page': fields.UrlFor(
         'posts.show', lambda o: {'post': o},
         description='The post page URL', readonly=True, fallback_endpoint='api.post'),
-}, mask='*,datasets{title,acronym,uri,page},reuses{title,image,image_thumbnail,uri,page}')
+}, mask='*,datasets{id,title,acronym,uri,page},reuses{id,title,image,image_thumbnail,uri,page}')
 
 post_page_fields = api.model('PostPage', fields.pager(post_fields))
 

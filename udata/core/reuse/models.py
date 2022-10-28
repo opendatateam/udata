@@ -1,7 +1,6 @@
 from blinker import Signal
 from mongoengine.signals import pre_save, post_save
 from werkzeug import cached_property
-from elasticsearch_dsl import Integer, Object
 
 from udata.core.storages import images, default_image_basename
 from udata.frontend.markdown import mdstrip
@@ -91,12 +90,6 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     __badges__ = {}
 
-    __search_metrics__ = Object(properties={
-        'datasets': Integer(),
-        'followers': Integer(),
-        'views': Integer(),
-    })
-
     __metrics_keys__ = [
         'discussions',
         'datasets',
@@ -105,7 +98,13 @@ class Reuse(db.Datetimed, WithMetrics, BadgeMixin, db.Owned, db.Document):
     ]
 
     meta = {
-        'indexes': ['-created_at', 'urlhash'] + db.Owned.meta['indexes'],
+        'indexes': ['$title',
+                    'created_at',
+                    'last_modified',
+                    'metrics.datasets',
+                    'metrics.followers',
+                    'metrics.views',
+                    'urlhash'] + db.Owned.meta['indexes'],
         'ordering': ['-created_at'],
         'queryset_class': ReuseQuerySet,
     }

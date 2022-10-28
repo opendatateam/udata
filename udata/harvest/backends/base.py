@@ -13,7 +13,7 @@ from udata.models import Dataset
 from udata.utils import safe_unicode
 
 from ..exceptions import HarvestException, HarvestSkipException, HarvestValidationError
-from ..models import HarvestItem, HarvestJob, HarvestError
+from ..models import HarvestItem, HarvestJob, HarvestError, archive_harvested_dataset
 from ..signals import before_harvest_job, after_harvest_job
 
 log = logging.getLogger(__name__)
@@ -250,16 +250,7 @@ class BaseBackend(object):
 
         for dataset in local_items_not_on_remote:
             if not dataset.extras.get('harvest:archived_at'):
-                log.debug('Archiving dataset %s', dataset.id)
-                archival_date = datetime.now()
-                dataset.archived = archival_date
-                dataset.extras['harvest:archived'] = 'not-on-remote'
-                dataset.extras['harvest:archived_at'] = archival_date
-                if self.dryrun:
-                    dataset.validate()
-                else:
-                    dataset.save()
-
+                archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
             item = self.add_item(dataset.extras['harvest:remote_id'])

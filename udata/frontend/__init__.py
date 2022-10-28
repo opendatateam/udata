@@ -1,8 +1,12 @@
 import inspect
 import logging
+import json
+import pkg_resources
 
+from time import time
 from importlib import import_module
 from jinja2 import Markup, contextfunction
+from flask import current_app
 
 from udata import assets, entrypoints
 from udata.i18n import I18nBlueprint
@@ -16,6 +20,23 @@ log = logging.getLogger(__name__)
 hook = I18nBlueprint('hook', __name__)
 
 _template_hooks = {}
+
+
+@hook.app_template_global()
+def package_version(name):
+    return pkg_resources.get_distribution(name).version
+
+
+@hook.app_template_global(name='static')
+def static_global(filename, _burst=True, **kwargs):
+    if current_app.config['DEBUG'] or current_app.config['TESTING']:
+        burst = time()
+    else:
+        burst = package_version('udata')
+    if _burst:
+        kwargs['_'] = burst
+    return assets.cdn_for('static', filename=filename, **kwargs)
+
 
 def _wrapper(func, name=None, when=None):
     name = name or func.__name__
@@ -109,10 +130,3 @@ def init_app(app, views=None):
     for module in entrypoints.get_enabled('udata.front', app).values():
         front_module = module if inspect.ismodule(module) else import_module(module)
         front_module.init_app(app)
-
-    # Load core manifest
-    with app.app_context():
-        assets.register_manifest('udata')
-        for dist in entrypoints.get_plugins_dists(app, 'udata.views'):
-            if assets.has_manifest(dist.project_name):
-                assets.register_manifest(dist.project_name)

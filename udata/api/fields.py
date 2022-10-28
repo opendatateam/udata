@@ -3,7 +3,7 @@ import logging
 from dateutil.parser import parse
 
 from flask import request, url_for
-from flask_restplus.fields import *  # noqa
+from flask_restx.fields import *  # noqa
 
 from udata.utils import multi_to_dict
 from udata.uris import endpoint_for
@@ -87,7 +87,6 @@ def pager(page_fields):
                          required=True, min=0),
         'next_page': NextPageUrl(description='The next page URL if exists'),
         'previous_page': PreviousPageUrl(
-            description='The previous page URL if exists'),
-        'facets': Raw(description='Search facets results if any'),
+            description='The previous page URL if exists')
     }
     return pager_fields

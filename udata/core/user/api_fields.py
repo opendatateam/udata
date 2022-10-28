@@ -97,13 +97,10 @@ user_suggestion_fields = api.model('UserSuggestion', {
                                 readonly=True),
     'last_name': fields.String(description='The user last name',
                                readonly=True),
-    'avatar_url': fields.String(description='The user avatar URL'),
+    'avatar_url': fields.ImageField(size=BIGGEST_AVATAR_SIZE, description='The user avatar URL', readonly=True),
     'slug': fields.String(
         description='The user permalink string', readonly=True),
-    'score': fields.Float(
-        description='The internal match score', readonly=True),
 })
-
 
 notifications_fields = api.model('Notification', {
     'type': fields.String(description='The notification type', readonly=True),

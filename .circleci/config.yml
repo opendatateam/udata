@@ -5,9 +5,8 @@ jobs:
   python:
     docker:
       - image: udata/circleci:2-alpine
-      - image: circleci/mongo:3.6-stretch-ram
+      - image: mongo:3.6
       - image: redis:alpine
-      - image: udata/elasticsearch:2.4.5
     environment:
        BASH_ENV: /root/.bashrc
     steps:
@@ -99,7 +98,6 @@ jobs:
           root: .
           paths:
             - udata/static
-            - udata/manifest.json
 
   dist:
     docker:

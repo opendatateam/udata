@@ -11,7 +11,6 @@ from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
 from werkzeug import cached_property
-from elasticsearch_dsl import Integer, Object
 import requests
 
 from udata.app import cache
@@ -202,6 +201,15 @@ class License(db.Document):
                 license = candidates[0]
 
         if license is None:
+            # Try to match `title` with a low Damerau-Levenshtein distance
+            computed = ((l, rdlevenshtein(l.title.lower(), text)) for l in cls.objects)
+            candidates = [l for l, d in computed if d <= MAX_DISTANCE]
+            # If there is more that one match, we cannot determinate
+            # which one is closer to safely choose between candidates
+            if len(candidates) == 1:
+                license = candidates[0]
+
+        if license is None:
             # Try to single match `alternate_titles` with a low Damerau-Levenshtein distance
             computed = (
                 (l, rdlevenshtein(cls.slug.slugify(t), slug))
@@ -209,9 +217,9 @@ class License(db.Document):
                 for t in l.alternate_titles
             )
             candidates = [l for l, d in computed if d <= MAX_DISTANCE]
-            # If there is more that one match, we cannot determinate
+            # If there is more that one license matching, we cannot determinate
             # which one is closer to safely choose between candidates
-            if len(candidates) == 1:
+            if len(set(candidates)) == 1:
                 license = candidates[0]
         return license
 
@@ -388,7 +396,13 @@ class Resource(ResourceMixin, WithMetrics, db.EmbeddedDocument):
 
     @property
     def dataset(self):
-        return self._instance
+        try:
+            self._instance.id  # try to access attr from parent instance
+            return self._instance
+        except ReferenceError:  # weakly-referenced object no longer exists
+            log.warning('Weakly referenced object for resource.dataset no longer exists, '
+                        'using a poor performance query instead.')
+            return Dataset.objects(resources__id=self.id).first()
 
     def save(self, *args, **kwargs):
         if not self.dataset:
@@ -434,12 +448,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         PIVOTAL_DATA: _('Pivotal data'),
     }
 
-    __search_metrics__ = Object(properties={
-        'reuses': Integer(),
-        'followers': Integer(),
-        'views': Integer(),
-    })
-
     __metrics_keys__ = [
         'discussions',
         'reuses',
@@ -449,7 +457,12 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     meta = {
         'indexes': [
-            '-created_at',
+            '$title',
+            'created_at',
+            'last_modified',
+            'metrics.reuses',
+            'metrics.followers',
+            'metrics.views',
             'slug',
             'resources.id',
             'resources.urlhash',
@@ -467,6 +480,8 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     on_delete = signal('Dataset.on_delete')
     on_archive = signal('Dataset.on_archive')
     on_resource_added = signal('Dataset.on_resource_added')
+    on_resource_updated = signal('Dataset.on_resource_updated')
+    on_resource_removed = signal('Dataset.on_resource_removed')
 
     verbose_name = _('dataset')
 
@@ -485,11 +500,6 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             cls.on_update.send(document)
         if document.deleted:
             cls.on_delete.send(document)
-        if document.archived:
-            cls.on_archive.send(document)
-        if kwargs.get('resource_added'):
-            cls.on_resource_added.send(document,
-                                       resource_id=kwargs['resource_added'])
 
     def clean(self):
         super(Dataset, self).clean()
@@ -597,67 +607,77 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             * description length
             * and so on
         """
-        from udata.models import Discussion  # noqa: Prevent circular imports
         result = {}
         if not self.id:
             # Quality is only relevant on saved Datasets
             return result
-        if self.frequency != 'unknown':
-            result['frequency'] = self.frequency
+
+        result['license'] = True if self.license else False
+        result['temporal_coverage'] = True if self.temporal_coverage else False
+        result['spatial'] = True if self.spatial else False
+
+        result['update_frequency'] = False if self.frequency in ['unknown', 'irregular', 'punctual'] else True
         if self.next_update:
-            result['update_in'] = -(self.next_update - datetime.now()).days
-        if self.tags:
-            result['tags_count'] = len(self.tags)
-        if self.description:
-            result['description_length'] = len(self.description)
+            result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days < 0 else False
+
+        result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH') else False
+
         if self.resources:
             result['has_resources'] = True
-            result['has_only_closed_or_no_formats'] = all(
+            result['has_open_format'] = not all(
                 resource.closed_or_no_format for resource in self.resources)
-            result['has_unavailable_resources'] = not all(
-                self.check_availability())
-        discussions = Discussion.objects(subject=self)
-        if discussions:
-            result['discussions'] = len(discussions)
-            result['has_untreated_discussions'] = not all(
-                discussion.person_involved(self.owner)
-                for discussion in discussions)
+            result['all_resources_available'] = all(self.check_availability())
+            resource_doc = False
+            resource_desc = False
+            for resource in self.resources:
+                if resource.type == 'documentation':
+                    resource_doc = True
+                if resource.description:
+                    resource_desc = True
+            result['resources_documentation'] = resource_doc or resource_desc
+
         result['score'] = self.compute_quality_score(result)
         return result
 
+    @staticmethod
+    def normalize_score(score):
+        """
+        Normalize score by dividing it by the quality max score.
+        Make sure to update QUALITY_MAX_SCORE accordingly if the max score changes.
+        """
+        QUALITY_MAX_SCORE = 9
+        return score / QUALITY_MAX_SCORE
+
     def compute_quality_score(self, quality):
-        """Compute the score related to the quality of that dataset."""
+        """
+        Compute the score related to the quality of that dataset.
+        The score is normalized between 0 and 1.
+
+        Make sure to update normalize_score if the max score changes.
+        """
         score = 0
-        UNIT = 2
-        if 'update_in' in quality:
-            # TODO: should be related to frequency.
-            if quality['update_in'] < 0:
+        UNIT = 1
+        if quality['license']:
+            score += UNIT
+        if quality['temporal_coverage']:
+            score += UNIT
+        if quality['spatial']:
+            score += UNIT
+        if quality['update_frequency']:
+            score += UNIT
+        if 'update_fulfilled_in_time' in quality:
+            if quality['update_fulfilled_in_time']:
                 score += UNIT
-            else:
-                score -= UNIT
-        if 'tags_count' in quality:
-            if quality['tags_count'] > 3:
-                score += UNIT
-        if 'description_length' in quality:
-            if quality['description_length'] > 100:
-                score += UNIT
+        if quality['dataset_description_quality']:
+            score += UNIT
         if 'has_resources' in quality:
-            if quality['has_only_closed_or_no_formats']:
-                score -= UNIT
-            else:
+            if quality['has_open_format']:
                 score += UNIT
-            if quality['has_unavailable_resources']:
-                score -= UNIT
-            else:
+            if quality['all_resources_available']:
                 score += UNIT
-        if 'discussions' in quality:
-            if quality['has_untreated_discussions']:
-                score -= UNIT
-            else:
+            if quality['resources_documentation']:
                 score += UNIT
-        if score < 0:
-            return 0
-        return score
+        return self.normalize_score(score)
 
     @classmethod
     def get(cls, id_or_slug):
@@ -676,8 +696,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             }
         })
         self.reload()
-        post_save.send(self.__class__, document=self,
-                       resource_added=resource.id)
+        self.on_resource_added.send(self.__class__, document=self, resource_id=resource.id)
 
     def update_resource(self, resource):
         '''Perform an atomic update for an existing resource'''
@@ -687,7 +706,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         }
         self.update(**data)
         self.reload()
-        post_save.send(self.__class__, document=self)
+        self.on_resource_updated.send(self.__class__, document=self, resource_id=resource.id)
 
     def remove_resource(self, resource):
         # Deletes resource's file from file storage
@@ -695,6 +714,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             storages.resources.delete(resource.fs_filename)
 
         self.resources.remove(resource)
+        self.on_resource_removed.send(self.__class__, document=self, resource_id=resource.id)
 
     @property
     def community_resources(self):

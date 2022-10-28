@@ -5,8 +5,7 @@ from datetime import datetime
 from flask import url_for
 
 from udata.models import (
-    Organization, Member, MembershipRequest, Follow, Discussion,
-    CERTIFIED, PUBLIC_SERVICE
+    Organization, Member, MembershipRequest, Follow, Discussion
 )
 
 from udata.utils import faker
@@ -31,10 +30,9 @@ pytestmark = [
 class OrganizationAPITest:
     modules = []
 
-    def test_organization_api_list(self, api, autoindex):
+    def test_organization_api_list(self, api):
         '''It should fetch an organization list from the API'''
-        with autoindex:
-            organizations = OrganizationFactory.create_batch(3)
+        organizations = OrganizationFactory.create_batch(3)
 
         response = api.get(url_for('api.organizations'))
         assert200(response)
@@ -486,13 +484,16 @@ class MembershipAPITest:
         assert Follow.objects.following(user).count() is 0
         assert Follow.objects.followers(user).count() is 0
 
-    def test_suggest_organizations_api(self, api, autoindex):
+    def test_suggest_organizations_api(self, api):
         '''It should suggest organizations'''
-        with autoindex:
-            for i in range(4):
-                OrganizationFactory(
-                    name='test-{0}'.format(i) if i % 2 else faker.word())
-
+        for i in range(3):
+            OrganizationFactory(
+                name='test-{0}'.format(i) if i % 2 else faker.word(),
+                metrics={"followers": i})
+        max_follower_organization = OrganizationFactory(
+            name='test-4',
+            metrics={"followers": 10}
+        )
         response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'tes', 'size': '5'})
         assert200(response)
@@ -504,17 +505,16 @@ class MembershipAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'name' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
             assert 'acronym' in suggestion
-            assert suggestion['name'].startswith('test')
+            assert 'tes' in suggestion['name']
+            assert response.json[0]['id'] == str(max_follower_organization.id)
 
-    def test_suggest_organizations_with_special_chars(self, api, autoindex):
+    def test_suggest_organizations_with_special_chars(self, api):
         '''It should suggest organizations with special caracters'''
-        with autoindex:
-            for i in range(4):
-                OrganizationFactory(
-                    name='testé-{0}'.format(i) if i % 2 else faker.word())
+        for i in range(4):
+            OrganizationFactory(
+                name='testé-{0}'.format(i) if i % 2 else faker.word())
 
         response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'testé', 'size': '5'})
@@ -527,16 +527,14 @@ class MembershipAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'name' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['name'].startswith('testé')
+            assert 'testé' in suggestion['name']
 
-    def test_suggest_organizations_with_multiple_words(self, api, autoindex):
+    def test_suggest_organizations_with_multiple_words(self, api):
         '''It should suggest organizations with words'''
-        with autoindex:
-            for i in range(4):
-                OrganizationFactory(
-                    name='mon testé-{0}'.format(i) if i % 2 else faker.word())
+        for i in range(4):
+            OrganizationFactory(
+                name='mon testé-{0}'.format(i) if i % 2 else faker.word())
 
         response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'mon testé', 'size': '5'})
@@ -549,20 +547,18 @@ class MembershipAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'name' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['name'].startswith('mon testé')
+            assert 'mon testé' in suggestion['name']
 
-    def test_suggest_organizations_with_apostrophe(self, api, autoindex):
+    def test_suggest_organizations_with_apostrophe(self, api):
         '''It should suggest organizations with words'''
-        with autoindex:
-            for i in range(4):
-                OrganizationFactory(
-                    name='Ministère de l\'intérieur {0}'.format(i)
-                    if i % 2 else faker.word())
+        for i in range(4):
+            OrganizationFactory(
+                name='Ministère de l\'intérieur {0}'.format(i)
+                if i % 2 else faker.word())
 
         response = api.get(url_for('api.suggest_organizations'),
-                           qs={'q': 'Ministère intérieur', 'size': '5'})
+                           qs={'q': 'Ministère', 'size': '5'})
         assert200(response)
 
         assert len(response.json) <= 5
@@ -572,31 +568,28 @@ class MembershipAPITest:
             assert 'id' in suggestion
             assert 'slug' in suggestion
             assert 'name' in suggestion
-            assert 'score' in suggestion
             assert 'image_url' in suggestion
-            assert suggestion['name'].startswith('Ministère de l\'intérieur')
+            assert 'Ministère' in suggestion['name']
 
-    def test_suggest_organizations_api_no_match(self, api, autoindex):
+    def test_suggest_organizations_api_no_match(self, api):
         '''It should not provide organization suggestion if no match'''
-        with autoindex:
-            OrganizationFactory.create_batch(3)
+        OrganizationFactory.create_batch(3)
 
         response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) is 0
 
-    def test_suggest_organizations_api_empty(self, api, autoindex):
+    def test_suggest_organizations_api_empty(self, api):
         '''It should not provide organization suggestion if no data'''
         response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'xxxxxx', 'size': '5'})
         assert200(response)
         assert len(response.json) is 0
 
-    def test_suggest_organizations_homonyms(self,api, autoindex):
+    def test_suggest_organizations_homonyms(self, api):
         '''It should suggest organizations and not deduplicate homonyms'''
-        with autoindex:
-            OrganizationFactory.create_batch(2, name='homonym')
+        OrganizationFactory.create_batch(2, name='homonym')
 
         response = api.get(url_for('api.suggest_organizations'),
                            qs={'q': 'homonym', 'size': '5'})
@@ -606,22 +599,6 @@ class MembershipAPITest:
 
         for suggestion in response.json:
             assert suggestion['name'] == 'homonym'
-
-    def test_suggest_organizations_by_id(self, api, autoindex):
-        '''It should suggest an organization by its ID'''
-        with autoindex:
-            orgs = OrganizationFactory.create_batch(3)
-
-        first_org = orgs[0]
-        response = api.get(url_for('api.suggest_organizations'),
-                           qs={'q': str(first_org.id), 'size': '5'})
-        assert200(response)
-
-        # The batch factory generates ids that might be too close
-        # which then are found with the fuzzy search.
-        suggested_ids = [u['id'] for u in response.json]
-        assert len(suggested_ids) >= 1
-        assert str(first_org.id) in suggested_ids
 
 
 class OrganizationDatasetsAPITest:

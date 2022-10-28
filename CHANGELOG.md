@@ -2,6 +2,89 @@
 
 ## Current (in progress)
 
+- Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
+- Switch from `Flask-restplus` to its fork `Flask-rest-x` [2770](https://github.com/opendatateam/udata/pull/2770)
+- Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764) [#2773](https://github.com/opendatateam/udata/pull/2773) [#2777](https://github.com/opendatateam/udata/pull/2777)
+- Fix randomly failing suggest tests [#2775](https://github.com/opendatateam/udata/pull/2775)
+- Fix alt attribute not shown on image [#2776](https://github.com/opendatateam/udata/pull/2776)
+
+## 4.1.2 (2022-09-01)
+
+- Clean up event code [#2751](https://github.com/opendatateam/udata/pull/2751)
+- Replace mongo legacy image in CI [#2754](https://github.com/opendatateam/udata/pull/2754)
+- Fixes test `test_suggest_datasets_api` by modifying condition [#2759](https://github.com/opendatateam/udata/pull/2759)
+- Fix doc name duplicate on rdf endpoints [#2763](https://github.com/opendatateam/udata/pull/2763)
+
+## 4.1.1 (2022-07-08)
+
+- Quality score computation refactoring and now returning it in list datasets endpoint. Update was made in admin too. [#2746](https://github.com/opendatateam/udata/pull/2746)
+- :warning: Manifest logic was removed and udata does now work as standalone [#2747](https://github.com/opendatateam/udata/pull/2747)
+- Remove map related stuff [#2749](https://github.com/opendatateam/udata/pull/2749)
+- Add library udata_event_service to produce Kafka messages [#2743](https://github.com/opendatateam/udata/pull/2743)
+
+## 4.1.0 (2022-06-09)
+
+- Add html support for posts [#2731](https://github.com/opendatateam/udata/pull/2731)
+- Use mongo search if `SEARCH_SERVICE_API_URL` variable is not set [#2728](https://github.com/opendatateam/udata/pull/2728)
+- Improve resource extension detection [#2729](https://github.com/opendatateam/udata/pull/2729/files)
+- Remove resources in dataset search serialization [#2730](https://github.com/opendatateam/udata/pull/2730)
+- Add endpoint to directly get specific resource by rid [#2732](https://github.com/opendatateam/udata/pull/2732).
+- Publish kafka message when resource is created, modified or deleted [#2733](https://github.com/opendatateam/udata/pull/2733)
+- Clean documentation and code with respect to independent search service [#2738](https://github.com/opendatateam/udata/pull/2738)
+- Fix size argument in suggests endpoint and corresponding tests [#2739](https://github.com/opendatateam/udata/pull/2739)
+- Add udata instance name prefix and action suffix for kafka topics [#2736](https://github.com/opendatateam/udata/pull/2736)
+- Fix tokenisation by building an `AND` query (see comments in code) for mongo text search and pagination [#2740](https://github.com/opendatateam/udata/pull/2740)
+
+## 4.0.2 (2022-05-04)
+
+- Remove unused `_total_pages` search property [#2726](https://github.com/opendatateam/udata/pull/2726)
+- Use -followers as default suggest sort on datasets, reuses and orgas [#2727](https://github.com/opendatateam/udata/pull/2727)
+- Reintroduce user suggest with mongo contains [#2725](https://github.com/opendatateam/udata/pull/2725)
+
+## 4.0.1 (2022-04-11)
+
+- Removed `post_save` signal within `add_resource` and `update_resource` methods. [#2720](https://github.com/opendatateam/udata/pull/2720)
+- Refactor and update documentation with latest udata updates [#2717](https://github.com/opendatateam/udata/pull/2717)
+- Add harvest csv adapter for a catalog of harvesters [#2722](https://github.com/opendatateam/udata/pull/2722)
+
+## 4.0.0 (2022-03-30)
+
+### Breaking change
+
+Search refactor [#2680](https://github.com/opendatateam/udata/pull/2680)
+- :warning: Search changes [#2692](https://github.com/opendatateam/udata/pull/2692):
+  - The search feature is not within udata anymore and queries a distant service.
+  - The search feature is now optional and is enabled by setting the `SEARCH_SERVICE_API_URL` setting.
+  - When search is not enabled, the search endpoints will return a `501 Not Implemented` error.
+  - The ModelAdapter, SearchQuery and SearchResult patterns were kept but heavily refactored.
+  - udata uses a Kafka producer to send documents to index to the search service.
+  - udata uses HTTP request to query the search service.
+- :warning: API changes [#2669](https://github.com/opendatateam/udata/pull/2669):
+  - List endpoints for organizations, datasets, reuses and users are now querying MongoDB instead of ElasticSearch.
+  - Those endpoints use MongoDB full text search when `q` argument is used. Some unused filters on this route were dropped.
+  - A new API parser was implemented to replace the search one.
+  - The previous ElasticSearch endpoints were moved to APIv2 with the following url pattern: `/{object}/search` (ex: `/datasets/search`).
+- :warning: Suggest changes [#2685](https://github.com/opendatateam/udata/pull/2685) and [#2696](https://github.com/opendatateam/udata/pull/2696):
+  - Current suggest implementation moved from an Elasticsearch index to a MongoDB query using the term `contains`.
+  - The user suggest was entirely removed, as its existence is now less relevant because of the full text search.
+
+## 3.3.3 (2022-03-29)
+
+- Extend dcat properties support (frequency litteral, creation and modification date, landing page and abstract description) [#2715](https://github.com/opendatateam/udata/pull/2715)
+
+
+## 3.3.2 (2022-03-01)
+
+- **Deprecation**: Topics are now deprecated and will be removed in upcoming releases.
+- Use title to improve License guess [#2697](https://github.com/opendatateam/udata/pull/2697)
+- Add a `q` argument to the paginated datasets resources endpoint, to search through resources titles. [#2701](https://github.com/opendatateam/udata/pull/2701)
+- Delete discussion with deleted user as only participant [#2702](https://github.com/opendatateam/udata/pull/2702)
+- Fix error on post creation when adding related reuse [#2704](https://github.com/opendatateam/udata/pull/2704)
+- Redirect in endpoints routing now returns 308 instead of 302 in order to keep the method and body. [#2706](https://github.com/opendatateam/udata/pull/2706)
+- Delete badges from datasets fixtures. [2709](https://github.com/opendatateam/udata/pull/2709)
+
+## 3.3.1 (2022-01-11)
+
 - Fix fields empty value in admin form to allow for unsetting fields [#2691](https://github.com/opendatateam/udata/pull/2691)
 - :warning: Add a new required topic string field on reuses. The associated migration set default topic to `others` [#2689](https://github.com/opendatateam/udata/pull/2689)
 

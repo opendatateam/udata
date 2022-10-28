@@ -117,7 +117,7 @@ Let's start with the uwsgi configuration file:
 master= true
 
 ; Python / Environment configuration
-plugin = python
+plugin = python3
 home = /srv/udata
 chdir = %(home)
 virtualenv = %(home)
@@ -376,8 +376,6 @@ SERVER_NAME = 'data.example.com'
 SECRET_KEY = 'put-some-unique-and-secret-key-here-for-security'
 
 MONGODB_HOST = 'mongodb://localhost:27017/udata'
-
-ELASTICSEARCH_URL = 'localhost:9200'
 
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'

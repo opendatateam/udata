@@ -8,7 +8,6 @@ from flask import current_app
 from flask_security import UserMixin, RoleMixin, MongoEngineUserDatastore
 from mongoengine.signals import pre_save, post_save
 from itsdangerous import JSONWebSignatureSerializer
-from elasticsearch_dsl import Integer, Object
 
 from werkzeug import cached_property
 
@@ -90,16 +89,9 @@ class User(WithMetrics, UserMixin, db.Document):
     on_delete = Signal()
 
     meta = {
-        'indexes': ['-created_at', 'slug', 'apikey'],
+        'indexes': ['$slug', '-created_at', 'slug', 'apikey'],
         'ordering': ['-created_at']
     }
-
-    __search_metrics__ = Object(properties={
-        'datasets': Integer(),
-        'reuses': Integer(),
-        'followers': Integer(),
-        'views': Integer()
-    })
 
     __metrics_keys__ = [
         'datasets',
@@ -256,6 +248,11 @@ class User(WithMetrics, UserMixin, db.Document):
                                     if member.user != self]
             organization.save()
         for discussion in Discussion.objects(discussion__posted_by=self):
+            # Remove all discussions with current user as only participant
+            if all(message.posted_by == self for message in discussion.discussion):
+                discussion.delete()
+                continue
+
             for message in discussion.discussion:
                 if message.posted_by == self:
                     message.content = 'DELETED'

@@ -1,6 +1,7 @@
 from udata.api import api, fields, base_reference
 from udata.core.badges.api import badge_fields
 from udata.core.organization.api_fields import org_ref_fields
+from udata.core.organization.models import LOGO_SIZES
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
 
@@ -8,6 +9,10 @@ from .models import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
     CHECKSUM_TYPES, DEFAULT_CHECKSUM_TYPE, DEFAULT_LICENSE, RESOURCE_TYPES
 )
+
+
+BIGGEST_LOGO_SIZE = LOGO_SIZES[0]
+
 
 checksum_fields = api.model('Checksum', {
     'type': fields.String(
@@ -126,7 +131,7 @@ DEFAULT_MASK = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
     'private', 'tags', 'badges', 'resources', 'frequency', 'frequency_date', 'extras',
     'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived'
+    'uri', 'page', 'last_update', 'archived', 'quality'
 ))
 
 dataset_fields = api.model('Dataset', {
@@ -199,13 +204,12 @@ dataset_suggestion_fields = api.model('DatasetSuggestion', {
     'acronym': fields.String(description='An optional dataset acronym'),
     'slug': fields.String(
         description='The dataset permalink string'),
-    'image_url': fields.String(
-        description='The dataset (organization) logo URL'),
+    'image_url': fields.ImageField(size=BIGGEST_LOGO_SIZE, description='The dataset (organization) logo URL', readonly=True),
     'page': fields.UrlFor(
         'datasets.show_redirect', lambda d: {'dataset': d['slug']},
-        description='The web page URL for this dataset', fallback_endpoint='api.dataset'),
-    'score': fields.Float(description='The internal match score'),
+        description='The web page URL for this dataset', fallback_endpoint='api.dataset')
 })
+
 
 resource_type_fields = api.model('ResourceType', {
     'id': fields.String(description='The resource type identifier'),

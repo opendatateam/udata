@@ -123,16 +123,13 @@ class UDataJsonEncoder(json.JSONEncoder):
         # Serialize Raw data for Document and EmbeddedDocument.
         elif hasattr(obj, '_data'):
             return obj._data
-        # Serialize raw data from Elasticsearch DSL AttrList
-        elif hasattr(obj, '_l_'):
-            return obj._l_
         return super(UDataJsonEncoder, self).default(obj)
 
 
 # These loggers are very verbose
 # We need to put them in WARNING level
 # even if the main level is INFO or DEBUG
-VERBOSE_LOGGERS = 'elasticsearch', 'requests'
+VERBOSE_LOGGERS = 'requests',
 
 
 def init_logging(app):

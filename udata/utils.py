@@ -158,7 +158,7 @@ def to_iso_date(dt):
     Support dates before 1900.
     '''
     if dt:
-        return '{dt.year:02d}-{dt.month:02d}-{dt.day:02d}'.format(dt=dt)
+        return '{dt.year:04d}-{dt.month:02d}-{dt.day:02d}'.format(dt=dt)
 
 
 def to_iso_datetime(dt):
