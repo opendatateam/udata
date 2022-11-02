@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 4.1.3 (2022-11-02)
 
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
 - Switch from `Flask-restplus` to its fork `Flask-rest-x` [2770](https://github.com/opendatateam/udata/pull/2770)
