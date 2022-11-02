@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 4.1.3 (2022-11-02)
 
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
