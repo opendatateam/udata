@@ -1723,7 +1723,6 @@ class HarvestMetadataAPITest:
         harvest_metadata = HarvestResourceMetadata(
             created_at=date,
             modified_at=date,
-            dct_identifier='http://domain.gouv.fr/dataset/identifier',
             uri='http://domain.gouv.fr/dataset/uri',
         )
         dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
@@ -1734,7 +1733,6 @@ class HarvestMetadataAPITest:
             'created_at': date.isoformat(),
             'modified_at': date.isoformat(),
             'uri': 'http://domain.gouv.fr/dataset/uri',
-            'dct_identifier': 'http://domain.gouv.fr/dataset/identifier',
         }
 
     def test_resource_dynamic_harvest_metadata_without_api_field(self, api):

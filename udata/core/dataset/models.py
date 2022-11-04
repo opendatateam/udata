@@ -146,7 +146,6 @@ class HarvestDatasetMetadata(DynamicEmbeddedDocument):
 class HarvestResourceMetadata(DynamicEmbeddedDocument):
     created_at = db.DateTimeField()
     modified_at = db.DateTimeField()
-    dct_identifier = db.StringField()
     uri = db.URLField()
 
 

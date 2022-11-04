@@ -566,8 +566,7 @@ class HarvestMetadataTest:
         harvest_metadata = HarvestResourceMetadata(
             created_at=datetime.now(),
             modified_at=datetime.now(),
-            uri='http://domain.gouv.fr/dataset/uri',
-            dct_identifier='http://domain.gouv.fr/dataset/identifier'
+            uri='http://domain.gouv.fr/dataset/uri'
         )
         resource.harvest = harvest_metadata
         resource.validate()
