@@ -268,7 +268,7 @@ class BaseBackend(object):
         raise NotImplementedError
 
     def add_item(self, identifier, *args, **kwargs):
-        if not identifier:
+        if identifier is None:
             raise ValueError('DCT.identifier is required for all DCAT.Dataset records')
         item = HarvestItem(remote_id=str(identifier), args=args, kwargs=kwargs)
         self.job.items.append(item)
