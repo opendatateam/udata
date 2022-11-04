@@ -243,7 +243,7 @@ class BaseBackend(object):
         '''
         log.debug('Running autoarchive')
         limit_days = current_app.config['HARVEST_AUTOARCHIVE_GRACE_DAYS']
-        limit_date = datetime.now() - timedelta(days=limit_days)
+        limit_date = date.today() - timedelta(days=limit_days)
         remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
         q = {
             'harvest__source_id': str(self.source.id),
@@ -253,7 +253,7 @@ class BaseBackend(object):
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
-            if not dataset.harvest or (dataset.harvest and not dataset.harvest.archived_at):
+            if not dataset.harvest.archived_at:
                 archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)

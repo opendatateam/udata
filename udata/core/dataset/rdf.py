@@ -337,19 +337,14 @@ def remote_url_from_rdf(rdf):
     Use RDF identifier as fallback if uri validation succeeds.
     '''
     landing_page = url_from_rdf(rdf, DCAT.landingPage)
-    if landing_page:
-        try:
-            uris.validate(landing_page)
-            return landing_page
-        except uris.ValidationError:
-            pass
     uri = rdf.identifier.toPython()
-    if uri:
-        try:
-            uris.validate(uri)
-            return uri
-        except uris.ValidationError:
-            pass
+    for candidate in [landing_page, uri]:
+        if candidate:
+            try:
+                uris.validate(candidate)
+                return candidate
+            except uris.ValidationError:
+                pass
 
 
 def resource_from_rdf(graph_or_distrib, dataset=None):
@@ -401,14 +396,10 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
 
     if not resource.harvest:
         resource.harvest = HarvestResourceMetadata()
-    if created_at:
-        resource.harvest.created_at = created_at
-    if modified_at:
-        resource.harvest.modified_at = modified_at
-    if identifier:
-        resource.harvest.dct_identifier = identifier
-    if uri:
-        resource.harvest.uri = uri
+    resource.harvest.created_at = created_at
+    resource.harvest.modified_at = modified_at
+    resource.harvest.dct_identifier = identifier
+    resource.harvest.uri = uri
 
     return resource
 
@@ -462,15 +453,10 @@ def dataset_from_rdf(graph, dataset=None, node=None):
 
     if not dataset.harvest:
         dataset.harvest = HarvestDatasetMetadata()
-    if identifier:
-        dataset.harvest.dct_identifier = identifier
-    if uri:
-        dataset.harvest.uri = uri
-    if remote_url:
-        dataset.harvest.remote_url = remote_url
-    if created_at:
-        dataset.harvest.created_at = created_at
-    if modified_at:
-        dataset.harvest.modified_at = modified_at
+    dataset.harvest.dct_identifier = identifier
+    dataset.harvest.uri = uri
+    dataset.harvest.remote_url = remote_url
+    dataset.harvest.created_at = created_at
+    dataset.harvest.modified_at = modified_at
 
     return dataset
