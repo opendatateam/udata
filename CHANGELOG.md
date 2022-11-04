@@ -2,8 +2,11 @@
 
 ## Current (in progress)
 
-- Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
 - Use dedicated dynamic harvest metadata for dataset and resources. :warning: a migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. [#2762](https://github.com/opendatateam/udata/pull/2762)
+
+## 4.1.3 (2022-11-02)
+
+- Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
 - Switch from `Flask-restplus` to its fork `Flask-rest-x` [2770](https://github.com/opendatateam/udata/pull/2770)
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764) [#2773](https://github.com/opendatateam/udata/pull/2773) [#2777](https://github.com/opendatateam/udata/pull/2777)
 - Fix randomly failing suggest tests [#2775](https://github.com/opendatateam/udata/pull/2775)
