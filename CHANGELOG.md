@@ -2,6 +2,10 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 4.1.3 (2022-11-02)
+
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
 - Switch from `Flask-restplus` to its fork `Flask-rest-x` [2770](https://github.com/opendatateam/udata/pull/2770)
 - :warning: Upgrade to `Flask-Security-Too` version 4.0.0 [#2772](https://github.com/opendatateam/udata/pull/2772):
