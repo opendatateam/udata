@@ -4,7 +4,7 @@ from bson import ObjectId
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
-from udata.auth.forms import ExtendedLoginForm, ExtendedResetPasswordForm
+from udata.auth.forms import ExtendedLoginForm
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.forms import ModelForm, fields
 from udata.models import db, User

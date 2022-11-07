@@ -466,3 +466,4 @@ class Debug(Defaults):
     )
     CACHE_TYPE = 'null'
     CACHE_NO_NULL_WARNING = True
+    SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}
