@@ -447,6 +447,7 @@ class Testing(object):
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
+    SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}
 
 
 class Debug(Defaults):
@@ -466,4 +467,3 @@ class Debug(Defaults):
     )
     CACHE_TYPE = 'null'
     CACHE_NO_NULL_WARNING = True
-    SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}
