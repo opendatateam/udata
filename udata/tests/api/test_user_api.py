@@ -64,10 +64,10 @@ class UserAPITest(APITestCase):
         '''It should suggest users based on first name'''
         for i in range(4):
             UserFactory(
-                first_name='test-{0}'.format(i) if i % 2 else faker.word())
+                first_name='first-name-test-{0}'.format(i) if i % 2 else faker.word())
 
         response = self.get(url_for('api.suggest_users'),
-                            qs={'q': 'tes', 'size': '5'})
+                            qs={'q': 'first-name-test', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -79,16 +79,16 @@ class UserAPITest(APITestCase):
             self.assertIn('last_name', suggestion)
             self.assertIn('avatar_url', suggestion)
             self.assertIn('slug', suggestion)
-            self.assertIn('test', suggestion['first_name'])
+            self.assertIn('first-name-test', suggestion['first_name'])
 
     def test_suggest_users_api_last_name(self):
         '''It should suggest users based on last name'''
         for i in range(4):
             UserFactory(
-                last_name='test-{0}'.format(i) if i % 2 else faker.word())
+                last_name='last-name-test-{0}'.format(i) if i % 2 else faker.word())
 
         response = self.get(url_for('api.suggest_users'),
-                            qs={'q': 'tes', 'size': '5'})
+                            qs={'q': 'last-name-test', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -99,16 +99,16 @@ class UserAPITest(APITestCase):
             self.assertIn('first_name', suggestion)
             self.assertIn('last_name', suggestion)
             self.assertIn('avatar_url', suggestion)
-            self.assertIn('test', suggestion['last_name'])
+            self.assertIn('last-name-test', suggestion['last_name'])
 
     def test_suggest_users_api_unicode(self):
         '''It should suggest users with special characters'''
         for i in range(4):
             UserFactory(
-                last_name='testé-{0}'.format(i) if i % 2 else faker.word())
+                last_name='last-name-testé-{0}'.format(i) if i % 2 else faker.word())
 
         response = self.get(url_for('api.suggest_users'),
-                            qs={'q': 'testé', 'size': '5'})
+                            qs={'q': 'last-name-testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -119,7 +119,7 @@ class UserAPITest(APITestCase):
             self.assertIn('first_name', suggestion)
             self.assertIn('last_name', suggestion)
             self.assertIn('avatar_url', suggestion)
-            self.assertIn('test', suggestion['last_name'])
+            self.assertIn('last-name-testé', suggestion['last_name'])
 
     def test_suggest_users_api_no_match(self):
         '''It should not provide user suggestion if no match'''

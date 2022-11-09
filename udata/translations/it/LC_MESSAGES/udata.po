@@ -3,10 +3,10 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-07-05 11:01\n"
+"PO-Revision-Date: 2022-08-31 15:20\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
-"Language: es\n"
-"Language-Team: Spanish\n"
+"Language: it\n"
+"Language-Team: Italian\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,118 +14,118 @@ msgstr ""
 "Generated-By: Babel 2.8.0\n"
 "X-Crowdin-Project: udata\n"
 "X-Crowdin-Project-ID: 291291\n"
-"X-Crowdin-Language: es-ES\n"
+"X-Crowdin-Language: it\n"
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
 #: udata/settings.py:99
 msgid "Welcome"
-msgstr ""
+msgstr "Benvenutə"
 
 #: udata/settings.py:100
 msgid "Please confirm your email"
-msgstr ""
+msgstr "Per favore conferma la tua email"
 
 #: udata/settings.py:101
 msgid "Login instructions"
-msgstr ""
+msgstr "Istruzioni di accesso"
 
 #: udata/settings.py:102
 msgid "Your password has been reset"
-msgstr ""
+msgstr "La tua password è stata reimpostata"
 
 #: udata/settings.py:103
 msgid "Your password has been changed"
-msgstr ""
+msgstr "La tua password è stata modificata"
 
 #: udata/settings.py:105
 msgid "Password reset instructions"
-msgstr ""
+msgstr "Istruzioni per reimpostare la password"
 
 #: udata/settings.py:390
 msgid "This dataset has been archived"
-msgstr ""
+msgstr "Questo dataset è stato archiviato"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
-msgstr ""
+msgstr "Errore di convalida: i tuoi dati non possono essere aggiornati per il momento, siamo stati informati dell'errore e lo risolveremo il prima possibile."
 
 #: udata/api/oauth2.py:53
 msgid "Bearer Token"
-msgstr "Portador de emergencia"
+msgstr "Bearer Token"
 
 #: udata/api/oauth2.py:57
 msgid "Default scope"
-msgstr "El ámbito predeterminado"
+msgstr "Scope di default"
 
 #: udata/api/oauth2.py:58
 msgid "System administrator rights"
-msgstr "Derechos del administrador del sistema"
+msgstr "Diritti di amministratore di sistema"
 
 #: udata/auth/forms.py:13 udata/core/user/forms.py:14
 msgid "First name"
-msgstr "Nombre"
+msgstr "Nome"
 
 #: udata/auth/forms.py:13
 msgid "First name is required"
-msgstr ""
+msgstr "Il nome è obbligatorio"
 
 #: udata/auth/forms.py:14 udata/auth/forms.py:17 udata/core/user/forms.py:15
 #: udata/core/user/forms.py:17
 msgid "URLs not allowed in this field"
-msgstr ""
+msgstr "URL non ammessi in questo campo"
 
 #: udata/auth/forms.py:16 udata/core/user/forms.py:16
 msgid "Last name"
-msgstr "Apellido"
+msgstr "Cognome"
 
 #: udata/auth/forms.py:16
 msgid "Last name is required"
-msgstr ""
+msgstr "Il cognome è obbligatorio"
 
 #: udata/auth/forms.py:33
 msgid "Password must be changed for security reasons"
-msgstr ""
+msgstr "La password deve essere cambiata per motivi di sicurezza"
 
 #: udata/auth/password_validation.py:13
 msgid "Password must be at least {pass_length} characters long"
-msgstr ""
+msgstr "La password deve contenere almeno {pass_length} caratteri"
 
 #: udata/auth/password_validation.py:18
 msgid "Password must contain lowercases"
-msgstr ""
+msgstr "La password deve includere delle lettere minuscole"
 
 #: udata/auth/password_validation.py:22
 msgid "Password must contain digits"
-msgstr ""
+msgstr "La password deve includere dei numeri"
 
 #: udata/auth/password_validation.py:26
 msgid "Password must contain uppercases"
-msgstr ""
+msgstr "La password deve includere delle lettere maiuscole"
 
 #: udata/auth/password_validation.py:30
 msgid "Password must contain symbols"
-msgstr ""
+msgstr "La password deve contenere dei caratteri speciali"
 
 #: udata/commands/init.py:29
 msgid "Do you want to create a superadmin user?"
-msgstr ""
+msgstr "Vuoi creare un utente superadmin?"
 
 #: udata/commands/init.py:34
 msgid "Do you want to import some data-related license?"
-msgstr ""
+msgstr "Vuoi importare delle licenze relative ai dati?"
 
 #: udata/commands/init.py:38
 msgid "Do you want to import some spatial zones (countries)?"
-msgstr ""
+msgstr "Vuoi importare delle zone spaziali (paesi)?"
 
 #: udata/commands/init.py:42
 msgid "Do you want to create some sample data?"
-msgstr ""
+msgstr "Vuoi generare alcuni dati di esempio?"
 
 #: udata/commands/init.py:46
 msgid "Your udata instance is ready!"
-msgstr ""
+msgstr "La tua istanza udata è pronta!"
 
 #: udata/core/badges/forms.py:14
 msgid "Kind"
@@ -133,35 +133,35 @@ msgstr "Tipo"
 
 #: udata/core/badges/forms.py:16
 msgid "Kind of badge (certified, etc)"
-msgstr "Tipo de insignia (certificada,etc)"
+msgstr "Tipo di badge (certificato, etc.)"
 
 #: udata/core/dataset/activities.py:21
 msgid "created a dataset"
-msgstr "ha creado un conjunto de datos"
+msgstr "ha creato un dataset"
 
 #: udata/core/dataset/activities.py:27
 msgid "updated a dataset"
-msgstr "ha actualizado un conjunto de datos"
+msgstr "ha aggiornato un dataset"
 
 #: udata/core/dataset/activities.py:34
 msgid "deleted a dataset"
-msgstr "ha eliminado un conjunto de datos"
+msgstr "ha eliminato un dataset"
 
 #: udata/core/dataset/forms.py:25
 msgid "Checksum value"
-msgstr ""
+msgstr "Valore del checksum"
 
 #: udata/core/dataset/forms.py:39
 msgid "Schema name \"{schema}\" is not an allowed value. Allowed values: {values}"
-msgstr ""
+msgstr "Il nome dello schema \"{schema}\" non è un valore consentito. Valori consentiti: {values}"
 
 #: udata/core/dataset/forms.py:50
 msgid "Version \"{version}\" is not an allowed value. Allowed values: {values}"
-msgstr ""
+msgstr "La versione \"{version}\" non è un valore consentito. Valori consentiti: {values}"
 
 #: udata/core/dataset/forms.py:58
 msgid "Sub-property \"{prop}\" is not allowed value in schema field. Allowed values is : {properties}"
-msgstr ""
+msgstr "La sotto-proprietà \"{prop}\" non è consentita nel campo schema. I valori consentiti sono : {properties}"
 
 #: udata/core/dataset/forms.py:67 udata/core/dataset/forms.py:128
 #: udata/core/discussions/forms.py:12 udata/core/reuse/forms.py:19
@@ -169,22 +169,22 @@ msgstr ""
 #: udata/templates/mail/new_discussion.html:25
 #: udata/templates/mail/new_discussion_comment.html:26
 msgid "Title"
-msgstr "Título"
+msgstr "Titolo"
 
 #: udata/core/dataset/forms.py:69 udata/core/dataset/forms.py:132
 #: udata/core/jobs/forms.py:28 udata/core/organization/forms.py:25
 #: udata/core/reuse/forms.py:21 udata/core/topic/forms.py:17
 #: udata/harvest/forms.py:62
 msgid "Description"
-msgstr "Descripción"
+msgstr "Descrizione"
 
 #: udata/core/dataset/forms.py:71
 msgid "File type"
-msgstr ""
+msgstr "Tipo di file"
 
 #: udata/core/dataset/forms.py:73
 msgid "Whether the resource is an uploaded file, a remote file or an API"
-msgstr "Bien sea el recurso un archivo cargado, un archivo remoto o una API"
+msgstr "Se il file è stato caricato manualmente, è un file remoto o un'API"
 
 #: udata/core/dataset/forms.py:76 udata/core/reuse/forms.py:24
 msgid "Type"
@@ -192,7 +192,7 @@ msgstr "Tipo"
 
 #: udata/core/dataset/forms.py:78
 msgid "Resource type (documentation, API...)"
-msgstr ""
+msgstr "Tipo di file (documentazione, API…)"
 
 #: udata/core/dataset/forms.py:80 udata/core/reuse/forms.py:26
 #: udata/harvest/forms.py:64
@@ -205,615 +205,615 @@ msgstr "Formato"
 
 #: udata/core/dataset/forms.py:87
 msgid "Mime type"
-msgstr "Tipo mime"
+msgstr "MIME type"
 
 #: udata/core/dataset/forms.py:88
 msgid "The mime type associated to the extension. (ex: text/plain)"
-msgstr "El tipo mime asociado a la extensión. (ej: texto / completo)"
+msgstr "Il MIME type associato al formato del file. (e.g.: text/plain)"
 
 #: udata/core/dataset/forms.py:91
 msgid "Size"
-msgstr "Tamaño"
+msgstr "Dimensione"
 
 #: udata/core/dataset/forms.py:92
 msgid "The file size in bytes"
-msgstr "Tamño del archivo en bytes"
+msgstr "Dimensione del file in byte"
 
 #: udata/core/dataset/forms.py:94
 msgid "Publication date"
-msgstr "Fecha de publicación"
+msgstr "Data di pubblicazione"
 
 #: udata/core/dataset/forms.py:95
 msgid "The publication date of the resource"
-msgstr "La fecha de publicación del recurso"
+msgstr "Data di pubblicazione del file"
 
 #: udata/core/dataset/forms.py:98
 msgid "Schema"
-msgstr ""
+msgstr "Schema"
 
 #: udata/core/dataset/forms.py:101
 msgid "The schema slug the resource adheres to"
-msgstr ""
+msgstr "Lo slug dello schema a cui il file è conforme"
 
 #: udata/core/dataset/forms.py:113
 msgid "Related dataset"
-msgstr "Conjunto de datos relacionado"
+msgstr "Dataset correlato"
 
 #: udata/core/dataset/forms.py:115 udata/core/dataset/forms.py:159
 #: udata/core/reuse/forms.py:38 udata/harvest/forms.py:69
 msgid "Publish as"
-msgstr "Publicar como"
+msgstr "Pubblica come"
 
 #: udata/core/dataset/forms.py:129 udata/core/organization/forms.py:23
 msgid "Acronym"
-msgstr "Acrónimo"
+msgstr "Acronimo"
 
 #: udata/core/dataset/forms.py:130
 msgid "An optional acronym"
-msgstr ""
+msgstr "Un acronimo opzionale"
 
 #: udata/core/dataset/forms.py:133
 msgid "The details about the dataset (collection process, specifics...)."
-msgstr "Los detalles sobre el conjunto de datos (proceso de colección, específicos...)."
+msgstr "Dettagli del dataset (processo di raccolta, specifiche...)."
 
 #: udata/core/dataset/forms.py:136
 msgid "License"
-msgstr "Licencia"
+msgstr "Licenza"
 
 #: udata/core/dataset/forms.py:138
 msgid "Update frequency"
-msgstr "Actualizar la frecuencia"
+msgstr "Frequenza di aggiornamento"
 
 #: udata/core/dataset/forms.py:142
 msgid "The frequency at which data are updated."
-msgstr "La frecuencia con la que se actualizan los datos."
+msgstr "Frequenza con cui i dati vengono aggiornati."
 
 #: udata/core/dataset/forms.py:143
 msgid "Expected frequency date"
-msgstr "Fecha de frecuencia esperada"
+msgstr "Data di aggiornamento prevista"
 
 #: udata/core/dataset/forms.py:147
 msgid "Temporal coverage"
-msgstr "Cobertura temporal"
+msgstr "Copertura temporale"
 
 #: udata/core/dataset/forms.py:148
 msgid "The period covered by the data"
-msgstr "El período cubierto por los datos. "
+msgstr "Il periodo coperto dai dati"
 
 #: udata/core/dataset/forms.py:150 udata/core/spatial/forms.py:83
 msgid "Spatial coverage"
-msgstr "Cobertura espacial"
+msgstr "Copertura spaziale"
 
 #: udata/core/dataset/forms.py:151
 msgid "The geographical area covered by the data."
-msgstr "El área geográfica cubierta por los datos. "
+msgstr "La zona geografica coperta dai dati."
 
 #: udata/core/dataset/forms.py:152 udata/core/post/forms.py:26
 #: udata/core/reuse/forms.py:29 udata/core/site/forms.py:13
 #: udata/core/topic/forms.py:22
 msgid "Tags"
-msgstr "Etiquetas"
+msgstr "Tag"
 
 #: udata/core/dataset/forms.py:152 udata/core/reuse/forms.py:29
 msgid "Some taxonomy keywords"
-msgstr "Algunas palabras clave de taxonomía"
+msgstr "Alcune parole chiave per la tassonomia"
 
 #: udata/core/dataset/forms.py:154 udata/core/reuse/forms.py:32
 #: udata/core/topic/forms.py:23
 msgid "Private"
-msgstr "Privado"
+msgstr "Privato"
 
 #: udata/core/dataset/forms.py:155 udata/core/reuse/forms.py:33
 msgid "Restrict the dataset visibility to you or your organization only."
-msgstr "Restringa la visibilidad del conjunto de datos solo para usted o su organización."
+msgstr "Limita la visibilità del dataset solo a te o alla tua organizzazione."
 
 #: udata/core/dataset/models.py:43
 msgid "Unknown"
-msgstr "Desconocido"
+msgstr "Sconosciuto"
 
 #: udata/core/dataset/models.py:44
 msgid "Punctual"
-msgstr "Puntual"
+msgstr "Puntuale"
 
 #: udata/core/dataset/models.py:45
 msgid "Real time"
-msgstr "Tiempo real"
+msgstr "Tempo reale"
 
 #: udata/core/dataset/models.py:46
 msgid "Hourly"
-msgstr ""
+msgstr "Ogni ora"
 
 #: udata/core/dataset/models.py:47
 msgid "Four times a day"
-msgstr "Cuatro veces al día"
+msgstr "Quattro volte al giorno"
 
 #: udata/core/dataset/models.py:48
 msgid "Three times a day"
-msgstr "Tres veces al día"
+msgstr "Tre volte al giorno"
 
 #: udata/core/dataset/models.py:49
 msgid "Semidaily"
-msgstr ""
+msgstr "Due volte al giorno"
 
 #: udata/core/dataset/models.py:50 udata/harvest/models.py:22
 msgid "Daily"
-msgstr "Diario"
+msgstr "Quotidiana"
 
 #: udata/core/dataset/models.py:51
 msgid "Four times a week"
-msgstr "Cuatro veces por semana"
+msgstr "Quattro volte alla settimana"
 
 #: udata/core/dataset/models.py:52
 msgid "Three times a week"
-msgstr "Tres veces por semana"
+msgstr "Tre volte a settimana"
 
 #: udata/core/dataset/models.py:53
 msgid "Semiweekly"
-msgstr ""
+msgstr "Due volte a settimana"
 
 #: udata/core/dataset/models.py:54 udata/harvest/models.py:21
 msgid "Weekly"
-msgstr "Semanal"
+msgstr "Settimanale"
 
 #: udata/core/dataset/models.py:55
 msgid "Biweekly"
-msgstr ""
+msgstr "Ogni due settimane"
 
 #: udata/core/dataset/models.py:56
 msgid "Three times a month"
-msgstr ""
+msgstr "Tre volte al mese"
 
 #: udata/core/dataset/models.py:57
 msgid "Semimonthly"
-msgstr ""
+msgstr "Due volte al mese"
 
 #: udata/core/dataset/models.py:58 udata/harvest/models.py:20
 msgid "Monthly"
-msgstr "Mensual"
+msgstr "Mensile"
 
 #: udata/core/dataset/models.py:59
 msgid "Bimonthly"
-msgstr "Bimensual"
+msgstr "Bimestrale"
 
 #: udata/core/dataset/models.py:60
 msgid "Quarterly"
-msgstr "Trimestral"
+msgstr "Trimestrale"
 
 #: udata/core/dataset/models.py:61
 msgid "Three times a year"
-msgstr ""
+msgstr "Tre volte all'anno"
 
 #: udata/core/dataset/models.py:62
 msgid "Biannual"
-msgstr "Bianual"
+msgstr "Semestrale"
 
 #: udata/core/dataset/models.py:63
 msgid "Annual"
-msgstr "Anual"
+msgstr "Annuale"
 
 #: udata/core/dataset/models.py:64
 msgid "Biennial"
-msgstr "Bienal"
+msgstr "Biennale"
 
 #: udata/core/dataset/models.py:65
 msgid "Triennial"
-msgstr "Trienal"
+msgstr "Triennale"
 
 #: udata/core/dataset/models.py:66
 msgid "Quinquennial"
-msgstr "Quinquenal"
+msgstr "Quinquennale"
 
 #: udata/core/dataset/models.py:67
 msgid "Irregular"
-msgstr ""
+msgstr "Irregolare"
 
 #: udata/core/dataset/models.py:89
 msgid "Main file"
-msgstr ""
+msgstr "File principale"
 
 #: udata/core/dataset/models.py:90
 msgid "Documentation"
-msgstr ""
+msgstr "Documentazione"
 
 #: udata/core/dataset/models.py:91
 msgid "Update"
-msgstr ""
+msgstr "Aggiornamento"
 
 #: udata/core/dataset/models.py:92 udata/core/reuse/models.py:16
 msgid "API"
-msgstr "IPA"
+msgstr "API"
 
 #: udata/core/dataset/models.py:93
 msgid "Code repository"
-msgstr ""
+msgstr "Repository di codice"
 
 #: udata/core/dataset/models.py:94 udata/core/spatial/models.py:24
 msgid "Other"
-msgstr "Otro"
+msgstr "Altro"
 
 #: udata/core/dataset/models.py:99
 msgid "Uploaded file"
-msgstr "Archivo cargado"
+msgstr "File caricato"
 
 #: udata/core/dataset/models.py:100
 msgid "Remote file"
-msgstr "Archivo eliminado"
+msgstr "File remoto"
 
 #: udata/core/dataset/models.py:352 udata/core/dataset/rdf.py:334
 msgid "Nameless resource"
-msgstr "Expedientes sin nombre"
+msgstr "File senza nome"
 
 #: udata/core/dataset/models.py:414 udata/models/datetime_fields.py:59
 msgid "Creation date"
-msgstr "Fecha de creación"
+msgstr "Data di creazione"
 
 #: udata/core/dataset/models.py:416 udata/models/datetime_fields.py:61
 msgid "Last modification date"
-msgstr "Ultima fecha de creación "
+msgstr "Data dell'ultima modifica"
 
 #: udata/core/dataset/models.py:432
 msgid "Future date of update"
-msgstr "La futura fecha de actualización"
+msgstr "Data di aggiornamento futura"
 
 #: udata/core/dataset/models.py:448
 msgid "Pivotal data"
-msgstr "Datos centrales"
+msgstr "Dati cardine"
 
 #: udata/core/dataset/models.py:486
 msgid "dataset"
-msgstr "conjunto de datos"
+msgstr "dataset"
 
 #: udata/core/dataset/rdf.py:332
 msgid "{format} resource"
-msgstr ""
+msgstr "File {format}"
 
 #: udata/core/dataset/tasks.py:95
 msgid "You need to update some frequency-based datasets"
-msgstr "Usted necesita actualizar algunos conjuntos de datos con frecuencia"
+msgstr "È necessario aggiornare alcuni dataset con una frequenza di aggiornamento"
 
 #: udata/core/discussions/forms.py:14 udata/core/discussions/forms.py:21
 #: udata/core/organization/forms.py:53 udata/core/organization/forms.py:57
 #: udata/harvest/forms.py:78
 msgid "Comment"
-msgstr "Comentar"
+msgstr "Commento"
 
 #: udata/core/discussions/forms.py:15
 msgid "Subject"
-msgstr "Tema"
+msgstr "Oggetto"
 
 #: udata/core/discussions/tasks.py:28
 #, python-format
 msgid "Your %(type)s have a new discussion"
-msgstr "Tu  %(type)s tiene una nueva discusión"
+msgstr "Il tuo %(type)s ha una nuova discussione"
 
 #: udata/core/discussions/tasks.py:45
 #, python-format
 msgid "%(user)s commented your discussion"
-msgstr "%(user)s comentó tu discusión"
+msgstr "%(user)s ha commentato la tua discussione"
 
 #: udata/core/discussions/tasks.py:63
 msgid "A discussion has been closed"
-msgstr "Una discusión fue cerrada"
+msgstr "Una discussione è stata chiusa"
 
 #: udata/core/jobs/forms.py:27 udata/core/organization/forms.py:21
 #: udata/core/post/forms.py:15 udata/core/topic/forms.py:15
 #: udata/harvest/forms.py:60 udata/templates/api/admin.html:10
 msgid "Name"
-msgstr "Nombre"
+msgstr "Nome"
 
 #: udata/core/jobs/forms.py:29
 msgid "Tasks"
-msgstr "Tareas"
+msgstr "Attività"
 
 #: udata/core/jobs/forms.py:30
 msgid "Enabled"
-msgstr "Deshabilitado"
+msgstr "Attivo"
 
 #: udata/core/jobs/models.py:18
 msgid "every {0.period_singular}"
-msgstr "cada {0.period_singular}"
+msgstr "ogni {0.period_singular}"
 
 #: udata/core/jobs/models.py:19
 msgid "every {0.every} {0.period}"
-msgstr "cada {0.every} {0.period} "
+msgstr "ogni {0.every} {0.period}"
 
 #: udata/core/organization/activities.py:21
 msgid "created an organization"
-msgstr "ha creado una organización"
+msgstr "ha creato un'organizzazione"
 
 #: udata/core/organization/activities.py:28
 msgid "updated an organization"
-msgstr "ha actualizado una organización"
+msgstr "ha aggiornato un'organizzazione"
 
 #: udata/core/organization/forms.py:23
 msgid "Shorter organization name"
-msgstr "Nombre de organización más corto"
+msgstr "Nome breve dell'organizzazione"
 
 #: udata/core/organization/forms.py:26
 msgid "The details about your organization"
-msgstr "Los detalles sobre su organización"
+msgstr "Dettagli sulla tua organizzazione"
 
 #: udata/core/organization/forms.py:28 udata/core/user/forms.py:20
 msgid "Website"
-msgstr "Sitio web"
+msgstr "Sito web"
 
 #: udata/core/organization/forms.py:28
 msgid "The organization website URL"
-msgstr "La URL de la organización del sitio web"
+msgstr "URL del sito web dell'organizzazione"
 
 #: udata/core/organization/forms.py:29
 msgid "Logo"
-msgstr "Logotipo"
+msgstr "Logo"
 
 #: udata/core/organization/forms.py:64
 msgid "Role"
-msgstr "Rol"
+msgstr "Ruolo"
 
 #: udata/core/organization/models.py:23
 msgid "Administrator"
-msgstr "Administrador"
+msgstr "Amministratore"
 
 #: udata/core/organization/models.py:24
 msgid "Editor"
-msgstr ""
+msgstr "Editor"
 
 #: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
 #: udata/harvest/models.py:26 udata/harvest/models.py:36 udata/harvest/models.py:74
 msgid "Pending"
-msgstr "Pendiente"
+msgstr "In attesa"
 
 #: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
 #: udata/harvest/models.py:75
 msgid "Accepted"
-msgstr "Aceptado"
+msgstr "Accettato"
 
 #: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
 #: udata/harvest/models.py:76
 msgid "Refused"
-msgstr "Rechazado"
+msgstr "Rifiutato"
 
 #: udata/core/organization/models.py:138
 msgid "Public Service"
-msgstr "Servicio público"
+msgstr "Servizio Pubblico"
 
 #: udata/core/organization/models.py:139
 msgid "Certified"
-msgstr "Certificado"
+msgstr "Certificato"
 
 #: udata/core/organization/tasks.py:50
 msgid "New membership request"
-msgstr "Nueva membresía solicitada"
+msgstr "Nuova richiesta di adesione"
 
 #: udata/core/organization/tasks.py:60 udata/core/organization/tasks.py:73
 #, python-format
 msgid "You are now a member of the organization \"%(org)s\""
-msgstr "Usted es ahora miembro de la organización \"%(org)s\""
+msgstr "Sei adesso un membro dell'organizzazione \"%(org)s\""
 
 #: udata/core/organization/tasks.py:64
 msgid "Membership refused"
-msgstr "Membresía rechazada"
+msgstr "Richiesta di adesione rifiutata"
 
 #: udata/core/organization/tasks.py:84
 #, python-format
 msgid "Your organization \"%(name)s\" has been certified"
-msgstr ""
+msgstr "La tua organizzazione \"%(name)s\" è stata certificata"
 
 #: udata/core/organization/tasks.py:104
 #, python-format
 msgid "Your organization \"%(name)s\" has been identified as public service"
-msgstr ""
+msgstr "La tua organizzazione \"%(name)s\" è stata identificata come servizio pubblico"
 
 #: udata/core/post/forms.py:16
 msgid "Headline"
-msgstr "Encabezado"
+msgstr "Intestazione"
 
 #: udata/core/post/forms.py:17
 msgid "Content"
-msgstr "Contenido"
+msgstr "Contenuto"
 
 #: udata/core/post/forms.py:19 udata/core/topic/forms.py:19
 msgid "Associated datasets"
-msgstr "Conjuntos de datos asociados"
+msgstr "Dataset associati"
 
 #: udata/core/post/forms.py:20 udata/core/topic/forms.py:20
 msgid "Associated reuses"
-msgstr "Reutilizaciones asociadas"
+msgstr "Riusi associati"
 
 #: udata/core/post/forms.py:22 udata/core/reuse/forms.py:28
 msgid "Image"
-msgstr "Imagen"
+msgstr "Immagine"
 
 #: udata/core/post/forms.py:23
 msgid "Image credits"
-msgstr "Créditos de la imagen"
+msgstr "Crediti dell'immagine"
 
 #: udata/core/post/forms.py:24
 msgid "Credit URL"
-msgstr "Créditos de la URL"
+msgstr "URL dei crediti"
 
 #: udata/core/post/forms.py:29
 msgid "body type"
-msgstr ""
+msgstr "tipo di corpo"
 
 #: udata/core/post/forms.py:30
 msgid "Specify your body type (HTML or markdown)"
-msgstr ""
+msgstr "Specifica il tipo di corpo (HTML o markdown)"
 
 #: udata/core/post/models.py:16
 msgid "Markdown"
-msgstr ""
+msgstr "Markdown"
 
 #: udata/core/post/models.py:17
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: udata/core/post/models.py:60
 msgid "post"
-msgstr ""
+msgstr "articolo"
 
 #: udata/core/reuse/activities.py:22
 msgid "created a reuse"
-msgstr "ha creado una reutilización"
+msgstr "ha creato un riuso"
 
 #: udata/core/reuse/activities.py:28
 msgid "updated a reuse"
-msgstr "ha actualizado una reutilización"
+msgstr "ha aggiornato un riuso"
 
 #: udata/core/reuse/activities.py:35
 msgid "deleted a reuse"
-msgstr "ha eliminado una reutilización"
+msgstr "ha eliminato un riuso"
 
 #: udata/core/reuse/forms.py:13
 msgid "This URL is already registered"
-msgstr "Esta URL ya está registrada"
+msgstr "Questo URL è già registrato"
 
 #: udata/core/reuse/forms.py:22
 msgid "The details about the reuse (build process, specifics, self-critics...)."
-msgstr "Los detalles sobre la reutilización (construcción de procesos, específicos, críticas propias...). "
+msgstr "I dettagli sul riuso (processo di costruzione, specifiche, autocritica...)."
 
 #: udata/core/reuse/forms.py:30
 msgid "Used datasets"
-msgstr "Conjunto de datos revisado"
+msgstr "Dataset utilizzati"
 
 #: udata/core/reuse/forms.py:35
 msgid "Topic"
-msgstr ""
+msgstr "Argomento"
 
 #: udata/core/reuse/models.py:17
 msgid "Application"
-msgstr "Aplicación"
+msgstr "Applicazione"
 
 #: udata/core/reuse/models.py:18
 msgid "Idea"
-msgstr ""
+msgstr "Idea"
 
 #: udata/core/reuse/models.py:19
 msgid "News Article"
-msgstr "Artículos nuevos"
+msgstr "Articolo di notizie"
 
 #: udata/core/reuse/models.py:20
 msgid "Paper"
-msgstr "Papel"
+msgstr "Paper"
 
 #: udata/core/reuse/models.py:21
 msgid "Post"
-msgstr "Publicación"
+msgstr "Post"
 
 #: udata/core/reuse/models.py:22
 msgid "Visualization"
-msgstr "Visualización"
+msgstr "Visualizzazione"
 
 #: udata/core/reuse/models.py:23
 msgid "Connected device"
-msgstr "Dispositivo conectado"
+msgstr "Dispositivo connesso"
 
 #: udata/core/reuse/models.py:27
 msgid "Health"
-msgstr ""
+msgstr "Salute"
 
 #: udata/core/reuse/models.py:28
 msgid "Transport and mobility"
-msgstr ""
+msgstr "Trasporti e mobilità"
 
 #: udata/core/reuse/models.py:29
 msgid "Housing and development"
-msgstr ""
+msgstr "Casa e pianificazione territoriale"
 
 #: udata/core/reuse/models.py:30
 msgid "Food and agriculture"
-msgstr ""
+msgstr "Alimentazione e agricoltura"
 
 #: udata/core/reuse/models.py:31
 msgid "Culture and recreation"
-msgstr ""
+msgstr "Cultura e divertimento"
 
 #: udata/core/reuse/models.py:32
 msgid "Economy and business"
-msgstr ""
+msgstr "Economia e affari"
 
 #: udata/core/reuse/models.py:33
 msgid "Environment and energy"
-msgstr ""
+msgstr "Ambiente ed energia"
 
 #: udata/core/reuse/models.py:34
 msgid "Work and training"
-msgstr ""
+msgstr "Lavoro e formazione"
 
 #: udata/core/reuse/models.py:35
 msgid "Politics and public life"
-msgstr ""
+msgstr "Politica e vita pubblica"
 
 #: udata/core/reuse/models.py:36
 msgid "Safety and security"
-msgstr ""
+msgstr "Sicurezza"
 
 #: udata/core/reuse/models.py:37
 msgid "Education and research"
-msgstr ""
+msgstr "Istruzione e ricerca"
 
 #: udata/core/reuse/models.py:38
 msgid "Society and demography"
-msgstr ""
+msgstr "Società e demografia"
 
 #: udata/core/reuse/models.py:39
 msgid "Law and justice"
-msgstr ""
+msgstr "Diritto e giustizia"
 
 #: udata/core/reuse/models.py:40
 msgid "Open data tools"
-msgstr ""
+msgstr "Strumenti open data"
 
 #: udata/core/reuse/models.py:41
 msgid "Others"
-msgstr ""
+msgstr "Altri"
 
 #: udata/core/reuse/models.py:120
 msgid "reuse"
-msgstr "reutilización"
+msgstr "riuso"
 
 #: udata/core/reuse/tasks.py:45
 msgid "New reuse"
-msgstr "Nueva reutilización"
+msgstr "Nuovo riuso"
 
 #: udata/core/site/forms.py:13
 msgid "Some SEO keywords"
-msgstr "Algunas palabras claves SEO"
+msgstr "Alcune parole chiave SEO"
 
 #: udata/core/site/forms.py:15
 msgid "Feed size"
-msgstr "Granulometría de entrada"
+msgstr "Dimensione del feed"
 
 #: udata/core/site/forms.py:15
 msgid "Number of elements in feeds"
-msgstr "Número de elementos de granularidad"
+msgstr "Numero di elementi nei feed"
 
 #: udata/core/spatial/forms.py:48
 msgid "Unknown geoid(s): {identifiers}"
-msgstr ""
+msgstr "Identificatori GeoID sconosciuti: {identifiers}"
 
 #: udata/core/spatial/forms.py:67
 msgid "Not a valid GeoJSON"
-msgstr ""
+msgstr "GeoJSON non valido"
 
 #: udata/core/spatial/forms.py:84
 msgid "A list of covered territories"
-msgstr "Lista de los territorios cubiertos"
+msgstr ""
 
 #: udata/core/spatial/forms.py:86
 msgid "Spatial granularity"
-msgstr "Granularidad espacial"
+msgstr ""
 
 #: udata/core/spatial/forms.py:87
 msgid "The size of the data increment"
-msgstr "El tamaño del incremento de datos "
+msgstr ""
 
 #: udata/core/spatial/models.py:23
 msgid "POI"
-msgstr "PDI"
+msgstr ""
 
 #: udata/core/spatial/translations.py:5
 msgid "French region"
-msgstr "Región francesa"
+msgstr ""
 
 #: udata/core/spatial/translations.py:6
 msgid "French intermunicipal (EPCI)"
@@ -821,7 +821,7 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:7
 msgid "French county"
-msgstr "Condado francés"
+msgstr ""
 
 #: udata/core/spatial/translations.py:8
 msgid "French district"
@@ -829,7 +829,7 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:9
 msgid "French town"
-msgstr "Ciudad francesa"
+msgstr ""
 
 #: udata/core/spatial/translations.py:10
 msgid "French canton"
@@ -837,27 +837,27 @@ msgstr ""
 
 #: udata/core/spatial/translations.py:11
 msgid "Iris (Insee districts)"
-msgstr "Iris (Distritos del INSEE)"
+msgstr ""
 
 #: udata/core/spatial/translations.py:12
 msgid "Country"
-msgstr "País"
+msgstr ""
 
 #: udata/core/spatial/translations.py:13
 msgid "World"
-msgstr "Mundo"
+msgstr "Mondo"
 
 #: udata/core/spatial/translations.py:14
 msgid "Country group"
-msgstr "Grupo de países"
+msgstr "Gruppo di paesi"
 
 #: udata/core/spatial/translations.py:15
 msgid "Country subset"
-msgstr "Subconjunto de países"
+msgstr "Sottoinsieme di un paese"
 
 #: udata/core/spatial/translations.py:16
 msgid "European Union"
-msgstr "Unión Europea"
+msgstr "Unione Europea"
 
 #: udata/core/spatial/translations.py:17
 msgid "Metropolitan France"
@@ -865,47 +865,47 @@ msgstr "Francia metropolitana"
 
 #: udata/core/spatial/translations.py:18
 msgid "Overseas France"
-msgstr ""
+msgstr "Francia d'oltremare"
 
 #: udata/core/spatial/translations.py:19
 msgid "French overseas collectivities"
-msgstr ""
+msgstr "Collettività francesi d'oltremare"
 
 #: udata/core/spatial/translations.py:20
 msgid "French arrondissement"
-msgstr ""
+msgstr "Arrondissement francese"
 
 #: udata/core/topic/forms.py:24
 msgid "Featured"
-msgstr "Destacado"
+msgstr "In evidenza"
 
 #: udata/core/user/activities.py:32 udata/core/user/activities.py:64
 msgid "followed an organization"
-msgstr "ha seguido una organización "
+msgstr "ha seguito un'organizzazione"
 
 #: udata/core/user/activities.py:37
 msgid "followed a user"
-msgstr "ha seguido un usuario"
+msgstr "ha seguito un utente"
 
 #: udata/core/user/activities.py:44
 msgid "discussed a dataset"
-msgstr ""
+msgstr "ha commentato un dataset"
 
 #: udata/core/user/activities.py:49
 msgid "discussed a reuse"
-msgstr ""
+msgstr "ha commentato un riuso"
 
 #: udata/core/user/activities.py:54
 msgid "followed a dataset"
-msgstr "ha seguido un conjunto de datos"
+msgstr "ha seguito un dataset"
 
 #: udata/core/user/activities.py:59
 msgid "followed a reuse"
-msgstr "ha seguido una reutilización "
+msgstr "ha seguito un riuso"
 
 #: udata/core/user/forms.py:18
 msgid "Email"
-msgstr ""
+msgstr "Email"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
@@ -913,85 +913,85 @@ msgstr "Avatar"
 
 #: udata/core/user/forms.py:21
 msgid "About"
-msgstr "Sobre"
+msgstr "Informazioni"
 
 #: udata/core/user/forms.py:25
 msgid "Roles"
-msgstr ""
+msgstr "Ruoli"
 
 #: udata/core/user/models.py:262 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
-msgstr ""
+msgstr "Eliminazione dell'account"
 
 #: udata/core/user/permissions.py:6
 msgid "System administrator"
-msgstr "Administrador del sistema"
+msgstr "Amministratore di sistema"
 
 #: udata/core/user/permissions.py:7
 msgid "Site editorialist"
-msgstr "Editor del sitio"
+msgstr "Editor del sito"
 
 #: udata/core/user/permissions.py:8
 msgid "Site moderator"
-msgstr "Moderador del sitio"
+msgstr "Moderatore del sito"
 
 #: udata/core/user/tasks.py:15
 msgid "Test mail"
-msgstr "Texto del correo"
+msgstr "Email di prova"
 
 #: udata/forms/fields.py:99
 msgid "The role {role} does not exist"
-msgstr ""
+msgstr "Il ruolo {role} non esiste"
 
 #: udata/forms/fields.py:116
 msgid "Not a valid UUID"
-msgstr ""
+msgstr "UUID non valido"
 
 #: udata/forms/fields.py:141
 msgid "Invalid URL"
-msgstr ""
+msgstr "URL non valido"
 
 #: udata/forms/fields.py:337
 #, python-format
 msgid "Tag \"%(tag)s\" must be between %(min)d and %(max)d characters long."
-msgstr "La etiqueta \"%(tag)s\" debe estar entre %(min)d y %(max)d caracteres"
+msgstr "Il tag \"%(tag)s\" deve essere di lunghezza compresa tra %(min)d e %(max)d caratteri."
 
 #: udata/forms/fields.py:377 udata/forms/fields.py:429
 msgid "{0} does not exists"
-msgstr "{0} no existe"
+msgstr "{0} non esiste"
 
 #: udata/forms/fields.py:416
 msgid "Expect both class and identifier"
-msgstr ""
+msgstr "Si attende sia una classe che un identificatore"
 
 #: udata/forms/fields.py:462
 msgid "Model for {0} not found"
-msgstr "Modelo para {0} no encontrado"
+msgstr "Modello per {0} non trovato"
 
 #: udata/forms/fields.py:497
 msgid "Unknown identifiers: {identifiers}"
-msgstr ""
+msgstr "Identificatori sconosciuti: {identifiers}"
 
 #: udata/forms/fields.py:632
 msgid "Unable to parse date range"
-msgstr "Incapaz de analizar el rango de los datos"
+msgstr "Impossibile analizzare l'intervallo di date"
 
 #: udata/forms/fields.py:659 udata/forms/fields.py:682
 msgid "You must be authenticated"
-msgstr "Usted debe estar autentificado"
+msgstr ""
 
 #: udata/forms/fields.py:662
 msgid "You can only set yourself as owner"
-msgstr "Sólo puede establecerse usted mismo como propietario"
+msgstr ""
 
 #: udata/forms/fields.py:685
 msgid "Permission denied for this organization"
-msgstr "Permiso negado para esta organización"
+msgstr ""
 
 #: udata/forms/validators.py:59
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
-msgstr "Este campo requiere de \"%(name)s\"  que deben ser ajustados"
+msgstr ""
 
 #: udata/frontend/markdown.py:30
 msgid "Source"
@@ -1003,7 +1003,7 @@ msgstr ""
 
 #: udata/harvest/forms.py:65
 msgid "Backend"
-msgstr "En la parte posterior"
+msgstr ""
 
 #: udata/harvest/models.py:19
 msgid "Manual"
@@ -1011,35 +1011,35 @@ msgstr ""
 
 #: udata/harvest/models.py:27
 msgid "Initializing"
-msgstr "Inicializando"
+msgstr ""
 
 #: udata/harvest/models.py:28
 msgid "Initialized"
-msgstr "Inicializado "
+msgstr ""
 
 #: udata/harvest/models.py:29
 msgid "Processing"
-msgstr "Procesando"
+msgstr ""
 
 #: udata/harvest/models.py:30 udata/harvest/models.py:38
 msgid "Done"
-msgstr "Hecho"
+msgstr ""
 
 #: udata/harvest/models.py:31
 msgid "Done with errors"
-msgstr "Hecho con errores"
+msgstr ""
 
 #: udata/harvest/models.py:32 udata/harvest/models.py:39
 msgid "Failed"
-msgstr "Fallado"
+msgstr ""
 
 #: udata/harvest/models.py:37
 msgid "Started"
-msgstr "Comenzó"
+msgstr ""
 
 #: udata/harvest/models.py:40
 msgid "Skipped"
-msgstr "Salteado"
+msgstr ""
 
 #: udata/harvest/models.py:41
 msgid "Archived"
@@ -1047,68 +1047,68 @@ msgstr ""
 
 #: udata/templates/admin.html:7
 msgid "Admin"
-msgstr "Administrador"
+msgstr ""
 
 #: udata/templates/api/admin.html:11
 msgid "Maintainer"
-msgstr "Encargado"
+msgstr ""
 
 #: udata/templates/api/admin.html:31
 msgid "Edit"
-msgstr "Editar"
+msgstr ""
 
 #: udata/templates/api/admin.html:34
 msgid "Delete"
-msgstr "Borrar"
+msgstr ""
 
 #: udata/templates/api/admin.html:42
 msgid "No OAuth clients"
-msgstr "Clientes no OAuth"
+msgstr ""
 
 #: udata/templates/api/admin.html:53
 msgid "Add a client"
-msgstr "Agregar un cliente"
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:23
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
-msgstr "%(app)s quiere acceder su cuenta  %(site)s. "
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:35
 msgid "Details"
-msgstr "Detalles"
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:45
 msgid "Access your profile"
-msgstr "Acceso a su perfil"
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Read your profile, the orgnization you belong to, your publications"
-msgstr "Lea su perfil, la organización a la que pertenece, sus publicaciones"
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:54
 msgid "Publish data"
-msgstr "Publique datos "
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:55
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr "Publique conjuntos de datos, reutilizaciones; siga o deje de seguir"
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:65
 msgid "Accept"
-msgstr "Aceptar"
+msgstr ""
 
 #: udata/templates/api/oauth_authorize.html:67
 msgid "Refuse"
-msgstr "Rechazar"
+msgstr ""
 
 #: udata/templates/api/oauth_error.html:15
 msgid "OAuth Authentication Error"
-msgstr "OAuth Error de Autentificación "
+msgstr ""
 
 #: udata/templates/api/oauth_error.html:20 udata/templates/macros/metadata.html:2
 msgid "Home"
-msgstr "Inicio"
+msgstr ""
 
 #: udata/templates/comments/dataset_archived.txt:1
 msgid "This dataset has been archived by our administration team.\n\n"
@@ -1119,11 +1119,11 @@ msgstr ""
 
 #: udata/templates/macros/forms.html:106
 msgid "required fields"
-msgstr "archivos requeridos"
+msgstr ""
 
 #: udata/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
-msgstr "Comparta, mejore y reutilice datos públicos"
+msgstr ""
 
 #: udata/templates/mail/account_deleted.html:4
 msgid "Your account has now been deleted"
@@ -1137,7 +1137,7 @@ msgstr ""
 #: udata/templates/mail/badge_added_certified.html:27
 #: udata/templates/mail/badge_added_public_service.html:27
 msgid "See the badge"
-msgstr "Ver la insignia"
+msgstr ""
 
 #: udata/templates/mail/badge_added_public_service.html:6
 #, python-format
@@ -1156,21 +1156,21 @@ msgstr ""
 #: udata/templates/mail/base.html:76
 #, python-format
 msgid "Hi %(user)s"
-msgstr "Hola %(user)s"
+msgstr ""
 
 #: udata/templates/mail/base.html:87
 msgid "See you soon on the platform"
-msgstr "Hasts pronto en la plataforma "
+msgstr ""
 
 #: udata/templates/mail/base.html:88
 #, python-format
 msgid "The %(site)s team"
-msgstr "El equipo %(site)s"
+msgstr ""
 
 #: udata/templates/mail/discussion_closed.html:6
 #, python-format
 msgid "%(user)s closed an discussion on your %(type)s %(subject)s"
-msgstr "%(user)s cerró una discusión sobre su  %(type)s %(subject)s"
+msgstr ""
 
 #: udata/templates/mail/discussion_closed.html:31
 #: udata/templates/mail/new_discussion.html:30
@@ -1182,83 +1182,83 @@ msgstr ""
 #: udata/templates/mail/new_discussion.html:38
 #: udata/templates/mail/new_discussion_comment.html:39
 msgid "See the discussion"
-msgstr "Ver la discusión"
+msgstr ""
 
 #: udata/templates/mail/frequency_reminder.html:6
 msgid "Some of your datasets need to be updated according to the frequency you set:"
-msgstr "Algunos conjuntos de datos necesitan ser actualizados en base a la frecuencia que señaló"
+msgstr ""
 
 #: udata/templates/mail/frequency_reminder.html:12
 #, python-format
 msgid "Dataset \"%(dataset_title)s\" last update is on %(published_date)s."
-msgstr "La última actualización del conjunto de datos \"%(dataset_title)s\" data de %(published_date)s."
+msgstr ""
 
 #: udata/templates/mail/frequency_reminder.html:17
 #, python-format
 msgid "Given the set frequency (%(dataset_frequency)s) update was due %(due_update_days)s days ago."
-msgstr "Dada la frecuencia  señalada (%(dataset_frequency)s) la actualización hubiera debido ser hace %(due_update_days)s dias. "
+msgstr ""
 
 #: udata/templates/mail/frequency_reminder.html:25
 msgid "Update the dataset and associated resources"
-msgstr "Actualice el conjunto de datos y las fuentes asociadas"
+msgstr ""
 
 #: udata/templates/mail/membership_refused.html:7
 #, python-format
 msgid "Your membership for the organization \"%(org)s\" has been refused"
-msgstr "La solicitud de membresía para la organización \"%(org)s\"  ha sido rechazada"
+msgstr ""
 
 #: udata/templates/mail/membership_refused.html:18
 msgid "Refusal reason"
-msgstr "La razón de rechazo"
+msgstr ""
 
 #: udata/templates/mail/membership_request.html:8
 #, python-format
 msgid "As an administrator of \"%(org)s\" you are being informed than a new membership request from %(user)s is pending for validation"
-msgstr "Como administrador de \"%(org)s\" se le informa que la solicitud de memebresía de %(user)s  sigue pendiente de validación"
+msgstr ""
 
 #: udata/templates/mail/membership_request.html:40
 msgid "See the request"
-msgstr "Ver esta solicitud"
+msgstr ""
 
 #: udata/templates/mail/new_discussion.html:6
 #, python-format
 msgid "%(user)s submitted a new discussion on your %(type)s %(subject)s"
-msgstr "%(user)s empezaron una nueva discusión en su %(type)s %(subject)s"
+msgstr ""
 
 #: udata/templates/mail/new_discussion_comment.html:6
 #, python-format
 msgid "%(user)s commented an discussion on your %(type)s %(subject)s"
-msgstr "%(user)s comentarion una discusión en su %(type)s %(subject)s"
+msgstr ""
 
 #: udata/templates/mail/new_member.html:7
 #, python-format
 msgid "Congratulations, you are now a member of the organization \"%(org)s\""
-msgstr "Felicitaciones, usted es ahora un miembro de la organización \"%(org)s\""
+msgstr ""
 
 #: udata/templates/mail/new_member.html:21
 msgid "See the organization page"
-msgstr "Vea la página de la organización"
+msgstr ""
 
 #: udata/templates/mail/new_reuse.html:7
 #, python-format
 msgid "A new reuse of your dataset %(dataset)s has been published"
-msgstr "Una nueva reutilización del conjunto de datos %(dataset)s ha sido publicado "
+msgstr ""
 
 #: udata/templates/mail/new_reuse.html:31
 msgid "See the reuse"
-msgstr "Ver esta reutilización"
+msgstr ""
 
 #: udata/templates/mail/new_reuse.html:37
 msgid "See on the dataset page"
-msgstr "Ver en la página del conjunto de datos"
+msgstr ""
 
 #: udata/templates/mail/test.html:4
 msgid "This is a test mail"
-msgstr "Este en un correo de prueba"
+msgstr ""
 
 #: udata/templates/mail/test.html:5
 msgid "If you read this, your mail configuration is working"
-msgstr "Si usted lee esto, su correo de configuración está funcionando "
+msgstr ""
 
 #: udata/templates/mail/security/change_notice.html:6
 msgid "Your password has been changed."
