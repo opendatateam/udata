@@ -245,7 +245,7 @@ class DatasetExtrasAPI(API):
     @api.secure
     @api.doc('update_dataset_extras')
     def put(self, dataset):
-        '''Update a given dataset extras on a given dataset'''
+        '''Update a given dataset extras'''
         data = request.json
         if not isinstance(data, dict):
             api.abort(400, 'Wrong payload format, dict expected')
