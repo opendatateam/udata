@@ -1208,21 +1208,36 @@ class DatasetExtrasAPITest(APITestCase):
         assert data['test::extra'] == 'test-value'
 
     def test_update_dataset_extras(self):
-        self.dataset.extras = {'test::extra': 'test-value'}
+        self.dataset.extras = {'test::extra': 'test-value', 'test::extra-second': 'test-value-second'}
         self.dataset.save()
-        data = {'another::key': 'another-value'}
+
+        data = ['test::extra-second', 'another::key']
+        response = self.put(url_for('api.dataset_extras', dataset=self.dataset), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, dict expected'
+
+        data = {'test::extra-second': 'test-value-changed', 'another::key': 'another-value'}
         response = self.put(url_for('api.dataset_extras', dataset=self.dataset), data)
         self.assert200(response)
+
         self.dataset.reload()
         assert self.dataset.extras['test::extra'] == 'test-value'
+        assert self.dataset.extras['test::extra-second'] == 'test-value-changed'
         assert self.dataset.extras['another::key'] == 'another-value'
 
     def test_delete_dataset_extras(self):
         self.dataset.extras = {'test::extra': 'test-value', 'another::key': 'another-value'}
         self.dataset.save()
+
         data = {'another::key': 'another-value'}
         response = self.delete(url_for('api.dataset_extras', dataset=self.dataset), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, list expected'
+
+        data = ['another::key']
+        response = self.delete(url_for('api.dataset_extras', dataset=self.dataset), data)
         self.assert204(response)
+
         self.dataset.reload()
         assert len(self.dataset.extras) == 1
         assert self.dataset.extras['test::extra'] == 'test-value'
@@ -1249,15 +1264,24 @@ class DatasetResourceExtrasAPITest(APITestCase):
 
     def test_update_resource_extras(self):
         resource = ResourceFactory()
-        resource.extras = {'test::extra': 'test-value'}
+        resource.extras = {'test::extra': 'test-value', 'test::extra-second': 'test-value-second'}
         self.dataset.resources.append(resource)
         self.dataset.save()
-        data = {'another::key': 'another-value'}
+
+        data = ['test::extra-second', 'another::key']
+        response = self.put(url_for('api.resource_extras', dataset=self.dataset,
+                                    rid=resource.id), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, dict expected'
+
+        data = {'test::extra-second': 'test-value-changed', 'another::key': 'another-value'}
         response = self.put(url_for('api.resource_extras', dataset=self.dataset,
                                     rid=resource.id), data)
         self.assert200(response)
+
         self.dataset.reload()
         assert self.dataset.resources[0].extras['test::extra'] == 'test-value'
+        assert self.dataset.resources[0].extras['test::extra-second'] == 'test-value-changed'
         assert self.dataset.resources[0].extras['another::key'] == 'another-value'
 
     def test_delete_resource_extras(self):
@@ -1265,7 +1289,14 @@ class DatasetResourceExtrasAPITest(APITestCase):
         resource.extras = {'test::extra': 'test-value', 'another::key': 'another-value'}
         self.dataset.resources.append(resource)
         self.dataset.save()
+
         data = {'another::key': 'another-value'}
+        response = self.delete(url_for('api.resource_extras', dataset=self.dataset,
+                                       rid=resource.id), data)
+        self.assert400(response)
+        assert response.json['message'] == 'Wrong payload format, list expected'
+
+        data = ['another::key']
         response = self.delete(url_for('api.resource_extras', dataset=self.dataset,
                                        rid=resource.id), data)
         self.assert204(response)

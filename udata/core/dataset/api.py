@@ -230,7 +230,8 @@ class DatasetAPI(API):
 
 @ns.route('/<dataset:dataset>/extras/', endpoint='dataset_extras',
           doc=common_doc)
-@api.response(400, 'Wrong payload format')
+@api.response(400, 'Wrong payload format, dict expected')
+@api.response(400, 'Wrong payload format, list expected')
 @api.response(404, 'Dataset not found')
 @api.response(410, 'Dataset has been deleted')
 class DatasetExtrasAPI(API):
@@ -246,13 +247,12 @@ class DatasetExtrasAPI(API):
     def put(self, dataset):
         '''Update a given dataset extras on a given dataset'''
         data = request.json
+        if not isinstance(data, dict):
+            api.abort(400, 'Wrong payload format, dict expected')
         if dataset.deleted:
             api.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
-        try:
-            dataset.extras.update(data)
-        except ValueError:
-            api.abort(400, 'Wrong payload format')
+        dataset.extras.update(data)
         dataset.save()
         return dataset.extras
 
@@ -261,14 +261,18 @@ class DatasetExtrasAPI(API):
     def delete(self, dataset):
         '''Delete a given dataset extras key on a given dataset'''
         data = request.json
-        ResourceEditPermission(dataset).test()
+        if not isinstance(data, list):
+            api.abort(400, 'Wrong payload format, list expected')
+        if dataset.deleted:
+            api.abort(410, 'Dataset has been deleted')
+        DatasetEditPermission(dataset).test()
         try:
-            for key, value in data.items():
+            for key in data:
                 del dataset.extras[key]
-        except AttributeError:
-            api.abort(400, 'Wrong payload format')
+        except KeyError:
+            api.abort(404, 'Key not found in existing extras')
         dataset.save()
-        return '', 204
+        return dataset.extras, 204
 
 
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
@@ -547,6 +551,10 @@ class ResourceAPI(ResourceMixin, API):
 @ns.route('/<dataset:dataset>/resources/<uuid:rid>/extras/', endpoint='resource_extras',
           doc=common_doc)
 @api.param('rid', 'The resource unique identifier')
+@api.response(400, 'Wrong payload format, dict expected')
+@api.response(400, 'Wrong payload format, list expected')
+@api.response(404, 'Key not found in existing extras')
+@api.response(410, 'Dataset has been deleted')
 class ResourceExtrasAPI(ResourceMixin, API):
     @api.doc('get_resource_extras')
     def get(self, dataset, rid):
@@ -561,12 +569,13 @@ class ResourceExtrasAPI(ResourceMixin, API):
     def put(self, dataset, rid):
         '''Update a given resource extras on a given dataset'''
         data = request.json
+        if not isinstance(data, dict):
+            api.abort(400, 'Wrong payload format, dict expected')
+        if dataset.deleted:
+            api.abort(410, 'Dataset has been deleted')
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
-        try:
-            resource.extras.update(data)
-        except ValueError:
-            api.abort(400, 'Wrong payload format')
+        resource.extras.update(data)
         resource.save()
         return resource.extras
 
@@ -575,15 +584,19 @@ class ResourceExtrasAPI(ResourceMixin, API):
     def delete(self, dataset, rid):
         '''Delete a given resource extras key on a given dataset'''
         data = request.json
+        if not isinstance(data, list):
+            api.abort(400, 'Wrong payload format, list expected')
+        if dataset.deleted:
+            api.abort(410, 'Dataset has been deleted')
         ResourceEditPermission(dataset).test()
         resource = self.get_resource_or_404(dataset, rid)
         try:
-            for key, value in data.items():
+            for key in data:
                 del resource.extras[key]
-        except AttributeError:
-            api.abort(400, 'Wrong payload format')
+        except KeyError:
+            api.abort(404, 'Key not found in existing extras')
         resource.save()
-        return '', 204
+        return resource.extras, 204
 
 
 @ns.route('/community_resources/', endpoint='community_resources')
