@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- :warning: **Breaking change** Use dedicated dynamic harvest metadata for dataset and resources. A migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. udata-ckan, udata-ods and udata-front packages are impacted and should be upgraded accordingly [#2762](https://github.com/opendatateam/udata/pull/2762)
 
 ## 4.1.3 (2022-11-02)
 

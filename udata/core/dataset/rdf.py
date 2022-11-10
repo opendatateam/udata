@@ -4,7 +4,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 import calendar
 import logging
 
-from datetime import date
+from datetime import date, datetime
 from html.parser import HTMLParser
 from dateutil.parser import parse as parse_dt
 from flask import current_app
@@ -14,6 +14,7 @@ from rdflib.namespace import RDF
 
 from udata import i18n, uris
 from udata.frontend.markdown import parse_html
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.models import db
 from udata.rdf import (
     DCAT, DCT, FREQ, SCV, SKOS, SPDX, SCHEMA, EUFREQ,
@@ -70,10 +71,6 @@ EU_RDF_REQUENCIES = {
 }
 
 
-Dataset.extras.register('uri', db.StringField)
-Dataset.extras.register('dct:identifier', db.StringField)
-
-
 class HTMLDetector(HTMLParser):
     def __init__(self, *args, **kwargs):
         HTMLParser.__init__(self, *args, **kwargs)
@@ -124,8 +121,8 @@ def resource_to_rdf(resource, dataset=None, graph=None):
     graph = graph or Graph(namespace_manager=namespace_manager)
     if dataset and dataset.id:
         id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset', dataset=dataset.id,
-                            _external=True,
-                            _anchor='resource-{0}'.format(resource.id)))
+                                 _external=True,
+                                 _anchor='resource-{0}'.format(resource.id)))
     else:
         id = BNode(resource.id)
     permalink = endpoint_for('datasets.resource', 'api.resource_redirect', id=resource.id, _external=True)
@@ -164,16 +161,16 @@ def dataset_to_rdf(dataset, graph=None):
     '''
     # Use the unlocalized permalink to the dataset as URI when available
     # unless there is already an upstream URI
-    if 'uri' in dataset.extras:
-        id = URIRef(dataset.extras['uri'])
+    if dataset.harvest and dataset.harvest.uri:
+        id = URIRef(dataset.harvest.uri)
     elif dataset.id:
         id = URIRef(endpoint_for('datasets.show_redirect', 'api.dataset',
                     dataset=dataset.id, _external=True))
     else:
         id = BNode()
     # Expose upstream identifier if present
-    if 'dct:identifier' in dataset.extras:
-        identifier = dataset.extras['dct:identifier']
+    if dataset.harvest and dataset.harvest.dct_identifier:
+        identifier = dataset.harvest.dct_identifier
     else:
         identifier = dataset.id
     graph = graph or Graph(namespace_manager=namespace_manager)
@@ -334,6 +331,22 @@ def title_from_rdf(rdf, url):
             return i18n._('Nameless resource')
 
 
+def remote_url_from_rdf(rdf):
+    '''
+    Return DCAT.landingPage if found and uri validation succeeds.
+    Use RDF identifier as fallback if uri validation succeeds.
+    '''
+    landing_page = url_from_rdf(rdf, DCAT.landingPage)
+    uri = rdf.identifier.toPython()
+    for candidate in [landing_page, uri]:
+        if candidate:
+            try:
+                uris.validate(candidate)
+                return candidate
+            except uris.ValidationError:
+                pass
+
+
 def resource_from_rdf(graph_or_distrib, dataset=None):
     '''
     Map a Resource domain model to a DCAT/RDF graph
@@ -376,15 +389,17 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
 
-    resource.published = rdf_value(distrib, DCT.issued, resource.published)
-    resource.modified = rdf_value(distrib, DCT.modified, resource.modified)
-
     identifier = rdf_value(distrib, DCT.identifier)
-    if identifier:
-        resource.extras['dct:identifier'] = identifier
+    uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
+    created_at = rdf_value(distrib, DCT.issued)
+    modified_at = rdf_value(distrib, DCT.modified)
 
-    if isinstance(distrib.identifier, URIRef):
-        resource.extras['uri'] = distrib.identifier.toPython()
+    if not resource.harvest:
+        resource.harvest = HarvestResourceMetadata()
+    resource.harvest.created_at = created_at
+    resource.harvest.modified_at = modified_at
+    resource.harvest.dct_identifier = identifier
+    resource.harvest.uri = uri
 
     return resource
 
@@ -405,8 +420,6 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     description = d.value(DCT.description) or d.value(DCT.abstract)
     dataset.description = sanitize_html(description)
     dataset.frequency = frequency_from_rdf(d.value(DCT.accrualPeriodicity))
-    dataset.created_at = rdf_value(d, DCT.issued, dataset.created_at)
-    dataset.last_modified = rdf_value(d, DCT.modified, dataset.last_modified)
 
     acronym = rdf_value(d, SKOS.altLabel)
     if acronym:
@@ -415,21 +428,6 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     tags = [tag.toPython() for tag in d.objects(DCAT.keyword)]
     tags += [theme.toPython() for theme in d.objects(DCAT.theme) if not isinstance(theme, RdfResource)]
     dataset.tags = list(set(tags))
-
-    identifier = rdf_value(d, DCT.identifier)
-    if identifier:
-        dataset.extras['dct:identifier'] = identifier
-
-    if isinstance(d.identifier, URIRef):
-        dataset.extras['uri'] = d.identifier.toPython()
-
-    landing_page = url_from_rdf(d, DCAT.landingPage)
-    if landing_page:
-        try:
-            uris.validate(landing_page)
-            dataset.extras['remote_url'] = landing_page
-        except uris.ValidationError:
-            pass
 
     dataset.temporal_coverage = temporal_from_rdf(d.value(DCT.temporal))
 
@@ -446,5 +444,19 @@ def dataset_from_rdf(graph, dataset=None, node=None):
     default_license = dataset.license or License.default()
     dataset_license = rdf_value(d, DCT.license)
     dataset.license = License.guess(dataset_license, *licenses, default=default_license)
+
+    identifier = rdf_value(d, DCT.identifier)
+    uri = d.identifier.toPython() if isinstance(d.identifier, URIRef) else None
+    remote_url = remote_url_from_rdf(d)
+    created_at = rdf_value(d, DCT.issued)
+    modified_at = rdf_value(d, DCT.modified)
+
+    if not dataset.harvest:
+        dataset.harvest = HarvestDatasetMetadata()
+    dataset.harvest.dct_identifier = identifier
+    dataset.harvest.uri = uri
+    dataset.harvest.remote_url = remote_url
+    dataset.harvest.created_at = created_at
+    dataset.harvest.modified_at = modified_at
 
     return dataset
