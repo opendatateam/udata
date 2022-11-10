@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-01-11 09:51+0100\n"
-"PO-Revision-Date: 2022-01-11 08:59\n"
+"POT-Creation-Date: 2022-06-27 11:45+0200\n"
+"PO-Revision-Date: 2022-10-28 13:09\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: fr\n"
 "Language-Team: French\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:101
+#: udata/settings.py:99
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: udata/settings.py:102
+#: udata/settings.py:100
 msgid "Please confirm your email"
 msgstr "Veuillez confirmer votre adresse e-mail"
 
-#: udata/settings.py:103
+#: udata/settings.py:101
 msgid "Login instructions"
 msgstr "Instructions de connexion"
 
-#: udata/settings.py:104
+#: udata/settings.py:102
 msgid "Your password has been reset"
 msgstr "Votre mot de passe a été réinitialisé"
 
-#: udata/settings.py:105
+#: udata/settings.py:103
 msgid "Your password has been changed"
 msgstr "Votre mot de passe a été modifié"
 
-#: udata/settings.py:107
+#: udata/settings.py:105
 msgid "Password reset instructions"
 msgstr "Instructions de réinitialisation du mot de passe"
 
-#: udata/settings.py:441
+#: udata/settings.py:390
 msgid "This dataset has been archived"
 msgstr "Ce jeu de données a été archivé"
 
@@ -307,183 +307,167 @@ msgstr "Privé"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "Restreint la visibilité du jeu de données à vous ou votre organisation seulement."
 
-#: udata/core/dataset/models.py:44
+#: udata/core/dataset/models.py:43
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:44
 msgid "Punctual"
 msgstr "Ponctuelle"
 
-#: udata/core/dataset/models.py:46
+#: udata/core/dataset/models.py:45
 msgid "Real time"
 msgstr "Temps réel"
 
-#: udata/core/dataset/models.py:47
+#: udata/core/dataset/models.py:46
 msgid "Hourly"
 msgstr "Toutes les heures"
 
-#: udata/core/dataset/models.py:48
+#: udata/core/dataset/models.py:47
 msgid "Four times a day"
 msgstr "Quatre fois par jour"
 
-#: udata/core/dataset/models.py:49
+#: udata/core/dataset/models.py:48
 msgid "Three times a day"
 msgstr "Trois fois par jour"
 
-#: udata/core/dataset/models.py:50
+#: udata/core/dataset/models.py:49
 msgid "Semidaily"
 msgstr "Deux fois par jour"
 
-#: udata/core/dataset/models.py:51 udata/harvest/models.py:22
+#: udata/core/dataset/models.py:50 udata/harvest/models.py:22
 msgid "Daily"
 msgstr "Quotidienne"
 
-#: udata/core/dataset/models.py:52
+#: udata/core/dataset/models.py:51
 msgid "Four times a week"
 msgstr "Quatre fois par semaine"
 
-#: udata/core/dataset/models.py:53
+#: udata/core/dataset/models.py:52
 msgid "Three times a week"
 msgstr "Trois fois par semaine"
 
-#: udata/core/dataset/models.py:54
+#: udata/core/dataset/models.py:53
 msgid "Semiweekly"
 msgstr "Deux fois par semaine"
 
-#: udata/core/dataset/models.py:55 udata/harvest/models.py:21
+#: udata/core/dataset/models.py:54 udata/harvest/models.py:21
 msgid "Weekly"
 msgstr "Hebdomadaire"
 
-#: udata/core/dataset/models.py:56
+#: udata/core/dataset/models.py:55
 msgid "Biweekly"
 msgstr "Toutes les deux semaines"
 
-#: udata/core/dataset/models.py:57
+#: udata/core/dataset/models.py:56
 msgid "Three times a month"
 msgstr "Trois fois par mois"
 
-#: udata/core/dataset/models.py:58
+#: udata/core/dataset/models.py:57
 msgid "Semimonthly"
 msgstr "Deux fois par mois"
 
-#: udata/core/dataset/models.py:59 udata/harvest/models.py:20
+#: udata/core/dataset/models.py:58 udata/harvest/models.py:20
 msgid "Monthly"
 msgstr "Mensuelle"
 
-#: udata/core/dataset/models.py:60
+#: udata/core/dataset/models.py:59
 msgid "Bimonthly"
 msgstr "Bimestrielle"
 
-#: udata/core/dataset/models.py:61
+#: udata/core/dataset/models.py:60
 msgid "Quarterly"
 msgstr "Trimestrielle"
 
-#: udata/core/dataset/models.py:62
+#: udata/core/dataset/models.py:61
 msgid "Three times a year"
 msgstr "Trois fois par an"
 
-#: udata/core/dataset/models.py:63
+#: udata/core/dataset/models.py:62
 msgid "Biannual"
 msgstr "Semestrielle"
 
-#: udata/core/dataset/models.py:64
+#: udata/core/dataset/models.py:63
 msgid "Annual"
 msgstr "Annuelle"
 
-#: udata/core/dataset/models.py:65
+#: udata/core/dataset/models.py:64
 msgid "Biennial"
 msgstr "Biennale"
 
-#: udata/core/dataset/models.py:66
+#: udata/core/dataset/models.py:65
 msgid "Triennial"
 msgstr "Triennale"
 
-#: udata/core/dataset/models.py:67
+#: udata/core/dataset/models.py:66
 msgid "Quinquennial"
 msgstr "Quinquennale"
 
-#: udata/core/dataset/models.py:68
+#: udata/core/dataset/models.py:67
 msgid "Irregular"
 msgstr "Sans régularité"
 
-#: udata/core/dataset/models.py:90
+#: udata/core/dataset/models.py:89
 msgid "Main file"
 msgstr "Fichier principal"
 
-#: udata/core/dataset/models.py:91
+#: udata/core/dataset/models.py:90
 msgid "Documentation"
 msgstr "Documentation"
 
-#: udata/core/dataset/models.py:92
+#: udata/core/dataset/models.py:91
 msgid "Update"
 msgstr "Mise à jour"
 
-#: udata/core/dataset/models.py:93 udata/core/reuse/models.py:17
+#: udata/core/dataset/models.py:92 udata/core/reuse/models.py:16
 msgid "API"
 msgstr "API"
 
-#: udata/core/dataset/models.py:94
+#: udata/core/dataset/models.py:93
 msgid "Code repository"
 msgstr "Dépôt de code"
 
-#: udata/core/dataset/models.py:95 udata/core/spatial/models.py:24
+#: udata/core/dataset/models.py:94 udata/core/spatial/models.py:24
 msgid "Other"
 msgstr "Autre"
 
-#: udata/core/dataset/models.py:100
+#: udata/core/dataset/models.py:99
 msgid "Uploaded file"
 msgstr "Fichier uploadé"
 
-#: udata/core/dataset/models.py:101
+#: udata/core/dataset/models.py:100
 msgid "Remote file"
 msgstr "Fichier distant"
 
-#: udata/core/dataset/models.py:344 udata/core/dataset/rdf.py:331
+#: udata/core/dataset/models.py:352 udata/core/dataset/rdf.py:334
 msgid "Nameless resource"
 msgstr "Ressource sans nom"
 
-#: udata/core/dataset/models.py:400 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:414 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr "Date de création"
 
-#: udata/core/dataset/models.py:402 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:416 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "Date de dernière modification"
 
-#: udata/core/dataset/models.py:418
+#: udata/core/dataset/models.py:432
 msgid "Future date of update"
 msgstr "Future date de mise à jour"
 
-#: udata/core/dataset/models.py:434
+#: udata/core/dataset/models.py:448
 msgid "Pivotal data"
 msgstr "Données pivot"
 
-#: udata/core/dataset/models.py:471
+#: udata/core/dataset/models.py:486
 msgid "dataset"
 msgstr "jeu de données"
 
-#: udata/core/dataset/rdf.py:329
+#: udata/core/dataset/rdf.py:332
 msgid "{format} resource"
 msgstr "Ressource {format}"
 
-#: udata/core/dataset/search.py:149 udata/tests/search/test_adapter.py:18
-msgid "Never reused"
-msgstr "Jamais réutilisé"
-
-#: udata/core/dataset/search.py:150 udata/tests/search/test_adapter.py:19
-msgid "Little reused"
-msgstr "Peu réutilisé"
-
-#: udata/core/dataset/search.py:151 udata/tests/search/test_adapter.py:20
-msgid "Quite reused"
-msgstr "Assez réutilisé"
-
-#: udata/core/dataset/search.py:152 udata/tests/search/test_adapter.py:21
-msgid "Heavily reused"
-msgstr "Souvent réutilisé"
-
-#: udata/core/dataset/tasks.py:91
+#: udata/core/dataset/tasks.py:95
 msgid "You need to update some frequency-based datasets"
 msgstr "Vous devez publier certains jeux de données avec une fréquence de mise à jour"
 
@@ -565,78 +549,36 @@ msgstr "Logo"
 msgid "Role"
 msgstr "Rôle"
 
-#: udata/core/organization/models.py:24
+#: udata/core/organization/models.py:23
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: udata/core/organization/models.py:25
+#: udata/core/organization/models.py:24
 msgid "Editor"
 msgstr "Éditeur"
 
-#: udata/core/organization/models.py:31 udata/features/transfer/models.py:14
+#: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
 #: udata/harvest/models.py:26 udata/harvest/models.py:36 udata/harvest/models.py:74
 msgid "Pending"
 msgstr "En attente"
 
-#: udata/core/organization/models.py:32 udata/features/transfer/models.py:15
+#: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
 #: udata/harvest/models.py:75
 msgid "Accepted"
 msgstr "Acceptée"
 
-#: udata/core/organization/models.py:33 udata/features/transfer/models.py:16
+#: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
 #: udata/harvest/models.py:76
 msgid "Refused"
 msgstr "Refusée"
 
-#: udata/core/organization/models.py:130
+#: udata/core/organization/models.py:138
 msgid "Public Service"
 msgstr "Service Public"
 
-#: udata/core/organization/models.py:131
+#: udata/core/organization/models.py:139
 msgid "Certified"
 msgstr "Certifié"
-
-#: udata/core/organization/search.py:68
-msgid "No reuses"
-msgstr "Aucune réutilisation"
-
-#: udata/core/organization/search.py:69
-msgid "Few reuses"
-msgstr "Peu de réutilisations"
-
-#: udata/core/organization/search.py:70
-msgid "Many reuses"
-msgstr "Nombreuses réutilisations"
-
-#: udata/core/organization/search.py:79 udata/core/reuse/search.py:92
-#: udata/core/user/search.py:52
-msgid "No datasets"
-msgstr "Aucun jeu de données"
-
-#: udata/core/organization/search.py:80 udata/core/reuse/search.py:93
-#: udata/core/user/search.py:53
-msgid "Few datasets"
-msgstr "Peu de jeux de données"
-
-#: udata/core/organization/search.py:81 udata/core/reuse/search.py:94
-#: udata/core/user/search.py:54
-msgid "Many datasets"
-msgstr "Nombreux jeux de données"
-
-#: udata/core/organization/search.py:88 udata/core/reuse/search.py:101
-#: udata/core/user/search.py:61
-msgid "No followers"
-msgstr "Aucun abonné"
-
-#: udata/core/organization/search.py:89 udata/core/reuse/search.py:102
-#: udata/core/user/search.py:62
-msgid "Few followers"
-msgstr "Peu d'abonnés"
-
-#: udata/core/organization/search.py:90 udata/core/reuse/search.py:103
-#: udata/core/user/search.py:63
-msgid "Many followers"
-msgstr "Nombreux abonnés"
 
 #: udata/core/organization/tasks.py:50
 msgid "New membership request"
@@ -689,7 +631,23 @@ msgstr "Crédits de l'image"
 msgid "Credit URL"
 msgstr "URL des crédits"
 
-#: udata/core/post/models.py:50
+#: udata/core/post/forms.py:29
+msgid "body type"
+msgstr "type du contenu"
+
+#: udata/core/post/forms.py:30
+msgid "Specify your body type (HTML or markdown)"
+msgstr "Spécifiez votre type de contenu (HTML ou markdown)"
+
+#: udata/core/post/models.py:16
+msgid "Markdown"
+msgstr "Markdown"
+
+#: udata/core/post/models.py:17
+msgid "HTML"
+msgstr "HTML"
+
+#: udata/core/post/models.py:60
 msgid "post"
 msgstr "article"
 
@@ -721,95 +679,95 @@ msgstr "Jeux de données utilisés"
 msgid "Topic"
 msgstr "Thématique"
 
-#: udata/core/reuse/models.py:18
+#: udata/core/reuse/models.py:17
 msgid "Application"
 msgstr "Application"
 
-#: udata/core/reuse/models.py:19
+#: udata/core/reuse/models.py:18
 msgid "Idea"
 msgstr "Idée"
 
-#: udata/core/reuse/models.py:20
+#: udata/core/reuse/models.py:19
 msgid "News Article"
 msgstr "Article de presse"
 
-#: udata/core/reuse/models.py:21
+#: udata/core/reuse/models.py:20
 msgid "Paper"
 msgstr "Papier"
 
-#: udata/core/reuse/models.py:22
+#: udata/core/reuse/models.py:21
 msgid "Post"
 msgstr "Article de blog"
 
-#: udata/core/reuse/models.py:23
+#: udata/core/reuse/models.py:22
 msgid "Visualization"
 msgstr "Visualisation"
 
-#: udata/core/reuse/models.py:24
+#: udata/core/reuse/models.py:23
 msgid "Connected device"
 msgstr "Objet connecté"
 
-#: udata/core/reuse/models.py:28
+#: udata/core/reuse/models.py:27
 msgid "Health"
 msgstr "Santé"
 
-#: udata/core/reuse/models.py:29
+#: udata/core/reuse/models.py:28
 msgid "Transport and mobility"
 msgstr "Transports et mobilité"
 
-#: udata/core/reuse/models.py:30
+#: udata/core/reuse/models.py:29
 msgid "Housing and development"
 msgstr "Aménagement du territoire et logement"
 
-#: udata/core/reuse/models.py:31
+#: udata/core/reuse/models.py:30
 msgid "Food and agriculture"
 msgstr "Alimentation et agriculture"
 
-#: udata/core/reuse/models.py:32
+#: udata/core/reuse/models.py:31
 msgid "Culture and recreation"
 msgstr "Culture et loisirs"
 
-#: udata/core/reuse/models.py:33
+#: udata/core/reuse/models.py:32
 msgid "Economy and business"
 msgstr "Économie et entreprise"
 
-#: udata/core/reuse/models.py:34
+#: udata/core/reuse/models.py:33
 msgid "Environment and energy"
 msgstr "Environnement et énergie"
 
-#: udata/core/reuse/models.py:35
+#: udata/core/reuse/models.py:34
 msgid "Work and training"
 msgstr "Emploi et formation"
 
-#: udata/core/reuse/models.py:36
+#: udata/core/reuse/models.py:35
 msgid "Politics and public life"
 msgstr "Politique et vie publique"
 
-#: udata/core/reuse/models.py:37
+#: udata/core/reuse/models.py:36
 msgid "Safety and security"
 msgstr "Sécurité"
 
-#: udata/core/reuse/models.py:38
+#: udata/core/reuse/models.py:37
 msgid "Education and research"
 msgstr "Éducation et recherche"
 
-#: udata/core/reuse/models.py:39
+#: udata/core/reuse/models.py:38
 msgid "Society and demography"
 msgstr "Société et démographie"
 
-#: udata/core/reuse/models.py:40
+#: udata/core/reuse/models.py:39
 msgid "Law and justice"
 msgstr "Droit et justice"
 
-#: udata/core/reuse/models.py:41
+#: udata/core/reuse/models.py:40
 msgid "Open data tools"
 msgstr "Outils open data"
 
-#: udata/core/reuse/models.py:42
+#: udata/core/reuse/models.py:41
 msgid "Others"
 msgstr "Autres"
 
-#: udata/core/reuse/models.py:121
+#: udata/core/reuse/models.py:120
 msgid "reuse"
 msgstr "réutilisation"
 
@@ -961,7 +919,7 @@ msgstr "À propos"
 msgid "Roles"
 msgstr "Rôles"
 
-#: udata/core/user/models.py:265 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:262 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "Suppression de compte"
 
@@ -1086,24 +1044,6 @@ msgstr "Ignoré"
 #: udata/harvest/models.py:41
 msgid "Archived"
 msgstr "Archivé"
-
-#: udata/search/fields.py:35
-msgid "OR"
-msgstr "OU"
-
-#: udata/search/fields.py:116 udata/tests/search/test_facets.py:98
-#: udata/tests/search/test_facets.py:101
-msgid "yes"
-msgstr "oui"
-
-#: udata/search/fields.py:116 udata/tests/search/test_facets.py:99
-#: udata/tests/search/test_facets.py:102
-msgid "no"
-msgstr "non"
-
-#: udata/search/fields.py:288
-msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
-msgstr "Une couverture temporelle est exprimée par début-fin où les deux dates sont au format ISO (c'est-à-dire YYYY-MM-DD-YYYY-MM-DD)"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
@@ -1451,4 +1391,20 @@ msgstr "Renvoyer les instructions de confirmation"
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
 msgstr "Soumettre"
+
+#: udata/tests/search/test_adapter.py:25
+msgid "Never reused"
+msgstr "Jamais réutilisé"
+
+#: udata/tests/search/test_adapter.py:26
+msgid "Little reused"
+msgstr "Peu réutilisé"
+
+#: udata/tests/search/test_adapter.py:27
+msgid "Quite reused"
+msgstr "Assez réutilisé"
+
+#: udata/tests/search/test_adapter.py:28
+msgid "Heavily reused"
+msgstr "Souvent réutilisé"
 
