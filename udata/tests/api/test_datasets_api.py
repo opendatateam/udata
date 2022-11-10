@@ -1192,6 +1192,42 @@ class DatasetResourceAPITest(APITestCase):
         self.assertEqual(len(response.json), 0)
 
 
+class DatasetExtrasAPITest(APITestCase):
+    modules = None
+
+    def setUp(self):
+        self.login()
+        self.dataset = DatasetFactory(owner=self.user)
+
+    def test_get_dataset_extras(self):
+        self.dataset.extras = {'test::extra': 'test-value'}
+        self.dataset.save()
+        response = self.get(url_for('api.dataset_extras', dataset=self.dataset))
+        self.assert200(response)
+        data = json.loads(response.data)
+        assert data['test::extra'] == 'test-value'
+
+    def test_update_dataset_extras(self):
+        self.dataset.extras = {'test::extra': 'test-value'}
+        self.dataset.save()
+        data = {'another::key': 'another-value'}
+        response = self.put(url_for('api.dataset_extras', dataset=self.dataset), data)
+        self.assert200(response)
+        self.dataset.reload()
+        assert self.dataset.extras['test::extra'] == 'test-value'
+        assert self.dataset.extras['another::key'] == 'another-value'
+
+    def test_delete_dataset_extras(self):
+        self.dataset.extras = {'test::extra': 'test-value', 'another::key': 'another-value'}
+        self.dataset.save()
+        data = {'another::key': 'another-value'}
+        response = self.delete(url_for('api.dataset_extras', dataset=self.dataset), data)
+        self.assert204(response)
+        self.dataset.reload()
+        assert len(self.dataset.extras) == 1
+        assert self.dataset.extras['test::extra'] == 'test-value'
+
+
 class DatasetResourceExtrasAPITest(APITestCase):
     modules = None
 
@@ -1203,8 +1239,9 @@ class DatasetResourceExtrasAPITest(APITestCase):
         '''It should fetch a resource from the API'''
         resource = ResourceFactory()
         resource.extras = {'test::extra': 'test-value'}
-        dataset = DatasetFactory(resources=[resource])
-        response = self.get(url_for('api.resource_extras', dataset=dataset,
+        self.dataset.resources.append(resource)
+        self.dataset.save()
+        response = self.get(url_for('api.resource_extras', dataset=self.dataset,
                                     rid=resource.id))
         self.assert200(response)
         data = json.loads(response.data)

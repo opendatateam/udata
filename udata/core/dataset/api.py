@@ -228,6 +228,49 @@ class DatasetAPI(API):
         return '', 204
 
 
+@ns.route('/<dataset:dataset>/extras/', endpoint='dataset_extras',
+          doc=common_doc)
+@api.response(400, 'Wrong payload format')
+@api.response(404, 'Dataset not found')
+@api.response(410, 'Dataset has been deleted')
+class DatasetExtrasAPI(API):
+    @api.doc('get_dataset_extras')
+    def get(self, dataset):
+        '''Get a dataset extras given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            api.abort(410, 'Dataset has been deleted')
+        return dataset.extras
+
+    @api.secure
+    @api.doc('update_dataset_extras')
+    def put(self, dataset):
+        '''Update a given dataset extras on a given dataset'''
+        data = request.json
+        if dataset.deleted:
+            api.abort(410, 'Dataset has been deleted')
+        DatasetEditPermission(dataset).test()
+        try:
+            dataset.extras.update(data)
+        except ValueError:
+            api.abort(400, 'Wrong payload format')
+        dataset.save()
+        return dataset.extras
+
+    @api.secure
+    @api.doc('delete_dataset_extras')
+    def delete(self, dataset):
+        '''Delete a given dataset extras key on a given dataset'''
+        data = request.json
+        ResourceEditPermission(dataset).test()
+        try:
+            for key, value in data.items():
+                del dataset.extras[key]
+        except AttributeError:
+            api.abort(400, 'Wrong payload format')
+        dataset.save()
+        return '', 204
+
+
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
 @api.doc(**common_doc)
 class DatasetFeaturedAPI(API):
