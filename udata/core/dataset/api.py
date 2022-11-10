@@ -567,8 +567,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
             resource.extras.update(data)
         except ValueError:
             api.abort(400, 'Wrong payload format')
-        dataset.update_resource(resource)
-        dataset.save()
+        resource.save()
         return resource.extras
 
     @api.secure
@@ -583,8 +582,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
                 del resource.extras[key]
         except AttributeError:
             api.abort(400, 'Wrong payload format')
-        dataset.update_resource(resource)
-        dataset.save()
+        resource.save()
         return '', 204
 
 
