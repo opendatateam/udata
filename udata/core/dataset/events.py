@@ -51,18 +51,17 @@ def publish(url, document, resource_id, action):
 
 @Dataset.on_resource_added.connect
 def publish_added_resource_message(sender, document, **kwargs):
-    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        current_app.config.get('RESOURCES_ANALYSER_URI')
-        publish.delay('http://localhost:8000/api/resource/created/', document, kwargs['resource_id'], KafkaMessageType.CREATED)
+    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS') and current_app.config.get('RESOURCES_ANALYSER_URI'):
+        publish.delay(f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resource/created/", document, kwargs['resource_id'], KafkaMessageType.CREATED)
 
 
 @Dataset.on_resource_updated.connect
 def publish_updated_resource_message(sender, document, **kwargs):
-    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay('http://localhost:8000/api/resource/updated/', document, kwargs['resource_id'], KafkaMessageType.MODIFIED)
+    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS') and current_app.config.get('RESOURCES_ANALYSER_URI'):
+        publish.delay(f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resource/updated/", document, kwargs['resource_id'], KafkaMessageType.MODIFIED)
 
 
 @Dataset.on_resource_removed.connect
 def publish_removed_resource_message(sender, document, **kwargs):
-    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS'):
-        publish.delay('http://localhost:8000/api/resource/deleted/', document, kwargs['resource_id'], KafkaMessageType.DELETED)
+    if current_app.config.get('PUBLISH_ON_RESOURCE_EVENTS') and current_app.config.get('RESOURCES_ANALYSER_URI'):
+        publish.delay(f"{current_app.config.get('RESOURCES_ANALYSER_URI')}/api/resource/deleted/", document, kwargs['resource_id'], KafkaMessageType.DELETED)

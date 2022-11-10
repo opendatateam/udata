@@ -412,6 +412,7 @@ class Defaults(object):
 
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
+    RESOURCES_ANALYSER_URI = 'http://localhost:8000'
 
     # Datasets quality settings
     ###########################################################################
@@ -444,6 +445,7 @@ class Testing(object):
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Debug(Defaults):
