@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-01-11 09:51+0100\n"
-"PO-Revision-Date: 2022-01-11 08:53\n"
+"POT-Creation-Date: 2022-06-27 11:45+0200\n"
+"PO-Revision-Date: 2022-07-05 11:01\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:101
+#: udata/settings.py:99
 msgid "Welcome"
 msgstr "مرحبًا"
 
-#: udata/settings.py:102
+#: udata/settings.py:100
 msgid "Please confirm your email"
 msgstr "الرجاء التأكد من البريد الإلكتروني الخاص بك"
 
-#: udata/settings.py:103
+#: udata/settings.py:101
 msgid "Login instructions"
 msgstr "تعليمات تسجيل الدخول"
 
-#: udata/settings.py:104
+#: udata/settings.py:102
 msgid "Your password has been reset"
 msgstr "لقد تم إعادة تعيين كلمة المرور الخاصة بك"
 
-#: udata/settings.py:105
+#: udata/settings.py:103
 msgid "Your password has been changed"
 msgstr "تم تغيير كلمة المرور الخاصه بك"
 
-#: udata/settings.py:107
+#: udata/settings.py:105
 msgid "Password reset instructions"
 msgstr "إرشادات إعادة تعيين كلمة المرور"
 
-#: udata/settings.py:441
+#: udata/settings.py:390
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -307,183 +307,167 @@ msgstr "خاص"
 msgid "Restrict the dataset visibility to you or your organization only."
 msgstr "قم بتقييد رؤية البيانات لك أو لمؤسستك فقط."
 
-#: udata/core/dataset/models.py:44
+#: udata/core/dataset/models.py:43
 msgid "Unknown"
 msgstr "غير معروف"
 
-#: udata/core/dataset/models.py:45
+#: udata/core/dataset/models.py:44
 msgid "Punctual"
 msgstr "في وقت محدد"
 
-#: udata/core/dataset/models.py:46
+#: udata/core/dataset/models.py:45
 msgid "Real time"
 msgstr "في الوقت الحالى"
 
-#: udata/core/dataset/models.py:47
+#: udata/core/dataset/models.py:46
 msgid "Hourly"
 msgstr "كل ساعة"
 
-#: udata/core/dataset/models.py:48
+#: udata/core/dataset/models.py:47
 msgid "Four times a day"
 msgstr "أربع مرات في اليوم"
 
-#: udata/core/dataset/models.py:49
+#: udata/core/dataset/models.py:48
 msgid "Three times a day"
 msgstr "ثلاث مرات في اليوم"
 
-#: udata/core/dataset/models.py:50
+#: udata/core/dataset/models.py:49
 msgid "Semidaily"
 msgstr "مرتين فى اليوم"
 
-#: udata/core/dataset/models.py:51 udata/harvest/models.py:22
+#: udata/core/dataset/models.py:50 udata/harvest/models.py:22
 msgid "Daily"
 msgstr "يوميا"
 
-#: udata/core/dataset/models.py:52
+#: udata/core/dataset/models.py:51
 msgid "Four times a week"
 msgstr "اربع مرات في الاسبوع"
 
-#: udata/core/dataset/models.py:53
+#: udata/core/dataset/models.py:52
 msgid "Three times a week"
 msgstr "ثلاث مرات في الاسبوع"
 
-#: udata/core/dataset/models.py:54
+#: udata/core/dataset/models.py:53
 msgid "Semiweekly"
 msgstr "مرتين في الأسبوع"
 
-#: udata/core/dataset/models.py:55 udata/harvest/models.py:21
+#: udata/core/dataset/models.py:54 udata/harvest/models.py:21
 msgid "Weekly"
 msgstr "أسبوعيا"
 
-#: udata/core/dataset/models.py:56
+#: udata/core/dataset/models.py:55
 msgid "Biweekly"
 msgstr "كل أسبوعين"
 
-#: udata/core/dataset/models.py:57
+#: udata/core/dataset/models.py:56
 msgid "Three times a month"
 msgstr "ثلاث مرات في الشهر"
 
-#: udata/core/dataset/models.py:58
+#: udata/core/dataset/models.py:57
 msgid "Semimonthly"
 msgstr "مرتين في الشهر"
 
-#: udata/core/dataset/models.py:59 udata/harvest/models.py:20
+#: udata/core/dataset/models.py:58 udata/harvest/models.py:20
 msgid "Monthly"
 msgstr "شهريا"
 
-#: udata/core/dataset/models.py:60
+#: udata/core/dataset/models.py:59
 msgid "Bimonthly"
 msgstr "كل شهرين"
 
-#: udata/core/dataset/models.py:61
+#: udata/core/dataset/models.py:60
 msgid "Quarterly"
 msgstr "ربع سنوي"
 
-#: udata/core/dataset/models.py:62
+#: udata/core/dataset/models.py:61
 msgid "Three times a year"
 msgstr "ثلاث مرات في السنة"
 
-#: udata/core/dataset/models.py:63
+#: udata/core/dataset/models.py:62
 msgid "Biannual"
 msgstr "نصف سنوي"
 
-#: udata/core/dataset/models.py:64
+#: udata/core/dataset/models.py:63
 msgid "Annual"
 msgstr "سنويا"
 
-#: udata/core/dataset/models.py:65
+#: udata/core/dataset/models.py:64
 msgid "Biennial"
 msgstr "كل سنتين"
 
-#: udata/core/dataset/models.py:66
+#: udata/core/dataset/models.py:65
 msgid "Triennial"
 msgstr "كل ثلاث سنوات"
 
-#: udata/core/dataset/models.py:67
+#: udata/core/dataset/models.py:66
 msgid "Quinquennial"
 msgstr "كل خمس سنوات"
 
-#: udata/core/dataset/models.py:68
+#: udata/core/dataset/models.py:67
 msgid "Irregular"
 msgstr "غير منتظم"
 
-#: udata/core/dataset/models.py:90
+#: udata/core/dataset/models.py:89
 msgid "Main file"
 msgstr ""
 
-#: udata/core/dataset/models.py:91
+#: udata/core/dataset/models.py:90
 msgid "Documentation"
 msgstr ""
 
-#: udata/core/dataset/models.py:92
+#: udata/core/dataset/models.py:91
 msgid "Update"
 msgstr ""
 
-#: udata/core/dataset/models.py:93 udata/core/reuse/models.py:17
+#: udata/core/dataset/models.py:92 udata/core/reuse/models.py:16
 msgid "API"
 msgstr "واجهة برمجة تطبيق (API)"
 
-#: udata/core/dataset/models.py:94
+#: udata/core/dataset/models.py:93
 msgid "Code repository"
 msgstr ""
 
-#: udata/core/dataset/models.py:95 udata/core/spatial/models.py:24
+#: udata/core/dataset/models.py:94 udata/core/spatial/models.py:24
 msgid "Other"
 msgstr "آخر"
 
-#: udata/core/dataset/models.py:100
+#: udata/core/dataset/models.py:99
 msgid "Uploaded file"
 msgstr "الملف الذي تم تحميله"
 
-#: udata/core/dataset/models.py:101
+#: udata/core/dataset/models.py:100
 msgid "Remote file"
 msgstr "ملف بعيد"
 
-#: udata/core/dataset/models.py:344 udata/core/dataset/rdf.py:331
+#: udata/core/dataset/models.py:352 udata/core/dataset/rdf.py:334
 msgid "Nameless resource"
 msgstr "مورد مجهول"
 
-#: udata/core/dataset/models.py:400 udata/models/datetime_fields.py:59
+#: udata/core/dataset/models.py:414 udata/models/datetime_fields.py:59
 msgid "Creation date"
 msgstr "تاريخ الإنشاء"
 
-#: udata/core/dataset/models.py:402 udata/models/datetime_fields.py:61
+#: udata/core/dataset/models.py:416 udata/models/datetime_fields.py:61
 msgid "Last modification date"
 msgstr "تاريخ التعديل الأخير"
 
-#: udata/core/dataset/models.py:418
+#: udata/core/dataset/models.py:432
 msgid "Future date of update"
 msgstr "تاريخ التحديث في المستقبل"
 
-#: udata/core/dataset/models.py:434
+#: udata/core/dataset/models.py:448
 msgid "Pivotal data"
 msgstr "بيانات محورية"
 
-#: udata/core/dataset/models.py:471
+#: udata/core/dataset/models.py:486
 msgid "dataset"
 msgstr "مجموعة البيانات"
 
-#: udata/core/dataset/rdf.py:329
+#: udata/core/dataset/rdf.py:332
 msgid "{format} resource"
 msgstr ""
 
-#: udata/core/dataset/search.py:149 udata/tests/search/test_adapter.py:18
-msgid "Never reused"
-msgstr "لم تستخدم قط"
-
-#: udata/core/dataset/search.py:150 udata/tests/search/test_adapter.py:19
-msgid "Little reused"
-msgstr "مستخدم قليلا"
-
-#: udata/core/dataset/search.py:151 udata/tests/search/test_adapter.py:20
-msgid "Quite reused"
-msgstr "مستخدم"
-
-#: udata/core/dataset/search.py:152 udata/tests/search/test_adapter.py:21
-msgid "Heavily reused"
-msgstr "مستخدم بشكل كبير"
-
-#: udata/core/dataset/tasks.py:91
+#: udata/core/dataset/tasks.py:95
 msgid "You need to update some frequency-based datasets"
 msgstr "يجب تحديث بعض مجموعات البيانات المستندة إلى الترددات"
 
@@ -565,78 +549,36 @@ msgstr "شعار"
 msgid "Role"
 msgstr "دور"
 
-#: udata/core/organization/models.py:24
+#: udata/core/organization/models.py:23
 msgid "Administrator"
 msgstr ""
 
-#: udata/core/organization/models.py:25
+#: udata/core/organization/models.py:24
 msgid "Editor"
 msgstr "الناشر"
 
-#: udata/core/organization/models.py:31 udata/features/transfer/models.py:14
+#: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
 #: udata/harvest/models.py:26 udata/harvest/models.py:36 udata/harvest/models.py:74
 msgid "Pending"
 msgstr "معلق"
 
-#: udata/core/organization/models.py:32 udata/features/transfer/models.py:15
+#: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
 #: udata/harvest/models.py:75
 msgid "Accepted"
 msgstr "مقبول"
 
-#: udata/core/organization/models.py:33 udata/features/transfer/models.py:16
+#: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
 #: udata/harvest/models.py:76
 msgid "Refused"
 msgstr "مرفوض"
 
-#: udata/core/organization/models.py:130
+#: udata/core/organization/models.py:138
 msgid "Public Service"
 msgstr "خدمات عامة"
 
-#: udata/core/organization/models.py:131
+#: udata/core/organization/models.py:139
 msgid "Certified"
 msgstr "معتمد"
-
-#: udata/core/organization/search.py:68
-msgid "No reuses"
-msgstr "دون استخدامات"
-
-#: udata/core/organization/search.py:69
-msgid "Few reuses"
-msgstr "استخدامات قليلة"
-
-#: udata/core/organization/search.py:70
-msgid "Many reuses"
-msgstr "استخدامات عديدة"
-
-#: udata/core/organization/search.py:79 udata/core/reuse/search.py:92
-#: udata/core/user/search.py:52
-msgid "No datasets"
-msgstr "دون مجموعة البيانات"
-
-#: udata/core/organization/search.py:80 udata/core/reuse/search.py:93
-#: udata/core/user/search.py:53
-msgid "Few datasets"
-msgstr "مجموعة البيانات قليلة"
-
-#: udata/core/organization/search.py:81 udata/core/reuse/search.py:94
-#: udata/core/user/search.py:54
-msgid "Many datasets"
-msgstr "مجموعات البيانات عديدة"
-
-#: udata/core/organization/search.py:88 udata/core/reuse/search.py:101
-#: udata/core/user/search.py:61
-msgid "No followers"
-msgstr "دون متابعين"
-
-#: udata/core/organization/search.py:89 udata/core/reuse/search.py:102
-#: udata/core/user/search.py:62
-msgid "Few followers"
-msgstr "متابعون قليلون"
-
-#: udata/core/organization/search.py:90 udata/core/reuse/search.py:103
-#: udata/core/user/search.py:63
-msgid "Many followers"
-msgstr "متابعون عديدون"
 
 #: udata/core/organization/tasks.py:50
 msgid "New membership request"
@@ -689,7 +631,23 @@ msgstr "أرصدة الصورة"
 msgid "Credit URL"
 msgstr ""
 
-#: udata/core/post/models.py:50
+#: udata/core/post/forms.py:29
+msgid "body type"
+msgstr ""
+
+#: udata/core/post/forms.py:30
+msgid "Specify your body type (HTML or markdown)"
+msgstr ""
+
+#: udata/core/post/models.py:16
+msgid "Markdown"
+msgstr ""
+
+#: udata/core/post/models.py:17
+msgid "HTML"
+msgstr ""
+
+#: udata/core/post/models.py:60
 msgid "post"
 msgstr ""
 
@@ -721,95 +679,95 @@ msgstr "مجموعة البيانات المستعملة"
 msgid "Topic"
 msgstr ""
 
-#: udata/core/reuse/models.py:18
+#: udata/core/reuse/models.py:17
 msgid "Application"
 msgstr "تطبيق"
 
-#: udata/core/reuse/models.py:19
+#: udata/core/reuse/models.py:18
 msgid "Idea"
 msgstr "فكرة"
 
-#: udata/core/reuse/models.py:20
+#: udata/core/reuse/models.py:19
 msgid "News Article"
 msgstr "مقال إخباري"
 
-#: udata/core/reuse/models.py:21
+#: udata/core/reuse/models.py:20
 msgid "Paper"
 msgstr "صحيفة"
 
-#: udata/core/reuse/models.py:22
+#: udata/core/reuse/models.py:21
 msgid "Post"
 msgstr "بريد"
 
-#: udata/core/reuse/models.py:23
+#: udata/core/reuse/models.py:22
 msgid "Visualization"
 msgstr "تصور"
 
-#: udata/core/reuse/models.py:24
+#: udata/core/reuse/models.py:23
 msgid "Connected device"
 msgstr "جهاز متصل"
 
-#: udata/core/reuse/models.py:28
+#: udata/core/reuse/models.py:27
 msgid "Health"
 msgstr ""
 
-#: udata/core/reuse/models.py:29
+#: udata/core/reuse/models.py:28
 msgid "Transport and mobility"
 msgstr ""
 
-#: udata/core/reuse/models.py:30
+#: udata/core/reuse/models.py:29
 msgid "Housing and development"
 msgstr ""
 
-#: udata/core/reuse/models.py:31
+#: udata/core/reuse/models.py:30
 msgid "Food and agriculture"
 msgstr ""
 
-#: udata/core/reuse/models.py:32
+#: udata/core/reuse/models.py:31
 msgid "Culture and recreation"
 msgstr ""
 
-#: udata/core/reuse/models.py:33
+#: udata/core/reuse/models.py:32
 msgid "Economy and business"
 msgstr ""
 
-#: udata/core/reuse/models.py:34
+#: udata/core/reuse/models.py:33
 msgid "Environment and energy"
 msgstr ""
 
-#: udata/core/reuse/models.py:35
+#: udata/core/reuse/models.py:34
 msgid "Work and training"
 msgstr ""
 
-#: udata/core/reuse/models.py:36
+#: udata/core/reuse/models.py:35
 msgid "Politics and public life"
 msgstr ""
 
-#: udata/core/reuse/models.py:37
+#: udata/core/reuse/models.py:36
 msgid "Safety and security"
 msgstr ""
 
-#: udata/core/reuse/models.py:38
+#: udata/core/reuse/models.py:37
 msgid "Education and research"
 msgstr ""
 
-#: udata/core/reuse/models.py:39
+#: udata/core/reuse/models.py:38
 msgid "Society and demography"
 msgstr ""
 
-#: udata/core/reuse/models.py:40
+#: udata/core/reuse/models.py:39
 msgid "Law and justice"
 msgstr ""
 
-#: udata/core/reuse/models.py:41
+#: udata/core/reuse/models.py:40
 msgid "Open data tools"
 msgstr ""
 
-#: udata/core/reuse/models.py:42
+#: udata/core/reuse/models.py:41
 msgid "Others"
 msgstr ""
 
-#: udata/core/reuse/models.py:121
+#: udata/core/reuse/models.py:120
 msgid "reuse"
 msgstr "استخدام"
 
@@ -961,7 +919,7 @@ msgstr "حول"
 msgid "Roles"
 msgstr "الأدوار"
 
-#: udata/core/user/models.py:265 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:262 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "حذف الحساب"
 
@@ -1085,24 +1043,6 @@ msgstr "تم تخطيه"
 
 #: udata/harvest/models.py:41
 msgid "Archived"
-msgstr ""
-
-#: udata/search/fields.py:35
-msgid "OR"
-msgstr "أو"
-
-#: udata/search/fields.py:116 udata/tests/search/test_facets.py:98
-#: udata/tests/search/test_facets.py:101
-msgid "yes"
-msgstr "نعم"
-
-#: udata/search/fields.py:116 udata/tests/search/test_facets.py:99
-#: udata/tests/search/test_facets.py:102
-msgid "no"
-msgstr "لا"
-
-#: udata/search/fields.py:288
-msgid "A date range expressed as start-end where both dates are in iso format (ie. YYYY-MM-DD-YYYY-MM-DD)"
 msgstr ""
 
 #: udata/templates/admin.html:7
@@ -1448,4 +1388,20 @@ msgstr ""
 #: udata/templates/security/send_confirmation.html:18
 msgid "Submit"
 msgstr ""
+
+#: udata/tests/search/test_adapter.py:25
+msgid "Never reused"
+msgstr "لم تستخدم قط"
+
+#: udata/tests/search/test_adapter.py:26
+msgid "Little reused"
+msgstr "مستخدم قليلا"
+
+#: udata/tests/search/test_adapter.py:27
+msgid "Quite reused"
+msgstr "مستخدم"
+
+#: udata/tests/search/test_adapter.py:28
+msgid "Heavily reused"
+msgstr "مستخدم بشكل كبير"
 
