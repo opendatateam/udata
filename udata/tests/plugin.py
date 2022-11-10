@@ -142,6 +142,7 @@ def raw_db(app, clean_db):
 def enable_resource_event(app):
     '''Enable resource event'''
     app.config['PUBLISH_ON_RESOURCE_EVENTS'] = True
+    app.config['RESOURCES_ANALYSER_URI'] = 'http://local.dev'
 
 
 @pytest.fixture

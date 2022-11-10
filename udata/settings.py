@@ -419,6 +419,7 @@ class Defaults(object):
 
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
+    RESOURCES_ANALYSER_URI = 'http://localhost:8000'
 
     # Datasets quality settings
     ###########################################################################
@@ -452,6 +453,7 @@ class Testing(object):
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
     SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}  # Disables deliverability for email domain name
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Debug(Defaults):
