@@ -1122,17 +1122,17 @@ class DatasetResourceAPITest(APITestCase):
         '''It should suggest datasets'''
         for i in range(3):
             DatasetFactory(
-                title='test-{0}'.format(i) if i % 2 else faker.word(),
+                title='title-test-{0}'.format(i) if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i})
         max_follower_dataset = DatasetFactory(
-            title='test-4',
+            title='title-test-4',
             visible=True,
             metrics={"followers": 10}
         )
 
         response = self.get(url_for('api.suggest_datasets'),
-                            qs={'q': 'tes', 'size': '5'})
+                            qs={'q': 'title-test', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1142,20 +1142,20 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertIn('tes', suggestion['title'])
+            self.assertIn('title-test', suggestion['title'])
         self.assertEqual(response.json[0]['id'], str(max_follower_dataset.id))
 
     def test_suggest_datasets_acronym_api(self):
         '''It should suggest datasets from their acronyms'''
         for i in range(4):
             DatasetFactory(
-                # Ensure title does not contains 'tes'
+                # Ensure title does not contains 'acronym-tes'
                 title=faker.unique_string(),
-                acronym='test-{0}'.format(i) if i % 2 else None,
+                acronym='acronym-test-{0}'.format(i) if i % 2 else None,
                 visible=True)
 
         response = self.get(url_for('api.suggest_datasets'),
-                            qs={'q': 'tes', 'size': '5'})
+                            qs={'q': 'acronym-test', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1167,17 +1167,17 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertNotIn('tes', suggestion['title'])
-            self.assertIn('test', suggestion['acronym'])
+            self.assertIn('acronym-test', suggestion['acronym'])
 
     def test_suggest_datasets_api_unicode(self):
         '''It should suggest datasets with special characters'''
         for i in range(4):
             DatasetFactory(
-                title='testé-{0}'.format(i) if i % 2 else faker.word(),
+                title='title-testé-{0}'.format(i) if i % 2 else faker.word(),
                 resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_datasets'),
-                            qs={'q': 'testé', 'size': '5'})
+                            qs={'q': 'title-testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1188,7 +1188,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertIn('test', suggestion['title'])
+            self.assertIn('title-testé', suggestion['title'])
 
     def test_suggest_datasets_api_no_match(self):
         '''It should not provide dataset suggestion if no match'''

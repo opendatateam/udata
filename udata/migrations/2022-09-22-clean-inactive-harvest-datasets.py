@@ -3,6 +3,8 @@ Datasets linked to an inactive harvester are archived
 '''
 import logging
 
+from mongoengine.errors import ValidationError
+
 from udata.models import Dataset
 from udata.harvest.actions import archive_harvested_dataset
 from udata.harvest.models import HarvestSource
@@ -24,6 +26,9 @@ def migrate(db):
     log.info(f'{dangling_datasets.count()} datasets to archive.')
 
     for dataset in dangling_datasets:
-        archive_harvested_dataset(dataset, reason='harvester-inactive', dryrun=False)
+        try:
+            archive_harvested_dataset(dataset, reason='harvester-inactive', dryrun=False)
+        except ValidationError as e:
+            log.error(f'Error on dataset {dataset.id}: {e}')
 
     log.info('Done')
