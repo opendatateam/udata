@@ -4,6 +4,7 @@ import requests
 
 from rdflib import Graph, URIRef, BNode
 from rdflib.namespace import RDF
+from typing import List
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
@@ -70,7 +71,11 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def parse_graph(self, url, fmt):
+    def parse_graph(self, url, fmt) -> List[Graph]:
+        """
+        Returns an instance of rdflib.Graph for each detected page
+        The index in the list is the page number
+        """
         graphs = []
         page = 0
         while url:
