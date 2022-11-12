@@ -72,6 +72,7 @@ class DcatBackend(BaseBackend):
 
     def parse_graph(self, url, fmt):
         graphs = []
+        page = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
             subgraph.parse(data=requests.get(url).text, format=fmt)
@@ -85,12 +86,16 @@ class DcatBackend(BaseBackend):
                     break
             graphs.append(subgraph)
 
-        for page, subgraph in enumerate(graphs):
             for node in subgraph.subjects(RDF.type, DCAT.Dataset):
                 id = subgraph.value(node, DCT.identifier)
                 kwargs = {'nid': str(node), 'page': page}
                 kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
                 self.add_item(id, **kwargs)
+                if self.max_items and len(self.job.items) >= self.max_items:
+                    # this will stop iterating on pagination
+                    url = None
+
+            page += 1
 
         return graphs
 
