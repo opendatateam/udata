@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Fix resource harvest uri validation error [#2780](https://github.com/opendatateam/udata/pull/2780)
 
 ## 5.0.0 (2022-11-14)
 
