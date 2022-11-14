@@ -7,16 +7,16 @@
 ## 5.0.0 (2022-11-14)
 
 - :warning: **Breaking change** Use dedicated dynamic harvest metadata for dataset and resources. A migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. udata-ckan, udata-ods and udata-front packages are impacted and should be upgraded accordingly [#2762](https://github.com/opendatateam/udata/pull/2762)
-
-## 4.1.3 (2022-11-02)
-
-- Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
-- Switch from `Flask-restplus` to its fork `Flask-rest-x` [2770](https://github.com/opendatateam/udata/pull/2770)
 - :warning: Upgrade to `Flask-Security-Too` version 4.0.0 [#2772](https://github.com/opendatateam/udata/pull/2772):
   - New User model attribute `fs_uniquifier`, migration needed.
   - The `fs_uniquifier` is used to invalidate existing session in case of password reset.
   - The user's `fs_uniquifier` is used instead of the `id` for auth mecanism including permissions.
   - Exhaustive list of changes [here](https://flask-security-too.readthedocs.io/en/stable/changelog.html#version-4-0-0).
+
+## 4.1.3 (2022-11-02)
+
+- Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
+- Switch from `Flask-restplus` to its fork `Flask-rest-x` [2770](https://github.com/opendatateam/udata/pull/2770)
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764) [#2773](https://github.com/opendatateam/udata/pull/2773) [#2777](https://github.com/opendatateam/udata/pull/2777)
 - Fix randomly failing suggest tests [#2775](https://github.com/opendatateam/udata/pull/2775)
 - Fix alt attribute not shown on image [#2776](https://github.com/opendatateam/udata/pull/2776)
