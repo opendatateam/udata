@@ -29,9 +29,15 @@ class UdataMailUtil:
         sendmail.delay(msg)
 
     def normalize(self, email):
+        # Called at registration and login
+        # Calls validate method with deliverability check disabled to prevent
+        # login failure for existing users without a valid email domain name
         return self.validate(email, validation_args={"check_deliverability": False})
 
     def validate(self, email, validation_args=None):
+        # Called at registration only
+        # Checks email domain name deliverability
+        # To prevent false email to register
         validator_args = self.app.config["SECURITY_EMAIL_VALIDATOR_ARGS"] or {}
         if validation_args:
             validator_args.update(validation_args)
