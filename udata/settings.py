@@ -447,7 +447,7 @@ class Testing(object):
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
-    SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}
+    SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}  # Disables deliverability for email domain name
 
 
 class Debug(Defaults):
