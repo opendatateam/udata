@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 5.0.1 (2022-11-14)
 
 - Fix resource harvest uri validation error [#2780](https://github.com/opendatateam/udata/pull/2780)
