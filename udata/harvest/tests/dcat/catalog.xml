@@ -22,7 +22,7 @@
         <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-14T18:59:02.737480</dcterms:issued>
         <dcterms:description>Dataset 3 description</dcterms:description>
         <dcat:keyword>Tag 1</dcat:keyword>
-        <dcat:distribution rdf:resource="http://data.test.org/datasets/3/resources/1"/>
+        <dcat:distribution rdf:resource="datasets/3/resources/1"/>
         <dct:license>Licence Ouverte Version 2.0</dct:license>
         <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
         <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
@@ -111,7 +111,7 @@
     <dcterms:format>JSON</dcterms:format>
     <dcterms:description>A JSON resource</dcterms:description>
   </dcat:Distribution>
-  <dcat:Distribution rdf:about="http://data.test.org/datasets/3/resources/1">
+  <dcat:Distribution rdf:about="datasets/3/resources/1">
     <dcterms:format>JSON</dcterms:format>
     <dcterms:title>Resource 3-1</dcterms:title>
     <dcterms:description>A JSON resource</dcterms:description>
