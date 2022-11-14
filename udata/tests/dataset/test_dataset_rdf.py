@@ -11,7 +11,7 @@ from rdflib.namespace import RDF
 from rdflib.resource import Resource as RdfResource
 
 from udata.models import db
-from udata.core.dataset.models import Dataset, Resource, License, Checksum
+from udata.core.dataset.models import Dataset, Resource, License, Checksum, HarvestDatasetMetadata
 from udata.core.dataset.factories import (
     DatasetFactory, ResourceFactory, LicenseFactory
 )
@@ -164,10 +164,10 @@ class DatasetToRdfTest:
         assert pot.value(SCHEMA.endDate).toPython() == end
 
     def test_from_external_repository(self):
-        dataset = DatasetFactory(extras={
-            'dct:identifier': 'an-identifier',
-            'uri': 'https://somewhere.org/dataset',
-        })
+        dataset = DatasetFactory(harvest=HarvestDatasetMetadata(
+            dct_identifier='an-identifier',
+            uri='https://somewhere.org/dataset'
+        ))
 
         d = dataset_to_rdf(dataset)
 
@@ -289,11 +289,8 @@ class RdfToDatasetTest:
         assert dataset.temporal_coverage.start == start
         assert dataset.temporal_coverage.end == end
 
-        extras = dataset.extras
-        assert 'dct:identifier' in extras
-        assert extras['dct:identifier'] == id
-        assert 'uri' in extras
-        assert extras['uri'] == uri
+        assert dataset.harvest.dct_identifier == id
+        assert dataset.harvest.uri == uri
 
     def test_html_description(self):
         node = BNode()
@@ -415,8 +412,8 @@ class RdfToDatasetTest:
         assert isinstance(resource.checksum, Checksum)
         assert resource.checksum.type == 'sha1'
         assert resource.checksum.value == sha1
-        assert resource.published == issued
-        assert resource.modified == modified
+        assert resource.harvest.created_at.date() == issued.date()
+        assert resource.harvest.modified_at.date() == modified.date()
         assert resource.format == 'csv'
 
     def test_download_url_over_access_url(self):

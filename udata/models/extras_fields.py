@@ -23,11 +23,11 @@ class ExtrasField(DictField):
             raise TypeError(msg)
         self.registered[key] = dbtype
 
-    def validate(self, value):
-        super(ExtrasField, self).validate(value)
+    def validate(self, values):
+        super(ExtrasField, self).validate(values)
 
         errors = {}
-        for key, value in value.items():
+        for key, value in values.items():
             extra_cls = self.registered.get(key)
 
             if not extra_cls:
