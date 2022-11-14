@@ -9,6 +9,7 @@ from udata.app import cache
 from udata.models import (
     db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema
 )
+from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
     ResourceFactory, DatasetFactory, CommunityResourceFactory, LicenseFactory
 )
@@ -521,3 +522,66 @@ class ResourceSchemaTest:
         rmock.get('https://example.com/schemas', status_code=500)
         assert 'dummy_from_cache' == ResourceSchema.objects()
         assert rmock.call_count == 2
+
+
+class HarvestMetadataTest:
+    def test_harvest_dataset_metadata_validate_success(self):
+        dataset = DatasetFactory()
+
+        harvest_metadata = HarvestDatasetMetadata(
+            backend='DCAT',
+            created_at=datetime.now(),
+            modified_at=datetime.now(),
+            source_id='source_id',
+            remote_id='remote_id',
+            domain='domain.gouv.fr',
+            last_update=datetime.now(),
+            remote_url='http://domain.gouv.fr/dataset/remote_url',
+            uri='http://domain.gouv.fr/dataset/uri',
+            dct_identifier='http://domain.gouv.fr/dataset/identifier',
+            archived_at=datetime.now(),
+            archived='not-on-remote'
+        )
+        dataset.harvest = harvest_metadata
+        dataset.save()
+
+    def test_harvest_dataset_metadata_validation_error(self):
+        harvest_metadata = HarvestDatasetMetadata(created_at='maintenant')
+        dataset = DatasetFactory()
+        dataset.harvest = harvest_metadata
+        with pytest.raises(db.ValidationError):
+            dataset.save()
+
+    def test_harvest_dataset_metadata_no_validation_dynamic(self):
+        # Adding a dynamic field (not defined in HarvestDatasetMetadata) does not raise error
+        # at validation time
+        harvest_metadata = HarvestDatasetMetadata(dynamic_created_at='maintenant')
+        dataset = DatasetFactory()
+        dataset.harvest = harvest_metadata
+        dataset.save()
+
+    def test_harvest_resource_metadata_validate_success(self):
+        resource = ResourceFactory()
+
+        harvest_metadata = HarvestResourceMetadata(
+            created_at=datetime.now(),
+            modified_at=datetime.now(),
+            uri='http://domain.gouv.fr/dataset/uri'
+        )
+        resource.harvest = harvest_metadata
+        resource.validate()
+
+    def test_harvest_resource_metadata_validation_error(self):
+        harvest_metadata = HarvestResourceMetadata(created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        with pytest.raises(db.ValidationError):
+            resource.validate()
+
+    def test_harvest_resource_metadata_no_validation_dynamic(self):
+        # Adding a dynamic field (not defined in HarvestResourceMetadata) does not raise error
+        # at validation time
+        harvest_metadata = HarvestResourceMetadata(dynamic_created_at='maintenant')
+        resource = ResourceFactory()
+        resource.harvest = harvest_metadata
+        resource.validate()

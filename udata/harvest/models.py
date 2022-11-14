@@ -5,18 +5,11 @@ from urllib.parse import urlparse
 
 from werkzeug import cached_property
 
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import db, Dataset
 from udata.i18n import lazy_gettext as _
 
 log = logging.getLogger(__name__)
-
-# Register harvest extras
-Dataset.extras.register('harvest:source_id', db.StringField)
-Dataset.extras.register('harvest:remote_id', db.StringField)
-Dataset.extras.register('harvest:domain', db.StringField)
-Dataset.extras.register('harvest:last_update', db.DateTimeField)
-Dataset.extras.register('remote_url', db.URLField)
-
 
 HARVEST_FREQUENCIES = OrderedDict((
     ('manual', _('Manual')),
@@ -186,8 +179,10 @@ def archive_harvested_dataset(dataset, reason, dryrun=False):
     log.debug('Archiving dataset %s', dataset.id)
     archival_date = datetime.now()
     dataset.archived = archival_date
-    dataset.extras['harvest:archived'] = reason
-    dataset.extras['harvest:archived_at'] = archival_date
+    if not dataset.harvest:
+        dataset.harvest = HarvestDatasetMetadata()
+    dataset.harvest.archived = reason
+    dataset.harvest.archived_at = archival_date
     if dryrun:
         dataset.validate()
     else:

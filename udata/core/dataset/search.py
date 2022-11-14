@@ -98,6 +98,11 @@ class DatasetSearch(ModelSearchAdapter):
         for key, value in dataset.extras.items():
             extras[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
         document.update({'extras': extras})
+        if dataset.harvest:
+            harvest = {}
+            for key, value in dataset.harvest._data.items():
+                harvest[key] = to_iso_datetime(value) if isinstance(value, datetime.datetime) else value
+            document.update({'harvest': harvest})
 
         if (dataset.temporal_coverage is not None and
                 dataset.temporal_coverage.start and
