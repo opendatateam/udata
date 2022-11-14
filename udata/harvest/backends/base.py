@@ -9,6 +9,7 @@ import requests
 from flask import current_app
 from voluptuous import MultipleInvalid, RequiredFieldInvalid
 
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import Dataset
 from udata.utils import safe_unicode
 
@@ -185,16 +186,19 @@ class BaseBackend(object):
 
         try:
             dataset = self.process(item)
-            dataset.extras['harvest:source_id'] = str(self.source.id)
-            dataset.extras['harvest:remote_id'] = item.remote_id
-            dataset.extras['harvest:domain'] = self.source.domain
-            dataset.extras['harvest:last_update'] = datetime.now().isoformat()
+            if not dataset.harvest:
+                dataset.harvest = HarvestDatasetMetadata()
+            dataset.harvest.domain = self.source.domain
+            dataset.harvest.remote_id = item.remote_id
+            dataset.harvest.source_id = str(self.source.id)
+            dataset.harvest.last_update = datetime.now()
+            dataset.harvest.backend = self.display_name
 
             # unset archived status if needed
-            if dataset.extras.get('harvest:archived_at'):
-                dataset.extras.pop('harvest:archived_at')
-                dataset.extras.pop('harvest:archived')
-                dataset.archived = None
+            if dataset.harvest:
+                dataset.harvest.archived_at = None
+                dataset.harvest.archived = None
+            dataset.archived = None
 
             # TODO permissions checking
             if not dataset.organization and not dataset.owner:
@@ -242,18 +246,18 @@ class BaseBackend(object):
         limit_date = date.today() - timedelta(days=limit_days)
         remote_ids = [i.remote_id for i in self.job.items if i.status != 'archived']
         q = {
-            'extras__harvest:source_id': str(self.source.id),
-            'extras__harvest:remote_id__nin': remote_ids,
-            'extras__harvest:last_update__lt': limit_date.isoformat()
+            'harvest__source_id': str(self.source.id),
+            'harvest__remote_id__nin': remote_ids,
+            'harvest__last_update__lt': limit_date
         }
         local_items_not_on_remote = Dataset.objects.filter(**q)
 
         for dataset in local_items_not_on_remote:
-            if not dataset.extras.get('harvest:archived_at'):
+            if not dataset.harvest.archived_at:
                 archive_harvested_dataset(dataset, reason='not-on-remote', dryrun=self.dryrun)
             # add a HarvestItem to the job list (useful for report)
             # even when archiving has already been done (useful for debug)
-            item = self.add_item(dataset.extras['harvest:remote_id'])
+            item = self.add_item(dataset.harvest.remote_id)
             item.dataset = dataset
             item.status = 'archived'
 
@@ -264,6 +268,8 @@ class BaseBackend(object):
         raise NotImplementedError
 
     def add_item(self, identifier, *args, **kwargs):
+        if identifier is None:
+            raise ValueError('DCT.identifier is required for all DCAT.Dataset records')
         item = HarvestItem(remote_id=str(identifier), args=args, kwargs=kwargs)
         self.job.items.append(item)
         return item
@@ -287,10 +293,10 @@ class BaseBackend(object):
         We first try to match `source_id` to be source domain independent
         '''
         dataset = Dataset.objects(__raw__={
-            'extras.harvest:remote_id': remote_id,
+            'harvest.remote_id': remote_id,
             '$or': [
-                {'extras.harvest:domain': self.source.domain},
-                {'extras.harvest:source_id': str(self.source.id)},
+                {'harvest.domain': self.source.domain},
+                {'harvest.source_id': str(self.source.id)},
             ],
         }).first()
         return dataset or Dataset()

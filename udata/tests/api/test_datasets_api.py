@@ -9,12 +9,14 @@ import pytest
 
 from . import APITestCase
 
+from udata.api import fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
-from udata.core.dataset.models import ResourceMixin
+from udata.core.dataset.api_fields import dataset_harvest_fields, resource_harvest_fields
+from udata.core.dataset.models import ResourceMixin, HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
@@ -1647,3 +1649,110 @@ class DatasetSchemasAPITest:
                 ]
             }
         ]
+
+
+@pytest.mark.usefixtures('clean_db')
+class HarvestMetadataAPITest:
+
+    modules = []
+
+    # api fields should be updated before app is created
+    dataset_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
+    resource_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
+
+    def test_dataset_with_harvest_metadata(self, api):
+        date = datetime(2022, 2, 22)
+        harvest_metadata = HarvestDatasetMetadata(
+            backend='DCAT',
+            created_at=date,
+            modified_at=date,
+            source_id='source_id',
+            remote_id='remote_id',
+            domain='domain.gouv.fr',
+            last_update=date,
+            remote_url='http://domain.gouv.fr/dataset/remote_url',
+            uri='http://domain.gouv.fr/dataset/uri',
+            dct_identifier='http://domain.gouv.fr/dataset/identifier',
+            archived_at=date,
+            archived='not-on-remote'
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['harvest'] == {
+            'backend': 'DCAT',
+            'created_at': date.isoformat(),
+            'modified_at': date.isoformat(),
+            'source_id': 'source_id',
+            'remote_id': 'remote_id',
+            'domain': 'domain.gouv.fr',
+            'last_update': date.isoformat(),
+            'remote_url': 'http://domain.gouv.fr/dataset/remote_url',
+            'uri': 'http://domain.gouv.fr/dataset/uri',
+            'dct_identifier': 'http://domain.gouv.fr/dataset/identifier',
+            'archived_at': date.isoformat(),
+            'archived': 'not-on-remote'
+        }
+
+    def test_dataset_dynamic_harvest_metadata_without_api_field(self, api):
+        harvest_metadata = HarvestDatasetMetadata(
+            dynamic_field_but_no_api_field_defined='DCAT'
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['harvest'] == {}
+
+    def test_dataset_dynamic_harvest_metadata_with_api_field(self, api):
+        harvest_metadata = HarvestDatasetMetadata(
+            dynamic_field='dynamic_value'
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['harvest'] == {
+            'dynamic_field': 'dynamic_value',
+        }
+
+    def test_dataset_with_resource_harvest_metadata(self, api):
+        date = datetime(2022, 2, 22)
+
+        harvest_metadata = HarvestResourceMetadata(
+            created_at=date,
+            modified_at=date,
+            uri='http://domain.gouv.fr/dataset/uri',
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {
+            'created_at': date.isoformat(),
+            'modified_at': date.isoformat(),
+            'uri': 'http://domain.gouv.fr/dataset/uri',
+        }
+
+    def test_resource_dynamic_harvest_metadata_without_api_field(self, api):
+        harvest_metadata = HarvestResourceMetadata(
+            dynamic_field_but_no_api_field_defined='dynamic_value'
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {}
+
+    def test_resource_dynamic_harvest_metadata_with_api_field(self, api):
+        harvest_metadata = HarvestResourceMetadata(
+            dynamic_field='dynamic_value'
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {
+            'dynamic_field': 'dynamic_value',
+        }
