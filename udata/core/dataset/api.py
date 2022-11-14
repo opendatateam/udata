@@ -228,53 +228,6 @@ class DatasetAPI(API):
         return '', 204
 
 
-@ns.route('/<dataset:dataset>/extras/', endpoint='dataset_extras',
-          doc=common_doc)
-@api.response(400, 'Wrong payload format, dict expected')
-@api.response(400, 'Wrong payload format, list expected')
-@api.response(404, 'Dataset not found')
-@api.response(410, 'Dataset has been deleted')
-class DatasetExtrasAPI(API):
-    @api.doc('get_dataset_extras')
-    def get(self, dataset):
-        '''Get a dataset extras given its identifier'''
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            api.abort(410, 'Dataset has been deleted')
-        return dataset.extras
-
-    @api.secure
-    @api.doc('update_dataset_extras')
-    def put(self, dataset):
-        '''Update a given dataset extras'''
-        data = request.json
-        if not isinstance(data, dict):
-            api.abort(400, 'Wrong payload format, dict expected')
-        if dataset.deleted:
-            api.abort(410, 'Dataset has been deleted')
-        DatasetEditPermission(dataset).test()
-        dataset.extras.update(data)
-        dataset.save()
-        return dataset.extras
-
-    @api.secure
-    @api.doc('delete_dataset_extras')
-    def delete(self, dataset):
-        '''Delete a given dataset extras key on a given dataset'''
-        data = request.json
-        if not isinstance(data, list):
-            api.abort(400, 'Wrong payload format, list expected')
-        if dataset.deleted:
-            api.abort(410, 'Dataset has been deleted')
-        DatasetEditPermission(dataset).test()
-        try:
-            for key in data:
-                del dataset.extras[key]
-        except KeyError:
-            api.abort(404, 'Key not found in existing extras')
-        dataset.save()
-        return dataset.extras, 204
-
-
 @ns.route('/<dataset:dataset>/featured/', endpoint='dataset_featured')
 @api.doc(**common_doc)
 class DatasetFeaturedAPI(API):
@@ -546,57 +499,6 @@ class ResourceAPI(ResourceMixin, API):
         dataset.last_modified = datetime.now()
         dataset.save()
         return '', 204
-
-
-@ns.route('/<dataset:dataset>/resources/<uuid:rid>/extras/', endpoint='resource_extras',
-          doc=common_doc)
-@api.param('rid', 'The resource unique identifier')
-@api.response(400, 'Wrong payload format, dict expected')
-@api.response(400, 'Wrong payload format, list expected')
-@api.response(404, 'Key not found in existing extras')
-@api.response(410, 'Dataset has been deleted')
-class ResourceExtrasAPI(ResourceMixin, API):
-    @api.doc('get_resource_extras')
-    def get(self, dataset, rid):
-        '''Get a resource extras given its identifier'''
-        if dataset.deleted and not DatasetEditPermission(dataset).can():
-            api.abort(410, 'Dataset has been deleted')
-        resource = self.get_resource_or_404(dataset, rid)
-        return resource.extras
-
-    @api.secure
-    @api.doc('update_resource_extras')
-    def put(self, dataset, rid):
-        '''Update a given resource extras on a given dataset'''
-        data = request.json
-        if not isinstance(data, dict):
-            api.abort(400, 'Wrong payload format, dict expected')
-        if dataset.deleted:
-            api.abort(410, 'Dataset has been deleted')
-        ResourceEditPermission(dataset).test()
-        resource = self.get_resource_or_404(dataset, rid)
-        resource.extras.update(data)
-        resource.save()
-        return resource.extras
-
-    @api.secure
-    @api.doc('delete_resource_extras')
-    def delete(self, dataset, rid):
-        '''Delete a given resource extras key on a given dataset'''
-        data = request.json
-        if not isinstance(data, list):
-            api.abort(400, 'Wrong payload format, list expected')
-        if dataset.deleted:
-            api.abort(410, 'Dataset has been deleted')
-        ResourceEditPermission(dataset).test()
-        resource = self.get_resource_or_404(dataset, rid)
-        try:
-            for key in data:
-                del resource.extras[key]
-        except KeyError:
-            api.abort(404, 'Key not found in existing extras')
-        resource.save()
-        return resource.extras, 204
 
 
 @ns.route('/community_resources/', endpoint='community_resources')
