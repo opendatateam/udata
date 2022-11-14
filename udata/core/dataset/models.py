@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
+from mongoengine import DynamicEmbeddedDocument
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
@@ -125,6 +126,27 @@ def get_json_ld_extra(key, value):
         'name': key,
         'value': value,
     }
+
+
+class HarvestDatasetMetadata(DynamicEmbeddedDocument):
+    backend = db.StringField()
+    created_at = db.DateTimeField()
+    modified_at = db.DateTimeField()
+    source_id = db.StringField()
+    remote_id = db.StringField()
+    domain = db.StringField()
+    last_update = db.DateTimeField()
+    remote_url = db.URLField()
+    uri = db.StringField()
+    dct_identifier = db.StringField()
+    archived_at = db.DateTimeField()
+    archived = db.StringField()
+
+
+class HarvestResourceMetadata(DynamicEmbeddedDocument):
+    created_at = db.DateTimeField()
+    modified_at = db.DateTimeField()
+    uri = db.URLField()
 
 
 class License(db.Document):
@@ -265,6 +287,7 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
     extras = db.ExtrasField()
+    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
@@ -435,6 +458,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
+    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
 
     featured = db.BooleanField(required=True, default=False)
 
@@ -557,8 +581,17 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def last_update(self):
+        """
+        Use the more recent date we would have on resources (harvest, published, modified).
+        Default to dataset last_modified if no resource.
+        """
         if self.resources:
-            return max(resource.published for resource in self.resources)
+            dates = []
+            for res in self.resources:
+                dates += [res.modified, res.published]
+                if res.harvest and res.harvest.modified_at:
+                    dates.append(res.harvest.modified_at)
+            return max(dates)
         else:
             return self.last_modified
 
