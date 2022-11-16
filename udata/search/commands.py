@@ -2,13 +2,12 @@ from datetime import datetime
 from flask import current_app
 import logging
 import sys
+import requests
 
 import click
-from udata_event_service.producer import produce
 
 from udata.commands import cli
-from udata.event.producer import get_topic
-from udata.search import adapter_catalog, KafkaMessageType
+from udata.search import adapter_catalog, EventMessageType
 
 
 log = logging.getLogger(__name__)
@@ -62,20 +61,24 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     for indexable, doc in docs:
         try:
             if indexable:
-                action = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
+                action = EventMessageType.REINDEX if reindex else EventMessageType.INDEX
             elif not indexable and not reindex:
-                action = KafkaMessageType.UNINDEX
+                action = EventMessageType.UNINDEX
             else:
                 continue
             message_type = f'{adapter.model.__name__.lower()}.{action.value}'
-            produce(
-                kafka_uri=current_app.config.get('KAFKA_URI'),
-                topic=get_topic(message_type),
-                service='udata',
-                key_id=doc['id'],
-                document=doc,
-                meta={'message_type': message_type, 'index': index_name}
-            )
+            url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
+            try:
+                payload = {
+                    'key_id': doc['id'],
+                    'document': doc,
+                    'message_type': message_type,
+                    'index': index_name
+                }
+                r = requests.post(url, json=payload)
+                r.raise_for_status()
+            except Exception:
+                log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)
