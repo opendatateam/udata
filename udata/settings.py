@@ -32,9 +32,6 @@ class Defaults(object):
     SEARCH_SERVICE_API_URL = None
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
 
-    # Kafka configuration
-    KAFKA_URI = None
-
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
     CELERY_BROKER_TRANSPORT_OPTIONS = {

@@ -145,12 +145,6 @@ def enable_resource_event(app):
     app.config['RESOURCES_ANALYSER_URI'] = 'http://local.dev'
 
 
-@pytest.fixture
-def enable_kafka(app):
-    '''Enable resource event'''
-    app.config['KAFKA_URI'] = 'localhost:9092'
-
-
 class ApiClient(object):
     def __init__(self, client):
         self.client = client

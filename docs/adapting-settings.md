@@ -213,16 +213,6 @@ SEARCH_SERVICE_API_URL = 'http://127.0.0.1:5000/api/1/'
 ```
 
 See [udata-search-service][udata-search-service] for more information on using a search service.
-You'll need a Kakfa broker for the search service to work. See `KAFKA_URI`.
-
-## Kafka configuration
-
-### KAFKA_URI
-
-**default**: None
-
-Optionnal Kafka URI to use. If specified, messages can be consumed and produced in udata workers.
-It is required for an independent search service.
 
 ## Spatial configuration
 

@@ -227,6 +227,7 @@ flask-principal==0.4.0
 flask-restx==0.5.1
     # via
     #   -c requirements/install.pip
+    #   -c requirements/test.pip
     #   -r requirements/install.in
 flask-security-too==4.0.0
     # via
@@ -306,11 +307,6 @@ jsonschema==3.2.0
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   flask-restx
-kafka-python==2.0.2
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   udata-event-service
 keyring==23.0.1
     # via twine
 kombu[redis]==4.4.0
@@ -561,11 +557,6 @@ tqdm==4.62.0
     # via twine
 twine==3.3.0
     # via -r requirements/develop.in
-udata-event-service==0.0.8
-    # via
-    #   -c requirements/install.pip
-    #   -c requirements/test.pip
-    #   -r requirements/install.in
 ujson==1.35
     # via
     #   -c requirements/install.pip

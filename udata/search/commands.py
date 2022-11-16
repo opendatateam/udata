@@ -120,6 +120,9 @@ def index(models=None, reindex=True, from_datetime=None):
 
     If from_datetime is specified, only models modified since this datetime will be indexed.
     '''
+    if not current_app.config['SEARCH_SERVICE_API_URL']:
+        log.error('Missing URL for search service')
+        sys.exit(-1)
 
     start = datetime.now()
     if from_datetime:
