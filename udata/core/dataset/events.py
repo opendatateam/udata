@@ -44,11 +44,10 @@ def publish(url, document, resource_id, action):
         resource = None
     else:
         resource = serialize_resource_for_event(get_by(document.resources, 'id', resource_id))
-    message_type = f'resource.{action.value}'
     payload = {
-        'key': str(resource_id),
-        'document': resource,
-        'meta': {'message_type': message_type, 'dataset_id': str(document.id)}
+        'resource_id': str(resource_id),
+        'dataset_id': str(document.id),
+        'document': resource
     }
     r = requests.post(url, json=payload)
     r.raise_for_status()
