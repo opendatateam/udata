@@ -565,26 +565,35 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
     @property
     def next_update(self):
         """Compute the next expected update date,
-
         given the frequency and last_update.
         Return None if the frequency is not handled.
+
+        We consider frequencies that have a number of
+        occurences on a timespan to be irregularry divided
+        in the timespan and expect a next update before the end
+        of the timespan.
+
+        Ex: the next update for a threeTimesAday freq is not
+        every 8 hours, but is maximum 24 hours later.
         """
         delta = None
-        if self.frequency == 'daily':
+        if self.frequency == 'hourly':
+            delta = timedelta(hours=1)
+        elif self.frequency in ['fourTimesADay', 'threeTimesADay', 'semidaily', 'daily']:
             delta = timedelta(days=1)
-        elif self.frequency == 'weekly':
+        elif self.frequency in ['fourTimesAWeek', 'threeTimesAWeek', 'semiweekly', 'weekly']:
             delta = timedelta(weeks=1)
         elif self.frequency == 'biweekly':
             delta = timedelta(weeks=2)
-        elif self.frequency == 'monthly':
+        elif self.frequency in ['threeTimesAMonth', 'semimonthly', 'monthly']:
             delta = timedelta(weeks=4)
         elif self.frequency == 'bimonthly':
             delta = timedelta(weeks=4 * 2)
         elif self.frequency == 'quarterly':
             delta = timedelta(weeks=52 / 4)
-        elif self.frequency == 'semiannual':
-            delta = timedelta(weeks=52 / 2)
-        elif self.frequency == 'annual':
+        elif self.frequency == 'threeTimesAYear':
+            delta = timedelta(weeks=52 / 3)
+        elif self.frequency == ['semiannual', 'annual']:
             delta = timedelta(weeks=52)
         elif self.frequency == 'biennial':
             delta = timedelta(weeks=52 * 2)
@@ -618,7 +627,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
         result['update_frequency'] = False if self.frequency in ['unknown', 'irregular', 'punctual'] else True
         if self.next_update:
-            result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days < 0 else False
+            result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days <= 0 else False
 
         result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH') else False
 
