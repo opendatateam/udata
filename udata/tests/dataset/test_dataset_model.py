@@ -144,10 +144,12 @@ class DatasetModelTest:
 
     @pytest.mark.parametrize('freq', UPDATE_FREQUENCIES)
     def test_quality_next_update(self, freq):
+        dataset = DatasetFactory(description='', frequency=freq)
         if freq in ['unknown', 'punctual', 'continuous', 'irregular']:
             # We can't compute update_fulfilled_in_time for these frequencies
+            assert dataset.next_update is None
+            assert 'update_fulfilled_in_time' not in dataset.quality
             return
-        dataset = DatasetFactory(description='', frequency=freq)
         assert dataset.quality['update_frequency'] is True
         assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['score'] == Dataset.normalize_score(2)
