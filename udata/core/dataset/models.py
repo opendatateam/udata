@@ -658,9 +658,13 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         result['temporal_coverage'] = True if self.temporal_coverage else False
         result['spatial'] = True if self.spatial else False
 
-        result['update_frequency'] = False if self.frequency in ['unknown', 'irregular', 'punctual'] else True
+        result['update_frequency'] = self.frequency and self.frequency != 'unknown'
         if self.next_update:
             result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days <= 0 else False
+        elif self.frequency in ['continuous', 'irregular', 'punctual']:
+            # For these frequencies, we don't expect regular updates or can't quantify them.
+            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
+            result['update_fulfilled_in_time'] = True
 
         result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH') else False
 
