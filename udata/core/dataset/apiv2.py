@@ -1,7 +1,7 @@
 import logging
 
 from flask import url_for, request, abort
-from flask_restplus import marshal
+from flask_restx import marshal
 
 from udata import search
 from udata.api import apiv2, API, fields
@@ -14,7 +14,9 @@ from .api_fields import (
     spatial_coverage_fields,
     temporal_coverage_fields,
     user_ref_fields,
-    checksum_fields
+    checksum_fields,
+    dataset_harvest_fields,
+    resource_harvest_fields
 )
 from udata.core.spatial.api_fields import geojson
 from .models import (
@@ -29,9 +31,9 @@ DEFAULT_SORTING = '-created_at'
 #: Default mask to make it lightweight by default
 DEFAULT_MASK_APIV2 = ','.join((
     'id', 'title', 'acronym', 'slug', 'description', 'created_at', 'last_modified', 'deleted',
-    'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date', 'extras',
-    'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
-    'uri', 'page', 'last_update', 'archived', 'quality'
+    'private', 'tags', 'badges', 'resources', 'community_resources', 'frequency', 'frequency_date',
+    'extras', 'metrics', 'organization', 'owner', 'temporal_coverage', 'spatial', 'license',
+    'uri', 'page', 'last_update', 'archived', 'quality', 'harvest'
 ))
 
 log = logging.getLogger(__name__)
@@ -95,6 +97,11 @@ dataset_fields = apiv2.model('Dataset', {
     'frequency_date': fields.ISODateTime(
         description=('Next expected update date, you will be notified '
                      'once that date is reached.')),
+    'harvest': fields.Nested(
+        dataset_harvest_fields, readonly=True, allow_null=True,
+        description='Dataset harvest metadata attributes',
+        skip_none=True
+    ),
     'extras': fields.Raw(description='Extras attributes as key-value pairs'),
     'metrics': fields.Raw(attribute=lambda o: o.get_metrics(), description='The dataset metrics'),
     'organization': fields.Nested(
@@ -153,6 +160,8 @@ apiv2.inherit('SpatialCoverage', spatial_coverage_fields)
 apiv2.inherit('TemporalCoverage', temporal_coverage_fields)
 apiv2.inherit('GeoJSON', geojson)
 apiv2.inherit('Checksum', checksum_fields)
+apiv2.inherit('HarvestDatasetMetadata', dataset_harvest_fields)
+apiv2.inherit('HarvestResourceMetadata', resource_harvest_fields)
 
 
 @ns.route('/search/', endpoint='dataset_search')

@@ -9,12 +9,14 @@ import pytest
 
 from . import APITestCase
 
+from udata.api import fields
 from udata.app import cache
 from udata.core import storages
 from udata.core.dataset.factories import (
     DatasetFactory, VisibleDatasetFactory, CommunityResourceFactory,
     LicenseFactory, ResourceFactory)
-from udata.core.dataset.models import ResourceMixin
+from udata.core.dataset.api_fields import dataset_harvest_fields, resource_harvest_fields
+from udata.core.dataset.models import ResourceMixin, HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.core.badges.factories import badge_factory
 from udata.core.organization.factories import OrganizationFactory
@@ -1122,17 +1124,17 @@ class DatasetResourceAPITest(APITestCase):
         '''It should suggest datasets'''
         for i in range(3):
             DatasetFactory(
-                title='test-{0}'.format(i) if i % 2 else faker.word(),
+                title='title-test-{0}'.format(i) if i % 2 else faker.word(),
                 visible=True,
                 metrics={"followers": i})
         max_follower_dataset = DatasetFactory(
-            title='test-4',
+            title='title-test-4',
             visible=True,
             metrics={"followers": 10}
         )
 
         response = self.get(url_for('api.suggest_datasets'),
-                            qs={'q': 'tes', 'size': '5'})
+                            qs={'q': 'title-test', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1142,20 +1144,20 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertIn('tes', suggestion['title'])
+            self.assertIn('title-test', suggestion['title'])
         self.assertEqual(response.json[0]['id'], str(max_follower_dataset.id))
 
     def test_suggest_datasets_acronym_api(self):
         '''It should suggest datasets from their acronyms'''
         for i in range(4):
             DatasetFactory(
-                # Ensure title does not contains 'tes'
+                # Ensure title does not contains 'acronym-tes'
                 title=faker.unique_string(),
-                acronym='test-{0}'.format(i) if i % 2 else None,
+                acronym='acronym-test-{0}'.format(i) if i % 2 else None,
                 visible=True)
 
         response = self.get(url_for('api.suggest_datasets'),
-                            qs={'q': 'tes', 'size': '5'})
+                            qs={'q': 'acronym-test', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1167,17 +1169,17 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
             self.assertNotIn('tes', suggestion['title'])
-            self.assertIn('test', suggestion['acronym'])
+            self.assertIn('acronym-test', suggestion['acronym'])
 
     def test_suggest_datasets_api_unicode(self):
         '''It should suggest datasets with special characters'''
         for i in range(4):
             DatasetFactory(
-                title='testé-{0}'.format(i) if i % 2 else faker.word(),
+                title='title-testé-{0}'.format(i) if i % 2 else faker.word(),
                 resources=[ResourceFactory()])
 
         response = self.get(url_for('api.suggest_datasets'),
-                            qs={'q': 'testé', 'size': '5'})
+                            qs={'q': 'title-testé', 'size': '5'})
         self.assert200(response)
 
         self.assertLessEqual(len(response.json), 5)
@@ -1188,7 +1190,7 @@ class DatasetResourceAPITest(APITestCase):
             self.assertIn('title', suggestion)
             self.assertIn('slug', suggestion)
             self.assertIn('image_url', suggestion)
-            self.assertIn('test', suggestion['title'])
+            self.assertIn('title-testé', suggestion['title'])
 
     def test_suggest_datasets_api_no_match(self):
         '''It should not provide dataset suggestion if no match'''
@@ -1647,3 +1649,110 @@ class DatasetSchemasAPITest:
                 ]
             }
         ]
+
+
+@pytest.mark.usefixtures('clean_db')
+class HarvestMetadataAPITest:
+
+    modules = []
+
+    # api fields should be updated before app is created
+    dataset_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
+    resource_harvest_fields['dynamic_field'] = fields.String(description='', allow_null=True)
+
+    def test_dataset_with_harvest_metadata(self, api):
+        date = datetime(2022, 2, 22)
+        harvest_metadata = HarvestDatasetMetadata(
+            backend='DCAT',
+            created_at=date,
+            modified_at=date,
+            source_id='source_id',
+            remote_id='remote_id',
+            domain='domain.gouv.fr',
+            last_update=date,
+            remote_url='http://domain.gouv.fr/dataset/remote_url',
+            uri='http://domain.gouv.fr/dataset/uri',
+            dct_identifier='http://domain.gouv.fr/dataset/identifier',
+            archived_at=date,
+            archived='not-on-remote'
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['harvest'] == {
+            'backend': 'DCAT',
+            'created_at': date.isoformat(),
+            'modified_at': date.isoformat(),
+            'source_id': 'source_id',
+            'remote_id': 'remote_id',
+            'domain': 'domain.gouv.fr',
+            'last_update': date.isoformat(),
+            'remote_url': 'http://domain.gouv.fr/dataset/remote_url',
+            'uri': 'http://domain.gouv.fr/dataset/uri',
+            'dct_identifier': 'http://domain.gouv.fr/dataset/identifier',
+            'archived_at': date.isoformat(),
+            'archived': 'not-on-remote'
+        }
+
+    def test_dataset_dynamic_harvest_metadata_without_api_field(self, api):
+        harvest_metadata = HarvestDatasetMetadata(
+            dynamic_field_but_no_api_field_defined='DCAT'
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['harvest'] == {}
+
+    def test_dataset_dynamic_harvest_metadata_with_api_field(self, api):
+        harvest_metadata = HarvestDatasetMetadata(
+            dynamic_field='dynamic_value'
+        )
+        dataset = DatasetFactory(harvest=harvest_metadata)
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['harvest'] == {
+            'dynamic_field': 'dynamic_value',
+        }
+
+    def test_dataset_with_resource_harvest_metadata(self, api):
+        date = datetime(2022, 2, 22)
+
+        harvest_metadata = HarvestResourceMetadata(
+            created_at=date,
+            modified_at=date,
+            uri='http://domain.gouv.fr/dataset/uri',
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {
+            'created_at': date.isoformat(),
+            'modified_at': date.isoformat(),
+            'uri': 'http://domain.gouv.fr/dataset/uri',
+        }
+
+    def test_resource_dynamic_harvest_metadata_without_api_field(self, api):
+        harvest_metadata = HarvestResourceMetadata(
+            dynamic_field_but_no_api_field_defined='dynamic_value'
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {}
+
+    def test_resource_dynamic_harvest_metadata_with_api_field(self, api):
+        harvest_metadata = HarvestResourceMetadata(
+            dynamic_field='dynamic_value'
+        )
+        dataset = DatasetFactory(resources=[ResourceFactory(harvest=harvest_metadata)])
+
+        response = api.get(url_for('api.dataset', dataset=dataset))
+        assert200(response)
+        assert response.json['resources'][0]['harvest'] == {
+            'dynamic_field': 'dynamic_value',
+        }
