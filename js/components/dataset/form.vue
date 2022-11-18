@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import config from 'config';
 import Dataset from 'models/dataset';
 import licenses from 'models/licenses';
 import granularities from 'models/geogranularities';
@@ -35,7 +36,7 @@ export default {
                     label: this._('License'),
                     widget: 'select-input-group',
                     values: licenses,
-                    groups: {'admin': ['lov2', 'odc-odbl'], 'other': ['cc-by', 'cc-by-sa', 'cc-zero', 'odc-by', 'odc-pddl']},
+                    groups: config.license_groups,
                     map(item) {
                         return {value: item.id, text: item.title};
                     }

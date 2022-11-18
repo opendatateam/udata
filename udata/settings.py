@@ -216,6 +216,14 @@ class Defaults(object):
     TAG_MIN_LENGTH = 3
     TAG_MAX_LENGTH = 96
 
+    # License groups in admin dataset edit view
+    # A list of tuples, each tuple describing a group with its title and licenses associated
+    LICENSE_GROUPS = [
+        (_('Administrative authorities'), ['lov2', 'odc-odbl']),
+        (_('All producers (recommended)'), ['lov2']),
+        (_('All producers'), ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero', 'odc-by', 'odc-pddl'])
+    ]
+
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
 
