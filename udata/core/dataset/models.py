@@ -619,21 +619,19 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         elif self.frequency == 'biweekly':
             delta = timedelta(weeks=2)
         elif self.frequency in ['threeTimesAMonth', 'semimonthly', 'monthly']:
-            delta = timedelta(weeks=4)
+            delta = timedelta(days=31)
         elif self.frequency == 'bimonthly':
-            delta = timedelta(weeks=4 * 2)
+            delta = timedelta(days=31 * 2)
         elif self.frequency == 'quarterly':
-            delta = timedelta(weeks=52 / 4)
-        elif self.frequency == 'threeTimesAYear':
-            delta = timedelta(weeks=52 / 3)
-        elif self.frequency in ['semiannual', 'annual']:
-            delta = timedelta(weeks=52)
+            delta = timedelta(days=365 / 4)
+        elif self.frequency in ['threeTimesAYear', 'semiannual', 'annual']:
+            delta = timedelta(days=365)
         elif self.frequency == 'biennial':
-            delta = timedelta(weeks=52 * 2)
+            delta = timedelta(days=365 * 2)
         elif self.frequency == 'triennial':
-            delta = timedelta(weeks=52 * 3)
+            delta = timedelta(days=365 * 3)
         elif self.frequency == 'quinquennial':
-            delta = timedelta(weeks=52 * 5)
+            delta = timedelta(days=365 * 5)
         if delta is None:
             return
         else:
