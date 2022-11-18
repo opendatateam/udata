@@ -3,6 +3,7 @@
 ## Current (in progress)
 
 - Fix apiv2 swagger with harvest metadata and add apiv2 swagger tests [#2782](https://github.com/opendatateam/udata/pull/2782)
+- Add quality score to csv catalogs [#2785](https://github.com/opendatateam/udata/pull/2785)
 
 ## 5.0.1 (2022-11-14)
 
