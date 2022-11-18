@@ -593,7 +593,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             delta = timedelta(weeks=52 / 4)
         elif self.frequency == 'threeTimesAYear':
             delta = timedelta(weeks=52 / 3)
-        elif self.frequency == ['semiannual', 'annual']:
+        elif self.frequency in ['semiannual', 'annual']:
             delta = timedelta(weeks=52)
         elif self.frequency == 'biennial':
             delta = timedelta(weeks=52 * 2)
