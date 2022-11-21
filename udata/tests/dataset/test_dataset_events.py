@@ -6,7 +6,6 @@ from udata.models import Dataset
 from udata.tests.helpers import assert_emit
 from udata.core.dataset.events import serialize_resource_for_event
 from udata.core.dataset.factories import ResourceFactory, DatasetFactory
-from udata.event.values import EventMessageType
 
 
 @pytest.mark.usefixtures('clean_db')
@@ -19,11 +18,10 @@ class DatasetEventsTest:
         resource = ResourceFactory()
         expected_signals = (Dataset.on_resource_added,)
 
-        message_type = f'resource.{EventMessageType.CREATED.value}'
         expected_value = {
-            'key': str(resource.id),
-            'document': serialize_resource_for_event(resource),
-            'meta': {'message_type': message_type, 'dataset_id': str(dataset.id)}
+            'resource_id': str(resource.id),
+            'dataset_id': str(dataset.id),
+            'document': serialize_resource_for_event(resource)
         }
 
         with assert_emit(*expected_signals):
@@ -40,11 +38,10 @@ class DatasetEventsTest:
 
         resource.description = 'New description'
 
-        message_type = f'resource.{EventMessageType.MODIFIED.value}'
         expected_value = {
-            'key': str(resource.id),
-            'document': serialize_resource_for_event(resource),
-            'meta': {'message_type': message_type, 'dataset_id': str(dataset.id)}
+            'resource_id': str(resource.id),
+            'dataset_id': str(dataset.id),
+            'document': serialize_resource_for_event(resource)
         }
 
         with assert_emit(*expected_signals):
@@ -59,11 +56,10 @@ class DatasetEventsTest:
         dataset = DatasetFactory(resources=[resource])
         expected_signals = (Dataset.on_resource_removed,)
 
-        message_type = f'resource.{EventMessageType.DELETED.value}'
         expected_value = {
-            'key': str(resource.id),
-            'document': None,
-            'meta': {'message_type': message_type, 'dataset_id': str(dataset.id)}
+            'resource_id': str(resource.id),
+            'dataset_id': str(dataset.id),
+            'document': None
         }
 
         with assert_emit(*expected_signals):
