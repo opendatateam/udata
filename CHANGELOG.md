@@ -2,11 +2,20 @@
 
 ## Current (in progress)
 
+- :warning: Upgrade to `Flask-Security-Too` version 4.0.0 [#2772](https://github.com/opendatateam/udata/pull/2772):
+  - New User model attribute `fs_uniquifier`, migration needed.
+  - The `fs_uniquifier` is used to invalidate existing session in case of password reset.
+  - The user's `fs_uniquifier` is used instead of the `id` for auth mecanism including permissions.
+  - Exhaustive list of changes [here](https://flask-security-too.readthedocs.io/en/stable/changelog.html#version-4-0-0).
 - Fix apiv2 swagger with harvest metadata and add apiv2 swagger tests [#2782](https://github.com/opendatateam/udata/pull/2782)
 
 ## 5.0.1 (2022-11-14)
 
 - Fix resource harvest uri validation error [#2780](https://github.com/opendatateam/udata/pull/2780)
+
+## 5.0.0 (2022-11-14)
+
+- :warning: **Breaking change** Use dedicated dynamic harvest metadata for dataset and resources. A migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. udata-ckan, udata-ods and udata-front packages are impacted and should be upgraded accordingly [#2762](https://github.com/opendatateam/udata/pull/2762)
 
 ## 5.0.0 (2022-11-14)
 

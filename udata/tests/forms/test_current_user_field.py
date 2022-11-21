@@ -4,14 +4,14 @@ from bson import ObjectId
 from werkzeug.datastructures import MultiDict
 
 from udata.auth import login_user
-from udata.auth.forms import ExtendedLoginForm, ExtendedResetPasswordForm
+from udata.auth.forms import ExtendedLoginForm, ExtendedRegisterForm
 from udata.core.user.factories import UserFactory, AdminFactory
 from udata.forms import ModelForm, fields
 from udata.models import db, User
-from udata.tests import TestCase
+from udata.tests import TestCase, DBTestMixin
 
 
-class CurrentUserFieldTest(TestCase):
+class CurrentUserFieldTest(TestCase, DBTestMixin):
     def factory(self, *args, **kwargs):
         class Ownable(db.Document):
             owner = db.ReferenceField(User)
@@ -207,3 +207,24 @@ class CurrentUserFieldTest(TestCase):
         form.validate()
 
         self.assertIn('Password must be changed for security reasons', form.errors['password'])
+
+    def test_email_validation(self):
+        self.app.config['SECURITY_EMAIL_VALIDATOR_ARGS'] = None
+        form = ExtendedRegisterForm.from_json({
+            'email': 'a@test.notreal',
+            'password': 'passpass',
+            'password_confirm': 'passpass',
+            'first_name': 'azeaezr',
+            'last_name': 'azeaze',
+        })
+        form.validate()
+        self.assertIn('Invalid email address', form.errors['email'])
+
+        today = datetime.datetime.now()
+        user = UserFactory(email='b@fake.notreal', password='password', confirmed_at=today)
+        form = ExtendedLoginForm.from_json({
+            'email': user.email,
+            'password': 'password'
+        })
+        form.validate()
+        assert not form.errors

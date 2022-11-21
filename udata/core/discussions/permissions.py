@@ -14,6 +14,6 @@ class CloseDiscussionPermission(Permission):
             needs.append(OrganizationAdminNeed(subject.organization.id))
             needs.append(OrganizationEditorNeed(subject.organization.id))
         elif subject.owner:
-            needs.append(UserNeed(subject.owner.id))
+            needs.append(UserNeed(subject.owner.fs_uniquifier))
 
         super(CloseDiscussionPermission, self).__init__(*needs)

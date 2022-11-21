@@ -4,7 +4,7 @@ import shlex
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
-from flask import json, template_rendered, url_for
+from flask import json, template_rendered, url_for, current_app
 from flask.testing import FlaskClient
 from lxml import etree
 from werkzeug.urls import url_encode
@@ -43,14 +43,18 @@ class TestClient(FlaskClient):
     def login(self, user=None):
         user = user or UserFactory()
         with self.session_transaction() as session:
-            session['user_id'] = str(user.id)
+            # Since flask-security-too 4.0.0, the user.fs_uniquifier is used instead of user.id for auth
+            user_id = getattr(user, current_app.login_manager.id_attribute)()
+            session['user_id'] = user_id
             session['_fresh'] = True
+            session['_id'] = current_app.login_manager._session_identifier_generator()
         return user
 
     def logout(self):
         with self.session_transaction() as session:
             del session['user_id']
             del session['_fresh']
+            del session['_id']
 
 
 @pytest.fixture
