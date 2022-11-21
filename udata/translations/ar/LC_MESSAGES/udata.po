@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-07-05 11:01\n"
+"POT-Creation-Date: 2022-10-19 14:26+0200\n"
+"PO-Revision-Date: 2022-11-21 18:15\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: ar\n"
 "Language-Team: Arabic\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:99
+#: udata/settings.py:102
 msgid "Welcome"
 msgstr "مرحبًا"
 
-#: udata/settings.py:100
+#: udata/settings.py:103
 msgid "Please confirm your email"
 msgstr "الرجاء التأكد من البريد الإلكتروني الخاص بك"
 
-#: udata/settings.py:101
+#: udata/settings.py:104
 msgid "Login instructions"
 msgstr "تعليمات تسجيل الدخول"
 
-#: udata/settings.py:102
+#: udata/settings.py:105
 msgid "Your password has been reset"
 msgstr "لقد تم إعادة تعيين كلمة المرور الخاصة بك"
 
-#: udata/settings.py:103
+#: udata/settings.py:106
 msgid "Your password has been changed"
 msgstr "تم تغيير كلمة المرور الخاصه بك"
 
-#: udata/settings.py:105
+#: udata/settings.py:108
 msgid "Password reset instructions"
 msgstr "إرشادات إعادة تعيين كلمة المرور"
 
-#: udata/settings.py:390
+#: udata/settings.py:393
 msgid "This dataset has been archived"
 msgstr ""
 
@@ -62,48 +62,48 @@ msgstr "النطاق الافتراضي"
 msgid "System administrator rights"
 msgstr "حقوق مسؤول النظام"
 
-#: udata/auth/forms.py:13 udata/core/user/forms.py:14
+#: udata/auth/forms.py:12 udata/core/user/forms.py:14
 msgid "First name"
 msgstr "الإ سم"
 
-#: udata/auth/forms.py:13
+#: udata/auth/forms.py:12
 msgid "First name is required"
 msgstr ""
 
-#: udata/auth/forms.py:14 udata/auth/forms.py:17 udata/core/user/forms.py:15
+#: udata/auth/forms.py:13 udata/auth/forms.py:16 udata/core/user/forms.py:15
 #: udata/core/user/forms.py:17
 msgid "URLs not allowed in this field"
 msgstr ""
 
-#: udata/auth/forms.py:16 udata/core/user/forms.py:16
+#: udata/auth/forms.py:15 udata/core/user/forms.py:16
 msgid "Last name"
 msgstr "اللقب "
 
-#: udata/auth/forms.py:16
+#: udata/auth/forms.py:15
 msgid "Last name is required"
 msgstr ""
 
-#: udata/auth/forms.py:33
+#: udata/auth/forms.py:32
 msgid "Password must be changed for security reasons"
 msgstr ""
 
-#: udata/auth/password_validation.py:13
+#: udata/auth/password_validation.py:27
 msgid "Password must be at least {pass_length} characters long"
 msgstr ""
 
-#: udata/auth/password_validation.py:18
+#: udata/auth/password_validation.py:33
 msgid "Password must contain lowercases"
 msgstr ""
 
-#: udata/auth/password_validation.py:22
+#: udata/auth/password_validation.py:37
 msgid "Password must contain digits"
 msgstr ""
 
-#: udata/auth/password_validation.py:26
+#: udata/auth/password_validation.py:42
 msgid "Password must contain uppercases"
 msgstr ""
 
-#: udata/auth/password_validation.py:30
+#: udata/auth/password_validation.py:47
 msgid "Password must contain symbols"
 msgstr ""
 
@@ -335,7 +335,7 @@ msgstr "ثلاث مرات في اليوم"
 msgid "Semidaily"
 msgstr "مرتين فى اليوم"
 
-#: udata/core/dataset/models.py:50 udata/harvest/models.py:22
+#: udata/core/dataset/models.py:50 udata/harvest/models.py:25
 msgid "Daily"
 msgstr "يوميا"
 
@@ -351,7 +351,7 @@ msgstr "ثلاث مرات في الاسبوع"
 msgid "Semiweekly"
 msgstr "مرتين في الأسبوع"
 
-#: udata/core/dataset/models.py:54 udata/harvest/models.py:21
+#: udata/core/dataset/models.py:54 udata/harvest/models.py:24
 msgid "Weekly"
 msgstr "أسبوعيا"
 
@@ -367,7 +367,7 @@ msgstr "ثلاث مرات في الشهر"
 msgid "Semimonthly"
 msgstr "مرتين في الشهر"
 
-#: udata/core/dataset/models.py:58 udata/harvest/models.py:20
+#: udata/core/dataset/models.py:58 udata/harvest/models.py:23
 msgid "Monthly"
 msgstr "شهريا"
 
@@ -558,17 +558,17 @@ msgid "Editor"
 msgstr "الناشر"
 
 #: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:26 udata/harvest/models.py:36 udata/harvest/models.py:74
+#: udata/harvest/models.py:29 udata/harvest/models.py:39 udata/harvest/models.py:77
 msgid "Pending"
 msgstr "معلق"
 
 #: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:75
+#: udata/harvest/models.py:78
 msgid "Accepted"
 msgstr "مقبول"
 
 #: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
-#: udata/harvest/models.py:76
+#: udata/harvest/models.py:79
 msgid "Refused"
 msgstr "مرفوض"
 
@@ -919,7 +919,7 @@ msgstr "حول"
 msgid "Roles"
 msgstr "الأدوار"
 
-#: udata/core/user/models.py:262 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:263 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "حذف الحساب"
 
@@ -1005,49 +1005,53 @@ msgstr ""
 msgid "Backend"
 msgstr "خلفية"
 
-#: udata/harvest/models.py:19
+#: udata/harvest/models.py:22
 msgid "Manual"
 msgstr "دليل"
 
-#: udata/harvest/models.py:27
+#: udata/harvest/models.py:30
 msgid "Initializing"
 msgstr "تهيئة"
 
-#: udata/harvest/models.py:28
+#: udata/harvest/models.py:31
 msgid "Initialized"
 msgstr "مهيئ"
 
-#: udata/harvest/models.py:29
+#: udata/harvest/models.py:32
 msgid "Processing"
 msgstr "يتم المعالجة"
 
-#: udata/harvest/models.py:30 udata/harvest/models.py:38
+#: udata/harvest/models.py:33 udata/harvest/models.py:41
 msgid "Done"
 msgstr "منجز"
 
-#: udata/harvest/models.py:31
+#: udata/harvest/models.py:34
 msgid "Done with errors"
 msgstr "منجز مع وجود أخطاء"
 
-#: udata/harvest/models.py:32 udata/harvest/models.py:39
+#: udata/harvest/models.py:35 udata/harvest/models.py:42
 msgid "Failed"
 msgstr "فشل"
 
-#: udata/harvest/models.py:37
+#: udata/harvest/models.py:40
 msgid "Started"
 msgstr "إبتدأ"
 
-#: udata/harvest/models.py:40
+#: udata/harvest/models.py:43
 msgid "Skipped"
 msgstr "تم تخطيه"
 
-#: udata/harvest/models.py:41
+#: udata/harvest/models.py:44
 msgid "Archived"
 msgstr ""
 
 #: udata/templates/admin.html:7
 msgid "Admin"
 msgstr "مشرف"
+
+#: udata/templates/base.html:7
+msgid "You must be connected to do this action."
+msgstr ""
 
 #: udata/templates/api/admin.html:11
 msgid "Maintainer"
@@ -1117,10 +1121,6 @@ msgid "This dataset has been archived by our administration team.\n\n"
 "If you think this is a mistake, you can contact the site administrator."
 msgstr ""
 
-#: udata/templates/macros/forms.html:106
-msgid "required fields"
-msgstr ""
-
 #: udata/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
 msgstr ""
@@ -1144,25 +1144,25 @@ msgstr ""
 msgid "%(user)s has identified your organization \"%(name)s\" as public service"
 msgstr ""
 
-#: udata/templates/mail/base.html:45
+#: udata/templates/mail/base.html:45 udata/templates/security/email/base.html:45
 msgid "on your browser."
 msgstr ""
 
-#: udata/templates/mail/base.html:48
+#: udata/templates/mail/base.html:48 udata/templates/security/email/base.html:48
 #, python-format
 msgid "View this email %(link)s"
 msgstr ""
 
-#: udata/templates/mail/base.html:76
+#: udata/templates/mail/base.html:76 udata/templates/security/email/base.html:76
 #, python-format
 msgid "Hi %(user)s"
 msgstr ""
 
-#: udata/templates/mail/base.html:87
+#: udata/templates/mail/base.html:87 udata/templates/security/email/base.html:87
 msgid "See you soon on the platform"
 msgstr ""
 
-#: udata/templates/mail/base.html:88
+#: udata/templates/mail/base.html:88 udata/templates/security/email/base.html:88
 #, python-format
 msgid "The %(site)s team"
 msgstr ""
@@ -1260,133 +1260,128 @@ msgstr ""
 msgid "If you read this, your mail configuration is working"
 msgstr ""
 
-#: udata/templates/mail/security/change_notice.html:6
+#: udata/templates/security/change_password.html:9
+#: udata/templates/security/change_password.html:16
+msgid "Change Password"
+msgstr ""
+
+#: udata/templates/security/forgot_password.html:9
+#: udata/templates/security/forgot_password.html:15
+#: udata/templates/security/reset_password.html:10
+#: udata/templates/security/reset_password.html:16
+msgid "Reset Password"
+msgstr ""
+
+#: udata/templates/security/forgot_password.html:10
+msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgstr ""
+
+#: udata/templates/security/login_user.html:13
+msgid "Sign In"
+msgstr ""
+
+#: udata/templates/security/login_user.html:17
+msgid "Sign in"
+msgstr "تسجيل الدخول"
+
+#: udata/templates/security/login_user.html:21
+msgid "Forgot your password?"
+msgstr ""
+
+#: udata/templates/security/login_user.html:23
+msgid "Recover your password"
+msgstr ""
+
+#: udata/templates/security/login_user.html:28
+msgid "Confirmation instructions not received?"
+msgstr ""
+
+#: udata/templates/security/login_user.html:30
+msgid "Send the instructions again"
+msgstr ""
+
+#: udata/templates/security/login_user.html:41
+#: udata/templates/security/register_user.html:13
+msgid "Sign up"
+msgstr ""
+
+#: udata/templates/security/login_user.html:44
+msgid "Register"
+msgstr ""
+
+#: udata/templates/security/login_user.html:48
+msgid "Create an account"
+msgstr ""
+
+#: udata/templates/security/register_user.html:9
+msgid "Sign Up"
+msgstr ""
+
+#: udata/templates/security/send_confirmation.html:9
+msgid "Resend confirmation instructions"
+msgstr ""
+
+#: udata/templates/security/send_confirmation.html:15
+msgid "Submit"
+msgstr ""
+
+#: udata/templates/security/email/change_notice.html:6
 msgid "Your password has been changed."
 msgstr ""
 
-#: udata/templates/mail/security/change_notice.html:10
+#: udata/templates/security/email/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
 msgstr ""
 
-#: udata/templates/mail/security/change_notice.html:15
+#: udata/templates/security/email/change_notice.html:15
 msgid "Reset password"
 msgstr ""
 
-#: udata/templates/mail/security/confirmation_instructions.html:6
+#: udata/templates/security/email/confirmation_instructions.html:6
 msgid "Please confirm your email through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/confirmation_instructions.html:14
+#: udata/templates/security/email/confirmation_instructions.html:14
 msgid "Confirm my account"
 msgstr ""
 
-#: udata/templates/mail/security/login_instructions.html:6
+#: udata/templates/security/email/login_instructions.html:6
 msgid "You can log into your account through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/login_instructions.html:13
+#: udata/templates/security/email/login_instructions.html:13
 msgid "Login now"
 msgstr ""
 
-#: udata/templates/mail/security/reset_instructions.html:7
+#: udata/templates/security/email/reset_instructions.html:7
 #, python-format
 msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
 msgstr ""
 
-#: udata/templates/mail/security/reset_instructions.html:10
+#: udata/templates/security/email/reset_instructions.html:10
 msgid "To reset your password, please confirm your request through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/reset_instructions.html:18
+#: udata/templates/security/email/reset_instructions.html:18
 msgid "Reset my password"
 msgstr ""
 
-#: udata/templates/mail/security/reset_notice.html:7
+#: udata/templates/security/email/reset_notice.html:7
 #, python-format
 msgid "Your password for %(site)s has been reset."
 msgstr ""
 
-#: udata/templates/mail/security/welcome.html:7
+#: udata/templates/security/email/welcome.html:7
 #, python-format
 msgid "Welcome to %(site)s!"
 msgstr ""
 
-#: udata/templates/mail/security/welcome.html:10
+#: udata/templates/security/email/welcome.html:10
 msgid "To activate your account, please confirm your email address through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/welcome.html:18
+#: udata/templates/security/email/welcome.html:18
 msgid "Confirm now"
-msgstr ""
-
-#: udata/templates/security/change_password.html:12
-#: udata/templates/security/change_password.html:19
-msgid "Change Password"
-msgstr ""
-
-#: udata/templates/security/forgot_password.html:12
-#: udata/templates/security/forgot_password.html:18
-#: udata/templates/security/reset_password.html:13
-#: udata/templates/security/reset_password.html:19
-msgid "Reset Password"
-msgstr ""
-
-#: udata/templates/security/forgot_password.html:13
-msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr ""
-
-#: udata/templates/security/login_user.html:14
-msgid "Sign In"
-msgstr ""
-
-#: udata/templates/security/login_user.html:18
-msgid "Sign in"
-msgstr "تسجيل الدخول"
-
-#: udata/templates/security/login_user.html:22
-msgid "Forgot your password?"
-msgstr ""
-
-#: udata/templates/security/login_user.html:24
-msgid "Recover your password"
-msgstr ""
-
-#: udata/templates/security/login_user.html:29
-msgid "Confirmation instructions not received?"
-msgstr ""
-
-#: udata/templates/security/login_user.html:31
-msgid "Send the instructions again"
-msgstr ""
-
-#: udata/templates/security/login_user.html:42
-#: udata/templates/security/register_user.html:29
-msgid "Sign up"
-msgstr ""
-
-#: udata/templates/security/login_user.html:45
-msgid "Register"
-msgstr ""
-
-#: udata/templates/security/login_user.html:49
-msgid "Create an account"
-msgstr ""
-
-#: udata/templates/security/register_user.html:12
-msgid "Sign Up"
-msgstr ""
-
-#: udata/templates/security/register_user.html:21
-#, python-format
-msgid "I have read and accept <a href=\"%(url)s\"> the terms and conditions of the service.</a>"
-msgstr ""
-
-#: udata/templates/security/send_confirmation.html:12
-msgid "Resend confirmation instructions"
-msgstr ""
-
-#: udata/templates/security/send_confirmation.html:18
-msgid "Submit"
 msgstr ""
 
 #: udata/tests/search/test_adapter.py:25
