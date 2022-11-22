@@ -1,5 +1,5 @@
-{% extends 'mail/base.html' %}
-{% from 'mail/button.html' import mail_button %}
+{% extends 'security/email/base.html' %}
+{% from 'security/email/button.html' import mail_button %}
 
 {% block body %}
 
@@ -13,7 +13,7 @@
         <td align="center">
             {{ mail_button(
                 _('Reset password'),
-                url_for_security('forgot_password', _external=True)
+                url_for('security.forgot_password', _external=True)
             ) }}
         </td>
     </tr>
