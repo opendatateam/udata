@@ -72,6 +72,8 @@ blinker==1.4
     #   flask-navigation
     #   flask-principal
     #   flask-sitemap
+build==0.8.0
+    # via pip-tools
 celery==4.3.0
     # via
     #   -c requirements/install.pip
@@ -171,7 +173,6 @@ flask-babelex==0.9.3
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-    #   flask-security-too
 flask-caching==1.8.0
     # via
     #   -c requirements/install.pip
@@ -208,7 +209,6 @@ flask-mail==0.9.1
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-    #   flask-security-too
 flask-mongoengine==0.9.5
     # via
     #   -c requirements/install.pip
@@ -228,7 +228,7 @@ flask-restx==0.5.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-flask-security-too==3.4.4
+flask-security-too==4.0.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -243,7 +243,7 @@ flask-themes2==0.1.4
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
-flask-wtf==0.14.2
+flask-wtf==1.0.1
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
@@ -292,6 +292,7 @@ itsdangerous==1.1.0
     #   -r requirements/install.in
     #   flask
     #   flask-security-too
+    #   flask-wtf
 jinja2==2.10.3
     # via
     #   -c requirements/install.pip
@@ -363,6 +364,7 @@ nodeenv==1.6.0
 packaging==21.0
     # via
     #   -c requirements/test.pip
+    #   build
     #   pytest
     #   pytest-sugar
 passlib==1.7.4
@@ -371,14 +373,14 @@ passlib==1.7.4
     #   -c requirements/test.pip
     #   flask-security-too
 pep517==0.11.0
-    # via pip-tools
+    # via build
 pillow==8.0.0
     # via
     #   -c requirements/install.pip
     #   -c requirements/test.pip
     #   -r requirements/install.in
     #   pydenticon
-pip-tools==6.2.0
+pip-tools==6.9.0
     # via -r requirements/develop.in
 pkginfo==1.7.1
     # via twine
@@ -554,7 +556,7 @@ tlds==2021080800
 toml==0.10.2
     # via pre-commit
 tomli==1.2.1
-    # via pep517
+    # via build
 tqdm==4.62.0
     # via twine
 twine==3.3.0

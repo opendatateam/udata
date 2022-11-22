@@ -83,6 +83,7 @@ class Defaults(object):
     SECURITY_CHANGEABLE = True
 
     SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_NORMALIZE_FORM = 'NFKD'
     SECURITY_PASSWORD_LENGTH_MIN = 8
     SECURITY_PASSWORD_REQUIREMENTS_LOWERCASE = True
     SECURITY_PASSWORD_REQUIREMENTS_DIGITS = True
@@ -95,6 +96,8 @@ class Defaults(object):
     SECURITY_REMEMBER_SALT = 'Default uData remember salt'
 
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
+
+    SECURITY_I18N_DOMAIN = 'udata'
 
     SECURITY_EMAIL_SUBJECT_REGISTER = _('Welcome')
     SECURITY_EMAIL_SUBJECT_CONFIRM = _('Please confirm your email')
@@ -444,6 +447,7 @@ class Testing(object):
     URLS_ALLOWED_TLDS = tld_set | set(['test'])
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
+    SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}  # Disables deliverability for email domain name
 
 
 class Debug(Defaults):

@@ -30,6 +30,13 @@ def dummyconnection(*args, **kw):
     yield FakeMailer()
 
 
+def get_con():
+    debug = current_app.config.get('DEBUG', False)
+    send_mail = current_app.config.get('SEND_MAIL', not debug)
+    connection = send_mail and mail.connect or dummyconnection
+    return connection
+
+
 def init_app(app):
     mail.init_app(app)
 
@@ -45,11 +52,11 @@ def send(subject, recipients, template_base, **kwargs):
     if not isinstance(recipients, (list, tuple)):
         recipients = [recipients]
 
-    debug = current_app.config.get('DEBUG', False)
-    send_mail = current_app.config.get('SEND_MAIL', not debug)
-    connection = send_mail and mail.connect or dummyconnection
+    tpl_path = kwargs.pop('security_tpl', f'mail/{template_base}')
 
-    with connection() as conn:
+    mail_con = get_con()
+
+    with mail_con() as conn:
         for recipient in recipients:
             lang = i18n._default_lang(recipient)
             with i18n.language(lang):
@@ -58,9 +65,9 @@ def send(subject, recipients, template_base, **kwargs):
                 msg = Message(subject, sender=sender,
                               recipients=[recipient.email])
                 msg.body = render_template(
-                    'mail/{0}.txt'.format(template_base), subject=subject,
+                    f'{tpl_path}.txt', subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
                 msg.html = render_template(
-                    'mail/{0}.html'.format(template_base), subject=subject,
+                    f'{tpl_path}.html', subject=subject,
                     sender=sender, recipient=recipient, **kwargs)
                 conn.send(msg)
