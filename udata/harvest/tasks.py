@@ -22,10 +22,11 @@ def harvest(self, ident):
     if items > 0:
         finalize = harvest_job_finalize.s(backend.job.id)
         items = [
-            harvest_job_item.s(backend.job.id, item.remote_id)
+            (backend.job.id, item.remote_id)
             for item in backend.job.items
         ]
-        chord(items)(finalize)
+        chunks = harvest_job_item.chunks(items, 10)
+        chord(chunks.group())(finalize)
     elif items == 0:
         backend.finalize()
 
