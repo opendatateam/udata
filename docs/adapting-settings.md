@@ -262,6 +262,12 @@ HANDLED_LEVELS = ('fr:commune', 'fr:departement', 'fr:region')
 
 The number of items to fetch while previewing an harvest source
 
+### HARVEST_MAX_ITEMS
+
+**default**: `None`
+
+The max number of items to fetch when harvesting (development setting)
+
 ### HARVEST_DEFAULT_SCHEDULE
 
 **default**: `0 0 * * *`

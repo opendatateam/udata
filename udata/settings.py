@@ -225,6 +225,10 @@ class Defaults(object):
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
+
+    # Development setting to allow minimizing the number of harvested items
+    HARVEST_MAX_ITEMS = None
+
     # Harvesters are scheduled at midnight by default
     HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
 
