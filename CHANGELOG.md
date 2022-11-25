@@ -8,6 +8,7 @@
   - The user's `fs_uniquifier` is used instead of the `id` for auth mecanism including permissions.
   - Exhaustive list of changes [here](https://flask-security-too.readthedocs.io/en/stable/changelog.html#version-4-0-0).
 - Fix apiv2 swagger with harvest metadata and add apiv2 swagger tests [#2782](https://github.com/opendatateam/udata/pull/2782)
+- Improve frequency criterion in quality score [#2771](https://github.com/opendatateam/udata/pull/2771)
 - Add quality score to csv catalogs [#2785](https://github.com/opendatateam/udata/pull/2785)
 
 ## 5.0.1 (2022-11-14)

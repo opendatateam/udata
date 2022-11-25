@@ -7,7 +7,7 @@ from mongoengine import post_save
 
 from udata.app import cache
 from udata.models import (
-    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema
+    db, Dataset, License, LEGACY_FREQUENCIES, ResourceSchema, UPDATE_FREQUENCIES
 )
 from udata.core.dataset.models import HarvestDatasetMetadata, HarvestResourceMetadata
 from udata.core.dataset.factories import (
@@ -127,10 +127,58 @@ class DatasetModelTest:
         dataset = DatasetFactory()
         assert dataset.next_update is None
 
-    def test_next_update_weekly(self):
-        dataset = DatasetFactory(frequency='weekly')
+    def test_next_update_hourly(self):
+        dataset = DatasetFactory(frequency='hourly')
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(hours=1))
+
+    @pytest.mark.parametrize('freq', ['fourTimesADay', 'threeTimesADay', 'semidaily', 'daily'])
+    def test_next_update_daily(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(days=1))
+
+    @pytest.mark.parametrize('freq', ['fourTimesAWeek', 'threeTimesAWeek', 'semiweekly', 'weekly'])
+    def test_next_update_weekly(self, freq):
+        dataset = DatasetFactory(frequency=freq)
         assert_equal_dates(dataset.next_update,
                            datetime.now() + timedelta(days=7))
+
+    def test_next_update_biweekly(self):
+        dataset = DatasetFactory(frequency='biweekly')
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(weeks=2))
+
+    def test_next_update_quarterly(self):
+        dataset = DatasetFactory(frequency='quarterly')
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(days=365/4))
+
+    @pytest.mark.parametrize('freq', ['threeTimesAYear', 'semiannual', 'annual'])
+    def test_next_update_annual(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(days=365))
+
+    def test_next_update_biennial(self):
+        dataset = DatasetFactory(frequency='biennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(days=365*2))
+
+    def test_next_update_triennial(self):
+        dataset = DatasetFactory(frequency='triennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(days=365*3))
+
+    def test_next_update_quinquennial(self):
+        dataset = DatasetFactory(frequency='quinquennial')
+        assert_equal_dates(dataset.next_update,
+                           datetime.now() + timedelta(days=365*5))
+
+    @pytest.mark.parametrize('freq', ['continuous', 'punctual', 'irregular', 'unknown'])
+    def test_next_update_undefined(self, freq):
+        dataset = DatasetFactory(frequency=freq)
+        assert dataset.next_update is None
 
     def test_quality_default(self):
         dataset = DatasetFactory(description='')
@@ -143,10 +191,15 @@ class DatasetModelTest:
             'score': 0
         }
 
-    def test_quality_next_update(self):
-        dataset = DatasetFactory(description='', frequency='weekly')
-        assert dataset.quality['update_fulfilled_in_time'] is True
+    @pytest.mark.parametrize('freq', UPDATE_FREQUENCIES)
+    def test_quality_frequency_update(self, freq):
+        dataset = DatasetFactory(description='', frequency=freq)
+        if freq == 'unknown':
+            assert dataset.quality['update_frequency'] is False
+            assert 'update_fulfilled_in_time' not in dataset.quality
+            return
         assert dataset.quality['update_frequency'] is True
+        assert dataset.quality['update_fulfilled_in_time'] is True
         assert dataset.quality['score'] == Dataset.normalize_score(2)
 
     def test_quality_description_length(self):
