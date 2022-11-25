@@ -33,6 +33,7 @@ class DatasetCsvAdapter(csv.Adapter):
         ('tags', lambda o: ','.join(o.tags)),
         ('archived', lambda o: o.archived or False),
         ('resources_count', lambda o: len(o.resources)),
+        ('quality_score', lambda o: format(o.quality['score'], '.2f'))
     )
 
     def dynamic_fields(self):
