@@ -629,6 +629,16 @@ class ExecutionTestMixin(MockBackendsMixin):
         assert len(HarvestJob.objects) == 1
         assert len(Dataset.objects) == 0
 
+    @pytest.mark.options(HARVEST_MAX_ITEMS=5)
+    def test_harvest_max_items(self):
+        org = OrganizationFactory()
+        source = HarvestSourceFactory(backend='factory',
+                                      organization=org,
+                                      config={'count': 10})
+
+        self.action(source.slug)
+        assert len(Dataset.objects) == 5
+
 
 class HarvestLaunchTest(ExecutionTestMixin):
     def action(self, *args, **kwargs):

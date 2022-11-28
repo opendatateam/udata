@@ -13,6 +13,7 @@ from udata.rdf import namespace_manager
 
 log = logging.getLogger(__name__)
 
+
 @cli.group('dcat')
 def grp():
     '''DCAT diagnosis operations'''
@@ -49,12 +50,14 @@ def parse_url(url, quiet=False, rid=''):
     backend.job = MockJob()
     format = backend.get_format()
     echo(yellow('Detected format: {}'.format(format)))
-    graph = backend.parse_graph(url, format)
+    graphs = backend.parse_graph(url, format)
 
     # serialize/unserialize graph like in the job mechanism
-    _graph = graph.serialize(format=format, indent=None)
     graph = Graph(namespace_manager=namespace_manager)
-    graph.parse(data=_graph, format=format)
+    for subgraph in graphs:
+        serialized = subgraph.serialize(format=format, indent=None)
+        _subgraph = Graph(namespace_manager=namespace_manager)
+        graph += _subgraph.parse(data=serialized, format=format)
 
     for item in backend.job.items:
         if not rid or rid in item.remote_id:
@@ -69,7 +72,9 @@ def parse_url(url, quiet=False, rid=''):
             echo('License: {}'.format(yellow(dataset.license)))
             echo('Description: {}'.format(yellow(dataset.description)))
             echo('Tags: {}'.format(yellow(dataset.tags)))
-            echo('Resources: {}'.format(yellow([(r.title, r.format, r.url) for r in dataset.resources])))
+            echo('Resources: {}'.format(yellow(
+                [(r.title, r.format, r.url) for r in dataset.resources]
+            )))
 
             try:
                 dataset.validate()
