@@ -25,8 +25,7 @@ def harvest(self, ident):
             (backend.job.id, item.remote_id)
             for item in backend.job.items
         ]
-        chunks = harvest_job_item.chunks(items, 10)
-        chord(chunks.group())(finalize)
+        chord(items)(finalize)
     elif items == 0:
         backend.finalize()
 

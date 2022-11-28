@@ -9,7 +9,7 @@
   - Exhaustive list of changes [here](https://flask-security-too.readthedocs.io/en/stable/changelog.html#version-4-0-0).
 - Fix apiv2 swagger with harvest metadata and add apiv2 swagger tests [#2782](https://github.com/opendatateam/udata/pull/2782)
 - Add quality score to csv catalogs [#2785](https://github.com/opendatateam/udata/pull/2785)
-- Optimize DCAT harvesting on large multiple-paged catalogs [#2781](https://github.com/opendatateam/udata/pull/2781)
+- Optimize DCAT harvesting on large multiple-paged catalogs, introduce `HARVEST_MAX_ITEMS` development setting [#2781](https://github.com/opendatateam/udata/pull/2781)
 
 ## 5.0.1 (2022-11-14)
 
