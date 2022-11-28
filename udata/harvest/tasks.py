@@ -22,7 +22,7 @@ def harvest(self, ident):
     if items > 0:
         finalize = harvest_job_finalize.s(backend.job.id)
         items = [
-            (backend.job.id, item.remote_id)
+            harvest_job_item.s(backend.job.id, item.remote_id)
             for item in backend.job.items
         ]
         chord(items)(finalize)
