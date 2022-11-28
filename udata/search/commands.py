@@ -85,12 +85,16 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
 
 
 def finalize_reindex(models, start):
-    models_str = " " + " ".join(models) if models else ""
-    log.warning(
-        f'In order to use the newly created index, you should set the alias '
-        f'on the search service. Ex on `udata-search-service`, run:\n'
-        f'`udata-search-service set-alias {default_index_suffix_name(start)}{models_str}`'
-    )
+    try:
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/set-index-alias"
+        payload = {
+            'index_suffix_name': default_index_suffix_name(start),
+            'indices': models
+        }
+        r = requests.post(url, json=payload)
+        r.raise_for_status()
+    except Exception:
+        log.exception(f'Unable to set alias for index')
 
     modified_since_reindex = 0
     for adapter in iter_adapters():

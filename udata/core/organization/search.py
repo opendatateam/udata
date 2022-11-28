@@ -12,7 +12,7 @@ __all__ = ('OrganizationSearch', )
 @search.register
 class OrganizationSearch(search.ModelSearchAdapter):
     model = Organization
-    search_url = 'organizations/'
+    search_url = '/organizations/'
 
     sorts = {
         'reuses': 'metrics.reuses',

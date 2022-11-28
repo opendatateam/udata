@@ -19,7 +19,7 @@ __all__ = ('DatasetSearch', )
 @register
 class DatasetSearch(ModelSearchAdapter):
     model = Dataset
-    search_url = 'datasets/'
+    search_url = '/datasets/'
 
     sorts = {
         'created': 'created_at',
