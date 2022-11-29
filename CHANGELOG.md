@@ -11,6 +11,7 @@
 - Improve frequency criterion in quality score [#2771](https://github.com/opendatateam/udata/pull/2771)
 - Add quality score to csv catalogs [#2785](https://github.com/opendatateam/udata/pull/2785)
 - Optimize DCAT harvesting on large multiple-paged catalogs, introduce `HARVEST_MAX_ITEMS` development setting [#2781](https://github.com/opendatateam/udata/pull/2781)
+- Add condition in security mail utils class to avoid mail sending according to config var [#2788](https://github.com/opendatateam/udata/pull/2788)
 
 ## 5.0.1 (2022-11-14)
 
