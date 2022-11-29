@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 5.0.2 (2022-11-29)
 
 - :warning: Upgrade to `Flask-Security-Too` version 4.0.0 [#2772](https://github.com/opendatateam/udata/pull/2772):
