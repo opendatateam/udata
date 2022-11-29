@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 5.0.2 (2022-11-29)
 
 - :warning: Upgrade to `Flask-Security-Too` version 4.0.0 [#2772](https://github.com/opendatateam/udata/pull/2772):
   - New User model attribute `fs_uniquifier`, migration needed.
