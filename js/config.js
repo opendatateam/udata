@@ -142,7 +142,7 @@ export const tags = _jsonMeta('tags-config');
 /**
  * License groups options
  */
- export const license_groups = Object.fromEntries(_jsonMeta('license-groups-options'));
+export const license_groups = _jsonMeta('license-groups-options') && Object.fromEntries(_jsonMeta('license-groups-options'));
 
 /**
  * Max number of resources to display uncollapsed in dataset view

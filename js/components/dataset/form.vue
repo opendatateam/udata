@@ -34,7 +34,7 @@ export default {
                 }, {
                     id: 'license',
                     label: this._('License'),
-                    widget: 'select-input-group',
+                    widget: config.license_groups ? 'select-input-group' : 'select-input',
                     values: licenses,
                     groups: config.license_groups,
                     map(item) {
