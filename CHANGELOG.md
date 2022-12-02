@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
 
 ## 5.0.2 (2022-11-29)
 
@@ -25,10 +25,6 @@
 
 - :warning: **Breaking change** Use dedicated dynamic harvest metadata for dataset and resources. A migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. udata-ckan, udata-ods and udata-front packages are impacted and should be upgraded accordingly [#2762](https://github.com/opendatateam/udata/pull/2762)
 
-## 5.0.0 (2022-11-14)
-
-- :warning: **Breaking change** Use dedicated dynamic harvest metadata for dataset and resources. A migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. udata-ckan, udata-ods and udata-front packages are impacted and should be upgraded accordingly [#2762](https://github.com/opendatateam/udata/pull/2762)
-
 ## 4.1.3 (2022-11-02)
 
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
@@ -36,7 +32,6 @@
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764) [#2773](https://github.com/opendatateam/udata/pull/2773) [#2777](https://github.com/opendatateam/udata/pull/2777)
 - Fix randomly failing suggest tests [#2775](https://github.com/opendatateam/udata/pull/2775)
 - Fix alt attribute not shown on image [#2776](https://github.com/opendatateam/udata/pull/2776)
-- Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
 
 ## 4.1.2 (2022-09-01)
 
