@@ -90,7 +90,7 @@ class BaseBackend(object):
             self.source = source_or_job
             self.job = None
         self.dryrun = dryrun
-        self.max_items = max_items
+        self.max_items = max_items or current_app.config['HARVEST_MAX_ITEMS']
 
     @property
     def config(self):
