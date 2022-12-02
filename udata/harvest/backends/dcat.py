@@ -4,6 +4,7 @@ import requests
 
 from rdflib import Graph, URIRef, BNode
 from rdflib.namespace import RDF
+from typing import List
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
@@ -48,9 +49,9 @@ class DcatBackend(BaseBackend):
     def initialize(self):
         '''List all datasets for a given ...'''
         fmt = self.get_format()
-        graph = self.parse_graph(self.source.url, fmt)
+        graphs = self.parse_graph(self.source.url, fmt)
         self.job.data = {
-            'graph': graph.serialize(format=fmt, indent=None),
+            'graphs': [graph.serialize(format=fmt, indent=None) for graph in graphs],
             'format': fmt,
         }
 
@@ -70,8 +71,13 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def parse_graph(self, url, fmt):
-        graph = Graph(namespace_manager=namespace_manager)
+    def parse_graph(self, url, fmt) -> List[Graph]:
+        """
+        Returns an instance of rdflib.Graph for each detected page
+        The index in the list is the page number
+        """
+        graphs = []
+        page = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
             subgraph.parse(data=requests.get(url).text, format=fmt)
@@ -83,16 +89,20 @@ class DcatBackend(BaseBackend):
                     pagination = subgraph.resource(pagination)
                     url = url_from_rdf(pagination, prop)
                     break
+            graphs.append(subgraph)
 
-            graph += subgraph
+            for node in subgraph.subjects(RDF.type, DCAT.Dataset):
+                id = subgraph.value(node, DCT.identifier)
+                kwargs = {'nid': str(node), 'page': page}
+                kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
+                self.add_item(id, **kwargs)
+                if self.max_items and len(self.job.items) >= self.max_items:
+                    # this will stop iterating on pagination
+                    url = None
 
-        for node in graph.subjects(RDF.type, DCAT.Dataset):
-            id = graph.value(node, DCT.identifier)
-            kwargs = {'nid': str(node)}
-            kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-            self.add_item(id, **kwargs)
+            page += 1
 
-        return graph
+        return graphs
 
     def get_node_from_item(self, item):
         if 'nid' in item.kwargs and 'type' in item.kwargs:
@@ -101,7 +111,7 @@ class DcatBackend(BaseBackend):
 
     def process(self, item):
         graph = Graph(namespace_manager=namespace_manager)
-        data = self.job.data['graph']
+        data = self.job.data['graphs'][item.kwargs['page']]
         format = self.job.data['format']
 
         node = self.get_node_from_item(item)

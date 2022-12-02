@@ -13,6 +13,6 @@ class ReuseEditPermission(Permission):
             needs.append(OrganizationAdminNeed(reuse.organization.id))
             needs.append(OrganizationEditorNeed(reuse.organization.id))
         elif reuse.owner:
-            needs.append(UserNeed(reuse.owner.id))
+            needs.append(UserNeed(reuse.owner.fs_uniquifier))
 
         super(ReuseEditPermission, self).__init__(*needs)

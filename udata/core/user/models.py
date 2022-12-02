@@ -44,6 +44,7 @@ class User(WithMetrics, UserMixin, db.Document):
     email = db.StringField(max_length=255, required=True, unique=True)
     password = db.StringField()
     active = db.BooleanField()
+    fs_uniquifier = db.StringField(max_length=64, unique=True, sparse=True)
     roles = db.ListField(db.ReferenceField(Role), default=[])
 
     first_name = db.StringField(max_length=255, required=True)

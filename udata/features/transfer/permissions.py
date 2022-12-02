@@ -11,7 +11,7 @@ class TransferPermission(Permission):
         if subject.organization:
             need = OrganizationAdminNeed(subject.organization.id)
         elif subject.owner:
-            need = UserNeed(subject.owner.id)
+            need = UserNeed(subject.owner.fs_uniquifier)
         super(TransferPermission, self).__init__(need)
 
 
@@ -21,5 +21,5 @@ class TransferResponsePermission(Permission):
         if isinstance(transfer.recipient, Organization):
             need = OrganizationAdminNeed(transfer.recipient.id)
         elif isinstance(transfer.recipient, User):
-            need = UserNeed(transfer.recipient.id)
+            need = UserNeed(transfer.recipient.fs_uniquifier)
         super(TransferResponsePermission, self).__init__(need)

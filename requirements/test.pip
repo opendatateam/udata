@@ -131,7 +131,6 @@ flask-babelex==0.9.3
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-    #   flask-security-too
 flask-caching==1.8.0
     # via
     #   -c requirements/install.pip
@@ -161,7 +160,6 @@ flask-mail==0.9.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-    #   flask-security-too
 flask-mongoengine==0.9.5
     # via
     #   -c requirements/install.pip
@@ -178,7 +176,7 @@ flask-restx==0.5.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-flask-security-too==3.4.4
+flask-security-too==4.0.0
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -190,7 +188,7 @@ flask-themes2==0.1.4
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
-flask-wtf==0.14.2
+flask-wtf==1.0.1
     # via
     #   -c requirements/install.pip
     #   -r requirements/install.in
@@ -224,6 +222,7 @@ itsdangerous==1.1.0
     #   -r requirements/install.in
     #   flask
     #   flask-security-too
+    #   flask-wtf
 jinja2==2.10.3
     # via
     #   -c requirements/install.pip

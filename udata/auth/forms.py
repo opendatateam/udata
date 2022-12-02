@@ -1,7 +1,6 @@
 import datetime
 
 from flask import current_app
-from flask_security import current_user
 from flask_security.forms import RegisterForm, LoginForm, ResetPasswordForm
 from udata.forms import fields
 from udata.forms import validators
@@ -15,7 +14,7 @@ class ExtendedRegisterForm(RegisterForm):
     last_name = fields.StringField(
         _('Last name'), [validators.DataRequired(_('Last name is required')),
                          validators.NoURLs(_('URLs not allowed in this field'))])
-    
+
     def validate(self):
         # no register allowed when read only mode is on
         if not super().validate() or current_app.config.get('READ_ONLY_MODE'):
