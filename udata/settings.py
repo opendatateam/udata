@@ -222,12 +222,12 @@ class Defaults(object):
     # Optionnal license groups used for a select input group widget
     # in admin dataset edit view.
     # A list of tuples, each tuple describing a group with its title and
-    # a list of licenses associated. Example:
+    # a list of licenses associated. Translations are not supported.
+    # Example:
     # LICENSE_GROUPS = [
-    #    (_('Administrative authorities'), ['lov2', 'odc-odbl']),
-    #    (_('All producers'), ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
+    #    ('Administrative authorities', ['lov2', 'odc-odbl']),
+    #    ('All producers', ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
     # ]
-    # TODO: how to deal with translations ?
     LICENSE_GROUPS = None
 
     # Cache duration for templates.
