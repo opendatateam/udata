@@ -219,13 +219,16 @@ class Defaults(object):
     TAG_MIN_LENGTH = 3
     TAG_MAX_LENGTH = 96
 
-    # License groups in admin dataset edit view
-    # A list of tuples, each tuple describing a group with its title and licenses associated
-    LICENSE_GROUPS = [
-        (_('Administrative authorities'), ['lov2', 'odc-odbl']),
-        (_('All producers (recommended)'), ['lov2']),
-        (_('All producers'), ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero', 'odc-by', 'odc-pddl'])
-    ]
+    # Optionnal license groups used for a select input group widget
+    # in admin dataset edit view.
+    # A list of tuples, each tuple describing a group with its title and
+    # a list of licenses associated. Example:
+    # LICENSE_GROUPS = [
+    #    (_('Administrative authorities'), ['lov2', 'odc-odbl']),
+    #    (_('All producers'), ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
+    # ]
+    # TODO: how to deal with translations ?
+    LICENSE_GROUPS = None
 
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
