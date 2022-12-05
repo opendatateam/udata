@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
 
 ## 5.0.2 (2022-11-29)
 

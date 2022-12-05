@@ -33,7 +33,11 @@ class DatasetCsvAdapter(csv.Adapter):
         ('tags', lambda o: ','.join(o.tags)),
         ('archived', lambda o: o.archived or False),
         ('resources_count', lambda o: len(o.resources)),
-        ('quality_score', lambda o: format(o.quality['score'], '.2f'))
+        ('harvest.backend', lambda r: r.harvest and r.harvest.backend),
+        ('harvest.domain', lambda r: r.harvest and r.harvest.domain),
+        ('harvest.created_at', lambda r: r.harvest and r.harvest.created_at),
+        ('harvest.modified_at', lambda r: r.harvest and r.harvest.modified_at),
+        ('quality_score', lambda o: format(o.quality['score'], '.2f')),
     )
 
     def dynamic_fields(self):
@@ -74,6 +78,8 @@ class ResourcesCsvAdapter(csv.NestedAdapter):
         'created_at',
         'modified',
         ('downloads', lambda o: int(o.metrics.get('views', 0))),
+        ('harvest.created_at', lambda o: o.harvest and o.harvest.created_at),
+        ('harvest.modified_at', lambda o: o.harvest and o.harvest.modified_at),
     )
     attribute = 'resources'
 
