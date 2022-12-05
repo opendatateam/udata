@@ -33,11 +33,11 @@ class DatasetCsvAdapter(csv.Adapter):
         ('tags', lambda o: ','.join(o.tags)),
         ('archived', lambda o: o.archived or False),
         ('resources_count', lambda o: len(o.resources)),
-        ('quality_score', lambda o: format(o.quality['score'], '.2f')),
         ('harvest.backend', lambda r: r.harvest and r.harvest.backend),
         ('harvest.domain', lambda r: r.harvest and r.harvest.domain),
         ('harvest.created_at', lambda r: r.harvest and r.harvest.created_at),
         ('harvest.modified_at', lambda r: r.harvest and r.harvest.modified_at),
+        ('quality_score', lambda o: format(o.quality['score'], '.2f')),
     )
 
     def dynamic_fields(self):

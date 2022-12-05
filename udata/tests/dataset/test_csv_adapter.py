@@ -23,7 +23,7 @@ class DatasetCSVAdapterTest:
             })],
             harvest={
                 'domain': 'example.com',
-                'backend': 'dcat',
+                'backend': 'dummy_backend',
                 'modified_at': another_date,
                 'created_at': another_date,
             },
@@ -45,7 +45,7 @@ class DatasetCSVAdapterTest:
         dataset = DatasetFactory(
             harvest={
                 'domain': 'example.com',
-                'backend': 'dcat',
+                'backend': 'dummy_backend',
                 'modified_at': date_modified,
                 'created_at': date_created,
             },
@@ -59,6 +59,6 @@ class DatasetCSVAdapterTest:
         # harvest.modified_at
         assert date_modified.isoformat() in d_row
         # harvest.backend
-        assert 'dcat' in d_row
+        assert 'dummy_backend' in d_row
         # harvest.domain
         assert 'example.com' in d_row
