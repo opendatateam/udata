@@ -16,7 +16,7 @@ __all__ = ('ReuseSearch', )
 @register
 class ReuseSearch(ModelSearchAdapter):
     model = Reuse
-    search_url = '/reuses/'
+    search_url = 'reuses/'
 
     sorts = {
         'created': 'created_at',
