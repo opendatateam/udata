@@ -7,7 +7,7 @@ import requests
 import click
 
 from udata.commands import cli
-from udata.search import adapter_catalog, EventMessageType
+from udata.search import adapter_catalog
 
 
 log = logging.getLogger(__name__)
@@ -56,29 +56,30 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     index_name = adapter.model.__name__.lower()
     if reindex:
         index_name += '-' + default_index_suffix_name(start)
+        payload = {
+            'index': index_name
+        }
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/create-index"
+        r = requests.post(url, json=payload)
+        r.raise_for_status()
 
     docs = iter_qs(qs, adapter)
     for indexable, doc in docs:
         try:
             if indexable:
-                action = EventMessageType.REINDEX if reindex else EventMessageType.INDEX
-            elif not indexable and not reindex:
-                action = EventMessageType.UNINDEX
-            else:
-                continue
-            message_type = f'{adapter.model.__name__.lower()}.{action.value}'
-            url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
-            try:
                 payload = {
-                    'key_id': doc['id'],
                     'document': doc,
-                    'message_type': message_type,
                     'index': index_name
                 }
+                url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/{adapter.model.__name__.lower()}s/index"
                 r = requests.post(url, json=payload)
                 r.raise_for_status()
-            except Exception:
-                log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
+            elif not indexable and not reindex:
+                url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/{adapter.model.__name__.lower()}s/{doc['id']}/unindex"
+                r = requests.delete(url)
+                r.raise_for_status()
+            else:
+                continue
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)

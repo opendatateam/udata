@@ -6,7 +6,6 @@ from mongoengine.signals import post_save, post_delete
 
 from udata.models import db
 from udata.tasks import task, as_task_param
-from udata.event.values import EventMessageType
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ def reindex(classname, id):
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/index"
         try:
             payload = {
-                'data': document,
+                'document': document
             }
             r = requests.post(url, json=payload)
             r.raise_for_status()
