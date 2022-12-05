@@ -119,7 +119,7 @@ class IndexingLifecycleTest(APITestCase):
         reindex.run(*as_task_param(fake_data))
 
         expected_value = {
-            'data': DatasetSearch.serialize(fake_data)
+            'document': DatasetSearch.serialize(fake_data)
         }
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{DatasetSearch.search_url}/index"
         mock_req.assert_called_with(url, json=expected_value)
@@ -134,7 +134,7 @@ class IndexingLifecycleTest(APITestCase):
             'document': DatasetSearch.serialize(fake_data),
             'index': 'dataset'
         }
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
         mock_req.assert_called_with(url, json=expected_value)
 
     @patch('requests.post')
@@ -147,7 +147,7 @@ class IndexingLifecycleTest(APITestCase):
             'document': DatasetSearch.serialize(fake_data),
             'index': 'dataset-2022-02-20-20-02'
         }
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
         mock_req.assert_called_with(url, json=expected_value)
 
     @patch('requests.post')
@@ -164,5 +164,5 @@ class IndexingLifecycleTest(APITestCase):
             'document': DatasetSearch.serialize(fake_data),
             'index': 'dataset'
         }
-        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/datasets/index"
         mock_req.assert_called_with(url, json=expected_value)
