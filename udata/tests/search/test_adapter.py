@@ -131,9 +131,7 @@ class IndexingLifecycleTest(APITestCase):
         index_model(DatasetSearch, start=None, reindex=False, from_datetime=None)
 
         expected_value = {
-            'key_id': str(fake_data.id),
             'document': DatasetSearch.serialize(fake_data),
-            'message_type': 'dataset.index',
             'index': 'dataset'
         }
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
@@ -146,9 +144,7 @@ class IndexingLifecycleTest(APITestCase):
         index_model(DatasetSearch, start=datetime.datetime(2022, 2, 20, 20, 2), reindex=True)
 
         expected_value = {
-            'key_id': str(fake_data.id),
             'document': DatasetSearch.serialize(fake_data),
-            'message_type': 'dataset.reindex',
             'index': 'dataset-2022-02-20-20-02'
         }
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
@@ -165,9 +161,7 @@ class IndexingLifecycleTest(APITestCase):
         index_model(DatasetSearch, start=None, from_datetime=datetime.datetime(2021, 1, 1))
 
         expected_value = {
-            'key_id': str(fake_data.id),
             'document': DatasetSearch.serialize(fake_data),
-            'message_type': 'dataset.index',
             'index': 'dataset'
         }
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/reindex"
