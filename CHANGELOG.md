@@ -2,7 +2,9 @@
 
 ## Current (in progress)
 
-- Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
+- :warning: Kafka removal [#2779](https://github.com/opendatateam/udata/pull/2779):
+  - Resources events publication uses now webhooks
+  - Search auto index and is index command now made throught HTTP requests
 - Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
 
 ## 5.0.2 (2022-11-29)
