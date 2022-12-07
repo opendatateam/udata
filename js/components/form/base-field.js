@@ -44,6 +44,7 @@ export const BaseField = {
         'number-input': require('components/form/number-input.vue'),
         'hidden-input': require('components/form/hidden-input.vue'),
         'select-input': require('components/form/select-input.vue'),
+        'select-input-group': require('components/form/select-input-group.vue'),
         'markdown-editor': require('components/form/markdown-editor.vue'),
         'date-picker': require('components/form/date-picker.vue'),
         'checkbox': require('components/form/checkbox.vue')

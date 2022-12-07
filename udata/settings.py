@@ -219,6 +219,17 @@ class Defaults(object):
     TAG_MIN_LENGTH = 3
     TAG_MAX_LENGTH = 96
 
+    # Optionnal license groups used for a select input group widget
+    # in admin dataset edit view.
+    # A list of tuples, each tuple describing a group with its title and
+    # a list of licenses associated. Translations are not supported.
+    # Example:
+    # LICENSE_GROUPS = [
+    #    ('Administrative authorities', ['lov2', 'odc-odbl']),
+    #    ('All producers', ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
+    # ]
+    LICENSE_GROUPS = None
+
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
 

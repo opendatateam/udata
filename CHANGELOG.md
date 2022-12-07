@@ -4,6 +4,7 @@
 
 - Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
 - Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
+- Add optionnal license select group custom setting for admin [#2786](https://github.com/opendatateam/udata/pull/2786)
 
 ## 5.0.2 (2022-11-29)
 
