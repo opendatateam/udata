@@ -1,5 +1,6 @@
 import logging
 import requests
+import udata.event
 
 from flask import current_app
 from mongoengine.signals import post_save, post_delete
