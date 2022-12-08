@@ -6,6 +6,7 @@
   - Resources events publication uses now webhooks
   - Search auto index and is index command now made throught HTTP requests
 - Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
+- Add optionnal license select group custom setting for admin [#2786](https://github.com/opendatateam/udata/pull/2786)
 
 ## 5.0.2 (2022-11-29)
 
