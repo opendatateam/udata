@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-10-19 14:26+0200\n"
-"PO-Revision-Date: 2022-12-08 13:26\n"
+"PO-Revision-Date: 2022-12-08 16:35\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -821,27 +821,27 @@ msgstr "Intercomunalità francese (EPCI)"
 
 #: udata/core/spatial/translations.py:7
 msgid "French county"
-msgstr ""
+msgstr "Dipartimento francese"
 
 #: udata/core/spatial/translations.py:8
 msgid "French district"
-msgstr ""
+msgstr "Quartiere francese"
 
 #: udata/core/spatial/translations.py:9
 msgid "French town"
-msgstr ""
+msgstr "Comune francese"
 
 #: udata/core/spatial/translations.py:10
 msgid "French canton"
-msgstr ""
+msgstr "Cantone francese"
 
 #: udata/core/spatial/translations.py:11
 msgid "Iris (Insee districts)"
-msgstr ""
+msgstr "IRIS (distretto statistico francese)"
 
 #: udata/core/spatial/translations.py:12
 msgid "Country"
-msgstr ""
+msgstr "Paese"
 
 #: udata/core/spatial/translations.py:13
 msgid "World"
@@ -978,141 +978,141 @@ msgstr "Impossibile analizzare l'intervallo di date"
 
 #: udata/forms/fields.py:659 udata/forms/fields.py:682
 msgid "You must be authenticated"
-msgstr ""
+msgstr "Devi essere autenticatə"
 
 #: udata/forms/fields.py:662
 msgid "You can only set yourself as owner"
-msgstr ""
+msgstr "Puoi solo impostare te stessə come proprietariə"
 
 #: udata/forms/fields.py:685
 msgid "Permission denied for this organization"
-msgstr ""
+msgstr "Permesso negato per questa organizzazione"
 
 #: udata/forms/validators.py:59
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
-msgstr ""
+msgstr "Questo campo richiede la definizione di \"%(name)s\""
 
 #: udata/frontend/markdown.py:30
 msgid "Source"
-msgstr ""
+msgstr "Fonte"
 
 #: udata/harvest/forms.py:63
 msgid "Some optional details about this harvester"
-msgstr ""
+msgstr "Alcuni dettagli opzionali su questo harvester"
 
 #: udata/harvest/forms.py:65
 msgid "Backend"
-msgstr ""
+msgstr "Backend"
 
 #: udata/harvest/models.py:22
 msgid "Manual"
-msgstr ""
+msgstr "Manuale"
 
 #: udata/harvest/models.py:30
 msgid "Initializing"
-msgstr ""
+msgstr "Inizializzazione in corso"
 
 #: udata/harvest/models.py:31
 msgid "Initialized"
-msgstr ""
+msgstr "Inizializzato"
 
 #: udata/harvest/models.py:32
 msgid "Processing"
-msgstr ""
+msgstr "In corso"
 
 #: udata/harvest/models.py:33 udata/harvest/models.py:41
 msgid "Done"
-msgstr ""
+msgstr "Fatto"
 
 #: udata/harvest/models.py:34
 msgid "Done with errors"
-msgstr ""
+msgstr "Fatto con errori"
 
 #: udata/harvest/models.py:35 udata/harvest/models.py:42
 msgid "Failed"
-msgstr ""
+msgstr "Fallito"
 
 #: udata/harvest/models.py:40
 msgid "Started"
-msgstr ""
+msgstr "Avviato"
 
 #: udata/harvest/models.py:43
 msgid "Skipped"
-msgstr ""
+msgstr "Ignorato"
 
 #: udata/harvest/models.py:44
 msgid "Archived"
-msgstr ""
+msgstr "Archiviato"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
 
 #: udata/templates/base.html:7
 msgid "You must be connected to do this action."
-msgstr ""
+msgstr "Devi essere connessə per eseguire questa azione."
 
 #: udata/templates/api/admin.html:11
 msgid "Maintainer"
-msgstr ""
+msgstr "Responsabile"
 
 #: udata/templates/api/admin.html:31
 msgid "Edit"
-msgstr ""
+msgstr "Modifica"
 
 #: udata/templates/api/admin.html:34
 msgid "Delete"
-msgstr ""
+msgstr "Elimina"
 
 #: udata/templates/api/admin.html:42
 msgid "No OAuth clients"
-msgstr ""
+msgstr "Nessun client OAuth"
 
 #: udata/templates/api/admin.html:53
 msgid "Add a client"
-msgstr ""
+msgstr "Aggiungi un client"
 
 #: udata/templates/api/oauth_authorize.html:23
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
-msgstr ""
+msgstr "%(app)s vuole accedere al tuo account %(site)s."
 
 #: udata/templates/api/oauth_authorize.html:35
 msgid "Details"
-msgstr ""
+msgstr "Dettagli"
 
 #: udata/templates/api/oauth_authorize.html:45
 msgid "Access your profile"
-msgstr ""
+msgstr "Accedi al tuo profilo"
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Read your profile, the orgnization you belong to, your publications"
-msgstr ""
+msgstr "Leggi il tuo profilo, l'orgnizzazione a cui appartieni, le tue pubblicazioni"
 
 #: udata/templates/api/oauth_authorize.html:54
 msgid "Publish data"
-msgstr ""
+msgstr "Pubblicare dati"
 
 #: udata/templates/api/oauth_authorize.html:55
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr ""
+msgstr "Pubblicare dataset, riusi, abbonarsi"
 
 #: udata/templates/api/oauth_authorize.html:65
 msgid "Accept"
-msgstr ""
+msgstr "Accettare"
 
 #: udata/templates/api/oauth_authorize.html:67
 msgid "Refuse"
-msgstr ""
+msgstr "Rifiutare"
 
 #: udata/templates/api/oauth_error.html:15
 msgid "OAuth Authentication Error"
-msgstr ""
+msgstr "Errore di autenticazione OAuth"
 
 #: udata/templates/api/oauth_error.html:20 udata/templates/macros/metadata.html:2
 msgid "Home"
-msgstr ""
+msgstr "Homepage"
 
 #: udata/templates/comments/dataset_archived.txt:1
 msgid "This dataset has been archived by our administration team.\n\n"
