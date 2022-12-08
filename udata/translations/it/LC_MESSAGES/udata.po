@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
 "POT-Creation-Date: 2022-10-19 14:26+0200\n"
-"PO-Revision-Date: 2022-11-21 18:16\n"
+"PO-Revision-Date: 2022-12-08 13:26\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -797,27 +797,27 @@ msgstr "GeoJSON non valido"
 
 #: udata/core/spatial/forms.py:84
 msgid "A list of covered territories"
-msgstr ""
+msgstr "Una lista dei territori interessati"
 
 #: udata/core/spatial/forms.py:86
 msgid "Spatial granularity"
-msgstr ""
+msgstr "Granularità spaziale"
 
 #: udata/core/spatial/forms.py:87
 msgid "The size of the data increment"
-msgstr ""
+msgstr "La dimensione dell'incremento dei dati"
 
 #: udata/core/spatial/models.py:23
 msgid "POI"
-msgstr ""
+msgstr "POI"
 
 #: udata/core/spatial/translations.py:5
 msgid "French region"
-msgstr ""
+msgstr "Regione francese"
 
 #: udata/core/spatial/translations.py:6
 msgid "French intermunicipal (EPCI)"
-msgstr ""
+msgstr "Intercomunalità francese (EPCI)"
 
 #: udata/core/spatial/translations.py:7
 msgid "French county"
