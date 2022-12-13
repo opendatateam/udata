@@ -5,6 +5,7 @@
 - :warning: Kafka removal [#2779](https://github.com/opendatateam/udata/pull/2779):
   - Resources events publication uses now webhooks
   - Search indexation (at runtime and with index command) are now made throught HTTP requests
+  - Add dedicated extras endpoints on resources and datasets
 - Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
 - Add optionnal license select group custom setting for admin [#2786](https://github.com/opendatateam/udata/pull/2786)
 
@@ -36,7 +37,6 @@
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764) [#2773](https://github.com/opendatateam/udata/pull/2773) [#2777](https://github.com/opendatateam/udata/pull/2777)
 - Fix randomly failing suggest tests [#2775](https://github.com/opendatateam/udata/pull/2775)
 - Fix alt attribute not shown on image [#2776](https://github.com/opendatateam/udata/pull/2776)
-- Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
 
 ## 4.1.2 (2022-09-01)
 
