@@ -4,7 +4,7 @@
 
 - :warning: Kafka removal [#2779](https://github.com/opendatateam/udata/pull/2779):
   - Resources events publication uses now webhooks
-  - Search auto index and is index command now made throught HTTP requests
+  - Search indexation (at runtime and with index command) are now made throught HTTP requests
 - Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
 - Add optionnal license select group custom setting for admin [#2786](https://github.com/opendatateam/udata/pull/2786)
 
