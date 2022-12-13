@@ -1,13 +1,13 @@
 import logging
+import requests
+import udata.event  # noqa
+# Import udata event in order for datasets event hooks to be executed
 
 from flask import current_app
 from mongoengine.signals import post_save, post_delete
-from udata_event_service.producer import produce
 
-from udata.models import db, Dataset, Organization, Reuse
+from udata.models import db
 from udata.tasks import task, as_task_param
-from udata.event.values import KafkaMessageType
-from udata.event.producer import get_topic
 
 log = logging.getLogger(__name__)
 
@@ -22,51 +22,47 @@ def reindex(classname, id):
     document = adapter_class.serialize(obj)
     if adapter_class.is_indexable(obj):
         log.info('Indexing %s (%s)', model.__name__, obj.id)
-        action = KafkaMessageType.INDEX
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/index"
+        try:
+            payload = {
+                'document': document
+            }
+            r = requests.post(url, json=payload)
+            r.raise_for_status()
+        except Exception:
+            log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
     else:
         log.info('Unindexing %s (%s)', model.__name__, obj.id)
-        action = KafkaMessageType.UNINDEX
-    try:
-        message_type = f'{classname.lower()}.{action.value}'
-        produce(
-            kafka_uri=current_app.config.get('KAFKA_URI'),
-            topic=get_topic(message_type),
-            service='udata',
-            key_id=str(obj.id),
-            document=document,
-            meta={'message_type': message_type, 'index': classname.lower()}
-        )
-    except Exception:
-        log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/{str(obj.id)}/unindex"
+        try:
+            r = requests.delete(url)
+            r.raise_for_status()
+        except Exception:
+            log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
 
 
 @task(route='high.search')
 def unindex(classname, id):
     model = db.resolve_model(classname)
+    adapter_class = adapter_catalog.get(model)
     log.info('Unindexing %s (%s)', model.__name__, id)
     try:
-        action = KafkaMessageType.UNINDEX
-        message_type = f'{classname.lower()}.{action.value}'
-        produce(
-            kafka_uri=current_app.config.get('KAFKA_URI'),
-            topic=get_topic(message_type),
-            service='udata',
-            key_id=id,
-            meta={'message_type': message_type, 'index': classname.lower()}
-        )
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/{str(id)}/unindex"
+        r = requests.delete(url)
+        r.raise_for_status()
     except Exception:
         log.exception('Unable to unindex %s "%s"', model.__name__, id)
 
 
 def reindex_model_on_save(sender, document, **kwargs):
     '''(Re/Un)Index Mongo document on post_save'''
-    if current_app.config.get('AUTO_INDEX'):
+    if current_app.config.get('AUTO_INDEX') and current_app.config['SEARCH_SERVICE_API_URL']:
         reindex.delay(*as_task_param(document))
 
 
 def unindex_model_on_delete(sender, document, **kwargs):
     '''Unindex Mongo document on post_delete'''
-    if current_app.config.get('AUTO_INDEX'):
+    if current_app.config.get('AUTO_INDEX') and current_app.config['SEARCH_SERVICE_API_URL']:
         unindex.delay(*as_task_param(document))
 
 

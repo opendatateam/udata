@@ -142,12 +142,7 @@ def raw_db(app, clean_db):
 def enable_resource_event(app):
     '''Enable resource event'''
     app.config['PUBLISH_ON_RESOURCE_EVENTS'] = True
-
-
-@pytest.fixture
-def enable_kafka(app):
-    '''Enable resource event'''
-    app.config['KAFKA_URI'] = 'localhost:9092'
+    app.config['RESOURCES_ANALYSER_URI'] = 'http://local.dev'
 
 
 class ApiClient(object):

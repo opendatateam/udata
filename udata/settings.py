@@ -32,9 +32,6 @@ class Defaults(object):
     SEARCH_SERVICE_API_URL = None
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
 
-    # Kafka configuration
-    KAFKA_URI = None
-
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
     CELERY_BROKER_TRANSPORT_OPTIONS = {
@@ -430,6 +427,7 @@ class Defaults(object):
 
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
+    RESOURCES_ANALYSER_URI = 'http://localhost:8000'
 
     # Datasets quality settings
     ###########################################################################
@@ -463,6 +461,7 @@ class Testing(object):
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
     SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}  # Disables deliverability for email domain name
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Debug(Defaults):
