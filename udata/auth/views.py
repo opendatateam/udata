@@ -89,6 +89,7 @@ def confirm_change_email(token):
     return redirect(url_for('home'))
 
 
+@login_required
 def change_email():
     """Change email page."""
 
@@ -166,17 +167,10 @@ def create_security_blueprint(state, import_name):
             endpoint='confirm_email'
         )(confirm_email)
 
-    # bp.route('/confirm-change-email/<token>',
-    #          methods=['GET', 'POST'],
-    #          endpoint='confirm_change_email')(confirm_change_email)
-    #
-    # # bp.route('/change-email', methods=['GET', 'POST'], endpoint='change_email')
-    # # @auth_required(lambda: config_value("API_ENABLED_METHODS"))
-    # # def change_email():
-    # #     pass
-    #
-    # bp.route('/change-email',
-    #          methods=['GET', 'POST'],
-    #          endpoint='change_email')(change_email)
+    bp.route('/confirm-change-email/<token>',
+             methods=['GET', 'POST'],
+             endpoint='confirm_change_email')(confirm_change_email)
+
+    bp.route('/change-email', methods=['GET', 'POST'], endpoint='change_email')(change_email)
 
     return bp
