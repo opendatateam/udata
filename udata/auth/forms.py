@@ -1,7 +1,8 @@
 import datetime
 
 from flask import current_app
-from flask_security.forms import RegisterForm, LoginForm, ResetPasswordForm, UserEmailFormMixin, Form
+from flask_login import current_user
+from flask_security.forms import RegisterForm, LoginForm, ResetPasswordForm, Form
 from udata.forms import fields
 from udata.forms import validators
 from udata.i18n import lazy_gettext as _
@@ -49,7 +50,6 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
 
 
 class ChangeEmailForm(Form):
-    user = None
     new_email = fields.StringField(_('New email'), [validators.DataRequired(), validators.Email()])
     new_email_confirm = fields.StringField(_('Retype email'), [validators.EqualTo('new_email', message=_('Email does not match')), validators.Email()])
 
@@ -57,12 +57,11 @@ class ChangeEmailForm(Form):
         if not super().validate():
             return False
 
-        # if self.email.data != self.user.email:
-        #     self.email.errors.append('Invalid email')
-        #     return False
-        # if self.email.data.strip() == self.new_email.data.strip():
-        #     self.email.errors.append(
-        #         'Your new email must be different than your '
-        #         'previous email')
-        #     return False
+        self.user = current_user
+
+        if self.user.email.strip() == self.new_email.data.strip():
+            self.new_email.errors.append(
+                'Your new email must be different than your '
+                'previous email')
+            return False
         return True

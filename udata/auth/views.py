@@ -14,6 +14,7 @@ from flask_security.utils import (
     send_mail, do_flash, get_message, get_token_status, hash_data,
     login_user, logout_user, verify_hash)
 from werkzeug.local import LocalProxy
+from udata.i18n import lazy_gettext as _
 
 from .forms import ChangeEmailForm
 
@@ -32,9 +33,9 @@ def slash_url_suffix(url, suffix):
 
 
 def send_change_email_confirmation_instructions(user, new_email):
-    data = [str(current_user.id), hash_data(current_user.email), new_email]
+    data = [str(current_user.fs_uniquifier), hash_data(current_user.email), new_email]
     token = _security.confirm_serializer.dumps(data)
-    confirmation_link = url_for('confirm_change_email', token=token, _external=True)
+    confirmation_link = url_for('security.confirm_change_email', token=token, _external=True)
 
     subject = _('Confirm change of email instructions')
     send_mail(
@@ -46,7 +47,7 @@ def send_change_email_confirmation_instructions(user, new_email):
     )
 
 
-def confirm_change_email(token):
+def confirm_change_email_token_status(token):
     expired, invalid, user, token_data = get_token_status(
         token, 'confirm', 'CONFIRM_EMAIL', return_data=True)
     new_email = None
@@ -54,6 +55,13 @@ def confirm_change_email(token):
     if not invalid and user:
         user_id, token_email_hash, new_email = token_data
         invalid = not verify_hash(token_email_hash, user.email)
+
+    return expired, invalid, user, new_email
+
+
+def confirm_change_email(token):
+    expired, invalid, user, new_email = (
+        confirm_change_email_token_status(token))
 
     if not user or invalid:
         invalid = True
@@ -68,7 +76,7 @@ def confirm_change_email(token):
                     _security.confirm_email_within, new_email),
             'error'))
     if invalid or expired:
-        return redirect(url_for('home'))
+        return redirect(url_for('site.home'))
 
     if user != current_user:
         logout_user()
@@ -86,7 +94,7 @@ def confirm_change_email(token):
             'success')
 
     do_flash(*msg)
-    return redirect(url_for('home'))
+    return redirect(url_for('site.home'))
 
 
 @login_required
@@ -104,7 +112,7 @@ def change_email():
                 'Thank you. Confirmation instructions for changing '
                 'your email have been sent to {0}.').format(new_email),
             'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('site.home'))
 
     return _security.render_template('security/change_email.html', form=form)
 

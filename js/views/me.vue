@@ -67,6 +67,11 @@ export default {
           method: this.edit
         },
         {
+          label: this._('Change email'),
+          icon: 'send',
+          method: this.change_email
+        },
+        {
           label: this._('Change password'),
           icon: 'key',
           method: this.change_password
@@ -114,6 +119,9 @@ export default {
     this._handler.remove()
   },
   methods: {
+    change_email() {
+      document.location = '/change-email'
+    },
     change_password() {
       document.location = '/change'
     },
