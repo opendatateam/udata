@@ -102,13 +102,13 @@ export default {
                 return '-';
             }
             if (size > _1GO) {
-                return Math.round(size * 100 / _1GO) / 100 + ' Go';
+                return Math.round(size * 100 / _1GO) / 100 + ' GB';
             } else if (size > _1MO) {
-                return Math.round(size * 10 / _1MO) / 10 + ' Mo';
+                return Math.round(size * 10 / _1MO) / 10 + ' MB';
             } else if (size > _1KO) {
-                return Math.round(size * 10 / _1KO) / 10 + ' Ko';
+                return Math.round(size * 10 / _1KO) / 10 + ' KB';
             } else {
-                return size + ' o';
+                return size + ' B';
             }
         }
     },
