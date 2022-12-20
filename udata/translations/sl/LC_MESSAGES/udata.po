@@ -1475,3 +1475,874 @@ msgstr "Dokumenta"
 #: udata_front/theme/govrs/__init__.py:50
 msgid "Open data"
 msgstr "Otvoreni podaci"
+
+#: udata_front/theme/govrs/templates/home.html:17
+msgid "Добродошли на портал отворених података"
+msgstr "Dobrodošli na portal otvorenih podataka"
+
+#: udata_front/theme/govrs/templates/home.html:40
+msgid "Topics"
+msgstr "Teme"
+
+#: udata_front/theme/govrs/templates/home.html:55
+msgid "Javne finansije"
+msgstr "Javne finansije"
+
+#: udata_front/theme/govrs/templates/home.html:61
+msgid "Mobilnost"
+msgstr "Mobilnost"
+
+#: udata_front/theme/govrs/templates/home.html:67
+msgid "Obrazovanje"
+msgstr "Obrazovanje"
+
+#: udata_front/theme/govrs/templates/home.html:73
+msgid "Energetika"
+msgstr "Energetika"
+
+#: udata_front/theme/govrs/templates/home.html:81
+msgid "Uprava"
+msgstr "Uprava"
+
+#: udata_front/theme/govrs/templates/home.html:87
+msgid "Zdravlje"
+msgstr "Zdravlje"
+
+#: udata_front/theme/govrs/templates/home.html:93
+msgid "Zivotna sredina"
+msgstr "Životna sredina"
+
+#: udata_front/theme/govrs/templates/home.html:99
+msgid "Ciljevi odrzivog razvoja"
+msgstr "Ciljevi održivog razvoja"
+
+#: udata_front/theme/govrs/templates/home.html:132
+msgid "Datasets paragraph"
+msgstr "Kompletni, ažurni i izvorni podaci kojima svako može slobodno pristupiti, koristiti i deliti."
+
+#: udata_front/theme/govrs/templates/home.html:180
+msgid "Data reuses paragraph"
+msgstr "Uvid u potencijal otvorenih podataka — od web-aplikacija koje upotrebljavaju otvorene podatke do vizuelizacijama mapa i drugih oblika upotrebe. "
+
+#: udata_front/theme/govrs/templates/home.html:209
+msgid "News overview paragraph"
+msgstr "Pregled svih aktuelnih vesti, dogadjaja i obaveštenja"
+
+#: udata_front/theme/govrs/templates/home.html:242
+msgid "data gov rs"
+msgstr "data.gov.rs"
+
+#: udata_front/theme/govrs/templates/home.html:240
+msgid "data gov rs includes"
+msgstr "u sebi sadrži"
+
+#: udata_front/theme/govrs/templates/participez/participez.html:44
+msgid "Visit Open Data Hub"
+msgstr "Posetite Open Data Hub"
+
+msgid "Useful links"
+msgstr "Korisni linkovi"
+
+#: udata_front/theme/govrs/templates/footer.html:45
+msgid "Канцеларија за ИТ и еУправу"
+msgstr "Kancelarija za IT i eUpravu"
+
+#: udata_front/theme/govrs/templates/footer.html:48
+msgid "Европски портал отворених података"
+msgstr "Evropski portal otvorenih podataka"
+
+#: udata_front/theme/govrs/templates/participez/participez.html:15
+msgid ""
+"Отворени подаци подстичу привредни раст, чине јавну управу ефикаснијом и "
+"економичнијом, омогућавају квалитетније услуге за грађане, осигуравају "
+"транспарентност и смањују простор за корупцију."
+msgstr ""
+"Otvoreni podaci podstiču privredni rast, čine javnu upravu efikasnijom i "
+"ekonomičnijom, omogućavaju kvalitetnije usluge za građane, osiguravaju "
+"transparentnost i smanjuju prostor za korupciju."
+
+#: udata_front/theme/govrs/templates/apidoc.html:4
+#: udata_front/theme/govrs/templates/apidoc.html:53
+msgid "API Documentation"
+msgstr "API dokumentacija"
+
+#: udata_front/theme/govrs/templates/apidoc.html:5
+#, python-format
+msgid "%(site)s dynamic API documentation"
+msgstr "%(site)s dinamična API dokumentacija"
+
+#: udata_front/theme/govrs/templates/apidoc.html:28
+#: udata_front/theme/govrs/templates/apidoc.html:64
+msgid "Potrvrda identiteta"
+msgstr "Potrvrda identiteta"
+
+#: udata_front/theme/govrs/templates/apidoc.html:31
+#: udata_front/theme/govrs/templates/apidoc.html:76
+msgid "Autorizacije"
+msgstr "Autorizacije"
+
+#: udata_front/theme/govrs/templates/apidoc.html:34
+#: udata_front/theme/govrs/templates/apidoc.html:87
+msgid "Numerisanje stranica"
+msgstr "Numerisanje stranica"
+
+#: udata_front/theme/govrs/templates/apidoc.html:37
+#: udata_front/theme/govrs/templates/apidoc.html:112
+msgid "Primeri"
+msgstr "Primeri"
+
+#: udata_front/theme/govrs/templates/apidoc.html:40
+#: udata_front/theme/govrs/templates/apidoc.html:121
+msgid "Provera da li httpie funkcioniše"
+msgstr "Provera da li httpie funkcioniše"
+
+#: udata_front/theme/govrs/templates/apidoc.html:43
+#: udata_front/theme/govrs/templates/apidoc.html:152
+msgid "Potvrda da jq funkcioniše"
+msgstr "Potvrda da jq funkcioniše"
+
+#: udata_front/theme/govrs/templates/apidoc.html:46
+#: udata_front/theme/govrs/templates/apidoc.html:163
+msgid "Pregled i preuzimanje podataka"
+msgstr "Pregled i preuzimanje podataka"
+
+#: udata_front/theme/govrs/templates/apidoc.html:49
+#: udata_front/theme/govrs/templates/apidoc.html:215
+msgid "Izmene i brisanje podataka"
+msgstr "Izmene i brisanje podataka"
+
+#: udata_front/theme/govrs/templates/apidoc.html:58
+msgid "Za developere i razvoj aplikacija"
+msgstr "Za programere i razvoj aplikacija"
+
+#: udata_front/theme/govrs/templates/apidoc.html:59
+msgid ""
+"На овој страници налази се опис рада бесплатног и отвореног RESTful API-ја "
+"овог веб-сајта"
+msgstr ""
+"Na ovoj stranici nalazi se opis rada besplatnog i otvorenog RESTful API-ja "
+"ovog veb-sajta"
+
+#: udata_front/theme/govrs/templates/apidoc.html:67
+msgid ""
+"Да бисте могли да извршите операције писања, прво морате да потврдите "
+"идентитет и добијете"
+msgstr ""
+"Da biste mogli da izvršite operacije pisanja, prvo morate da potvrdite "
+"identitet i dobijete"
+
+#: udata_front/theme/govrs/templates/apidoc.html:67
+msgid "API кључ"
+msgstr "API ključ"
+
+#: udata_front/theme/govrs/templates/apidoc.html:68
+msgid "у поставкама профила."
+msgstr "u postavkama profila."
+
+#: udata_front/theme/govrs/templates/apidoc.html:71
+msgid "Тај кључ треба да буде обезбеђен за сваки позив у"
+msgstr "Taj klјuč treba da bude obezbeđen za svaki poziv u"
+
+#: udata_front/theme/govrs/templates/apidoc.html:71
+msgid "HTTP заглављу."
+msgstr "HTTP zaglavlju."
+
+#: udata_front/theme/govrs/templates/apidoc.html:79
+msgid "За API позиве потребне су исте дозволе као за веб-интерфејс."
+msgstr "Za API pozive potrebne su iste dozvole kao za veb-interfejs."
+
+#: udata_front/theme/govrs/templates/apidoc.html:82
+msgid ""
+"На пример, морате бити члан неке организације да бисте променили неки од "
+"скупова података те организације."
+msgstr ""
+"Na primer, morate biti član neke organizacije da biste promenili neki od "
+"skupova podataka te organizacije."
+
+#: udata_front/theme/govrs/templates/apidoc.html:90
+msgid ""
+"Неке методе имају нумерацију страница и увек прате исти образац. Листа "
+"објеката је увијена у објекат"
+msgstr ""
+"Neke metode imaju numeraciju stranica i uvek prate isti obrazac. Lista "
+"objekata je uvijena u objekat"
+
+#: udata_front/theme/govrs/templates/apidoc.html:92
+msgid ""
+"Не морате сами да израчунавате претходне и наредне странице јер су URL-ови "
+"доступни као одговор у оквиру атрибута"
+msgstr ""
+"Ne morate sami da izračunavate prethodne i naredne stranice jer su URL-ovi "
+"dostupni kao odgovor u okviru atributa"
+
+#: udata_front/theme/govrs/templates/apidoc.html:93
+#: udata_front/theme/govrs/templates/apidoc.html:115
+#: udata_front/theme/govrs/templates/apidoc.html:209
+msgid "и"
+msgstr "i"
+
+#: udata_front/theme/govrs/templates/apidoc.html:94
+msgid "Биће постављени на вредност"
+msgstr "Biće postavlјeni na vrednost"
+
+#: udata_front/theme/govrs/templates/apidoc.html:94
+msgid "ако не постоји претходна и/или наредна страница."
+msgstr "ako ne postoji prethodna i/ili naredna stranica."
+
+#: udata_front/theme/govrs/templates/apidoc.html:97
+msgid "Пример:"
+msgstr "Primer:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:115
+msgid "Сви примери користе"
+msgstr "Svi primeri koriste"
+
+#: udata_front/theme/govrs/templates/apidoc.html:116
+msgid ""
+"услужне програме због читљивости. Међутим, те алатке не морате да користите у"
+" свом коду; оне вам само помажу да боље разумете API."
+msgstr ""
+"uslužne programe zbog čitlјivosti. Međutim, te alatke ne morate da koristite u"
+" svom kodu; one vam samo pomažu da bolјe razumete API."
+
+#: udata_front/theme/govrs/templates/apidoc.html:122
+msgid ""
+"Кад се httpie инсталира, можете проверити да ли функционише тако што ћете "
+"откуцати команду у терминалу:"
+msgstr ""
+"Kad se httpie instalira, možete proveriti da li funkcioniše tako što ćete "
+"otkucati komandu u terminalu:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:124
+#: udata_front/theme/govrs/templates/apidoc.html:155
+msgid "Резултат би требало да буде нешто слично овоме:"
+msgstr "Rezultat bi trebalo da bude nešto slično ovome:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:153
+msgid ""
+"Кад се jq инсталира, можете проверити да ли функционише тако што ћете "
+"откуцати команду у терминалу:"
+msgstr ""
+"Kad se jq instalira, možete proveriti da li funkcioniše tako što ćete "
+"otkucati komandu u terminalu:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:157
+msgid ""
+"То је већ боље! Сада кад смо сигурни да функционише као што је очекивано, "
+"хајде да мало скратимо командну линију:"
+msgstr ""
+"To je već bolјe! Sada kad smo sigurni da funkcioniše kao što je očekivano, "
+"hajde da malo skratimo komandnu liniju:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:164
+msgid ""
+"Можете преузети листу организација (филтрирану или нефилтрирану) или једну "
+"организацију. Кад стигнете до крајње тачке, подразумевана величина странице "
+"износи 20. Хајде да преузмемо првих 20 организација из API-ја:"
+msgstr ""
+"Možete preuzeti listu organizacija (filtriranu ili nefiltriranu) ili jednu "
+"organizaciju. Kad stignete do krajnje tačke, podrazumevana veličina stranice "
+"iznosi 20. Hajde da preuzmemo prvih 20 organizacija iz API-ja:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:178
+msgid ""
+"Ова листа је сјајна, али шта ако желимо да прођемо кроз листу враћених "
+"организација? Хајде да преузмемо URI-је првих 5 организација:"
+msgstr ""
+"Ova lista je sjajna, ali šta ako želimo da prođemo kroz listu vraćenih "
+"organizacija? Hajde da preuzmemo URI-je prvih 5 organizacija:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:187
+msgid "Сада можемо да преузмемо јединствену организацију захваљујући враћеном URI-ју:"
+msgstr "Sada možemo da preuzmemo jedinstvenu organizaciju zahvalјujući vraćenom URI-ju:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:189
+msgid ""
+"То је много података за израчунавање. Хајде да прерадимо те податке ако "
+"желимо искључиво метрику:"
+msgstr ""
+"To je mnogo podataka za izračunavanje. Hajde da preradimo te podatke ako "
+"želimo isklјučivo metriku:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:204
+msgid "Или можда само имена чланова организације:"
+msgstr "Ili možda samo imena članova organizacije:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:207
+msgid ""
+"На вама је да преузмете податке који су од значаја за ваш пројекат. Не "
+"оклевајте да прођете кроз"
+msgstr ""
+"Na vama je da preuzmete podatke koji su od značaja za vaš projekat. Ne "
+"oklevajte da prođete kroz"
+
+#: udata_front/theme/govrs/templates/apidoc.html:208
+msgid "jq's tutorial"
+msgstr "jq tutorijal"
+
+#: udata_front/theme/govrs/templates/apidoc.html:210
+msgid "приручник"
+msgstr "priručnik"
+
+#: udata_front/theme/govrs/templates/apidoc.html:211
+msgid "ако желите да детаљно прегледате API преко командне линије."
+msgstr "ako želite da detalјno pregledate API preko komandne linije."
+
+#: udata_front/theme/govrs/templates/apidoc.html:216
+msgid ""
+"Упозорење, ово може да буде опасно! Измене или брисања података помоћу API-ја"
+" не могу се опозвати и ми не пружамо никакав sandbox у којем бисте могли то "
+"да тестирате пре извршења (за сада). Пре употребе својих привилегија, будите "
+"свесни своје одговорности."
+msgstr ""
+"Upozorenje, ovo može da bude opasno! Izmene ili brisanja podataka pomoću API-ja"
+" ne mogu se opozvati i mi ne pružamo nikakav sandbox u kojem biste mogli to "
+"da testirate pre izvršenja (za sada). Pre upotrebe svojih privilegija, budite "
+"svesni svoje odgovornosti."
+
+#: udata_front/theme/govrs/templates/apidoc.html:217
+msgid ""
+"Уколико покушате да измените ресурс без токена за потврду идентитета, биће "
+"враћен кôд 401:"
+msgstr ""
+"Ukoliko pokušate da izmenite resurs bez tokena za potvrdu identiteta, biće "
+"vraćen kôd 401:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:228
+msgid ""
+"Морате да наведете API кључ (погледајте изнад) и да користите X-API-KEY HTTP "
+"заглавље. Ако покушајте да измените ресурс који не контролишете, биће враћен "
+"кôд 400:"
+msgstr ""
+"Morate da navedete API klјuč (pogledajte iznad) i da koristite X-API-KEY HTTP "
+"zaglavlјe. Ako pokušajte da izmenite resurs koji ne kontrolišete, biće vraćen "
+"kôd 400:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:239
+msgid ""
+"Ово је порука коју ћете добити уколико сте навели погрешан API кључ. Постоји "
+"још једна потенцијална порука о грешци на коју можете да наиђете:"
+msgstr ""
+"Ovo je poruka koju ćete dobiti ukoliko ste naveli pogrešan API klјuč. Postoji "
+"još jedna potencijalna poruka o grešci na koju možete da naiđete:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:249
+msgid ""
+"Појављује се уколико покушате да приступите ресурсу који не можете да мењате "
+"са својим акредитивима. Уколико је ваш кључ валидан, требало би да добијете "
+"нешто налик следећем:"
+msgstr ""
+"Pojavlјuje se ukoliko pokušate da pristupite resursu koji ne možete da menjate "
+"sa svojim akreditivima. Ukoliko je vaš klјuč validan, trebalo bi da dobijete "
+"nešto nalik sledećem:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:258
+msgid ""
+"Међутим, ништа се није променило! То је сасвим у реду, јер смо заборавили да "
+"наведемо праве податке који ће бити послати на сервер."
+msgstr ""
+"Međutim, ništa se nije promenilo! To je sasvim u redu, jer smo zaboravili da "
+"navedemo prave podatke koji će biti poslati na server."
+
+#: udata_front/theme/govrs/templates/apidoc.html:266
+msgid ""
+"Ресурс је модификован са жељеним вредностима. Коначно, можете обрисати ресурс"
+" употребом одговарајућег HTTP глагола (пазите, тренутно није могуће опозвати "
+"операцију брисања кроз API):"
+msgstr ""
+"Resurs je modifikovan sa želјenim vrednostima. Konačno, možete obrisati resurs"
+" upotrebom odgovarajućeg HTTP glagola (pazite, trenutno nije moguće opozvati "
+"operaciju brisanja kroz API):"
+
+#: udata_front/theme/govrs/templates/apidoc.html:272
+msgid ""
+"Кад то обавите, можете проверити да ли је промена ступила на снагу користећи "
+"GET у односу на претходни URI:"
+msgstr ""
+"Kad to obavite, možete proveriti da li je promena stupila na snagu koristeći "
+"GET u odnosu na prethodni URI:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:283
+msgid ""
+"Консултујте референтну документацију у наставку да бисте пронашли више детаља"
+" о употреби API-ја или поставили питања у вези с њим!"
+msgstr ""
+"Konsultujte referentnu dokumentaciju u nastavku da biste pronašli više detalјa"
+" o upotrebi API-ja ili postavili pitanja u vezi s njim!"
+
+#: udata_front/theme/govrs/templates/apidoc.html:290
+msgid "API Reference"
+msgstr "Referenca"
+
+#: udata_front/theme/govrs/templates/discover.html:10
+#: udata_front/theme/govrs/templates/discover.html:40
+msgid "Отворени подаци"
+msgstr "Otvoreni podaci"
+
+#: udata_front/theme/govrs/templates/discover.html:16
+msgid "Намена, функција Отворених података"
+msgstr "Namena, funkcija Otvorenih podataka"
+
+#: udata_front/theme/govrs/templates/discover.html:22
+#: udata_front/theme/govrs/templates/discover.html:112
+msgid "Зашто институције отварају податке?"
+msgstr "Zašto institucije otvaraju podatke?"
+
+#: udata_front/theme/govrs/templates/discover.html:28
+msgid "Ко управља процесом"
+msgstr "Ko upravlјa procesom"
+
+#: udata_front/theme/govrs/templates/discover.html:34
+msgid "Напредак држава на пољу отварања података"
+msgstr "Napredak država na polјu otvaranja podataka"
+
+#: udata_front/theme/govrs/templates/discover.html:43
+msgid "Шта су отворени подаци?"
+msgstr "Šta su otvoreni podaci?"
+
+#: udata_front/theme/govrs/templates/discover.html:46
+msgid "Према једној од "
+msgstr "Prema jednoj od "
+
+#: udata_front/theme/govrs/templates/discover.html:48
+msgid "дефиниција"
+msgstr "definicija"
+ 
+#: udata_front/theme/govrs/templates/discover.html:49
+msgid ", отворени подаци су подаци у машински читљивом и отвореном облику доступни за поновну употребу:"
+msgstr ", otvoreni podaci su podaci u mašinski čitlјivom i otvorenom obliku dostupni za ponovnu upotrebu:"
+
+msgid "Поновна употреба односи се на коришћење отворених података од стране физичких или правних лица за комерцијалне или некомерцијалне сврхе другачије од првобитне за коју су били прикупљени или израђени, и обухвата могућност њиховог умножавања, дистрибуције, стављања на располагање трећим лицима, прилагођавање, повезивање са другим подацима, интегрисање у пословне процесе, производе и услуге, као и друге поновне употребе."
+msgstr "Ponovna upotreba odnosi se na korišćenje otvorenih podataka od strane fizičkih ili pravnih lica za komercijalne ili nekomercijalne svrhe drugačije od prvobitne za koju su bili prikuplјeni ili izrađeni, i obuhvata mogućnost njihovog umnožavanja, distribucije, stavlјanja na raspolaganje trećim licima, prilagođavanje, povezivanje sa drugim podacima, integrisanje u poslovne procese, proizvode i usluge, kao i druge ponovne upotrebe."
+
+msgid "Подаци морају бити у облику који је погодан за рачунарску обраду, односно облику који омогућава лак приступ и манипулацију подацима помоћу рачунарских програма (машински читљиви)."
+msgstr "Podaci moraju biti u obliku koji je pogodan za računarsku obradu, odnosno obliku koji omogućava lak pristup i manipulaciju podacima pomoću računarskih programa (mašinski čitlјivi)."
+
+msgid "Подаци морају бити доступни у форматима записа чија је употреба могућа без плаћања накнаде или других ограничења, као и за чију обраду је доступан најмање један алат"
+msgstr "Podaci moraju biti dostupni u formatima zapisa čija je upotreba moguća bez plaćanja naknade ili drugih ograničenja, kao i za čiju obradu je dostupan najmanje jedan alat"
+
+msgid "Осим наведеног, отворени подаци подразумевају изворност (објављивање података у облику у коме су прикупљени, без накнадних трансформација), комплетност (постојање описа структуре података, пратећих шифарника и сл.) и ажурност (која се, када год је то могуће, постиже директним преузимањем података из базе у којој се изворно обрађују)"
+msgstr "Osim navedenog, otvoreni podaci podrazumevaju izvornost (objavljivanje podataka u obliku u kome su prikupljeni, bez naknadnih transformacija), kompletnost (postojanje opisa strukture podataka, pratećih šifarnika i sl.) i ažurnost (koja se, kada god je to moguće, postiže direktnim preuzimanjem podataka iz baze u kojoj se izvorno obrađuju)"
+
+msgid "Национални Портал отворених података (data.gov.rs) представља место на коме се објављују скупови отворених података у поседу"
+msgstr "Nacionalni Portal otvorenih podataka (data.gov.rs) predstavlјa mesto na kome se objavlјuju skupovi otvorenih podataka u posedu"
+
+msgid "(што обухвата органе државне управе, аутономних покрајина и локалне самоуправе, као и организације којима је поверено вршење јавних овлашћења – нпр. Влада, министарства, општине, агенције, регулаторна тела, установе и комунална предузећа и други)."
+msgstr "(što obuhvata organe državne uprave, autonomnih pokrajina i lokalne samouprave, kao i organizacije kojima je povereno vršenje javnih ovlašćenja – npr. Vlada, ministarstva, opštine, agencije, regulatorna tela, ustanove i komunalna preduzeća i drugi)."
+
+msgid "државних органа, већ и као место интеракције са заједницом која те податке користи. Осим могућности"
+msgstr "državnih organa, već i kao mesto interakcije sa zajednicom koja te podatke koristi. Osim mogućnosti"
+
+msgid "објављених скупова података, портал корисницима нуди могућност праћења активности државних органа који објављују податке, као и могућност дискусије о објављеним подацима."
+msgstr "objavlјenih skupova podataka, portal korisnicima nudi mogućnost praćenja aktivnosti državnih organa koji objavlјuju podatke, kao i mogućnost diskusije o objavlјenim podacima."
+
+msgid "Такође, на порталу је заинтересованим посетиоцима омогућено да стекну увид у потенцијал отворених података, кроз представљање конкретних"
+msgstr "Takođe, na portalu je zainteresovanim posetiocima omogućeno da steknu uvid u potencijal otvorenih podataka, kroz predstavlјanje konkretnih"
+
+msgid "објављених скупова података – било да се ради о мобилним или веб-апликацијама које употребљавају отворене податке, различитим визуелизацијама, мапама или другим облицима поновне употребе."
+msgstr "objavlјenih skupova podataka – bilo da se radi o mobilnim ili veb-aplikacijama koje upotreblјavaju otvorene podatke, različitim vizuelizacijama, mapama ili drugim oblicima ponovne upotrebe."
+
+msgid "Јавне институције сакупљају и производе велику количину различитих података, а обезбеђивањем њихове доступности у форми отворених података (без угрожавања поверљивости или приватности) они се чине доступним ширем кругу корисника."
+msgstr "Javne institucije sakuplјaju i proizvode veliku količinu različitih podataka, a obezbeđivanjem njihove dostupnosti u formi otvorenih podataka (bez ugrožavanja poverlјivosti ili privatnosti) oni se čine dostupnim širem krugu korisnika."
+
+msgid "Институције тиме не само да обезбеђују виши ниво јавности рада, већ пружају грађанима и привреди нове могућности да од података створе неку нову вредност – било да се ради о некој новој апликацији, пословном моделу, визуелизацији, мапи, истраживачком пројекту итд."
+msgstr "Institucije time ne samo da obezbeđuju viši nivo javnosti rada, već pružaju građanima i privredi nove mogućnosti da od podataka stvore neku novu vrednost – bilo da se radi o nekoj novoj aplikaciji, poslovnom modelu, vizuelizaciji, mapi, istraživačkom projektu itd."
+
+msgid "Кроз отварање података, држава подстиче развој креативног бизниса и економије знања, али и добија драгоцене повратне информације, које могу да се искористе за побољшање квалитета података, боље разумевање потреба корисника, квалитетније формулисање и спровођење јавних политика."
+msgstr "Kroz otvaranje podataka, država podstiče razvoj kreativnog biznisa i ekonomije znanja, ali i dobija dragocene povratne informacije, koje mogu da se iskoriste za pobolјšanje kvaliteta podataka, bolјe razumevanje potreba korisnika, kvalitetnije formulisanje i sprovođenje javnih politika."
+
+msgid ", који је усвојен 5. априла 2018. године, уведена је обавеза органа да на Порталу отворених података објављују отворене податке из своје надлежности на начин који омогућава њихово лако претраживање и поновну употребу, и омогућен је слободан приступ објављеним подацима без накнаде. Ступањем на снагу"
+msgstr ", koji je usvojen 5. aprila 2018. godine, uvedena je obaveza organa da na Portalu otvorenih podataka objavlјuju otvorene podatke iz svoje nadležnosti na način koji omogućava njihovo lako pretraživanje i ponovnu upotrebu, i omogućen je slobodan pristup objavlјenim podacima bez naknade. Stupanjem na snagu"
+
+msgid "успостављен је целовит правни оквир за отварање података у поседу државних органа и њихово објављивање."
+msgstr "uspostavlјen je celovit pravni okvir za otvaranje podataka u posedu državnih organa i njihovo objavlјivanje."
+
+msgid "Отварање података у поседу јавних институција ради њихове поновне употребе стратешко је опредељење Владе Србије, о чему сведочи и то што"
+msgstr "Otvaranje podataka u posedu javnih institucija radi njihove ponovne upotrebe strateško je opredelјenje Vlade Srbije, o čemu svedoči i to što"
+
+msgid "у Републици Србији за 2016-2017. и 2018-2020. годину садрже посебна поглавља посвећена отварању података. Област отварања података ће бити обухваћена и новим стратешким оквиром за електронску управу у Републици Србији за период од 2019. до 2021. године, чија је израда у току."
+msgstr "u Republici Srbiji za 2016-2017. i 2018-2020. godinu sadrže posebna poglavlјa posvećena otvaranju podataka. Oblast otvaranja podataka će biti obuhvaćena i novim strateškim okvirom za elektronsku upravu u Republici Srbiji za period od 2019. do 2021. godine, čija je izrada u toku."
+
+msgid "од 28. јуна 2017, у коме је, између осталог, наведено да ће један од приоритета Владе бити подршка отварању података у поседу јавних институција."
+msgstr "od 28. juna 2017, u kome je, između ostalog, navedeno da će jedan od prioriteta Vlade biti podrška otvaranju podataka u posedu javnih institucija."
+
+msgid ", која одржава национални Портал отворених података и представља први контакт за све институције које желе да објављују податке."
+msgstr ", koja održava nacionalni Portal otvorenih podataka i predstavlјa prvi kontakt za sve institucije koje žele da objavlјuju podatke."
+
+msgid "Почетком 2016. формирана је Радна група за отворене податке сачињена од представника државних институција, организација цивилног друштва, академских институција, пословних асоцијација, међународних организација и развојних партнера, са задатком да планира и координира активности на даљем отварању података, пружа подршку институцијама које отварају податке, обезбеђује сталну сарадњу између јавне управе и цивилног сектора, подстиче тражњу за отвореним подацима, и промовише резултате и користи које доноси отварање података. У фебруару 2019. Радна група је бројала 120 чланова из 62 организације (39 државних институција, 13 организација цивилног друштва, четири академске институције, две пословне асоцијације и четири међународна развојна партнера)."
+msgstr "Početkom 2016. formirana je Radna grupa za otvorene podatke sačinjena od predstavnika državnih institucija, organizacija civilnog društva, akademskih institucija, poslovnih asocijacija, međunarodnih organizacija i razvojnih partnera, sa zadatkom da planira i koordinira aktivnosti na dalјem otvaranju podataka, pruža podršku institucijama koje otvaraju podatke, obezbeđuje stalnu saradnju između javne uprave i civilnog sektora, podstiče tražnju za otvorenim podacima, i promoviše rezultate i koristi koje donosi otvaranje podataka. U februaru 2019. Radna grupa je brojala 120 članova iz 62 organizacije (39 državnih institucija, 13 organizacija civilnog društva, četiri akademske institucije, dve poslovne asocijacije i četiri međunarodna razvojna partnera)."
+
+msgid "(UNDP), преко пројекта „Отворени подаци - отворене могућности”. Овај пројекат реализује се уз подршку Светске банке, Владе Велике Британије у склопу Фонда за добру управу (GGF) и Шведске агенције за међународни развој и сарадњу (SIDA). Пројекат је започет 2015. године, када је израђена "
+msgstr "(UNDP), preko projekta „Otvoreni podaci - otvorene mogućnosti”. Ovaj projekat realizuje se uz podršku Svetske banke, Vlade Velike Britanije u sklopu Fonda za dobru upravu (GGF) i Švedske agencije za međunarodni razvoj i saradnju (SIDA). Projekat je započet 2015. godine, kada je izrađena "
+
+msgid "и пружена подршка првим институцијама које су отвориле своје податке. У оквиру пројекта организовано је више догађаја са циљем промоције отворених података, подржано је успостављање овог Портала отворених података, те рад на формулисању законског оквира за отворене податке и функционисање Радне групе за отворене податке. Оваква подршка стварању одрживог екосистема отворених података у Србији наставиће се током 2019. године, што ће допринети унапређењу рада институција, бољим услугама за грађане и привредном развоју земље."
+msgstr "i pružena podrška prvim institucijama koje su otvorile svoje podatke. U okviru projekta organizovano je više događaja sa cilјem promocije otvorenih podataka, podržano je uspostavlјanje ovog Portala otvorenih podataka, te rad na formulisanju zakonskog okvira za otvorene podatke i funkcionisanje Radne grupe za otvorene podatke. Ovakva podrška stvaranju održivog ekosistema otvorenih podataka u Srbiji nastaviće se tokom 2019. godine, što će doprineti unapređenju rada institucija, bolјim uslugama za građane i privrednom razvoju zemlјe."
+
+msgid "одавно су откриле да отворени подаци подстичу привредни раст, чине јавну управу ефикаснијом и економичнијом, омогућавају квалитетније услуге за грађане, осигуравају транспарентност и смањују простор за корупцију."
+msgstr "odavno su otkrile da otvoreni podaci podstiču privredni rast, čine javnu upravu efikasnijom i ekonomičnijom, omogućavaju kvalitetnije usluge za građane, osiguravaju transparentnost i smanjuju prostor za korupciju."
+
+msgid "Европска унија међу првима је препознала значај отварања података у поседу органа јавне власти, па је још 2003. године донела Директиву о поновној употреби информација јавног сектора (Directive 2003/98/EC), која је унапређена 2013. године ("
+msgstr "Evropska unija među prvima je prepoznala značaj otvaranja podataka u posedu organa javne vlasti, pa je još 2003. godine donela Direktivu o ponovnoj upotrebi informacija javnog sektora (Directive 2003/98/EC), koja je unapređena 2013. godine ("
+
+msgid "успоставиле су Сједињене Америчке Државе, маја 2009, а на њему се у фебруару 2019. године налазило преко 300.000 скупова отворених података. Европска унија успоставила је два портала отворених података."
+msgstr "uspostavile su Sjedinjene Američke Države, maja 2009, a na njemu se u februaru 2019. godine nalazilo preko 300.000 skupova otvorenih podataka. Evropska unija uspostavila je dva portala otvorenih podataka."
+
+msgid "отворени подаци европских институција успостављен је 2012. године, док је 2015. године успостављен"
+msgstr "otvoreni podaci evropskih institucija uspostavlјen je 2012. godine, dok je 2015. godine uspostavlјen"
+
+msgid "објављене скупове података са портала отворених података европских држава и држава кандидата ("
+msgstr "objavlјene skupove podataka sa portala otvorenih podataka evropskih država i država kandidata ("
+
+msgid "и податке са Портала отворених података Србије)."
+msgstr "i podatke sa Portala otvorenih podataka Srbije)."
+
+msgid "да ће у периоду од 2016. до 2020. године отварање података створити тржиште вредно између 55.3 и 75.7 милијарди евра годишње, док ће кумулативна вредност тржишта достићи 325 милијарди евра. Зато се на међународном нивоу о подацима већ дуже време говори као о „новој нафти”, а отворени подаци препознати су као један од кључних фактора за достизање циљева одрживог развоја и дигиталну трансформацију друштва. О значајном нивоу политичке подршке отварању података на међународном нивоу говори иницијатива"
+msgstr "da će u periodu od 2016. do 2020. godine otvaranje podataka stvoriti tržište vredno između 55.3 i 75.7 milijardi evra godišnje, dok će kumulativna vrednost tržišta dostići 325 milijardi evra. Zato se na međunarodnom nivou o podacima već duže vreme govori kao o „novoj nafti”, a otvoreni podaci prepoznati su kao jedan od klјučnih faktora za dostizanje cilјeva održivog razvoja i digitalnu transformaciju društva. O značajnom nivou političke podrške otvaranju podataka na međunarodnom nivou govori inicijativa"
+
+msgid "(чија је Србија чланица од 2012), као и"
+msgstr "(čija je Srbija članica od 2012), kao i"
+
+msgid "Напредак држава на пољу отварања података може се пратити преко неколико међународних ранг-листа, као што су"
+msgstr "Napredak država na polјu otvaranja podataka može se pratiti preko nekoliko međunarodnih rang-lista, kao što su"
+
+#: udata_front/theme/govrs/templates/discover.html:65
+msgid "слободног софтвера"
+msgstr "slobodnog softvera"
+
+#: udata_front/theme/govrs/templates/discover.html:65
+msgid "(отворени облик)."
+msgstr "(otvoreni oblik)."
+
+#: udata_front/theme/govrs/templates/discover.html:76
+msgid "Шта је и како функционише Портал отворених података?"
+msgstr "Šta je i kako funkcioniše Portal otvorenih podataka?"
+
+#: udata_front/theme/govrs/templates/discover.html:81
+msgid "државних органа Републике Србије"
+msgstr "državnih organa Republike Srbije"
+
+#: udata_front/theme/govrs/templates/discover.html:87
+msgid "Портал отворених података замишљен је не само као"
+msgstr "Portal otvorenih podataka zamišlјen je ne samo kao"
+
+#: udata_front/theme/govrs/templates/discover.html:88
+msgid "репозиторијум отворених података"
+msgstr "repozitorijum otvorenih podataka"
+
+#: udata_front/theme/govrs/templates/discover.html:91
+msgid "свеобухватног претраживања"
+msgstr "sveobuhvatnog pretraživanja"
+
+#: udata_front/theme/govrs/templates/discover.html:98
+msgid "Садржаји портала доступни су програмерима путем"
+msgstr "Sadržaji portala dostupni su programerima putem"
+
+#: udata_front/theme/govrs/templates/discover.html:99
+msgid "апликативног програмског интерфејса"
+msgstr "aplikativnog programskog interfejsa"
+
+#: udata_front/theme/govrs/templates/discover.html:99
+msgid "(API)."
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:104
+msgid "примера употребе"
+msgstr "primera upotrebe"
+
+#: udata_front/theme/govrs/templates/discover.html:134
+msgid "Доношењем"
+msgstr "Donošenjem"
+
+#: udata_front/theme/govrs/templates/discover.html:136
+msgid "Закона о електронској управи"
+msgstr "Zakona o elektronskoj upravi"
+
+#: udata_front/theme/govrs/templates/discover.html:144
+msgid "Уредбе о начину рада Портала отворених података"
+msgstr "Uredbe o načinu rada Portala otvorenih podataka"
+
+#: udata_front/theme/govrs/templates/discover.html:152
+msgid "Ко управља процесом отварања података у Србији?"
+msgstr "Ko upravlјa procesom otvaranja podataka u Srbiji?"
+
+#: udata_front/theme/govrs/templates/discover.html:157
+msgid "Стратегија развоја електронске управе"
+msgstr "Strategija razvoja elektronske uprave"
+
+#: udata_front/theme/govrs/templates/discover.html:158
+msgid "у Републици Србији за период од 2015. до 2018, као и"
+msgstr "u Republici Srbiji za period od 2015. do 2018, kao i"
+
+#: udata_front/theme/govrs/templates/discover.html:160
+msgid "акциони планови за спровођење иницијативе Партнерство за отворену управу"
+msgstr "akcioni planovi za sprovođenje inicijative Partnerstvo za otvorenu upravu"
+
+#: udata_front/theme/govrs/templates/discover.html:169
+msgid "Значај отворених података у Републици Србији препознат је и у"
+msgstr "Značaj otvorenih podataka u Republici Srbiji prepoznat je i u"
+
+#: udata_front/theme/govrs/templates/discover.html:171
+msgid "експозеу председника Владе"
+msgstr "ekspozeu predsednika Vlade"
+
+#: udata_front/theme/govrs/templates/discover.html:177
+msgid "Институционално, процесом отварања података руководи"
+msgstr "Institucionalno, procesom otvaranja podataka rukovodi"
+
+#: udata_front/theme/govrs/templates/discover.html:179
+msgid "Канцеларија за информационе технологије и електронску управу"
+msgstr "Kancelarija za informacione tehnologije i elektronsku upravu"
+
+#: udata_front/theme/govrs/templates/discover.html:197
+msgid "Свеобухватну подршку процесу отварања података у Србији пружа"
+msgstr "Sveobuhvatnu podršku procesu otvaranja podataka u Srbiji pruža"
+
+#: udata_front/theme/govrs/templates/discover.html:199
+msgid "Програм Уједињених нација за развој"
+msgstr "Program Ujedinjenih nacija za razvoj"
+
+#: udata_front/theme/govrs/templates/discover.html:206
+msgid "Оцена спремности за отварање података"
+msgstr "Ocena spremnosti za otvaranje podataka"
+
+#: udata_front/theme/govrs/templates/discover.html:219
+msgid "Отворени подаци на међународном нивоу"
+msgstr "Otvoreni podaci na međunarodnom nivou"
+
+#: udata_front/theme/govrs/templates/discover.html:223
+msgid "Државе широм света"
+msgstr "Države širom sveta"
+
+#: udata_front/theme/govrs/templates/discover.html:235
+msgid "Directive 2013/37/EU"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:237
+msgid ")."
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:240
+msgid "Први портал отворених података"
+msgstr "Prvi portal otvorenih podataka"
+
+#: udata_front/theme/govrs/templates/discover.html:244
+msgid "Портал отворених података Европске уније"
+msgstr "Portal otvorenih podataka Evropske unije"
+
+#: udata_front/theme/govrs/templates/discover.html:248
+msgid "Европски портал за податке"
+msgstr "Evropski portal za podatke"
+
+#: udata_front/theme/govrs/templates/discover.html:248
+msgid ", који аутоматски"
+msgstr ", koji automatski"
+
+#: udata_front/theme/govrs/templates/discover.html:249
+msgid "преузима"
+msgstr "preuzima"
+
+#: udata_front/theme/govrs/templates/discover.html:251
+msgid "укључујући"
+msgstr "uklјučujući"
+
+#: udata_front/theme/govrs/templates/discover.html:255
+msgid "Европска комисија"
+msgstr "Evropska komisija"
+
+#: udata_front/theme/govrs/templates/discover.html:257
+msgid "процењује"
+msgstr "procenjuje"
+
+#: udata_front/theme/govrs/templates/discover.html:266
+msgid "Партнерство за отворену управу"
+msgstr "Partnerstvo za otvorenu upravu"
+
+#: udata_front/theme/govrs/templates/discover.html:270
+msgid "Међународна повеља о отвореним подацима."
+msgstr "Međunarodna povelјa o otvorenim podacima."
+
+#: udata_front/theme/govrs/templates/discover.html:277
+msgid "Global Open Data Index"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:278
+msgid "или"
+msgstr "ili"
+
+#: udata_front/theme/govrs/templates/discover.html:280
+msgid "Open Data Barometer"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/documents.html:6
+msgid "Documents and instructions"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/documents.html:11
+msgid "Law and by laws"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/documents.html:34
+msgid "Instructions"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/footer.html:42
+msgid "Useful links"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/footer.html:103
+msgid "Terms and conditions"
+msgstr "Uslovi korišćenja"
+
+#: udata_front/theme/govrs/templates/home.html:17
+msgid "Добродошли на портал отворених података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/home.html:18
+msgid "Пратите стање отворених података владе Републике Србије"
+msgstr "Pratite stanje otvorenih podataka vlade Republike Srbije"
+
+#: udata_front/theme/govrs/templates/home.html:19
+msgid ""
+"Индекс отворених података пружа најсвеобухватнији доступни преглед стања "
+"јавних објава информација у влади. \n"
+"                Упоредите рангиране табеле и приказе мапа или дискутујте о "
+"налазима из локалне и тематске перспективе."
+msgstr ""
+"Indeks otvorenih podataka pruža najsveobuhvatniji dostupni pregled stanja "
+"javnih objava informacija u vladi. \n"
+"                Uporedite rangirane tabele i prikaze mapa ili diskutujte o "
+"nalazima iz lokalne i tematske perspektive."
+
+#: udata_front/theme/govrs/templates/documents.html:17
+msgid "Закон о електронској управи"
+msgstr "Zakon o elektronskoj upravi"
+
+#: udata_front/theme/govrs/templates/documents.html:23
+msgid "Уредба о начину рада Портала отворених података"
+msgstr "Uredba o načinu rada Portala otvorenih podataka"
+
+
+#: udata_front/theme/govrs/templates/documents.html:40
+msgid "Упутство за постављање скупова података"
+msgstr "Uputstvo za postavlјanje skupova podataka"
+
+#: udata_front/theme/govrs/templates/documents.html:47
+msgid "Документација за АПИ"
+msgstr "Dokumentacija za API"
+
+#: udata_front/theme/govrs/templates/documents.html:64
+msgid "Упутство за израду отвореног буџета"
+msgstr "Uputstvo za izradu otvorenog budžeta"
+
+#: udata_front/theme/govrs/templates/documents.html:70
+msgid "Отворени буџет планирани приходи"
+msgstr "Otvoreni budžet planirani prihodi"
+
+#: udata_front/theme/govrs/templates/documents.html:76
+msgid "Отворени буџет планирани расходи"
+msgstr "Otvoreni budžet planirani rashodi"
+
+#: udata_front/theme/govrs/templates/documents.html:82
+msgid "Пример попуњеног буџета план прихода"
+msgstr "Primer popunjenog budžeta plan prihoda"
+
+#: udata_front/theme/govrs/templates/documents.html:88
+msgid "Пример попуњеног буџета план расхода"
+msgstr "Primer popunjenog budžeta plan rashoda"
+
+#: udata_front/theme/govrs/templates/user/card.html:10
+msgid "admin"
+msgstr "Administrator"
+
+#: udata_front/theme/govrs/templates/user/card.html:13
+msgid "editor"
+msgstr "Urednik"
+
+#: udata_front/theme/govrs/templates/organization/list.html:20
+msgid "Datasets-total"
+msgstr "Podataka ukupno"
+
+#: udata_front/theme/govrs/templates/organization/list.html:24
+msgid "Download resources"
+msgstr "Preuzmi spsisak organizacija"
+
+#: udata_front/theme/govrs/templates/reuse/list.html:48
+msgid "Download reuses"
+msgstr "Preuzmi primere upotrebe"
+
+#: udata_front/theme/govrs/templates/organization/list.html:41
+msgid "Created date asc"
+msgstr "Kreirano naviše"
+
+#: udata_front/theme/govrs/templates/organization/list.html:42
+msgid "Created date desc"
+msgstr "Kreirano naniže"
+
+#: udata_front/theme/govrs/templates/organization/list.html:43
+msgid "Last modified asc"
+msgstr "Izmenjeno naviše"
+
+#: udata_front/theme/govrs/templates/organization/list.html:44
+msgid "Last modified desc"
+msgstr "Izmenjeno naniže"
+
+#: udata_front/theme/govrs/templates/organization/list.html:45
+msgid "Title asc"
+msgstr "Naslov naviše"
+
+#: udata_front/theme/govrs/templates/organization/list.html:46
+msgid "Title desc"
+msgstr "Naslov naniže"
+
+#: udata_front/theme/govrs/templates/organization/list.html:47
+msgid "Followers asc"
+msgstr "Pratioci naviše"
+
+#: udata_front/theme/govrs/templates/organization/list.html:48
+msgid "Followers desc"
+msgstr "Pratioci naniže"
+
+#: udata_front/theme/govrs/templates/organization/list.html:49
+msgid "Reuses asc"
+msgstr "Primeri upotrebe naviše"
+
+#: udata_front/theme/govrs/templates/organization/list.html:50
+msgid "Reuses desc"
+msgstr "Primer upotrebe naniže"
+
+#: udata_front/theme/govrs/templates/post/list.html:28
+msgid "Posts total"
+msgstr "Vesti ukupno"
+
+#: udata_front/theme/govrs/templates/organization/list.html:21
+msgid "Organizations total"
+msgstr "Organizacija ukupno"
+
+
+#: udata_front/theme/govrs/templates/dataset/display.html:273
+#: udata_front/theme/govrs/templates/participez/participez.html:5
+#: udata_front/theme/govrs/templates/reuse/display.html:180
+msgid "Participate new"
+msgstr "Uključite se u svet otvorenih podataka"
+
+#: udata_front/theme/govrs/templates/participez/participez.html:36
+#: udata_front/theme/govrs/templates/participez/participez.html:42
+msgid "Go to documentation new"
+msgstr "Pogledajte kompletnu dokumentaciju"
+
+#: udata_front/theme/govrs/templates/home.html:144
+msgid "Featured reuses new"
+msgstr "Istaknute upotrebe"
+
+#: udata_front/theme/govrs/templates/home.html:144
+msgid "Latest reuses new"
+msgstr "Poslednje upotrebe"
+
+
+#: udata_front/theme/gouvfr/templates/home.html:99
+msgid "Featured datasets new"
+msgstr "Istaknuti podaci"
+
+#: udata_front/theme/gouvfr/templates/home.html:100
+msgid "Latest datasets new"
+msgstr "Poslednji podaci"

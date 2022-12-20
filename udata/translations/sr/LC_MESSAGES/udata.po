@@ -1475,3 +1475,717 @@ msgstr "Документа"
 #: udata_front/theme/govrs/__init__.py:50
 msgid "Open data"
 msgstr "Отворени подаци"
+
+#: udata_front/theme/govrs/templates/home.html:17
+msgid "Добродошли на портал отворених података"
+msgstr "Добродошли на портал отворених података"
+
+#: udata_front/theme/govrs/templates/home.html:40
+msgid "Topics"
+msgstr "Теме"
+
+#: udata_front/theme/govrs/templates/home.html:55
+msgid "Javne finansije"
+msgstr "Јавне финансије"
+
+#: udata_front/theme/govrs/templates/home.html:61
+msgid "Mobilnost"
+msgstr "Мобилност"
+
+#: udata_front/theme/govrs/templates/home.html:67
+msgid "Obrazovanje"
+msgstr "Образовање"
+
+#: udata_front/theme/govrs/templates/home.html:73
+msgid "Energetika"
+msgstr "Енергетика"
+
+#: udata_front/theme/govrs/templates/home.html:81
+msgid "Uprava"
+msgstr "Управа"
+
+#: udata_front/theme/govrs/templates/home.html:87
+msgid "Zdravlje"
+msgstr "Здравље"
+
+#: udata_front/theme/govrs/templates/home.html:93
+msgid "Zivotna sredina"
+msgstr "Животна средина"
+
+#: udata_front/theme/govrs/templates/home.html:99
+msgid "Ciljevi odrzivog razvoja"
+msgstr "Циљеви одрживог развоја"
+
+#: udata_front/theme/govrs/templates/home.html:132
+msgid "Datasets paragraph"
+msgstr "Комплетни, ажурни и изворни подаци којима свако може слободно приступити, користити и делити."
+
+#: udata_front/theme/govrs/templates/home.html:180
+msgid "Data reuses paragraph"
+msgstr "Увид у потенцијал отворених података — од веб-апликација које употребљавају отворене податке до визуелизацијама, мапа и других облика употребе."
+
+#: udata_front/theme/govrs/templates/home.html:209
+msgid "News overview paragraph"
+msgstr "Преглед свих актуелних вести, догађаја и обавештења."
+
+#: udata_front/theme/govrs/templates/home.html:242
+msgid "data gov rs"
+msgstr "data.gov.rs"
+
+#: udata_front/theme/govrs/templates/home.html:242
+msgid "data gov rs includes"
+msgstr "у себи садржи"
+
+#: udata_front/theme/govrs/templates/participez/participez.html:44
+msgid "Visit Open Data Hub"
+msgstr "Посетите Open Data Hub"
+
+msgid "Useful links"
+msgstr "Корисни линкови"
+
+#: udata_front/theme/govrs/templates/apidoc.html:4
+#: udata_front/theme/govrs/templates/apidoc.html:53
+msgid "API Documentation"
+msgstr "API документација"
+
+#: udata_front/theme/govrs/templates/apidoc.html:5
+#, python-format
+msgid "%(site)s dynamic API documentation"
+msgstr "%(site)s динамична API документација"
+
+#: udata_front/theme/govrs/templates/apidoc.html:28
+#: udata_front/theme/govrs/templates/apidoc.html:64
+msgid "Potrvrda identiteta"
+msgstr "Потврда идентитета"
+
+#: udata_front/theme/govrs/templates/apidoc.html:31
+#: udata_front/theme/govrs/templates/apidoc.html:76
+msgid "Autorizacije"
+msgstr "Ауторизације"
+
+#: udata_front/theme/govrs/templates/apidoc.html:34
+#: udata_front/theme/govrs/templates/apidoc.html:87
+msgid "Numerisanje stranica"
+msgstr "Нумерисање страница"
+
+#: udata_front/theme/govrs/templates/apidoc.html:37
+#: udata_front/theme/govrs/templates/apidoc.html:112
+msgid "Primeri"
+msgstr "Примери"
+
+#: udata_front/theme/govrs/templates/apidoc.html:40
+#: udata_front/theme/govrs/templates/apidoc.html:121
+msgid "Provera da li httpie funkcioniše"
+msgstr "Провера да ли httpie функционише"
+
+#: udata_front/theme/govrs/templates/apidoc.html:43
+#: udata_front/theme/govrs/templates/apidoc.html:152
+msgid "Potvrda da jq funkcioniše"
+msgstr "Потврда да ли jq функционише"
+
+#: udata_front/theme/govrs/templates/apidoc.html:46
+#: udata_front/theme/govrs/templates/apidoc.html:163
+msgid "Pregled i preuzimanje podataka"
+msgstr "Преглед и преузимање података"
+
+#: udata_front/theme/govrs/templates/apidoc.html:49
+#: udata_front/theme/govrs/templates/apidoc.html:215
+msgid "Izmene i brisanje podataka"
+msgstr "Измене и брисање података"
+
+#: udata_front/theme/govrs/templates/apidoc.html:58
+msgid "Za developere i razvoj aplikacija"
+msgstr "За програмере и развој апликација"
+
+#: udata_front/theme/govrs/templates/apidoc.html:59
+msgid ""
+"На овој страници налази се опис рада бесплатног и отвореног RESTful API-ја "
+"овог веб-сајта"
+msgstr ""
+"На овој страници налази се опис рада бесплатног и отвореног RESTful API-ја "
+"овог веб-сајта"
+
+#: udata_front/theme/govrs/templates/apidoc.html:67
+msgid ""
+"Да бисте могли да извршите операције писања, прво морате да потврдите "
+"идентитет и добијете"
+msgstr ""
+"Да бисте могли да извршите операције писања, прво морате да потврдите "
+"идентитет и добијете"
+
+#: udata_front/theme/govrs/templates/apidoc.html:67
+msgid "API кључ"
+msgstr "API кључ"
+
+#: udata_front/theme/govrs/templates/apidoc.html:68
+msgid "у поставкама профила."
+msgstr "у поставкама профила."
+
+#: udata_front/theme/govrs/templates/apidoc.html:71
+msgid "Тај кључ треба да буде обезбеђен за сваки позив у"
+msgstr "Тај кључ треба да буде обезбеђен за сваки позив у"
+
+#: udata_front/theme/govrs/templates/apidoc.html:71
+msgid "HTTP заглављу."
+msgstr "HTTP заглављу."
+
+#: udata_front/theme/govrs/templates/apidoc.html:79
+msgid "За API позиве потребне су исте дозволе као за веб-интерфејс."
+msgstr "За API позиве потребне су исте дозволе као за веб-интерфејс."
+
+#: udata_front/theme/govrs/templates/apidoc.html:82
+msgid ""
+"На пример, морате бити члан неке организације да бисте променили неки од "
+"скупова података те организације."
+msgstr ""
+"На пример, морате бити члан неке организације да бисте променили неки од "
+"скупова података те организације."
+
+#: udata_front/theme/govrs/templates/apidoc.html:90
+msgid ""
+"Неке методе имају нумерацију страница и увек прате исти образац. Листа "
+"објеката је увијена у објекат"
+msgstr ""
+"Неке методе имају нумерацију страница и увек прате исти образац. Листа "
+"објеката је увијена у објекат"
+
+#: udata_front/theme/govrs/templates/apidoc.html:92
+msgid ""
+"Не морате сами да израчунавате претходне и наредне странице јер су URL-ови "
+"доступни као одговор у оквиру атрибута"
+msgstr ""
+"Не морате сами да израчунавате претходне и наредне странице јер су URL-ови "
+"доступни као одговор у оквиру атрибута"
+
+#: udata_front/theme/govrs/templates/apidoc.html:93
+#: udata_front/theme/govrs/templates/apidoc.html:115
+#: udata_front/theme/govrs/templates/apidoc.html:209
+msgid "и"
+msgstr "и"
+
+#: udata_front/theme/govrs/templates/apidoc.html:94
+msgid "Биће постављени на вредност"
+msgstr "Биће постављени на вредност"
+
+#: udata_front/theme/govrs/templates/apidoc.html:94
+msgid "ако не постоји претходна и/или наредна страница."
+msgstr "ако не постоји претходна и/или наредна страница."
+
+#: udata_front/theme/govrs/templates/apidoc.html:97
+msgid "Пример:"
+msgstr "Пример:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:115
+msgid "Сви примери користе"
+msgstr "Сви примери користе"
+
+#: udata_front/theme/govrs/templates/apidoc.html:116
+msgid ""
+"услужне програме због читљивости. Међутим, те алатке не морате да користите у"
+" свом коду; оне вам само помажу да боље разумете API."
+msgstr ""
+"услужне програме због читљивости. Међутим, те алатке не морате да користите у"
+" свом коду; оне вам само помажу да боље разумете API."
+
+#: udata_front/theme/govrs/templates/apidoc.html:122
+msgid ""
+"Кад се httpie инсталира, можете проверити да ли функционише тако што ћете "
+"откуцати команду у терминалу:"
+msgstr ""
+"Кад се httpie инсталира, можете проверити да ли функционише тако што ћете "
+"откуцати команду у терминалу:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:124
+#: udata_front/theme/govrs/templates/apidoc.html:155
+msgid "Резултат би требало да буде нешто слично овоме:"
+msgstr "Резултат би требало да буде нешто слично овоме:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:153
+msgid ""
+"Кад се jq инсталира, можете проверити да ли функционише тако што ћете "
+"откуцати команду у терминалу:"
+msgstr ""
+"Кад се jq инсталира, можете проверити да ли функционише тако што ћете "
+"откуцати команду у терминалу:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:157
+msgid ""
+"То је већ боље! Сада кад смо сигурни да функционише као што је очекивано, "
+"хајде да мало скратимо командну линију:"
+msgstr ""
+"То је већ боље! Сада кад смо сигурни да функционише као што је очекивано, "
+"хајде да мало скратимо командну линију:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:164
+msgid ""
+"Можете преузети листу организација (филтрирану или нефилтрирану) или једну "
+"организацију. Кад стигнете до крајње тачке, подразумевана величина странице "
+"износи 20. Хајде да преузмемо првих 20 организација из API-ја:"
+msgstr ""
+"Можете преузети листу организација (филтрирану или нефилтрирану) или једну "
+"организацију. Кад стигнете до крајње тачке, подразумевана величина странице "
+"износи 20. Хајде да преузмемо првих 20 организација из API-ја:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:178
+msgid ""
+"Ова листа је сјајна, али шта ако желимо да прођемо кроз листу враћених "
+"организација? Хајде да преузмемо URI-је првих 5 организација:"
+msgstr ""
+"Ова листа је сјајна, али шта ако желимо да прођемо кроз листу враћених "
+"организација? Хајде да преузмемо URI-је првих 5 организација:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:187
+msgid "Сада можемо да преузмемо јединствену организацију захваљујући враћеном URI-ју:"
+msgstr "Сада можемо да преузмемо јединствену организацију захваљујући враћеном URI-ју:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:189
+msgid ""
+"То је много података за израчунавање. Хајде да прерадимо те податке ако "
+"желимо искључиво метрику:"
+msgstr ""
+"То је много података за израчунавање. Хајде да прерадимо те податке ако "
+"желимо искључиво метрику:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:204
+msgid "Или можда само имена чланова организације:"
+msgstr "Или можда само имена чланова организације:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:207
+msgid ""
+"На вама је да преузмете податке који су од значаја за ваш пројекат. Не "
+"оклевајте да прођете кроз"
+msgstr ""
+"На вама је да преузмете податке који су од значаја за ваш пројекат. Не "
+"оклевајте да прођете кроз"
+
+#: udata_front/theme/govrs/templates/apidoc.html:208
+msgid "jq's tutorial"
+msgstr "jq туторијал"
+
+#: udata_front/theme/govrs/templates/apidoc.html:210
+msgid "приручник"
+msgstr "приручник"
+
+#: udata_front/theme/govrs/templates/apidoc.html:211
+msgid "ако желите да детаљно прегледате API преко командне линије."
+msgstr "ако желите да детаљно прегледате API преко командне линије."
+
+#: udata_front/theme/govrs/templates/apidoc.html:216
+msgid ""
+"Упозорење, ово може да буде опасно! Измене или брисања података помоћу API-ја"
+" не могу се опозвати и ми не пружамо никакав sandbox у којем бисте могли то "
+"да тестирате пре извршења (за сада). Пре употребе својих привилегија, будите "
+"свесни своје одговорности."
+msgstr ""
+"Упозорење, ово може да буде опасно! Измене или брисања података помоћу API-ја"
+" не могу се опозвати и ми не пружамо никакав sandbox у којем бисте могли то "
+"да тестирате пре извршења (за сада). Пре употребе својих привилегија, будите "
+"свесни своје одговорности."
+
+#: udata_front/theme/govrs/templates/apidoc.html:217
+msgid ""
+"Уколико покушате да измените ресурс без токена за потврду идентитета, биће "
+"враћен кôд 401:"
+msgstr ""
+"Уколико покушате да измените ресурс без токена за потврду идентитета, биће "
+"враћен кôд 401:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:228
+msgid ""
+"Морате да наведете API кључ (погледајте изнад) и да користите X-API-KEY HTTP "
+"заглавље. Ако покушајте да измените ресурс који не контролишете, биће враћен "
+"кôд 400:"
+msgstr ""
+"Морате да наведете API кључ (погледајте изнад) и да користите X-API-KEY HTTP "
+"заглавље. Ако покушајте да измените ресурс који не контролишете, биће враћен "
+"кôд 400:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:239
+msgid ""
+"Ово је порука коју ћете добити уколико сте навели погрешан API кључ. Постоји "
+"још једна потенцијална порука о грешци на коју можете да наиђете:"
+msgstr ""
+"Ово је порука коју ћете добити уколико сте навели погрешан API кључ. Постоји "
+"још једна потенцијална порука о грешци на коју можете да наиђете:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:249
+msgid ""
+"Појављује се уколико покушате да приступите ресурсу који не можете да мењате "
+"са својим акредитивима. Уколико је ваш кључ валидан, требало би да добијете "
+"нешто налик следећем:"
+msgstr ""
+"Појављује се уколико покушате да приступите ресурсу који не можете да мењате "
+"са својим акредитивима. Уколико је ваш кључ валидан, требало би да добијете "
+"нешто налик следећем:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:258
+msgid ""
+"Међутим, ништа се није променило! То је сасвим у реду, јер смо заборавили да "
+"наведемо праве податке који ће бити послати на сервер."
+msgstr ""
+"Међутим, ништа се није променило! То је сасвим у реду, јер смо заборавили да "
+"наведемо праве податке који ће бити послати на сервер."
+
+#: udata_front/theme/govrs/templates/apidoc.html:266
+msgid ""
+"Ресурс је модификован са жељеним вредностима. Коначно, можете обрисати ресурс"
+" употребом одговарајућег HTTP глагола (пазите, тренутно није могуће опозвати "
+"операцију брисања кроз API):"
+msgstr ""
+"Ресурс је модификован са жељеним вредностима. Коначно, можете обрисати ресурс"
+" употребом одговарајућег HTTP глагола (пазите, тренутно није могуће опозвати "
+"операцију брисања кроз API):"
+
+#: udata_front/theme/govrs/templates/apidoc.html:272
+msgid ""
+"Кад то обавите, можете проверити да ли је промена ступила на снагу користећи "
+"GET у односу на претходни URI:"
+msgstr ""
+"Кад то обавите, можете проверити да ли је промена ступила на снагу користећи "
+"GET у односу на претходни URI:"
+
+#: udata_front/theme/govrs/templates/apidoc.html:283
+msgid ""
+"Консултујте референтну документацију у наставку да бисте пронашли више детаља"
+" о употреби API-ја или поставили питања у вези с њим!"
+msgstr ""
+"Консултујте референтну документацију у наставку да бисте пронашли више детаља"
+" о употреби API-ја или поставили питања у вези с њим!"
+
+#: udata_front/theme/govrs/templates/apidoc.html:290
+msgid "API Reference"
+msgstr "Референца"
+
+
+#: udata_front/theme/govrs/templates/discover.html:10
+#: udata_front/theme/govrs/templates/discover.html:40
+msgid "Отворени подаци"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:16
+msgid "Намена, функција Отворених података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:22
+#: udata_front/theme/govrs/templates/discover.html:112
+msgid "Зашто институције отварају податке?"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:28
+msgid "Ко управља процесом"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:34
+msgid "Напредак држава на пољу отварања података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:43
+msgid "Шта су отворени подаци?"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:46
+msgid "Према једној од "
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:48
+msgid "дефиниција"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:65
+msgid "слободног софтвера"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:65
+msgid "(отворени облик)."
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:76
+msgid "Шта је и како функционише Портал отворених података?"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:81
+msgid "државних органа Републике Србије"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:87
+msgid "Портал отворених података замишљен је не само као"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:88
+msgid "репозиторијум отворених података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:91
+msgid "свеобухватног претраживања"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:98
+msgid "Садржаји портала доступни су програмерима путем"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:99
+msgid "апликативног програмског интерфејса"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:99
+msgid "(API)."
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:104
+msgid "примера употребе"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:134
+msgid "Доношењем"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:136
+msgid "Закона о електронској управи"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:144
+msgid "Уредбе о начину рада Портала отворених података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:152
+msgid "Ко управља процесом отварања података у Србији?"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:157
+msgid "Стратегија развоја електронске управе"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:158
+msgid "у Републици Србији за период од 2015. до 2018, као и"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:160
+msgid "акциони планови за спровођење иницијативе Партнерство за отворену управу"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:169
+msgid "Значај отворених података у Републици Србији препознат је и у"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:171
+msgid "експозеу председника Владе"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:177
+msgid "Институционално, процесом отварања података руководи"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:179
+msgid "Канцеларија за информационе технологије и електронску управу"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:197
+msgid "Свеобухватну подршку процесу отварања података у Србији пружа"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:199
+msgid "Програм Уједињених нација за развој"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:206
+msgid "Оцена спремности за отварање података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:219
+msgid "Отворени подаци на међународном нивоу"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:223
+msgid "Државе широм света"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:235
+msgid "Directive 2013/37/EU"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:237
+msgid ")."
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:240
+msgid "Први портал отворених података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:244
+msgid "Портал отворених података Европске уније"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:248
+msgid "Европски портал за податке"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:248
+msgid ", који аутоматски"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:249
+msgid "преузима"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:251
+msgid "укључујући"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:255
+msgid "Европска комисија"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:257
+msgid "процењује"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:266
+msgid "Партнерство за отворену управу"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:270
+msgid "Међународна повеља о отвореним подацима."
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:277
+msgid "Global Open Data Index"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:278
+msgid "или"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/discover.html:280
+msgid "Open Data Barometer"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/documents.html:6
+msgid "Documents and instructions"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/documents.html:11
+msgid "Law and by laws"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/documents.html:34
+msgid "Instructions"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/footer.html:42
+msgid "Useful links"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/footer.html:103
+msgid "Terms and conditions"
+msgstr "Услови коришћења"
+
+#: udata_front/theme/govrs/templates/home.html:17
+msgid "Добродошли на портал отворених података"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/home.html:18
+msgid "Пратите стање отворених података владе Републике Србије"
+msgstr ""
+
+#: udata_front/theme/govrs/templates/home.html:19
+msgid ""
+"Индекс отворених података пружа најсвеобухватнији доступни преглед стања "
+"јавних објава информација у влади. \n"
+"                Упоредите рангиране табеле и приказе мапа или дискутујте о "
+"налазима из локалне и тематске перспективе."
+msgstr ""
+
+#: udata_front/theme/govrs/templates/user/card.html:10
+msgid "admin"
+msgstr "Администратор"
+
+#: udata_front/theme/govrs/templates/user/card.html:13
+msgid "editor"
+msgstr "Уредник"
+
+#: udata_front/theme/govrs/templates/organization/list.html:20
+msgid "Datasets-total"
+msgstr "Података укупно"
+
+#: udata_front/theme/govrs/templates/organization/list.html:24
+msgid "Download resources"
+msgstr "Преузми списак организација"
+
+#: udata_front/theme/govrs/templates/reuse/list.html:48
+msgid "Download reuses"
+msgstr "Преузми примере употребе"
+
+#: udata_front/theme/govrs/templates/organization/list.html:41
+msgid "Created date asc"
+msgstr "Креирано навише"
+
+#: udata_front/theme/govrs/templates/organization/list.html:42
+msgid "Created date desc"
+msgstr "Креирано наниже"
+
+#: udata_front/theme/govrs/templates/organization/list.html:43
+msgid "Last modified asc"
+msgstr "Измењено навише"
+
+#: udata_front/theme/govrs/templates/organization/list.html:44
+msgid "Last modified desc"
+msgstr "Измењено наниже"
+
+#: udata_front/theme/govrs/templates/organization/list.html:45
+msgid "Title asc"
+msgstr "Наслов навише"
+
+#: udata_front/theme/govrs/templates/organization/list.html:46
+msgid "Title desc"
+msgstr "Наслов наниже"
+
+#: udata_front/theme/govrs/templates/organization/list.html:47
+msgid "Followers asc"
+msgstr "Пратиоци навише"
+
+#: udata_front/theme/govrs/templates/organization/list.html:48
+msgid "Followers desc"
+msgstr "Пратиоци наниже"
+
+#: udata_front/theme/govrs/templates/organization/list.html:49
+msgid "Reuses asc"
+msgstr "Примери употребе навише"
+
+#: udata_front/theme/govrs/templates/organization/list.html:50
+msgid "Reuses desc"
+msgstr "Примери употребе наниже"
+
+#: udata_front/theme/govrs/templates/post/list.html:28
+msgid "Posts total"
+msgstr "Вести укупно"
+
+#: udata_front/theme/govrs/templates/organization/list.html:21
+msgid "Organizations total"
+msgstr "Организација укупно"
+
+#: udata_front/theme/govrs/templates/dataset/display.html:273
+#: udata_front/theme/govrs/templates/participez/participez.html:5
+#: udata_front/theme/govrs/templates/reuse/display.html:180
+msgid "Participate new"
+msgstr "Укључите се у све отворених података"
+
+#: udata_front/theme/govrs/templates/participez/participez.html:36
+#: udata_front/theme/govrs/templates/participez/participez.html:42
+msgid "Go to documentation new"
+msgstr "Погледајте комплетну документацију"
+
+#: udata_front/theme/govrs/templates/home.html:144
+msgid "Featured reuses new"
+msgstr "Истакнутe употребе"
+
+#: udata_front/theme/govrs/templates/home.html:144
+msgid "Latest reuses new"
+msgstr "Последње употребе"
+
+#: udata_front/theme/gouvfr/templates/home.html:99
+msgid "Featured datasets new"
+msgstr "Истакни подаци"
+
+#: udata_front/theme/gouvfr/templates/home.html:100
+msgid "Latest datasets new"
+msgstr "Последњи подаци"
