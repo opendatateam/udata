@@ -36,6 +36,9 @@ def reindex(classname, id):
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/{str(obj.id)}/unindex"
         try:
             r = requests.delete(url)
+            if r == 404:
+                # Unindexed already, we don't want to raise
+                return
             r.raise_for_status()
         except Exception:
             log.exception('Unable to index/unindex %s "%s"', model.__name__, str(obj.id))
