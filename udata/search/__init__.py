@@ -36,7 +36,7 @@ def reindex(classname, id):
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/{str(obj.id)}/unindex"
         try:
             r = requests.delete(url)
-            if r == 404:
+            if r.status_code == 404:
                 # Unindexed already, we don't want to raise
                 return
             r.raise_for_status()
@@ -52,7 +52,7 @@ def unindex(classname, id):
     try:
         url = f"{current_app.config['SEARCH_SERVICE_API_URL']}{adapter_class.search_url}/{str(id)}/unindex"
         r = requests.delete(url)
-        if r == 404:
+        if r.status_code == 404:
             # Unindexed already, we don't want to raise
             return
         r.raise_for_status()
