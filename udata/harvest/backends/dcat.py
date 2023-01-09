@@ -5,6 +5,7 @@ import requests
 from rdflib import Graph, URIRef, BNode
 from rdflib.namespace import RDF
 import xml.etree.ElementTree as ET
+from typing import List
 
 from udata.rdf import (
     DCAT, DCT, HYDRA, SPDX, namespace_manager, guess_format, url_from_rdf
@@ -49,9 +50,9 @@ class DcatBackend(BaseBackend):
     def initialize(self):
         '''List all datasets for a given ...'''
         fmt = self.get_format()
-        graph = self.parse_graph(self.source.url, fmt)
+        graphs = self.parse_graph(self.source.url, fmt)
         self.job.data = {
-            'graph': graph.serialize(format=fmt, indent=None),
+            'graphs': [graph.serialize(format=fmt, indent=None) for graph in graphs],
             'format': fmt,
         }
 
@@ -71,8 +72,13 @@ class DcatBackend(BaseBackend):
                 raise ValueError(msg)
         return fmt
 
-    def parse_graph(self, url, fmt):
-        graph = Graph(namespace_manager=namespace_manager)
+    def parse_graph(self, url, fmt) -> List[Graph]:
+        """
+        Returns an instance of rdflib.Graph for each detected page
+        The index in the list is the page number
+        """
+        graphs = []
+        page = 0
         while url:
             subgraph = Graph(namespace_manager=namespace_manager)
             subgraph.parse(data=requests.get(url).text, format=fmt)
@@ -84,20 +90,25 @@ class DcatBackend(BaseBackend):
                     pagination = subgraph.resource(pagination)
                     url = url_from_rdf(pagination, prop)
                     break
+            graphs.append(subgraph)
 
-            graph += subgraph
+            for node in subgraph.subjects(RDF.type, DCAT.Dataset):
+                id = subgraph.value(node, DCT.identifier)
+                kwargs = {'nid': str(node), 'page': page}
+                kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
+                self.add_item(id, **kwargs)
+                if self.max_items and len(self.job.items) >= self.max_items:
+                    # this will stop iterating on pagination
+                    url = None
 
-        for node in graph.subjects(RDF.type, DCAT.Dataset):
-            id = graph.value(node, DCT.identifier)
-            kwargs = {'nid': str(node)}
-            kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-            self.add_item(id, **kwargs)
+            page += 1
 
-        return graph
+        return graphs
 
     def parse_csw_graph(self, url, fmt):
-        graph = Graph(namespace_manager=namespace_manager)
+        graphs = []
 
+        page = 0
         body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" service="CSW" version="2.0.2" resultType="results" startPosition="{start}" maxRecords="15" outputFormat="application/xml" outputSchema="http://www.w3.org/ns/dcat#">
             <csw:Query typeNames="csw:Record">
                 <csw:ElementSetName>full</csw:ElementSetName>
@@ -105,7 +116,8 @@ class DcatBackend(BaseBackend):
             </csw:GetRecords>'''
         headers = {"Content-Type": "application/xml"}
 
-        tree = ET.fromstring(requests.post(url, data=body.format(start=1), headers=headers, verify=False).text)
+        content = requests.post(url, data=body.format(start=1), headers=headers, verify=False).text
+        tree = ET.fromstring(content)
 
         with open('./csw.xml', 'w') as f:
             while tree:
@@ -113,10 +125,15 @@ class DcatBackend(BaseBackend):
                     # Why? Happens on https://data.naturefrance.fr/geonetwork/srv/eng/csw
                     break
                 for child in tree[1]:  # Iterating on CSW SearchResults
-                    f.write(ET.tostring(child).decode('utf-8') + '\n')
                     subgraph = Graph(namespace_manager=namespace_manager)
                     subgraph.parse(data=ET.tostring(child), format=fmt)
-                    graph += subgraph
+                    graphs.append(subgraph)
+
+                    for node in subgraph.subjects(RDF.type, DCAT.Dataset):
+                        id = subgraph.value(node, DCT.identifier)
+                        kwargs = {'nid': str(node), 'page': page}
+                        kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
+                        self.add_item(id, **kwargs)
 
                 if tree[1].attrib['nextRecord'] != '0':
                     print(tree[1].attrib['nextRecord'])
@@ -125,14 +142,8 @@ class DcatBackend(BaseBackend):
                         headers=headers, verify=False).text)
                 else:
                     break
-
-        for node in graph.subjects(RDF.type, DCAT.Dataset):
-            id = graph.value(node, DCT.identifier)
-            kwargs = {'nid': str(node)}
-            kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-            self.add_item(id, **kwargs)
-
-        return graph
+                page += 1
+        return graphs
 
     def get_node_from_item(self, item):
         if 'nid' in item.kwargs and 'type' in item.kwargs:
@@ -141,7 +152,7 @@ class DcatBackend(BaseBackend):
 
     def process(self, item):
         graph = Graph(namespace_manager=namespace_manager)
-        data = self.job.data['graph']
+        data = self.job.data['graphs'][item.kwargs['page']]
         format = self.job.data['format']
 
         node = self.get_node_from_item(item)

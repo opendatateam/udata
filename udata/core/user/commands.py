@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from flask import current_app
 from flask_security.forms import RegisterForm
-from flask_security.utils import encrypt_password
+from flask_security.utils import hash_password
 from werkzeug.datastructures import MultiDict
 
 from udata.models import User, datastore
@@ -34,7 +34,7 @@ def create():
     with current_app.test_request_context():
         form = RegisterForm(MultiDict(data), meta={'csrf': False})
     if form.validate():
-        data['password'] = encrypt_password(data['password'])
+        data['password'] = hash_password(data['password'])
         del data['password_confirm']
         data['confirmed_at'] = datetime.utcnow()
         user = datastore.create_user(**data)
@@ -74,7 +74,7 @@ def delete():
 @click.argument('email')
 def set_admin(email):
     '''Set an user as administrator'''
-    user = datastore.get_user(email)
+    user = datastore.find_user(email=email)
     log.info('Adding admin role to user %s (%s)', user.fullname, user.email)
     role = datastore.find_or_create_role('admin')
     datastore.add_role_to_user(user, role)
@@ -84,7 +84,7 @@ def set_admin(email):
 @grp.command()
 @click.argument('email')
 def password(email):
-    user = datastore.get_user(email)
+    user = datastore.find_user(email=email)
     password = click.prompt('Enter new password', hide_input=True)
-    user.password = encrypt_password(password)
+    user.password = hash_password(password)
     user.save()

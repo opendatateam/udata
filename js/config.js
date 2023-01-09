@@ -140,6 +140,11 @@ export const hidpi = (window.devicePixelRatio > 1 || (
 export const tags = _jsonMeta('tags-config');
 
 /**
+ * License groups options
+ */
+export const license_groups = _jsonMeta('license-groups-options') && Object.fromEntries(_jsonMeta('license-groups-options'));
+
+/**
  * Max number of resources to display uncollapsed in dataset view
  */
 export const dataset_max_resources_uncollapsed = _jsonMeta('dataset-max-resources-uncollapsed');
@@ -185,6 +190,7 @@ export default {
     is_delete_me_enabled,
     hidpi,
     tags,
+    license_groups,
     dataset_max_resources_uncollapsed,
     is_search_autocomplete_enabled,
     search_autocomplete_debounce,

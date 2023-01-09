@@ -61,15 +61,26 @@ class DcatBackendTest:
         job = source.get_last_job()
         assert len(job.items) == 3
 
-        datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
         assert len(datasets) == 3
 
         for i in '1 2 3'.split():
             d = datasets[i]
-            assert d.title == 'Dataset {0}'.format(i)
-            assert d.description == 'Dataset {0} description'.format(i)
-            assert d.extras['dct:identifier'] == i
+            assert d.title == f'Dataset {i}'
+            assert d.description == f'Dataset {i} description'
+            assert d.harvest.remote_id == i
+            assert d.harvest.backend == 'DCAT'
+            assert d.harvest.source_id == str(source.id)
+            assert d.harvest.domain == source.domain
+            assert d.harvest.dct_identifier == i
+            assert d.harvest.remote_url == f'http://data.test.org/datasets/{i}'
+            assert d.harvest.uri == f'http://data.test.org/datasets/{i}'
+            assert d.harvest.created_at.date() == date(2016, 12, 14)
+            assert d.harvest.modified_at.date() == date(2016, 12, 14)
+            assert d.harvest.last_update.date() == date.today()
+            assert d.harvest.archived_at is None
+            assert d.harvest.archived is None
 
         # First dataset
         dataset = datasets['1']
@@ -97,7 +108,7 @@ class DcatBackendTest:
 
         actions.run(source.slug)
 
-        datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
         assert len(datasets) == 3
         assert len(datasets['1'].resources) == 2
@@ -122,7 +133,7 @@ class DcatBackendTest:
         assert dataset.temporal_coverage is not None
         assert dataset.temporal_coverage.start == date(2016, 1, 1)
         assert dataset.temporal_coverage.end == date(2016, 12, 5)
-        assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/1'
+        assert dataset.harvest.remote_url == 'http://data.test.org/datasets/1'
 
         assert len(dataset.resources) == 1
 
@@ -144,7 +155,7 @@ class DcatBackendTest:
         actions.run(source.slug)
         actions.run(source.slug)
 
-        datasets = {d.extras['dct:identifier']: d for d in Dataset.objects}
+        datasets = {d.harvest.dct_identifier: d for d in Dataset.objects}
 
         assert len(datasets) == 3
         assert len(datasets['1'].resources) == 2
@@ -227,17 +238,16 @@ class DcatBackendTest:
         actions.run(source.slug)
 
         # test dct:license support
-        extras = {'extras__dct:identifier': '3'}
-        dataset = Dataset.objects.get(**extras)
+        dataset = Dataset.objects.get(harvest__dct_identifier='3')
         assert dataset.license.id == 'lov2'
-        assert dataset.extras['remote_url'] == 'http://data.test.org/datasets/3'
-        assert dataset.created_at.date() == date(2016, 12, 14)
-        assert dataset.last_modified.date() == date(2016, 12, 14)
+        assert dataset.harvest.remote_url == 'http://data.test.org/datasets/3'
+        assert dataset.harvest.remote_id == '3'
+        assert dataset.harvest.created_at.date() == date(2016, 12, 14)
+        assert dataset.harvest.modified_at.date() == date(2016, 12, 14)
         assert dataset.frequency == 'daily'
         assert dataset.description == 'Dataset 3 description'
 
-        extras = {'extras__dct:identifier': '1'}
-        dataset = Dataset.objects.get(**extras)
+        dataset = Dataset.objects.get(harvest__dct_identifier='1')
         # test abstract description support
         assert dataset.description == 'Dataset 1 description'
 
@@ -250,7 +260,13 @@ class DcatBackendTest:
         actions.run(source.slug)
         dataset = Dataset.objects.filter(organization=org).first()
         assert dataset is not None
-        assert dataset.created_at.date() == date(2004, 11, 3)
+        assert dataset.harvest is not None
+        assert dataset.harvest.remote_id == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
+        assert dataset.harvest.dct_identifier == '0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
+        assert dataset.harvest.created_at.date() == date(2004, 11, 3)
+        assert dataset.harvest.modified_at is None
+        assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
+        assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith('Data of type chemistry')
 
     def test_sigoreme_xml_catalog(self, rmock):
@@ -270,6 +286,14 @@ class DcatBackendTest:
         assert dataset.license.id == 'fr-lo'
         assert len(dataset.resources) == 1
         assert dataset.description.startswith('Data from the \'National network')
+        assert dataset.harvest is not None
+        assert dataset.harvest.dct_identifier == '0437a976-cff1-4fa6-807a-c23006df2f8f'
+        assert dataset.harvest.remote_id == '0437a976-cff1-4fa6-807a-c23006df2f8f'
+        assert dataset.harvest.created_at is None
+        assert dataset.harvest.modified_at is None
+        assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'
+        assert dataset.harvest.remote_url == 'https://sig.oreme.org/geonetwork/srv/eng/catalog.search#/metadata//datasets/0437a976-cff1-4fa6-807a-c23006df2f8f'
+        assert dataset.harvest.last_update.date() == date.today()
 
     def test_unsupported_mime_type(self, rmock):
         url = DCAT_URL_PATTERN.format(path='', domain=TEST_DOMAIN)

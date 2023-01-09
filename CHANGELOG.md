@@ -2,6 +2,42 @@
 
 ## Current (in progress)
 
+- Nothing yet
+
+## 6.0.0 (2023-01-09)
+
+- :warning: Kafka removal [#2783](https://github.com/opendatateam/udata/pull/2783)[#2794](https://github.com/opendatateam/udata/pull/2794):
+  - Resources events publication now uses webhooks
+  - Search indexation (at runtime and with index command) are now made through HTTP requests.
+  - If you use [udata-search-service](https://pypi.org/project/udata-search-service/), you need to upgrade to the >=2.0.0 version
+- Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
+- Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
+- Add optionnal license select group custom setting for admin [#2786](https://github.com/opendatateam/udata/pull/2786)
+- Make index setup optional on init based on config [#2797](https://github.com/opendatateam/udata/pull/2797)
+
+## 5.0.2 (2022-11-29)
+
+- :warning: Upgrade to `Flask-Security-Too` version 4.0.0 [#2772](https://github.com/opendatateam/udata/pull/2772):
+  - New User model attribute `fs_uniquifier`, migration needed.
+  - The `fs_uniquifier` is used to invalidate existing session in case of password reset.
+  - The user's `fs_uniquifier` is used instead of the `id` for auth mecanism including permissions.
+  - Exhaustive list of changes [here](https://flask-security-too.readthedocs.io/en/stable/changelog.html#version-4-0-0).
+- Fix apiv2 swagger with harvest metadata and add apiv2 swagger tests [#2782](https://github.com/opendatateam/udata/pull/2782)
+- Improve frequency criterion in quality score [#2771](https://github.com/opendatateam/udata/pull/2771)
+- Add quality score to csv catalogs [#2785](https://github.com/opendatateam/udata/pull/2785)
+- Optimize DCAT harvesting on large multiple-paged catalogs, introduce `HARVEST_MAX_ITEMS` development setting [#2781](https://github.com/opendatateam/udata/pull/2781)
+- Add condition in security mail utils class to avoid mail sending according to config var [#2788](https://github.com/opendatateam/udata/pull/2788)
+
+## 5.0.1 (2022-11-14)
+
+- Fix resource harvest uri validation error [#2780](https://github.com/opendatateam/udata/pull/2780)
+
+## 5.0.0 (2022-11-14)
+
+- :warning: **Breaking change** Use dedicated dynamic harvest metadata for dataset and resources. A migration copies identifying fields from extras to this dedicated metadata field. Extras won't be used anymore for harvest-related information. udata-ckan, udata-ods and udata-front packages are impacted and should be upgraded accordingly [#2762](https://github.com/opendatateam/udata/pull/2762)
+
+## 4.1.3 (2022-11-02)
+
 - Fix image URLs for suggest endpoints [#2761](https://github.com/opendatateam/udata/pull/2761)
 - Switch from `Flask-restplus` to its fork `Flask-rest-x` [2770](https://github.com/opendatateam/udata/pull/2770)
 - Clean inactive harvest datasets. :warning: a migration archives datasets linked to inactive harvest sources [#2764](https://github.com/opendatateam/udata/pull/2764) [#2773](https://github.com/opendatateam/udata/pull/2773) [#2777](https://github.com/opendatateam/udata/pull/2777)

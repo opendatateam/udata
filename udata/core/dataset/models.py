@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from blinker import signal
 from dateutil.parser import parse as parse_dt
 from flask import current_app
+from mongoengine import DynamicEmbeddedDocument
 from mongoengine.signals import pre_save, post_save
 from mongoengine.fields import DateTimeField
 from stringdist import rdlevenshtein
@@ -125,6 +126,27 @@ def get_json_ld_extra(key, value):
         'name': key,
         'value': value,
     }
+
+
+class HarvestDatasetMetadata(DynamicEmbeddedDocument):
+    backend = db.StringField()
+    created_at = db.DateTimeField()
+    modified_at = db.DateTimeField()
+    source_id = db.StringField()
+    remote_id = db.StringField()
+    domain = db.StringField()
+    last_update = db.DateTimeField()
+    remote_url = db.URLField()
+    uri = db.StringField()
+    dct_identifier = db.StringField()
+    archived_at = db.DateTimeField()
+    archived = db.StringField()
+
+
+class HarvestResourceMetadata(DynamicEmbeddedDocument):
+    created_at = db.DateTimeField()
+    modified_at = db.DateTimeField()
+    uri = db.StringField()
 
 
 class License(db.Document):
@@ -265,6 +287,7 @@ class ResourceMixin(object):
     filesize = db.IntField()  # `size` is a reserved keyword for mongoengine.
     fs_filename = db.StringField()
     extras = db.ExtrasField()
+    harvest = db.EmbeddedDocumentField(HarvestResourceMetadata)
     schema = db.DictField()
 
     created_at = db.DateTimeField(default=datetime.now, required=True)
@@ -435,6 +458,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     ext = db.MapField(db.GenericEmbeddedDocumentField())
     extras = db.ExtrasField()
+    harvest = db.EmbeddedDocumentField(HarvestDatasetMetadata)
 
     featured = db.BooleanField(required=True, default=False)
 
@@ -557,41 +581,57 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
 
     @property
     def last_update(self):
+        """
+        Use the more recent date we would have on resources (harvest, published, modified).
+        Default to dataset last_modified if no resource.
+        """
         if self.resources:
-            return max(resource.published for resource in self.resources)
+            dates = []
+            for res in self.resources:
+                dates += [res.modified, res.published]
+                if res.harvest and res.harvest.modified_at:
+                    dates.append(res.harvest.modified_at)
+            return max(dates)
         else:
             return self.last_modified
 
     @property
     def next_update(self):
         """Compute the next expected update date,
-
         given the frequency and last_update.
         Return None if the frequency is not handled.
+
+        We consider frequencies that have a number of
+        occurences on a timespan to be irregularry divided
+        in the timespan and expect a next update before the end
+        of the timespan.
+
+        Ex: the next update for a threeTimesAday freq is not
+        every 8 hours, but is maximum 24 hours later.
         """
         delta = None
-        if self.frequency == 'daily':
+        if self.frequency == 'hourly':
+            delta = timedelta(hours=1)
+        elif self.frequency in ['fourTimesADay', 'threeTimesADay', 'semidaily', 'daily']:
             delta = timedelta(days=1)
-        elif self.frequency == 'weekly':
+        elif self.frequency in ['fourTimesAWeek', 'threeTimesAWeek', 'semiweekly', 'weekly']:
             delta = timedelta(weeks=1)
-        elif self.frequency == 'fortnighly':
+        elif self.frequency == 'biweekly':
             delta = timedelta(weeks=2)
-        elif self.frequency == 'monthly':
-            delta = timedelta(weeks=4)
+        elif self.frequency in ['threeTimesAMonth', 'semimonthly', 'monthly']:
+            delta = timedelta(days=31)
         elif self.frequency == 'bimonthly':
-            delta = timedelta(weeks=4 * 2)
+            delta = timedelta(days=31 * 2)
         elif self.frequency == 'quarterly':
-            delta = timedelta(weeks=52 / 4)
-        elif self.frequency == 'biannual':
-            delta = timedelta(weeks=52 / 2)
-        elif self.frequency == 'annual':
-            delta = timedelta(weeks=52)
+            delta = timedelta(days=365 / 4)
+        elif self.frequency in ['threeTimesAYear', 'semiannual', 'annual']:
+            delta = timedelta(days=365)
         elif self.frequency == 'biennial':
-            delta = timedelta(weeks=52 * 2)
+            delta = timedelta(days=365 * 2)
         elif self.frequency == 'triennial':
-            delta = timedelta(weeks=52 * 3)
+            delta = timedelta(days=365 * 3)
         elif self.frequency == 'quinquennial':
-            delta = timedelta(weeks=52 * 5)
+            delta = timedelta(days=365 * 5)
         if delta is None:
             return
         else:
@@ -616,9 +656,13 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
         result['temporal_coverage'] = True if self.temporal_coverage else False
         result['spatial'] = True if self.spatial else False
 
-        result['update_frequency'] = False if self.frequency in ['unknown', 'irregular', 'punctual'] else True
+        result['update_frequency'] = self.frequency and self.frequency != 'unknown'
         if self.next_update:
-            result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days < 0 else False
+            result['update_fulfilled_in_time'] = True if -(self.next_update - datetime.now()).days <= 0 else False
+        elif self.frequency in ['continuous', 'irregular', 'punctual']:
+            # For these frequencies, we don't expect regular updates or can't quantify them.
+            # Thus we consider the update_fulfilled_in_time quality criterion to be true.
+            result['update_fulfilled_in_time'] = True
 
         result['dataset_description_quality'] = True if len(self.description) > current_app.config.get('QUALITY_DESCRIPTION_LENGTH') else False
 

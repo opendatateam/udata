@@ -8,6 +8,7 @@ from bson import ObjectId
 from flask import current_app
 
 from udata.auth import current_user
+from udata.core.dataset.models import HarvestDatasetMetadata
 from udata.models import User, Organization, PeriodicTask, Dataset
 
 from . import backends, signals
@@ -140,7 +141,7 @@ def purge_sources():
     for source in sources:
         if source.periodic_task:
             source.periodic_task.delete()
-        datasets = Dataset.objects.filter(**{'extras__harvest:source_id': str(source.id)})
+        datasets = Dataset.objects.filter(harvest__source_id=str(source.id))
         for dataset in datasets:
             archive_harvested_dataset(dataset, reason='harvester-deleted', dryrun=False)
         source.delete()
@@ -281,15 +282,18 @@ def attach(domain, filename):
 
             # Detach previously attached dataset
             Dataset.objects(**{
-                'extras__harvest:domain': domain,
-                'extras__harvest:remote_id': row['remote']
+                'harvest__domain': domain,
+                'harvest__remote_id': row['remote']
             }).update(**{
-                'unset__extras__harvest:domain': True,
-                'unset__extras__harvest:remote_id': True
+                'unset__harvest__domain': True,
+                'unset__harvest__remote_id': True
             })
 
-            dataset.extras['harvest:domain'] = domain
-            dataset.extras['harvest:remote_id'] = row['remote']
+            if not dataset.harvest:
+                dataset.harvest = HarvestDatasetMetadata()
+            dataset.harvest.domain = domain
+            dataset.harvest.remote_id = row['remote']
+
             dataset.last_modified = datetime.now()
             dataset.save()
             count += 1

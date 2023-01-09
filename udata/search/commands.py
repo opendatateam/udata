@@ -2,13 +2,12 @@ from datetime import datetime
 from flask import current_app
 import logging
 import sys
+import requests
 
 import click
-from udata_event_service.producer import produce
 
 from udata.commands import cli
-from udata.event.producer import get_topic
-from udata.search import adapter_catalog, KafkaMessageType
+from udata.search import adapter_catalog
 
 
 log = logging.getLogger(__name__)
@@ -57,37 +56,46 @@ def index_model(adapter, start, reindex=False, from_datetime=None):
     index_name = adapter.model.__name__.lower()
     if reindex:
         index_name += '-' + default_index_suffix_name(start)
+        payload = {
+            'index': index_name
+        }
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/create-index"
+        r = requests.post(url, json=payload)
+        r.raise_for_status()
 
     docs = iter_qs(qs, adapter)
     for indexable, doc in docs:
         try:
             if indexable:
-                action = KafkaMessageType.REINDEX if reindex else KafkaMessageType.INDEX
+                payload = {
+                    'document': doc,
+                    'index': index_name
+                }
+                url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/{adapter.model.__name__.lower()}s/index"
+                r = requests.post(url, json=payload)
+                r.raise_for_status()
             elif not indexable and not reindex:
-                action = KafkaMessageType.UNINDEX
+                url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/{adapter.model.__name__.lower()}s/{doc['id']}/unindex"
+                r = requests.delete(url)
+                r.raise_for_status()
             else:
                 continue
-            message_type = f'{adapter.model.__name__.lower()}.{action.value}'
-            produce(
-                kafka_uri=current_app.config.get('KAFKA_URI'),
-                topic=get_topic(message_type),
-                service='udata',
-                key_id=doc['id'],
-                document=doc,
-                meta={'message_type': message_type, 'index': index_name}
-            )
         except Exception as e:
             log.error('Unable to index %s "%s": %s', model, str(doc['id']),
                       str(e), exc_info=True)
 
 
 def finalize_reindex(models, start):
-    models_str = " " + " ".join(models) if models else ""
-    log.warning(
-        f'In order to use the newly created index, you should set the alias '
-        f'on the search service. Ex on `udata-search-service`, run:\n'
-        f'`udata-search-service set-alias {default_index_suffix_name(start)}{models_str}`'
-    )
+    try:
+        url = f"{current_app.config['SEARCH_SERVICE_API_URL']}/set-index-alias"
+        payload = {
+            'index_suffix_name': default_index_suffix_name(start),
+            'indices': models
+        }
+        r = requests.post(url, json=payload)
+        r.raise_for_status()
+    except Exception:
+        log.exception(f'Unable to set alias for index')
 
     modified_since_reindex = 0
     for adapter in iter_adapters():
@@ -117,6 +125,9 @@ def index(models=None, reindex=True, from_datetime=None):
 
     If from_datetime is specified, only models modified since this datetime will be indexed.
     '''
+    if not current_app.config['SEARCH_SERVICE_API_URL']:
+        log.error('Missing URL for search service')
+        sys.exit(-1)
 
     start = datetime.now()
     if from_datetime:
