@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- :warning: Kafka removal [#2783](https://github.com/opendatateam/udata/pull/2783):
+- :warning: Kafka removal [#2783](https://github.com/opendatateam/udata/pull/2783)[#2794](https://github.com/opendatateam/udata/pull/2794):
   - Resources events publication now uses webhooks
   - Search indexation (at runtime and with index command) are now made through HTTP requests
 - Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
