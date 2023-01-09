@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 6.0.0 (2023-01-09)
 
 - :warning: Kafka removal [#2783](https://github.com/opendatateam/udata/pull/2783)[#2794](https://github.com/opendatateam/udata/pull/2794):
   - Resources events publication now uses webhooks
