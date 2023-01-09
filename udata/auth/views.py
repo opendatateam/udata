@@ -84,7 +84,7 @@ def confirm_change_email(token):
 
     if user.email == new_email:
         msg = (
-            'Your change of email has already been confirmed.'
+            'Your change of email has already been confirmed.',
             'info')
     else:
         user.email = new_email
