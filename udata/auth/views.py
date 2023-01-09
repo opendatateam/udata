@@ -53,7 +53,7 @@ def confirm_change_email_token_status(token):
     new_email = None
 
     if not invalid and user:
-        user_id, token_email_hash, new_email = token_data
+        _, token_email_hash, new_email = token_data
         invalid = not verify_hash(token_email_hash, user.email)
 
     return expired, invalid, user, new_email
