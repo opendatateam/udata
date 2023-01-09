@@ -32,9 +32,6 @@ class Defaults(object):
     SEARCH_SERVICE_API_URL = None
     SEARCH_SERVICE_REQUEST_TIMEOUT = 20
 
-    # Kafka configuration
-    KAFKA_URI = None
-
     # BROKER_TRANSPORT = 'redis'
     CELERY_BROKER_URL = 'redis://localhost:6379'
     CELERY_BROKER_TRANSPORT_OPTIONS = {
@@ -219,12 +216,27 @@ class Defaults(object):
     TAG_MIN_LENGTH = 3
     TAG_MAX_LENGTH = 96
 
+    # Optionnal license groups used for a select input group widget
+    # in admin dataset edit view.
+    # A list of tuples, each tuple describing a group with its title and
+    # a list of licenses associated. Translations are not supported.
+    # Example:
+    # LICENSE_GROUPS = [
+    #    ('Administrative authorities', ['lov2', 'odc-odbl']),
+    #    ('All producers', ['lov2', 'cc-by', 'cc-by-sa', 'cc-zero'])
+    # ]
+    LICENSE_GROUPS = None
+
     # Cache duration for templates.
     TEMPLATE_CACHE_DURATION = 5  # Minutes.
 
     DELAY_BEFORE_REMINDER_NOTIFICATION = 30  # Days
 
     HARVEST_PREVIEW_MAX_ITEMS = 20
+
+    # Development setting to allow minimizing the number of harvested items
+    HARVEST_MAX_ITEMS = None
+
     # Harvesters are scheduled at midnight by default
     HARVEST_DEFAULT_SCHEDULE = '0 0 * * *'
 
@@ -415,6 +427,7 @@ class Defaults(object):
 
     FIXTURE_DATASET_SLUGS = []
     PUBLISH_ON_RESOURCE_EVENTS = False
+    RESOURCES_ANALYSER_URI = 'http://localhost:8000'
 
     # Datasets quality settings
     ###########################################################################
@@ -448,6 +461,7 @@ class Testing(object):
     URLS_ALLOW_PRIVATE = False
     FS_IMAGES_OPTIMIZE = True
     SECURITY_EMAIL_VALIDATOR_ARGS = {"check_deliverability": False}  # Disables deliverability for email domain name
+    PUBLISH_ON_RESOURCE_EVENTS = False
 
 
 class Debug(Defaults):

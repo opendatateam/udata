@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class KafkaMessageType(Enum):
+class EventMessageType(Enum):
     INDEX = 'index'
     REINDEX = 'reindex'
     UNINDEX = 'unindex'

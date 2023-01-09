@@ -58,6 +58,9 @@
     'MIN_LENGTH': config.TAG_MIN_LENGTH,
     'MAX_LENGTH': config.TAG_MAX_LENGTH,
 }|tojson|urlencode }}" />
+<meta name="license-groups-options" content={{
+    config.LICENSE_GROUPS|tojson|urlencode
+}} />
 <meta name="read-only-enabled" content="{{ 'true' if config.READ_ONLY_MODE else 'false' }}">
 
 {% endmacro %}

@@ -22,7 +22,8 @@ from udata.core.spatial.api_fields import geojson
 from .models import (
     Dataset, UPDATE_FREQUENCIES, DEFAULT_FREQUENCY, DEFAULT_LICENSE, CommunityResource
 )
-from .permissions import DatasetEditPermission
+from .api import ResourceMixin
+from .permissions import DatasetEditPermission, ResourceEditPermission
 from .search import DatasetSearch
 
 DEFAULT_PAGE_SIZE = 50
@@ -194,6 +195,53 @@ class DatasetAPI(API):
         return dataset
 
 
+@ns.route('/<dataset:dataset>/extras/', endpoint='dataset_extras',
+          doc=common_doc)
+@apiv2.response(400, 'Wrong payload format, dict expected')
+@apiv2.response(400, 'Wrong payload format, list expected')
+@apiv2.response(404, 'Dataset not found')
+@apiv2.response(410, 'Dataset has been deleted')
+class DatasetExtrasAPI(API):
+    @apiv2.doc('get_dataset_extras')
+    def get(self, dataset):
+        '''Get a dataset extras given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            apiv2.abort(410, 'Dataset has been deleted')
+        return dataset.extras
+
+    @apiv2.secure
+    @apiv2.doc('update_dataset_extras')
+    def put(self, dataset):
+        '''Update a given dataset extras'''
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, 'Wrong payload format, dict expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        DatasetEditPermission(dataset).test()
+        dataset.extras.update(data)
+        dataset.save()
+        return dataset.extras
+
+    @apiv2.secure
+    @apiv2.doc('delete_dataset_extras')
+    def delete(self, dataset):
+        '''Delete a given dataset extras key on a given dataset'''
+        data = request.json
+        if not isinstance(data, list):
+            apiv2.abort(400, 'Wrong payload format, list expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        DatasetEditPermission(dataset).test()
+        try:
+            for key in data:
+                del dataset.extras[key]
+        except KeyError:
+            apiv2.abort(404, 'Key not found in existing extras')
+        dataset.save()
+        return dataset.extras, 204
+
+
 @ns.route('/<dataset:dataset>/resources/', endpoint='resources')
 class ResourcesAPI(API):
     @apiv2.doc('list_resources')
@@ -252,3 +300,54 @@ class ResourceAPI(API):
             'resource': resource,
             'dataset_id': dataset.id if dataset else None
         }, specific_resource_fields)
+
+
+@ns.route('/<dataset:dataset>/resources/<uuid:rid>/extras/', endpoint='resource_extras',
+          doc=common_doc)
+@apiv2.param('rid', 'The resource unique identifier')
+@apiv2.response(400, 'Wrong payload format, dict expected')
+@apiv2.response(400, 'Wrong payload format, list expected')
+@apiv2.response(404, 'Key not found in existing extras')
+@apiv2.response(410, 'Dataset has been deleted')
+class ResourceExtrasAPI(ResourceMixin, API):
+    @apiv2.doc('get_resource_extras')
+    def get(self, dataset, rid):
+        '''Get a resource extras given its identifier'''
+        if dataset.deleted and not DatasetEditPermission(dataset).can():
+            apiv2.abort(410, 'Dataset has been deleted')
+        resource = self.get_resource_or_404(dataset, rid)
+        return resource.extras
+
+    @apiv2.secure
+    @apiv2.doc('update_resource_extras')
+    def put(self, dataset, rid):
+        '''Update a given resource extras on a given dataset'''
+        data = request.json
+        if not isinstance(data, dict):
+            apiv2.abort(400, 'Wrong payload format, dict expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        ResourceEditPermission(dataset).test()
+        resource = self.get_resource_or_404(dataset, rid)
+        resource.extras.update(data)
+        resource.save()
+        return resource.extras
+
+    @apiv2.secure
+    @apiv2.doc('delete_resource_extras')
+    def delete(self, dataset, rid):
+        '''Delete a given resource extras key on a given dataset'''
+        data = request.json
+        if not isinstance(data, list):
+            apiv2.abort(400, 'Wrong payload format, list expected')
+        if dataset.deleted:
+            apiv2.abort(410, 'Dataset has been deleted')
+        ResourceEditPermission(dataset).test()
+        resource = self.get_resource_or_404(dataset, rid)
+        try:
+            for key in data:
+                del resource.extras[key]
+        except KeyError:
+            apiv2.abort(404, 'Key not found in existing extras')
+        resource.save()
+        return resource.extras, 204

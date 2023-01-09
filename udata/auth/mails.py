@@ -5,8 +5,11 @@ from udata.tasks import task
 
 @task
 def sendmail(msg):
-    mail = current_app.extensions.get("mail")
-    mail.send(msg)
+    debug = current_app.config.get('DEBUG', False)
+    send_mail = current_app.config.get('SEND_MAIL', not debug)
+    if send_mail:
+        mail = current_app.extensions.get("mail")
+        mail.send(msg)
 
 
 class UdataMailUtil:
