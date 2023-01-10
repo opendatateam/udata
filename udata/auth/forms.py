@@ -51,7 +51,10 @@ class ExtendedResetPasswordForm(ResetPasswordForm):
 
 class ChangeEmailForm(Form):
     new_email = fields.StringField(_('New email'), [validators.DataRequired(), validators.Email()])
-    new_email_confirm = fields.StringField(_('Retype email'), [validators.EqualTo('new_email', message=_('Email does not match')), validators.Email()])
+    new_email_confirm = fields.StringField(
+        _('Retype email'),
+        [validators.EqualTo('new_email', message=_('Email does not match')), validators.Email()]
+    )
 
     def validate(self):
         if not super().validate():
