@@ -1,4 +1,4 @@
-from flask import flash, redirect, url_for, current_app
+from flask import flash, redirect, current_app
 from flask_login import current_user, login_required
 from flask_security.views import change_password
 from flask_security.views import confirm_email
@@ -15,6 +15,7 @@ from flask_security.utils import (
     login_user, logout_user, verify_hash)
 from werkzeug.local import LocalProxy
 from udata.i18n import lazy_gettext as _
+from udata.uris import endpoint_for
 
 from .forms import ChangeEmailForm
 
@@ -76,25 +77,20 @@ def confirm_change_email(token):
                     _security.confirm_email_within, new_email),
             'error'))
     if invalid or expired:
-        return redirect(url_for('site.home'))
+        return redirect(endpoint_for('site.home', 'admin.index'))
 
     if user != current_user:
         logout_user()
         login_user(user)
 
-    if user.email == new_email:
-        msg = (
-            'Your change of email has already been confirmed.',
-            'info')
-    else:
-        user.email = new_email
-        _datastore.put(user)
-        msg = (
-            'Thank you. Your change of email has been confirmed.',
-            'success')
+    user.email = new_email
+    _datastore.put(user)
+    msg = (
+        'Thank you. Your change of email has been confirmed.',
+        'success')
 
     do_flash(*msg)
-    return redirect(url_for('site.home'))
+    return redirect(endpoint_for('site.home', 'admin.index'))
 
 
 @login_required
@@ -112,7 +108,7 @@ def change_email():
                 'Thank you. Confirmation instructions for changing '
                 'your email have been sent to {0}.').format(new_email),
             'success')
-        return redirect(url_for('site.home'))
+        return redirect(endpoint_for('site.home', 'admin.index'))
 
     return _security.render_template('security/change_email.html', form=form)
 
