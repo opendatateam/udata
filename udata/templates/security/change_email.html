@@ -8,9 +8,9 @@
         method="POST" name="change_email_form">
         <fieldset>
             <legend>{{ _('Change email') }}</legend>
-              {{ form.hidden_tag() }}
-              {{ forms.field(form.new_email) }}
-              {{ forms.field(form.new_email_confirm) }}
+              {{ change_email_form.hidden_tag() }}
+              {{ forms.field(change_email_form.new_email) }}
+              {{ forms.field(change_email_form.new_email_confirm) }}
             <div class="form-group">
                 <div class="col-md-12">
                     <button type="submit" class="btn btn-primary btn-block">{{ _('Change email') }}</button>

@@ -55,6 +55,7 @@ class ChangeEmailForm(Form):
         _('Retype email'),
         [validators.EqualTo('new_email', message=_('Email does not match')), validators.Email()]
     )
+    submit = fields.SubmitField(_('Change email'))
 
     def validate(self):
         if not super().validate():

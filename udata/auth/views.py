@@ -1,4 +1,4 @@
-from flask import flash, redirect, current_app
+from flask import flash, redirect, current_app, url_for
 from flask_login import current_user, login_required
 from flask_security.views import change_password
 from flask_security.views import confirm_email
@@ -110,7 +110,7 @@ def change_email():
             'success')
         return redirect(endpoint_for('site.home', 'admin.index'))
 
-    return _security.render_template('security/change_email.html', form=form)
+    return _security.render_template('security/change_email.html', change_email_form=form)
 
 
 def create_security_blueprint(state, import_name):
