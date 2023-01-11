@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Add python version requirement <3.10 [#2798](https://github.com/opendatateam/udata/pull/2798)
 
 ## 6.0.0 (2023-01-09)
 
