@@ -1,6 +1,6 @@
 import logging
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from collections import OrderedDict
 from urllib.parse import urlparse
 
@@ -590,7 +590,14 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             for res in self.resources:
                 dates += [res.modified, res.published]
                 if res.harvest and res.harvest.modified_at:
-                    dates.append(res.harvest.modified_at)
+                    if isinstance(res.harvest.modified_at, date):
+                        dates.append(datetime(
+                            res.harvest.modified_at.year,
+                            res.harvest.modified_at.month,
+                            res.harvest.modified_at.day
+                        ))
+                    else:
+                        dates.append(res.harvest.modified_at.replace(tzinfo=None))
             return max(dates)
         else:
             return self.last_modified
