@@ -50,7 +50,7 @@ class DcatBackend(BaseBackend):
     def initialize(self):
         '''List all datasets for a given ...'''
         fmt = self.get_format()
-        graphs = self.parse_graph(self.source.url, fmt)
+        graphs = self.parse_csw_graph(self.source.url, fmt)
         self.job.data = {
             'graphs': [graph.serialize(format=fmt, indent=None) for graph in graphs],
             'format': fmt,
@@ -109,15 +109,19 @@ class DcatBackend(BaseBackend):
         graphs = []
 
         page = 0
-        body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" service="CSW" version="2.0.2" resultType="results" startPosition="{start}" maxRecords="15" outputFormat="application/xml" outputSchema="http://www.w3.org/ns/dcat#">
-            <csw:Query typeNames="csw:Record">
-                <csw:ElementSetName>full</csw:ElementSetName>
-            </csw:Query>
-            </csw:GetRecords>'''
+        body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:gmd="http://www.isotc211.org/2005/gmd" service="CSW" version="2.0.2" resultType="results" outputSchema="http://www.w3.org/ns/dcat#">
+                    <csw:Query typeNames="gmd:MD_Metadata"><csw:ElementSetName>full</csw:ElementSetName>
+                        <csw:Constraint version="1.1.0">
+                            <Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo><PropertyName>documentStandard</PropertyName><Literal>iso19139</Literal></PropertyIsEqualTo></Filter>
+                        </csw:Constraint>
+                    </csw:Query>
+                </csw:GetRecords>'''
         headers = {"Content-Type": "application/xml"}
 
         content = requests.post(url, data=body.format(start=1), headers=headers, verify=False).text
         tree = ET.fromstring(content)
+
+        print(content)
 
         with open('./csw.xml', 'w') as f:
             while tree:
