@@ -256,6 +256,7 @@ def temporal_from_resource(resource):
     '''
     Parse a temporal coverage from a RDF class/resource ie. either:
     - a `dct:PeriodOfTime` with schema.org `startDate` and `endDate` properties
+    - a `dct:PeriodOfTime` with DCAT `startDate` and `endDate` properties
     - an inline gov.uk Time Interval value
     - an URI reference to a gov.uk Time Interval ontology
       http://reference.data.gov.uk/
@@ -268,6 +269,11 @@ def temporal_from_resource(resource):
         return db.DateRange(
             start=resource.value(SCHEMA.startDate).toPython(),
             end=resource.value(SCHEMA.endDate).toPython()
+        )
+    elif resource.value(DCAT.startDate):
+        return db.DateRange(
+            start=resource.value(DCAT.startDate).toPython(),
+            end=resource.value(DCAT.endDate).toPython()
         )
     elif resource.value(SCV.min):
         return db.DateRange(
