@@ -3,6 +3,7 @@ This module centralize dataset helpers for RDF/DCAT serialization and parsing
 '''
 import calendar
 import logging
+import re
 
 from datetime import date, datetime
 from html.parser import HTMLParser
@@ -331,6 +332,20 @@ def title_from_rdf(rdf, url):
             return i18n._('Nameless resource')
 
 
+def schema_from_rdf(rdf):
+    schema_string = rdf_value(rdf, DCT.conformsTo)
+    # TODO: what is the best way to properly check the url
+    if schema_string and schema_string.startswith('https://schema.data.gouv.fr/schemas'):
+        match = re.match(
+            r'/(?<name>[^\/]*\/[^\/]*)\/(?<version>[^\/]*)\/schema\.json',
+            schema_string)
+        if match:
+            # what about latest ?
+            # TODO : check that it does match with schema catalog
+            return {'name': match.name, 'version': match.version}
+    # TODO: we could want to store schema url in extras if it isn't in schema.data.gouv.fr catalog
+
+
 def remote_url_from_rdf(rdf):
     '''
     Return DCAT.landingPage if found and uri validation succeeds.
@@ -388,6 +403,8 @@ def resource_from_rdf(graph_or_distrib, dataset=None):
             resource.checksum = Checksum()
             resource.checksum.value = rdf_value(checksum, SPDX.checksumValue)
             resource.checksum.type = algorithm
+
+    resource.schema = schema_from_rdf(distrib)
 
     identifier = rdf_value(distrib, DCT.identifier)
     uri = distrib.identifier.toPython() if isinstance(distrib.identifier, URIRef) else None
