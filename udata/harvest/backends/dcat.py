@@ -109,7 +109,7 @@ class DcatBackend(BaseBackend):
         graphs = []
 
         page = 0
-        body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:gmd="http://www.isotc211.org/2005/gmd" service="CSW" version="2.0.2" resultType="results" outputSchema="http://www.w3.org/ns/dcat#">
+        body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:gmd="http://www.isotc211.org/2005/gmd" service="CSW" version="2.0.2" resultType="results" startPosition="{start}" maxPosition="15" outputSchema="http://www.w3.org/ns/dcat#">
                     <csw:Query typeNames="gmd:MD_Metadata"><csw:ElementSetName>full</csw:ElementSetName>
                         <csw:Constraint version="1.1.0">
                             <Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo><PropertyName>documentStandard</PropertyName><Literal>iso19139</Literal></PropertyIsEqualTo></Filter>
@@ -121,17 +121,17 @@ class DcatBackend(BaseBackend):
         content = requests.post(url, data=body.format(start=1), headers=headers, verify=False).text
         tree = ET.fromstring(content)
 
-        print(content)
-
         with open('./csw.xml', 'w') as f:
             while tree:
+                graph = Graph(namespace_manager=namespace_manager)
                 if len(tree) < 2:
                     # Why? Happens on https://data.naturefrance.fr/geonetwork/srv/eng/csw
                     break
                 for child in tree[1]:  # Iterating on CSW SearchResults
+                    f.write(ET.tostring(child).decode('utf-8') + '\n')
                     subgraph = Graph(namespace_manager=namespace_manager)
                     subgraph.parse(data=ET.tostring(child), format=fmt)
-                    graphs.append(subgraph)
+                    graph += subgraph
 
                     for node in subgraph.subjects(RDF.type, DCAT.Dataset):
                         id = subgraph.value(node, DCT.identifier)
@@ -141,11 +141,11 @@ class DcatBackend(BaseBackend):
 
                 if tree[1].attrib['nextRecord'] != '0':
                     print(tree[1].attrib['nextRecord'])
-                    tree = ET.fromstring(requests.post(
-                        url, data=body.format(start=tree[1].attrib['nextRecord']),
-                        headers=headers, verify=False).text)
+                    tree = ET.fromstring(requests.post(url, data=body.format(start=tree[1].attrib['nextRecord']),
+                                                       headers=headers, verify=False).text)
                 else:
                     break
+                graphs.append(graph)
                 page += 1
         return graphs
 
