@@ -153,6 +153,7 @@ class CswBackend(DcatBackend):
         with open('./csw.xml', 'w') as f:
             while tree:
                 graph = Graph(namespace_manager=namespace_manager)
+                # TODO: we should get the csw:SearchResults node
                 if len(tree) < 2:
                     # Why? Happens on https://data.naturefrance.fr/geonetwork/srv/eng/csw
                     break
