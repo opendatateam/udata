@@ -61,7 +61,7 @@ class DcatBackend(BaseBackend):
         # if format can't be guessed from the url
         # we fallback on the declared Content-Type
         if not fmt:
-            response = requests.head(self.source.url, verify=False)
+            response = requests.head(self.source.url)
             mime_type = response.headers.get('Content-Type', '').split(';', 1)[0]
             if not mime_type:
                 msg = 'Unable to detect format from extension or mime type'
@@ -147,7 +147,7 @@ class CswBackend(DcatBackend):
                 </csw:GetRecords>'''
         headers = {"Content-Type": "application/xml"}
 
-        content = requests.post(url, data=body.format(start=1), headers=headers, verify=False).text
+        content = requests.post(url, data=body.format(start=1), headers=headers).text
         tree = ET.fromstring(content)
 
         with open('./csw.xml', 'w') as f:
@@ -173,7 +173,7 @@ class CswBackend(DcatBackend):
                 if tree[1].attrib['nextRecord'] != '0':
                     tree = ET.fromstring(
                         requests.post(url, data=body.format(start=tree[1].attrib['nextRecord']),
-                                      headers=headers, verify=False).text)
+                                      headers=headers).text)
                 else:
                     break
 
