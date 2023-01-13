@@ -44,6 +44,7 @@ setup(
         ],
         'udata.harvesters': [
             'dcat = udata.harvest.backends.dcat:DcatBackend',
+            'csw = udata.harvest.backends.dcat:CswBackend',
         ],
         'udata.avatars': [
             'internal = udata.features.identicon.backends:internal',

@@ -50,7 +50,7 @@ class DcatBackend(BaseBackend):
     def initialize(self):
         '''List all datasets for a given ...'''
         fmt = self.get_format()
-        graphs = self.parse_csw_graph(self.source.url, fmt)
+        graphs = self.parse_graph(self.source.url, fmt)
         self.job.data = {
             'graphs': [graph.serialize(format=fmt, indent=None) for graph in graphs],
             'format': fmt,
@@ -105,14 +105,43 @@ class DcatBackend(BaseBackend):
 
         return graphs
 
-    def parse_csw_graph(self, url, fmt):
+    def get_node_from_item(self, item):
+        if 'nid' in item.kwargs and 'type' in item.kwargs:
+            nid = item.kwargs['nid']
+            return URIRef(nid) if item.kwargs['type'] == 'uriref' else BNode(nid)
+
+    def process(self, item):
+        graph = Graph(namespace_manager=namespace_manager)
+        data = self.job.data['graphs'][item.kwargs['page']]
+        format = self.job.data['format']
+
+        node = self.get_node_from_item(item)
+        graph.parse(data=bytes(data, encoding='utf8'), format=format)
+
+        dataset = self.get_dataset(item.remote_id)
+        dataset = dataset_from_rdf(graph, dataset, node=node)
+        return dataset
+
+
+class CswBackend(DcatBackend):
+    display_name = 'CSW'
+
+    def parse_graph(self, url, fmt):
         graphs = []
 
         page = 0
-        body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:gmd="http://www.isotc211.org/2005/gmd" service="CSW" version="2.0.2" resultType="results" startPosition="{start}" maxPosition="15" outputSchema="http://www.w3.org/ns/dcat#">
-                    <csw:Query typeNames="gmd:MD_Metadata"><csw:ElementSetName>full</csw:ElementSetName>
+        body = '''<csw:GetRecords xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                                  xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                                  service="CSW" version="2.0.2" resultType="results"
+                                  startPosition="{start}" maxPosition="15"
+                                  outputSchema="http://www.w3.org/ns/dcat#">
+                    <csw:Query typeNames="gmd:MD_Metadata">
+                        <csw:ElementSetName>full</csw:ElementSetName>
                         <csw:Constraint version="1.1.0">
-                            <Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo><PropertyName>documentStandard</PropertyName><Literal>iso19139</Literal></PropertyIsEqualTo></Filter>
+                            <Filter xmlns="http://www.opengis.net/ogc"><PropertyIsEqualTo>
+                                <PropertyName>documentStandard</PropertyName>
+                                <Literal>iso19139</Literal>
+                            </PropertyIsEqualTo></Filter>
                         </csw:Constraint>
                     </csw:Query>
                 </csw:GetRecords>'''
@@ -138,30 +167,14 @@ class DcatBackend(BaseBackend):
                         kwargs = {'nid': str(node), 'page': page}
                         kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
                         self.add_item(id, **kwargs)
-
-                if tree[1].attrib['nextRecord'] != '0':
-                    print(tree[1].attrib['nextRecord'])
-                    tree = ET.fromstring(requests.post(url, data=body.format(start=tree[1].attrib['nextRecord']),
-                                                       headers=headers, verify=False).text)
-                else:
-                    break
                 graphs.append(graph)
                 page += 1
+
+                if tree[1].attrib['nextRecord'] != '0':
+                    tree = ET.fromstring(
+                        requests.post(url, data=body.format(start=tree[1].attrib['nextRecord']),
+                                      headers=headers, verify=False).text)
+                else:
+                    break
+
         return graphs
-
-    def get_node_from_item(self, item):
-        if 'nid' in item.kwargs and 'type' in item.kwargs:
-            nid = item.kwargs['nid']
-            return URIRef(nid) if item.kwargs['type'] == 'uriref' else BNode(nid)
-
-    def process(self, item):
-        graph = Graph(namespace_manager=namespace_manager)
-        data = self.job.data['graphs'][item.kwargs['page']]
-        format = self.job.data['format']
-
-        node = self.get_node_from_item(item)
-        graph.parse(data=bytes(data, encoding='utf8'), format=format)
-
-        dataset = self.get_dataset(item.remote_id)
-        dataset = dataset_from_rdf(graph, dataset, node=node)
-        return dataset
