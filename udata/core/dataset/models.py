@@ -19,7 +19,7 @@ from udata.core import storages
 from udata.frontend.markdown import mdstrip
 from udata.models import db, WithMetrics, BadgeMixin, SpatialCoverage
 from udata.i18n import lazy_gettext as _
-from udata.utils import get_by, hash_url
+from udata.utils import get_by, hash_url, date_or_aware_datetime_to_naive_datetime
 from udata.uris import ValidationError, endpoint_for
 from udata.uris import validate as validate_url
 
@@ -590,14 +590,7 @@ class Dataset(WithMetrics, BadgeMixin, db.Owned, db.Document):
             for res in self.resources:
                 dates += [res.modified, res.published]
                 if res.harvest and res.harvest.modified_at:
-                    if isinstance(res.harvest.modified_at, date):
-                        dates.append(datetime(
-                            res.harvest.modified_at.year,
-                            res.harvest.modified_at.month,
-                            res.harvest.modified_at.day
-                        ))
-                    else:
-                        dates.append(res.harvest.modified_at.replace(tzinfo=None))
+                    dates.append(date_or_aware_datetime_to_naive_datetime(res.harvest.modified_at))
             return max(dates)
         else:
             return self.last_modified
