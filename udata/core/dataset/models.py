@@ -1,6 +1,6 @@
 import logging
 
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from collections import OrderedDict
 from urllib.parse import urlparse
 
