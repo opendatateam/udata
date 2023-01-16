@@ -26,6 +26,12 @@
         <dct:license>Licence Ouverte Version 2.0</dct:license>
         <dcat:landingPage>http://data.test.org/datasets/3</dcat:landingPage>
         <dct:accrualPeriodicity xmlns:dct="http://purl.org/dc/terms/">daily</dct:accrualPeriodicity>
+        <dct:temporal>
+          <dcterms:PeriodOfTime>
+            <schema:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</schema:startDate>
+            <schema:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</schema:endDate>
+          </dcterms:PeriodOfTime>
+        </dct:temporal>
       </dcat:Dataset>
     </dcat:dataset>
     <dcterms:title>Sample DCAT Catalog</dcterms:title>
@@ -37,7 +43,12 @@
         <dcat:keyword>Tag 3</dcat:keyword>
         <dcterms:abstract>Dataset 1 description</dcterms:abstract>
         <dcterms:title>Dataset 1</dcterms:title>
-        <dcterms:temporal rdf:resource="file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/temporal-1"/>
+        <dct:temporal>
+          <dcterms:PeriodOfTime>
+            <dcat:startDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-01-01T00:00:00</dcat:startDate>
+            <dcat:endDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2016-12-05T00:00:00</dcat:endDate>
+          </dcterms:PeriodOfTime>
+        </dct:temporal>
         <dcat:theme>Theme 1</dcat:theme>
         <dcterms:publisher rdf:resource="http://data.test.org/organizations/1"/>
         <owl:versionInfo>1.0</owl:versionInfo>

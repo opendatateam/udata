@@ -247,9 +247,17 @@ class DcatBackendTest:
         assert dataset.frequency == 'daily'
         assert dataset.description == 'Dataset 3 description'
 
+        assert dataset.temporal_coverage is not None
+        assert dataset.temporal_coverage.start == date(2016, 1, 1)
+        assert dataset.temporal_coverage.end == date(2016, 12, 5)
+
         dataset = Dataset.objects.get(harvest__dct_identifier='1')
         # test abstract description support
         assert dataset.description == 'Dataset 1 description'
+        # test DCAT periodoftime
+        assert dataset.temporal_coverage is not None
+        assert dataset.temporal_coverage.start == date(2016, 1, 1)
+        assert dataset.temporal_coverage.end == date(2016, 12, 5)
 
     def test_geonetwork_xml_catalog(self, rmock):
         url = mock_dcat(rmock, 'geonetwork.xml', path='catalog.xml')
@@ -268,6 +276,9 @@ class DcatBackendTest:
         assert dataset.harvest.uri == 'https://sig.oreme.org/geonetwork/srv/resources/datasets/0c456d2d-9548-4a2a-94ef-231d9d890ce2 https://sig.oreme.org/geonetwork/srv/resources0c456d2d-9548-4a2a-94ef-231d9d890ce2'
         assert dataset.harvest.remote_url is None  # the uri validation failed
         assert dataset.description.startswith('Data of type chemistry')
+        assert dataset.temporal_coverage is not None
+        assert dataset.temporal_coverage.start == date(2004, 11, 3)
+        assert dataset.temporal_coverage.end == date(2005, 3, 30)
 
     def test_sigoreme_xml_catalog(self, rmock):
         LicenseFactory(id='fr-lo', title='Licence ouverte / Open Licence')
