@@ -69,13 +69,7 @@ def confirm_change_email(token):
         do_flash(*get_message('INVALID_CONFIRMATION_TOKEN'))
     if expired:
         send_change_email_confirmation_instructions(user, new_email)
-        do_flash(*(
-            (
-                'You did not confirm your change of email within {0}. '
-                'New instructions to confirm your change of email have '
-                'been sent to {1}.').format(
-                    _security.confirm_email_within, new_email),
-            'error'))
+        do_flash(_('You did not confirm your change of email within {email_within}. New instructions to confirm your change of email have been sent to {new_email}.').format(email_within=_security.confirm_email_within, new_email=new_email), 'error')
     if invalid or expired:
         return redirect(endpoint_for('site.home', 'admin.index'))
 
@@ -85,9 +79,7 @@ def confirm_change_email(token):
 
     user.email = new_email
     _datastore.put(user)
-    msg = (
-        'Thank you. Your change of email has been confirmed.',
-        'success')
+    msg = (_('Thank you. Your change of email has been confirmed.'), 'success')
 
     do_flash(*msg)
     return redirect(endpoint_for('site.home', 'admin.index'))
@@ -102,12 +94,7 @@ def change_email():
     if form.validate_on_submit():
         new_email = form.new_email.data
         send_change_email_confirmation_instructions(current_user, new_email)
-
-        flash(
-            (
-                'Thank you. Confirmation instructions for changing '
-                'your email have been sent to {0}.').format(new_email),
-            'success')
+        flash(_('Thank you. Confirmation instructions for changing your email have been sent to {new_email}.').format(new_email=new_email), 'success')
         return redirect(endpoint_for('site.home', 'admin.index'))
 
     return _security.render_template('security/change_email.html', change_email_form=form)
