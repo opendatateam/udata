@@ -139,6 +139,17 @@ def daterange_end(value):
         return result.replace(month=12, day=31)
 
 
+def to_naive_datetime(given_date):
+    if isinstance(given_date, date):
+        return datetime(
+            given_date.year,
+            given_date.month,
+            given_date.day
+        )
+    elif isinstance(given_date, datetime):
+        return given_date.replace(tzinfo=None)
+
+
 def to_iso(dt):
     '''
     Format a date or datetime into an ISO-8601 string
