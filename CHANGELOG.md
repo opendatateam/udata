@@ -2,13 +2,21 @@
 
 ## Current (in progress)
 
+- Add python version requirement <3.10 [#2798](https://github.com/opendatateam/udata/pull/2798)
+- Fix date timezone and format for harvest previz [#2799](https://github.com/opendatateam/udata/pull/2799)
+- Add support for DCAT startDate and endDate in temporal coverage [#2801](https://github.com/opendatateam/udata/pull/2801)
+- New feature: Users can now change their email by themselves [#2792](https://github.com/opendatateam/udata/pull/2792)
+
+## 6.0.0 (2023-01-09)
+
 - :warning: Kafka removal [#2783](https://github.com/opendatateam/udata/pull/2783)[#2794](https://github.com/opendatateam/udata/pull/2794):
   - Resources events publication now uses webhooks
-  - Search indexation (at runtime and with index command) are now made through HTTP requests
+  - Search indexation (at runtime and with index command) are now made through HTTP requests.
+  - If you use [udata-search-service](https://pypi.org/project/udata-search-service/), you need to upgrade to the >=2.0.0 version
 - Add dedicated extras endpoints on resources and datasets [#2779](https://github.com/opendatateam/udata/pull/2779)
 - Enrich catalog with harvest infos [#2789](https://github.com/opendatateam/udata/pull/2789)
 - Add optionnal license select group custom setting for admin [#2786](https://github.com/opendatateam/udata/pull/2786)
-- New feature: Users can now change their email by themselves [#2792](https://github.com/opendatateam/udata/pull/2792)
+- Make index setup optional on init based on config [#2797](https://github.com/opendatateam/udata/pull/2797)
 
 ## 5.0.2 (2022-11-29)
 

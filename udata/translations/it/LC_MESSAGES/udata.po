@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-08-31 15:20\n"
+"POT-Creation-Date: 2022-10-19 14:26+0200\n"
+"PO-Revision-Date: 2022-12-08 16:35\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: it\n"
 "Language-Team: Italian\n"
@@ -18,31 +18,31 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:99
+#: udata/settings.py:102
 msgid "Welcome"
 msgstr "Benvenutə"
 
-#: udata/settings.py:100
+#: udata/settings.py:103
 msgid "Please confirm your email"
 msgstr "Per favore conferma la tua email"
 
-#: udata/settings.py:101
+#: udata/settings.py:104
 msgid "Login instructions"
 msgstr "Istruzioni di accesso"
 
-#: udata/settings.py:102
+#: udata/settings.py:105
 msgid "Your password has been reset"
 msgstr "La tua password è stata reimpostata"
 
-#: udata/settings.py:103
+#: udata/settings.py:106
 msgid "Your password has been changed"
 msgstr "La tua password è stata modificata"
 
-#: udata/settings.py:105
+#: udata/settings.py:108
 msgid "Password reset instructions"
 msgstr "Istruzioni per reimpostare la password"
 
-#: udata/settings.py:390
+#: udata/settings.py:393
 msgid "This dataset has been archived"
 msgstr "Questo dataset è stato archiviato"
 
@@ -62,48 +62,48 @@ msgstr "Scope di default"
 msgid "System administrator rights"
 msgstr "Diritti di amministratore di sistema"
 
-#: udata/auth/forms.py:13 udata/core/user/forms.py:14
+#: udata/auth/forms.py:12 udata/core/user/forms.py:14
 msgid "First name"
 msgstr "Nome"
 
-#: udata/auth/forms.py:13
+#: udata/auth/forms.py:12
 msgid "First name is required"
 msgstr "Il nome è obbligatorio"
 
-#: udata/auth/forms.py:14 udata/auth/forms.py:17 udata/core/user/forms.py:15
+#: udata/auth/forms.py:13 udata/auth/forms.py:16 udata/core/user/forms.py:15
 #: udata/core/user/forms.py:17
 msgid "URLs not allowed in this field"
 msgstr "URL non ammessi in questo campo"
 
-#: udata/auth/forms.py:16 udata/core/user/forms.py:16
+#: udata/auth/forms.py:15 udata/core/user/forms.py:16
 msgid "Last name"
 msgstr "Cognome"
 
-#: udata/auth/forms.py:16
+#: udata/auth/forms.py:15
 msgid "Last name is required"
 msgstr "Il cognome è obbligatorio"
 
-#: udata/auth/forms.py:33
+#: udata/auth/forms.py:32
 msgid "Password must be changed for security reasons"
 msgstr "La password deve essere cambiata per motivi di sicurezza"
 
-#: udata/auth/password_validation.py:13
+#: udata/auth/password_validation.py:27
 msgid "Password must be at least {pass_length} characters long"
 msgstr "La password deve contenere almeno {pass_length} caratteri"
 
-#: udata/auth/password_validation.py:18
+#: udata/auth/password_validation.py:33
 msgid "Password must contain lowercases"
 msgstr "La password deve includere delle lettere minuscole"
 
-#: udata/auth/password_validation.py:22
+#: udata/auth/password_validation.py:37
 msgid "Password must contain digits"
 msgstr "La password deve includere dei numeri"
 
-#: udata/auth/password_validation.py:26
+#: udata/auth/password_validation.py:42
 msgid "Password must contain uppercases"
 msgstr "La password deve includere delle lettere maiuscole"
 
-#: udata/auth/password_validation.py:30
+#: udata/auth/password_validation.py:47
 msgid "Password must contain symbols"
 msgstr "La password deve contenere dei caratteri speciali"
 
@@ -335,7 +335,7 @@ msgstr "Tre volte al giorno"
 msgid "Semidaily"
 msgstr "Due volte al giorno"
 
-#: udata/core/dataset/models.py:50 udata/harvest/models.py:22
+#: udata/core/dataset/models.py:50 udata/harvest/models.py:25
 msgid "Daily"
 msgstr "Quotidiana"
 
@@ -351,7 +351,7 @@ msgstr "Tre volte a settimana"
 msgid "Semiweekly"
 msgstr "Due volte a settimana"
 
-#: udata/core/dataset/models.py:54 udata/harvest/models.py:21
+#: udata/core/dataset/models.py:54 udata/harvest/models.py:24
 msgid "Weekly"
 msgstr "Settimanale"
 
@@ -367,7 +367,7 @@ msgstr "Tre volte al mese"
 msgid "Semimonthly"
 msgstr "Due volte al mese"
 
-#: udata/core/dataset/models.py:58 udata/harvest/models.py:20
+#: udata/core/dataset/models.py:58 udata/harvest/models.py:23
 msgid "Monthly"
 msgstr "Mensile"
 
@@ -558,17 +558,17 @@ msgid "Editor"
 msgstr "Editor"
 
 #: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:26 udata/harvest/models.py:36 udata/harvest/models.py:74
+#: udata/harvest/models.py:29 udata/harvest/models.py:39 udata/harvest/models.py:77
 msgid "Pending"
 msgstr "In attesa"
 
 #: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:75
+#: udata/harvest/models.py:78
 msgid "Accepted"
 msgstr "Accettato"
 
 #: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
-#: udata/harvest/models.py:76
+#: udata/harvest/models.py:79
 msgid "Refused"
 msgstr "Rifiutato"
 
@@ -797,51 +797,51 @@ msgstr "GeoJSON non valido"
 
 #: udata/core/spatial/forms.py:84
 msgid "A list of covered territories"
-msgstr ""
+msgstr "Una lista dei territori interessati"
 
 #: udata/core/spatial/forms.py:86
 msgid "Spatial granularity"
-msgstr ""
+msgstr "Granularità spaziale"
 
 #: udata/core/spatial/forms.py:87
 msgid "The size of the data increment"
-msgstr ""
+msgstr "La dimensione dell'incremento dei dati"
 
 #: udata/core/spatial/models.py:23
 msgid "POI"
-msgstr ""
+msgstr "POI"
 
 #: udata/core/spatial/translations.py:5
 msgid "French region"
-msgstr ""
+msgstr "Regione francese"
 
 #: udata/core/spatial/translations.py:6
 msgid "French intermunicipal (EPCI)"
-msgstr ""
+msgstr "Intercomunalità francese (EPCI)"
 
 #: udata/core/spatial/translations.py:7
 msgid "French county"
-msgstr ""
+msgstr "Dipartimento francese"
 
 #: udata/core/spatial/translations.py:8
 msgid "French district"
-msgstr ""
+msgstr "Quartiere francese"
 
 #: udata/core/spatial/translations.py:9
 msgid "French town"
-msgstr ""
+msgstr "Comune francese"
 
 #: udata/core/spatial/translations.py:10
 msgid "French canton"
-msgstr ""
+msgstr "Cantone francese"
 
 #: udata/core/spatial/translations.py:11
 msgid "Iris (Insee districts)"
-msgstr ""
+msgstr "IRIS (distretto statistico francese)"
 
 #: udata/core/spatial/translations.py:12
 msgid "Country"
-msgstr ""
+msgstr "Paese"
 
 #: udata/core/spatial/translations.py:13
 msgid "World"
@@ -919,7 +919,7 @@ msgstr "Informazioni"
 msgid "Roles"
 msgstr "Ruoli"
 
-#: udata/core/user/models.py:262 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:263 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "Eliminazione dell'account"
 
@@ -978,147 +978,147 @@ msgstr "Impossibile analizzare l'intervallo di date"
 
 #: udata/forms/fields.py:659 udata/forms/fields.py:682
 msgid "You must be authenticated"
-msgstr ""
+msgstr "Devi essere autenticatə"
 
 #: udata/forms/fields.py:662
 msgid "You can only set yourself as owner"
-msgstr ""
+msgstr "Puoi solo impostare te stessə come proprietariə"
 
 #: udata/forms/fields.py:685
 msgid "Permission denied for this organization"
-msgstr ""
+msgstr "Permesso negato per questa organizzazione"
 
 #: udata/forms/validators.py:59
 #, python-format
 msgid "This field requires \"%(name)s\" to be set"
-msgstr ""
+msgstr "Questo campo richiede la definizione di \"%(name)s\""
 
 #: udata/frontend/markdown.py:30
 msgid "Source"
-msgstr ""
+msgstr "Fonte"
 
 #: udata/harvest/forms.py:63
 msgid "Some optional details about this harvester"
-msgstr ""
+msgstr "Alcuni dettagli opzionali su questo harvester"
 
 #: udata/harvest/forms.py:65
 msgid "Backend"
-msgstr ""
+msgstr "Backend"
 
-#: udata/harvest/models.py:19
+#: udata/harvest/models.py:22
 msgid "Manual"
-msgstr ""
+msgstr "Manuale"
 
-#: udata/harvest/models.py:27
+#: udata/harvest/models.py:30
 msgid "Initializing"
-msgstr ""
-
-#: udata/harvest/models.py:28
-msgid "Initialized"
-msgstr ""
-
-#: udata/harvest/models.py:29
-msgid "Processing"
-msgstr ""
-
-#: udata/harvest/models.py:30 udata/harvest/models.py:38
-msgid "Done"
-msgstr ""
+msgstr "Inizializzazione in corso"
 
 #: udata/harvest/models.py:31
+msgid "Initialized"
+msgstr "Inizializzato"
+
+#: udata/harvest/models.py:32
+msgid "Processing"
+msgstr "In corso"
+
+#: udata/harvest/models.py:33 udata/harvest/models.py:41
+msgid "Done"
+msgstr "Fatto"
+
+#: udata/harvest/models.py:34
 msgid "Done with errors"
-msgstr ""
+msgstr "Fatto con errori"
 
-#: udata/harvest/models.py:32 udata/harvest/models.py:39
+#: udata/harvest/models.py:35 udata/harvest/models.py:42
 msgid "Failed"
-msgstr ""
-
-#: udata/harvest/models.py:37
-msgid "Started"
-msgstr ""
+msgstr "Fallito"
 
 #: udata/harvest/models.py:40
-msgid "Skipped"
-msgstr ""
+msgid "Started"
+msgstr "Avviato"
 
-#: udata/harvest/models.py:41
+#: udata/harvest/models.py:43
+msgid "Skipped"
+msgstr "Ignorato"
+
+#: udata/harvest/models.py:44
 msgid "Archived"
-msgstr ""
+msgstr "Archiviato"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
-msgstr ""
+msgstr "Admin"
+
+#: udata/templates/base.html:7
+msgid "You must be connected to do this action."
+msgstr "Devi essere connessə per eseguire questa azione."
 
 #: udata/templates/api/admin.html:11
 msgid "Maintainer"
-msgstr ""
+msgstr "Responsabile"
 
 #: udata/templates/api/admin.html:31
 msgid "Edit"
-msgstr ""
+msgstr "Modifica"
 
 #: udata/templates/api/admin.html:34
 msgid "Delete"
-msgstr ""
+msgstr "Elimina"
 
 #: udata/templates/api/admin.html:42
 msgid "No OAuth clients"
-msgstr ""
+msgstr "Nessun client OAuth"
 
 #: udata/templates/api/admin.html:53
 msgid "Add a client"
-msgstr ""
+msgstr "Aggiungi un client"
 
 #: udata/templates/api/oauth_authorize.html:23
 #, python-format
 msgid "%(app)s want to access your %(site)s account."
-msgstr ""
+msgstr "%(app)s vuole accedere al tuo account %(site)s."
 
 #: udata/templates/api/oauth_authorize.html:35
 msgid "Details"
-msgstr ""
+msgstr "Dettagli"
 
 #: udata/templates/api/oauth_authorize.html:45
 msgid "Access your profile"
-msgstr ""
+msgstr "Accedi al tuo profilo"
 
 #: udata/templates/api/oauth_authorize.html:46
 msgid "Read your profile, the orgnization you belong to, your publications"
-msgstr ""
+msgstr "Leggi il tuo profilo, l'orgnizzazione a cui appartieni, le tue pubblicazioni"
 
 #: udata/templates/api/oauth_authorize.html:54
 msgid "Publish data"
-msgstr ""
+msgstr "Pubblicare dati"
 
 #: udata/templates/api/oauth_authorize.html:55
 msgid "Publish datasets, reuses, follow or unfollow"
-msgstr ""
+msgstr "Pubblicare dataset, riusi, abbonarsi"
 
 #: udata/templates/api/oauth_authorize.html:65
 msgid "Accept"
-msgstr ""
+msgstr "Accettare"
 
 #: udata/templates/api/oauth_authorize.html:67
 msgid "Refuse"
-msgstr ""
+msgstr "Rifiutare"
 
 #: udata/templates/api/oauth_error.html:15
 msgid "OAuth Authentication Error"
-msgstr ""
+msgstr "Errore di autenticazione OAuth"
 
 #: udata/templates/api/oauth_error.html:20 udata/templates/macros/metadata.html:2
 msgid "Home"
-msgstr ""
+msgstr "Homepage"
 
 #: udata/templates/comments/dataset_archived.txt:1
 msgid "This dataset has been archived by our administration team.\n\n"
 "An archived dataset is considered out of date by a combination of factors.\n"
 "It does not appear in the search results and has a special layout warning the site's users.\n\n"
 "If you think this is a mistake, you can contact the site administrator."
-msgstr ""
-
-#: udata/templates/macros/forms.html:106
-msgid "required fields"
 msgstr ""
 
 #: udata/templates/macros/metadata.html:3
@@ -1144,25 +1144,25 @@ msgstr ""
 msgid "%(user)s has identified your organization \"%(name)s\" as public service"
 msgstr ""
 
-#: udata/templates/mail/base.html:45
+#: udata/templates/mail/base.html:45 udata/templates/security/email/base.html:45
 msgid "on your browser."
 msgstr ""
 
-#: udata/templates/mail/base.html:48
+#: udata/templates/mail/base.html:48 udata/templates/security/email/base.html:48
 #, python-format
 msgid "View this email %(link)s"
 msgstr ""
 
-#: udata/templates/mail/base.html:76
+#: udata/templates/mail/base.html:76 udata/templates/security/email/base.html:76
 #, python-format
 msgid "Hi %(user)s"
 msgstr ""
 
-#: udata/templates/mail/base.html:87
+#: udata/templates/mail/base.html:87 udata/templates/security/email/base.html:87
 msgid "See you soon on the platform"
 msgstr ""
 
-#: udata/templates/mail/base.html:88
+#: udata/templates/mail/base.html:88 udata/templates/security/email/base.html:88
 #, python-format
 msgid "The %(site)s team"
 msgstr ""
@@ -1260,133 +1260,128 @@ msgstr ""
 msgid "If you read this, your mail configuration is working"
 msgstr ""
 
-#: udata/templates/mail/security/change_notice.html:6
+#: udata/templates/security/change_password.html:9
+#: udata/templates/security/change_password.html:16
+msgid "Change Password"
+msgstr ""
+
+#: udata/templates/security/forgot_password.html:9
+#: udata/templates/security/forgot_password.html:15
+#: udata/templates/security/reset_password.html:10
+#: udata/templates/security/reset_password.html:16
+msgid "Reset Password"
+msgstr ""
+
+#: udata/templates/security/forgot_password.html:10
+msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgstr ""
+
+#: udata/templates/security/login_user.html:13
+msgid "Sign In"
+msgstr ""
+
+#: udata/templates/security/login_user.html:17
+msgid "Sign in"
+msgstr ""
+
+#: udata/templates/security/login_user.html:21
+msgid "Forgot your password?"
+msgstr ""
+
+#: udata/templates/security/login_user.html:23
+msgid "Recover your password"
+msgstr ""
+
+#: udata/templates/security/login_user.html:28
+msgid "Confirmation instructions not received?"
+msgstr ""
+
+#: udata/templates/security/login_user.html:30
+msgid "Send the instructions again"
+msgstr ""
+
+#: udata/templates/security/login_user.html:41
+#: udata/templates/security/register_user.html:13
+msgid "Sign up"
+msgstr ""
+
+#: udata/templates/security/login_user.html:44
+msgid "Register"
+msgstr ""
+
+#: udata/templates/security/login_user.html:48
+msgid "Create an account"
+msgstr ""
+
+#: udata/templates/security/register_user.html:9
+msgid "Sign Up"
+msgstr ""
+
+#: udata/templates/security/send_confirmation.html:9
+msgid "Resend confirmation instructions"
+msgstr ""
+
+#: udata/templates/security/send_confirmation.html:15
+msgid "Submit"
+msgstr ""
+
+#: udata/templates/security/email/change_notice.html:6
 msgid "Your password has been changed."
 msgstr ""
 
-#: udata/templates/mail/security/change_notice.html:10
+#: udata/templates/security/email/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
 msgstr ""
 
-#: udata/templates/mail/security/change_notice.html:15
+#: udata/templates/security/email/change_notice.html:15
 msgid "Reset password"
 msgstr ""
 
-#: udata/templates/mail/security/confirmation_instructions.html:6
+#: udata/templates/security/email/confirmation_instructions.html:6
 msgid "Please confirm your email through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/confirmation_instructions.html:14
+#: udata/templates/security/email/confirmation_instructions.html:14
 msgid "Confirm my account"
 msgstr ""
 
-#: udata/templates/mail/security/login_instructions.html:6
+#: udata/templates/security/email/login_instructions.html:6
 msgid "You can log into your account through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/login_instructions.html:13
+#: udata/templates/security/email/login_instructions.html:13
 msgid "Login now"
 msgstr ""
 
-#: udata/templates/mail/security/reset_instructions.html:7
+#: udata/templates/security/email/reset_instructions.html:7
 #, python-format
 msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
 msgstr ""
 
-#: udata/templates/mail/security/reset_instructions.html:10
+#: udata/templates/security/email/reset_instructions.html:10
 msgid "To reset your password, please confirm your request through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/reset_instructions.html:18
+#: udata/templates/security/email/reset_instructions.html:18
 msgid "Reset my password"
 msgstr ""
 
-#: udata/templates/mail/security/reset_notice.html:7
+#: udata/templates/security/email/reset_notice.html:7
 #, python-format
 msgid "Your password for %(site)s has been reset."
 msgstr ""
 
-#: udata/templates/mail/security/welcome.html:7
+#: udata/templates/security/email/welcome.html:7
 #, python-format
 msgid "Welcome to %(site)s!"
 msgstr ""
 
-#: udata/templates/mail/security/welcome.html:10
+#: udata/templates/security/email/welcome.html:10
 msgid "To activate your account, please confirm your email address through the link below:"
 msgstr ""
 
-#: udata/templates/mail/security/welcome.html:18
+#: udata/templates/security/email/welcome.html:18
 msgid "Confirm now"
-msgstr ""
-
-#: udata/templates/security/change_password.html:12
-#: udata/templates/security/change_password.html:19
-msgid "Change Password"
-msgstr ""
-
-#: udata/templates/security/forgot_password.html:12
-#: udata/templates/security/forgot_password.html:18
-#: udata/templates/security/reset_password.html:13
-#: udata/templates/security/reset_password.html:19
-msgid "Reset Password"
-msgstr ""
-
-#: udata/templates/security/forgot_password.html:13
-msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr ""
-
-#: udata/templates/security/login_user.html:14
-msgid "Sign In"
-msgstr ""
-
-#: udata/templates/security/login_user.html:18
-msgid "Sign in"
-msgstr ""
-
-#: udata/templates/security/login_user.html:22
-msgid "Forgot your password?"
-msgstr ""
-
-#: udata/templates/security/login_user.html:24
-msgid "Recover your password"
-msgstr ""
-
-#: udata/templates/security/login_user.html:29
-msgid "Confirmation instructions not received?"
-msgstr ""
-
-#: udata/templates/security/login_user.html:31
-msgid "Send the instructions again"
-msgstr ""
-
-#: udata/templates/security/login_user.html:42
-#: udata/templates/security/register_user.html:29
-msgid "Sign up"
-msgstr ""
-
-#: udata/templates/security/login_user.html:45
-msgid "Register"
-msgstr ""
-
-#: udata/templates/security/login_user.html:49
-msgid "Create an account"
-msgstr ""
-
-#: udata/templates/security/register_user.html:12
-msgid "Sign Up"
-msgstr ""
-
-#: udata/templates/security/register_user.html:21
-#, python-format
-msgid "I have read and accept <a href=\"%(url)s\"> the terms and conditions of the service.</a>"
-msgstr ""
-
-#: udata/templates/security/send_confirmation.html:12
-msgid "Resend confirmation instructions"
-msgstr ""
-
-#: udata/templates/security/send_confirmation.html:18
-msgid "Submit"
 msgstr ""
 
 #: udata/tests/search/test_adapter.py:25

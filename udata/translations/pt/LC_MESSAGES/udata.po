@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udata\n"
 "Report-Msgid-Bugs-To: i18n@opendata.team\n"
-"POT-Creation-Date: 2022-06-27 11:45+0200\n"
-"PO-Revision-Date: 2022-07-05 11:01\n"
+"POT-Creation-Date: 2022-10-19 14:26+0200\n"
+"PO-Revision-Date: 2022-12-14 12:23\n"
 "Last-Translator: Open Data Team <i18n@opendata.team>\n"
 "Language: pt\n"
 "Language-Team: Portuguese\n"
@@ -18,33 +18,33 @@ msgstr ""
 "X-Crowdin-File: /master/udata/translations/udata.pot\n"
 "X-Crowdin-File-ID: 6\n"
 
-#: udata/settings.py:99
+#: udata/settings.py:102
 msgid "Welcome"
 msgstr "Bem-vindo"
 
-#: udata/settings.py:100
+#: udata/settings.py:103
 msgid "Please confirm your email"
 msgstr "Por favor confirme o seu e-mail"
 
-#: udata/settings.py:101
+#: udata/settings.py:104
 msgid "Login instructions"
 msgstr "Instruções de login"
 
-#: udata/settings.py:102
+#: udata/settings.py:105
 msgid "Your password has been reset"
 msgstr "A sua palavra-passe foi redefinida"
 
-#: udata/settings.py:103
+#: udata/settings.py:106
 msgid "Your password has been changed"
 msgstr "A sua palavra-passe foi alterada"
 
-#: udata/settings.py:105
+#: udata/settings.py:108
 msgid "Password reset instructions"
 msgstr "Instruções para recuperação da palavra-passe"
 
-#: udata/settings.py:390
+#: udata/settings.py:393
 msgid "This dataset has been archived"
-msgstr ""
+msgstr "O seu conjunto de dados foi arquivado"
 
 #: udata/api/errors.py:4
 msgid "Validation error: your data cannot be updated for now, we have been notified of the error and we will fix it as soon as possible."
@@ -62,50 +62,50 @@ msgstr "Âmbito predefinido"
 msgid "System administrator rights"
 msgstr "Direitos do administrador de sistema"
 
-#: udata/auth/forms.py:13 udata/core/user/forms.py:14
+#: udata/auth/forms.py:12 udata/core/user/forms.py:14
 msgid "First name"
 msgstr "Nome"
 
-#: udata/auth/forms.py:13
+#: udata/auth/forms.py:12
 msgid "First name is required"
 msgstr "O primeiro nome é obrigatório"
 
-#: udata/auth/forms.py:14 udata/auth/forms.py:17 udata/core/user/forms.py:15
+#: udata/auth/forms.py:13 udata/auth/forms.py:16 udata/core/user/forms.py:15
 #: udata/core/user/forms.py:17
 msgid "URLs not allowed in this field"
-msgstr ""
+msgstr "URLs não permitidas neste campo"
 
-#: udata/auth/forms.py:16 udata/core/user/forms.py:16
+#: udata/auth/forms.py:15 udata/core/user/forms.py:16
 msgid "Last name"
 msgstr "Apelido"
 
-#: udata/auth/forms.py:16
+#: udata/auth/forms.py:15
 msgid "Last name is required"
 msgstr "O último nome é obrigatório"
 
-#: udata/auth/forms.py:33
+#: udata/auth/forms.py:32
 msgid "Password must be changed for security reasons"
-msgstr ""
+msgstr "A senha deve ser alterada por razões de segurança"
 
-#: udata/auth/password_validation.py:13
+#: udata/auth/password_validation.py:27
 msgid "Password must be at least {pass_length} characters long"
 msgstr ""
 
-#: udata/auth/password_validation.py:18
+#: udata/auth/password_validation.py:33
 msgid "Password must contain lowercases"
-msgstr ""
+msgstr "A senha deve conter letras minúsculas"
 
-#: udata/auth/password_validation.py:22
+#: udata/auth/password_validation.py:37
 msgid "Password must contain digits"
-msgstr ""
+msgstr "Password deve conter um ou mais dígitos"
 
-#: udata/auth/password_validation.py:26
+#: udata/auth/password_validation.py:42
 msgid "Password must contain uppercases"
-msgstr ""
+msgstr "A senha deve conter maiúsculas"
 
-#: udata/auth/password_validation.py:30
+#: udata/auth/password_validation.py:47
 msgid "Password must contain symbols"
-msgstr ""
+msgstr "A palavra-passe pode conter símbolos"
 
 #: udata/commands/init.py:29
 msgid "Do you want to create a superadmin user?"
@@ -117,7 +117,7 @@ msgstr "Quer importar dados relacionados com licenças?"
 
 #: udata/commands/init.py:38
 msgid "Do you want to import some spatial zones (countries)?"
-msgstr ""
+msgstr "Você deseja importar algumas zonas espaciais (países)?"
 
 #: udata/commands/init.py:42
 msgid "Do you want to create some sample data?"
@@ -335,7 +335,7 @@ msgstr "Três vezes por dia"
 msgid "Semidaily"
 msgstr "Duas vezes por dia"
 
-#: udata/core/dataset/models.py:50 udata/harvest/models.py:22
+#: udata/core/dataset/models.py:50 udata/harvest/models.py:25
 msgid "Daily"
 msgstr "Diário"
 
@@ -351,7 +351,7 @@ msgstr "Três vezes por semana"
 msgid "Semiweekly"
 msgstr "Duas vezes por semana"
 
-#: udata/core/dataset/models.py:54 udata/harvest/models.py:21
+#: udata/core/dataset/models.py:54 udata/harvest/models.py:24
 msgid "Weekly"
 msgstr "Semanal"
 
@@ -367,7 +367,7 @@ msgstr "Três vezes por mês"
 msgid "Semimonthly"
 msgstr "Duas vezes por mês"
 
-#: udata/core/dataset/models.py:58 udata/harvest/models.py:20
+#: udata/core/dataset/models.py:58 udata/harvest/models.py:23
 msgid "Monthly"
 msgstr "Mensal"
 
@@ -558,17 +558,17 @@ msgid "Editor"
 msgstr "Editor"
 
 #: udata/core/organization/models.py:30 udata/features/transfer/models.py:14
-#: udata/harvest/models.py:26 udata/harvest/models.py:36 udata/harvest/models.py:74
+#: udata/harvest/models.py:29 udata/harvest/models.py:39 udata/harvest/models.py:77
 msgid "Pending"
 msgstr "Pendente"
 
 #: udata/core/organization/models.py:31 udata/features/transfer/models.py:15
-#: udata/harvest/models.py:75
+#: udata/harvest/models.py:78
 msgid "Accepted"
 msgstr "Aceite"
 
 #: udata/core/organization/models.py:32 udata/features/transfer/models.py:16
-#: udata/harvest/models.py:76
+#: udata/harvest/models.py:79
 msgid "Refused"
 msgstr "Recusado"
 
@@ -645,7 +645,7 @@ msgstr ""
 
 #: udata/core/post/models.py:17
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: udata/core/post/models.py:60
 msgid "post"
@@ -709,31 +709,31 @@ msgstr "Dispositivo ligado"
 
 #: udata/core/reuse/models.py:27
 msgid "Health"
-msgstr ""
+msgstr "Saúde"
 
 #: udata/core/reuse/models.py:28
 msgid "Transport and mobility"
-msgstr ""
+msgstr "Transporte e mobilidade"
 
 #: udata/core/reuse/models.py:29
 msgid "Housing and development"
-msgstr ""
+msgstr "Habitação e desenvolvimento"
 
 #: udata/core/reuse/models.py:30
 msgid "Food and agriculture"
-msgstr ""
+msgstr "Alimentos e agricultura"
 
 #: udata/core/reuse/models.py:31
 msgid "Culture and recreation"
-msgstr ""
+msgstr "Cultura e recreação"
 
 #: udata/core/reuse/models.py:32
 msgid "Economy and business"
-msgstr ""
+msgstr "Economia e empresas"
 
 #: udata/core/reuse/models.py:33
 msgid "Environment and energy"
-msgstr ""
+msgstr "Ambiente e energia"
 
 #: udata/core/reuse/models.py:34
 msgid "Work and training"
@@ -741,11 +741,11 @@ msgstr ""
 
 #: udata/core/reuse/models.py:35
 msgid "Politics and public life"
-msgstr ""
+msgstr "Política e vida pública"
 
 #: udata/core/reuse/models.py:36
 msgid "Safety and security"
-msgstr ""
+msgstr "Proteção e Segurança"
 
 #: udata/core/reuse/models.py:37
 msgid "Education and research"
@@ -753,19 +753,19 @@ msgstr ""
 
 #: udata/core/reuse/models.py:38
 msgid "Society and demography"
-msgstr ""
+msgstr "Sociedade e demografia"
 
 #: udata/core/reuse/models.py:39
 msgid "Law and justice"
-msgstr ""
+msgstr "Lei e justiça"
 
 #: udata/core/reuse/models.py:40
 msgid "Open data tools"
-msgstr ""
+msgstr "Abrir ferramentas de dados"
 
 #: udata/core/reuse/models.py:41
 msgid "Others"
-msgstr ""
+msgstr "Outros"
 
 #: udata/core/reuse/models.py:120
 msgid "reuse"
@@ -905,7 +905,7 @@ msgstr "seguiu uma reutilização"
 
 #: udata/core/user/forms.py:18
 msgid "Email"
-msgstr ""
+msgstr "E-mail"
 
 #: udata/core/user/forms.py:19
 msgid "Avatar"
@@ -919,7 +919,7 @@ msgstr "Sobre"
 msgid "Roles"
 msgstr "Perfis"
 
-#: udata/core/user/models.py:262 udata/tests/api/test_me_api.py:313
+#: udata/core/user/models.py:263 udata/tests/api/test_me_api.py:313
 msgid "Account deletion"
 msgstr "Conta eliminada"
 
@@ -1005,49 +1005,53 @@ msgstr "Alguns detalhes opcionais sobre esta colheita"
 msgid "Backend"
 msgstr "Backend"
 
-#: udata/harvest/models.py:19
+#: udata/harvest/models.py:22
 msgid "Manual"
 msgstr "Manual"
 
-#: udata/harvest/models.py:27
+#: udata/harvest/models.py:30
 msgid "Initializing"
 msgstr "A iniciar"
 
-#: udata/harvest/models.py:28
+#: udata/harvest/models.py:31
 msgid "Initialized"
 msgstr "Iniciado"
 
-#: udata/harvest/models.py:29
+#: udata/harvest/models.py:32
 msgid "Processing"
 msgstr "Processando"
 
-#: udata/harvest/models.py:30 udata/harvest/models.py:38
+#: udata/harvest/models.py:33 udata/harvest/models.py:41
 msgid "Done"
 msgstr "Concluído"
 
-#: udata/harvest/models.py:31
+#: udata/harvest/models.py:34
 msgid "Done with errors"
 msgstr "Concluído com erros"
 
-#: udata/harvest/models.py:32 udata/harvest/models.py:39
+#: udata/harvest/models.py:35 udata/harvest/models.py:42
 msgid "Failed"
 msgstr "Falhou"
 
-#: udata/harvest/models.py:37
+#: udata/harvest/models.py:40
 msgid "Started"
 msgstr "Iniciado"
 
-#: udata/harvest/models.py:40
+#: udata/harvest/models.py:43
 msgid "Skipped"
 msgstr "Ignorado"
 
-#: udata/harvest/models.py:41
+#: udata/harvest/models.py:44
 msgid "Archived"
-msgstr ""
+msgstr "Arquivado"
 
 #: udata/templates/admin.html:7
 msgid "Admin"
 msgstr "Admin"
+
+#: udata/templates/base.html:7
+msgid "You must be connected to do this action."
+msgstr "Deverá estar conectado à internet."
 
 #: udata/templates/api/admin.html:11
 msgid "Maintainer"
@@ -1117,10 +1121,6 @@ msgid "This dataset has been archived by our administration team.\n\n"
 "If you think this is a mistake, you can contact the site administrator."
 msgstr ""
 
-#: udata/templates/macros/forms.html:106
-msgid "required fields"
-msgstr "campos obrigatórios"
-
 #: udata/templates/macros/metadata.html:3
 msgid "Share, improve and reuse public data"
 msgstr "Partilhar, melhorar e reutilizar dados públicos"
@@ -1144,25 +1144,25 @@ msgstr "Ver o emblema"
 msgid "%(user)s has identified your organization \"%(name)s\" as public service"
 msgstr "%(user)s identificou sua organização \"%(name)s\" como serviço público"
 
-#: udata/templates/mail/base.html:45
+#: udata/templates/mail/base.html:45 udata/templates/security/email/base.html:45
 msgid "on your browser."
-msgstr ""
+msgstr "no seu navegador."
 
-#: udata/templates/mail/base.html:48
+#: udata/templates/mail/base.html:48 udata/templates/security/email/base.html:48
 #, python-format
 msgid "View this email %(link)s"
 msgstr ""
 
-#: udata/templates/mail/base.html:76
+#: udata/templates/mail/base.html:76 udata/templates/security/email/base.html:76
 #, python-format
 msgid "Hi %(user)s"
 msgstr "Olá %(user)s,"
 
-#: udata/templates/mail/base.html:87
+#: udata/templates/mail/base.html:87 udata/templates/security/email/base.html:87
 msgid "See you soon on the platform"
 msgstr "Até breve na plataforma"
 
-#: udata/templates/mail/base.html:88
+#: udata/templates/mail/base.html:88 udata/templates/security/email/base.html:88
 #, python-format
 msgid "The %(site)s team"
 msgstr "A equipa do %(site)s"
@@ -1260,134 +1260,129 @@ msgstr "Este é um e-mail de teste"
 msgid "If you read this, your mail configuration is working"
 msgstr "Se estiver a ler isto a sua configuração de correio está operacional"
 
-#: udata/templates/mail/security/change_notice.html:6
+#: udata/templates/security/change_password.html:9
+#: udata/templates/security/change_password.html:16
+msgid "Change Password"
+msgstr "Alterar palavra-passe"
+
+#: udata/templates/security/forgot_password.html:9
+#: udata/templates/security/forgot_password.html:15
+#: udata/templates/security/reset_password.html:10
+#: udata/templates/security/reset_password.html:16
+msgid "Reset Password"
+msgstr "Redefinir palavra-passe"
+
+#: udata/templates/security/forgot_password.html:10
+msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgstr "Esqueceu a palavra-passe? Introduza o seu endereço de email e enviaremos instruções para redefinir uma nova."
+
+#: udata/templates/security/login_user.html:13
+msgid "Sign In"
+msgstr "Iniciar sessão"
+
+#: udata/templates/security/login_user.html:17
+msgid "Sign in"
+msgstr "Iniciar sessão"
+
+#: udata/templates/security/login_user.html:21
+msgid "Forgot your password?"
+msgstr "Esqueceu a sua palavra-passe?"
+
+#: udata/templates/security/login_user.html:23
+msgid "Recover your password"
+msgstr "Recuperar palavra-passe"
+
+#: udata/templates/security/login_user.html:28
+msgid "Confirmation instructions not received?"
+msgstr "Não recebeu as instruções de confirmação?"
+
+#: udata/templates/security/login_user.html:30
+msgid "Send the instructions again"
+msgstr "Reenviar instruções"
+
+#: udata/templates/security/login_user.html:41
+#: udata/templates/security/register_user.html:13
+msgid "Sign up"
+msgstr "Criar conta"
+
+#: udata/templates/security/login_user.html:44
+msgid "Register"
+msgstr "Registar-se"
+
+#: udata/templates/security/login_user.html:48
+msgid "Create an account"
+msgstr "Criar uma conta"
+
+#: udata/templates/security/register_user.html:9
+msgid "Sign Up"
+msgstr "Registar-se"
+
+#: udata/templates/security/send_confirmation.html:9
+msgid "Resend confirmation instructions"
+msgstr "Reenviar instruções de confirmação"
+
+#: udata/templates/security/send_confirmation.html:15
+msgid "Submit"
+msgstr "Submeter"
+
+#: udata/templates/security/email/change_notice.html:6
 msgid "Your password has been changed."
 msgstr "A sua palavra-passe foi alterada."
 
-#: udata/templates/mail/security/change_notice.html:10
+#: udata/templates/security/email/change_notice.html:10
 msgid "If you did not change your password, click below to reset it."
 msgstr "Se não alterou a sua senha, clique abaixo para redefini-la."
 
-#: udata/templates/mail/security/change_notice.html:15
+#: udata/templates/security/email/change_notice.html:15
 msgid "Reset password"
 msgstr "Redefinir palavra-passe"
 
-#: udata/templates/mail/security/confirmation_instructions.html:6
+#: udata/templates/security/email/confirmation_instructions.html:6
 msgid "Please confirm your email through the link below:"
 msgstr "Por favor, confirme o seu e-mail através do link abaixo:"
 
-#: udata/templates/mail/security/confirmation_instructions.html:14
+#: udata/templates/security/email/confirmation_instructions.html:14
 msgid "Confirm my account"
 msgstr "Confirmar a minha conta"
 
-#: udata/templates/mail/security/login_instructions.html:6
+#: udata/templates/security/email/login_instructions.html:6
 msgid "You can log into your account through the link below:"
 msgstr "Pode entrar na sua conta através do link abaixo:"
 
-#: udata/templates/mail/security/login_instructions.html:13
+#: udata/templates/security/email/login_instructions.html:13
 msgid "Login now"
 msgstr "Iniciar sessão agora"
 
-#: udata/templates/mail/security/reset_instructions.html:7
+#: udata/templates/security/email/reset_instructions.html:7
 #, python-format
 msgid "Someone has requested a password reset for your %(site)s account. If you didn't, please ignore this email."
 msgstr "Alguém pediu uma redefinição de palavra-passe para a conta %(site)s. Se não foi você, por favor, ignore este e-mail."
 
-#: udata/templates/mail/security/reset_instructions.html:10
+#: udata/templates/security/email/reset_instructions.html:10
 msgid "To reset your password, please confirm your request through the link below:"
 msgstr "Para redefinir a sua palavra-passe, por favor confirme o seu pedido através do link abaixo:"
 
-#: udata/templates/mail/security/reset_instructions.html:18
+#: udata/templates/security/email/reset_instructions.html:18
 msgid "Reset my password"
 msgstr "Redefinir a minha palavra-passe"
 
-#: udata/templates/mail/security/reset_notice.html:7
+#: udata/templates/security/email/reset_notice.html:7
 #, python-format
 msgid "Your password for %(site)s has been reset."
 msgstr "A sua palavra-passe para o %(site)s foi redefinida."
 
-#: udata/templates/mail/security/welcome.html:7
+#: udata/templates/security/email/welcome.html:7
 #, python-format
 msgid "Welcome to %(site)s!"
 msgstr "Bem-vindo a %(site)s!"
 
-#: udata/templates/mail/security/welcome.html:10
+#: udata/templates/security/email/welcome.html:10
 msgid "To activate your account, please confirm your email address through the link below:"
 msgstr "Para ativar a sua conta, por favor confirme o seu endereço de e-mail através do seguinte link:"
 
-#: udata/templates/mail/security/welcome.html:18
+#: udata/templates/security/email/welcome.html:18
 msgid "Confirm now"
 msgstr "Confirmar agora"
-
-#: udata/templates/security/change_password.html:12
-#: udata/templates/security/change_password.html:19
-msgid "Change Password"
-msgstr "Alterar palavra-passe"
-
-#: udata/templates/security/forgot_password.html:12
-#: udata/templates/security/forgot_password.html:18
-#: udata/templates/security/reset_password.html:13
-#: udata/templates/security/reset_password.html:19
-msgid "Reset Password"
-msgstr "Redefinir palavra-passe"
-
-#: udata/templates/security/forgot_password.html:13
-msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr "Esqueceu a palavra-passe? Introduza o seu endereço de email e enviaremos instruções para redefinir uma nova."
-
-#: udata/templates/security/login_user.html:14
-msgid "Sign In"
-msgstr "Iniciar sessão"
-
-#: udata/templates/security/login_user.html:18
-msgid "Sign in"
-msgstr "Iniciar sessão"
-
-#: udata/templates/security/login_user.html:22
-msgid "Forgot your password?"
-msgstr "Esqueceu a sua palavra-passe?"
-
-#: udata/templates/security/login_user.html:24
-msgid "Recover your password"
-msgstr "Recuperar palavra-passe"
-
-#: udata/templates/security/login_user.html:29
-msgid "Confirmation instructions not received?"
-msgstr "Não recebeu as instruções de confirmação?"
-
-#: udata/templates/security/login_user.html:31
-msgid "Send the instructions again"
-msgstr "Reenviar instruções"
-
-#: udata/templates/security/login_user.html:42
-#: udata/templates/security/register_user.html:29
-msgid "Sign up"
-msgstr "Criar conta"
-
-#: udata/templates/security/login_user.html:45
-msgid "Register"
-msgstr "Registar-se"
-
-#: udata/templates/security/login_user.html:49
-msgid "Create an account"
-msgstr "Criar uma conta"
-
-#: udata/templates/security/register_user.html:12
-msgid "Sign Up"
-msgstr "Registar-se"
-
-#: udata/templates/security/register_user.html:21
-#, python-format
-msgid "I have read and accept <a href=\"%(url)s\"> the terms and conditions of the service.</a>"
-msgstr "Li e aceitei <a href=\"%(url)s\"> os termos e condições do serviço.</a>"
-
-#: udata/templates/security/send_confirmation.html:12
-msgid "Resend confirmation instructions"
-msgstr "Reenviar instruções de confirmação"
-
-#: udata/templates/security/send_confirmation.html:18
-msgid "Submit"
-msgstr "Submeter"
 
 #: udata/tests/search/test_adapter.py:25
 msgid "Never reused"
