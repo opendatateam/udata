@@ -1,6 +1,6 @@
 # Changelog
 
-## Current (in progress)
+## 6.0.1 (2023-01-18)
 
 - Add python version requirement <3.10 [#2798](https://github.com/opendatateam/udata/pull/2798)
 - Fix date timezone and format for harvest previz [#2799](https://github.com/opendatateam/udata/pull/2799)
