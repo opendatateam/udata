@@ -1,5 +1,9 @@
 # Changelog
 
+## Current (in progress)
+
+- Nothing yet
+
 ## 6.0.1 (2023-01-18)
 
 - Add python version requirement <3.10 [#2798](https://github.com/opendatateam/udata/pull/2798)
