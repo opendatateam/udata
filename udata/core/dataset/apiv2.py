@@ -336,8 +336,7 @@ class ResourceExtrasAPI(ResourceMixin, API):
         resource = self.get_resource_or_404(dataset, rid)
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] == None]:
-            if key in resource.extras:
-                del resource.extras[key]
+            resource.extras.pop(key, None)
             data.pop(key)
         # then update the extras with the remaining payload
         resource.extras.update(data)
