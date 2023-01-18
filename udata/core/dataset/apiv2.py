@@ -220,7 +220,7 @@ class DatasetExtrasAPI(API):
             apiv2.abort(410, 'Dataset has been deleted')
         DatasetEditPermission(dataset).test()
         # first remove extras key associated to a None value in payload
-        for key in [k for k in data if data[k] == None]:
+        for key in [k for k in data if data[k] is None]:
             if key in dataset.extras:
                 del dataset.extras[key]
             data.pop(key)
