@@ -221,8 +221,7 @@ class DatasetExtrasAPI(API):
         DatasetEditPermission(dataset).test()
         # first remove extras key associated to a None value in payload
         for key in [k for k in data if data[k] is None]:
-            if key in dataset.extras:
-                del dataset.extras[key]
+            dataset.extras.pop(key, None)
             data.pop(key)
         # then update the extras with the remaining payload
         dataset.extras.update(data)
