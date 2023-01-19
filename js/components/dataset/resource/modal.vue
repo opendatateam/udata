@@ -49,8 +49,6 @@
                 <dd v-if="resource.created_at">{{ resource.created_at | dt }}</dd>
                 <dt v-if="resource.last_modified">{{ _('Modified on') }}</dt>
                 <dd v-if="resource.last_modified">{{ resource.last_modified | dt }}</dd>
-                <dt v-if="resource.published">{{ _('Published on') }}</dt>
-                <dd v-if="resource.published">{{ resource.published | dt }}</dd>
                 <dt v-if="resource.metrics && resource.metrics.downloads">{{ _('Downloads') }}</dt>
                 <dd v-if="resource.metrics && resource.metrics.downloads">{{ resource.metrics.downloads }}</dd>
                 <dt v-if="is_community">{{ _('Publish by') }}</dt>

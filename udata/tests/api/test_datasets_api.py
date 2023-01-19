@@ -812,7 +812,6 @@ class DatasetResourceAPITest(APITestCase):
             'title': faker.sentence(),
             'description': faker.text(),
             'url': faker.url(),
-            'published': now.isoformat(),
             'extras': {
                 'extra:id': 'id',
             }
@@ -829,7 +828,6 @@ class DatasetResourceAPITest(APITestCase):
         # Url should NOT have been updated as it is a hosted resource
         self.assertNotEqual(updated.url, data['url'])
         self.assertEqual(updated.extras, {'extra:id': 'id'})
-        self.assertEqualDates(updated.published, now)
 
     def test_update_remote(self):
         resource = ResourceFactory()
@@ -841,7 +839,6 @@ class DatasetResourceAPITest(APITestCase):
             'title': faker.sentence(),
             'description': faker.text(),
             'url': faker.url(),
-            'published': now.isoformat(),
             'extras': {
                 'extra:id': 'id',
             }
@@ -858,7 +855,6 @@ class DatasetResourceAPITest(APITestCase):
         # Url should have been updated as it is a remote resource
         self.assertEqual(updated.url, data['url'])
         self.assertEqual(updated.extras, {'extra:id': 'id'})
-        self.assertEqualDates(updated.published, now)
 
     def test_bulk_update(self):
         resources = ResourceFactory.build_batch(2)
@@ -887,8 +883,6 @@ class DatasetResourceAPITest(APITestCase):
             self.assertEqual(resource.title, rdata['title'])
             self.assertEqual(resource.description, rdata['description'])
             self.assertIsNotNone(resource.url)
-        new_resource = self.dataset.resources[-1]
-        self.assertEqualDates(new_resource.published, now)
 
     def test_update_404(self):
         data = {

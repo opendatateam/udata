@@ -89,13 +89,6 @@ class DatasetModelTest:
         with pytest.raises(db.ValidationError):
             dataset.update_resource(resource)
 
-    def test_last_update_with_resource(self):
-        user = UserFactory()
-        dataset = DatasetFactory(owner=user)
-        resource = ResourceFactory()
-        dataset.add_resource(resource)
-        assert_equal_dates(dataset.last_update, resource.published)
-
     def test_last_update_without_resource(self):
         user = UserFactory()
         dataset = DatasetFactory(owner=user)
