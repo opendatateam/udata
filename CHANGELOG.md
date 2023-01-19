@@ -2,7 +2,7 @@
 
 ## Current (in progress)
 
-- Nothing yet
+- Handle None values in dataset and resource extras endpoints [#2805](https://github.com/opendatateam/udata/pull/2805)
 
 ## 6.0.1 (2023-01-18)
 
