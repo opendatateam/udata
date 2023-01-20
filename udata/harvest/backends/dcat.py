@@ -150,32 +150,33 @@ class CswBackend(DcatBackend):
         content = requests.post(url, data=body.format(start=1), headers=headers).text
         tree = ET.fromstring(content)
 
-        with open('./csw.xml', 'w') as f:
-            while tree:
-                graph = Graph(namespace_manager=namespace_manager)
-                # TODO: we should get the csw:SearchResults node
-                if len(tree) < 2:
-                    # Why? Happens on https://data.naturefrance.fr/geonetwork/srv/eng/csw
-                    break
-                for child in tree[1]:  # Iterating on CSW SearchResults
-                    f.write(ET.tostring(child).decode('utf-8') + '\n')
-                    subgraph = Graph(namespace_manager=namespace_manager)
-                    subgraph.parse(data=ET.tostring(child), format=fmt)
-                    graph += subgraph
+        while tree:
+            graph = Graph(namespace_manager=namespace_manager)
+            # TODO: could we find a better way to deal with namespaces?
+            namespace = tree.tag.split('}')[0].strip('{}')
+            search_results = tree.find('csw:SearchResults', {'csw': namespace})
+            if not search_results:
+                # TODO: may be worth an investigation if it happens
+                log.error(f'No search results found for {url} on page {page}')
+                break
+            for child in search_results:
+                subgraph = Graph(namespace_manager=namespace_manager)
+                subgraph.parse(data=ET.tostring(child), format=fmt)
+                graph += subgraph
 
-                    for node in subgraph.subjects(RDF.type, DCAT.Dataset):
-                        id = subgraph.value(node, DCT.identifier)
-                        kwargs = {'nid': str(node), 'page': page}
-                        kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
-                        self.add_item(id, **kwargs)
-                graphs.append(graph)
-                page += 1
+                for node in subgraph.subjects(RDF.type, DCAT.Dataset):
+                    id = subgraph.value(node, DCT.identifier)
+                    kwargs = {'nid': str(node), 'page': page}
+                    kwargs['type'] = 'uriref' if isinstance(node, URIRef) else 'blank'
+                    self.add_item(id, **kwargs)
+            graphs.append(graph)
+            page += 1
 
-                if tree[1].attrib['nextRecord'] != '0':
-                    tree = ET.fromstring(
-                        requests.post(url, data=body.format(start=tree[1].attrib['nextRecord']),
-                                      headers=headers).text)
-                else:
-                    break
+            if search_results.attrib['nextRecord'] != '0':
+                tree = ET.fromstring(
+                    requests.post(url, data=body.format(start=search_results.attrib['nextRecord']),
+                                  headers=headers).text)
+            else:
+                break
 
         return graphs
