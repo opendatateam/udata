@@ -3,7 +3,7 @@
 ## Current (in progress)
 
 - Handle None values in dataset and resource extras endpoints [#2805](https://github.com/opendatateam/udata/pull/2805)
-- Fix only SHA1 checksum is accepted when uploading resources
+- Fix only SHA1 checksum is accepted when uploading resources [#2808](https://github.com/opendatateam/udata/pull/2808)
 
 ## 6.0.1 (2023-01-18)
 
