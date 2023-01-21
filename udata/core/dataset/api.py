@@ -363,10 +363,8 @@ class UploadMixin(object):
         if 'html' in infos['mime']:
             api.abort(415, 'Incorrect file content type: HTML')
         infos['title'] = os.path.basename(infos['filename'])
-        for checksum_type in CHECKSUM_TYPES:
-            if checksum_type in infos:
-                infos['checksum'] = Checksum(type=checksum_type, value=infos.pop(checksum_type))
-                break
+        checksum_type = next(checksum_type for checksum_type in CHECKSUM_TYPES if checksum_type in infos)
+        infos['checksum'] = Checksum(type=checksum_type, value=infos.pop(checksum_type))
         infos['filesize'] = infos.pop('size')
         del infos['filename']
         return infos
