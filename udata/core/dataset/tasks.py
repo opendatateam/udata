@@ -151,9 +151,8 @@ def store_resource(csvfile, model, dataset):
     r_info['fs_filename'] = stored_filename
     checksum = r_info.pop('checksum')
     algo, checksum = checksum.split(':', 1)
-    r_info[algo] = checksum
     r_info['format'] = storages.utils.extension(stored_filename)
-    r_info['checksum'] = Checksum(type='sha1', value=r_info.pop('sha1'))
+    r_info['checksum'] = Checksum(type=algo, value=checksum)
     r_info['filesize'] = r_info.pop('size')
     del r_info['filename']
     r_info['title'] = filename

@@ -29,6 +29,7 @@ from udata.auth import admin_permission
 from udata.api import api, API, errors
 from udata.api.parsers import ModelApiParser
 from udata.core import storages
+from udata.core.dataset.models import CHECKSUM_TYPES
 from udata.core.storages.api import handle_upload, upload_parser
 from udata.core.badges import api as badges_api
 from udata.core.followers.api import FollowAPI
@@ -362,7 +363,8 @@ class UploadMixin(object):
         if 'html' in infos['mime']:
             api.abort(415, 'Incorrect file content type: HTML')
         infos['title'] = os.path.basename(infos['filename'])
-        infos['checksum'] = Checksum(type='sha1', value=infos.pop('sha1'))
+        checksum_type = next(checksum_type for checksum_type in CHECKSUM_TYPES if checksum_type in infos)
+        infos['checksum'] = Checksum(type=checksum_type, value=infos.pop(checksum_type))
         infos['filesize'] = infos.pop('size')
         del infos['filename']
         return infos
