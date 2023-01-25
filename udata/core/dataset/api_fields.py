@@ -4,6 +4,7 @@ from udata.core.organization.api_fields import org_ref_fields
 from udata.core.organization.models import LOGO_SIZES
 from udata.core.spatial.api_fields import spatial_coverage_fields
 from udata.core.user.api_fields import user_ref_fields
+from udata.utils import to_naive_datetime
 
 from .models import (
     UPDATE_FREQUENCIES, RESOURCE_FILETYPES, DEFAULT_FREQUENCY,
@@ -102,7 +103,8 @@ resource_fields = api.model('Resource', {
     'published': fields.ISODateTime(
         description='The resource publication date'),
     'last_modified': fields.ISODateTime(
-        attribute='modified', readonly=True,
+        attribute=lambda o: max([o.modified, to_naive_datetime(o.harvest.modified_at)]) if o.harvest and o.harvest.modified_at else o.modified,
+        readonly=True,
         description='The resource last modification date'),
     'metrics': fields.Raw(
         description='The resource metrics', readonly=True),
@@ -178,8 +180,10 @@ dataset_fields = api.model('Dataset', {
     'description': fields.Markdown(
         description='The dataset description in markdown', required=True),
     'created_at': fields.ISODateTime(
+        attribute=lambda o: max([o.created_at, to_naive_datetime(o.harvest.created_at)]) if o.harvest and o.harvest.created_at else o.created_at,
         description='The dataset creation date', required=True),
     'last_modified': fields.ISODateTime(
+        attribute=lambda o: max([o.last_modified, to_naive_datetime(o.harvest.modified_at)]) if o.harvest and o.harvest.modified_at else o.last_modified,
         description='The dataset last modification date', required=True),
     'deleted': fields.ISODateTime(description='The deletion date if deleted'),
     'archived': fields.ISODateTime(description='The archival date if archived'),
