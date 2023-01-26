@@ -1,13 +1,13 @@
 import logging
+from datetime import date, datetime
+
 import pytz
-
 from dateutil.parser import parse
-
 from flask import request, url_for
 from flask_restx.fields import *  # noqa
 
-from udata.utils import multi_to_dict
 from udata.uris import endpoint_for
+from udata.utils import multi_to_dict
 
 log = logging.getLogger(__name__)
 
@@ -18,6 +18,8 @@ class ISODateTime(String):
     def format(self, value):
         if isinstance(value, str):
             value = parse(value)
+        elif isinstance(value, date):
+            value = datetime.combine(value, datetime.min.time())
         return pytz.utc.localize(value).isoformat()
 
 
