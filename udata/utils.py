@@ -140,7 +140,7 @@ def daterange_end(value):
 
 
 def to_naive_datetime(given_date):
-    if isinstance(given_date, date) and not isinstance(value, datetime.datetime):
+    if isinstance(given_date, date) and not isinstance(given_date, datetime):
         return datetime(
             given_date.year,
             given_date.month,
