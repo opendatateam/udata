@@ -357,6 +357,7 @@ class MemberAPI(API):
         member = org.member(user)
         if member:
             Organization.objects(id=org.id).update_one(pull__members=member)
+            org.reload()
             org.count_members()
             return '', 204
         else:
