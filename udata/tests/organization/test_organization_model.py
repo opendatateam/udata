@@ -13,6 +13,10 @@ from .. import TestCase, DBTestMixin
 
 class OrganizationModelTest(TestCase, DBTestMixin):
 
+    # Load metrics
+    import udata.core.organization.metrics  # noqa
+    import udata.core.followers.metrics  # noqa
+
     def test_organization_metrics(self):
         # Members count update are in API calls, thus being tested in API dedicated tests
 
