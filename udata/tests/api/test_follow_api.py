@@ -12,6 +12,9 @@ from . import APITestCase
 class Fake(db.Document):
     name = db.StringField()
 
+    def count_followers(self):
+        pass
+
 
 @api.route('/fake/<id>/follow/', endpoint='follow_fake')
 class FollowFakeAPI(FollowAPI):
